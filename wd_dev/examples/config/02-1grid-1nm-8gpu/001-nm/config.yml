@@ -1,0 +1,32 @@
+generic:
+  workspace: "./work"
+  job_command: "python user.py"
+  batch_job_timeout: 3600
+
+resource:
+  type: "local"
+  num_node: 4
+
+ABCI:
+  group: "[group]"
+  job_script_preamble: "./job_script_preamble.sh"
+  job_execution_options: ""
+
+optimize:
+  search_algorithm: "nelder-mead"
+  goal: "minimize"
+  trial_number: 8
+  rand_seed: 42
+  parameters:
+    -
+      name: "x1"
+      type: "uniform_float"
+      lower: 0.1
+      upper: 0.9
+      initial: 0.5
+    -
+      name: "x2"
+      type: "uniform_float"
+      lower: 96
+      upper: 128
+      initial: 112

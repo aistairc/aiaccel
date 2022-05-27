@@ -1,0 +1,4 @@
+# -*- coding: utf-8-unix; mode: Text  -*-
+cat ${BASH_ARGV[0]}
+source ~/opt/wd_dev/tools/make_wd_env.source
+export PYTHONPATH=~/opt:$WD_DEV_DIR:$PYTHONPATH

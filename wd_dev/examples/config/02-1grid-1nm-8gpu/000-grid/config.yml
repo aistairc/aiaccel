@@ -1,0 +1,35 @@
+generic:
+  workspace: "./work"
+  job_command: "python user.py"
+  batch_job_timeout: 3600
+
+resource:
+  type: "local"
+  num_node: 4
+
+ABCI:
+  group: "[group]"
+  job_script_preamble: "./job_script_preamble.sh"
+  job_execution_options: ""
+
+optimize:
+  search_algorithm: "grid"
+  goal: "minimize"
+  trial_number: 24
+  parameters:
+    -
+      name: "x1"
+      type: "uniform_float"
+      lower: 0.1
+      upper: 0.9
+      step: 0.1
+      log: false
+      base: 10
+    -
+      name: "x2"
+      type: "uniform_float"
+      lower: 96
+      upper: 128
+      step: 3
+      log: false
+      base: 10

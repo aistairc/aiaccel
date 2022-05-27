@@ -1,0 +1,278 @@
+{
+  "generic": {
+    "config_path": "config.json",
+    "init_fail_count": 10,
+    "$name_length": 32,
+    "name_length": 3,
+    "project_name": "sphere",
+    "randseed": 1,
+    "silent_mode": false,
+    "workspace": "/tmp/work",
+    "job_command": "python wrapper.py"
+  },
+  "resource": {
+    "type": "ABCI",
+    "num_node": 4
+  },
+  "ABCI": {
+    "job_script_preamble": "wrapper_abci.sh",
+    "group": "gaa"
+  },
+  "optimize": {
+    "search_algorithm": "nelder-mead",
+    "goal": "minimize",
+    "trial_number": 10,
+    "parameters": [
+      {
+        "name": "x1",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 0.74,  1.69,  1.22,  2.09, -3.24, -3.58,  4.13,  2.08]
+      },
+      {
+        "name": "x2",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 2.98,  2.27,  1.41, -2.10, -3.29, -0.35,  3.87,  4.66,  3.54,  1.17, 3.10]
+      },
+      {
+        "name": "x3",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 3.62,  4.38, -0.40,  2.94,  2.23, -3.07, -2.35, -1.15,  0.89,  2.01, -0.58]
+      },
+      {
+        "name": "x4",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 0.90,  2.00,  4.29, -1.43, -4.02,  2.25,  0.28, -3.00, -0.18,  0.96, -2.09]
+      },
+      {
+        "name": "x5",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 1.99,  3.90,  3.10,  0.06, -3.83,  1.16,  0.93,  0.01, -3.89, -2.04, 0.33]
+      },
+      {
+        "name": "x6",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [-2.78,  4.62, -2.71, -0.66, -2.48, -3.07, -0.04,  0.87,  3.89,  2.68, -4.18]
+      },
+      {
+        "name": "x7",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 1.00, -2.20,  1.82,  0.52, -3.82,  3.23,  3.16,  2.41,  4.99, -2.01, 2.05]
+      },
+      {
+        "name": "x8",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 4.97,  4.77, -0.60, -1.75, -0.68,  2.16,  3.70, -0.86, -2.32, -4.90, -1.4]
+      },
+      {
+        "name": "x9",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 1.98, -3.66, -3.17,  2.95,  2.27, -3.19, -1.18, -1.60,  4.96, -2.39, 1.64]
+      },
+      {
+        "name": "x10",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0,
+        "initial": [ 4.03,  3.59, -2.06,  3.03,  3.10, -2.84, -4.57, -0.62, -1.14,  2.15, 1.92]
+      }
+    ],
+    "parameters_for_TestNelderMead": [
+      {
+        "name": "x1",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -1.0,
+        "upper": 1.0,
+        "initial": [ 0.81,  0.72, -0.41]
+      },
+      {
+        "name": "x2",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -1.0,
+        "upper": 1.0,
+        "initial": [ 0.61,  0.62, -0.56]
+      }
+    ],
+    "parameters_for_TestNelderMeadSearch": [
+      {
+        "name": "x1",
+        "type": "uniform_int",
+        "log": false,
+        "lower": -10,
+        "upper": 10,
+        "initial": [ 4, 2, -3]
+      },
+      {
+        "name": "x2",
+        "type": "uniform_int",
+        "log": false,
+        "lower": -10,
+        "upper": 10,
+        "initial": [-1, 9, -3]
+      }
+    ],
+    "parameters_for_TestTPESampler": [
+      {
+        "name": "x1",
+        "type": "uniform_int",
+        "log": false,
+        "lower": -10,
+        "upper": 10,
+        "initial": 5
+      },
+      {
+        "name": "x2",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -1.0,
+        "upper": 1.0,
+        "initial": 0.5
+      },
+      {
+        "name": "x3",
+        "type": "categorical",
+        "choices": ["red", "green", "blue"],
+        "initial": "red"
+      }
+    ]
+  },
+  "job_setting": {
+    "name_length": 6,
+    "init_fail_count": 100,
+    "cancel_retry": 3,
+    "cancel_timeout": 60,
+    "expire_retry": 3,
+    "expire_timeout": 60,
+    "finished_retry": 3,
+    "finished_timeout": 60,
+    "job_loop_duration": 0.5,
+    "job_retry": 2,
+    "job_timeout": 60,
+    "kill_retry": 3,
+    "kill_timeout": 60,
+    "result_retry": 1,
+    "runner_retry": 3,
+    "runner_timeout": 60,
+    "running_retry": 3,
+    "running_timeout": 60
+  },
+  "sleep_time": {
+    "master": 1,
+    "optimizer": 1,
+    "scheduler": 1
+  },
+  "logger": {
+    "file":{
+      "master": "master.log",
+      "scheduler": "scheduler.log",
+      "optimizer": "optimizer.log"
+    },
+    "log_level":{
+      "master": "DEBUG",
+      "scheduler": "DEBUG",
+      "optimizer": "DEBUG"
+    },
+    "stream_level":{
+      "master": "DEBUG",
+      "scheduler": "DEBUG",
+      "optimizer": "DEBUG"
+    }
+  },
+  "ui": {
+    "silent_mode": true
+  },
+  "verification": {
+    "is_verified": true,
+    "condition": [
+      {
+        "loop": 1,
+        "minimum": 0.0,
+        "maximum": 70.0
+      },
+      {
+        "loop": 5,
+        "minimum": 0.0,
+        "maximum": 60.0
+      },
+      {
+        "loop": 10,
+        "minimum": 0.0,
+        "maximum": 50.0
+      },
+      {
+        "loop": 20,
+        "minimum": 0.0,
+        "maximum": 10.0
+      },
+      {
+        "loop": 30,
+        "minimum": 0.0,
+        "maximum": 9.0
+      },
+      {
+        "loop": 40,
+        "minimum": 0.0,
+        "maximum": 8.0
+      },
+      {
+        "loop": 50,
+        "minimum": 0.0,
+        "maximum": 6.0
+      },
+      {
+        "loop": 60,
+        "minimum": 0.0,
+        "maximum": 5.0
+      },
+      {
+        "loop": 70,
+        "minimum": 0.0,
+        "maximum": 3.0
+      },
+      {
+        "loop": 80,
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      {
+        "loop": 90,
+        "minimum": 0.0,
+        "maximum": 0.5
+      },
+      {
+        "loop": 100,
+        "minimum": 0.0,
+        "maximum": 0.1
+      }
+    ]
+  }
+}

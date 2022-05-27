@@ -1,0 +1,36 @@
+generic:
+  workspace: "./work"
+  job_command: "python user.py"
+  batch_job_timeout: 600
+
+resource:
+  type: "local"
+  num_node: 4
+
+ABCI:
+  group: "[group]"
+  job_script_preamble: "./job_script_preamble.sh"
+  job_execution_options: ""
+
+optimize:
+  #search_algorithm: "nelder-mead"
+  #search_algorithm: "random"
+  search_algorithm: "sobol"
+  #search_algorithm: "grid"
+  #search_algorithm: "tpe"
+  goal: "minimize"
+  trial_number: 30
+  rand_seed: 42
+  parameters:
+    -
+      name: "x1"
+      type: "uniform_float"
+      lower: 0.0
+      upper: 5.0
+      initial: 1.0
+    -
+      name: "x2"
+      type: "uniform_float"
+      lower: 0.0
+      upper: 5.0
+      initial: 1.0
