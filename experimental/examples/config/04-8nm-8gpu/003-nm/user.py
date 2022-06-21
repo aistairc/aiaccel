@@ -1,0 +1,14 @@
+from aiaccel.util import aiaccel
+
+
+def func(p):
+    x1 = p["x1"]
+    x2 = p["x2"]
+    y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
+    return y
+
+
+if __name__ == "__main__":
+
+    run = aiaccel.Run()
+    run.execute_and_report(func)

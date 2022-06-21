@@ -1,8 +1,0 @@
-# -*- coding: utf-8-unix; mode: Text  -*-
-cat ${BASH_ARGV[0]}
-module load gcc/11.2.0 python/3.8/3.8.13 cuda/11.0/11.0.3 cudnn/8.0/8.0.5
-python3 -m venv ~/tfenv
-source ~/tfenv/bin/activate
-pip3 install --upgrade pip setuptools
-pip3 install tensorflow==2.4.1
-git clone https://github.com/keras-team/keras-io.git

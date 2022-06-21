@@ -10,9 +10,9 @@ with codecs.open(here / 'requirements.txt', 'r') as fh:
 
 setup(
     name='aiaccel',
-    version='0.0.4',
+    version='0.0.1',
     description='AIST hyperparameter optimizer',
-    url='https://gitlab.com/onishi-lab/opt',
+    url='https://github.com/aistairc/aiaccel',
     license='MIT',
     package_dir={'sobol_seq': 'lib/sobol_seq'},
     packages=[
