@@ -51,22 +51,29 @@ This tutorial describes how to run in examples/sphere directory.
     > source venv/bin/activate
 ~~~
 
-2. Download the repository. This example assumes as running on bash terminal.
+<!-- 2. Download the repository. This example assumes as running on bash terminal.
 ~~~
-    > git clone https://github.com/aistairc/aiaccel.git
+    > git clone http://gitlab.com/onishi-lab/opt.git
 
     > ls
-    opt
+    aiaccel
 ~~~
 
-1. Install the requirements and the software
+3. Install the requirements and the software
 ~~~
     > cd opt
     > pip install cython numpy pytest
     > python setup.py install
+~~~ -->
+
+2. Install the requirements and the software
+~~~
+    pip install cython numpy pytest
+    pip install git+https://github.com/aistairc/aiaccel.git 
 ~~~
 
-4. Prepare the workspace and copy the sphere directory.
+
+3. Prepare the workspace and copy the sphere directory.
 ~~~
     > cd your_workspace_directory
     > cp -R cloned_directory/opt/examples .
@@ -79,12 +86,17 @@ This tutorial describes how to run in examples/sphere directory.
     config.yaml         job_script_preamble.sh         user.py
 ~~~
 
-1. Run
+4. Run
 ~~~
     > python -m aiaccel.start --config config.yaml
 ~~~
 
-6. After finishing master, check the results.
+ You can clean the workspace directory using `--clean`.
+~~~
+    > python -m aiaccel.start --config config.yaml --clean
+~~~
+
+5. After finishing master, check the results.
 ~~~
     > ls /tmp/work
     abci_output         alive               hp                  lock
@@ -95,17 +107,17 @@ This tutorial describes how to run in examples/sphere directory.
     /tmp/work/result/final_result.result
 ~~~
 
-7. If you want to change settings, please edit config.yaml file.
+6. If you want to change settings, please edit config.yaml file.
 ~~~
     vi config.yaml
 ~~~
 
-8. If you want to re-run the optimization, please move the `work_aiaccel` directory.
+7. If you want to re-run the optimization, please move the `work_aiaccel` directory.
 ~~~
     > mv /tmp/work /tmp/work/work_aiaccel_200101
 ~~~
 
-9. You can clean the workspace directory using `clean_workspace.py`.
+<!-- 9. You can clean the workspace directory using `clean_workspace.py`.
 ~~~
     > python -m aiaccel.bin.clean
 ~~~
@@ -113,7 +125,7 @@ This tutorial describes how to run in examples/sphere directory.
 10. If you want to stop the optimization, please use `stop_all.py`.
 ~~~
     > python -m aiaccel.bin.stop
-~~~
+~~~ -->
 
 ## sphere tutorial on ABCI
 This tutorial describes how to run examples/sphere on ABCI.
@@ -133,7 +145,7 @@ resource:
   type: "ABCI"
   num_node: 4
 ```
-1. Run
+4. Run
 ~~~
     > python -m aiaccel.start --config config.yaml
 ~~~
@@ -314,8 +326,6 @@ The integration tests test optimizer algorithms using `examples/sphere`.
 - Synchronization of re-run.
 - Error detections for user applications.
 - Refactor the codes. Line feeds manner, single quotation and double quotation, and so on.
-- Need a good name!
 
 # Acknowledgment
-Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Development Organization (NEDO). <BR>
-The aiaccel is built with the help of Optuna.
+aiaccel is built with the help of Optuna.
