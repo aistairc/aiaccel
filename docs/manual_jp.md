@@ -30,9 +30,8 @@
   - [6 最適化実行](#6-最適化実行)
       - [オプション付きの実行](#オプション付きの実行)
         - [例](#例)
-  - [7 進捗の可視化について](#7-進捗の可視化について)
-        - [全結果の表示](#全結果の表示)
-        - [簡易フラグの表示](#簡易フラグの表示)
+- [ローカル環境での実行方法](#ローカル環境での実行方法)
+  - [resourceの設定](#resourceの設定)
   - [ABCIの設定](#abciの設定)
   - [job_script_preamble.sh](#job_script_preamblesh)
 - [補助ツールについて](#補助ツールについて)
@@ -565,8 +564,40 @@ python -m aiaccel.start --config config.yaml --clean
 python -m aiaccel.start --config config.yaml --resume 5
 ```
 
+<hr>
+
+# ローカル環境での実行方法
+
+ローカル環境でaiaccelを使用する場合は、次のように設定を変更します。
+
+## resourceの設定
+
+コンフィグファイルの`resource`の`type`に`local`を指定します。
+```yaml
+resource:
+  type: "local"
+  num_node: 4
+
+```
+
+## ABCIの設定
+
+ローカル環境で実施する場合,`ABCI`の設定は動作に反映されません。
+```yaml
+ABCI:
+  group: "[group]"
+  job_script_preamble: "./job_script_preamble.sh"
+  job_execution_options: ""
+```
+
+## job_script_preamble.sh
+
+ローカル環境で実施する場合、`job_script_preamble.sh`は不要です。
+記述した内容は動作に反映されません。
+
 <!-- <br>
-## 7 進捗の可視化について
+<hr>
+# 7 進捗の可視化について
 ##### 全結果の表示
 ```bash
 > python -m aiaccel.view --config config.yaml
@@ -577,30 +608,6 @@ python -m aiaccel.start --config config.yaml --resume 5
 > python -m aiaccel.graph --config config.yaml
 ``` -->
 
-
-# ローカル環境での実行方法
-ローカル環境でaiaccelを使用する場合は、次のように設定を変更します。
-## resourceの設定
-コンフィグファイルの`resource`の`type`に`local`を指定します。
-```yaml
-resource:
-  type: "local"
-  num_node: 4
-
-```
-
-## ABCIの設定
-ローカル環境で実施する場合,`ABCI`の設定は動作に反映されません。
-```yaml
-ABCI:
-  group: "[group]"
-  job_script_preamble: "./job_script_preamble.sh"
-  job_execution_options: ""
-```
-
-## job_script_preamble.sh
-ローカル環境で実施する場合、`job_script_preamble.sh`は不要です。
-記述した内容は動作に反映されません。
 
 <br>
 <hr>
