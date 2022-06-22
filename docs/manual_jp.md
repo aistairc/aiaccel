@@ -2,7 +2,6 @@
 
 <!-- code_chunk_output -->
 # aiaccel
-ABCI 用ハイパパラメータ最適化ソフトウェア
 - [aiaccel](#aiaccel)
 - [セットアップと事前準備](#セットアップと事前準備)
   - [1. ABCIの準備](#1-abciの準備)
@@ -31,9 +30,14 @@ ABCI 用ハイパパラメータ最適化ソフトウェア
   - [6 最適化実行](#6-最適化実行)
       - [オプション付きの実行](#オプション付きの実行)
         - [例](#例)
-  - [補助ツールについて](#補助ツールについて)
-    - [補助ツールの機能概要](#補助ツールの機能概要)
-  - [謝辞](#謝辞)
+  - [7 進捗の可視化について](#7-進捗の可視化について)
+        - [全結果の表示](#全結果の表示)
+        - [簡易フラグの表示](#簡易フラグの表示)
+  - [ABCIの設定](#abciの設定)
+  - [job_script_preamble.sh](#job_script_preamblesh)
+- [補助ツールについて](#補助ツールについて)
+- [補助ツールの機能概要](#補助ツールの機能概要)
+- [謝辞](#謝辞)
 
 <!-- /code_chunk_output -->
 
@@ -101,7 +105,7 @@ setup.pyを実行し、aiaccelをインストールします。
 > python setup.py install
 ~~~
 
-または，
+または、
 ~~~bash
 > python -m pip install git+https://github.com/aistairc/aiaccel.git
 ~~~
@@ -160,7 +164,7 @@ generic:
 **サンプル**
 ```yaml
 resource:
-  type: "local"
+  type: "ABCI"
   num_node: 4
 
 ```
@@ -550,7 +554,7 @@ export PYTHONPATH=$AIACCELPATH:$AIACCELPATH/lib
 > python -m aiaccel.start
 ```
 - --clean : workspaceが既に存在する場合、最適化実行前にworkspaceを削除します。
-- --resume : workspaceが既に存在する場合、保存データが存在するトライアルを指定することで，指定のトライアルから再開することができます．
+- --resume : workspaceが既に存在する場合、保存データが存在するトライアルを指定することで、指定のトライアルから再開することができます。
 
 ##### 例
 ```bash
@@ -574,18 +578,41 @@ python -m aiaccel.start --config config.yaml --resume 5
 ``` -->
 
 
+# ローカル環境での実行方法
+ローカル環境でaiaccelを使用する場合は、次のように設定を変更します。
+## resourceの設定
+コンフィグファイルの`resource`の`type`に`local`を指定します。
+```yaml
+resource:
+  type: "local"
+  num_node: 4
+
+```
+
+## ABCIの設定
+ローカル環境で実施する場合,`ABCI`の設定は動作に反映されません。
+```yaml
+ABCI:
+  group: "[group]"
+  job_script_preamble: "./job_script_preamble.sh"
+  job_execution_options: ""
+```
+
+## job_script_preamble.sh
+ローカル環境で実施する場合、`job_script_preamble.sh`は不要です。
+記述した内容は動作に反映されません。
 
 <br>
 <hr>
 
-## 補助ツールについて
+# 補助ツールについて
 
 ABCI上でaiaccelを使用する際、aiaccelの補助ツール(wd)を使用できます。<br>
 試作中につき機能は制限していますが、必要ならば是非ともご利用ください。<br>
 詳細は[wd_dev/README_JP.md]をご参照ください。
 
 
-### 補助ツールの機能概要
+# 補助ツールの機能概要
 
 1. ABCI上でaiaccelを使用するためのCUI機能を利用できます。
 2. ABCIのポイント消費量を最大で約25%抑えることができます。
@@ -595,7 +622,8 @@ ABCI上でaiaccelを使用する際、aiaccelの補助ツール(wd)を使用で�
 <br>
 <hr>
 
-## 謝辞
+
+# 謝辞
 
 この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。<BR>
 TPEアルゴリズムは Optuna を利用しました。
