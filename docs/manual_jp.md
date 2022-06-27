@@ -34,9 +34,6 @@
   - [resourceの設定](#resourceの設定)
   - [ABCIの設定](#abciの設定)
   - [job_script_preamble.sh](#job_script_preamblesh)
-- [補助ツールについて](#補助ツールについて)
-- [補助ツールの機能概要](#補助ツールの機能概要)
-- [謝辞](#謝辞)
 
 <!-- /code_chunk_output -->
 
@@ -179,7 +176,7 @@ ABCI:
   job_script_preamble: "./job_script_preamble.sh"
   job_execution_options: ""
 ```
-- **job_script_preamble** - ABCIが実行するシェルスクリプト名を指定します。詳細は後述します。
+- **job_script_preamble** - ABCI上でソフトウェアを実行するためのラッパーシェルスクリプトです。詳細は後述します。
 - **group** - 自分が所属しているABCIグループ名を指定します。([]は記述不要です。)
 
 
@@ -207,7 +204,7 @@ optimize:
       initial: 1.0
 ```
 - **search_algorithm** - 最適化アルゴリズム[*1]を指定します。
-- **goal** - 最適化の方向を設定します。
+- **goal** - 最適化の方向を設定します。[minimize | maximize]
 - **trial_number** - 試行回数を設定します。
   - ご注意
     - trial_numberは最適化モデルの実行回数を指定します。例として、Nelder-Meadを使用する場合、ハイパラが2変数のとき一回の評価で最低3点を評価する必要があります。この場合はtrial_numberを3に指定します。
@@ -611,26 +608,3 @@ ABCI:
 
 <br>
 <hr>
-
-# 補助ツールについて
-
-ABCI上でaiaccelを使用する際、aiaccelの補助ツール(wd)を使用できます。<br>
-試作中につき機能は制限していますが、必要ならば是非ともご利用ください。<br>
-詳細は[wd_dev/README_JP.md]をご参照ください。
-
-
-# 補助ツールの機能概要
-
-1. ABCI上でaiaccelを使用するためのCUI機能を利用できます。
-2. ABCIのポイント消費量を最大で約25%抑えることができます。
-
-[wd_dev/README_JP.md]:wd_dev/README_JP.md
-
-<br>
-<hr>
-
-
-# 謝辞
-
-この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。<BR>
-TPEアルゴリズムは Optuna を利用しました。
