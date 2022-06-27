@@ -70,7 +70,7 @@ cd ~/aiaccel
 > Warning
 > インタラクティブノードのCPUやメモリなどの資源は多くの利用者で共有するため、高負荷な処理は行わないようにしてください。高負荷な前処理、後処理を行う場合は、計算ノードを利用してください。 インタラクティブノードで高負荷な処理を行った場合、システムにより処理が強制終了されますのでご注意ください。
 
-## 2. インストール。[「~/aiaccel/README_JP.md」など](../README_JP.md)の通りに
+## 2. インストール。[「~/aiaccel/README_JP.md」](../README_JP.md)などの通りに
 abciのmodule関連の記述などの詳細は、
 [「Environment Modules</a>」](https://docs.abci.ai/ja/environment-modules/)も合わせてご参照いただきたく。  
 ~/aiaccel/experimental/tools/[install_aiaccel.source](tools/install_aiaccel.source)  
@@ -111,10 +111,8 @@ exit()
 ```
 ssh abci
 source ~/aiaccel/experimental/tools/make_aiaccel_env.source
-cd ~/aiaccel/experimental/examples/config/aiaccel-test/readme_jp-sample-local/
-python -m aiaccel.start --config config.yml --clean
 ```
-で、実行できます。
+で、インストール時と同じ状態になります。
 
 ## 3. テスト
 
