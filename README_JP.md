@@ -129,7 +129,7 @@ resource:
 
 ABCI上でaiaccelを使用する際、aiaccelの補助ツール(wd)を使用できます。<br>
 試作中につき機能は制限していますが、必要ならば是非ともご利用ください。<br>
-詳細は[wd_dev/README_JP.md]をご参照ください。
+詳細は[experimental/README_JP.md](experimental/README_JP.md)をご参照ください。
 
 
 # 補助ツールの機能概要
@@ -137,7 +137,6 @@ ABCI上でaiaccelを使用する際、aiaccelの補助ツール(wd)を使用で�
 1. ABCI上でaiaccelを使用するためのCUI機能を利用できます。
 2. ABCIのポイント消費量を最大で約25%抑えることができます。
 
-[experimental/README_JP.md]:experimental/README_JP.md
 
 <br>
 <hr>
