@@ -44,22 +44,7 @@ examples/sphere を実行する方法を説明します。
     > source venv/bin/activate
 ~~~
 
-<!-- 2. Download the repository. This example assumes as running on bash terminal.
-~~~
-    > git clone http://gitlab.com/onishi-lab/opt.git
-
-    > ls
-    aiaccel
-~~~
-
-3. Install the requirements and the software
-~~~
-    > cd opt
-    > pip install cython numpy pytest
-    > python setup.py install
-~~~ -->
-
-2. 本ソフトウェアをインストールします
+1. 本ソフトウェアをインストールします
 ~~~
     pip install cython numpy pytest
     pip install git+https://github.com/aistairc/aiaccel.git 
@@ -69,7 +54,7 @@ examples/sphere を実行する方法を説明します。
 3. ワークスペースを用意し、sphereディレクトリをコピーします。
 ~~~
     > cd your_workspace_directory
-    > cp -R cloned_directory/opt/examples .
+    > cp -R cloned_directory/aiaccel/examples .
     > cd examples
     > ls
     sphere

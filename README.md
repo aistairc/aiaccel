@@ -66,7 +66,7 @@ This tutorial describes how to run in examples/sphere directory.
     config.yaml         job_script_preamble.sh         user.py
 ~~~
 
-4. Run
+4. Run on an (interactive) jobn
 ~~~
     > python -m aiaccel.start --config config.yaml
 ~~~
@@ -135,4 +135,6 @@ resource:
 If you want to check the running jobs, please refer the [ABCI User Guide](https://docs.abci.ai/ja/).
 
 # Acknowledgment
+Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Deve
+lopment Organization (NEDO).
 aiaccel is built with the help of Optuna.
