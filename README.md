@@ -114,7 +114,7 @@ This tutorial describes how to run in examples/sphere directory.
     > python -m aiaccel.bin.stop
 ~~~ -->
 
-## sphere tutorial on ABCI
+## Sphere tutorial on ABCI
 This tutorial describes how to run examples/sphere on ABCI.
 
 1. At first, please setup python environment following the ABCI Users Guide:
