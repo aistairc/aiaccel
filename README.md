@@ -14,13 +14,6 @@ pip install git+https://github.com/aistairc/aiaccel.git
 # Requirements
 Require Python 3 (>= 3.8.13).
 
-# Dependencies
-Required libraries can be installed using `pip`.
-If you install the software using `setup.py`, you need not install using `pip`, because `setup.py` installs the libraries.
-~~~
-pip install -r requirements.txt
-~~~
-
 # How to run examples
 
 ## Abstract of examples
@@ -114,7 +107,7 @@ This tutorial describes how to run in examples/sphere directory.
     > python -m aiaccel.bin.stop
 ~~~ -->
 
-## Sphere tutorial on ABCI
+## sphere tutorial on ABCI
 This tutorial describes how to run examples/sphere on ABCI.
 
 1. At first, please setup python environment following the ABCI Users Guide:
@@ -133,7 +126,7 @@ resource:
   num_node: 4
 ```
 
-4. Run on an (interactive) job
+4. Run
 ~~~
     > python -m aiaccel.start --config config.yaml
 ~~~
@@ -143,4 +136,3 @@ If you want to check the running jobs, please refer the [ABCI User Guide](https:
 
 # Acknowledgment
 aiaccel is built with the help of Optuna.
-Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Development Organization (NEDO).

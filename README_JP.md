@@ -11,11 +11,6 @@ pip install git+https://github.com/aistairc/aiaccel.git
 # 動作環境
   - python 3 (3.8.13以上)
 
-# 依存ライブラリ
-必要なライブラリは `pip` を使用してインストールすることができます。
-~~~
-pip install -r requirements.txt
-~~~
 
 # examples
 
