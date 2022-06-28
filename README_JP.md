@@ -37,14 +37,14 @@ pip install git+https://github.com/aistairc/aiaccel.git
 examples/sphere を実行する方法を説明します。
 
 
-1.virtualenvをインストールし、仮想環境を作成します。
+1. virtualenvをインストールし、仮想環境を作成します。
 ~~~
     > pip install virtualenv
     > virtualenv venv
     > source venv/bin/activate
 ~~~
 
-1. 本ソフトウェアをインストールします
+2. 本ソフトウェアをインストールします
 ~~~
     pip install cython numpy pytest
     pip install git+https://github.com/aistairc/aiaccel.git 
