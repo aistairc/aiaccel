@@ -66,7 +66,7 @@ This tutorial describes how to run in examples/sphere directory.
     config.yaml         job_script_preamble.sh         user.py
 ~~~
 
-4. Run on an (interactive) jobn
+4. Run
 ~~~
     > python -m aiaccel.start --config config.yaml
 ~~~
@@ -126,7 +126,7 @@ resource:
   num_node: 4
 ```
 
-4. Run on an (interactive) jobn
+4. Run on an (interactive) job
 ~~~
     > python -m aiaccel.start --config config.yaml
 ~~~
