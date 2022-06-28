@@ -126,7 +126,7 @@ resource:
   num_node: 4
 ```
 
-4. Run
+4. Run on an (interactive) jobn
 ~~~
     > python -m aiaccel.start --config config.yaml
 ~~~
