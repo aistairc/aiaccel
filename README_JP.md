@@ -127,8 +127,7 @@ resource:
 
 # 補助ツールについて
 
-ABCI上でaiaccelを使用する際、aiaccelの補助ツール(wd)を使用できます。<br>
-試作中につき機能は制限していますが、必要ならば是非ともご利用ください。<br>
+ABCI上でaiaccelを使用する際、aiaccelの補助ツールを使用できます。<br>
 詳細は[experimental/README_JP.md](experimental/README_JP.md)をご参照ください。
 
 
