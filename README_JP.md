@@ -21,7 +21,7 @@ pip install -r requirements.txt
 
 ## examplesについて
 
-examplesディレクトリでは、5種類のサンプルを試用することができます。
+`./examples/` 以下に、5種類のサンプルを提供しています。
 ディレクトリ名は、対象のベンチマーク関数名を意味する。
 例えば、`sphere`ディレクトリはsphere関数です。
 
