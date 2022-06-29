@@ -1,62 +1,44 @@
-# aiaccel
-A hyperparameter optimization library for the ABCI.
-The software solves hyperparameter optimizations related to AI technologies such as deep learning and multi-agent simulation.
-Currently the software supports five optimization algorithms as follows: random search, grid search, sobol sequence, nelder mead and TPE.
+# aiaccel: an HPO library for ABCI
+[![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
+[![Supported Python version](https://img.shields.io/badge/Python-3.8-blue)](https://github.com/aistairc/aiaccel)
 
-[** README in Japanese **](https://github.com/aistairc/aiaccel/blob/main/README_JP.md)
+[**日本語  (Japanese)**](https://github.com/aistairc/aiaccel/blob/main/README_JP.md)
+
+
+A hyperparameter optimization library for [AI Bridging Cloud Infrastructure (ABCI)](https://abci.ai/).
+This software solves hyperparameter optimizations related to AI technologies including deep learning and multi-agent simulation.
+The software currently supports five optimization algorithms: random search, grid search, sobol sequence, nelder-mead method, and TPE.
 
 # Installation
-The software can be installed using `setup.py`.
+The software can be installed using `pip`.
 ~~~
 pip install git+https://github.com/aistairc/aiaccel.git
 ~~~
 
-# Requirements
-Require Python 3 (>= 3.8.13).
+# Getting started
 
-# How to run examples
-
-## Abstract of examples
-
-In examples directory, six kinds of examples can be tested.
-The directory name means the target application to test.
-For example, `sphere` directory is sphere function.
-
-This software supports two environments: local and abci, and five search algorithm: random search, grid search, sobol sequence, nelder mead and TPE.
-These environments and algorithm can be changed in configuration file.
-Please edit the configuration file in the example directory if you want to run your choices.
-
-- Environment
-  - Environment local means that the software runs on your local computer.
-  - Environment abci means that you access to [ABCI](https://abci.ai/) and run your program on it.
-- Search algorithm
-  - Search algorithm: random search means that the software searches hyperparameters at random.
-  - Search algorithm: grid search means that the software searches exhaustive search over hyperparameters.
-  - Search algorithm: sobol sequence means that the software searches hyperparameters following the [sobol sequence](https://en.wikipedia.org/wiki/Sobol_sequence).
-  - Search algorithm: nelder mead means that the optimizer searches hyperparameters following the [nelder mead method](https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method).
-  - Search algorithm: TPE means that the optimizer searches hyperparameters following the [TPE(Tree-structed Parzen Estimator Approach)](https://www.lri.fr/~kegl/research/PDFs/BeBaBeKe11.pdf).
-
-## sphere tutorial on local computer
-This tutorial describes how to run in examples/sphere directory.
+## Running on a local computer
+An example for optimizeing a simple function (i.e., sphere function) on a local computer.
 
 
-1. Install the virtualenv and create the virtual environment. (Optional)
-~~~
+0. (Optional) Install [Virtualenv](https://virtualenv.pypa.io/en/latest/) and create a virtual environment. 
+    ~~~bash
     > pip install virtualenv
     > virtualenv venv
     > source venv/bin/activate
-~~~
+    ~~~
 
-2. Install the requirements and the software
-~~~
-    pip install cython numpy pytest
-    pip install git+https://github.com/aistairc/aiaccel.git 
-~~~
+1. Install `aiaccel`
+    ~~~bash
+    > pip install git+https://github.com/aistairc/aiaccel.git 
+    ~~~
 
-3. Prepare the workspace and copy the sphere directory.
-~~~
+2. Create a workspace and copy the sphere example on the repository.
+    ~~~bash
+    > mkdir your_workspace_directory
     > cd your_workspace_directory
-    > cp -R cloned_directory/aiaccel/examples .
+    > git clone https://github.com/aistairc/aiaccel.git 
+    > cp -R ./aiaccel/examples .
     > cd examples
     > ls
     sphere
@@ -64,77 +46,66 @@ This tutorial describes how to run in examples/sphere directory.
     > cd sphere
     > ls
     config.yaml         job_script_preamble.sh         user.py
-~~~
+    ~~~
 
-4. Run
-~~~
+3. Run the parameter optimization
+    ~~~bash
     > python -m aiaccel.start --config config.yaml
-~~~
+    ~~~
 
- You can clean the workspace directory using `--clean`.
-~~~
+    Tips: You can clean the workspace directory using `--clean`.
+    ~~~bash
     > python -m aiaccel.start --config config.yaml --clean
-~~~
+    ~~~
 
-5. After finishing master, check the results.
-~~~
-    > ls /tmp/work
+4. Wait for the program to finish and check the optimization results.
+    ~~~bash
+    > ls ./work
     abci_output         alive               hp                  lock
     log                 resource            result              runner
     state               verification
 
-    > ls /tmp/work/result/final_result.result
-    /tmp/work/result/final_result.result
-~~~
+    > cat ./work/result/final_result.result
+    ~~~
 
-6. If you want to change settings, please edit config.yaml file.
-~~~
+5. If you want to change configurations, edit `config.yaml`.
+    ~~~bash
     vi config.yaml
-~~~
+    ~~~
 
-7. If you want to re-run the optimization, please move the `work_aiaccel` directory.
-~~~
+6. If you want to re-run the optimization, move the `work_aiaccel` directory.
+    ~~~bash
     > mv /tmp/work /tmp/work/work_aiaccel_200101
-~~~
+    ~~~
 
-<!-- 9. You can clean the workspace directory using `clean_workspace.py`.
-~~~
-    > python -m aiaccel.bin.clean
-~~~
-
-10. If you want to stop the optimization, please use `stop_all.py`.
-~~~
-    > python -m aiaccel.bin.stop
-~~~ -->
-
-## sphere tutorial on ABCI
+## Running on ABCI
 This tutorial describes how to run examples/sphere on ABCI.
 
-1. At first, please setup python environment following the ABCI Users Guide:
-~~~
+1. First, setup python environment following [the ABCI Users Guide](https://docs.abci.ai/en/python/):
+    ~~~bash
     module load python/3.8/3.8.13
     python3 -m venv work
     source work/bin/activate
-~~~
+    ~~~
 
-2. Prepare sphere workspace. Thease processes are same with [sphere tutorial on local computer](https://github.com/aistairc/aiaccel#sphere-tutorial-on-local-computer) from 2 to 4.
+2. Prepare the workspace by following Steps 2 to 4 in [Running on a local computer](https://github.com/aistairc/aiaccel#Running-on-a-local-computer).
 
 3. Please confirm the configuration file before running master.
-```yaml
-resource:
-  type: "ABCI"
-  num_node: 4
-```
+    ```yaml
+    resource:
+        type: "ABCI"
+        num_node: 4
+    ```
 
 4. Run on an (interactive) job
-~~~
+    ~~~
     > python -m aiaccel.start --config config.yaml
-~~~
+    ~~~
 
 5. The other processes are same with [sphere tutorial on local computer](https://github.com/aistairc/aiaccel#sphere-tutorial-on-local-computer) from 6 to 10.
 If you want to check the running jobs, please refer the [ABCI User Guide](https://docs.abci.ai/ja/).
 
 # Acknowledgment
-Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Deve
+* Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Deve
 lopment Organization (NEDO).
-aiaccel is built with the help of Optuna.
+* aiaccel is built with the help of Optuna.
