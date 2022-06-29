@@ -62,8 +62,8 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
     ~~~bash
     > ls ./work
     abci_output         alive               hp                  lock
-    log                 resource            result              runner
-    state               verification
+    log                 result              runner              state
+    verification
 
     > cat ./work/result/final_result.result
     ~~~
@@ -71,11 +71,6 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
 5. If you want to change configurations, edit `config.yaml`.
     ~~~bash
     vi config.yaml
-    ~~~
-
-6. If you want to re-run the optimization, move the `work_aiaccel` directory.
-    ~~~bash
-    > mv /tmp/work /tmp/work/work_aiaccel_200101
     ~~~
 
 ## Running on ABCI
