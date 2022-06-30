@@ -56,8 +56,8 @@ pip install git+https://github.com/aistairc/aiaccel.git
     ~~~bash
     > ls ./work
     abci_output         alive               hp                  lock
-    log                 resource            result              runner
-    state               verification
+    log                 result              runner              state
+    verification
 
     > cat ./work/result/final_result.result
     ~~~
@@ -66,12 +66,6 @@ pip install git+https://github.com/aistairc/aiaccel.git
     ~~~bash
     vi config.yaml
     ~~~
-
-6. 最適化を再実行したい場合は、ワークスペースディレクトリを移動してください。
-    ~~~bash
-    > mv /tmp/work /tmp/work/work_aiaccel_200101
-    ~~~
-
 
 ## ABCI上で実行する
 1. まず、[ABCIユーザーズガイド](https://docs.abci.ai/ja/python)に従って、pythonの環境を構築してください。
