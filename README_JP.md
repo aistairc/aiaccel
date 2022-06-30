@@ -1,75 +1,38 @@
-# aiaccel
+# aiaccel: an HPO library for ABCI
+[![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
+[![Supported Python version](https://img.shields.io/badge/Python-3.8-blue)](https://github.com/aistairc/aiaccel)
+
 [AI橋渡しクラウドABCI](https://abci.ai/)向けハイパーパラメータ最適化ライブラリ。
-サポートされている最適化アルゴリズムは、ランダムサーチ、グリッドサーチ、Sobol列、Nelder-Mead法、およびベイズ最適化法 (TPE)。
+ランダムサーチ、グリッドサーチ、Sobol列、Nelder-Mead法、およびベイズ最適化法 (TPE)をサポートしています。
 
 # インストール
 本ソフトウェアは下記コマンドでインストールできます。
-~~~
+~~~bash
 pip install git+https://github.com/aistairc/aiaccel.git
 ~~~
 
-# 動作環境
-  - python 3 (3.8.13以上)
+# 実行例
+## ローカル環境で実行する場合
 
-
-# examples
-
-## examplesについて
-
-`./examples/` 以下に、5種類のサンプルを提供しています。
-ディレクトリ名 (`sphere`, `schwefel`, ...) は、対象のベンチマーク関数名を意味します。
-
-本ソフトウェアは、localとabciの2つの動作環境をサポートしています。
-本ソフトウェアは、ランダムサーチ、グリッドサーチ、ソボルシーケンス、ネルダーミード、TPEの5つの探索アルゴリズムをサポートしています。
-
-動作環境とアルゴリズムは、コンフィギュレーションファイルで変更することができます。
-- 動作環境
-  - local: ローカル上で最適化を実行します。
-  - abci: [ABCI](https://abci.ai/)上で最適化を実行します。
-- 探索アルゴリズム
-  - ランダム: ハイパーパラメータをランダムに探索します。
-  - グリッド: ハイパーパラメータを網羅的に探索します。
-  - ソボル列: [sobol sequence](https://en.wikipedia.org/wiki/Sobol_sequence)に従ってハイパーパラメータを探索します。
-  - ネルダーミード: [nelder mead method](https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method)に従ってハイパーパラメータを探索します。
-  - TPE: [TPE(Tree-structed Parzen Estimator Approach)](https://www.lri.fr/~kegl/research/PDFs/BeBaBeKe11.pdf)に従ってハイパーパラメータを探索します。
-
-## ローカル環境でsphere関数の最適化を実行
-examples/sphere を実行する方法を説明します。
-
-
-1.virtualenvをインストールし、仮想環境を作成します。
-~~~
+0. (オプション) Virtualenvをインストールし、仮想環境を作成します。
+    ~~~bash
     > pip install virtualenv
     > virtualenv venv
     > source venv/bin/activate
-~~~
+    ~~~
 
-<!-- 2. Download the repository. This example assumes as running on bash terminal.
-~~~
-    > git clone http://gitlab.com/onishi-lab/opt.git
-
-    > ls
-    aiaccel
-~~~
-
-3. Install the requirements and the software
-~~~
-    > cd opt
-    > pip install cython numpy pytest
-    > python setup.py install
-~~~ -->
-
-2. 本ソフトウェアをインストールします
-~~~
-    pip install cython numpy pytest
+1. `aiaccel`をインストールします
+    ~~~bash
     pip install git+https://github.com/aistairc/aiaccel.git 
-~~~
+    ~~~
 
 
-3. ワークスペースを用意し、sphereディレクトリをコピーします。
-~~~
+2. ワークスペースを作成し、sphereディレクトリをコピーします。
+    ~~~bash
+    > mkdir your_workspace_directory
     > cd your_workspace_directory
-    > cp -R cloned_directory/opt/examples .
+    > git clone https://github.com/aistairc/aiaccel.git 
+    > cp -R cloned_directory/aiaccel/examples .
     > cd examples
     > ls
     sphere
@@ -77,88 +40,70 @@ examples/sphere を実行する方法を説明します。
     > cd sphere
     > ls
     config.yaml         job_script_preamble.sh         user.py
-~~~
+    ~~~
 
-4. 実行。
-~~~
+3. パラメータ最適化を実行します。
+    ~~~bash
     > python -m aiaccel.start --config config.yaml
-~~~
+    ~~~
 
-ワークスペースディレクトリは `--clean` を付加することで実行前に削除できます。
-~~~
+    Tips: ワークスペースは `--clean` を付加することで実行前に初期化できます。
+    ~~~bash
     > python -m aiaccel.start --config config.yaml --clean
-~~~
+    ~~~
 
-5. 結果を確認
-~~~
+4. 結果を確認する。
+    ~~~bash
     > ls ./work
     abci_output         alive               hp                  lock
     log                 resource            result              runner
     state               verification
 
     > cat ./work/result/final_result.result
-~~~
+    ~~~
 
-6. 設定を変更したい場合は、config.yamlファイルを編集してください。
-~~~
+5. 設定を変更したい場合は、config.yamlファイルを編集してください。
+    ~~~bash
     vi config.yaml
-~~~
+    ~~~
 
-7. 最適化を再実行したい場合は、ワークスペースディレクトリを移動してください。
-~~~
+6. 最適化を再実行したい場合は、ワークスペースディレクトリを移動してください。
+    ~~~bash
     > mv /tmp/work /tmp/work/work_aiaccel_200101
-~~~
+    ~~~
 
 
-## ABCI環境でsphere関数の最適化を実行
-ABCI上でexamples/sphereを実行する手順を説明します。
-
-1. まず、ABCIユーザーズガイドに従って、pythonの環境を構築してください。
-~~~
+## ABCI上で実行する
+1. まず、[ABCIユーザーズガイド](https://docs.abci.ai/ja/python)に従って、pythonの環境を構築してください。
+    ~~~bash
     module load python/3.8/3.8.13
     python3 -m venv work
     source work/bin/activate
-~~~
+    ~~~
 
 2. config.yamlのresourceをABCIに変更します。
-```yaml
-resource:
-  type: "ABCI"
-  num_node: 4
-```
+    ```yaml
+    resource:
+        type: "ABCI"
+        num_node: 4
+    ```
 
-3. ワークスペースを用意します．ここからの作業は、[ローカル環境でsphere関数の最適化を実行]の3〜4と同じです。
+3. ワークスペースを用意します．ここからの作業は、[ローカル環境で実行する場合](https://github.com/aistairc/aiaccel/blob/main/README_JP.md#%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E3%81%A7%E5%AE%9F%E8%A1%8C%E3%81%99%E3%82%8B%E5%A0%B4%E5%90%88)の2および3と同じです。
 
 4. 実行
-~~~
+    ~~~bash
     > python -m aiaccel.start --config config.yaml
-~~~
+    ~~~
 
 5. 実行中のジョブを確認したい場合は、[ABCIユーザーズガイド](https://docs.abci.ai/ja/)を参照してください。
 
 
-<br>
-<hr>
-
-# 補助ツールについて
-
-ABCI上でaiaccelを使用する際、aiaccelの補助ツール(wd)を使用できます。<br>
-試作中につき機能は制限していますが、必要ならば是非ともご利用ください。<br>
-詳細は[wd_dev/README_JP.md]をご参照ください。
-
-
-# 補助ツールの機能概要
-
-1. ABCI上でaiaccelを使用するためのCUI機能を利用できます。
-2. ABCIのポイント消費量を最大で約25%抑えることができます。
-
-[experimental/README_JP.md]:experimental/README_JP.md
-
-<br>
-<hr>
+# 開発中の機能wdについて
+ABCI上で `aiaccel` を実行する場合、HPOを管理する `master` プログラムが常時実行している必要があり、目的関数を計算している間も待機のためにポイントを消費してしまいます。
+`./experimental/wd` (watch dog) と呼ばれる開発中の機能を用いれば、このような不必要な消費を抑制することができます。
+詳細は[experimental/README_JP.md](experimental/README_JP.md)をご参照ください。
 
 
 # 謝辞
-
-この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。<BR>
-TPEアルゴリズムは Optuna を利用しました。
+* この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。
+* TPEアルゴリズムは Optuna を利用しました。
