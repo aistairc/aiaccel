@@ -1,27 +1,17 @@
 import aiaccel
-import fasteners
 import logging
 import os
 import threading
 import time
 import sys
 from aiaccel.config import Config
-from aiaccel.util.filesystem import check_alive_file
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.filesystem import get_file_hp_finished
-from aiaccel.util.filesystem import get_file_hp_ready
-from aiaccel.util.filesystem import get_file_hp_running
-from aiaccel.util.filesystem import interprocess_lock_file
-from aiaccel.util.filesystem import load_yaml
-from aiaccel.util.filesystem import make_directories
-from aiaccel.util.filesystem import make_directory
 from aiaccel.util.process import is_process_running
 from multiprocessing import Barrier
 from pathlib import Path
-from typing import Tuple
 import numpy as np
 import random
-from aiaccel.util.snapshot import SnapShot
+from aiaccel.storage.storage import Storage
+from aiaccel.util.trialid import TrialId
 
 
 class AbstractModule(object):
@@ -44,7 +34,6 @@ class AbstractModule(object):
     Attributes:
         barrier (multiprocessing.Barrier): A barrier to synchronize processes.
         config (ConfileWrapper): A config object.
-        dict_alive (Path): A path to alive directory.
         dict_hp (Path): A path to hp directory.
         dict_lock (Path): A path to lock directory.
         dict_log (Path): A path to log directory.
@@ -79,6 +68,8 @@ class AbstractModule(object):
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
+
+        # working directory
         self.dict_alive = self.ws / aiaccel.dict_alive
         self.dict_hp = self.ws / aiaccel.dict_hp
         self.dict_lock = self.ws / aiaccel.dict_lock
@@ -88,131 +79,80 @@ class AbstractModule(object):
         self.dict_runner = self.ws / aiaccel.dict_runner
         self.dict_state = self.ws / aiaccel.dict_state
         self.dict_verification = self.ws / aiaccel.dict_verification
-        self.alive_master = self.dict_alive / aiaccel.alive_master
-        self.alive_optimizer = self.dict_alive / aiaccel.alive_optimizer
-        self.alive_scheduler = self.dict_alive / aiaccel.alive_scheduler
         self.dict_hp_ready = self.ws / aiaccel.dict_hp_ready
         self.dict_hp_running = self.ws / aiaccel.dict_hp_running
         self.dict_hp_finished = self.ws / aiaccel.dict_hp_finished
+        self.dict_storage = self.ws / aiaccel.dict_storage
+
+        # alive file
+        self.alive_master = self.dict_alive / aiaccel.alive_master
+        self.alive_optimizer = self.dict_alive / aiaccel.alive_optimizer
+        self.alive_scheduler = self.dict_alive / aiaccel.alive_scheduler
+
+        self.logger = None
+        self.fh = None
+        self.ch = None
+        self.ch_formatter = None
+        self.ch_formatter = None
+        self.loop_count = 0
+        self.hp_ready = 0
+        self.hp_running = 0
+        self.hp_finished = 0
         self.sleep_time = 1.0
         self.barrier = None
         self.seed = self.config.randseed.get()
-        self.snapshot = SnapShot(self.ws, self.options['process_name'])
+        self.storage = Storage(
+            self.ws,
+            fsmode=options['fs'],
+            config_path=self.config.config_path
+        )
+        self.management_trial_id = TrialId(self.options['config'])
         self.barrier_timeout = (self.config.batch_job_timeout.get() * self.config.job_retry.get())
+        self.serialize_datas = {}
+        self.deserialize_datas = {}
 
-    def make_work_directory(self) -> None:
-        """Create a work directory.
-
-        Returns:
-            None
-
-        Raises:
-            NotADirectoryError: It raises if a workspace argument (self.ws) is
-            not a directory.
-        """
-        if not self.ws.is_dir():
-            self.logger.error(
-                'Invalid work path: {}, is set in config.'.format(self.ws)
-            )
-            raise NotADirectoryError(
-                'Invalid work path: {}, is set in config.'.format(self.ws)
-            )
-
-        for d in [self.dict_lock]:
-            if not d.is_dir():
-                if d.exists():
-                    os.remove(d)
-                make_directory(d)
-
-        make_directories(
-            [
-                self.dict_alive,
-                self.dict_hp,
-                self.dict_log,
-                self.dict_output,
-                self.dict_result,
-                self.dict_runner,
-                self.dict_state,
-                self.dict_verification
-            ],
-            self.dict_lock
-        )
-
-        make_directories(
-            [
-                self.dict_hp_ready, self.dict_hp_running, self.dict_hp_finished
-            ],
-            self.dict_lock
-        )
-
-    def check_work_directory(self) -> bool:
-        """Check required directories exist or not.
-
-        Returns:
-            bool: All required directories exist or not.
-        """
-
-        dirs = [
-            self.dict_alive,
-            self.dict_hp,
-            self.dict_lock,
-            self.dict_log,
-            self.dict_output,
-            self.dict_result,
-            self.dict_runner,
-            self.dict_verification,
-            self.dict_hp_ready,
-            self.dict_hp_running,
-            self.dict_hp_finished
+        self.process_names = [
+            aiaccel.module_type_master,
+            aiaccel.module_type_optimizer,
+            aiaccel.module_type_scheduler
         ]
 
-        for d in dirs:
-            with fasteners.InterProcessLock(
-                    interprocess_lock_file(d, self.dict_lock)):
-                if d.is_dir():
-                    continue
-                else:
-                    return False
-
-        return True
-
-    def get_dict_state(self) -> None:
+    def get_each_state_count(self) -> None:
         """Updates the number of files in hp(hyper parameter) directories.
 
         Returns:
             None
         """
-        self.hp_ready = len(get_file_hp_ready(self.ws, self.dict_lock))
-        self.hp_running = len(get_file_hp_running(self.ws, self.dict_lock))
-        self.hp_finished = len(get_file_hp_finished(self.ws, self.dict_lock))
+        self.hp_ready = self.storage.get_num_ready()
+        self.hp_running = self.storage.get_num_running()
+        self.hp_finished = self.storage.get_num_finished()
 
-    def get_module_type_alive_file(self) -> Tuple[str, Path]:
-        """Get this module type and a path to alive file.
+    def get_module_type(self) -> str:
+        """Get this module type.
 
         Returns:
-            Tuple[str, Path]: This module type and a path to alive file.
+            str: This module type(name).
         """
-        with fasteners.InterProcessLock(
-            interprocess_lock_file(self.dict_alive, self.dict_lock)
-        ):
-            if aiaccel.class_master in self.__class__.__name__:
-                module_type = aiaccel.module_type_master
-                alive_file = self.alive_master
-            elif aiaccel.class_optimizer in self.__class__.__name__:
-                module_type = aiaccel.module_type_optimizer
-                alive_file = self.alive_optimizer
-            elif aiaccel.class_scheduler in self.__class__.__name__:
-                module_type = aiaccel.module_type_scheduler
-                alive_file = self.alive_scheduler
-            else:
-                module_type = None
-                alive_file = None
-                self.logger.error(
-                    'Unknown type of module: {}'
-                    .format(self.__class__.__name__)
-                )
 
-        return module_type, alive_file
+        if aiaccel.class_master in self.__class__.__name__:
+            return aiaccel.module_type_master
+        elif aiaccel.class_optimizer in self.__class__.__name__:
+            return aiaccel.module_type_optimizer
+        elif aiaccel.class_scheduler in self.__class__.__name__:
+            return aiaccel.module_type_scheduler
+        else:
+            return None
+
+    def get_alive_file(self) -> Path:
+        if aiaccel.class_master in self.__class__.__name__:
+            return self.alive_master
+        elif aiaccel.class_optimizer in self.__class__.__name__:
+            return self.alive_optimizer
+        elif aiaccel.class_scheduler in self.__class__.__name__:
+            return self.alive_scheduler
+        else:
+            self.logger.error(f'Unknown type of module: {self.__class__.__name__}')
+            return None
 
     def check_finished(self) -> bool:
         """Check whether all optimization finished or not.
@@ -220,20 +160,15 @@ class AbstractModule(object):
         Returns:
             bool: All optimization finished or not.
         """
-        with fasteners.InterProcessLock(
-            interprocess_lock_file(self.dict_hp, self.dict_lock)
-        ):
-            files = get_file_hp_finished(self.ws)
-
-        self.hp_finished = len(files)
+        self.hp_finished = self.storage.get_num_finished()
 
         if self.hp_finished >= self.config.trial_number.get():
             return True
 
         return False
 
-    def exit_alive(self, filename: Path) -> None:
-        """Exit the execution if alive files exist.
+    def exit_alive(self, process_name: str) -> None:
+        """Exit the execution.
 
         Args:
             filename (Path): A path to an alive file.
@@ -241,16 +176,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        with fasteners.InterProcessLock(
-            interprocess_lock_file(self.dict_alive, self.dict_lock)
-        ):
-            if check_alive_file(filename, self.dict_lock):
-                self.logger.info('Alive file exist: {}'.format(filename))
-                self.logger.info(
-                    'Please confirm the previous execution is '
-                    'finished, and delete the alive file.'
-                )
-                sys.exit()
+        self.storage.alive.stop_any_process(process_name)
 
     def print_dict_state(self) -> None:
         """Print hp(hyperparameter) directory states.
@@ -262,7 +188,8 @@ class AbstractModule(object):
             self.hp_finished,
             self.config.trial_number.get(),
             self.hp_ready,
-            self.hp_running))
+            self.hp_running)
+        )
 
     def set_barrier(self, barrier: Barrier) -> None:
         """Set a multiprocessing barrier.
@@ -326,19 +253,15 @@ class AbstractModule(object):
         Returns:
             None
         """
-        module_type, alive_file = self.get_module_type_alive_file()
+        module_type = self.get_module_type()
 
-        if check_alive_file(alive_file, self.dict_lock):
-            self.logger.error('Alive file still remains: {}.'.format(
-                alive_file))
+        if self.storage.alive.check_alive(module_type) is True:
+            self.logger.error('{} still remains.'.format(module_type))
             sys.exit()
 
-        yml = {
-            aiaccel.key_pid: os.getpid(),
-            aiaccel.key_path: str(self.ws),
-            aiaccel.key_module_type: module_type
-        }
-        create_yaml(alive_file, yml, self.dict_lock)
+        self.storage.alive.set_any_process_state(module_type, 1)
+        self.storage.pid.set_any_process_pid(module_type, os.getpid())
+
         self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
@@ -371,8 +294,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        while not self.check_work_directory():
-            time.sleep(self.config.sleep_time_master.get())
+        raise NotImplementedError
 
     def loop_post_process(self) -> None:
         """Called after exiting a main loop process.
@@ -451,6 +373,7 @@ class AbstractModule(object):
 
             if not self.check_error():
                 break
+
             self._serialize()
 
             if not self.is_barrier():
@@ -465,9 +388,11 @@ class AbstractModule(object):
             bool: It returns false if the barrier object is not set or the
             processes are not running. Otherwise, it returns true.
         """
+        self.logger.debug("Waiting for sync")
 
         start_time = time.time()
         check_cycle_time = 60
+
         while self.is_process_alive() and (time.time() - start_time) < self.barrier_timeout:
             try:
                 self.barrier.wait(check_cycle_time)
@@ -482,15 +407,9 @@ class AbstractModule(object):
         Returns:
             bool: Is processes running or not.
         """
-        alive_files = [
-            self.alive_master,
-            self.alive_scheduler,
-            self.alive_optimizer
-        ]
-        for alive_file in alive_files:
-            if alive_file.exists():
-                obj = load_yaml(alive_file, self.dict_lock)
-                if not is_process_running(obj['pid']):
+        for pname in self.process_names:
+            if self.storage.alive.check_alive(pname):
+                if not is_process_running(self.storage.pid.get_any_process_pid(pname)):
                     return False
             else:
                 return False
@@ -511,7 +430,7 @@ class AbstractModule(object):
         """
         raise NotImplementedError
 
-    def _deserialize(self, dict_objects: dict) -> None:
+    def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
 
         Args:
@@ -535,9 +454,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(
-            'set native random seed: {}'.format(self.seed)
-        )
+        self.logger.debug('set native random seed: {}'.format(self.seed))
         random.seed(self.seed)
 
     def set_numpy_random_seed(self) -> None:
@@ -549,9 +466,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(
-            'set numpy random seed: {}'.format(self.seed)
-        )
+        self.logger.debug('set numpy random seed: {}'.format(self.seed))
         np.random.seed(seed=self.seed)
 
     def get_native_random_state(self) -> tuple:
@@ -574,9 +489,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(
-            'set native random state: {}'.format(state)
-        )
+        self.logger.debug('set native random state: {}'.format(state))
         random.setstate(state)
 
     def get_numpy_random_state(self) -> tuple:
@@ -599,9 +512,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(
-            'set numpy random state: {}'.format(state)
-        )
+        self.logger.debug('set numpy random state: {}'.format(state))
         np.random.set_state(state)
 
     def check_error(self) -> bool:
@@ -616,7 +527,7 @@ class AbstractModule(object):
         return True
 
     @property
-    def curr_trial_number(self) -> int:
+    def current_max_trial_number(self) -> int:
         """ Get current trial number
 
         Args:
@@ -625,7 +536,7 @@ class AbstractModule(object):
         Returns:
             int: current trial number
         """
-        return len(list(self.dict_hp_finished.glob("*.hp")))
+        return self.storage.current_max_trial_number()
 
     def resume(self) -> None:
         """ When in resume mode, load the previous
@@ -641,10 +552,7 @@ class AbstractModule(object):
             self.options['resume'] is not None and
             self.options['resume'] > 0
         ):
-            self.snapshot.load(self.options['resume'])
-            self.set_native_random_state(self.snapshot.random_state_native)
-            self.set_numpy_random_state(self.snapshot.random_state_numpy)
-            self._deserialize(self.snapshot.process_memory_objects)
+            self._deserialize(self.options['resume'])
 
     def stop(self) -> None:
         """ Stop optimization.
@@ -655,11 +563,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        alive_files = [
-            self.alive_master,
-            self.alive_scheduler,
-            self.alive_optimizer
-        ]
-        for alive_file in alive_files:
-            if alive_file.exists():
-                alive_file.unlink()
+        self.storage.alive.init_alive()
+
+    def get_zero_padding_any_trial_id(self, trial_id: int):
+        return self.management_trial_id.zero_padding_any_trial_id(trial_id)

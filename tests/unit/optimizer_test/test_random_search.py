@@ -6,14 +6,14 @@ class TestRandomSearchOptimizer(BaseTest):
 
     def test_generate_parameter(self):
         options = {
-            'config': self.config_json,
+            'config': str(self.config_random_path),
             'resume': None,
             'clean': False,
             'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'optimizer'
         }
         optimizer = RandomSearchOptimizer(options)
+        optimizer.storage.alive.init_alive()
         optimizer.pre_process()
         assert optimizer.generate_parameter() is None

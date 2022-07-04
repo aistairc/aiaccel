@@ -15,7 +15,7 @@ class RamsomSampling(AbstractSchedulingAlgorithm):
         arr = []
         samples = min(num, len(hp_ready))
 
-        for i in range(0, samples):
+        for _ in range(0, samples):
             arr.append(random.choice(hp_ready))
 
         return arr

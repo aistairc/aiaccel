@@ -1,7 +1,7 @@
-from aiaccel.master.local_master import LocalMaster
+from aiaccel.master.local import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer.random.search import RandomSearchOptimizer
-from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.scheduler.local import LocalScheduler
 from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
 from contextlib import ExitStack
@@ -17,6 +17,8 @@ import logging
 import pytest
 import shutil
 import time
+import sys
+from aiaccel.storage.storage import Storage
 
 
 async def async_function(func):
@@ -35,21 +37,21 @@ def dummy_break():
     sys.exit()
 
 
-def test_make_work_directory_exit(config_json, work_dir):
-    options = {
-        'config': config_json,
-        'process_name': 'test'
-    }
-    module = AbstractModule(options)
-    module.logger = logging.getLogger(__name__)
-    shutil.rmtree(work_dir)
-    file_create(work_dir.parent.joinpath('work'), "")
+# def test_make_work_directory_exit(config_json, work_dir):
+#     options = {
+#         'config': config_json,
+#         'process_name': 'test'
+#     }
+#     module = AbstractModule(options)
+#     module.logger = logging.getLogger(__name__)
+#     shutil.rmtree(work_dir)
+#     file_create(work_dir.parent.joinpath('work'), "")
 
-    try:
-        module.make_work_directory()
-        assert False
-    except NotADirectoryError:
-        assert True
+#     try:
+#         module.make_work_directory()
+#         assert False
+#     except NotADirectoryError:
+#         assert True
 
 
 class TestAbstractModule(BaseTest):
@@ -57,98 +59,93 @@ class TestAbstractModule(BaseTest):
     @pytest.fixture(autouse=True)
     def setup_module(self, clean_work_dir):
         options = {
-            'config': self.config_json,
+            'config': str(self.config_json),
             'resume': None,
             'clean': False,
             'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'test'
         }
+
         self.module = AbstractModule(options)
+        self.module.storage.alive.init_alive()
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
 
-    def test_make_work_directory(self, work_dir):
-        assert self.module.make_work_directory() is None
+    # def test_make_work_directory(self, work_dir):
+    #     assert self.module.make_work_directory() is None
 
-        file_create(work_dir.joinpath(aiaccel.dict_state, 'test.txt'), "")
-        try:
-            self.module.make_work_directory()
-            assert True
-        except NotImplementedError:
-            assert False
+    #     file_create(work_dir.joinpath(aiaccel.dict_state, 'test.txt'), "")
+    #     try:
+    #         self.module.make_work_directory()
+    #         assert True
+    #     except NotImplementedError:
+    #         assert False
 
-        work_dir.joinpath(aiaccel.dict_state, 'test.txt').unlink()
-        shutil.rmtree(work_dir.joinpath(aiaccel.dict_lock))
-        file_create(work_dir.joinpath(aiaccel.dict_lock), "")
-        assert self.module.make_work_directory() is None
+    #     work_dir.joinpath(aiaccel.dict_state, 'test.txt').unlink()
+    #     shutil.rmtree(work_dir.joinpath(aiaccel.dict_lock))
+    #     file_create(work_dir.joinpath(aiaccel.dict_lock), "")
+    #     assert self.module.make_work_directory() is None
 
-    def test_check_work_directory(self, work_dir):
-        shutil.rmtree(work_dir.joinpath(aiaccel.dict_runner))
-        assert not self.module.check_work_directory()
-        work_dir.joinpath(aiaccel.dict_runner).mkdir()
-        assert self.module.check_work_directory()
+    # def test_check_work_directory(self, work_dir):
+    #     shutil.rmtree(work_dir.joinpath(aiaccel.dict_runner))
+    #     assert not self.module.check_work_directory()
+    #     work_dir.joinpath(aiaccel.dict_runner).mkdir()
+    #     assert self.module.check_work_directory()
 
-    def test_get_dict_state(self):
-        assert self.module.get_dict_state() is None
+    def test_get_each_state_count(self):
+        assert self.module.get_each_state_count() is None
         assert self.module.hp_ready == 0
         assert self.module.hp_running == 0
         assert self.module.hp_finished == 0
 
-    def test_get_module_type_alive_file(self, work_dir):
-        module_type, alive_file = self.module.get_module_type_alive_file()
+    def test_get_module_type(self, work_dir):
+        module_type = self.module.get_module_type()
         assert module_type is None
-        assert alive_file is None
 
         options = {
-            'config': self.config_json,
+            'config': str(self.config_json),
             'resume': None,
             'clean': False,
             'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'master'
         }
-        master = LocalMaster(options)
-        module_type, alive_file = master.get_module_type_alive_file()
-        assert module_type == aiaccel.module_type_master
-        assert Path(alive_file).resolve() == work_dir.joinpath(
-            aiaccel.dict_alive, aiaccel.alive_master
-        )
+        commandline_args = [
+            "start.py",
+            "--config",
+            str(self.config_json)
+        ]
 
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = RandomSearchOptimizer(options)
-        module_type, alive_file = optimizer.get_module_type_alive_file()
-        assert module_type == aiaccel.module_type_optimizer
-        assert Path(alive_file).resolve() == work_dir.joinpath(
-            aiaccel.dict_alive, aiaccel.alive_optimizer
-        )
+        with patch.object(sys, 'argv', commandline_args):
+            master = LocalMaster(options)
+            module_type = master.get_module_type()
+            assert module_type == aiaccel.module_type_master
 
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
-            'process_name': 'scheduler'
-        }
-        scheduler = LocalScheduler(options)
-        module_type, alive_file = scheduler.get_module_type_alive_file()
-        assert module_type == aiaccel.module_type_scheduler
-        assert Path(alive_file).resolve() == work_dir.joinpath(
-            aiaccel.dict_alive, aiaccel.alive_scheduler
-        )
+            options = {
+                'config': str(self.config_json),
+                'resume': None,
+                'clean': False,
+                'nosave': False,
+                'fs': False,
+                'process_name': 'optimizer'
+            }
+            optimizer = RandomSearchOptimizer(options)
+            module_type = optimizer.get_module_type()
+            assert module_type == aiaccel.module_type_optimizer
+
+            options = {
+                'config': str(self.config_json),
+                'resume': None,
+                'clean': False,
+                'nosave': False,
+                'fs': False,
+                'process_name': 'scheduler'
+            }
+            scheduler = LocalScheduler(options)
+            module_type = scheduler.get_module_type()
+            assert module_type == aiaccel.module_type_scheduler
 
     def test_check_finished(self, setup_hp_finished):
         assert not self.module.check_finished()
@@ -158,18 +155,18 @@ class TestAbstractModule(BaseTest):
             # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
             int(self.module.config.trial_number.get())
         )
+
         assert self.module.check_finished()
 
     def test_exit_alive(self, work_dir):
-        alive_file = work_dir.joinpath(aiaccel.dict_alive, aiaccel.alive_master)
-        assert self.module.exit_alive(alive_file) is None
 
-        file_create(alive_file, "")
-        with pytest.raises(SystemExit) as e:
-            self.module.exit_alive(alive_file)
+        assert self.module.exit_alive('master') is None
 
-        assert e.type == SystemExit
-        assert e.value.code is None
+        # with pytest.raises(SystemExit) as e:
+        #     self.module.exit_alive('master')
+
+        # assert e.type == SystemExit
+        # assert e.value.code is None
 
     def test_print_dict_state(self):
         assert self.module.print_dict_state() is None
@@ -201,10 +198,8 @@ class TestAbstractModule(BaseTest):
         ) is None
 
     def test_pre_process(self, work_dir):
-        self.module.get_module_type_alive_file = MagicMock(
-            return_value=(aiaccel.module_type_optimizer,
-                          work_dir.joinpath(aiaccel.dict_alive, aiaccel.alive_optimizer))
-        )
+        self.module.get_module_type = MagicMock(return_value=(aiaccel.module_type_optimizer))
+        self.module.storage.alive.init_alive()
         assert self.module.pre_process() is None
 
         with pytest.raises(SystemExit) as e:
@@ -227,14 +222,19 @@ class TestAbstractModule(BaseTest):
             assert self.module.start() is None
 
     def test_loop_pre_process(self, work_dir):
-        work_dir.joinpath(aiaccel.dict_runner).rmdir()
-        loop = asyncio.get_event_loop()
-        gather = asyncio.gather(
-            async_function(self.module.loop_pre_process),
-            delay_make_directory(1, work_dir.joinpath(aiaccel.dict_runner))
-        )
-        loop.run_until_complete(gather)
-        assert self.module.loop_pre_process() is None
+        # work_dir.joinpath(aiaccel.dict_runner).rmdir()
+        # loop = asyncio.get_event_loop()
+        # gather = asyncio.gather(
+        #     async_function(self.module.loop_pre_process),
+        #     delay_make_directory(1, work_dir.joinpath(aiaccel.dict_runner))
+        # )
+        # loop.run_until_complete(gather)
+        # assert self.module.loop_pre_process() is None
+        try:
+            self.module.post_process()
+            assert False
+        except NotImplementedError:
+            assert True
 
     def test_loop_post_process(self):
         try:

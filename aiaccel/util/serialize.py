@@ -1,226 +1,92 @@
-from aiaccel.util.filesystem import interprocess_lock_file
 from pathlib import Path
-import aiaccel
-import fasteners
-import logging
-import numpy as np
-import pathlib
-import pickle
-import random
-import re
-import shutil
-from aiaccel.util.filesystem import retry
+from aiaccel.config import Config
+from typing import Dict
+from aiaccel.storage.storage import Storage
 
 
-def resub_loop_count(s: Path) -> int:
-    """Find a loop count from a file name.
+class Serializer:
+    def __init__(self, config: Config, process_name: str, options):
+        self.config = config
+        self.ws = Path(self.config.workspace.get()).resolve()
+        self.storage = Storage(self.ws)
+        self.process_name = process_name.lower()
+        if self.process_name not in ['master', 'optimizer', 'scheduler']:
+            raise
 
-    Args:
-        s (Path): A path of a serialized native random file.
+    def _get_initialized_serialize_data(self):
+        return {
+            'num_of_generated_parameter': None,
+            'loop_count': None,
+            'ready_params': None,
+            'generate_index': None,
+            'parameter_pool': None,
+            'study': None,
+            'nelder_mead': None,
+            'order': None
+        }
 
-    Returns:
-        int: A loop count.
-    """
-    return int(re.sub("\\D", "", s.name))
-
-
-def deserialize_state(
-    dict_state: Path, class_name: str, dict_lock: Path
-) -> int:
-
-    """Deserialize a state of an execution from a state directory.
-
-    Args:
-        dict_state (Path): A path of a state directory.
-        class_name (str): A class name of caller module.
-        dict_lock (Path): A directory to store lock files.
-
-    Returns:
-        int: A loop count.
-    """
-    class_str = aiaccel.get_module_type_from_class_name(class_name)
-
-    with fasteners.InterProcessLock(
-        interprocess_lock_file(dict_state, dict_lock)
+    def serialize(
+        self,
+        trial_id: int,
+        optimization_variables: Dict,
+        native_random_state: tuple,
+        numpy_random_state: tuple
     ):
-        native_pattern = '{}_{}_*.{}'.format(
-            class_str, aiaccel.file_native_random, aiaccel.extension_pickle
-        )
-        numpy_pattern = '{}_{}_*.{}'.format(
-            class_str, aiaccel.file_numpy_random, aiaccel.extension_pickle
-        )
-        native_random_files = sorted(dict_state.glob(native_pattern))
-        numpy_random_files = sorted(dict_state.glob(numpy_pattern))
-        logger = None
+        # optimization_variables
+        serialize_data = self._get_initialized_serialize_data()
+        for key in optimization_variables.keys():
+            if key in serialize_data.keys():
+                serialize_data[key] = optimization_variables[key]
 
-        if class_str == aiaccel.module_type_optimizer:
-            logger = logging.getLogger('root.optimizer.random')
-        if class_str == aiaccel.module_type_scheduler:
-            logger = logging.getLogger('root.scheduler.random')
-            # Recover the hp directory
-            hpdict_pattern = '{}_*'.format(aiaccel.dict_hp)
-            hpdict_files = sorted(dict_state.glob(hpdict_pattern))
-            pdict = dict_state.parent
-            hp_dict = pdict / aiaccel.dict_hp
-
-            if hp_dict.is_dir():
-                shutil.rmtree(hp_dict)
-
-            print('\tDEBUG hpdict_files:', hpdict_files, 'hp_dict:', hp_dict)
-            dsgs = dict_state.glob('*')
-            for dsg in dsgs:
-                print('\tDEBUG dict_state glob:', dsg)
-            shutil.copytree(hpdict_files[-1], hp_dict)
-
-        native_num = resub_loop_count(native_random_files[-1])
-        numpy_num = resub_loop_count(numpy_random_files[-1])
-        loop_count = min(native_num, numpy_num)
-
-        if len(native_random_files) > 0:
-            logger.info(
-                'deserialize: {}'
-                .format(native_random_files[loop_count - 1])
-            )
-            deserialize_native_random(native_random_files[loop_count - 1])
-
-        if len(numpy_random_files) > 0:
-            logger.info(
-                'deserialize: {}'
-                .format(numpy_random_files[loop_count - 1])
-            )
-            deserialize_numpy_random(numpy_random_files[loop_count - 1])
-
-        return loop_count
-
-
-def deserialize_native_random(filename: Path) -> None:
-    """Deserialize a native random object.
-
-    Args:
-        filename (Path): A path of serialized random object.
-
-    Returns:
-        None
-
-    Raises:
-        FileNotFoundError: Causes when a serialized random object file is not
-            found.
-    """
-    logger = logging.getLogger('root.scheduler.random')
-
-    if not filename.is_file():
-        logger.error(
-            'Cannot find serialized random object: {}'
-            .format(filename)
-        )
-        raise FileNotFoundError(
-            'Cannot find serialized random object: {}'
-            .format(filename)
+        self.storage.serializer.set_any_trial_serialize(
+            trial_id=trial_id,
+            optimization_variable=serialize_data,
+            process_name=self.process_name,
+            native_random_state=native_random_state,
+            numpy_random_state=numpy_random_state
         )
 
-    with open(filename, 'rb') as f:
-        obj = pickle.load(f)
+        # # random_state
+        # self.storage.random_state.set_random_state(
+        #     trial_id=trial_id,
+        #     process_name=self.process_name,
+        #     native_random_state=native_random_state,
+        #     numpy_random_state=numpy_random_state
+        # )
 
-    random.setstate(obj)
-
-
-def deserialize_numpy_random(filename: Path) -> None:
-    """Deserialize a numpy random object.
-
-    Args:
-        filename (Path): A serialized numpy object.
-
-    Returns:
-        None
-
-    Raises:
-        FileNotFoundError: Causes when a serialized numpy random object file is
-            not found.
-    """
-    logger = logging.getLogger('root.scheduler.random')
-
-    if not filename.exists():
-        logger.error(
-            'Cannot find serialized numpy object: {}'.format(filename)
-        )
-        raise FileNotFoundError(
-            'Cannot find serialized numpy object: {}'.format(filename)
-        )
-
-    with open(filename, 'rb') as f:
-        obj = pickle.load(f)
-
-    np.random.set_state(obj)
-
-
-def serialize_state(
-    dict_state: Path, class_name: str, loop_count: int, dict_lock: Path
-) -> None:
-    """Serialize current state.
-
-    Args:
-        dict_state (Path): A path of a state directory.
-        class_name (str): A class name of caller module.
-        loop_count (int): A loop count
-        dict_lock (Path): A directory to store lock files.
-
-    Returns:
-        None
-    """
-    class_str = aiaccel.get_module_type_from_class_name(class_name)
-
-    with fasteners.InterProcessLock(
-        interprocess_lock_file(dict_state, dict_lock)
-    ):
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _copytree(_hp_dict, _copy_dict):
-            shutil.copytree(_hp_dict, _copy_dict)
-
-        if class_str == aiaccel.module_type_scheduler:
-            parent = pathlib.Path(dict_state).parent
-            hp_dict = parent / aiaccel.dict_hp
-            copy_dict = dict_state / '{}_{:0=10}'.format(aiaccel.dict_hp, loop_count)
-
-            if not copy_dict.exists():
-                _copytree(hp_dict, copy_dict)
-
-        serialize_native_random(
-            aiaccel.get_file_random(
-                dict_state, class_name, loop_count, aiaccel.file_native_random
-            )
-        )
-        serialize_numpy_random(
-            aiaccel.get_file_random(
-                dict_state, class_name, loop_count, aiaccel.file_numpy_random
+    def deserialize(self, trial_id: int) -> Dict:
+        # optimization_variables, random_state
+        optimization_variables, native_rnd_state, numpy_rnd_state = (
+            self.storage.serializer.get_any_trial_serialize(
+                trial_id=trial_id,
+                process_name=self.process_name
             )
         )
 
+        if optimization_variables is None:
+            optimization_variables = self._get_initialized_serialize_data()
 
-def serialize_native_random(filename: Path) -> None:
-    """Serialize a current native random object.
+        # optimization_variables = (
+        #     self.storage.serializer.get_any_trial_serialize(
+        #         trial_id=trial_id,
+        #         process_name=self.process_name
+        #     )
+        # )
+        # if optimization_variables is None:
+        #     optimization_variables = self._get_initialized_serialize_data()
 
-    Args:
-        filename (Path): A path to store a random object.
+        # # random_state
+        # native_rnd_state, numpy_rnd_state = (
+        #     self.storage.random_state.get_random_state(
+        #         trial_id=trial_id,
+        #         process_name=self.process_name
+        #     )
+        # )
 
-    Returns:
-        None
-    """
-    obj = random.getstate()
+        data = {
+            "optimization_variables": optimization_variables,
+            "native_random_state": native_rnd_state,
+            "numpy_random_state": numpy_rnd_state
+        }
 
-    with open(filename, 'wb') as f:
-        pickle.dump(obj, f)
-
-
-def serialize_numpy_random(filename: Path) -> None:
-    """Serialize a current numpy random object.
-
-    Args:
-        filename (Path): A path to store a numpy random object.
-
-    Returns:
-        None
-    """
-    obj = np.random.get_state()
-
-    with open(filename, 'wb') as f:
-        pickle.dump(obj, f)
+        return data

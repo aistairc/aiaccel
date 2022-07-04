@@ -1,0 +1,277 @@
+from typing import Union
+from pathlib import PosixPath
+import aiaccel
+# === fs ===
+from aiaccel.storage.alive.fs import Alive as fsAlive
+from aiaccel.storage.pid.fs import Pid as fsPid
+from aiaccel.storage.trial.fs import Trial as fsTrial
+from aiaccel.storage.hp.fs import Hp as fsHp
+from aiaccel.storage.jobstate.fs import JobState as fsJobState
+from aiaccel.storage.result.fs import Result as fsResult
+from aiaccel.storage.serializer.fs import Serializer as fsSerializer
+from aiaccel.storage.error.fs import Error as fsError
+from aiaccel.storage.timestamp.fs import TimeStamp as fsTimeStamp
+# === db ===
+from aiaccel.storage.alive.db import Alive
+from aiaccel.storage.pid.db import Pid
+from aiaccel.storage.trial.db import Trial
+from aiaccel.storage.hp.db import Hp
+from aiaccel.storage.result.db import Result
+from aiaccel.storage.jobstate.db import JobState
+from aiaccel.storage.error.db import Error
+from aiaccel.storage.timestamp.db import TimeStamp
+from aiaccel.storage.serializer.db import Serializer
+
+from aiaccel.config import Config
+
+
+class Storage:
+    """ Database
+    """
+    def __init__(
+        self,
+        ws: PosixPath,
+        fsmode: bool = False,
+        config_path: PosixPath = None
+    ) -> None:
+        if fsmode is True:
+            if config_path is None:
+                assert False
+            config = Config(config_path)
+            self.alive = fsAlive(config)
+            self.pid = fsPid(config)
+            self.trial = fsTrial(config)
+            self.hp = fsHp(config)
+            self.jobstate = fsJobState(config)
+            self.result = fsResult(config)
+            self.serializer = fsSerializer(config)
+            self.error = fsError(config)
+            self.timestamp = fsTimeStamp(config)
+        else:
+            db_path = ws / aiaccel.dict_storage / "storage.db"
+            self.alive = Alive(db_path)
+            self.pid = Pid(db_path)
+            self.trial = Trial(db_path)
+            self.hp = Hp(db_path)
+            self.result = Result(db_path)
+            self.jobstate = JobState(db_path)
+            self.serializer = Serializer(db_path)
+            self.error = Error(db_path)
+            self.timestamp = TimeStamp(db_path)
+
+    def current_max_trial_number(self) -> int:
+        """Get the current maximum number of trials.
+
+        Returns:
+            trial_id (int): Any trial id
+
+        TODO: Refuctoring
+        """
+        # with InterProcessLock(self.lock_file):
+        #     session = self.trial.session()
+        #     try:
+        #         trial_id = max(session.query(TrialTable.trial_id).all())[0]
+        #     except ValueError:
+        #         trial_id = None
+        #     session.expunge_all()
+        #     self.engine.dispose()
+
+        trial_ids = self.trial.get_all_trial_id()
+        if trial_ids is None or len(trial_ids) == 0:
+            return None
+
+        return max(trial_ids)
+
+    def get_ready(self) -> list:
+        """Get a trial number for the ready state.
+
+        Returns:
+            trial_ids (list): trial ids in ready states
+        """
+        return self.trial.get_ready()
+
+    def get_running(self) -> list:
+        """Get a trial number for the running state.
+
+        Returns:
+            trial_ids (list): trial ids in running states
+        """
+        return self.trial.get_running()
+
+    def get_finished(self) -> list:
+        """Get a trial number for the finished state.
+
+        Returns:
+            trial_ids (list): trial ids in finished states
+        """
+        return self.trial.get_finished()
+
+    def get_num_ready(self) -> int:
+        """Get the number of trials in the ready state.
+
+        Returns:
+            int: number of ready state in trials
+        """
+        return len(self.trial.get_ready())
+
+    def get_num_running(self) -> int:
+        """Get the number of trials in the running state.
+
+        Returns:
+            int: number of running state in trials
+        """
+        return len(self.trial.get_running())
+
+    def get_num_finished(self) -> int:
+        """Get the number of trials in the finished state.
+
+        Returns:
+            int: number of finished state in trials
+        """
+        return len(self.trial.get_finished())
+
+    def is_ready(self, trial_id: int) -> bool:
+        """Whether the specified trial ID is ready or not.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            bool
+        """
+        return trial_id in self.trial.get_ready()
+
+    def is_running(self, trial_id: int) -> bool:
+        """Whether the specified trial ID is running or not.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            bool
+        """
+        return trial_id in self.trial.get_running()
+
+    def is_finished(self, trial_id: int) -> bool:
+        """Whether the specified trial ID is finished or not.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            bool
+        """
+        return trial_id in self.trial.get_finished()
+
+    def get_hp_dict(self, trial_id_str: str) -> Union[None, dict]:
+        """Obtain information on a specified trial in dict.
+
+        Args:
+            trial_id_str(str): trial id
+
+        Returns:
+            content(dict): Any trials information
+        """
+        trial_id = int(trial_id_str)
+        data = self.hp.get_any_trial_params(trial_id=trial_id)
+        if data is None:
+            return None
+
+        hp = []
+        for d in data:
+            param_name = d.param_name
+            dtype = d.param_type
+            value = d.param_value
+
+            if dtype.lower() == "float":
+                value = float(d.param_value)
+            elif dtype.lower() == "int":
+                value = int(d.param_value)
+            elif dtype.lower() == "categorical":
+                value == str(d.param_value)
+
+            hp.append(
+                {
+                    'parameter_name': param_name,
+                    'type': dtype,
+                    'value': value
+                }
+            )
+        result = self.result.get_any_trial_objective(trial_id=trial_id)
+        start_time = self.timestamp.get_any_trial_start_time(trial_id=trial_id)
+        end_time = self.timestamp.get_any_trial_end_time(trial_id=trial_id)
+        error = self.error.get_any_trial_error(trial_id=trial_id)
+
+        content = {}
+        content['trial_id'] = trial_id_str
+        content['parameters'] = hp
+        content['result'] = result
+        content['start_time'] = start_time
+        content['end_time'] = end_time
+
+        if error is not None:
+            content['error'] = error
+
+        return content
+
+    def get_best_trial(self, goal: str) -> tuple:
+        """Get best trial number and best value.
+
+        Args:
+            goal(str): minimize | maximize
+
+        Returns:
+            best(tuple): (trial_id, value)
+        """
+
+        best_value = float('inf')
+        if goal.lower() == 'maximize':
+            best_value = float('-inf')
+
+        best_trial_id = 0
+
+        results = self.result.get_all_result()
+
+        for d in results:
+            value = d.objective
+            trial_id = d.trial_id
+
+            if goal.lower() == 'maximize':
+                if best_value < value:
+                    best_value = value
+                    best_trial_id = trial_id
+
+            elif goal.lower() == 'minimize':
+                if best_value > value:
+                    best_value = value
+                    best_trial_id = trial_id
+
+            else:
+                return (None, None)
+
+        return (best_trial_id, best_value)
+
+    def get_best_trial_dict(self, goal: str) -> dict:
+        """Get best trial information in dict format.
+
+        Args:
+            goal(str): minimize | maximize
+
+        Returns:
+            -(dict): Any trials information
+        """
+        best_trial_id, _ = self.get_best_trial(goal)
+        return self.get_hp_dict(str(best_trial_id))
+
+    def get_result_and_error(self, trial_id: int) -> tuple:
+        """Get results and errors for a given trial number.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            tuple(result, error)
+        """
+        r = self.result.get_any_trial_objective(trial_id=trial_id)
+        e = self.error.get_any_trial_error(trial_id=trial_id)
+        return (r, e)

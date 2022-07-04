@@ -1,10 +1,6 @@
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from aiaccel.util.filesystem import get_file_hp_finished,\
-    interprocess_lock_file
+from aiaccel.optimizer.abstract import AbstractOptimizer
 from sobol_seq import i4_sobol
 from typing import Optional
-import aiaccel
-import fasteners
 
 
 class SobolSearchOptimizer(AbstractOptimizer):
@@ -33,10 +29,8 @@ class SobolSearchOptimizer(AbstractOptimizer):
             None
         """
         super().pre_process()
-        with fasteners.InterProcessLock(interprocess_lock_file((self.ws / aiaccel.dict_hp), self.dict_lock)):
-            files = get_file_hp_finished(self.ws)
-
-        self.generate_index = len(files)
+        finished = self.storage.trial.get_finished()
+        self.generate_index = len(finished)
 
     def generate_parameter(self, number: Optional[int] = 1) -> None:
         """Generate parameters.
@@ -73,9 +67,9 @@ class SobolSearchOptimizer(AbstractOptimizer):
                 new_params.append(new_param)
 
             returned_params.append({'parameters': new_params})
-            self.generated_parameter += 1
+            self.num_of_generated_parameter += 1
 
-        self.create_parameter_files(returned_params)
+        self.register_new_parameters(returned_params)
 
     def _serialize(self) -> dict:
         """Serialize this module.
@@ -84,13 +78,13 @@ class SobolSearchOptimizer(AbstractOptimizer):
             dict: The serialized objects.
         """
         self.serialize_datas = {
-            'generated_parameter': self.generated_parameter,
+            'num_of_generated_parameter': self.num_of_generated_parameter,
             'loop_count': self.loop_count,
             'generate_index': self.generate_index
         }
-        return super()._serialize()
+        super()._serialize()
 
-    def _deserialize(self, dict_objects: dict) -> None:
+    def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
 
         Args:
@@ -99,5 +93,7 @@ class SobolSearchOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        super()._deserialize(dict_objects)
-        self.generate_index = dict_objects['generate_index']
+        super()._deserialize(trial_id)
+        self.generate_index = self.deserialize_datas['generate_index']
+        self.loop_count = self.deserialize_datas['loop_count']
+        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']

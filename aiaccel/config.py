@@ -164,7 +164,7 @@ class ConfigEntry:
     Exmple:
         ```
         workspace = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_WORKSPACE,
             warning=warn,
@@ -178,7 +178,7 @@ class ConfigEntry:
 
     def __init__(
         self,
-        config_file_path: str,
+        config: ConfileWrapper,
         type: list,
         default: Any,
         warning: bool,
@@ -187,7 +187,7 @@ class ConfigEntry:
     ):
         """
         Args:
-            config_file_path (str): A path of configuration file.
+            config_path (str): A path of configuration file.
             type (list): A data type.
             default (any): A default value.
             warning (bool): A flag of print a warning or not.
@@ -199,7 +199,7 @@ class ConfigEntry:
             None
 
         """
-        self.config_file_path = config_file_path
+        self.config = config
         self.group = group
         self.type = type
         self.default = default
@@ -207,7 +207,6 @@ class ConfigEntry:
         self.group = group
         self.keys = keys
         self._value = None
-        self.config = None
         self.read_values_from_config_file = False
 
         # laod
@@ -233,7 +232,7 @@ class ConfigEntry:
         self._value = value
 
     def show_warning(self):
-        """　If the default value is used, a warning is displayed.
+        """ If the default value is used, a warning is displayed.
         """
         if self.warning:
             item = []
@@ -273,9 +272,6 @@ class ConfigEntry:
     def load_config_values(self):
         """ Reads values from the configuration file.
         """
-        if self.config is None:
-            self.config = load_config(self.config_file_path)
-
         if (
             type(self.keys) is list or
             type(self.keys) is tuple
@@ -291,8 +287,6 @@ class ConfigEntry:
         else:
             self.set(value)
             self.read_values_from_config_file = True
-
-        self.config = None
 
     @property
     def Value(self):
@@ -361,18 +355,19 @@ class Config:
 
     def __init__(
         self,
-        config_file_path: str,
+        config_path: str,
         warn=False,
         format_check=False
     ):
         """
         Args:
-            config_file_path (str): A path of configuration file.
+            config_path (str): A path of configuration file.
             warn (bool): A flag of print a warning or not.
             format_check (bool): A flag of do tha check format or not.
         """
-        self.config_file_path = Path(config_file_path).resolve()
-        self.define_items(config_file_path, warn)
+        self.config_path = Path(config_path).resolve()
+        self.config = load_config(self.config_path)
+        self.define_items(self.config, warn)
         if format_check:
             self.workspace.empty_if_error()
 
@@ -402,12 +397,11 @@ class Config:
                     sys.exit()
             self.hps_format_check()
 
-    def define_items(self, config_file_path, warn):
+    def define_items(self, config: ConfileWrapper, warn: bool):
         """ Define the configuration of the configuration file
         """
-
         self.silent_mode = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[bool],
             default=_DEFAULT_SILENT_MODE,
             warning=False,
@@ -415,7 +409,7 @@ class Config:
             keys=("silent_mode")
         )
         self.workspace = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_WORKSPACE,
             warning=warn,
@@ -423,7 +417,7 @@ class Config:
             keys=("workspace")
         )
         self.job_command = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_JOB_COMMAND,
             warning=warn,
@@ -431,7 +425,7 @@ class Config:
             keys=("job_command")
         )
         self.optimizer_command = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_OPTIMIZER_COMMAND,
             warning=False,
@@ -439,7 +433,7 @@ class Config:
             keys=("optimizer_command")
         )
         self.scheduler_command = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_SCHDULER_COMMAND,
             warning=False,
@@ -449,7 +443,7 @@ class Config:
 
         # === scheduler defalt config===
         self.cancel_retry = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_CANCEL_RETRY,
             warning=False,
@@ -457,7 +451,7 @@ class Config:
             keys=("cancel_retry")
         )
         self.cancel_timeout = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_CANCEL_TIMEOUT,
             warning=False,
@@ -465,7 +459,7 @@ class Config:
             keys=("cancel_timeout")
         )
         self.expire_retry = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_EXPIRE_RETRY,
             warning=False,
@@ -473,7 +467,7 @@ class Config:
             keys=("expire_retry")
         )
         self.expire_timeout = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_EXPIRE_TIMEOUT,
             warning=False,
@@ -481,7 +475,7 @@ class Config:
             keys=("expire_timeout")
         )
         self.finished_retry = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_FINISHED_RETRY,
             warning=False,
@@ -489,7 +483,7 @@ class Config:
             keys=("finished_retry")
         )
         self.finished_timeout = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_FINISHED_TIMEOUT,
             warning=False,
@@ -497,7 +491,7 @@ class Config:
             keys=("finished_timeout")
         )
         self.job_loop_duration = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[float],
             default=_DEFAULT_JOB_LOOP_DURATION,
             warning=False,
@@ -505,7 +499,7 @@ class Config:
             keys=("job_loop_duration")
         )
         self.job_retry = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_JOB_RETRY,
             warning=False,
@@ -513,7 +507,7 @@ class Config:
             keys=("job_retry")
         )
         self.job_timeout = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_JOB_TIMEOUT,
             warning=False,
@@ -521,7 +515,7 @@ class Config:
             keys=("job_timeout")
         )
         self.kill_retry = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_KILL_RETRY,
             warning=False,
@@ -529,7 +523,7 @@ class Config:
             keys=("kill_retry")
         )
         self.kill_timeout = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_KILL_TIMEOUT,
             warning=False,
@@ -537,7 +531,7 @@ class Config:
             keys=("kill_timeout")
         )
         self.result_retry = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_RESULT_RETRY,
             warning=False,
@@ -545,7 +539,7 @@ class Config:
             keys=("result_retry")
         )
         self.batch_job_timeout = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_BATCH_JOB_TIMEOUT,
             warning=False,
@@ -553,7 +547,7 @@ class Config:
             keys=("batch_job_timeout")
         )
         self.runner_retry = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_RUNNER_RETRY,
             warning=False,
@@ -561,7 +555,7 @@ class Config:
             keys=("runner_retry")
         )
         self.runner_timeout = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_RUNNER_TIMEOUT,
             warning=False,
@@ -569,7 +563,7 @@ class Config:
             keys=("runner_timeout")
         )
         self.running_retry = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_RUNNING_RETRY,
             warning=False,
@@ -577,7 +571,7 @@ class Config:
             keys=("running_retry")
         )
         self.running_timeout = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_RUNNING_TIMEOUT,
             warning=False,
@@ -586,7 +580,7 @@ class Config:
         )
         # === generic defalt config===
         self.init_fail_count = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_INIT_FAIL_COUNT,
             warning=False,
@@ -594,7 +588,7 @@ class Config:
             keys=("init_fail_count"),
         )
         self.name_length = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_NAME_LENGTH,
             warning=False,
@@ -605,7 +599,7 @@ class Config:
         # This is probably not needed, but we'll keep it just in case.
         # random_scheduling = True for random scheduling.
         self.random_scheduling = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[bool],
             default=_DEFAULT_RANDOM_SCHESULING,
             warning=False,
@@ -615,7 +609,7 @@ class Config:
 
         # === resource defalt config ===
         self.resource_type = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_RESOURCE_TYPE,
             warning=warn,
@@ -623,7 +617,7 @@ class Config:
             keys=("type")
         )
         self.num_node = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_NUM_NODE,
             warning=warn,
@@ -638,7 +632,7 @@ class Config:
 
         # === ABCI defalt config ===
         self.job_script_preamble = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_JOB_SCRIPT_PREAMBLE,
             warning=warn,
@@ -646,7 +640,7 @@ class Config:
             keys=("job_script_preamble")
         )
         self.abci_group = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_ABCI_GROUP,
             warning=warn,
@@ -654,7 +648,7 @@ class Config:
             keys=("group")
         )
         self.job_execution_options = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_JOB_EXECUTION_OPTIONS,
             warning=warn,
@@ -662,7 +656,7 @@ class Config:
             keys=("job_execution_options")
         )
         self.runner_search_pattern = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_RUNNER_SEARCH_PATTERN,
             warning=False,
@@ -672,7 +666,7 @@ class Config:
 
         # === hyperparameter defalt config ===
         self.goal = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_GOAL,
             warning=warn,
@@ -680,7 +674,7 @@ class Config:
             keys=("goal")
         )
         self.trial_number = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int],
             default=_DEFAULT_MAX_TRIAL_NUMBER,
             warning=warn,
@@ -688,7 +682,7 @@ class Config:
             keys=("trial_number")
         )
         self.randseed = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[int, NoneType],
             default=_DEFAULT_RAND_SEED,
             warning=warn,
@@ -696,7 +690,7 @@ class Config:
             keys=("rand_seed")
         )
         self.hyperparameters = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[list],
             default=_DEFAULT_HYPERPARAMETERS,
             warning=warn,
@@ -704,7 +698,7 @@ class Config:
             keys=("parameters")
         )
         self.search_algorithm = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_SEARCH_ALGORITHM,
             warning=warn,
@@ -714,7 +708,7 @@ class Config:
 
         # === sleep time ===
         self.sleep_time_master = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[float, int],
             default=_DEFAULT_SLEEP_TIME_MASTER,
             warning=False,
@@ -722,7 +716,7 @@ class Config:
             keys=("master")
         )
         self.sleep_time_scheduler = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[float, int],
             default=_DEFAULT_SLEEP_TIME_SCHEDULER,
             warning=False,
@@ -730,7 +724,7 @@ class Config:
             keys=("scheduler")
         )
         self.sleep_time_optimizer = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[float, int],
             default=_DEFAULT_SLEEP_TIME_OPTIMIZER,
             warning=False,
@@ -740,7 +734,7 @@ class Config:
 
         # === logger defalt config===
         self.master_logfile = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_MASTER_LOGFILE,
             warning=False,
@@ -748,7 +742,7 @@ class Config:
             keys=("file", "master")
         )
         self.master_file_log_level = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_MASTER_FILE_LOG_LEVEL,
             warning=False,
@@ -756,7 +750,7 @@ class Config:
             keys=("log_level", "master")
         )
         self.master_stream_log_level = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_MASTER_STREAM_LOG_LEVEL,
             warning=False,
@@ -764,7 +758,7 @@ class Config:
             keys=("stream_level", "master")
         )
         self.optimizer_logfile = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_OPTIMIZER_LOGFILE,
             warning=False,
@@ -772,7 +766,7 @@ class Config:
             keys=("file", "optimizer")
         )
         self.optimizer_file_log_level = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_OPTIMIZER_FILE_LOG_LEVEL,
             warning=False,
@@ -780,7 +774,7 @@ class Config:
             keys=("log_level", "optimizer")
         )
         self.optimizer_stream_log_level = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_OPTIMIZER_STREAM_LOG_LEBEL,
             warning=False,
@@ -788,7 +782,7 @@ class Config:
             keys=("stream_level", "optimizer")
         )
         self.scheduler_logfile = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_SCHDULER_LOGFILE,
             warning=False,
@@ -796,7 +790,7 @@ class Config:
             keys=("file", "scheduler")
         )
         self.scheduler_file_log_level = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_SCHDULER_FILE_LOG_LEVEL,
             warning=False,
@@ -804,7 +798,7 @@ class Config:
             keys=("log_level", "scheduler")
         )
         self.scheduler_stream_log_level = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[str],
             default=_DEFAULT_SCHDULER_STREAM_LOG_LEBEL,
             warning=False,
@@ -814,7 +808,7 @@ class Config:
 
         # === verification ===
         self.is_verified = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[bool],
             default=_DEFAULT_IS_VERIFIED,
             warning=False,
@@ -822,7 +816,7 @@ class Config:
             keys=("is_verified")
         )
         self.condition = ConfigEntry(
-            config_file_path=config_file_path,
+            config=config,
             type=[list],
             default=_DEFAULT_VERIFI_CONDITION,
             warning=False,

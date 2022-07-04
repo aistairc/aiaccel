@@ -1,4 +1,4 @@
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer.abstract import AbstractOptimizer
 from typing import Optional
 
 
@@ -18,7 +18,7 @@ class RandomSearchOptimizer(AbstractOptimizer):
         """
 
         returned_params = []
-        self.get_dict_state()
+        self.get_each_state_count()
         initial_parameter = self.generate_initial_parameter()
 
         if initial_parameter is not None:
@@ -38,9 +38,9 @@ class RandomSearchOptimizer(AbstractOptimizer):
                 new_params.append(new_param)
 
             returned_params.append({'parameters': new_params})
-            self.generated_parameter += 1
+            self.num_of_generated_parameter += 1
 
-        self.create_parameter_files(returned_params)
+        self.register_new_parameters(returned_params)
 
     def _serialize(self) -> dict:
         """Serialize this module.
@@ -49,12 +49,12 @@ class RandomSearchOptimizer(AbstractOptimizer):
             dict: serialize data.
         """
         self.serialize_datas = {
-            'generated_parameter': self.generated_parameter,
+            'num_of_generated_parameter': self.num_of_generated_parameter,
             'loop_count': self.loop_count
         }
-        return super()._serialize()
+        super()._serialize()
 
-    def _deserialize(self, dict_objects: dict) -> None:
+    def _deserialize(self, trial_id: int) -> None:
         """ Deserialize this module.
 
         Args:
@@ -63,4 +63,6 @@ class RandomSearchOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        super()._deserialize(dict_objects)
+        super()._deserialize(trial_id)
+        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
+        self.loop_count = self.deserialize_datas['loop_count']

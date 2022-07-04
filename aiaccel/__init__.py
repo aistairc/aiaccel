@@ -4,19 +4,32 @@ from .common import alive_scheduler
 from .common import class_master
 from .common import class_optimizer
 from .common import class_scheduler
-from .common import dict_alive
 from .common import dict_work
+from .common import dict_alive
+from .common import dict_pid
+from .common import dict_trial
+from .common import dict_error
+from .common import dict_ready
+from .common import dict_running
+from .common import dict_finished
 from .common import dict_hp
 from .common import dict_hp_ready
 from .common import dict_hp_running
 from .common import dict_hp_finished
 from .common import dict_lock
 from .common import dict_log
+from .common import dict_new
 from .common import dict_output
 from .common import dict_state
+from .common import dict_jobstate
 from .common import dict_result
 from .common import dict_runner
 from .common import dict_verification
+from .common import dict_serialize
+from .common import dict_storage
+from .common import dict_timestamp
+from .common import dict_randomstate
+from .common import dict_snapshot
 from .common import extension_hp
 from .common import extension_pickle
 from .common import extension_resource
@@ -47,8 +60,7 @@ from .common import search_algorithm_nelder_mead
 from .common import search_algorithm_random
 from .common import search_algorithm_sobol
 from .common import search_algorithm_tpe
-from .common import get_module_type_from_class_name
-from .common import get_file_random
+
 
 __all__ = [
     alive_master,
@@ -57,19 +69,32 @@ __all__ = [
     class_master,
     class_optimizer,
     class_scheduler,
-    dict_alive,
     dict_work,
+    dict_alive,
+    dict_pid,
+    dict_trial,
+    dict_error,
     dict_hp,
     dict_hp_ready,
     dict_hp_running,
     dict_hp_finished,
     dict_lock,
     dict_log,
+    dict_new,
     dict_output,
+    dict_jobstate,
     dict_state,
+    dict_ready,
+    dict_running,
+    dict_finished,
     dict_result,
     dict_runner,
+    dict_serialize,
+    dict_storage,
+    dict_timestamp,
+    dict_randomstate,
     dict_verification,
+    dict_snapshot,
     extension_hp,
     extension_pickle,
     extension_resource,
@@ -99,7 +124,5 @@ __all__ = [
     search_algorithm_nelder_mead,
     search_algorithm_random,
     search_algorithm_sobol,
-    search_algorithm_tpe,
-    get_module_type_from_class_name,
-    get_file_random
+    search_algorithm_tpe
 ]

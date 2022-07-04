@@ -1,7 +1,7 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python wrapper.py",
+    "job_command": "python /tmp/work/original_main.py",
     "batch_job_timeout": 600,
     "optimizer_command": "python -m aiaccel.bin.optimizer",
     "pytho": "python -m aistiot.bin.scheduler"
@@ -11,7 +11,7 @@
     "num_node": 4
   },
   "ABCI": {
-    "group": "gaa50073",
+    "group": "[group]",
     "job_script_preamble": "./job_script_preamble.sh",
     "job_execution_options": ""
   },

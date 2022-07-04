@@ -1,5 +1,7 @@
-from aiaccel.parameter import get_best_parameter, get_grid_options, get_type,\
-    load_parameter
+from aiaccel.parameter import get_best_parameter
+from aiaccel.parameter import get_grid_options
+from aiaccel.parameter import get_type
+from aiaccel.parameter import load_parameter
 from aiaccel.util.filesystem import create_yaml
 from tests.base_test import BaseTest
 import aiaccel
@@ -7,8 +9,13 @@ import aiaccel
 
 class TestParameter(BaseTest):
 
-    def test_get_best_parameters(self, clean_work_dir, get_one_parameter,
-                                 work_dir):
+    def test_get_best_parameters(
+        self,
+        clean_work_dir,
+        get_one_parameter,
+        work_dir
+    ):
+
         files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
         best, best_file = get_best_parameter(
             files,
@@ -19,12 +26,20 @@ class TestParameter(BaseTest):
         assert best_file is None
 
         results = [120, 101., 140.]
-        for i in range(0, 3):
-            name = i
-            path = work_dir.joinpath(aiaccel.dict_result, '{}.yml'.format(name))
-            content = get_one_parameter()
-            content['result'] = results[i]
-            create_yaml(path, content, work_dir.joinpath(aiaccel.dict_lock))
+        # for i in range(0, 3):
+        #     name = i
+        #     path = work_dir.joinpath(aiaccel.dict_result, '{}.yml'.format(name))
+        #     print(path)
+        #     content = get_one_parameter()
+        #     content['result'] = results[i]
+        #     create_yaml(path, content, work_dir.joinpath(aiaccel.dict_lock))
+
+        for i in range(len(self.test_result_data)):
+            d = self.test_result_data[i]
+            name = f"{d['trial_id']}.yml"
+            path = work_dir / 'result' / name
+            d['result'] = results[i]
+            create_yaml(path, d)
 
         files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
         files.sort()

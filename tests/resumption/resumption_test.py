@@ -8,6 +8,9 @@ import asyncio
 import sys
 import time
 
+from aiaccel.master.local import LocalMaster
+from aiaccel.argument import Arguments
+from aiaccel.storage.storage import Storage
 
 class ResumptionTest(IntegrationTest):
     search_algorithm = None
@@ -21,23 +24,48 @@ class ResumptionTest(IntegrationTest):
             "--config",
             format(config_file)
         ]
-        run_master(commandline_args, work_dir)
-        final_result_at_one_time = get_final_result(work_dir)
-        print('at one time', final_result_at_one_time)
-        wait_alive(work_dir)
-        base_clean_work_dir(data_dir, work_dir)
 
-        config_file = data_dir.joinpath(
-            'config_{}_resumption.json'.format(self.search_algorithm)
-        )
+        if self.workspace.path.exists():
+            self.workspace.clean()
+        self.workspace.create()
+
+        self.create_main()
+
+        with patch.object(sys, 'argv', commandline_args):
+            options = Arguments()
+            master = LocalMaster(options)
+
+            run_master(master)
+            final_result_at_one_time = get_final_result(work_dir, master)
+            print('at one time', final_result_at_one_time)
+            wait_alive(work_dir)
+            base_clean_work_dir(data_dir, work_dir)
+
+        config_file = data_dir / f'config_{self.search_algorithm}_resumption.json'
+
+        time.sleep(5)
+
         commandline_args = [
             "start.py",
             "--config",
             format(config_file)
         ]
-        run_master(commandline_args, work_dir)
-        print('resumed steps finished')
-        wait_alive(work_dir)
+
+        if self.workspace.path.exists():
+            self.workspace.clean()
+        self.workspace.create()
+
+        self.create_main()
+
+        with patch.object(sys, 'argv', commandline_args):
+            options = Arguments()
+            master = LocalMaster(options)
+            master.storage.alive.init_alive()
+            run_master(master)
+            print('resumed steps finished')
+            wait_alive(work_dir)
+
+        time.sleep(5)
 
         config_file = data_dir.joinpath(
             'config_{}.json'.format(self.search_algorithm)
@@ -47,30 +75,34 @@ class ResumptionTest(IntegrationTest):
             "--config",
             format(config_file),
             "--resume",
-            "5"
+            # "5"
+            "4"
         ]
-        run_master(commandline_args, work_dir)
-        final_result_resumption = get_final_result(work_dir)
-        print('resumption steps finished', final_result_resumption)
-        assert final_result_at_one_time == final_result_resumption
+        with patch.object(sys, 'argv', commandline_args):
+            options = Arguments()
+            master = LocalMaster(options)
+            master.storage.alive.init_alive()
+            run_master(master)
+            final_result_resumption = get_final_result(work_dir, master)
+            print('resumption steps finished', final_result_resumption)
+            assert final_result_at_one_time == final_result_resumption
 
 
-def get_final_result(work_dir):
-    final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
-    final_result_yaml = fs.load_yaml(final_result)
-    return final_result_yaml['result']
+def get_final_result(work_dir, master):
+    # final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
+    # final_result_yaml = fs.load_yaml(final_result)
+    # return final_result_yaml['result']
+    data = master.storage.result.get_all_result()
+    return [d.objective for d in data][-1]
 
 
-def run_master(commandline_args, work_dir):
-    with patch.object(sys, 'argv', commandline_args):
-        from aiaccel import start
-        master = start.Master()
-        loop = asyncio.get_event_loop()
-        gather = asyncio.gather(
-            start_master(master),
-            wait_finish_wrapper(1, work_dir.joinpath(aiaccel.dict_alive), master)
-        )
-        loop.run_until_complete(gather)
+def run_master(master):
+    loop = asyncio.get_event_loop()
+    gather = asyncio.gather(
+        start_master(master),
+        wait_finish_wrapper(1, master.storage, master)
+    )
+    loop.run_until_complete(gather)
 
 
 def wait_alive(work_dir):

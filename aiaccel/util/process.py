@@ -6,9 +6,9 @@ import re
 import subprocess
 import threading
 if TYPE_CHECKING:
-    from aiaccel.master.abci_master import AbciMaster
-    from aiaccel.master.abstract_master import AbstractMaster
-    from aiaccel.master.local_master import LocalMaster
+    from aiaccel.master.abci import AbciMaster
+    from aiaccel.master.abstract import AbstractMaster
+    from aiaccel.master.local import LocalMaster
 
 
 def exec_runner(command: list, silent: bool = True) -> Popen:
@@ -21,12 +21,17 @@ def exec_runner(command: list, silent: bool = True) -> Popen:
     Returns:
         Popen: An opened process object.
     """
-    if silent:
-        return subprocess.Popen(command, stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-    else:
-        return subprocess.Popen(command, stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
+    # if silent:
+    #     return subprocess.Popen(command, stdout=subprocess.DEVNULL,
+    #                             stderr=subprocess.DEVNULL)
+    # else:
+    #     return subprocess.Popen(command, stdout=subprocess.PIPE,
+    #                             stderr=subprocess.STDOUT)
+    return subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
 
 
 def subprocess_ps() -> List[dict]:
@@ -153,7 +158,10 @@ class OutputHandler(threading.Thread):
     def __init__(
         self,
         parent: Union[AbciMaster, AbstractMaster, LocalMaster],
-        proc: subprocess.Popen, module_name: str
+        proc: subprocess.Popen,
+        module_name: str,
+        # resource_name: str,
+        # storage: Storage
     ) -> None:
         """Initial method for OutputHandler.
 
@@ -190,8 +198,7 @@ class OutputHandler(threading.Thread):
                 print(line, flush=True)
 
             if not line and self._proc.poll() is not None:
-                self._parent.logger.debug('{} process finished.'.format(
-                    self._module_name))
+                self._parent.logger.debug(f'{self._module_name} process finished.')
                 o, e = self._proc.communicate()
 
                 if o:
@@ -214,9 +221,18 @@ def is_process_running(pid: int) -> bool:
     Returns:
         bool: The process is running or not.
     """
+    status = [
+        "running",
+        "sleeping",
+        "disk-sleep",
+        "stopped",
+        "tracing-stop",
+        "waking",
+        "idle"
+    ]
+
     try:
         p = psutil.Process(pid)
-        return p.status() in ["running", "sleeping", "disk-sleep",
-                              "stopped", "tracing-stop", "waking", "idle"]
+        return p.status() in status
     except psutil.NoSuchProcess:
         return False

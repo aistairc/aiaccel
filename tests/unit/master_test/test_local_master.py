@@ -1,4 +1,4 @@
-from aiaccel.master.local_master import LocalMaster
+from aiaccel.master.local import LocalMaster
 from tests.base_test import BaseTest
 
 
@@ -10,8 +10,7 @@ class TestLocalMaster(BaseTest):
             'resume': None,
             'clean': False,
             'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'master'
         }
         master = LocalMaster(options)

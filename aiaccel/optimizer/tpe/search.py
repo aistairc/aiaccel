@@ -1,13 +1,11 @@
 import optuna
 
 import aiaccel.parameter
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer.abstract import AbstractOptimizer
 from aiaccel.optimizer.tpe.sampler import TPESamplerWrapper
 from optuna.trial import TrialState
 from typing import Optional
-import aiaccel.util.filesystem as fs
 import copy
-import joblib
 import numpy as np
 import pathlib
 
@@ -51,34 +49,21 @@ class TpeSearchOptimizer(AbstractOptimizer):
         """
 
         del_keys = []
-        result_files = fs.get_file_result(self.ws, self.dict_lock)
-        hashnames = [fs.get_basename(f) for f in result_files]
-
-        for hashname, params in self.parameter_pool.items():
-            try:
-                index = hashnames.index(hashname)
-            except ValueError:
-                continue
-            result_file = result_files[index]
-            result_content = fs.load_yaml(result_file, self.dict_lock)
-            result = result_content['result']
-            trial = self.trial_pool[hashname]
-            self.study.tell(trial, result)
-            del_keys.append(hashname)
+        results = self.storage.result.get_result_trial_id_list()
+        for trial_id, params in self.parameter_pool.items():
+            if int(trial_id) in results:
+                trial_id_str = self.get_zero_padding_any_trial_id(trial_id)
+                result_content = self.storage.get_hp_dict(trial_id_str)
+                objective = result_content['result']
+                trial = self.trial_pool[trial_id]
+                self.study.tell(trial, objective)
+                del_keys.append(trial_id)
 
         for key in del_keys:
             self.parameter_pool.pop(key)
-            self.logger.info(
-                'hashname {} is deleted from parameter_pool'
-                .format(key)
-            )
+            self.logger.info(f'trial_id {key} is deleted from parameter_pool')
 
-        self.logger.debug(
-            'current pool {}'
-            .format(
-                [k for k, v in self.parameter_pool.items()]
-            )
-        )
+        self.logger.debug(f'current pool {[k for k, v in self.parameter_pool.items()]}')
 
     def is_startup_trials(self) -> bool:
         """Is a current trial startup trial or not.
@@ -87,7 +72,7 @@ class TpeSearchOptimizer(AbstractOptimizer):
             bool: Is a current trial startup trial or not.
         """
         n_startup_trials = self.study.sampler.get_startup_trials()
-        return self.generated_parameter < n_startup_trials
+        return self.num_of_generated_parameter < n_startup_trials
 
     def generate_parameter(self, number: Optional[int] = 1) -> None:
         """Generate parameters.
@@ -96,28 +81,23 @@ class TpeSearchOptimizer(AbstractOptimizer):
             number (Optional[int]): A number of generating parameters.
         """
         self.check_result()
-        self.logger.debug(
-            'number: {}, pool: {} losses'
-            .format(number, len(self.parameter_pool))
-        )
+        self.logger.debug(f'number: {number}, pool: {len(self.parameter_pool)} losses')
 
         initial_parameter = self.generate_initial_parameter()
 
         if initial_parameter is not None:
-            hashname = self.create_parameter_file(initial_parameter)
-            self.parameter_pool[hashname] = initial_parameter['parameters']
+            trial_id = self.register_ready(initial_parameter)
+            self.parameter_pool[trial_id] = initial_parameter['parameters']
             enqueue_trial = {}
 
-            for param in self.parameter_pool[hashname]:
+            for param in self.parameter_pool[trial_id]:
                 enqueue_trial[param['parameter_name']] = param['value']
 
             self.study.enqueue_trial(enqueue_trial)
-            self.logger.info(
-                'newly added name: {} to parameter_pool'.format(hashname)
-            )
+            self.logger.info(f'newly added name: {trial_id} to parameter_pool')
             t = self.study.ask(self.distributions)
-            self.trial_pool[hashname] = t
-            self.generated_parameter += 1
+            self.trial_pool[trial_id] = t
+            self.num_of_generated_parameter += 1
             number -= 1
 
         for n in range(number):
@@ -142,14 +122,11 @@ class TpeSearchOptimizer(AbstractOptimizer):
                 }
                 new_params.append(new_param)
 
-            hashname = self.create_parameter_file({'parameters': new_params})
-            self.parameter_pool[hashname] = new_params
-            self.trial_pool[hashname] = trial
-            self.logger.info(
-                'newly added name: {} to parameter_pool'
-                .format(hashname)
-            )
-            self.generated_parameter += 1
+            trial_id = self.register_ready({'parameters': new_params})
+            self.parameter_pool[trial_id] = new_params
+            self.trial_pool[trial_id] = trial
+            self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+            self.num_of_generated_parameter += 1
 
     def create_study(self) -> None:
         """Create the optuna.study object and store it.
@@ -172,16 +149,16 @@ class TpeSearchOptimizer(AbstractOptimizer):
             pathlib.Path: the path object to store the pickled optuna.study
             object.
         """
-        return self.ws / 'state' / str(self.curr_trial_number) / 'study.pkl'
+        return self.ws / 'state' / str(self.current_max_trial_number) / 'study.pkl'
 
-    def _serialize(self) -> dict:
+    def _serialize(self) -> None:
         """Serialize this module.
 
         Returns:
             dict: The serialized objects.
         """
         parameter_pool = copy.deepcopy(self.parameter_pool)
-        for hashname, params in parameter_pool.items():
+        for _, params in parameter_pool.items():
             for param in params:
                 if type(param['value']) is np.float64:
                     param['value'] = float(param['value'])
@@ -189,18 +166,15 @@ class TpeSearchOptimizer(AbstractOptimizer):
         # TODO: add serialize trial_pool
 
         self.serialize_datas = {
-            'generated_parameter': self.generated_parameter,
+            'num_of_generated_parameter': self.num_of_generated_parameter,
             'loop_count': self.loop_count,
-            'parameter_pool': parameter_pool
+            'parameter_pool': parameter_pool,
+            'study': self.study
         }
         super()._serialize()
-        # TODO: add the path to pickled study.
-        base_dir_path = self.ws / 'state' / str(self.curr_trial_number)
-        if base_dir_path.exists():
-            joblib.dump(self.study, str(self.study_pickle_path))
-        return {}
 
-    def _deserialize(self, dict_objects: dict) -> None:
+    def _deserialize(self, trial_id: int) -> None:
+
         """Deserialize this module.
 
         Args:
@@ -209,28 +183,28 @@ class TpeSearchOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        super()._deserialize(dict_objects)
-        parameter_pool = copy.deepcopy(dict_objects['parameter_pool'])
-        for hashname, params in parameter_pool.items():
+        super()._deserialize(trial_id)
+        parameter_pool = copy.deepcopy(self.deserialize_datas['parameter_pool'])
+        for _, params in parameter_pool.items():
             for param in params:
                 if type(param['value']) is float:
                     param['value'] = np.float64(param['value'])
 
         self.parameter_pool = parameter_pool
-        self.study = joblib.load(str(self.study_pickle_path))
+        self.study = self.deserialize_datas['study']
+
         # TODO: add deserialize trial_pool
-        running_files = fs.get_file_hp_running(self.ws, self.dict_lock)
+
+        runnings = self.storage.trial.get_running()
         running_trials = self.study.get_trials(states=(TrialState.RUNNING,))
 
         for _ in range(len(running_trials)):
             t = self.study.ask(self.distributions)
 
-            for running_file in running_files:
-                rf_content = fs.load_yaml(running_file)
-                rf_param_dict = {
-                    i['parameter_name']: i['value']
-                    for i in rf_content['parameters']
-                }
+            for trial_id in runnings:
+                trial_id_str = self.get_zero_padding_any_trial_id(trial_id)
+                rf_content = self.storage.get_hp_dict(trial_id_str)
+                rf_param_dict = {i['parameter_name']: i['value']for i in rf_content['parameters']}
                 match = True
 
                 for k, v in t.params.items():
@@ -238,7 +212,7 @@ class TpeSearchOptimizer(AbstractOptimizer):
                         match = False
                         break
                 if match:
-                    self.trial_pool[rf_content['hashname']] = t
+                    self.trial_pool[rf_content['trial_id']] = t
                     break
             else:
                 # debug
@@ -264,35 +238,18 @@ def create_distributions(
     for p in parameters.get_parameter_list():
         if p.type == 'FLOAT':
             if p.log:
-                distributions[p.name] = \
-                    optuna.distributions.LogUniformDistribution(
-                    p.lower,
-                    p.upper
-                )
+                distributions[p.name] = optuna.distributions.LogUniformDistribution(p.lower, p.upper)
             else:
-                distributions[p.name] = \
-                    optuna.distributions.UniformDistribution(
-                    p.lower,
-                    p.upper
-                )
+                distributions[p.name] = optuna.distributions.UniformDistribution(p.lower, p.upper)
+
         elif p.type == 'INT':
             if p.log:
-                distributions[p.name] = \
-                    optuna.distributions.IntLogUniformDistribution(
-                    p.lower,
-                    p.upper
-                )
+                distributions[p.name] = optuna.distributions.IntLogUniformDistribution(p.lower, p.upper)
             else:
-                distributions[p.name] = \
-                    optuna.distributions.IntUniformDistribution(
-                    p.lower,
-                    p.upper
-                )
+                distributions[p.name] = optuna.distributions.IntUniformDistribution(p.lower, p.upper)
+
         elif p.type == 'CATEGORICAL':
-            distributions[p.name] = \
-                optuna.distributions.CategoricalDistribution(
-                    p.choices
-            )
+            distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
         else:
             raise 'Unsupported parameter type'
 

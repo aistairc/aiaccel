@@ -1,14 +1,16 @@
-import pathlib
-from functools import singledispatchmethod
-from aiaccel.parameter import load_parameter
-from aiaccel.util.time_tools import get_time_now
-from aiaccel.wrapper_tools import save_result
-import aiaccel
 import argparse
 import subprocess
+import pathlib
 import logging
+
+from functools import singledispatchmethod
 from typing import Any
+
+import aiaccel
 from aiaccel.config import Config
+from aiaccel.storage.storage import Storage
+from aiaccel.parameter import load_parameter
+from aiaccel.util.time_tools import get_time_now
 
 
 class _Message:
@@ -68,10 +70,10 @@ class _Message:
         """
         Args:
             raw_data (str): It is assumed the format
-                                e.g "{label}:{message}".format(
-                                        label="HOGE",
-                                        message="hoge@hoge@hoge"
-                                    )
+            e.g "{label}:{message}".format(
+                    label="HOGE",
+                    message="hoge@hoge@hoge"
+                )
         """
         raw_data = raw_data.split("\n")
         target_data = []
@@ -130,7 +132,7 @@ class Messages:
 
 
 class WrapperInterface:
-    """　Interface of between Wrapper and User function.
+    """ Interface of between Wrapper and User function.
 
     Note:
         user function:
@@ -200,8 +202,9 @@ class Run:
     def __init__(self) -> None:
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-i', '--index', type=str, required=False)
+        parser.add_argument('-i', '--trial_id', type=str, required=False)
         parser.add_argument('-c', '--config', type=str, required=False)
+        parser.add_argument('--fs', nargs='?', const=True, default=False)
 
         self.args = vars(parser.parse_known_args()[0])
 
@@ -209,16 +212,24 @@ class Run:
         self.ys = None
         self.err = ""
 
-        self.index = self.args["index"]
+        self.trial_id = self.args["trial_id"]
         self.config = None
+        self.storage = None
         if self.args["config"] is not None:
             self.config_path = pathlib.Path(self.args["config"])
             self.config = Config(self.config_path)
 
             # create paths
-            self.workspace = pathlib.Path(self.config.workspace.get())
+            # self.workspace = pathlib.Path(self.config.workspace.get())
+            self.workspace = pathlib.Path(self.config.workspace.get()).resolve()
             self.dict_lock = self.workspace / aiaccel.dict_lock
-            self.dict_alive = self.workspace / aiaccel.dict_alive
+
+            # create database
+            self.storage = Storage(
+                self.workspace,
+                self.args['fs'],
+                config_path=self.config_path
+            )
 
         parameters_config = load_parameter(self.config.hyperparameters.get())
         for p in parameters_config.get_parameter_list():
@@ -238,7 +249,7 @@ class Run:
 
         # logger
         log_dir = self.workspace / "log"
-        self.log_path = log_dir / f"job_{self.index}.log"
+        self.log_path = log_dir / f"job_{self.trial_id}.log"
         if not log_dir.exists():
             log_dir.mkdir(parents=True)
         logging.basicConfig(
@@ -252,14 +263,14 @@ class Run:
 
         self.com = WrapperInterface()
 
-    @property
-    def hashname(self) -> str:
-        """ Get tha hashname of this trial.
+    # @property
+    # def trial_id(self) -> str:
+    #     """ Get tha trial_id of this trial.
 
-        Returns:
-            index (str): hashname of this trial.
-        """
-        return self.index
+    #     Returns:
+    #         index (str): trial_id of this trial.
+    #     """
+    #     return self.index
 
     @property
     def parameters(self) -> dict:
@@ -326,7 +337,7 @@ class Run:
             return commands
 
         commands.append("--config={}".format(str(self.config_path)))
-        commands.append("--index={}".format(self.hashname))
+        commands.append("--trial_id={}".format(self.trial_id))
 
         for key in self.xs:
             name = key
@@ -402,7 +413,7 @@ class Run:
             y (Union): Objective value. (return values of the user program.)
         """
         if (
-            self.args["index"] is None or
+            self.args["trial_id"] is None or
             self.args["config"] is None
         ):
             return
@@ -417,15 +428,24 @@ class Run:
                 y = float("nan")
                 err = f"user function returns invalid type value, {type(y)}({y})."
 
-            save_result(
-                self.workspace,
-                self.dict_lock,
-                self.index,
-                y,
-                self.start_time,
-                self.end_time,
-                err
+            self.storage.result.set_any_trial_objective(
+                trial_id=int(self.trial_id),
+                objective=y
             )
+            self.storage.timestamp.set_any_trial_start_time(
+                trial_id=int(self.trial_id),
+                start_time=self.start_time
+            )
+            self.storage.timestamp.set_any_trial_end_time(
+                trial_id=int(self.trial_id),
+                end_time=self.end_time
+            )
+
+            if err != "":
+                self.storage.error.set_any_trial_error(
+                    trial_id=int(self.trial_id),
+                    error_message=err
+                )
 
     @singledispatchmethod
     def execute_and_report(self, func: callable):

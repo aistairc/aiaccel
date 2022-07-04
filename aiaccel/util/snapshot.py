@@ -5,7 +5,7 @@ from typing import Union
 from typing import Any
 from fasteners import InterProcessLock
 from aiaccel.util import filesystem as fs
-from aiaccel.util.filesystem import retry
+from aiaccel.util.retry import retry
 import pickle
 
 
@@ -30,8 +30,8 @@ class SnapShot:
 
         Example:
             ss = SnapShot("config.json")
-            ss.save(trial_number)
-            ss.load(trial_number)  # Replace the contents of the directory
+            ss.save(trial_id)
+            ss.load(trial_id)  # Replace the contents of the directory
 
         Attributes:
             process_name (str)  : A process name (master, optimizer, scheduler)
@@ -47,17 +47,17 @@ class SnapShot:
                                             and scheduler.
             random_state_native (tuple) : nataive random state
             random_state_numpy (tuple)  : numpy random state
-            process_memory_objects (dict): store serialized memory objects of
+            optimization_variables (dict): store serialized memory objects of
                                             the process.
     """
 
     def __init__(
         self,
         workspace: pathlib.Path,
-        process_name: str   # Assume 'scheduler' or 'optimizer' or 'master'
+        # process_name: str   # Assume 'scheduler' or 'optimizer' or 'master'
     ) -> None:
 
-        self.process_name = process_name
+        # self.process_name = process_name
 
         self.ws = workspace.resolve()
         self.ws_alive = self.ws / 'alive'
@@ -93,7 +93,7 @@ class SnapShot:
         }
         self.random_state_native = None
         self.random_state_numpy = None
-        self.process_memory_objects = None
+        self.optimization_variables = None
 
     def register_new_lock_file(self, label: str) -> None:
         """ Register a new lock file
@@ -129,56 +129,54 @@ class SnapShot:
 
     def save(
         self,
-        curr_trial_number: int,
-        inner_loop_counter: int,
+        trial_id: int,
+        process_name: str,
+        optimization_variables: dict,
         native_random_object: tuple,
-        numpy_random_object: tuple,
-        process_memory_objects: dict
+        numpy_random_object: tuple
     ) -> None:
         """ Save any data.
         Args:
-            curr_trial_number (int)     : Current trial number.
-            inner_loop_counter (int)    : Internal control variables.(not used)
+            trial_id (int)     : Current trial number.
             native_random_object (tuple): Native random state.
             numpy_random_object (tuple) : Numpy random state.
-            process_memory_objects (dict): Intermediate data of optimize.
+            optimization_variables (dict): Intermediate data of optimize.
 
         Result:
             None
         """
         with InterProcessLock(self.lock_file['serialize']):
             self._save(
-                curr_trial_number,
-                inner_loop_counter,
+                trial_id,
+                process_name,
+                optimization_variables,
                 native_random_object,
                 numpy_random_object,
-                process_memory_objects
             )
 
     def _save(
         self,
-        curr_trial_number: int,
-        inner_loop_counter: int,
+        trial_id: int,
+        process_name: str,
+        optimization_variables: dict,
         native_random_object: tuple,
-        numpy_random_object: tuple,
-        process_memory_objects: dict
+        numpy_random_object: tuple
     ) -> None:
         """
         Args:
-            curr_trial_number (int)     : Current trial number.
-            inner_loop_counter (int)    : Internal control variables.(not used)
+            trial_id (int)     : Current trial number.
+            optimization_variables (dict): Intermediate data of optimize.
             native_random_object (tuple): Native random state.
             numpy_random_object (tuple) : Numpy random state.
-            process_memory_objects (dict): Intermediate data of optimize.
 
         Note:
             Save the contents of the Hp directory in yaml format.
         """
         # If self.process_name == 'scheduler':
-        if self.process_name == 'master':
+        if process_name == 'master':
             self.shot()
 
-        base_dir_path = self.ws / 'state' / str(curr_trial_number)
+        base_dir_path = self.ws / 'state' / str(trial_id)
         native_dir_path = base_dir_path / 'native_random'
         numpy_dir_path = base_dir_path / 'numpy_random'
 
@@ -187,20 +185,25 @@ class SnapShot:
                 base_dir_path.mkdir()
 
         # (loop_counter)
-        self.update_inner_loop_count(curr_trial_number, inner_loop_counter)
+        loop_count = optimization_variables['loop_count']
+        self._update_inner_loop_count(
+            trial_id,
+            process_name,
+            loop_count
+        )
 
         # (hp)
         save_file_path = base_dir_path / 'hp.yaml'
         if not save_file_path.exists():
             # Save only once per trial.
             with InterProcessLock(self.lock_file['state']):
-                if self.process_name == 'master':
+                if process_name == 'master':
                     data = self.create_data()
                     self.hp_status_recoard_yml(save_file_path, data)
-                self.write_inner_loop_count(curr_trial_number)
+                self.write_inner_loop_count(trial_id)
 
         # native random file
-        save_path = native_dir_path / (self.process_name + '.pickle')
+        save_path = native_dir_path / (process_name + '.pickle')
         if not native_dir_path.exists():
             native_dir_path.mkdir()
         if not save_path.exists():
@@ -208,7 +211,7 @@ class SnapShot:
             self._serialize_any_object(save_path, native_random_object)
 
         # numpy random file
-        save_path = numpy_dir_path / (self.process_name + '.pickle')
+        save_path = numpy_dir_path / (process_name + '.pickle')
         if not numpy_dir_path.exists():
             numpy_dir_path.mkdir()
         if not save_path.exists():
@@ -216,28 +219,29 @@ class SnapShot:
             self._serialize_any_object(save_path, numpy_random_object)
 
         # Optuna DB file copy
-        if self.process_name == 'master':
+        if process_name == 'master':
             src = self.ws / 'optuna_study.db'
             dst = base_dir_path / 'optuna_study.db'
             if src.exists():
                 shutil.copy(src, dst)
 
         # Generete count file(count.txt) copy
-        if self.process_name == 'master':
+        if process_name == 'master':
             src = self.ws_hp / 'count.txt'
             dst = base_dir_path / 'count.txt'
             if src.exists():
                 shutil.copy(src, dst)
 
         # Write process memory objects
-        pmo_file_path = base_dir_path / '{}.yaml'.format(self.process_name)
+        pmo_file_path = base_dir_path / f'{process_name}.yaml'
         if not pmo_file_path.exists():
             with InterProcessLock(self.lock_file['state']):
-                fs.create_yaml(pmo_file_path, process_memory_objects)
+                fs.create_yaml(pmo_file_path, optimization_variables)
 
-    def update_inner_loop_count(
+    def _update_inner_loop_count(
         self,
-        curr_trial_number: int,
+        trial_id: int,
+        process_name: str,
         inner_loop_count: int
     ) -> None:
         """ Update inner loop counter value.
@@ -253,15 +257,15 @@ class SnapShot:
             * The "inner loop counter" is not used for internal control.
             * See "module.py" for the meaning of "inner loop"
         """
-        base_dir_path = self.ws / 'state' / str(curr_trial_number)
+        base_dir_path = self.ws / 'state' / str(trial_id)
         file_path = base_dir_path / 'hp.yaml'
         if not file_path.exists():
-            self.ss_loop_count[self.process_name] = inner_loop_count
+            self.ss_loop_count[process_name] = inner_loop_count
         else:
             self.ss_loop_count = fs.load_yaml(file_path)['loop_count']
-            self.ss_loop_count[self.process_name] = inner_loop_count
+            self.ss_loop_count[process_name] = inner_loop_count
 
-    def write_inner_loop_count(self, curr_trial_number: int) -> None:
+    def write_inner_loop_count(self, trial_id: int) -> None:
         """ Write the inner loop count value to text.
 
         Args:
@@ -271,7 +275,7 @@ class SnapShot:
         Returns:
             None
         """
-        base_dir_path = self.ws / 'state' / str(curr_trial_number)
+        base_dir_path = self.ws / 'state' / str(trial_id)
         file_path = base_dir_path / 'hp.yaml'
         if not file_path.exists():
             return
@@ -323,23 +327,23 @@ class SnapShot:
         with open(save_path, 'wb') as f:
             pickle.dump(obj, f)
 
-    def load(self, trial_number: int) -> None:
+    def load(self, trial_id: int, process_name: str) -> bool:
         """ Load any trial data.
 
         Args:
-            trial_number (int): target trial number.
+            trial_id (int): target trial number.
 
         Returns:
             None
         """
         ss_files = list(self.ws_state.glob("*"))
         if len(ss_files) == 0:
-            return
+            return False
         # ss_files.sort()
         with InterProcessLock(self.lock_file['deserialize']):
-            self._load(trial_number)
+            return self._load(trial_id, process_name)
 
-    def _load(self, trial_number: int) -> None:
+    def _load(self, trial_id: int, process_name: str) -> bool:
         """ Serialize anything.
 
         Args:
@@ -347,20 +351,31 @@ class SnapShot:
             obj (any): Subject to save.
 
         Returns:
-            None
+            bool
 
         Note:
             Replace the contents of the directory
         """
-        base_dir_path = self.ws / 'state' / str(trial_number)
+        base_dir_path = self.ws / 'state' / str(trial_id)
         native_dir_path = base_dir_path / 'native_random'
         numpy_dir_path = base_dir_path / 'numpy_random'
 
+        if not base_dir_path.exists():
+            return False
+
+        if not native_dir_path.exists():
+            return False
+
+        if not numpy_dir_path.exists():
+            return False
+
         # Load hp-file
-        if self.process_name == 'master':
+        if process_name == 'master':
             filename = 'hp.yaml'
             load_file_path = base_dir_path / filename
             with InterProcessLock(self.lock_file['state']):
+                if not load_file_path.exists():
+                    return False
                 load_data = fs.load_yaml(load_file_path)
                 self.ss_hp = load_data['hp']
 
@@ -369,63 +384,74 @@ class SnapShot:
                 self.replace_hp_dir()
 
         # native random file
-        load_path = native_dir_path / (self.process_name + '.pickle')
-        with open(load_path, 'rb') as f:
-            self.random_state_native = pickle.load(f)
+        load_path = native_dir_path / (process_name + '.pickle')
+        with InterProcessLock(self.lock_file['state']):
+            if not load_path.exists():
+                return False
+            with open(load_path, 'rb') as f:
+                self.random_state_native = pickle.load(f)
 
         # numpy random file
-        load_path = numpy_dir_path / (self.process_name + '.pickle')
-        with open(load_path, 'rb') as f:
-            self.random_state_numpy = pickle.load(f)
+        load_path = numpy_dir_path / (process_name + '.pickle')
+        with InterProcessLock(self.lock_file['state']):
+            if not load_path.exists():
+                return False
+            with open(load_path, 'rb') as f:
+                self.random_state_numpy = pickle.load(f)
 
         # Optuna DB file copy
-        if self.process_name == 'master':
+        if process_name == 'master':
             src = base_dir_path / 'optuna_study.db'
             dst = self.ws / 'optuna_study.db'
             if dst.exists():
                 dst.unlink()
 
-            if src.exists():
-                shutil.copy(src, dst)
+            with InterProcessLock(self.lock_file['state']):
+                if src.exists():
+                    shutil.copy(src, dst)
 
-        if self.process_name == 'master':
+        if process_name == 'master':
             src = base_dir_path / 'count.txt'
             dst = self.ws / 'hp' / 'count.txt'
             if dst.exists():
                 dst.unlink()
 
-            if src.exists():
-                shutil.copy(src, dst)
+            with InterProcessLock(self.lock_file['state']):
+                if src.exists():
+                    shutil.copy(src, dst)
 
         # Load process memory objects
-        pmo_file_path = base_dir_path / '{}.yaml'.format(self.process_name)
+        pmo_file_path = base_dir_path / f'{process_name}.yaml'
         with InterProcessLock(self.lock_file['state']):
-            self.process_memory_objects = fs.load_yaml(pmo_file_path)
+            if not pmo_file_path.exists():
+                return False
+            self.optimization_variables = fs.load_yaml(pmo_file_path)
 
-        print("loaded {}".format(self.process_name))
+        print(f"loaded {process_name}")
+        return True
 
-    def get_base_dir_path(self, curr_trial_number: int) -> pathlib.Path:
+    def get_base_dir_path(self, trial_id: int) -> pathlib.Path:
         """ Get the snapshot data save directory for each trial.
 
         Args:
-            curr_trial_number (int): Current trial number
+            trial_id (int): Current trial number
 
         Returns:
             pathlib.Path: save directory path
         """
-        return (self.ws / 'state' / str(curr_trial_number))
+        return (self.ws / 'state' / str(trial_id))
 
-    def get_inner_loop_counter(self, trial_number: int) -> Union[int, None]:
+    def get_inner_loop_counter(self, trial_id: int) -> Union[int, None]:
         """ Get the value of the inner loop counter for a given
             trial from a yaml file.
 
         Args:
-            trial_number (int): The any trial number.
+            trial_id (int): The any trial number.
 
         Returns:
             Int value if target file exists, or None if it does not exist.
         """
-        base_dir_path = self.ws / 'state' / str(trial_number)
+        base_dir_path = self.ws / 'state' / str(trial_id)
         if not base_dir_path.exists():
             return None
 

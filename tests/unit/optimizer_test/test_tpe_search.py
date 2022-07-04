@@ -15,11 +15,11 @@ class TestTpeSearchOptimizer(BaseTest):
             'resume': None,
             'clean': False,
             'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'optimizer'
         }
         self.optimizer = TpeSearchOptimizer(options)
+        self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None
 
@@ -49,17 +49,18 @@ class TestTpeSearchOptimizer(BaseTest):
         assert self.optimizer.study_pickle_path.name == 'study.pkl'
 
     def test_serialize(self):
-        assert self.optimizer._serialize() == {}
+        self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
+        assert self.optimizer._serialize() is None
 
     def test_deserialize(self):
         self.optimizer.pre_process()
         self.optimizer.serialize_datas = {
-            'generated_parameter': None,
+            'num_of_generated_parameter': None,
             'loop_count': 0
         }
+        self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         self.optimizer._serialize()
-        serialized_dict = self.optimizer.serialize_datas
-        assert self.optimizer._deserialize(serialized_dict) is None
+        assert self.optimizer._deserialize(trial_id=0) is None
 
 
 def test_create_distributions(data_dir):

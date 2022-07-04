@@ -1,6 +1,9 @@
 from threading import local
-from aiaccel.config import BaseConfig, Config, ConfileWrapper, JsonOrYamlObjectConfig,\
-    load_config
+from aiaccel.config import BaseConfig
+from aiaccel.config import Config
+from aiaccel.config import ConfileWrapper
+from aiaccel.config import JsonOrYamlObjectConfig
+from aiaccel.config import load_config
 from tests.base_test import BaseTest
 import dataclasses
 import pytest
@@ -30,7 +33,6 @@ class TestJsonOrYamlObjectConfig(BaseTest):
         with open(config_json, 'r') as f:
             config = json.load(f)
         self.config = JsonOrYamlObjectConfig(config, 'json_object')
-        
 
     def test_init(self):
         try:

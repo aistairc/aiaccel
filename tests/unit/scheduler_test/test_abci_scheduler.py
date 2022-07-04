@@ -1,4 +1,4 @@
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
+from aiaccel.scheduler.abci import AbciScheduler
 from tests.base_test import BaseTest
 
 
@@ -9,15 +9,16 @@ class TestAbciScheduler(BaseTest):
         clean_work_dir,
         config_json,
         data_dir,
-        fake_process
+        fake_process,
+        database_remove
     ):
+        database_remove()
         options = {
             'config': self.config_json,
             'resume': None,
             'clean': False,
             'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbciScheduler(options)
@@ -33,3 +34,26 @@ class TestAbciScheduler(BaseTest):
             stdout=[xml_string]
         )
         assert scheduler.get_stats() is None
+
+    def test_parse_trial_id(
+        self,
+        config_json,
+        database_remove
+    ):
+        database_remove()
+        options = {
+            'config': config_json,
+            'resume': None,
+            'clean': False,
+            'nosave': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbciScheduler(options)
+        s = {"name": "run_000005.sh"}
+        trial_id = int(scheduler.parse_trial_id(s['name']))
+        assert trial_id == 5
+
+        s = {"name": "run_xxxxxx.sh"}
+        trial_id = scheduler.parse_trial_id(s['name'])
+        assert trial_id is None
