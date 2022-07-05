@@ -322,6 +322,7 @@ parameters:
 
 ##### grid使用時の注意事項
 最適化アルゴリズムで`grid`を使用する場合、`parameters`の設定に`log`、`step`、`base`を指定してください。
+また、`grid`では`initial`の項目は使用できません。初期値は`lower`に設定してください。
 
 ```yaml
 parameters:
@@ -333,7 +334,6 @@ parameters:
   step: 1
   log: false
   base: 10
-  initial: 0.0
 -
   name: "x2"
   type: "uniform_int"
@@ -342,7 +342,6 @@ parameters:
   step: 1
   log: false
   base: 10
-  initial: 0.0
 ```
 
 
