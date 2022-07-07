@@ -221,8 +221,8 @@ optimize:
   - **upper** - ハイパーパラメータ最大値を設定します。
   - **initial** - ハイパーパラメータの初期値を設定します。
   - **step**  - ハイパーパラメータの分解能を設定します(最適化アルゴリズムがgridの場合は必ず指定してください。)。
-  - **log** - 対数設定用の項目です(最適化アルゴリズムがgridの場合は必ず指定してください。)。
-  - **base** - 対数設定用の項目です(最適化アルゴリズムがgridの場合は必ず指定してください。)。
+  - **log** - 対数スケールで探索します。値はtrue/falseで指定して下さい。最適化アルゴリズムがgridの場合は必ず指定してください。
+  - **base** - 底数を指定します。最適化アルゴリズムがgridの場合は必ず指定してください。
   - **comment** - 自由記述欄。
 
 
@@ -451,7 +451,7 @@ def func(x1, x2):
 
 これを、aiaccelで最適化させるには次のように変更します。
 ```python
-from aiaccel.util import opt
+from aiaccel.util import aiaccel
 
 def func(p):
     x1 = p["x1"]
@@ -461,7 +461,7 @@ def func(p):
 
 if __name__ == "__main__":
     
-    run = opt.Run()
+    run = aiaccel.Run()
     run.execute_and_report(func)
 ```
 
