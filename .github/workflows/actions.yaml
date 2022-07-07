@@ -1,0 +1,92 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        #os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
+        #python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.8']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Up ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Software
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python setup.py install
+
+      - name: Unit Test
+        run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit --junit-xml pytest-${{ matrix.os }}-${{ matrix.python-version }}.xml
+        continue-on-error: true
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Test Results (Python ${{ matrix.python-version }})
+          path: pytest-${{ matrix.os }}-${{ matrix.python-version }}.xml
+
+      - name: Pycodestyle Test
+        run: pytest -v --pycodestyle aiaccel examples
+        continue-on-error: true
+
+      - name: Flack8 Test
+        run: pytest -v --flake8 aiaccel examples
+        continue-on-error: true
+
+      - name: Optimizer Algorithm Test
+        run: |
+          pytest -v tests/integration/sphere/test_sphere_random.py
+          pytest -v tests/integration/sphere/test_sphere_grid.py
+          pytest -v tests/integration/sphere/test_sphere_sobol.py
+          pytest -v tests/integration/sphere/test_sphere_tpe.py
+          pytest -v tests/integration/sphere/test_sphere_nelder_mead.py
+        continue-on-error: true
+
+      - name: Resume Test
+        run: |
+          pytest -v tests/resumption/sphere/test_sphere_random_resumption.py
+          pytest -v tests/resumption/sphere/test_sphere_grid_resumption.py
+          pytest -v tests/resumption/sphere/test_sphere_sobol_resumption.py
+          pytest -v tests/resumption/sphere/test_sphere_tpe_resumption.py
+          pytest -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
+        continue-on-error: true
+
+  publish-test-results:
+    name: "Publish Tests Results"
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+
+      # only needed unless run with comment_mode: off
+      pull-requests: write
+
+      # only needed for private repository
+      contents: read
+
+      # only needed for private repository
+      issues: read
+    if: always()
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: artifacts/**/*.xml
