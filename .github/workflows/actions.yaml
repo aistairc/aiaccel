@@ -74,10 +74,10 @@ jobs:
       pull-requests: write
 
       # only needed for private repository
-      contents: read
+      #contents: read
 
       # only needed for private repository
-      issues: read
+      #issues: read
     if: always()
 
     steps:
