@@ -2,6 +2,7 @@
    sphinx-quickstart on Mon Jan 18 15:46:13 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
+
 ========
 aiaccel
 ========
@@ -30,6 +31,7 @@ User Guide
    :maxdepth: 2
 
    manual_jp.rst
+
 
 =============
 API Reference

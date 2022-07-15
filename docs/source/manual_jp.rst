@@ -147,7 +147,7 @@ resource
         num_node: 4
 
 
-- **type** - 実行環境を指定します。`ABCI`、または`local`を指定します。
+- **type** - 実行環境を指定します。 `ABCI` 、または `local` を指定します。
 - **num_node** - 使用するノード数を指定します。ローカルの場合はCPUコア数を指定してください。
 
 
@@ -324,7 +324,7 @@ Type: ordinalの記述例
 .. note::
     - ordinal使用時は `sequence` 項目を使用します. `sequence` は配列で指定する必要があります。
     - ordinal使用時は `initial` の設定はできません。
-    - ordinalを使用できるのは、最適化アルゴリズムが`RandomSearch`と`TPE`の場合のみです。
+    - ordinalを使用できるのは、最適化アルゴリズムが `RandomSearch` と `TPE` の場合のみです。
 
 
 
@@ -568,7 +568,7 @@ aiaccelでwrapperプログラムを最適化させる場合はコンフィグフ
 
 .. note::
 
-    コンフィグファイル名`config.yaml`は適切な文字列に変更してください。
+    コンフィグファイル名 `config.yaml` は適切な文字列に変更してください。
 
 実行するとターミナルに進捗状況を出力します。
 
@@ -604,7 +604,7 @@ aiaccelでwrapperプログラムを最適化させる場合はコンフィグフ
 resourceの設定
 ======================
 
-コンフィグファイルの`resource`の`type`に`local`を指定します。
+コンフィグファイルの `resource` の `type` に `local` を指定します。
 
 .. code-block:: bash
 
@@ -617,7 +617,7 @@ resourceの設定
 ABCIの設定
 ##############################
 
-ローカル環境で実施する場合,`ABCI`の設定は動作に反映されません。
+ローカル環境で実施する場合, `ABCI` の設定は動作に反映されません。
 
 .. code-block:: yaml
 
