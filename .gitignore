@@ -109,3 +109,6 @@ work_aiaccel/
 
 # vscode
 *.code-workspace
+
+# document
+docs/build

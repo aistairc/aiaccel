@@ -158,11 +158,10 @@ def load_config(config_path: str) -> ConfileWrapper:
 
 
 class ConfigEntry:
-    """ A class for defining values in a configuration file
+    """ A class for defining values in a configuration file \
         or for holding read values.
 
-    Exmple:
-        ```
+    Example:
         workspace = ConfigEntry(
             config_file_path=config_file_path,
             type=[str],
@@ -172,8 +171,6 @@ class ConfigEntry:
             keys=("workspace")
         )
         workspace.get()
-        ```
-
     """
 
     def __init__(
@@ -832,13 +829,19 @@ class Config:
 
     def hps_format_check(self):
         """ Check the hyperparameter items.
+        Args:
+            None
+
+        Returns:
+            None
+
         Note
             Available items
-            * Random: uniform_float, uniform_int, categorical, ordinal
-            * Grid: uniform_float, uniform_int, categorical, ordinal
-            * Sobol: uniform_float, uniform_int
-            * NM: uniform_float, uniform_int
-            * TPE: niform_float, uniform_int, categorical, ordinal
+            - Random: uniform_float, uniform_int, categorical, ordinal
+            - Grid: uniform_float, uniform_int, categorical, ordinal
+            - Sobol: uniform_float, uniform_int
+            - NM: uniform_float, uniform_int
+            - TPE: niform_float, uniform_int, categorical, ordinal
         """
         algorithm = self.search_algorithm.get()
         hyperparameters = self.hyperparameters.get()
@@ -1063,12 +1066,12 @@ class FormatChecker:
 
     Attributes:
         supprt_search_types (list):
-            List of data types supported　by this search algorithm.
-            * Items
-                * uniform_float
-                * uniform_int
-                * categorical
-                * ordinal
+            List of data types supported by this search algorithm.
+                - Items
+                    - uniform_float
+                    - uniform_int
+                    - categorical
+                    - ordinal
         hyperparameters (list): Items of hyperparametes.
         algorithm (str): search algorithm search algorithm.
     """

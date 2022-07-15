@@ -15,7 +15,7 @@ aiaccel.optimizer.abstract\_optimizer module
 aiaccel.optimizer.grid\_search module
 -------------------------------------
 
-.. automodule:: aiaccel.optimizer.grid_search
+.. automodule:: aiaccel.optimizer.grid
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ aiaccel.optimizer.grid\_search module
 aiaccel.optimizer.nelder\_mead module
 -------------------------------------
 
-.. automodule:: aiaccel.optimizer.nelder_mead
+.. automodule:: aiaccel.optimizer.nelder_mead.sampler
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ aiaccel.optimizer.nelder\_mead module
 aiaccel.optimizer.nelder\_mead\_search module
 ---------------------------------------------
 
-.. automodule:: aiaccel.optimizer.nelder_mead_search
+.. automodule:: aiaccel.optimizer.nelder_mead.search
    :members:
    :undoc-members:
    :show-inheritance:
@@ -39,7 +39,7 @@ aiaccel.optimizer.nelder\_mead\_search module
 aiaccel.optimizer.random\_search module
 ---------------------------------------
 
-.. automodule:: aiaccel.optimizer.random_search
+.. automodule:: aiaccel.optimizer.random
    :members:
    :undoc-members:
    :show-inheritance:
@@ -47,7 +47,7 @@ aiaccel.optimizer.random\_search module
 aiaccel.optimizer.sobol\_search module
 --------------------------------------
 
-.. automodule:: aiaccel.optimizer.sobol_search
+.. automodule:: aiaccel.optimizer.sobol
    :members:
    :undoc-members:
    :show-inheritance:
@@ -55,7 +55,7 @@ aiaccel.optimizer.sobol\_search module
 aiaccel.optimizer.tpe\_sampler module
 -------------------------------------
 
-.. automodule:: aiaccel.optimizer.tpe_sampler
+.. automodule:: aiaccel.optimizer.tpe.sampler
    :members:
    :undoc-members:
    :show-inheritance:
@@ -63,7 +63,7 @@ aiaccel.optimizer.tpe\_sampler module
 aiaccel.optimizer.tpe\_search module
 ------------------------------------
 
-.. automodule:: aiaccel.optimizer.tpe_search
+.. automodule:: aiaccel.optimizer.tpe.search
    :members:
    :undoc-members:
    :show-inheritance:

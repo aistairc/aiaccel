@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 1
 
    aiaccel.abci
-   aiaccel.bin
    aiaccel.master
    aiaccel.optimizer
    aiaccel.scheduler
