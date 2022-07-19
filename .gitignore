@@ -104,8 +104,11 @@ venv.bak/
 .mypy_cache/
 
 # application workspace
-work/
+/work/
 work_aiaccel/
 
 # vscode
 *.code-workspace
+
+# IntelliJ
+.idea

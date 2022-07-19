@@ -1,0 +1,35 @@
+end_time: 11/03/2020 16:07:45
+hashname: 001
+parameters:
+- parameter_name: x1
+  type: FLOAT
+  value: 0.9932890709584586
+- parameter_name: x10
+  type: FLOAT
+  value: 3.599465287952899
+- parameter_name: x2
+  type: FLOAT
+  value: -3.791100401941936
+- parameter_name: x3
+  type: FLOAT
+  value: -1.6730481463987088
+- parameter_name: x4
+  type: FLOAT
+  value: 2.2148440758326835
+- parameter_name: x5
+  type: FLOAT
+  value: 2.111917696952796
+- parameter_name: x6
+  type: FLOAT
+  value: 4.364405867994597
+- parameter_name: x7
+  type: FLOAT
+  value: -0.7789300003858477
+- parameter_name: x8
+  type: FLOAT
+  value: 3.30035693274327
+- parameter_name: x9
+  type: FLOAT
+  value: 1.7030556641407104
+result: 73.92756153914445
+start_time: 11/03/2020 16:07:38
