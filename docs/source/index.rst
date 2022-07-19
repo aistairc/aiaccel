@@ -27,11 +27,8 @@ The software can be installed using `pip`.
 User Guide
 =============
 
-.. toctree::
-   :maxdepth: 2
-
-   manual_jp.rst
-
+* :doc:`./manual_jp`
+* :doc:`./manual_en`
 
 =============
 API Reference
