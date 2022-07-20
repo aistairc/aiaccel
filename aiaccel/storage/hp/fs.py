@@ -1,4 +1,3 @@
-from pathlib import PosixPath
 from pathlib import Path
 from typing import Any
 from typing import Union
@@ -127,4 +126,5 @@ class Hp:
         """
         self.update()
         for hp in self.datas.data:
-            hp.remove()
+            if hp is not None:
+                hp.remove()

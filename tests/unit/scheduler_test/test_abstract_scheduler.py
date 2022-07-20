@@ -113,6 +113,7 @@ class TestAbstractScheduler(BaseTest):
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
+        scheduler.storage.alive.init_alive()
         scheduler.print_dict_state()
         setup_hp_ready(1)
         trial_id = 1

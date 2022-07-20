@@ -3,10 +3,10 @@ from aiaccel.view import Viewer
 import pathlib
 from functools import wraps
 from aiaccel.workspace import Workspace
-from base import t_base
-from base import db_path
-from base import ws
-from base import config_path
+from tests.unit.view.base import t_base
+from tests.unit.view.base import db_path
+from tests.unit.view.base import ws
+from tests.unit.view.base import config_path
 from aiaccel.config import Config
 
 

@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from aiaccel.master.abci import AbciMaster
     from aiaccel.master.abstract import AbstractMaster
     from aiaccel.master.local import LocalMaster
+import datetime
 
 
 def exec_runner(command: list, silent: bool = True) -> Popen:
@@ -89,6 +90,7 @@ def parse_psaux(outputs: List[bytes]) -> List[dict]:
     return [dict(zip(headers, r)) for r in raw_data]
 
 
+'''
 def ps2joblist() -> List[dict]:
     """Get a ps result and convert to a job list format.
 
@@ -125,6 +127,34 @@ def ps2joblist() -> List[dict]:
         else:
             raise KeyError
 
+        job_list.append(d)
+
+    return job_list
+'''
+
+
+def ps2joblist() -> List[dict]:
+    """Get a ps result and convert to a job list format.
+
+    Returns:
+        List[dict]: A job list of ps result.
+
+    Raises:
+        KeyError: Causes when required keys are not contained in a ps result.
+    """
+
+    job_list = []
+
+    for pInfoDict in psutil.process_iter(['pid', 'username', 'status', 'create_time', 'cmdline']):
+        # pInfoDict = proc.as_dict(
+        #    attrs=['pid', 'username', 'status', 'create_time', 'cmdline'])
+        d = {
+            'job-ID': pInfoDict.info['pid'], 'prior': None, 'user': pInfoDict.info['username'],
+            'state': pInfoDict.info['status'], 'queue': None, 'jclass': None,
+            'slots': None, 'ja-task-ID': None, 'name': " ".join(pInfoDict.info['cmdline']),
+            'submit/start at': datetime.datetime.fromtimestamp(
+                pInfoDict.info['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+        }
         job_list.append(d)
 
     return job_list
