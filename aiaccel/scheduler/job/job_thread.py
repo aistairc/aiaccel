@@ -1103,7 +1103,7 @@ class Job(threading.Thread):
         self.storage = Storage(
             self.ws,
             fsmode=self.options['fs'],
-            config_path=self.config_path    
+            config_path=self.config_path
         )
         self.content = self.storage.get_hp_dict(self.trial_id)
         self.result_file_path = self.ws / aiaccel.dict_result / (self.trial_id_str + '.hp')
