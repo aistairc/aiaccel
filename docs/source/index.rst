@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-========
+
 aiaccel
 ========
 A hyperparameter optimization library for `AI Bridging Cloud Infrastructure (ABCI)`_.
@@ -13,7 +13,7 @@ The software currently supports five optimization algorithms: random search, gri
 
 .. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
 
-=============
+
 Installation
 =============
 The software can be installed using `pip`.
@@ -23,14 +23,19 @@ The software can be installed using `pip`.
    pip install git+https://github.com/aistairc/aiaccel.git
 
 
-=============
 User Guide
 =============
 
 * :doc:`./manual_jp`
 * :doc:`./manual_en`
 
-=============
+
+Guide for adding an optimizer
+=============================
+
+* :doc:`./optimizer_jp`
+
+
 API Reference
 =============
 
