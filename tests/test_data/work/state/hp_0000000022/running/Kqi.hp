@@ -1,0 +1,32 @@
+hashname: Kqi
+parameters:
+- parameter_name: x1
+  type: FLOAT
+  value: 0.5407241684160324
+- parameter_name: x10
+  type: FLOAT
+  value: -4.70425036033093
+- parameter_name: x2
+  type: FLOAT
+  value: -4.5651270964347255
+- parameter_name: x3
+  type: FLOAT
+  value: 2.0338208860383595
+- parameter_name: x4
+  type: FLOAT
+  value: 4.831877173096739
+- parameter_name: x5
+  type: FLOAT
+  value: 0.9318373038005756
+- parameter_name: x6
+  type: FLOAT
+  value: -1.06400313622086
+- parameter_name: x7
+  type: FLOAT
+  value: -3.296508031443187
+- parameter_name: x8
+  type: FLOAT
+  value: 0.022385584334831066
+- parameter_name: x9
+  type: FLOAT
+  value: 4.820766375385343

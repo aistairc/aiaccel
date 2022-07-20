@@ -1,0 +1,35 @@
+end_time: 11/09/2020 16:53:23
+hashname: VkA
+parameters:
+- parameter_name: x1
+  type: FLOAT
+  value: 0.25570666142114584
+- parameter_name: x10
+  type: FLOAT
+  value: 0.48798761388153
+- parameter_name: x2
+  type: FLOAT
+  value: 2.030407620656315
+- parameter_name: x3
+  type: FLOAT
+  value: 1.7448583050232722
+- parameter_name: x4
+  type: FLOAT
+  value: -1.2529697949835974
+- parameter_name: x5
+  type: FLOAT
+  value: -0.6103836995543688
+- parameter_name: x6
+  type: FLOAT
+  value: 0.08426488249981823
+- parameter_name: x7
+  type: FLOAT
+  value: 2.784426150001458
+- parameter_name: x8
+  type: FLOAT
+  value: 0.20938417613145166
+- parameter_name: x9
+  type: FLOAT
+  value: -1.0674490503577392
+result: 18.356523750006314
+start_time: 11/09/2020 16:53:15
