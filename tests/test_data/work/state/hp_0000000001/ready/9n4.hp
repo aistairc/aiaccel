@@ -1,0 +1,32 @@
+hashname: 9n4
+parameters:
+- parameter_name: x1
+  type: FLOAT
+  value: 0.12290127489411473
+- parameter_name: x10
+  type: FLOAT
+  value: 0.4141247279349658
+- parameter_name: x2
+  type: FLOAT
+  value: 4.391491627785106
+- parameter_name: x3
+  type: FLOAT
+  value: -1.1879576231178754
+- parameter_name: x4
+  type: FLOAT
+  value: -2.8340060286938664
+- parameter_name: x5
+  type: FLOAT
+  value: -0.7788342441728267
+- parameter_name: x6
+  type: FLOAT
+  value: -4.709592124251321
+- parameter_name: x7
+  type: FLOAT
+  value: -2.7830833372696495
+- parameter_name: x8
+  type: FLOAT
+  value: -0.6211240634942792
+- parameter_name: x9
+  type: FLOAT
+  value: -0.04187758618149395

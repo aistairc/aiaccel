@@ -1,0 +1,32 @@
+hashname: aJ4
+parameters:
+- parameter_name: x1
+  type: FLOAT
+  value: 0.7934708258477206
+- parameter_name: x10
+  type: FLOAT
+  value: 0.3961744844977879
+- parameter_name: x2
+  type: FLOAT
+  value: 3.602897789205496
+- parameter_name: x3
+  type: FLOAT
+  value: -2.6782387193698542
+- parameter_name: x4
+  type: FLOAT
+  value: 0.13771663187637007
+- parameter_name: x5
+  type: FLOAT
+  value: 4.524673882682695
+- parameter_name: x6
+  type: FLOAT
+  value: 0.7779480780120309
+- parameter_name: x7
+  type: FLOAT
+  value: -0.4086826808933166
+- parameter_name: x8
+  type: FLOAT
+  value: -2.307205225585788
+- parameter_name: x9
+  type: FLOAT
+  value: 0.4799630946624891
