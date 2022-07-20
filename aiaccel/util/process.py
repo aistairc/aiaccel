@@ -145,15 +145,15 @@ def ps2joblist() -> List[dict]:
 
     job_list = []
 
-    for pInfoDict in psutil.process_iter(['pid', 'username', 'status', 'create_time', 'cmdline']):
-        # pInfoDict = proc.as_dict(
+    for p_info in psutil.process_iter(['pid', 'username', 'status', 'create_time', 'cmdline']):
+        # p_info = proc.as_dict(
         #    attrs=['pid', 'username', 'status', 'create_time', 'cmdline'])
         d = {
-            'job-ID': pInfoDict.info['pid'], 'prior': None, 'user': pInfoDict.info['username'],
-            'state': pInfoDict.info['status'], 'queue': None, 'jclass': None,
-            'slots': None, 'ja-task-ID': None, 'name': " ".join(pInfoDict.info['cmdline']),
+            'job-ID': p_info.info['pid'], 'prior': None, 'user': p_info.info['username'],
+            'state': p_info.info['status'], 'queue': None, 'jclass': None,
+            'slots': None, 'ja-task-ID': None, 'name': " ".join(p_info.info['cmdline']),
             'submit/start at': datetime.datetime.fromtimestamp(
-                pInfoDict.info['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+                p_info.info['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         }
         job_list.append(d)
 
