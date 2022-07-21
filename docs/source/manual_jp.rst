@@ -251,7 +251,8 @@ Type: uniform_intの記述例
             initial: 1
 
 
-- ご参考
+.. note::
+
     - initialを指定しない場合は、項目を削除します。
 
     .. code-block:: yaml
