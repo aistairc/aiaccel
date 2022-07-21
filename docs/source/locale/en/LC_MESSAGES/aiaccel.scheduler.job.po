@@ -1,0 +1,589 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-07-21 16:01+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/aiaccel.scheduler.job.rst:2
+msgid "aiaccel.scheduler.job package"
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.job.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.job.rst:8
+msgid "aiaccel.scheduler.job.job\\_thread module"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.CustomMachine:1 of
+msgid "Bases: :py:class:`~transitions.core.Machine`"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:1 of
+msgid "Bases: :py:class:`~threading.Thread`"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:1 of
+msgid "A job thread to manage running jobs on local computer or ABCI."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:4 of
+msgid "ToDo: Confirm the state transition especially timeout expire and retry"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:4 of
+msgid "expire. Retry expire works well?"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:8 of
+msgid "A configuration object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job of
+msgid "type"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:10 of
+msgid "ConfileWrapper"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:14 of
+msgid "A path of a workspace."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:16
+#: aiaccel.scheduler.job.job_thread.Job:22
+#: aiaccel.scheduler.job.job_thread.Job:197
+#: aiaccel.scheduler.job.job_thread.Job:210
+#: aiaccel.scheduler.job.job_thread.Job:217 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:20 of
+msgid "A directory to store lock files."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:26 of
+msgid "Timeout seconds to transit the state from RunnerChecking to RunnerFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:29
+#: aiaccel.scheduler.job.job_thread.Job:36
+#: aiaccel.scheduler.job.job_thread.Job:43
+#: aiaccel.scheduler.job.job_thread.Job:50
+#: aiaccel.scheduler.job.job_thread.Job:57
+#: aiaccel.scheduler.job.job_thread.Job:64
+#: aiaccel.scheduler.job.job_thread.Job:71
+#: aiaccel.scheduler.job.job_thread.Job:78
+#: aiaccel.scheduler.job.job_thread.Job:85
+#: aiaccel.scheduler.job.job_thread.Job:92
+#: aiaccel.scheduler.job.job_thread.Job:99
+#: aiaccel.scheduler.job.job_thread.Job:106
+#: aiaccel.scheduler.job.job_thread.Job:113
+#: aiaccel.scheduler.job.job_thread.Job:120
+#: aiaccel.scheduler.job.job_thread.Job:127
+#: aiaccel.scheduler.job.job_thread.Job:134
+#: aiaccel.scheduler.job.job_thread.Job:141
+#: aiaccel.scheduler.job.job_thread.Job:148
+#: aiaccel.scheduler.job.job_thread.Job:154
+#: aiaccel.scheduler.job.job_thread.Job:160
+#: aiaccel.scheduler.job.job_thread.Job:178 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:33 of
+msgid ""
+"Timeout seconds to transit the state from HpRunningChecking to "
+"HpRunningFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:40 of
+msgid "Timeout seconds to transit the state from JobChecking to JobFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:47 of
+msgid "Timeout seconds to transit the state from WaitResult to HpExpireReady."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:54 of
+msgid ""
+"Timeout seconds to transit the state from HpFinishedChecking to "
+"HpFinishedFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:61 of
+msgid "Timeout seconds to transit the state from KillChecking to KillFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:68 of
+msgid ""
+"Timeout seconds to transit the state from HpCancelChecking to "
+"HpCancelFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:75 of
+msgid ""
+"Timeout seconds to transit the state from HpExpireChecking to "
+"HpExpireFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:82
+#: aiaccel.scheduler.job.job_thread.Job:103 of
+msgid "Max retry counts to transit the state from RunnerFailed to RunnerFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:89 of
+msgid ""
+"Max retry counts to transit the state from HpRunningFailed to "
+"HpRunningFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:96 of
+msgid "Max retry counts to transit the state from JobFailed to JobFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:110 of
+msgid ""
+"Max retry counts to transit the state from HpFinishedFailed to "
+"HpFinishedFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:117 of
+msgid "Max retry counts to transit the state from KillFailed to KillFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:124 of
+msgid ""
+"Max retry counts to transit the state from HpCancelFailed to "
+"HpCancelFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:131 of
+msgid ""
+"Max retry counts to transit the state from HpExpireFailed to "
+"HpExpireFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:138 of
+msgid ""
+"A timeout threshold for each state. A new value is stored each state "
+"transition if necessary."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:145 of
+msgid ""
+"A retry threshold for each state. A new value is stored each state "
+"transition if necessary."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:152 of
+msgid "A current retry count. This is compared with threshold_retry."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:158 of
+msgid "A sleep time each job loop."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:164 of
+msgid "A model object of state transitions."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:166 of
+msgid "Model"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:170
+#: aiaccel.scheduler.job.job_thread.Job.get_machine:3 of
+msgid "A state machine object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:172 of
+msgid "CustomMachine"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:176 of
+msgid "A loop counter."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:182 of
+msgid "A reference for scheduler object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:184 of
+msgid "Union[LocalScheduler, AbciScheduler]"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:188 of
+msgid ""
+"A reference for scheduler lock object. This is for exclusive control of "
+"job threads each other."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:191 of
+msgid "fastener.lock.ReadWriteLock"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:195 of
+msgid "A hyper parameter file for this job."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:201 of
+msgid "A unique name of this job."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:203 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:207 of
+msgid ""
+"A temporal file path to be used for each state transition. For example, "
+"it's used for file moving."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:214 of
+msgid ""
+"A temporal file path to be used for each state transition. Usage is same "
+"with form_file."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:221 of
+msgid "A running process."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:223 of
+msgid "subprocess.Popen"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:227 of
+msgid "An output handler for subprocess."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job:229 of
+msgid "OutputHandler"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_machine:1 of
+msgid "Get a state machine object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_machine
+#: aiaccel.scheduler.job.job_thread.Job.get_model
+#: aiaccel.scheduler.job.job_thread.Job.get_state
+#: aiaccel.scheduler.job.job_thread.Job.get_state_name
+#: aiaccel.scheduler.job.job_thread.Job.is_local
+#: aiaccel.scheduler.job.job_thread.Job.run
+#: aiaccel.scheduler.job.job_thread.Job.schedule
+#: aiaccel.scheduler.job.job_thread.Model.after_cancel
+#: aiaccel.scheduler.job.job_thread.Model.after_check_result
+#: aiaccel.scheduler.job.job_thread.Model.after_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.after_expire
+#: aiaccel.scheduler.job.job_thread.Model.after_finished
+#: aiaccel.scheduler.job.job_thread.Model.after_job
+#: aiaccel.scheduler.job.job_thread.Model.after_kill
+#: aiaccel.scheduler.job.job_thread.Model.after_result
+#: aiaccel.scheduler.job.job_thread.Model.after_runner
+#: aiaccel.scheduler.job.job_thread.Model.after_running
+#: aiaccel.scheduler.job.job_thread.Model.after_wait_result
+#: aiaccel.scheduler.job.job_thread.Model.before_failed
+#: aiaccel.scheduler.job.job_thread.Model.before_file_move
+#: aiaccel.scheduler.job.job_thread.Model.before_finished_move
+#: aiaccel.scheduler.job.job_thread.Model.before_job_submitted
+#: aiaccel.scheduler.job.job_thread.Model.before_kill_submitted
+#: aiaccel.scheduler.job.job_thread.Model.before_runner_create
+#: aiaccel.scheduler.job.job_thread.Model.conditions_file_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_job_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_kill_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_result
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed of
+msgid "Returns"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_machine
+#: aiaccel.scheduler.job.job_thread.Job.get_model
+#: aiaccel.scheduler.job.job_thread.Job.get_state
+#: aiaccel.scheduler.job.job_thread.Job.get_state_name
+#: aiaccel.scheduler.job.job_thread.Job.is_local
+#: aiaccel.scheduler.job.job_thread.Model.conditions_file_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_job_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_kill_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_result
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed of
+msgid "Return type"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_model:1 of
+msgid "Get a state transition model object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_model:3 of
+msgid "A state transition model object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_state:1 of
+msgid "Get a current state."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_state:3 of
+msgid "A current state."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_state_name:1 of
+msgid "Get a current state name."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.get_state_name:3 of
+msgid "A current state name."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.is_local:1
+#: aiaccel.scheduler.job.job_thread.Job.is_local:3 of
+msgid "Is the execution on a local computer or not(ABCI)."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.run:1 of
+msgid "Thread.run method."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.run:3
+#: aiaccel.scheduler.job.job_thread.Job.schedule:3
+#: aiaccel.scheduler.job.job_thread.Model.after_cancel:8
+#: aiaccel.scheduler.job.job_thread.Model.after_check_result:8
+#: aiaccel.scheduler.job.job_thread.Model.after_confirmed:8
+#: aiaccel.scheduler.job.job_thread.Model.after_expire:8
+#: aiaccel.scheduler.job.job_thread.Model.after_finished:8
+#: aiaccel.scheduler.job.job_thread.Model.after_job:8
+#: aiaccel.scheduler.job.job_thread.Model.after_kill:8
+#: aiaccel.scheduler.job.job_thread.Model.after_result:8
+#: aiaccel.scheduler.job.job_thread.Model.after_runner:8
+#: aiaccel.scheduler.job.job_thread.Model.after_running:8
+#: aiaccel.scheduler.job.job_thread.Model.after_wait_result:8
+#: aiaccel.scheduler.job.job_thread.Model.before_failed:8
+#: aiaccel.scheduler.job.job_thread.Model.before_file_move:8
+#: aiaccel.scheduler.job.job_thread.Model.before_finished_move:8
+#: aiaccel.scheduler.job.job_thread.Model.before_job_submitted:8
+#: aiaccel.scheduler.job.job_thread.Model.before_kill_submitted:8
+#: aiaccel.scheduler.job.job_thread.Model.before_runner_create:8 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Job.schedule:1 of
+msgid "Schedule to run this execution."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model:1 of
+msgid "Bases: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_cancel:1 of
+msgid "State transition of 'after_cancel'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_cancel:3
+#: aiaccel.scheduler.job.job_thread.Model.after_check_result:3
+#: aiaccel.scheduler.job.job_thread.Model.after_confirmed:3
+#: aiaccel.scheduler.job.job_thread.Model.after_expire:3
+#: aiaccel.scheduler.job.job_thread.Model.after_finished:3
+#: aiaccel.scheduler.job.job_thread.Model.after_job:3
+#: aiaccel.scheduler.job.job_thread.Model.after_kill:3
+#: aiaccel.scheduler.job.job_thread.Model.after_result:3
+#: aiaccel.scheduler.job.job_thread.Model.after_runner:3
+#: aiaccel.scheduler.job.job_thread.Model.after_running:3
+#: aiaccel.scheduler.job.job_thread.Model.after_wait_result:3
+#: aiaccel.scheduler.job.job_thread.Model.before_failed:3
+#: aiaccel.scheduler.job.job_thread.Model.before_file_move:3
+#: aiaccel.scheduler.job.job_thread.Model.before_finished_move:3
+#: aiaccel.scheduler.job.job_thread.Model.before_job_submitted:3
+#: aiaccel.scheduler.job.job_thread.Model.before_kill_submitted:3
+#: aiaccel.scheduler.job.job_thread.Model.before_runner_create:3
+#: aiaccel.scheduler.job.job_thread.Model.conditions_file_confirmed:3
+#: aiaccel.scheduler.job.job_thread.Model.conditions_job_confirmed:3
+#: aiaccel.scheduler.job.job_thread.Model.conditions_kill_confirmed:3
+#: aiaccel.scheduler.job.job_thread.Model.conditions_result:3
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed:3 of
+msgid "Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_cancel
+#: aiaccel.scheduler.job.job_thread.Model.after_check_result
+#: aiaccel.scheduler.job.job_thread.Model.after_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.after_expire
+#: aiaccel.scheduler.job.job_thread.Model.after_finished
+#: aiaccel.scheduler.job.job_thread.Model.after_job
+#: aiaccel.scheduler.job.job_thread.Model.after_kill
+#: aiaccel.scheduler.job.job_thread.Model.after_result
+#: aiaccel.scheduler.job.job_thread.Model.after_runner
+#: aiaccel.scheduler.job.job_thread.Model.after_running
+#: aiaccel.scheduler.job.job_thread.Model.after_wait_result
+#: aiaccel.scheduler.job.job_thread.Model.before_failed
+#: aiaccel.scheduler.job.job_thread.Model.before_file_move
+#: aiaccel.scheduler.job.job_thread.Model.before_finished_move
+#: aiaccel.scheduler.job.job_thread.Model.before_job_submitted
+#: aiaccel.scheduler.job.job_thread.Model.before_kill_submitted
+#: aiaccel.scheduler.job.job_thread.Model.before_runner_create
+#: aiaccel.scheduler.job.job_thread.Model.conditions_file_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_job_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_kill_confirmed
+#: aiaccel.scheduler.job.job_thread.Model.conditions_result
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed of
+msgid "Parameters"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_cancel:5
+#: aiaccel.scheduler.job.job_thread.Model.after_check_result:5
+#: aiaccel.scheduler.job.job_thread.Model.after_confirmed:5
+#: aiaccel.scheduler.job.job_thread.Model.after_expire:5
+#: aiaccel.scheduler.job.job_thread.Model.after_finished:5
+#: aiaccel.scheduler.job.job_thread.Model.after_job:5
+#: aiaccel.scheduler.job.job_thread.Model.after_kill:5
+#: aiaccel.scheduler.job.job_thread.Model.after_result:5
+#: aiaccel.scheduler.job.job_thread.Model.after_runner:5
+#: aiaccel.scheduler.job.job_thread.Model.after_running:5
+#: aiaccel.scheduler.job.job_thread.Model.after_wait_result:5
+#: aiaccel.scheduler.job.job_thread.Model.before_failed:5
+#: aiaccel.scheduler.job.job_thread.Model.before_file_move:5
+#: aiaccel.scheduler.job.job_thread.Model.before_finished_move:5
+#: aiaccel.scheduler.job.job_thread.Model.before_job_submitted:5
+#: aiaccel.scheduler.job.job_thread.Model.before_runner_create:5
+#: aiaccel.scheduler.job.job_thread.Model.conditions_file_confirmed:5
+#: aiaccel.scheduler.job.job_thread.Model.conditions_job_confirmed:5
+#: aiaccel.scheduler.job.job_thread.Model.conditions_kill_confirmed:5
+#: aiaccel.scheduler.job.job_thread.Model.conditions_result:5
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed:5 of
+msgid "A job object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_check_result:1 of
+msgid "State transition of 'after_check_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_confirmed:1 of
+msgid "State transition of 'after_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_expire:1 of
+msgid "State transition of 'after_expire'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_finished:1 of
+msgid "State transition of 'after_finished'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_job:1 of
+msgid "State transition of 'after_job'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_kill:1 of
+msgid "State transition of 'after_kill'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_result:1 of
+msgid "State transition of 'after_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_runner:1 of
+msgid "State transition of 'after_runner'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_running:1 of
+msgid "State transition of 'after_running'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.after_wait_result:1 of
+msgid "State transition of 'after_wait_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.before_failed:1 of
+msgid "State transition of 'before_failed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.before_file_move:1 of
+msgid "State transition of 'before_file_move'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.before_finished_move:1 of
+msgid "State transition of 'before_finished_move'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.before_job_submitted:1 of
+msgid "State transition of 'before_job_submitted'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.before_kill_submitted:1 of
+msgid "State transition of 'before_kill_submitted'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.before_kill_submitted:5 of
+msgid "Ab object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.before_runner_create:1 of
+msgid "State transition of 'before_runner_create'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_file_confirmed:1 of
+msgid "State transition of 'conditions_file_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_file_confirmed:8 of
+msgid "A target file exists or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_job_confirmed:1 of
+msgid "State transition of 'conditions_job_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_job_confirmed:8 of
+msgid "A target job is finished or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_kill_confirmed:1 of
+msgid "State transition of 'conditions_kill_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_kill_confirmed:8 of
+msgid "A target is killed or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_result:1 of
+msgid "State transition of 'conditions_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_result:8 of
+msgid "A target is in result files or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed:1 of
+msgid "State transition of 'conditions_runner_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed:8 of
+msgid "A target file exists or not. But always true if local     execution."
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed:10 of
+msgid "A target file exists or not. But always true if local"
+msgstr ""
+
+#: aiaccel.scheduler.job.job_thread.Model.conditions_runner_confirmed:11 of
+msgid "execution."
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.job.rst:16
+msgid "Module contents"
+msgstr ""
+

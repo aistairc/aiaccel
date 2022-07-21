@@ -1,0 +1,262 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-07-21 16:01+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/aiaccel.master.rst:2
+msgid "aiaccel.master package"
+msgstr ""
+
+#: ../../source/aiaccel.master.rst:5
+msgid "Subpackages"
+msgstr ""
+
+#: ../../source/aiaccel.master.rst:14
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/aiaccel.master.rst:17
+msgid "aiaccel.master.abci\\_master module"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster:1
+#: aiaccel.master.local_master.LocalMaster:1 of
+msgid "Bases: :py:class:`~aiaccel.master.abstract_master.AbstractMaster`"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster:1 of
+msgid "A master class running on ABCI environment."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster:5 of
+msgid "A list of path of runner files."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster
+#: aiaccel.master.abstract_master.AbstractMaster of
+msgid "type"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster:7 of
+msgid "List[Path]"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster:11 of
+msgid "A result string of 'qstat' command."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster:13 of
+msgid "Anystr"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.check_error:1 of
+msgid "Check to confirm if an error has occurred."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.check_error of
+msgid "Parameters"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.check_error
+#: aiaccel.master.abci_master.AbciMaster.get_stats
+#: aiaccel.master.abci_master.AbciMaster.inner_loop_post_process
+#: aiaccel.master.abci_master.AbciMaster.loop_post_process
+#: aiaccel.master.abci_master.AbciMaster.pre_process
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_post_process
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_pre_process
+#: aiaccel.master.abstract_master.AbstractMaster.loop_post_process
+#: aiaccel.master.abstract_master.AbstractMaster.loop_pre_process
+#: aiaccel.master.abstract_master.AbstractMaster.other_process_is_alive
+#: aiaccel.master.abstract_master.AbstractMaster.post_process
+#: aiaccel.master.abstract_master.AbstractMaster.pre_process
+#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state
+#: aiaccel.master.abstract_master.AbstractMaster.start_optimizer
+#: aiaccel.master.abstract_master.AbstractMaster.start_scheduler of
+msgid "Returns"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.check_error:5 of
+msgid "no error | False: with error."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.check_error
+#: aiaccel.master.abci_master.AbciMaster.inner_loop_post_process
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_post_process
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_pre_process of
+msgid "Return type"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.get_stats:1 of
+msgid "Get a current status and update."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.get_stats:3
+#: aiaccel.master.abci_master.AbciMaster.loop_post_process:3
+#: aiaccel.master.abci_master.AbciMaster.pre_process:3
+#: aiaccel.master.abstract_master.AbstractMaster.loop_post_process:3
+#: aiaccel.master.abstract_master.AbstractMaster.loop_pre_process:3
+#: aiaccel.master.abstract_master.AbstractMaster.post_process:3
+#: aiaccel.master.abstract_master.AbstractMaster.pre_process:3
+#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:4
+#: aiaccel.master.abstract_master.AbstractMaster.start_optimizer:3
+#: aiaccel.master.abstract_master.AbstractMaster.start_scheduler:3 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.inner_loop_post_process:2
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_post_process:2 of
+msgid "Called after exiting a main loop process. This process is repeated"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.inner_loop_post_process:2
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_post_process:2 of
+msgid "every main loop."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.inner_loop_post_process:4
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process:3
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_post_process:4
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_pre_process:4 of
+msgid "The process succeeds or not. The main loop exits if failed."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.loop_post_process:1
+#: aiaccel.master.abstract_master.AbstractMaster.loop_post_process:1 of
+msgid "Called after exiting a main loop process."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster.pre_process:1
+#: aiaccel.master.abstract_master.AbstractMaster.post_process:1
+#: aiaccel.master.abstract_master.AbstractMaster.pre_process:1 of
+msgid "Pre-procedure before executing processes."
+msgstr ""
+
+#: ../../source/aiaccel.master.rst:25
+msgid "aiaccel.master.abstract\\_master module"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:1 of
+msgid "Bases: :py:class:`~aiaccel.module.AbstractModule`"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:1 of
+msgid "An abstract class for AbciMaster and LocalMaster."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:5 of
+msgid "A stored loop starting time."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:7
+#: aiaccel.master.abstract_master.AbstractMaster:20 of
+msgid "datetime.datetime"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:11 of
+msgid "A reference for a subprocess of Optimizer."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:14
+#: aiaccel.master.abstract_master.AbstractMaster:27 of
+msgid "subprocess.Popen"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:18 of
+msgid "A stored starting time."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:24 of
+msgid "A reference for a subprocess of Scheduler."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:31 of
+msgid "A verification object."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:33 of
+msgid "AbstractVerification"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process:1 of
+msgid "A main loop process. This process is repeated every main loop."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_pre_process:2 of
+msgid "Called before executing a main loop process. This process is"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_pre_process:2 of
+msgid "repeated every main loop."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.loop_pre_process:1 of
+msgid "Called before entering a main loop process."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.other_process_is_alive:1 of
+msgid "Check the optimizer and scheduler process are alive."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.other_process_is_alive:3 of
+msgid "bool"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.post_process
+#: aiaccel.master.abstract_master.AbstractMaster.pre_process of
+msgid "Raises"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.post_process:5 of
+msgid "Causes when an invalid goal is set."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.pre_process:5 of
+msgid ""
+"Causes when expire the count which cannot confirm to     run Optimizer "
+"and Scheduler."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:2 of
+msgid "Display the number of yaml files in 'ready' 'running'"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:2 of
+msgid "and 'finished' directries in hp directory."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.start_optimizer:1 of
+msgid "Start Optimizer."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.start_scheduler:1 of
+msgid "Start Scheduler"
+msgstr ""
+
+#: ../../source/aiaccel.master.rst:33
+msgid "aiaccel.master.local\\_master module"
+msgstr ""
+
+#: aiaccel.master.local_master.LocalMaster:1 of
+msgid "A master class running on a local computer."
+msgstr ""
+
+#: ../../source/aiaccel.master.rst:41
+msgid "Module contents"
+msgstr ""
+

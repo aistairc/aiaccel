@@ -1,0 +1,275 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-07-21 16:01+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/aiaccel.scheduler.rst:2
+msgid "aiaccel.scheduler package"
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.rst:5
+msgid "Subpackages"
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.rst:14
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.rst:17
+msgid "aiaccel.scheduler.abci\\_scheduler module"
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler:1
+#: aiaccel.scheduler.local_scheduler.LocalScheduler:1 of
+msgid "Bases: :py:class:`~aiaccel.scheduler.abstract_scheduler.AbstractScheduler`"
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler:1 of
+msgid "A scheduler class running on ABCI environment."
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.get_stats:1
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats:1 of
+msgid "Get a current status and update."
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.get_stats
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_finished_hp
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_post_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_pre_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.loop_post_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.loop_pre_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.post_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.pre_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job_thread
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.update_resource
+#: aiaccel.scheduler.abstract_scheduler.parse_hashname
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats of
+msgid "Returns"
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.get_stats:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_finished_hp:4
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.loop_post_process:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.loop_pre_process:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.post_process:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.pre_process:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.update_resource:3
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats:3 of
+msgid "None"
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.rst:25
+msgid "aiaccel.scheduler.abstract\\_scheduler module"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:1 of
+msgid "Bases: :py:class:`~aiaccel.module.AbstractModule`"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:1 of
+msgid "An abstract class for AbciScheduler and LocalScheduler."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:5 of
+msgid "A scheduling algorithm to select hyper parameters from a parameter pool."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler of
+msgid "type"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:8 of
+msgid "RandomSamplingSchedulingAlgorithm"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:12 of
+msgid "An available current resource number."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:14
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:33 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:18 of
+msgid "A list to store job dictionaries."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:20
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:40 of
+msgid "List[dict]"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:24 of
+msgid "A lock object to manage exclusive control of job threads each other."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:27 of
+msgid "fastener.lock.ReadWriteLock"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:31 of
+msgid "A max resource number."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:37 of
+msgid ""
+"A list of current status which is updated using ps command or qstat "
+"command."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error:1 of
+msgid "Check to confirm if an error has occurred."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job_thread
+#: aiaccel.scheduler.abstract_scheduler.parse_hashname of
+msgid "Parameters"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error:5 of
+msgid "no error | False: with error."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_post_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_pre_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job_thread
+#: aiaccel.scheduler.abstract_scheduler.parse_hashname of
+msgid "Return type"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_finished_hp:2
+#: of
+msgid "Create finished hyper parameter files if result files can be found"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_finished_hp:2
+#: of
+msgid "and running files are in running directory."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats:1 of
+msgid "Updates the number of files in hp(hyper parameter) directories."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process:1
+#: of
+msgid "A main loop process. This process is repeated every main loop."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_post_process:4
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_pre_process:4
+#: of
+msgid "The process succeeds or not. The main loop exits if failed."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_post_process:2
+#: of
+msgid "Called after exiting a main loop process. This process is repeated"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_post_process:2
+#: of
+msgid "every main loop."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_pre_process:2
+#: of
+msgid "Called before executing a main loop process. This process is"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_pre_process:2
+#: of
+msgid "repeated every main loop."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.loop_post_process:1
+#: of
+msgid "Called after exiting a main loop process."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.loop_pre_process:1 of
+msgid "Called before entering a main loop process."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.post_process:1 of
+msgid "Post-procedure after executed processes."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.pre_process:1 of
+msgid "Pre-procedure before executing processes."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job_thread:1 of
+msgid "Start a new job thread."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job_thread:3 of
+msgid "A parameter file."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job_thread:6 of
+msgid ""
+"A reference for created job. It returns None if     specified hyper "
+"parameter file already exists."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job_thread:8 of
+msgid "A reference for created job. It returns None if"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job_thread:9 of
+msgid "specified hyper parameter file already exists."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.update_resource:1 of
+msgid "Update an available current resource number."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.parse_hashname:1 of
+msgid "Parse a command string and extract an unique name."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.parse_hashname:3 of
+msgid "A command string from ps command."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.parse_hashname:6 of
+msgid "An unique name."
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.rst:33
+msgid "aiaccel.scheduler.local\\_scheduler module"
+msgstr ""
+
+#: aiaccel.scheduler.local_scheduler.LocalScheduler:1 of
+msgid "A scheduler class running on a local computer."
+msgstr ""
+
+#: ../../source/aiaccel.scheduler.rst:41
+msgid "Module contents"
+msgstr ""
+

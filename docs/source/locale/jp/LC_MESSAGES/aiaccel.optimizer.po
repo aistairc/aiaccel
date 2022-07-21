@@ -1,0 +1,720 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-07-21 16:01+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/aiaccel.optimizer.rst:2
+msgid "aiaccel.optimizer package"
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:8
+msgid "aiaccel.optimizer.abstract\\_optimizer module"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:1 of
+msgid "Bases: :py:class:`~aiaccel.module.AbstractModule`"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:1 of
+msgid "An abstract class for Optimizer classes."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:5 of
+msgid "A total number to generate hyper parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead of
+msgid "type"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:7
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:13
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:26
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:56
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:68
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:112
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:118
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:144 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:11 of
+msgid "A number to pool hyper parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:17 of
+msgid "Loaded hyper parameter configuration object."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:20 of
+msgid "HyperParameterConfiguration"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:24 of
+msgid "A number of generated hyper paramters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_file:1
+#: of
+msgid "Create a hyper parameter file."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_file
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_files
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.add_result_parameters
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.deserialize
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.nelder_mead_main
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.generate_parameter
+#: aiaccel.optimizer.tpe.search.create_distributions of
+msgid "Parameters"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_file:3
+#: of
+msgid "A hyper parameter dictionary."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_file
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_files
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_main_process
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_post_process
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_pre_process
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.loop_post_process
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.loop_pre_process
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.post_process
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.pre_process
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.add_result_parameters
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.deserialize
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.serialize
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.check_result
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.generate_parameter
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.get_nm_results
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.get_ready_parameters
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.nelder_mead_main
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.pre_process
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.set_maximize
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.set_minimize
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name
+#: aiaccel.optimizer.tpe.sampler.TPESamplerWrapper.get_startup_trials
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.check_result
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.create_study
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.is_startup_trials
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.study_pickle_path
+#: aiaccel.optimizer.tpe.search.create_distributions of
+msgid "Returns"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_file:6
+#: of
+msgid "An unique hyper parameter name."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_file
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_main_process
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_post_process
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_pre_process
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.serialize
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.get_nm_results
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.nelder_mead_main
+#: aiaccel.optimizer.tpe.sampler.TPESamplerWrapper.get_startup_trials
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.is_startup_trials
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.study_pickle_path
+#: aiaccel.optimizer.tpe.search.create_distributions of
+msgid "Return type"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_files:1
+#: of
+msgid "Create hyper parameter files."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_files:3
+#: of
+msgid "A list of hyper parameter dictionaries."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.create_parameter_files:6
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:6
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.loop_post_process:3
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.loop_pre_process:3
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.post_process:3
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.pre_process:3
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.add_result_parameters:6
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.deserialize:6
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:28
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.check_result:3
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.generate_parameter:5
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.pre_process:3
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.set_maximize:3
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.set_minimize:3
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:8
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.check_result:3
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.create_study:3 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter:1
+#: of
+msgid "Generate a initial parameter."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter:3
+#: of
+msgid ""
+"Union[Dict[str, List[Dict[str, Union[str, Union[float,     "
+"List[float]]]]], None]: A created initial parameter. It returns     None "
+"if any parameters are already created."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter:6
+#: of
+msgid "Union[Dict[str, List[Dict[str, Union[str, Union[float,"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter:6
+#: of
+msgid ""
+"List[float]]]]], None]: A created initial parameter. It returns None if "
+"any parameters are already created."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:1
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.generate_parameter:1 of
+msgid "Generate parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:3
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.generate_parameter:3 of
+msgid "A number of generating parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.generate_parameter
+#: of
+msgid "Raises"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:8
+#: of
+msgid "Causes when the inherited class does not     implement."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_main_process:1
+#: of
+msgid "A main loop process. This process is repeated every main loop."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_main_process:3
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_post_process:4
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_pre_process:4
+#: of
+msgid "The process succeeds or not. The main loop exits if failed."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_post_process:2
+#: of
+msgid "Called after exiting a main loop process. This process is repeated"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_post_process:2
+#: of
+msgid "every main loop."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_pre_process:2
+#: of
+msgid "Called before executing a main loop process. This process is"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_pre_process:2
+#: of
+msgid "repeated every main loop."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.loop_post_process:1
+#: of
+msgid "Called after exiting a main loop process."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.loop_pre_process:1 of
+msgid "Called before entering a main loop process."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.post_process:1
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.post_process:1 of
+msgid "Post-procedure after executed processes."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.pre_process:1
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.pre_process:1
+#: of
+msgid "Pre-procedure before executing processes."
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:16
+msgid "aiaccel.optimizer.grid\\_search module"
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:24
+msgid "aiaccel.optimizer.nelder\\_mead module"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:1 of
+msgid "Bases: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:1 of
+msgid "A class implementing Nelder-Mead method."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:5 of
+msgid "A list of boundaries."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:7
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:19
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:44 of
+msgid "np.ndarray"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:11 of
+msgid "A dictionary of coefficients."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:13 of
+msgid "Dict[str, float]"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:17 of
+msgid "A list of evaluated parameter results."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:23 of
+msgid "A logger object."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:25 of
+msgid "logging.Logger"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:29 of
+msgid "A list of hyper parameters."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:31 of
+msgid "List[HyperParameter]"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:35 of
+msgid "A dictionary to store temporal calculation results."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:38 of
+msgid "Dict[str, Union[float, None]]"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:42 of
+msgid "A list of current evaluated parameters."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:48 of
+msgid "A current centroid value of y."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:50
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:74
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:80
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:86
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:92 of
+msgid "float"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:54 of
+msgid "A count of evaluation each loop."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:60 of
+msgid "A list to store candidates to be executed."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:62 of
+msgid "List[dict]"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:66 of
+msgid "A number to be added to executing list."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:72 of
+msgid "A temporal result of Expand."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:78 of
+msgid "A temporal result of Inside Contraction."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:84 of
+msgid "A temporal result of Outside Contraction."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:90 of
+msgid "A temporal result of Reflection"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:96 of
+msgid "A storage of execution history of each value and operator."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:99 of
+msgid "Dict[str, List[Union[float, str]]]"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:103 of
+msgid "Evaluate the result as maximize or minimize."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:105
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:125 of
+msgid "bool"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:109 of
+msgid "A number of max iterations. This is compared with _evaluated_itr."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:116 of
+msgid "A number of Shrink."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:122 of
+msgid "Is a current iteration out of boundaries or not."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:129 of
+msgid "A list of results for _executing."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:131 of
+msgid "List[float]"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:135 of
+msgid "A current state."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:137 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:141 of
+msgid ""
+"A number of iterations. Currently same with _evaluated_itr. It's "
+"different if counts out of boundaries."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead:146 of
+msgid "ToDo: Fix float comparison errors."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.add_result_parameters:1 of
+msgid "Add a new result."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.add_result_parameters:3 of
+msgid "A dictionary of a result parameter."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.deserialize:1 of
+msgid "Deserialize this module."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.deserialize:3 of
+msgid "A dictionary including serialized objects."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:2 of
+msgid "Proceed a search step. One search method does not increment the"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:2 of
+msgid "iteration. It increments when finalize method is called."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:4 of
+msgid "The details of state transitions are as follows:"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:6 of
+msgid "-->: state change indent: conditional branch"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:9 of
+msgid ""
+"WaitInitialize: wait first three executing --> Initialize: add reflect "
+"executing --> WaitReflect: wait executing reflect one --> ReflectBranch: "
+"conditional jump using reflect"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:13 of
+msgid "--> back to Initialize --> WaitExpand: wait executing expand one"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:15 of
+msgid "--> ExpandBranch: calc using expand"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:16
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:21
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:26 of
+msgid "---> back to Initialize"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:20 of
+msgid "--> WaitOutsideContract: wait executing oc one"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:20 of
+msgid "---> OutsideContractBranch: conditional jump using oc"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:19
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:24 of
+msgid "--> back to Initialize --> WaitShrink: wait executing shrink f(y)"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:26 of
+msgid "--> WaitInsideContract: wait executing ic one"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.search:26 of
+msgid "---> InsideContractBranch: conditional jump using ic"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.serialize:1 of
+msgid "Serialize this module."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.sampler.NelderMead.serialize:3 of
+msgid "The serialized master objects."
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:32
+msgid "aiaccel.optimizer.nelder\\_mead\\_search module"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer:1
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer:1 of
+msgid "Bases: :py:class:`~aiaccel.optimizer.abstract_optimizer.AbstractOptimizer`"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer:1 of
+msgid "An optimizer class with nelder mead algorithm."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.check_result:1
+#: of
+msgid "Check the result files and update nelder mead object."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.generate_parameter:1
+#: of
+msgid ""
+"Generate parameters. :param number: A number of generating parameters. "
+":type number: Optional[int]"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.generate_parameter:7
+#: of
+msgid "Causes when an invalid parameter type is set."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.get_nm_results:1
+#: of
+msgid "Get the list of Nelder-Mead result."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.get_nm_results:3
+#: of
+msgid "Results per trial."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.get_ready_parameters:1
+#: of
+msgid "Get the list of ready parameters."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.get_ready_parameters:3
+#: of
+msgid "list"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.nelder_mead_main:1
+#: of
+msgid "Nelder Mead's main module."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.nelder_mead_main:5
+#: of
+msgid "Result of optimization."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.set_maximize:1
+#: of
+msgid "Set the goal to Maximize."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.set_minimize:1
+#: of
+msgid "Set the goal to Minimize."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:1
+#: of
+msgid "Update hyperparameter's names."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:3
+#: of
+msgid "old parameter name"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:5
+#: of
+msgid "New parameter name"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:13
+#: of
+msgid "befor"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:22
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:35
+#: of
+msgid "{"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:15
+#: of
+msgid "'name': 'CMTrNe5P8a', 'parameters': ["
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:17
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:30
+#: of
+msgid ""
+"{'parameter_name': 'x1', 'value': 3.37640289751353}, {'parameter_name': "
+"'x2', 'value': 1.6556037243290205}"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:19
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:32
+#: of
+msgid ""
+"], 'state': 'WaitExpand', 'itr': 5, 'index': None, 'out_of_boundary': "
+"False"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:26
+#: of
+msgid "after"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer.update_ready_parameter_name:28
+#: of
+msgid "'name': '000014', 'parameters': ["
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:40
+msgid "aiaccel.optimizer.random\\_search module"
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:48
+msgid "aiaccel.optimizer.sobol\\_search module"
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:56
+msgid "aiaccel.optimizer.tpe\\_sampler module"
+msgstr ""
+
+#: aiaccel.optimizer.tpe.sampler.TPESamplerWrapper:1 of
+msgid "Bases: :py:class:`~optuna.samplers._tpe.sampler.TPESampler`"
+msgstr ""
+
+#: aiaccel.optimizer.tpe.sampler.TPESamplerWrapper.get_startup_trials:1 of
+msgid "Get a number of startup trials in TPESampler."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.sampler.TPESamplerWrapper.get_startup_trials:3 of
+msgid "A number of startup trials."
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:64
+msgid "aiaccel.optimizer.tpe\\_search module"
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.check_result:1 of
+msgid "Check the result files and add it to sampler object."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.create_study:1 of
+msgid "Create the optuna.study object and store it."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.is_startup_trials:1
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.is_startup_trials:3 of
+msgid "Is a current trial startup trial or not."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.pre_process:1 of
+msgid "Pre-Procedure before executing optimize processes."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.study_pickle_path:1 of
+msgid "Returns the path object to store the pickled optuna.study object."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.TpeSearchOptimizer.study_pickle_path:3 of
+msgid "the path object to store the pickled optuna.study object."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.create_distributions:1 of
+msgid "Create an optuna.distributions dictionary for the parameters."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.create_distributions:3 of
+msgid "A parameter configuration object."
+msgstr ""
+
+#: aiaccel.optimizer.tpe.search.create_distributions:7 of
+msgid "An optuna.distributions object."
+msgstr ""
+
+#: ../../source/aiaccel.optimizer.rst:72
+msgid "Module contents"
+msgstr ""
+
