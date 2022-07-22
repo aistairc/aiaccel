@@ -6,9 +6,9 @@
 
 aiaccel
 ========
-A hyperparameter optimization library for `AI Bridging Cloud Infrastructure (ABCI)`_.
-This software solves hyperparameter optimizations related to AI technologies including deep learning and multi-agent simulation.
-The software currently supports five optimization algorithms: random search, grid search, sobol sequence, nelder-mead method, and TPE.
+本ソフトウェアは、AI Bridging Cloud Infrastructure (ABCI)`_ のためのハイパーパラメータ最適化ライブラリです。
+ディープラーニングやマルチエージェントシミュレーションなどのAI技術に関連するハイパーパラメータ最適化を解決します。
+現在、ランダムサーチ、グリッドサーチ、ソボルシーケンス、ネルダーミード法、TPEの5つの最適化アルゴリズムに対応しています。
 
 
 .. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
@@ -16,7 +16,7 @@ The software currently supports five optimization algorithms: random search, gri
 
 Installation
 =============
-The software can be installed using `pip`.
+このソフトは `pip` を使ってインストールすることができます。
 
 .. code-block:: bash
 
@@ -27,7 +27,6 @@ User Guide
 =============
 
 * :doc:`./manual_jp`
-* :doc:`./manual_en`
 
 
 Guide for adding an optimizer
