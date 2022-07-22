@@ -64,4 +64,4 @@ gettext_compact = False
 
 locale_dirs = ['locale/']
 
-language = None
+language = 'jp'

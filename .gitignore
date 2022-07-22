@@ -111,7 +111,7 @@ work_aiaccel/
 *.code-workspace
 
 # document
-docs/build
+docs/build/html
 
 # IntelliJ
 .idea
