@@ -26,14 +26,13 @@ The software can be installed using `pip`.
 User Guide
 =============
 
-* :doc:`./manual_jp`
 * :doc:`./manual_en`
 
 
 Guide for adding an optimizer
 =============================
 
-* :doc:`./optimizer_jp`
+* 
 
 
 API Reference
