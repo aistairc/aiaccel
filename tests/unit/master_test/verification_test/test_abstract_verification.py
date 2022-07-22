@@ -50,13 +50,20 @@ class TestAbstractVerification(BaseTest):
                 objective=(i * 1.0)
             )
             verification.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            for j in range(2):
-                verification.storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f'x{j+1}',
-                    param_value=0.0,
-                    param_type='float'
-                )
+            # for j in range(2):
+            # verification.storage.hp.set_any_trial_param(
+            #    trial_id=i,
+            #    param_name=f'x{j+1}',
+            #    param_value=0.0,
+            #    param_type='float'
+            # )
+            verification.storage.hp.set_any_trial_params(
+                trial_id=i,
+                params=[
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
+                    for j in range(2)
+                ]
+            )
 
         verification.verify()
         file_path = work_dir / aiaccel.dict_verification / f'1.{aiaccel.extension_verification}'

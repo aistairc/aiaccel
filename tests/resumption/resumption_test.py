@@ -34,16 +34,13 @@ class ResumptionTest(IntegrationTest):
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
             master = LocalMaster(options)
-
+            master.storage.alive.init_alive()
             run_master(master)
             final_result_at_one_time = get_final_result(work_dir, master)
             print('at one time', final_result_at_one_time)
-            wait_alive(work_dir)
             base_clean_work_dir(data_dir, work_dir)
 
         config_file = data_dir / f'config_{self.search_algorithm}_resumption.json'
-
-        time.sleep(5)
 
         commandline_args = [
             "start.py",
@@ -57,13 +54,14 @@ class ResumptionTest(IntegrationTest):
 
         self.create_main()
 
+        time.sleep(5)
+
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
             master = LocalMaster(options)
             master.storage.alive.init_alive()
             run_master(master)
             print('resumed steps finished')
-            wait_alive(work_dir)
 
         time.sleep(5)
 
@@ -103,23 +101,6 @@ def run_master(master):
         wait_finish_wrapper(1, master.storage, master)
     )
     loop.run_until_complete(gather)
-
-
-def wait_alive(work_dir):
-    alive_files = [
-        work_dir.joinpath(aiaccel.dict_alive, aiaccel.alive_master),
-        work_dir.joinpath(aiaccel.dict_alive, aiaccel.alive_optimizer),
-        work_dir.joinpath(aiaccel.dict_alive, aiaccel.alive_scheduler)
-    ]
-    while True:
-        alive = False
-        for alive_file in alive_files:
-            if fs.check_alive_file(alive_file):
-                alive = True
-                break
-        if not alive:
-            break
-        time.sleep(0.1)
 
 
 def base_clean_work_dir(data_dir, work_dir):

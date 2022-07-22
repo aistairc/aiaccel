@@ -1,5 +1,4 @@
 from typing import Any
-from pathlib import PosixPath
 from pathlib import Path
 from aiaccel.util.snapshot import SnapShot
 from aiaccel.util.retry import retry

@@ -1,4 +1,3 @@
-from pathlib import PosixPath
 from pathlib import Path
 import aiaccel
 from aiaccel.storage.model.fs import Datalist

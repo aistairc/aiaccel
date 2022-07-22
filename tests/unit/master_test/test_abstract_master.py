@@ -76,6 +76,10 @@ class TestAbstractMaster(BaseTest):
         if master.optimizer_proc is not None:
             master.optimizer_proc.wait()
 
+        master.worker_o.kill()
+        master.worker_s.kill()
+        master.storage.alive.init_alive()
+
     def test_pre_process_2(
         self,
         cd_work,
@@ -168,6 +172,10 @@ class TestAbstractMaster(BaseTest):
 
         if master.optimizer_proc is not None:
             master.optimizer_proc.wait()
+
+        master.worker_o.kill()
+        master.worker_s.kill()
+        master.storage.alive.init_alive()
 
     def test_post_process(
         self,
@@ -421,6 +429,10 @@ class TestAbstractMaster(BaseTest):
                 master.pre_process()
                 assert master.inner_loop_pre_process()
 
+        master.worker_o.kill()
+        master.worker_s.kill()
+        master.storage.alive.init_alive()
+
     def test_inner_loop_main_process(
         self,
         cd_work,
@@ -467,6 +479,10 @@ class TestAbstractMaster(BaseTest):
         master.get_each_state_count()
         assert not master.inner_loop_main_process()
 
+        master.worker_o.kill()
+        master.worker_s.kill()
+        master.storage.alive.init_alive()
+
     def test_inner_loop_post_process(
         self,
         cd_work,
@@ -498,6 +514,10 @@ class TestAbstractMaster(BaseTest):
         master.inner_loop_pre_process()
         master.inner_loop_main_process()
         assert master.inner_loop_post_process()
+
+        master.worker_o.kill()
+        master.worker_s.kill()
+        master.storage.alive.init_alive()
 
     def test_serialize(
         self,

@@ -23,6 +23,7 @@ async def wait_finish_wrapper(sleep_time, storage, master):
 
 
 def wait_finish(sleep_time, storage, master):
+    time.sleep(sleep_time)
     while (
         storage.alive.check_alive(process_name='master') or
         storage.alive.check_alive(process_name='optimizer') or

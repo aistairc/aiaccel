@@ -230,6 +230,7 @@ class TestModel(BaseTest):
     def test_after_finished(self, database_remove):
         assert self.model.after_finished(self.job) is None
 
+    """
     def test_before_finished(
         self,
         setup_hp_running,
@@ -271,7 +272,73 @@ class TestModel(BaseTest):
         print(self.job.trial_id)
         print([d.objective for d in self.job.storage.result.get_all_result()])
         print(self.job.storage.get_best_trial_dict('minimize'))
-        
+
+        self.job.next_state = 'finished'
+        self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_running, '001.hp')
+        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp')
+        assert self.model.before_finished(self.job) is None
+    """
+
+    def test_before_finished(
+        self,
+        setup_hp_running,
+        setup_result,
+        work_dir,
+        database_remove
+    ):
+        # setup_hp_running(0)
+        # setup_result(0)
+        # print(self.job.trial_id_str)
+        # print(self.storage.result.get_result_trial_id_list())
+        print(self.job.storage.result.get_all_result())
+        for i in range(10):
+            self.job.storage.result.set_any_trial_objective(trial_id=i, objective=i*1.0)
+            self.job.storage.hp.set_any_trial_params(
+                trial_id=i,
+                params=[
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
+                    for j in range(10)
+                ]
+            )
+            """
+            for j in range(10):
+                self.job.storage.hp.set_any_trial_param(
+                    trial_id=i,
+                    param_name=f'x{j+1}',
+                    param_value=0.0,
+                    param_type='float'
+                )
+            """
+        assert self.model.before_finished(self.job) is None
+
+        # self.job.storage.trial.all_delete()
+        # self.job.storage.hp.all_delete()
+
+        # setup_hp_running(1)
+        # setup_result(1)
+
+        for i in range(10):
+            self.job.storage.trial.set_any_trial_state(trial_id=i, state='finished')
+            self.job.storage.hp.set_any_trial_params(
+                trial_id=i,
+                params=[
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
+                    for j in range(10)
+                ]
+            )
+            """
+            for j in range(10):
+                self.job.storage.hp.set_any_trial_param(
+                    trial_id=i,
+                    param_name=f'x{j+1}',
+                    param_value=0.0,
+                    param_type='float'
+                )
+            """
+        print(self.job.trial_id)
+        print([d.objective for d in self.job.storage.result.get_all_result()])
+        print(self.job.storage.get_best_trial_dict('minimize'))
+
         self.job.next_state = 'finished'
         self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_running, '001.hp')
         self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp')
@@ -392,7 +459,7 @@ class TestJob(BaseTest):
         )
         assert type(job) is Job
 
-    #def test_get_initial_timeout(self):
+    # def test_get_initial_timeout(self):
     #    assert type(self.job.get_initial_timeout()) is datetime.datetime
 
     def test_get_machine(self, database_remove):
@@ -415,6 +482,7 @@ class TestJob(BaseTest):
         assert self.job.schedule() is None
 
     def test_run_1(self, database_remove):
+        self.job.scheduler.storage.alive.init_alive()
         self.job.start()
         self.job.join()
 
