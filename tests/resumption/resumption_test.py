@@ -5,6 +5,7 @@ from unittest.mock import patch
 import aiaccel
 import aiaccel.util.filesystem as fs
 import asyncio
+import pathlib
 import sys
 import time
 
@@ -42,12 +43,15 @@ class ResumptionTest(IntegrationTest):
         config_file = data_dir.joinpath(
             'config_{}.json'.format(self.search_algorithm)
         )
+        dict_resume = sorted(
+            [f for f in list(work_dir.joinpath(aiaccel.dict_state).iterdir()) if pathlib.Path.is_dir(f)]
+        )[-1].name
         commandline_args = [
             "start.py",
             "--config",
             format(config_file),
             "--resume",
-            "5"
+            dict_resume
         ]
         run_master(commandline_args, work_dir)
         final_result_resumption = get_final_result(work_dir)
