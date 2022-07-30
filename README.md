@@ -79,12 +79,13 @@ This tutorial describes how to run examples/sphere on ABCI.
 
 1. First, setup python environment following [the ABCI Users Guide](https://docs.abci.ai/en/python/):
     ~~~bash
+    module load gcc/11.2.0
     module load python/3.8/3.8.13
     python3 -m venv work
     source work/bin/activate
     ~~~
 
-2. Prepare the workspace by following Steps 2 to 4 in [Running on a local computer](https://github.com/aistairc/aiaccel#Running-on-a-local-computer).
+2. Prepare the workspace by following Steps 1 to 4 in [Running on a local computer](https://github.com/aistairc/aiaccel#Running-on-a-local-computer).
 
 3. Please confirm the configuration file before running master.
     ```yaml
