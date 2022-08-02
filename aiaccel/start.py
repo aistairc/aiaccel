@@ -12,11 +12,8 @@ from aiaccel.master.abci_master import AbciMaster
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.optimizer.grid.search import GridSearchOptimizer
 from aiaccel.optimizer.nelder_mead.search import NelderMeadSearchOptimizer
-from aiaccel.optimizer.random.search import RandomSearchOptimizer
-from aiaccel.optimizer.sobol.search import SobolSearchOptimizer
-from aiaccel.optimizer.tpe.search import TpeSearchOptimizer
+from aiaccel.optimizer.optimizer import OptimizerLoeader
 from aiaccel.util import filesystem as fs
 from aiaccel.easy_visualizer import EasyVisualizer
 from aiaccel import parameter as pt
@@ -25,6 +22,7 @@ from aiaccel.util.suffix import Suffix
 from aiaccel.util.buffer import Buffer
 from aiaccel.config import Config
 from aiaccel.util.terminal import Terminal
+from pathlib import Path
 
 
 class Arguments:
@@ -507,34 +505,36 @@ class CreationOptimizer:
     def __init__(self, config_path: str) -> None:
         config = Config(config_path)
         algorithm = config.search_algorithm.get()
+        self.optimizer = OptimizerLoeader(Path(algorithm)).get()
+        # self.optimizer = NelderMeadSearchOptimizer
 
-        # === grid search===
-        if algorithm.lower() == aiaccel.search_algorithm_grid:
-            self.optimizer = GridSearchOptimizer
+    #     # === grid search===
+    #     if algorithm.lower() == aiaccel.search_algorithm_grid:
+    #         self.optimizer = GridSearchOptimizer
 
-        # === nelder-mead search===
-        elif algorithm.lower() == aiaccel.search_algorithm_nelder_mead:
-            self.optimizer = NelderMeadSearchOptimizer
+    #     # === nelder-mead search===
+    #     elif algorithm.lower() == aiaccel.search_algorithm_nelder_mead:
+    #         self.optimizer = NelderMeadSearchOptimizer
 
-        # === ramdom search===
-        elif algorithm.lower() == aiaccel.search_algorithm_random:
-            self.optimizer = RandomSearchOptimizer
+    #     # === ramdom search===
+    #     elif algorithm.lower() == aiaccel.search_algorithm_random:
+    #         self.optimizer = RandomSearchOptimizer
 
-        # === sobol search ===
-        elif algorithm.lower() == aiaccel.search_algorithm_sobol:
-            self.optimizer = SobolSearchOptimizer
+    #     # === sobol search ===
+    #     elif algorithm.lower() == aiaccel.search_algorithm_sobol:
+    #         self.optimizer = SobolSearchOptimizer
 
-        # === tpe search ===
-        elif algorithm.lower() == aiaccel.search_algorithm_tpe:
-            self.optimizer = TpeSearchOptimizer
+    #     # === tpe search ===
+    #     elif algorithm.lower() == aiaccel.search_algorithm_tpe:
+    #         self.optimizer = TpeSearchOptimizer
 
-        # === other (error) ===
-        else:
-            self.optimizer = None
-        config = None
+    #     # === other (error) ===
+    #     else:
+    #         self.optimizer = None
+    #     config = None
 
     def __call__(self) -> Any:
-        return self.optimizer
+        return self.optimizer.NelderMeadSearchOptimizer
 
 
 class Master(CreationMaster(Arguments()['config'])()):

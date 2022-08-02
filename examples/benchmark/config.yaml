@@ -13,9 +13,9 @@ ABCI:
   job_execution_options: ""
 
 optimize:
-  #search_algorithm: "nelder-mead"
+  search_algorithm: "../../aiaccel/optimizer/nelder_mead"
   #search_algorithm: "random"
-  search_algorithm: "sobol"
+  #search_algorithm: "sobol"
   #search_algorithm: "grid"
   #search_algorithm: "tpe"
   goal: "minimize"
