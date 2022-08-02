@@ -62,7 +62,7 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
     return new_param
 
 
-class GridSearchOptimizer(AbstractOptimizer):
+class Optimizer(AbstractOptimizer):
     """An optimizer class with grid search algorithm.
 
     Attributes:
@@ -71,7 +71,7 @@ class GridSearchOptimizer(AbstractOptimizer):
     """
 
     def __init__(self, options: dict) -> None:
-        """Initial method of GridSearchOptimizer.
+        """Initial method of Optimizer.
 
         Args:
             config (str): A file name of a configuration.

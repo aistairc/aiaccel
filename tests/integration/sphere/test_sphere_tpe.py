@@ -6,4 +6,4 @@ class TestSphereTPE(IntegrationTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = aiaccel.search_algorithm_tpe
+        cls.search_algorithm = "tpe"

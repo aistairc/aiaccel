@@ -58,11 +58,11 @@ module_type_scheduler = 'scheduler'
 resource_type_local = 'local'
 resource_type_abci = 'abci'
 
-search_algorithm_grid = 'grid'
-search_algorithm_nelder_mead = 'nelder-mead'
-search_algorithm_random = 'random'
-search_algorithm_sobol = 'sobol'
-search_algorithm_tpe = 'tpe'
+search_algorithm_grid = 'aiaccel.optimizer.grid'
+search_algorithm_nelder_mead = 'aiaccel.optimizer.nelder_mead'
+search_algorithm_random = 'aiaccel.optimizer.random'
+search_algorithm_sobol = 'aiaccel.optimizer.sobol'
+search_algorithm_tpe = 'aiaccel.optimizer.tpe'
 
 
 def get_module_type_from_class_name(class_name: str) -> str:

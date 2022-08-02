@@ -12,9 +12,9 @@ import numpy as np
 import pathlib
 
 
-class TpeSearchOptimizer(AbstractOptimizer):
+class Optimizer(AbstractOptimizer):
     def __init__(self, options: dict) -> None:
-        """Initial method of TpeSearchOptimizer.
+        """Initial method of Optimizer.
 
         Args:
             options (dict): A file name of a configuration.

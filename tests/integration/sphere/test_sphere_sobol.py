@@ -6,4 +6,4 @@ class TestSphereSobol(IntegrationTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = aiaccel.search_algorithm_sobol
+        cls.search_algorithm = "sobol"

@@ -13,7 +13,7 @@
     "group": "gaa"
   },
   "optimize": {
-    "search_algorithm": "grid",
+    "search_algorithm": "aiaccel.optimizer.grid",
     "goal": "minimize",
     "trial_number": 10,
     "rand_seed": 42,
