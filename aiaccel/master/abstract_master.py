@@ -342,7 +342,7 @@ class AbstractMaster(AbstractModule):
         Returns:
             bool
         """
-        if(
+        if (
             not self.optimizer_proc.poll() is None or
             not self.scheduler_proc.poll() is None
         ):
