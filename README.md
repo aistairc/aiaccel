@@ -12,7 +12,7 @@ The software currently supports five optimization algorithms: random search, gri
 
 # Installation
 The software can be installed using `pip`.
-~~~
+~~~bash
 > pip install git+https://github.com/aistairc/aiaccel.git
 ~~~
 
@@ -94,7 +94,7 @@ This tutorial describes how to run examples/sphere on ABCI.
     ```
 
 4. Run on an (interactive) job
-    ~~~
+    ~~~bash
     > python -m aiaccel.start --config config.yaml
     ~~~
 
