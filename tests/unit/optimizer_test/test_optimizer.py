@@ -31,6 +31,5 @@ def test_OptimizerLoeader_2():
     try:
         opt = OptimizerLoeader(algorithm)
         assert True
-
     except:
         assert False

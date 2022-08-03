@@ -509,7 +509,7 @@ class CreationOptimizer:
         self.optimizer = OptimizerLoeader(algorithm).get()
 
     def __call__(self) -> Any:
-        return self.optimizer.Optimizer
+        return self.optimizer
 
 
 class Master(CreationMaster(Arguments()['config'])()):
