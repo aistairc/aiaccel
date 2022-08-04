@@ -28,6 +28,7 @@ class ResumptionTest(IntegrationTest):
         wait_alive(work_dir)
         base_clean_work_dir(data_dir, work_dir)
 
+        time.sleep(10)
         config_file = data_dir.joinpath(
             'config_{}_resumption.json'.format(self.search_algorithm)
         )
@@ -40,6 +41,7 @@ class ResumptionTest(IntegrationTest):
         print('resumed steps finished')
         wait_alive(work_dir)
 
+        time.sleep(10)
         config_file = data_dir.joinpath(
             'config_{}.json'.format(self.search_algorithm)
         )
@@ -54,6 +56,7 @@ class ResumptionTest(IntegrationTest):
             dict_resume
         ]
         run_master(commandline_args, work_dir)
+        wait_alive(work_dir)    #
         final_result_resumption = get_final_result(work_dir)
         print('resumption steps finished', final_result_resumption)
         assert final_result_at_one_time == final_result_resumption
