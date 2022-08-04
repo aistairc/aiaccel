@@ -20,28 +20,29 @@ class ResumptionTest(IntegrationTest):
         commandline_args = [
             "start.py",
             "--config",
-            format(config_file)
+            format(config_file),
+            "--clean"
         ]
+        delete_alive(work_dir)
         run_master(commandline_args, work_dir)
         final_result_at_one_time = get_final_result(work_dir)
         print('at one time', final_result_at_one_time)
         wait_alive(work_dir)
+        delete_alive(work_dir)
         base_clean_work_dir(data_dir, work_dir)
-
-        time.sleep(10)
         config_file = data_dir.joinpath(
             'config_{}_resumption.json'.format(self.search_algorithm)
         )
         commandline_args = [
             "start.py",
             "--config",
-            format(config_file)
+            format(config_file),
+            "--clean"
         ]
         run_master(commandline_args, work_dir)
         print('resumed steps finished')
         wait_alive(work_dir)
-
-        time.sleep(10)
+        delete_alive(work_dir)
         config_file = data_dir.joinpath(
             'config_{}.json'.format(self.search_algorithm)
         )
@@ -57,6 +58,7 @@ class ResumptionTest(IntegrationTest):
         ]
         run_master(commandline_args, work_dir)
         wait_alive(work_dir)    #
+        delete_alive(work_dir)
         final_result_resumption = get_final_result(work_dir)
         print('resumption steps finished', final_result_resumption)
         assert final_result_at_one_time == final_result_resumption
@@ -94,7 +96,18 @@ def wait_alive(work_dir):
                 break
         if not alive:
             break
-        time.sleep(0.1)
+        time.sleep(1.0)
+
+
+def delete_alive(work_dir):
+    alive_files = [
+        work_dir.joinpath(aiaccel.dict_alive, aiaccel.alive_master),
+        work_dir.joinpath(aiaccel.dict_alive, aiaccel.alive_optimizer),
+        work_dir.joinpath(aiaccel.dict_alive, aiaccel.alive_scheduler)
+    ]
+    for alive_file in alive_files:
+        if alive_file.exists():
+            alive_file.unlink()
 
 
 def base_clean_work_dir(data_dir, work_dir):
