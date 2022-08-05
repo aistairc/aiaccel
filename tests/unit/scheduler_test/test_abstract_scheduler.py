@@ -46,7 +46,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -65,7 +64,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -87,7 +85,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -108,7 +105,6 @@ class TestAbstractScheduler(BaseTest):
             'config': str(config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -136,7 +132,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -158,7 +153,6 @@ class TestAbstractScheduler(BaseTest):
             'config': str(config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -181,7 +175,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -199,7 +192,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -218,7 +210,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -239,7 +230,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -274,7 +264,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -306,7 +295,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -325,7 +313,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -346,7 +333,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -362,7 +348,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }

@@ -26,7 +26,6 @@ class TestCeaterRunnerComand(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
         }
 

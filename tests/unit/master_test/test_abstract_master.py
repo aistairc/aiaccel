@@ -157,7 +157,6 @@ class TestAbstractMaster(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -190,7 +189,6 @@ class TestAbstractMaster(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -356,7 +354,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -381,7 +378,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -405,7 +401,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -446,7 +441,6 @@ class TestAbstractMaster(BaseTest):
         #     'config': config_json,
         #     'resume': None,
         #     'clean': False,
-        #     'nosave': False,
         #     'fs': False,
         #     'process_name': 'master'
         # }
@@ -459,7 +453,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -501,7 +494,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -537,7 +529,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': 0,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -568,7 +559,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': 0,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }

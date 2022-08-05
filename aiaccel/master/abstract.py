@@ -61,15 +61,10 @@ class AbstractMaster(AbstractModule):
         self.trial_number = self.config.trial_number.get()
         self.serialize = Serializer(self.config, 'master', self.options)
 
-        barrier = multiprocessing.Barrier(3)
-        self.set_barrier(barrier)
-
         # optimizer
         self.o = create_optimizer(options['config'])(options)
-        self.o.set_barrier(barrier)
         # scheduler
         self.s = create_scheduler(options['config'])(options)
-        self.s.set_barrier(barrier)
 
         self.worker_o = multiprocessing.Process(target=self.o.start)
         self.worker_s = multiprocessing.Process(target=self.s.start)
@@ -249,49 +244,6 @@ class AbstractMaster(AbstractModule):
         self.verification.verify()
 
         return True
-
-    def _serialize(self) -> None:
-        """Serialize this module.
-
-        Returns:
-            dict: The serialized master objects.
-        """
-        if self.options['nosave'] is True:
-            return
-        else:
-            self.serialize_data = {
-                'start_time': self.start_time,
-                'loop_start_time': self.loop_start_time
-            }
-
-            if self.current_max_trial_number is None:
-                return
-
-            self.serialize.serialize(
-                self.current_max_trial_number,
-                self.serialize_data,
-                self.get_native_random_state(),
-                self.get_numpy_random_state()
-            )
-
-    def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-
-        Returns:
-            None
-        """
-        data = self.serialize.deserialize(trial_id)
-
-        loop_counts = data['optimization_variables']['loop_count']
-
-        if loop_counts is None:
-            return
-
-        self.loop_count = loop_counts
-        print(f"(master)set inner loop count: {self.loop_count}")
 
     def other_process_is_alive(self) -> bool:
         if (

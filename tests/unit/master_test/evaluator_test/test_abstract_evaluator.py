@@ -10,7 +10,6 @@ class TestAbstractEvaluator(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'test'
         }
@@ -22,7 +21,6 @@ class TestAbstractEvaluator(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'test'
         }
@@ -41,7 +39,6 @@ class TestAbstractEvaluator(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'test'
         }
@@ -57,7 +54,6 @@ class TestAbstractEvaluator(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'test'
         }

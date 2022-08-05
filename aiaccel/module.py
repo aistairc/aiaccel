@@ -1,12 +1,10 @@
 import aiaccel
 import logging
 import os
-import threading
 import time
 import sys
 from aiaccel.config import Config
 from aiaccel.util.process import is_process_running
-from multiprocessing import Barrier
 from pathlib import Path
 import numpy as np
 import random
@@ -32,7 +30,6 @@ class AbstractModule(object):
         5. call post_process()
 
     Attributes:
-        barrier (multiprocessing.Barrier): A barrier to synchronize processes.
         config (ConfileWrapper): A config object.
         dict_hp (Path): A path to hp directory.
         dict_lock (Path): A path to lock directory.
@@ -99,7 +96,6 @@ class AbstractModule(object):
         self.hp_running = 0
         self.hp_finished = 0
         self.sleep_time = 1.0
-        self.barrier = None
         self.seed = self.config.randseed.get()
         self.storage = Storage(
             self.ws,
@@ -107,7 +103,6 @@ class AbstractModule(object):
             config_path=self.config.config_path
         )
         self.management_trial_id = TrialId(self.options['config'])
-        self.barrier_timeout = (self.config.batch_job_timeout.get() * self.config.job_retry.get())
         self.serialize_datas = {}
         self.deserialize_datas = {}
 
@@ -191,17 +186,6 @@ class AbstractModule(object):
             self.hp_running)
         )
 
-    def set_barrier(self, barrier: Barrier) -> None:
-        """Set a multiprocessing barrier.
-
-        Args:
-            barrier (multiprocessing.Barrier): A barrier object.
-
-        Returns:
-            None
-        """
-        self.barrier = barrier
-
     def set_logger(
         self,
         logger_name: str,
@@ -261,10 +245,6 @@ class AbstractModule(object):
 
         self.storage.alive.set_any_process_state(module_type, 1)
         self.storage.pid.set_any_process_pid(module_type, os.getpid())
-
-        self.set_native_random_seed()
-        self.set_numpy_random_seed()
-        self.resume()
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
@@ -368,38 +348,10 @@ class AbstractModule(object):
             self.wait()
             self.loop_count += 1
 
-            if not self.is_barrier():
-                break
-
             if not self.check_error():
                 break
 
-            self._serialize()
-
-            if not self.is_barrier():
-                break
-
         self.loop_post_process()
-
-    def is_barrier(self) -> bool:
-        """Is barrier waiting working well or not.
-
-        Returns:
-            bool: It returns false if the barrier object is not set or the
-            processes are not running. Otherwise, it returns true.
-        """
-        self.logger.debug("Waiting for sync")
-
-        start_time = time.time()
-        check_cycle_time = 60
-
-        while self.is_process_alive() and (time.time() - start_time) < self.barrier_timeout:
-            try:
-                self.barrier.wait(check_cycle_time)
-                return True
-            except threading.BrokenBarrierError:
-                self.wait()
-        return False
 
     def is_process_alive(self) -> bool:
         """Is processes(master, optimizer and scheduler) running or not.

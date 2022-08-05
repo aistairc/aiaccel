@@ -9,7 +9,6 @@ class TestLocalScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -35,7 +34,6 @@ class TestLocalScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
