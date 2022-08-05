@@ -5,6 +5,7 @@ from unittest.mock import patch
 import aiaccel
 import aiaccel.util.filesystem as fs
 import asyncio
+import pathlib
 import sys
 import time
 

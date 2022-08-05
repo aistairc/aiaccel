@@ -218,7 +218,7 @@ class TpeSearchOptimizer(AbstractOptimizer):
                 # debug
                 print('Running trial does not match any running files.')
                 print('\ttrial params: ', t.params)
-                raise()
+                raise ()
 
 
 def create_distributions(
