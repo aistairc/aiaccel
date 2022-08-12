@@ -238,6 +238,12 @@ class AbstractOptimizer(AbstractModule):
         self.print_dict_state()
         return True
 
+    def _serialize(self) -> None:
+        pass
+
+    def _deserialize(self, trial_id: int) -> None:
+        pass
+
     def resume(self) -> None:
         """ When in resume mode, load the previous
                 optimization data in advance.

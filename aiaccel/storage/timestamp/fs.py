@@ -115,3 +115,7 @@ class TimeStamp:
         self.update()
         for d in self.datas.data:
             d.remove()
+
+    def delete_any_trial_timestamp(self, trial_id) -> None:
+        self.update()
+        self.datas.remove(trial_id)

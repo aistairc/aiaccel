@@ -194,3 +194,7 @@ class Trial:
     def all_delete(self):
         self.update()
         self.trials.all_delete()
+
+    def delete_any_trial_state(self, trial_id: int) -> None:
+        self.update()
+        self.trials.remove(trial_id)

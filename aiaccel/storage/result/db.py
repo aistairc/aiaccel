@@ -139,3 +139,15 @@ class Result(Abstract):
         session.commit()
         session.expunge_all()
         self.engine.dispose()
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def delete_any_trial_objective(self, trial_id) -> None:
+        """
+        Returns:
+            None
+        """
+        session = self.session()
+        session.query(ResultTable).filter(ResultTable.trial_id == trial_id).delete()
+        session.commit()
+        session.expunge_all()
+        self.engine.dispose()

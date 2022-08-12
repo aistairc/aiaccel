@@ -49,6 +49,7 @@ class TestTpeSearchOptimizer(BaseTest):
 
     def test_serialize(self):
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
+        self.optimizer.trial_id.increment()
         assert self.optimizer._serialize() is None
 
     def test_deserialize(self):
@@ -58,6 +59,7 @@ class TestTpeSearchOptimizer(BaseTest):
             'loop_count': 0
         }
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
+        self.optimizer.trial_id.increment()
         self.optimizer._serialize()
         assert self.optimizer._deserialize(trial_id=0) is None
 

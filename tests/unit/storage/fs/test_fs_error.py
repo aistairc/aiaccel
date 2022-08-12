@@ -77,3 +77,37 @@ def test_all_delete():
     assert storage.error.all_delete() is None
     for id in ids:
         assert storage.error.get_any_trial_error(id) is None
+
+
+# delete_any_trial_error
+@t_base()
+def test_delete_any_trial_error():
+    storage = Storage(ws.path)
+
+    ids = [0, 1, 2]
+    messages = ["hoge0", "hoge1", "hoge2"]
+
+    for i in range(len(ids)):
+        storage.error.set_any_trial_error(
+            trial_id=ids[i],
+            error_message=messages[i]
+        )
+
+    assert storage.error.get_any_trial_error(trial_id=0) is not None
+    assert storage.error.get_any_trial_error(trial_id=1) is not None
+    assert storage.error.get_any_trial_error(trial_id=2) is not None
+
+    assert storage.error.delete_any_trial_error(trial_id=0) is None
+    assert storage.error.get_any_trial_error(trial_id=0) is None
+    assert storage.error.get_any_trial_error(trial_id=1) is not None
+    assert storage.error.get_any_trial_error(trial_id=2) is not None
+
+    assert storage.error.delete_any_trial_error(trial_id=1) is None
+    assert storage.error.get_any_trial_error(trial_id=0) is None
+    assert storage.error.get_any_trial_error(trial_id=1) is None
+    assert storage.error.get_any_trial_error(trial_id=2) is not None
+
+    assert storage.error.delete_any_trial_error(trial_id=2) is None
+    assert storage.error.get_any_trial_error(trial_id=0) is None
+    assert storage.error.get_any_trial_error(trial_id=1) is None
+    assert storage.error.get_any_trial_error(trial_id=2) is None

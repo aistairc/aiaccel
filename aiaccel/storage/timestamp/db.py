@@ -145,3 +145,11 @@ class TimeStamp(Abstract):
         session.commit()
         session.expunge_all()
         self.engine.dispose()
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def delete_any_trial_timestamp(self, trial_id) -> None:
+        session = self.session()
+        session.query(TimestampTable).filter(TimestampTable.trial_id == trial_id).delete()
+        session.commit()
+        session.expunge_all()
+        self.engine.dispose()

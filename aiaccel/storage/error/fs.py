@@ -76,3 +76,7 @@ class Error:
         self.update()
         for d in self.errors.data:
             d.remove()
+
+    def delete_any_trial_error(self, trial_id: int) -> None:
+        self.update()
+        self.errors.remove(trial_id)
