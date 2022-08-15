@@ -4,7 +4,6 @@ from base import db_path
 from base import ws
 
 
-
 # set_any_trial_param
 @t_base()
 def test_set_any_trial_param():
@@ -21,6 +20,7 @@ def test_set_any_trial_param():
         param_value=param_value,
         param_type=param_type
     ) is None
+
 
 # set_any_trial_param
 @t_base()
@@ -93,7 +93,6 @@ def test_get_any_trial_params():
     else:
         assert False
 
-    
 
 # all_delete
 @t_base()
@@ -114,3 +113,82 @@ def test_all_delete():
 
     assert storage.hp.all_delete() is None
     assert storage.hp.get_any_trial_params(trial_id) is None
+
+
+# delete_any_trial_params
+@t_base()
+def test_delete_any_trial_params():
+    storage = Storage(ws.path)
+
+    trial_id = 0
+    params = [
+        {
+            "parameter_name": "x1",
+            "value": 0.01,
+            "type": "float"
+        },
+        {
+            "parameter_name": "x2",
+            "value": 0.02,
+            "type": "float"
+        }
+    ]
+    storage.hp.set_any_trial_params(
+        trial_id=trial_id,
+        params=params
+    )
+
+    trial_id = 1
+    params = [
+        {
+            "parameter_name": "x1",
+            "value": 0.01,
+            "type": "float"
+        },
+        {
+            "parameter_name": "x2",
+            "value": 0.02,
+            "type": "float"
+        }
+    ]
+    storage.hp.set_any_trial_params(
+        trial_id=trial_id,
+        params=params
+    )
+
+    trial_id = 2
+    params = [
+        {
+            "parameter_name": "x1",
+            "value": 0.01,
+            "type": "float"
+        },
+        {
+            "parameter_name": "x2",
+            "value": 0.02,
+            "type": "float"
+        }
+    ]
+    storage.hp.set_any_trial_params(
+        trial_id=trial_id,
+        params=params
+    )
+
+    assert storage.hp.get_any_trial_params(trial_id=0) is not None
+    assert storage.hp.get_any_trial_params(trial_id=1) is not None
+    assert storage.hp.get_any_trial_params(trial_id=2) is not None
+
+    assert storage.hp.delete_any_trial_params(trial_id=0) is None
+    assert storage.hp.get_any_trial_params(trial_id=0) is None
+    assert storage.hp.get_any_trial_params(trial_id=1) is not None
+    assert storage.hp.get_any_trial_params(trial_id=2) is not None
+
+    assert storage.hp.delete_any_trial_params(trial_id=1) is None
+    assert storage.hp.get_any_trial_params(trial_id=0) is None
+    assert storage.hp.get_any_trial_params(trial_id=1) is None
+    assert storage.hp.get_any_trial_params(trial_id=2) is not None
+
+    assert storage.hp.delete_any_trial_params(trial_id=2) is None
+    assert storage.hp.get_any_trial_params(trial_id=0) is None
+    assert storage.hp.get_any_trial_params(trial_id=1) is None
+    assert storage.hp.get_any_trial_params(trial_id=2) is None

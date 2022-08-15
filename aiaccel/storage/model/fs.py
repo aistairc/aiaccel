@@ -103,6 +103,9 @@ class Datalist:
     def set(self, index: int, set_data: any):
         self.arr[index].write(set_data)
 
+    def remove(self, index: int):
+        self.arr[index].remove()
+
     @property
     def len(self):
         return len(self.arr)

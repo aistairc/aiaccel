@@ -58,3 +58,7 @@ class JobState:
     def all_delete(self) -> None:
         self.update()
         self.jobstates.all_delete()
+
+    def delete_any_trial_jobstate(self, trial_id: int) -> None:
+        self.update()
+        self.jobstates.remove(trial_id)

@@ -206,3 +206,43 @@ def test_get_all_trial_id():
         )
 
     assert storage.trial.get_all_trial_id() == [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+
+# delete_any_trial_state
+@t_base()
+def test_delete_any_trial_state():
+    storage = Storage(ws.path)
+
+    states = [
+        "ready",
+        "running",
+        "finished",
+    ]
+
+    for i in range(len(states)):
+        storage.trial.set_any_trial_state(
+            trial_id=i,
+            state=states[i]
+        )
+
+    for i in range(len(states)):
+        assert storage.trial.get_any_trial_state(i) == states[i]
+
+    assert storage.trial.get_any_trial_state(trial_id=0) is not None
+    assert storage.trial.get_any_trial_state(trial_id=1) is not None
+    assert storage.trial.get_any_trial_state(trial_id=2) is not None
+
+    assert storage.trial.delete_any_trial_state(trial_id=0) is None
+    assert storage.trial.get_any_trial_state(trial_id=0) is None
+    assert storage.trial.get_any_trial_state(trial_id=1) is not None
+    assert storage.trial.get_any_trial_state(trial_id=2) is not None
+
+    assert storage.trial.delete_any_trial_state(trial_id=1) is None
+    assert storage.trial.get_any_trial_state(trial_id=0) is None
+    assert storage.trial.get_any_trial_state(trial_id=1) is None
+    assert storage.trial.get_any_trial_state(trial_id=2) is not None
+
+    assert storage.trial.delete_any_trial_state(trial_id=2) is None
+    assert storage.trial.get_any_trial_state(trial_id=0) is None
+    assert storage.trial.get_any_trial_state(trial_id=1) is None
+    assert storage.trial.get_any_trial_state(trial_id=2) is None

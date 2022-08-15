@@ -22,7 +22,6 @@ class TestRandom(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'optimizer'
         }
@@ -66,7 +65,6 @@ class TestRandom(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }

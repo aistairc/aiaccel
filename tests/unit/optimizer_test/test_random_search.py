@@ -9,7 +9,6 @@ class TestRandomSearchOptimizer(BaseTest):
             'config': str(self.config_random_path),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'optimizer'
         }

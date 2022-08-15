@@ -42,7 +42,7 @@ class Viewer:
                 if len(error) > 4:
                     error = error[0:3] + "..."
 
-            resume = "possible" if self.storage.serializer.is_exists_any_trial(trial_id) else ""
+            # resume = "possible" if self.storage.serializer.is_exists_any_trial(trial_id) else ""
 
             infos.append(
                 {
@@ -53,7 +53,7 @@ class Viewer:
                     "job": str(job),
                     "result": str(result),
                     "error": error,
-                    "resume": resume
+                    # "resume": resume
                 }
             )
 

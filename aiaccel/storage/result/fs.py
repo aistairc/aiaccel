@@ -152,3 +152,7 @@ class Result:
         """
         self.update()
         self.results.all_delete()
+
+    def delete_any_trial_objective(self, trial_id) -> None:
+        self.update()
+        self.results.remove(trial_id)

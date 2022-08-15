@@ -76,7 +76,6 @@ class TestGridSearchOptimizer(BaseTest):
             'config': self.grid_config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'optimizer'
         }
@@ -92,7 +91,6 @@ class TestGridSearchOptimizer(BaseTest):
             'config': self.grid_config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'optimizer'
         }
@@ -116,7 +114,6 @@ class TestGridSearchOptimizer(BaseTest):
             'config': self.grid_config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'optimizer'
         }

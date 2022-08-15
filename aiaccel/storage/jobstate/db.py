@@ -122,6 +122,18 @@ class JobState(Abstract):
         return jobstates
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
+    def delete_any_trial_jobstate(self, trial_id: int) -> None:
+        """
+        Returns:
+            None
+        """
+        session = self.session()
+        session.query(JobStateTable).filter(JobStateTable.trial_id == trial_id).delete()
+        session.commit()
+        session.expunge_all()
+        self.engine.dispose()
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def is_failure(self, trial_id: int) -> bool:
         """Whether the jobstate of the specified trial is Failuer or not.
 
