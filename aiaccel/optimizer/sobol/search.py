@@ -7,7 +7,7 @@ import aiaccel
 import fasteners
 
 
-class Optimizer(AbstractOptimizer):
+class SobolSearchOptimizer(AbstractOptimizer):
     """An optimizer class with sobol algorithm.
 
     Attributes:

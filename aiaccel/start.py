@@ -12,7 +12,6 @@ from aiaccel.master.abci_master import AbciMaster
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.optimizer.optimizer import OptimizerLoeader
 from aiaccel.util import filesystem as fs
 from aiaccel.easy_visualizer import EasyVisualizer
 from aiaccel import parameter as pt
@@ -22,6 +21,8 @@ from aiaccel.util.buffer import Buffer
 from aiaccel.config import Config
 from aiaccel.util.terminal import Terminal
 from pathlib import Path
+from importlib import import_module
+from importlib.machinery import SourceFileLoader
 
 
 class Arguments:
@@ -506,10 +507,29 @@ class CreationOptimizer:
         algorithm = config.search_algorithm.get()
         if Path(algorithm).exists() is True:
             algorithm = Path(algorithm)
-        self.optimizer = OptimizerLoeader(algorithm).get()
+        self.optimizer = self.import_and_getattr(algorithm)
 
     def __call__(self) -> Any:
         return self.optimizer
+
+    def get_pyfile_path(self, module_name: str) -> str:
+        path = (
+            module_name
+            .replace(".", "/")
+            .replace("//", "../")
+            .replace(" ", "")
+        ) + ".py"
+        return path
+
+    def import_and_getattr(self, name):
+        module_name, attr_name = name.rsplit(".", 1)
+        pyfile = self.get_pyfile_path(module_name)
+
+        if Path(pyfile).exists():
+            mod = SourceFileLoader('optimizer', pyfile).load_module()
+        else:
+            mod = import_module(module_name)
+        return getattr(mod, attr_name)
 
 
 class Master(CreationMaster(Arguments()['config'])()):

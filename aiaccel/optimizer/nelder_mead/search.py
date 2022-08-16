@@ -7,7 +7,7 @@ import copy
 import numpy as np
 
 
-class Optimizer(AbstractOptimizer):
+class NelderMeadSearchOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
 
     Attributes:

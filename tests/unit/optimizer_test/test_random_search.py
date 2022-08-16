@@ -1,4 +1,4 @@
-from aiaccel.optimizer.random.search import Optimizer
+from aiaccel.optimizer.random.search import RandomSearchOptimizer
 from tests.base_test import BaseTest
 
 
@@ -14,6 +14,6 @@ class TestOptimizer(BaseTest):
             'graph': False,
             'process_name': 'optimizer'
         }
-        optimizer = Optimizer(options)
+        optimizer = RandomSearchOptimizer(options)
         optimizer.pre_process()
         assert optimizer.generate_parameter() is None

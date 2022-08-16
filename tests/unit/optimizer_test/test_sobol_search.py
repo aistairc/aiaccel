@@ -1,4 +1,4 @@
-from aiaccel.optimizer.sobol.search import Optimizer
+from aiaccel.optimizer.sobol.search import SobolSearchOptimizer
 from tests.base_test import BaseTest
 import pytest
 
@@ -16,7 +16,7 @@ class TestOptimizer(BaseTest):
             'graph': False,
             'process_name': 'optimizer'
         }
-        self.optimizer = Optimizer(options)
+        self.optimizer = SobolSearchOptimizer(options)
         yield
         self.optimizer = None
 

@@ -2,7 +2,7 @@ from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from typing import Optional
 
 
-class Optimizer(AbstractOptimizer):
+class MyOptimizer(AbstractOptimizer):
     def generate_parameter(self, number: Optional[int] = 1) -> None:
 
         returned_params = []

@@ -1,7 +1,7 @@
 import pytest
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.tpe.search import Optimizer
+from aiaccel.optimizer.tpe.search import TpeSearchOptimizer
 from aiaccel.optimizer.tpe.search import create_distributions
 from tests.base_test import BaseTest
 
@@ -19,7 +19,7 @@ class TestOptimizer(BaseTest):
             'graph': False,
             'process_name': 'optimizer'
         }
-        self.optimizer = Optimizer(options)
+        self.optimizer = TpeSearchOptimizer(options)
         yield
         self.optimizer = None
 

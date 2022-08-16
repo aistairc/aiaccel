@@ -13,7 +13,7 @@
     "job_execution_options": ""
   },
   "optimize": {
-    "search_algorithm": "aiaccel.optimizer.sobol",
+    "search_algorithm": "aiaccel.optimizer.sobol.search.SobolSearchOptimizer",
     "goal": "minimize",
     "trial_number": 5,
     "rand_seed": 42,

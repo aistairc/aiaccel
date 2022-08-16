@@ -2,7 +2,7 @@ from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from typing import Optional
 
 
-class Optimizer(AbstractOptimizer):
+class RandomSearchOptimizer(AbstractOptimizer):
     """An optimizer class with a random algorithm.
 
     """

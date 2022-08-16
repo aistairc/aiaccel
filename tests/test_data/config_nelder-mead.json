@@ -16,7 +16,7 @@
     "job_execution_options": ""
   },
   "optimize": {
-    "search_algorithm": "aiaccel.optimizer.nelder_mead",
+    "search_algorithm": "aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer",
     "goal": "minimize",
     "trial_number": 10,
     "rand_seed": 42,

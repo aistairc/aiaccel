@@ -1,6 +1,6 @@
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.module import AbstractModule
-from aiaccel.optimizer.random.search import Optimizer
+from aiaccel.optimizer.random.search import RandomSearchOptimizer
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
@@ -127,7 +127,7 @@ class TestAbstractModule(BaseTest):
             'graph': False,
             'process_name': 'optimizer'
         }
-        optimizer = Optimizer(options)
+        optimizer = RandomSearchOptimizer(options)
         module_type, alive_file = optimizer.get_module_type_alive_file()
         assert module_type == aiaccel.module_type_optimizer
         assert Path(alive_file).resolve() == work_dir.joinpath(

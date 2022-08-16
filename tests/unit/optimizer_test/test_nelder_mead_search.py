@@ -1,6 +1,6 @@
 from aiaccel.config import ConfileWrapper
 from aiaccel.optimizer.nelder_mead.sampler import NelderMead
-from aiaccel.optimizer.nelder_mead.search import Optimizer
+from aiaccel.optimizer.nelder_mead.search import NelderMeadSearchOptimizer
 from aiaccel.parameter import load_parameter
 from aiaccel.util.filesystem import move_file
 from tests.base_test import BaseTest
@@ -22,7 +22,7 @@ class TestOptimizer(BaseTest):
             'graph': False,
             'process_name': 'optimizer'
         }
-        self.optimizer = Optimizer(options)
+        self.optimizer = NelderMeadSearchOptimizer(options)
         yield
         self.optimizer = None
 
