@@ -6,4 +6,4 @@ class TestSphereRandomResumption(ResumptionTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = "nelder_mead"
+        cls.search_algorithm = "nelder-mead"
