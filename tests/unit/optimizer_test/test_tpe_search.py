@@ -6,7 +6,7 @@ from aiaccel.optimizer.tpe.search import create_distributions
 from tests.base_test import BaseTest
 
 
-class TestOptimizer(BaseTest):
+class TestTpeSearchOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir, data_dir):

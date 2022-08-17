@@ -3,7 +3,7 @@ from tests.base_test import BaseTest
 import pytest
 
 
-class TestOptimizer(BaseTest):
+class TestSobolSearchOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):

@@ -2,7 +2,7 @@ from aiaccel.optimizer.random.search import RandomSearchOptimizer
 from tests.base_test import BaseTest
 
 
-class TestOptimizer(BaseTest):
+class TestRandomSearchOptimizer(BaseTest):
 
     def test_generate_parameter(self):
         options = {

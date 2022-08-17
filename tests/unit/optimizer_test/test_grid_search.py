@@ -66,7 +66,7 @@ def test_generate_grid_points(grid_load_test_config):
         assert True
 
 
-class TestOptimizer(BaseTest):
+class TestGridSearchOptimizer(BaseTest):
 
     def test_pre_process(self, clean_work_dir):
         options = {

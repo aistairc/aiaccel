@@ -9,7 +9,7 @@ import json
 import pytest
 
 
-class TestOptimizer(BaseTest):
+class TestNelderMeadSearchOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
