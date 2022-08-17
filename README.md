@@ -78,15 +78,6 @@ This tutorial describes how to run examples/sphere on ABCI.
 
 1. First, setup python environment following [the ABCI Users Guide](https://docs.abci.ai/en/python/):
     ~~~bash
-<<<<<<< HEAD
-    module load gcc/11.2.0
-    module load python/3.8/3.8.13
-    python3 -m venv work
-    source work/bin/activate
-    ~~~
-
-2. Prepare the workspace by following Steps 1 to 4 in [Running on a local computer](https://github.com/aistairc/aiaccel#Running-on-a-local-computer).
-=======
     > module load gcc/11.2.0
     > module load python/3.8/3.8.13
     > python3 -m venv work
@@ -94,7 +85,6 @@ This tutorial describes how to run examples/sphere on ABCI.
     ~~~
 
 2. Prepare the workspace by following Steps 1 and 2 in [Running on a local computer](https://github.com/aistairc/aiaccel#Running-on-a-local-computer).
->>>>>>> 3511f8717de098884b66e0120a190299ee82cfc4
 
 3. Please confirm the configuration file before running master.
     ```yaml
@@ -109,6 +99,25 @@ This tutorial describes how to run examples/sphere on ABCI.
     ~~~
 
 5. If you want to check the running jobs, please refer the [ABCI User Guide](https://docs.abci.ai/en/job-execution/#show-the-status-of-batch-jobs).
+
+
+## Other
+- Check the progress
+    ~~~bash
+    > python -m aiaccel.view --config config.yaml
+    ~~~
+
+- Display simple graphs
+    ~~~bash
+    > python -m aiaccel.plot --config config.yaml
+    ~~~
+
+- Output results to workspace/results.csv.
+    ~~~bash
+    > python -m aiaccel.report --config config.yaml
+    ~~~
+
+
 
 # Acknowledgment
 * Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Deve
