@@ -46,7 +46,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -65,7 +64,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -87,7 +85,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -108,7 +105,6 @@ class TestAbstractScheduler(BaseTest):
             'config': str(config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -136,7 +132,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -158,7 +153,6 @@ class TestAbstractScheduler(BaseTest):
             'config': str(config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -181,7 +175,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -199,7 +192,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -218,7 +210,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -239,7 +230,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -274,7 +264,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -306,7 +295,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
@@ -325,14 +313,13 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.alive.init_alive()
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        scheduler._serialize()
+        scheduler._serialize(trial_id=0)
         assert 'loop_count' in scheduler.serialize_datas
 
     def test_deserialize(
@@ -346,14 +333,13 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.alive.init_alive()
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        scheduler._serialize()
+        scheduler._serialize(trial_id=0)
         assert scheduler._deserialize(trial_id=0) is None
 
     def test_parse_trial_id(self, config_json, database_remove):
@@ -362,7 +348,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'scheduler'
         }

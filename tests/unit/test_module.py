@@ -5,7 +5,6 @@ from aiaccel.scheduler.local import LocalScheduler
 from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
 from contextlib import ExitStack
-from multiprocessing import Barrier
 from pathlib import Path
 from tests.base_test import BaseTest
 from unittest.mock import MagicMock
@@ -62,7 +61,6 @@ class TestAbstractModule(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'test'
         }
@@ -108,7 +106,6 @@ class TestAbstractModule(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -127,7 +124,6 @@ class TestAbstractModule(BaseTest):
                 'config': str(self.config_json),
                 'resume': None,
                 'clean': False,
-                'nosave': False,
                 'fs': False,
                 'process_name': 'optimizer'
             }
@@ -139,7 +135,6 @@ class TestAbstractModule(BaseTest):
                 'config': str(self.config_json),
                 'resume': None,
                 'clean': False,
-                'nosave': False,
                 'fs': False,
                 'process_name': 'scheduler'
             }
@@ -170,10 +165,6 @@ class TestAbstractModule(BaseTest):
 
     def test_print_dict_state(self):
         assert self.module.print_dict_state() is None
-
-    def test_set_barrier(self):
-        barrier = Barrier(3)
-        assert self.module.set_barrier(barrier) is None
 
     def test_set_logger(self, work_dir):
         assert self.module.set_logger(
@@ -326,6 +317,9 @@ class TestAbstractModule(BaseTest):
             stack.enter_context(patch.object(
                 self.module, 'loop_post_process', return_value=True
             ))
+            stack.enter_context(patch.object(
+                self.module, 'check_error', return_value=False
+            ))
             self.module._serialize = Mock()
             self.module._serialize.side_effect = dummy_break
 
@@ -344,9 +338,6 @@ class TestAbstractModule(BaseTest):
             assert False
         except NotImplementedError:
             assert True
-
-    def test_is_barrier(self):
-        assert not self.module.is_barrier()
 
     def test_is_process_alive(self):
         assert not self.module.is_process_alive()

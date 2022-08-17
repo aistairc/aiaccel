@@ -79,6 +79,7 @@ class AbstractOptimizer(AbstractModule):
 
         # wd/
         self.trial_id.increment()
+        self._serialize()
         param['trial_id'] = self.trial_id.get()
         # for p in param['parameters']:
         #     self.storage.hp.set_any_trial_param(
@@ -149,6 +150,9 @@ class AbstractOptimizer(AbstractModule):
             None
         """
         super().pre_process()
+        self.set_native_random_seed()
+        self.set_numpy_random_seed()
+        self.resume()
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
@@ -235,31 +239,23 @@ class AbstractOptimizer(AbstractModule):
         return True
 
     def _serialize(self) -> None:
-        """Serialize this module.
-
-        Returns:
-            None
-        """
-        if self.options['nosave'] is True:
-            pass
-        else:
-            self.serialize.serialize(
-                trial_id=self.current_max_trial_number,
-                optimization_variables=self.serialize_datas,
-                native_random_state=self.get_native_random_state(),
-                numpy_random_state=self.get_numpy_random_state()
-            )
+        pass
 
     def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
+        pass
+
+    def resume(self) -> None:
+        """ When in resume mode, load the previous
+                optimization data in advance.
 
         Args:
-            dict_objects(dict): A dictionary including serialized objects.
+            None
 
         Returns:
             None
         """
-        d = self.serialize.deserialize(trial_id)
-        self.deserialize_datas = d['optimization_variables']
-        self.set_native_random_state(d['native_random_state'])
-        self.set_numpy_random_state(d['numpy_random_state'])
+        if (
+            self.options['resume'] is not None and
+            self.options['resume'] > 0
+        ):
+            self._deserialize(self.options['resume'])

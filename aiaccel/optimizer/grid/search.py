@@ -175,7 +175,12 @@ class GridSearchOptimizer(AbstractOptimizer):
             'ready_params': self.ready_params,
             'generate_index': self.generate_index
         }
-        super()._serialize()
+        self.serialize.serialize(
+            trial_id=self.trial_id.integer,
+            optimization_variables=self.serialize_datas,
+            native_random_state=self.get_native_random_state(),
+            numpy_random_state=self.get_numpy_random_state()
+        )
 
     def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
@@ -186,7 +191,11 @@ class GridSearchOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        super()._deserialize(trial_id)
+        d = self.serialize.deserialize(trial_id)
+        self.deserialize_datas = d['optimization_variables']
+        self.set_native_random_state(d['native_random_state'])
+        self.set_numpy_random_state(d['numpy_random_state'])
+
         self.ready_params = self.deserialize_datas['ready_params']
         self.generate_index = self.deserialize_datas['generate_index']
         self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']

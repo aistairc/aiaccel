@@ -99,3 +99,71 @@ def test_get_any_trial_serialize():
         trial_id=trial_id,
         process_name=process_name
     ) is None
+
+
+
+# delete_any_trial_serialize
+@t_base()
+def test_delete_any_trial_serialize():
+    storage = Storage(ws.path)
+
+    trial_id = 0
+    process_name = "test0"
+    optimization_variable = 0
+    native_random_state = random.getstate()
+    numpy_random_state = np.random.get_state()
+
+    storage.serializer.set_any_trial_serialize(
+        trial_id=trial_id,
+        optimization_variable=optimization_variable,
+        process_name=process_name,
+        native_random_state=native_random_state,
+        numpy_random_state=numpy_random_state
+    )
+
+    trial_id = 1
+    process_name = "test1"
+    optimization_variable = 1
+    native_random_state = random.getstate()
+    numpy_random_state = np.random.get_state()
+
+    storage.serializer.set_any_trial_serialize(
+        trial_id=trial_id,
+        optimization_variable=optimization_variable,
+        process_name=process_name,
+        native_random_state=native_random_state,
+        numpy_random_state=numpy_random_state
+    )
+
+    trial_id = 2
+    process_name = "test2"
+    optimization_variable = 2
+    native_random_state = random.getstate()
+    numpy_random_state = np.random.get_state()
+
+    storage.serializer.set_any_trial_serialize(
+        trial_id=trial_id,
+        optimization_variable=optimization_variable,
+        process_name=process_name,
+        native_random_state=native_random_state,
+        numpy_random_state=numpy_random_state
+    )
+
+    assert storage.serializer.get_any_trial_serialize(trial_id=0,process_name="test0") is not None
+    assert storage.serializer.get_any_trial_serialize(trial_id=1,process_name="test1") is not None
+    assert storage.serializer.get_any_trial_serialize(trial_id=2,process_name="test2") is not None
+
+    assert storage.serializer.delete_any_trial_serialize(trial_id=0) is None
+    assert storage.serializer.get_any_trial_serialize(trial_id=0,process_name="test0") is None
+    assert storage.serializer.get_any_trial_serialize(trial_id=1,process_name="test1") is not None
+    assert storage.serializer.get_any_trial_serialize(trial_id=2,process_name="test2") is not None
+
+    assert storage.serializer.delete_any_trial_serialize(trial_id=1) is None
+    assert storage.serializer.get_any_trial_serialize(trial_id=0,process_name="test0") is None
+    assert storage.serializer.get_any_trial_serialize(trial_id=1,process_name="test1") is None
+    assert storage.serializer.get_any_trial_serialize(trial_id=2,process_name="test2") is not None
+
+    assert storage.serializer.delete_any_trial_serialize(trial_id=2) is None
+    assert storage.serializer.get_any_trial_serialize(trial_id=0,process_name="test0") is None
+    assert storage.serializer.get_any_trial_serialize(trial_id=1,process_name="test1") is None
+    assert storage.serializer.get_any_trial_serialize(trial_id=2,process_name="test2") is None

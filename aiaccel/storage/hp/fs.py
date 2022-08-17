@@ -128,3 +128,7 @@ class Hp:
         for hp in self.datas.data:
             if hp is not None:
                 hp.remove()
+
+    def delete_any_trial_params(self, trial_id: int) -> None:
+        self.update()
+        self.datas.remove(trial_id)

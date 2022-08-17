@@ -82,7 +82,12 @@ class SobolSearchOptimizer(AbstractOptimizer):
             'loop_count': self.loop_count,
             'generate_index': self.generate_index
         }
-        super()._serialize()
+        self.serialize.serialize(
+            trial_id=self.trial_id.integer,
+            optimization_variables=self.serialize_datas,
+            native_random_state=self.get_native_random_state(),
+            numpy_random_state=self.get_numpy_random_state()
+        )
 
     def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
@@ -93,7 +98,11 @@ class SobolSearchOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        super()._deserialize(trial_id)
+        d = self.serialize.deserialize(trial_id)
+        self.deserialize_datas = d['optimization_variables']
+        self.set_native_random_state(d['native_random_state'])
+        self.set_numpy_random_state(d['numpy_random_state'])
+
         self.generate_index = self.deserialize_datas['generate_index']
         self.loop_count = self.deserialize_datas['loop_count']
         self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']

@@ -157,7 +157,6 @@ class TestAbstractMaster(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -190,7 +189,6 @@ class TestAbstractMaster(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -356,7 +354,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -381,7 +378,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -405,7 +401,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -446,7 +441,6 @@ class TestAbstractMaster(BaseTest):
         #     'config': config_json,
         #     'resume': None,
         #     'clean': False,
-        #     'nosave': False,
         #     'fs': False,
         #     'process_name': 'master'
         # }
@@ -459,7 +453,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -501,7 +494,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
             'fs': False,
             'process_name': 'master'
         }
@@ -518,64 +510,3 @@ class TestAbstractMaster(BaseTest):
         master.worker_o.kill()
         master.worker_s.kill()
         master.storage.alive.init_alive()
-
-    def test_serialize(
-        self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        database_remove
-    ):
-        database_remove()
-
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        options = {
-            'config': config_json,
-            'resume': 0,
-            'clean': False,
-            'nosave': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        with patch.object(sys, 'argv', commandline_args):
-            master = AbstractMaster(options)
-        master.storage.alive.init_alive()
-        master.storage.trial.all_delete()
-        master.storage.trial.set_any_trial_state(trial_id=0, state="ready")
-        assert master._serialize() is None
-        assert 'start_time' in master.serialize_data
-        assert 'loop_start_time' in master.serialize_data
-
-    def test_deserialize(
-        self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        database_remove
-    ):
-        database_remove()
-
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        options = {
-            'config': config_json,
-            'resume': 0,
-            'clean': False,
-            'nosave': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        with patch.object(sys, 'argv', commandline_args):
-            master = AbstractMaster(options)
-        master.storage.alive.init_alive()
-        master.storage.trial.all_delete()
-        master.storage.trial.set_any_trial_state(trial_id=0, state="ready")
-        assert master._serialize() is None
-        assert master._deserialize(trial_id=0) is None

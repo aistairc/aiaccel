@@ -48,3 +48,6 @@ class Pid:
         self.master.remove()
         self.optimizer.remove()
         self.scheduler.remove()
+
+    def delete_any_process_pid(self, process_name: str) -> None:
+        self._(process_name).remove()

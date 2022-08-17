@@ -12,7 +12,6 @@ options = {
     'config': str(config_path),
     'resume': None,
     'clean': False,
-    'nosave': False,
     'fs': False,
     'process_name': 'test'
 }

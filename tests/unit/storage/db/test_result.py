@@ -123,3 +123,37 @@ def test_all_delete():
     assert storage.result.get_any_trial_objective(0) == 1
     assert storage.result.all_delete() is None
     assert storage.result.get_any_trial_objective(0) is None
+
+
+# delete_any_trial_objective
+@t_base()
+def test_delete_any_trial_objective():
+    storage = Storage(ws.path)
+
+    ids = [0, 1, 2]
+    objectives = [0.01, 0.02, 0.03]
+
+    for i in range(len(ids)):
+        storage.result.set_any_trial_objective(
+            trial_id=ids[i],
+            objective=objectives[i]
+        )
+
+    assert storage.result.get_any_trial_objective(ids[0]) is not None
+    assert storage.result.get_any_trial_objective(ids[1]) is not None
+    assert storage.result.get_any_trial_objective(ids[2]) is not None
+
+    assert storage.result.delete_any_trial_objective(ids[0]) is None
+    assert storage.result.get_any_trial_objective(ids[0]) is None
+    assert storage.result.get_any_trial_objective(ids[1]) is not None
+    assert storage.result.get_any_trial_objective(ids[2]) is not None
+
+    assert storage.result.delete_any_trial_objective(ids[1]) is None
+    assert storage.result.get_any_trial_objective(ids[0]) is None
+    assert storage.result.get_any_trial_objective(ids[1]) is None
+    assert storage.result.get_any_trial_objective(ids[2]) is not None
+
+    assert storage.result.delete_any_trial_objective(ids[2]) is None
+    assert storage.result.get_any_trial_objective(ids[0]) is None
+    assert storage.result.get_any_trial_objective(ids[1]) is None
+    assert storage.result.get_any_trial_objective(ids[2]) is None

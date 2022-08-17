@@ -91,6 +91,18 @@ class Serializer(Abstract):
             data.numpy_random_state
         )
 
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def delete_any_trial_serialize(self, trial_id: int) -> None:
+        session = self.session()
+        (
+            session.query(SerializeTable)
+            .filter(SerializeTable.trial_id == trial_id)
+            .delete()
+        )
+        session.commit()
+        session.expunge_all()
+        self.engine.dispose()
+
     def is_exists_any_trial(self, trial_id: int):
         process_names = [
             'master',

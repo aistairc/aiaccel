@@ -49,9 +49,9 @@ class AbstractScheduler(AbstractModule):
         self.available_resource = self.max_resource
         self.stats = []
         self.jobs = []
+        self.job_status = {}
         self.algorithm = None
         self.sleep_time = self.config.sleep_time_scheduler.get()
-        self.job_status = {}
         self.serialize = Serializer(self.config, 'scheduler', self.options)
 
     def change_state_finished_trials(self) -> None:
@@ -133,6 +133,10 @@ class AbstractScheduler(AbstractModule):
             None
         """
         super().pre_process()
+        self.set_native_random_seed()
+        self.set_numpy_random_seed()
+        self.resume()
+
         self.algorithm = schdule_sampling.RamsomSampling(self.config)
         self.change_state_finished_trials()
 
@@ -223,6 +227,7 @@ class AbstractScheduler(AbstractModule):
         if len(selected_threads) > 0:
             for th in selected_threads:
                 if th.get_state_name() == 'Scheduling':
+                    self._serialize(th.trial_id)
                     th.schedule()
                     self.logger.debug(
                         f"trial id: {th.trial_id} has been scheduled."
@@ -248,24 +253,16 @@ class AbstractScheduler(AbstractModule):
             return False
         return True
 
-    def _serialize(self) -> dict:
-        """Serialize this module.
-
-        Returns:
-            dict: The serialized scheduler objects.
-        """
+    def _serialize(self, trial_id) -> None:
 
         self.serialize_datas = {'loop_count': self.loop_count}
 
-        if self.options['nosave'] is True:
-            pass
-        else:
-            self.serialize.serialize(
-                trial_id=self.current_max_trial_number,
-                optimization_variables=self.serialize_datas,
-                native_random_state=self.get_native_random_state(),
-                numpy_random_state=self.get_numpy_random_state()
-            )
+        self.serialize.serialize(
+            trial_id=trial_id,
+            optimization_variables=self.serialize_datas,
+            native_random_state=self.get_native_random_state(),
+            numpy_random_state=self.get_numpy_random_state()
+        )
 
     def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
@@ -297,23 +294,7 @@ class AbstractScheduler(AbstractModule):
         """
         pass
 
-    def update_scheduler_status(self):
-        # states = [
-        #     {
-        #         "trial_id": job['trial_id'],
-        #         "jobstate": job['thread'].get_state_name()
-        #     } for job in self.jobs
-        # ]
-        # self.storage.jobstate.set_any_trial_jobstates(states=states)
-
-        for job in self.jobs:
-            self.storage.jobstate.set_any_trial_jobstate(
-                trial_id=job['trial_id'],
-                state=job['thread'].get_state_name()
-            )
-
     def check_error(self):
-        # self.update_scheduler_status()
 
         # Check state machin
         jobstates = self.storage.jobstate.get_all_trial_jobstate()
@@ -381,3 +362,19 @@ class AbstractScheduler(AbstractModule):
             num_trials += jobstates.count(s)
 
         return (num_trials >= self.config.trial_number.get())
+
+    def resume(self) -> None:
+        """ When in resume mode, load the previous
+                optimization data in advance.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        if (
+            self.options['resume'] is not None and
+            self.options['resume'] > 0
+        ):
+            self._deserialize(self.options['resume'])

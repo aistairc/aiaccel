@@ -79,3 +79,15 @@ class Pid(Abstract):
         session.commit()
         session.expunge_all()
         self.engine.dispose()
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def delete_any_process_pid(self, process_name: str) -> None:
+        """
+        Returns:
+            None
+        """
+        session = self.session()
+        session.query(PidTable).filter(PidTable.process_name == process_name).delete()
+        session.commit()
+        session.expunge_all()
+        self.engine.dispose()
