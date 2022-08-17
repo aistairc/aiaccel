@@ -504,10 +504,7 @@ class CreationOptimizer:
 
     def __init__(self, config_path: str) -> None:
         config = Config(config_path)
-        algorithm = config.search_algorithm.get()
-        if Path(algorithm).exists() is True:
-            algorithm = Path(algorithm)
-        self.optimizer = self.import_and_getattr(algorithm)
+        self.optimizer = self.import_and_getattr(config.search_algorithm.get())
 
     def __call__(self) -> Any:
         return self.optimizer
@@ -521,15 +518,17 @@ class CreationOptimizer:
         ) + ".py"
         return path
 
-    def import_and_getattr(self, name):
+    def import_and_getattr(self, name: str) -> Any:
         module_name, attr_name = name.rsplit(".", 1)
         pyfile = self.get_pyfile_path(module_name)
 
         if Path(pyfile).exists():
-            mod = SourceFileLoader('optimizer', pyfile).load_module()
+            # Import external modules not included in the aiaccel package.
+            module = SourceFileLoader('MyOptimizer', pyfile).load_module()
         else:
-            mod = import_module(module_name)
-        return getattr(mod, attr_name)
+            # It is assumed to be imported from aiaccel.optimizer.*.
+            module = import_module(module_name)
+        return getattr(module, attr_name)
 
 
 class Master(CreationMaster(Arguments()['config'])()):
