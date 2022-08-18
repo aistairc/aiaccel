@@ -8,7 +8,11 @@ class Serializer:
     def __init__(self, config: Config, process_name: str, options):
         self.config = config
         self.ws = Path(self.config.workspace.get()).resolve()
-        self.storage = Storage(self.ws)
+        self.storage = Storage(
+            self.ws,
+            fsmode=options['fs'],
+            config_path=options['config']
+        )
         self.process_name = process_name.lower()
         if self.process_name not in ['master', 'optimizer', 'scheduler']:
             raise
