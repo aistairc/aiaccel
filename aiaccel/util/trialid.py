@@ -38,9 +38,9 @@ class TrialId:
             return None
         return int(self.count_path.read_text())
 
-    def initial(self) -> None:
+    def initial(self, num: int = 0) -> None:
         if self.lock.acquire(timeout=aiaccel.file_hp_count_lock_timeout):
-            trial_id = 0
+            trial_id = num
             self.count_path.write_text('%d' % trial_id)
             self.lock.release()
 

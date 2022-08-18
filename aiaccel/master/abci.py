@@ -86,7 +86,6 @@ class AbciMaster(AbstractMaster):
         """
         self.get_stats()
         self.print_dict_state()
-        time.sleep(self.sleep_time)
 
         return True
 
