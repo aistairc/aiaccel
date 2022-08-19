@@ -24,10 +24,8 @@ from .common import dict_jobstate
 from .common import dict_result
 from .common import dict_runner
 from .common import dict_verification
-from .common import dict_serialize
 from .common import dict_storage
 from .common import dict_timestamp
-from .common import dict_randomstate
 from .common import dict_snapshot
 from .common import extension_hp
 from .common import extension_pickle
@@ -87,10 +85,8 @@ __all__ = [
     dict_finished,
     dict_result,
     dict_runner,
-    dict_serialize,
     dict_storage,
     dict_timestamp,
-    dict_randomstate,
     dict_verification,
     dict_snapshot,
     extension_hp,

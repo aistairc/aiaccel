@@ -25,8 +25,6 @@ class Workspace:
         self.pid = self.path / aiaccel.dict_pid
         self.result = self.path / aiaccel.dict_result
         self.runner = self.path / aiaccel.dict_runner
-        self.ramdomstate = self.path / aiaccel.dict_randomstate
-        self.serialize = self.path / aiaccel.dict_serialize
         self.storage = self.path / aiaccel.dict_storage
         self.snapshpt = self.path / aiaccel.dict_snapshot
         self.timestamp = self.path / aiaccel.dict_timestamp
