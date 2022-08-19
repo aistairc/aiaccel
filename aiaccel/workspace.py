@@ -14,7 +14,6 @@ class Workspace:
         self.alive = self.path / aiaccel.dict_alive
         self.error = self.path / aiaccel.dict_error
         self.hp = self.path / aiaccel.dict_hp
-        self.hp_new = self.path / aiaccel.dict_hp / aiaccel.dict_new
         self.hp_ready = self.path / aiaccel.dict_hp / aiaccel.dict_ready
         self.hp_running = self.path / aiaccel.dict_hp / aiaccel.dict_running
         self.hp_finished = self.path / aiaccel.dict_hp / aiaccel.dict_finished

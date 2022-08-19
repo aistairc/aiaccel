@@ -18,7 +18,6 @@ from .common import dict_hp_running
 from .common import dict_hp_finished
 from .common import dict_lock
 from .common import dict_log
-from .common import dict_new
 from .common import dict_output
 from .common import dict_jobstate
 from .common import dict_result
@@ -77,7 +76,6 @@ __all__ = [
     dict_hp_finished,
     dict_lock,
     dict_log,
-    dict_new,
     dict_output,
     dict_jobstate,
     dict_ready,
