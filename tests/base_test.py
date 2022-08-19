@@ -229,7 +229,6 @@ class BaseTest(object):
         self.work_dir = work_dir
 
         self.dict_lock = work_dir.joinpath('lock')
-        self.dict_state = work_dir.joinpath('state')
 
         self.config_grid = Config(self.grid_config_json)
 

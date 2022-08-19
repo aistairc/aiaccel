@@ -71,27 +71,6 @@ class TestAbstractModule(BaseTest):
         yield
         self.module = None
 
-    # def test_make_work_directory(self, work_dir):
-    #     assert self.module.make_work_directory() is None
-
-    #     file_create(work_dir.joinpath(aiaccel.dict_state, 'test.txt'), "")
-    #     try:
-    #         self.module.make_work_directory()
-    #         assert True
-    #     except NotImplementedError:
-    #         assert False
-
-    #     work_dir.joinpath(aiaccel.dict_state, 'test.txt').unlink()
-    #     shutil.rmtree(work_dir.joinpath(aiaccel.dict_lock))
-    #     file_create(work_dir.joinpath(aiaccel.dict_lock), "")
-    #     assert self.module.make_work_directory() is None
-
-    # def test_check_work_directory(self, work_dir):
-    #     shutil.rmtree(work_dir.joinpath(aiaccel.dict_runner))
-    #     assert not self.module.check_work_directory()
-    #     work_dir.joinpath(aiaccel.dict_runner).mkdir()
-    #     assert self.module.check_work_directory()
-
     def test_get_each_state_count(self):
         assert self.module.get_each_state_count() is None
         assert self.module.hp_ready == 0

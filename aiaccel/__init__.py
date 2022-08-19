@@ -20,7 +20,6 @@ from .common import dict_lock
 from .common import dict_log
 from .common import dict_new
 from .common import dict_output
-from .common import dict_state
 from .common import dict_jobstate
 from .common import dict_result
 from .common import dict_runner
@@ -83,7 +82,6 @@ __all__ = [
     dict_new,
     dict_output,
     dict_jobstate,
-    dict_state,
     dict_ready,
     dict_running,
     dict_finished,
