@@ -776,18 +776,18 @@ class NelderMead(object):
             for v in dict_objects['_history'][key]:
                 if type(v) is list:
                     history[key].append(
-                        np.array(dict_objects['_history'][key])
+                        np.array(v)
                     )
                 elif type(v) is float:
                     history[key].append(
-                        np.float64(dict_objects['_history'][key])
+                        np.float64(v)
                     )
                 elif type(v) is int:
                     history[key].append(
-                        np.int64(dict_objects['_history'][key])
+                        np.int64(v)
                     )
                 else:
-                    history[key].append(dict_objects['_history'][key])
+                    history[key].append(v)
 
         executing = copy.deepcopy(dict_objects['_executing'])
         for e in executing:
