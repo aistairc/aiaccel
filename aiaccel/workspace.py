@@ -27,8 +27,6 @@ class Workspace:
         self.storage = self.path / aiaccel.dict_storage
         self.snapshpt = self.path / aiaccel.dict_snapshot
         self.timestamp = self.path / aiaccel.dict_timestamp
-        self.trial = self.path / aiaccel.dict_trial
-
         self.verification = self.path / aiaccel.dict_verification
 
         self.consists = [
@@ -45,8 +43,6 @@ class Workspace:
             self.pid,
             self.result,
             self.runner,
-            self.ramdomstate,
-            self.serialize,
             self.storage,
             self.snapshpt,
             self.timestamp,

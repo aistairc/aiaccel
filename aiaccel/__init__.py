@@ -7,7 +7,6 @@ from .common import class_scheduler
 from .common import dict_work
 from .common import dict_alive
 from .common import dict_pid
-from .common import dict_trial
 from .common import dict_error
 from .common import dict_ready
 from .common import dict_running
@@ -68,7 +67,6 @@ __all__ = [
     dict_work,
     dict_alive,
     dict_pid,
-    dict_trial,
     dict_error,
     dict_hp,
     dict_hp_ready,
