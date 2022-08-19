@@ -495,3 +495,8 @@ class SnapShot:
                 files = list(self.ss_hp[hp_dir].keys())
                 for file in files:
                     fs.create_yaml(file, self.ss_hp[hp_dir][file])
+
+    def delete(self, trial_id: int):
+        base_dir_path = self.ws / 'state' / str(trial_id)
+        if base_dir_path.exists():
+            shutil.rmtree(base_dir_path)

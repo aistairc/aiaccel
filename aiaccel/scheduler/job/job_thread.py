@@ -747,7 +747,7 @@ class Model(object):
             if error is not None:
                 content['error'] = error
 
-            create_yaml(obj.result_file_path, content)
+            # create_yaml(obj.result_file_path, content)
 
     # Expire
     def after_expire(self, obj: 'Job') -> None:
