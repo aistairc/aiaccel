@@ -2,12 +2,13 @@ import pathlib
 import shutil
 import time
 import aiaccel
-from aiaccel.util import filesystem as fs
 from aiaccel import parameter as pt
 from aiaccel.config import Config
+from aiaccel.util import filesystem as fs
 from aiaccel.util.terminal import Terminal
-from aiaccel.storage.storage import Storage
 from aiaccel.util.report import CreationReaport
+from aiaccel.util.trialid import TrialId
+from aiaccel.storage.storage import Storage
 from aiaccel.argument import Arguments
 from aiaccel.master.create import create_master
 from aiaccel.workspace import Workspace
@@ -39,10 +40,6 @@ def main(options: dict = Arguments()) -> None:
         if options['clean'] is True:
             print("Cleaning workspace")
             workspace.clean()
-
-            time.sleep(config.sleep_time_master.get())
-            # Waiting for modification of launched processes
-
             print(f'Workspace directory {str(workspace.path)} is cleaned.')
         else:
             if workspace.exists():
@@ -60,6 +57,12 @@ def main(options: dict = Arguments()) -> None:
         config_path=config.config_path
     )
     storage.alive.init_alive()
+
+    if options['resume'] is not None:
+        resume_trial_id = int(options['resume'])
+        storage.delete_trial_data_after_this(resume_trial_id)
+        trial_id = TrialId(options['config'])
+        trial_id.initial(num=resume_trial_id)
 
     print(f"Start {config.search_algorithm.get()} Optimization")
     print(f"config: {str(pathlib.Path(options['config']).resolve())}")

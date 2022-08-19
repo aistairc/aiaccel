@@ -88,7 +88,7 @@ class AbstractMaster(AbstractModule):
             self.storage.alive.check_alive('optimizer') is False or
             self.storage.alive.check_alive('scheduler') is False
         ):
-            time.sleep(self.sleep_time)
+            time.sleep(1.0)
             c += 1
 
             if c >= self.config.init_fail_count.get():
