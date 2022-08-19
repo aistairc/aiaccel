@@ -46,7 +46,6 @@ class Workspace:
             self.storage,
             self.snapshpt,
             self.timestamp,
-            self.trial,
             self.verification
         ]
         self.results = pathlib.Path("./results")
