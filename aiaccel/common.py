@@ -56,16 +56,14 @@ module_type_master = 'master'
 module_type_optimizer = 'optimizer'
 module_type_scheduler = 'scheduler'
 
-pkg_name = "aiaccel"
-
 resource_type_local = 'local'
 resource_type_abci = 'abci'
 
-search_algorithm_grid = 'aiaccel.optimizer.grid.search.GridOptimizer'
-search_algorithm_nelder_mead = 'aiaccel.optimizer.nelder_mead.search.NelderMeadOptimizer'
-search_algorithm_random = 'aiaccel.optimizer.random.search.RandomOptimizer'
-search_algorithm_sobol = 'aiaccel.optimizer.sobol.search.SobolOptimizer'
-search_algorithm_tpe = 'aiaccel.optimizer.tpe.search.TpeOptimizer'
+search_algorithm_grid = 'aiaccel.optimizer.GridOptimizer'
+search_algorithm_nelder_mead = 'aiaccel.optimizer.NelderMeadOptimizer'
+search_algorithm_random = 'aiaccel.optimizer.RandomOptimizer'
+search_algorithm_sobol = 'aiaccel.optimizer.SobolOptimizer'
+search_algorithm_tpe = 'aiaccel.optimizer.TpeOptimizer'
 
 
 def get_module_type_from_class_name(class_name: str) -> str:

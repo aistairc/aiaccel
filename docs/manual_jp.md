@@ -185,7 +185,7 @@ ABCI:
 **サンプル**
 ```yaml
 optimize:
-  search_algorithm: "NelderMeadOptimizer"
+  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
   goal: "minimize"
   trial_number: 30
   rand_seed: 42
@@ -417,7 +417,7 @@ ABCI:
   job_execution_options: ""
 
 optimize:
-  search_algorithm: "NelderMeadOptimizer"
+  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
   goal: "minimize"
   trial_number: 30
   rand_seed: 42

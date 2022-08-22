@@ -57,7 +57,7 @@ default_config = {
         "job_execution_options": ""
     },
     "optimize": {
-        "search_algorithm": "aiaccel.optimizer.nelder_mead.search.NelderMeadOptimizer",
+        "search_algorithm": "aiaccel.optimizer.NelderMeadOptimizer",
         "goal": "minimize",
         "trial_number": 5,
         "rand_seed": 42,

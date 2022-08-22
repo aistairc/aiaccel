@@ -13,7 +13,7 @@
     "job_execution_options": ""
   },
   "optimize": {
-    "search_algorithm": "aiaccel.optimizer.tpe.search.TpeOptimizer",
+    "search_algorithm": "aiaccel.optimizer.TpeOptimizer",
     "goal": "minimize",
     "trial_number": 10,
     "rand_seed": 42,

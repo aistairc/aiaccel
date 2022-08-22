@@ -20,9 +20,7 @@ from aiaccel.util.suffix import Suffix
 from aiaccel.util.buffer import Buffer
 from aiaccel.config import Config
 from aiaccel.util.terminal import Terminal
-from pathlib import Path
 from importlib import import_module
-from importlib.machinery import SourceFileLoader
 
 
 class Arguments:
@@ -509,35 +507,18 @@ class CreationOptimizer:
     def __call__(self) -> Any:
         return self.optimizer
 
-    def get_pyfile_path(self, module_name: str) -> str:
-        file_name = (
-            module_name
-            .replace(".", "/")
-            .replace("//", "../")
-            .replace(" ", "")
-        )
-        return f'{file_name}.{"py"}'
-
     def import_and_getattr(self, name: str) -> Any:
-        if (
-            len(name.rsplit(".", 1)) == 1 and
-            name.rsplit(".", 1)[0] == name
-        ):
-            # To specify an standard optimizer, specify only the class name of
-            # the optimizer (e.g., NelderMeadIOtimizer).
-            # However, when calling, the package name must be added to
-            # the class name. (e.g. aiaccel.NelderMeadOptimizer)
-            name = f'{aiaccel.pkg_name}.{name}'
+        """ Imports the specified Optimizer class.
 
+        Args:
+            name(str): Optimizer class name
+                (e.g.) aiaccel.optimizer.NelderMeadOptimizer
+
+        Returns:
+            Any: <Optimizer class>
+        """
         module_name, attr_name = name.rsplit(".", 1)
-        pyfile = self.get_pyfile_path(module_name)
-
-        if Path(pyfile).exists():
-            # Import external modules not included in the aiaccel package.
-            module = SourceFileLoader('MyOptimizer', pyfile).load_module()
-        else:
-            # It is assumed to be imported from aiaccel.optimizer.*.
-            module = import_module(module_name)
+        module = import_module(module_name)
         return getattr(module, attr_name)
 
 
