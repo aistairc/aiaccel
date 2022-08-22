@@ -1,9 +1,9 @@
-from aiaccel.optimizer.sobol.search import SobolSearchOptimizer
+from aiaccel.optimizer.sobol.search import SobolOptimizer
 from tests.base_test import BaseTest
 import pytest
 
 
-class TestSobolSearchOptimizer(BaseTest):
+class TestSobolOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
@@ -16,7 +16,7 @@ class TestSobolSearchOptimizer(BaseTest):
             'graph': False,
             'process_name': 'optimizer'
         }
-        self.optimizer = SobolSearchOptimizer(options)
+        self.optimizer = SobolOptimizer(options)
         yield
         self.optimizer = None
 
