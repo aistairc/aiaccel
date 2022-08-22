@@ -7,7 +7,7 @@ import copy
 import numpy as np
 
 
-class NelderMeadSearchOptimizer(AbstractOptimizer):
+class NelderMeadOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
 
     Attributes:
@@ -16,7 +16,7 @@ class NelderMeadSearchOptimizer(AbstractOptimizer):
     """
 
     def __init__(self, options: dict) -> None:
-        """Initial method of NelderMeadSearchOptimizer.
+        """Initial method of NelderMeadOptimizer.
 
         Args:
             config (str): A file name of a configuration.

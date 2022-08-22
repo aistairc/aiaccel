@@ -13,7 +13,11 @@ ABCI:
   job_execution_options: ""
 
 optimize:
-  search_algorithm: "nelder-mead"
+  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
+  #search_algorithm: "aiaccel.optimizer.RandomOptimizer"
+  #search_algorithm: "aiaccel.optimizer.SobolOptimizer"
+  #search_algorithm: "aiaccel.optimizer.GridOptimizer"
+  #search_algorithm: "aiaccel.optimizer.TpeOptimizer"
   goal: "minimize"
   trial_number: 100
   rand_seed: 42

@@ -50,6 +50,7 @@ from .common import search_algorithm_tpe
 from .common import get_module_type_from_class_name
 from .common import get_file_random
 
+
 __all__ = [
     alive_master,
     alive_optimizer,
