@@ -4,6 +4,7 @@ import copy
 from typing import Union
 from typing import Any
 from fasteners import InterProcessLock
+import aiaccel
 from aiaccel.util import filesystem as fs
 from aiaccel.util.retry import retry
 import pickle
@@ -38,7 +39,6 @@ class SnapShot:
             ws (pathlib.Path)      : A path of workspace directory.
             ws_alive (pathlib.Path): A path of alive directory.
             ws_hp (pathlib.Path)   : A path of hp directory.
-            ws_state (pathlib.Path): A path of state directory.
             lock_file (dict)       : A set of lock file path and lock name.
             hp_dirs (list)         : directory names in hp.
             snap_shot (dict)       : snapshot data of any directory.
@@ -62,13 +62,13 @@ class SnapShot:
         self.ws = workspace.resolve()
         self.ws_alive = self.ws / 'alive'
         self.ws_hp = self.ws / 'hp'
-        self.ws_state = self.ws / 'state'
+        self.ws_snapshot = self.ws / aiaccel.dict_snapshot
         self.lock_file = {
             'hp': str(self.ws / 'lock' / 'hp'),
             'ready': str(self.ws / 'lock' / 'ready'),
             'running': str(self.ws / 'lock' / 'running'),
             'finished': str(self.ws / 'lock' / 'finished'),
-            'state': str(self.ws / 'lock' / 'state'),
+            'snapshot': str(self.ws / 'lock' / 'snapshot'),
             'serialize': str(self.ws / 'lock' / 'serialize'),
             'deserialize': str(self.ws / 'lock' / 'deserialize'),
             'num_gem_param_txt': str(self.ws / 'lock' / 'count'),
@@ -176,11 +176,11 @@ class SnapShot:
         if process_name == 'master':
             self.shot()
 
-        base_dir_path = self.ws / 'state' / str(trial_id)
+        base_dir_path = self.ws_snapshot / str(trial_id)
         native_dir_path = base_dir_path / 'native_random'
         numpy_dir_path = base_dir_path / 'numpy_random'
 
-        with InterProcessLock(self.lock_file['state']):
+        with InterProcessLock(self.lock_file['snapshot']):
             if not base_dir_path.exists():
                 base_dir_path.mkdir()
 
@@ -196,7 +196,7 @@ class SnapShot:
         save_file_path = base_dir_path / 'hp.yaml'
         if not save_file_path.exists():
             # Save only once per trial.
-            with InterProcessLock(self.lock_file['state']):
+            with InterProcessLock(self.lock_file['snapshot']):
                 if process_name == 'master':
                     data = self.create_data()
                     self.hp_status_recoard_yml(save_file_path, data)
@@ -235,7 +235,7 @@ class SnapShot:
         # Write process memory objects
         pmo_file_path = base_dir_path / f'{process_name}.yaml'
         if not pmo_file_path.exists():
-            with InterProcessLock(self.lock_file['state']):
+            with InterProcessLock(self.lock_file['snapshot']):
                 fs.create_yaml(pmo_file_path, optimization_variables)
 
     def _update_inner_loop_count(
@@ -257,7 +257,7 @@ class SnapShot:
             * The "inner loop counter" is not used for internal control.
             * See "module.py" for the meaning of "inner loop"
         """
-        base_dir_path = self.ws / 'state' / str(trial_id)
+        base_dir_path = self.ws_snapshot / str(trial_id)
         file_path = base_dir_path / 'hp.yaml'
         if not file_path.exists():
             self.ss_loop_count[process_name] = inner_loop_count
@@ -275,7 +275,7 @@ class SnapShot:
         Returns:
             None
         """
-        base_dir_path = self.ws / 'state' / str(trial_id)
+        base_dir_path = self.ws_snapshot / str(trial_id)
         file_path = base_dir_path / 'hp.yaml'
         if not file_path.exists():
             return
@@ -336,7 +336,7 @@ class SnapShot:
         Returns:
             None
         """
-        ss_files = list(self.ws_state.glob("*"))
+        ss_files = list(self.ws_snapshot.glob("*"))
         if len(ss_files) == 0:
             return False
         # ss_files.sort()
@@ -356,7 +356,7 @@ class SnapShot:
         Note:
             Replace the contents of the directory
         """
-        base_dir_path = self.ws / 'state' / str(trial_id)
+        base_dir_path = self.ws_snapshot / str(trial_id)
         native_dir_path = base_dir_path / 'native_random'
         numpy_dir_path = base_dir_path / 'numpy_random'
 
@@ -373,7 +373,7 @@ class SnapShot:
         if process_name == 'master':
             filename = 'hp.yaml'
             load_file_path = base_dir_path / filename
-            with InterProcessLock(self.lock_file['state']):
+            with InterProcessLock(self.lock_file['snapshot']):
                 if not load_file_path.exists():
                     return False
                 load_data = fs.load_yaml(load_file_path)
@@ -385,7 +385,7 @@ class SnapShot:
 
         # native random file
         load_path = native_dir_path / (process_name + '.pickle')
-        with InterProcessLock(self.lock_file['state']):
+        with InterProcessLock(self.lock_file['snapshot']):
             if not load_path.exists():
                 return False
             with open(load_path, 'rb') as f:
@@ -393,7 +393,7 @@ class SnapShot:
 
         # numpy random file
         load_path = numpy_dir_path / (process_name + '.pickle')
-        with InterProcessLock(self.lock_file['state']):
+        with InterProcessLock(self.lock_file['snapshot']):
             if not load_path.exists():
                 return False
             with open(load_path, 'rb') as f:
@@ -406,7 +406,7 @@ class SnapShot:
             if dst.exists():
                 dst.unlink()
 
-            with InterProcessLock(self.lock_file['state']):
+            with InterProcessLock(self.lock_file['snapshot']):
                 if src.exists():
                     shutil.copy(src, dst)
 
@@ -416,13 +416,13 @@ class SnapShot:
             if dst.exists():
                 dst.unlink()
 
-            with InterProcessLock(self.lock_file['state']):
+            with InterProcessLock(self.lock_file['snapshot']):
                 if src.exists():
                     shutil.copy(src, dst)
 
         # Load process memory objects
         pmo_file_path = base_dir_path / f'{process_name}.yaml'
-        with InterProcessLock(self.lock_file['state']):
+        with InterProcessLock(self.lock_file['snapshot']):
             if not pmo_file_path.exists():
                 return False
             self.optimization_variables = fs.load_yaml(pmo_file_path)
@@ -439,7 +439,7 @@ class SnapShot:
         Returns:
             pathlib.Path: save directory path
         """
-        return (self.ws / 'state' / str(trial_id))
+        return (self.ws_snapshot / str(trial_id))
 
     def get_inner_loop_counter(self, trial_id: int) -> Union[int, None]:
         """ Get the value of the inner loop counter for a given
@@ -451,7 +451,7 @@ class SnapShot:
         Returns:
             Int value if target file exists, or None if it does not exist.
         """
-        base_dir_path = self.ws / 'state' / str(trial_id)
+        base_dir_path = self.ws_snapshot / str(trial_id)
         if not base_dir_path.exists():
             return None
 
@@ -460,7 +460,7 @@ class SnapShot:
         if not load_file_path.exists():
             return None
 
-        with InterProcessLock(self.lock_file['state']):
+        with InterProcessLock(self.lock_file['snapshot']):
             load_data = fs.load_yaml(load_file_path)
             inner_loop_counter = load_data['loop_count']
         return inner_loop_counter
@@ -495,3 +495,8 @@ class SnapShot:
                 files = list(self.ss_hp[hp_dir].keys())
                 for file in files:
                     fs.create_yaml(file, self.ss_hp[hp_dir][file])
+
+    def delete(self, trial_id: int):
+        base_dir_path = self.ws_snapshot / str(trial_id)
+        if base_dir_path.exists():
+            shutil.rmtree(base_dir_path)

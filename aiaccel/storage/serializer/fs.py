@@ -58,6 +58,9 @@ class Serializer():
             self.snapshot.random_state_numpy
         )
 
+    def delete_any_trial_serialize(self, trial_id: int) -> None:
+        self.snapshot.delete(trial_id)
+
     def is_exists_any_trial(self, trial_id: int):
         process_names = [
             'master',

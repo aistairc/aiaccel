@@ -104,6 +104,12 @@ class Datalist:
         self.arr[index].write(set_data)
 
     def remove(self, index: int):
+        if self.len == 0:
+            return None
+        if index > self.len - 1:
+            return None
+        if self.arr[index] is None:
+            return None
         self.arr[index].remove()
 
     @property
@@ -257,6 +263,12 @@ class _trial(_base):
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def finished_to_running(self) -> None:
         self.finished.move(self.running.path)
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def delete(self) -> None:
+        self.ready.remove()
+        self.running.remove()
+        self.finished.remove()
 
 
 class _hp(_base):

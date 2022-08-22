@@ -14,7 +14,6 @@ class Workspace:
         self.alive = self.path / aiaccel.dict_alive
         self.error = self.path / aiaccel.dict_error
         self.hp = self.path / aiaccel.dict_hp
-        self.hp_new = self.path / aiaccel.dict_hp / aiaccel.dict_new
         self.hp_ready = self.path / aiaccel.dict_hp / aiaccel.dict_ready
         self.hp_running = self.path / aiaccel.dict_hp / aiaccel.dict_running
         self.hp_finished = self.path / aiaccel.dict_hp / aiaccel.dict_finished
@@ -25,14 +24,9 @@ class Workspace:
         self.pid = self.path / aiaccel.dict_pid
         self.result = self.path / aiaccel.dict_result
         self.runner = self.path / aiaccel.dict_runner
-        self.ramdomstate = self.path / aiaccel.dict_randomstate
-        self.serialize = self.path / aiaccel.dict_serialize
-        self.state = self.path / aiaccel.dict_state
         self.storage = self.path / aiaccel.dict_storage
         self.snapshpt = self.path / aiaccel.dict_snapshot
         self.timestamp = self.path / aiaccel.dict_timestamp
-        self.trial = self.path / aiaccel.dict_trial
-
         self.verification = self.path / aiaccel.dict_verification
 
         self.consists = [
@@ -49,13 +43,9 @@ class Workspace:
             self.pid,
             self.result,
             self.runner,
-            self.ramdomstate,
-            self.serialize,
-            self.state,
             self.storage,
             self.snapshpt,
             self.timestamp,
-            self.trial,
             self.verification
         ]
         self.results = pathlib.Path("./results")
@@ -120,91 +110,3 @@ class Workspace:
 
         shutil.copytree(self.path, dst)
         return dst
-
-    # @property
-    # def alive(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_alive
-
-    # @property
-    # def error(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_error
-
-    # @property
-    # def hp(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_hp
-
-    # @property
-    # def jobstate(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_jobstate
-
-    # @property
-    # def lock(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_lock
-
-    # @property
-    # def log(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_log
-
-    # @property
-    # def output(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_output
-
-    # @property
-    # def pid(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_pid
-
-    # @property
-    # def result(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_result
-
-    # @property
-    # def runner(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_runner
-
-    # @property
-    # def randomstate(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_randomstate
-
-    # @property
-    # def serialize(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_serialize
-
-    # @property
-    # def state(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_state
-
-    # @property
-    # def storage(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_storage
-
-    # @property
-    # def snapshpt(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_snapshot
-
-    # @property
-    # def timestamp(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_timestamp
-
-    # @property
-    # def trial(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_trial
-
-    # @property
-    # def ready(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_trial / aiaccel.dict_ready
-
-    # @property
-    # def running(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_trial / aiaccel.dict_running
-
-    # @property
-    # def finished(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_trial / aiaccel.dict_finished
-
-    # @property
-    # def verification(self) -> PosixPath:
-    #     return self.path / aiaccel.dict_verification
-
-    # @property
-    # def results(self) -> PosixPath:
-    #     return pathlib.Path("./results")

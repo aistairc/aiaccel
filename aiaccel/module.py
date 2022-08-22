@@ -36,7 +36,6 @@ class AbstractModule(object):
         dict_log (Path): A path to log directory.
         dict_output (Path): A path to output directory.
         dict_runner (Path): A path to runner directory.
-        dict_state (Path): A path to state directory.
         dict_verification (Path): A path to verification directory.
         hp_finished (int): A number of files in hp/finished directory.
         hp_ready (int): A number of files in hp/ready directory.
@@ -74,7 +73,6 @@ class AbstractModule(object):
         self.dict_output = self.ws / aiaccel.dict_output
         self.dict_result = self.ws / aiaccel.dict_result
         self.dict_runner = self.ws / aiaccel.dict_runner
-        self.dict_state = self.ws / aiaccel.dict_state
         self.dict_verification = self.ws / aiaccel.dict_verification
         self.dict_hp_ready = self.ws / aiaccel.dict_hp_ready
         self.dict_hp_running = self.ws / aiaccel.dict_hp_running

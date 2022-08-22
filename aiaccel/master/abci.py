@@ -3,7 +3,6 @@ from aiaccel.master.abstract import AbstractMaster
 from aiaccel.util.filesystem import get_dict_files
 import aiaccel
 import subprocess
-import time
 
 
 class AbciMaster(AbstractMaster):
@@ -86,7 +85,6 @@ class AbciMaster(AbstractMaster):
         """
         self.get_stats()
         self.print_dict_state()
-        time.sleep(self.sleep_time)
 
         return True
 

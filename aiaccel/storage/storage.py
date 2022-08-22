@@ -34,7 +34,8 @@ class Storage:
         fsmode: bool = False,
         config_path: PosixPath = None
     ) -> None:
-        if fsmode is True:
+        self.fsmode = fsmode
+        if self.fsmode is True:
             if config_path is None:
                 assert False
             config = Config(config_path)
@@ -275,3 +276,14 @@ class Storage:
         r = self.result.get_any_trial_objective(trial_id=trial_id)
         e = self.error.get_any_trial_error(trial_id=trial_id)
         return (r, e)
+
+    def delete_trial_data_after_this(self, trial_id: int) -> None:
+        max_trial_id = self.current_max_trial_number()
+        for i in range(trial_id + 1, max_trial_id + 1):
+            self.error.delete_any_trial_error(i)
+            self.jobstate.delete_any_trial_jobstate(i)
+            self.result.delete_any_trial_objective(i)
+            self.serializer.delete_any_trial_serialize(i)
+            self.timestamp.delete_any_trial_timestamp(i)
+            self.trial.delete_any_trial_state(i)
+            self.hp.delete_any_trial_params(i)
