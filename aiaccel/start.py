@@ -510,15 +510,25 @@ class CreationOptimizer:
         return self.optimizer
 
     def get_pyfile_path(self, module_name: str) -> str:
-        path = (
+        file_name = (
             module_name
             .replace(".", "/")
             .replace("//", "../")
             .replace(" ", "")
-        ) + ".py"
-        return path
+        )
+        return f'{file_name}.{"py"}'
 
     def import_and_getattr(self, name: str) -> Any:
+        if (
+            len(name.rsplit(".", 1)) == 1 and
+            name.rsplit(".", 1)[0] == name
+        ):
+            # To specify an standard optimizer, specify only the class name of
+            # the optimizer (e.g., NelderMeadIOtimizer).
+            # However, when calling, the package name must be added to
+            # the class name. (e.g. aiaccel.NelderMeadOptimizer)
+            name = f'{aiaccel.pkg_name}.{name}'
+
         module_name, attr_name = name.rsplit(".", 1)
         pyfile = self.get_pyfile_path(module_name)
 

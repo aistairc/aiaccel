@@ -13,7 +13,7 @@
     "job_execution_options": ""
   },
   "optimize": {
-    "search_algorithm": "aiaccel.optimizer.random.search.RandomSearchOptimizer",
+    "search_algorithm": "aiaccel.optimizer.random.search.RandomOptimizer",
     "goal": "minimize",
     "trial_number": 10,
     "rand_seed": 42,

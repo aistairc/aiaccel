@@ -19,7 +19,7 @@
     "group": "gaa"
   },
   "optimize": {
-    "search_algorithm": "aiaccel.optimizer.nelder_mead.search.NelderMeadSearchOptimizer",
+    "search_algorithm": "aiaccel.optimizer.nelder_mead.search.NelderMeadOptimizer",
     "goal": "minimize",
     "trial_number": 10,
     "parameters": [

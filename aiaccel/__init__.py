@@ -40,6 +40,7 @@ from .common import key_project_name
 from .common import module_type_master
 from .common import module_type_optimizer
 from .common import module_type_scheduler
+from .common import pkg_name
 from .common import resource_type_abci
 from .common import resource_type_local
 from .common import search_algorithm_grid
@@ -49,6 +50,11 @@ from .common import search_algorithm_sobol
 from .common import search_algorithm_tpe
 from .common import get_module_type_from_class_name
 from .common import get_file_random
+from .optimizer.grid.search import GridOptimizer
+from .optimizer.random.search import RandomOptimizer
+from .optimizer.sobol.search import SobolOptimizer
+from .optimizer.nelder_mead.search import NelderMeadOptimizer
+from .optimizer.tpe.search import TpeOptimizer
 
 __all__ = [
     alive_master,
@@ -95,11 +101,17 @@ __all__ = [
     module_type_scheduler,
     resource_type_abci,
     resource_type_local,
+    pkg_name,
     search_algorithm_grid,
     search_algorithm_nelder_mead,
     search_algorithm_random,
     search_algorithm_sobol,
     search_algorithm_tpe,
     get_module_type_from_class_name,
-    get_file_random
+    get_file_random,
+    GridOptimizer,
+    RandomOptimizer,
+    SobolOptimizer,
+    NelderMeadOptimizer,
+    TpeOptimizer
 ]

@@ -4,6 +4,7 @@ from pathlib import Path
 
     * Import this as follows:
 """
+
 alive_master = 'master.yml'
 alive_optimizer = 'optimizer.yml'
 alive_scheduler = 'scheduler.yml'
@@ -55,14 +56,16 @@ module_type_master = 'master'
 module_type_optimizer = 'optimizer'
 module_type_scheduler = 'scheduler'
 
+pkg_name = "aiaccel"
+
 resource_type_local = 'local'
 resource_type_abci = 'abci'
 
-search_algorithm_grid = 'aiaccel.optimizer.grid.search.GridSearchOptimizer'
+search_algorithm_grid = 'aiaccel.optimizer.grid.search.GridOptimizer'
 search_algorithm_nelder_mead = 'aiaccel.optimizer.nelder_mead.search.NelderMeadOptimizer'
-search_algorithm_random = 'aiaccel.optimizer.random.search.RandomSearchOptimizer'
-search_algorithm_sobol = 'aiaccel.optimizer.sobol.search.SobolSearchOptimizer'
-search_algorithm_tpe = 'aiaccel.optimizer.tpe.search.TpeSearchOptimizer'
+search_algorithm_random = 'aiaccel.optimizer.random.search.RandomOptimizer'
+search_algorithm_sobol = 'aiaccel.optimizer.sobol.search.SobolOptimizer'
+search_algorithm_tpe = 'aiaccel.optimizer.tpe.search.TpeOptimizer'
 
 
 def get_module_type_from_class_name(class_name: str) -> str:
