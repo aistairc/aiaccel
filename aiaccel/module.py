@@ -439,7 +439,6 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug('set native random state: {}'.format(state))
         random.setstate(state)
 
     def get_numpy_random_state(self) -> tuple:
@@ -462,7 +461,6 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug('set numpy random state: {}'.format(state))
         np.random.set_state(state)
 
     def check_error(self) -> bool:

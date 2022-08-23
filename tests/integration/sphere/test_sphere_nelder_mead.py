@@ -6,5 +6,5 @@ class TestSphereNelderMead(IntegrationTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = aiaccel.search_algorithm_nelder_mead
+        cls.search_algorithm = 'nelder-mead'
 

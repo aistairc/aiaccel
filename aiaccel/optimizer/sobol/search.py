@@ -3,7 +3,7 @@ from sobol_seq import i4_sobol
 from typing import Optional
 
 
-class SobolSearchOptimizer(AbstractOptimizer):
+class SobolOptimizer(AbstractOptimizer):
     """An optimizer class with sobol algorithm.
 
     Attributes:

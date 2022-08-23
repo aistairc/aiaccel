@@ -6,4 +6,4 @@ class TestSphereRandom(IntegrationTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = aiaccel.search_algorithm_random
+        cls.search_algorithm = 'random'

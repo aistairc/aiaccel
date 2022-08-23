@@ -60,7 +60,7 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
     return new_param
 
 
-class GridSearchOptimizer(AbstractOptimizer):
+class GridOptimizer(AbstractOptimizer):
     """An optimizer class with grid search algorithm.
 
     Attributes:
