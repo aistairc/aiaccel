@@ -60,9 +60,11 @@ def main(options: dict = Arguments()) -> None:
 
     if options['resume'] is not None:
         resume_trial_id = int(options['resume'])
+        storage.rollback_to_ready(resume_trial_id)
         storage.delete_trial_data_after_this(resume_trial_id)
         trial_id = TrialId(options['config'])
-        trial_id.initial(num=resume_trial_id)
+        trial_id.initial(num=resume_trial_id - 1)
+    storage = None
 
     print(f"Start {config.search_algorithm.get()} Optimization")
     print(f"config: {str(pathlib.Path(options['config']).resolve())}")

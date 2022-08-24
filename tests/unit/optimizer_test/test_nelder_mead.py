@@ -331,7 +331,7 @@ def test_nelder_mead_parameters(load_test_config):
                   'executing:', nelder_mead._executing_index,
                   'evaluated_itr:', nelder_mead._evaluated_itr)
 
-        # a functionality of NelderMeadSearchOptimizer::check_result()
+        # a functionality of NelderMeadOptimizer::check_result()
         # ready_params = nelder_mead.get_ready_parameters()
         ready_params = nelder_mead._executing
 
@@ -342,7 +342,7 @@ def test_nelder_mead_parameters(load_test_config):
             if debug:
                 print('\tsum:', rp['result'])
 
-        # a functionality of NelderMeadSearchOptimizer::generate_parameter()
+        # a functionality of NelderMeadOptimizer::generate_parameter()
         searched_params = nelder_mead.search()
 
         if searched_params is None:

@@ -69,7 +69,7 @@ class GridOptimizer(AbstractOptimizer):
     """
 
     def __init__(self, options: dict) -> None:
-        """Initial method of GridSearchOptimizer.
+        """Initial method of GridOptimizer.
 
         Args:
             config (str): A file name of a configuration.

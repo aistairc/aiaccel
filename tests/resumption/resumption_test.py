@@ -46,7 +46,8 @@ class ResumptionTest(IntegrationTest):
         commandline_args = [
             "start.py",
             "--config",
-            format(config_file)
+            format(config_file),
+            "--clean"
         ]
 
         if self.workspace.path.exists():
@@ -75,7 +76,6 @@ class ResumptionTest(IntegrationTest):
             "--config",
             format(config_file),
             "--resume",
-            # "5"
             "4"
         ]
         with patch.object(sys, 'argv', commandline_args):

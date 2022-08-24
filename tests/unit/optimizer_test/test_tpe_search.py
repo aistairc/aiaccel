@@ -1,12 +1,12 @@
 import pytest
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.tpe.search import TpeSearchOptimizer
+from aiaccel.optimizer.tpe.search import TpeOptimizer
 from aiaccel.optimizer.tpe.search import create_distributions
 from tests.base_test import BaseTest
 
 
-class TestTpeSearchOptimizer(BaseTest):
+class TestTpeOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir, data_dir):
@@ -17,7 +17,7 @@ class TestTpeSearchOptimizer(BaseTest):
             'fs': False,
             'process_name': 'optimizer'
         }
-        self.optimizer = TpeSearchOptimizer(options)
+        self.optimizer = TpeOptimizer(options)
         self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None

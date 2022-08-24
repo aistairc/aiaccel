@@ -14,7 +14,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
     """
 
     def __init__(self, options: dict) -> None:
-        """Initial method of NelderMeadSearchOptimizer.
+        """Initial method of NelderMeadOptimizer.
 
         Args:
             config (str): A file name of a configuration.
@@ -375,6 +375,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 if type(p_pool_param['value']) is float:
                     p_pool_param['value'] = np.float64(p_pool_param['value'])
 
+        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
         self.parameter_pool = parameter_pool
         self.nelder_mead = NelderMead(self.params.get_parameter_list())
         self.nelder_mead.deserialize(self.deserialize_datas['nelder_mead'])

@@ -79,7 +79,7 @@ class AbstractOptimizer(AbstractModule):
 
         # wd/
         self.trial_id.increment()
-        self._serialize()
+        
         param['trial_id'] = self.trial_id.get()
         # for p in param['parameters']:
         #     self.storage.hp.set_any_trial_param(
@@ -97,6 +97,8 @@ class AbstractOptimizer(AbstractModule):
             trial_id=param['trial_id'],
             state='ready'
         )
+
+        self._serialize()
 
         return param['trial_id']
 
