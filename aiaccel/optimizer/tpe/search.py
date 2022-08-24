@@ -203,31 +203,10 @@ class TpeOptimizer(AbstractOptimizer):
         self.study = self.deserialize_datas['study']
 
         # TODO: add deserialize trial_pool
-
-        runnings = self.storage.trial.get_running()
         running_trials = self.study.get_trials(states=(TrialState.RUNNING,))
 
-        for _ in range(len(running_trials)):
-            t = self.study.ask(self.distributions)
-
-            for trial_id in runnings:
-                trial_id_str = self.get_zero_padding_any_trial_id(trial_id)
-                rf_content = self.storage.get_hp_dict(trial_id_str)
-                rf_param_dict = {i['parameter_name']: i['value']for i in rf_content['parameters']}
-                match = True
-
-                for k, v in t.params.items():
-                    if rf_param_dict[k] != v:
-                        match = False
-                        break
-                if match:
-                    self.trial_pool[rf_content['trial_id']] = t
-                    break
-            else:
-                # debug
-                print('Running trial does not match any running files.')
-                print('\ttrial params: ', t.params)
-                raise ()
+        for t in running_trials:
+            self.trial_pool[t._trial_id] = optuna.trial.Trial(self.study, t._trial_id)
 
 
 def create_distributions(
