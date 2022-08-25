@@ -100,7 +100,7 @@ class TpeOptimizer(AbstractOptimizer):
             self.num_of_generated_parameter += 1
             number -= 1
 
-        for n in range(number):
+        for _ in range(number):
             # TPE has to be sequential.
             if (
                 (not self.is_startup_trials()) and

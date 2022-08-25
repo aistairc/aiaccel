@@ -80,26 +80,17 @@ class AbstractOptimizer(AbstractModule):
         # wd/
         self.trial_id.increment()
 
-        self._serialize()
-
         param['trial_id'] = self.trial_id.get()
-        # for p in param['parameters']:
-        #     self.storage.hp.set_any_trial_param(
-        #         trial_id=param['trial_id'],
-        #         param_name=p['parameter_name'],
-        #         param_value=p['value'],
-        #         param_type=p['type'],
-        #     )
         self.storage.hp.set_any_trial_params(
             trial_id=param['trial_id'],
             params=param['parameters']
         )
-
         self.storage.trial.set_any_trial_state(
             trial_id=param['trial_id'],
             state='ready'
         )
 
+        self._serialize()
         return param['trial_id']
 
     def generate_initial_parameter(self) -> Union[
