@@ -179,7 +179,6 @@ class TpeOptimizer(AbstractOptimizer):
         )
 
     def _deserialize(self, trial_id: int) -> None:
-
         """Deserialize this module.
 
         Args:
