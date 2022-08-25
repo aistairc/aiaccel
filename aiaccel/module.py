@@ -100,7 +100,7 @@ class AbstractModule(object):
             fsmode=options['fs'],
             config_path=self.config.config_path
         )
-        self.management_trial_id = TrialId(self.options['config'])
+        self.trial_id = TrialId(self.options['config'])
         self.serialize_datas = {}
         self.deserialize_datas = {}
 
@@ -514,4 +514,4 @@ class AbstractModule(object):
         self.storage.alive.init_alive()
 
     def get_zero_padding_any_trial_id(self, trial_id: int):
-        return self.management_trial_id.zero_padding_any_trial_id(trial_id)
+        return self.trial_id.zero_padding_any_trial_id(trial_id)

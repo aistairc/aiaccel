@@ -21,6 +21,9 @@ class TrialId:
         self.lock_path = self.dict_hp / aiaccel.file_hp_count_lock
         self.lock = fasteners.InterProcessLock(str(self.lock_path))
 
+        if self.get() is None:
+            self.initial()
+
     def zero_padding_any_trial_id(self, trial_id: int):
         return self.file_hp_count_fmt % trial_id
 

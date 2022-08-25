@@ -282,7 +282,7 @@ class Storage:
         for i in range(trial_id + 1, max_trial_id + 1):
             self.delete_trial(i)
 
-    def delete_trial(self, trial_id: int):
+    def delete_trial(self, trial_id: int) -> None:
         self.error.delete_any_trial_error(trial_id)
         self.jobstate.delete_any_trial_jobstate(trial_id)
         self.result.delete_any_trial_objective(trial_id)
@@ -292,8 +292,10 @@ class Storage:
         self.hp.delete_any_trial_params(trial_id)
 
     def rollback_to_ready(self, trial_id: int) -> None:
+        if self.hp.get_any_trial_params(trial_id) is None:
+            self.delete_trial(trial_id)
+            return
         self.error.delete_any_trial_error(trial_id)
         self.jobstate.delete_any_trial_jobstate(trial_id)
         self.result.delete_any_trial_objective(trial_id)
-        self.timestamp.delete_any_trial_timestamp(trial_id)
         self.trial.set_any_trial_state(trial_id, 'ready')

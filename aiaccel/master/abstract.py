@@ -80,6 +80,16 @@ class AbstractMaster(AbstractModule):
                 run Optimizer and Scheduler.
         """
         super().pre_process()
+
+        self.trial_id.initial(num=0)
+        resume_trial_id = self.options['resume']
+        if resume_trial_id is not None:
+            self.storage.rollback_to_ready(resume_trial_id)
+            self.storage.delete_trial_data_after_this(resume_trial_id)
+            self.trial_id.initial(num=resume_trial_id)
+
+        self.storage.alive.init_alive()
+
         self.start_optimizer()
         self.start_scheduler()
         c = 0
