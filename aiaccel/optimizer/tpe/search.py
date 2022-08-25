@@ -211,17 +211,18 @@ class TpeOptimizer(AbstractOptimizer):
 
         # Running trials asked before serialize are reflected in parameter_pool and storage.
         # serialize前にaskされたrunning trialを parameter_pool storage に反映
-        new_params = []
-        for param in self.params.get_parameter_list():
-            new_param = {
-                'parameter_name': param.name,
-                'type': param.type,
-                'value': running_trials[-1].params[param.name]
-            }
-            new_params.append(new_param)
+        if len(running_trials) > 0:
+            new_params = []
+            for param in self.params.get_parameter_list():
+                new_param = {
+                    'parameter_name': param.name,
+                    'type': param.type,
+                    'value': running_trials[-1].params[param.name]
+                }
+                new_params.append(new_param)
 
-        _trial_id = self.register_ready({'parameters': new_params})
-        self.parameter_pool[_trial_id] = new_params
+            _trial_id = self.register_ready({'parameters': new_params})
+            self.parameter_pool[_trial_id] = new_params
 
 
 def create_distributions(
