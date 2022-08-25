@@ -122,11 +122,11 @@ class TpeOptimizer(AbstractOptimizer):
                 }
                 new_params.append(new_param)
 
+            self.num_of_generated_parameter += 1
             trial_id = self.register_ready({'parameters': new_params})
             self.parameter_pool[trial_id] = new_params
             self.trial_pool[trial_id] = trial
             self.logger.info(f'newly added name: {trial_id} to parameter_pool')
-            self.num_of_generated_parameter += 1
 
     def create_study(self) -> None:
         """Create the optuna.study object and store it.
@@ -202,11 +202,27 @@ class TpeOptimizer(AbstractOptimizer):
         self.parameter_pool = parameter_pool
         self.study = self.deserialize_datas['study']
 
+        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
+
         # TODO: add deserialize trial_pool
         running_trials = self.study.get_trials(states=(TrialState.RUNNING,))
 
         for t in running_trials:
             self.trial_pool[t._trial_id] = optuna.trial.Trial(self.study, t._trial_id)
+
+        # Running trials asked before serialize are reflected in parameter_pool and storage.
+        # serialize前にaskされたrunning trialを parameter_pool storage に反映
+        new_params = []
+        for param in self.params.get_parameter_list():
+            new_param = {
+                'parameter_name': param.name,
+                'type': param.type,
+                'value': running_trials[-1].params[param.name]
+            }
+            new_params.append(new_param)
+
+        _trial_id = self.register_ready({'parameters': new_params})
+        self.parameter_pool[_trial_id] = new_params
 
 
 def create_distributions(
