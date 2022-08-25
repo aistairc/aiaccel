@@ -187,6 +187,7 @@ class TpeOptimizer(AbstractOptimizer):
         Returns:
             None
         """
+        self.trial_id.initial(num=trial_id-1)
         d = self.serialize.deserialize(trial_id)
         self.deserialize_datas = d['optimization_variables']
         self.set_native_random_state(d['native_random_state'])
@@ -207,7 +208,7 @@ class TpeOptimizer(AbstractOptimizer):
         running_trials = self.study.get_trials(states=(TrialState.RUNNING,))
 
         for t in running_trials:
-            self.trial_pool[t._trial_id] = optuna.trial.Trial(self.study, t._trial_id)
+            self.trial_pool[t._trial_id + 1] = optuna.trial.Trial(self.study, t._trial_id)
 
         # Running trials asked before serialize are reflected in parameter_pool and storage.
         # serialize前にaskされたrunning trialを parameter_pool storage に反映
