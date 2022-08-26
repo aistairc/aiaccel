@@ -28,11 +28,6 @@
   },
   "optimizer": {
     "optimizer_command": "python -m aiaccel.bin.optimizer",
-    "$optimizer_runner": "run_optimizer.sh",
-    "$1search_algorithm": "Random",
-    "$2search_algorithm": "Grid",
-    "$3search_algorithm": "Sobol",
-    "$$$search_algorithm": 'aiaccel.optimizer.NelderMeadOptimizer',
     "search_algorithm": "Tpe",
     "parameter_pool_size": 4,
     "sleep_time_optimizer": 1
