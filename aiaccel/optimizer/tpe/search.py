@@ -210,10 +210,7 @@ class TpeOptimizer(AbstractOptimizer):
                 }
                 new_params.append(new_param)
 
-            set_params = {'parameters': new_params}
-            set_params['trial_id'] = self.trial_id.get()
-
-            self.parameter_pool[set_params['trial_id']] = new_params
+            self.parameter_pool[self.trial_id.get()] = new_params
 
 
 def create_distributions(
