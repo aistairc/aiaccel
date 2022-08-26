@@ -176,7 +176,6 @@ class TpeOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        self.trial_id.initial(num=trial_id - 1)
         d = self.serialize.deserialize(trial_id)
         self.deserialize_datas = d['optimization_variables']
         self.set_native_random_state(d['native_random_state'])
@@ -211,8 +210,10 @@ class TpeOptimizer(AbstractOptimizer):
                 }
                 new_params.append(new_param)
 
-            _trial_id = self.register_ready({'parameters': new_params})
-            self.parameter_pool[_trial_id] = new_params
+            set_params = {'parameters': new_params}
+            set_params['trial_id'] = self.trial_id.get()
+
+            self.parameter_pool[set_params['trial_id']] = new_params
 
 
 def create_distributions(
