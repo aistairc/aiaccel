@@ -57,7 +57,6 @@ from .common import search_algorithm_sobol
 from .common import search_algorithm_tpe
 
 
-
 __all__ = [
     alive_master,
     alive_optimizer,
