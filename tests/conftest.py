@@ -5,6 +5,8 @@ from pathlib import Path
 import os
 import pytest
 import shutil
+from aiaccel.storage.storage import Storage
+import time
 
 WORK_SUB_DIRECTORIES = [
     'abci_output', 'alive', 'hp', 'hp/finished', 'hp/ready', 'hp/running',
@@ -52,7 +54,8 @@ def data_dir(root_dir):
 @pytest.fixture(scope="session")
 def get_one_parameter(data_dir):
     def _get_one_parameter():
-        path = data_dir.joinpath('work/hp/finished/001.hp')
+        # path = data_dir.joinpath('work/hp/finished/001.hp')
+        path = Path('/tmp/work/result/0.yml')
         return load_yaml(path)
 
     return _get_one_parameter
@@ -103,15 +106,18 @@ def setup_hp_files(data_dir, work_dir):
         if hp_type not in ['ready', 'running', 'finished']:
             hp_type = 'ready'
 
-        hp_files = list(data_dir.joinpath('work/hp/finished').glob('*.hp'))
-        n = min(n, len(hp_files))
+        # hp_files = list(data_dir.joinpath('work/hp/finished').glob('*.hp'))
+        # n = min(n, len(hp_files))
 
-        for i in range(1, n+1):
-            shutil.copyfile(
-                data_dir.joinpath('work/hp/finished/{:03}.hp'.format(i)),
-                work_dir.joinpath('hp/{}/{:03}.hp'.format(hp_type, i))
-            )
+        # for i in range(1, n+1):
+        #     shutil.copyfile(
+        #         data_dir.joinpath('work/hp/finished/{:03}.hp'.format(i)),
+        #         work_dir.joinpath('hp/{}/{:03}.hp'.format(hp_type, i))
+        #     )
 
+        storage = Storage(work_dir)
+        for i in range(n):
+            storage.trial.set_any_trial_state(trial_id=i, state=hp_type)
     return _setup_hp_files
 
 
@@ -142,16 +148,32 @@ def setup_hp_finished(setup_hp_files):
 @pytest.fixture(scope="session")
 def setup_result(data_dir: Path, work_dir: Path):
     def _setup_result(n=1):
-        files = list(data_dir.joinpath('work/result').glob('*.result'))
-        n = min(n, len(files))
+        # files = list(data_dir.joinpath('work/result').glob('*.result'))
+        # n = min(n, len(files))
 
-        for i in range(1, n+1):
-            shutil.copyfile(
-                data_dir.joinpath('work/result/{:03}.result'.format(i)),
-                work_dir.joinpath('result/{:03}.result'.format(i))
-            )
+        # for i in range(1, n+1):
+        #     shutil.copyfile(
+        #         data_dir.joinpath('work/result/{:03}.result'.format(i)),
+        #         work_dir.joinpath('result/{:03}.result'.format(i))
+        #     )
+        storage = Storage(work_dir)
+        running = storage.get_running()
+        print('dbg')
+        print(running)
+        for trial_id in running:
+            # storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
+            storage.result.set_any_trial_objective(trial_id=trial_id, objective=0)
 
     return _setup_result
+
+
+@pytest.fixture(scope="session")
+def database_remove(work_dir: Path):
+    def _database_remove():
+        p = work_dir / 'storage' / 'storage.db'
+        if p.exists():
+            p.unlink()
+    return _database_remove
 
 
 @pytest.fixture(scope="session", autouse=True)

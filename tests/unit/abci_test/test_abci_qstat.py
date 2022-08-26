@@ -1,4 +1,4 @@
-from aiaccel.abci.abci_qstat import parse_qstat, parse_job_list
+from aiaccel.abci.qstat import parse_qstat, parse_job_list
 import xml.etree.ElementTree as ElementTree
 
 

@@ -17,12 +17,11 @@ class TestNelderMeadOptimizer(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'optimizer'
         }
         self.optimizer = NelderMeadOptimizer(options)
+        self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None
 
@@ -43,16 +42,17 @@ class TestNelderMeadOptimizer(BaseTest):
         setup_result(1)
         # params = self.optimizer.nelder_mead.get_ready_parameters()
         params = self.optimizer.get_ready_parameters()
-        move_file(
-            work_dir.joinpath(
-                aiaccel.dict_result,
-                '001.{}'.format(aiaccel.extension_result)
-            ),
-            work_dir.joinpath(
-                aiaccel.dict_result,
-                '{}.{}'.format(params[0]['name'], aiaccel.extension_result)
-            )
-        )
+        print(params)
+        # move_file(
+        #     work_dir.joinpath(
+        #         aiaccel.dict_result,
+        #         '001.{}'.format(aiaccel.extension_result)
+        #     ),
+        #     work_dir.joinpath(
+        #         aiaccel.dict_result,
+        #         '{}.{}'.format(params[0]['vertex_id'], aiaccel.extension_result)
+        #     )
+        # )
         assert self.optimizer.check_result() is None
 
     def test_generate_parameter(
@@ -74,17 +74,17 @@ class TestNelderMeadOptimizer(BaseTest):
         params = self.optimizer.get_ready_parameters()
         assert params is not None
         setup_result(len(params))
-        for i in range(0, len(params)):
-            move_file(
-                work_dir.joinpath(
-                    aiaccel.dict_result,
-                    '{:03}.{}'.format(i+1, aiaccel.extension_result)
-                ),
-                work_dir.joinpath(
-                    aiaccel.dict_result,
-                    '{}.{}'.format(params[i]['name'], aiaccel.extension_result)
-                )
-            )
+        # for i in range(0, len(params)):
+        #     move_file(
+        #         work_dir.joinpath(
+        #             aiaccel.dict_result,
+        #             '{:03}.{}'.format(i+1, aiaccel.extension_result)
+        #         ),
+        #         work_dir.joinpath(
+        #             aiaccel.dict_result,
+        #             '{}.{}'.format(params[i]['name'], aiaccel.extension_result)
+        #         )
+        #     )
         assert self.optimizer.generate_parameter() is None
         assert self.optimizer.generate_parameter() is None
         assert self.optimizer.generate_parameter() is None
@@ -110,17 +110,17 @@ class TestNelderMeadOptimizer(BaseTest):
         # params = self.optimizer.get_ready_parameters()
         params = self.optimizer.nelder_mead._executing
         setup_result(len(params))
-        for i in range(0, len(params)):
-            move_file(
-                work_dir.joinpath(
-                    aiaccel.dict_result,
-                    '{:03}.{}'.format(i+1, aiaccel.extension_result)
-                ),
-                work_dir.joinpath(
-                    aiaccel.dict_result,
-                    '{}.{}'.format(params[i]['name'], aiaccel.extension_result)
-                )
-            )
+        # for i in range(0, len(params)):
+        #     move_file(
+        #         work_dir.joinpath(
+        #             aiaccel.dict_result,
+        #             '{:03}.{}'.format(i+1, aiaccel.extension_result)
+        #         ),
+        #         work_dir.joinpath(
+        #             aiaccel.dict_result,
+        #             '{}.{}'.format(params[i]['name'], aiaccel.extension_result)
+        #         )
+        #     )
         assert self.optimizer.generate_parameter() is None
         assert self.optimizer.generate_parameter() is None
 
@@ -181,9 +181,9 @@ class TestNelderMeadOptimizer(BaseTest):
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list()
         )
-        self.optimizer.nelder_mead._executing.append({'name': '001'})
+        self.optimizer.nelder_mead._executing.append({'vertex_id': '001'})
         # assert self.nm.update_ready_parameter_name('001', 'new') is None
-        pool_p = {"name": "001"}
+        pool_p = {"vertex_id": "001"}
         assert self.optimizer.update_ready_parameter_name(pool_p, 'new') is None
 
     def test_get_ready_parameters(

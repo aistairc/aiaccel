@@ -1,6 +1,9 @@
 from threading import local
-from aiaccel.config import BaseConfig, Config, ConfileWrapper, JsonOrYamlObjectConfig,\
-    load_config
+from aiaccel.config import BaseConfig
+from aiaccel.config import Config
+from aiaccel.config import ConfileWrapper
+from aiaccel.config import JsonOrYamlObjectConfig
+from aiaccel.config import load_config
 from tests.base_test import BaseTest
 import dataclasses
 import pytest
@@ -30,7 +33,6 @@ class TestJsonOrYamlObjectConfig(BaseTest):
         with open(config_json, 'r') as f:
             config = json.load(f)
         self.config = JsonOrYamlObjectConfig(config, 'json_object')
-        
 
     def test_init(self):
         try:
@@ -106,7 +108,7 @@ def test_config(config_json):
     assert config.resource_type.get() == "local"
     assert config.num_node.get() == 4
     assert config.abci_group.get() == "gaa"
-    assert config.search_algorithm.get() == "aiaccel.optimizer.NelderMeadOptimizer"
+    assert config.search_algorithm.get() == 'aiaccel.optimizer.NelderMeadOptimizer'
     assert config.goal.get() == "minimize"
     assert config.trial_number.get() == 10
     assert config.name_length.get() == 6
