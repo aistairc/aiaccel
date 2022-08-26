@@ -7,7 +7,6 @@ from optuna.trial import TrialState
 from typing import Optional
 import copy
 import numpy as np
-import pathlib
 
 
 class TpeOptimizer(AbstractOptimizer):
@@ -141,16 +140,6 @@ class TpeOptimizer(AbstractOptimizer):
                 direction=self.config.goal.get().lower()
             )
 
-    @property
-    def study_pickle_path(self) -> pathlib.Path:
-        """Returns the path object to store the pickled optuna.study object.
-
-        Returns:
-            pathlib.Path: the path object to store the pickled optuna.study
-            object.
-        """
-        return self.ws / 'state' / str(self.current_max_trial_number) / 'study.pkl'
-
     def _serialize(self) -> None:
         """Serialize this module.
 
@@ -187,7 +176,7 @@ class TpeOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        self.trial_id.initial(num=trial_id-1)
+        self.trial_id.initial(num=trial_id - 1)
         d = self.serialize.deserialize(trial_id)
         self.deserialize_datas = d['optimization_variables']
         self.set_native_random_state(d['native_random_state'])

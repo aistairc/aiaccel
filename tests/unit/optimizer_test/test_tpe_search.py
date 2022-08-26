@@ -44,9 +44,6 @@ class TestTpeOptimizer(BaseTest):
     def test_create_study(self):
         assert self.optimizer.create_study() is None
 
-    def test_study_pickle_path(self):
-        assert self.optimizer.study_pickle_path.name == 'study.pkl'
-
     def test_serialize(self):
         self.optimizer.trial_id.initial(num=0)
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
