@@ -5,6 +5,7 @@ from pathlib import Path
     * Import this as follows:
     * import aiaccel
 """
+
 alive_master = 'master.yml'
 alive_optimizer = 'optimizer.yml'
 alive_scheduler = 'scheduler.yml'
@@ -68,11 +69,11 @@ module_type_scheduler = 'scheduler'
 resource_type_local = 'local'
 resource_type_abci = 'abci'
 
-search_algorithm_grid = 'grid'
-search_algorithm_nelder_mead = 'nelder-mead'
-search_algorithm_random = 'random'
-search_algorithm_sobol = 'sobol'
-search_algorithm_tpe = 'tpe'
+search_algorithm_grid = 'aiaccel.optimizer.GridOptimizer'
+search_algorithm_nelder_mead = 'aiaccel.optimizer.NelderMeadOptimizer'
+search_algorithm_random = 'aiaccel.optimizer.RandomOptimizer'
+search_algorithm_sobol = 'aiaccel.optimizer.SobolOptimizer'
+search_algorithm_tpe = 'aiaccel.optimizer.TpeOptimizer'
 
 
 def get_module_type_from_class_name(class_name: str) -> str:

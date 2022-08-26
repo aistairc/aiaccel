@@ -3,6 +3,7 @@ from aiaccel.master.abstract import AbstractMaster
 from aiaccel.util.filesystem import get_dict_files
 import aiaccel
 import subprocess
+from aiaccel.util.filesystem import retry
 
 
 class AbciMaster(AbstractMaster):
@@ -44,6 +45,7 @@ class AbciMaster(AbstractMaster):
             "run_*.sh"
         )
 
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_stats(self) -> None:
         """Get a current status and update.
 

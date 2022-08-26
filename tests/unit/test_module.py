@@ -1,6 +1,6 @@
 from aiaccel.master.local import LocalMaster
 from aiaccel.module import AbstractModule
-from aiaccel.optimizer.random.search import RandomSearchOptimizer
+from aiaccel.optimizer.random.search import RandomOptimizer
 from aiaccel.scheduler.local import LocalScheduler
 from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
@@ -106,7 +106,7 @@ class TestAbstractModule(BaseTest):
                 'fs': False,
                 'process_name': 'optimizer'
             }
-            optimizer = RandomSearchOptimizer(options)
+            optimizer = RandomOptimizer(options)
             module_type = optimizer.get_module_type()
             assert module_type == aiaccel.module_type_optimizer
 

@@ -1,6 +1,6 @@
 from aiaccel.config import ConfileWrapper
 from aiaccel.optimizer.nelder_mead.sampler import NelderMead
-from aiaccel.optimizer.nelder_mead.search import NelderMeadSearchOptimizer
+from aiaccel.optimizer.nelder_mead.search import NelderMeadOptimizer
 from aiaccel.parameter import load_parameter
 from aiaccel.util.filesystem import move_file
 from tests.base_test import BaseTest
@@ -9,7 +9,7 @@ import json
 import pytest
 
 
-class TestNelderMeadSearchOptimizer(BaseTest):
+class TestNelderMeadOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
@@ -20,7 +20,7 @@ class TestNelderMeadSearchOptimizer(BaseTest):
             'fs': False,
             'process_name': 'optimizer'
         }
-        self.optimizer = NelderMeadSearchOptimizer(options)
+        self.optimizer = NelderMeadOptimizer(options)
         self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None

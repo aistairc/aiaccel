@@ -5,7 +5,7 @@ import copy
 import numpy as np
 
 
-class NelderMeadSearchOptimizer(AbstractOptimizer):
+class NelderMeadOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
 
     Attributes:
@@ -375,6 +375,7 @@ class NelderMeadSearchOptimizer(AbstractOptimizer):
                 if type(p_pool_param['value']) is float:
                     p_pool_param['value'] = np.float64(p_pool_param['value'])
 
+        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
         self.parameter_pool = parameter_pool
         self.nelder_mead = NelderMead(self.params.get_parameter_list())
         self.nelder_mead.deserialize(self.deserialize_datas['nelder_mead'])

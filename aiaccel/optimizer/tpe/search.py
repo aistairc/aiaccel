@@ -7,10 +7,9 @@ from optuna.trial import TrialState
 from typing import Optional
 import copy
 import numpy as np
-import pathlib
 
 
-class TpeSearchOptimizer(AbstractOptimizer):
+class TpeOptimizer(AbstractOptimizer):
     def __init__(self, options: dict) -> None:
         """Initial method of TpeSearchOptimizer.
 
@@ -100,7 +99,7 @@ class TpeSearchOptimizer(AbstractOptimizer):
             self.num_of_generated_parameter += 1
             number -= 1
 
-        for n in range(number):
+        for _ in range(number):
             # TPE has to be sequential.
             if (
                 (not self.is_startup_trials()) and
@@ -122,11 +121,11 @@ class TpeSearchOptimizer(AbstractOptimizer):
                 }
                 new_params.append(new_param)
 
+            self.num_of_generated_parameter += 1
             trial_id = self.register_ready({'parameters': new_params})
             self.parameter_pool[trial_id] = new_params
             self.trial_pool[trial_id] = trial
             self.logger.info(f'newly added name: {trial_id} to parameter_pool')
-            self.num_of_generated_parameter += 1
 
     def create_study(self) -> None:
         """Create the optuna.study object and store it.
@@ -140,16 +139,6 @@ class TpeSearchOptimizer(AbstractOptimizer):
                 study_name=self.study_name,
                 direction=self.config.goal.get().lower()
             )
-
-    @property
-    def study_pickle_path(self) -> pathlib.Path:
-        """Returns the path object to store the pickled optuna.study object.
-
-        Returns:
-            pathlib.Path: the path object to store the pickled optuna.study
-            object.
-        """
-        return self.ws / 'state' / str(self.current_max_trial_number) / 'study.pkl'
 
     def _serialize(self) -> None:
         """Serialize this module.
@@ -179,7 +168,6 @@ class TpeSearchOptimizer(AbstractOptimizer):
         )
 
     def _deserialize(self, trial_id: int) -> None:
-
         """Deserialize this module.
 
         Args:
@@ -188,6 +176,7 @@ class TpeSearchOptimizer(AbstractOptimizer):
         Returns:
             None
         """
+        self.trial_id.initial(num=trial_id - 1)
         d = self.serialize.deserialize(trial_id)
         self.deserialize_datas = d['optimization_variables']
         self.set_native_random_state(d['native_random_state'])
@@ -202,32 +191,28 @@ class TpeSearchOptimizer(AbstractOptimizer):
         self.parameter_pool = parameter_pool
         self.study = self.deserialize_datas['study']
 
-        # TODO: add deserialize trial_pool
+        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
 
-        runnings = self.storage.trial.get_running()
+        # TODO: add deserialize trial_pool
         running_trials = self.study.get_trials(states=(TrialState.RUNNING,))
 
-        for _ in range(len(running_trials)):
-            t = self.study.ask(self.distributions)
+        for t in running_trials:
+            self.trial_pool[t._trial_id + 1] = optuna.trial.Trial(self.study, t._trial_id)
 
-            for trial_id in runnings:
-                trial_id_str = self.get_zero_padding_any_trial_id(trial_id)
-                rf_content = self.storage.get_hp_dict(trial_id_str)
-                rf_param_dict = {i['parameter_name']: i['value']for i in rf_content['parameters']}
-                match = True
+        # Running trials asked before serialize are reflected in parameter_pool and storage.
+        # serialize前にaskされたrunning trialを parameter_pool storage に反映
+        if len(running_trials) > 0:
+            new_params = []
+            for param in self.params.get_parameter_list():
+                new_param = {
+                    'parameter_name': param.name,
+                    'type': param.type,
+                    'value': running_trials[-1].params[param.name]
+                }
+                new_params.append(new_param)
 
-                for k, v in t.params.items():
-                    if rf_param_dict[k] != v:
-                        match = False
-                        break
-                if match:
-                    self.trial_pool[rf_content['trial_id']] = t
-                    break
-            else:
-                # debug
-                print('Running trial does not match any running files.')
-                print('\ttrial params: ', t.params)
-                raise ()
+            _trial_id = self.register_ready({'parameters': new_params})
+            self.parameter_pool[_trial_id] = new_params
 
 
 def create_distributions(

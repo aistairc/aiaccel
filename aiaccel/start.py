@@ -7,8 +7,6 @@ from aiaccel.config import Config
 from aiaccel.util import filesystem as fs
 from aiaccel.util.terminal import Terminal
 from aiaccel.util.report import CreationReaport
-from aiaccel.util.trialid import TrialId
-from aiaccel.storage.storage import Storage
 from aiaccel.argument import Arguments
 from aiaccel.master.create import create_master
 from aiaccel.workspace import Workspace
@@ -50,19 +48,6 @@ def main(options: dict = Arguments()) -> None:
     if workspace.check_consists() is False:
         print("Creating workspace is Failed.")
         return
-
-    storage = Storage(
-        workspace.path,
-        fsmode=options['fs'],
-        config_path=config.config_path
-    )
-    storage.alive.init_alive()
-
-    if options['resume'] is not None:
-        resume_trial_id = int(options['resume'])
-        storage.delete_trial_data_after_this(resume_trial_id)
-        trial_id = TrialId(options['config'])
-        trial_id.initial(num=resume_trial_id)
 
     print(f"Start {config.search_algorithm.get()} Optimization")
     print(f"config: {str(pathlib.Path(options['config']).resolve())}")

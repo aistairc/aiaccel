@@ -108,7 +108,7 @@ def test_config(config_json):
     assert config.resource_type.get() == "local"
     assert config.num_node.get() == 4
     assert config.abci_group.get() == "gaa"
-    assert config.search_algorithm.get() == "nelder-mead"
+    assert config.search_algorithm.get() == 'aiaccel.optimizer.NelderMeadOptimizer'
     assert config.goal.get() == "minimize"
     assert config.trial_number.get() == 10
     assert config.name_length.get() == 6

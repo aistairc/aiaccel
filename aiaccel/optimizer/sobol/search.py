@@ -3,7 +3,7 @@ from sobol_seq import i4_sobol
 from typing import Optional
 
 
-class SobolSearchOptimizer(AbstractOptimizer):
+class SobolOptimizer(AbstractOptimizer):
     """An optimizer class with sobol algorithm.
 
     Attributes:
@@ -14,7 +14,7 @@ class SobolSearchOptimizer(AbstractOptimizer):
     """
 
     def __init__(self, options: dict) -> None:
-        """Initial method of SobolSearchOptimizer.
+        """Initial method of SobolOptimizer.
 
         Args:
             config (str): A file name of a configuration.
@@ -50,7 +50,7 @@ class SobolSearchOptimizer(AbstractOptimizer):
             returned_params.append(initial_parameter)
             number -= 1
 
-        for n in range(number):
+        for _ in range(number):
             new_params = []
             vec, seed = i4_sobol(n_params, self.generate_index)
             self.generate_index = seed

@@ -1,12 +1,12 @@
 import pytest
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.tpe.search import TpeSearchOptimizer
+from aiaccel.optimizer.tpe.search import TpeOptimizer
 from aiaccel.optimizer.tpe.search import create_distributions
 from tests.base_test import BaseTest
 
 
-class TestTpeSearchOptimizer(BaseTest):
+class TestTpeOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir, data_dir):
@@ -17,7 +17,7 @@ class TestTpeSearchOptimizer(BaseTest):
             'fs': False,
             'process_name': 'optimizer'
         }
-        self.optimizer = TpeSearchOptimizer(options)
+        self.optimizer = TpeOptimizer(options)
         self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None
@@ -44,22 +44,21 @@ class TestTpeSearchOptimizer(BaseTest):
     def test_create_study(self):
         assert self.optimizer.create_study() is None
 
-    def test_study_pickle_path(self):
-        assert self.optimizer.study_pickle_path.name == 'study.pkl'
-
     def test_serialize(self):
+        self.optimizer.trial_id.initial(num=0)
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
-        self.optimizer.trial_id.increment()
         assert self.optimizer._serialize() is None
 
     def test_deserialize(self):
         self.optimizer.pre_process()
         self.optimizer.serialize_datas = {
             'num_of_generated_parameter': None,
-            'loop_count': 0
+            'loop_count': 0,
+            'parameter_pool': None,
+            'study': None
         }
+        self.optimizer.trial_id.initial(num=0)
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        self.optimizer.trial_id.increment()
         self.optimizer._serialize()
         assert self.optimizer._deserialize(trial_id=0) is None
 

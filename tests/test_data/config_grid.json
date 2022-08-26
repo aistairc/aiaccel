@@ -14,7 +14,7 @@
     "job_execution_options": ""
   },
   "optimize": {
-    "search_algorithm": "grid",
+    "search_algorithm": "aiaccel.optimizer.GridOptimizer",
     "goal": "minimize",
     "trial_number": 10,
     "rand_seed": 42,
