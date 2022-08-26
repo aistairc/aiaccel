@@ -8,8 +8,9 @@ def create_runner_command(
     command: str,
     param_content:
     dict,
-    hashname: str,
-    configpath: str
+    trial_id: int,
+    config_path: str,
+    options: dict
 ) -> list:
 
     """Create a list of command strings to run a hyper parameter.
@@ -17,17 +18,19 @@ def create_runner_command(
     Args:
         command (str): A string command.
         param_content (dict): A hyper parameter content.
-        hashname (str): A unique name of a hyper parameter.
+        trial_id (str): A unique name of a hyper parameter.
 
     Returns:
         A list of command strings.
     """
     commands = re.split(' +', command)
     params = param_content['parameters']
-    commands.append('--index')
-    commands.append(hashname)
+    commands.append('--trial_id')
+    commands.append(trial_id)
     commands.append('--config')
-    commands.append(configpath)
+    commands.append(config_path)
+    if options['fs'] is True:
+        commands.append('--fs')
 
     for param in params:
         # Fix a bug related a negative exponential parameters
@@ -36,9 +39,7 @@ def create_runner_command(
             'parameter_name' in param.keys() and
             'value' in param.keys()
         ):
-            commands.append(
-                '--{}={}'.format(param['parameter_name'], param['value'])
-            )
+            commands.append('--{}={}'.format(param['parameter_name'], param['value']))
 
     return commands
 
@@ -46,7 +47,7 @@ def create_runner_command(
 def save_result(
     ws: Path,
     dict_lock: Path,
-    hashname: str,
+    trial_id_str: str,
     result: float,
     start_time: str,
     end_time: str,
@@ -57,7 +58,7 @@ def save_result(
     Args:
         ws (Path): A path of a workspace.
         dict_lock (Path): A directory to store lock files.
-        hashname (str): An unique name of a parameter set.
+        trial_id_str (str): An unique name of a parameter set.
         result (float): A result of a parameter set.
         start_time (str): A start time string.
         end_time (str): An end time string.
@@ -66,7 +67,7 @@ def save_result(
     Returns:
         None
     """
-    result_file = ws / aiaccel.dict_result / '{}.result'.format(hashname)
+    result_file = ws / aiaccel.dict_result / '{}.result'.format(trial_id_str)
 
     contents = {
         'result': result,

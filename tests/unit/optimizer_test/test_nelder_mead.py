@@ -1,4 +1,5 @@
 #from ConfigSpace.read_and_write import json as configspace_json
+from re import T
 from aiaccel.parameter import load_parameter
 from aiaccel.optimizer.nelder_mead.sampler import NelderMead
 from aiaccel.util.filesystem import load_yaml
@@ -7,6 +8,7 @@ import copy
 import json
 import numpy as np
 import pytest
+from aiaccel.storage.storage import Storage
 
 
 class TestNelderMead(object):
@@ -39,33 +41,55 @@ class TestNelderMead(object):
         params = self.nm._executing
 
         for p, i in zip(params, range(1, len(self.nm.bdrys)+2)):
-            p['name'] = '{:03}'.format(i)
+            p['vertex_id'] = '{:03}'.format(i)
 
+        storage = Storage(work_dir)
         setup_hp_finished(1)
-        c = load_yaml(work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp'))
-        param = copy.copy(params[[p['name'] for p in params].index('001')])
+        for i in range(1):
+            storage.result.set_any_trial_objective(trial_id=i, objective=0.0)
+            for j in range(2):
+                storage.hp.set_any_trial_param(
+                    trial_id=i,
+                    param_name=f'x{j+1}',
+                    param_value=0.0,
+                    param_type='float'
+                )
+        storage.trial.set_any_trial_state(trial_id=1, state='finished')
+        #
+        # c = load_yaml(work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp'))
+        #
+        print(storage.get_finished())
+        print(storage.result.get_all_result())
+        c = storage.get_hp_dict(trial_id_str='000')
+        assert c is not None
+
+        param = copy.copy(params[[p['vertex_id'] for p in params].index('001')])
         param['result'] = c['result']
         self.nm.add_result_parameters(param)
         self.nm._maximize = True
         v = self.nm._pop_result()
-        assert v['name'] == '001'
+        assert v['vertex_id'] == '001'
 
-        param['name'] = '002'
+        param['vertex_id'] = '002'
         param['out_of_boundary'] = True
         self.nm.add_result_parameters(param)
         self.nm._pop_result()
 
-        param['name'] = '003'
+        param['vertex_id'] = '003'
         param['out_of_boundary'] = True
         self.nm._state = 'WaitShrink'
         self.nm.add_result_parameters(param)
+
+        # for d in self.nm._executing:
+        #     print(d['vertex_id'])
+
         try:
             self.nm._pop_result()
             assert False
         except ValueError:
             assert True
 
-        param['name'] = 'invalid'
+        param['vertex_id'] = 'invalid'
         self.nm.add_result_parameters(param)
         try:
             self.nm._pop_result()

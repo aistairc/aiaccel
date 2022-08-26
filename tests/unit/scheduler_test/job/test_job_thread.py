@@ -1,7 +1,10 @@
 from aiaccel.config import ConfileWrapper
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.job.job_thread import CustomMachine, Job, JOB_STATES,\
-    JOB_TRANSITIONS, Model
+from aiaccel.scheduler.local import LocalScheduler
+from aiaccel.scheduler.job.job_thread import CustomMachine
+from aiaccel.scheduler.job.job_thread import Job
+from aiaccel.scheduler.job.job_thread import JOB_STATES
+from aiaccel.scheduler.job.job_thread import JOB_TRANSITIONS
+from aiaccel.scheduler.job.job_thread import Model
 from aiaccel.util.time_tools import get_time_now_object
 from tests.base_test import BaseTest
 import aiaccel
@@ -13,6 +16,9 @@ import time
 from pathlib import Path
 import sys
 from unittest.mock import patch
+from aiaccel.argument import Arguments
+from aiaccel.scheduler.create import create_scheduler
+import time
 
 
 async def async_start_job(job):
@@ -51,6 +57,9 @@ class TestModel(BaseTest):
         work_dir
     ):
 
+        self.workspace.clean()
+        self.workspace.create()
+
         commandline_args = [
             "start.py",
             "--config",
@@ -58,16 +67,19 @@ class TestModel(BaseTest):
         ]
 
         with patch.object(sys, 'argv', commandline_args):
-            from aiaccel import start
-            scheduler = start.Scheduler()
+            # from aiaccel import start
+            # scheduler = start.Scheduler()
+            options = Arguments()
+            scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
         setup_hp_ready(1)
+        trial_id = 0
         self.job = Job(
             self.config,
-            Path(config_json).resolve(),
+            options,
             scheduler,
-            work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
+            trial_id
         )
         self.model = Model()
         yield
@@ -75,7 +87,13 @@ class TestModel(BaseTest):
         self.model = None
 
     @pytest.fixture
-    def setup_abci_job(self, config_json, work_dir):
+    def setup_abci_job(
+        self,
+        config_json,
+        work_dir,
+        database_remove
+    ):
+
         with open(config_json) as f:
             json_object = json.load(f)
 
@@ -89,53 +107,68 @@ class TestModel(BaseTest):
         ]
 
         with patch.object(sys, 'argv', commandline_args):
-            from aiaccel import start
-            scheduler = start.Scheduler()
+            # from aiaccel import start
+            # scheduler = start.Scheduler()
+            options = Arguments()
+            scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
+        trial_id = 1
         self.abci_job = Job(
             # json_object_config,
             self.config,
-            Path(config_json).resolve(),
+            options,
             scheduler,
-            work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
+            trial_id
         )
         yield
         self.abci_job = None
 
-    def test_after_confirmed(self):
+    def test_after_confirmed(self, database_remove):
         assert self.model.after_confirmed(self.job) is None
 
-    def test_before_failed(self):
+    def test_before_failed(self, database_remove):
         assert self.model.before_failed(self.job) is None
 
-    def test_conditions_file_confirmed(self, work_dir):
+    def test_conditions_confirmed(self, work_dir, database_remove):
         self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
-        assert self.model.conditions_file_confirmed(self.job)
+        self.job.next_state = 'ready'
+        assert self.model.conditions_confirmed(self.job)
 
-    def test_before_file_move(self, work_dir):
-        self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
-        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '002.hp')
-        assert self.model.before_file_move(self.job) is None
+    # def test_before_file_move(self, work_dir):
+    #     self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
+    #     self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '002.hp')
+    #     assert self.model.before_file_move(self.job) is None
 
-    def test_after_runner(self):
+    def test_after_runner(self, database_remove):
         assert self.model.after_runner(self.job) is None
 
-    def test_before_runner_create(self, cd_work, setup_abci_job, work_dir):
+    def test_before_runner_create(
+        self,
+        cd_work,
+        setup_abci_job,
+        work_dir,
+        database_remove
+    ):
         assert self.model.before_runner_create(self.job) is None
 
         self.abci_job.to_file = work_dir.joinpath(aiaccel.dict_runner, 'run_001.sh')
         assert self.model.before_runner_create(self.abci_job) is None
 
-    def test_conditions_runner_confirmed(self, setup_abci_job, work_dir):
+    def test_conditions_runner_confirmed(
+        self,
+        setup_abci_job,
+        work_dir,
+        database_remove
+    ):
         assert self.model.conditions_runner_confirmed(self.job)
 
         self.abci_job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
         assert self.model.conditions_runner_confirmed(self.abci_job)
 
-    def test_after_running(self):
+    def test_after_running(self, database_remove):
         assert self.model.after_running(self.job) is None
 
-    def test_after_job(self):
+    def test_after_job(self, database_remove):
         assert self.model.after_job(self.job) is None
 
     # def test_before_job_submitted(self, fake_process, setup_abci_job):
@@ -175,45 +208,159 @@ class TestModel(BaseTest):
         # )
         # assert self.model.before_job_submitted(self.abci_job) is None
 
-    def test_conditions_job_confirmed(self):
+    def test_conditions_job_confirmed(self, database_remove):
         assert not self.model.conditions_job_confirmed(self.job)
 
-        self.job.scheduler.stats.append({'name': '001'})
+        # self.job.scheduler.stats.append({'name': '001'})
+        # self.job.scheduler.stats.append({'name': 0})
+        self.job.scheduler.stats.append(
+            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0',}
+        )
         assert self.model.conditions_job_confirmed(self.job)
 
-    def test_after_result(self):
+    def test_after_result(self, database_remove):
         assert self.model.after_result(self.job) is None
 
-    def test_after_wait_result(self):
+    def test_after_wait_result(self, database_remove):
         assert self.model.after_wait_result(self.job) is None
 
-    def test_conditions_result(self):
+    def test_conditions_result(self, database_remove):
         assert not self.model.conditions_result(self.job)
 
-    def test_after_finished(self):
+    def test_after_finished(self, database_remove):
         assert self.model.after_finished(self.job) is None
 
-    def test_before_finished_move(self, setup_hp_running, setup_result,
-                                  work_dir):
-        assert self.model.before_finished_move(self.job) is None
+    """
+    def test_before_finished(
+        self,
+        setup_hp_running,
+        setup_result,
+        work_dir,
+        database_remove
+    ):
+        # setup_hp_running(0)
+        # setup_result(0)
+        # print(self.job.trial_id_str)
+        # print(self.storage.result.get_result_trial_id_list())
+        print(self.job.storage.result.get_all_result())
+        for i in range(10):
+            self.job.storage.result.set_any_trial_objective(trial_id=i, objective=i*1.0)
+            for j in range(10):
+                self.job.storage.hp.set_any_trial_param(
+                    trial_id=i,
+                    param_name=f'x{j+1}',
+                    param_value=0.0,
+                    param_type='float'
+                )
+        assert self.model.before_finished(self.job) is None
 
-        setup_hp_running(1)
-        setup_result(1)
+        # self.job.storage.trial.all_delete()
+        # self.job.storage.hp.all_delete()
+
+        # setup_hp_running(1)
+        # setup_result(1)
+
+        for i in range(10):
+            self.job.storage.trial.set_any_trial_state(trial_id=i, state='finished')
+            for j in range(10):
+                self.job.storage.hp.set_any_trial_param(
+                    trial_id=i,
+                    param_name=f'x{j+1}',
+                    param_value=0.0,
+                    param_type='float'
+                )
+        print(self.job.trial_id)
+        print([d.objective for d in self.job.storage.result.get_all_result()])
+        print(self.job.storage.get_best_trial_dict('minimize'))
+
+        self.job.next_state = 'finished'
         self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_running, '001.hp')
         self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp')
-        assert self.model.before_finished_move(self.job) is None
+        assert self.model.before_finished(self.job) is None
+    """
 
-    def test_after_expire(self):
+    def test_before_finished(
+        self,
+        setup_hp_running,
+        setup_result,
+        work_dir,
+        database_remove
+    ):
+        # setup_hp_running(0)
+        # setup_result(0)
+        # print(self.job.trial_id_str)
+        # print(self.storage.result.get_result_trial_id_list())
+        print(self.job.storage.result.get_all_result())
+        for i in range(10):
+            self.job.storage.result.set_any_trial_objective(trial_id=i, objective=i*1.0)
+            self.job.storage.hp.set_any_trial_params(
+                trial_id=i,
+                params=[
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
+                    for j in range(10)
+                ]
+            )
+            """
+            for j in range(10):
+                self.job.storage.hp.set_any_trial_param(
+                    trial_id=i,
+                    param_name=f'x{j+1}',
+                    param_value=0.0,
+                    param_type='float'
+                )
+            """
+        assert self.model.before_finished(self.job) is None
+
+        # self.job.storage.trial.all_delete()
+        # self.job.storage.hp.all_delete()
+
+        # setup_hp_running(1)
+        # setup_result(1)
+
+        for i in range(10):
+            self.job.storage.trial.set_any_trial_state(trial_id=i, state='finished')
+            self.job.storage.hp.set_any_trial_params(
+                trial_id=i,
+                params=[
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
+                    for j in range(10)
+                ]
+            )
+            """
+            for j in range(10):
+                self.job.storage.hp.set_any_trial_param(
+                    trial_id=i,
+                    param_name=f'x{j+1}',
+                    param_value=0.0,
+                    param_type='float'
+                )
+            """
+        print(self.job.trial_id)
+        print([d.objective for d in self.job.storage.result.get_all_result()])
+        print(self.job.storage.get_best_trial_dict('minimize'))
+
+        self.job.next_state = 'finished'
+        self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_running, '001.hp')
+        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp')
+        assert self.model.before_finished(self.job) is None
+
+    def test_after_expire(self, database_remove):
         assert self.model.after_expire(self.job) is None
 
-    def test_after_kill(self):
+    def test_after_kill(self, database_remove):
         assert self.model.after_kill(self.job) is None
 
-    def test_before_kill_submitted(self, fake_process):
+    def test_before_kill_submitted(self, fake_process, database_remove):
         assert self.model.before_kill_submitted(self.job) is None
 
         fake_pid = 99999999
-        self.job.scheduler.stats.append({'name': '001', 'job-ID': fake_pid})
+        # self.job.scheduler.stats.append({'name': '001', 'job-ID': fake_pid})
+        self.job.scheduler.stats.append(
+            {
+                'name': '2 python user.py --trial_id 1 --config config.yaml --x1=1.0 --x2=1.0',
+                'job-ID': fake_pid
+            }
+        )
         fake_process.register_subprocess(
             [
                 '/bin/kill', '{}'.format(fake_pid)
@@ -222,24 +369,28 @@ class TestModel(BaseTest):
         )
         assert self.model.before_kill_submitted(self.job) is None
 
-    def test_conditions_kill_confirmed(self):
+    def test_conditions_kill_confirmed(self, database_remove):
         assert self.model.conditions_kill_confirmed(self.job)
 
-        self.job.scheduler.stats.append({'name': '001'})
+        # self.job.scheduler.stats.append({'name': '001'})
+        # self.job.scheduler.stats.append({'name': 0})
+        self.job.scheduler.stats.append(
+            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0'}
+        )
         assert not self.model.conditions_kill_confirmed(self.job)
 
-    def test_after_check_result(self):
+    def test_after_check_result(self, database_remove):
         assert self.model.after_check_result(self.job) is None
 
-    def test_after_cancel(self, setup_hp_running, work_dir):
+    def test_after_cancel(
+        self,
+        setup_hp_running,
+        work_dir,
+        database_remove
+    ):
         assert self.model.after_cancel(self.job) is None
-
-        work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp').unlink()
-        assert self.model.after_cancel(self.job) is None
-
         setup_hp_running(1)
         assert self.model.after_cancel(self.job) is None
-
 
 class TestJob(BaseTest):
 
@@ -252,6 +403,8 @@ class TestJob(BaseTest):
         setup_hp_ready,
         work_dir
     ):
+        self.workspace.clean()
+        self.workspace.create()
 
         commandline_args = [
             "start.py",
@@ -259,16 +412,19 @@ class TestJob(BaseTest):
             format(config_json)
         ]
         with patch.object(sys, 'argv', commandline_args):
-            from aiaccel import start
-            scheduler = start.Scheduler()
+            # from aiaccel import start
+            # scheduler = start.Scheduler()
+            options = Arguments()
+            scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
         setup_hp_ready(1)
+        trial_id = 1
         self.job = Job(
             self.config,
-            Path(config_json).resolve(),
+            options,
             scheduler,
-            work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
+            trial_id
         )
         yield
         self.job = None
@@ -279,66 +435,65 @@ class TestJob(BaseTest):
         config_json,
         load_test_config,
         setup_hp_ready,
-        work_dir
+        work_dir,
+        database_remove
     ):
+
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = LocalScheduler(options)
         # config = load_test_config()
         setup_hp_ready(1)
+        trial_id = 1
         job = Job(
             self.config,
-            Path(config_json).resolve(),
+            options,
             scheduler,
-            work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
+            trial_id
         )
         assert type(job) is Job
 
-    #def test_get_initial_timeout(self):
+    # def test_get_initial_timeout(self):
     #    assert type(self.job.get_initial_timeout()) is datetime.datetime
 
-    def test_get_machine(self):
+    def test_get_machine(self, database_remove):
         assert type(self.job.get_machine()) is CustomMachine
 
-    def test_get_model(self):
+    def test_get_model(self, database_remove):
         assert type(self.job.get_model()) is Model
 
-    def test_get_state(self):
+    def test_get_state(self, database_remove):
         assert self.job.get_state().name == 'Init'
 
-    def test_get_state_name(self):
+    def test_get_state_name(self, database_remove):
         assert self.job.get_state_name() == 'Init'
 
-    def test_is_local(self):
+    def test_is_local(self, database_remove):
         assert self.job.is_local()
 
-    def test_schedule(self):
+    def test_schedule(self, database_remove):
         self.job.get_machine().set_state('Scheduling')
         assert self.job.schedule() is None
 
-    def test_run_1(self):
+    def test_run_1(self, database_remove):
+        self.job.scheduler.storage.alive.init_alive()
         self.job.start()
         self.job.join()
 
-    def test_run_2(self):
+    def test_run_2(self, database_remove):
+        self.job.scheduler.storage.alive.init_alive()
         self.job.scheduler.pre_process()
         self.job.start()
-        time.sleep(1)
         self.job.threshold_timeout = get_time_now_object()
-        time.sleep(1)
         self.job.threshold_timeout =\
             get_time_now_object() + datetime.timedelta(10)
         self.job.get_machine().set_state('Init')
-        time.sleep(1)
         self.job.count_retry = 100
         self.job.threshold_retry = 10
-        time.sleep(1)
         self.job.get_machine().set_state('Success')
         self.job.join()

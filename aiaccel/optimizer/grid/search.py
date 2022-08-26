@@ -1,8 +1,6 @@
 from aiaccel.config import Config
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer.abstract import AbstractOptimizer
 from aiaccel.parameter import HyperParameter, get_grid_options
-from aiaccel.util.filesystem import get_file_hp_finished, get_file_hp_ready,\
-    get_file_hp_running
 from functools import reduce
 from operator import mul
 from typing import List, Optional, Union
@@ -93,12 +91,11 @@ class GridOptimizer(AbstractOptimizer):
         for param in self.params.get_parameter_list():
             self.ready_params.append(generate_grid_points(param, self.config))
 
-        ready_files = get_file_hp_ready(self.ws, self.dict_lock)
-        running_files = get_file_hp_running(self.ws, self.dict_lock)
-        finished_files = get_file_hp_finished(self.ws, self.dict_lock)
-
-        self.generate_index = len(ready_files) + len(running_files) +\
-            len(finished_files)
+        self.generate_index = (
+            self.storage.get_num_ready() +
+            self.storage.get_num_running() +
+            self.storage.get_num_finished()
+        )
 
     def get_parameter_index(self) -> Union[List[int], None]:
         """Get a next parameter index.
@@ -118,8 +115,7 @@ class GridOptimizer(AbstractOptimizer):
         parameter_index = []
         div = [
             reduce(
-                lambda x, y: x * y,
-                parameter_lengths[0:-1 - i]
+                lambda x, y: x * y, parameter_lengths[0:-1 - i]
             ) for i in range(0, len(parameter_lengths) - 1)
         ]
 
@@ -144,7 +140,7 @@ class GridOptimizer(AbstractOptimizer):
         """
         returned_params = []
 
-        for n in range(number):
+        for _ in range(number):
             parameter_index = self.get_parameter_index()
             new_params = []
 
@@ -163,9 +159,9 @@ class GridOptimizer(AbstractOptimizer):
                 new_params.append(new_param)
 
             returned_params.append({'parameters': new_params})
-            self.generated_parameter += 1
+            self.num_of_generated_parameter += 1
 
-        self.create_parameter_files(returned_params)
+        self.register_new_parameters(returned_params)
 
     def _serialize(self) -> None:
         """Serialize this module.
@@ -174,14 +170,19 @@ class GridOptimizer(AbstractOptimizer):
             dict: The serialized objects.
         """
         self.serialize_datas = {
-            'generated_parameter': self.generated_parameter,
+            'num_of_generated_parameter': self.num_of_generated_parameter,
             'loop_count': self.loop_count,
             'ready_params': self.ready_params,
             'generate_index': self.generate_index
         }
-        return super()._serialize()
+        self.serialize.serialize(
+            trial_id=self.trial_id.integer,
+            optimization_variables=self.serialize_datas,
+            native_random_state=self.get_native_random_state(),
+            numpy_random_state=self.get_numpy_random_state()
+        )
 
-    def _deserialize(self, dict_objects: dict) -> None:
+    def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
 
         Args:
@@ -190,6 +191,12 @@ class GridOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        super()._deserialize(dict_objects)
-        self.ready_params = dict_objects['ready_params']
-        self.generate_index = dict_objects['generate_index']
+        d = self.serialize.deserialize(trial_id)
+        self.deserialize_datas = d['optimization_variables']
+        self.set_native_random_state(d['native_random_state'])
+        self.set_numpy_random_state(d['numpy_random_state'])
+
+        self.ready_params = self.deserialize_datas['ready_params']
+        self.generate_index = self.deserialize_datas['generate_index']
+        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
+        self.loop_count = self.deserialize_datas['loop_count']

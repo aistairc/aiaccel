@@ -1,4 +1,4 @@
-from aiaccel.abci.abci_qsub import create_qsub_command
+from aiaccel.abci.qsub import create_qsub_command
 from aiaccel.config import load_config
 import aiaccel
 import os

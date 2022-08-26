@@ -100,6 +100,24 @@ This tutorial describes how to run examples/sphere on ABCI.
 
 5. If you want to check the running jobs, please refer the [ABCI User Guide](https://docs.abci.ai/en/job-execution/#show-the-status-of-batch-jobs).
 
+
+## Other
+- Check the progress
+    ~~~bash
+    > python -m aiaccel.view --config config.yaml
+    ~~~
+
+- Display simple graphs
+    ~~~bash
+    > python -m aiaccel.plot --config config.yaml
+    ~~~
+
+- Output results to workspace/results.csv.
+    ~~~bash
+    > python -m aiaccel.report --config config.yaml
+    ~~~
+
+
 # Acknowledgment
 * Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Deve
 lopment Organization (NEDO).

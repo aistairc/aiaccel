@@ -75,18 +75,18 @@ def clean_directory(path: Path, exclude_dir: list = None,
                                 exclude_dir + exclude_file]:
                     p.unlink()
     else:
-        with fasteners.InterProcessLock(
-            interprocess_lock_file(path, dict_lock)
-        ):
+        with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
             for p in path.glob('**/*'):
                 if p.is_file():
-                    if True not in [p in d.parts for d in
-                                    exclude_dir + exclude_file]:
+                    if True not in [p in d.parts for d in exclude_dir + exclude_file]:
                         p.unlink()
 
 
-def copy_directory(from_directory: Path, to_directory: Path,
-                   dict_lock: Path = None) -> None:
+def copy_directory(
+    from_directory: Path,
+    to_directory: Path,
+    dict_lock: Path = None
+) -> None:
     """Copy a directory.
 
     Args:
@@ -305,6 +305,24 @@ def get_file_result(path, dict_lock=None):
     )
 
 
+def get_file_result_hp(path, dict_lock=None):
+    """Get files in result directory.
+
+    Args:
+        path (Path): A path to result directory.
+        dict_lock (Path): A directory to store lock files.
+
+    Returns:
+        list: Files in result directory.
+    """
+
+    return get_dict_files(
+        path / aiaccel.dict_result,
+        '*.{}'.format(aiaccel.extension_hp),
+        dict_lock=dict_lock
+    )
+
+
 def interprocess_lock_file(path: Path, dict_lock: Path) -> Path:
     """Get a directory of storing lock files.
 
@@ -333,11 +351,9 @@ def load_yaml(path: Path, dict_lock: Path = None) -> dict:
         with open(path, 'r') as f:
             yml = yaml.load(f, Loader=yaml.SafeLoader)
     else:
-        with fasteners.InterProcessLock(
-                interprocess_lock_file(path, dict_lock)):
+        with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
             with open(path, 'r') as f:
                 yml = yaml.load(f, Loader=yaml.SafeLoader)
-
     return yml
 
 
@@ -355,8 +371,7 @@ def make_directory(d: Path, dict_lock: Path = None) -> None:
         if not d.exists():
             d.mkdir()
     else:
-        with fasteners.InterProcessLock(
-                interprocess_lock_file(d, dict_lock)):
+        with fasteners.InterProcessLock(interprocess_lock_file(d, dict_lock)):
             if not d.exists():
                 d.mkdir()
 
@@ -377,8 +392,7 @@ def make_directories(ds: list, dict_lock: Path = None) -> None:
                 d.unlink()
             make_directory(d)
         else:
-            with fasteners.InterProcessLock(
-                    interprocess_lock_file(d, dict_lock)):
+            with fasteners.InterProcessLock(interprocess_lock_file(d, dict_lock)):
                 if not d.is_dir() and d.exists():
                     d.unlink()
                 make_directory(d)
