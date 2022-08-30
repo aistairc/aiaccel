@@ -45,6 +45,7 @@ class TimeStamp(Abstract):
         finally:
             session.commit()
             session.expunge_all()
+            session.close()
             self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -79,6 +80,7 @@ class TimeStamp(Abstract):
         finally:
             session.commit()
             session.expunge_all()
+            session.close()
             self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -98,6 +100,10 @@ class TimeStamp(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
+
+        session.expunge_all()
+        session.close()
+        self.engine.dispose()
 
         if data is None:
             return None
@@ -124,6 +130,10 @@ class TimeStamp(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
+
+        session.expunge_all()
+        session.close()
+        self.engine.dispose()
 
         if data is None:
             return None
@@ -152,4 +162,5 @@ class TimeStamp(Abstract):
         session.query(TimestampTable).filter(TimestampTable.trial_id == trial_id).delete()
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()

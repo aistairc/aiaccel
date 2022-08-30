@@ -42,6 +42,7 @@ class Error(Abstract):
         finally:
             session.commit()
             session.expunge_all()
+            session.close()
             self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -62,6 +63,7 @@ class Error(Abstract):
             .one_or_none()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if data is None:
@@ -82,6 +84,7 @@ class Error(Abstract):
             .all()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if data is None:
@@ -100,6 +103,7 @@ class Error(Abstract):
         session.query(ErrorTable).with_for_update(read=True).delete()
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -112,4 +116,5 @@ class Error(Abstract):
         session.query(ErrorTable).filter(ErrorTable.trial_id == trial_id).delete()
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()

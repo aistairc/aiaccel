@@ -48,6 +48,7 @@ class Serializer(Abstract):
                 session.add(new_row)
             else:
                 session.expunge_all()
+                session.close()
                 self.engine.dispose()
                 return
 
@@ -58,6 +59,7 @@ class Serializer(Abstract):
         finally:
             session.commit()
             session.expunge_all()
+            session.close()
             self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -80,6 +82,7 @@ class Serializer(Abstract):
             .one_or_none()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if data is None:
@@ -101,6 +104,7 @@ class Serializer(Abstract):
         )
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
     def is_exists_any_trial(self, trial_id: int):

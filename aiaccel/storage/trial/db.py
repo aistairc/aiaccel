@@ -28,6 +28,7 @@ class Trial(Abstract):
         )
 
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if trials is None:
@@ -52,6 +53,7 @@ class Trial(Abstract):
         )
 
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if trials is None:
@@ -93,6 +95,7 @@ class Trial(Abstract):
         finally:
             session.commit()
             session.expunge_all()
+            session.close()
             self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -106,6 +109,7 @@ class Trial(Abstract):
         session.query(TrialTable).with_for_update(read=True).delete()
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -114,6 +118,7 @@ class Trial(Abstract):
         session.query(TrialTable).filter(TrialTable.trial_id == trial_id).delete()
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -131,6 +136,7 @@ class Trial(Abstract):
             .all()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         return [trial.trial_id for trial in trials]
@@ -150,6 +156,7 @@ class Trial(Abstract):
             .all()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         return [trial.trial_id for trial in trials]
@@ -169,6 +176,7 @@ class Trial(Abstract):
             .all()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         return [trial.trial_id for trial in trials]
@@ -185,6 +193,7 @@ class Trial(Abstract):
             .with_for_update(read=True)
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if trials is None:

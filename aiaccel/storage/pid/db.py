@@ -41,6 +41,7 @@ class Pid(Abstract):
         finally:
             session.commit()
             session.expunge_all()
+            session.close()
             self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -61,6 +62,7 @@ class Pid(Abstract):
             .one_or_none()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if data is None:
@@ -78,6 +80,7 @@ class Pid(Abstract):
         session.query(PidTable).with_for_update(read=True).delete()
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -90,4 +93,5 @@ class Pid(Abstract):
         session.query(PidTable).filter(PidTable.process_name == process_name).delete()
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()

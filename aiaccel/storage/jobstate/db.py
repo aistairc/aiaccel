@@ -45,6 +45,7 @@ class JobState(Abstract):
         finally:
             session.commit()
             session.expunge_all()
+            session.close()
             self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -75,6 +76,7 @@ class JobState(Abstract):
         finally:
             session.commit()
             session.expunge_all()
+            session.close()
             self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -95,6 +97,7 @@ class JobState(Abstract):
             .one_or_none()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if data is None:
@@ -110,6 +113,7 @@ class JobState(Abstract):
             .all()
         )
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
         if data is None:
@@ -131,6 +135,7 @@ class JobState(Abstract):
         session.query(JobStateTable).filter(JobStateTable.trial_id == trial_id).delete()
         session.commit()
         session.expunge_all()
+        session.close()
         self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -151,7 +156,7 @@ class JobState(Abstract):
             .one_or_none()
         )
         session.expunge_all()
-
+        session.close()
         self.engine.dispose()
 
         if data is None:
