@@ -14,7 +14,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
     """
 
     def __init__(self, options: dict) -> None:
-        """Initial method of NelderMeadSearchOptimizer.
+        """Initial method of NelderMeadOptimizer.
 
         Args:
             config (str): A file name of a configuration.

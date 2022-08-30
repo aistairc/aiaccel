@@ -6,4 +6,4 @@ class TestSphereSobolResumption(ResumptionTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = 'sobol'
+        cls.search_algorithm = "sobol"

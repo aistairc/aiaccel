@@ -23,7 +23,8 @@ class ResumptionTest(IntegrationTest):
         commandline_args = [
             "start.py",
             "--config",
-            format(config_file)
+            format(config_file),
+            "--clean"
         ]
 
         if self.workspace.path.exists():
