@@ -15,7 +15,7 @@ class Abstract:
         self.engine = create_engine(
             self.url,
             echo=False,
-            connect_args={'check_same_thread': False, 'timeout': 10}
+            connect_args={'check_same_thread': False, 'timeout': 60}
         )
         self.metadata = MetaData()
         self.metadata.bind = self.engine
