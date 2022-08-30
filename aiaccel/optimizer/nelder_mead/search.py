@@ -266,6 +266,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     'parameters': self.new_params
                 }
             )
+            self._serialize()
 
     def _get_all_trial_id(self) -> list:
         """_get_all_trial_id.

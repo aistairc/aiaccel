@@ -161,7 +161,8 @@ class GridOptimizer(AbstractOptimizer):
             returned_params.append({'parameters': new_params})
             self.num_of_generated_parameter += 1
 
-        self.register_new_parameters(returned_params)
+            self.register_ready({'parameters': new_params})
+            self._serialize()
 
     def _serialize(self) -> None:
         """Serialize this module.
