@@ -3,6 +3,7 @@ from pathlib import Path
 """Common variables and methods.
 
     * Import this as follows:
+    * import aiaccel
 """
 
 alive_master = 'master.yml'
@@ -15,17 +16,26 @@ class_scheduler = 'Scheduler'
 
 dict_work = 'work_aiaccel'
 dict_alive = 'alive'
+dict_pid = 'pid'
+dict_ready = 'ready'
+dict_running = 'running'
+dict_finished = 'finished'
 dict_hp = 'hp'
 dict_hp_ready = 'hp/ready'
 dict_hp_running = 'hp/running'
 dict_hp_finished = 'hp/finished'
+dict_srialize = 'serialize'
 dict_lock = 'lock'
 dict_log = 'log'
+dict_error = 'error'
 dict_output = 'abci_output'
-dict_state = 'state'
+dict_jobstate = 'jobstate'
 dict_result = 'result'
 dict_runner = 'runner'
+dict_timestamp = 'timestamp'
 dict_verification = 'verification'
+dict_storage = 'storage'
+dict_snapshot = 'snapshot'
 
 extension_hp = 'hp'
 extension_pickle = 'pickle'

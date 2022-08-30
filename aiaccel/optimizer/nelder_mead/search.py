@@ -1,7 +1,5 @@
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer.abstract import AbstractOptimizer
 from aiaccel.optimizer.nelder_mead.sampler import NelderMead
-from aiaccel.util.filesystem import get_basename, get_file_hp_finished,\
-    get_file_hp_ready, get_file_hp_running, get_file_result, load_yaml
 from typing import Optional
 import copy
 import numpy as np
@@ -62,51 +60,35 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         self.nelder_mead._maximize = False
 
+    # def check_result(self) -> None:
+    #     """Check the result files and update nelder mead object.
+
+    #     Returns:
+    #         None
+    #     """
+    #     # result_files = get_file_result(self.ws, self.dict_lock)
+    #     results = self.storage.result.get_result_trial_id_list()
+    #     params = self.get_ready_parameters()
+    #     for p in params:
+    #         try:
+    #             int(p['name'])
+    #         except ValueError:
+    #             continue
+
+    #         if self.storage.is_finished(trial_id=int(p['name'])):
+    #             index = p['name']
+    #             self.logger.debug(f"(nelder-mead)check_result:: p['name']: {p['name']}")
+    #             for i in range(len(results)):
+    #                 self.logger.debug(f'(nelder-mead)check_result:: trial[{i}]: {results[i]}')
+    #         else:
+    #             continue
+
+    #         nm_result = self.storage.get_hp_dict(trial_id_str=index)
+    #         self.logger.debug(f"nm_result :{nm_result}")
+    #         self.nelder_mead.add_result_parameters(nm_result)
+
     def check_result(self) -> None:
-        """Check the result files and update nelder mead object.
-
-        Returns:
-            None
-        """
-        result_files = get_file_result(self.ws, self.dict_lock)
-        hashnames = [get_basename(f) for f in result_files]
-        params = self.get_ready_parameters()
-
-        for p in params:
-            try:
-                index = hashnames.index(p['name'])
-                # logging
-                self.logger.debug(
-                    "(nelder-mead)check_result:: p['name']: {}"
-                    .format(p['name'])
-                )
-                # logging
-                for i in range(len(result_files)):
-                    self.logger.debug(
-                        '(nelder-mead)check_result:: result_files[{}]: {}'
-                        .format(i, result_files[i])
-                    )
-            except ValueError:
-                continue
-
-            result_file = result_files[index]
-            result_content = load_yaml(result_file, self.dict_lock)
-
-            # logging
-            self.logger.debug(
-                '(nelder-mead)check_result:: result_file: {}'
-                .format(result_file)
-            )
-
-            # logging
-            self.logger.debug(
-                '(nelder-mead)check_result:: result_content: {}'
-                .format(result_content)
-            )
-
-            nm_result = copy.copy(p)
-            nm_result['result'] = result_content['result']
-            self.nelder_mead.add_result_parameters(nm_result)
+        pass
 
     def get_ready_parameters(self) -> list:
         """ Get the list of ready parameters.
@@ -122,15 +104,22 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Returns:
             list[dict]: Results per trial.
         """
-        result_files = get_file_result(self.ws, self.dict_lock)
-        hashnames = [get_basename(f) for f in result_files]
+        results = self.storage.result.get_result_trial_id_list()
         nm_results = []
         for p in self.get_ready_parameters():
             try:
-                index = hashnames.index(p['name'])
+                int(p['vertex_id'])
             except ValueError:
                 continue
-            result_content = load_yaml(result_files[index], self.dict_lock)
+            except KeyError:
+                continue
+
+            if int(p['vertex_id']) in results:
+                index = p['vertex_id']
+            else:
+                continue
+
+            result_content = self.storage.get_hp_dict(trial_id_str=index)
             nm_result = copy.copy(p)
             nm_result['result'] = result_content['result']
             nm_results.append(nm_result)
@@ -154,13 +143,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         # Store results in order of HP file generation
         order = self.order[0]
         for nm_result in nm_results:
-            if order['name'] == nm_result['name']:
-                self.logger.info(
-                    "(nm) order: {}".format(order)
-                )
-                self.logger.info(
-                    "(nm) nm_result: {}".format(nm_result)
-                )
+            if order['vertex_id'] == nm_result['vertex_id']:
                 self.nelder_mead.add_result_parameters(nm_result)
                 self.order.pop(0)
                 break
@@ -183,7 +166,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             --------------------------------------------------------------
             - befor
             {
-                'name': 'CMTrNe5P8a',
+                'vertex_id': 'CMTrNe5P8a',
                 'parameters': [
                     {'parameter_name': 'x1', 'value': 3.37640289751353},
                     {'parameter_name': 'x2', 'value': 1.6556037243290205}
@@ -196,7 +179,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             --------------------------------------------------------------
             - after
             {
-                'name': '000014',
+                'vertex_id': '000014', <---- replace to trial_id
                 'parameters': [
                     {'parameter_name': 'x1', 'value': 3.37640289751353},
                     {'parameter_name': 'x2', 'value': 1.6556037243290205}
@@ -208,11 +191,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
             }
             --------------------------------------------------------------
         """
-        old_param_name = pool_p['name']
+        old_param_name = pool_p['vertex_id']
         new_param_name = name
         for e in self.nelder_mead._executing:
-            if e['name'] == old_param_name:
-                e['name'] = new_param_name
+            if e['vertex_id'] == old_param_name:
+                e['vertex_id'] = new_param_name
                 break
 
     def nelder_mead_main(self) -> list:
@@ -226,9 +209,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         searched_params = self.nelder_mead.search()
         if searched_params is None:
-            self.logger.info(
-                'generate_parameter(): reached to max iteration.'
-            )
+            self.logger.info('generate_parameter(): reached to max iteration.')
             return None
         if len(searched_params) == 0:
             return None
@@ -253,14 +234,10 @@ class NelderMeadOptimizer(AbstractOptimizer):
             self.new_params = []
             pool_p = self.parameter_pool.pop(0)
 
-            self.logger.debug(
-                'pool_p: {}'.format(pool_p)
-            )
+            # self.logger.debug('pool_p: {}'.format(pool_p))
 
             for param in self.params.get_parameter_list():
-                i = [p['parameter_name'] for p in pool_p['parameters']].index(
-                    param.name
-                )
+                i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
 
                 if param.type == 'FLOAT':
                     value = float(pool_p['parameters'][i]['value'])
@@ -281,41 +258,43 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     }
                 )
 
-            name = self.create_parameter_file({'parameters': self.new_params})
-            self.update_ready_parameter_name(pool_p, name)
+            self.register_ready({'parameters': self.new_params})
+            self.update_ready_parameter_name(pool_p, self.trial_id.get())
             self.order.append(
                 {
-                    'name': name,
+                    'vertex_id': self.trial_id.get(),
                     'parameters': self.new_params
                 }
             )
 
-    def _get_all_hashnames(self) -> list:
-        """_get_all_hashnames.
+    def _get_all_trial_id(self) -> list:
+        """_get_all_trial_id.
 
-        Get hashname from dirs: 'result', 'finished', 'running', 'ready'
+        Get trial_ids from DB: 'result', 'finished', 'running', 'ready'
 
         Returns:
-            List: hashname
+            List: trial_id
         """
-        result_files = get_file_result(self.ws, self.dict_lock)
-        finished_files = get_file_hp_finished(self.ws, self.dict_lock)
-        running_files = get_file_hp_running(self.ws, self.dict_lock)
-        ready_files = get_file_hp_ready(self.ws, self.dict_lock)
-        hashnames = [get_basename(f) for f in result_files]
-        hashnames += [get_basename(f) for f in finished_files]
-        hashnames += [get_basename(f) for f in running_files]
-        hashnames += [get_basename(f) for f in ready_files]
-        return hashnames
+        get_trial_id = [
+            self.storage.trial.get_finished,
+            self.storage.trial.get_running,
+            self.storage.trial.get_ready
+        ]
+
+        trial_id = []
+        for p in get_trial_id:
+            trial_id += p()
+
+        return trial_id
 
     def _get_current_names(self):
-        """ get parameter names.
+        """ get parameter trial_id.
 
         Returns:
             parameter names in parameter_pool (list)
         """
         # WARN: Always empty.
-        return [p['name'] for p in self.parameter_pool]
+        return [p['vertex_id'] for p in self.parameter_pool]
 
     def generate_parameter(
         self,
@@ -333,31 +312,24 @@ class NelderMeadOptimizer(AbstractOptimizer):
             TypeError: Causes when an invalid parameter type is set.
         """
 
-        nm_results = self.get_nm_results()
-        self._add_result(nm_results)
+        self._add_result(self.get_nm_results())
 
         searched_params = self.nelder_mead_main()
-
-        self.logger.debug(
-            "searched_params: {}".format(searched_params)
-        )
+        # self.logger.debug(f"searched_params: {searched_params}")
 
         if searched_params is None:
             return None
 
         for p in searched_params:
             if (
-                p['name'] not in self._get_all_hashnames() and
-                p['name'] not in self._get_current_names()
+                p['vertex_id'] not in self._get_all_trial_id() and
+                p['vertex_id'] not in self._get_current_names()
             ):
-                self.logger.debug(
-                    "parameter_pool.append({})".format(p)
-                )
                 self.parameter_pool.append(copy.copy(p))
 
         self._generate_hp_ready(number)
 
-    def _serialize(self) -> dict:
+    def _serialize(self) -> None:
         """Serialize this module.
 
         Returns:
@@ -370,15 +342,20 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     p_pool_param['value'] = float(p_pool_param['value'])
 
         self.serialize_datas = {
-            'generated_parameter': self.generated_parameter,
+            'num_of_generated_parameter': self.num_of_generated_parameter,
             'loop_count': self.loop_count,
             'parameter_pool': parameter_pool,
             'nelder_mead': self.nelder_mead.serialize(),
             'order': self.order
         }
-        return super()._serialize()
+        self.serialize.serialize(
+            trial_id=self.trial_id.integer,
+            optimization_variables=self.serialize_datas,
+            native_random_state=self.get_native_random_state(),
+            numpy_random_state=self.get_numpy_random_state()
+        )
 
-    def _deserialize(self, dict_objects: dict) -> None:
+    def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
 
         Args:
@@ -387,14 +364,19 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        super()._deserialize(dict_objects)
-        parameter_pool = copy.deepcopy(dict_objects['parameter_pool'])
+        d = self.serialize.deserialize(trial_id)
+        self.deserialize_datas = d['optimization_variables']
+        self.set_native_random_state(d['native_random_state'])
+        self.set_numpy_random_state(d['numpy_random_state'])
+
+        parameter_pool = copy.deepcopy(self.deserialize_datas['parameter_pool'])
         for p_pool in parameter_pool:
             for p_pool_param in p_pool['parameters']:
                 if type(p_pool_param['value']) is float:
                     p_pool_param['value'] = np.float64(p_pool_param['value'])
 
+        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
         self.parameter_pool = parameter_pool
         self.nelder_mead = NelderMead(self.params.get_parameter_list())
-        self.nelder_mead.deserialize(dict_objects['nelder_mead'])
-        self.order = dict_objects['order']
+        self.nelder_mead.deserialize(self.deserialize_datas['nelder_mead'])
+        self.order = self.deserialize_datas['order']

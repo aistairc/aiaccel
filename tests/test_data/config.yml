@@ -18,7 +18,7 @@ master:
 optimizer:
   #search_algorithm: "Random"
   #search_algorithm: "Grid"
-  search_algorithm: "Nelder-Mead"
+  search_algorithm: 'aiaccel.optimizer.NelderMeadOptimizer'
   #search_algorithm: "Sobol"
   #search_algorithm: "Tpe"
   sleep_time_optimizer: 3
@@ -50,7 +50,7 @@ resource:
   # num_node is the number how many ready files are allocated at a moment.
   #num_node: 4
 ABCI:
-  group: gaa
+  group: "[group]"
 hyperparameter:
   goal: "minimize"
   trial_number: 10

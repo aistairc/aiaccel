@@ -1,5 +1,6 @@
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler,\
-    parse_hashname
+from aiaccel.scheduler.abstract import AbstractScheduler
+from aiaccel.scheduler.abci import AbciScheduler
+from aiaccel.scheduler.local import LocalScheduler
 from tests.base_test import BaseTest
 import aiaccel
 import asyncio
@@ -36,12 +37,6 @@ def test_create_stat():
 '''
 
 
-def test_parse_hashname():
-    s = "python wrapper.py --index 001"
-    name = parse_hashname(s)
-    assert name in '001'
-
-
 class TestAbstractScheduler(BaseTest):
     # TODO: Need to fix?
     #  logging modules are generated each method.
@@ -51,44 +46,46 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         assert type(AbstractScheduler(options)) is AbstractScheduler
 
-    def test_check_finished_hp(
+    def test_change_state_finished_trials(
         self,
         clean_work_dir,
         config_json,
         setup_hp_running,
         setup_result,
-        work_dir
+        work_dir,
+        database_remove
     ):
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
+        database_remove()
         scheduler = AbstractScheduler(options)
         scheduler.print_dict_state()
         setup_hp_running(1)
         setup_result(1)
-        assert scheduler.check_finished_hp() is None
+        assert scheduler.change_state_finished_trials() is None
 
-    def test_get_stats(self, config_json, work_dir):
+    def test_get_stats(
+        self,
+        config_json,
+        work_dir,
+        database_remove
+    ):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -99,40 +96,43 @@ class TestAbstractScheduler(BaseTest):
         self,
         clean_work_dir,
         config_json,
-        setup_hp_ready, work_dir
+        setup_hp_ready,
+        work_dir,
+        database_remove
     ):
+        database_remove()
         options = {
-            'config': config_json,
+            'config': str(config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
+        scheduler.storage.alive.init_alive()
         scheduler.print_dict_state()
         setup_hp_ready(1)
-        scheduler.start_job_thread(
-            work_dir.joinpath(aiaccel.dict_hp_ready).joinpath('001.hp')
-        )
-        assert scheduler.start_job_thread(
-            work_dir.joinpath(aiaccel.dict_hp_ready).joinpath('001.hp')
-        ) is None
+        trial_id = 1
+        scheduler.start_job_thread(trial_id)
+        assert scheduler.start_job_thread(trial_id) is None
 
         for job in scheduler.jobs:
             machine = job['thread'].get_machine()
             machine.set_state('Success')
             job['thread'].join()
 
-    def test_update_resource(self, config_json, work_dir):
+    def test_update_resource(
+        self,
+        config_json,
+        work_dir,
+        database_remove
+    ):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -145,15 +145,15 @@ class TestAbstractScheduler(BaseTest):
         config_json,
         setup_hp_running,
         setup_result,
-        work_dir
+        work_dir,
+        database_remove
     ):
+        database_remove()
         options = {
-            'config': config_json,
+            'config': str(config_json),
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -161,6 +161,7 @@ class TestAbstractScheduler(BaseTest):
         setup_hp_running(2)
         setup_result(1)
 
+        scheduler.storage.alive.init_alive()
         scheduler.pre_process()
 
         for job in scheduler.jobs:
@@ -168,27 +169,30 @@ class TestAbstractScheduler(BaseTest):
             machine.set_state('Success')
             job['thread'].join()
 
-    def test_post_process(self, config_json):
+    def test_post_process(self, config_json, database_remove):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         assert scheduler.post_process() is None
 
-    def test_loop_pre_process(self, config_json, work_dir):
+    def test_loop_pre_process(
+        self,
+        config_json,
+        work_dir,
+        database_remove
+    ):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -200,14 +204,13 @@ class TestAbstractScheduler(BaseTest):
         )
         loop.run_until_complete(gather)
 
-    def test_loop_post_process(self, config_json):
+    def test_loop_post_process(self, config_json, database_remove):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -219,28 +222,29 @@ class TestAbstractScheduler(BaseTest):
         config_json,
         setup_hp_finished,
         setup_hp_ready,
-        work_dir
+        work_dir,
+        database_remove
     ):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        assert not scheduler.inner_loop_pre_process()
+        scheduler.storage.alive.init_alive()
 
+        assert not scheduler.inner_loop_pre_process()
+        
         scheduler.pre_process()
         assert scheduler.inner_loop_pre_process()
 
         setup_hp_ready(1)
         setup_hp_finished(10)
-        scheduler.start_job_thread(
-            work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
-        )
+        trial_id = 1
+        scheduler.start_job_thread(trial_id)
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
             async_function(scheduler.inner_loop_pre_process),
@@ -252,18 +256,19 @@ class TestAbstractScheduler(BaseTest):
         self,
         clean_work_dir,
         config_json,
-        setup_hp_ready
+        setup_hp_ready,
+        database_remove
     ):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
+        scheduler.storage.alive.init_alive()
         scheduler.pre_process()
         setup_hp_ready(1)
 
@@ -280,43 +285,75 @@ class TestAbstractScheduler(BaseTest):
             machine.set_state('Success')
             job['thread'].join()
 
-    def test_inner_loop_post_process(self, config_json):
+    def test_inner_loop_post_process(
+        self,
+        config_json,
+        database_remove
+    ):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
+        scheduler.storage.alive.init_alive()
         assert scheduler.inner_loop_post_process()
 
-    def test_serialize(self, clean_work_dir, config_json):
+    def test_serialize(
+        self,
+        clean_work_dir,
+        config_json,
+        database_remove
+    ):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        serialized_dict = scheduler._serialize()
-        assert 'loop_count' in serialized_dict
+        scheduler.storage.alive.init_alive()
+        scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
+        scheduler._serialize(trial_id=0)
+        assert 'loop_count' in scheduler.serialize_datas
 
-    def test_deserialize(self, clean_work_dir, config_json):
+    def test_deserialize(
+        self,
+        clean_work_dir,
+        config_json,
+        database_remove
+    ):
+        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        serialized_dict = scheduler._serialize()
-        assert scheduler._deserialize(serialized_dict) is None
+        scheduler.storage.alive.init_alive()
+        scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
+        scheduler._serialize(trial_id=0)
+        assert scheduler._deserialize(trial_id=0) is None
+
+    def test_parse_trial_id(self, config_json, database_remove):
+        database_remove()
+        options = {
+            'config': config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+        s = "python wrapper.py --trial_id 001"
+        s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
+        trial_id = scheduler.parse_trial_id(s['name'])
+        # assert name in '001'
+        assert trial_id is None

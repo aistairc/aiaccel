@@ -61,7 +61,7 @@ ABCI:
 #### optimize
 ```yaml
 optimize:
-  search_algorithm: "nelder-mead"
+  search_algorithm: 'aiaccel.optimizer.NelderMeadOptimizer'
   goal: "minimize"
   trial_number: 100
   rand_seed: 42
