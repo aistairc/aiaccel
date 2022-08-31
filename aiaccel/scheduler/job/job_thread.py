@@ -639,19 +639,8 @@ class Model(object):
             bool: A target job is finished or not.
         """
         for state in obj.scheduler.stats:
-            # state: {
-            #     'job-ID': '2481',
-            #     'prior': None,
-            #     'user': '3 member',
-            #     'state': 'R+   Wed May 25 13:5',
-            #     'queue': None,
-            #     'jclass': None,
-            #     'slots': None,
-            #     'ja-task-ID': None,
-            #     'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0',
-            #     'submit/start at': '4:11 202'
-            # }
-            if obj.trial_id == int(obj.scheduler.parse_trial_id(state['name'])):
+            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
+            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
                 return True
         else:
             # confirm whether the result file exists or not (this means the job finished quickly
@@ -797,8 +786,8 @@ class Model(object):
             None
         """
         for state in obj.scheduler.stats:
-            # if obj.trial_id == state['name']:
-            if obj.trial_id == int(obj.scheduler.parse_trial_id(state['name'])):
+            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
+            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
                 kill_process(state['job-ID'])
         else:
             logger = logging.getLogger('root.scheduler.job')
@@ -816,8 +805,8 @@ class Model(object):
             bool: A target is killed or not.
         """
         for state in obj.scheduler.stats:
-            # if obj.trial_id == state['name']:
-            if obj.trial_id == int(obj.scheduler.parse_trial_id(state['name'])):
+            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
+            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
                 return False
         else:
             return True
