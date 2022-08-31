@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
+from sqlalchemy.pool import NullPool
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from aiaccel.storage.model.db import Base
@@ -15,6 +16,7 @@ class Abstract:
         self.engine = create_engine(
             self.url,
             echo=False,
+            poolclass=NullPool,
             connect_args={'check_same_thread': False, 'timeout': 60}
         )
         self.metadata = MetaData()

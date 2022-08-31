@@ -44,9 +44,7 @@ class TimeStamp(Abstract):
 
         finally:
             session.commit()
-            session.expunge_all()
             session.close()
-            self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_end_time(self, trial_id: int, end_time: str) -> None:
@@ -79,9 +77,7 @@ class TimeStamp(Abstract):
 
         finally:
             session.commit()
-            session.expunge_all()
             session.close()
-            self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_start_time(self, trial_id: int) -> str:
@@ -101,9 +97,7 @@ class TimeStamp(Abstract):
             .one_or_none()
         )
 
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if data is None:
             return None
@@ -131,9 +125,7 @@ class TimeStamp(Abstract):
             .one_or_none()
         )
 
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if data is None:
             return None
@@ -153,14 +145,11 @@ class TimeStamp(Abstract):
         session = self.session()
         session.query(TimestampTable).with_for_update(read=True).delete()
         session.commit()
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_timestamp(self, trial_id) -> None:
         session = self.session()
         session.query(TimestampTable).filter(TimestampTable.trial_id == trial_id).delete()
         session.commit()
-        session.expunge_all()
         session.close()
-        self.engine.dispose()

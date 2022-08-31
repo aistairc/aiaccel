@@ -32,9 +32,7 @@ class Result(Abstract):
 
         finally:
             session.commit()
-            session.expunge_all()
             session.close()
-            self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_objective(self, trial_id) -> Union[None, int, float]:
@@ -53,9 +51,7 @@ class Result(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if data is None:
             return None
@@ -73,9 +69,7 @@ class Result(Abstract):
             session.query(ResultTable)
             .with_for_update(read=True)
         )
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
         # return [d.objective for d in data]
         return data
 
@@ -123,9 +117,7 @@ class Result(Abstract):
         """
         session = self.session()
         data = session.query(ResultTable).with_for_update(read=True)
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if data is None:
             return None
@@ -141,9 +133,7 @@ class Result(Abstract):
         session = self.session()
         session.query(ResultTable).with_for_update(read=True).delete()
         session.commit()
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_objective(self, trial_id) -> None:
@@ -154,6 +144,4 @@ class Result(Abstract):
         session = self.session()
         session.query(ResultTable).filter(ResultTable.trial_id == trial_id).delete()
         session.commit()
-        session.expunge_all()
         session.close()
-        self.engine.dispose()

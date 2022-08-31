@@ -45,9 +45,7 @@ class Hp(Abstract):
 
         finally:
             session.commit()
-            session.expunge_all()
             session.close()
-            self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_params(self, trial_id: int, params: list) -> None:
@@ -70,9 +68,7 @@ class Hp(Abstract):
 
         finally:
             session.commit()
-            session.expunge_all()
             session.close()
-            self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_params(self, trial_id: int) -> Union[None, list]:
@@ -91,9 +87,7 @@ class Hp(Abstract):
             .with_for_update(read=True)
             .all()
         )
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if len(hp) == 0:
             return None
@@ -109,9 +103,7 @@ class Hp(Abstract):
         session = self.session()
         session.query(HpTable).with_for_update(read=True).delete()
         session.commit()
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_params(self, trial_id: int) -> None:
@@ -122,6 +114,4 @@ class Hp(Abstract):
         session = self.session()
         session.query(HpTable).filter(HpTable.trial_id == trial_id).delete()
         session.commit()
-        session.expunge_all()
         session.close()
-        self.engine.dispose()

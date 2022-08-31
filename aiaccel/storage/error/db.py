@@ -41,9 +41,7 @@ class Error(Abstract):
 
         finally:
             session.commit()
-            session.expunge_all()
             session.close()
-            self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_error(self, trial_id: int) -> Union[None, str]:
@@ -62,9 +60,7 @@ class Error(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if data is None:
             return None
@@ -83,9 +79,7 @@ class Error(Abstract):
             .with_for_update(read=True)
             .all()
         )
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if data is None:
             return []
@@ -102,9 +96,7 @@ class Error(Abstract):
         session = self.session()
         session.query(ErrorTable).with_for_update(read=True).delete()
         session.commit()
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_error(self, trial_id: int) -> None:
@@ -115,6 +107,4 @@ class Error(Abstract):
         session = self.session()
         session.query(ErrorTable).filter(ErrorTable.trial_id == trial_id).delete()
         session.commit()
-        session.expunge_all()
         session.close()
-        self.engine.dispose()

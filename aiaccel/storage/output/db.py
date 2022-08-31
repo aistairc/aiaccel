@@ -41,9 +41,7 @@ class AbciOutput(Abstract):
 
         finally:
             session.commit()
-            session.expunge_all()
             session.close()
-            self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_abci_output(self, trial_id: int) -> Union[None, str]:
@@ -62,9 +60,7 @@ class AbciOutput(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if data is None:
             return None

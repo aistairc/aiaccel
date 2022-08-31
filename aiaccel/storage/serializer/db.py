@@ -47,9 +47,7 @@ class Serializer(Abstract):
                 )
                 session.add(new_row)
             else:
-                session.expunge_all()
                 session.close()
-                self.engine.dispose()
                 return
 
         except SQLAlchemyError as e:
@@ -58,9 +56,7 @@ class Serializer(Abstract):
 
         finally:
             session.commit()
-            session.expunge_all()
             session.close()
-            self.engine.dispose()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_serialize(self, trial_id: int, process_name: str) -> Any:
@@ -81,9 +77,7 @@ class Serializer(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
         if data is None:
             return None
@@ -103,9 +97,7 @@ class Serializer(Abstract):
             .delete()
         )
         session.commit()
-        session.expunge_all()
         session.close()
-        self.engine.dispose()
 
     def is_exists_any_trial(self, trial_id: int):
         process_names = [
