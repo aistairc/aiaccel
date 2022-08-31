@@ -41,13 +41,13 @@ class SobolOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        returned_params = []
         l_params = self.params.get_parameter_list()
         n_params = len(l_params)
         initial_parameter = self.generate_initial_parameter()
 
         if initial_parameter is not None:
-            returned_params.append(initial_parameter)
+            self.register_ready(initial_parameter)
+            self._serialize()
             number -= 1
 
         for _ in range(number):
@@ -66,10 +66,9 @@ class SobolOptimizer(AbstractOptimizer):
                 }
                 new_params.append(new_param)
 
-            returned_params.append({'parameters': new_params})
             self.num_of_generated_parameter += 1
-
-        self.register_new_parameters(returned_params)
+            self.register_ready({'parameters': new_params})
+            self._serialize()
 
     def _serialize(self) -> dict:
         """Serialize this module.
