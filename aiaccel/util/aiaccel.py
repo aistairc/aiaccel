@@ -12,6 +12,32 @@ from aiaccel.storage.storage import Storage
 from aiaccel.parameter import load_parameter
 from aiaccel.util.time_tools import get_time_now
 
+import numpy as np
+
+SUPPORTED_TYPES = [
+    int,
+    float,
+    str,
+    np.int8,
+    np.int16,
+    np.int32,
+    np.int64,
+    np.uint8,
+    np.uint16,
+    np.uint32,
+    np.uint64,
+    np.float16,
+    np.float32,
+    np.float64,
+    np.float128,
+    np.complex64,
+    np.complex128,
+    np.complex256,
+    np.bool,
+    np.unicode,
+    np.object
+]
+
 
 class _Message:
     """
@@ -420,11 +446,7 @@ class Run:
 
         if self.args["config"] is not None:
             err = self.err
-            if not (
-                type(y) == int or
-                type(y) == float or
-                type(y) == str
-            ):
+            if not type(y) in SUPPORTED_TYPES:
                 y = float("nan")
                 err = f"user function returns invalid type value, {type(y)}({y})."
 
