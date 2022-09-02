@@ -32,6 +32,7 @@ class Error(Abstract):
             if data is None:
                 new_row = ErrorTable(trial_id=trial_id, error=error_message)
                 session.add(new_row)
+                session.commit()
             else:
                 data.error = error_message
 
@@ -40,7 +41,6 @@ class Error(Abstract):
             raise e
 
         finally:
-            session.commit()
             session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)

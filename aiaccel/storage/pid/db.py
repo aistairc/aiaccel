@@ -31,6 +31,7 @@ class Pid(Abstract):
             if data is None:
                 new_row = PidTable(process_name=process_name, pid=pid)
                 session.add(new_row)
+                session.commit()
             else:
                 data.pid = pid
 
@@ -39,7 +40,6 @@ class Pid(Abstract):
             raise e
 
         finally:
-            session.commit()
             session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)

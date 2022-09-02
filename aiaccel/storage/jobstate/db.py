@@ -37,13 +37,13 @@ class JobState(Abstract):
                 session.add(new_row)
             else:
                 data.state = state
+            session.commit()
 
         except SQLAlchemyError as e:
             session.rollback()
             raise e
 
         finally:
-            session.commit()
             session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -66,13 +66,13 @@ class JobState(Abstract):
                 ) for state in states
             ]
             session.bulk_save_objects(data)
+            session.commit()
 
         except SQLAlchemyError as e:
             session.rollback()
             raise e
 
         finally:
-            session.commit()
             session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)

@@ -25,13 +25,13 @@ class Result(Abstract):
         try:
             data = ResultTable(trial_id=trial_id, objective=objective)
             session.add(data)
+            session.commit()
 
         except SQLAlchemyError as e:
             session.rollback()
             raise e
 
         finally:
-            session.commit()
             session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)

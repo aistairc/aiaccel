@@ -46,6 +46,7 @@ class Serializer(Abstract):
                     numpy_random_state=numpy_random_state
                 )
                 session.add(new_row)
+                session.commit()
             else:
                 session.close()
                 return
@@ -55,7 +56,6 @@ class Serializer(Abstract):
             raise e
 
         finally:
-            session.commit()
             session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
