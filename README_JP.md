@@ -52,7 +52,7 @@
     > python -m aiaccel.start --config config.yaml --clean
     ~~~
 
-    Tips: `--resume trial_id`を付加することで、指定した`trial_id`から再開できます。
+    Tips: `--resume 試行数`を付加することで、指定した試行数から再開できます。
     ~~~bash
     > python -m aiaccel.start --config config.yaml --resume 10
     ~~~

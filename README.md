@@ -58,7 +58,7 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
     > python -m aiaccel.start --config config.yaml --clean
     ~~~
 
-    Tips: You can resume from the given `trial_id` by using `--resume trial_id`.
+    Tips: You can resume from the given `trial number` by using `--resume trial number`.
     ~~~bash
     > python -m aiaccel.start --config config.yaml --resume 10
     ~~~
