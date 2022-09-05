@@ -68,7 +68,7 @@ class TestAbstractMaster(BaseTest):
         )
         loop.run_until_complete(gather)
 
-        # master.storage.alive.init_alive()
+        master.storage.alive.init_alive()
 
         if master.scheduler_proc is not None:
             master.scheduler_proc.wait()
