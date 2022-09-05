@@ -23,6 +23,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         self.nelder_mead = None
         self.parameter_pool = None
         self.order = []
+        self.all_trial_id = []
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -266,6 +267,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     'parameters': self.new_params
                 }
             )
+            self.all_trial_id.append(self.trial_id.get())
             self._serialize()
 
     def _get_all_trial_id(self) -> list:
@@ -276,17 +278,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Returns:
             List: trial_id
         """
-        get_trial_id = [
-            self.storage.trial.get_finished,
-            self.storage.trial.get_running,
-            self.storage.trial.get_ready
-        ]
 
-        trial_id = []
-        for p in get_trial_id:
-            trial_id += p()
-
-        return trial_id
+        return self.all_trial_id
 
     def _get_current_names(self):
         """ get parameter trial_id.
@@ -347,7 +340,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
             'loop_count': self.loop_count,
             'parameter_pool': parameter_pool,
             'nelder_mead': self.nelder_mead.serialize(),
-            'order': self.order
+            'order': self.order,
+            'all_trial_id': self.all_trial_id
         }
         self.serialize.serialize(
             trial_id=self.trial_id.integer,
@@ -381,3 +375,4 @@ class NelderMeadOptimizer(AbstractOptimizer):
         self.nelder_mead = NelderMead(self.params.get_parameter_list())
         self.nelder_mead.deserialize(self.deserialize_datas['nelder_mead'])
         self.order = self.deserialize_datas['order']
+        self.all_trial_id = self.deserialize_datas['all_trial_id']
