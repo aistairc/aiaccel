@@ -38,15 +38,14 @@ class Hp(Abstract):
                 param_type=param_type
             )
             session.add(p)
+            session.commit()
 
         except SQLAlchemyError as e:
             session.rollback()
             raise e
 
         finally:
-            session.commit()
-            session.expunge_all()
-            self.engine.dispose()
+            session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_params(self, trial_id: int, params: list) -> None:
@@ -62,15 +61,14 @@ class Hp(Abstract):
             ]
             # session.add_all(hps)
             session.bulk_save_objects(hps)
+            session.commit()
 
         except SQLAlchemyError as e:
             session.rollback()
             raise e
 
         finally:
-            session.commit()
-            session.expunge_all()
-            self.engine.dispose()
+            session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_params(self, trial_id: int) -> Union[None, list]:
@@ -89,8 +87,7 @@ class Hp(Abstract):
             .with_for_update(read=True)
             .all()
         )
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
         if len(hp) == 0:
             return None
@@ -106,8 +103,7 @@ class Hp(Abstract):
         session = self.session()
         session.query(HpTable).with_for_update(read=True).delete()
         session.commit()
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_params(self, trial_id: int) -> None:
@@ -118,5 +114,4 @@ class Hp(Abstract):
         session = self.session()
         session.query(HpTable).filter(HpTable.trial_id == trial_id).delete()
         session.commit()
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()

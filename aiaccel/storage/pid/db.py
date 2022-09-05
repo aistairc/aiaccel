@@ -31,6 +31,7 @@ class Pid(Abstract):
             if data is None:
                 new_row = PidTable(process_name=process_name, pid=pid)
                 session.add(new_row)
+                session.commit()
             else:
                 data.pid = pid
 
@@ -39,9 +40,7 @@ class Pid(Abstract):
             raise e
 
         finally:
-            session.commit()
-            session.expunge_all()
-            self.engine.dispose()
+            session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_process_pid(self, process_name: str) -> Union[None, int]:
@@ -60,8 +59,7 @@ class Pid(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
         if data is None:
             return None
@@ -77,8 +75,7 @@ class Pid(Abstract):
         session = self.session()
         session.query(PidTable).with_for_update(read=True).delete()
         session.commit()
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_process_pid(self, process_name: str) -> None:
@@ -89,5 +86,4 @@ class Pid(Abstract):
         session = self.session()
         session.query(PidTable).filter(PidTable.process_name == process_name).delete()
         session.commit()
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()

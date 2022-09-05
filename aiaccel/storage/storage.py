@@ -68,14 +68,6 @@ class Storage:
 
         TODO: Refuctoring
         """
-        # with InterProcessLock(self.lock_file):
-        #     session = self.trial.session()
-        #     try:
-        #         trial_id = max(session.query(TrialTable.trial_id).all())[0]
-        #     except ValueError:
-        #         trial_id = None
-        #     session.expunge_all()
-        #     self.engine.dispose()
 
         trial_ids = self.trial.get_all_trial_id()
         if trial_ids is None or len(trial_ids) == 0:

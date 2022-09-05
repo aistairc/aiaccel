@@ -32,6 +32,7 @@ class Error(Abstract):
             if data is None:
                 new_row = ErrorTable(trial_id=trial_id, error=error_message)
                 session.add(new_row)
+                session.commit()
             else:
                 data.error = error_message
 
@@ -40,9 +41,7 @@ class Error(Abstract):
             raise e
 
         finally:
-            session.commit()
-            session.expunge_all()
-            self.engine.dispose()
+            session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_error(self, trial_id: int) -> Union[None, str]:
@@ -61,8 +60,7 @@ class Error(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
         if data is None:
             return None
@@ -81,8 +79,7 @@ class Error(Abstract):
             .with_for_update(read=True)
             .all()
         )
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
         if data is None:
             return []
@@ -99,8 +96,7 @@ class Error(Abstract):
         session = self.session()
         session.query(ErrorTable).with_for_update(read=True).delete()
         session.commit()
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_error(self, trial_id: int) -> None:
@@ -111,5 +107,4 @@ class Error(Abstract):
         session = self.session()
         session.query(ErrorTable).filter(ErrorTable.trial_id == trial_id).delete()
         session.commit()
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()

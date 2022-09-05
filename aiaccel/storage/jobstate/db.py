@@ -37,15 +37,14 @@ class JobState(Abstract):
                 session.add(new_row)
             else:
                 data.state = state
+            session.commit()
 
         except SQLAlchemyError as e:
             session.rollback()
             raise e
 
         finally:
-            session.commit()
-            session.expunge_all()
-            self.engine.dispose()
+            session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_jobstates(self, states: list) -> None:
@@ -67,15 +66,14 @@ class JobState(Abstract):
                 ) for state in states
             ]
             session.bulk_save_objects(data)
+            session.commit()
 
         except SQLAlchemyError as e:
             session.rollback()
             raise e
 
         finally:
-            session.commit()
-            session.expunge_all()
-            self.engine.dispose()
+            session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_jobstate(self, trial_id: int) -> Union[None, str]:
@@ -94,8 +92,7 @@ class JobState(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
         if data is None:
             return None
@@ -109,8 +106,7 @@ class JobState(Abstract):
             .with_for_update(read=True)
             .all()
         )
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
         if data is None:
             return [{'trial_id': None, 'jobstate': None}]
@@ -130,8 +126,7 @@ class JobState(Abstract):
         session = self.session()
         session.query(JobStateTable).filter(JobStateTable.trial_id == trial_id).delete()
         session.commit()
-        session.expunge_all()
-        self.engine.dispose()
+        session.close()
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def is_failure(self, trial_id: int) -> bool:
@@ -150,9 +145,7 @@ class JobState(Abstract):
             .with_for_update(read=True)
             .one_or_none()
         )
-        session.expunge_all()
-
-        self.engine.dispose()
+        session.close()
 
         if data is None:
             return False
