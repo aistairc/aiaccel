@@ -56,10 +56,7 @@ class TestAbstractMaster(BaseTest):
 
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
-            # master = create_master(options['config'])(options)
             master = AbstractMaster(options)
-            # master = start.Master()
-        # master = AbstractMaster(options)
         work_dir.joinpath(aiaccel.dict_runner).rmdir()
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
@@ -67,8 +64,6 @@ class TestAbstractMaster(BaseTest):
             delay_make_directory(1, work_dir.joinpath(aiaccel.dict_runner))
         )
         loop.run_until_complete(gather)
-
-        master.storage.alive.init_alive()
 
         if master.scheduler_proc is not None:
             master.scheduler_proc.wait()
@@ -78,7 +73,7 @@ class TestAbstractMaster(BaseTest):
 
         master.worker_o.kill()
         master.worker_s.kill()
-        master.storage.alive.init_alive()
+        
 
     def test_pre_process_2(
         self,
@@ -98,6 +93,7 @@ class TestAbstractMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
             master = AbstractMaster(options)
+        master.storage.alive.init_alive()
         master.start_optimizer()
         master.start_scheduler()
 
@@ -141,7 +137,6 @@ class TestAbstractMaster(BaseTest):
         # master.th_scheduler.abort()
         master.worker_o.kill()
         master.worker_s.kill()
-        master.storage.alive.init_alive()
 
     def test_pre_process_3(
         self,
@@ -161,6 +156,7 @@ class TestAbstractMaster(BaseTest):
             'process_name': 'master'
         }
         master = AbstractMaster(options)
+        master.storage.alive.init_alive()
         setup_hp_finished(10)
         assert master.pre_process() is None
 
