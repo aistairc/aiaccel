@@ -9,10 +9,10 @@ from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.time_tools import get_time_string_from_object
 import aiaccel
 import logging
-import time
 from aiaccel.util.serialize import Serializer
 from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
+from aiaccel.util.retry import retry
 
 
 class AbstractMaster(AbstractModule):
@@ -38,7 +38,6 @@ class AbstractMaster(AbstractModule):
         self.options['process_name'] = 'master'
 
         super().__init__(self.options)
-        self.alive_file = self.ws / aiaccel.dict_alive / aiaccel.alive_master
         self.logger = logging.getLogger('root.master')
         self.logger.setLevel(logging.DEBUG)
         self.exit_alive('master')
@@ -50,7 +49,7 @@ class AbstractMaster(AbstractModule):
             str_to_logging_level(self.config.master_stream_log_level.get()),
             'Master   '
         )
-        print(self.options)
+
         self.verification = AbstractVerification(self.options)
         self.sleep_time = self.config.sleep_time_master.get()
         self.goal = self.config.goal.get()
@@ -59,8 +58,10 @@ class AbstractMaster(AbstractModule):
 
         # optimizer
         self.o = create_optimizer(options['config'])(options)
+        self.o.__init__(self.options)
         # scheduler
         self.s = create_scheduler(options['config'])(options)
+        self.s.__init__(self.options)
 
         self.worker_o = multiprocessing.Process(target=self.o.start)
         self.worker_s = multiprocessing.Process(target=self.s.start)
@@ -86,31 +87,52 @@ class AbstractMaster(AbstractModule):
 
         self.start_optimizer()
         self.start_scheduler()
-        c = 0
 
-        while (
-            self.storage.alive.check_alive('optimizer') is False or
-            self.storage.alive.check_alive('scheduler') is False
-        ):
-            time.sleep(1.0)
-            c += 1
-
-            if c >= self.config.init_fail_count.get():
-                self.logger.error(f'Start process fails {self.config.init_fail_count.get()} times.')
+        def wait_startup(self, max_num):
+            @retry(_MAX_NUM=max_num, _DELAY=1.0)
+            def _wait_startup(self):
+                if self.check_finished():
+                    return
 
                 if self.storage.alive.check_alive('optimizer') is False:
-                    raise IndexError('Could not start an optimizer process.')
+                    raise IndexError(
+                        'Could not start an optimizer process.'
+                    )
+                if self.storage.alive.check_alive('scheduler') is False:
+                    raise IndexError(
+                        'Could not start an scheduler process.'
+                    )
+                return
+            _wait_startup(self)
 
-                elif self.storage.alive.check_alive('scheduler') is False:
-                    raise IndexError('Could not start an scheduler process.')
+        wait_startup(self, self.config.init_fail_count.get())
 
-                else:
-                    assert False
+        # c = 0
+        # while (
+        #     self.storage.alive.check_alive('optimizer') is False or
+        #     self.storage.alive.check_alive('scheduler') is False
+        # ):
+        #     time.sleep(1.0)
+        #     c += 1
 
-            if self.check_finished():
-                break
+        #     if c >= self.config.init_fail_count.get():
+        #         self.logger.error(f'Start process fails {self.config.init_fail_count.get()} times.')
 
-            self.logger.debug('check alive loop')
+        #         if self.storage.alive.check_alive('optimizer') is False:
+        #             print(self.storage.alive.check_alive('optimizer'))
+        #             raise IndexError('Could not start an optimizer process.')
+
+        #         elif self.storage.alive.check_alive('scheduler') is False:
+        #             raise IndexError('Could not start an scheduler process.')
+
+        #         else:
+        #             assert False
+
+        #     if self.check_finished():
+        #         break
+
+        #     self.logger.debug('check alive loop')
+        return
 
     def post_process(self) -> None:
         """Pre-procedure before executing processes.

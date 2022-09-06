@@ -8,7 +8,7 @@
     "randseed": 1,
     "silent_mode": false,
     "workspace": "/tmp/work",
-    "job_command": "python wrapper.py"
+    "job_command": "python original_main.py"
   },
   "resource": {
     "type": "local",

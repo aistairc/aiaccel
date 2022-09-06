@@ -75,6 +75,8 @@ class TestAbciMaster(BaseTest):
             master = AbciMaster(options)
         master.pre_process()
         assert type(master.runner_files) is list
+        master.worker_o.kill()
+        master.worker_s.kill()
 
     def test_get_stats(
         self,
