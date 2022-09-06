@@ -26,7 +26,7 @@ class Serializer:
             'parameter_pool': None,
             'study': None,
             'nelder_mead': None,
-            'order': None
+            'order': None,
         }
 
     def serialize(
