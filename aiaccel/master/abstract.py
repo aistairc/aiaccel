@@ -93,7 +93,6 @@ class AbstractMaster(AbstractModule):
             def _wait_startup(self):
                 if self.check_finished():
                     return
-
                 if self.storage.alive.check_alive('optimizer') is False:
                     raise IndexError(
                         'Could not start an optimizer process.'
@@ -104,34 +103,7 @@ class AbstractMaster(AbstractModule):
                     )
                 return
             _wait_startup(self)
-
         wait_startup(self, self.config.init_fail_count.get())
-
-        # c = 0
-        # while (
-        #     self.storage.alive.check_alive('optimizer') is False or
-        #     self.storage.alive.check_alive('scheduler') is False
-        # ):
-        #     time.sleep(1.0)
-        #     c += 1
-
-        #     if c >= self.config.init_fail_count.get():
-        #         self.logger.error(f'Start process fails {self.config.init_fail_count.get()} times.')
-
-        #         if self.storage.alive.check_alive('optimizer') is False:
-        #             print(self.storage.alive.check_alive('optimizer'))
-        #             raise IndexError('Could not start an optimizer process.')
-
-        #         elif self.storage.alive.check_alive('scheduler') is False:
-        #             raise IndexError('Could not start an scheduler process.')
-
-        #         else:
-        #             assert False
-
-        #     if self.check_finished():
-        #         break
-
-        #     self.logger.debug('check alive loop')
         return
 
     def post_process(self) -> None:
