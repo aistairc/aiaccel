@@ -16,13 +16,3 @@ def retry(_MAX_NUM=60, _DELAY=1.0):
                     continue
         return _wrapper
     return _retry
-
-
-def fretry(func, _MAX_NUM=60, _DELAY=1.0):
-    @retry(_MAX_NUM, _DELAY)
-    def _fretry():
-        @wraps(func)
-        def _wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-        return _wrapper
-    return _fretry
