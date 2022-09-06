@@ -60,20 +60,11 @@ class TestAbstractMaster(BaseTest):
         work_dir.joinpath(aiaccel.dict_runner).rmdir()
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
-            loop_pre_process(master),
-            delay_make_directory(1, work_dir.joinpath(aiaccel.dict_runner))
+            loop_pre_process(master)
         )
         loop.run_until_complete(gather)
-
-        if master.scheduler_proc is not None:
-            master.scheduler_proc.wait()
-
-        if master.optimizer_proc is not None:
-            master.optimizer_proc.wait()
-
         master.worker_o.kill()
         master.worker_s.kill()
-        
 
     def test_pre_process_2(
         self,
@@ -159,18 +150,8 @@ class TestAbstractMaster(BaseTest):
         master.storage.alive.init_alive()
         setup_hp_finished(10)
         assert master.pre_process() is None
-
-        master.storage.alive.init_alive()
-
-        if master.scheduler_proc is not None:
-            master.scheduler_proc.wait()
-
-        if master.optimizer_proc is not None:
-            master.optimizer_proc.wait()
-
         master.worker_o.kill()
         master.worker_s.kill()
-        master.storage.alive.init_alive()
 
     def test_post_process(
         self,
@@ -380,9 +361,7 @@ class TestAbstractMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             master = AbstractMaster(options)
         p = subprocess.Popen(['ls'])
-        with patch.object(master, 'optimizer_proc', return_value=p):
-            with patch.object(master, 'scheduler_proc', return_value=p):
-                assert master.loop_post_process() is None
+        assert master.loop_post_process() is None
 
     def test_inner_loop_pre_process(
         self,

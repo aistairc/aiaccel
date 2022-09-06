@@ -23,8 +23,6 @@ class AbstractMaster(AbstractModule):
         optimizer_proc (subprocess.Popen): A reference for a subprocess of
             Optimizer.
         start_time (datetime.datetime): A stored starting time.
-        scheduler_proc (subprocess.Popen): A reference for a subprocess of
-            Scheduler.
         verification (AbstractVerification): A verification object.
     """
 
@@ -54,8 +52,6 @@ class AbstractMaster(AbstractModule):
         )
         print(self.options)
         self.verification = AbstractVerification(self.options)
-        self.optimizer_proc = None
-        self.scheduler_proc = None
         self.sleep_time = self.config.sleep_time_master.get()
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
@@ -88,8 +84,6 @@ class AbstractMaster(AbstractModule):
             self.storage.delete_trial_data_after_this(resume_trial_id)
             self.trial_id.initial(num=resume_trial_id)
 
-        self.storage.alive.init_alive()
-
         self.start_optimizer()
         self.start_scheduler()
         c = 0
@@ -103,7 +97,15 @@ class AbstractMaster(AbstractModule):
 
             if c >= self.config.init_fail_count.get():
                 self.logger.error(f'Start process fails {self.config.init_fail_count.get()} times.')
-                raise IndexError('Could not start an optimizer or a scheduler process.')
+
+                if self.storage.alive.check_alive('optimizer') is False:
+                    raise IndexError('Could not start an optimizer process.')
+
+                elif self.storage.alive.check_alive('scheduler') is False:
+                    raise IndexError('Could not start an scheduler process.')
+
+                else:
+                    assert False
 
             if self.check_finished():
                 break
