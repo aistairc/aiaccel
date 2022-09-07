@@ -2,7 +2,7 @@ from aiaccel.argument import Arguments
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from pathlib import Path
-from aiaccel.easy_visualizer import EasyVisualizer
+from aiaccel.util.easy_visualizer import EasyVisualizer
 
 
 class Plotter:
