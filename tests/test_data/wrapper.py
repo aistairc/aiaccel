@@ -4,8 +4,8 @@ from aiaccel.util import aiaccel
 run = aiaccel.Run()
 
 # Optimization
-y = run.execute_and_report("python user.py")
-ys = run.execute("python user.py")
+y = run.execute_and_report("python original_main.py")
+ys = run.execute("python original_main.py")
 run.report(ys[0])
 print(run.ys)
 

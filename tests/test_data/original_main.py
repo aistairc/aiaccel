@@ -11,7 +11,7 @@ def main(p):
 
     # Sphere
     y = np.sum(x ** 2)
-    return float(y)
+    return y
 
 
 if __name__ == "__main__":

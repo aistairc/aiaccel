@@ -73,16 +73,10 @@ class TestAbciMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
             master = AbciMaster(options)
-        master.storage.alive.init_alive()
         master.pre_process()
-        # alive_files = get_dict_files(work_dir.joinpath('alive'), '*.yml')
-
-        # for f in alive_files:
-        #     f.unlink()
-
-        # self.master.scheduler_proc.wait()
-        # self.master.optimizer_proc.wait()
         assert type(master.runner_files) is list
+        master.worker_o.kill()
+        master.worker_s.kill()
 
     def test_get_stats(
         self,
