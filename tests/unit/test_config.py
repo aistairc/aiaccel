@@ -104,7 +104,7 @@ def test_config(config_json):
     config = Config(config_json)
     
     assert config.workspace.get() == "/tmp/work"
-    assert config.job_command.get() == "python wrapper.py"
+    assert config.job_command.get() == "python original_main.py"
     assert config.resource_type.get() == "local"
     assert config.num_node.get() == 4
     assert config.abci_group.get() == "gaa"

@@ -56,15 +56,6 @@ class AbstractModule(object):
         self.config = Config(self.config_path)
         self.ws = Path(self.config.workspace.get()).resolve()
 
-        self.logger = None
-        self.ch = None
-        self.ch_formatter = None
-        self.ch_formatter = None
-        self.loop_count = 0
-        self.hp_ready = 0
-        self.hp_running = 0
-        self.hp_finished = 0
-
         # working directory
         self.dict_alive = self.ws / aiaccel.dict_alive
         self.dict_hp = self.ws / aiaccel.dict_hp
