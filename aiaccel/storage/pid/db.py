@@ -20,27 +20,23 @@ class Pid(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            data = (
-                session.query(PidTable)
-                .filter(PidTable.process_name == process_name)
-                .with_for_update(read=True)
-                .one_or_none()
-            )
-            if data is None:
-                new_row = PidTable(process_name=process_name, pid=pid)
-                session.add(new_row)
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(PidTable)
+                    .filter(PidTable.process_name == process_name)
+                    .with_for_update(read=True)
+                    .one_or_none()
+                )
+                if data is None:
+                    new_row = PidTable(process_name=process_name, pid=pid)
+                    session.add(new_row)
+                else:
+                    data.pid = pid
                 session.commit()
-            else:
-                data.pid = pid
-
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_process_pid(self, process_name: str) -> Union[None, int]:
@@ -52,14 +48,13 @@ class Pid(Abstract):
         Returns:
             pid (int): Any pid
         """
-        session = self.session()
-        data = (
-            session.query(PidTable)
-            .filter(PidTable.process_name == process_name)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(PidTable)
+                .filter(PidTable.process_name == process_name)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if data is None:
             return None
@@ -72,10 +67,13 @@ class Pid(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(PidTable).with_for_update(read=True).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(PidTable).with_for_update(read=True).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_process_pid(self, process_name: str) -> None:
@@ -83,7 +81,10 @@ class Pid(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(PidTable).filter(PidTable.process_name == process_name).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(PidTable).filter(PidTable.process_name == process_name).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e

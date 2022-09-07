@@ -20,31 +20,26 @@ class JobState(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            data = (
-                session.query(JobStateTable)
-                .filter(JobStateTable.trial_id == trial_id)
-                .with_for_update(read=True)
-                .one_or_none()
-            )
-
-            if data is None:
-                new_row = JobStateTable(
-                    trial_id=trial_id,
-                    state=state
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(JobStateTable)
+                    .filter(JobStateTable.trial_id == trial_id)
+                    .with_for_update(read=True)
+                    .one_or_none()
                 )
-                session.add(new_row)
-            else:
-                data.state = state
-            session.commit()
-
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+                if data is None:
+                    new_row = JobStateTable(
+                        trial_id=trial_id,
+                        state=state
+                    )
+                    session.add(new_row)
+                else:
+                    data.state = state
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_jobstates(self, states: list) -> None:
@@ -57,23 +52,19 @@ class JobState(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            data = [
-                JobStateTable(
-                    trial_id=state['trial_id'],
-                    state=state['jobstate']
-                ) for state in states
-            ]
-            session.bulk_save_objects(data)
-            session.commit()
-
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+        with self.create_session() as session:
+            try:
+                data = [
+                    JobStateTable(
+                        trial_id=state['trial_id'],
+                        state=state['jobstate']
+                    ) for state in states
+                ]
+                session.bulk_save_objects(data)
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_jobstate(self, trial_id: int) -> Union[None, str]:
@@ -85,14 +76,13 @@ class JobState(Abstract):
         Returns:
             str: Some kind of jobstate
         """
-        session = self.session()
-        data = (
-            session.query(JobStateTable)
-            .filter(JobStateTable.trial_id == trial_id)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(JobStateTable)
+                .filter(JobStateTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if data is None:
             return None
@@ -100,13 +90,12 @@ class JobState(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_all_trial_jobstate(self) -> list:
-        session = self.session()
-        data = (
-            session.query(JobStateTable)
-            .with_for_update(read=True)
-            .all()
-        )
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(JobStateTable)
+                .with_for_update(read=True)
+                .all()
+            )
 
         if data is None:
             return [{'trial_id': None, 'jobstate': None}]
@@ -123,10 +112,13 @@ class JobState(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(JobStateTable).filter(JobStateTable.trial_id == trial_id).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(JobStateTable).filter(JobStateTable.trial_id == trial_id).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def is_failure(self, trial_id: int) -> bool:
@@ -138,14 +130,13 @@ class JobState(Abstract):
         Return:
             bool
         """
-        session = self.session()
-        data = (
-            session.query(JobStateTable)
-            .filter(JobStateTable.trial_id == trial_id)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(JobStateTable)
+                .filter(JobStateTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if data is None:
             return False

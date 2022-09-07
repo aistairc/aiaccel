@@ -6,6 +6,7 @@ from sqlalchemy.orm import scoped_session
 from aiaccel.storage.model.db import Base
 from pathlib import Path
 from aiaccel.util.retry import retry
+from contextlib import contextmanager
 
 
 class Abstract:
@@ -26,3 +27,9 @@ class Abstract:
             sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         )
         self.lock_file = Path(file_name).resolve().parent / "db_lock"
+
+    @contextmanager
+    def create_session(self):
+        session = self.session()
+        yield session
+        session.close()

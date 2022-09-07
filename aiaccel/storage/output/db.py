@@ -20,28 +20,25 @@ class AbciOutput(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            data = (
-                session.query(AbciOutputTable)
-                .filter(AbciOutputTable.trial_id == trial_id)
-                .with_for_update(read=True)
-                .one_or_none()
-            )
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(AbciOutputTable)
+                    .filter(AbciOutputTable.trial_id == trial_id)
+                    .with_for_update(read=True)
+                    .one_or_none()
+                )
 
-            if data is None:
-                new_row = AbciOutputTable(trial_id=trial_id, message=message)
-                session.add(new_row)
-            else:
-                data.message = message
-            session.commit()
+                if data is None:
+                    new_row = AbciOutputTable(trial_id=trial_id, message=message)
+                    session.add(new_row)
+                else:
+                    data.message = message
+                session.commit()
 
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_abci_output(self, trial_id: int) -> Union[None, str]:
@@ -53,14 +50,13 @@ class AbciOutput(Abstract):
         Returns:
             Union[None, str]
         """
-        session = self.session()
-        data = (
-            session.query(AbciOutputTable)
-            .filter(AbciOutputTable.trial_id == trial_id)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(AbciOutputTable)
+                .filter(AbciOutputTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if data is None:
             return None

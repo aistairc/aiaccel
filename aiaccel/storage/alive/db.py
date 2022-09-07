@@ -39,27 +39,24 @@ class Alive(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            data = (
-                session.query(AliveTable)
-                .filter(AliveTable.process_name == process_name)
-                .with_for_update(read=True)
-                .one_or_none()
-            )
-            if data is None:
-                new_row = AliveTable(process_name=process_name, alive_state=alive_state)
-                session.add(new_row)
-            else:
-                data.alive_state = alive_state
-            session.commit()
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(AliveTable)
+                    .filter(AliveTable.process_name == process_name)
+                    .with_for_update(read=True)
+                    .one_or_none()
+                )
+                if data is None:
+                    new_row = AliveTable(process_name=process_name, alive_state=alive_state)
+                    session.add(new_row)
+                else:
+                    data.alive_state = alive_state
+                session.commit()
 
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_process_state(self, process_name: str) -> Union[None, int]:
@@ -68,14 +65,13 @@ class Alive(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        data = (
-            session.query(AliveTable)
-            .filter(AliveTable.process_name == process_name)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(AliveTable)
+                .filter(AliveTable.process_name == process_name)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if data is None:
             assert False
