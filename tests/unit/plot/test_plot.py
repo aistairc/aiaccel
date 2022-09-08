@@ -1,5 +1,5 @@
 from aiaccel.storage.storage import Storage
-from aiaccel.plot import Plotter
+from aiaccel.cli.plot import Plotter
 import pathlib
 from functools import wraps
 from aiaccel.workspace import Workspace
