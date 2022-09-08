@@ -33,9 +33,9 @@ def create_qsub_command(config: Config, runner_file: Path) -> list:
 
     command = [
         'qsub',
-        '-g', '{}'.format(config.abci_group.get()),
+        '-g', f'{config.abci_group.get()}',
         '-j', 'y',
-        '-o', '{}'.format(path / aiaccel.dict_output),
+        '-o', f'{path / aiaccel.dict_output}',
 
         str(runner_file)
     ]
@@ -63,8 +63,7 @@ def create_qsub_command(config: Config, runner_file: Path) -> list:
                 command_tmp.insert(-1, cmd)
     else:
         raise ValueError(
-            "job_execution_options: {} is invalid value"
-            .format(job_execution_options)
+            f"job_execution_options: {job_execution_options} is invalid value"
         )
 
     return command_tmp

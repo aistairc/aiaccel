@@ -203,15 +203,11 @@ class AbstractOptimizer(AbstractModule):
 
         if self.hp_ready < _max_pool_size:
             self.logger.info(
-                'hp_ready: {}, hp_running: {}, hp_finished: {}, '
-                'total: {}, pool_size: {}'
-                .format(
-                    self.hp_ready,
-                    self.hp_running,
-                    self.hp_finished,
-                    self.hp_total,
-                    pool_size
-                )
+                f'hp_ready: {self.hp_ready}, '
+                f'hp_running: {self.hp_running}, '
+                f'hp_finished: {self.hp_finished}, '
+                f'total: {self.hp_total}, '
+                f'pool_size: {pool_size}'
             )
             self.generate_parameter(number=pool_size)
             if self.all_parameter_generated is True:

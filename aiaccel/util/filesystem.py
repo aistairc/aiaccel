@@ -246,7 +246,7 @@ def get_file_hp_ready(path: Path, dict_lock: Path = None) -> list:
 
     return get_dict_files(
         path / aiaccel.dict_hp_ready,
-        '*.{}'.format(aiaccel.extension_hp),
+        f'*.{aiaccel.extension_hp}',
         dict_lock=dict_lock
     )
 
@@ -264,7 +264,7 @@ def get_file_hp_running(path, dict_lock=None):
 
     return get_dict_files(
         path / aiaccel.dict_hp_running,
-        '*.{}'.format(aiaccel.extension_hp),
+        f'*.{aiaccel.extension_hp}',
         dict_lock=dict_lock
     )
 
@@ -282,7 +282,7 @@ def get_file_hp_finished(path, dict_lock=None):
 
     return get_dict_files(
         path / aiaccel.dict_hp_finished,
-        '*.{}'.format(aiaccel.extension_hp),
+        f'*.{aiaccel.extension_hp}',
         dict_lock=dict_lock
     )
 
@@ -300,7 +300,7 @@ def get_file_result(path, dict_lock=None):
 
     return get_dict_files(
         path / aiaccel.dict_result,
-        '*.{}'.format(aiaccel.extension_result),
+        f'*.{aiaccel.extension_result}',
         dict_lock=dict_lock
     )
 
@@ -318,7 +318,7 @@ def get_file_result_hp(path, dict_lock=None):
 
     return get_dict_files(
         path / aiaccel.dict_result,
-        '*.{}'.format(aiaccel.extension_hp),
+        f'*.{aiaccel.extension_hp}',
         dict_lock=dict_lock
     )
 

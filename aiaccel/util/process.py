@@ -169,7 +169,7 @@ def kill_process(pid: int) -> None:
     Returns:
         None
     """
-    args = ['/bin/kill', '{}'.format(pid)]
+    args = ['/bin/kill', f'{pid}']
     subprocess.Popen(args, stdout=subprocess.PIPE)
 
 

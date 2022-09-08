@@ -57,7 +57,7 @@ class TestRun(BaseTest):
     def get_test_args(self):
         return [
             "wapper.py",
-            "--config={}".format(self.config_json),
+            f"--config={self.config_json}",
             "--trial_id=0001",
             "--x1=0.1",
             "--x2=0.2",

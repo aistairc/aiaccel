@@ -39,8 +39,7 @@ def create_runner_command(
             'parameter_name' in param.keys() and
             'value' in param.keys()
         ):
-            commands.append('--{}={}'.format(param['parameter_name'], param['value']))
-
+            commands.append(f'--{param["parameter_name"]}={param["value"]}')
     return commands
 
 
@@ -67,7 +66,7 @@ def save_result(
     Returns:
         None
     """
-    result_file = ws / aiaccel.dict_result / '{}.result'.format(trial_id_str)
+    result_file = ws / aiaccel.dict_result / f'{trial_id_str}.result'
 
     contents = {
         'result': result,
