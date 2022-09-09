@@ -26,13 +26,6 @@ class TestParameter(BaseTest):
         assert best_file is None
 
         results = [120, 101., 140.]
-        # for i in range(0, 3):
-        #     name = i
-        #     path = work_dir.joinpath(aiaccel.dict_result, '{}.yml'.format(name))
-        #     print(path)
-        #     content = get_one_parameter()
-        #     content['result'] = results[i]
-        #     create_yaml(path, content, work_dir.joinpath(aiaccel.dict_lock))
 
         for i in range(len(self.test_result_data)):
             d = self.test_result_data[i]

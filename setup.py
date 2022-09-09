@@ -31,6 +31,7 @@ setup(
         'aiaccel.scheduler.algorithm',
         'aiaccel.scheduler.job',
         'aiaccel.util',
+        'aiaccel.cli',
         'aiaccel.storage',
         'aiaccel.storage.abstruct',
         'aiaccel.storage.alive',

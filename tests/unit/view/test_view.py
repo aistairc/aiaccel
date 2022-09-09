@@ -1,5 +1,5 @@
 from aiaccel.storage.storage import Storage
-from aiaccel.view import Viewer
+from aiaccel.cli.view import Viewer
 import pathlib
 from functools import wraps
 from aiaccel.workspace import Workspace

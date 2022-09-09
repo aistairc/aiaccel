@@ -363,7 +363,7 @@ class TestModel(BaseTest):
         )
         fake_process.register_subprocess(
             [
-                '/bin/kill', '{}'.format(fake_pid)
+                '/bin/kill', f'{fake_pid}'
             ],
             stdout=[]
         )
