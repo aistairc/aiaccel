@@ -71,28 +71,27 @@ class Viewer:
 
         max_width = sum(max_column_width)
         print("\n")
-        print("{}{}{}".format(symbols[2], symbols[0] * max_width, symbols[3]))
+        print(f"{symbols[2]}{symbols[0] * max_width}{symbols[3]}")
 
         # Header
         header = list(infos[0].keys())
-        print("{}".format(symbols[5]), end="")
+        print(f"{symbols[5]}", end="")
         for i in range(len(header)):
             margin = " " * (max_column_width[i] - len(header[i]))
-            print("{}{}".format(header[i], margin), end="")
-        print("{}".format(symbols[5]))
+            print(f"{header[i]}{margin}", end="")
+        print(f"{symbols[5]}")
 
         # Separator
-        print("{}{}{}".format(symbols[5], symbols[0] * sum(max_column_width), symbols[5]))
+        print(f"{symbols[5]}{symbols[0] * sum(max_column_width)}{symbols[5]}")
 
         for info in infos:
-            print("{}".format(symbols[5]), end="")
+            print(f"{symbols[5]}", end="")
             keys = list(info.keys())
             for i in range(len(keys)):
                 margin = " " * (max_column_width[i] - len(info[keys[i]]))
-                print("{}{}".format(info[keys[i]], margin), end="")
-            print("{}".format(symbols[5]))
-
-        print("{}{}{}".format(symbols[1], symbols[0] * max_width, symbols[4]))
+                print(f"{info[keys[i]]}{margin}", end="")
+            print(f"{symbols[5]}")
+        print(f"{symbols[1]}{symbols[0] * max_width}{symbols[4]}")
 
 
 def main() -> None:  # pragma: no cover

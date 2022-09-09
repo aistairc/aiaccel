@@ -171,7 +171,7 @@ class _error(_base):
         self.config = config
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
-        self.fmt = '%0{}d'.format(self.name_length)
+        self.fmt = f'%0{self.name_length}d'
         self.trial_id = self.zero_padding(trial_id)
         self.file_type = "yaml"
         self.file_name = f'{self.trial_id}.{self.file_type}'
@@ -188,7 +188,7 @@ class _result(_base):
         self.config = config
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
-        self.fmt = '%0{}d'.format(self.name_length)
+        self.fmt = f'%0{self.name_length}d'
         self.trial_id = self.zero_padding(trial_id)
         self.file_type = "result"
         self.file_name = f'{self.trial_id}.{self.file_type}'
@@ -205,7 +205,7 @@ class _timestamp(_base):
         self.config = config
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
-        self.fmt = '%0{}d'.format(self.name_length)
+        self.fmt = f'%0{self.name_length}d'
         self.trial_id = self.zero_padding(trial_id)
         self.file_type = "yaml"
         self.file_name = f'{self.trial_id}.{self.file_type}'
@@ -222,7 +222,7 @@ class _trial(_base):
         self.config = config
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
-        self.fmt = '%0{}d'.format(self.name_length)
+        self.fmt = f'%0{self.name_length}d'
         self.trial_id = self.zero_padding(trial_id)
         self.state = None
         self.lock = self.workspace / aiaccel.dict_lock / f'hp{trial_id}'
@@ -276,7 +276,7 @@ class _hp(_base):
         self.config = config
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
-        self.fmt = '%0{}d'.format(self.name_length)
+        self.fmt = f'%0{self.name_length}d'
         self.trial_id = self.zero_padding(trial_id)
         self.file_type = 'hp'
         self.file_name = f'{self.trial_id}.{self.file_type}'
@@ -298,7 +298,7 @@ class _jobstate(_base):
         self.config = config
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
-        self.fmt = '%0{}d'.format(self.name_length)
+        self.fmt = f'%0{self.name_length}d'
         self.trial_id = self.zero_padding(trial_id)
         self.file_type = 'txt'
         self.file_name = f'{self.trial_id}.{self.file_type}'

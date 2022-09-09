@@ -118,7 +118,7 @@ class EasyVisualizer:
         labels = list(labels)[0]
         for i in range(len(labels)):
             color = self.line_colors[self.color_priority[i]]
-            print('{}{}{}'.format(color, list(labels)[i], reset))
+            print(f'{color}{list(labels)[i]}{reset}')
 
     def line_plot(self, *data: tuple) -> None:
         """ Plot the any datas.
@@ -147,34 +147,16 @@ class EasyVisualizer:
             if None in data[i]:
                 return
             if np.float("nan") in data[i]:
-                print(
-                    "{}{}{}"
-                    .format(
-                        yellow,
-                        "WARNING: result data has 'nan'",
-                        reset
-                    )
-                )
+                message = "WARNING: result data has 'nan'"
+                print(f"{yellow}{message}{reset}")
                 return
             if np.float("inf") in data[i]:
-                print(
-                    "{}{}{}"
-                    .format(
-                        yellow,
-                        "WARNING: result data has 'inf'",
-                        reset
-                    )
-                )
+                message = "WARNING: result data has 'inf'"
+                print(f"{yellow}{message}{reset}")
                 return
             if np.float("-inf") in data[i]:
-                print(
-                    "{}{}{}"
-                    .format(
-                        yellow,
-                        "WARNING: result data has '-inf'",
-                        reset
-                    )
-                )
+                message = "WARNING: result data has '-inf'"
+                print(f"{yellow}{message}{reset}")
                 return
 
             if len(data[i]) >= plot_width_max:
@@ -208,7 +190,7 @@ class EasyVisualizer:
                     best_values.append(d)
                 else:
                     best_values.append(max_value)
-            print("max_value:{}".format(max_value))
+            print(f"max_value:{max_value}")
 
         elif goal.lower() == "minimize":
             min_value = float("inf")
@@ -218,7 +200,7 @@ class EasyVisualizer:
                     best_values.append(d)
                 else:
                     best_values.append(min_value)
-            print("min_value:{}".format(min_value))
+            print(f"min_value:{min_value}")
 
         else:
             """Usually Not reached."""

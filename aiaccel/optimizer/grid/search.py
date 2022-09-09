@@ -55,7 +55,7 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
         new_param['parameters'] = list(p.sequence)
 
     else:
-        raise TypeError('Invalid parameter type: {}'.format(p.type))
+        raise TypeError(f'Invalid parameter type: {p.type}')
 
     return new_param
 

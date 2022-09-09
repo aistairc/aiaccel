@@ -26,4 +26,4 @@ def str_to_logging_level(s: str) -> int:
     elif 'CRITICAL' in s:
         return logging.CRITICAL
     else:
-        raise ValueError('Invalid logging level: {}, {}'.format(s, type(s)))
+        raise ValueError(f'Invalid logging level: {s}, {type(s)}')

@@ -473,7 +473,7 @@ class Model(object):
         return
 
     def get_runner_file(self, obj: 'Job') -> None:
-        return obj.ws / aiaccel.dict_runner / 'run_{}.sh'.format(obj.trial_id_str)
+        return obj.ws / aiaccel.dict_runner / f'run_{obj.trial_id_str}.sh'
 
     # Runner
     def after_runner(self, obj: 'Job') -> None:
@@ -791,7 +791,7 @@ class Model(object):
                 kill_process(state['job-ID'])
         else:
             logger = logging.getLogger('root.scheduler.job')
-            logger.warning('Not matched job trial_id: {}'.format(obj.trial_id))
+            logger.warning(f'Not matched job trial_id: {obj.trial_id}')
 
     def conditions_kill_confirmed(self, obj: 'Job') -> bool:
         """State transition of 'conditions_kill_confirmed'.
@@ -885,7 +885,7 @@ class Model(object):
                 obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state='ready')
             else:
                 logger = logging.getLogger('root.scheduler.job')
-                logger.warning('Could not find any trial_id: {}'.format(obj.trial_id))
+                logger.warning(f'Could not find any trial_id: {obj.trial_id}')
 
         obj.threshold_timeout = (
             get_time_now_object() + get_time_delta(obj.expire_timeout)
@@ -1207,15 +1207,17 @@ class Job(threading.Thread):
 
             if self.is_timeout():
                 logger.debug(
-                    'Timeout expire state: {}, now: {}, timeout: {}'
-                    .format(state.name, now, self.threshold_timeout)
+                    f'Timeout expire state: {state.name}, '
+                    f'now: {now}, '
+                    f'timeout: {self.threshold_timeout}'
                 )
                 self.model.expire(self)
 
             elif self.is_exceeded_retry_times_max():
                 logger.debug(
-                    'Retry expire state: {}, count: {}, threshold: {}'
-                    .format(state.name, self.count_retry, self.threshold_retry)
+                    f'Retry expire state: {state.name}, '
+                    f'count: {self.count_retry}, '
+                    f'threshold: {self.threshold_retry}'
                 )
                 self.model.expire(self)
 
@@ -1223,8 +1225,11 @@ class Job(threading.Thread):
                 self.model.next(self)
 
             logger.debug(
-                'Running job thread, trial id: {}, loop: {}, state: {}, count retry: {}'
-                .format(self.trial_id, self.loop_count, state.name, self.count_retry)
+                f'Running job thread, '
+                f'trial id: {self.trial_id}, '
+                f'floop: {self.loop_count}, '
+                f'state: {state.name} ,'
+                f'count retry: {self.count_retry}'
             )
 
             if self.stop_flag:
@@ -1233,11 +1238,9 @@ class Job(threading.Thread):
             time.sleep(self.job_loop_duration)
 
         logger.info(
-            'Thread finished, trial id: {}, loop: {}, state: {}, count retry: {}'
-            .format(
-                self.trial_id,
-                self.loop_count,
-                state if state is None else state.name,
-                self.count_retry
-            )
+            f'Thread finished, '
+            f'trial id: {self.trial_id}, '
+            f'loop: {self.loop_count}, '
+            f'state: {state if state is None else state.name}, '
+            f'count retry: {self.count_retry}'
         )

@@ -234,8 +234,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
             self.new_params = []
             pool_p = self.parameter_pool.pop(0)
 
-            # self.logger.debug('pool_p: {}'.format(pool_p))
-
             for param in self.params.get_parameter_list():
                 i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
 
@@ -246,8 +244,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 else:
                     raise TypeError(
                         'Invalid parameter type for NelderMeadSearch.'
-                        'FLOAT or INT is required, but {} is given.'
-                        .format(param.type)
+                        f'FLOAT or INT is required, but {param.type} is given.'
                     )
 
                 self.new_params.append(
@@ -316,7 +313,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
         self._add_result(self.get_nm_results())
 
         searched_params = self.nelder_mead_main()
-        # self.logger.debug(f"searched_params: {searched_params}")
 
         if searched_params is None:
             return None

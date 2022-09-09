@@ -16,14 +16,7 @@ class Suffix:
         """
         t = datetime.datetime.today()
         suffix = (
-            "{}{}{}_{}{}{}"
-            .format(
-                str(t.year).zfill(4),
-                str(t.month).zfill(2),
-                str(t.day).zfill(2),
-                str(t.hour).zfill(2),
-                str(t.minute).zfill(2),
-                str(t.second).zfill(2)
-            )
+            f"{str(t.year).zfill(4)}{str(t.month).zfill(2)}{str(t.day).zfill(2)}_"
+            f"{str(t.hour).zfill(2)}{str(t.minute).zfill(2)}{str(t.second).zfill(2)}"
         )
         return suffix
