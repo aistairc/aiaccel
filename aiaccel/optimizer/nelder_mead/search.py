@@ -342,7 +342,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             'loop_count': self.loop_count,
             'parameter_pool': parameter_pool,
             'nelder_mead': self.nelder_mead.serialize(),
-            'order': self.order,
+            'order': self.order
         }
         self.serialize.serialize(
             trial_id=self.trial_id.integer,
