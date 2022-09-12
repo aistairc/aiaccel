@@ -37,7 +37,7 @@ class Terminal:
         Note:
             The color of the text will change until self.reset() is called.
         """
-        print("{}".format(self.colors[color]), end="")
+        print(f"{self.colors[color]}", end="")
 
     def reset(self):
         """ Reset the default text color of the terminal.
@@ -48,7 +48,7 @@ class Terminal:
         Returns:
             None
         """
-        print("{}".format(self.colors["reset"]), end="")
+        print(f"{self.colors['reset']}", end="")
 
     def print_note(self, message):
         """ Print when notification(note).
@@ -60,7 +60,7 @@ class Terminal:
             None
         """
         self.set_terminal_color("green")
-        print("[NOTE] {}".format(message))
+        print(f"[NOTE] {message}")
         self.reset()
 
     def print_warning(self, message):
@@ -73,7 +73,7 @@ class Terminal:
             None
         """
         self.set_terminal_color("yellow")
-        print("[WARNING] {}".format(message))
+        print(f"[WARNING] {message}")
         self.reset()
 
     def print_error(self, message):
@@ -86,7 +86,7 @@ class Terminal:
             None
         """
         self.set_terminal_color("red")
-        print("[ERROR] {}".format(message))
+        print(f"[ERROR] {message}")
         self.reset()
 
     def cprint(self, message: str, color: str):

@@ -56,15 +56,6 @@ class AbstractModule(object):
         self.config = Config(self.config_path)
         self.ws = Path(self.config.workspace.get()).resolve()
 
-        self.logger = None
-        self.ch = None
-        self.ch_formatter = None
-        self.ch_formatter = None
-        self.loop_count = 0
-        self.hp_ready = 0
-        self.hp_running = 0
-        self.hp_finished = 0
-
         # working directory
         self.dict_alive = self.ws / aiaccel.dict_alive
         self.dict_hp = self.ws / aiaccel.dict_hp
@@ -177,11 +168,11 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.info('{}/{} finished, ready: {}, running: {}'.format(
-            self.hp_finished,
-            self.config.trial_number.get(),
-            self.hp_ready,
-            self.hp_running)
+        self.logger.info(
+            f'{self.hp_finished}/{self.config.trial_number.get()}, '
+            f'finished, '
+            f'ready: {self.hp_ready}, '
+            f'running: {self.hp_running}'
         )
 
     def set_logger(
@@ -216,9 +207,7 @@ class AbstractModule(object):
         fh.setLevel(file_level)
 
         ch = logging.StreamHandler()
-        ch_formatter = (
-            '{} %(levelname)-8s %(message)s'.format(module_type)
-        )
+        ch_formatter = (f'{module_type} %(levelname)-8s %(message)s')
         ch_formatter = logging.Formatter(ch_formatter)
         ch.setFormatter(ch_formatter)
         ch.setLevel(stream_level)
@@ -238,7 +227,7 @@ class AbstractModule(object):
         module_type = self.get_module_type()
 
         if self.storage.alive.check_alive(module_type) is True:
-            self.logger.error('{} still remains.'.format(module_type))
+            self.logger.error(f'{module_type} still remains.')
             sys.exit()
 
         self.storage.alive.set_any_process_state(module_type, 1)
@@ -404,7 +393,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug('set native random seed: {}'.format(self.seed))
+        self.logger.debug(f'set native random seed: {self.seed}')
         random.seed(self.seed)
 
     def set_numpy_random_seed(self) -> None:
@@ -416,7 +405,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug('set numpy random seed: {}'.format(self.seed))
+        self.logger.debug(f'set numpy random seed: {self.seed}')
         np.random.seed(seed=self.seed)
 
     def get_native_random_state(self) -> tuple:

@@ -9,10 +9,10 @@ from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.time_tools import get_time_string_from_object
 import aiaccel
 import logging
-import time
 from aiaccel.util.serialize import Serializer
 from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
+from aiaccel.util.retry import retry
 
 
 class AbstractMaster(AbstractModule):
@@ -23,8 +23,6 @@ class AbstractMaster(AbstractModule):
         optimizer_proc (subprocess.Popen): A reference for a subprocess of
             Optimizer.
         start_time (datetime.datetime): A stored starting time.
-        scheduler_proc (subprocess.Popen): A reference for a subprocess of
-            Scheduler.
         verification (AbstractVerification): A verification object.
     """
 
@@ -40,7 +38,6 @@ class AbstractMaster(AbstractModule):
         self.options['process_name'] = 'master'
 
         super().__init__(self.options)
-        self.alive_file = self.ws / aiaccel.dict_alive / aiaccel.alive_master
         self.logger = logging.getLogger('root.master')
         self.logger.setLevel(logging.DEBUG)
         self.exit_alive('master')
@@ -52,10 +49,8 @@ class AbstractMaster(AbstractModule):
             str_to_logging_level(self.config.master_stream_log_level.get()),
             'Master   '
         )
-        print(self.options)
+
         self.verification = AbstractVerification(self.options)
-        self.optimizer_proc = None
-        self.scheduler_proc = None
         self.sleep_time = self.config.sleep_time_master.get()
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
@@ -63,8 +58,10 @@ class AbstractMaster(AbstractModule):
 
         # optimizer
         self.o = create_optimizer(options['config'])(options)
+        self.o.__init__(self.options)
         # scheduler
         self.s = create_scheduler(options['config'])(options)
+        self.s.__init__(self.options)
 
         self.worker_o = multiprocessing.Process(target=self.o.start)
         self.worker_s = multiprocessing.Process(target=self.s.start)
@@ -88,27 +85,26 @@ class AbstractMaster(AbstractModule):
             self.storage.delete_trial_data_after_this(resume_trial_id)
             self.trial_id.initial(num=resume_trial_id)
 
-        self.storage.alive.init_alive()
-
         self.start_optimizer()
         self.start_scheduler()
-        c = 0
 
-        while (
-            self.storage.alive.check_alive('optimizer') is False or
-            self.storage.alive.check_alive('scheduler') is False
-        ):
-            time.sleep(1.0)
-            c += 1
-
-            if c >= self.config.init_fail_count.get():
-                self.logger.error(f'Start process fails {self.config.init_fail_count.get()} times.')
-                raise IndexError('Could not start an optimizer or a scheduler process.')
-
-            if self.check_finished():
-                break
-
-            self.logger.debug('check alive loop')
+        def wait_startup(self, max_num):
+            @retry(_MAX_NUM=max_num, _DELAY=1.0)
+            def _wait_startup(self):
+                if self.check_finished():
+                    return
+                if self.storage.alive.check_alive('optimizer') is False:
+                    raise IndexError(
+                        'Could not start an optimizer process.'
+                    )
+                if self.storage.alive.check_alive('scheduler') is False:
+                    raise IndexError(
+                        'Could not start an scheduler process.'
+                    )
+                return
+            _wait_startup(self)
+        wait_startup(self, self.config.init_fail_count.get())
+        return
 
     def post_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -127,8 +123,8 @@ class AbstractMaster(AbstractModule):
         elif self.goal.lower() == aiaccel.goal_minimize:
             evaluator = MinimizeEvaluator(self.options)
         else:
-            self.logger.error('Invalid goal: {}.'.format(self.goal))
-            raise ValueError('Invalid goal: {}.'.format(self.goal))
+            self.logger.error(f'Invalid goal: {self.goal}.')
+            raise ValueError(f'Invalid goal: {self.goal}.')
 
         evaluator.evaluate()
         evaluator.print()
@@ -163,14 +159,10 @@ class AbstractMaster(AbstractModule):
                 end_estimated_time = 'Unknown'
 
         self.logger.info(
-            '{}/{} finished, ready: {}, running: {}, end estimated time: {}'
-            .format(
-                self.hp_finished,
-                self.trial_number,
-                self.hp_ready,
-                self.hp_running,
-                end_estimated_time
-            )
+            f'{self.hp_finished}/{self.trial_number} finished, '
+            f'ready: {self.hp_ready} ,'
+            f'running: {self.hp_running}, '
+            f'end estimated time: {end_estimated_time}'
         )
 
     def start_optimizer(self) -> None:

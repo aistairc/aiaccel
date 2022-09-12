@@ -14,7 +14,7 @@ class TrialId:
 
         self.ws = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
-        self.file_hp_count_fmt = '%0{}d'.format(self.name_length)
+        self.file_hp_count_fmt = f'%0{self.name_length}d'
         self.dict_hp = self.ws / aiaccel.dict_hp
 
         self.count_path = self.dict_hp / aiaccel.file_hp_count

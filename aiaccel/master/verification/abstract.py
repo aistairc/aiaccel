@@ -121,7 +121,7 @@ class AbstractVerification(object):
 
         logger = logging.getLogger('root.master.verification')
         logger.info('Current verification is followings:')
-        logger.info('{}'.format(self.verification_result))
+        logger.info(f'{self.verification_result}')
 
     def save(self, name: int) -> None:
         """Save current verifications result to a file.

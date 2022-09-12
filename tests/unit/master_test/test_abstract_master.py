@@ -56,29 +56,14 @@ class TestAbstractMaster(BaseTest):
 
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
-            # master = create_master(options['config'])(options)
             master = AbstractMaster(options)
-            # master = start.Master()
-        # master = AbstractMaster(options)
-        work_dir.joinpath(aiaccel.dict_runner).rmdir()
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
-            loop_pre_process(master),
-            delay_make_directory(1, work_dir.joinpath(aiaccel.dict_runner))
+            loop_pre_process(master)
         )
         loop.run_until_complete(gather)
-
-        # master.storage.alive.init_alive()
-
-        if master.scheduler_proc is not None:
-            master.scheduler_proc.wait()
-
-        if master.optimizer_proc is not None:
-            master.optimizer_proc.wait()
-
         master.worker_o.kill()
         master.worker_s.kill()
-        master.storage.alive.init_alive()
 
     def test_pre_process_2(
         self,
@@ -141,7 +126,6 @@ class TestAbstractMaster(BaseTest):
         # master.th_scheduler.abort()
         master.worker_o.kill()
         master.worker_s.kill()
-        master.storage.alive.init_alive()
 
     def test_pre_process_3(
         self,
@@ -161,20 +145,11 @@ class TestAbstractMaster(BaseTest):
             'process_name': 'master'
         }
         master = AbstractMaster(options)
+        master.storage.alive.init_alive()
         setup_hp_finished(10)
         assert master.pre_process() is None
-
-        master.storage.alive.init_alive()
-
-        if master.scheduler_proc is not None:
-            master.scheduler_proc.wait()
-
-        if master.optimizer_proc is not None:
-            master.optimizer_proc.wait()
-
         master.worker_o.kill()
         master.worker_s.kill()
-        master.storage.alive.init_alive()
 
     def test_post_process(
         self,
@@ -207,22 +182,11 @@ class TestAbstractMaster(BaseTest):
                 )
         assert master.post_process() is None
 
-        # with open(self.config_json, 'r') as f:
-        #     json_obj = json.load(f)
-        # json_obj['hyperparameter']['goal'] = aiaccel.goal_maximize
-        # config = ConfileWrapper(json_obj, 'json_object')
-        # master.config = config
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         master.config = Config(self.config_json)
         master.config.goal.set(aiaccel.goal_maximize)
         assert master.post_process() is None
 
-        # json_obj['hyperparameter']['goal'] = 'invalid_goal'
-        # config = ConfileWrapper(json_obj, 'json_object')
-        # master.config = config
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         master.config = Config(self.config_json)
-        # master.config.goal.set('invalid_goal')
         master.goal = 'invalid_goal'
 
         for i in range(10):
@@ -279,24 +243,11 @@ class TestAbstractMaster(BaseTest):
             format(config_json)
         ]
         with patch.object(sys, 'argv', commandline_args):
-            # from aiaccel import start
-            # master = start.Master()
             options = Arguments()
             master = AbstractMaster(options)
 
         assert master.start_optimizer() is None
         master.worker_o.kill()
-
-        # master = AbstractMaster(config_json)
-        # opt_cmd = master.config.optimizer_command.get().split(" ")
-        # opt_cmd.append('--config')
-        # opt_cmd.append(str(config_json))
-
-        # fake_process.register_subprocess(
-        #     master.start_optimizer(), callback=callback_return
-        # )
-        # assert master.start_optimizer() is None
-        # master.th_optimizer.abort()
 
     def test_start_scheduler(
         self,
@@ -384,9 +335,7 @@ class TestAbstractMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             master = AbstractMaster(options)
         p = subprocess.Popen(['ls'])
-        with patch.object(master, 'optimizer_proc', return_value=p):
-            with patch.object(master, 'scheduler_proc', return_value=p):
-                assert master.loop_post_process() is None
+        assert master.loop_post_process() is None
 
     def test_inner_loop_pre_process(
         self,

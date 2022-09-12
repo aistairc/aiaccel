@@ -29,8 +29,9 @@ class AbciScheduler(AbstractScheduler):
 
         for stat in self.stats:
             self.logger.info(
-                'stat job-ID: {}, name: {}, state: {}'
-                .format(stat['job-ID'], stat['name'], stat['state'])
+                f'stat job-ID: {stat["job-ID"]}, '
+                f'name: {stat["name"]}, '
+                f'state: {stat["state"]}'
             )
 
     def parse_trial_id(self, command: str) -> Union[None, str]:

@@ -42,7 +42,7 @@ class JsonOrYamlObjectConfig(BaseConfig):
         if file_type in ['json_object', 'yaml_object']:
             self._config_dict = config
         else:
-            raise TypeError('Unknown file type {}'.format(file_type))
+            raise TypeError(f'Unknown file type {file_type}')
 
     def get_property(self, key: str, *keys: str) ->\
             Union[str, list, dict, None]:
@@ -105,7 +105,7 @@ class ConfileWrapper(object):
             'yaml_object'
         ]
         if config_type not in config_types:
-            raise TypeError('Unknown config type: {}'.format(config_type))
+            raise TypeError(f'Unknown config type: {config_type}')
 
         if config_type in ['json_file', 'yaml_file']:
             self.config = confile.read_config(str(config))
@@ -138,10 +138,7 @@ def load_config(config_path: str) -> ConfileWrapper:
     path = Path(config_path).resolve()
 
     if not path.exists():
-        raise FileNotFoundError(
-            'config file cannot be found: {}'
-            .format(config_path)
-        )
+        raise FileNotFoundError(f'config file cannot be found: {config_path}')
 
     file_type = path.suffix[1:].lower()
 
@@ -150,7 +147,7 @@ def load_config(config_path: str) -> ConfileWrapper:
     elif file_type in ['yml', 'yaml']:
         return ConfileWrapper(config_path, 'yaml_file')
     else:
-        raise TypeError('Unknown file type {}'.format(file_type))
+        raise TypeError(f'Unknown file type {file_type}')
 
 
 class ConfigEntry:
@@ -221,9 +218,7 @@ class ConfigEntry:
             value (any)
         """
         if type(value) not in self.type:
-            Terminal().print_error(
-                "may be invalid value '{}'.".format(value)
-            )
+            Terminal().print_error(f"may be invalid value '{value}'.")
             raise TypeError
         self._value = value
 
@@ -244,10 +239,8 @@ class ConfigEntry:
 
             item = ".".join(item)
             Terminal().print_warning(
-                "{} is not found in the configuration file, "
-                "the default value will be applied.(default: {})".format(
-                    item, self.default
-                )
+                f"{item} is not found in the configuration file, "
+                f"the default value will be applied.(default: {self.default})"
             )
 
     def empty_if_error(self):
@@ -259,10 +252,7 @@ class ConfigEntry:
             self._value == [] or
             self._value == ()
         ):
-            Terminal().print_error(
-                "Configuration error. '{}' is not found."
-                .format(self.keys)
-            )
+            Terminal().print_error(f"Configuration error. '{self.keys}' is not found.")
             sys.exit()
 
     def load_config_values(self):
@@ -370,26 +360,17 @@ class Config:
             self.job_command.empty_if_error()
 
             if self.goal.get().lower() not in _GOALS:
-                Terminal().print_error(
-                    'Invalid goal: {}'
-                    .format(self.goal.get())
-                )
+                Terminal().print_error(f'Invalid goal: {self.goal.get()}')
 
             if self.resource_type.get().lower() not in _RESOURCE_TYPES:
-                Terminal().print_error(
-                    'Invalid resource type: {}.'
-                    .format(self.resource_type.get())
-                )
+                Terminal().print_error(f'Invalid resource type: {self.resource_type.get()}.')
                 sys.exit()
 
             if self.resource_type.get().lower() == "abci":
                 self.abci_group.empty_if_error()
                 self.job_script_preamble.empty_if_error()
                 if Path(self.job_script_preamble.get()).exists() is False:
-                    Terminal().print_error(
-                        "{} is not found."
-                        .format(self.job_script_preamble.get())
-                    )
+                    Terminal().print_error(f"{self.job_script_preamble.get()} is not found.")
                     sys.exit()
             # self.hps_format_check()
 

@@ -160,7 +160,7 @@ class TestAbstractVerification(BaseTest):
         verification.verify()
         path = work_dir.joinpath(
             aiaccel.dict_verification,
-            '1.{}'.format(aiaccel.extension_verification)
+            f'1.{aiaccel.extension_verification}'
         )
 
         if path.exists():

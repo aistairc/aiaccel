@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Union
 import time
-from aiaccel.util.terminal import Terminal
 from aiaccel.util.serialize import Serializer
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schdule_sampling
@@ -304,43 +303,22 @@ class AbstractScheduler(AbstractModule):
                     jobstate['trial_id'] == trial_id and
                     "failure" in jobstate['jobstate'].lower()
                 ):
-                    Terminal().print_error(
-                        "Job: {} is Failed.({})\n"
-                        "This is a fatal internal error. "
-                        "Please review the configuration file. "
-                        "In particular, we recommend that you "
-                        "review the following items: "
-                        "'{}', '{}', '{}', '{}'"
-                        "'{}', '{}', '{}', '{}'"
-                        .format(
-                            trial_id, self.job_status[trial_id],
-                            "cancel_timeout", "expire_timeout",
-                            "finished_timeout", "job_timeout",
-                            "kill_timeout", "batch_job_timeout",
-                            "runner_timeout", "running_timeout"
-                        )
+                    self.logger.info(
+                        f"Job: {trial_id} is Failed.({self.job_status[trial_id]})\n"
+                        f"This is a fatal internal error. "
+                        f"Please review the configuration file. "
+                        f"In particular, we recommend that you "
+                        f"review the following items: "
+                        f"{'cancel_timeout'}, "
+                        f"{'expire_timeout'}, "
+                        f"{'finished_timeout'}, "
+                        f"{'job_timeout'}, "
+                        f"{'kill_timeout'}, "
+                        f"{'batch_job_timeout'}, "
+                        f"{'runner_timeout'}, "
+                        f"{'running_timeout'}"
                     )
                     return False
-
-        # for trial_id in self.job_status.keys():
-        #     if self.storage.jobstate.is_failure(int(trial_id)):
-        #         Terminal().print_error(
-        #             "Job: {} is Failed.({})\n"
-        #             "This is a fatal internal error. "
-        #             "Please review the configuration file. "
-        #             "In particular, we recommend that you "
-        #             "review the following items: "
-        #             "'{}', '{}', '{}', '{}'"
-        #             "'{}', '{}', '{}', '{}'"
-        #             .format(
-        #                 trial_id, self.job_status[trial_id],
-        #                 "cancel_timeout", "expire_timeout",
-        #                 "finished_timeout", "job_timeout",
-        #                 "kill_timeout", "batch_job_timeout",
-        #                 "runner_timeout", "running_timeout"
-        #             )
-        #         )
-        #         return False
         return True
 
     def all_done(self):

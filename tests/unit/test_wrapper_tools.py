@@ -37,7 +37,7 @@ class TestCeaterRunnerComand(BaseTest):
             options
         )
         assert commands[0] == 'python'
-        assert commands[1] == 'wrapper.py'
+        assert commands[1] == 'original_main.py'
         # assert commands[2] == '-i'
         assert commands[2] == '--trial_id'
         assert commands[3] == 'name'
