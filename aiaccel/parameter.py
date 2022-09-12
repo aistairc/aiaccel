@@ -43,8 +43,8 @@ def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
                 best, best_file = result, f
         else:
             logger = logging.getLogger('root.master.parameter')
-            logger.error('Invalid goal: {}.'.format(goal))
-            raise ValueError('Invalid goal: {}.'.format(goal))
+            logger.error(f'Invalid goal: {goal}.')
+            raise ValueError(f'Invalid goal: {goal}.')
 
     return best, best_file
 
@@ -86,10 +86,7 @@ def get_grid_options(
             break
 
     if step is None:
-        raise KeyError(
-            'No grid option for parameter: {}'
-            .format(parameter_name)
-        )
+        raise KeyError(f'No grid option for parameter: {parameter_name}')
     else:
         return base, log, step
 
@@ -205,7 +202,7 @@ class HyperParameter(object):
             value = random.choice(self.sequence)
         else:
             raise TypeError(
-                'Invalid hyper parameter type: {}'.format(self.type))
+                f'Invalid hyper parameter type: {self.type}')
 
         return {'name': self.name, 'type': self.type, 'value': value}
 
@@ -245,10 +242,7 @@ class HyperParameterConfiguration(object):
         if name in self.hps:
             return self.hps[name]
         else:
-            raise KeyError(
-                'The parameter name {} does not exist.'
-                .format(name)
-            )
+            raise KeyError(f'The parameter name {name} does not exist.')
 
     def get_parameter_list(self) -> List[HyperParameter]:
         """Get a list of hyper parameter objects.

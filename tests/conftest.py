@@ -148,20 +148,11 @@ def setup_hp_finished(setup_hp_files):
 @pytest.fixture(scope="session")
 def setup_result(data_dir: Path, work_dir: Path):
     def _setup_result(n=1):
-        # files = list(data_dir.joinpath('work/result').glob('*.result'))
-        # n = min(n, len(files))
-
-        # for i in range(1, n+1):
-        #     shutil.copyfile(
-        #         data_dir.joinpath('work/result/{:03}.result'.format(i)),
-        #         work_dir.joinpath('result/{:03}.result'.format(i))
-        #     )
         storage = Storage(work_dir)
         running = storage.get_running()
         print('dbg')
         print(running)
         for trial_id in running:
-            # storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
             storage.result.set_any_trial_objective(trial_id=trial_id, objective=0)
 
     return _setup_result

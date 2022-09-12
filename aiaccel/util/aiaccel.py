@@ -76,7 +76,7 @@ class _Message:
         else:
             mess = message
         tmp = self.delimiter.join(map(str, mess))
-        self.outputs.append("{}:{}".format(self.label, tmp))
+        self.outputs.append(f"{self.label}:{tmp}")
 
     def out(self, all=False) -> None:
         """ Output message to stdout.
@@ -362,8 +362,8 @@ class Run:
         if not auto_args:
             return commands
 
-        commands.append("--config={}".format(str(self.config_path)))
-        commands.append("--trial_id={}".format(self.trial_id))
+        commands.append(f"--config={str(self.config_path)}")
+        commands.append(f"--trial_id={self.trial_id}")
 
         for key in self.xs:
             name = key
@@ -406,15 +406,15 @@ class Run:
         # Make running command of user program
         if command == "":
             self.set_error("Invalid execute command")
-            logging.debug("execute(err): {}".format(self.err))
+            logging.debug(f"execute(err): {self.err}")
             self.ys = [float("nan")]
             return self.ys
 
         commands = self._generate_commands(command, auto_args)
-        logging.debug("command: {}".format(commands))
+        logging.debug(f"command: {commands}")
 
         self.start_time = get_time_now()
-        logging.debug("start time: {}".format(self.start_time))
+        logging.debug(f"start time: {self.start_time}")
 
         output = subprocess.run(
             commands,
@@ -424,11 +424,11 @@ class Run:
         ys, err = self.com.get_data(output)
         self.ys = float(ys[0])  # todo: do refactoring
         self.err = ("\n").join(err)
-        logging.debug("execute(out): {}".format(self.ys))
-        logging.debug("execute(err): {}".format(self.err))
+        logging.debug(f"execute(out): {self.ys}")
+        logging.debug(f"execute(err): {self.err}")
 
         self.end_time = get_time_now()
-        logging.debug("end time: {}".format(self.end_time))
+        logging.debug(f"end time: {self.end_time}")
 
         return self.ys
 

@@ -158,7 +158,7 @@ class NelderMead(object):
 
         if self._is_out_of_boundary(y):
             out_of_boundary = True
-            self.logger.debug('_add_executing out of boundary y: {}'.format(y))
+            self.logger.debug(f'_add_executing out of boundary y: {y}')
 
         vertex_id = generate_random_name()
         params = []
@@ -257,8 +257,8 @@ class NelderMead(object):
             ValueError: Causes when unsupported state is given.
         """
         if state not in STATES:
-            self.logger.error('Unsupported state: {}'.format(state))
-            raise ValueError('Unsupported state: {}'.format(state))
+            self.logger.error(f'Unsupported state: {state}')
+            raise ValueError(f'Unsupported state: {state}')
 
         self._state = state
 
@@ -430,9 +430,9 @@ class NelderMead(object):
             self._evaluated_itr += 1
             self._history['evaluated_sample'].append(self.y[-1])
         else:
-            self.logger.debug('history: {}'.format(self._history['op']))
-            self.logger.debug('y: {}'.format(self.y))
-            self.logger.debug('f: {}'.format(self.f))
+            self.logger.debug(f'history: {self._history["op"]}')
+            self.logger.debug(f'y: {self.y}')
+            self.logger.debug(f'f: {self.f}')
 
         self._total_itr += 1
         self._add_y_history()
@@ -631,8 +631,8 @@ class NelderMead(object):
         elif self._state == 'WaitShrink':
             self._wait_shrink(results)
         else:
-            self.logger.error('Invalid state: {}'.format(self._state))
-            raise ValueError('Invalid state: {}'.format(self._state))
+            self.logger.error(f'Invalid state: {self._state}')
+            raise ValueError(f'Invalid state: {self._state}')
 
         return self._executing
 

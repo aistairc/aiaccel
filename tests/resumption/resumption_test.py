@@ -17,9 +17,7 @@ class ResumptionTest(IntegrationTest):
     search_algorithm = None
 
     def test_run(self, cd_work, data_dir, work_dir):
-        config_file = data_dir.joinpath(
-            'config_{}.json'.format(self.search_algorithm)
-        )
+        config_file = data_dir.joinpath(f'config_{self.search_algorithm}.json')
         commandline_args = [
             "start.py",
             "--config",
@@ -68,9 +66,7 @@ class ResumptionTest(IntegrationTest):
 
         time.sleep(5)
 
-        config_file = data_dir.joinpath(
-            'config_{}.json'.format(self.search_algorithm)
-        )
+        config_file = data_dir.joinpath(f'config_{self.search_algorithm}.json')
 
         commandline_args = [
             "start.py",

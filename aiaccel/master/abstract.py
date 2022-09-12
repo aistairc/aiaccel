@@ -123,8 +123,8 @@ class AbstractMaster(AbstractModule):
         elif self.goal.lower() == aiaccel.goal_minimize:
             evaluator = MinimizeEvaluator(self.options)
         else:
-            self.logger.error('Invalid goal: {}.'.format(self.goal))
-            raise ValueError('Invalid goal: {}.'.format(self.goal))
+            self.logger.error(f'Invalid goal: {self.goal}.')
+            raise ValueError(f'Invalid goal: {self.goal}.')
 
         evaluator.evaluate()
         evaluator.print()
@@ -159,14 +159,10 @@ class AbstractMaster(AbstractModule):
                 end_estimated_time = 'Unknown'
 
         self.logger.info(
-            '{}/{} finished, ready: {}, running: {}, end estimated time: {}'
-            .format(
-                self.hp_finished,
-                self.trial_number,
-                self.hp_ready,
-                self.hp_running,
-                end_estimated_time
-            )
+            f'{self.hp_finished}/{self.trial_number} finished, '
+            f'ready: {self.hp_ready} ,'
+            f'running: {self.hp_running}, '
+            f'end estimated time: {end_estimated_time}'
         )
 
     def start_optimizer(self) -> None:

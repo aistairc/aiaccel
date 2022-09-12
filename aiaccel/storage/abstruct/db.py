@@ -13,7 +13,7 @@ class Abstract:
 
     @retry(_MAX_NUM=6, _DELAY=1.0)
     def __init__(self, file_name):
-        self.url = 'sqlite:///{file_name}'.format(file_name=file_name)
+        self.url = f'sqlite:///{file_name}'
         self.engine = create_engine(
             self.url,
             echo=False,
