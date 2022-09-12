@@ -53,7 +53,7 @@ class Hp(Abstract):
                         param_name=d['parameter_name'],
                         param_value=d['value'],
                         param_type=d['type']
-                    )for d in params
+                    ) for d in params
                 ]
                 session.bulk_save_objects(hps)
                 session.commit()
