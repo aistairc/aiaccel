@@ -50,12 +50,18 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
 
 3. Run the parameter optimization
     ~~~bash
-    > python -m aiaccel.start --config config.yaml
+    > aiaccel-start --config config.yaml
+    ~~~
+
+    or
+
+    ~~~bash
+    > python -m aiaccel.cli.start --config config.yaml
     ~~~
 
     Tips: You can start after cleaning the workspace directory using `--clean`.
     ~~~bash
-    > python -m aiaccel.start --config config.yaml --clean
+    > aiaccel-start --config config.yaml --clean
     ~~~
 
 4. Wait for the program to finish and check the optimization results.
@@ -95,7 +101,7 @@ This tutorial describes how to run examples/sphere on ABCI.
 
 4. Run on an (interactive) job
     ~~~bash
-    > python -m aiaccel.start --config config.yaml
+    > aiaccel-start --config config.yaml
     ~~~
 
 5. If you want to check the running jobs, please refer the [ABCI User Guide](https://docs.abci.ai/en/job-execution/#show-the-status-of-batch-jobs).
@@ -104,17 +110,17 @@ This tutorial describes how to run examples/sphere on ABCI.
 ## Other
 - Check the progress
     ~~~bash
-    > python -m aiaccel.view --config config.yaml
+    > aiaccel-view --config config.yaml
     ~~~
 
 - Display simple graphs
     ~~~bash
-    > python -m aiaccel.plot --config config.yaml
+    > aiaccel-plot --config config.yaml
     ~~~
 
 - Output results to workspace/results.csv.
     ~~~bash
-    > python -m aiaccel.report --config config.yaml
+    > aiaccel-report --config config.yaml
     ~~~
 
 
