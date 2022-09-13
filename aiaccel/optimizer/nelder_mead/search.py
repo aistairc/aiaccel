@@ -273,15 +273,10 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Returns:
             List: trial_id
         """
-        get_trial_id = [
-            self.storage.trial.get_finished,
-            self.storage.trial.get_running,
-            self.storage.trial.get_ready
-        ]
 
-        trial_id = []
-        for p in get_trial_id:
-            trial_id += p()
+        trial_id = self.storage.trial.get_all_trial_id()
+        if trial_id is None:
+            return []
 
         return trial_id
 
