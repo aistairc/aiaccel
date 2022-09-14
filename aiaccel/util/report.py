@@ -4,18 +4,22 @@ from fasteners import InterProcessLock
 from aiaccel.util.trialid import TrialId
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
+from typing import Union
 
 
 class CreationReaport:
-    def __init__(self, options: dict):
-        self.config_path = options['config']
+    def __init__(self, config_path: Union[pathlib.Path, str]):
+        self.config_path = config_path
+        if type(config_path) == str:
+            self.config_path = pathlib.Path(config_path)
         self.config = Config(self.config_path)
+
         self.ws = pathlib.Path(self.config.workspace.get()).resolve()
         self.fp = self.ws / 'results.csv'
         self.trialid = TrialId(str(self.config_path))
         self.storage = Storage(
             self.ws,
-            fsmode=options['fs'],
+            fsmode=self.config.filesystem_mode.get(),
             config_path=self.config.config_path
         )
         self.lock_file = {

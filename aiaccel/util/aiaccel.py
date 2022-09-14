@@ -230,7 +230,6 @@ class Run:
         parser = argparse.ArgumentParser()
         parser.add_argument('-i', '--trial_id', type=str, required=False)
         parser.add_argument('-c', '--config', type=str, required=False)
-        parser.add_argument('--fs', nargs='?', const=True, default=False)
 
         self.args = vars(parser.parse_known_args()[0])
 
@@ -253,7 +252,7 @@ class Run:
             # create database
             self.storage = Storage(
                 self.workspace,
-                self.args['fs'],
+                self.config.filesystem_mode.get(),
                 config_path=self.config_path
             )
 

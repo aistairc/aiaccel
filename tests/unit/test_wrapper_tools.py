@@ -26,7 +26,6 @@ class TestCeaterRunnerComand(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
         }
 
         commands = create_runner_command(

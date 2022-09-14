@@ -14,7 +14,6 @@ class TestTpeOptimizer(BaseTest):
             'config': data_dir / 'config_tpe.json',
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'optimizer'
         }
         self.optimizer = TpeOptimizer(options)

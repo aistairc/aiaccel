@@ -22,7 +22,6 @@ class TestRandom(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'optimizer'
         }
         serialize = Serializer(self.config, 'optimizer',options)
@@ -62,7 +61,6 @@ class TestRandom(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         serialize = Serializer(self.config, 'scheduler', options)

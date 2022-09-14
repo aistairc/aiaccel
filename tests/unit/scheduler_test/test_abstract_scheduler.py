@@ -46,7 +46,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         assert type(AbstractScheduler(options)) is AbstractScheduler
@@ -64,7 +63,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         database_remove()
@@ -85,7 +83,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -105,7 +102,6 @@ class TestAbstractScheduler(BaseTest):
             'config': str(config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -132,7 +128,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -153,7 +148,6 @@ class TestAbstractScheduler(BaseTest):
             'config': str(config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -175,7 +169,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -192,7 +185,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -210,7 +202,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -230,7 +221,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -264,7 +254,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -295,7 +284,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -313,7 +301,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -333,7 +320,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
@@ -348,7 +334,6 @@ class TestAbstractScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)

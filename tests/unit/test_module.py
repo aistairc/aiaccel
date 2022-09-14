@@ -61,7 +61,6 @@ class TestAbstractModule(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'test'
         }
 
@@ -85,7 +84,6 @@ class TestAbstractModule(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         commandline_args = [
@@ -103,7 +101,6 @@ class TestAbstractModule(BaseTest):
                 'config': str(self.config_json),
                 'resume': None,
                 'clean': False,
-                'fs': False,
                 'process_name': 'optimizer'
             }
             optimizer = RandomOptimizer(options)
@@ -114,7 +111,6 @@ class TestAbstractModule(BaseTest):
                 'config': str(self.config_json),
                 'resume': None,
                 'clean': False,
-                'fs': False,
                 'process_name': 'scheduler'
             }
             scheduler = LocalScheduler(options)

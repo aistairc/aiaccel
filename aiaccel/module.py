@@ -88,7 +88,7 @@ class AbstractModule(object):
         self.seed = self.config.randseed.get()
         self.storage = Storage(
             self.ws,
-            fsmode=options['fs'],
+            fsmode=self.config.filesystem_mode.get(),
             config_path=self.config.config_path
         )
         self.trial_id = TrialId(self.options['config'])

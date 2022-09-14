@@ -17,7 +17,6 @@ class TestAbciScheduler(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbciScheduler(options)
@@ -44,7 +43,6 @@ class TestAbciScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = AbciScheduler(options)

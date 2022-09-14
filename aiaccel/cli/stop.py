@@ -20,7 +20,7 @@ def main() -> None:  # pragma: no cover
 
     storage = Storage(
         workspace,
-        fsmode=options['fs'],
+        fsmode=config.filesystem_mode.get(),
         config_path=options['config']
     )
 

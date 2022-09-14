@@ -17,7 +17,6 @@ class TestAbstractVerification(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         
@@ -32,7 +31,6 @@ class TestAbstractVerification(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
 
@@ -80,7 +78,6 @@ class TestAbstractVerification(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
 
@@ -114,12 +111,8 @@ class TestAbstractVerification(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
-
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         verification = AbstractVerification(options)
         verification.is_verified = False
         assert verification.print() is None
@@ -131,12 +124,8 @@ class TestAbstractVerification(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
-
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         verification = AbstractVerification(options)
         verification.is_verified = False
         assert verification.save(1) is None

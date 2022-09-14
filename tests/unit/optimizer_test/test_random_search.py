@@ -9,7 +9,6 @@ class TestRandomOptimizer(BaseTest):
             'config': str(self.config_random_path),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'optimizer'
         }
         optimizer = RandomOptimizer(options)

@@ -1,13 +1,8 @@
 from aiaccel.storage.storage import Storage
 from aiaccel.cli.view import Viewer
-import pathlib
-from functools import wraps
-from aiaccel.workspace import Workspace
 from tests.unit.view.base import t_base
-from tests.unit.view.base import db_path
 from tests.unit.view.base import ws
 from tests.unit.view.base import config_path
-from aiaccel.config import Config
 
 
 @t_base()
@@ -46,15 +41,5 @@ def test_view():
         objective=objective
     )
 
-    config = Config(config_path)
-
-    options = {
-        'config': config_path,
-        'resume': None,
-        'clean': False,
-        'fs': False,
-        'process_name': 'master'
-    }
-
-    viewer = Viewer(config, options)
+    viewer = Viewer(config_path)
     assert viewer.view() is None

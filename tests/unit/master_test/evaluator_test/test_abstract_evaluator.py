@@ -10,7 +10,6 @@ class TestAbstractEvaluator(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'test'
         }
         evaluator = AbstractEvaluator(options)
@@ -21,7 +20,6 @@ class TestAbstractEvaluator(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'test'
         }
         evaluator = AbstractEvaluator(options)
@@ -39,7 +37,6 @@ class TestAbstractEvaluator(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'test'
         }
         
@@ -54,7 +51,6 @@ class TestAbstractEvaluator(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'test'
         }
         

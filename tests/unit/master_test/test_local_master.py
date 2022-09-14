@@ -9,7 +9,6 @@ class TestLocalMaster(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         master = LocalMaster(options)

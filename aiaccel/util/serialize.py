@@ -10,7 +10,7 @@ class Serializer:
         self.ws = Path(self.config.workspace.get()).resolve()
         self.storage = Storage(
             self.ws,
-            fsmode=options['fs'],
+            fsmode=self.config.filesystem_mode.get(),
             config_path=options['config']
         )
         self.process_name = process_name.lower()

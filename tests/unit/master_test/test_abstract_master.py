@@ -141,7 +141,6 @@ class TestAbstractMaster(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         master = AbstractMaster(options)
@@ -164,7 +163,6 @@ class TestAbstractMaster(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         master = AbstractMaster(options)
@@ -305,7 +303,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         with patch.object(sys, 'argv', commandline_args):
@@ -329,7 +326,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         with patch.object(sys, 'argv', commandline_args):
@@ -350,7 +346,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         commandline_args = [
@@ -390,7 +385,6 @@ class TestAbstractMaster(BaseTest):
         #     'config': config_json,
         #     'resume': None,
         #     'clean': False,
-        #     'fs': False,
         #     'process_name': 'master'
         # }
         commandline_args = [
@@ -402,7 +396,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         with patch.object(sys, 'argv', commandline_args):
@@ -443,7 +436,6 @@ class TestAbstractMaster(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'master'
         }
         with patch.object(sys, 'argv', commandline_args):

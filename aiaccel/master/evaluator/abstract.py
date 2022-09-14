@@ -20,13 +20,13 @@ class AbstractEvaluator(object):
         """
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
-        self.config = Config(str(self.config_path))
+        self.config = Config(self.config_path)
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
         self.hp_result = None
         self.storage = Storage(
             self.ws,
-            fsmode=self.options['fs'],
+            fsmode=self.config.filesystem_mode.get(),
             config_path=self.config_path
         )
         self.goal = self.config.goal.get()

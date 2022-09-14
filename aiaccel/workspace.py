@@ -8,9 +8,11 @@ from aiaccel.util.suffix import Suffix
 
 
 class Workspace:
-    def __init__(self, base_path: str):
+    def __init__(self, base_path: Union[str, pathlib.Path]):
+        self.path = base_path
+        if type(self.path) is str:
+            self.path = pathlib.Path(base_path)
         self.path = pathlib.Path(base_path).resolve()
-
         self.alive = self.path / aiaccel.dict_alive
         self.error = self.path / aiaccel.dict_error
         self.hp = self.path / aiaccel.dict_hp

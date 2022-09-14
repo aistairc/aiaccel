@@ -58,8 +58,6 @@ def test_generate_grid_points(grid_load_test_config):
             self.type = type_name
 
     try:
-        # generate_grid_points(FakeParameter('1', 'uniform_int'), config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         generate_grid_points(FakeParameter('1', 'uniform_int'), config)
         assert False
     except TypeError:
@@ -76,7 +74,6 @@ class TestGridOptimizer(BaseTest):
             'config': self.grid_config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)
@@ -91,7 +88,6 @@ class TestGridOptimizer(BaseTest):
             'config': self.grid_config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)
@@ -114,7 +110,6 @@ class TestGridOptimizer(BaseTest):
             'config': self.grid_config_json,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)

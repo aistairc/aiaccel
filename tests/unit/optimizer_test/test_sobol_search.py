@@ -11,7 +11,6 @@ class TestSobolOptimizer(BaseTest):
             'config': self.config_sobol_path,
             'resume': None,
             'clean': False,
-            'fs': False,
             'process_name': 'optimizer'
         }
         self.optimizer = SobolOptimizer(options)
