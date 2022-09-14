@@ -1,18 +1,26 @@
 from aiaccel.argument import Arguments
 from aiaccel.config import Config
-from aiaccel.workspace import Workspace
 from aiaccel.storage.storage import Storage
 from pathlib import Path
 from numpy import maximum
+from typing import Union
 
 
 class Viewer:
-    def __init__(self, config: Config, options: dict):
-        self.config_path = config.config_path
-        self.workspace = Path(config.workspace.get()).resolve()
+    def __init__(self, config_path: Union[str, Path]):
+        self.config_path = config_path
+        if type(self.config_path) is str:
+            self.config_path = Path(self.config_path)
+        self.config = Config(self.config_path)
+
+        self.workspace = Path(self.config.workspace.get()).resolve()
+        if self.workspace.exists() is False:
+            print(f"{self.workspace} is not found.")
+            raise ()
+
         self.storage = Storage(
             self.workspace,
-            fsmode=options['fs'],
+            fsmode=self.config.filesystem_mode.get(),
             config_path=self.config_path
         )
 
@@ -100,15 +108,7 @@ def main() -> None:  # pragma: no cover
         print("Specify the config file path with the --config option.")
         return
 
-    config = Config(options['config'])
-    workspace = config.workspace.get()
-
-    ws = Workspace(workspace)
-    if ws.exists() is False:
-        print(f"{workspace} is not found.")
-        return
-
-    viewer = Viewer(config, options)
+    viewer = Viewer(options['config'])
     viewer.view()
 
 

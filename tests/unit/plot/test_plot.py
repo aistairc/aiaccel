@@ -52,7 +52,7 @@ def test_plot():
     config.goal.set(goal)
 
     # データ無しの場合
-    plotter = Plotter(config, options)
+    plotter = Plotter(config_path)
     assert plotter.plot() is None
 
     # 正常
@@ -64,6 +64,6 @@ def test_plot():
         objective=objective
     )
 
-    plotter = Plotter(config, options)
+    plotter = Plotter(config_path)
     assert plotter.plot() is None
 

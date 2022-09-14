@@ -8,5 +8,5 @@ if __name__ == "__main__":
         print("Specify the config file path with the --config option.")
         sys.exit()
 
-    report = CreationReaport(options)
+    report = CreationReaport(options['config'])
     report.create()

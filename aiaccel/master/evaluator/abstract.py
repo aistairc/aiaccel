@@ -26,7 +26,7 @@ class AbstractEvaluator(object):
         self.hp_result = None
         self.storage = Storage(
             self.ws,
-            fsmode=self.options['fs'],
+            fsmode=self.config.filesystem_mode.get(),
             config_path=self.config_path
         )
         self.goal = self.config.goal.get()

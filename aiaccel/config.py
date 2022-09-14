@@ -333,6 +333,7 @@ _DEFAULT_VERIFI_CONDITION = []
 _DEFAULT_RANDOM_SCHESULING = True
 _RESOURCE_TYPES = ['abci', 'local']
 _GOALS = ['minimize', 'maximize']
+_FILESYSTEM_MODE = False
 
 
 class Config:
@@ -417,7 +418,14 @@ class Config:
             group="generic",
             keys=("scheduler_command")
         )
-
+        self.filesystem_mode = ConfigEntry(
+            config=config,
+            type=[bool],
+            default=_FILESYSTEM_MODE,
+            warning=False,
+            group="generic",
+            keys=("filesystem_mode")
+        )
         # === scheduler defalt config===
         self.cancel_retry = ConfigEntry(
             config=config,

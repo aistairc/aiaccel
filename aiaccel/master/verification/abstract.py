@@ -30,7 +30,7 @@ class AbstractVerification(object):
         self.load_verification_config()
         self.storage = Storage(
             self.ws,
-            fsmode=self.options['fs'],
+            fsmode=self.config.filesystem_mode.get(),
             config_path=self.config.config_path
         )
 

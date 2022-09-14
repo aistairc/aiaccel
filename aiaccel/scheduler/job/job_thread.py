@@ -1091,7 +1091,7 @@ class Job(threading.Thread):
         self.stop_flag = False
         self.storage = Storage(
             self.ws,
-            fsmode=self.options['fs'],
+            fsmode=self.config.filesystem_mode.get(),
             config_path=self.config_path
         )
         self.content = self.storage.get_hp_dict(self.trial_id)

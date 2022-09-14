@@ -57,7 +57,7 @@ def main(options: dict = Arguments()) -> None:
 
     M.start()
 
-    report = CreationReaport(options)
+    report = CreationReaport(options['config'])
     report.create()
 
     print("moving...")
