@@ -19,32 +19,27 @@ class TimeStamp(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            data = (
-                session.query(TimestampTable)
-                .filter(TimestampTable.trial_id == trial_id)
-                .with_for_update(read=True)
-                .one_or_none()
-            )
-
-            if data is None:
-                new_row = TimestampTable(
-                    trial_id=trial_id,
-                    start_time=start_time,
-                    end_time=""
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(TimestampTable)
+                    .filter(TimestampTable.trial_id == trial_id)
+                    .with_for_update(read=True)
+                    .one_or_none()
                 )
-                session.add(new_row)
-            else:
-                data.start_time = start_time
-            session.commit()
-
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+                if data is None:
+                    new_row = TimestampTable(
+                        trial_id=trial_id,
+                        start_time=start_time,
+                        end_time=""
+                    )
+                    session.add(new_row)
+                else:
+                    data.start_time = start_time
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_end_time(self, trial_id: int, end_time: str) -> None:
@@ -57,27 +52,21 @@ class TimeStamp(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            data = (
-                session.query(TimestampTable)
-                .filter(TimestampTable.trial_id == trial_id)
-                .with_for_update(read=True)
-                .one_or_none()
-            )
-
-            if data is None:
-                assert False
-
-            data.end_time = end_time
-            session.commit()
-
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(TimestampTable)
+                    .filter(TimestampTable.trial_id == trial_id)
+                    .with_for_update(read=True)
+                    .one_or_none()
+                )
+                if data is None:
+                    assert False
+                data.end_time = end_time
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_start_time(self, trial_id: int) -> str:
@@ -89,22 +78,18 @@ class TimeStamp(Abstract):
         Returns:
             start_time(str): "MM/DD/YYYY hh:mm:ss"
         """
-        session = self.session()
-        data = (
-            session.query(TimestampTable)
-            .filter(TimestampTable.trial_id == trial_id)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(TimestampTable)
+                .filter(TimestampTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if data is None:
             return None
-
         if data.start_time == '':
             return None
-
         return data.start_time
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -117,22 +102,18 @@ class TimeStamp(Abstract):
         Returns:
             end_time(str): "MM/DD/YYYY hh:mm:ss"
         """
-        session = self.session()
-        data = (
-            session.query(TimestampTable)
-            .filter(TimestampTable.trial_id == trial_id)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(TimestampTable)
+                .filter(TimestampTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if data is None:
             return None
-
         if data.end_time == '':
             return None
-
         return data.end_time
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -142,14 +123,20 @@ class TimeStamp(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(TimestampTable).with_for_update(read=True).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(TimestampTable).with_for_update(read=True).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_timestamp(self, trial_id) -> None:
-        session = self.session()
-        session.query(TimestampTable).filter(TimestampTable.trial_id == trial_id).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(TimestampTable).filter(TimestampTable.trial_id == trial_id).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e

@@ -19,15 +19,13 @@ class Trial(Abstract):
         Returns:
             trials state(str): ready, running, finished
         """
-        session = self.session()
-        trials = (
-            session.query(TrialTable)
-            .filter(TrialTable.trial_id == trial_id)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-
-        session.close()
+        with self.create_session() as session:
+            trials = (
+                session.query(TrialTable)
+                .filter(TrialTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if trials is None:
             return None
@@ -43,14 +41,12 @@ class Trial(Abstract):
         Returns:
             trial ids(list[int])
         """
-        session = self.session()
-        trials = (
-            session.query(TrialTable)
-            .filter(TrialTable.state == state)
-            .with_for_update(read=True)
-        )
-
-        session.close()
+        with self.create_session() as session:
+            trials = (
+                session.query(TrialTable)
+                .filter(TrialTable.state == state)
+                .with_for_update(read=True)
+            )
 
         if trials is None:
             return None
@@ -67,30 +63,26 @@ class Trial(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            trials = (
-                session.query(TrialTable)
-                .filter(TrialTable.trial_id == trial_id)
-                .with_for_update(read=True)
-                .one_or_none()
-            )
-            if trials is None:
-                new_row = TrialTable(
-                    trial_id=trial_id,
-                    state=state
+        with self.create_session() as session:
+            try:
+                trials = (
+                    session.query(TrialTable)
+                    .filter(TrialTable.trial_id == trial_id)
+                    .with_for_update(read=True)
+                    .one_or_none()
                 )
-                session.add(new_row)
-            else:
-                trials.state = state
-            session.commit()
-
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+                if trials is None:
+                    new_row = TrialTable(
+                        trial_id=trial_id,
+                        state=state
+                    )
+                    session.add(new_row)
+                else:
+                    trials.state = state
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def all_delete(self) -> None:
@@ -99,17 +91,23 @@ class Trial(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(TrialTable).with_for_update(read=True).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(TrialTable).with_for_update(read=True).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_state(self, trial_id: int) -> None:
-        session = self.session()
-        session.query(TrialTable).filter(TrialTable.trial_id == trial_id).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(TrialTable).filter(TrialTable.trial_id == trial_id).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_ready(self) -> list:
@@ -118,14 +116,13 @@ class Trial(Abstract):
         Returns:
             trial ids(list[int])
         """
-        session = self.session()
-        trials = (
-            session.query(TrialTable)
-            .filter(TrialTable.state == 'ready')
-            .with_for_update(read=True)
-            .all()
-        )
-        session.close()
+        with self.create_session() as session:
+            trials = (
+                session.query(TrialTable)
+                .filter(TrialTable.state == 'ready')
+                .with_for_update(read=True)
+                .all()
+            )
 
         return [trial.trial_id for trial in trials]
 
@@ -136,14 +133,13 @@ class Trial(Abstract):
         Returns:
             trial ids(list[int])
         """
-        session = self.session()
-        trials = (
-            session.query(TrialTable)
-            .filter(TrialTable.state == 'running')
-            .with_for_update(read=True)
-            .all()
-        )
-        session.close()
+        with self.create_session() as session:
+            trials = (
+                session.query(TrialTable)
+                .filter(TrialTable.state == 'running')
+                .with_for_update(read=True)
+                .all()
+            )
 
         return [trial.trial_id for trial in trials]
 
@@ -154,14 +150,13 @@ class Trial(Abstract):
         Returns:
             trial ids(list[int])
         """
-        session = self.session()
-        trials = (
-            session.query(TrialTable)
-            .filter(TrialTable.state == 'finished')
-            .with_for_update(read=True)
-            .all()
-        )
-        session.close()
+        with self.create_session() as session:
+            trials = (
+                session.query(TrialTable)
+                .filter(TrialTable.state == 'finished')
+                .with_for_update(read=True)
+                .all()
+            )
 
         return [trial.trial_id for trial in trials]
 
@@ -171,12 +166,11 @@ class Trial(Abstract):
         Returns:
             trial ids(list[int])
         """
-        session = self.session()
-        trials = (
-            session.query(TrialTable)
-            .with_for_update(read=True)
-        )
-        session.close()
+        with self.create_session() as session:
+            trials = (
+                session.query(TrialTable)
+                .with_for_update(read=True)
+            )
 
         if trials is None:
             return None
