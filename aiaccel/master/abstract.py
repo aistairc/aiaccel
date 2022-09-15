@@ -58,10 +58,8 @@ class AbstractMaster(AbstractModule):
 
         # optimizer
         self.o = create_optimizer(options['config'])(options)
-        self.o.__init__(self.options)
         # scheduler
         self.s = create_scheduler(options['config'])(options)
-        self.s.__init__(self.options)
 
         self.worker_o = multiprocessing.Process(target=self.o.start)
         self.worker_s = multiprocessing.Process(target=self.s.start)
