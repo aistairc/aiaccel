@@ -20,28 +20,25 @@ class Error(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        try:
-            data = (
-                session.query(ErrorTable)
-                .filter(ErrorTable.trial_id == trial_id)
-                .with_for_update(read=True)
-                .one_or_none()
-            )
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(ErrorTable)
+                    .filter(ErrorTable.trial_id == trial_id)
+                    .with_for_update(read=True)
+                    .one_or_none()
+                )
 
-            if data is None:
-                new_row = ErrorTable(trial_id=trial_id, error=error_message)
-                session.add(new_row)
-                session.commit()
-            else:
-                data.error = error_message
+                if data is None:
+                    new_row = ErrorTable(trial_id=trial_id, error=error_message)
+                    session.add(new_row)
+                    session.commit()
+                else:
+                    data.error = error_message
 
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_error(self, trial_id: int) -> Union[None, str]:
@@ -53,14 +50,13 @@ class Error(Abstract):
         Returns:
             str | None
         """
-        session = self.session()
-        data = (
-            session.query(ErrorTable)
-            .filter(ErrorTable.trial_id == trial_id)
-            .with_for_update(read=True)
-            .one_or_none()
-        )
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(ErrorTable)
+                .filter(ErrorTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
 
         if data is None:
             return None
@@ -73,13 +69,12 @@ class Error(Abstract):
         Returns:
             trial_ids(list): trial id list
         """
-        session = self.session()
-        data = (
-            session.query(ErrorTable)
-            .with_for_update(read=True)
-            .all()
-        )
-        session.close()
+        with self.create_session() as session:
+            data = (
+                session.query(ErrorTable)
+                .with_for_update(read=True)
+                .all()
+            )
 
         if data is None:
             return []
@@ -93,10 +88,13 @@ class Error(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(ErrorTable).with_for_update(read=True).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(ErrorTable).with_for_update(read=True).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_error(self, trial_id: int) -> None:
@@ -104,7 +102,10 @@ class Error(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(ErrorTable).filter(ErrorTable.trial_id == trial_id).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(ErrorTable).filter(ErrorTable.trial_id == trial_id).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e

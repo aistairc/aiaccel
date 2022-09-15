@@ -29,46 +29,37 @@ class Hp(Abstract):
         Returns:
             TrialTable | None
         """
-        session = self.session()
-        try:
-            p = HpTable(
-                trial_id=trial_id,
-                param_name=param_name,
-                param_value=param_value,
-                param_type=param_type
-            )
-            session.add(p)
-            session.commit()
-
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+        with self.create_session() as session:
+            try:
+                p = HpTable(
+                    trial_id=trial_id,
+                    param_name=param_name,
+                    param_value=param_value,
+                    param_type=param_type
+                )
+                session.add(p)
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_params(self, trial_id: int, params: list) -> None:
-        session = self.session()
-        try:
-            hps = [
-                HpTable(
-                    trial_id=trial_id,
-                    param_name=d['parameter_name'],
-                    param_value=d['value'],
-                    param_type=d['type']
-                )for d in params
-            ]
-            # session.add_all(hps)
-            session.bulk_save_objects(hps)
-            session.commit()
-
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
-
-        finally:
-            session.close()
+        with self.create_session() as session:
+            try:
+                hps = [
+                    HpTable(
+                        trial_id=trial_id,
+                        param_name=d['parameter_name'],
+                        param_value=d['value'],
+                        param_type=d['type']
+                    ) for d in params
+                ]
+                session.bulk_save_objects(hps)
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_params(self, trial_id: int) -> Union[None, list]:
@@ -80,14 +71,13 @@ class Hp(Abstract):
         Returns:
             list[HpTable]
         """
-        session = self.session()
-        hp = (
-            session.query(HpTable)
-            .filter(HpTable.trial_id == trial_id)
-            .with_for_update(read=True)
-            .all()
-        )
-        session.close()
+        with self.create_session() as session:
+            hp = (
+                session.query(HpTable)
+                .filter(HpTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .all()
+            )
 
         if len(hp) == 0:
             return None
@@ -100,10 +90,13 @@ class Hp(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(HpTable).with_for_update(read=True).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(HpTable).with_for_update(read=True).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_params(self, trial_id: int) -> None:
@@ -111,7 +104,10 @@ class Hp(Abstract):
         Returns:
             None
         """
-        session = self.session()
-        session.query(HpTable).filter(HpTable.trial_id == trial_id).delete()
-        session.commit()
-        session.close()
+        with self.create_session() as session:
+            try:
+                session.query(HpTable).filter(HpTable.trial_id == trial_id).delete()
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
