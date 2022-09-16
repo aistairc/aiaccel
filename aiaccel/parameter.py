@@ -193,7 +193,7 @@ class HyperParameter(object):
         if initial and self.initial is not None:
             value = self.initial
         elif self.type == 'INT':
-            value = np.random.randrange(self.lower, self.upper)
+            value = np.random.randint(self.lower, self.upper)
         elif self.type == 'FLOAT':
             value = np.random.uniform(self.lower, self.upper)
         elif self.type == 'CATEGORICAL':
