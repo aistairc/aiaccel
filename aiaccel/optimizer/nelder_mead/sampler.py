@@ -120,7 +120,7 @@ class NelderMead(object):
 
     def _create_initial_values(self, initial_parameters) -> list:
         initial_values = [
-            [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.bdrys))]
+            [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
             for num_of_initials in range(self.n_dim + 1)
         ]
 
@@ -140,10 +140,10 @@ class NelderMead(object):
             if num_of_initials < len(initial_parameters[dim]['value']):
                 return initial_parameters[dim]['value'][num_of_initials]
             else:
-                return np.random.random() * (self.bdrys[dim][1] - self.bdrys[dim][0]) + self.bdrys[dim][0]
+                return self.params[dim].sample()['value']
 
         else:
-            return np.random.random() * (self.bdrys[dim][1] - self.bdrys[dim][0]) + self.bdrys[dim][0]
+            return self.params[dim].sample()['value']
 
     def _add_executing(
         self, y: np.ndarray,
