@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Union
 import copy
 import logging
 import numpy as np
-import random
 
 STATES = [
     'WaitInitialize',

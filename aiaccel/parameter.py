@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List, Tuple, Union
 import aiaccel
 import logging
-import random
 import numpy as np
 
 
