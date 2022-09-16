@@ -5,6 +5,7 @@ from typing import List, Tuple, Union
 import aiaccel
 import logging
 import random
+import numpy as np
 
 
 def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
@@ -193,13 +194,13 @@ class HyperParameter(object):
         if initial and self.initial is not None:
             value = self.initial
         elif self.type == 'INT':
-            value = random.randrange(self.lower, self.upper)
+            value = np.random.randrange(self.lower, self.upper)
         elif self.type == 'FLOAT':
-            value = random.uniform(self.lower, self.upper)
+            value = np.random.uniform(self.lower, self.upper)
         elif self.type == 'CATEGORICAL':
-            value = random.choice(self.choices)
+            value = np.random.choice(self.choices)
         elif self.type == 'ORDINAL':
-            value = random.choice(self.sequence)
+            value = np.random.choice(self.sequence)
         else:
             raise TypeError(
                 f'Invalid hyper parameter type: {self.type}')
