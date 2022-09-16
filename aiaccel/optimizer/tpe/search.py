@@ -72,6 +72,9 @@ class TpeOptimizer(AbstractOptimizer):
             bool: Is a current trial startup trial or not.
         """
         n_startup_trials = self.study.sampler.get_startup_trials()
+        # If initial exists, the output of n_startup_trials is reduced
+        # by the number of initials before the original n_startup_trials,
+        # so the number of initials needs to be added to the right side.
         return self.num_of_generated_parameter < n_startup_trials + self.initial_count
 
     def generate_parameter(self, number: Optional[int] = 1) -> None:
