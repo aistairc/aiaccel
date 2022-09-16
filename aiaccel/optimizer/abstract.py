@@ -103,14 +103,6 @@ class AbstractOptimizer(AbstractModule):
                 None if any parameters are already created.
         """
         if self.num_of_generated_parameter == 0:
-
-            for hp in self.params.hps.values():
-                if hp.initial is not None:
-                    break
-            else:
-                # all hp.initial is None
-                return None
-
             sample = self.params.sample(initial=True)
             new_params = []
 
