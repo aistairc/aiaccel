@@ -529,7 +529,7 @@ export PYTHONPATH=$AIACCELPATH:$AIACCELPATH/lib
 ## 6 最適化実行
 プロジェクトフォルダに移動し、次のコマンドを実行します。
 ```bash
-> python -m aiaccel.start --config config.yaml
+> aiaccel-start --config config.yaml
 ```
 
 - ご注意
@@ -546,18 +546,18 @@ export PYTHONPATH=$AIACCELPATH:$AIACCELPATH/lib
 
 `start`コマンドの後に、追加オプションを指定できます。
 ```bash
-> python -m aiaccel.start
+> aiaccel-start
 ```
 - --clean : workspaceが既に存在する場合、最適化実行前にworkspaceを削除します。
 - --resume : workspaceが既に存在する場合、保存データが存在するトライアルを指定することで、指定のトライアルから再開することができます。
 
 ##### 例
 ```bash
-python -m aiaccel.start --config config.yaml --clean
+> aiaccel-start --config config.yaml --clean
 ```
 
 ```bash
-python -m aiaccel.start --config config.yaml --resume 5
+> aiaccel-start --config config.yaml --resume 5
 ```
 
 <hr>
@@ -596,12 +596,12 @@ ABCI:
 # 7 進捗の可視化について
 ##### 全結果の表示
 ```bash
-> python -m aiaccel.view --config config.yaml
+> aiaccel-view --config config.yaml
 ```
 
 ##### 簡易フラグの表示
 ```bash
-> python -m aiaccel.graph --config config.yaml
+> aiaccel-graph --config config.yaml
 ``` -->
 
 
