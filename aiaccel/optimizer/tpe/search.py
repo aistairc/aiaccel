@@ -24,6 +24,7 @@ class TpeOptimizer(AbstractOptimizer):
         self.distributions = None
         self.trial_pool = {}
         self.randseed = self.config.randseed.get()
+        self.initial_count = 0
 
     def pre_process(self) -> None:
         """Pre-Procedure before executing optimize processes.
@@ -71,7 +72,10 @@ class TpeOptimizer(AbstractOptimizer):
             bool: Is a current trial startup trial or not.
         """
         n_startup_trials = self.study.sampler.get_startup_trials()
-        return self.num_of_generated_parameter < n_startup_trials
+        # If initial exists, the output of n_startup_trials is reduced
+        # by the number of initials before the original n_startup_trials,
+        # so the number of initials needs to be added to the right side.
+        return self.num_of_generated_parameter < n_startup_trials + self.initial_count
 
     def generate_parameter(self, number: Optional[int] = 1) -> None:
         """Generate parameters.
@@ -87,16 +91,8 @@ class TpeOptimizer(AbstractOptimizer):
         if initial_parameter is not None:
             trial_id = self.register_ready(initial_parameter)
             self.parameter_pool[trial_id] = initial_parameter['parameters']
-            enqueue_trial = {}
-
-            for param in self.parameter_pool[trial_id]:
-                enqueue_trial[param['parameter_name']] = param['value']
-
-            self.study.enqueue_trial(enqueue_trial)
             self.logger.info(f'newly added name: {trial_id} to parameter_pool')
-            t = self.study.ask(self.distributions)
-            self.trial_pool[trial_id] = t
-            self.num_of_generated_parameter += 1
+
             number -= 1
 
         for _ in range(number):
@@ -128,6 +124,38 @@ class TpeOptimizer(AbstractOptimizer):
             self.logger.info(f'newly added name: {trial_id} to parameter_pool')
 
             self._serialize()
+
+    def generate_initial_parameter(self):
+
+        if self.num_of_generated_parameter == 0:
+            enqueue_trial = {}
+            for hp in self.params.hps.values():
+                if hp.initial is not None:
+                    enqueue_trial[hp.name] = hp.initial
+
+            # all hp.initial is None
+            if len(enqueue_trial) == 0:
+                return None
+
+            self.study.enqueue_trial(enqueue_trial)
+            t = self.study.ask(self.distributions)
+            self.initial_count += 1
+            self.trial_pool[self.initial_count] = t
+
+            new_params = []
+
+            for name, value in t.params.items():
+                new_param = {
+                    'parameter_name': name,
+                    'type': self.params.hps[name].type,
+                    'value': value
+                }
+                new_params.append(new_param)
+
+            self.num_of_generated_parameter += 1
+            return {'parameters': new_params}
+
+        return None
 
     def create_study(self) -> None:
         """Create the optuna.study object and store it.

@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Union
 import copy
 import logging
 import numpy as np
-import random
 
 STATES = [
     'WaitInitialize',
@@ -88,22 +87,7 @@ class NelderMead(object):
         self.coef = coef
         self.n_dim = len(self.bdrys)
 
-        self.y = self._create_initial_values()
-        if initial_parameters is not None:
-            for dp in initial_parameters:
-                if (
-                    type(dp['value']) is int or
-                    type(dp['value']) is float
-                ):
-                    dp['value'] = [dp['value']]
-
-                if type(dp['value']) is not list:
-                    raise TypeError('Default parameter should be set as list.')
-
-                ind = [p.name for p in self.params].index(dp['parameter_name'])
-
-                for i in range(len(dp['value'])):
-                    self.y[i][ind] = dp['value'][i]
+        self.y = self._create_initial_values(initial_parameters)
 
         self.f = []
         self.yc = None
@@ -134,12 +118,32 @@ class NelderMead(object):
         for y in self.y:
             self._add_executing(y)
 
-    def _create_initial_values(self) -> list:
+    def _create_initial_values(self, initial_parameters) -> list:
         initial_values = [
-            [random.random() * (b[1] - b[0]) + b[0] for b in self.bdrys]
-            for _ in range(self.n_dim + 1)
+            [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
+            for num_of_initials in range(self.n_dim + 1)
         ]
+
         return np.array(initial_values)
+
+    def _create_initial_value(self, initial_parameters, dim, num_of_initials):
+        if initial_parameters is not None:
+            if (
+                type(initial_parameters[dim]['value']) is int or
+                type(initial_parameters[dim]['value']) is float
+            ):
+                initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
+
+            if type(initial_parameters[dim]['value']) is not list:
+                raise TypeError('Default parameter should be set as list.')
+
+            if num_of_initials < len(initial_parameters[dim]['value']):
+                return initial_parameters[dim]['value'][num_of_initials]
+            else:
+                return self.params[dim].sample()['value']
+
+        else:
+            return self.params[dim].sample()['value']
 
     def _add_executing(
         self, y: np.ndarray,
