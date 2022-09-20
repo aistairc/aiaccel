@@ -44,12 +44,18 @@
 
 3. パラメータ最適化を実行します。
     ~~~bash
-    > python -m aiaccel.start --config config.yaml
+    > aiaccel-start --config config.yaml
+    ~~~
+
+    または、
+
+    ~~~bash
+    > python -m aiaccel.cli.start --config config.yaml
     ~~~
 
     Tips: ワークスペースは `--clean` を付加することで実行前に初期化できます。
     ~~~bash
-    > python -m aiaccel.start --config config.yaml --clean
+    > aiaccel-start --config config.yaml --clean
     ~~~
 
 4. 結果を確認する。
@@ -87,7 +93,7 @@
 
 4. 実行
     ~~~bash
-    > python -m aiaccel.start --config config.yaml
+    > aiaccel-start --config config.yaml
     ~~~
 
 5. 実行中のジョブを確認したい場合は、[ABCIユーザーズガイド](https://docs.abci.ai/ja/job-execution/#show-the-status-of-batch-jobs)を参照してください。
@@ -96,17 +102,17 @@
 ## その他
 - 処理の進捗を確認
     ~~~bash
-    > python -m aiaccel.view --config config.yaml
+    > aiaccel-view --config config.yaml
     ~~~
 
 - 簡易グラフを表示
     ~~~bash
-    > python -m aiaccel.plot --config config.yaml
+    > aiaccel-plot --config config.yaml
     ~~~
 
 - workspace/results.csvに結果を出力
     ~~~bash
-    > python -m aiaccel.report --config config.yaml
+    > aiaccel-report --config config.yaml
     ~~~
 
 # 開発中の機能wdについて

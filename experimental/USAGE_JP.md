@@ -136,7 +136,7 @@ qrsh -g gaa*****(ご自身のグループ名) -l rt_C.small=1 -l h_rt=1:00:00
 ```
 source ~/aiaccel/experimental/tools/make_aiaccel_env.source
 cd ~/aiaccel/experimental/examples/config/aiaccel-test/readme_jp-sample-local/
-python -m aiaccel.start --config config.yml --clean
+aiaccel-start --config config.yml --clean
 ```
 と実行します。
 

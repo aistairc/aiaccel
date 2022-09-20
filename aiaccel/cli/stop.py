@@ -1,7 +1,7 @@
 from aiaccel.argument import Arguments
 from aiaccel.config import Config
-from aiaccel.workspace import Workspace
 from aiaccel.storage.storage import Storage
+from pathlib import Path
 
 
 def main() -> None:  # pragma: no cover
@@ -13,13 +13,12 @@ def main() -> None:  # pragma: no cover
     config = Config(options['config'])
     workspace = config.workspace.get()
 
-    ws = Workspace(workspace)
-    if ws.exists() is False:
+    if Path(workspace).exists() is False:
         print(f"{workspace} is not found.")
         return
 
     storage = Storage(
-        workspace,
+        Path(workspace).resolve(),
         fsmode=options['fs'],
         config_path=options['config']
     )

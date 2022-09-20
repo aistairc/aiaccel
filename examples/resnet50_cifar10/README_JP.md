@@ -149,10 +149,10 @@ source ../../../../resnet50sample_env/bin/activate
 <br>
 
 ## 3. 動作説明
-- optとpytorchが動作する環境が必要です。
+- aiaccelとpytorchが動作する環境が必要です。
 
     - ABCIにおけるpytorch導入手順(出典:https://docs.abci.ai/ja/apps/pytorch/)
-        - optの仮想環境作成・activate後、下記コマンドを実行してください。
+        - aiaccelの仮想環境作成・activate後、下記コマンドを実行してください。
 
             ```bash
             pip3 install --upgrade pip setuptools
@@ -180,10 +180,10 @@ source ../../../../resnet50sample_env/bin/activate
     python setup_dataset.py
     ```
 
-- 上記準備が完了したら、下記コマンドでoptを起動してください。
+- 上記準備が完了したら、下記コマンドでaiaccelを起動してください。
 
     ```bash
-    python -m aiaccel.start --config config.yaml --clean
+    aiaccel-start --config config.yaml --clean
     ```
 
 <br>

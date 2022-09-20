@@ -50,5 +50,14 @@ setup(
     install_requires=requirements,
     zip_safe=False,
     setup_requires=["pytest-runner"],
-    tests_require=["pytest", "pytest-cov"]
+    tests_require=["pytest", "pytest-cov"],
+    entry_points={
+        'console_scripts': [
+            'aiaccel-plot=aiaccel.cli.plot:main',
+            'aiaccel-report=aiaccel.cli.report:main',
+            'aiaccel-start=aiaccel.cli.start:main',
+            'aiaccel-stop=aiaccel.cli.stop:main',
+            'aiaccel-view=aiaccel.cli.view:main',
+        ],
+    },
 )
