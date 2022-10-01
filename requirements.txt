@@ -4,7 +4,7 @@ coverage==4.5.2
 cython
 fasteners==0.14.1
 filelock==3.0.10
-joblib==1.1.0
+joblib==1.2.0
 monotonic==1.5
 numpy
 pluggy
