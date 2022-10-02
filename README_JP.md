@@ -115,11 +115,6 @@
     > aiaccel-report --config config.yaml
     ~~~
 
-# 開発中の機能wdについて
-ABCI上で `aiaccel` を実行する場合、HPOを管理する `master` プログラムが常時実行している必要があり、目的関数を計算している間も待機のためにポイントを消費してしまいます。
-`./experimental/wd` (watch dog) と呼ばれる開発中の機能を用いれば、このような不必要な消費を抑制することができます。
-詳細は[experimental/README_JP.md](experimental/README_JP.md)をご参照ください。
-
 
 # 謝辞
 * この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。

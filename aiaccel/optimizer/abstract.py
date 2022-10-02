@@ -77,7 +77,6 @@ class AbstractOptimizer(AbstractModule):
             str: An unique hyper parameter name.
         """
 
-        # wd/
         self.trial_id.increment()
 
         param['trial_id'] = self.trial_id.get()

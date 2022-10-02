@@ -11,7 +11,6 @@ from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.time_tools import get_time_delta
 from aiaccel.util.trialid import TrialId
 from aiaccel.wrapper_tools import create_runner_command
-from aiaccel.util.wd import get_cmd_array  # wd/
 from aiaccel.util.buffer import Buffer
 from enum import Enum
 from pathlib import Path
@@ -604,10 +603,6 @@ class Model(object):
                 obj.config_path,
                 obj.options
             )
-            # wd/
-            wd_cmd = get_cmd_array()
-            if wd_cmd is not None:
-                runner_command[0:0] = wd_cmd
         else:
             runner_file = self.get_runner_file(obj)
             runner_command = create_qsub_command(

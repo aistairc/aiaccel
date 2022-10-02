@@ -48,9 +48,9 @@ file_native_random = 'native_random'
 file_numpy_random = 'numpy_random'
 file_numpy_random_extension = 'npy'
 
-file_hp_count = 'count.txt'  # wd/
-file_hp_count_lock = 'count.lock'  # wd/
-file_hp_count_lock_timeout = 10  # wd/
+file_hp_count = 'count.txt'
+file_hp_count_lock = 'count.lock'
+file_hp_count_lock_timeout = 10
 
 goal_maximize = 'maximize'
 goal_minimize = 'minimize'
