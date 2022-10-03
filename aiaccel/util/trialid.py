@@ -4,8 +4,6 @@ import aiaccel
 import fasteners
 from typing import Union
 
-# wd/
-
 
 class TrialId:
     def __init__(self, config_path: str):

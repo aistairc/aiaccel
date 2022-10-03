@@ -36,9 +36,9 @@ from .common import file_hyperparameter
 from .common import file_native_random
 from .common import file_numpy_random
 from .common import file_numpy_random_extension
-from .common import file_hp_count  # wd/
-from .common import file_hp_count_lock  # wd/
-from .common import file_hp_count_lock_timeout  # wd/
+from .common import file_hp_count
+from .common import file_hp_count_lock
+from .common import file_hp_count_lock_timeout
 from .common import goal_minimize
 from .common import goal_maximize
 from .common import key_module_type
@@ -96,9 +96,9 @@ __all__ = [
     file_native_random,
     file_numpy_random,
     file_numpy_random_extension,
-    file_hp_count,  # wd/
-    file_hp_count_lock,  # wd/
-    file_hp_count_lock_timeout,  # wd/
+    file_hp_count,
+    file_hp_count_lock,
+    file_hp_count_lock_timeout,
     goal_minimize,
     goal_maximize,
     key_module_type,

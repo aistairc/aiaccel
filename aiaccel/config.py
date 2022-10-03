@@ -6,7 +6,6 @@ import confile
 import copy
 from aiaccel.common import search_algorithm_nelder_mead
 from aiaccel.util.terminal import Terminal
-from aiaccel.util.wd import get_num_node_all  # wd/
 import sys
 NoneType = type(None)
 
@@ -601,11 +600,6 @@ class Config:
             group="resource",
             keys=("num_node")
         )
-        # wd/
-        wd_num_node_all = get_num_node_all()
-        if wd_num_node_all >= 1:
-            self.resource_type.set('local')
-            self.num_node.set(wd_num_node_all)
 
         # === ABCI defalt config ===
         self.job_script_preamble = ConfigEntry(

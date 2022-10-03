@@ -1,4 +1,0 @@
-wd:
-  name_aiaccel_config: "config.yml"
-  max_small_minutes: "1*60"
-  max_large_minutes: "1*60"
