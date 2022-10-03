@@ -1,0 +1,239 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 22:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.optimizer.rst:2
+msgid "aiaccel.optimizer package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.optimizer.rst:5
+msgid "Subpackages"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.optimizer.rst:17
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.optimizer.rst:20
+msgid "aiaccel.optimizer.abstract module"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.module.AbstractModule`"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer:1 of
+msgid "An abstract class for Optimizer classes."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer:5 of
+msgid "A total number to generate hyper parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer of
+msgid "type"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer:7
+#: aiaccel.optimizer.abstract.AbstractOptimizer:13
+#: aiaccel.optimizer.abstract.AbstractOptimizer:26 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer:11 of
+msgid "A number to pool hyper parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer:17 of
+msgid "Loaded hyper parameter configuration object."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer:20 of
+msgid "HyperParameterConfiguration"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer:24 of
+msgid "A number of generated hyper paramters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_initial_parameter:1 of
+msgid "Generate a initial parameter."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_initial_parameter
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_parameter
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_main_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_post_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_pre_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.loop_post_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.loop_pre_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.post_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.pre_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_new_parameters
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_ready
+#: aiaccel.optimizer.abstract.AbstractOptimizer.resume of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_initial_parameter:3 of
+msgid ""
+"Union[Dict[str, List[Dict[str, Union[str, Union[float,     "
+"List[float]]]]], None]: A created initial parameter. It returns     None "
+"if any parameters are already created."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_initial_parameter:6 of
+msgid "Union[Dict[str, List[Dict[str, Union[str, Union[float,"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_initial_parameter:6 of
+msgid ""
+"List[float]]]]], None]: A created initial parameter. It returns None if "
+"any parameters are already created."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_parameter:1 of
+msgid "Generate parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_parameter
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_new_parameters
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_ready
+#: aiaccel.optimizer.abstract.AbstractOptimizer.resume of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_parameter:3 of
+msgid "A number of generating parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_parameter:6
+#: aiaccel.optimizer.abstract.AbstractOptimizer.loop_post_process:3
+#: aiaccel.optimizer.abstract.AbstractOptimizer.loop_pre_process:3
+#: aiaccel.optimizer.abstract.AbstractOptimizer.post_process:3
+#: aiaccel.optimizer.abstract.AbstractOptimizer.pre_process:3
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_new_parameters:6
+#: aiaccel.optimizer.abstract.AbstractOptimizer.resume:6 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_parameter of
+msgid "例外"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.generate_parameter:8 of
+msgid "Causes when the inherited class does not     implement."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_main_process:1 of
+msgid "A main loop process. This process is repeated every main loop."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_main_process:3
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_post_process:4
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_pre_process:4 of
+msgid "The process succeeds or not. The main loop exits if failed."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_main_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_post_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_pre_process
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_ready of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_post_process:2 of
+msgid "Called after exiting a main loop process. This process is repeated"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_post_process:2 of
+msgid "every main loop."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_pre_process:2 of
+msgid "Called before executing a main loop process. This process is"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.inner_loop_pre_process:2 of
+msgid "repeated every main loop."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.loop_post_process:1 of
+msgid "Called after exiting a main loop process."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.loop_pre_process:1 of
+msgid "Called before entering a main loop process."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.post_process:1 of
+msgid "Post-procedure after executed processes."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.pre_process:1 of
+msgid "Pre-procedure before executing processes."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_new_parameters:1 of
+msgid "Create hyper parameter files."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_new_parameters:3 of
+msgid "A list of hyper parameter dictionaries."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_new_parameters:12 of
+msgid "param = {"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_new_parameters:11 of
+msgid "'parameter_name': ..., 'type': ..., 'value': ..."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_new_parameters:14 of
+msgid "}"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_ready:1 of
+msgid "Create a hyper parameter file."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_ready:3 of
+msgid "A hyper parameter dictionary."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.register_ready:6 of
+msgid "An unique hyper parameter name."
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.resume:2 of
+msgid "When in resume mode, load the previous"
+msgstr ""
+
+#: aiaccel.optimizer.abstract.AbstractOptimizer.resume:2 of
+msgid "optimization data in advance."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.optimizer.rst:28
+msgid "aiaccel.optimizer.create module"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.optimizer.rst:36
+msgid "Module contents"
+msgstr ""
+

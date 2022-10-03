@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 16:01+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/contribution_guide/contribution_guide.md:1
+msgid "イシュー(WIP)"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:3
+msgid "プルリクエスト(WIP)"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:5
+msgid "テスト(WIP)"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:7
+msgid "コーディング規約(WIP)"
+msgstr ""
+

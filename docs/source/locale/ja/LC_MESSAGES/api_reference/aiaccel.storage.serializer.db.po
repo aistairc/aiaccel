@@ -1,0 +1,64 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 21:55+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.storage.serializer.db.rst:2
+msgid "aiaccel.storage.serializer.db module"
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.storage.abstruct.db.Abstract`"
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer.get_any_trial_serialize:1 of
+msgid "Obtain serialized data for a given trial."
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer.get_any_trial_serialize
+#: aiaccel.storage.serializer.db.Serializer.set_any_trial_serialize of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer.get_any_trial_serialize:3
+#: aiaccel.storage.serializer.db.Serializer.set_any_trial_serialize:3 of
+msgid "Any trial id"
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer.get_any_trial_serialize:5
+#: aiaccel.storage.serializer.db.Serializer.set_any_trial_serialize:6 of
+msgid "master, optimizer, scheduler"
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer.get_any_trial_serialize
+#: aiaccel.storage.serializer.db.Serializer.set_any_trial_serialize of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer.get_any_trial_serialize:8
+#: aiaccel.storage.serializer.db.Serializer.set_any_trial_serialize:5 of
+msgid "serialized data"
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer.set_any_trial_serialize:1 of
+msgid "Sets serialization data for a given trial."
+msgstr ""
+
+#: aiaccel.storage.serializer.db.Serializer.set_any_trial_serialize:9 of
+msgid "None"
+msgstr ""
+

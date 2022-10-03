@@ -1,0 +1,63 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 22:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.optimizer.random.rst:2
+msgid "aiaccel.optimizer.random package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.optimizer.random.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.optimizer.random.rst:8
+msgid "aiaccel.optimizer.random.search module"
+msgstr ""
+
+#: aiaccel.optimizer.random.search.RandomOptimizer:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.optimizer.abstract.AbstractOptimizer`"
+msgstr ""
+
+#: aiaccel.optimizer.random.search.RandomOptimizer:1 of
+msgid "An optimizer class with a random algorithm."
+msgstr ""
+
+#: aiaccel.optimizer.random.search.RandomOptimizer.generate_parameter:1 of
+msgid "Generate parameters."
+msgstr ""
+
+#: aiaccel.optimizer.random.search.RandomOptimizer.generate_parameter of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.optimizer.random.search.RandomOptimizer.generate_parameter:3 of
+msgid "A number of generating parameters."
+msgstr ""
+
+#: aiaccel.optimizer.random.search.RandomOptimizer.generate_parameter of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.optimizer.random.search.RandomOptimizer.generate_parameter:6 of
+msgid "None"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.optimizer.random.rst:16
+msgid "Module contents"
+msgstr ""
+

@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 22:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.storage.error.rst:2
+msgid "aiaccel.storage.error package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.error.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.error.rst:8
+msgid "aiaccel.storage.error.db module"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.storage.abstruct.db.Abstract`"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.all_delete:1 of
+msgid "Clear table"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.all_delete
+#: aiaccel.storage.error.db.Error.delete_any_trial_error
+#: aiaccel.storage.error.db.Error.get_any_trial_error
+#: aiaccel.storage.error.db.Error.get_error_trial_id
+#: aiaccel.storage.error.db.Error.set_any_trial_error
+#: aiaccel.storage.error.fs.Error.get_any_trial_error
+#: aiaccel.storage.error.fs.Error.get_error_trial_id
+#: aiaccel.storage.error.fs.Error.set_any_trial_error of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.all_delete:3
+#: aiaccel.storage.error.db.Error.delete_any_trial_error:1
+#: aiaccel.storage.error.db.Error.set_any_trial_error:8
+#: aiaccel.storage.error.fs.Error.set_any_trial_error:8 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.get_any_trial_error:1
+#: aiaccel.storage.error.fs.Error.get_any_trial_error:1 of
+msgid "Get error messages for any trial."
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.get_any_trial_error
+#: aiaccel.storage.error.db.Error.set_any_trial_error
+#: aiaccel.storage.error.fs.Error.get_any_trial_error
+#: aiaccel.storage.error.fs.Error.set_any_trial_error of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.get_any_trial_error:3
+#: aiaccel.storage.error.db.Error.set_any_trial_error:3
+#: aiaccel.storage.error.fs.Error.get_any_trial_error:3
+#: aiaccel.storage.error.fs.Error.set_any_trial_error:3 of
+msgid "Any trial id"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.get_any_trial_error:6
+#: aiaccel.storage.error.fs.Error.get_any_trial_error:6 of
+msgid "str | None"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.get_error_trial_id:1
+#: aiaccel.storage.error.fs.Error.get_error_trial_id:1 of
+msgid "Obtain a list of trial ids in which an error occurred."
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.get_error_trial_id:3
+#: aiaccel.storage.error.fs.Error.get_error_trial_id:3 of
+msgid "trial id list"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.get_error_trial_id
+#: aiaccel.storage.error.fs.Error.get_error_trial_id of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.set_any_trial_error:1
+#: aiaccel.storage.error.fs.Error.set_any_trial_error:1 of
+msgid "Set any error message for any trial."
+msgstr ""
+
+#: aiaccel.storage.error.db.Error.set_any_trial_error:5
+#: aiaccel.storage.error.fs.Error.set_any_trial_error:5 of
+msgid "Any error message"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.error.rst:16
+msgid "aiaccel.storage.error.fs module"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.error.rst:24
+msgid "Module contents"
+msgstr ""
+

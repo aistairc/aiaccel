@@ -1,0 +1,43 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 22:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.storage.abstruct.rst:2
+msgid "aiaccel.storage.abstruct package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.abstruct.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.abstruct.rst:8
+msgid "aiaccel.storage.abstruct.db module"
+msgstr ""
+
+#: aiaccel.storage.abstruct.db.Abstract:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.abstruct.rst:16
+msgid "aiaccel.storage.abstruct.fs module"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.abstruct.rst:24
+msgid "Module contents"
+msgstr ""
+

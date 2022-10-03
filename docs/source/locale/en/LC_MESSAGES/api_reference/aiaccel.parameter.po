@@ -1,0 +1,299 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 21:55+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.parameter.rst:2
+msgid "aiaccel.parameter module"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:1
+#: aiaccel.parameter.HyperParameterConfiguration:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:1 of
+msgid "A hyper parameter class."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:5 aiaccel.parameter.get_type:3 of
+msgid "A parameter dictionary in a configuration file."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter
+#: aiaccel.parameter.HyperParameterConfiguration of
+msgid "type"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:7
+#: aiaccel.parameter.HyperParameterConfiguration:7
+#: aiaccel.parameter.HyperParameterConfiguration:13 of
+msgid "dict"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:11 of
+msgid "A parameter name."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:13 aiaccel.parameter.HyperParameter:20 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:17 of
+msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and 'ORDINAL'."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:24 of
+msgid "A parameter is logarithm or not."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:26 of
+msgid "bool"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:30 of
+msgid "A lower value of a parameter."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:32 aiaccel.parameter.HyperParameter:38
+#: aiaccel.parameter.HyperParameter:65 of
+msgid "Union[float, int]"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:36 of
+msgid "A upper value of a parameter."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:42 of
+msgid ""
+"This is set as a list of a parameter, when a parameter type is "
+"'CATEGORICAL'."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:45 aiaccel.parameter.HyperParameter:52 of
+msgid "List[float, int, str]"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:49 of
+msgid "This is set as a list of a parameter, when a parameter type is 'ORDINAL'."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:56 of
+msgid "A initial value. If this is set, this value is evaluated at first run."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:59 of
+msgid "Union[float, int, str]"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter:63 of
+msgid "A quantization factor."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter.sample:1 of
+msgid "Sample a parameter."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter.sample
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
+#: aiaccel.parameter.HyperParameterConfiguration.sample
+#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_grid_options
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter.sample:3
+#: aiaccel.parameter.HyperParameterConfiguration.sample:3 of
+msgid "This is set, when a initial value is required."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter.sample
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
+#: aiaccel.parameter.HyperParameterConfiguration.sample
+#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_grid_options
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter.sample:6 of
+msgid "A parameter dictionary."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter.sample
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
+#: aiaccel.parameter.HyperParameterConfiguration.sample
+#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_grid_options
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter.sample
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
+#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_grid_options of
+msgid "例外"
+msgstr ""
+
+#: aiaccel.parameter.HyperParameter.sample:9 of
+msgid "Causes when an invalid type is set."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration:1 of
+msgid "A configuration of hyper parameters."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration:5 of
+msgid "A configuration dictionary of hyper parameters."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration:11 of
+msgid "Hyper parameters."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter:1 of
+msgid "Get a hyper parameter with a name."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter:3 of
+msgid "A hyper parameter name."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter:6 of
+msgid "A matched hyper parameter object."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter:9 of
+msgid "Causes when no matched hyper parameter is."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict:1 of
+msgid "Get a dictionary of hyper parameters."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict:3 of
+msgid "A hyper parameter dictionary."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list:1 of
+msgid "Get a list of hyper parameter objects."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list:3 of
+msgid "A list of hyper parameter objects."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.sample:1 of
+msgid "Sample a hyper parameters set."
+msgstr ""
+
+#: aiaccel.parameter.HyperParameterConfiguration.sample:6 of
+msgid "A hyper parameters set."
+msgstr ""
+
+#: aiaccel.parameter.get_best_parameter:1 of
+msgid "Get a best parameter in specified files."
+msgstr ""
+
+#: aiaccel.parameter.get_best_parameter:3 of
+msgid "A list of files to find a best."
+msgstr ""
+
+#: aiaccel.parameter.get_best_parameter:5 of
+msgid "Maximize or Minimize."
+msgstr ""
+
+#: aiaccel.parameter.get_best_parameter:7 of
+msgid "A directory to store lock files."
+msgstr ""
+
+#: aiaccel.parameter.get_best_parameter:10 of
+msgid ""
+"A best result value and a     file path. It returns None if a number of "
+"files is less than one."
+msgstr ""
+
+#: aiaccel.parameter.get_best_parameter:12 of
+msgid "A best result value and a"
+msgstr ""
+
+#: aiaccel.parameter.get_best_parameter:13 of
+msgid "file path. It returns None if a number of files is less than one."
+msgstr ""
+
+#: aiaccel.parameter.get_best_parameter:16 of
+msgid "Causes when an invalid goal is set."
+msgstr ""
+
+#: aiaccel.parameter.get_grid_options:1 of
+msgid "Get options about grid search."
+msgstr ""
+
+#: aiaccel.parameter.get_grid_options:3 of
+msgid "A parameter name to get its options."
+msgstr ""
+
+#: aiaccel.parameter.get_grid_options:5 of
+msgid "A config object."
+msgstr ""
+
+#: aiaccel.parameter.get_grid_options:8 of
+msgid ""
+"The first one is a     base of logarithm parameter. The second one is "
+"logarithm parameter     or not. The third one is a step of the grid."
+msgstr ""
+
+#: aiaccel.parameter.get_grid_options:11 of
+msgid "The first one is a"
+msgstr ""
+
+#: aiaccel.parameter.get_grid_options:11 of
+msgid ""
+"base of logarithm parameter. The second one is logarithm parameter or "
+"not. The third one is a step of the grid."
+msgstr ""
+
+#: aiaccel.parameter.get_grid_options:15 of
+msgid "Causes when step is not specified."
+msgstr ""
+
+#: aiaccel.parameter.get_type:1 of
+msgid "Get a type of a specified parameter."
+msgstr ""
+
+#: aiaccel.parameter.get_type:6 of
+msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and     'ORDINAL'."
+msgstr ""
+
+#: aiaccel.parameter.get_type:8 of
+msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and"
+msgstr ""
+
+#: aiaccel.parameter.get_type:9 of
+msgid "'ORDINAL'."
+msgstr ""
+
+#: aiaccel.parameter.load_parameter:1 of
+msgid "Load HyperParameterConfiguration object from a configuration file."
+msgstr ""
+
+#: aiaccel.parameter.load_parameter:3 aiaccel.parameter.load_parameter:6 of
+msgid "A hyper parameter configuration."
+msgstr ""
+

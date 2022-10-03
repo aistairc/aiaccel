@@ -1,0 +1,102 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 22:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.storage.alive.rst:2
+msgid "aiaccel.storage.alive package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.alive.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.alive.rst:8
+msgid "aiaccel.storage.alive.db module"
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.storage.abstruct.db.Abstract`"
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.check_alive:1 of
+msgid "Check if any process is alive."
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.check_alive
+#: aiaccel.storage.alive.db.Alive.get_any_process_state
+#: aiaccel.storage.alive.db.Alive.get_state
+#: aiaccel.storage.alive.db.Alive.init_alive
+#: aiaccel.storage.alive.db.Alive.set_any_process_state
+#: aiaccel.storage.alive.db.Alive.stop_any_process
+#: aiaccel.storage.alive.fs.Alive.set_any_process_state of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.check_alive:3 of
+msgid "bool"
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.get_any_process_state:1 of
+msgid "Get the state of a any process."
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.get_any_process_state:3
+#: aiaccel.storage.alive.db.Alive.init_alive:3
+#: aiaccel.storage.alive.db.Alive.set_any_process_state:3
+#: aiaccel.storage.alive.db.Alive.stop_any_process:3
+#: aiaccel.storage.alive.fs.Alive.set_any_process_state:3 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.get_state:1 of
+msgid "Get all alive state."
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.get_state:3 of
+msgid "{'master':int[0|1], 'optimizer':int[0|1], 'scheduler':int[0|1]}"
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.get_state of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.init_alive:1 of
+msgid "Initialize alive state."
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.set_any_process_state:1
+#: aiaccel.storage.alive.fs.Alive.set_any_process_state:1 of
+msgid "Set the specified process state."
+msgstr ""
+
+#: aiaccel.storage.alive.db.Alive.stop_any_process:1 of
+msgid "Stop state of any process.."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.alive.rst:16
+msgid "aiaccel.storage.alive.fs module"
+msgstr ""
+
+#: aiaccel.storage.alive.fs.Alive:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.alive.rst:24
+msgid "Module contents"
+msgstr ""
+

@@ -1,0 +1,75 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 21:55+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.storage.error.fs.rst:2
+msgid "aiaccel.storage.error.fs module"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.get_any_trial_error:1 of
+msgid "Get error messages for any trial."
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.get_any_trial_error
+#: aiaccel.storage.error.fs.Error.set_any_trial_error of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.get_any_trial_error:3
+#: aiaccel.storage.error.fs.Error.set_any_trial_error:3 of
+msgid "Any trial id"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.get_any_trial_error
+#: aiaccel.storage.error.fs.Error.get_error_trial_id
+#: aiaccel.storage.error.fs.Error.set_any_trial_error of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.get_any_trial_error:6 of
+msgid "str | None"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.get_error_trial_id:1 of
+msgid "Obtain a list of trial ids in which an error occurred."
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.get_error_trial_id:3 of
+msgid "trial id list"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.get_error_trial_id of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.set_any_trial_error:1 of
+msgid "Set any error message for any trial."
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.set_any_trial_error:5 of
+msgid "Any error message"
+msgstr ""
+
+#: aiaccel.storage.error.fs.Error.set_any_trial_error:8 of
+msgid "None"
+msgstr ""
+

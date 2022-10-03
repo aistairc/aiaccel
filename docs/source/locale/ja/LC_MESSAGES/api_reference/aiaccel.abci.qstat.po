@@ -1,0 +1,63 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 21:55+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.abci.qstat.rst:2
+msgid "aiaccel.abci.qstat module"
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_job_list:1 of
+msgid "Parse from XML element of 'qstat' to a job list."
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_job_list aiaccel.abci.qstat.parse_qstat of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_job_list:3 aiaccel.abci.qstat.parse_qstat:3 of
+msgid "A configuration object."
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_job_list:5 of
+msgid "A XML element of 'qstat' command."
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_job_list aiaccel.abci.qstat.parse_qstat of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_job_list:8 of
+msgid "A job list converted from a XML element of 'qstat' command."
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_qstat:1 of
+msgid "Parse ABCI 'qstat' command result."
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_qstat:5 of
+msgid "A 'qstat' result."
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_qstat:8 of
+msgid "A parsed job list from ABCI 'qstat' command."
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_qstat of
+msgid "戻り値の型"
+msgstr ""
+

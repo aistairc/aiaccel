@@ -4,8 +4,8 @@
    contain the root `toctree` directive.
 
 
-aiaccel
-========
+aiaccelドキュメント
+===================
 本ソフトウェアは、AI Bridging Cloud Infrastructure (ABCI)`_ のためのハイパーパラメータ最適化ライブラリです。
 ディープラーニングやマルチエージェントシミュレーションなどのAI技術に関連するハイパーパラメータ最適化を解決します。
 現在、ランダムサーチ、グリッドサーチ、ソボルシーケンス、ネルダーミード法、TPEの5つの最適化アルゴリズムに対応しています。
@@ -13,32 +13,73 @@ aiaccel
 
 .. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
 
+.. toctree::
+   :maxdepth: 2
+   :caption: オーバービュー:
 
-Installation
-=============
-このソフトは `pip` を使ってインストールすることができます。
-
-.. code-block:: bash
-
-   pip install git+https://github.com/aistairc/aiaccel.git
-
-
-User Guide
-=============
-
-* :doc:`./manual_jp`
-
-
-Guide for adding an optimizer
-=============================
-
-* :doc:`./optimizer_jp`
-
-
-API Reference
-=============
+   overview/overview.md
 
 .. toctree::
+   :maxdepth: 2
+   :caption: インストール:
+
+   installation/installation.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: 利用例:
+
+   examples/examples.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: ユーザーガイド:
+
+   user_guide/basic_usage.md
+   user_guide/configuration_setting.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: ディベロッパーガイド:
+
+   developer_guide/architecture.md
+   developer_guide/custom_optimizer.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: コントリビューションガイド:
+
+   contribution_guide/contribution_guide.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: リファレンス:
+
+   references/references.md
+
+.. toctree::
+   :maxdepth: 2
+   :caption: コードリファレンス
+
+   api_reference/aiaccel
+
+索引と検索
+==========
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+謝辞
+====
+* この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。
+* TPEアルゴリズムは Optuna を利用しました。
+
+
+.. API Reference
+   =============
+
+    .. toctree::
    :maxdepth: 2
 
    aiaccel.rst
@@ -48,9 +89,9 @@ API Reference
    aiaccel.scheduler.rst
    aiaccel.util.rst
 
-Indices and tables
-==================
+.. Indices and tables
+   ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`

@@ -1,0 +1,72 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 21:55+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.workspace.rst:2
+msgid "aiaccel.workspace module"
+msgstr ""
+
+#: aiaccel.workspace.Workspace:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.workspace.Workspace.check_consists:1 of
+msgid "Check required directories exist or not."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.check_consists
+#: aiaccel.workspace.Workspace.create of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.workspace.Workspace.check_consists:3 of
+msgid "All required directories exist or not."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.check_consists of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.workspace.Workspace.clean:1 of
+msgid "Delete a workspace."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.clean:3 of
+msgid "It is assumed to be the first one to be executed."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.create:1 of
+msgid "Create a work directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.create:3 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.workspace.Workspace.create of
+msgid "例外"
+msgstr ""
+
+#: aiaccel.workspace.Workspace.create:5 of
+msgid "It raises if a workspace argument (self.path) is"
+msgstr ""
+
+#: aiaccel.workspace.Workspace.move_completed_data:1 of
+msgid "Move workspace to under of results directory when finished."
+msgstr ""
+

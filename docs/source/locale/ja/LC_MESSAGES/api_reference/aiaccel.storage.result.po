@@ -1,0 +1,144 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 22:12+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.storage.result.rst:2
+msgid "aiaccel.storage.result package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.result.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.result.rst:8
+msgid "aiaccel.storage.result.db module"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.storage.abstruct.db.Abstract`"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.all_delete:1
+#: aiaccel.storage.result.fs.Result.all_delete:1 of
+msgid "Clear table"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.all_delete
+#: aiaccel.storage.result.db.Result.delete_any_trial_objective
+#: aiaccel.storage.result.db.Result.get_all_result
+#: aiaccel.storage.result.db.Result.get_any_trial_objective
+#: aiaccel.storage.result.db.Result.get_bests
+#: aiaccel.storage.result.db.Result.get_objectives
+#: aiaccel.storage.result.db.Result.get_result_trial_id_list
+#: aiaccel.storage.result.db.Result.set_any_trial_objective
+#: aiaccel.storage.result.fs.Result.all_delete
+#: aiaccel.storage.result.fs.Result.get_all_result
+#: aiaccel.storage.result.fs.Result.get_bests
+#: aiaccel.storage.result.fs.Result.get_objectives
+#: aiaccel.storage.result.fs.Result.get_result_trial_id_list
+#: aiaccel.storage.result.fs.Result.set_any_trial_objective of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.all_delete:3
+#: aiaccel.storage.result.db.Result.delete_any_trial_objective:1
+#: aiaccel.storage.result.db.Result.set_any_trial_objective:8
+#: aiaccel.storage.result.fs.Result.all_delete:3
+#: aiaccel.storage.result.fs.Result.set_any_trial_objective:8 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_all_result:1
+#: aiaccel.storage.result.fs.Result.get_all_result:1 of
+msgid "Get all results"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_all_result:3
+#: aiaccel.storage.result.db.Result.get_any_trial_objective:6
+#: aiaccel.storage.result.fs.Result.get_all_result:3 of
+msgid "Any"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_any_trial_objective:1 of
+msgid "Obtain the results of an arbitrary trial."
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_any_trial_objective
+#: aiaccel.storage.result.db.Result.set_any_trial_objective
+#: aiaccel.storage.result.fs.Result.set_any_trial_objective of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_any_trial_objective:3
+#: aiaccel.storage.result.db.Result.set_any_trial_objective:3
+#: aiaccel.storage.result.fs.Result.set_any_trial_objective:3 of
+msgid "Any trial id"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_bests:1
+#: aiaccel.storage.result.db.Result.get_result_trial_id_list:1
+#: aiaccel.storage.result.fs.Result.get_bests:1
+#: aiaccel.storage.result.fs.Result.get_result_trial_id_list:1 of
+msgid "Obtains the sorted result."
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_bests:3
+#: aiaccel.storage.result.db.Result.get_objectives:3
+#: aiaccel.storage.result.db.Result.get_result_trial_id_list:3
+#: aiaccel.storage.result.fs.Result.get_bests:3
+#: aiaccel.storage.result.fs.Result.get_objectives:3
+#: aiaccel.storage.result.fs.Result.get_result_trial_id_list:3 of
+msgid "result values"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_bests
+#: aiaccel.storage.result.db.Result.get_objectives
+#: aiaccel.storage.result.db.Result.get_result_trial_id_list
+#: aiaccel.storage.result.fs.Result.get_bests
+#: aiaccel.storage.result.fs.Result.get_objectives
+#: aiaccel.storage.result.fs.Result.get_result_trial_id_list of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.get_objectives:1
+#: aiaccel.storage.result.fs.Result.get_objectives:1 of
+msgid "Get all results in list."
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.set_any_trial_objective:1
+#: aiaccel.storage.result.fs.Result.set_any_trial_objective:1 of
+msgid "Set any trial result value."
+msgstr ""
+
+#: aiaccel.storage.result.db.Result.set_any_trial_objective:5 of
+msgid "ready, running, finished"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.result.rst:16
+msgid "aiaccel.storage.result.fs module"
+msgstr ""
+
+#: aiaccel.storage.result.fs.Result:1 aiaccel.storage.result.fs.ResultTable:1
+#: of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.storage.result.rst:24
+msgid "Module contents"
+msgstr ""
+

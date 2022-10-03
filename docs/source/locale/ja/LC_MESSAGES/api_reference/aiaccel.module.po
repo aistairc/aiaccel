@@ -1,0 +1,398 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-03 21:55+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: ../../source/api_reference/aiaccel.module.rst:2
+msgid "aiaccel.module module"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:1 of
+msgid "An abstract class for Master, Optimizer and Scheduler."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:15 of
+msgid "The procedure of this class is as follows:"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:4 of
+msgid "At first, deserialize() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:5 of
+msgid "start() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:6 of
+msgid "pre_process() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:13 of
+msgid "loop() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:8 of
+msgid ""
+"4-1. loop() calls loop_pre_process(). 4-2. in while loop, "
+"inner_loop_pre_process() is called. 4-3. in while loop, "
+"inner_loop_main_process() is called. 4-4. in while loop, "
+"inner_loop_post_process() is called. 4-5. in while loop, loop_count is "
+"incremented. 4-6. in while loop, serialize() is called. 4-7. loop() calls"
+" loop_post_process()."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:15 of
+msgid "call post_process()"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:19 of
+msgid "A config object."
+msgstr ""
+
+#: aiaccel.module.AbstractModule of
+msgid "type"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:21 of
+msgid "ConfileWrapper"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:25 of
+msgid "A path to hp directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:27 aiaccel.module.AbstractModule:33
+#: aiaccel.module.AbstractModule:39 aiaccel.module.AbstractModule:45
+#: aiaccel.module.AbstractModule:51 aiaccel.module.AbstractModule:57
+#: aiaccel.module.AbstractModule:93 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:31 of
+msgid "A path to lock directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:37 of
+msgid "A path to log directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:43 of
+msgid "A path to output directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:49 of
+msgid "A path to runner directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:55 of
+msgid "A path to verification directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:61 of
+msgid "A number of files in hp/finished directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:63 aiaccel.module.AbstractModule:69
+#: aiaccel.module.AbstractModule:75 aiaccel.module.AbstractModule:87 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:67 of
+msgid "A number of files in hp/ready directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:73 of
+msgid "A number of files in hp/running directory."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:79 of
+msgid "A logger object."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:81 of
+msgid "logging.Logger"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:85 of
+msgid "A loop count that is incremented in loop method."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:91 of
+msgid "A path to a current workspace."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.check_error:1 of
+msgid "Check to confirm if an error has occurred."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.check_error
+#: aiaccel.module.AbstractModule.current_max_trial_number
+#: aiaccel.module.AbstractModule.exit_alive
+#: aiaccel.module.AbstractModule.get_native_random_state
+#: aiaccel.module.AbstractModule.get_numpy_random_state
+#: aiaccel.module.AbstractModule.resume
+#: aiaccel.module.AbstractModule.set_logger
+#: aiaccel.module.AbstractModule.set_native_random_seed
+#: aiaccel.module.AbstractModule.set_native_random_state
+#: aiaccel.module.AbstractModule.set_numpy_random_seed
+#: aiaccel.module.AbstractModule.set_numpy_random_state
+#: aiaccel.module.AbstractModule.stop of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.check_error
+#: aiaccel.module.AbstractModule.check_finished
+#: aiaccel.module.AbstractModule.current_max_trial_number
+#: aiaccel.module.AbstractModule.exit_alive
+#: aiaccel.module.AbstractModule.get_each_state_count
+#: aiaccel.module.AbstractModule.get_module_type
+#: aiaccel.module.AbstractModule.get_native_random_state
+#: aiaccel.module.AbstractModule.get_numpy_random_state
+#: aiaccel.module.AbstractModule.inner_loop_main_process
+#: aiaccel.module.AbstractModule.inner_loop_post_process
+#: aiaccel.module.AbstractModule.inner_loop_pre_process
+#: aiaccel.module.AbstractModule.is_process_alive
+#: aiaccel.module.AbstractModule.loop
+#: aiaccel.module.AbstractModule.loop_post_process
+#: aiaccel.module.AbstractModule.loop_pre_process
+#: aiaccel.module.AbstractModule.post_process
+#: aiaccel.module.AbstractModule.pre_process
+#: aiaccel.module.AbstractModule.print_dict_state
+#: aiaccel.module.AbstractModule.resume
+#: aiaccel.module.AbstractModule.set_logger
+#: aiaccel.module.AbstractModule.set_native_random_seed
+#: aiaccel.module.AbstractModule.set_native_random_state
+#: aiaccel.module.AbstractModule.set_numpy_random_seed
+#: aiaccel.module.AbstractModule.set_numpy_random_state
+#: aiaccel.module.AbstractModule.start aiaccel.module.AbstractModule.stop of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.check_error:5 of
+msgid "no error | False: with error."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.check_error
+#: aiaccel.module.AbstractModule.check_finished
+#: aiaccel.module.AbstractModule.current_max_trial_number
+#: aiaccel.module.AbstractModule.get_module_type
+#: aiaccel.module.AbstractModule.is_process_alive of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.check_finished:1 of
+msgid "Check whether all optimization finished or not."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.check_finished:3 of
+msgid "All optimization finished or not."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.current_max_trial_number:1 of
+msgid "Get current trial number"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.current_max_trial_number:5 of
+msgid "current trial number"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.exit_alive:1 of
+msgid "Exit the execution."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.exit_alive:3 of
+msgid "A path to an alive file."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.exit_alive:6
+#: aiaccel.module.AbstractModule.get_each_state_count:3
+#: aiaccel.module.AbstractModule.inner_loop_main_process:3
+#: aiaccel.module.AbstractModule.inner_loop_post_process:4
+#: aiaccel.module.AbstractModule.inner_loop_pre_process:4
+#: aiaccel.module.AbstractModule.loop:4
+#: aiaccel.module.AbstractModule.loop_post_process:3
+#: aiaccel.module.AbstractModule.loop_pre_process:3
+#: aiaccel.module.AbstractModule.post_process:3
+#: aiaccel.module.AbstractModule.pre_process:3
+#: aiaccel.module.AbstractModule.print_dict_state:3
+#: aiaccel.module.AbstractModule.resume:6
+#: aiaccel.module.AbstractModule.set_logger:14
+#: aiaccel.module.AbstractModule.set_native_random_seed:5
+#: aiaccel.module.AbstractModule.set_native_random_state:6
+#: aiaccel.module.AbstractModule.set_numpy_random_seed:5
+#: aiaccel.module.AbstractModule.set_numpy_random_state:6
+#: aiaccel.module.AbstractModule.start:3 aiaccel.module.AbstractModule.stop:5
+#: of
+msgid "None"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_each_state_count:1 of
+msgid "Updates the number of files in hp(hyper parameter) directories."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_module_type:1 of
+msgid "Get this module type."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_module_type:3 of
+msgid "This module type(name)."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_native_random_state:1
+#: aiaccel.module.AbstractModule.get_numpy_random_state:1
+#: aiaccel.module.AbstractModule.set_native_random_state:1
+#: aiaccel.module.AbstractModule.set_numpy_random_state:1 of
+msgid "get random state."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_native_random_state:5 of
+msgid "random.getstate (tuple)"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_numpy_random_state:5 of
+msgid "numpy.random.get_state (tuple)"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.inner_loop_main_process:1 of
+msgid "A main loop process. This process is repeated every main loop."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.inner_loop_main_process
+#: aiaccel.module.AbstractModule.inner_loop_post_process
+#: aiaccel.module.AbstractModule.inner_loop_pre_process
+#: aiaccel.module.AbstractModule.loop_post_process
+#: aiaccel.module.AbstractModule.post_process of
+msgid "例外"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.inner_loop_main_process:5
+#: aiaccel.module.AbstractModule.inner_loop_post_process:6
+#: aiaccel.module.AbstractModule.inner_loop_pre_process:6
+#: aiaccel.module.AbstractModule.loop_post_process:5 of
+msgid "Causes when the inherited class does not     implement."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.inner_loop_post_process:2 of
+msgid "Called after exiting a main loop process. This process is repeated"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.inner_loop_post_process:2 of
+msgid "every main loop."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.inner_loop_pre_process:2 of
+msgid "Called before executing a main loop process. This process is"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.inner_loop_pre_process:2 of
+msgid "repeated every main loop."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.is_process_alive:1 of
+msgid "Is processes(master, optimizer and scheduler) running or not."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.is_process_alive:3 of
+msgid "Is processes running or not."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.loop:2 of
+msgid "A loop process. This process is called after calling pre_process"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.loop:2 of
+msgid "method, and is called before calling post_process."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.loop_post_process:1 of
+msgid "Called after exiting a main loop process."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.loop_pre_process:1 of
+msgid "Called before entering a main loop process."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.post_process:1 of
+msgid "Post-procedure after executed processes."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.post_process:5 of
+msgid "Causes when he inherited class does not     implement."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.pre_process:1 of
+msgid "Pre-procedure before executing processes."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.print_dict_state:1 of
+msgid "Print hp(hyperparameter) directory states."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.resume:2 of
+msgid "When in resume mode, load the previous"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.resume:2 of
+msgid "optimization data in advance."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:1 of
+msgid "Set a default logger options."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:3 of
+msgid "A name of a logger."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:5 of
+msgid "A path to a log file."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:7 of
+msgid "A logging level for a log file output. For example logging.DEBUG"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:9 of
+msgid "A logging level for a stream output."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:11 of
+msgid "A module type of a caller."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_native_random_seed:1
+#: aiaccel.module.AbstractModule.set_numpy_random_seed:1 of
+msgid "set any random seed."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_native_random_state:3
+#: aiaccel.module.AbstractModule.set_numpy_random_state:3 of
+msgid "random state"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.start:1 of
+msgid "Start the all processes."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.stop:1 of
+msgid "Stop optimization."
+msgstr ""
+
