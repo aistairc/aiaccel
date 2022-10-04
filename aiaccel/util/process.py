@@ -240,29 +240,3 @@ class OutputHandler(threading.Thread):
 
             if self._abort:
                 break
-
-
-def is_process_running(pid: int) -> bool:
-    """Check the process is running or not.
-
-    Args:
-        pid (int): A pid.
-
-    Returns:
-        bool: The process is running or not.
-    """
-    status = [
-        "running",
-        "sleeping",
-        "disk-sleep",
-        "stopped",
-        "tracing-stop",
-        "waking",
-        "idle"
-    ]
-
-    try:
-        p = psutil.Process(pid)
-        return p.status() in status
-    except psutil.NoSuchProcess:
-        return False

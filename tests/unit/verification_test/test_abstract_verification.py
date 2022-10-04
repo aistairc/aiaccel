@@ -1,5 +1,4 @@
-from aiaccel.master.verification.abstract import\
-    AbstractVerification
+from aiaccel.verification.abstract import AbstractVerification
 from aiaccel.util.filesystem import load_yaml
 from tests.base_test import BaseTest
 import aiaccel
@@ -10,30 +9,24 @@ from aiaccel.storage.storage import Storage
 class TestAbstractVerification(BaseTest):
 
     def test_init(self):
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-        
         options = {
             'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'master'
+            'module_name': 'master'
         }
         
         verification = AbstractVerification(options)
         assert verification.is_verified
 
     def test_verify(self, clean_work_dir, setup_hp_finished, work_dir):
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-
         options = {
             'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'master'
+            'module_name': 'master'
         }
 
         verification = AbstractVerification(options)
@@ -81,7 +74,7 @@ class TestAbstractVerification(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'master'
+            'module_name': 'master'
         }
 
         verification = AbstractVerification(options)
@@ -115,7 +108,7 @@ class TestAbstractVerification(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'master'
+            'module_name': 'master'
         }
 
         # verification = AbstractVerification(self.config)
@@ -132,7 +125,7 @@ class TestAbstractVerification(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'master'
+            'module_name': 'master'
         }
 
         # verification = AbstractVerification(self.config)

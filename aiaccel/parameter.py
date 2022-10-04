@@ -42,7 +42,7 @@ def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
             if best > result:
                 best, best_file = result, f
         else:
-            logger = logging.getLogger('root.master.parameter')
+            logger = logging.getLogger('root.scheduler.parameter')
             logger.error(f'Invalid goal: {goal}.')
             raise ValueError(f'Invalid goal: {goal}.')
 

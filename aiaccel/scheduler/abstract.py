@@ -1,11 +1,17 @@
 from pathlib import Path
 from typing import Union
 import time
+import aiaccel
 from aiaccel.util.serialize import Serializer
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schdule_sampling
 from aiaccel.scheduler.job.job_thread import Job
-from aiaccel.util.logger import str_to_logging_level
+from aiaccel.evaluator.maximize import MaximizeEvaluator
+from aiaccel.evaluator.minimize import MinimizeEvaluator
+from aiaccel.verification.abstract import AbstractVerification
+from aiaccel.util.time_tools import get_time_now_object
+from aiaccel.util.time_tools import get_time_string_from_object
+from aiaccel.util.logger import Logger
 
 
 class AbstractScheduler(AbstractModule):
@@ -30,28 +36,32 @@ class AbstractScheduler(AbstractModule):
             config (str): A file name of a configuration.
         """
         self.options = options
-        self.options['process_name'] = 'scheduler'
+        self.options['module_name'] = 'scheduler'
         super().__init__(self.options)
 
         self.config_path = Path(self.options['config']).resolve()
 
-        self.set_logger(
-            'root.scheduler',
-            self.dict_log / self.config.scheduler_logfile.get(),
-            str_to_logging_level(self.config.scheduler_file_log_level.get()),
-            str_to_logging_level(self.config.scheduler_stream_log_level.get()),
-            'Scheduler'
+        self._logger = Logger(
+            logger_name='root.scheduler',
+            logfile_path=self.ws / aiaccel.dict_log / self.config.scheduler_logfile.get()
+        )
+        self.logger = self._logger.create_logger(
+            file_level=self.config.scheduler_file_log_level.get(),
+            stream_level=self.config.scheduler_stream_log_level.get(),
+            module_type='Scheduler'
         )
 
-        self.exit_alive('scheduler')
         self.max_resource = self.config.num_node.get()
+        self.trial_number = self.config.trial_number.get()
         self.available_resource = self.max_resource
         self.stats = []
         self.jobs = []
         self.job_status = {}
         self.algorithm = None
-        self.sleep_time = self.config.sleep_time_scheduler.get()
         self.serialize = Serializer(self.config, 'scheduler', self.options)
+        self.verification = AbstractVerification(self.options)
+        self.start_time = get_time_now_object()
+        self.loop_start_time = None
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
@@ -131,7 +141,7 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        super().pre_process()
+        self.trial_id.initial(num=0)
         self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
@@ -140,12 +150,14 @@ class AbstractScheduler(AbstractModule):
         self.change_state_finished_trials()
 
         runnings = self.storage.trial.get_running()
+        sleep_time = self.config.sleep_time.get()
+
         for running in runnings:
             th = self.start_job_thread(running)
             self.logger.info(f'restart hp files in previous running directory: {running}')
 
             while th.get_state_name() != 'Scheduling':
-                time.sleep(self.sleep_time)
+                time.sleep(sleep_time)
 
             th.schedule()
 
@@ -155,7 +167,26 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.storage.alive.set_any_process_state('scheduler', 0)
+
+        if not self.check_finished():
+            return
+
+        goal = self.config.goal.get()
+        if goal.lower() == aiaccel.goal_maximize:
+            evaluator = MaximizeEvaluator(self.options)
+        elif goal.lower() == aiaccel.goal_minimize:
+            evaluator = MinimizeEvaluator(self.options)
+        else:
+            self.logger.error(f'Invalid goal: {goal}.')
+            raise ValueError(f'Invalid goal: {goal}.')
+
+        evaluator.evaluate()
+        evaluator.print()
+        evaluator.save()
+
+        # verification
+        self.verification.verify()
+        self.verification.save('final')
         self.logger.info('Scheduler finished.')
 
     def loop_pre_process(self) -> None:
@@ -164,6 +195,7 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
+        self.loop_start_time = get_time_now_object()
         return None
 
     def loop_post_process(self) -> None:
@@ -186,10 +218,6 @@ class AbstractScheduler(AbstractModule):
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
-        if not self.storage.alive.check_alive('scheduler'):
-            self.logger.info('Scheduler alive state is False')
-            return False
-
         if self.check_finished():
             self.logger.info('All parameters have been done.')
             self.logger.info('Wait all threads finish...')
@@ -233,8 +261,16 @@ class AbstractScheduler(AbstractModule):
                     )
                     selected_threads.remove(th)
 
-        for job in self.jobs:
-            self.logger.info(f"name: {job['trial_id']}, state: {job['thread'].get_state_name()}")
+        for i in reversed(range(len(self.jobs))):
+            if self.jobs[i]['thread'].get_state_name().lower() == "success":
+                del self.jobs[i]
+
+        if (
+            self.config.scheduler_file_log_level.get().lower() == "info" or
+            self.config.scheduler_stream_log_level.get().lower() == "info"
+        ):
+            for job in self.jobs:
+                self.logger.info(f"name: {job['trial_id']}, state: {job['thread'].get_state_name()}")
 
         return True
 
@@ -248,6 +284,8 @@ class AbstractScheduler(AbstractModule):
         self.get_stats()
         self.update_resource()
         self.print_dict_state()
+        self.verification.verify()
+
         if self.all_done() is True:
             return False
         return True
@@ -355,4 +393,37 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] is not None and
             self.options['resume'] > 0
         ):
+            self.storage.rollback_to_ready(self.options['resume'])
+            self.storage.delete_trial_data_after_this(self.options['resume'])
+            self.trial_id.initial(num=self.options['resume'])
+
             self._deserialize(self.options['resume'])
+
+    def print_dict_state(self):
+        """ Display the number of yaml files in 'ready' 'running'
+            and 'finished' directries in hp directory.
+
+        Returns:
+            None
+        """
+        now = get_time_now_object()
+
+        if self.loop_start_time is None:
+            end_estimated_time = 'Unknown'
+        else:
+            looping_time = now - self.loop_start_time
+
+            if self.hp_finished != 0:
+                one_loop_time = (looping_time / self.hp_finished)
+                hp_finished = self.hp_finished
+                finishing_time = (now + (self.trial_number - hp_finished) * one_loop_time)
+                end_estimated_time = get_time_string_from_object(finishing_time)
+            else:
+                end_estimated_time = 'Unknown'
+
+        self.logger.info(
+            f'{self.hp_finished}/{self.trial_number} finished, '
+            f'ready: {self.hp_ready} ,'
+            f'running: {self.hp_running}, '
+            f'end estimated time: {end_estimated_time}'
+        )

@@ -35,7 +35,7 @@ class SnapShot:
             ss.load(trial_id)  # Replace the contents of the directory
 
         Attributes:
-            process_name (str)  : A process name (master, optimizer, scheduler)
+            module_name (str)  : A process name (master, optimizer, scheduler)
             ws (pathlib.Path)      : A path of workspace directory.
             ws_alive (pathlib.Path): A path of alive directory.
             ws_hp (pathlib.Path)   : A path of hp directory.
@@ -54,10 +54,10 @@ class SnapShot:
     def __init__(
         self,
         workspace: pathlib.Path,
-        # process_name: str   # Assume 'scheduler' or 'optimizer' or 'master'
+        # module_name: str   # Assume 'scheduler' or 'optimizer' or 'master'
     ) -> None:
 
-        # self.process_name = process_name
+        # self.module_name = module_name
 
         self.ws = workspace.resolve()
         self.ws_alive = self.ws / 'alive'
@@ -130,7 +130,7 @@ class SnapShot:
     def save(
         self,
         trial_id: int,
-        process_name: str,
+        module_name: str,
         optimization_variables: dict,
         native_random_object: tuple,
         numpy_random_object: tuple
@@ -148,7 +148,7 @@ class SnapShot:
         with InterProcessLock(self.lock_file['serialize']):
             self._save(
                 trial_id,
-                process_name,
+                module_name,
                 optimization_variables,
                 native_random_object,
                 numpy_random_object,
@@ -157,7 +157,7 @@ class SnapShot:
     def _save(
         self,
         trial_id: int,
-        process_name: str,
+        module_name: str,
         optimization_variables: dict,
         native_random_object: tuple,
         numpy_random_object: tuple
@@ -172,8 +172,8 @@ class SnapShot:
         Note:
             Save the contents of the Hp directory in yaml format.
         """
-        # If self.process_name == 'scheduler':
-        if process_name == 'master':
+        # If self.module_name == 'scheduler':
+        if module_name == 'master':
             self.shot()
 
         base_dir_path = self.ws_snapshot / str(trial_id)
@@ -188,7 +188,7 @@ class SnapShot:
         loop_count = optimization_variables['loop_count']
         self._update_inner_loop_count(
             trial_id,
-            process_name,
+            module_name,
             loop_count
         )
 
@@ -197,13 +197,13 @@ class SnapShot:
         if not save_file_path.exists():
             # Save only once per trial.
             with InterProcessLock(self.lock_file['snapshot']):
-                if process_name == 'master':
+                if module_name == 'master':
                     data = self.create_data()
                     self.hp_status_recoard_yml(save_file_path, data)
                 self.write_inner_loop_count(trial_id)
 
         # native random file
-        save_path = native_dir_path / (process_name + '.pickle')
+        save_path = native_dir_path / (module_name + '.pickle')
         if not native_dir_path.exists():
             native_dir_path.mkdir()
         if not save_path.exists():
@@ -211,7 +211,7 @@ class SnapShot:
             self._serialize_any_object(save_path, native_random_object)
 
         # numpy random file
-        save_path = numpy_dir_path / (process_name + '.pickle')
+        save_path = numpy_dir_path / (module_name + '.pickle')
         if not numpy_dir_path.exists():
             numpy_dir_path.mkdir()
         if not save_path.exists():
@@ -219,21 +219,21 @@ class SnapShot:
             self._serialize_any_object(save_path, numpy_random_object)
 
         # Optuna DB file copy
-        if process_name == 'master':
+        if module_name == 'master':
             src = self.ws / 'optuna_study.db'
             dst = base_dir_path / 'optuna_study.db'
             if src.exists():
                 shutil.copy(src, dst)
 
         # Generete count file(count.txt) copy
-        if process_name == 'master':
+        if module_name == 'master':
             src = self.ws_hp / 'count.txt'
             dst = base_dir_path / 'count.txt'
             if src.exists():
                 shutil.copy(src, dst)
 
         # Write process memory objects
-        pmo_file_path = base_dir_path / f'{process_name}.yaml'
+        pmo_file_path = base_dir_path / f'{module_name}.yaml'
         if not pmo_file_path.exists():
             with InterProcessLock(self.lock_file['snapshot']):
                 fs.create_yaml(pmo_file_path, optimization_variables)
@@ -241,7 +241,7 @@ class SnapShot:
     def _update_inner_loop_count(
         self,
         trial_id: int,
-        process_name: str,
+        module_name: str,
         inner_loop_count: int
     ) -> None:
         """ Update inner loop counter value.
@@ -260,10 +260,10 @@ class SnapShot:
         base_dir_path = self.ws_snapshot / str(trial_id)
         file_path = base_dir_path / 'hp.yaml'
         if not file_path.exists():
-            self.ss_loop_count[process_name] = inner_loop_count
+            self.ss_loop_count[module_name] = inner_loop_count
         else:
             self.ss_loop_count = fs.load_yaml(file_path)['loop_count']
-            self.ss_loop_count[process_name] = inner_loop_count
+            self.ss_loop_count[module_name] = inner_loop_count
 
     def write_inner_loop_count(self, trial_id: int) -> None:
         """ Write the inner loop count value to text.
@@ -327,7 +327,7 @@ class SnapShot:
         with open(save_path, 'wb') as f:
             pickle.dump(obj, f)
 
-    def load(self, trial_id: int, process_name: str) -> bool:
+    def load(self, trial_id: int, module_name: str) -> bool:
         """ Load any trial data.
 
         Args:
@@ -341,9 +341,9 @@ class SnapShot:
             return False
         # ss_files.sort()
         with InterProcessLock(self.lock_file['deserialize']):
-            return self._load(trial_id, process_name)
+            return self._load(trial_id, module_name)
 
-    def _load(self, trial_id: int, process_name: str) -> bool:
+    def _load(self, trial_id: int, module_name: str) -> bool:
         """ Serialize anything.
 
         Args:
@@ -370,7 +370,7 @@ class SnapShot:
             return False
 
         # Load hp-file
-        if process_name == 'master':
+        if module_name == 'master':
             filename = 'hp.yaml'
             load_file_path = base_dir_path / filename
             with InterProcessLock(self.lock_file['snapshot']):
@@ -384,7 +384,7 @@ class SnapShot:
                 self.replace_hp_dir()
 
         # native random file
-        load_path = native_dir_path / (process_name + '.pickle')
+        load_path = native_dir_path / (module_name + '.pickle')
         with InterProcessLock(self.lock_file['snapshot']):
             if not load_path.exists():
                 return False
@@ -392,7 +392,7 @@ class SnapShot:
                 self.random_state_native = pickle.load(f)
 
         # numpy random file
-        load_path = numpy_dir_path / (process_name + '.pickle')
+        load_path = numpy_dir_path / (module_name + '.pickle')
         with InterProcessLock(self.lock_file['snapshot']):
             if not load_path.exists():
                 return False
@@ -400,7 +400,7 @@ class SnapShot:
                 self.random_state_numpy = pickle.load(f)
 
         # Optuna DB file copy
-        if process_name == 'master':
+        if module_name == 'master':
             src = base_dir_path / 'optuna_study.db'
             dst = self.ws / 'optuna_study.db'
             if dst.exists():
@@ -410,7 +410,7 @@ class SnapShot:
                 if src.exists():
                     shutil.copy(src, dst)
 
-        if process_name == 'master':
+        if module_name == 'master':
             src = base_dir_path / 'count.txt'
             dst = self.ws / 'hp' / 'count.txt'
             if dst.exists():
@@ -421,13 +421,13 @@ class SnapShot:
                     shutil.copy(src, dst)
 
         # Load process memory objects
-        pmo_file_path = base_dir_path / f'{process_name}.yaml'
+        pmo_file_path = base_dir_path / f'{module_name}.yaml'
         with InterProcessLock(self.lock_file['snapshot']):
             if not pmo_file_path.exists():
                 return False
             self.optimization_variables = fs.load_yaml(pmo_file_path)
 
-        print(f"loaded {process_name}")
+        print(f"loaded {module_name}")
         return True
 
     def get_base_dir_path(self, trial_id: int) -> pathlib.Path:

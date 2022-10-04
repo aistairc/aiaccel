@@ -9,7 +9,6 @@ Subpackages
 
    aiaccel.abci
    aiaccel.bin
-   aiaccel.master
    aiaccel.optimizer
    aiaccel.scheduler
    aiaccel.util

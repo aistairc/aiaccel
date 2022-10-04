@@ -1,9 +1,16 @@
-from aiaccel.argument import Arguments
+import argparse
 from aiaccel.config import Config
 from aiaccel.workspace import Workspace
 from aiaccel.storage.storage import Storage
 from pathlib import Path
 from numpy import maximum
+
+
+args = argparse.ArgumentParser(allow_abbrev=False)
+args.add_argument('--config', '-c', type=str)
+args.add_argument('--resume', type=int, default=None)
+args.add_argument('--clean', nargs='?', const=True, default=False)
+args.add_argument('--fs', nargs='?', const=True, default=False)
 
 
 class Viewer:
@@ -95,7 +102,7 @@ class Viewer:
 
 
 def main() -> None:  # pragma: no cover
-    options = Arguments()
+    options = vars(args.parse_args())
     if "config" not in options.keys():
         print("Specify the config file path with the --config option.")
         return

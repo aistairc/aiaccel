@@ -1,17 +1,22 @@
-from aiaccel.util.logger import str_to_logging_level
+from aiaccel.util.logger import Logger
 import logging
 
 
 def test_str_to_logging_level():
-    assert str_to_logging_level('DEBUG') == logging.DEBUG
-    assert str_to_logging_level('INFO') == logging.INFO
-    assert str_to_logging_level('WARN') == logging.WARNING
-    assert str_to_logging_level('WARNING') == logging.WARNING
-    assert str_to_logging_level('ERROR') == logging.ERROR
-    assert str_to_logging_level('CRITICAL') == logging.CRITICAL
+
+    _logger = Logger(
+        logger_name='root.optimizer',
+        logfile_path=''
+    )
+    assert _logger.str_to_logging_level('DEBUG') == logging.DEBUG
+    assert _logger.str_to_logging_level('INFO') == logging.INFO
+    assert _logger.str_to_logging_level('WARN') == logging.WARNING
+    assert _logger.str_to_logging_level('WARNING') == logging.WARNING
+    assert _logger.str_to_logging_level('ERROR') == logging.ERROR
+    assert _logger.str_to_logging_level('CRITICAL') == logging.CRITICAL
 
     try:
-        str_to_logging_level('invalid')
+        _logger.str_to_logging_level('invalid')
         assert False
     except ValueError:
         assert True

@@ -24,9 +24,6 @@
     "$aistopt_wrapper": "wrapper_aistopt.sh",
     "wrapper_command": "python wrapper.py"
   },
-  "master": {
-    "sleep_time_master": 1
-  },
   "optimizer": {
     "optimizer_command": "run_optimizer.py",
     "$optimizer_runner": "run_optimizer.sh",
@@ -57,8 +54,6 @@
     "runner_timeout": 10,
     "running_retry": 3,
     "running_timeout": 10,
-    "scheduler_command": "run_scheduler.py",
-    "$scheduler_runner": "run_scheduler.sh",
     "sleep_time_scheduler": 1
   },
   "resource": {

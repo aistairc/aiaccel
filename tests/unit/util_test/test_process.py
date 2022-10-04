@@ -1,7 +1,6 @@
 import os
 from aiaccel.util.process import exec_runner, subprocess_ps, ps2joblist,\
     kill_process
-from aiaccel.util.process import is_process_running
 import subprocess
 
 
@@ -91,7 +90,3 @@ def test_kill_process():
     proc = subprocess.Popen(['sleep', '5'], stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
     assert kill_process(proc.pid) is None
-
-
-def test_is_process_running():
-    assert is_process_running(os.getpid())

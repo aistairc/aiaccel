@@ -5,7 +5,7 @@ from aiaccel.storage.storage import Storage
 
 
 class Serializer:
-    def __init__(self, config: Config, process_name: str, options):
+    def __init__(self, config: Config, module_name: str, options):
         self.config = config
         self.ws = Path(self.config.workspace.get()).resolve()
         self.storage = Storage(
@@ -13,8 +13,8 @@ class Serializer:
             fsmode=options['fs'],
             config_path=options['config']
         )
-        self.process_name = process_name.lower()
-        if self.process_name not in ['master', 'optimizer', 'scheduler']:
+        self.module_name = module_name.lower()
+        if self.module_name not in ['optimizer', 'scheduler']:
             raise
 
     def _get_initialized_serialize_data(self):
@@ -45,7 +45,7 @@ class Serializer:
         self.storage.serializer.set_any_trial_serialize(
             trial_id=trial_id,
             optimization_variable=serialize_data,
-            process_name=self.process_name,
+            module_name=self.module_name,
             native_random_state=native_random_state,
             numpy_random_state=numpy_random_state
         )
@@ -53,7 +53,7 @@ class Serializer:
         # # random_state
         # self.storage.random_state.set_random_state(
         #     trial_id=trial_id,
-        #     process_name=self.process_name,
+        #     module_name=self.module_name,
         #     native_random_state=native_random_state,
         #     numpy_random_state=numpy_random_state
         # )
@@ -63,7 +63,7 @@ class Serializer:
         optimization_variables, native_rnd_state, numpy_rnd_state = (
             self.storage.serializer.get_any_trial_serialize(
                 trial_id=trial_id,
-                process_name=self.process_name
+                module_name=self.module_name
             )
         )
 
@@ -73,7 +73,7 @@ class Serializer:
         # optimization_variables = (
         #     self.storage.serializer.get_any_trial_serialize(
         #         trial_id=trial_id,
-        #         process_name=self.process_name
+        #         module_name=self.module_name
         #     )
         # )
         # if optimization_variables is None:
@@ -83,7 +83,7 @@ class Serializer:
         # native_rnd_state, numpy_rnd_state = (
         #     self.storage.random_state.get_random_state(
         #         trial_id=trial_id,
-        #         process_name=self.process_name
+        #         module_name=self.module_name
         #     )
         # )
 

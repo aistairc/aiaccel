@@ -1,4 +1,4 @@
-from aiaccel.master.evaluator.abstract import AbstractEvaluator
+from aiaccel.evaluator.abstract import AbstractEvaluator
 from tests.base_test import BaseTest
 import aiaccel
 
@@ -11,7 +11,7 @@ class TestAbstractEvaluator(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'test'
+            'module_name': 'test'
         }
         evaluator = AbstractEvaluator(options)
         assert evaluator.hp_result is None
@@ -22,7 +22,7 @@ class TestAbstractEvaluator(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'test'
+            'module_name': 'test'
         }
         evaluator = AbstractEvaluator(options)
         evaluator.storage.alive.init_alive()
@@ -40,7 +40,7 @@ class TestAbstractEvaluator(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'test'
+            'module_name': 'test'
         }
         
         evaluator = AbstractEvaluator(options)
@@ -55,7 +55,7 @@ class TestAbstractEvaluator(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'test'
+            'module_name': 'test'
         }
         
         evaluator = AbstractEvaluator(options)

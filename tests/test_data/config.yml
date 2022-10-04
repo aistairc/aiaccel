@@ -6,15 +6,10 @@ generic:
   init_fail_count: 50
   randseed: 1
 logger:
-  master_logfile: 'master.log'
-  master_loglevel: 'DEBUG'
   optimizer_logfile: 'optimizer.log'
   optimizer_loglevel: 'DEBUG'
   scheduler_logfile: 'scheduler.log'
   scheduler_loglevel: 'DEBUG'
-wrapper:
-master:
-  sleep_time_master: 1
 optimizer:
   #search_algorithm: "Random"
   #search_algorithm: "Grid"

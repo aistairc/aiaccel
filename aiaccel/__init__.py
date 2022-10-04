@@ -1,7 +1,5 @@
-from .common import alive_master
 from .common import alive_optimizer
 from .common import alive_scheduler
-from .common import class_master
 from .common import class_optimizer
 from .common import class_scheduler
 from .common import dict_work
@@ -45,7 +43,6 @@ from .common import key_module_type
 from .common import key_pid
 from .common import key_path
 from .common import key_project_name
-from .common import module_type_master
 from .common import module_type_optimizer
 from .common import module_type_scheduler
 from .common import resource_type_abci
@@ -58,10 +55,8 @@ from .common import search_algorithm_tpe
 
 
 __all__ = [
-    alive_master,
     alive_optimizer,
     alive_scheduler,
-    class_master,
     class_optimizer,
     class_scheduler,
     dict_work,
@@ -105,7 +100,6 @@ __all__ = [
     key_pid,
     key_path,
     key_project_name,
-    module_type_master,
     module_type_optimizer,
     module_type_scheduler,
     resource_type_abci,

@@ -1,3 +1,4 @@
+import argparse
 import pathlib
 import shutil
 import time
@@ -7,12 +8,19 @@ from aiaccel.config import Config
 from aiaccel.util import filesystem as fs
 from aiaccel.util.terminal import Terminal
 from aiaccel.util.report import CreationReaport
-from aiaccel.argument import Arguments
-from aiaccel.master.create import create_master
+from aiaccel.optimizer.create import create_optimizer
+from aiaccel.scheduler.create import create_scheduler
 from aiaccel.workspace import Workspace
 
+args = argparse.ArgumentParser(allow_abbrev=False)
+args.add_argument('--config', '-c', type=str)
+args.add_argument('--resume', type=int, default=None)
+args.add_argument('--clean', nargs='?', const=True, default=False)
+args.add_argument('--fs', nargs='?', const=True, default=False)
 
-def main(options: dict = Arguments()) -> None:
+
+def main() -> None:
+    options = vars(args.parse_args())
     if options['config'] == "" or options['config'] is None:
         Terminal().print_error(
             "The configuration file is not specified. "
@@ -52,10 +60,39 @@ def main(options: dict = Arguments()) -> None:
     print(f"Start {config.search_algorithm.get()} Optimization")
     print(f"config: {str(pathlib.Path(options['config']).resolve())}")
 
+    Optimizer = create_optimizer(options['config'])
+    Scheduler = create_scheduler(options['config'])
+    modules = [Scheduler(options), Optimizer(options)]
+    sleep_time = config.sleep_time.get()
     time_s = time.time()
-    M = create_master(options)
 
-    M.start()
+    for module in modules:
+        module.pre_process()
+
+    for module in modules:
+        module.loop_pre_process()
+
+    while True:
+        for module in modules:
+            if not module.inner_loop_pre_process():
+                break
+            if not module.inner_loop_main_process():
+                break
+            if not module.inner_loop_post_process():
+                break
+            if not module.check_error():
+                break
+            module.loop_count += 1
+        else:
+            time.sleep(sleep_time)
+            continue
+        break
+
+    for module in modules:
+        module.loop_post_process()
+
+    for module in modules:
+        module.post_process()
 
     report = CreationReaport(options)
     report.create()

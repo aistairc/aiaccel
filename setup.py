@@ -18,9 +18,8 @@ setup(
     packages=[
         'aiaccel',
         'aiaccel.abci',
-        'aiaccel.master',
-        'aiaccel.master.evaluator',
-        'aiaccel.master.verification',
+        'aiaccel.evaluator',
+        'aiaccel.verification',
         'aiaccel.optimizer',
         'aiaccel.optimizer.grid',
         'aiaccel.optimizer.random',

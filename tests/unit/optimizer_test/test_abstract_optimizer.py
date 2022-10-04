@@ -29,7 +29,7 @@ class TestAbstractOptimizer(BaseTest):
             'resume': 0,
             'clean': False,
             'fs': False,
-            'process_name': 'optimizer'
+            'module_name': 'optimizer'
         }
         self.optimizer = AbstractOptimizer(options)
         self.optimizer.storage.alive.init_alive()
@@ -70,14 +70,11 @@ class TestAbstractOptimizer(BaseTest):
         assert self.optimizer.post_process() is None
 
     def test_inner_loop_pre_process(self, setup_hp_finished):
-        assert not self.optimizer.inner_loop_pre_process()
+        with patch.object(self.optimizer, 'check_finished', return_value=False):
+            assert self.optimizer.inner_loop_pre_process()
 
-        self.optimizer.pre_process()
-        assert self.optimizer.inner_loop_pre_process()
-
-        #setup_hp_finished(len(self.optimizer.params.get_hyperparameters()))
-        setup_hp_finished(len(self.optimizer.params.get_parameter_list()))
-        assert not self.optimizer.inner_loop_pre_process()
+        with patch.object(self.optimizer, 'check_finished', return_value=True):
+            assert not self.optimizer.inner_loop_pre_process()
 
     def test_inner_loop_main_process(self):
         def f(number=1):

@@ -14,7 +14,7 @@ class Serializer(Abstract):
         self,
         trial_id: int,
         optimization_variable,
-        process_name: str,
+        module_name: str,
         native_random_state: tuple,
         numpy_random_state: tuple
     ) -> None:
@@ -23,7 +23,7 @@ class Serializer(Abstract):
         Args:
             trial_id (int): Any trial id
             optimization_variable: serialized data
-            process_name (str): master, optimizer, scheduler
+            module_name (str): master, optimizer, scheduler
 
         Returns:
             None
@@ -33,14 +33,14 @@ class Serializer(Abstract):
                 data = (
                     session.query(SerializeTable)
                     .filter(SerializeTable.trial_id == trial_id)
-                    .filter(SerializeTable.process_name == process_name)
+                    .filter(SerializeTable.module_name == module_name)
                     .with_for_update(read=True)
                     .one_or_none()
                 )
                 if data is None:
                     new_row = SerializeTable(
                         trial_id=trial_id,
-                        process_name=process_name,
+                        module_name=module_name,
                         optimization_variable=optimization_variable,
                         native_random_state=native_random_state,
                         numpy_random_state=numpy_random_state
@@ -55,12 +55,12 @@ class Serializer(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_serialize(self, trial_id: int, process_name: str) -> Any:
+    def get_any_trial_serialize(self, trial_id: int, module_name: str) -> Any:
         """Obtain serialized data for a given trial.
 
         Args:
             trial_id (int): Any trial id
-            process_name (str): master, optimizer, scheduler
+            module_name (str): master, optimizer, scheduler
 
         Returns:
             serialized data
@@ -69,7 +69,7 @@ class Serializer(Abstract):
             data = (
                 session.query(SerializeTable)
                 .filter(SerializeTable.trial_id == trial_id)
-                .filter(SerializeTable.process_name == process_name)
+                .filter(SerializeTable.module_name == module_name)
                 .with_for_update(read=True)
                 .one_or_none()
             )
@@ -98,16 +98,15 @@ class Serializer(Abstract):
                 raise e
 
     def is_exists_any_trial(self, trial_id: int):
-        process_names = [
-            'master',
+        module_names = [
             'optimizer',
             'scheduler'
         ]
-        for process_name in process_names:
+        for module_name in module_names:
             if (
                 self.get_any_trial_serialize(
                     trial_id=trial_id,
-                    process_name=process_name
+                    module_name=module_name
                 )
             ) is None:
                 return False

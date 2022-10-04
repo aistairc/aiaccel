@@ -1,29 +1,29 @@
-aiaccel.master.evaluator package
+aiaccel.evaluator package
 ================================
 
 Submodules
 ----------
 
-aiaccel.master.evaluator.abstract\_evaluator module
+aiaccel.evaluator.abstract\_evaluator module
 ---------------------------------------------------
 
-.. automodule:: aiaccel.master.evaluator.abstract_evaluator
+.. automodule:: aiaccel.evaluator.abstract_evaluator
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.master.evaluator.maximize\_evaluator module
+aiaccel.evaluator.maximize\_evaluator module
 ---------------------------------------------------
 
-.. automodule:: aiaccel.master.evaluator.maximize_evaluator
+.. automodule:: aiaccel.evaluator.maximize_evaluator
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.master.evaluator.minimize\_evaluator module
+aiaccel.evaluator.minimize\_evaluator module
 ---------------------------------------------------
 
-.. automodule:: aiaccel.master.evaluator.minimize_evaluator
+.. automodule:: aiaccel.evaluator.minimize_evaluator
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ aiaccel.master.evaluator.minimize\_evaluator module
 Module contents
 ---------------
 
-.. automodule:: aiaccel.master.evaluator
+.. automodule:: aiaccel.evaluator
    :members:
    :undoc-members:
    :show-inheritance:

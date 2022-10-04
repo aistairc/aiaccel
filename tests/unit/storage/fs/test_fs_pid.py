@@ -10,11 +10,11 @@ from base import config_path
 def test_set_any_process_pid():
     storage = Storage(ws.path, fsmode=True, config_path=config_path)
     
-    process_name = "master"
+    module_name = "optimizer"
     pid = 12345
 
     assert storage.pid.set_any_process_pid(
-        process_name=process_name,
+        module_name=module_name,
         pid=pid
     ) is None
 
@@ -24,15 +24,15 @@ def test_set_any_process_pid():
 def test_get_any_process_pid():
     storage = Storage(ws.path, fsmode=True, config_path=config_path)
     
-    process_name = "master"
+    module_name = "optimizer"
     pid = 12345
 
     storage.pid.set_any_process_pid(
-        process_name=process_name,
+        module_name=module_name,
         pid=pid
     )
 
-    assert storage.pid.get_any_process_pid(process_name) == pid
+    assert storage.pid.get_any_process_pid(module_name) == pid
 
 
 # all_delete
@@ -40,18 +40,18 @@ def test_get_any_process_pid():
 def test_all_delete():
     storage = Storage(ws.path, fsmode=True, config_path=config_path)
     
-    process_name = "master"
+    module_name = "optimizer"
     pid = 12345
 
     storage.pid.set_any_process_pid(
-        process_name=process_name,
+        module_name=module_name,
         pid=pid
     )
 
-    assert storage.pid.get_any_process_pid(process_name) == pid
+    assert storage.pid.get_any_process_pid(module_name) == pid
 
     storage.pid.all_delete()
-    assert storage.pid.get_any_process_pid(process_name) is None
+    assert storage.pid.get_any_process_pid(module_name) is None
 
 
 # delete_any_process_pid
@@ -59,24 +59,24 @@ def test_all_delete():
 def test_delete_any_process_pid():
     storage = Storage(ws.path)
     
-    process_name = "test_process_0"
+    module_name = "test_process_0"
     pid = 10000
     storage.pid.set_any_process_pid(
-        process_name=process_name,
+        module_name=module_name,
         pid=pid
     )
 
-    process_name = "test_process_1"
+    module_name = "test_process_1"
     pid = 10001
     storage.pid.set_any_process_pid(
-        process_name=process_name,
+        module_name=module_name,
         pid=pid
     )
 
-    process_name = "test_process_2"
+    module_name = "test_process_2"
     pid = 10002
     storage.pid.set_any_process_pid(
-        process_name=process_name,
+        module_name=module_name,
         pid=pid
     )
 

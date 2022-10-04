@@ -285,9 +285,6 @@ _DEFAULT_NAME_LENGTH = 6
 _DEFAULT_RAND_SEED = None
 _DEFAULT_SILENT_MODE = True
 _DEFAULT_WORKSPACE = "./work"
-_DEFAULT_MASTER_LOGFILE = "master.log"
-_DEFAULT_MASTER_FILE_LOG_LEVEL = "DEBUG"
-_DEFAULT_MASTER_STREAM_LOG_LEVEL = "DEBUG"
 _DEFAULT_OPTIMIZER_LOGFILE = "optimizer.log"
 _DEFAULT_OPTIMIZER_FILE_LOG_LEVEL = "DEBUG"
 _DEFAULT_OPTIMIZER_STREAM_LOG_LEBEL = "DEBUG"
@@ -295,11 +292,8 @@ _DEFAULT_SCHDULER_LOGFILE = "scheduler.log"
 _DEFAULT_SCHDULER_FILE_LOG_LEVEL = "DEBUG"
 _DEFAULT_SCHDULER_STREAM_LOG_LEBEL = "DEBUG"
 _DEFAULT_JOB_COMMAND = ""
-_DEFAULT_SLEEP_TIME_MASTER = 1
-_DEFAULT_OPTIMIZER_COMMAND = "python -m aiaccel.bin.optimizer"
-_DEFAULT_SCHDULER_COMMAND = "python -m aiaccel.bin.scheduler"
+_DEFAULT_SLEEP_TIME = 0.01
 _DEFAULT_SEARCH_ALGORITHM = search_algorithm_nelder_mead
-_DEFAULT_SLEEP_TIME_OPTIMIZER = 1
 _DEFAULT_CANCEL_RETRY = 3
 _DEFAULT_CANCEL_TIMEOUT = 60
 _DEFAULT_EXPIRE_RETRY = 3
@@ -317,7 +311,6 @@ _DEFAULT_RUNNER_RETRY = 3
 _DEFAULT_RUNNER_TIMEOUT = 60
 _DEFAULT_RUNNING_RETRY = 3
 _DEFAULT_RUNNING_TIMEOUT = 60
-_DEFAULT_SLEEP_TIME_SCHEDULER = 1
 _DEFAULT_RESOURCE_TYPE = "local"
 _DEFAULT_NUM_NODE = 1
 _DEFAULT_JOB_SCRIPT_PREAMBLE = ""
@@ -400,21 +393,13 @@ class Config:
             group="generic",
             keys=("job_command")
         )
-        self.optimizer_command = ConfigEntry(
+        self.sleep_time = ConfigEntry(
             config=config,
-            type=[str],
-            default=_DEFAULT_OPTIMIZER_COMMAND,
+            type=[float, int],
+            default=_DEFAULT_SLEEP_TIME,
             warning=False,
             group="generic",
-            keys=("optimizer_command")
-        )
-        self.scheduler_command = ConfigEntry(
-            config=config,
-            type=[str],
-            default=_DEFAULT_SCHDULER_COMMAND,
-            warning=False,
-            group="generic",
-            keys=("scheduler_command")
+            keys=("sleep_time")
         )
 
         # === scheduler defalt config===
@@ -677,57 +662,7 @@ class Config:
             keys=("search_algorithm")
         )
 
-        # === sleep time ===
-        self.sleep_time_master = ConfigEntry(
-            config=config,
-            type=[float, int],
-            default=_DEFAULT_SLEEP_TIME_MASTER,
-            warning=False,
-            group="sleep_time",
-            keys=("master")
-        )
-        self.sleep_time_scheduler = ConfigEntry(
-            config=config,
-            type=[float, int],
-            default=_DEFAULT_SLEEP_TIME_SCHEDULER,
-            warning=False,
-            group="sleep_time",
-            keys=("scheduler")
-        )
-        self.sleep_time_optimizer = ConfigEntry(
-            config=config,
-            type=[float, int],
-            default=_DEFAULT_SLEEP_TIME_OPTIMIZER,
-            warning=False,
-            group="sleep_time",
-            keys=("optimizer")
-        )
-
         # === logger defalt config===
-        self.master_logfile = ConfigEntry(
-            config=config,
-            type=[str],
-            default=_DEFAULT_MASTER_LOGFILE,
-            warning=False,
-            group="logger",
-            keys=("file", "master")
-        )
-        self.master_file_log_level = ConfigEntry(
-            config=config,
-            type=[str],
-            default=_DEFAULT_MASTER_FILE_LOG_LEVEL,
-            warning=False,
-            group="logger",
-            keys=("log_level", "master")
-        )
-        self.master_stream_log_level = ConfigEntry(
-            config=config,
-            type=[str],
-            default=_DEFAULT_MASTER_STREAM_LOG_LEVEL,
-            warning=False,
-            group="logger",
-            keys=("stream_level", "master")
-        )
         self.optimizer_logfile = ConfigEntry(
             config=config,
             type=[str],

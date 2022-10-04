@@ -1,5 +1,3 @@
-from aiaccel.master.local import LocalMaster
-from aiaccel.argument import Arguments
 from tests.base_test import BaseTest
 import aiaccel
 import asyncio
@@ -10,6 +8,8 @@ import os
 from aiaccel.storage.storage import Storage
 from pathlib import Path
 import copy
+import subprocess
+from aiaccel.config import Config
 
 
 async def start_master(master):
@@ -25,9 +25,9 @@ async def wait_finish_wrapper(sleep_time, storage, master):
 def wait_finish(sleep_time, storage, master):
     time.sleep(sleep_time)
     while (
-        storage.alive.check_alive(process_name='master') or
-        storage.alive.check_alive(process_name='optimizer') or
-        storage.alive.check_alive(process_name='scheduler')
+        storage.alive.check_alive(module_name='master') or
+        storage.alive.check_alive(module_name='optimizer') or
+        storage.alive.check_alive(module_name='scheduler')
     ):
         time.sleep(sleep_time)
         master.print_dict_state()
@@ -37,39 +37,12 @@ class IntegrationTest(BaseTest):
     search_algorithm = None
 
     def test_run(self, cd_work, data_dir, work_dir):
-
-        print(f"cd: {os.getcwd()}")
-
-        config_file = data_dir.joinpath(
-            'config_{}.json'.format(self.search_algorithm)
-        )
-
-        print(f"config_file: {str(config_file)}")
-
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_file)
-        ]
-
-        if self.workspace.path.exists():
-            self.workspace.clean()
-        self.workspace.create()
-
-        self.create_main()
-
-        with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
-            master = LocalMaster(options)
-
-            master.storage.alive.init_alive()
-            loop = asyncio.get_event_loop()
-            gather = asyncio.gather(
-                start_master(master),
-                wait_finish_wrapper(1, master.storage, master)
-            )
-            loop.run_until_complete(gather)
-            self.evaluate(data_dir, work_dir, master.storage)
+        with self.create_main():
+            config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+            config = Config(config_file)
+            storage = Storage(ws=Path(config.workspace.get()), fsmode=False, config_path=Path(config_file))
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
+            self.evaluate(data_dir, work_dir, storage)
 
     def evaluate(self, data_dir, work_dir, storage):
         running = storage.get_num_running()

@@ -77,7 +77,7 @@ class TestGridOptimizer(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'optimizer'
+            'module_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)
         optimizer.storage.alive.init_alive()
@@ -92,7 +92,7 @@ class TestGridOptimizer(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'optimizer'
+            'module_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)
         optimizer.storage.alive.init_alive()
@@ -115,7 +115,7 @@ class TestGridOptimizer(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'optimizer'
+            'module_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)
         optimizer.storage.alive.init_alive()

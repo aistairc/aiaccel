@@ -51,7 +51,7 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        logger = logging.getLogger('root.master.evaluator')
+        logger = logging.getLogger('root.scheduler.evaluator')
         logger.info('Best hyperparameter is followings:')
         logger.info(self.hp_result)
 

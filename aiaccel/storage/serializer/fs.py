@@ -16,7 +16,7 @@ class Serializer():
         self,
         trial_id: int,
         optimization_variable,
-        process_name: str,
+        module_name: str,
         native_random_state: tuple,
         numpy_random_state: tuple
     ) -> None:
@@ -25,31 +25,31 @@ class Serializer():
         Args:
             trial_id (int): Any trial id
             optimization_variable: serialized data
-            process_name (str): master, optimizer, scheduler
+            module_name (str): master, optimizer, scheduler
 
         Returns:
             None
         """
         self.snapshot.save(
             trial_id,
-            process_name,
+            module_name,
             optimization_variable,
             native_random_state,
             numpy_random_state
         )
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_serialize(self, trial_id: int, process_name: str) -> Any:
+    def get_any_trial_serialize(self, trial_id: int, module_name: str) -> Any:
         """Obtain serialized data for a given trial.
 
         Args:
             trial_id (int): Any trial id
-            process_name (str): master, optimizer, scheduler
+            module_name (str): master, optimizer, scheduler
 
         Returns:
             serialized data
         """
-        if self.snapshot.load(trial_id, process_name) is False:
+        if self.snapshot.load(trial_id, module_name) is False:
             return None
 
         return (
@@ -62,12 +62,12 @@ class Serializer():
         self.snapshot.delete(trial_id)
 
     def is_exists_any_trial(self, trial_id: int):
-        process_names = [
+        module_names = [
             'master',
             'optimizer',
             'scheduler'
         ]
-        for process_name in process_names:
-            if self.snapshot.load(trial_id, process_name) is False:
+        for module_name in module_names:
+            if self.snapshot.load(trial_id, module_name) is False:
                 return False
         return True

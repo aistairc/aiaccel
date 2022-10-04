@@ -13,7 +13,7 @@ options = {
     'resume': None,
     'clean': False,
     'fs': False,
-    'process_name': 'test'
+    'module_name': 'test'
 }
 
 

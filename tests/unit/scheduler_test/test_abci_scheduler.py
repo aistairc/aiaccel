@@ -18,7 +18,7 @@ class TestAbciScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbciScheduler(options)
         xml_path = data_dir.joinpath('qstat.xml')
@@ -45,7 +45,7 @@ class TestAbciScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbciScheduler(options)
         s = {"name": "run_000005.sh"}

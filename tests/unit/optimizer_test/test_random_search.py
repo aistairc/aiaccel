@@ -10,7 +10,7 @@ class TestRandomOptimizer(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'optimizer'
+            'module_name': 'optimizer'
         }
         optimizer = RandomOptimizer(options)
         optimizer.storage.alive.init_alive()

@@ -10,7 +10,7 @@ class TestLocalScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = LocalScheduler(options)
         fake_process.register_subprocess(
@@ -35,7 +35,7 @@ class TestLocalScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
 
         scheduler = LocalScheduler(options)

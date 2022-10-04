@@ -23,12 +23,7 @@
   "wrapper": {
     "job_command": "python wrapper.py"
   },
-  "master": {
-    "sleep_time_master": 1
-  },
   "optimizer": {
-    "optimizer_command": "python -m aiaccel.bin.optimizer",
-    "search_algorithm": "aiaccel.optimizer.TpeOptimizer",
     "parameter_pool_size": 4,
     "sleep_time_optimizer": 1
   },
@@ -50,7 +45,6 @@
     "runner_timeout": 10,
     "running_retry": 3,
     "running_timeout": 10,
-    "scheduler_command": "python -m aiaccel.bin.scheduler",
     "sleep_time_scheduler": 1
   },
   "resource": {

@@ -23,7 +23,7 @@ class TestRandom(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'optimizer'
+            'module_name': 'optimizer'
         }
         serialize = Serializer(self.config, 'optimizer',options)
         serialize.storage.alive.init_alive()
@@ -63,7 +63,7 @@ class TestRandom(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         serialize = Serializer(self.config, 'scheduler', options)
         serialize.storage.alive.init_alive()

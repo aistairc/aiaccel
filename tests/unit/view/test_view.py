@@ -53,7 +53,7 @@ def test_view():
         'resume': None,
         'clean': False,
         'fs': False,
-        'process_name': 'master'
+        'module_name': 'master'
     }
 
     viewer = Viewer(config, options)

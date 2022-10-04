@@ -6,6 +6,8 @@ import aiaccel
 import asyncio
 import os
 import time
+from unittest.mock import patch
+
 
 
 async def async_function(func):
@@ -47,7 +49,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         assert type(AbstractScheduler(options)) is AbstractScheduler
 
@@ -65,7 +67,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         database_remove()
         scheduler = AbstractScheduler(options)
@@ -86,7 +88,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.print_dict_state()
@@ -106,7 +108,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.alive.init_alive()
@@ -133,7 +135,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.print_dict_state()
@@ -154,7 +156,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.print_dict_state()
@@ -176,7 +178,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         assert scheduler.post_process() is None
@@ -193,7 +195,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         work_dir.joinpath(aiaccel.dict_runner).rmdir()
@@ -211,7 +213,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         assert scheduler.loop_post_process() is None
@@ -225,32 +227,20 @@ class TestAbstractScheduler(BaseTest):
         work_dir,
         database_remove
     ):
-        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        scheduler.storage.alive.init_alive()
 
-        assert not scheduler.inner_loop_pre_process()
-        
-        scheduler.pre_process()
-        assert scheduler.inner_loop_pre_process()
+        with patch.object(scheduler, 'check_finished', return_value=False):
+            assert scheduler.inner_loop_pre_process()
 
-        setup_hp_ready(1)
-        setup_hp_finished(10)
-        trial_id = 1
-        scheduler.start_job_thread(trial_id)
-        loop = asyncio.get_event_loop()
-        gather = asyncio.gather(
-            async_function(scheduler.inner_loop_pre_process),
-            stop_jobs(1, scheduler)
-        )
-        loop.run_until_complete(gather)
+        with patch.object(scheduler, 'check_finished', return_value=True):
+            assert not scheduler.inner_loop_pre_process()
 
     def test_inner_loop_main_process(
         self,
@@ -265,7 +255,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.alive.init_alive()
@@ -296,7 +286,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.alive.init_alive()
@@ -314,7 +304,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.alive.init_alive()
@@ -334,7 +324,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.alive.init_alive()
@@ -349,7 +339,7 @@ class TestAbstractScheduler(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
         s = "python wrapper.py --trial_id 001"

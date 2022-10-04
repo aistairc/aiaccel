@@ -83,16 +83,7 @@ def parse_job_list(config: Config, job_list: Element) -> List[dict]:
         elif 'slots' == j.tag:
             slots = j.text
 
-    exclude_name_list = [
-        config.optimizer_command.get(),
-        config.scheduler_command.get()
-    ]
-
-    if (
-        job_id is not None and
-        name is not None and
-        name not in exclude_name_list
-    ):
+    if (job_id is not None and name is not None):
         stat_list.append(
             {
                 'job-ID': job_id,

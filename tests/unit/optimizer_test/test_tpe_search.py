@@ -15,7 +15,7 @@ class TestTpeOptimizer(BaseTest):
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'optimizer'
+            'module_name': 'optimizer'
         }
         self.optimizer = TpeOptimizer(options)
         self.optimizer.storage.alive.init_alive()

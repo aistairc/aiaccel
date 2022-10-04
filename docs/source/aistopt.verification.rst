@@ -1,13 +1,13 @@
-aiaccel.master.verification package
+aiaccel.verification package
 ===================================
 
 Submodules
 ----------
 
-aiaccel.master.verification.abstract\_verification module
+aiaccel.verification.abstract\_verification module
 ---------------------------------------------------------
 
-.. automodule:: aiaccel.master.verification.abstract_verification
+.. automodule:: aiaccel.verification.abstract_verification
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ aiaccel.master.verification.abstract\_verification module
 Module contents
 ---------------
 
-.. automodule:: aiaccel.master.verification
+.. automodule:: aiaccel.verification
    :members:
    :undoc-members:
    :show-inheritance:

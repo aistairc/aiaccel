@@ -3,12 +3,14 @@ import subprocess
 from typing import Union
 from aiaccel.abci.qstat import parse_qstat
 from aiaccel.scheduler.abstract import AbstractScheduler
+from aiaccel.util.filesystem import retry
 
 
 class AbciScheduler(AbstractScheduler):
     """A scheduler class running on ABCI environment.
     """
 
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_stats(self) -> None:
         """Get a current status and update.
 

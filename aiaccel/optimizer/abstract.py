@@ -1,9 +1,10 @@
+import aiaccel
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
-from aiaccel.util.logger import str_to_logging_level
 from typing import Dict, List, Optional, Union
 from aiaccel.util.trialid import TrialId
 from aiaccel.util.serialize import Serializer
+from aiaccel.util.logger import Logger
 
 
 class AbstractOptimizer(AbstractModule):
@@ -24,24 +25,20 @@ class AbstractOptimizer(AbstractModule):
             config (str): A file name of a configuration.
         """
         self.options = options
-        self.options['process_name'] = 'optimizer'
+        self.options['module_name'] = 'optimizer'
         super().__init__(self.options)
 
-        self.set_logger(
-            'root.optimizer',
-            self.dict_log / self.config.optimizer_logfile.get(),
-            str_to_logging_level(self.config.optimizer_file_log_level.get()),
-            str_to_logging_level(self.config.optimizer_stream_log_level.get()),
-            'Optimizer'
+        self._logger = Logger(
+            logger_name='root.optimizer',
+            logfile_path=self.ws / aiaccel.dict_log / self.config.optimizer_logfile.get()
+        )
+        self.logger = self._logger.create_logger(
+            file_level=self.config.optimizer_file_log_level.get(),
+            stream_level=self.config.optimizer_stream_log_level.get(),
+            module_type='Optimizer'
         )
 
-        self.exit_alive('optimizer')
-        self.hp_total = self.config.trial_number.get()
-        self.hp_ready = 0
-        self.hp_running = 0
-        self.hp_finished = 0
         self.num_of_generated_parameter = 0
-        self.sleep_time = self.config.sleep_time_optimizer.get()
         self.all_parameter_generated = False
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
@@ -140,7 +137,6 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        super().pre_process()
         self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
@@ -151,8 +147,6 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.storage.alive.stop_any_process('optimizer')
-        self.logger.info('Optimizer delete alive file.')
         self.logger.info('Optimizer finished.')
 
     def loop_pre_process(self) -> None:
@@ -178,10 +172,6 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
-        if not self.storage.alive.check_alive('optimizer'):
-            self.logger.info('The alive file of optimizer is deleted')
-            return False
-
         if self.check_finished():
             return False
 

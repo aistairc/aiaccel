@@ -47,7 +47,6 @@ class TestJsonOrYamlObjectConfig(BaseTest):
         none_config = JsonOrYamlObjectConfig({}, 'json_object')
         assert none_config.get_property('key') is None
         assert self.config.get_property('sleep_time') == {
-            'master': 1,
             'optimizer': 1,
             'scheduler': 1
         }
@@ -129,12 +128,7 @@ def test_config(config_json):
     assert config.runner_timeout.get() == 60
     assert config.running_retry.get() == 3
     assert config.running_timeout.get() == 60
-    assert config.sleep_time_master.get() == 1
-    assert config.sleep_time_optimizer.get() == 1
-    assert config.sleep_time_scheduler.get() == 1
-    assert config.master_logfile.get() == "master.log"
-    assert config.master_file_log_level.get() == "DEBUG"
-    assert config.master_stream_log_level.get() == "DEBUG"
+    assert config.sleep_time.get() == 0.01
     assert config.optimizer_logfile.get() == "optimizer.log"
     assert config.optimizer_file_log_level.get() == "DEBUG"
     assert config.optimizer_stream_log_level.get() == "DEBUG"

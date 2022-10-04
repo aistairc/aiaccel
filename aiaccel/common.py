@@ -4,11 +4,9 @@
     * import aiaccel
 """
 
-alive_master = 'master.yml'
 alive_optimizer = 'optimizer.yml'
 alive_scheduler = 'scheduler.yml'
 
-class_master = 'Master'
 class_optimizer = 'Optimizer'
 class_scheduler = 'Scheduler'
 
@@ -60,7 +58,6 @@ key_path = 'path'
 key_pid = 'pid'
 key_project_name = 'project_name'
 
-module_type_master = 'master'
 module_type_optimizer = 'optimizer'
 module_type_scheduler = 'scheduler'
 

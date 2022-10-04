@@ -9,6 +9,7 @@ from aiaccel.workspace import Workspace
 from aiaccel.storage.storage import Storage
 import os
 import sys
+from contextlib import contextmanager
 
 
 d0 = {
@@ -249,11 +250,15 @@ class BaseTest(object):
             name = f"{d['trial_id']}.yml"
             path = work_dir / 'result' / name
             create_yaml(path, d)
-        
+
+    @contextmanager
     def create_main(self):
-        with open('/tmp/work/original_main.py', 'w', encoding='UTF-8') as f:
+        file_path = Path('/tmp/original_main.py')
+        with open(file_path, 'w', encoding='UTF-8') as f:
             for line in original_main:
                 f.write(line + '\n')
+        yield
+        file_path.unlink()
 
     def get_workspace_path(self):
         return self.work_dir
