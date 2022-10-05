@@ -43,14 +43,13 @@ class AbstractScheduler(AbstractModule):
             'Scheduler'
         )
 
-        self.exit_alive('scheduler')
         self.max_resource = self.config.num_node.get()
         self.available_resource = self.max_resource
         self.stats = []
         self.jobs = []
         self.job_status = {}
         self.algorithm = None
-        self.sleep_time = self.config.sleep_time_scheduler.get()
+        self.sleep_time = self.config.sleep_time.get()
         self.serialize = Serializer(self.config, 'scheduler', self.options)
 
     def change_state_finished_trials(self) -> None:
@@ -131,7 +130,7 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        super().pre_process()
+        self.trial_id.initial(num=0)
         self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
@@ -155,7 +154,6 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.storage.alive.set_any_process_state('scheduler', 0)
         self.logger.info('Scheduler finished.')
 
     def loop_pre_process(self) -> None:
@@ -186,10 +184,6 @@ class AbstractScheduler(AbstractModule):
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
-        if not self.storage.alive.check_alive('scheduler'):
-            self.logger.info('Scheduler alive state is False')
-            return False
-
         if self.check_finished():
             self.logger.info('All parameters have been done.')
             self.logger.info('Wait all threads finish...')
@@ -355,4 +349,7 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] is not None and
             self.options['resume'] > 0
         ):
+            self.storage.rollback_to_ready(self.options['resume'])
+            self.storage.delete_trial_data_after_this(self.options['resume'])
+            self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])

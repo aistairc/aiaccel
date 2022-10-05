@@ -1176,11 +1176,6 @@ class Job(threading.Thread):
         buff.d['state.name'].set_max_len(2)
 
         while True:
-            with self.lock:
-                if self.storage.alive.check_alive('scheduler') is False:
-                    logger.info('Scheduler alive state is False')
-                    break
-
             self.loop_count += 1
 
             state = self.machine.get_state(self.model.state)

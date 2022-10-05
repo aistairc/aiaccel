@@ -25,7 +25,6 @@ class TestAbstractEvaluator(BaseTest):
             'process_name': 'test'
         }
         evaluator = AbstractEvaluator(options)
-        evaluator.storage.alive.init_alive()
         assert evaluator.evaluate() is None
 
         # try:

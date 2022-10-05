@@ -29,8 +29,8 @@ class TpeOptimizer(AbstractOptimizer):
     def pre_process(self) -> None:
         """Pre-Procedure before executing optimize processes.
         """
-
         super().pre_process()
+
         self.parameter_list = self.params.get_parameter_list()
         self.create_study()
         self.distributions = create_distributions(self.params)

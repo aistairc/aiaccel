@@ -8,8 +8,10 @@ from aiaccel.util import filesystem as fs
 from aiaccel.util.terminal import Terminal
 from aiaccel.util.report import CreationReaport
 from aiaccel.argument import Arguments
-from aiaccel.master.create import create_master
 from aiaccel.workspace import Workspace
+from aiaccel.optimizer.create import create_optimizer
+from aiaccel.scheduler.create import create_scheduler
+from aiaccel.master.create import create_master
 
 
 def main(options: dict = Arguments()) -> None:
@@ -53,9 +55,42 @@ def main(options: dict = Arguments()) -> None:
     print(f"config: {str(pathlib.Path(options['config']).resolve())}")
 
     time_s = time.time()
-    M = create_master(options)
 
-    M.start()
+    Master = create_master(options['config'])
+    Optimizer = create_optimizer(options['config'])
+    Scheduler = create_scheduler(options['config'])
+    modules = [Master(options), Scheduler(options), Optimizer(options)]
+
+    sleep_time = config.sleep_time.get()
+    time_s = time.time()
+
+    for module in modules:
+        module.pre_process()
+
+    for module in modules:
+        module.loop_pre_process()
+
+    while True:
+        for module in modules:
+            if not module.inner_loop_pre_process():
+                break
+            if not module.inner_loop_main_process():
+                break
+            if not module.inner_loop_post_process():
+                break
+            if not module.check_error():
+                break
+            module.loop_count += 1
+        else:
+            time.sleep(sleep_time)
+            continue
+        break
+
+    for module in modules:
+        module.loop_post_process()
+
+    for module in modules:
+        module.post_process()
 
     report = CreationReaport(options)
     report.create()

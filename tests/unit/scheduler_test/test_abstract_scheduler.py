@@ -6,6 +6,7 @@ import aiaccel
 import asyncio
 import os
 import time
+from unittest.mock import patch
 
 
 async def async_function(func):
@@ -109,7 +110,6 @@ class TestAbstractScheduler(BaseTest):
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        scheduler.storage.alive.init_alive()
         scheduler.print_dict_state()
         setup_hp_ready(1)
         trial_id = 1
@@ -161,7 +161,6 @@ class TestAbstractScheduler(BaseTest):
         setup_hp_running(2)
         setup_result(1)
 
-        scheduler.storage.alive.init_alive()
         scheduler.pre_process()
 
         for job in scheduler.jobs:
@@ -225,32 +224,20 @@ class TestAbstractScheduler(BaseTest):
         work_dir,
         database_remove
     ):
-        database_remove()
         options = {
             'config': config_json,
             'resume': None,
             'clean': False,
             'fs': False,
-            'process_name': 'scheduler'
+            'module_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        scheduler.storage.alive.init_alive()
 
-        assert not scheduler.inner_loop_pre_process()
-        
-        scheduler.pre_process()
-        assert scheduler.inner_loop_pre_process()
+        with patch.object(scheduler, 'check_finished', return_value=False):
+            assert scheduler.inner_loop_pre_process()
 
-        setup_hp_ready(1)
-        setup_hp_finished(10)
-        trial_id = 1
-        scheduler.start_job_thread(trial_id)
-        loop = asyncio.get_event_loop()
-        gather = asyncio.gather(
-            async_function(scheduler.inner_loop_pre_process),
-            stop_jobs(1, scheduler)
-        )
-        loop.run_until_complete(gather)
+        with patch.object(scheduler, 'check_finished', return_value=True):
+            assert not scheduler.inner_loop_pre_process()
 
     def test_inner_loop_main_process(
         self,
@@ -268,7 +255,6 @@ class TestAbstractScheduler(BaseTest):
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        scheduler.storage.alive.init_alive()
         scheduler.pre_process()
         setup_hp_ready(1)
 
@@ -299,7 +285,6 @@ class TestAbstractScheduler(BaseTest):
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        scheduler.storage.alive.init_alive()
         assert scheduler.inner_loop_post_process()
 
     def test_serialize(
@@ -317,7 +302,6 @@ class TestAbstractScheduler(BaseTest):
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        scheduler.storage.alive.init_alive()
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         scheduler._serialize(trial_id=0)
         assert 'loop_count' in scheduler.serialize_datas
@@ -337,7 +321,6 @@ class TestAbstractScheduler(BaseTest):
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
-        scheduler.storage.alive.init_alive()
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         scheduler._serialize(trial_id=0)
         assert scheduler._deserialize(trial_id=0) is None

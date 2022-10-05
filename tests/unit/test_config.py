@@ -129,9 +129,7 @@ def test_config(config_json):
     assert config.runner_timeout.get() == 60
     assert config.running_retry.get() == 3
     assert config.running_timeout.get() == 60
-    assert config.sleep_time_master.get() == 1
-    assert config.sleep_time_optimizer.get() == 1
-    assert config.sleep_time_scheduler.get() == 1
+    assert config.sleep_time.get() == 0.01
     assert config.master_logfile.get() == "master.log"
     assert config.master_file_log_level.get() == "DEBUG"
     assert config.master_stream_log_level.get() == "DEBUG"

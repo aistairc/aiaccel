@@ -80,7 +80,6 @@ class TestGridOptimizer(BaseTest):
             'process_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)
-        optimizer.storage.alive.init_alive()
         optimizer.pre_process()
 
     def test_get_parameter_index(self, clean_work_dir):
@@ -95,7 +94,6 @@ class TestGridOptimizer(BaseTest):
             'process_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)
-        optimizer.storage.alive.init_alive()
         optimizer.pre_process()
         assert optimizer.get_parameter_index() == [0 for _ in range(0, 10)]
 
@@ -118,7 +116,6 @@ class TestGridOptimizer(BaseTest):
             'process_name': 'optimizer'
         }
         optimizer = GridOptimizer(options)
-        optimizer.storage.alive.init_alive()
         optimizer.pre_process()
         max_index = functools.reduce(
             lambda x, y: x*y,
