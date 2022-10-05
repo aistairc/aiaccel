@@ -30,8 +30,6 @@ class AbciMaster(AbstractMaster):
         Returns:
             None
         """
-        super().pre_process()
-
         #
         # In job_thread.after_runner, use 'run_{}.sh'.
         # match this one too.

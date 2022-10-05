@@ -1,5 +1,3 @@
-import multiprocessing
-
 from aiaccel.module import AbstractModule
 from aiaccel.master.evaluator.maximize import MaximizeEvaluator
 from aiaccel.master.evaluator.minimize import MinimizeEvaluator
@@ -10,9 +8,6 @@ from aiaccel.util.time_tools import get_time_string_from_object
 import aiaccel
 import logging
 from aiaccel.util.serialize import Serializer
-from aiaccel.optimizer.create import create_optimizer
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.util.retry import retry
 
 
 class AbstractMaster(AbstractModule):
@@ -40,7 +35,6 @@ class AbstractMaster(AbstractModule):
         super().__init__(self.options)
         self.logger = logging.getLogger('root.master')
         self.logger.setLevel(logging.DEBUG)
-        self.exit_alive('master')
 
         self.set_logger(
             'root.master',
@@ -51,18 +45,9 @@ class AbstractMaster(AbstractModule):
         )
 
         self.verification = AbstractVerification(self.options)
-        self.sleep_time = self.config.sleep_time_master.get()
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
         self.serialize = Serializer(self.config, 'master', self.options)
-
-        # optimizer
-        self.o = create_optimizer(options['config'])(options)
-        # scheduler
-        self.s = create_scheduler(options['config'])(options)
-
-        self.worker_o = multiprocessing.Process(target=self.o.start)
-        self.worker_s = multiprocessing.Process(target=self.s.start)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -74,34 +59,6 @@ class AbstractMaster(AbstractModule):
             IndexError: Causes when expire the count which cannot confirm to
                 run Optimizer and Scheduler.
         """
-        super().pre_process()
-
-        self.trial_id.initial(num=0)
-        resume_trial_id = self.options['resume']
-        if resume_trial_id is not None:
-            self.storage.rollback_to_ready(resume_trial_id)
-            self.storage.delete_trial_data_after_this(resume_trial_id)
-            self.trial_id.initial(num=resume_trial_id)
-
-        self.start_optimizer()
-        self.start_scheduler()
-
-        def wait_startup(self, max_num):
-            @retry(_MAX_NUM=max_num, _DELAY=1.0)
-            def _wait_startup(self):
-                if self.check_finished():
-                    return
-                if self.storage.alive.check_alive('optimizer') is False:
-                    raise IndexError(
-                        'Could not start an optimizer process.'
-                    )
-                if self.storage.alive.check_alive('scheduler') is False:
-                    raise IndexError(
-                        'Could not start an scheduler process.'
-                    )
-                return
-            _wait_startup(self)
-        wait_startup(self, self.config.init_fail_count.get())
         return
 
     def post_process(self) -> None:
@@ -131,7 +88,6 @@ class AbstractMaster(AbstractModule):
         # verification
         self.verification.verify()
         self.verification.save('final')
-        self.storage.alive.set_any_process_state('master', 0)
         self.logger.info('Master finished.')
 
     def print_dict_state(self):
@@ -163,24 +119,6 @@ class AbstractMaster(AbstractModule):
             f'end estimated time: {end_estimated_time}'
         )
 
-    def start_optimizer(self) -> None:
-        """ Start the Optimizer process.
-
-        Returns:
-            None
-        """
-        self.worker_o.daemon = True
-        self.worker_o.start()
-
-    def start_scheduler(self) -> None:
-        """ Start the Scheduler process.
-
-        Returns:
-            None
-        """
-        self.worker_s.daemon = True
-        self.worker_s.start()
-
     def loop_pre_process(self) -> None:
         """Called before entering a main loop process.
 
@@ -195,9 +133,6 @@ class AbstractMaster(AbstractModule):
         Returns:
             None
         """
-        while self.other_process_is_alive():
-            self.logger.debug('Wait till optimizer or scheduler finished.')
-
         return
 
     def inner_loop_pre_process(self) -> bool:
@@ -208,16 +143,6 @@ class AbstractMaster(AbstractModule):
             bool: The process succeeds or not. The main loop exits if failed.
         """
         self.get_each_state_count()
-
-        if not self.storage.alive.check_alive('optimizer'):
-            self.logger.info('Optimizer alive state is False')
-            self.stop()
-            return False
-
-        if not self.storage.alive.check_alive('scheduler'):
-            self.logger.info('Scheduler alive state is False')
-            self.stop()
-            return False
 
         return True
 
@@ -243,12 +168,4 @@ class AbstractMaster(AbstractModule):
         # verification
         self.verification.verify()
 
-        return True
-
-    def other_process_is_alive(self) -> bool:
-        if (
-            not self.worker_o.is_alive() or
-            not self.worker_s.is_alive()
-        ):
-            return False
         return True

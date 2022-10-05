@@ -35,13 +35,11 @@ class AbstractOptimizer(AbstractModule):
             'Optimizer'
         )
 
-        self.exit_alive('optimizer')
         self.hp_total = self.config.trial_number.get()
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
         self.num_of_generated_parameter = 0
-        self.sleep_time = self.config.sleep_time_optimizer.get()
         self.all_parameter_generated = False
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
@@ -140,7 +138,6 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        super().pre_process()
         self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
@@ -151,7 +148,6 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.storage.alive.stop_any_process('optimizer')
         self.logger.info('Optimizer delete alive file.')
         self.logger.info('Optimizer finished.')
 
@@ -178,10 +174,6 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
-        if not self.storage.alive.check_alive('optimizer'):
-            self.logger.info('The alive file of optimizer is deleted')
-            return False
-
         if self.check_finished():
             return False
 

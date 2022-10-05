@@ -1,15 +1,11 @@
 import aiaccel
 import logging
-import os
-import time
-import sys
-from aiaccel.config import Config
-from aiaccel.util.process import is_process_running
-from pathlib import Path
 import numpy as np
 import random
+from pathlib import Path
 from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
+from aiaccel.config import Config
 
 
 class AbstractModule(object):
@@ -84,7 +80,6 @@ class AbstractModule(object):
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
-        self.sleep_time = 1.0
         self.seed = self.config.randseed.get()
         self.storage = Storage(
             self.ws,
@@ -127,17 +122,6 @@ class AbstractModule(object):
         else:
             return None
 
-    def get_alive_file(self) -> Path:
-        if aiaccel.class_master in self.__class__.__name__:
-            return self.alive_master
-        elif aiaccel.class_optimizer in self.__class__.__name__:
-            return self.alive_optimizer
-        elif aiaccel.class_scheduler in self.__class__.__name__:
-            return self.alive_scheduler
-        else:
-            self.logger.error(f'Unknown type of module: {self.__class__.__name__}')
-            return None
-
     def check_finished(self) -> bool:
         """Check whether all optimization finished or not.
 
@@ -150,17 +134,6 @@ class AbstractModule(object):
             return True
 
         return False
-
-    def exit_alive(self, process_name: str) -> None:
-        """Exit the execution.
-
-        Args:
-            filename (Path): A path to an alive file.
-
-        Returns:
-            None
-        """
-        self.storage.alive.stop_any_process(process_name)
 
     def print_dict_state(self) -> None:
         """Print hp(hyperparameter) directory states.
@@ -224,14 +197,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        module_type = self.get_module_type()
-
-        if self.storage.alive.check_alive(module_type) is True:
-            self.logger.error(f'{module_type} still remains.')
-            sys.exit()
-
-        self.storage.alive.set_any_process_state(module_type, 1)
-        self.storage.pid.set_any_process_pid(module_type, os.getpid())
+        raise NotImplementedError
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
@@ -244,16 +210,6 @@ class AbstractModule(object):
                 implement.
         """
         raise NotImplementedError
-
-    def start(self) -> None:
-        """Start the all processes.
-
-        Returns:
-            None
-        """
-        self.pre_process()
-        self.loop()
-        self.post_process()
 
     def loop_pre_process(self) -> None:
         """Called before entering a main loop process.
@@ -312,50 +268,6 @@ class AbstractModule(object):
                 implement.
         """
         raise NotImplementedError
-
-    def loop(self) -> None:
-        """A loop process. This process is called after calling pre_process
-            method, and is called before calling post_process.
-
-        Returns:
-            None
-        """
-        self.loop_pre_process()
-
-        while True:
-            if not self.inner_loop_pre_process():
-                break
-
-            if not self.inner_loop_main_process():
-                break
-
-            if not self.inner_loop_post_process():
-                break
-
-            self.wait()
-            self.loop_count += 1
-
-            if not self.check_error():
-                break
-
-        self.loop_post_process()
-
-    def is_process_alive(self) -> bool:
-        """Is processes(master, optimizer and scheduler) running or not.
-
-        Returns:
-            bool: Is processes running or not.
-        """
-        for pname in self.process_names:
-            if self.storage.alive.check_alive(pname):
-                if not is_process_running(self.storage.pid.get_any_process_pid(pname)):
-                    return False
-            else:
-                return False
-        return True
-
-    def wait(self):
-        time.sleep(self.sleep_time)
 
     def _serialize(self) -> None:
         """Serialize this module.
@@ -490,17 +402,6 @@ class AbstractModule(object):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
-
-    def stop(self) -> None:
-        """ Stop optimization.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.storage.alive.init_alive()
 
     def get_zero_padding_any_trial_id(self, trial_id: int):
         return self.trial_id.zero_padding_any_trial_id(trial_id)

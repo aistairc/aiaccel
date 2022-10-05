@@ -62,8 +62,6 @@ class TestAbstractMaster(BaseTest):
             loop_pre_process(master)
         )
         loop.run_until_complete(gather)
-        master.worker_o.kill()
-        master.worker_s.kill()
 
     def test_pre_process_2(
         self,
@@ -83,49 +81,13 @@ class TestAbstractMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
             master = AbstractMaster(options)
-        master.start_optimizer()
-        master.start_scheduler()
 
-        # # master = AbstractMaster(config_json)
-        # opt_cmd = master.config.optimizer_command.get().split(" ")
-        # opt_cmd.append('--config')
-        # opt_cmd.append(str(config_json))
-
-        # # opt_cmd = [
-        # #     # 'python',
-        # #     # '-m',
-        # #     # master.config.get('optimizer', 'optimizer_command'),
-        # #     master.config.optimizer_command.get(),
-        # #     '--config',
-        # #     config_json
-        # # ]
-        # fake_process.register_subprocess(
-        #     opt_cmd, callback=callback_module
-        # )
-        # sch_cmd = master.config.scheduler_command.get().split(" ")
-        # sch_cmd.append('--config')
-        # sch_cmd.append(str(config_json))
-        # # sch_cmd = [
-        # #     # 'python',
-        # #     # '-m',
-        # #     # master.config.get('scheduler', 'scheduler_command'),
-        # #     master.config.scheduler_command.get(),
-        # #     '--config',
-        # #     config_json
-        # # ]
-        # fake_process.register_subprocess(
-        #     sch_cmd, callback=callback_module
-        # )
         try:
             master.pre_process()
             assert False
         except AssertionError:
             assert True
 
-        # master.th_optimizer.abort()
-        # master.th_scheduler.abort()
-        master.worker_o.kill()
-        master.worker_s.kill()
 
     def test_pre_process_3(
         self,
@@ -145,11 +107,8 @@ class TestAbstractMaster(BaseTest):
             'process_name': 'master'
         }
         master = AbstractMaster(options)
-        master.storage.alive.init_alive()
         setup_hp_finished(10)
         assert master.pre_process() is None
-        master.worker_o.kill()
-        master.worker_s.kill()
 
     def test_post_process(
         self,
@@ -168,7 +127,6 @@ class TestAbstractMaster(BaseTest):
             'process_name': 'master'
         }
         master = AbstractMaster(options)
-        master.storage.alive.init_alive()
         
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
@@ -227,65 +185,6 @@ class TestAbstractMaster(BaseTest):
         setup_hp_finished(1)
         master.get_each_state_count()
         assert master.print_dict_state() is None
-
-    def test_start_optimizer(
-        self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        fake_process,
-        database_remove
-    ):
-        database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
-            master = AbstractMaster(options)
-
-        assert master.start_optimizer() is None
-        master.worker_o.kill()
-
-    def test_start_scheduler(
-        self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        fake_process,
-        database_remove
-    ):
-        database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
-            master = AbstractMaster(options)
-
-        assert master.start_scheduler() is None
-        master.worker_s.kill()
-
-        # master = AbstractMaster(config_json)
-        # sch_cmd = master.config.scheduler_command.get().split(" ")
-        # sch_cmd.append('--config')
-        # sch_cmd.append(str(config_json))
-        # # sch_cmd = [
-        # #     'python',
-        # #     '-m',
-        # #     master.config.get('scheduler', 'scheduler_command'),
-        # #     '--config',
-        # #     config_json
-        # # ]
-        # fake_process.register_subprocess(
-        #     sch_cmd, callback=callback_return
-        # )
-        # assert master.start_scheduler() is None
-        # master.th_scheduler.abort()
 
     def test_loop_pre_process(
         self,
@@ -360,7 +259,6 @@ class TestAbstractMaster(BaseTest):
         ]
         with patch.object(sys, 'argv', commandline_args):
             master = AbstractMaster(options)
-        master.storage.alive.init_alive()
         # with patch.object(master, 'ws', return_value='/'):
         #     with patch('aiaccel.dict_alive', return_value=''):
         #         with patch('aiaccel.alive_master', return_value='tmp'):
@@ -369,13 +267,8 @@ class TestAbstractMaster(BaseTest):
         #                 assert master.inner_loop_pre_process()
         with patch.object(master, 'ws', return_value='/tmp'):
             with patch.object(master, 'get_each_state_count', return_value=None):
-                master.storage.alive.init_alive()
                 master.pre_process()
                 assert master.inner_loop_pre_process()
-
-        master.worker_o.kill()
-        master.worker_s.kill()
-        master.storage.alive.init_alive()
 
     def test_inner_loop_main_process(
         self,
@@ -409,7 +302,6 @@ class TestAbstractMaster(BaseTest):
             options = Arguments()
             master = AbstractMaster(options)
         
-        master.storage.alive.init_alive()
         master.pre_process()
         master.inner_loop_pre_process()
         assert master.inner_loop_main_process()
@@ -420,10 +312,6 @@ class TestAbstractMaster(BaseTest):
         # setup_hp_finished(10)
         master.get_each_state_count()
         assert not master.inner_loop_main_process()
-
-        master.worker_o.kill()
-        master.worker_s.kill()
-        master.storage.alive.init_alive()
 
     def test_inner_loop_post_process(
         self,
@@ -449,13 +337,8 @@ class TestAbstractMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             master = AbstractMaster(options)
         master = AbstractMaster(options)
-        master.storage.alive.init_alive()
 
         master.pre_process()
         master.inner_loop_pre_process()
         master.inner_loop_main_process()
         assert master.inner_loop_post_process()
-
-        master.worker_o.kill()
-        master.worker_s.kill()
-        master.storage.alive.init_alive()

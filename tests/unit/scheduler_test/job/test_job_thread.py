@@ -480,13 +480,7 @@ class TestJob(BaseTest):
         self.job.get_machine().set_state('Scheduling')
         assert self.job.schedule() is None
 
-    def test_run_1(self, database_remove):
-        self.job.scheduler.storage.alive.init_alive()
-        self.job.start()
-        self.job.join()
-
     def test_run_2(self, database_remove):
-        self.job.scheduler.storage.alive.init_alive()
         self.job.scheduler.pre_process()
         self.job.start()
         self.job.threshold_timeout = get_time_now_object()

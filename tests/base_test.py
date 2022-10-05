@@ -1,14 +1,9 @@
-from curses import window
 from aiaccel.config import Config
-from aiaccel.config import load_config
 from aiaccel.util.filesystem import create_yaml
 from pathlib import Path
 import pytest
-from aiaccel.util.serialize import Serializer
 from aiaccel.workspace import Workspace
-from aiaccel.storage.storage import Storage
-import os
-import sys
+from contextlib import contextmanager
 
 
 d0 = {
@@ -237,9 +232,6 @@ class BaseTest(object):
             self.workspace.clean()
         self.workspace.create()
 
-        # self.storage = Storage(self.workspace.path / "storage" / "storage.db")
-        # self.storage = Storage(self.workspace.path)
-
         self.test_result_data = []
         self.test_result_data.append(d0)
         self.test_result_data.append(d1)
@@ -250,10 +242,14 @@ class BaseTest(object):
             path = work_dir / 'result' / name
             create_yaml(path, d)
         
+    @contextmanager
     def create_main(self):
-        with open('/tmp/work/original_main.py', 'w', encoding='UTF-8') as f:
+        file_path = Path('/tmp/original_main.py')
+        with open(file_path, 'w', encoding='UTF-8') as f:
             for line in original_main:
                 f.write(line + '\n')
+        yield
+        file_path.unlink()
 
     def get_workspace_path(self):
         return self.work_dir

@@ -1,7 +1,7 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python /tmp/work/original_main.py",
+    "job_command": "python /tmp/original_main.py",
     "batch_job_timeout": 600
   },
   "resource": {

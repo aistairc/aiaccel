@@ -31,6 +31,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             None
         """
         super().pre_process()
+
         initial_parameter = self.generate_initial_parameter()
         if self.nelder_mead is not None:
             return

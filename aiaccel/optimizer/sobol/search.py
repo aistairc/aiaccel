@@ -29,6 +29,7 @@ class SobolOptimizer(AbstractOptimizer):
             None
         """
         super().pre_process()
+
         finished = self.storage.trial.get_finished()
         self.generate_index = len(finished)
 

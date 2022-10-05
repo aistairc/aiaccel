@@ -132,16 +132,6 @@ class TestAbstractModule(BaseTest):
 
         assert self.module.check_finished()
 
-    def test_exit_alive(self, work_dir):
-
-        assert self.module.exit_alive('master') is None
-
-        # with pytest.raises(SystemExit) as e:
-        #     self.module.exit_alive('master')
-
-        # assert e.type == SystemExit
-        # assert e.value.code is None
-
     def test_print_dict_state(self):
         assert self.module.print_dict_state() is None
 
@@ -168,15 +158,11 @@ class TestAbstractModule(BaseTest):
         ) is None
 
     def test_pre_process(self, work_dir):
-        self.module.get_module_type = MagicMock(return_value=(aiaccel.module_type_optimizer))
-        self.module.storage.alive.init_alive()
-        assert self.module.pre_process() is None
-
-        with pytest.raises(SystemExit) as e:
+        try:
             self.module.pre_process()
-
-        assert e.type == SystemExit
-        assert e.value.code is None
+            assert False
+        except NotImplementedError:
+            assert True
 
     def test_post_process(self):
         try:
@@ -184,12 +170,6 @@ class TestAbstractModule(BaseTest):
             assert False
         except NotImplementedError:
             assert True
-
-    def test_start(self):
-        with patch.object(self.module, "loop", return_value=True),\
-                patch.object(self.module, 'pre_process', return_value=True),\
-                patch.object(self.module, 'post_process', return_value=True):
-            assert self.module.start() is None
 
     def test_loop_pre_process(self, work_dir):
         # work_dir.joinpath(aiaccel.dict_runner).rmdir()
@@ -234,76 +214,6 @@ class TestAbstractModule(BaseTest):
         except NotImplementedError:
             assert True
 
-    def test_loop(self):
-        with ExitStack() as stack:
-            stack.enter_context(patch.object(
-                self.module, 'loop_pre_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_pre_process', return_value=False
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'loop_post_process', return_value=True
-            ))
-            assert self.module.loop() is None
-
-        with ExitStack() as stack:
-            stack.enter_context(patch.object(
-                self.module, 'loop_pre_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_pre_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'loop_post_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_main_process', return_value=False
-            ))
-            assert self.module.loop() is None
-
-        with ExitStack() as stack:
-            stack.enter_context(patch.object(
-                self.module, 'loop_pre_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_pre_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_main_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_post_process', return_value=False
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'loop_post_process', return_value=True
-            ))
-            assert self.module.loop() is None
-
-        with ExitStack() as stack:
-            stack.enter_context(patch.object(
-                self.module, 'loop_pre_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_pre_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_main_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'inner_loop_post_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'loop_post_process', return_value=True
-            ))
-            stack.enter_context(patch.object(
-                self.module, 'check_error', return_value=False
-            ))
-            self.module._serialize = Mock()
-            self.module._serialize.side_effect = dummy_break
-
-            self.module.loop()
-
     def test_serialize(self):
         try:
             self.module._serialize()
@@ -317,6 +227,3 @@ class TestAbstractModule(BaseTest):
             assert False
         except NotImplementedError:
             assert True
-
-    def test_is_process_alive(self):
-        assert not self.module.is_process_alive()

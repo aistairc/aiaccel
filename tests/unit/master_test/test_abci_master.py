@@ -75,8 +75,6 @@ class TestAbciMaster(BaseTest):
             master = AbciMaster(options)
         master.pre_process()
         assert type(master.runner_files) is list
-        master.worker_o.kill()
-        master.worker_s.kill()
 
     def test_get_stats(
         self,
@@ -94,7 +92,6 @@ class TestAbciMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
             master = AbciMaster(options)
-        master.storage.alive.init_alive()
 
         xml_path = data_dir.joinpath('qstat.xml')
         fake_process.register_subprocess(
@@ -134,7 +131,6 @@ class TestAbciMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
             master = AbciMaster(options)
-        master.storage.alive.init_alive()
 
         fake_process.register_subprocess(
             ['qstat', '-xml'], callback=callback_return
@@ -151,5 +147,4 @@ class TestAbciMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             options = Arguments()
             master = AbciMaster(options)
-        master.storage.alive.init_alive()
         assert master.loop_post_process() is None
