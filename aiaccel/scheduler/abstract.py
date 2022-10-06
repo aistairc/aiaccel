@@ -50,7 +50,15 @@ class AbstractScheduler(AbstractModule):
         self.job_status = {}
         self.algorithm = None
         self.sleep_time = self.config.sleep_time.get()
-        self.serialize = Serializer(self.config, 'scheduler', self.options)
+
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=[
+                'native_random_state',
+                'numpy_random_state',
+                'loop_count'
+            ]
+        )
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
@@ -247,15 +255,9 @@ class AbstractScheduler(AbstractModule):
         return True
 
     def _serialize(self, trial_id) -> None:
-
-        self.serialize_datas = {'loop_count': self.loop_count}
-
-        self.serialize.serialize(
-            trial_id=trial_id,
-            optimization_variables=self.serialize_datas,
-            native_random_state=self.get_native_random_state(),
-            numpy_random_state=self.get_numpy_random_state()
-        )
+        self.storage.variable.d['native_random_state'].set(trial_id=trial_id, value=self.get_native_random_state())
+        self.storage.variable.d['numpy_random_state'].set(trial_id=trial_id, value=self.get_numpy_random_state())
+        self.storage.variable.d['loop_count'].set(trial_id=trial_id, value=self.loop_count)
 
     def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
@@ -266,15 +268,9 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        d = self.serialize.deserialize(trial_id)
-        self.deserialize_datas = d['optimization_variables']
-
-        if self.deserialize_datas['loop_count'] is None:
-            return
-
-        self.loop_count = self.deserialize_datas['loop_count']
-
-        print(f"(scheduler)set inner loop count: {self.loop_count}")
+        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
+        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
+        self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
 
     def parse_trial_id(self, command: str) -> str:
         """Parse a command string and extract an unique name.

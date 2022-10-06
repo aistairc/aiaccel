@@ -8,6 +8,7 @@ class ResumptionTest(IntegrationTest):
     search_algorithm = None
 
     def test_run(self, cd_work, data_dir, work_dir):
+        print(self.search_algorithm)
         with self.create_main():
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             config = Config(config_file)

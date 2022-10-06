@@ -20,7 +20,8 @@ from aiaccel.storage.result.db import Result
 from aiaccel.storage.jobstate.db import JobState
 from aiaccel.storage.error.db import Error
 from aiaccel.storage.timestamp.db import TimeStamp
-from aiaccel.storage.serializer.db import Serializer
+# from aiaccel.storage.serializer.db import Serializer
+from aiaccel.storage.variant.db import Serializer
 
 from aiaccel.config import Config
 
@@ -35,6 +36,8 @@ class Storage:
         config_path: PosixPath = None
     ) -> None:
         self.fsmode = fsmode
+        self.db_path = ws / aiaccel.dict_storage / "storage.db"
+
         if self.fsmode is True:
             if config_path is None:
                 assert False
@@ -49,16 +52,16 @@ class Storage:
             self.error = fsError(config)
             self.timestamp = fsTimeStamp(config)
         else:
-            db_path = ws / aiaccel.dict_storage / "storage.db"
-            self.alive = Alive(db_path)
-            self.pid = Pid(db_path)
-            self.trial = Trial(db_path)
-            self.hp = Hp(db_path)
-            self.result = Result(db_path)
-            self.jobstate = JobState(db_path)
-            self.serializer = Serializer(db_path)
-            self.error = Error(db_path)
-            self.timestamp = TimeStamp(db_path)
+            self.alive = Alive(self.db_path)
+            self.pid = Pid(self.db_path)
+            self.trial = Trial(self.db_path)
+            self.hp = Hp(self.db_path)
+            self.result = Result(self.db_path)
+            self.jobstate = JobState(self.db_path)
+            # self.serializer = Serializer(self.db_path)
+            self.error = Error(self.db_path)
+            self.timestamp = TimeStamp(self.db_path)
+            self.variable = Serializer(self.db_path)
 
     def current_max_trial_number(self) -> int:
         """Get the current maximum number of trials.
@@ -278,7 +281,7 @@ class Storage:
         self.error.delete_any_trial_error(trial_id)
         self.jobstate.delete_any_trial_jobstate(trial_id)
         self.result.delete_any_trial_objective(trial_id)
-        self.serializer.delete_any_trial_serialize(trial_id)
+        self.variable.delete_any_trial_variable(trial_id)
         self.timestamp.delete_any_trial_timestamp(trial_id)
         self.trial.delete_any_trial_state(trial_id)
         self.hp.delete_any_trial_params(trial_id)

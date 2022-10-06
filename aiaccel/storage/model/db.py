@@ -101,3 +101,12 @@ class AbciOutputTable(Base):
     __tablename__ = 'abci_output'
     trial_id = Column(Integer, primary_key=True)
     message = Column(Text, nullable=True)
+
+
+class VariableTable(Base):
+    __tablename__ = 'variable'
+    data_id = Column(Integer, primary_key=True)
+    trial_id = Column(Integer, nullable=False)
+    process_name = Column(String(length=128), nullable=False)
+    label = Column(String(length=128), nullable=False)
+    value = Column(PickleType, nullable=False)

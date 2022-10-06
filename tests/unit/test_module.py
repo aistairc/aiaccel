@@ -216,7 +216,7 @@ class TestAbstractModule(BaseTest):
 
     def test_serialize(self):
         try:
-            self.module._serialize()
+            self.module._serialize(trial_id=0)
             assert False
         except NotImplementedError:
             assert True

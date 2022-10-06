@@ -42,8 +42,6 @@ class Viewer:
                 if len(error) > 4:
                     error = error[0:3] + "..."
 
-            # resume = "possible" if self.storage.serializer.is_exists_any_trial(trial_id) else ""
-
             infos.append(
                 {
                     "trial_id": str(trial_id),

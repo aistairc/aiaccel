@@ -78,6 +78,18 @@ class GridOptimizer(AbstractOptimizer):
         self.ready_params = None
         self.generate_index = None
 
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=[
+                'native_random_state',
+                'numpy_random_state',
+                'num_of_generated_parameter',
+                'loop_count',
+                'ready_params',
+                'generate_index'
+            ]
+        )
+
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
@@ -85,9 +97,7 @@ class GridOptimizer(AbstractOptimizer):
             None
         """
         super().pre_process()
-
         self.ready_params = []
-
         for param in self.params.get_parameter_list():
             self.ready_params.append(generate_grid_points(param, self.config))
 
@@ -139,7 +149,7 @@ class GridOptimizer(AbstractOptimizer):
             None
         """
         returned_params = []
-
+        trial_id = self.trial_id.integer
         for _ in range(number):
             parameter_index = self.get_parameter_index()
             new_params = []
@@ -162,26 +172,20 @@ class GridOptimizer(AbstractOptimizer):
             self.num_of_generated_parameter += 1
 
             self.register_ready({'parameters': new_params})
-            self._serialize()
+            self._serialize(trial_id)
 
-    def _serialize(self) -> None:
+    def _serialize(self, trial_id: int) -> None:
         """Serialize this module.
 
         Returns:
             dict: The serialized objects.
         """
-        self.serialize_datas = {
-            'num_of_generated_parameter': self.num_of_generated_parameter,
-            'loop_count': self.loop_count,
-            'ready_params': self.ready_params,
-            'generate_index': self.generate_index
-        }
-        self.serialize.serialize(
-            trial_id=self.trial_id.integer,
-            optimization_variables=self.serialize_datas,
-            native_random_state=self.get_native_random_state(),
-            numpy_random_state=self.get_numpy_random_state()
-        )
+        self.storage.variable.d['native_random_state'].set(trial_id=trial_id, value=self.get_native_random_state())
+        self.storage.variable.d['numpy_random_state'].set(trial_id=trial_id, value=self.get_numpy_random_state())
+        self.storage.variable.d['num_of_generated_parameter'].set(trial_id=trial_id, value=self.num_of_generated_parameter)
+        self.storage.variable.d['loop_count'].set(trial_id=trial_id, value=self.loop_count)
+        self.storage.variable.d['ready_params'].set(trial_id=trial_id, value=self.ready_params)
+        self.storage.variable.d['generate_index'].set(trial_id=trial_id, value=self.generate_index)
 
     def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
@@ -192,12 +196,9 @@ class GridOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        d = self.serialize.deserialize(trial_id)
-        self.deserialize_datas = d['optimization_variables']
-        self.set_native_random_state(d['native_random_state'])
-        self.set_numpy_random_state(d['numpy_random_state'])
-
-        self.ready_params = self.deserialize_datas['ready_params']
-        self.generate_index = self.deserialize_datas['generate_index']
-        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
-        self.loop_count = self.deserialize_datas['loop_count']
+        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
+        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
+        self.num_of_generated_parameter = self.storage.variable.d['num_of_generated_parameter'].get(trial_id)
+        self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
+        self.ready_params = self.storage.variable.d['ready_params'].get(trial_id)
+        self.generate_index = self.storage.variable.d['generate_index'].get(trial_id)

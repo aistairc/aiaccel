@@ -43,7 +43,6 @@ class AbstractOptimizer(AbstractModule):
         self.all_parameter_generated = False
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
-        self.serialize = Serializer(self.config, 'optimizer', self.options)
 
     def register_new_parameters(self, params: List[dict]) -> None:
         """Create hyper parameter files.
@@ -217,7 +216,7 @@ class AbstractOptimizer(AbstractModule):
         self.print_dict_state()
         return True
 
-    def _serialize(self) -> None:
+    def _serialize(self, trial_id: int) -> None:
         pass
 
     def _deserialize(self, trial_id: int) -> None:

@@ -47,7 +47,7 @@ class TestTpeOptimizer(BaseTest):
     def test_serialize(self):
         self.optimizer.trial_id.initial(num=0)
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
-        assert self.optimizer._serialize() is None
+        assert self.optimizer._serialize(trial_id=0) is None
 
     def test_deserialize(self):
         self.optimizer.pre_process()

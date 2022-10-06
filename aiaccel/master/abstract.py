@@ -47,7 +47,6 @@ class AbstractMaster(AbstractModule):
         self.verification = AbstractVerification(self.options)
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
-        self.serialize = Serializer(self.config, 'master', self.options)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
