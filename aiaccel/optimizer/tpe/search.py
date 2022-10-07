@@ -134,7 +134,7 @@ class TpeOptimizer(AbstractOptimizer):
             self.trial_pool[trial_id] = trial
             self.logger.info(f'newly added name: {trial_id} to parameter_pool')
 
-            self._serialize(trial_id)
+            self._serialize(self.trial_id.integer)
 
     def generate_initial_parameter(self):
 

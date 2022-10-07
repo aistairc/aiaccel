@@ -17,7 +17,8 @@ class Variable(Abstract):
         trial_id: int,
         process_name: str,
         label: str,
-        value: Any
+        value: Any,
+        update_allow: bool
     ):
         with self.create_session() as session:
             try:
@@ -29,7 +30,9 @@ class Variable(Abstract):
                     .with_for_update(read=True)
                     .one_or_none()
                 )
-                if data is not None:
+                update_num = 0
+                if data is not None and update_allow is True:
+                    update_num = data.update_num + 1
                     self.delete_any_trial_variable(
                         trial_id=trial_id,
                         process_name=process_name,
@@ -40,8 +43,10 @@ class Variable(Abstract):
                     trial_id=trial_id,
                     process_name=process_name,
                     label=label,
-                    value=value
+                    value=value,
+                    update_num=update_num
                 )
+
                 session.add(new_row)
                 session.commit()
 
@@ -105,12 +110,13 @@ class Value(Variable):
     def set_process_name(self, process_name: str):
         self.process_name = process_name
 
-    def set(self, trial_id: int, value: Any):
+    def set(self, trial_id: int, value: Any, update_allow: bool = True):
         self.set_any_trial_variable(
             trial_id=trial_id,
             process_name=self.process_name,
             label=self.label,
-            value=value
+            value=value,
+            update_allow=update_allow
         )
 
     def get(self, trial_id: int):
@@ -143,6 +149,7 @@ class Serializer:
     def delete_any_trial_variable(self, trial_id):
         for key in self.d.keys():
             self.d[key].delete(trial_id)
+
 
 if __name__ == "__main__":
     from pathlib import Path

@@ -55,11 +55,10 @@ class SobolOptimizer(AbstractOptimizer):
         l_params = self.params.get_parameter_list()
         n_params = len(l_params)
         initial_parameter = self.generate_initial_parameter()
-        trial_id = self.trial_id.integer
 
         if initial_parameter is not None:
             self.register_ready(initial_parameter)
-            self._serialize(trial_id)
+            self._serialize(self.trial_id.integer)
             number -= 1
 
         for _ in range(number):
@@ -80,7 +79,7 @@ class SobolOptimizer(AbstractOptimizer):
 
             self.num_of_generated_parameter += 1
             self.register_ready({'parameters': new_params})
-            self._serialize(trial_id)
+            self._serialize(self.trial_id.integer)
 
     def _serialize(self, trial_id: int) -> dict:
         """Serialize this module.

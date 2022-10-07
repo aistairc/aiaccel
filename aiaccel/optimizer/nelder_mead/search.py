@@ -241,7 +241,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        trial_id = self.trial_id.integer
         for _ in range(number_of_generate):
             if len(self.parameter_pool) == 0:
                 self.logger.info('All parameters in pool has been generated.')
@@ -279,7 +278,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     'parameters': self.new_params
                 }
             )
-            self._serialize(trial_id)
+            self._serialize(self.trial_id.integer)
 
     def _get_all_trial_id(self) -> list:
         """_get_all_trial_id.

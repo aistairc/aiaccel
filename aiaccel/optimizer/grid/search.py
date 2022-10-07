@@ -149,7 +149,6 @@ class GridOptimizer(AbstractOptimizer):
             None
         """
         returned_params = []
-        trial_id = self.trial_id.integer
         for _ in range(number):
             parameter_index = self.get_parameter_index()
             new_params = []
@@ -172,7 +171,7 @@ class GridOptimizer(AbstractOptimizer):
             self.num_of_generated_parameter += 1
 
             self.register_ready({'parameters': new_params})
-            self._serialize(trial_id)
+            self._serialize(self.trial_id.integer)
 
     def _serialize(self, trial_id: int) -> None:
         """Serialize this module.

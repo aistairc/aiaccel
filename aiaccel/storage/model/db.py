@@ -110,3 +110,4 @@ class VariableTable(Base):
     process_name = Column(String(length=128), nullable=False)
     label = Column(String(length=128), nullable=False)
     value = Column(PickleType, nullable=False)
+    update_num = Column(Integer, nullable=False)
