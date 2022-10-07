@@ -24,11 +24,7 @@ class AbstractEvaluator(object):
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
         self.hp_result = None
-        self.storage = Storage(
-            self.ws,
-            fsmode=self.options['fs'],
-            config_path=self.config_path
-        )
+        self.storage = Storage(self.ws)
         self.goal = self.config.goal.get()
         self.trial_id = TrialId(str(self.config_path))
 

@@ -1084,11 +1084,7 @@ class Job(threading.Thread):
         self.proc = None
         self.th_oh = None
         self.stop_flag = False
-        self.storage = Storage(
-            self.ws,
-            fsmode=self.options['fs'],
-            config_path=self.config_path
-        )
+        self.storage = Storage(self.ws)
         self.content = self.storage.get_hp_dict(self.trial_id)
         self.result_file_path = self.ws / aiaccel.dict_result / (self.trial_id_str + '.hp')
         self.expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt["trigger"] == "expire"]

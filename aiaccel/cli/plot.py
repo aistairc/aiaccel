@@ -9,11 +9,7 @@ class Plotter:
     def __init__(self, config: Config, options: dict):
         self.config_path = config.config_path
         self.workspace = Path(config.workspace.get()).resolve()
-        self.storage = Storage(
-            self.workspace,
-            fsmode=options['fs'],
-            config_path=self.config_path
-        )
+        self.storage = Storage(self.workspace)
         self.goal = config.goal.get().lower()
         self.cplt = EasyVisualizer()
 

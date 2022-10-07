@@ -251,11 +251,7 @@ class Run:
             self.dict_lock = self.workspace / aiaccel.dict_lock
 
             # create database
-            self.storage = Storage(
-                self.workspace,
-                self.args['fs'],
-                config_path=self.config_path
-            )
+            self.storage = Storage(self.workspace)
 
         parameters_config = load_parameter(self.config.hyperparameters.get())
         for p in parameters_config.get_parameter_list():

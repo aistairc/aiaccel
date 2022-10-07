@@ -1,17 +1,6 @@
 from typing import Union
 from pathlib import PosixPath
 import aiaccel
-# === fs ===
-from aiaccel.storage.alive.fs import Alive as fsAlive
-from aiaccel.storage.pid.fs import Pid as fsPid
-from aiaccel.storage.trial.fs import Trial as fsTrial
-from aiaccel.storage.hp.fs import Hp as fsHp
-from aiaccel.storage.jobstate.fs import JobState as fsJobState
-from aiaccel.storage.result.fs import Result as fsResult
-from aiaccel.storage.serializer.fs import Serializer as fsSerializer
-from aiaccel.storage.error.fs import Error as fsError
-from aiaccel.storage.timestamp.fs import TimeStamp as fsTimeStamp
-# === db ===
 from aiaccel.storage.alive.db import Alive
 from aiaccel.storage.pid.db import Pid
 from aiaccel.storage.trial.db import Trial
@@ -22,43 +11,21 @@ from aiaccel.storage.error.db import Error
 from aiaccel.storage.timestamp.db import TimeStamp
 from aiaccel.storage.serializer.db import Serializer
 
-from aiaccel.config import Config
-
 
 class Storage:
     """ Database
     """
-    def __init__(
-        self,
-        ws: PosixPath,
-        fsmode: bool = False,
-        config_path: PosixPath = None
-    ) -> None:
-        self.fsmode = fsmode
-        if self.fsmode is True:
-            if config_path is None:
-                assert False
-            config = Config(config_path)
-            self.alive = fsAlive(config)
-            self.pid = fsPid(config)
-            self.trial = fsTrial(config)
-            self.hp = fsHp(config)
-            self.jobstate = fsJobState(config)
-            self.result = fsResult(config)
-            self.serializer = fsSerializer(config)
-            self.error = fsError(config)
-            self.timestamp = fsTimeStamp(config)
-        else:
-            db_path = ws / aiaccel.dict_storage / "storage.db"
-            self.alive = Alive(db_path)
-            self.pid = Pid(db_path)
-            self.trial = Trial(db_path)
-            self.hp = Hp(db_path)
-            self.result = Result(db_path)
-            self.jobstate = JobState(db_path)
-            self.serializer = Serializer(db_path)
-            self.error = Error(db_path)
-            self.timestamp = TimeStamp(db_path)
+    def __init__(self, ws: PosixPath) -> None:
+        db_path = ws / aiaccel.dict_storage / "storage.db"
+        self.alive = Alive(db_path)
+        self.pid = Pid(db_path)
+        self.trial = Trial(db_path)
+        self.hp = Hp(db_path)
+        self.result = Result(db_path)
+        self.jobstate = JobState(db_path)
+        self.serializer = Serializer(db_path)
+        self.error = Error(db_path)
+        self.timestamp = TimeStamp(db_path)
 
     def current_max_trial_number(self) -> int:
         """Get the current maximum number of trials.

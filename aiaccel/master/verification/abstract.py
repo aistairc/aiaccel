@@ -28,11 +28,7 @@ class AbstractVerification(object):
         self.condition = None
         self.verification_result = None
         self.load_verification_config()
-        self.storage = Storage(
-            self.ws,
-            fsmode=self.options['fs'],
-            config_path=self.config.config_path
-        )
+        self.storage = Storage(self.ws)
 
     def verify(self) -> None:
         """Run a verification. The trigger to run a verification, is described
