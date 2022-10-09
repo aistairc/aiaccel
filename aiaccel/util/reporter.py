@@ -3,7 +3,7 @@ import csv
 
 from fasteners import InterProcessLock
 
-from aiaccel.util import TrialId
+from aiaccel.util.trial_id import TrialId
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 
