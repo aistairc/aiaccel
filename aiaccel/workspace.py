@@ -2,9 +2,8 @@ import shutil
 import pathlib
 from typing import Union
 import aiaccel
-from aiaccel.util import filesystem as fs
-from aiaccel.util.retry import retry
-from aiaccel.util.suffix import Suffix
+from aiaccel import filesystem as fs
+from aiaccel import Suffix, retry
 
 
 class Workspace:

@@ -4,7 +4,7 @@ import logging
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.trialid import TrialId
+from aiaccel.util import TrialId
 
 
 class AbstractEvaluator(object):

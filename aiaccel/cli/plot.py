@@ -1,16 +1,18 @@
-from aiaccel.argument import Arguments
+from argparse import ArgumentParser
+from pathlib import Path
+
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
-from pathlib import Path
-from aiaccel.util.easy_visualizer import EasyVisualizer
+from aiaccel.util import EasyVisualizer
 
 
 class Plotter:
-    def __init__(self, config: Config, options: dict):
-        self.config_path = config.config_path
+    def __init__(self, config: Config):
         self.workspace = Path(config.workspace.get()).resolve()
+
         self.storage = Storage(self.workspace)
         self.goal = config.goal.get().lower()
+
         self.cplt = EasyVisualizer()
 
     def plot(self) -> None:
@@ -30,41 +32,24 @@ class Plotter:
             print("Invalid data")
             return
 
-        self.cplt.set_colors(
-            [
-                "red",
-                "green"
-            ]
-        )
-        self.cplt.caption(
-            [
-                "objective",
-                "best value"
-            ]
-        )
-        self.cplt.line_plot(
-            [
-                objectives,
-                bests
-            ]
-        )
-        return
+        self.cplt.set_colors(["red", "green"])
+        self.cplt.caption(["objective", "best value"])
+        self.cplt.line_plot([objectives, bests])
 
 
 def main() -> None:  # pragma: no cover
-    options = Arguments()
-    if "config" not in options.keys():
-        print("Specify the config file path with the --config option.")
-        return
+    parser = ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    args = parser.parse_args()
 
-    config = Config(options['config'])
+    config = Config(args.config)
     workspace = config.workspace.get()
 
     if Path(workspace).exists() is False:
         print(f"{workspace} is not found.")
         return
 
-    plotter = Plotter(config, options)
+    plotter = Plotter(config)
     plotter.plot()
 
 

@@ -1,16 +1,15 @@
-from aiaccel.argument import Arguments
-from aiaccel.util.report import CreationReaport
-import sys
+from argparse import ArgumentParser
+
+from aiaccel.util import Reporter
 
 
 def main():
-    options = Arguments()
-    if "config" not in options.keys():
-        print("Specify the config file path with the --config option.")
-        sys.exit()
+    parser = ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    args = parser.parse_args()
 
-    report = CreationReaport(options)
-    report.create()
+    reporter = Reporter(args.config)
+    reporter.create()
 
 
 if __name__ == "__main__":

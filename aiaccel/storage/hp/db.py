@@ -3,7 +3,7 @@ from typing import Any
 from typing import Union
 from aiaccel.storage.abstruct.db import Abstract
 from aiaccel.storage.model.db import HpTable
-from aiaccel.util.retry import retry
+from aiaccel.util import retry
 
 
 class Hp(Abstract):

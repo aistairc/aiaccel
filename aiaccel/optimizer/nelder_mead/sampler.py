@@ -1,9 +1,12 @@
-from aiaccel.util.name import generate_random_name
-from aiaccel.parameter import HyperParameter
 from typing import Dict, List, Optional, Union
 import copy
 import logging
+
 import numpy as np
+
+from aiaccel.util import generate_random_name
+from aiaccel.parameter import HyperParameter
+
 
 STATES = [
     'WaitInitialize',

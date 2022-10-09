@@ -3,7 +3,7 @@
 # from aiaccel.util.serialize import deserialize_native_random
 # from aiaccel.util.serialize import deserialize_numpy_random
 # from aiaccel.util.serialize import serialize_state
-from aiaccel.util.serialize import Serializer
+from aiaccel.util.serializer import Serializer
 from tests.base_test import BaseTest
 import numpy as np
 import random

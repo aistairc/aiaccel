@@ -1,13 +1,12 @@
+import logging
+
+import aiaccel
 from aiaccel.module import AbstractModule
 from aiaccel.master.evaluator.maximize import MaximizeEvaluator
 from aiaccel.master.evaluator.minimize import MinimizeEvaluator
 from aiaccel.master.verification.abstract import AbstractVerification
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.time_tools import get_time_now_object
-from aiaccel.util.time_tools import get_time_string_from_object
-import aiaccel
-import logging
-from aiaccel.util.serialize import Serializer
+from aiaccel.util import Serializer, str_to_logging_level
+from aiaccel.util.time_tools import get_time_now_object, get_time_string_from_object
 
 
 class AbstractMaster(AbstractModule):

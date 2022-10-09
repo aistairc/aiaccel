@@ -1,13 +1,15 @@
-from aiaccel.argument import Arguments
+from pathlib import Path
+from argparse import ArgumentParser
+
+from numpy import maximum
+
 from aiaccel.config import Config
 from aiaccel.workspace import Workspace
 from aiaccel.storage.storage import Storage
-from pathlib import Path
-from numpy import maximum
 
 
 class Viewer:
-    def __init__(self, config: Config, options: dict):
+    def __init__(self, config: Config):
         self.config_path = config.config_path
         self.workspace = Path(config.workspace.get()).resolve()
         self.storage = Storage(self.workspace)
@@ -91,12 +93,11 @@ class Viewer:
 
 
 def main() -> None:  # pragma: no cover
-    options = Arguments()
-    if "config" not in options.keys():
-        print("Specify the config file path with the --config option.")
-        return
+    parser = ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    args = parser.parse_args()
 
-    config = Config(options['config'])
+    config = Config(args.config)
     workspace = config.workspace.get()
 
     ws = Workspace(workspace)
@@ -104,7 +105,7 @@ def main() -> None:  # pragma: no cover
         print(f"{workspace} is not found.")
         return
 
-    viewer = Viewer(config, options)
+    viewer = Viewer(config)
     viewer.view()
 
 

@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Union
 import time
-from aiaccel.util.serialize import Serializer
+
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schdule_sampling
 from aiaccel.scheduler.job.job_thread import Job
-from aiaccel.util.logger import str_to_logging_level
+from aiaccel.util import Serializer, str_to_logging_level
 
 
 class AbstractScheduler(AbstractModule):

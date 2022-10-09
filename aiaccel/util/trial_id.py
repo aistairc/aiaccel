@@ -1,8 +1,10 @@
+from typing import Union
 from pathlib import Path
+
+import fasteners
+
 from aiaccel.config import Config
 import aiaccel
-import fasteners
-from typing import Union
 
 
 class TrialId:

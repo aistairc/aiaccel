@@ -1,8 +1,10 @@
 from typing import Any
+
 from sqlalchemy.exc import SQLAlchemyError
+
 from aiaccel.storage.abstruct.db import Abstract
 from aiaccel.storage.model.db import SerializeTable
-from aiaccel.util.retry import retry
+from aiaccel.util import retry
 
 
 class Serializer(Abstract):

@@ -46,16 +46,7 @@ class Serializer:
             numpy_random_state=numpy_random_state
         )
 
-        # # random_state
-        # self.storage.random_state.set_random_state(
-        #     trial_id=trial_id,
-        #     process_name=self.process_name,
-        #     native_random_state=native_random_state,
-        #     numpy_random_state=numpy_random_state
-        # )
-
     def deserialize(self, trial_id: int) -> Dict:
-        # optimization_variables, random_state
         optimization_variables, native_rnd_state, numpy_rnd_state = (
             self.storage.serializer.get_any_trial_serialize(
                 trial_id=trial_id,
@@ -65,23 +56,6 @@ class Serializer:
 
         if optimization_variables is None:
             optimization_variables = self._get_initialized_serialize_data()
-
-        # optimization_variables = (
-        #     self.storage.serializer.get_any_trial_serialize(
-        #         trial_id=trial_id,
-        #         process_name=self.process_name
-        #     )
-        # )
-        # if optimization_variables is None:
-        #     optimization_variables = self._get_initialized_serialize_data()
-
-        # # random_state
-        # native_rnd_state, numpy_rnd_state = (
-        #     self.storage.random_state.get_random_state(
-        #         trial_id=trial_id,
-        #         process_name=self.process_name
-        #     )
-        # )
 
         data = {
             "optimization_variables": optimization_variables,
