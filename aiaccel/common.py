@@ -33,7 +33,6 @@ dict_runner = 'runner'
 dict_timestamp = 'timestamp'
 dict_verification = 'verification'
 dict_storage = 'storage'
-dict_snapshot = 'snapshot'
 
 extension_hp = 'hp'
 extension_pickle = 'pickle'

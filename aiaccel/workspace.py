@@ -25,7 +25,6 @@ class Workspace:
         self.result = self.path / aiaccel.dict_result
         self.runner = self.path / aiaccel.dict_runner
         self.storage = self.path / aiaccel.dict_storage
-        self.snapshpt = self.path / aiaccel.dict_snapshot
         self.timestamp = self.path / aiaccel.dict_timestamp
         self.verification = self.path / aiaccel.dict_verification
 
@@ -44,7 +43,6 @@ class Workspace:
             self.result,
             self.runner,
             self.storage,
-            self.snapshpt,
             self.timestamp,
             self.verification
         ]

@@ -3,7 +3,7 @@ from aiaccel.master.abstract import AbstractMaster
 from aiaccel.util.filesystem import get_dict_files
 import aiaccel
 import subprocess
-from aiaccel.util.filesystem import retry
+from aiaccel.util.retry import retry
 
 
 class AbciMaster(AbstractMaster):

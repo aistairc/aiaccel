@@ -2,7 +2,6 @@ from aiaccel.config import ConfileWrapper
 from aiaccel.optimizer.nelder_mead.sampler import NelderMead
 from aiaccel.optimizer.nelder_mead.search import NelderMeadOptimizer
 from aiaccel.parameter import load_parameter
-from aiaccel.util.filesystem import move_file
 from tests.base_test import BaseTest
 import aiaccel
 import json
@@ -43,16 +42,6 @@ class TestNelderMeadOptimizer(BaseTest):
         # params = self.optimizer.nelder_mead.get_ready_parameters()
         params = self.optimizer.get_ready_parameters()
         print(params)
-        # move_file(
-        #     work_dir.joinpath(
-        #         aiaccel.dict_result,
-        #         '001.{}'.format(aiaccel.extension_result)
-        #     ),
-        #     work_dir.joinpath(
-        #         aiaccel.dict_result,
-        #         '{}.{}'.format(params[0]['vertex_id'], aiaccel.extension_result)
-        #     )
-        # )
         assert self.optimizer.check_result() is None
 
     def test_generate_parameter(
@@ -74,17 +63,6 @@ class TestNelderMeadOptimizer(BaseTest):
         params = self.optimizer.get_ready_parameters()
         assert params is not None
         setup_result(len(params))
-        # for i in range(0, len(params)):
-        #     move_file(
-        #         work_dir.joinpath(
-        #             aiaccel.dict_result,
-        #             '{:03}.{}'.format(i+1, aiaccel.extension_result)
-        #         ),
-        #         work_dir.joinpath(
-        #             aiaccel.dict_result,
-        #             '{}.{}'.format(params[i]['name'], aiaccel.extension_result)
-        #         )
-        #     )
         assert self.optimizer.generate_parameter() is None
         assert self.optimizer.generate_parameter() is None
         assert self.optimizer.generate_parameter() is None
@@ -110,17 +88,6 @@ class TestNelderMeadOptimizer(BaseTest):
         # params = self.optimizer.get_ready_parameters()
         params = self.optimizer.nelder_mead._executing
         setup_result(len(params))
-        # for i in range(0, len(params)):
-        #     move_file(
-        #         work_dir.joinpath(
-        #             aiaccel.dict_result,
-        #             '{:03}.{}'.format(i+1, aiaccel.extension_result)
-        #         ),
-        #         work_dir.joinpath(
-        #             aiaccel.dict_result,
-        #             '{}.{}'.format(params[i]['name'], aiaccel.extension_result)
-        #         )
-        #     )
         assert self.optimizer.generate_parameter() is None
         assert self.optimizer.generate_parameter() is None
 
