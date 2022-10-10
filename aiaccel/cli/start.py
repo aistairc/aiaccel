@@ -1,43 +1,38 @@
 import pathlib
 import shutil
 import time
+from argparse import ArgumentParser
+
 import aiaccel
 from aiaccel import parameter as pt
 from aiaccel.config import Config
 from aiaccel.util import filesystem as fs
 from aiaccel.util.terminal import Terminal
-from aiaccel.util.report import CreationReaport
-from aiaccel.argument import Arguments
+from aiaccel.util.report import CreationReport
 from aiaccel.workspace import Workspace
 from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.master.create import create_master
 
 
-def main(options: dict = Arguments()) -> None:
-    if options['config'] == "" or options['config'] is None:
-        Terminal().print_error(
-            "The configuration file is not specified. "
-            "Please specify it with the command line argument "
-            "'--config' or '-c'."
-        )
-        return
+def main() -> None:
+    parser = ArgumentParser()
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument('--resume', type=int, default=None)
+    parser.add_argument('--clean', nargs='?', const=True, default=False)
+    args = parser.parse_args()
 
-    if not pathlib.Path(options['config']).exists():
-        Terminal().print_error(f"config file: {options['config']} doesn't exist.")
-        return
-
-    config = Config(options['config'], warn=True, format_check=True)
+    config = Config(args.config, warn=True, format_check=True)
     if config is None:
-        Terminal().print_error(f"Invalid workspace: {options['workspace']} or config: {options['config']}")
+        Terminal().print_error(f"Invalid workspace: {args.workspace} or config: {args.config}")
         return
 
     workspace = Workspace(config.workspace.get())
     goal = config.goal.get()
     dict_lock = workspace.path / aiaccel.dict_lock
 
-    if options['resume'] is None:
-        if options['clean'] is True:
+    if args.resume is None:
+        if args.clean is True:
             print("Cleaning workspace")
             workspace.clean()
             print(f'Workspace directory {str(workspace.path)} is cleaned.')
@@ -52,14 +47,14 @@ def main(options: dict = Arguments()) -> None:
         return
 
     print(f"Start {config.search_algorithm.get()} Optimization")
-    print(f"config: {str(pathlib.Path(options['config']).resolve())}")
+    print(f"config: {str(pathlib.Path(args.config).resolve())}")
 
     time_s = time.time()
 
-    Master = create_master(options['config'])
-    Optimizer = create_optimizer(options['config'])
-    Scheduler = create_scheduler(options['config'])
-    modules = [Master(options), Scheduler(options), Optimizer(options)]
+    Master = create_master(args.config)
+    Optimizer = create_optimizer(args.config)
+    Scheduler = create_scheduler(args.config)
+    modules = [Master(args), Scheduler(args), Optimizer(args)]
 
     sleep_time = config.sleep_time.get()
     time_s = time.time()
@@ -92,14 +87,14 @@ def main(options: dict = Arguments()) -> None:
     for module in modules:
         module.post_process()
 
-    report = CreationReaport(options)
+    report = CreationReport(args.config)
     report.create()
 
     print("moving...")
     dst = workspace.move_completed_data()
 
-    config_name = pathlib.Path(options['config']).name
-    shutil.copy(pathlib.Path(options['config']), dst / config_name)
+    config_name = pathlib.Path(args.config).name
+    shutil.copy(pathlib.Path(args.config), dst / config_name)
 
     files = fs.get_file_result_hp(dst)
     best, best_file = pt.get_best_parameter(files, goal, dict_lock)

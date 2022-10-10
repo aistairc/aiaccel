@@ -1,16 +1,15 @@
 import pathlib
-from aiaccel.master.abci import AbciMaster
-from aiaccel.scheduler.abci import AbciScheduler
-from aiaccel.util.filesystem import get_dict_files
-from tests.base_test import BaseTest
-import pytest
 import subprocess
 import time
 import sys
+
+import pytest
 from unittest.mock import patch
-from aiaccel.master.create import create_master
+
 from aiaccel.master.abci import AbciMaster
-from aiaccel.argument import Arguments
+
+from tests.base_test import BaseTest
+from tests.arguments import parse_arguments
 
 
 def callback_qstat():
@@ -50,7 +49,7 @@ class TestAbciMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # self.master = start.Master()
-            options = Arguments()
+            options = parse_arguments()
             # self.master = create_master(options['config'])(options)
             self.master = AbciMaster(options)
 
@@ -71,7 +70,7 @@ class TestAbciMaster(BaseTest):
             self.get_confit_path()
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbciMaster(options)
         master.pre_process()
         assert type(master.runner_files) is list
@@ -90,7 +89,7 @@ class TestAbciMaster(BaseTest):
             self.get_confit_path()
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbciMaster(options)
 
         xml_path = data_dir.joinpath('qstat.xml')
@@ -129,7 +128,7 @@ class TestAbciMaster(BaseTest):
             self.get_confit_path()
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbciMaster(options)
 
         fake_process.register_subprocess(
@@ -145,6 +144,6 @@ class TestAbciMaster(BaseTest):
             self.get_confit_path()
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbciMaster(options)
         assert master.loop_post_process() is None

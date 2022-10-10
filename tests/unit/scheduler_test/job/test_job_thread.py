@@ -1,24 +1,23 @@
-from aiaccel.config import ConfileWrapper
-from aiaccel.scheduler.local import LocalScheduler
-from aiaccel.scheduler.job.job_thread import CustomMachine
-from aiaccel.scheduler.job.job_thread import Job
-from aiaccel.scheduler.job.job_thread import JOB_STATES
-from aiaccel.scheduler.job.job_thread import JOB_TRANSITIONS
-from aiaccel.scheduler.job.job_thread import Model
-from aiaccel.util.time_tools import get_time_now_object
-from tests.base_test import BaseTest
-import aiaccel
 import asyncio
 import datetime
-import json
-import pytest
 import time
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import json
+
+import pytest
 from unittest.mock import patch
-from aiaccel.argument import Arguments
+
+import aiaccel
+from aiaccel.util.time_tools import get_time_now_object
+from aiaccel.config import ConfileWrapper
+from aiaccel.scheduler.local import LocalScheduler
+from aiaccel.scheduler.job.job_thread import CustomMachine, Job, Model, JOB_STATES, JOB_TRANSITIONS
 from aiaccel.scheduler.create import create_scheduler
-import time
+
+from tests.base_test import BaseTest
+from tests.arguments import parse_arguments
 
 
 async def async_start_job(job):
@@ -69,7 +68,7 @@ class TestModel(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = Arguments()
+            options = parse_arguments()
             scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
@@ -109,7 +108,7 @@ class TestModel(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = Arguments()
+            options = parse_arguments()
             scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
         trial_id = 1
@@ -414,7 +413,7 @@ class TestJob(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = Arguments()
+            options = parse_arguments()
             scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
