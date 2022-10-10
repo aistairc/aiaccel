@@ -48,5 +48,5 @@ def test_view():
 
     config = Config(config_path)
 
-    viewer = Viewer(config, options)
+    viewer = Viewer(config)
     assert viewer.view() is None
