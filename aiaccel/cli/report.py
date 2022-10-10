@@ -1,4 +1,3 @@
-import sys
 from argparse import ArgumentParser
 
 from aiaccel.util.report import CreationReport
