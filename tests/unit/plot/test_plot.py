@@ -8,14 +8,6 @@ from aiaccel.config import Config
 ws = Workspace("test_work")
 config_path = pathlib.Path('tests/test_data/config.json')
 
-options = {
-    'config': str(config_path),
-    'resume': None,
-    'clean': False,
-    'fs': False,
-    'process_name': 'test'
-}
-
 
 def init():
     if ws.exists():
@@ -52,7 +44,7 @@ def test_plot():
     config.goal.set(goal)
 
     # データ無しの場合
-    plotter = Plotter(config, options)
+    plotter = Plotter(config)
     assert plotter.plot() is None
 
     # 正常
@@ -64,6 +56,6 @@ def test_plot():
         objective=objective
     )
 
-    plotter = Plotter(config, options)
+    plotter = Plotter(config)
     assert plotter.plot() is None
 
