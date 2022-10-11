@@ -1,7 +1,10 @@
-from aiaccel.optimizer.grid_optimizer import GridOptimizer, generate_grid_points
-from aiaccel.parameter import HyperParameter, load_parameter
-from tests.base_test import BaseTest
 import functools
+
+from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
+                                              generate_grid_points)
+from aiaccel.parameter import HyperParameter, load_parameter
+
+from tests.base_test import BaseTest
 
 
 # def test_generate_grid_points(load_test_config):

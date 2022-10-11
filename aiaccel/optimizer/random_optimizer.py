@@ -1,5 +1,6 @@
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from typing import Optional
+
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
 class RandomOptimizer(AbstractOptimizer):

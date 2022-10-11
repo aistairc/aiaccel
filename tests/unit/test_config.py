@@ -1,13 +1,12 @@
-from threading import local
-from aiaccel.config import BaseConfig
-from aiaccel.config import Config
-from aiaccel.config import ConfileWrapper
-from aiaccel.config import JsonOrYamlObjectConfig
-from aiaccel.config import load_config
-from tests.base_test import BaseTest
 import dataclasses
-import pytest
 import json
+from threading import local
+
+import pytest
+from aiaccel.config import (BaseConfig, Config, ConfileWrapper,
+                            JsonOrYamlObjectConfig, load_config)
+
+from tests.base_test import BaseTest
 
 
 class TestBaseConfig(object):

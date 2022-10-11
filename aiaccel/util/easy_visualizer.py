@@ -1,24 +1,11 @@
 import shutil
-import numpy as np
 from typing import Union
-from asciichartpy import plot
-from asciichartpy import black
-from asciichartpy import red
-from asciichartpy import green
-from asciichartpy import yellow
-from asciichartpy import blue
-from asciichartpy import magenta
-from asciichartpy import cyan
-from asciichartpy import lightgray
-from asciichartpy import darkgray
-from asciichartpy import lightred
-from asciichartpy import lightgreen
-from asciichartpy import lightyellow
-from asciichartpy import lightblue
-from asciichartpy import lightmagenta
-from asciichartpy import lightcyan
-from asciichartpy import white
-from asciichartpy import reset
+
+import numpy as np
+from asciichartpy import (black, blue, cyan, darkgray, green, lightblue,
+                          lightcyan, lightgray, lightgreen, lightmagenta,
+                          lightred, lightyellow, magenta, plot, red, reset,
+                          white, yellow)
 
 
 class EasyVisualizer:

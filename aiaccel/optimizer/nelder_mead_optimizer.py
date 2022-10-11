@@ -1,8 +1,10 @@
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from aiaccel.optimizer._nelder_mead import NelderMead
-from typing import Optional
 import copy
+from typing import Optional
+
 import numpy as np
+
+from aiaccel.optimizer._nelder_mead import NelderMead
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
 class NelderMeadOptimizer(AbstractOptimizer):

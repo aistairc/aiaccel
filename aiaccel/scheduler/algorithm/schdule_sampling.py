@@ -1,8 +1,9 @@
-from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import \
-    AbstractSchedulingAlgorithm
+import random
 from pathlib import Path
 from typing import List, Optional
-import random
+
+from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import \
+    AbstractSchedulingAlgorithm
 
 
 class RamsomSampling(AbstractSchedulingAlgorithm):

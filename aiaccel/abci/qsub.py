@@ -1,6 +1,7 @@
-from aiaccel.config import Config
 from pathlib import Path
+
 import aiaccel
+from aiaccel.config import Config
 
 ''' Example of stat
 stat = {

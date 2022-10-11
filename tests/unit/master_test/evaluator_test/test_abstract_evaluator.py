@@ -1,6 +1,7 @@
-from aiaccel.master.evaluator.abstract_evaluator import AbstractEvaluator
-from tests.base_test import BaseTest
 import aiaccel
+from aiaccel.master.evaluator.abstract_evaluator import AbstractEvaluator
+
+from tests.base_test import BaseTest
 
 
 class TestAbstractEvaluator(BaseTest):

@@ -1,7 +1,8 @@
+import os
+
+import aiaccel
 from aiaccel.abci.qsub import create_qsub_command
 from aiaccel.config import load_config
-import aiaccel
-import os
 
 
 # def test_create_qsub_command(load_test_config):

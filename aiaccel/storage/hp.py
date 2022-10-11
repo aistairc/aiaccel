@@ -1,6 +1,7 @@
+from typing import Any, Union
+
 from sqlalchemy.exc import SQLAlchemyError
-from typing import Any
-from typing import Union
+
 from aiaccel.storage.abstruct import Abstract
 from aiaccel.storage.model import HpTable
 from aiaccel.util.retry import retry

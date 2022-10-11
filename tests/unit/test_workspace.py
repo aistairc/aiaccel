@@ -1,6 +1,7 @@
-from aiaccel.workspace import Workspace
 import pathlib
 import shutil
+
+from aiaccel.workspace import Workspace
 
 
 def test_create():

@@ -1,7 +1,8 @@
-from aiaccel.util.filesystem import create_yaml
-from pathlib import Path
-import aiaccel
 import re
+from pathlib import Path
+
+import aiaccel
+from aiaccel.util.filesystem import create_yaml
 
 
 def create_runner_command(

@@ -1,8 +1,9 @@
+import subprocess
+
+import aiaccel
 from aiaccel.abci.qstat import parse_qstat
 from aiaccel.master.abstract_master import AbstractMaster
 from aiaccel.util.filesystem import get_dict_files
-import aiaccel
-import subprocess
 from aiaccel.util.retry import retry
 
 

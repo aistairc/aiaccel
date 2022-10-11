@@ -1,10 +1,11 @@
-from aiaccel.config import Config
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from aiaccel.parameter import HyperParameter, get_grid_options
+import math
 from functools import reduce
 from operator import mul
 from typing import List, Optional, Union
-import math
+
+from aiaccel.config import Config
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.parameter import HyperParameter, get_grid_options
 
 
 def generate_grid_points(p: HyperParameter, config: Config) -> dict:

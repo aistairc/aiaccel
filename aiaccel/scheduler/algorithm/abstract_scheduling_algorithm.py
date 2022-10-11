@@ -1,6 +1,7 @@
-from aiaccel.config import Config
 from pathlib import Path
 from typing import List, Optional
+
+from aiaccel.config import Config
 
 
 class AbstractSchedulingAlgorithm(object):

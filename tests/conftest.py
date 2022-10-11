@@ -1,12 +1,12 @@
-from aiaccel.config import load_config
-from aiaccel.config import Config
-from aiaccel.util.filesystem import clean_directory, load_yaml
-from pathlib import Path
 import os
-import pytest
 import shutil
-from aiaccel.storage.storage import Storage
 import time
+from pathlib import Path
+
+import pytest
+from aiaccel.config import Config, load_config
+from aiaccel.storage.storage import Storage
+from aiaccel.util.filesystem import clean_directory, load_yaml
 
 WORK_SUB_DIRECTORIES = [
     'abci_output', 'alive', 'hp', 'hp/finished', 'hp/ready', 'hp/running',

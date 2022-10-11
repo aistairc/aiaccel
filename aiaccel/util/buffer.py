@@ -1,6 +1,5 @@
 import copy
-from typing import Union
-from typing import Any
+from typing import Any, Union
 
 
 class _buffer:

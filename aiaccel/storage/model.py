@@ -1,12 +1,9 @@
 from typing import Any
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Integer
-from sqlalchemy.types import BigInteger
-from sqlalchemy.types import Float
-from sqlalchemy.types import Text
-from sqlalchemy.types import String
-from sqlalchemy.types import PickleType
+from sqlalchemy.types import (BigInteger, Float, Integer, PickleType, String,
+                              Text)
 
 Base: Any = declarative_base()
 

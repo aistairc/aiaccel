@@ -1,8 +1,11 @@
-from tests.integration.integration_test import IntegrationTest
-from aiaccel.storage.storage import Storage
 import subprocess
-from aiaccel.config import Config
 from pathlib import Path
+
+from aiaccel.config import Config
+from aiaccel.storage.storage import Storage
+
+from tests.integration.integration_test import IntegrationTest
+
 
 class ResumptionTest(IntegrationTest):
     search_algorithm = None
