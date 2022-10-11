@@ -1,9 +1,17 @@
 import pytest
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.tpe.tpe_optimizer import TpeOptimizer
-from aiaccel.optimizer.tpe.tpe_optimizer import create_distributions
+from aiaccel.optimizer.tpe_optimizer import TpeOptimizer
+from aiaccel.optimizer.tpe_optimizer import TPESamplerWrapper
+from aiaccel.optimizer.tpe_optimizer import create_distributions
 from tests.base_test import BaseTest
+
+
+class TestTPESamplerWrapper(BaseTest):
+
+    def test_get_startup_trials(self):
+        tpe_sampler_wrapper = TPESamplerWrapper()
+        assert tpe_sampler_wrapper.get_startup_trials() == 10
 
 
 class TestTpeOptimizer(BaseTest):

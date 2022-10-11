@@ -1,4 +1,4 @@
-from aiaccel.optimizer.sobol.sobol_optimizer import SobolOptimizer
+from aiaccel.optimizer.sobol_optimizer import SobolOptimizer
 from tests.base_test import BaseTest
 import pytest
 

@@ -1,4 +1,4 @@
-from aiaccel.optimizer.random.random_optimizer import RandomOptimizer
+from aiaccel.optimizer.random_optimizer import RandomOptimizer
 from tests.base_test import BaseTest
 
 

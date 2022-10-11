@@ -1,6 +1,6 @@
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.module import AbstractModule
-from aiaccel.optimizer.random.random_optimizer import RandomOptimizer
+from aiaccel.optimizer.random_optimizer import RandomOptimizer
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
