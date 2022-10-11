@@ -1,6 +1,6 @@
 from typing import Any
-from aiaccel.scheduler.abci import AbciScheduler
-from aiaccel.scheduler.local import LocalScheduler
+from aiaccel.scheduler.abci_scheduler import AbciScheduler
+from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.config import Config
 
 

@@ -24,7 +24,6 @@ from .common import dict_runner
 from .common import dict_verification
 from .common import dict_storage
 from .common import dict_timestamp
-from .common import dict_snapshot
 from .common import extension_hp
 from .common import extension_pickle
 from .common import extension_resource
@@ -84,7 +83,6 @@ __all__ = [
     dict_storage,
     dict_timestamp,
     dict_verification,
-    dict_snapshot,
     extension_hp,
     extension_pickle,
     extension_resource,

@@ -12,7 +12,7 @@ class ResumptionTest(IntegrationTest):
         with self.create_main():
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             config = Config(config_file)
-            storage = Storage(ws=Path(config.workspace.get()), fsmode=False, config_path=Path(config_file))
+            storage = Storage(ws=Path(config.workspace.get()))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
             final_result_at_one_time = self.get_final_result(storage)
             print('at one time', final_result_at_one_time)
@@ -25,7 +25,7 @@ class ResumptionTest(IntegrationTest):
         # resume
         with self.create_main():
             config_file = data_dir.joinpath(f'config_{self.search_algorithm}.json')
-            storage = Storage(ws=Path(config.workspace.get()), fsmode=False, config_path=Path(config_file))
+            storage = Storage(ws=Path(config.workspace.get()))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--resume', '4']).wait()
             final_result_resumption = self.get_final_result(storage)
             print('resumption steps finished', final_result_resumption)

@@ -81,11 +81,7 @@ class AbstractModule(object):
         self.hp_running = 0
         self.hp_finished = 0
         self.seed = self.config.randseed.get()
-        self.storage = Storage(
-            self.ws,
-            fsmode=options['fs'],
-            config_path=self.config.config_path
-        )
+        self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
 
     def get_each_state_count(self) -> None:

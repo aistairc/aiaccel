@@ -1,4 +1,4 @@
-from aiaccel.master.verification.abstract import\
+from aiaccel.master.verification.abstract_verification import\
     AbstractVerification
 from aiaccel.util.filesystem import load_yaml
 from tests.base_test import BaseTest

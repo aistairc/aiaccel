@@ -1,5 +1,5 @@
 from aiaccel.config import ConfileWrapper
-from aiaccel.scheduler.local import LocalScheduler
+from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.job.job_thread import CustomMachine
 from aiaccel.scheduler.job.job_thread import Job
 from aiaccel.scheduler.job.job_thread import JOB_STATES

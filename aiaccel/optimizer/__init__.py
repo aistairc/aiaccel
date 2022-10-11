@@ -1,8 +1,8 @@
-from .grid.search import GridOptimizer
-from .random.search import RandomOptimizer
-from .sobol.search import SobolOptimizer
-from .nelder_mead.search import NelderMeadOptimizer
-from .tpe.search import TpeOptimizer
+from .grid.grid_optimizer import GridOptimizer
+from .random.random_optimizer import RandomOptimizer
+from .sobol.sobol_optimizer import SobolOptimizer
+from .nelder_mead.nelder_mead_optimizer import NelderMeadOptimizer
+from .tpe.tpe_optimizer import TpeOptimizer
 
 __all__ = [
     GridOptimizer,

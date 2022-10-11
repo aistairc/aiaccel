@@ -13,11 +13,7 @@ class CreationReaport:
         self.ws = pathlib.Path(self.config.workspace.get()).resolve()
         self.fp = self.ws / 'results.csv'
         self.trialid = TrialId(str(self.config_path))
-        self.storage = Storage(
-            self.ws,
-            fsmode=options['fs'],
-            config_path=self.config.config_path
-        )
+        self.storage = Storage(self.ws)
         self.lock_file = {
             'result_txt': str(self.ws / 'lock' / 'result_txt')
         }
