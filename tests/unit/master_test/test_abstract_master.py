@@ -1,6 +1,6 @@
 from aiaccel import workspace
 from aiaccel.config import ConfileWrapper, Config
-from aiaccel.master.abstract import AbstractMaster
+from aiaccel.master.abstract_master import AbstractMaster
 from aiaccel.util.filesystem import get_dict_files
 from aiaccel.util.time_tools import get_time_now_object
 from tests.base_test import BaseTest

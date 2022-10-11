@@ -1,4 +1,4 @@
-from aiaccel.optimizer.abstract import AbstractOptimizer
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from aiaccel.optimizer.nelder_mead.sampler import NelderMead
 from typing import Optional
 import copy

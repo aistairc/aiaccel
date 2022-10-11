@@ -1,4 +1,4 @@
-from aiaccel.optimizer.abstract import AbstractOptimizer
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from typing import Optional
 
 

@@ -1,6 +1,6 @@
-from aiaccel.scheduler.abstract import AbstractScheduler
-from aiaccel.scheduler.abci import AbciScheduler
-from aiaccel.scheduler.local import LocalScheduler
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler.abci_scheduler import AbciScheduler
+from aiaccel.scheduler.local_scheduler import LocalScheduler
 from tests.base_test import BaseTest
 import aiaccel
 import asyncio

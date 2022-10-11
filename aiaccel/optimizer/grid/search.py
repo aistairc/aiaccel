@@ -1,5 +1,5 @@
 from aiaccel.config import Config
-from aiaccel.optimizer.abstract import AbstractOptimizer
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter, get_grid_options
 from functools import reduce
 from operator import mul

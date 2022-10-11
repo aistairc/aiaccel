@@ -1,6 +1,6 @@
 import pathlib
-from aiaccel.master.abci import AbciMaster
-from aiaccel.scheduler.abci import AbciScheduler
+from aiaccel.master.abc_master import AbciMaster
+from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.util.filesystem import get_dict_files
 from tests.base_test import BaseTest
 import pytest
@@ -9,7 +9,7 @@ import time
 import sys
 from unittest.mock import patch
 from aiaccel.master.create import create_master
-from aiaccel.master.abci import AbciMaster
+from aiaccel.master.abc_master import AbciMaster
 from aiaccel.argument import Arguments
 
 

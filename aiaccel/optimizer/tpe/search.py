@@ -1,7 +1,7 @@
 import optuna
 
 import aiaccel.parameter
-from aiaccel.optimizer.abstract import AbstractOptimizer
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from aiaccel.optimizer.tpe.sampler import TPESamplerWrapper
 from optuna.trial import TrialState
 from typing import Optional

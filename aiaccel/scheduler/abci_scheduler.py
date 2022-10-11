@@ -2,7 +2,7 @@ import re
 import subprocess
 from typing import Union
 from aiaccel.abci.qstat import parse_qstat
-from aiaccel.scheduler.abstract import AbstractScheduler
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 
 
 class AbciScheduler(AbstractScheduler):

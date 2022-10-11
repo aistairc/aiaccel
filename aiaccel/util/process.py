@@ -6,9 +6,9 @@ import re
 import subprocess
 import threading
 if TYPE_CHECKING:
-    from aiaccel.master.abci import AbciMaster
-    from aiaccel.master.abstract import AbstractMaster
-    from aiaccel.master.local import LocalMaster
+    from aiaccel.master.abc_master import AbciMaster
+    from aiaccel.master.abstract_master import AbstractMaster
+    from aiaccel.master.local_master import LocalMaster
 import datetime
 
 

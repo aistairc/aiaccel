@@ -1,6 +1,6 @@
 import re
 from typing import Union
-from aiaccel.scheduler.abstract import AbstractScheduler
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.process import ps2joblist
 
 
