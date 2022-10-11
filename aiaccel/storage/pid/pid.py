@@ -1,7 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Union
-from aiaccel.storage.abstruct.db import Abstract
-from aiaccel.storage.model.db import PidTable
+from aiaccel.storage.abstruct.abstruct import Abstract
+from aiaccel.storage.model.model import PidTable
 from aiaccel.util.retry import retry
 
 
