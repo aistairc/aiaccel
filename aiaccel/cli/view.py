@@ -1,9 +1,11 @@
+from pathlib import Path
+
+from numpy import maximum
+
 from aiaccel.argument import Arguments
 from aiaccel.config import Config
-from aiaccel.workspace import Workspace
 from aiaccel.storage.storage import Storage
-from pathlib import Path
-from numpy import maximum
+from aiaccel.workspace import Workspace
 
 
 class Viewer:

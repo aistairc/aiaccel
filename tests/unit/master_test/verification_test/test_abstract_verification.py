@@ -1,10 +1,10 @@
-from aiaccel.master.verification.abstract_verification import\
-    AbstractVerification
-from aiaccel.util.filesystem import load_yaml
-from tests.base_test import BaseTest
 import aiaccel
+from aiaccel.master.verification.abstract_verification import \
+    AbstractVerification
 from aiaccel.storage.storage import Storage
+from aiaccel.util.filesystem import load_yaml
 
+from tests.base_test import BaseTest
 
 
 class TestAbstractVerification(BaseTest):

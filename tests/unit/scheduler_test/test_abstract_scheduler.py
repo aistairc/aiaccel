@@ -1,12 +1,14 @@
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from tests.base_test import BaseTest
-import aiaccel
 import asyncio
 import os
 import time
 from unittest.mock import patch
+
+import aiaccel
+from aiaccel.scheduler.abci_scheduler import AbciScheduler
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler.local_scheduler import LocalScheduler
+
+from tests.base_test import BaseTest
 
 
 async def async_function(func):

@@ -1,14 +1,15 @@
 #from ConfigSpace.read_and_write import json as configspace_json
-from re import T
-from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.nelder_mead.sampler import NelderMead
-from aiaccel.util.filesystem import load_yaml
-import aiaccel
 import copy
 import json
+from re import T
+
+import aiaccel
 import numpy as np
 import pytest
+from aiaccel.optimizer._nelder_mead import NelderMead
+from aiaccel.parameter import load_parameter
 from aiaccel.storage.storage import Storage
+from aiaccel.util.filesystem import load_yaml
 
 
 class TestNelderMead(object):

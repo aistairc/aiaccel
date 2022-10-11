@@ -1,9 +1,10 @@
+from typing import Dict, List, Optional, Union
+
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
 from aiaccel.util.logger import str_to_logging_level
-from typing import Dict, List, Optional, Union
-from aiaccel.util.trialid import TrialId
 from aiaccel.util.serialize import Serializer
+from aiaccel.util.trialid import TrialId
 
 
 class AbstractOptimizer(AbstractModule):

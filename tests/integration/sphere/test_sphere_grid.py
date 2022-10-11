@@ -1,5 +1,6 @@
-from tests.integration.integration_test import IntegrationTest
 import aiaccel
+
+from tests.integration.integration_test import IntegrationTest
 
 
 class TestSphereGrid(IntegrationTest):

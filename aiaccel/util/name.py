@@ -1,7 +1,7 @@
-from typing import Union
 import logging
 import random
 import string
+from typing import Union
 
 
 def generate_random_name(length: int = 10) -> Union[str, None]:

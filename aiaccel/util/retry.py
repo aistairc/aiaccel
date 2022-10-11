@@ -1,5 +1,5 @@
-from functools import wraps
 import time
+from functools import wraps
 
 
 def retry(_MAX_NUM=60, _DELAY=1.0):

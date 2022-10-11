@@ -1,6 +1,7 @@
+import sys
+
 from aiaccel.argument import Arguments
 from aiaccel.util.report import CreationReaport
-import sys
 
 
 def main():

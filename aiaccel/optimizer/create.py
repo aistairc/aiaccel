@@ -1,6 +1,7 @@
-from typing import Any
-from aiaccel.config import Config
 from importlib import import_module
+from typing import Any
+
+from aiaccel.config import Config
 
 
 def create_optimizer(config_path: str) -> Any:

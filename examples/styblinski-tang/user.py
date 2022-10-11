@@ -1,5 +1,6 @@
-from aiaccel.util import aiaccel
 import numpy as np
+
+from aiaccel.util import aiaccel
 
 
 def main(p):

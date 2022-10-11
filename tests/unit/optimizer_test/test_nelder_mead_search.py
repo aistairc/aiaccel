@@ -1,11 +1,13 @@
-from aiaccel.config import ConfileWrapper
-from aiaccel.optimizer.nelder_mead.sampler import NelderMead
-from aiaccel.optimizer.nelder_mead.nelder_mead_optimizer import NelderMeadOptimizer
-from aiaccel.parameter import load_parameter
-from tests.base_test import BaseTest
-import aiaccel
 import json
+
+import aiaccel
 import pytest
+from aiaccel.config import ConfileWrapper
+from aiaccel.optimizer._nelder_mead import NelderMead
+from aiaccel.optimizer.nelder_mead_optimizer import NelderMeadOptimizer
+from aiaccel.parameter import load_parameter
+
+from tests.base_test import BaseTest
 
 
 class TestNelderMeadOptimizer(BaseTest):

@@ -1,10 +1,12 @@
-from aiaccel.util import aiaccel
+import logging
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms, models
 from torch.optim.lr_scheduler import CosineAnnealingLR
-import logging
+from torchvision import datasets, models, transforms
+
+from aiaccel.util import aiaccel
 
 
 # Train
