@@ -1,4 +1,4 @@
-from aiaccel.optimizer.abstract import AbstractOptimizer
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from tests.base_test import BaseTest
 import asyncio
 import pytest

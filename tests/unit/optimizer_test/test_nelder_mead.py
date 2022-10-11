@@ -1,7 +1,7 @@
 #from ConfigSpace.read_and_write import json as configspace_json
 from re import T
 from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.nelder_mead.sampler import NelderMead
+from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.util.filesystem import load_yaml
 import aiaccel
 import copy

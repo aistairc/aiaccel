@@ -1,15 +1,15 @@
 from typing import Union
 from pathlib import PosixPath
 import aiaccel
-from aiaccel.storage.alive.db import Alive
-from aiaccel.storage.pid.db import Pid
-from aiaccel.storage.trial.db import Trial
-from aiaccel.storage.hp.db import Hp
-from aiaccel.storage.result.db import Result
-from aiaccel.storage.jobstate.db import JobState
-from aiaccel.storage.error.db import Error
-from aiaccel.storage.timestamp.db import TimeStamp
-from aiaccel.storage.serializer.db import Serializer
+from aiaccel.storage.alive import Alive
+from aiaccel.storage.pid import Pid
+from aiaccel.storage.trial import Trial
+from aiaccel.storage.hp import Hp
+from aiaccel.storage.result import Result
+from aiaccel.storage.jobstate import JobState
+from aiaccel.storage.error import Error
+from aiaccel.storage.timestamp import TimeStamp
+from aiaccel.storage.serializer import Serializer
 
 
 class Storage:
