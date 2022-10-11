@@ -1,4 +1,4 @@
-from aiaccel.optimizer.grid.search import GridOptimizer, generate_grid_points
+from aiaccel.optimizer.grid.grid_optimizer import GridOptimizer, generate_grid_points
 from aiaccel.parameter import HyperParameter, load_parameter
 from tests.base_test import BaseTest
 import functools

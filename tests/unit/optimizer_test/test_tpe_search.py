@@ -1,8 +1,8 @@
 import pytest
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.tpe.search import TpeOptimizer
-from aiaccel.optimizer.tpe.search import create_distributions
+from aiaccel.optimizer.tpe.tpe_optimizer import TpeOptimizer
+from aiaccel.optimizer.tpe.tpe_optimizer import create_distributions
 from tests.base_test import BaseTest
 
 
