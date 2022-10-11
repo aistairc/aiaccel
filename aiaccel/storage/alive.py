@@ -1,6 +1,6 @@
 from typing import Union
-from aiaccel.storage.abstruct.abstruct import Abstract
-from aiaccel.storage.model.model import AliveTable
+from aiaccel.storage.abstruct import Abstract
+from aiaccel.storage.model import AliveTable
 from sqlalchemy.exc import SQLAlchemyError
 from aiaccel.util.retry import retry
 

@@ -1,8 +1,8 @@
 from typing import Any
 from typing import Union
 from sqlalchemy.exc import SQLAlchemyError
-from aiaccel.storage.abstruct.abstruct import Abstract
-from aiaccel.storage.model.model import ResultTable
+from aiaccel.storage.abstruct import Abstract
+from aiaccel.storage.model import ResultTable
 from aiaccel.util.retry import retry
 
 

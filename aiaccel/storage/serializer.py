@@ -1,7 +1,7 @@
 from typing import Any
 from sqlalchemy.exc import SQLAlchemyError
-from aiaccel.storage.abstruct.abstruct import Abstract
-from aiaccel.storage.model.model import SerializeTable
+from aiaccel.storage.abstruct import Abstract
+from aiaccel.storage.model import SerializeTable
 from aiaccel.util.retry import retry
 
 

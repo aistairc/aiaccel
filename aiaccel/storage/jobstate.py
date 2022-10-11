@@ -1,7 +1,7 @@
 from typing import Union
 from sqlalchemy.exc import SQLAlchemyError
-from aiaccel.storage.abstruct.abstruct import Abstract
-from aiaccel.storage.model.model import JobStateTable
+from aiaccel.storage.abstruct import Abstract
+from aiaccel.storage.model import JobStateTable
 from aiaccel.util.retry import retry
 
 

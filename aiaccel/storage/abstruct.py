@@ -3,7 +3,7 @@ from sqlalchemy import MetaData
 from sqlalchemy.pool import NullPool
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
-from aiaccel.storage.model.model import Base
+from aiaccel.storage.model import Base
 from pathlib import Path
 from aiaccel.util.retry import retry
 from contextlib import contextmanager

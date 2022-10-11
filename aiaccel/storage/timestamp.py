@@ -1,6 +1,6 @@
 from sqlalchemy.exc import SQLAlchemyError
-from aiaccel.storage.abstruct.abstruct import Abstract
-from aiaccel.storage.model.model import TimestampTable
+from aiaccel.storage.abstruct import Abstract
+from aiaccel.storage.model import TimestampTable
 from aiaccel.util.retry import retry
 
 
