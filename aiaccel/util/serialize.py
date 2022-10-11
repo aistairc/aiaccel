@@ -1,6 +1,7 @@
 from pathlib import Path
-from aiaccel.config import Config
 from typing import Dict
+
+from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 
 

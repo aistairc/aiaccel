@@ -1,10 +1,9 @@
-from aiaccel.parameter import get_best_parameter
-from aiaccel.parameter import get_grid_options
-from aiaccel.parameter import get_type
-from aiaccel.parameter import load_parameter
-from aiaccel.util.filesystem import create_yaml
-from tests.base_test import BaseTest
 import aiaccel
+from aiaccel.parameter import (get_best_parameter, get_grid_options, get_type,
+                               load_parameter)
+from aiaccel.util.filesystem import create_yaml
+
+from tests.base_test import BaseTest
 
 
 class TestParameter(BaseTest):

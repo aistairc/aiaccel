@@ -1,6 +1,8 @@
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from sobol_seq import i4_sobol
 from typing import Optional
+
+from sobol_seq import i4_sobol
+
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
 class SobolOptimizer(AbstractOptimizer):

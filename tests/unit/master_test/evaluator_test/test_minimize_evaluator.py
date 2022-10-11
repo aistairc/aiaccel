@@ -1,4 +1,5 @@
 from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
+
 from tests.base_test import BaseTest
 
 # # def test_maximize_evaluator(load_test_config):

@@ -1,9 +1,10 @@
-from aiaccel.storage.storage import Storage
-from aiaccel.cli.plot import Plotter
 import pathlib
 from functools import wraps
-from aiaccel.workspace import Workspace
+
+from aiaccel.cli.plot import Plotter
 from aiaccel.config import Config
+from aiaccel.storage.storage import Storage
+from aiaccel.workspace import Workspace
 
 ws = Workspace("test_work")
 config_path = pathlib.Path('tests/test_data/config.json')

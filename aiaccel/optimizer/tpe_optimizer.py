@@ -1,11 +1,12 @@
+import copy
+from typing import Optional
+
+import numpy as np
 import optuna
+from optuna.trial import TrialState
 
 import aiaccel.parameter
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from optuna.trial import TrialState
-from typing import Optional
-import copy
-import numpy as np
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):

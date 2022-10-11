@@ -1,7 +1,8 @@
-from aiaccel.config import Config
+import xml.etree.ElementTree as ElementTree
 from typing import List
 from xml.etree.ElementTree import Element
-import xml.etree.ElementTree as ElementTree
+
+from aiaccel.config import Config
 
 ''' Example of stat
 stat = {

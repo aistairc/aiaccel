@@ -1,10 +1,10 @@
+from contextlib import contextmanager
+from pathlib import Path
+
+import pytest
 from aiaccel.config import Config
 from aiaccel.util.filesystem import create_yaml
-from pathlib import Path
-import pytest
 from aiaccel.workspace import Workspace
-from contextlib import contextmanager
-
 
 d0 = {
     "end_time": "11/03/2020 16:07:45",

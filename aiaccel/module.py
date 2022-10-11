@@ -1,11 +1,13 @@
-import aiaccel
 import logging
-import numpy as np
 import random
 from pathlib import Path
+
+import numpy as np
+
+import aiaccel
+from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
-from aiaccel.config import Config
 
 
 class AbstractModule(object):

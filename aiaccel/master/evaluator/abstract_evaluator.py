@@ -1,6 +1,7 @@
-from pathlib import Path
-import aiaccel
 import logging
+from pathlib import Path
+
+import aiaccel
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
