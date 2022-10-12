@@ -266,7 +266,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     'parameters': self.new_params
                 }
             )
-            self._serialize()
+            self._serialize(self.trial_id.integer)
 
     def _get_all_trial_id(self) -> list:
         """_get_all_trial_id.
@@ -324,54 +324,47 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         self._generate_hp_ready(number)
 
-    def _serialize(self) -> None:
+    def _serialize(self, trial_id) -> None:
         """Serialize this module.
-
         Returns:
             dict: The serialized objects.
         """
+
         parameter_pool = copy.deepcopy(self.parameter_pool)
         for p_pool in parameter_pool:
             for p_pool_param in p_pool['parameters']:
                 if type(p_pool_param['value']) is np.float64:
                     p_pool_param['value'] = float(p_pool_param['value'])
 
-        self.serialize_datas = {
-            'num_of_generated_parameter': self.num_of_generated_parameter,
-            'loop_count': self.loop_count,
-            'parameter_pool': parameter_pool,
-            'nelder_mead': self.nelder_mead.serialize(),
-            'order': self.order
-        }
-        self.serialize.serialize(
-            trial_id=self.trial_id.integer,
-            optimization_variables=self.serialize_datas,
-            native_random_state=self.get_native_random_state(),
-            numpy_random_state=self.get_numpy_random_state()
-        )
+        self.storage.variable.d['native_random_state'].set(trial_id=trial_id, value=self.get_native_random_state())
+        self.storage.variable.d['numpy_random_state'].set(trial_id=trial_id, value=self.get_numpy_random_state())
+        self.storage.variable.d['num_of_generated_parameter'].set(trial_id=trial_id, value=self.num_of_generated_parameter)
+        self.storage.variable.d['loop_count'].set(trial_id=trial_id, value=self.loop_count)
+        self.storage.variable.d['parameter_pool'].set(trial_id=trial_id, value=parameter_pool)
+        self.storage.variable.d['nelder_mead'].set(trial_id=trial_id, value=self.nelder_mead.serialize())
+        self.storage.variable.d['order'].set(trial_id=trial_id, value=self.order)
 
     def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
-
         Args:
             dict_objects(dict): A dictionary including serialized objects.
-
         Returns:
             None
         """
-        d = self.serialize.deserialize(trial_id)
-        self.deserialize_datas = d['optimization_variables']
-        self.set_native_random_state(d['native_random_state'])
-        self.set_numpy_random_state(d['numpy_random_state'])
+        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
+        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
-        parameter_pool = copy.deepcopy(self.deserialize_datas['parameter_pool'])
+        self.num_of_generated_parameter = self.storage.variable.d['num_of_generated_parameter'].get(trial_id)
+        self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
+
+        parameter_pool = copy.deepcopy(self.storage.variable.d['parameter_pool'].get(trial_id))
         for p_pool in parameter_pool:
             for p_pool_param in p_pool['parameters']:
                 if type(p_pool_param['value']) is float:
                     p_pool_param['value'] = np.float64(p_pool_param['value'])
-
-        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
         self.parameter_pool = parameter_pool
+
         self.nelder_mead = NelderMead(self.params.get_parameter_list())
-        self.nelder_mead.deserialize(self.deserialize_datas['nelder_mead'])
-        self.order = self.deserialize_datas['order']
+        self.nelder_mead.deserialize(self.storage.variable.d['nelder_mead'].get(trial_id))
+
+        self.order = self.storage.variable.d['order'].get(trial_id)
