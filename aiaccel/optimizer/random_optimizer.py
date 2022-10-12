@@ -59,10 +59,10 @@ class RandomOptimizer(AbstractOptimizer):
         Returns:
             dict: serialize data.
         """
-        self.storage.variable.d['native_random_state'].set(trial_id=trial_id, value=self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id=trial_id, value=self.get_numpy_random_state())
-        self.storage.variable.d['num_of_generated_parameter'].set(trial_id=trial_id, value=self.num_of_generated_parameter)
-        self.storage.variable.d['loop_count'].set(trial_id=trial_id, value=self.loop_count)
+        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
+        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
+        self.storage.variable.d['num_of_generated_parameter'].set(trial_id, self.num_of_generated_parameter)
+        self.storage.variable.d['loop_count'].set(trial_id, self.loop_count)
 
     def _deserialize(self, trial_id: int) -> None:
         """ Deserialize this module.

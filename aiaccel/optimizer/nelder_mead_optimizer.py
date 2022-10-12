@@ -349,13 +349,13 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 if type(p_pool_param['value']) is np.float64:
                     p_pool_param['value'] = float(p_pool_param['value'])
 
-        self.storage.variable.d['native_random_state'].set(trial_id=trial_id, value=self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id=trial_id, value=self.get_numpy_random_state())
-        self.storage.variable.d['num_of_generated_parameter'].set(trial_id=trial_id, value=self.num_of_generated_parameter)
-        self.storage.variable.d['loop_count'].set(trial_id=trial_id, value=self.loop_count)
-        self.storage.variable.d['parameter_pool'].set(trial_id=trial_id, value=parameter_pool)
-        self.storage.variable.d['nelder_mead'].set(trial_id=trial_id, value=self.nelder_mead.serialize())
-        self.storage.variable.d['order'].set(trial_id=trial_id, value=self.order)
+        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
+        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
+        self.storage.variable.d['num_of_generated_parameter'].set(trial_id, self.num_of_generated_parameter)
+        self.storage.variable.d['loop_count'].set(trial_id, self.loop_count)
+        self.storage.variable.d['parameter_pool'].set(trial_id, parameter_pool)
+        self.storage.variable.d['nelder_mead'].set(trial_id, self.nelder_mead.serialize())
+        self.storage.variable.d['order'].set(trial_id, self.order)
 
     def _deserialize(self, trial_id: int) -> None:
         """Deserialize this module.
