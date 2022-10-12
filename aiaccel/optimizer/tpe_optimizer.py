@@ -36,6 +36,18 @@ class TpeOptimizer(AbstractOptimizer):
         self.randseed = self.config.randseed.get()
         self.initial_count = 0
 
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=[
+                'native_random_state',
+                'numpy_random_state',
+                'num_of_generated_parameter',
+                'loop_count',
+                'parameter_pool',
+                'study'
+            ]
+        )
+
     def pre_process(self) -> None:
         """Pre-Procedure before executing optimize processes.
         """

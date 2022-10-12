@@ -79,6 +79,18 @@ class GridOptimizer(AbstractOptimizer):
         self.ready_params = None
         self.generate_index = None
 
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=[
+                'native_random_state',
+                'numpy_random_state',
+                'num_of_generated_parameter',
+                'loop_count',
+                'ready_params',
+                'generate_index'
+            ]
+        )
+
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 

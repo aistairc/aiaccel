@@ -8,7 +8,6 @@ from aiaccel.storage.hp import Hp
 from aiaccel.storage.jobstate import JobState
 from aiaccel.storage.pid import Pid
 from aiaccel.storage.result import Result
-from aiaccel.storage.serializer import Serializer
 from aiaccel.storage.timestamp import TimeStamp
 from aiaccel.storage.trial import Trial
 from aiaccel.storage.variable import Serializer

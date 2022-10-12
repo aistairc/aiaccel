@@ -8,6 +8,18 @@ class RandomOptimizer(AbstractOptimizer):
 
     """
 
+    def __init__(self, options: dict) -> None:
+        super().__init__(options)
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=[
+                'native_random_state',
+                'numpy_random_state',
+                'num_of_generated_parameter',
+                'loop_count'
+            ]
+        )
+
     def generate_parameter(self, number: Optional[int] = 1) -> None:
         """Generate parameters.
 
