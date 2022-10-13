@@ -37,7 +37,7 @@ class SobolOptimizer(AbstractOptimizer):
         self.generate_index = len(finished)
         self.sampler = qmc.Sobol(d=len(self.params.get_parameter_list()), scramble=False)
 
-        if self.generate_index is not None:
+        if self.generate_index is not None and self.generate_index > 0:
             self.sampler.fast_forward(self.generate_index)
 
     def generate_parameter(self, number: Optional[int] = 1) -> None:
