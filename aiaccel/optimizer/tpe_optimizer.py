@@ -1,9 +1,6 @@
-import copy
 from typing import Optional
 
-import numpy as np
 import optuna
-from optuna.trial import TrialState
 
 import aiaccel.parameter
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer

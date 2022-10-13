@@ -1,8 +1,6 @@
 import copy
 from typing import Optional
 
-import numpy as np
-
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 

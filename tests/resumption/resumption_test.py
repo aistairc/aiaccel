@@ -37,4 +37,3 @@ class ResumptionTest(IntegrationTest):
     def get_final_result(self, storage):
         data = storage.result.get_all_result()
         return [d.objective for d in data][-1]
-

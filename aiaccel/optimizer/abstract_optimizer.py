@@ -253,7 +253,6 @@ class AbstractOptimizer(AbstractModule):
         _values = self.storage.variable.d['self_values'].get(trial_id)
         _keys = self.storage.variable.d['self_keys'].get(trial_id)
         self.__dict__.update(dict(zip(_keys, _values)))
-        print(self.__dict__)
 
         # random state
         self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
