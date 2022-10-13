@@ -24,19 +24,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
         self.parameter_pool = None
         self.order = []
 
-        self.storage.variable.register(
-            process_name=self.options['process_name'],
-            labels=[
-                'native_random_state',
-                'numpy_random_state',
-                'num_of_generated_parameter',
-                'loop_count',
-                'parameter_pool',
-                'nelder_mead',
-                'order'
-            ]
-        )
-
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
