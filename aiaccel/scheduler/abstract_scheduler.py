@@ -53,11 +53,7 @@ class AbstractScheduler(AbstractModule):
 
         self.storage.variable.register(
             process_name=self.options['process_name'],
-            labels=[
-                'native_random_state',
-                'numpy_random_state',
-                'loop_count'
-            ]
+            labels=['native_random_state', 'numpy_random_state', 'loop_count']
         )
 
     def change_state_finished_trials(self) -> None:
