@@ -12,7 +12,7 @@ class Variable(Abstract):
     def __init__(self, file_name) -> None:
         super().__init__(file_name)
 
-    # @retry(_MAX_NUM=60, _DELAY=1.0)
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_variable(
         self,
         trial_id: int,
@@ -55,7 +55,7 @@ class Variable(Abstract):
                 session.rollback()
                 raise e
 
-    # @retry(_MAX_NUM=60, _DELAY=1.0)
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_variable(self, trial_id: int, process_name: str, label: str):
         with self.create_session() as session:
             data = (
