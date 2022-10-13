@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
@@ -13,10 +13,9 @@ class RandomOptimizer(AbstractOptimizer):
         self.storage.variable.register(
             process_name=self.options['process_name'],
             labels=[
-                'native_random_state',
-                'numpy_random_state',
-                'num_of_generated_parameter',
-                'loop_count'
+                'self_values',
+                'self_keys',
+                'self'
             ]
         )
 
@@ -59,10 +58,17 @@ class RandomOptimizer(AbstractOptimizer):
         Returns:
             dict: serialize data.
         """
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
-        self.storage.variable.d['num_of_generated_parameter'].set(trial_id, self.num_of_generated_parameter)
-        self.storage.variable.d['loop_count'].set(trial_id, self.loop_count)
+
+        obj = self.__dict__.copy()
+        del obj['storage']
+        _values = list(obj.values())
+        _keys = list(obj.keys())
+        self.storage.variable.d['self_values'].set(trial_id, _values)
+        self.storage.variable.d['self_keys'].set(trial_id, _keys)
+
+        # from aiaccel.util.snapshot import SnapShot
+        # ss = SnapShot(self.ws, self.options['process_name'])
+        # ss.save(trial_id=trial_id, obj=self)
 
     def _deserialize(self, trial_id: int) -> None:
         """ Deserialize this module.
@@ -71,7 +77,13 @@ class RandomOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
-        self.num_of_generated_parameter = self.storage.variable.d['num_of_generated_parameter'].get(trial_id)
-        self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
+        # obj = self.storage.variable.d['self'].get(trial_id)
+        # print(obj)
+        # self.__dict__.update(obj)
+
+        _values = self.storage.variable.d['self_values'].get(trial_id)
+        _keys = self.storage.variable.d['self_keys'].get(trial_id)
+        self.__dict__.update(dict(zip(_keys, _values)))
+
+    # def __reduce__(self):
+    #     return ('storage', (self.storage,))
