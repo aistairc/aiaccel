@@ -35,7 +35,6 @@ class AbstractOptimizer(AbstractModule):
             'Optimizer'
         )
 
-        self.hp_total = self.config.trial_number.get()
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
@@ -43,6 +42,11 @@ class AbstractOptimizer(AbstractModule):
         self.all_parameter_generated = False
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
+
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=['native_random_state', 'numpy_random_state', 'self_values', 'self_keys']
+        )
 
     def register_new_parameters(self, params: List[dict]) -> None:
         """Create hyper parameter files.
@@ -187,8 +191,10 @@ class AbstractOptimizer(AbstractModule):
         self.get_each_state_count()
 
         _max_pool_size = self.config.num_node.get()
+        _max_trial_number = self.config.trial_number.get()
+
         n1 = _max_pool_size - self.hp_running - self.hp_ready
-        n2 = self.hp_total - self.hp_finished - self.hp_running - self.hp_ready
+        n2 = _max_trial_number - self.hp_finished - self.hp_running - self.hp_ready
         pool_size = min(n1, n2)
 
         if self.hp_ready < _max_pool_size:
@@ -196,7 +202,7 @@ class AbstractOptimizer(AbstractModule):
                 f'hp_ready: {self.hp_ready}, '
                 f'hp_running: {self.hp_running}, '
                 f'hp_finished: {self.hp_finished}, '
-                f'total: {self.hp_total}, '
+                f'total: {_max_trial_number}, '
                 f'pool_size: {pool_size}'
             )
             self.generate_parameter(number=pool_size)
@@ -216,11 +222,42 @@ class AbstractOptimizer(AbstractModule):
         self.print_dict_state()
         return True
 
-    def _serialize(self, trial_id: int) -> None:
-        pass
+    def _serialize(self, trial_id: int) -> dict:
+        """Serialize this module.
+        Returns:
+            dict: serialize data.
+        """
+
+        obj = self.__dict__.copy()
+        del obj['storage']
+        del obj['config']
+        del obj['options']
+
+        _values = list(obj.values())
+        _keys = list(obj.keys())
+
+        self.storage.variable.d['self_values'].set(trial_id, _values)
+        self.storage.variable.d['self_keys'].set(trial_id, _keys)
+
+        # random state
+        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
+        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
 
     def _deserialize(self, trial_id: int) -> None:
-        pass
+        """ Deserialize this module.
+        Args:
+            dict_objects(dict): A dictionary including serialized objects.
+        Returns:
+            None
+        """
+        _values = self.storage.variable.d['self_values'].get(trial_id)
+        _keys = self.storage.variable.d['self_keys'].get(trial_id)
+        self.__dict__.update(dict(zip(_keys, _values)))
+        print(self.__dict__)
+
+        # random state
+        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
+        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
     def resume(self) -> None:
         """ When in resume mode, load the previous

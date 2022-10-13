@@ -79,18 +79,6 @@ class GridOptimizer(AbstractOptimizer):
         self.ready_params = None
         self.generate_index = None
 
-        self.storage.variable.register(
-            process_name=self.options['process_name'],
-            labels=[
-                'native_random_state',
-                'numpy_random_state',
-                'num_of_generated_parameter',
-                'loop_count',
-                'ready_params',
-                'generate_index'
-            ]
-        )
-
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
@@ -176,29 +164,3 @@ class GridOptimizer(AbstractOptimizer):
 
             self.register_ready({'parameters': new_params})
             self._serialize(self.trial_id.integer)
-
-    def _serialize(self, trial_id: int) -> None:
-        """Serialize this module.
-        Returns:
-            dict: The serialized objects.
-        """
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
-        self.storage.variable.d['num_of_generated_parameter'].set(trial_id, self.num_of_generated_parameter)
-        self.storage.variable.d['loop_count'].set(trial_id, self.loop_count)
-        self.storage.variable.d['ready_params'].set(trial_id=trial_id, value=self.ready_params)
-        self.storage.variable.d['generate_index'].set(trial_id=trial_id, value=self.generate_index)
-
-    def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-        Returns:
-            None
-        """
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
-        self.num_of_generated_parameter = self.storage.variable.d['num_of_generated_parameter'].get(trial_id)
-        self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
-        self.ready_params = self.storage.variable.d['ready_params'].get(trial_id)
-        self.generate_index = self.storage.variable.d['generate_index'].get(trial_id)

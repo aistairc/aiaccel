@@ -192,53 +192,6 @@ class TpeOptimizer(AbstractOptimizer):
                 direction=self.config.goal.get().lower()
             )
 
-    def _serialize(self, trial_id: int) -> None:
-        """Serialize this module.
-        Returns:
-            dict: The serialized objects.
-        """
-        parameter_pool = copy.deepcopy(self.parameter_pool)
-        for _, params in parameter_pool.items():
-            for param in params:
-                if type(param['value']) is np.float64:
-                    param['value'] = float(param['value'])
-
-        # TODO: add serialize trial_pool
-
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
-        self.storage.variable.d['num_of_generated_parameter'].set(trial_id, self.num_of_generated_parameter)
-        self.storage.variable.d['loop_count'].set(trial_id, self.loop_count)
-        self.storage.variable.d['parameter_pool'].set(trial_id, parameter_pool)
-        self.storage.variable.d['study'].set(trial_id=trial_id, value=self.study)
-
-    def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-        Returns:
-            None
-        """
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
-        self.num_of_generated_parameter = self.storage.variable.d['num_of_generated_parameter'].get(trial_id)
-        self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
-        self.study = self.storage.variable.d['study'].get(trial_id)
-
-        parameter_pool = copy.deepcopy(self.storage.variable.d['parameter_pool'].get(trial_id))
-        for _, params in parameter_pool.items():
-            for param in params:
-                if type(param['value']) is float:
-                    param['value'] = np.float64(param['value'])
-
-        self.parameter_pool = parameter_pool
-
-        # TODO: add deserialize trial_pool
-        running_trials = self.study.get_trials(states=(TrialState.RUNNING,))
-
-        for t in running_trials:
-            self.trial_pool[t._trial_id + 1] = optuna.trial.Trial(self.study, t._trial_id)
-
 
 def create_distributions(
         parameters: aiaccel.parameter.HyperParameterConfiguration
