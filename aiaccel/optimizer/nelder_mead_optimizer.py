@@ -1,8 +1,6 @@
 import copy
 from typing import Optional
 
-import numpy as np
-
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
@@ -62,33 +60,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
             None
         """
         self.nelder_mead._maximize = False
-
-    # def check_result(self) -> None:
-    #     """Check the result files and update nelder mead object.
-
-    #     Returns:
-    #         None
-    #     """
-    #     # result_files = get_file_result(self.ws, self.dict_lock)
-    #     results = self.storage.result.get_result_trial_id_list()
-    #     params = self.get_ready_parameters()
-    #     for p in params:
-    #         try:
-    #             int(p['name'])
-    #         except ValueError:
-    #             continue
-
-    #         if self.storage.is_finished(trial_id=int(p['name'])):
-    #             index = p['name']
-    #             self.logger.debug(f"(nelder-mead)check_result:: p['name']: {p['name']}")
-    #             for i in range(len(results)):
-    #                 self.logger.debug(f'(nelder-mead)check_result:: trial[{i}]: {results[i]}')
-    #         else:
-    #             continue
-
-    #         nm_result = self.storage.get_hp_dict(trial_id_str=index)
-    #         self.logger.debug(f"nm_result :{nm_result}")
-    #         self.nelder_mead.add_result_parameters(nm_result)
 
     def check_result(self) -> None:
         pass
@@ -258,7 +229,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     }
                 )
 
-            self.register_ready({'parameters': self.new_params})
             self.update_ready_parameter_name(pool_p, self.trial_id.get())
             self.order.append(
                 {
@@ -266,7 +236,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     'parameters': self.new_params
                 }
             )
-            self._serialize()
+            self.register_ready({'parameters': self.new_params})
 
     def _get_all_trial_id(self) -> list:
         """_get_all_trial_id.
@@ -323,55 +293,3 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 self.parameter_pool.append(copy.copy(p))
 
         self._generate_hp_ready(number)
-
-    def _serialize(self) -> None:
-        """Serialize this module.
-
-        Returns:
-            dict: The serialized objects.
-        """
-        parameter_pool = copy.deepcopy(self.parameter_pool)
-        for p_pool in parameter_pool:
-            for p_pool_param in p_pool['parameters']:
-                if type(p_pool_param['value']) is np.float64:
-                    p_pool_param['value'] = float(p_pool_param['value'])
-
-        self.serialize_datas = {
-            'num_of_generated_parameter': self.num_of_generated_parameter,
-            'loop_count': self.loop_count,
-            'parameter_pool': parameter_pool,
-            'nelder_mead': self.nelder_mead.serialize(),
-            'order': self.order
-        }
-        self.serialize.serialize(
-            trial_id=self.trial_id.integer,
-            optimization_variables=self.serialize_datas,
-            native_random_state=self.get_native_random_state(),
-            numpy_random_state=self.get_numpy_random_state()
-        )
-
-    def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-
-        Returns:
-            None
-        """
-        d = self.serialize.deserialize(trial_id)
-        self.deserialize_datas = d['optimization_variables']
-        self.set_native_random_state(d['native_random_state'])
-        self.set_numpy_random_state(d['numpy_random_state'])
-
-        parameter_pool = copy.deepcopy(self.deserialize_datas['parameter_pool'])
-        for p_pool in parameter_pool:
-            for p_pool_param in p_pool['parameters']:
-                if type(p_pool_param['value']) is float:
-                    p_pool_param['value'] = np.float64(p_pool_param['value'])
-
-        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
-        self.parameter_pool = parameter_pool
-        self.nelder_mead = NelderMead(self.params.get_parameter_list())
-        self.nelder_mead.deserialize(self.deserialize_datas['nelder_mead'])
-        self.order = self.deserialize_datas['order']

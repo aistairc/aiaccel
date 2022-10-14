@@ -39,7 +39,6 @@ setup(
             'aiaccel-plot=aiaccel.cli.plot:main',
             'aiaccel-report=aiaccel.cli.report:main',
             'aiaccel-start=aiaccel.cli.start:main',
-            'aiaccel-stop=aiaccel.cli.stop:main',
             'aiaccel-view=aiaccel.cli.view:main',
         ],
     },

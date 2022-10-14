@@ -305,8 +305,7 @@ class TestAbstractScheduler(BaseTest):
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        scheduler._serialize(trial_id=0)
-        assert 'loop_count' in scheduler.serialize_datas
+        assert scheduler._serialize(trial_id=0) is None
 
     def test_deserialize(
         self,

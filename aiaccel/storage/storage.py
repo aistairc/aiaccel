@@ -8,9 +8,9 @@ from aiaccel.storage.hp import Hp
 from aiaccel.storage.jobstate import JobState
 from aiaccel.storage.pid import Pid
 from aiaccel.storage.result import Result
-from aiaccel.storage.serializer import Serializer
 from aiaccel.storage.timestamp import TimeStamp
 from aiaccel.storage.trial import Trial
+from aiaccel.storage.variable import Serializer
 
 
 class Storage:
@@ -27,6 +27,7 @@ class Storage:
         self.serializer = Serializer(db_path)
         self.error = Error(db_path)
         self.timestamp = TimeStamp(db_path)
+        self.variable = Serializer(db_path)
 
     def current_max_trial_number(self) -> int:
         """Get the current maximum number of trials.
@@ -246,7 +247,7 @@ class Storage:
         self.error.delete_any_trial_error(trial_id)
         self.jobstate.delete_any_trial_jobstate(trial_id)
         self.result.delete_any_trial_objective(trial_id)
-        self.serializer.delete_any_trial_serialize(trial_id)
+        self.variable.delete_any_trial_variable(trial_id)
         self.timestamp.delete_any_trial_timestamp(trial_id)
         self.trial.delete_any_trial_state(trial_id)
         self.hp.delete_any_trial_params(trial_id)

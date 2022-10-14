@@ -85,14 +85,6 @@ class AbstractModule(object):
         self.seed = self.config.randseed.get()
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
-        self.serialize_datas = {}
-        self.deserialize_datas = {}
-
-        self.process_names = [
-            aiaccel.module_type_master,
-            aiaccel.module_type_optimizer,
-            aiaccel.module_type_scheduler
-        ]
 
     def get_each_state_count(self) -> None:
         """Updates the number of files in hp(hyper parameter) directories.
@@ -267,7 +259,7 @@ class AbstractModule(object):
         """
         raise NotImplementedError
 
-    def _serialize(self) -> None:
+    def _serialize(self, trial_id: int) -> None:
         """Serialize this module.
 
         Returns:
