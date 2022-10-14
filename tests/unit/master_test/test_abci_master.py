@@ -49,13 +49,9 @@ class TestAbciMaster(BaseTest):
         ]
 
         with patch.object(sys, 'argv', commandline_args):
-            # from aiaccel import start
-            # self.master = start.Master()
             options = Arguments()
-            # self.master = create_master(options['config'])(options)
             self.master = AbciMaster(options)
 
-        # self.master = AbciMaster(self.config_json)
         yield
         self.master = None
 

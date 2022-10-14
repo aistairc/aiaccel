@@ -261,12 +261,7 @@ class TestAbstractMaster(BaseTest):
         ]
         with patch.object(sys, 'argv', commandline_args):
             master = AbstractMaster(options)
-        # with patch.object(master, 'ws', return_value='/'):
-        #     with patch('aiaccel.dict_alive', return_value=''):
-        #         with patch('aiaccel.alive_master', return_value='tmp'):
-        #             with patch.object(master, 'get_each_state_count', return_value=None):
-        #                 master.pre_process()
-        #                 assert master.inner_loop_pre_process()
+
         with patch.object(master, 'ws', return_value='/tmp'):
             with patch.object(master, 'get_each_state_count', return_value=None):
                 master.pre_process()
@@ -281,13 +276,6 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        # options = {
-        #     'config': config_json,
-        #     'resume': None,
-        #     'clean': False,
-        #     'fs': False,
-        #     'process_name': 'master'
-        # }
         commandline_args = [
             "start.py",
             "--config",

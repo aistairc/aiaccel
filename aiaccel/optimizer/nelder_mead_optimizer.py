@@ -61,33 +61,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         self.nelder_mead._maximize = False
 
-    # def check_result(self) -> None:
-    #     """Check the result files and update nelder mead object.
-
-    #     Returns:
-    #         None
-    #     """
-    #     # result_files = get_file_result(self.ws, self.dict_lock)
-    #     results = self.storage.result.get_result_trial_id_list()
-    #     params = self.get_ready_parameters()
-    #     for p in params:
-    #         try:
-    #             int(p['name'])
-    #         except ValueError:
-    #             continue
-
-    #         if self.storage.is_finished(trial_id=int(p['name'])):
-    #             index = p['name']
-    #             self.logger.debug(f"(nelder-mead)check_result:: p['name']: {p['name']}")
-    #             for i in range(len(results)):
-    #                 self.logger.debug(f'(nelder-mead)check_result:: trial[{i}]: {results[i]}')
-    #         else:
-    #             continue
-
-    #         nm_result = self.storage.get_hp_dict(trial_id_str=index)
-    #         self.logger.debug(f"nm_result :{nm_result}")
-    #         self.nelder_mead.add_result_parameters(nm_result)
-
     def check_result(self) -> None:
         pass
 
