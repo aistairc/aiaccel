@@ -256,7 +256,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     }
                 )
 
-            self.register_ready({'parameters': self.new_params})
             self.update_ready_parameter_name(pool_p, self.trial_id.get())
             self.order.append(
                 {
@@ -264,7 +263,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     'parameters': self.new_params
                 }
             )
-            self._serialize(self.trial_id.integer)
+            self.register_ready({'parameters': self.new_params})
 
     def _get_all_trial_id(self) -> list:
         """_get_all_trial_id.

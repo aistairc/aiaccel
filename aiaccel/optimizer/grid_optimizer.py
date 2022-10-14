@@ -163,4 +163,3 @@ class GridOptimizer(AbstractOptimizer):
             self.num_of_generated_parameter += 1
 
             self.register_ready({'parameters': new_params})
-            self._serialize(self.trial_id.integer)

@@ -23,7 +23,6 @@ class RandomOptimizer(AbstractOptimizer):
 
         if initial_parameter is not None:
             self.register_ready(initial_parameter)
-            self._serialize(self.trial_id.integer)
             number -= 1
 
         for i in range(number):
@@ -40,4 +39,3 @@ class RandomOptimizer(AbstractOptimizer):
 
             self.num_of_generated_parameter += 1
             self.register_ready({'parameters': new_params})
-            self._serialize(self.trial_id.integer)

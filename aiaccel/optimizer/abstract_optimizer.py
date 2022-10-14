@@ -90,6 +90,8 @@ class AbstractOptimizer(AbstractModule):
             state='ready'
         )
 
+        self._serialize(self.trial_id.integer)
+
         return param['trial_id']
 
     def generate_initial_parameter(self) -> Union[
