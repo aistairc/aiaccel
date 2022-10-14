@@ -1,4 +1,6 @@
 import csv
+from logging import getLogger, StreamHandler, DEBUG
+
 import pathlib
 
 from fasteners import InterProcessLock
@@ -6,6 +8,11 @@ from fasteners import InterProcessLock
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
+
+
+logger = getLogger(__name__)
+logger.setLevel(DEBUG)
+logger.addHandler(StreamHandler())
 
 
 class CreationReaport:
@@ -29,7 +36,7 @@ class CreationReaport:
 
         finished = self.storage.trial.get_finished()
         if len(finished) == 0:
-            print('No buffer.')
+            logger.info('No data.')
             return
 
         # write header

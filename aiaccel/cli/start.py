@@ -1,3 +1,5 @@
+from logging import getLogger, StreamHandler, DEBUG
+
 import pathlib
 import shutil
 import time
@@ -15,8 +17,13 @@ from aiaccel.workspace import Workspace
 
 
 def main(options: dict = Arguments()) -> None:
+
+    logger = getLogger(__name__)
+    logger.setLevel(DEBUG)
+    logger.addHandler(StreamHandler())
+
     if options['config'] == "" or options['config'] is None:
-        print(
+        logger.info(
             "The configuration file is not specified. "
             "Please specify it with the command line argument "
             "'--config' or '-c'."
@@ -24,12 +31,12 @@ def main(options: dict = Arguments()) -> None:
         return
 
     if not pathlib.Path(options['config']).exists():
-        print(f"config file: {options['config']} doesn't exist.")
+        logger.info(f"config file: {options['config']} doesn't exist.")
         return
 
     config = Config(options['config'], warn=True, format_check=True)
     if config is None:
-        print(f"Invalid workspace: {options['workspace']} or config: {options['config']}")
+        logger.info(f"Invalid workspace: {options['workspace']} or config: {options['config']}")
         return
 
     workspace = Workspace(config.workspace.get())
@@ -38,21 +45,21 @@ def main(options: dict = Arguments()) -> None:
 
     if options['resume'] is None:
         if options['clean'] is True:
-            print("Cleaning workspace")
+            logger.info("Cleaning workspace")
             workspace.clean()
-            print(f'Workspace directory {str(workspace.path)} is cleaned.')
+            logger.info(f'Workspace directory {str(workspace.path)} is cleaned.')
         else:
             if workspace.exists():
-                print("workspace exists.")
+                logger.info("workspace exists.")
                 return
 
     workspace.create()
     if workspace.check_consists() is False:
-        print("Creating workspace is Failed.")
+        logger.info("Creating workspace is Failed.")
         return
 
-    print(f"Start {config.search_algorithm.get()} Optimization")
-    print(f"config: {str(pathlib.Path(options['config']).resolve())}")
+    logger.info(f"Start {config.search_algorithm.get()} Optimization")
+    logger.info(f"config: {str(pathlib.Path(options['config']).resolve())}")
 
     time_s = time.time()
 
@@ -95,7 +102,7 @@ def main(options: dict = Arguments()) -> None:
     report = CreationReaport(options)
     report.create()
 
-    print("moving...")
+    logger.info("moving...")
     dst = workspace.move_completed_data()
 
     config_name = pathlib.Path(options['config']).name
@@ -104,10 +111,10 @@ def main(options: dict = Arguments()) -> None:
     files = fs.get_file_result_hp(dst)
     best, best_file = pt.get_best_parameter(files, goal, dict_lock)
 
-    print(f"Best result    : {best_file}")
-    print(f"               : {best}")
-    print(f"Total time [s] : {round(time.time() - time_s)}")
-    print("Done.")
+    logger.info(f"Best result    : {best_file}")
+    logger.info(f"               : {best}")
+    logger.info(f"Total time [s] : {round(time.time() - time_s)}")
+    logger.info("Done.")
     return
 
 

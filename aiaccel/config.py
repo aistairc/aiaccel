@@ -1,6 +1,7 @@
 import copy
 import sys
 from abc import ABCMeta, abstractmethod
+from logging import getLogger, StreamHandler, DEBUG
 from pathlib import Path
 from typing import Any, Union
 
@@ -9,6 +10,10 @@ import confile
 from aiaccel.common import search_algorithm_nelder_mead
 
 NoneType = type(None)
+
+logger = getLogger(__name__)
+logger.setLevel(DEBUG)
+logger.addHandler(StreamHandler())
 
 
 class BaseConfig(metaclass=ABCMeta):
@@ -218,7 +223,7 @@ class ConfigEntry:
             value (any)
         """
         if type(value) not in self.type:
-            print(f"may be invalid value '{value}'.")
+            logger.info(f"may be invalid value '{value}'.")
             raise TypeError
         self._value = value
 
@@ -238,7 +243,7 @@ class ConfigEntry:
                 item.append(self.keys)
 
             item = ".".join(item)
-            print(
+            logger.info(
                 f"{item} is not found in the configuration file, "
                 f"the default value will be applied.(default: {self.default})"
             )
@@ -252,7 +257,7 @@ class ConfigEntry:
             self._value == [] or
             self._value == ()
         ):
-            print(f"Configuration error. '{self.keys}' is not found.")
+            logger.info(f"Configuration error. '{self.keys}' is not found.")
             sys.exit()
 
     def load_config_values(self):
@@ -356,17 +361,17 @@ class Config:
             self.job_command.empty_if_error()
 
             if self.goal.get().lower() not in _GOALS:
-                print(f'Invalid goal: {self.goal.get()}')
+                logger.info(f'Invalid goal: {self.goal.get()}')
 
             if self.resource_type.get().lower() not in _RESOURCE_TYPES:
-                print(f'Invalid resource type: {self.resource_type.get()}.')
+                logger.info(f'Invalid resource type: {self.resource_type.get()}.')
                 sys.exit()
 
             if self.resource_type.get().lower() == "abci":
                 self.abci_group.empty_if_error()
                 self.job_script_preamble.empty_if_error()
                 if Path(self.job_script_preamble.get()).exists() is False:
-                    print(f"{self.job_script_preamble.get()} is not found.")
+                    logger.info(f"{self.job_script_preamble.get()} is not found.")
                     sys.exit()
             # self.hps_format_check()
 
