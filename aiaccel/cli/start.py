@@ -11,13 +11,12 @@ from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.util import filesystem as fs
 from aiaccel.util.report import CreationReaport
-from aiaccel.util.terminal import Terminal
 from aiaccel.workspace import Workspace
 
 
 def main(options: dict = Arguments()) -> None:
     if options['config'] == "" or options['config'] is None:
-        Terminal().print_error(
+        print(
             "The configuration file is not specified. "
             "Please specify it with the command line argument "
             "'--config' or '-c'."
@@ -25,12 +24,12 @@ def main(options: dict = Arguments()) -> None:
         return
 
     if not pathlib.Path(options['config']).exists():
-        Terminal().print_error(f"config file: {options['config']} doesn't exist.")
+        print(f"config file: {options['config']} doesn't exist.")
         return
 
     config = Config(options['config'], warn=True, format_check=True)
     if config is None:
-        Terminal().print_error(f"Invalid workspace: {options['workspace']} or config: {options['config']}")
+        print(f"Invalid workspace: {options['workspace']} or config: {options['config']}")
         return
 
     workspace = Workspace(config.workspace.get())
@@ -44,7 +43,7 @@ def main(options: dict = Arguments()) -> None:
             print(f'Workspace directory {str(workspace.path)} is cleaned.')
         else:
             if workspace.exists():
-                Terminal().print_error("workspace exists.")
+                print("workspace exists.")
                 return
 
     workspace.create()

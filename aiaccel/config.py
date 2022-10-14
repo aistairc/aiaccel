@@ -7,7 +7,6 @@ from typing import Any, Union
 import confile
 
 from aiaccel.common import search_algorithm_nelder_mead
-from aiaccel.util.terminal import Terminal
 
 NoneType = type(None)
 
@@ -219,7 +218,7 @@ class ConfigEntry:
             value (any)
         """
         if type(value) not in self.type:
-            Terminal().print_error(f"may be invalid value '{value}'.")
+            print(f"may be invalid value '{value}'.")
             raise TypeError
         self._value = value
 
@@ -239,7 +238,7 @@ class ConfigEntry:
                 item.append(self.keys)
 
             item = ".".join(item)
-            Terminal().print_warning(
+            print(
                 f"{item} is not found in the configuration file, "
                 f"the default value will be applied.(default: {self.default})"
             )
@@ -253,7 +252,7 @@ class ConfigEntry:
             self._value == [] or
             self._value == ()
         ):
-            Terminal().print_error(f"Configuration error. '{self.keys}' is not found.")
+            print(f"Configuration error. '{self.keys}' is not found.")
             sys.exit()
 
     def load_config_values(self):
@@ -357,17 +356,17 @@ class Config:
             self.job_command.empty_if_error()
 
             if self.goal.get().lower() not in _GOALS:
-                Terminal().print_error(f'Invalid goal: {self.goal.get()}')
+                print(f'Invalid goal: {self.goal.get()}')
 
             if self.resource_type.get().lower() not in _RESOURCE_TYPES:
-                Terminal().print_error(f'Invalid resource type: {self.resource_type.get()}.')
+                print(f'Invalid resource type: {self.resource_type.get()}.')
                 sys.exit()
 
             if self.resource_type.get().lower() == "abci":
                 self.abci_group.empty_if_error()
                 self.job_script_preamble.empty_if_error()
                 if Path(self.job_script_preamble.get()).exists() is False:
-                    Terminal().print_error(f"{self.job_script_preamble.get()} is not found.")
+                    print(f"{self.job_script_preamble.get()} is not found.")
                     sys.exit()
             # self.hps_format_check()
 
