@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, List, Union
 import psutil
 
 if TYPE_CHECKING:
-    from aiaccel.master.abc_master import AbciMaster
+    from aiaccel.master.abci_master import AbciMaster
     from aiaccel.master.abstract_master import AbstractMaster
     from aiaccel.master.local_master import LocalMaster
 
