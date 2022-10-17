@@ -14,7 +14,6 @@ setup(
     description='AIST hyperparameter optimizer',
     url='https://github.com/aistairc/aiaccel',
     license='MIT',
-    package_dir={'sobol_seq': 'lib/sobol_seq'},
     packages=[
         'aiaccel',
         'aiaccel.abci',
@@ -27,8 +26,7 @@ setup(
         'aiaccel.scheduler.job',
         'aiaccel.util',
         'aiaccel.cli',
-        'aiaccel.storage',
-        'sobol_seq'
+        'aiaccel.storage'
     ],
     install_requires=requirements,
     zip_safe=False,
