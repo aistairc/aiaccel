@@ -7,7 +7,6 @@ from aiaccel.master.verification.abstract_verification import \
     AbstractVerification
 from aiaccel.module import AbstractModule
 from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.serialize import Serializer
 from aiaccel.util.time_tools import (get_time_now_object,
                                      get_time_string_from_object)
 
@@ -49,7 +48,6 @@ class AbstractMaster(AbstractModule):
         self.verification = AbstractVerification(self.options)
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
-        self.serialize = Serializer(self.config, 'master', self.options)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.

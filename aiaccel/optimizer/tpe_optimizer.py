@@ -1,9 +1,6 @@
-import copy
 from typing import Optional
 
-import numpy as np
 import optuna
-from optuna.trial import TrialState
 
 import aiaccel.parameter
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -133,8 +130,6 @@ class TpeOptimizer(AbstractOptimizer):
             self.trial_pool[trial_id] = trial
             self.logger.info(f'newly added name: {trial_id} to parameter_pool')
 
-            self._serialize()
-
     def generate_initial_parameter(self):
 
         if self.num_of_generated_parameter == 0:
@@ -179,64 +174,6 @@ class TpeOptimizer(AbstractOptimizer):
                 study_name=self.study_name,
                 direction=self.config.goal.get().lower()
             )
-
-    def _serialize(self) -> None:
-        """Serialize this module.
-
-        Returns:
-            dict: The serialized objects.
-        """
-        parameter_pool = copy.deepcopy(self.parameter_pool)
-        for _, params in parameter_pool.items():
-            for param in params:
-                if type(param['value']) is np.float64:
-                    param['value'] = float(param['value'])
-
-        # TODO: add serialize trial_pool
-
-        self.serialize_datas = {
-            'num_of_generated_parameter': self.num_of_generated_parameter,
-            'loop_count': self.loop_count,
-            'parameter_pool': parameter_pool,
-            'study': self.study
-        }
-        self.serialize.serialize(
-            trial_id=self.trial_id.integer,
-            optimization_variables=self.serialize_datas,
-            native_random_state=self.get_native_random_state(),
-            numpy_random_state=self.get_numpy_random_state()
-        )
-
-    def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-
-        Returns:
-            None
-        """
-        d = self.serialize.deserialize(trial_id)
-        self.deserialize_datas = d['optimization_variables']
-        self.set_native_random_state(d['native_random_state'])
-        self.set_numpy_random_state(d['numpy_random_state'])
-
-        parameter_pool = copy.deepcopy(self.deserialize_datas['parameter_pool'])
-        for _, params in parameter_pool.items():
-            for param in params:
-                if type(param['value']) is float:
-                    param['value'] = np.float64(param['value'])
-
-        self.parameter_pool = parameter_pool
-        self.study = self.deserialize_datas['study']
-
-        self.num_of_generated_parameter = self.deserialize_datas['num_of_generated_parameter']
-
-        # TODO: add deserialize trial_pool
-        running_trials = self.study.get_trials(states=(TrialState.RUNNING,))
-
-        for t in running_trials:
-            self.trial_pool[t._trial_id + 1] = optuna.trial.Trial(self.study, t._trial_id)
 
 
 def create_distributions(

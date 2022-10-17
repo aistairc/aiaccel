@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from aiaccel.argument import Arguments
-from aiaccel.master.abc_master import AbciMaster
+from aiaccel.master.abci_master import AbciMaster
 from aiaccel.master.create import create_master
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.util.filesystem import get_dict_files
@@ -49,13 +49,9 @@ class TestAbciMaster(BaseTest):
         ]
 
         with patch.object(sys, 'argv', commandline_args):
-            # from aiaccel import start
-            # self.master = start.Master()
             options = Arguments()
-            # self.master = create_master(options['config'])(options)
             self.master = AbciMaster(options)
 
-        # self.master = AbciMaster(self.config_json)
         yield
         self.master = None
 
