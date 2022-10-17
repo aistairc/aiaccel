@@ -1,7 +1,7 @@
 from typing import Any
 
 from aiaccel.config import Config
-from aiaccel.master.abc_master import AbciMaster
+from aiaccel.master.abci_master import AbciMaster
 from aiaccel.master.local_master import LocalMaster
 
 

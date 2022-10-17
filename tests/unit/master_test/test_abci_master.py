@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from aiaccel.argument import Arguments
-from aiaccel.master.abc_master import AbciMaster
+from aiaccel.master.abci_master import AbciMaster
 from aiaccel.master.create import create_master
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.util.filesystem import get_dict_files
