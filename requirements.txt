@@ -21,7 +21,7 @@ pytest-tornasync
 pytest-trio
 pytest-twisted
 PyYAML==5.4
-#scipy==1.2.1
+scipy
 six==1.12.0
 SQLAlchemy==1.4.27
 toml==0.10.0
