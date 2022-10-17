@@ -64,35 +64,49 @@ class AbstractOptimizer(AbstractModule):
                 'value': ...
             }
         """
-
         for param in params:
-            self.register_ready(param)
 
-    def register_ready(self, param: dict) -> str:
-        """Create a hyper parameter file.
+            self.trial_id.increment()
 
-        Args:
-            param (dict): A hyper parameter dictionary.
+            param['trial_id'] = self.trial_id.get()
+            self.storage.hp.set_any_trial_params(
+                trial_id=param['trial_id'],
+                params=param['parameters']
+            )
+            self.storage.trial.set_any_trial_state(
+                trial_id=param['trial_id'],
+                state='ready'
+            )
 
-        Returns:
-            str: An unique hyper parameter name.
-        """
+            self._serialize(self.trial_id.integer)
 
-        self.trial_id.increment()
+        return None
 
-        param['trial_id'] = self.trial_id.get()
-        self.storage.hp.set_any_trial_params(
-            trial_id=param['trial_id'],
-            params=param['parameters']
-        )
-        self.storage.trial.set_any_trial_state(
-            trial_id=param['trial_id'],
-            state='ready'
-        )
+    # def register_ready(self, param: dict) -> str:
+    #     """Create a hyper parameter file.
 
-        self._serialize(self.trial_id.integer)
+    #     Args:
+    #         param (dict): A hyper parameter dictionary.
 
-        return param['trial_id']
+    #     Returns:
+    #         str: An unique hyper parameter name.
+    #     """
+
+    #     self.trial_id.increment()
+
+    #     param['trial_id'] = self.trial_id.get()
+    #     self.storage.hp.set_any_trial_params(
+    #         trial_id=param['trial_id'],
+    #         params=param['parameters']
+    #     )
+    #     self.storage.trial.set_any_trial_state(
+    #         trial_id=param['trial_id'],
+    #         state='ready'
+    #     )
+
+    #     self._serialize(self.trial_id.integer)
+
+    #     return param['trial_id']
 
     def generate_initial_parameter(self) -> Union[
         Dict[str, List[Dict[str, Union[str, Union[float, List[float]]]]]], None
@@ -122,7 +136,7 @@ class AbstractOptimizer(AbstractModule):
 
         return None
 
-    def generate_parameter(self, number: Optional[int] = 1) -> None:
+    def generate_parameter(self, number: Optional[int] = 1) -> list:
         """Generate parameters.
 
         Args:
@@ -207,7 +221,10 @@ class AbstractOptimizer(AbstractModule):
                 f'total: {_max_trial_number}, '
                 f'pool_size: {pool_size}'
             )
-            self.generate_parameter(number=pool_size)
+
+            new_params = self.generate_parameter(number=pool_size)
+            self.register_new_parameters(new_params)
+
             if self.all_parameter_generated is True:
                 self.logger.info("All parameter was generated.")
                 return False

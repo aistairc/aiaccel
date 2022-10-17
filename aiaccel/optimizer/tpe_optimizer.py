@@ -95,7 +95,10 @@ class TpeOptimizer(AbstractOptimizer):
 
         initial_parameter = self.generate_initial_parameter()
 
+        generated_params = []
+
         if initial_parameter is not None:
+            generated_params.append(initial_parameter)
             trial_id = self.register_ready(initial_parameter)
             self.parameter_pool[trial_id] = initial_parameter['parameters']
             self.logger.info(f'newly added name: {trial_id} to parameter_pool')
@@ -124,11 +127,15 @@ class TpeOptimizer(AbstractOptimizer):
                 }
                 new_params.append(new_param)
 
-            self.num_of_generated_parameter += 1
             trial_id = self.register_ready({'parameters': new_params})
             self.parameter_pool[trial_id] = new_params
             self.trial_pool[trial_id] = trial
             self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+
+            self.num_of_generated_parameter += 1
+            generated_params.append({'parameters': new_params})
+
+        return generated_params
 
     def generate_initial_parameter(self):
 

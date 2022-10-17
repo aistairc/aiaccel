@@ -21,11 +21,13 @@ class RandomOptimizer(AbstractOptimizer):
         self.get_each_state_count()
         initial_parameter = self.generate_initial_parameter()
 
+        generated_params = []
+
         if initial_parameter is not None:
-            self.register_ready(initial_parameter)
+            generated_params.append(initial_parameter)
             number -= 1
 
-        for i in range(number):
+        for _ in range(number):
             new_params = []
             sample = self.params.sample()
 
@@ -38,4 +40,6 @@ class RandomOptimizer(AbstractOptimizer):
                 new_params.append(new_param)
 
             self.num_of_generated_parameter += 1
-            self.register_ready({'parameters': new_params})
+            generated_params.append({'parameters': new_params})
+
+        return generated_params

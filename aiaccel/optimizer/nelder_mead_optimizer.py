@@ -277,7 +277,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Raises:
             TypeError: Causes when an invalid parameter type is set.
         """
-
+        generaed_params = []
         self._add_result(self.get_nm_results())
 
         searched_params = self.nelder_mead_main()
@@ -290,6 +290,43 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 p['vertex_id'] not in self._get_all_trial_id() and
                 p['vertex_id'] not in self._get_current_names()
             ):
-                self.parameter_pool.append(copy.copy(p))
 
-        self._generate_hp_ready(number)
+        for _ in range(number):
+            if len(self.parameter_pool) == 0:
+                break
+
+            self.new_params = []
+            pool_p = self.parameter_pool.pop(0)
+
+            for param in self.params.get_parameter_list():
+                i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
+
+                if param.type == 'FLOAT':
+                    value = float(pool_p['parameters'][i]['value'])
+                elif param.type == 'INT':
+                    value = int(pool_p['parameters'][i]['value'])
+                else:
+                    raise TypeError(
+                        'Invalid parameter type for NelderMeadSearch.'
+                        f'FLOAT or INT is required, but {param.type} is given.'
+                    )
+
+                self.new_params.append(
+                    {
+                        'parameter_name': param.name,
+                        'type': param.type,
+                        'value': value
+                    }
+                )
+
+            self.update_ready_parameter_name(pool_p, self.trial_id.get())
+            self.order.append(
+                {
+                    'vertex_id': self.trial_id.get(),
+                    'parameters': self.new_params
+                }
+            )
+            generaed_params.append({'parameters': self.new_params})
+        
+        return generaed_params
+

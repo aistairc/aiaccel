@@ -139,7 +139,7 @@ class GridOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        returned_params = []
+        generated_params = []
 
         for _ in range(number):
             parameter_index = self.get_parameter_index()
@@ -159,7 +159,7 @@ class GridOptimizer(AbstractOptimizer):
                 }
                 new_params.append(new_param)
 
-            returned_params.append({'parameters': new_params})
             self.num_of_generated_parameter += 1
+            generated_params.append({'parameters': new_params})
 
-            self.register_ready({'parameters': new_params})
+        return generated_params
