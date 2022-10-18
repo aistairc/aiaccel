@@ -27,8 +27,6 @@ def main() -> None:
     parser.add_argument('--clean', nargs='?', const=True, default=False)
     args = parser.parse_args()
 
-    logger = getLogger(__name__)
-
     config = Config(args.config, warn=True, format_check=True)
     if config is None:
         logger.error(f"Invalid workspace: {args.workspace} or config: {args.config}")
