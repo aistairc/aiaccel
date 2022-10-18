@@ -2,17 +2,17 @@ import os
 import pathlib
 import shutil
 import time
+from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
 
 import aiaccel
 from aiaccel import parameter as pt
-from aiaccel.argument import Arguments
 from aiaccel.config import Config
 from aiaccel.master.create import create_master
 from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.util import filesystem as fs
-from aiaccel.util.report import CreationReaport
+from aiaccel.util.report import CreationReport
 from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
@@ -20,31 +20,24 @@ logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
 
 
-def main(options: dict = Arguments()) -> None:
+def main() -> None:
+    parser = ArgumentParser()
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument('--resume', type=int, default=None)
+    parser.add_argument('--clean', nargs='?', const=True, default=False)
+    args = parser.parse_args()
 
-    if options['config'] == "" or options['config'] is None:
-        logger.info(
-            "The configuration file is not specified. "
-            "Please specify it with the command line argument "
-            "'--config' or '-c'."
-        )
-        return
-
-    if not pathlib.Path(options['config']).exists():
-        logger.info(f"config file: {options['config']} doesn't exist.")
-        return
-
-    config = Config(options['config'], warn=True, format_check=True)
+    config = Config(args.config, warn=True, format_check=True)
     if config is None:
-        logger.info(f"Invalid workspace: {options['workspace']} or config: {options['config']}")
+        logger.info(f"Invalid workspace: {args.workspace} or config: {args.config}")
         return
 
     workspace = Workspace(config.workspace.get())
     goal = config.goal.get()
     dict_lock = workspace.path / aiaccel.dict_lock
 
-    if options['resume'] is None:
-        if options['clean'] is True:
+    if args.resume is None:
+        if args.clean is True:
             logger.info("Cleaning workspace")
             workspace.clean()
             logger.info(f'Workspace directory {str(workspace.path)} is cleaned.')
@@ -58,15 +51,14 @@ def main(options: dict = Arguments()) -> None:
         logger.info("Creating workspace is Failed.")
         return
 
-    logger.info(f"Start {config.search_algorithm.get()} Optimization")
-    logger.info(f"config: {str(pathlib.Path(options['config']).resolve())}")
+    logger.info(f"config: {str(pathlib.Path(args.config).resolve())}")
 
     time_s = time.time()
 
-    Master = create_master(options['config'])
-    Optimizer = create_optimizer(options['config'])
-    Scheduler = create_scheduler(options['config'])
-    modules = [Master(options), Scheduler(options), Optimizer(options)]
+    Master = create_master(args.config)
+    Optimizer = create_optimizer(args.config)
+    Scheduler = create_scheduler(args.config)
+    modules = [Master(vars(args)), Scheduler(vars(args)), Optimizer(vars(args))]
 
     sleep_time = config.sleep_time.get()
     time_s = time.time()
@@ -99,14 +91,14 @@ def main(options: dict = Arguments()) -> None:
     for module in modules:
         module.post_process()
 
-    report = CreationReaport(options)
+    report = CreationReport(args.config)
     report.create()
 
     logger.info("moving...")
     dst = workspace.move_completed_data()
 
-    config_name = pathlib.Path(options['config']).name
-    shutil.copy(pathlib.Path(options['config']), dst / config_name)
+    config_name = pathlib.Path(args.config).name
+    shutil.copy(pathlib.Path(args.config), dst / config_name)
 
     files = fs.get_file_result_hp(dst)
     best, best_file = pt.get_best_parameter(files, goal, dict_lock)

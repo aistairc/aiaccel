@@ -354,6 +354,9 @@ class Config:
             format_check (bool): A flag of do tha check format or not.
         """
         self.config_path = Path(config_path).resolve()
+        if not self.config_path.exists():
+            Terminal().print_error(f"config file: {config_path} doesn't exist.")
+
         self.config = load_config(self.config_path)
         self.define_items(self.config, warn)
         if format_check:

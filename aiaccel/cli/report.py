@@ -1,9 +1,8 @@
 import os
-import sys
+from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
 
-from aiaccel.argument import Arguments
-from aiaccel.util.report import CreationReaport
+from aiaccel.util.report import CreationReport
 
 logger = getLogger(__name__)
 logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
@@ -11,12 +10,11 @@ logger.addHandler(StreamHandler())
 
 
 def main():
-    options = Arguments()
-    if "config" not in options.keys():
-        logger.info("Specify the config file path with the --config option.")
-        sys.exit()
+    parser = ArgumentParser()
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    args = parser.parse_args()
 
-    report = CreationReaport(options)
+    report = CreationReport(args.config)
     report.create()
 
 

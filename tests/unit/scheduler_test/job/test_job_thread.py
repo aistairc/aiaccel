@@ -3,19 +3,17 @@ import datetime
 import json
 import sys
 import time
-from pathlib import Path
 from unittest.mock import patch
 
 import aiaccel
 import pytest
-from aiaccel.argument import Arguments
 from aiaccel.config import ConfileWrapper
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.job.job_thread import (JOB_STATES, JOB_TRANSITIONS,
                                               CustomMachine, Job, Model)
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.util.time_tools import get_time_now_object
-
+from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
 
@@ -67,7 +65,7 @@ class TestModel(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = Arguments()
+            options = parse_arguments()
             scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
@@ -107,7 +105,7 @@ class TestModel(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = Arguments()
+            options = parse_arguments()
             scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
         trial_id = 1
@@ -412,7 +410,7 @@ class TestJob(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = Arguments()
+            options = parse_arguments()
             scheduler = create_scheduler(options['config'])(options)
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
