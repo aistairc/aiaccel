@@ -290,6 +290,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 p['vertex_id'] not in self._get_all_trial_id() and
                 p['vertex_id'] not in self._get_current_names()
             ):
+                self.parameter_pool.append(copy.copy(p))
 
         for _ in range(number):
             if len(self.parameter_pool) == 0:
@@ -318,8 +319,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
                         'value': value
                     }
                 )
+            print(f"executing:{self.nelder_mead._executing}")
 
-            self.update_ready_parameter_name(pool_p, self.trial_id.get())
+            # self.update_ready_parameter_name(pool_p, self.trial_id.get())
             self.order.append(
                 {
                     'vertex_id': self.trial_id.get(),
@@ -330,3 +332,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
         
         return generaed_params
 
+    def toMM(self):
+        trial_ids = self.storage.trial.get_finished()
+        
