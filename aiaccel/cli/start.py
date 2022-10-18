@@ -27,9 +27,11 @@ def main() -> None:
     parser.add_argument('--clean', nargs='?', const=True, default=False)
     args = parser.parse_args()
 
+    logger = getLogger(__name__)
+
     config = Config(args.config, warn=True, format_check=True)
     if config is None:
-        logger.info(f"Invalid workspace: {args.workspace} or config: {args.config}")
+        logger.error(f"Invalid workspace: {args.workspace} or config: {args.config}")
         return
 
     workspace = Workspace(config.workspace.get())
@@ -38,7 +40,7 @@ def main() -> None:
 
     if args.resume is None:
         if args.clean is True:
-            logger.info("Cleaning workspace")
+            logger.e("Cleaning workspace")
             workspace.clean()
             logger.info(f'Workspace directory {str(workspace.path)} is cleaned.')
         else:
@@ -48,7 +50,7 @@ def main() -> None:
 
     workspace.create()
     if workspace.check_consists() is False:
-        logger.info("Creating workspace is Failed.")
+        logger.error("Creating workspace is Failed.")
         return
 
     logger.info(f"config: {str(pathlib.Path(args.config).resolve())}")
