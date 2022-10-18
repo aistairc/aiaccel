@@ -1,12 +1,12 @@
-from logging import getLogger, StreamHandler, DEBUG
-
+import os
 import sys
+from logging import StreamHandler, getLogger
 
 from aiaccel.argument import Arguments
 from aiaccel.util.report import CreationReaport
 
 logger = getLogger(__name__)
-logger.setLevel(DEBUG)
+logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
 
 

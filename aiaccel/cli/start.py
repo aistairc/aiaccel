@@ -1,8 +1,8 @@
-from logging import getLogger, StreamHandler, DEBUG
-
+import os
 import pathlib
 import shutil
 import time
+from logging import StreamHandler, getLogger
 
 import aiaccel
 from aiaccel import parameter as pt
@@ -15,12 +15,12 @@ from aiaccel.util import filesystem as fs
 from aiaccel.util.report import CreationReaport
 from aiaccel.workspace import Workspace
 
+logger = getLogger(__name__)
+logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+logger.addHandler(StreamHandler())
+
 
 def main(options: dict = Arguments()) -> None:
-
-    logger = getLogger(__name__)
-    logger.setLevel(DEBUG)
-    logger.addHandler(StreamHandler())
 
     if options['config'] == "" or options['config'] is None:
         logger.info(

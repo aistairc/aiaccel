@@ -1,7 +1,8 @@
 import copy
+import os
 import sys
 from abc import ABCMeta, abstractmethod
-from logging import getLogger, StreamHandler, DEBUG
+from logging import StreamHandler, getLogger
 from pathlib import Path
 from typing import Any, Union
 
@@ -12,7 +13,7 @@ from aiaccel.common import search_algorithm_nelder_mead
 NoneType = type(None)
 
 logger = getLogger(__name__)
-logger.setLevel(DEBUG)
+logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
 
 
