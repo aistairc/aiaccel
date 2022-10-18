@@ -8,13 +8,12 @@ from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
 
 
-class CreationReaport:
-    def __init__(self, options: dict):
-        self.config_path = options['config']
-        self.config = Config(self.config_path)
+class CreationReport:
+    def __init__(self, config_path: str):
+        self.config = Config(config_path)
         self.ws = pathlib.Path(self.config.workspace.get()).resolve()
         self.fp = self.ws / 'results.csv'
-        self.trialid = TrialId(str(self.config_path))
+        self.trialid = TrialId(str(config_path))
         self.storage = Storage(self.ws)
         self.lock_file = {
             'result_txt': str(self.ws / 'lock' / 'result_txt')

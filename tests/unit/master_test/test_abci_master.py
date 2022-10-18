@@ -5,12 +5,8 @@ import time
 from unittest.mock import patch
 
 import pytest
-from aiaccel.argument import Arguments
 from aiaccel.master.abci_master import AbciMaster
-from aiaccel.master.create import create_master
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.util.filesystem import get_dict_files
-
+from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
 
@@ -49,7 +45,10 @@ class TestAbciMaster(BaseTest):
         ]
 
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            # from aiaccel import start
+            # self.master = start.Master()
+            options = parse_arguments()
+            # self.master = create_master(options['config'])(options)
             self.master = AbciMaster(options)
 
         yield
@@ -68,7 +67,7 @@ class TestAbciMaster(BaseTest):
             self.get_confit_path()
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbciMaster(options)
         master.pre_process()
         assert type(master.runner_files) is list
@@ -87,7 +86,7 @@ class TestAbciMaster(BaseTest):
             self.get_confit_path()
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbciMaster(options)
 
         xml_path = data_dir.joinpath('qstat.xml')
@@ -126,7 +125,7 @@ class TestAbciMaster(BaseTest):
             self.get_confit_path()
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbciMaster(options)
 
         fake_process.register_subprocess(
@@ -142,6 +141,6 @@ class TestAbciMaster(BaseTest):
             self.get_confit_path()
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbciMaster(options)
         assert master.loop_post_process() is None
