@@ -1,14 +1,10 @@
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.filesystem import file_create
-from aiaccel.util.filesystem import file_delete
-from aiaccel.util.filesystem import file_read
-from aiaccel.util.filesystem import get_dict_files
-from aiaccel.util.filesystem import get_file_result
-from aiaccel.util.filesystem import load_yaml
-from aiaccel.util.filesystem import make_directories
-from aiaccel.util.filesystem import make_directory
 import shutil
+
 from aiaccel.storage.storage import Storage
+from aiaccel.util.filesystem import (create_yaml, file_create, file_delete,
+                                     file_read, get_dict_files,
+                                     get_file_result, load_yaml,
+                                     make_directories, make_directory)
 
 
 def test_create_yaml(clean_work_dir, work_dir):

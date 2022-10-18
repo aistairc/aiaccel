@@ -1,5 +1,5 @@
-from pathlib import Path
 from argparse import ArgumentParser
+from pathlib import Path
 
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage

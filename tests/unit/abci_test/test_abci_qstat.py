@@ -1,10 +1,8 @@
-from aiaccel.abci.qstat import parse_qstat, parse_job_list
 import xml.etree.ElementTree as ElementTree
 
+from aiaccel.abci.qstat import parse_job_list, parse_qstat
 
-# def test_parse_qstat(data_dir, load_test_config):
-#     config = load_test_config()
-# コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
+
 def test_parse_qstat(data_dir, load_test_config):
     config = load_test_config()
     xml_path = data_dir.joinpath('qstat.xml')
@@ -15,10 +13,6 @@ def test_parse_qstat(data_dir, load_test_config):
     stat_list = parse_qstat(config, xml_string)
     assert type(stat_list) is list
 
-
-# def test_parse_job_list(data_dir, load_test_config):
-#     config = load_test_config()
-# コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
 def test_parse_job_list(data_dir, load_test_config):
     config = load_test_config()
     xml_path = data_dir.joinpath('qstat.xml')

@@ -1,18 +1,19 @@
-import aiaccel
 import argparse
 import pathlib
 import subprocess
 import sys
+from subprocess import CompletedProcess
 from unittest import mock
 from unittest.mock import patch
-# from aiaccel.util.opt import Wrapper
-from aiaccel.util.aiaccel import Run
-from aiaccel.util.aiaccel import Messages
-# from aiaccel.util.opt import create_objective
-from tests.base_test import BaseTest
-from subprocess import CompletedProcess
+
+import aiaccel
 import numpy as np
 from aiaccel.storage.storage import Storage
+# from aiaccel.util.opt import Wrapper
+from aiaccel.util.aiaccel import Messages, Run
+
+# from aiaccel.util.opt import create_objective
+from tests.base_test import BaseTest
 
 
 def test_create_message():

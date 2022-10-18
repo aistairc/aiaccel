@@ -1,12 +1,14 @@
-from aiaccel.scheduler.abstract import AbstractScheduler
-from aiaccel.scheduler.abci import AbciScheduler
-from aiaccel.scheduler.local import LocalScheduler
-from tests.base_test import BaseTest
-import aiaccel
 import asyncio
 import os
 import time
 from unittest.mock import patch
+
+import aiaccel
+from aiaccel.scheduler.abci_scheduler import AbciScheduler
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler.local_scheduler import LocalScheduler
+
+from tests.base_test import BaseTest
 
 
 async def async_function(func):
@@ -303,8 +305,7 @@ class TestAbstractScheduler(BaseTest):
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        scheduler._serialize(trial_id=0)
-        assert 'loop_count' in scheduler.serialize_datas
+        assert scheduler._serialize(trial_id=0) is None
 
     def test_deserialize(
         self,

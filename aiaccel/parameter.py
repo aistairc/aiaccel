@@ -1,10 +1,12 @@
-from aiaccel.config import Config
-from aiaccel.util.filesystem import load_yaml
+import logging
 from pathlib import Path
 from typing import List, Tuple, Union
-import aiaccel
-import logging
+
 import numpy as np
+
+import aiaccel
+from aiaccel.config import Config
+from aiaccel.util.filesystem import load_yaml
 
 
 def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\

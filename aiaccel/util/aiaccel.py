@@ -1,18 +1,17 @@
 import argparse
-import subprocess
-import pathlib
 import logging
-
+import pathlib
+import subprocess
 from functools import singledispatchmethod
 from typing import Any
 
+import numpy as np
+
 import aiaccel
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
 from aiaccel.parameter import load_parameter
+from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
-
-import numpy as np
 
 SUPPORTED_TYPES = [
     int,

@@ -1,8 +1,8 @@
 import os
-from aiaccel.util.process import exec_runner, subprocess_ps, ps2joblist,\
-    kill_process
-from aiaccel.util.process import is_process_running
 import subprocess
+
+from aiaccel.util.process import (exec_runner, is_process_running,
+                                  kill_process, ps2joblist, subprocess_ps)
 
 
 def test_exec_runner():

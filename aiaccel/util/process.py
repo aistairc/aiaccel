@@ -1,14 +1,18 @@
 from __future__ import annotations
-from subprocess import Popen
-from typing import List, Union, TYPE_CHECKING
-import psutil
+
 import re
 import subprocess
 import threading
+from subprocess import Popen
+from typing import TYPE_CHECKING, List, Union
+
+import psutil
+
 if TYPE_CHECKING:
-    from aiaccel.master.abci import AbciMaster
-    from aiaccel.master.abstract import AbstractMaster
-    from aiaccel.master.local import LocalMaster
+    from aiaccel.master.abci_master import AbciMaster
+    from aiaccel.master.abstract_master import AbstractMaster
+    from aiaccel.master.local_master import LocalMaster
+
 import datetime
 
 

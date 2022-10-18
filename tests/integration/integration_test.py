@@ -1,15 +1,17 @@
-from tests.base_test import BaseTest
-import aiaccel
 import asyncio
-import time
-from unittest.mock import patch
-import sys
-import os
-from aiaccel.storage.storage import Storage
-from pathlib import Path
 import copy
+import os
 import subprocess
+import sys
+import time
+from pathlib import Path
+from unittest.mock import patch
+
+import aiaccel
 from aiaccel.config import Config
+from aiaccel.storage.storage import Storage
+
+from tests.base_test import BaseTest
 
 
 async def start_master(master):

@@ -1,9 +1,17 @@
 import pytest
 from aiaccel.config import Config
+from aiaccel.optimizer.tpe_optimizer import (TpeOptimizer, TPESamplerWrapper,
+                                             create_distributions)
 from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.tpe.search import TpeOptimizer
-from aiaccel.optimizer.tpe.search import create_distributions
+
 from tests.base_test import BaseTest
+
+
+class TestTPESamplerWrapper(BaseTest):
+
+    def test_get_startup_trials(self):
+        tpe_sampler_wrapper = TPESamplerWrapper()
+        assert tpe_sampler_wrapper.get_startup_trials() == 10
 
 
 class TestTpeOptimizer(BaseTest):
@@ -45,21 +53,16 @@ class TestTpeOptimizer(BaseTest):
         assert self.optimizer.create_study() is None
 
     def test_serialize(self):
+        self.optimizer.create_study()
         self.optimizer.trial_id.initial(num=0)
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
-        assert self.optimizer._serialize() is None
+        assert self.optimizer._serialize(trial_id=0) is None
 
     def test_deserialize(self):
         self.optimizer.pre_process()
-        self.optimizer.serialize_datas = {
-            'num_of_generated_parameter': None,
-            'loop_count': 0,
-            'parameter_pool': None,
-            'study': None
-        }
         self.optimizer.trial_id.initial(num=0)
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        self.optimizer._serialize()
+        self.optimizer._serialize(trial_id=0)
         assert self.optimizer._deserialize(trial_id=0) is None
 
 

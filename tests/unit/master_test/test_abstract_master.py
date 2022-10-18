@@ -1,22 +1,24 @@
 
+import asyncio
+import json
 import os
 import subprocess
-import time
-from pathlib import Path
 import sys
-import asyncio
+import time
 from functools import wraps
-
-import json
+from pathlib import Path
 from unittest.mock import patch
 
 import aiaccel
+from aiaccel import workspace
+from aiaccel.config import Config, ConfileWrapper
+from aiaccel.master.abstract_master import AbstractMaster
+from aiaccel.master.create import create_master
+from aiaccel.util.filesystem import get_dict_files
 from aiaccel.util.time_tools import get_time_now_object
-from aiaccel.config import Config
-from aiaccel.master.abstract import AbstractMaster
-
-from tests.base_test import BaseTest
+from aiaccel.workspace import Workspace
 from tests.arguments import parse_arguments
+from tests.base_test import BaseTest
 
 
 async def loop_pre_process(master):
@@ -34,7 +36,6 @@ async def delay_make_directory(sleep_time, d):
 
 def callback_return():
     return
-
 
 
 class TestAbstractMaster(BaseTest):
@@ -87,7 +88,6 @@ class TestAbstractMaster(BaseTest):
             assert False
         except AssertionError:
             assert True
-
 
     def test_pre_process_3(
         self,
@@ -259,12 +259,7 @@ class TestAbstractMaster(BaseTest):
         ]
         with patch.object(sys, 'argv', commandline_args):
             master = AbstractMaster(options)
-        # with patch.object(master, 'ws', return_value='/'):
-        #     with patch('aiaccel.dict_alive', return_value=''):
-        #         with patch('aiaccel.alive_master', return_value='tmp'):
-        #             with patch.object(master, 'get_each_state_count', return_value=None):
-        #                 master.pre_process()
-        #                 assert master.inner_loop_pre_process()
+
         with patch.object(master, 'ws', return_value='/tmp'):
             with patch.object(master, 'get_each_state_count', return_value=None):
                 master.pre_process()
@@ -279,13 +274,6 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        # options = {
-        #     'config': config_json,
-        #     'resume': None,
-        #     'clean': False,
-        #     'fs': False,
-        #     'process_name': 'master'
-        # }
         commandline_args = [
             "start.py",
             "--config",

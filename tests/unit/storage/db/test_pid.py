@@ -1,7 +1,5 @@
 from aiaccel.storage.storage import Storage
-from base import t_base
-from base import db_path
-from base import ws
+from base import db_path, t_base, ws
 
 
 # set_any_process_pid

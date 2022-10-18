@@ -1,18 +1,15 @@
-from aiaccel.master.verification.abstract import\
-    AbstractVerification
-from aiaccel.util.filesystem import load_yaml
-from tests.base_test import BaseTest
 import aiaccel
+from aiaccel.master.verification.abstract_verification import \
+    AbstractVerification
 from aiaccel.storage.storage import Storage
+from aiaccel.util.filesystem import load_yaml
 
+from tests.base_test import BaseTest
 
 
 class TestAbstractVerification(BaseTest):
 
     def test_init(self):
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-        
         options = {
             'config': self.config_json,
             'resume': None,
@@ -25,9 +22,6 @@ class TestAbstractVerification(BaseTest):
         assert verification.is_verified
 
     def test_verify(self, clean_work_dir, setup_hp_finished, work_dir):
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-
         options = {
             'config': self.config_json,
             'resume': None,
@@ -48,13 +42,6 @@ class TestAbstractVerification(BaseTest):
                 objective=(i * 1.0)
             )
             verification.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            # for j in range(2):
-            # verification.storage.hp.set_any_trial_param(
-            #    trial_id=i,
-            #    param_name=f'x{j+1}',
-            #    param_value=0.0,
-            #    param_type='float'
-            # )
             verification.storage.hp.set_any_trial_params(
                 trial_id=i,
                 params=[
@@ -73,9 +60,6 @@ class TestAbstractVerification(BaseTest):
         setup_hp_finished,
         work_dir
     ):
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-
         options = {
             'config': self.config_json,
             'resume': None,
@@ -117,9 +101,6 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
-
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         verification = AbstractVerification(options)
         verification.is_verified = False
         assert verification.print() is None
@@ -134,9 +115,6 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
-
-        # verification = AbstractVerification(self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         verification = AbstractVerification(options)
         verification.is_verified = False
         assert verification.save(1) is None

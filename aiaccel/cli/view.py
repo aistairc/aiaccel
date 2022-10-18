@@ -1,11 +1,10 @@
-from pathlib import Path
 from argparse import ArgumentParser
-
-from numpy import maximum
+from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.workspace import Workspace
 from aiaccel.storage.storage import Storage
+from aiaccel.workspace import Workspace
+from numpy import maximum
 
 
 class Viewer:
@@ -39,8 +38,6 @@ class Viewer:
             else:
                 if len(error) > 4:
                     error = error[0:3] + "..."
-
-            # resume = "possible" if self.storage.serializer.is_exists_any_trial(trial_id) else ""
 
             infos.append(
                 {

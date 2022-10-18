@@ -1,23 +1,20 @@
 import asyncio
 import datetime
-import time
-import sys
-from pathlib import Path
-
 import json
-
-import pytest
+import sys
+import time
 from unittest.mock import patch
 
 import aiaccel
-from aiaccel.util.time_tools import get_time_now_object
+import pytest
 from aiaccel.config import ConfileWrapper
-from aiaccel.scheduler.local import LocalScheduler
-from aiaccel.scheduler.job.job_thread import CustomMachine, Job, Model, JOB_STATES, JOB_TRANSITIONS
 from aiaccel.scheduler.create import create_scheduler
-
-from tests.base_test import BaseTest
+from aiaccel.scheduler.job.job_thread import (JOB_STATES, JOB_TRANSITIONS,
+                                              CustomMachine, Job, Model)
+from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.util.time_tools import get_time_now_object
 from tests.arguments import parse_arguments
+from tests.base_test import BaseTest
 
 
 async def async_start_job(job):

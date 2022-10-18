@@ -1,15 +1,13 @@
 import pathlib
 import subprocess
-import time
 import sys
-
-import pytest
+import time
 from unittest.mock import patch
 
-from aiaccel.master.abci import AbciMaster
-
-from tests.base_test import BaseTest
+import pytest
+from aiaccel.master.abci_master import AbciMaster
 from tests.arguments import parse_arguments
+from tests.base_test import BaseTest
 
 
 def callback_qstat():
@@ -53,7 +51,6 @@ class TestAbciMaster(BaseTest):
             # self.master = create_master(options['config'])(options)
             self.master = AbciMaster(options)
 
-        # self.master = AbciMaster(self.config_json)
         yield
         self.master = None
 

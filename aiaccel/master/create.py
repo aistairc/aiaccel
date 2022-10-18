@@ -1,7 +1,8 @@
 from typing import Any
-from aiaccel.master.abci import AbciMaster
-from aiaccel.master.local import LocalMaster
+
 from aiaccel.config import Config
+from aiaccel.master.abci_master import AbciMaster
+from aiaccel.master.local_master import LocalMaster
 
 
 def create_master(config_path: str) -> Any:

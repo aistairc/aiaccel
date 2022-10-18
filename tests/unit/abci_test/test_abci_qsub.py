@@ -1,23 +1,14 @@
-from aiaccel.abci.qsub import create_qsub_command
-from aiaccel.config import load_config
-import aiaccel
 import os
 
+import aiaccel
+from aiaccel.abci.qsub import create_qsub_command
+from aiaccel.config import load_config
 
-# def test_create_qsub_command(load_test_config):
-# コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
+
 def test_create_qsub_command(load_test_config):
-    #
-    # 戻り値がlistであればテストをPASSする？
-    # テストとして意味がないような・・・
-    #
-
     config = load_test_config()
     optimizer_file = os.path.join(
         os.path.join('', aiaccel.dict_runner),
-        # config.get('optimizer', 'optimizer_runner')
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-        # config.optimizer_runner.get()
         ""
     )
     qsub_command = create_qsub_command(config, optimizer_file)

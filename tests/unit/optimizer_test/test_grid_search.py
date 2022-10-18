@@ -1,22 +1,16 @@
-from aiaccel.optimizer.grid.search import GridOptimizer, generate_grid_points
-from aiaccel.parameter import HyperParameter, load_parameter
-from tests.base_test import BaseTest
 import functools
 
+from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
+                                              generate_grid_points)
+from aiaccel.parameter import HyperParameter, load_parameter
 
-# def test_generate_grid_points(load_test_config):
-#     config = load_test_config()
-# コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
+from tests.base_test import BaseTest
+
+
 def test_generate_grid_points(grid_load_test_config):
     config = grid_load_test_config()
-    params = load_parameter(
-        # config.get('hyperparameter', 'ConfigSpace_hyperparameter')
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-        config.hyperparameters.get()
-    )
+    params = load_parameter(config.hyperparameters.get())
     for p in params.get_parameter_list():
-        # generate_grid_points(p, config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         generate_grid_points(p, config)
 
     int_p = HyperParameter(
@@ -31,9 +25,6 @@ def test_generate_grid_points(grid_load_test_config):
         }
     )
 
-    print(int_p)
-    # assert generate_grid_points(int_p, config)
-    # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
     assert generate_grid_points(int_p, config)
 
     cat_p = HyperParameter(
@@ -46,8 +37,6 @@ def test_generate_grid_points(grid_load_test_config):
             'base': 10
         }
     )
-    # cat_grid = generate_grid_points(cat_p, config)
-    # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
     cat_grid = generate_grid_points(cat_p, config)
     assert cat_grid['parameters'] == ['red', 'green', 'blue']
 
@@ -58,8 +47,6 @@ def test_generate_grid_points(grid_load_test_config):
             self.type = type_name
 
     try:
-        # generate_grid_points(FakeParameter('1', 'uniform_int'), config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
         generate_grid_points(FakeParameter('1', 'uniform_int'), config)
         assert False
     except TypeError:

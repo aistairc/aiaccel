@@ -1,7 +1,5 @@
 from aiaccel.storage.storage import Storage
-from base import t_base
-from base import ws
-
+from base import t_base, ws
 
 
 # set_any_trial_start_time

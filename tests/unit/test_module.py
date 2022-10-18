@@ -1,23 +1,23 @@
-from aiaccel.master.local import LocalMaster
-from aiaccel.module import AbstractModule
-from aiaccel.optimizer.random.search import RandomOptimizer
-from aiaccel.scheduler.local import LocalScheduler
-from aiaccel.util.filesystem import file_create
-from aiaccel.util.logger import str_to_logging_level
-from contextlib import ExitStack
-from pathlib import Path
-from tests.base_test import BaseTest
-from unittest.mock import MagicMock
-from unittest.mock import Mock
-from unittest.mock import patch
-import aiaccel
 import asyncio
 import logging
-import pytest
 import shutil
-import time
 import sys
+import time
+from contextlib import ExitStack
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
+
+import aiaccel
+import pytest
+from aiaccel.master.local_master import LocalMaster
+from aiaccel.module import AbstractModule
+from aiaccel.optimizer.random_optimizer import RandomOptimizer
+from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.storage.storage import Storage
+from aiaccel.util.filesystem import file_create
+from aiaccel.util.logger import str_to_logging_level
+
+from tests.base_test import BaseTest
 
 
 async def async_function(func):
@@ -216,7 +216,7 @@ class TestAbstractModule(BaseTest):
 
     def test_serialize(self):
         try:
-            self.module._serialize()
+            self.module._serialize(trial_id=0)
             assert False
         except NotImplementedError:
             assert True

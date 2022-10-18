@@ -1,8 +1,8 @@
 import pathlib
 from functools import wraps
-from aiaccel.workspace import Workspace
-from aiaccel.config import Config
 
+from aiaccel.config import Config
+from aiaccel.workspace import Workspace
 
 # db_path = pathlib.Path("test.db")
 # ws = Workspace("test_work")
