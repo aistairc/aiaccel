@@ -40,7 +40,7 @@ def main() -> None:
 
     if args.resume is None:
         if args.clean is True:
-            logger.e("Cleaning workspace")
+            logger.info("Cleaning workspace")
             workspace.clean()
             logger.info(f'Workspace directory {str(workspace.path)} is cleaned.')
         else:
