@@ -229,7 +229,6 @@ class Run:
         parser = argparse.ArgumentParser()
         parser.add_argument('-i', '--trial_id', type=str, required=False)
         parser.add_argument('-c', '--config', type=str, required=False)
-        parser.add_argument('--fs', nargs='?', const=True, default=False)
 
         self.args = vars(parser.parse_known_args()[0])
 

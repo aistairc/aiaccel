@@ -54,7 +54,7 @@ def main() -> None:
     Master = create_master(args.config)
     Optimizer = create_optimizer(args.config)
     Scheduler = create_scheduler(args.config)
-    modules = [Master(args), Scheduler(args), Optimizer(args)]
+    modules = [Master(vars(args)), Scheduler(vars(args)), Optimizer(vars(args))]
 
     sleep_time = config.sleep_time.get()
     time_s = time.time()
