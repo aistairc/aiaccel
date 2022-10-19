@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sobol_seq import i4_sobol
+from scipy.stats import qmc
 
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
@@ -11,8 +11,8 @@ class SobolOptimizer(AbstractOptimizer):
     Attributes:
         generate_index (int): A number of generated hyper parameters.
 
-    ToDo: The development of original library was stopped. It's recommended to
-        be replaced with SciPy sobol module.
+    ToDo: Make it clear to resume this optimizer with Sobol sampler. Current code resume the sampler counts with a
+        number of FINISHED PARAMETER FILES. Confirm whether the current code resumes for any timings of quits.
     """
 
     def __init__(self, options: dict) -> None:
@@ -23,6 +23,7 @@ class SobolOptimizer(AbstractOptimizer):
         """
         super().__init__(options)
         self.generate_index = None
+        self.sampler = None
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -34,6 +35,10 @@ class SobolOptimizer(AbstractOptimizer):
 
         finished = self.storage.trial.get_finished()
         self.generate_index = len(finished)
+        self.sampler = qmc.Sobol(d=len(self.params.get_parameter_list()), scramble=False)
+
+        if self.generate_index is not None and self.generate_index > 0:
+            self.sampler.fast_forward(self.generate_index)
 
     def generate_parameter(self, number: Optional[int] = 1) -> None:
         """Generate parameters.
@@ -56,8 +61,12 @@ class SobolOptimizer(AbstractOptimizer):
 
         for _ in range(number):
             new_params = []
-            vec, seed = i4_sobol(n_params, self.generate_index)
-            self.generate_index = seed
+            vec = self.sampler.random()[0]
+
+            if self.generate_index is None:
+                self.generate_index = 1
+            else:
+                self.generate_index += 1
 
             for i in range(0, n_params):
                 min_value = l_params[i].lower
