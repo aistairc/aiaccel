@@ -1,4 +1,5 @@
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+
 from scipy.stats import qmc
 
 
