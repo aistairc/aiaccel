@@ -1,5 +1,6 @@
 import pytest
 from aiaccel.optimizer.sobol_optimizer import SobolOptimizer
+
 from tests.base_test import BaseTest
 
 

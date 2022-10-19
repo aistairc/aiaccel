@@ -1,7 +1,8 @@
 from typing import Optional
 
-import aiaccel.parameter
 import optuna
+
+import aiaccel.parameter
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 

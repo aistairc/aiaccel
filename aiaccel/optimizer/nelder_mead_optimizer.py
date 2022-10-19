@@ -6,6 +6,7 @@ from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 class NelderMeadOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
+
     Attributes:
         nelder_mead ():
         parameter_pool ():
@@ -13,6 +14,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict) -> None:
         """Initial method of NelderMeadOptimizer.
+
         Args:
             config (str): A file name of a configuration.
         """
@@ -36,6 +38,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def set_maximize(self):
         """ Set the goal to Maximize.
+
         Returns:
             None
         """
@@ -43,6 +46,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def set_minimize(self):
         """ Set the goal to Minimize.
+
         Returns:
             None
         """
@@ -53,6 +57,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def get_ready_parameters(self) -> list:
         """ Get the list of ready parameters.
+
         Returns:
             list
         """
@@ -60,6 +65,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def get_nm_results(self) -> list:
         """ Get the list of Nelder-Mead result.
+
         Returns:
             list[dict]: Results per trial.
         """
@@ -86,8 +92,10 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def _add_result(self, nm_results: list) -> None:
         """  Add a result parameter.
+
         Args:
             nm_results (list):
+
         Returns:
             None
         """
@@ -111,11 +119,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
         name: str     # new_param_name
     ) -> None:
         """ Update hyperparameter's names.
+
         Args:
             pool_p (str): old parameter name
             name (str): New parameter name
+
         Returns:
             None
+
         Note:
             --------------------------------------------------------------
             - befor
@@ -154,8 +165,10 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def nelder_mead_main(self) -> list:
         """ Nelder Mead's main module.
+
         Args:
             None
+
         Returns:
             searched_params (list): Result of optimization.
         """
@@ -169,7 +182,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def _get_all_trial_id(self) -> list:
         """_get_all_trial_id.
+
         Get trial_ids from DB: 'result', 'finished', 'running', 'ready'
+
         Returns:
             List: trial_id
         """
@@ -182,6 +197,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def _get_current_names(self):
         """ get parameter trial_id.
+
         Returns:
             parameter names in parameter_pool (list)
         """
@@ -190,11 +206,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def generate_parameter(self) -> None:
         """Generate parameters.
+
         Args:
             number (Optional[int]):
                 A number of generating parameters.
+
         Returns:
             None
+
         Raises:
             TypeError: Causes when an invalid parameter type is set.
         """
