@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
@@ -64,49 +64,17 @@ class AbstractOptimizer(AbstractModule):
                 'value': ...
             }
         """
-        for param in params:
+        self.storage.hp.set_any_trial_params(
+            trial_id=self.trial_id.get(),
+            params=params
+        )
 
-            self.trial_id.increment()
-
-            param['trial_id'] = self.trial_id.get()
-            self.storage.hp.set_any_trial_params(
-                trial_id=param['trial_id'],
-                params=param['parameters']
-            )
-            self.storage.trial.set_any_trial_state(
-                trial_id=param['trial_id'],
-                state='ready'
-            )
-
-            self._serialize(self.trial_id.integer)
+        self.storage.trial.set_any_trial_state(
+            trial_id=self.trial_id.get(),
+            state='ready'
+        )
 
         return None
-
-    # def register_ready(self, param: dict) -> str:
-    #     """Create a hyper parameter file.
-
-    #     Args:
-    #         param (dict): A hyper parameter dictionary.
-
-    #     Returns:
-    #         str: An unique hyper parameter name.
-    #     """
-
-    #     self.trial_id.increment()
-
-    #     param['trial_id'] = self.trial_id.get()
-    #     self.storage.hp.set_any_trial_params(
-    #         trial_id=param['trial_id'],
-    #         params=param['parameters']
-    #     )
-    #     self.storage.trial.set_any_trial_state(
-    #         trial_id=param['trial_id'],
-    #         state='ready'
-    #     )
-
-    #     self._serialize(self.trial_id.integer)
-
-    #     return param['trial_id']
 
     def generate_initial_parameter(self) -> Union[
         Dict[str, List[Dict[str, Union[str, Union[float, List[float]]]]]], None
@@ -118,25 +86,23 @@ class AbstractOptimizer(AbstractModule):
                 List[float]]]]], None]: A created initial parameter. It returns
                 None if any parameters are already created.
         """
-        if self.num_of_generated_parameter == 0:
-            sample = self.params.sample(initial=True)
-            new_params = []
+        if self.num_of_generated_parameter > 0:
+            return None
 
-            for s in sample:
-                new_param = {
-                    'parameter_name': s['name'],
-                    'type': s['type'],
-                    'value': s['value']
-                }
-                new_params.append(new_param)
+        sample = self.params.sample(initial=True)
+        new_params = []
 
-            if len(new_params) == len(self.params.get_parameter_list()):
-                self.num_of_generated_parameter += 1
-                return {'parameters': new_params}
+        for s in sample:
+            new_param = {
+                'parameter_name': s['name'],
+                'type': s['type'],
+                'value': s['value']
+            }
+            new_params.append(new_param)
 
-        return None
+        return new_params
 
-    def generate_parameter(self, number: Optional[int] = 1) -> list:
+    def generate_parameter(self) -> list:
         """Generate parameters.
 
         Args:
@@ -222,8 +188,22 @@ class AbstractOptimizer(AbstractModule):
                 f'pool_size: {pool_size}'
             )
 
-            new_params = self.generate_parameter(number=pool_size)
-            self.register_new_parameters(new_params)
+            initial_parameter = self.generate_initial_parameter()
+            if initial_parameter is not None:
+                self.register_new_parameters(initial_parameter)
+                self.num_of_generated_parameter += 1
+                self._serialize(self.trial_id.integer)
+                pool_size -= 1
+
+            for _ in range(pool_size):
+                new_params = self.generate_parameter()
+                if new_params is None or len(new_params) == 0:
+                    continue
+
+                self.register_new_parameters(new_params)
+                self.num_of_generated_parameter += 1
+                self.trial_id.increment()
+                self._serialize(self.trial_id.integer)
 
             if self.all_parameter_generated is True:
                 self.logger.info("All parameter was generated.")

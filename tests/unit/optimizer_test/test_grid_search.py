@@ -3,7 +3,6 @@ import functools
 from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
                                               generate_grid_points)
 from aiaccel.parameter import HyperParameter, load_parameter
-
 from tests.base_test import BaseTest
 
 
@@ -108,8 +107,10 @@ class TestGridOptimizer(BaseTest):
             lambda x, y: x*y,
             [len(p['parameters']) for p in optimizer.ready_params]
         )
+
+        # All generated
         optimizer.generate_index = max_index + 1
-        assert optimizer.generate_parameter() is None
+        assert len(optimizer.generate_parameter()) == 0
 
         optimizer.generate_index = 0
-        assert optimizer.generate_parameter() is None
+        assert len(optimizer.generate_parameter()) == self.config.trial_number.get()

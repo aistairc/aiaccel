@@ -3,7 +3,6 @@ from aiaccel.config import Config
 from aiaccel.optimizer.tpe_optimizer import (TpeOptimizer, TPESamplerWrapper,
                                              create_distributions)
 from aiaccel.parameter import load_parameter
-
 from tests.base_test import BaseTest
 
 
@@ -47,7 +46,7 @@ class TestTpeOptimizer(BaseTest):
 
     def test_generate_parameter(self):
         self.optimizer.pre_process()
-        assert self.optimizer.generate_parameter() is None
+        assert len(self.optimizer.generate_parameter()) > 0
 
     def test_create_study(self):
         assert self.optimizer.create_study() is None

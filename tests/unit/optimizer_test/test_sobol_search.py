@@ -1,6 +1,5 @@
 import pytest
 from aiaccel.optimizer.sobol_optimizer import SobolOptimizer
-
 from tests.base_test import BaseTest
 
 
@@ -26,4 +25,4 @@ class TestSobolOptimizer(BaseTest):
 
     def test_generate_parameter(self):
         self.optimizer.pre_process()
-        assert self.optimizer.generate_parameter() is None
+        assert len(self.optimizer.generate_parameter()) > 0

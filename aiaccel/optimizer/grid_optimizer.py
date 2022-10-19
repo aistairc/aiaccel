@@ -1,7 +1,7 @@
 import math
 from functools import reduce
 from operator import mul
-from typing import List, Optional, Union
+from typing import List, Union
 
 from aiaccel.config import Config
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -130,7 +130,7 @@ class GridOptimizer(AbstractOptimizer):
 
         return parameter_index
 
-    def generate_parameter(self, number: Optional[int] = 1) -> None:
+    def generate_parameter(self) -> None:
         """Generate parameters.
 
         Args:
@@ -139,27 +139,22 @@ class GridOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        generated_params = []
 
-        for _ in range(number):
-            parameter_index = self.get_parameter_index()
-            new_params = []
+        parameter_index = self.get_parameter_index()
+        new_params = []
 
-            if parameter_index is None:
-                self.logger.info('Generated all of parameters.')
-                self.all_parameter_generated = True
-                break
+        if parameter_index is None:
+            self.logger.info('Generated all of parameters.')
+            self.all_parameter_generated = True
+            return new_params
 
-            for i in range(0, len(self.ready_params)):
-                new_param = {
-                    'parameter_name': self.ready_params[i]['parameter_name'],
-                    'type': self.ready_params[i]['type'],
-                    'value': self.ready_params[i]['parameters']
-                    [parameter_index[i]]
-                }
-                new_params.append(new_param)
+        for i in range(0, len(self.ready_params)):
+            new_param = {
+                'parameter_name': self.ready_params[i]['parameter_name'],
+                'type': self.ready_params[i]['type'],
+                'value': self.ready_params[i]['parameters']
+                [parameter_index[i]]
+            }
+            new_params.append(new_param)
 
-            self.num_of_generated_parameter += 1
-            generated_params.append({'parameters': new_params})
-
-        return generated_params
+        return new_params
