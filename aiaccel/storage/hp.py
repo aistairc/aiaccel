@@ -1,10 +1,9 @@
 from typing import Any, Union
 
-from sqlalchemy.exc import SQLAlchemyError
-
 from aiaccel.storage.abstruct import Abstract
 from aiaccel.storage.model import HpTable
 from aiaccel.util.retry import retry
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class Hp(Abstract):
