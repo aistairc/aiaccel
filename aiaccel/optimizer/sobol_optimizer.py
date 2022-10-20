@@ -1,8 +1,7 @@
 from typing import Optional
 
-from scipy.stats import qmc
-
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from scipy.stats import qmc
 
 
 class SobolOptimizer(AbstractOptimizer):
@@ -70,12 +69,20 @@ class SobolOptimizer(AbstractOptimizer):
                 min_value = l_params[i].lower
                 max_value = l_params[i].upper
                 value = (max_value - min_value) * vec[i] + min_value
-                new_param = {
+                new_param = self.cast({
                     'parameter_name': l_params[i].name,
                     'type': l_params[i].type,
-                    'value': float(value)
-                }
+                    'value': value
+                })
                 new_params.append(new_param)
 
             self.num_of_generated_parameter += 1
             self.register_ready({'parameters': new_params})
+
+    def generate_initial_parameter(self) -> None:
+        if super().generate_initial_parameter() is not None:
+            self.logger.warning(
+                "Initial values cannot be specified for sobol."
+                "The set initial value has been invalidated."
+            )
+        return None

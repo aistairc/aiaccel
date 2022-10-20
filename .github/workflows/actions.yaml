@@ -47,6 +47,7 @@ jobs:
           pytest -v tests/integration/sphere/test_sphere_random.py
           pytest -v tests/integration/sphere/test_sphere_grid.py
           pytest -v tests/integration/sphere/test_sphere_sobol.py
+          pytest -v tests/integration/sphere/test_sphere_sobol_int.py
           pytest -v tests/integration/sphere/test_sphere_tpe.py
           pytest -v tests/integration/sphere/test_sphere_nelder_mead.py
 

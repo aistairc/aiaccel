@@ -1,3 +1,4 @@
+import copy
 from typing import Dict, List, Optional, Union
 
 from aiaccel.module import AbstractModule
@@ -275,3 +276,18 @@ class AbstractOptimizer(AbstractModule):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
+
+    def cast(self, param: dict) -> dict:
+        _param = copy.deepcopy(param)
+        param_type = _param['type']
+        param_value = _param['value']
+
+        try:
+            if param_type.lower() == 'float':
+                _param['value'] = float(param_value)
+            if param_type.lower() == 'int':
+                _param['value'] = int(param_value)
+        except ValueError as e:
+            raise ValueError(e)
+
+        return _param
