@@ -30,8 +30,6 @@ def create_runner_command(
     commands.append(trial_id)
     commands.append('--config')
     commands.append(config_path)
-    if options['fs'] is True:
-        commands.append('--fs')
 
     for param in params:
         # Fix a bug related a negative exponential parameters

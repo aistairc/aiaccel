@@ -1,3 +1,4 @@
+
 import asyncio
 import json
 import os
@@ -10,14 +11,13 @@ from unittest.mock import patch
 
 import aiaccel
 from aiaccel import workspace
-from aiaccel.argument import Arguments
 from aiaccel.config import Config, ConfileWrapper
 from aiaccel.master.abstract_master import AbstractMaster
 from aiaccel.master.create import create_master
 from aiaccel.util.filesystem import get_dict_files
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.workspace import Workspace
-
+from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
 
@@ -38,7 +38,6 @@ def callback_return():
     return
 
 
-
 class TestAbstractMaster(BaseTest):
 
     def test_pre_process(
@@ -57,7 +56,7 @@ class TestAbstractMaster(BaseTest):
         ]
 
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbstractMaster(options)
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
@@ -81,7 +80,7 @@ class TestAbstractMaster(BaseTest):
             format(config_json)
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbstractMaster(options)
 
         try:
@@ -89,7 +88,6 @@ class TestAbstractMaster(BaseTest):
             assert False
         except AssertionError:
             assert True
-
 
     def test_pre_process_3(
         self,
@@ -175,7 +173,7 @@ class TestAbstractMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # master = start.Master()
-            options = Arguments()
+            options = parse_arguments()
             master = AbstractMaster(options)
 
         # master = AbstractMaster(config_json)
@@ -289,7 +287,7 @@ class TestAbstractMaster(BaseTest):
             'process_name': 'master'
         }
         with patch.object(sys, 'argv', commandline_args):
-            options = Arguments()
+            options = parse_arguments()
             master = AbstractMaster(options)
         
         master.pre_process()

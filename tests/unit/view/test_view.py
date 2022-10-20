@@ -47,13 +47,5 @@ def test_view():
 
     config = Config(config_path)
 
-    options = {
-        'config': config_path,
-        'resume': None,
-        'clean': False,
-        'fs': False,
-        'process_name': 'master'
-    }
-
-    viewer = Viewer(config, options)
+    viewer = Viewer(config)
     assert viewer.view() is None
