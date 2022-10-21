@@ -171,45 +171,9 @@ class TestAbstractModule(BaseTest):
         except NotImplementedError:
             assert True
 
-    def test_loop_pre_process(self, work_dir):
-        # work_dir.joinpath(aiaccel.dict_runner).rmdir()
-        # loop = asyncio.get_event_loop()
-        # gather = asyncio.gather(
-        #     async_function(self.module.loop_pre_process),
-        #     delay_make_directory(1, work_dir.joinpath(aiaccel.dict_runner))
-        # )
-        # loop.run_until_complete(gather)
-        # assert self.module.loop_pre_process() is None
-        try:
-            self.module.post_process()
-            assert False
-        except NotImplementedError:
-            assert True
-
-    def test_loop_post_process(self):
-        try:
-            self.module.loop_post_process()
-            assert False
-        except NotImplementedError:
-            assert True
-
-    def test_inner_loop_pre_process(self):
-        try:
-            self.module.inner_loop_pre_process()
-            assert False
-        except NotImplementedError:
-            assert True
-
     def test_inner_loop_main_process(self):
         try:
             self.module.inner_loop_main_process()
-            assert False
-        except NotImplementedError:
-            assert True
-
-    def test_inner_loop_post_process(self):
-        try:
-            self.module.inner_loop_post_process()
             assert False
         except NotImplementedError:
             assert True

@@ -7,7 +7,6 @@ from unittest.mock import patch
 
 import pytest
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-
 from tests.base_test import BaseTest
 
 
@@ -60,13 +59,6 @@ class TestAbstractOptimizer(BaseTest):
         self.optimizer.pre_process()
         assert self.optimizer.post_process() is None
 
-    def test_inner_loop_pre_process(self, setup_hp_finished):
-        with patch.object(self.optimizer, 'check_finished', return_value=False):
-            assert self.optimizer.inner_loop_pre_process()
-
-        with patch.object(self.optimizer, 'check_finished', return_value=True):
-            assert not self.optimizer.inner_loop_pre_process()
-
     def test_inner_loop_main_process(self):
         initial = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1}, {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.1}]
         param = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.2}, {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.2}]
@@ -75,6 +67,3 @@ class TestAbstractOptimizer(BaseTest):
             with patch.object(self.optimizer, 'generate_parameter', return_value=param):
                 with patch.object(self.optimizer, '_serialize', return_value=None):
                     assert self.optimizer.inner_loop_main_process() is True
-
-    def test_inner_loop_post_process(self):
-        assert self.optimizer.inner_loop_post_process()

@@ -182,65 +182,6 @@ class TestAbstractScheduler(BaseTest):
         scheduler = AbstractScheduler(options)
         assert scheduler.post_process() is None
 
-    def test_loop_pre_process(
-        self,
-        config_json,
-        work_dir,
-        database_remove
-    ):
-        database_remove()
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'scheduler'
-        }
-        scheduler = AbstractScheduler(options)
-        work_dir.joinpath(aiaccel.dict_runner).rmdir()
-        loop = asyncio.get_event_loop()
-        gather = asyncio.gather(
-            async_function(scheduler.loop_pre_process),
-            make_directory(1, work_dir.joinpath(aiaccel.dict_runner))
-        )
-        loop.run_until_complete(gather)
-
-    def test_loop_post_process(self, config_json, database_remove):
-        database_remove()
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'scheduler'
-        }
-        scheduler = AbstractScheduler(options)
-        assert scheduler.loop_post_process() is None
-
-    def test_inner_loop_pre_process(
-        self,
-        clean_work_dir,
-        config_json,
-        setup_hp_finished,
-        setup_hp_ready,
-        work_dir,
-        database_remove
-    ):
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'module_name': 'scheduler'
-        }
-        scheduler = AbstractScheduler(options)
-
-        with patch.object(scheduler, 'check_finished', return_value=False):
-            assert scheduler.inner_loop_pre_process()
-
-        with patch.object(scheduler, 'check_finished', return_value=True):
-            assert not scheduler.inner_loop_pre_process()
-
     def test_inner_loop_main_process(
         self,
         clean_work_dir,
@@ -272,22 +213,6 @@ class TestAbstractScheduler(BaseTest):
             machine = job['thread'].get_machine()
             machine.set_state('Success')
             job['thread'].join()
-
-    def test_inner_loop_post_process(
-        self,
-        config_json,
-        database_remove
-    ):
-        database_remove()
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'scheduler'
-        }
-        scheduler = AbstractScheduler(options)
-        assert scheduler.inner_loop_post_process()
 
     def test_serialize(
         self,

@@ -136,40 +136,16 @@ class AbstractOptimizer(AbstractModule):
         self.logger.info('Optimizer delete alive file.')
         self.logger.info('Optimizer finished.')
 
-    def loop_pre_process(self) -> None:
-        """Called before entering a main loop process.
-
-        Returns:
-            None
-        """
-        return None
-
-    def loop_post_process(self) -> None:
-        """Called after exiting a main loop process.
-
-        Returns:
-            None
-        """
-        return None
-
-    def inner_loop_pre_process(self) -> bool:
-        """Called before executing a main loop process. This process is
-            repeated every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
-        if self.check_finished():
-            return False
-
-        return True
-
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
 
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
+
+        if self.check_finished():
+            return False
+
         self.get_each_state_count()
 
         _max_pool_size = self.config.num_node.get()
@@ -209,16 +185,8 @@ class AbstractOptimizer(AbstractModule):
                 self.logger.info("All parameter was generated.")
                 return False
 
-        return True
-
-    def inner_loop_post_process(self) -> bool:
-        """Called after exiting a main loop process. This process is repeated
-            every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
         self.print_dict_state()
+
         return True
 
     def _serialize(self, trial_id: int) -> dict:

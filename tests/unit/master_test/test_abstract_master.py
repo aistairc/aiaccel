@@ -186,85 +186,6 @@ class TestAbstractMaster(BaseTest):
         master.get_each_state_count()
         assert master.print_dict_state() is None
 
-    def test_loop_pre_process(
-        self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        database_remove
-    ):
-        database_remove()
-
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        with patch.object(sys, 'argv', commandline_args):
-            master = AbstractMaster(options)
-        assert master.loop_pre_process() is None
-
-    def test_loop_post_process(
-        self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        database_remove
-    ):
-        database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        with patch.object(sys, 'argv', commandline_args):
-            master = AbstractMaster(options)
-        p = subprocess.Popen(['ls'])
-        assert master.loop_post_process() is None
-
-    def test_inner_loop_pre_process(
-        self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        database_remove
-    ):
-        database_remove()
-
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        with patch.object(sys, 'argv', commandline_args):
-            master = AbstractMaster(options)
-
-        with patch.object(master, 'ws', return_value='/tmp'):
-            with patch.object(master, 'get_each_state_count', return_value=None):
-                master.pre_process()
-                assert master.inner_loop_pre_process()
-
     def test_inner_loop_main_process(
         self,
         cd_work,
@@ -291,7 +212,6 @@ class TestAbstractMaster(BaseTest):
             master = AbstractMaster(options)
         
         master.pre_process()
-        master.inner_loop_pre_process()
         assert master.inner_loop_main_process()
 
         master.trial_number = 10
@@ -300,33 +220,3 @@ class TestAbstractMaster(BaseTest):
         # setup_hp_finished(10)
         master.get_each_state_count()
         assert not master.inner_loop_main_process()
-
-    def test_inner_loop_post_process(
-        self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        database_remove
-    ):
-        database_remove()
-
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        with patch.object(sys, 'argv', commandline_args):
-            master = AbstractMaster(options)
-        master = AbstractMaster(options)
-
-        master.pre_process()
-        master.inner_loop_pre_process()
-        master.inner_loop_main_process()
-        assert master.inner_loop_post_process()
