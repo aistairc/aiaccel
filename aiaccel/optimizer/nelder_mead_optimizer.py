@@ -45,22 +45,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
             self.nelder_mead = NelderMead(self.params.get_parameter_list())
         self.parameter_pool = []
 
-    def set_maximize(self):
-        """ Set the goal to Maximize.
-
-        Returns:
-            None
-        """
-        self.nelder_mead._maximize = True
-
-    def set_minimize(self):
-        """ Set the goal to Minimize.
-
-        Returns:
-            None
-        """
-        self.nelder_mead._maximize = False
-
     def check_result(self) -> None:
         pass
 

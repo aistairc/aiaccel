@@ -93,46 +93,6 @@ class TestNelderMeadOptimizer(BaseTest):
         assert self.optimizer.generate_parameter() is None
         assert self.optimizer.generate_parameter() is None
 
-    def test_set_minimize(
-        self,
-        load_test_config_org,
-        setup_result,
-        work_dir
-    ):
-        self.optimizer.pre_process()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get(
-                'optimize',
-                'parameters_for_TestNelderMead'
-            )
-        )
-        self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
-        )
-        # assert self.nm.set_minimize() is None
-        assert self.optimizer.set_minimize() is None
-
-    def test_set_maximize(
-        self,
-        load_test_config_org,
-        setup_result,
-        work_dir
-    ):
-        self.optimizer.pre_process()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get(
-                'optimize',
-                'parameters_for_TestNelderMead'
-            )
-        )
-        self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
-        )
-        # assert self.nm.set_maximize() is None
-        assert self.optimizer.set_maximize() is None
-
     def test_update_ready_parameter_name(
         self,
         load_test_config_org,
