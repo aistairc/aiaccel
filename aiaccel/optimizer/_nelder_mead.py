@@ -688,7 +688,6 @@ class NelderMead(object):
                 elif type(v) is np.int64:
                     value.append(int(v))
                 else:
-                    print('nm serialize history key: ', key, ', type: ', type(v))
                     value.append(v)
             history[key] = value
 
