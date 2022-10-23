@@ -246,23 +246,6 @@ class TestNelderMead(object):
     def test_add_result_parameters(self):
         assert self.nm.add_result_parameters({}) is None
 
-    # def test_get_ready_parameters(self):
-    #     # assert len(self.nm.get_ready_parameters()) == 11
-    #     assert len(self.get_ready_parameters()) == 11
-
-    # def test_set_minimize(self):
-    #     # assert self.nm.set_minimize() is None
-    #     assert self.set_minimize() is None
-
-    # def test_set_maximize(self):
-    #     # assert self.nm.set_maximize() is None
-    #     assert self.set_maximize() is None
-
-    # def test_update_ready_parameter_name(self):
-    #     self.nm._executing.append({'name': '001'})
-    #     # assert self.nm.update_ready_parameter_name('001', 'new') is None
-    #     assert self.update_ready_parameter_name('001', 'new') is None
-
     def calc_and_add_results(self):
         # params = self.nm.get_ready_parameters()
         params = self.nm._executing
@@ -310,11 +293,9 @@ def test_nelder_mead_parameters(load_test_config):
     initial_parameters = None
     nelder_mead = NelderMead(
         params.get_parameter_list(), initial_parameters=initial_parameters,
-        iteration=100
+        iteration=100,
+        maximize=(config.goal.get().lower() == 'maximize')
     )
-
-    if config.goal.get().lower() == 'maximize':
-        nelder_mead.set_maximize()
 
     c_max = 1000
     c = 0
