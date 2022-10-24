@@ -193,13 +193,9 @@ class AbstractOptimizer(AbstractModule):
             f'pool_size: {pool_size}'
         )
 
-        initial_parameter = self.generate_initial_parameter()
-        if initial_parameter is not None:
-            self.register_new_parameters(initial_parameter)
-            self.num_of_generated_parameter += 1
-            self._serialize(self.trial_id.integer)
-
-        new_params = self.generate_parameter()
+        new_params = self.generate_initial_parameter()
+        if new_params is None:
+            new_params = self.generate_parameter()
         if new_params is None or len(new_params) == 0:
             return True
 
