@@ -73,7 +73,7 @@ class AbstractOptimizer(AbstractModule):
             trial_id=self.trial_id.get(),
             state='ready'
         )
-        
+
         self.num_of_generated_parameter += 1
 
     def generate_initial_parameter(self) -> Union[
@@ -189,12 +189,12 @@ class AbstractOptimizer(AbstractModule):
             f'total: {_max_trial_number}, '
             f'pool_size: {pool_size}'
         )
-        
+
         if self.num_of_generated_parameter == 0:
             new_params = self.generate_initial_parameter()
         else:
             new_params = self.generate_parameter()
-            
+
         if new_params is not None and len(new_params) > 0:
             self.register_new_parameters(new_params)
 
