@@ -179,35 +179,38 @@ class AbstractOptimizer(AbstractModule):
         n2 = _max_trial_number - self.hp_finished - self.hp_running - self.hp_ready
         pool_size = min(n1, n2)
 
-        if self.hp_ready < _max_pool_size:
-            self.logger.info(
-                f'hp_ready: {self.hp_ready}, '
-                f'hp_running: {self.hp_running}, '
-                f'hp_finished: {self.hp_finished}, '
-                f'total: {_max_trial_number}, '
-                f'pool_size: {pool_size}'
-            )
+        if pool_size <= 0:
+            return True
 
-            initial_parameter = self.generate_initial_parameter()
-            if initial_parameter is not None:
-                self.register_new_parameters(initial_parameter)
-                self.num_of_generated_parameter += 1
-                self._serialize(self.trial_id.integer)
-                pool_size -= 1
+        if self.hp_ready >= _max_pool_size:
+            return True
 
-            for _ in range(pool_size):
-                new_params = self.generate_parameter()
-                if new_params is None or len(new_params) == 0:
-                    continue
+        self.logger.info(
+            f'hp_ready: {self.hp_ready}, '
+            f'hp_running: {self.hp_running}, '
+            f'hp_finished: {self.hp_finished}, '
+            f'total: {_max_trial_number}, '
+            f'pool_size: {pool_size}'
+        )
 
-                self.register_new_parameters(new_params)
-                self.num_of_generated_parameter += 1
-                self.trial_id.increment()
-                self._serialize(self.trial_id.integer)
+        initial_parameter = self.generate_initial_parameter()
+        if initial_parameter is not None:
+            self.register_new_parameters(initial_parameter)
+            self.num_of_generated_parameter += 1
+            self._serialize(self.trial_id.integer)
 
-            if self.all_parameter_generated is True:
-                self.logger.info("All parameter was generated.")
-                return False
+        new_params = self.generate_parameter()
+        if new_params is None or len(new_params) == 0:
+            return True
+
+        self.register_new_parameters(new_params)
+        self.num_of_generated_parameter += 1
+        self.trial_id.increment()
+        self._serialize(self.trial_id.integer)
+
+        if self.all_parameter_generated is True:
+            self.logger.info("All parameter was generated.")
+            return False
 
         return True
 

@@ -27,5 +27,4 @@ class RandomOptimizer(AbstractOptimizer):
             }
             new_params.append(new_param)
 
-        print(new_params)
         return new_params
