@@ -1,8 +1,7 @@
 from typing import Optional
 
-import optuna
-
 import aiaccel.parameter
+import optuna
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -93,15 +92,6 @@ class TpeOptimizer(AbstractOptimizer):
         self.check_result()
         self.logger.debug(f'number: {number}, pool: {len(self.parameter_pool)} losses')
 
-        # initial_parameter = self.generate_initial_parameter()
-
-        # if initial_parameter is not None:
-        #     trial_id = self.register_ready(initial_parameter)
-        #     self.parameter_pool[trial_id] = initial_parameter['parameters']
-        #     self.logger.info(f'newly added name: {trial_id} to parameter_pool')
-
-        #     number -= 1
-
         # TPE has to be sequential.
         if (
             (not self.is_startup_trials()) and
@@ -146,8 +136,8 @@ class TpeOptimizer(AbstractOptimizer):
 
         self.study.enqueue_trial(enqueue_trial)
         t = self.study.ask(self.distributions)
-        self.initial_count += 1
         self.trial_pool[self.initial_count] = t
+        self.initial_count += 1
 
         new_params = []
 
