@@ -53,6 +53,13 @@ aiaccelドキュメント
 
 .. toctree::
    :maxdepth: 2
+   :caption: Tips:
+
+   tips/qrsh-inherit.md
+   tips/rsync-localdir.md
+
+.. toctree::
+   :maxdepth: 2
    :caption: リファレンス:
 
    references/references.md
