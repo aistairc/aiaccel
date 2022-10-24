@@ -73,8 +73,8 @@ class AbstractOptimizer(AbstractModule):
             trial_id=self.trial_id.get(),
             state='ready'
         )
-
-        return None
+        
+        self.num_of_generated_parameter += 1
 
     def generate_initial_parameter(self) -> Union[
         Dict[str, List[Dict[str, Union[str, Union[float, List[float]]]]]], None
@@ -86,8 +86,6 @@ class AbstractOptimizer(AbstractModule):
                 List[float]]]]], None]: A created initial parameter. It returns
                 None if any parameters are already created.
         """
-        if self.num_of_generated_parameter > 0:
-            return None
 
         sample = self.params.sample(initial=True)
         new_params = []
@@ -178,7 +176,6 @@ class AbstractOptimizer(AbstractModule):
         n1 = _max_pool_size - self.hp_running - self.hp_ready
         n2 = _max_trial_number - self.hp_finished - self.hp_running - self.hp_ready
         pool_size = min(n1, n2)
-
         if pool_size <= 0:
             return True
 
@@ -192,21 +189,21 @@ class AbstractOptimizer(AbstractModule):
             f'total: {_max_trial_number}, '
             f'pool_size: {pool_size}'
         )
-
-        new_params = self.generate_initial_parameter()
-        if new_params is None:
+        
+        if self.num_of_generated_parameter == 0:
+            new_params = self.generate_initial_parameter()
+        else:
             new_params = self.generate_parameter()
-        if new_params is None or len(new_params) == 0:
-            return True
+            
+        if new_params is not None and len(new_params) > 0:
+            self.register_new_parameters(new_params)
 
-        self.register_new_parameters(new_params)
-        self.num_of_generated_parameter += 1
-        self.trial_id.increment()
-        self._serialize(self.trial_id.integer)
+            self.trial_id.increment()
+            self._serialize(self.trial_id.integer)
 
-        if self.all_parameter_generated is True:
-            self.logger.info("All parameter was generated.")
-            return False
+            if self.all_parameter_generated is True:
+                self.logger.info("All parameter was generated.")
+                return False
 
         return True
 
