@@ -1,5 +1,3 @@
-from typing import Optional
-
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -8,7 +6,7 @@ class RandomOptimizer(AbstractOptimizer):
 
     """
 
-    def generate_parameter(self, number: Optional[int] = 1) -> None:
+    def generate_parameter(self) -> None:
         """Generate parameters.
 
         Args:
@@ -18,24 +16,15 @@ class RandomOptimizer(AbstractOptimizer):
             None
         """
 
-        self.get_each_state_count()
-        initial_parameter = self.generate_initial_parameter()
+        new_params = []
+        sample = self.params.sample()
 
-        if initial_parameter is not None:
-            self.register_ready(initial_parameter)
-            number -= 1
+        for s in sample:
+            new_param = {
+                'parameter_name': s['name'],
+                'type': s['type'],
+                'value': s['value']
+            }
+            new_params.append(new_param)
 
-        for i in range(number):
-            new_params = []
-            sample = self.params.sample()
-
-            for s in sample:
-                new_param = {
-                    'parameter_name': s['name'],
-                    'type': s['type'],
-                    'value': s['value']
-                }
-                new_params.append(new_param)
-
-            self.num_of_generated_parameter += 1
-            self.register_ready({'parameters': new_params})
+        return new_params

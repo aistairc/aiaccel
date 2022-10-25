@@ -1,5 +1,4 @@
 import copy
-from typing import Optional
 
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -21,29 +20,21 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         super().__init__(options)
         self.nelder_mead = None
-        self.parameter_pool = None
+        self.parameter_pool = []
         self.order = []
 
-    def pre_process(self) -> None:
-        """Pre-procedure before executing processes.
+    def generate_initial_parameter(self):
+        initial_parameter = super().generate_initial_parameter()
 
-        Returns:
-            None
-        """
-        super().pre_process()
-
-        initial_parameter = self.generate_initial_parameter()
         if self.nelder_mead is not None:
             return
 
-        if initial_parameter is not None:
-            self.nelder_mead = NelderMead(
-                self.params.get_parameter_list(),
-                initial_parameters=initial_parameter['parameters']
-            )
-        else:
-            self.nelder_mead = NelderMead(self.params.get_parameter_list())
-        self.parameter_pool = []
+        self.nelder_mead = NelderMead(
+            self.params.get_parameter_list(),
+            initial_parameters=initial_parameter
+        )
+
+        return self.generate_parameter()
 
     def check_result(self) -> None:
         pass
@@ -173,55 +164,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
             return None
         return searched_params
 
-    def _generate_hp_ready(self, number_of_generate: int) -> None:
-        """ generate hp-file for ready.
-
-        The generated parameter data will be append to 'self.order'
-
-        Args:
-            number_of_generate (int): The number of generate parameter.
-
-        Returns:
-            None
-        """
-        for _ in range(number_of_generate):
-            if len(self.parameter_pool) == 0:
-                self.logger.info('All parameters in pool has been generated.')
-                break
-
-            self.new_params = []
-            pool_p = self.parameter_pool.pop(0)
-
-            for param in self.params.get_parameter_list():
-                i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
-
-                if param.type == 'FLOAT':
-                    value = float(pool_p['parameters'][i]['value'])
-                elif param.type == 'INT':
-                    value = int(pool_p['parameters'][i]['value'])
-                else:
-                    raise TypeError(
-                        'Invalid parameter type for NelderMeadSearch.'
-                        f'FLOAT or INT is required, but {param.type} is given.'
-                    )
-
-                self.new_params.append(
-                    {
-                        'parameter_name': param.name,
-                        'type': param.type,
-                        'value': value
-                    }
-                )
-
-            self.update_ready_parameter_name(pool_p, self.trial_id.get())
-            self.order.append(
-                {
-                    'vertex_id': self.trial_id.get(),
-                    'parameters': self.new_params
-                }
-            )
-            self.register_ready({'parameters': self.new_params})
-
     def _get_all_trial_id(self) -> list:
         """_get_all_trial_id.
 
@@ -246,11 +188,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
         # WARN: Always empty.
         return [p['vertex_id'] for p in self.parameter_pool]
 
-    def generate_parameter(
-        self,
-        number: Optional[int] = 1  # A number of generating parameters.
-    ) -> None:
+    def generate_parameter(self) -> None:
         """Generate parameters.
+
         Args:
             number (Optional[int]):
                 A number of generating parameters.
@@ -276,4 +216,43 @@ class NelderMeadOptimizer(AbstractOptimizer):
             ):
                 self.parameter_pool.append(copy.copy(p))
 
-        self._generate_hp_ready(number)
+        # self._generate_hp_ready(number)
+
+        new_params = []
+
+        if len(self.parameter_pool) == 0:
+            self.logger.info('All parameters in pool has been generated.')
+            return new_params
+
+        pool_p = self.parameter_pool.pop(0)
+
+        for param in self.params.get_parameter_list():
+            i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
+
+            if param.type == 'FLOAT':
+                value = float(pool_p['parameters'][i]['value'])
+            elif param.type == 'INT':
+                value = int(pool_p['parameters'][i]['value'])
+            else:
+                raise TypeError(
+                    'Invalid parameter type for NelderMeadSearch.'
+                    f'FLOAT or INT is required, but {param.type} is given.'
+                )
+
+            new_params.append(
+                {
+                    'parameter_name': param.name,
+                    'type': param.type,
+                    'value': value
+                }
+            )
+
+        self.update_ready_parameter_name(pool_p, self.trial_id.get())
+        self.order.append(
+            {
+                'vertex_id': self.trial_id.get(),
+                'parameters': new_params
+            }
+        )
+
+        return new_params

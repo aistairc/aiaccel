@@ -1,8 +1,5 @@
-from typing import Optional
-
-from scipy.stats import qmc
-
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from scipy.stats import qmc
 
 
 class SobolOptimizer(AbstractOptimizer):
@@ -40,7 +37,7 @@ class SobolOptimizer(AbstractOptimizer):
         if self.generate_index is not None and self.generate_index > 0:
             self.sampler.fast_forward(self.generate_index)
 
-    def generate_parameter(self, number: Optional[int] = 1) -> None:
+    def generate_parameter(self) -> None:
         """Generate parameters.
 
         Args:
@@ -51,31 +48,32 @@ class SobolOptimizer(AbstractOptimizer):
         """
         l_params = self.params.get_parameter_list()
         n_params = len(l_params)
-        initial_parameter = self.generate_initial_parameter()
 
-        if initial_parameter is not None:
-            self.register_ready(initial_parameter)
-            number -= 1
+        new_params = []
+        vec = self.sampler.random()[0]
 
-        for _ in range(number):
-            new_params = []
-            vec = self.sampler.random()[0]
+        if self.generate_index is None:
+            self.generate_index = 1
+        else:
+            self.generate_index += 1
 
-            if self.generate_index is None:
-                self.generate_index = 1
-            else:
-                self.generate_index += 1
+        for i in range(0, n_params):
+            min_value = l_params[i].lower
+            max_value = l_params[i].upper
+            value = (max_value - min_value) * vec[i] + min_value
+            new_param = {
+                'parameter_name': l_params[i].name,
+                'type': l_params[i].type,
+                'value': float(value)
+            }
+            new_params.append(new_param)
 
-            for i in range(0, n_params):
-                min_value = l_params[i].lower
-                max_value = l_params[i].upper
-                value = (max_value - min_value) * vec[i] + min_value
-                new_param = {
-                    'parameter_name': l_params[i].name,
-                    'type': l_params[i].type,
-                    'value': float(value)
-                }
-                new_params.append(new_param)
+        return new_params
 
-            self.num_of_generated_parameter += 1
-            self.register_ready({'parameters': new_params})
+    def generate_initial_parameter(self) -> None:
+        if super().generate_initial_parameter() is not None:
+            self.logger.warning(
+                "Initial values cannot be specified for sobol."
+                "The set initial value has been invalidated."
+            )
+        return self.generate_parameter()
