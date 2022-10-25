@@ -1,7 +1,12 @@
-
+import os
 from argparse import ArgumentParser
+from logging import StreamHandler, getLogger
 
 from aiaccel.util.report import CreationReport
+
+logger = getLogger(__name__)
+logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+logger.addHandler(StreamHandler())
 
 
 def main():

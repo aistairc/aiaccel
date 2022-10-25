@@ -1,8 +1,7 @@
 from typing import Optional
 
-import optuna
-
 import aiaccel.parameter
+import optuna
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -93,15 +92,6 @@ class TpeOptimizer(AbstractOptimizer):
         self.check_result()
         self.logger.debug(f'number: {number}, pool: {len(self.parameter_pool)} losses')
 
-        # initial_parameter = self.generate_initial_parameter()
-
-        # if initial_parameter is not None:
-        #     trial_id = self.register_ready(initial_parameter)
-        #     self.parameter_pool[trial_id] = initial_parameter['parameters']
-        #     self.logger.info(f'newly added name: {trial_id} to parameter_pool')
-
-        #     number -= 1
-
         # TPE has to be sequential.
         if (
             (not self.is_startup_trials()) and
@@ -128,40 +118,6 @@ class TpeOptimizer(AbstractOptimizer):
         self.trial_pool[trial_id] = trial
         self.logger.info(f'newly added name: {trial_id} to parameter_pool')
 
-        return new_params
-
-    def generate_initial_parameter(self):
-
-        if self.num_of_generated_parameter > 0:
-            return None
-
-        enqueue_trial = {}
-        for hp in self.params.hps.values():
-            if hp.initial is not None:
-                enqueue_trial[hp.name] = hp.initial
-
-        # all hp.initial is None
-        if len(enqueue_trial) == 0:
-            return None
-
-        self.study.enqueue_trial(enqueue_trial)
-        t = self.study.ask(self.distributions)
-        self.initial_count += 1
-        self.trial_pool[self.initial_count] = t
-
-        new_params = []
-
-        for name, value in t.params.items():
-            new_param = {
-                'parameter_name': name,
-                'type': self.params.hps[name].type,
-                'value': value
-            }
-            new_params.append(new_param)
-
-        trial_id = self.trial_id.get()
-        self.parameter_pool[trial_id] = new_params
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
         return new_params
 
     def create_study(self) -> None:

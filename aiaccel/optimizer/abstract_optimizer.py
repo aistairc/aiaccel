@@ -74,7 +74,7 @@ class AbstractOptimizer(AbstractModule):
             state='ready'
         )
 
-        return None
+        self.num_of_generated_parameter += 1
 
     def generate_initial_parameter(self) -> Union[
         Dict[str, List[Dict[str, Union[str, Union[float, List[float]]]]]], None
@@ -86,8 +86,6 @@ class AbstractOptimizer(AbstractModule):
                 List[float]]]]], None]: A created initial parameter. It returns
                 None if any parameters are already created.
         """
-        if self.num_of_generated_parameter > 0:
-            return None
 
         sample = self.params.sample(initial=True)
         new_params = []
@@ -154,32 +152,30 @@ class AbstractOptimizer(AbstractModule):
         n1 = _max_pool_size - self.hp_running - self.hp_ready
         n2 = _max_trial_number - self.hp_finished - self.hp_running - self.hp_ready
         pool_size = min(n1, n2)
+        if pool_size <= 0:
+            return True
 
-        if self.hp_ready < _max_pool_size:
-            self.logger.info(
-                f'hp_ready: {self.hp_ready}, '
-                f'hp_running: {self.hp_running}, '
-                f'hp_finished: {self.hp_finished}, '
-                f'total: {_max_trial_number}, '
-                f'pool_size: {pool_size}'
-            )
+        if self.hp_ready >= _max_pool_size:
+            return True
 
-            initial_parameter = self.generate_initial_parameter()
-            if initial_parameter is not None:
-                self.register_new_parameters(initial_parameter)
-                self.num_of_generated_parameter += 1
-                self._serialize(self.trial_id.integer)
-                pool_size -= 1
+        self.logger.info(
+            f'hp_ready: {self.hp_ready}, '
+            f'hp_running: {self.hp_running}, '
+            f'hp_finished: {self.hp_finished}, '
+            f'total: {_max_trial_number}, '
+            f'pool_size: {pool_size}'
+        )
 
-            for _ in range(pool_size):
-                new_params = self.generate_parameter()
-                if new_params is None or len(new_params) == 0:
-                    continue
+        if self.num_of_generated_parameter == 0:
+            new_params = self.generate_initial_parameter()
+        else:
+            new_params = self.generate_parameter()
 
-                self.register_new_parameters(new_params)
-                self.num_of_generated_parameter += 1
-                self.trial_id.increment()
-                self._serialize(self.trial_id.integer)
+        if new_params is not None and len(new_params) > 0:
+            self.register_new_parameters(new_params)
+
+            self.trial_id.increment()
+            self._serialize(self.trial_id.integer)
 
             if self.all_parameter_generated is True:
                 self.logger.info("All parameter was generated.")

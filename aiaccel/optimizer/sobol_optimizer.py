@@ -1,5 +1,4 @@
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-
 from scipy.stats import qmc
 
 
@@ -70,3 +69,11 @@ class SobolOptimizer(AbstractOptimizer):
             new_params.append(new_param)
 
         return new_params
+
+    def generate_initial_parameter(self) -> None:
+        if super().generate_initial_parameter() is not None:
+            self.logger.warning(
+                "Initial values cannot be specified for sobol."
+                "The set initial value has been invalidated."
+            )
+        return self.generate_parameter()

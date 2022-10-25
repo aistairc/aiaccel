@@ -67,3 +67,6 @@ class TestAbstractOptimizer(BaseTest):
             with patch.object(self.optimizer, 'generate_parameter', return_value=param):
                 with patch.object(self.optimizer, '_serialize', return_value=None):
                     assert self.optimizer.inner_loop_main_process() is True
+
+    def test_inner_loop_post_process(self):
+        assert self.optimizer.inner_loop_post_process()
