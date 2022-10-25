@@ -34,7 +34,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             initial_parameters=initial_parameter
         )
 
-        return
+        return self.generate_parameter()
 
     def check_result(self) -> None:
         pass

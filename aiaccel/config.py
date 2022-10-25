@@ -355,7 +355,7 @@ class Config:
         """
         self.config_path = Path(config_path).resolve()
         if not self.config_path.exists():
-            logger.erro(f"config file: {config_path} doesn't exist.")
+            logger.error(f"config file: {config_path} doesn't exist.")
 
         self.config = load_config(self.config_path)
         self.define_items(self.config, warn)

@@ -165,4 +165,4 @@ class GridOptimizer(AbstractOptimizer):
                 "Initial values cannot be specified for grid search."
                 "The set initial value has been invalidated."
             )
-        return None
+        return self.generate_parameter()
