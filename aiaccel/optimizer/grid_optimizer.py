@@ -1,11 +1,55 @@
 import math
 from functools import reduce
 from operator import mul
-from typing import List, Union
+from typing import List, Tuple, Union
 
 from aiaccel.config import Config
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from aiaccel.parameter import HyperParameter, get_grid_options
+from aiaccel.parameter import HyperParameter
+
+
+def get_grid_options(
+    parameter_name: str,
+    config: Config
+) -> Tuple[Union[int, None], bool, Union[int, None]]:
+
+    """Get options about grid search.
+
+    Args:
+        parameter_name (str): A parameter name to get its options.
+        config (ConfileWrapper): A config object.
+
+    Returns:
+        Tuple[Union[int, None], bool, Union[int, None]]: The first one is a
+            base of logarithm parameter. The second one is logarithm parameter
+            or not. The third one is a step of the grid.
+
+    Raises:
+        KeyError: Causes when step is not specified.
+    """
+    base = None
+    log = False
+    step = None
+
+    grid_options = config.hyperparameters.get()
+
+    for g in grid_options:
+        if g['name'] == parameter_name:
+            if 'step' not in g.keys():
+                raise KeyError(f'No grid option `step` for parameter: {parameter_name}')
+            if 'log' not in g.keys():
+                raise KeyError(f'No grid option `log` for parameter: {parameter_name}')
+            if 'base' not in g.keys():
+                raise KeyError(f'No grid option `base` for parameter: {parameter_name}')
+
+            step = float(g['step'])
+            log = bool(g['log'])
+            if log:
+                base = int(g['base'])
+
+            return base, log, step
+
+    raise KeyError(f'Invalid parameter name: {parameter_name}')
 
 
 def generate_grid_points(p: HyperParameter, config: Config) -> dict:
