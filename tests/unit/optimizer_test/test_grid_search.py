@@ -1,10 +1,28 @@
 import functools
+from pathlib import Path
 
+from aiaccel.config import Config
 from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
-                                              generate_grid_points)
+                                              generate_grid_points,
+                                              get_grid_options)
 from aiaccel.parameter import HyperParameter, load_parameter
-
 from tests.base_test import BaseTest
+
+
+def test_get_grid_options():
+    test_data_dir = Path(__file__).resolve().parent.parent.parent.joinpath('test_data')
+    grid_config_json = test_data_dir.joinpath('grid_config.json')
+    config_grid = Config(grid_config_json)
+
+    base, log, step = get_grid_options('x1', config_grid)
+    assert base == 10
+    assert log
+    assert step == 0.1
+    try:
+        _, _, _ = get_grid_options('invalid', config_grid)
+        assert False
+    except KeyError:
+        assert True
 
 
 def test_generate_grid_points(grid_load_test_config):

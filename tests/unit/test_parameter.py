@@ -1,8 +1,6 @@
 import aiaccel
-from aiaccel.parameter import (get_best_parameter, get_grid_options, get_type,
-                               load_parameter)
+from aiaccel.parameter import get_best_parameter, get_type, load_parameter
 from aiaccel.util.filesystem import create_yaml
-
 from tests.base_test import BaseTest
 
 
@@ -55,21 +53,6 @@ class TestParameter(BaseTest):
             )
             assert False
         except ValueError:
-            assert True
-
-    def test_get_grid_options(self):
-        # base, log, step = get_grid_options('x1', self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-        base, log, step = get_grid_options('x1', self.config_grid)
-        assert base == 10
-        assert log
-        assert step == 0.1
-        try:
-            # _, _, _ = get_grid_options('invalid', self.config)
-            # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-            _, _, _ = get_grid_options('invalid', self.config_grid)
-            assert False
-        except KeyError:
             assert True
 
     def test_get_type(self):
