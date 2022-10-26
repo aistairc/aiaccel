@@ -30,7 +30,6 @@ class TpeOptimizer(AbstractOptimizer):
         self.distributions = None
         self.trial_pool = {}
         self.randseed = self.config.randseed.get()
-        self.initial_count = 0
 
     def pre_process(self) -> None:
         """Pre-Procedure before executing optimize processes.
@@ -55,12 +54,9 @@ class TpeOptimizer(AbstractOptimizer):
         """
 
         del_keys = []
-        results = self.storage.result.get_result_trial_id_list()
-        for trial_id, params in self.parameter_pool.items():
-            if int(trial_id) in results:
-                trial_id_str = self.get_zero_padding_any_trial_id(trial_id)
-                result_content = self.storage.get_hp_dict(trial_id_str)
-                objective = result_content['result']
+        for trial_id, param in self.parameter_pool.items():
+            objective = self.storage.result.get_any_trial_objective(trial_id)
+            if objective is not None:
                 trial = self.trial_pool[trial_id]
                 self.study.tell(trial, objective)
                 del_keys.append(trial_id)
@@ -78,10 +74,7 @@ class TpeOptimizer(AbstractOptimizer):
             bool: Is a current trial startup trial or not.
         """
         n_startup_trials = self.study.sampler.get_startup_trials()
-        # If initial exists, the output of n_startup_trials is reduced
-        # by the number of initials before the original n_startup_trials,
-        # so the number of initials needs to be added to the right side.
-        return self.num_of_generated_parameter < n_startup_trials + self.initial_count
+        return self.num_of_generated_parameter < n_startup_trials
 
     def generate_parameter(self, number: Optional[int] = 1) -> None:
         """Generate parameters.
@@ -135,13 +128,11 @@ class TpeOptimizer(AbstractOptimizer):
             return None
 
         self.study.enqueue_trial(enqueue_trial)
-        t = self.study.ask(self.distributions)
-        self.trial_pool[self.initial_count] = t
-        self.initial_count += 1
+        trial = self.study.ask(self.distributions)
 
         new_params = []
 
-        for name, value in t.params.items():
+        for name, value in trial.params.items():
             new_param = {
                 'parameter_name': name,
                 'type': self.params.hps[name].type,
@@ -151,6 +142,7 @@ class TpeOptimizer(AbstractOptimizer):
 
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
+        self.trial_pool[trial_id] = trial
         self.logger.info(f'newly added name: {trial_id} to parameter_pool')
         return new_params
 
