@@ -60,8 +60,8 @@ jobs:
 
       - name: Newly Test
         run: |
-          pytest -v tests/newly_test/benchmark/test_benchmark_tpe_resumption.py
-          pytest -v tests/newly_test/benchmark/test_benchmark_nelder_mead_resumption.py
+          pytest -v tests/newly_test/additional_resumption_test/benchmark/test_benchmark_tpe_resumption.py
+          pytest -v tests/newly_test/additional_resumption_test/benchmark/test_benchmark_nelder_mead_resumption.py
 
   publish-test-results:
     name: "Publish Tests Results"
