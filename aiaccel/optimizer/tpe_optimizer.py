@@ -115,9 +115,6 @@ class TpeOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(self):
 
-        if self.num_of_generated_parameter > 0:
-            return None
-
         enqueue_trial = {}
         for hp in self.params.hps.values():
             if hp.initial is not None:
@@ -125,7 +122,7 @@ class TpeOptimizer(AbstractOptimizer):
 
         # all hp.initial is None
         if len(enqueue_trial) == 0:
-            return None
+            return self.generate_parameter()
 
         self.study.enqueue_trial(enqueue_trial)
         trial = self.study.ask(self.distributions)
