@@ -49,6 +49,9 @@ class AbstractMaster(AbstractModule):
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
 
+        self.runner_files = []
+        self.stats = []
+
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
@@ -59,6 +62,8 @@ class AbstractMaster(AbstractModule):
             IndexError: Causes when expire the count which cannot confirm to
                 run Optimizer and Scheduler.
         """
+        self.loop_start_time = get_time_now_object()
+
         return
 
     def post_process(self) -> None:
@@ -119,53 +124,39 @@ class AbstractMaster(AbstractModule):
             f'end estimated time: {end_estimated_time}'
         )
 
-    def loop_pre_process(self) -> None:
-        """Called before entering a main loop process.
-
-        Returns:
-            None
-        """
-        self.loop_start_time = get_time_now_object()
-
-    def loop_post_process(self) -> None:
-        """Called after exiting a main loop process.
-
-        Returns:
-            None
-        """
-        return
-
-    def inner_loop_pre_process(self) -> bool:
-        """Called before executing a main loop process. This process is
-            repeated every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
-        self.get_each_state_count()
-
-        return True
-
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
 
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
+        self.get_each_state_count()
+
         if self.hp_finished >= self.trial_number:
             return False
 
-        return True
-
-    def inner_loop_post_process(self) -> bool:
-        """Called after exiting a main loop process. This process is repeated
-            every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
+        self.get_stats()
         self.print_dict_state()
         # verification
         self.verification.verify()
 
+        return True
+
+    def get_stats(self) -> None:
+        """Get a current status and update.
+
+        Returns:
+            None
+        """
+        return None
+
+    def check_error(self):
+        """ Check to confirm if an error has occurred.
+
+        Args:
+            None
+
+        Returns:
+            True: no error | False: with error.
+        """
         return True

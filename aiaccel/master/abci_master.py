@@ -76,34 +76,3 @@ class AbciMaster(AbstractMaster):
             return
 
         self.stats = parse_qstat(self.config, stats)
-
-    def inner_loop_post_process(self) -> bool:
-        """Called after exiting a main loop process. This process is repeated
-            every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
-        self.get_stats()
-        self.print_dict_state()
-
-        return True
-
-    def loop_post_process(self) -> None:
-        """Called after exiting a main loop process.
-
-        Returns:
-            None
-        """
-        return None
-
-    def check_error(self):
-        """ Check to confirm if an error has occurred.
-
-        Args:
-            None
-
-        Returns:
-            True: no error | False: with error.
-        """
-        return True
