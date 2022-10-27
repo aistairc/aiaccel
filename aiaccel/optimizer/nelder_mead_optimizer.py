@@ -53,25 +53,22 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Returns:
             list[dict]: Results per trial.
         """
-        results = self.storage.result.get_result_trial_id_list()
         nm_results = []
         for p in self.get_ready_parameters():
             try:
-                int(p['vertex_id'])
+                index = int(p['vertex_id'])
             except ValueError:
                 continue
             except KeyError:
                 continue
 
-            if int(p['vertex_id']) in results:
-                index = p['vertex_id']
-            else:
-                continue
+            result_content = self.storage.result.get_any_trial_objective(index)
 
-            result_content = self.storage.get_hp_dict(trial_id_str=index)
-            nm_result = copy.copy(p)
-            nm_result['result'] = result_content['result']
-            nm_results.append(nm_result)
+            if result_content is not None:
+                nm_result = copy.copy(p)
+                nm_result['result'] = result_content
+                nm_results.append(nm_result)
+
         return nm_results
 
     def _add_result(self, nm_results: list) -> None:

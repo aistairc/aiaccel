@@ -5,7 +5,6 @@ from typing import List, Tuple, Union
 import numpy as np
 
 import aiaccel
-from aiaccel.config import Config
 from aiaccel.util.filesystem import load_yaml
 
 
@@ -49,48 +48,6 @@ def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
             raise ValueError(f'Invalid goal: {goal}.')
 
     return best, best_file
-
-
-def get_grid_options(
-    parameter_name: str,
-    config: Config
-) -> Tuple[Union[int, None], bool, Union[int, None]]:
-
-    """Get options about grid search.
-
-    Args:
-        parameter_name (str): A parameter name to get its options.
-        config (ConfileWrapper): A config object.
-
-    Returns:
-        Tuple[Union[int, None], bool, Union[int, None]]: The first one is a
-            base of logarithm parameter. The second one is logarithm parameter
-            or not. The third one is a step of the grid.
-
-    Raises:
-        KeyError: Causes when step is not specified.
-    """
-    base = None
-    log = False
-    step = None
-
-    grid_options = config.hyperparameters.get()
-
-    for g in grid_options:
-        if g['name'] == parameter_name:
-            if 'step' in g.keys():
-                step = float(g['step'])
-            else:
-                step = None
-            log = bool(g['log'])
-            if log:
-                base = int(g['base'])
-            break
-
-    if step is None:
-        raise KeyError(f'No grid option for parameter: {parameter_name}')
-    else:
-        return base, log, step
 
 
 def get_type(parameter: dict) -> str:
