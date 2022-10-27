@@ -3,7 +3,7 @@
 from tests.newly_test.additional_resumption_test.resumption_test import AdditionalResumptionTest
 
 
-class TestSphereTpeResumption(AdditionalResumptionTest):
+class TestBenchmarkTpeResumption(AdditionalResumptionTest):
 
     @classmethod
     def setup_class(cls):
