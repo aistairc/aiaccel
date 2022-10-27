@@ -259,4 +259,5 @@ class Storage:
         self.error.delete_any_trial_error(trial_id)
         self.jobstate.delete_any_trial_jobstate(trial_id)
         self.result.delete_any_trial_objective(trial_id)
-        self.trial.set_any_trial_state(trial_id, 'ready')
+        self.hp.delete_any_trial_params(trial_id)
+        self.trial.delete_any_trial_state(trial_id)

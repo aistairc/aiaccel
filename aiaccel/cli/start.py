@@ -1,7 +1,9 @@
+import os
 import pathlib
 import shutil
 import time
 from argparse import ArgumentParser
+from logging import StreamHandler, getLogger
 
 import aiaccel
 from aiaccel import parameter as pt
@@ -11,8 +13,11 @@ from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.util import filesystem as fs
 from aiaccel.util.report import CreationReport
-from aiaccel.util.terminal import Terminal
 from aiaccel.workspace import Workspace
+
+logger = getLogger(__name__)
+logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+logger.addHandler(StreamHandler())
 
 
 def main() -> None:
@@ -24,7 +29,7 @@ def main() -> None:
 
     config = Config(args.config, warn=True, format_check=True)
     if config is None:
-        Terminal().print_error(f"Invalid workspace: {args.workspace} or config: {args.config}")
+        logger.error(f"Invalid workspace: {args.workspace} or config: {args.config}")
         return
 
     workspace = Workspace(config.workspace.get())
@@ -33,21 +38,20 @@ def main() -> None:
 
     if args.resume is None:
         if args.clean is True:
-            print("Cleaning workspace")
+            logger.info("Cleaning workspace")
             workspace.clean()
-            print(f'Workspace directory {str(workspace.path)} is cleaned.')
+            logger.info(f'Workspace directory {str(workspace.path)} is cleaned.')
         else:
             if workspace.exists():
-                Terminal().print_error("workspace exists.")
+                logger.info("workspace exists.")
                 return
 
     workspace.create()
     if workspace.check_consists() is False:
-        print("Creating workspace is Failed.")
+        logger.error("Creating workspace is Failed.")
         return
 
-    print(f"Start {config.search_algorithm.get()} Optimization")
-    print(f"config: {str(pathlib.Path(args.config).resolve())}")
+    logger.info(f"config: {str(pathlib.Path(args.config).resolve())}")
 
     time_s = time.time()
 
@@ -62,16 +66,9 @@ def main() -> None:
     for module in modules:
         module.pre_process()
 
-    for module in modules:
-        module.loop_pre_process()
-
     while True:
         for module in modules:
-            if not module.inner_loop_pre_process():
-                break
             if not module.inner_loop_main_process():
-                break
-            if not module.inner_loop_post_process():
                 break
             if not module.check_error():
                 break
@@ -82,15 +79,12 @@ def main() -> None:
         break
 
     for module in modules:
-        module.loop_post_process()
-
-    for module in modules:
         module.post_process()
 
     report = CreationReport(args.config)
     report.create()
 
-    print("moving...")
+    logger.info("moving...")
     dst = workspace.move_completed_data()
 
     config_name = pathlib.Path(args.config).name
@@ -99,10 +93,10 @@ def main() -> None:
     files = fs.get_file_result_hp(dst)
     best, best_file = pt.get_best_parameter(files, goal, dict_lock)
 
-    print(f"Best result    : {best_file}")
-    print(f"               : {best}")
-    print(f"Total time [s] : {round(time.time() - time_s)}")
-    print("Done.")
+    logger.info(f"Best result    : {best_file}")
+    logger.info(f"               : {best}")
+    logger.info(f"Total time [s] : {round(time.time() - time_s)}")
+    logger.info("Done.")
     return
 
 

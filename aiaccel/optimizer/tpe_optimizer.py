@@ -1,8 +1,7 @@
 from typing import Optional
 
-import optuna
-
 import aiaccel.parameter
+import optuna
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -31,7 +30,6 @@ class TpeOptimizer(AbstractOptimizer):
         self.distributions = None
         self.trial_pool = {}
         self.randseed = self.config.randseed.get()
-        self.initial_count = 0
 
     def pre_process(self) -> None:
         """Pre-Procedure before executing optimize processes.
@@ -56,12 +54,9 @@ class TpeOptimizer(AbstractOptimizer):
         """
 
         del_keys = []
-        results = self.storage.result.get_result_trial_id_list()
-        for trial_id, params in self.parameter_pool.items():
-            if int(trial_id) in results:
-                trial_id_str = self.get_zero_padding_any_trial_id(trial_id)
-                result_content = self.storage.get_hp_dict(trial_id_str)
-                objective = result_content['result']
+        for trial_id, param in self.parameter_pool.items():
+            objective = self.storage.result.get_any_trial_objective(trial_id)
+            if objective is not None:
                 trial = self.trial_pool[trial_id]
                 self.study.tell(trial, objective)
                 del_keys.append(trial_id)
@@ -79,10 +74,7 @@ class TpeOptimizer(AbstractOptimizer):
             bool: Is a current trial startup trial or not.
         """
         n_startup_trials = self.study.sampler.get_startup_trials()
-        # If initial exists, the output of n_startup_trials is reduced
-        # by the number of initials before the original n_startup_trials,
-        # so the number of initials needs to be added to the right side.
-        return self.num_of_generated_parameter < n_startup_trials + self.initial_count
+        return self.num_of_generated_parameter < n_startup_trials
 
     def generate_parameter(self, number: Optional[int] = 1) -> None:
         """Generate parameters.
@@ -93,74 +85,63 @@ class TpeOptimizer(AbstractOptimizer):
         self.check_result()
         self.logger.debug(f'number: {number}, pool: {len(self.parameter_pool)} losses')
 
-        initial_parameter = self.generate_initial_parameter()
+        # TPE has to be sequential.
+        if (
+            (not self.is_startup_trials()) and
+            (len(self.parameter_pool) >= 1)
+        ):
+            return None
 
-        if initial_parameter is not None:
-            trial_id = self.register_ready(initial_parameter)
-            self.parameter_pool[trial_id] = initial_parameter['parameters']
-            self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        if len(self.parameter_pool) >= self.config.num_node.get():
+            return None
 
-            number -= 1
+        new_params = []
+        trial = self.study.ask(self.distributions)
 
-        for _ in range(number):
-            # TPE has to be sequential.
-            if (
-                (not self.is_startup_trials()) and
-                (len(self.parameter_pool) >= 1)
-            ):
-                break
+        for param in self.params.get_parameter_list():
+            new_param = {
+                'parameter_name': param.name,
+                'type': param.type,
+                'value': trial.params[param.name]
+            }
+            new_params.append(new_param)
 
-            if len(self.parameter_pool) >= self.config.num_node.get():
-                break
+        trial_id = self.trial_id.get()
+        self.parameter_pool[trial_id] = new_params
+        self.trial_pool[trial_id] = trial
+        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
 
-            new_params = []
-            trial = self.study.ask(self.distributions)
-
-            for param in self.params.get_parameter_list():
-                new_param = {
-                    'parameter_name': param.name,
-                    'type': param.type,
-                    'value': trial.params[param.name]
-                }
-                new_params.append(new_param)
-
-            self.num_of_generated_parameter += 1
-            trial_id = self.register_ready({'parameters': new_params})
-            self.parameter_pool[trial_id] = new_params
-            self.trial_pool[trial_id] = trial
-            self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        return new_params
 
     def generate_initial_parameter(self):
 
-        if self.num_of_generated_parameter == 0:
-            enqueue_trial = {}
-            for hp in self.params.hps.values():
-                if hp.initial is not None:
-                    enqueue_trial[hp.name] = hp.initial
+        enqueue_trial = {}
+        for hp in self.params.hps.values():
+            if hp.initial is not None:
+                enqueue_trial[hp.name] = hp.initial
 
-            # all hp.initial is None
-            if len(enqueue_trial) == 0:
-                return None
+        # all hp.initial is None
+        if len(enqueue_trial) == 0:
+            return self.generate_parameter()
 
-            self.study.enqueue_trial(enqueue_trial)
-            t = self.study.ask(self.distributions)
-            self.initial_count += 1
-            self.trial_pool[self.initial_count] = t
+        self.study.enqueue_trial(enqueue_trial)
+        trial = self.study.ask(self.distributions)
 
-            new_params = []
+        new_params = []
 
-            for name, value in t.params.items():
-                new_param = {
-                    'parameter_name': name,
-                    'type': self.params.hps[name].type,
-                    'value': value
-                }
-                new_params.append(new_param)
+        for name, value in trial.params.items():
+            new_param = {
+                'parameter_name': name,
+                'type': self.params.hps[name].type,
+                'value': value
+            }
+            new_params.append(new_param)
 
-            self.num_of_generated_parameter += 1
-            return {'parameters': new_params}
-
-        return None
+        trial_id = self.trial_id.get()
+        self.parameter_pool[trial_id] = new_params
+        self.trial_pool[trial_id] = trial
+        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        return new_params
 
     def create_study(self) -> None:
         """Create the optuna.study object and store it.

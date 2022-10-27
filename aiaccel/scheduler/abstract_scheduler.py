@@ -158,22 +158,6 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.logger.info('Scheduler finished.')
-
-    def loop_pre_process(self) -> None:
-        """Called before entering a main loop process.
-
-        Returns:
-            None
-        """
-        return None
-
-    def loop_post_process(self) -> None:
-        """Called after exiting a main loop process.
-
-        Returns:
-            None
-        """
         if not self.check_finished():
             for job in self.jobs:
                 job['thread'].stop()
@@ -181,20 +165,7 @@ class AbstractScheduler(AbstractModule):
             for job in self.jobs:
                 job['thread'].join()
 
-    def inner_loop_pre_process(self) -> bool:
-        """Called before executing a main loop process. This process is
-            repeated every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
-        if self.check_finished():
-            self.logger.info('All parameters have been done.')
-            self.logger.info('Wait all threads finish...')
-            for job in self.jobs:
-                job['thread'].join()
-            return False
-        return True
+        self.logger.info('Scheduler finished.')
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -202,6 +173,14 @@ class AbstractScheduler(AbstractModule):
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
+
+        if self.check_finished():
+            self.logger.info('All parameters have been done.')
+            self.logger.info('Wait all threads finish...')
+            for job in self.jobs:
+                job['thread'].join()
+            return False
+
         self.get_stats()
 
         readies = self.storage.trial.get_ready()
@@ -234,20 +213,12 @@ class AbstractScheduler(AbstractModule):
         for job in self.jobs:
             self.logger.info(f"name: {job['trial_id']}, state: {job['thread'].get_state_name()}")
 
-        return True
-
-    def inner_loop_post_process(self) -> bool:
-        """Called after exiting a main loop process. This process is repeated
-            every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
         self.get_stats()
         self.update_resource()
         self.print_dict_state()
         if self.all_done() is True:
             return False
+
         return True
 
     def _serialize(self, trial_id) -> None:

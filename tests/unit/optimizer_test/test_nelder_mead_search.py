@@ -40,6 +40,7 @@ class TestNelderMeadOptimizer(BaseTest):
 
     def test_check_result(self, setup_result, work_dir):
         self.optimizer.pre_process()
+        self.optimizer.generate_initial_parameter()
         setup_result(1)
         # params = self.optimizer.nelder_mead.get_ready_parameters()
         params = self.optimizer.get_ready_parameters()
@@ -65,9 +66,7 @@ class TestNelderMeadOptimizer(BaseTest):
         params = self.optimizer.get_ready_parameters()
         assert params is not None
         setup_result(len(params))
-        assert self.optimizer.generate_parameter() is None
-        assert self.optimizer.generate_parameter() is None
-        assert self.optimizer.generate_parameter() is None
+        assert len(self.optimizer.generate_parameter()) > 0
 
         self.optimizer.nelder_mead._max_itr = 0
         assert self.optimizer.generate_parameter() is None
@@ -90,48 +89,7 @@ class TestNelderMeadOptimizer(BaseTest):
         # params = self.optimizer.get_ready_parameters()
         params = self.optimizer.nelder_mead._executing
         setup_result(len(params))
-        assert self.optimizer.generate_parameter() is None
-        assert self.optimizer.generate_parameter() is None
-
-    def test_set_minimize(
-        self,
-        load_test_config_org,
-        setup_result,
-        work_dir
-    ):
-        self.optimizer.pre_process()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get(
-                'optimize',
-                'parameters_for_TestNelderMead'
-            )
-        )
-        self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
-        )
-        # assert self.nm.set_minimize() is None
-        assert self.optimizer.set_minimize() is None
-
-    def test_set_maximize(
-        self,
-        load_test_config_org,
-        setup_result,
-        work_dir
-    ):
-        self.optimizer.pre_process()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get(
-                'optimize',
-                'parameters_for_TestNelderMead'
-            )
-        )
-        self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
-        )
-        # assert self.nm.set_maximize() is None
-        assert self.optimizer.set_maximize() is None
+        assert len(self.optimizer.generate_parameter()) > 0
 
     def test_update_ready_parameter_name(
         self,
