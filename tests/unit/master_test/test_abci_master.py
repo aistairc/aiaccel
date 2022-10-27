@@ -111,36 +111,3 @@ class TestAbciMaster(BaseTest):
         # with pytest.raises(subprocess.TimeoutExpired):
         #    master.get_stats()
         master.get_stats()
-
-    def test_inner_loop_post_process(
-        self,
-        cd_work,
-        fake_process,
-        database_remove
-    ):
-        database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            self.get_confit_path()
-        ]
-        with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
-            master = AbciMaster(options)
-
-        fake_process.register_subprocess(
-            ['qstat', '-xml'], callback=callback_return
-        )
-        assert master.inner_loop_post_process()
-
-    def test_loop_post_process(self, database_remove):
-        database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            self.get_confit_path()
-        ]
-        with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
-            master = AbciMaster(options)
-        assert master.loop_post_process() is None

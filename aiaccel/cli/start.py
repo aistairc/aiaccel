@@ -66,16 +66,9 @@ def main() -> None:
     for module in modules:
         module.pre_process()
 
-    for module in modules:
-        module.loop_pre_process()
-
     while True:
         for module in modules:
-            if not module.inner_loop_pre_process():
-                break
             if not module.inner_loop_main_process():
-                break
-            if not module.inner_loop_post_process():
                 break
             if not module.check_error():
                 break
@@ -84,9 +77,6 @@ def main() -> None:
             time.sleep(sleep_time)
             continue
         break
-
-    for module in modules:
-        module.loop_post_process()
 
     for module in modules:
         module.post_process()

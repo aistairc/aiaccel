@@ -18,13 +18,8 @@ class AbstractModule(object):
         2. start() is called.
         3. pre_process() is called.
         4. loop() is called.
-            4-1. loop() calls loop_pre_process().
-            4-2. in while loop, inner_loop_pre_process() is called.
-            4-3. in while loop, inner_loop_main_process() is called.
-            4-4. in while loop, inner_loop_post_process() is called.
-            4-5. in while loop, loop_count is incremented.
-            4-6. in while loop, serialize() is called.
-            4-7. loop() calls loop_post_process().
+            4-1. in while loop, inner_loop_main_process() is called.
+            4-2. in while loop, loop_count is incremented.
         5. call post_process()
 
     Attributes:
@@ -201,54 +196,8 @@ class AbstractModule(object):
         """
         raise NotImplementedError
 
-    def loop_pre_process(self) -> None:
-        """Called before entering a main loop process.
-
-        Returns:
-            None
-        """
-        raise NotImplementedError
-
-    def loop_post_process(self) -> None:
-        """Called after exiting a main loop process.
-
-        Returns:
-            None
-
-        Raises:
-            NotImplementedError: Causes when the inherited class does not
-                implement.
-        """
-        raise NotImplementedError
-
-    def inner_loop_pre_process(self) -> None:
-        """Called before executing a main loop process. This process is
-            repeated every main loop.
-
-        Returns:
-            None
-
-        Raises:
-            NotImplementedError: Causes when the inherited class does not
-                implement.
-        """
-        raise NotImplementedError
-
     def inner_loop_main_process(self) -> None:
         """A main loop process. This process is repeated every main loop.
-
-        Returns:
-            None
-
-        Raises:
-            NotImplementedError: Causes when the inherited class does not
-                implement.
-        """
-        raise NotImplementedError
-
-    def inner_loop_post_process(self) -> None:
-        """Called after exiting a main loop process. This process is repeated
-            every main loop.
 
         Returns:
             None
