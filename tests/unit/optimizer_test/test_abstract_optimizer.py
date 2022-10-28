@@ -79,6 +79,16 @@ class TestAbstractOptimizer(BaseTest):
         assert new_params[0]["value"] == 0.1
         assert new_params[1]["value"] == 1.5
 
+        org_params = [{'parameter_name': 'x1', 'type': 'CATEGORICAL', 'value': 'a'}, {'parameter_name': 'x2', 'type': 'CATEGORICAL', 'value': 'b'}]
+        new_params = self.optimizer.cast(org_params)
+        assert new_params[0]["value"] == 'a'
+        assert new_params[1]["value"] == 'b'
+
+        org_params = [{'parameter_name': 'x1', 'type': 'ORDINAL', 'value': [1, 2, 3]}, {'parameter_name': 'x2', 'type': 'ORDINAL', 'value': [4, 5, 6]}]
+        new_params = self.optimizer.cast(org_params)
+        assert new_params[0]["value"] == [1, 2, 3]
+        assert new_params[1]["value"] == [4, 5, 6]
+
         org_params = []
         new_params = self.optimizer.cast(org_params)
         assert new_params == []

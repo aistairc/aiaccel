@@ -250,14 +250,20 @@ class AbstractOptimizer(AbstractModule):
             param_value = _param['value']
 
             try:
+                if param_type.lower() == 'categorical' or param_type.lower() == 'ordinal':
+                    casted_params.append(_param)
+                    continue
+
                 if type(_param['value']) == eval(param_type.lower()):
                     casted_params.append(_param)
                     continue
+
                 if param_type.lower() == 'float':
                     _param['value'] = float(param_value)
                 if param_type.lower() == 'int':
                     _param['value'] = int(param_value)
                 casted_params.append(_param)
+
             except ValueError as e:
                 raise ValueError(e)
 
