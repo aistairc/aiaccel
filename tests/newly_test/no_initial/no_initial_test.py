@@ -8,7 +8,7 @@ from aiaccel.storage.storage import Storage
 from tests.base_test import BaseTest
 
 
-class NoInitialIntegrationTest(BaseTest):
+class NoInitialTest(BaseTest):
     search_algorithm = None
 
     def test_run(self, cd_work, data_dir, work_dir):
