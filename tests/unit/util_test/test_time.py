@@ -1,6 +1,8 @@
-from aiaccel.util.time_tools import get_time_delta, get_time_now_object,\
-    get_time_now, get_time_string_from_object, get_datetime_from_string
 import datetime
+
+from aiaccel.util.time_tools import (get_datetime_from_string, get_time_delta,
+                                     get_time_now, get_time_now_object,
+                                     get_time_string_from_object)
 
 
 def test_time():

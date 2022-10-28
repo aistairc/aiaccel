@@ -1,14 +1,18 @@
-from aiaccel.parameter import get_best_parameter, get_grid_options, get_type,\
-    load_parameter
+import aiaccel
+from aiaccel.parameter import get_best_parameter, get_type, load_parameter
 from aiaccel.util.filesystem import create_yaml
 from tests.base_test import BaseTest
-import aiaccel
 
 
 class TestParameter(BaseTest):
 
-    def test_get_best_parameters(self, clean_work_dir, get_one_parameter,
-                                 work_dir):
+    def test_get_best_parameters(
+        self,
+        clean_work_dir,
+        get_one_parameter,
+        work_dir
+    ):
+
         files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
         best, best_file = get_best_parameter(
             files,
@@ -19,12 +23,13 @@ class TestParameter(BaseTest):
         assert best_file is None
 
         results = [120, 101., 140.]
-        for i in range(0, 3):
-            name = i
-            path = work_dir.joinpath(aiaccel.dict_result, '{}.yml'.format(name))
-            content = get_one_parameter()
-            content['result'] = results[i]
-            create_yaml(path, content, work_dir.joinpath(aiaccel.dict_lock))
+
+        for i in range(len(self.test_result_data)):
+            d = self.test_result_data[i]
+            name = f"{d['trial_id']}.yml"
+            path = work_dir / 'result' / name
+            d['result'] = results[i]
+            create_yaml(path, d)
 
         files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
         files.sort()
@@ -48,21 +53,6 @@ class TestParameter(BaseTest):
             )
             assert False
         except ValueError:
-            assert True
-
-    def test_get_grid_options(self):
-        # base, log, step = get_grid_options('x1', self.config)
-        # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-        base, log, step = get_grid_options('x1', self.config_grid)
-        assert base == 10
-        assert log
-        assert step == 0.1
-        try:
-            # _, _, _ = get_grid_options('invalid', self.config)
-            # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-            _, _, _ = get_grid_options('invalid', self.config_grid)
-            assert False
-        except KeyError:
             assert True
 
     def test_get_type(self):

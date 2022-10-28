@@ -1,7 +1,7 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python wrapper.py",
+    "job_command": "python /tmp/original_main.py",
     "batch_job_timeout": 600
   },
   "resource": {
@@ -13,7 +13,7 @@
     "group": "gaa"
   },
   "optimize": {
-    "search_algorithm": "grid",
+    "search_algorithm": "aiaccel.optimizer.GridOptimizer",
     "goal": "minimize",
     "trial_number": 10,
     "rand_seed": 42,
@@ -33,6 +33,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": 2.98
@@ -42,6 +43,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": 3.62
@@ -51,6 +53,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": 0.90
@@ -60,6 +63,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": 1.99
@@ -69,6 +73,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": -2.78
@@ -78,6 +83,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": 1.00
@@ -87,6 +93,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": 4.97
@@ -96,6 +103,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": 1.98
@@ -105,6 +113,7 @@
         "type": "uniform_float",
         "step": 1.0,
         "log": false,
+        "base": 10,
         "lower": -5.0,
         "upper": 5.0,
         "initial": 4.03

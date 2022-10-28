@@ -12,8 +12,8 @@ The software currently supports five optimization algorithms: random search, gri
 
 # Installation
 The software can be installed using `pip`.
-~~~
-pip install git+https://github.com/aistairc/aiaccel.git
+~~~bash
+> pip install git+https://github.com/aistairc/aiaccel.git
 ~~~
 
 # Getting started
@@ -24,9 +24,8 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
 
 0. (Optional) Install [Virtualenv](https://virtualenv.pypa.io/en/latest/) and create a virtual environment. 
     ~~~bash
-    > pip install virtualenv
-    > virtualenv venv
-    > source venv/bin/activate
+    > python3 -m venv work
+    > source work/bin/activate
     ~~~
 
 1. Install `aiaccel`
@@ -51,12 +50,18 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
 
 3. Run the parameter optimization
     ~~~bash
-    > python -m aiaccel.start --config config.yaml
+    > aiaccel-start --config config.yaml
     ~~~
 
-    Tips: You can clean the workspace directory using `--clean`.
+    or
+
     ~~~bash
-    > python -m aiaccel.start --config config.yaml --clean
+    > python -m aiaccel.cli.start --config config.yaml
+    ~~~
+
+    Tips: You can start after cleaning the workspace directory using `--clean`.
+    ~~~bash
+    > aiaccel-start --config config.yaml --clean
     ~~~
 
 4. Wait for the program to finish and check the optimization results.
@@ -71,7 +76,7 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
 
 5. If you want to change configurations, edit `config.yaml`.
     ~~~bash
-    vi config.yaml
+    > vi config.yaml
     ~~~
 
 ## Running on ABCI
@@ -79,12 +84,13 @@ This tutorial describes how to run examples/sphere on ABCI.
 
 1. First, setup python environment following [the ABCI Users Guide](https://docs.abci.ai/en/python/):
     ~~~bash
-    module load python/3.8/3.8.13
-    python3 -m venv work
-    source work/bin/activate
+    > module load gcc/11.2.0
+    > module load python/3.8/3.8.13
+    > python3 -m venv work
+    > source work/bin/activate
     ~~~
 
-2. Prepare the workspace by following Steps 2 to 4 in [Running on a local computer](https://github.com/aistairc/aiaccel#Running-on-a-local-computer).
+2. Prepare the workspace by following Steps 1 and 2 in [Running on a local computer](https://github.com/aistairc/aiaccel#Running-on-a-local-computer).
 
 3. Please confirm the configuration file before running master.
     ```yaml
@@ -94,12 +100,29 @@ This tutorial describes how to run examples/sphere on ABCI.
     ```
 
 4. Run on an (interactive) job
-    ~~~
-    > python -m aiaccel.start --config config.yaml
+    ~~~bash
+    > aiaccel-start --config config.yaml
     ~~~
 
-5. The other processes are same with [sphere tutorial on local computer](https://github.com/aistairc/aiaccel#sphere-tutorial-on-local-computer) from 6 to 10.
-If you want to check the running jobs, please refer the [ABCI User Guide](https://docs.abci.ai/ja/).
+5. If you want to check the running jobs, please refer the [ABCI User Guide](https://docs.abci.ai/en/job-execution/#show-the-status-of-batch-jobs).
+
+
+## Other
+- Check the progress
+    ~~~bash
+    > aiaccel-view --config config.yaml
+    ~~~
+
+- Display simple graphs
+    ~~~bash
+    > aiaccel-plot --config config.yaml
+    ~~~
+
+- Output results to workspace/results.csv.
+    ~~~bash
+    > aiaccel-report --config config.yaml
+    ~~~
+
 
 # Acknowledgment
 * Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Deve

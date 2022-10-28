@@ -1,9 +1,10 @@
-from tests.integration.integration_test import IntegrationTest
 import aiaccel
+
+from tests.integration.integration_test import IntegrationTest
 
 
 class TestSphereGrid(IntegrationTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = aiaccel.search_algorithm_grid
+        cls.search_algorithm = 'grid'

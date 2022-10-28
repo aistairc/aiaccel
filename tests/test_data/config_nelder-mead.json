@@ -1,22 +1,20 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python wrapper.py",
-    "batch_job_timeout": 600,
-    "optimizer_command": "python -m aiaccel.bin.optimizer",
-    "pytho": "python -m aistiot.bin.scheduler"
+    "job_command": "python /tmp/original_main.py",
+    "batch_job_timeout": 600
   },
   "resource": {
     "type": "local",
     "num_node": 4
   },
   "ABCI": {
-    "group": "gaa",
+    "group": "[group]",
     "job_script_preamble": "./job_script_preamble.sh",
     "job_execution_options": ""
   },
   "optimize": {
-    "search_algorithm": "nelder-mead",
+    "search_algorithm": "aiaccel.optimizer.NelderMeadOptimizer",
     "goal": "minimize",
     "trial_number": 10,
     "rand_seed": 42,

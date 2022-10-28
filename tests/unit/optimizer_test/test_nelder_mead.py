@@ -1,12 +1,15 @@
 #from ConfigSpace.read_and_write import json as configspace_json
-from aiaccel.parameter import load_parameter
-from aiaccel.optimizer.nelder_mead.sampler import NelderMead
-from aiaccel.util.filesystem import load_yaml
-import aiaccel
 import copy
 import json
+from re import T
+
+import aiaccel
 import numpy as np
 import pytest
+from aiaccel.optimizer._nelder_mead import NelderMead
+from aiaccel.parameter import load_parameter
+from aiaccel.storage.storage import Storage
+from aiaccel.util.filesystem import load_yaml
 
 
 class TestNelderMead(object):
@@ -39,33 +42,55 @@ class TestNelderMead(object):
         params = self.nm._executing
 
         for p, i in zip(params, range(1, len(self.nm.bdrys)+2)):
-            p['name'] = '{:03}'.format(i)
+            p['vertex_id'] = '{:03}'.format(i)
 
+        storage = Storage(work_dir)
         setup_hp_finished(1)
-        c = load_yaml(work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp'))
-        param = copy.copy(params[[p['name'] for p in params].index('001')])
+        for i in range(1):
+            storage.result.set_any_trial_objective(trial_id=i, objective=0.0)
+            for j in range(2):
+                storage.hp.set_any_trial_param(
+                    trial_id=i,
+                    param_name=f'x{j+1}',
+                    param_value=0.0,
+                    param_type='float'
+                )
+        storage.trial.set_any_trial_state(trial_id=1, state='finished')
+        #
+        # c = load_yaml(work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp'))
+        #
+        print(storage.get_finished())
+        print(storage.result.get_all_result())
+        c = storage.get_hp_dict(trial_id_str='000')
+        assert c is not None
+
+        param = copy.copy(params[[p['vertex_id'] for p in params].index('001')])
         param['result'] = c['result']
         self.nm.add_result_parameters(param)
         self.nm._maximize = True
         v = self.nm._pop_result()
-        assert v['name'] == '001'
+        assert v['vertex_id'] == '001'
 
-        param['name'] = '002'
+        param['vertex_id'] = '002'
         param['out_of_boundary'] = True
         self.nm.add_result_parameters(param)
         self.nm._pop_result()
 
-        param['name'] = '003'
+        param['vertex_id'] = '003'
         param['out_of_boundary'] = True
         self.nm._state = 'WaitShrink'
         self.nm.add_result_parameters(param)
+
+        # for d in self.nm._executing:
+        #     print(d['vertex_id'])
+
         try:
             self.nm._pop_result()
             assert False
         except ValueError:
             assert True
 
-        param['name'] = 'invalid'
+        param['vertex_id'] = 'invalid'
         self.nm.add_result_parameters(param)
         try:
             self.nm._pop_result()
@@ -221,23 +246,6 @@ class TestNelderMead(object):
     def test_add_result_parameters(self):
         assert self.nm.add_result_parameters({}) is None
 
-    # def test_get_ready_parameters(self):
-    #     # assert len(self.nm.get_ready_parameters()) == 11
-    #     assert len(self.get_ready_parameters()) == 11
-
-    # def test_set_minimize(self):
-    #     # assert self.nm.set_minimize() is None
-    #     assert self.set_minimize() is None
-
-    # def test_set_maximize(self):
-    #     # assert self.nm.set_maximize() is None
-    #     assert self.set_maximize() is None
-
-    # def test_update_ready_parameter_name(self):
-    #     self.nm._executing.append({'name': '001'})
-    #     # assert self.nm.update_ready_parameter_name('001', 'new') is None
-    #     assert self.update_ready_parameter_name('001', 'new') is None
-
     def calc_and_add_results(self):
         # params = self.nm.get_ready_parameters()
         params = self.nm._executing
@@ -285,11 +293,9 @@ def test_nelder_mead_parameters(load_test_config):
     initial_parameters = None
     nelder_mead = NelderMead(
         params.get_parameter_list(), initial_parameters=initial_parameters,
-        iteration=100
+        iteration=100,
+        maximize=(config.goal.get().lower() == 'maximize')
     )
-
-    if config.goal.get().lower() == 'maximize':
-        nelder_mead.set_maximize()
 
     c_max = 1000
     c = 0
@@ -307,7 +313,7 @@ def test_nelder_mead_parameters(load_test_config):
                   'executing:', nelder_mead._executing_index,
                   'evaluated_itr:', nelder_mead._evaluated_itr)
 
-        # a functionality of NelderMeadSearchOptimizer::check_result()
+        # a functionality of NelderMeadOptimizer::check_result()
         # ready_params = nelder_mead.get_ready_parameters()
         ready_params = nelder_mead._executing
 
@@ -318,7 +324,7 @@ def test_nelder_mead_parameters(load_test_config):
             if debug:
                 print('\tsum:', rp['result'])
 
-        # a functionality of NelderMeadSearchOptimizer::generate_parameter()
+        # a functionality of NelderMeadOptimizer::generate_parameter()
         searched_params = nelder_mead.search()
 
         if searched_params is None:

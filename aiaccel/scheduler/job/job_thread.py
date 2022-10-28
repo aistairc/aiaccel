@@ -1,39 +1,33 @@
 from __future__ import annotations
-from aiaccel.abci.abci_batch import create_abci_batch_file
-from aiaccel.abci.abci_qsub import create_qsub_command
-from aiaccel.util.filesystem import check_alive_file
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.filesystem import file_delete
-from aiaccel.util.filesystem import get_basename
-from aiaccel.util.filesystem import get_file_result
-from aiaccel.util.filesystem import get_file_hp_ready
-from aiaccel.util.filesystem import get_file_hp_running
-from aiaccel.util.filesystem import interprocess_lock_file
-from aiaccel.util.filesystem import load_yaml
-from aiaccel.util.filesystem import move_file
-from aiaccel.util.filesystem import retry
-from aiaccel.util.process import exec_runner
-from aiaccel.util.process import kill_process
-from aiaccel.util.process import OutputHandler
-from aiaccel.util.time_tools import get_time_now_object
-from aiaccel.util.time_tools import get_time_delta
-from aiaccel.wrapper_tools import create_runner_command
-from aiaccel.util.wd import get_cmd_array  # wd/
-from enum import Enum
-from pathlib import Path
-from transitions import Machine
-from transitions.extensions.states import add_state_features, Tags
-from typing import Union, TYPE_CHECKING
-import aiaccel
-import fasteners
+
 import logging
 import threading
 import time
+from enum import Enum
+from pathlib import Path
+from typing import TYPE_CHECKING, Union
+
+import fasteners
+from transitions import Machine
+from transitions.extensions.states import Tags, add_state_features
+
+import aiaccel
+from aiaccel.abci.batch import create_abci_batch_file
+from aiaccel.abci.qsub import create_qsub_command
+from aiaccel.util.buffer import Buffer
+from aiaccel.util.filesystem import create_yaml, interprocess_lock_file
+from aiaccel.util.process import OutputHandler, exec_runner, kill_process
+from aiaccel.util.retry import retry
+from aiaccel.util.time_tools import get_time_delta, get_time_now_object
+from aiaccel.util.trialid import TrialId
+from aiaccel.wrapper_tools import create_runner_command
+
 if TYPE_CHECKING:
     from aiaccel.scheduler.abci_scheduler import AbciScheduler
     from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.config import Config
 
+from aiaccel.config import Config
+from aiaccel.storage.storage import Storage
 
 JOB_STATES = [
     {'name': 'Init'},
@@ -133,13 +127,13 @@ JOB_TRANSITIONS = [
         'trigger': 'next',
         'source': 'HpRunningReady',
         'dest': 'HpRunningChecking',
-        'before': 'before_file_move'
+        'before': 'change_state'
     },
     {
         'trigger': 'next',
         'source': 'HpRunningChecking',
         'dest': 'HpRunningConfirmed',
-        'conditions': 'conditions_file_confirmed'
+        'conditions': 'conditions_confirmed'
     },
     {
         'trigger': 'expire',
@@ -220,13 +214,13 @@ JOB_TRANSITIONS = [
         'trigger': 'next',
         'source': 'HpFinishedReady',
         'dest': 'HpFinishedChecking',
-        'before': 'before_finished_move'
+        'before': 'before_finished'
     },
     {
         'trigger': 'next',
         'source': 'HpFinishedChecking',
         'dest': 'HpFinishedConfirmed',
-        'conditions': 'conditions_file_confirmed'
+        'conditions': 'conditions_confirmed'
     },
     {
         'trigger': 'expire',
@@ -254,13 +248,13 @@ JOB_TRANSITIONS = [
         'trigger': 'next',
         'source': 'HpExpireReady',
         'dest': 'HpExpireChecking',
-        'before': 'before_file_move'
+        'before': 'change_state'
     },
     {
         'trigger': 'next',
         'source': 'HpExpireChecking',
         'dest': 'HpExpireConfirmed',
-        'conditions': 'conditions_file_confirmed'
+        'conditions': 'conditions_confirmed'
     },
     {
         'trigger': 'expire',
@@ -341,13 +335,13 @@ JOB_TRANSITIONS = [
         'source': 'HpCancelReady',
         'dest': 'HpCancelChecking',
         'prepare': 'prepare_expire',
-        'before': 'before_file_move'
+        'before': 'change_state'
     },
     {
         'trigger': 'next',
         'source': 'HpCancelChecking',
         'dest': 'HpCancelConfirmed',
-        'conditions': 'conditions_file_confirmed'
+        'conditions': 'conditions_confirmed'
     },
     {
         'trigger': 'expire',
@@ -444,8 +438,8 @@ class Model(object):
         """
         obj.count_retry += 1
 
-    def conditions_file_confirmed(self, obj) -> bool:
-        """State transition of 'conditions_file_confirmed'.
+    def conditions_confirmed(self, obj) -> bool:
+        """State transition of 'conditions_confirmed'.
 
         Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
 
@@ -455,17 +449,12 @@ class Model(object):
         Returns:
             bool: A target file exists or not.
         """
+        with obj.lock:
+            any_trial_state = obj.storage.trial.get_any_trial_state(trial_id=obj.trial_id)
+        return (obj.next_state == any_trial_state)
 
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _conditions_file_confirmed(_obj):
-            with _obj.lock:
-                lockpath = interprocess_lock_file(_obj.to_file, _obj.dict_lock)
-                with fasteners.InterProcessLock(lockpath):
-                    return _obj.to_file.exists()
-        return _conditions_file_confirmed(obj)
-
-    def before_file_move(self, obj: 'Job') -> None:
-        """State transition of 'before_file_move'.
+    def change_trial_state(self, obj: 'Job') -> None:
+        """State transition of 'change_trial_state'.
 
         Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
 
@@ -476,7 +465,14 @@ class Model(object):
             None
         """
         with obj.lock:
-            move_file(obj.from_file, obj.to_file, obj.dict_lock)
+            obj.storage.trial.set_any_trial_state(
+                trial_id=obj.trial_id,
+                state=obj.next_trial_state
+            )
+        return
+
+    def get_runner_file(self, obj: 'Job') -> None:
+        return obj.ws / aiaccel.dict_runner / f'run_{obj.trial_id_str}.sh'
 
     # Runner
     def after_runner(self, obj: 'Job') -> None:
@@ -490,7 +486,8 @@ class Model(object):
         Returns:
             None
         """
-        obj.to_file = obj.ws / aiaccel.dict_runner / 'run_{}.sh'.format(obj.hashname)
+        obj.to_file = self.get_runner_file(obj)
+        obj.next_state = 'running'
         obj.threshold_timeout = (
             get_time_now_object() +
             get_time_delta(obj.runner_timeout)
@@ -514,8 +511,9 @@ class Model(object):
         commands = create_runner_command(
             obj.config.job_command.get(),
             obj.content,
-            obj.hashname,
-            obj.configpath
+            str(obj.trial_id),
+            obj.config_path,
+            obj.options
         )
 
         with obj.lock:
@@ -562,8 +560,7 @@ class Model(object):
         Returns:
             None
         """
-        obj.from_file = obj.hp_file
-        obj.to_file = obj.ws / aiaccel.dict_hp_running / obj.hp_file.name
+        obj.next_state = "running"
         obj.threshold_timeout = (
             get_time_now_object() + get_time_delta(obj.running_timeout)
         )
@@ -602,24 +599,27 @@ class Model(object):
             runner_command = create_runner_command(
                 obj.config.job_command.get(),
                 obj.content,
-                obj.hashname,
-                obj.configpath
+                str(obj.trial_id),
+                obj.config_path,
+                obj.options
             )
-            # wd/
-            wd_cmd = get_cmd_array()
-            if wd_cmd is not None:
-                runner_command[0:0] = wd_cmd
         else:
-            runner_file = obj.ws / aiaccel.dict_runner / 'run_{}.sh'.format(obj.hashname)
+            runner_file = self.get_runner_file(obj)
             runner_command = create_qsub_command(
                 obj.config,
                 str(runner_file)
             )
+
         obj.proc = exec_runner(
             runner_command,
             bool(obj.config.silent_mode.get())
         )
-        obj.th_oh = OutputHandler(obj.scheduler, obj.proc, 'Job')
+
+        obj.th_oh = OutputHandler(
+            obj.scheduler,
+            obj.proc,
+            'Job'
+        )
         obj.th_oh.start()
 
     def conditions_job_confirmed(self, obj: 'Job') -> bool:
@@ -633,21 +633,15 @@ class Model(object):
         Returns:
             bool: A target job is finished or not.
         """
-
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _get_result_files(_obj):
-            with _obj.lock:
-                result_files = get_file_result(_obj.ws, _obj.dict_lock)
-            return result_files
-
         for state in obj.scheduler.stats:
-            if obj.hashname in state['name']:
+            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
+            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
                 return True
         else:
-            result_files = _get_result_files(obj)
-            hashnames = [get_basename(f) for f in result_files]
-
-            return obj.hashname in hashnames
+            # confirm whether the result file exists or not (this means the job finished quickly
+            with obj.lock:
+                trial_ids = obj.storage.result.get_result_trial_id_list()
+            return obj.trial_id in trial_ids
 
     # Result
     def after_result(self, obj: 'Job') -> None:
@@ -675,9 +669,7 @@ class Model(object):
             None
         """
         self.after_confirmed(obj)
-        obj.threshold_timeout = (
-            get_time_now_object() + get_time_delta(obj.batch_job_timeout)
-        )
+        obj.threshold_timeout = (get_time_now_object() + get_time_delta(obj.batch_job_timeout))
         obj.threshold_retry = obj.result_retry
 
     def conditions_result(self, obj: 'Job') -> bool:
@@ -691,23 +683,9 @@ class Model(object):
         Returns:
             bool: A target is in result files or not.
         """
-
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _conditions_result():
-            logger = logging.getLogger('root.scheduler.job')
-            try:
-                with obj.lock:
-                    result_files = get_file_result(obj.ws, obj.dict_lock)
-            except RuntimeError:
-                # Raises a RuntimeError if a pending writer tries to
-                # acquire a read lock.
-                logger.error('read_lock failed at conditions_result')
-                raise RuntimeError
-            return result_files
-
-        result_files = _conditions_result()
-        hashnames = [get_basename(f) for f in result_files]
-        return obj.hashname in hashnames
+        with obj.lock:
+            objective = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
+        return (objective is not None)
 
     # Finished
     def after_finished(self, obj: 'Job') -> None:
@@ -722,15 +700,16 @@ class Model(object):
             None
         """
         self.after_confirmed(obj)
-        obj.from_file = obj.ws / aiaccel.dict_hp_running / obj.hp_file.name
-        obj.to_file = obj.ws / aiaccel.dict_hp_finished / obj.hp_file.name
+        # obj.from_file = obj.ws / aiaccel.dict_hp_running / obj.hp_file.name
+        # obj.to_file = obj.ws / aiaccel.dict_hp_finished / obj.hp_file.name
+        obj.next_state = 'finished'
         obj.threshold_timeout = (
             get_time_now_object() + get_time_delta(obj.finished_timeout)
         )
         obj.threshold_retry = obj.finished_retry
 
-    def before_finished_move(self, obj: 'Job') -> None:
-        """State transition of 'before_finished_move'.
+    def before_finished(self, obj: 'Job') -> None:
+        """State transition of 'before_finished'.
 
         Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
 
@@ -741,45 +720,18 @@ class Model(object):
             None
         """
 
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _get_result_files(_obj):
-            with _obj.lock:
-                _result_files = (
-                    [rf for rf in get_file_result(_obj.ws, _obj.dict_lock)
-                        if _obj.hashname in rf.name]
-                )
-            return _result_files
-
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _get_hp_content(_obj):
-            with _obj.lock:
-                _hp_content = load_yaml(_obj.from_file, _obj.dict_lock)
-            return _hp_content
-
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _get_result_content(_obj, _result_file):
-            with _obj.lock:
-                _result_content = load_yaml(_result_file, _obj.dict_lock)
-            return _result_content
-
-        result_files = _get_result_files(obj)
-        if len(result_files) == 0:
-            return
-
-        result_file = result_files[0]
-
-        hp_content = _get_hp_content(obj)
-        result_content = _get_result_content(obj, result_file)
-
-        hp_content['end_time'] = result_content['end_time']
-        hp_content['start_time'] = result_content['start_time']
-        hp_content['result'] = result_content['result']
-        if 'error' in result_content.keys():
-            hp_content['error'] = result_content['error']
+        self.change_state(obj)
 
         with obj.lock:
-            create_yaml(obj.to_file, hp_content, obj.dict_lock)
-            file_delete(obj.from_file, obj.dict_lock)
+            result = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
+            error = obj.storage.error.get_any_trial_error(trial_id=obj.trial_id)
+            content = obj.storage.get_hp_dict(trial_id_str=obj.trial_id_str)
+            content['result'] = result
+
+            if error is not None:
+                content['error'] = error
+
+            create_yaml(obj.result_file_path, content)
 
     # Expire
     def after_expire(self, obj: 'Job') -> None:
@@ -794,9 +746,7 @@ class Model(object):
             None
         """
 
-        obj.from_file = obj.ws / aiaccel.dict_hp_running / obj.hp_file.name
-
-        obj.to_file = obj.hp_file
+        obj.next_state = "ready"
         obj.threshold_timeout = (
             get_time_now_object() + get_time_delta(obj.expire_timeout)
         )
@@ -831,11 +781,12 @@ class Model(object):
             None
         """
         for state in obj.scheduler.stats:
-            if obj.hashname in state['name']:
+            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
+            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
                 kill_process(state['job-ID'])
         else:
             logger = logging.getLogger('root.scheduler.job')
-            logger.warning('Not matched job hashname: {}'.format(obj.hashname))
+            logger.warning(f'Not matched job trial_id: {obj.trial_id}')
 
     def conditions_kill_confirmed(self, obj: 'Job') -> bool:
         """State transition of 'conditions_kill_confirmed'.
@@ -849,7 +800,8 @@ class Model(object):
             bool: A target is killed or not.
         """
         for state in obj.scheduler.stats:
-            if obj.hashname in state['name']:
+            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
+            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
                 return False
         else:
             return True
@@ -885,41 +837,59 @@ class Model(object):
             None
         """
 
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _get_hp_ready_files(_obj):
-            with _obj.lock:
-                ready_files = get_file_hp_ready(_obj.ws, _obj.dict_lock)
-            return ready_files
+        # @retry(_MAX_NUM=60, _DELAY=1.0)
+        # def _get_hp_ready_files(_obj):
+        #     with _obj.lock.read_lock():
+        #         ready_files = get_file_hp_ready(_obj.ws, _obj.dict_lock)
+        #     return ready_files
 
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _get_hp_running_files(_obj):
-            with _obj.lock:
-                running_files = get_file_hp_running(_obj.ws, _obj.dict_lock)
-            return running_files
+        # @retry(_MAX_NUM=60, _DELAY=1.0)
+        # def _get_hp_running_files(_obj):
+        #     with _obj.lock.read_lock():
+        #         running_files = get_file_hp_running(_obj.ws, _obj.dict_lock)
+        #     return running_files
 
-        self.after_confirmed(obj)
-        # Search hp file in ready or running directory
-        ready_files = _get_hp_ready_files(obj)
-        running_files = _get_hp_running_files(obj)
+        # self.after_confirmed(obj)
+        # # Search hp file in ready or running directory
+        # ready_files = _get_hp_ready_files(obj)
+        # running_files = _get_hp_running_files(obj)
 
-        if obj.hashname in [get_basename(f) for f in ready_files]:
-            obj.from_file = obj.ws / aiaccel.dict_hp_ready / obj.hp_file.name
+        # if obj.trial_id in [get_basename(f) for f in ready_files]:
+        #     obj.from_file = obj.ws / aiaccel.dict_hp_ready / obj.hp_file.name
 
-        elif obj.hashname in [get_basename(f) for f in running_files]:
-            obj.from_file = obj.ws / aiaccel.dict_hp_running / obj.hp_file.name
+        # elif obj.trial_id in [get_basename(f) for f in running_files]:
+        #     obj.from_file = obj.ws / aiaccel.dict_hp_running / obj.hp_file.name
 
-        else:
-            logger = logging.getLogger('root.scheduler.job')
-            logger.warning(
-                'Could not find any files hashname: {}'
-                .format(obj.hashname)
-            )
+        # else:
+        #     logger = logging.getLogger('root.scheduler.job')
+        #     logger.warning(
+        #         'Could not find any files trial_id: {}'
+        #         .format(obj.trial_id)
+        #     )
 
-        obj.to_file = obj.ws / aiaccel.dict_hp_ready / obj.hp_file.name
+        # obj.to_file = obj.ws / aiaccel.dict_hp_ready / obj.hp_file.name
+        # obj.threshold_timeout = (
+        #     get_time_now_object() + get_time_delta(obj.expire_timeout)
+        # )
+        # obj.threshold_retry = obj.expire_retry
+        with obj.lock:
+            if (
+                obj.storage.is_ready(obj.trial_id) or
+                obj.storage.is_running(obj.trial_id)
+            ):
+                obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state='ready')
+            else:
+                logger = logging.getLogger('root.scheduler.job')
+                logger.warning(f'Could not find any trial_id: {obj.trial_id}')
+
         obj.threshold_timeout = (
             get_time_now_object() + get_time_delta(obj.expire_timeout)
         )
         obj.threshold_retry = obj.expire_retry
+
+    def change_state(self, obj: 'Job'):
+        with obj.lock:
+            obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state=obj.next_state)
 
 
 class Job(threading.Thread):
@@ -1027,7 +997,7 @@ class Job(threading.Thread):
 
         - hp_file (Path): A hyper parameter file for this job.
 
-        - hashname (str): A unique name of this job.
+        - trial_id (str): A unique name of this job.
 
         - from_file (Path):
             A temporal file path to be used for each state transition.
@@ -1043,10 +1013,11 @@ class Job(threading.Thread):
     """
 
     def __init__(
-        self, config: Config,
-        config_path: Path,
+        self,
+        config: Config,
+        options: dict,
         scheduler: Union[AbciScheduler, LocalScheduler],
-        hp_file: Path
+        trial_id: int
     ) -> None:
         """Initial method for Job class.
 
@@ -1058,8 +1029,9 @@ class Job(threading.Thread):
         """
         super(Job, self).__init__()
         # === Load config file===
-        self.config_path = config_path
         self.config = config
+        self.config_path = self.config.config_path
+        self.options = options
         # === Get config parameter values ===
         self.workspace = self.config.workspace.get()
         self.cancel_retry = self.config.cancel_retry.get()
@@ -1086,6 +1058,7 @@ class Job(threading.Thread):
         self.count_retry = 0
 
         self.ws = Path(self.workspace).resolve()
+        self.abci_output_path = self.ws / aiaccel.dict_output
         self.dict_lock = self.ws / aiaccel.dict_lock
 
         self.model = Model()
@@ -1097,28 +1070,24 @@ class Job(threading.Thread):
             auto_transitions=False,
             ordered_transitions=False
         )
-        self.c = 0
+        self.loop_count = 0
         self.scheduler = scheduler
         global job_lock
         self.lock = job_lock
 
-        # files
-        self.hp_file = hp_file
-
-        self.content = load_yaml(hp_file, self.dict_lock)
-        self.hashname = get_basename(hp_file)
-        self.configpath = str(self.config_path)
+        self.config_path = str(self.config_path)
+        self.trial_id = trial_id
+        self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
         self.from_file = None
         self.to_file = None
+        self.next_state = None
         self.proc = None
         self.th_oh = None
         self.stop_flag = False
-
-    @retry(_MAX_NUM=60, _DELAY=1.0)
-    def _load_yaml(self, _hp_file, _dict_lock):
-        with self.lock:
-            content = load_yaml(_hp_file, _dict_lock)
-        return content
+        self.storage = Storage(self.ws)
+        self.content = self.storage.get_hp_dict(self.trial_id)
+        self.result_file_path = self.ws / aiaccel.dict_result / (self.trial_id_str + '.hp')
+        self.expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt["trigger"] == "expire"]
 
     def get_machine(self) -> CustomMachine:
         """Get a state machine object.
@@ -1172,6 +1141,25 @@ class Job(threading.Thread):
     def stop(self):
         self.stop_flag = True
 
+    def is_timeout(self) -> bool:
+        state = self.machine.get_state(self.model.state)
+        now = get_time_now_object()
+        if self.threshold_timeout is None:
+            return False
+        return (
+            now >= self.threshold_timeout and
+            state.name in self.expirable_states
+        )
+
+    def is_exceeded_retry_times_max(self) -> bool:
+        state = self.machine.get_state(self.model.state)
+        if self.threshold_retry is None:
+            return False
+        return (
+            self.count_retry >= self.threshold_retry and
+            state.name in self.expirable_states
+        )
+
     def run(self) -> None:
         """Thread.run method.
 
@@ -1180,50 +1168,42 @@ class Job(threading.Thread):
         """
         logger = logging.getLogger('root.scheduler.job')
         state = None
+        buff = Buffer(['state.name'])
+        buff.d['state.name'].set_max_len(2)
 
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _check_no_alive(_lock):
-            ws = self.scheduler.ws
-            alive_scheduler = ws / aiaccel.dict_alive / aiaccel.alive_scheduler
-            with self.lock:
-                if not check_alive_file(alive_scheduler):
-                    logger.info('Alive file is deleted')
-                    return True
-                else:
-                    return False
-
-        expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt[
-            "trigger"] == "expire"]
         while True:
-            if _check_no_alive(self.lock) is True:
-                break
+            self.loop_count += 1
 
-            self.c += 1
             state = self.machine.get_state(self.model.state)
+            buff.Add("state.name", state.name)
+            if (
+                buff.d["state.name"].Len == 1 or
+                buff.d["state.name"].has_difference()
+            ):
+                with self.lock:
+                    self.storage.jobstate.set_any_trial_jobstate(
+                        trial_id=self.trial_id,
+                        state=state.name
+                    )
+
             if state.name == 'Success' or 'Failure' in state.name:
                 break
 
             now = get_time_now_object()
 
-            if (
-                self.threshold_timeout is not None and
-                now >= self.threshold_timeout and
-                state.name in expirable_states
-            ):
+            if self.is_timeout():
                 logger.debug(
-                    'Timeout expire state: {}, now: {}, timeout: {}'
-                    .format(state.name, now, self.threshold_timeout)
+                    f'Timeout expire state: {state.name}, '
+                    f'now: {now}, '
+                    f'timeout: {self.threshold_timeout}'
                 )
                 self.model.expire(self)
 
-            elif (
-                self.threshold_retry is not None and
-                self.count_retry >= self.threshold_retry and
-                state.name in expirable_states
-            ):
+            elif self.is_exceeded_retry_times_max():
                 logger.debug(
-                    'Retry expire state: {}, count: {}, threshold: {}'
-                    .format(state.name, self.count_retry, self.threshold_retry)
+                    f'Retry expire state: {state.name}, '
+                    f'count: {self.count_retry}, '
+                    f'threshold: {self.threshold_retry}'
                 )
                 self.model.expire(self)
 
@@ -1231,9 +1211,11 @@ class Job(threading.Thread):
                 self.model.next(self)
 
             logger.debug(
-                '\tRunning job thread, hash: {}, loop: {},'
-                ' state: {}, count_retry: {}'
-                .format(self.hashname, self.c, state.name, self.count_retry)
+                f'Running job thread, '
+                f'trial id: {self.trial_id}, '
+                f'floop: {self.loop_count}, '
+                f'state: {state.name} ,'
+                f'count retry: {self.count_retry}'
             )
 
             if self.stop_flag:
@@ -1242,10 +1224,9 @@ class Job(threading.Thread):
             time.sleep(self.job_loop_duration)
 
         logger.info(
-            'Thread finished, hash: {}, loop: {}, state: {}, count_retry: {}'
-            .format(
-                self.hashname, self.c,
-                state if state is None else state.name,
-                self.count_retry
-            )
+            f'Thread finished, '
+            f'trial id: {self.trial_id}, '
+            f'loop: {self.loop_count}, '
+            f'state: {state if state is None else state.name}, '
+            f'count retry: {self.count_retry}'
         )

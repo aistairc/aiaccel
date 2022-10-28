@@ -1,12 +1,11 @@
-from aiaccel.config import Config
-from aiaccel.parameter import get_best_parameter
-from aiaccel.util.filesystem import create_yaml, get_file_hp_finished,\
-    interprocess_lock_file
-from pathlib import Path
-import aiaccel
 import copy
-import fasteners
 import logging
+from pathlib import Path
+
+import aiaccel
+from aiaccel.config import Config
+from aiaccel.storage.storage import Storage
+from aiaccel.util.filesystem import create_yaml
 
 
 class AbstractVerification(object):
@@ -14,14 +13,15 @@ class AbstractVerification(object):
 
     """
 
-    def __init__(self, config_path: str) -> None:
+    def __init__(self, options: dict) -> None:
         """Initial method for AbstractVerification.
 
         Args:
             config (ConfileWrapper): A configuration object.
         """
         # === Load config file===
-        self.config = Config(config_path)
+        self.options = options
+        self.config = Config(self.options['config'])
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
         self.is_verified = None
@@ -29,6 +29,7 @@ class AbstractVerification(object):
         self.condition = None
         self.verification_result = None
         self.load_verification_config()
+        self.storage = Storage(self.ws)
 
     def verify(self) -> None:
         """Run a verification. The trigger to run a verification, is described
@@ -40,14 +41,16 @@ class AbstractVerification(object):
         if not self.is_verified:
             return
 
-        with fasteners.InterProcessLock(interprocess_lock_file(
-                (self.ws / aiaccel.dict_hp), self.dict_lock)):
-            hp_finished_files = get_file_hp_finished(self.ws)
+        # with fasteners.InterProcessLock(interprocess_lock_file(
+        #         (self.ws / aiaccel.dict_hp), self.dict_lock)):
+        #     hp_finished_files = get_file_hp_finished(self.ws)
 
         for i, c in enumerate(self.condition):
-            if len(hp_finished_files) >= c['loop']:
-                if self.finished_loop is None or c['loop'] >\
-                        self.finished_loop:
+            if self.storage.get_num_finished() >= c['loop']:
+                if (
+                    self.finished_loop is None or
+                    c['loop'] > self.finished_loop
+                ):
                     self.make_verification(i, c['loop'])
                     self.finished_loop = c['loop']
 
@@ -61,27 +64,37 @@ class AbstractVerification(object):
         Returns:
             None
         """
-        with fasteners.InterProcessLock(
-            interprocess_lock_file(
-                (self.ws / aiaccel.dict_hp),
-                self.dict_lock
-            )
+        # with fasteners.InterProcessLock(
+        #     interprocess_lock_file((self.ws / aiaccel.dict_hp), self.dict_lock)
+        # ):
+        #     hp_finished_files = get_file_hp_finished(self.ws)
+
+        # best, best_file = get_best_parameter(
+        #     hp_finished_files,
+        #     self.config.goal.get(),
+        #     self.dict_lock
+        # )
+        # self.verification_result[index]['best'] = best
+
+        # if (
+        #     best < self.condition[index]['minimum'] or
+        #     best > self.condition[index]['maximum']
+        # ):
+        #     self.verification_result[index]['passed'] = False
+        # else:
+        #     self.verification_result[index]['passed'] = True
+
+        # self.save(loop)
+
+        best_trial = self.storage.get_best_trial_dict(self.config.goal.get().lower())
+
+        if (
+            best_trial['result'] < self.condition[index]['minimum'] or
+            best_trial['result'] > self.condition[index]['maximum']
         ):
-            hp_finished_files = get_file_hp_finished(self.ws)
-
-        best, best_file = get_best_parameter(
-            hp_finished_files,
-            self.config.goal.get(),
-            self.dict_lock
-        )
-        self.verification_result[index]['best'] = best
-
-        if best < self.condition[index]['minimum'] or \
-                best > self.condition[index]['maximum']:
             self.verification_result[index]['passed'] = False
         else:
             self.verification_result[index]['passed'] = True
-
         self.save(loop)
 
     def load_verification_config(self) -> None:
@@ -105,7 +118,7 @@ class AbstractVerification(object):
 
         logger = logging.getLogger('root.master.verification')
         logger.info('Current verification is followings:')
-        logger.info('{}'.format(self.verification_result))
+        logger.info(f'{self.verification_result}')
 
     def save(self, name: int) -> None:
         """Save current verifications result to a file.
@@ -119,8 +132,7 @@ class AbstractVerification(object):
         if not self.is_verified:
             return None
 
-        path = self.ws / aiaccel.dict_verification / '{}.{}'.format(name, aiaccel.extension_verification)
+        path = self.ws / aiaccel.dict_verification / f'{name}.{aiaccel.extension_verification}'
         create_yaml(path, self.verification_result, self.dict_lock)
         logger = logging.getLogger('root.master.verification')
-        logger.info('Save verifiation file: {}.{}'.format(
-            name, aiaccel.extension_verification))
+        logger.info(f'Save verifiation file: {name}.{aiaccel.extension_verification}')

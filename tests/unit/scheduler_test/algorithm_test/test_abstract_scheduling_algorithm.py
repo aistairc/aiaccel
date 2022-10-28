@@ -1,4 +1,4 @@
-from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import\
+from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import \
     AbstractSchedulingAlgorithm
 
 

@@ -14,7 +14,6 @@ setup(
     description='AIST hyperparameter optimizer',
     url='https://github.com/aistairc/aiaccel',
     license='MIT',
-    package_dir={'sobol_seq': 'lib/sobol_seq'},
     packages=[
         'aiaccel',
         'aiaccel.abci',
@@ -22,19 +21,23 @@ setup(
         'aiaccel.master.evaluator',
         'aiaccel.master.verification',
         'aiaccel.optimizer',
-        'aiaccel.optimizer.grid',
-        'aiaccel.optimizer.random',
-        'aiaccel.optimizer.nelder_mead',
-        'aiaccel.optimizer.sobol',
-        'aiaccel.optimizer.tpe',
         'aiaccel.scheduler',
         'aiaccel.scheduler.algorithm',
         'aiaccel.scheduler.job',
         'aiaccel.util',
-        'sobol_seq'
+        'aiaccel.cli',
+        'aiaccel.storage'
     ],
     install_requires=requirements,
     zip_safe=False,
     setup_requires=["pytest-runner"],
-    tests_require=["pytest", "pytest-cov"]
+    tests_require=["pytest", "pytest-cov"],
+    entry_points={
+        'console_scripts': [
+            'aiaccel-plot=aiaccel.cli.plot:main',
+            'aiaccel-report=aiaccel.cli.report:main',
+            'aiaccel-start=aiaccel.cli.start:main',
+            'aiaccel-view=aiaccel.cli.view:main',
+        ],
+    },
 )

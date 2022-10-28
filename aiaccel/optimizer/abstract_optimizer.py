@@ -1,13 +1,9 @@
+from typing import Dict, List, Union
+
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
-from aiaccel.util.filesystem import check_alive_file, create_yaml, file_delete
 from aiaccel.util.logger import str_to_logging_level
-from typing import Dict, List, Optional, Union
-import aiaccel
-import fasteners  # wd/
-import logging
-import time
-from aiaccel.util.snapshot import SnapShot
+from aiaccel.util.trialid import TrialId
 
 
 class AbstractOptimizer(AbstractModule):
@@ -18,7 +14,7 @@ class AbstractOptimizer(AbstractModule):
         pool_size (int): A number to pool hyper parameters.
         params (HyperParameterConfiguration): Loaded hyper parameter
             configuration object.
-        generated_parameter (int): A number of generated hyper paramters.
+        num_of_generated_parameter (int): A number of generated hyper paramters.
     """
 
     def __init__(self, options: dict) -> None:
@@ -28,6 +24,7 @@ class AbstractOptimizer(AbstractModule):
             config (str): A file name of a configuration.
         """
         self.options = options
+        self.options['process_name'] = 'optimizer'
         super().__init__(self.options)
 
         self.set_logger(
@@ -37,32 +34,21 @@ class AbstractOptimizer(AbstractModule):
             str_to_logging_level(self.config.optimizer_stream_log_level.get()),
             'Optimizer'
         )
-        if self.options['dbg'] is True:
-            self.config.silent_mode.set(False)
-        else:
-            self.remove_logger_handler()
-            self.logfile = "optimizer.log"
-            self.set_logger(
-                'root.optimizer',
-                self.dict_log / self.logfile,
-                logging.DEBUG,
-                logging.CRITICAL,
-                'Optimizer'
-            )
 
-        self.exit_alive(self.alive_optimizer)
-        self.hp_total = self.config.trial_number.get()
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
-        self.generated_parameter = 0
-        self.sleep_time = self.config.sleep_time_optimizer.get()
+        self.num_of_generated_parameter = 0
         self.all_parameter_generated = False
-        self.snapshot = SnapShot(self.ws, self.options['process_name'])
         self.params = load_parameter(self.config.hyperparameters.get())
-        self.serialize_datas = {}
+        self.trial_id = TrialId(str(self.config_path))
 
-    def create_parameter_files(self, params: List[dict]) -> None:
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=['native_random_state', 'numpy_random_state', 'self_values', 'self_keys']
+        )
+
+    def register_new_parameters(self, params: List[dict]) -> None:
         """Create hyper parameter files.
 
         Args:
@@ -70,55 +56,29 @@ class AbstractOptimizer(AbstractModule):
 
         Returns:
             None
+
+        Note:
+            param = {
+                'parameter_name': ...,
+                'type': ...,
+                'value': ...
+            }
         """
-        for param in params:
-            self.create_parameter_file(param)
-
-    def create_parameter_file(self, param: dict) -> str:
-        """Create a hyper parameter file.
-
-        Args:
-            param (dict): A hyper parameter dictionary.
-
-        Returns:
-            str: An unique hyper parameter name.
-        """
-
-        # wd/
-        file_hp_count_fmt = '%0{}d'.format(self.config.name_length.get())
-        count_path = self.dict_hp / aiaccel.file_hp_count
-        lock_path = self.dict_hp / aiaccel.file_hp_count_lock
-        lock = fasteners.InterProcessLock(str(lock_path))
-        if lock.acquire(timeout=aiaccel.file_hp_count_lock_timeout):
-            number = 0
-            if count_path.exists():
-                number = int(count_path.read_text())
-                number += 1
-            count_path.write_text('%d' % number)
-            lock.release()
-            name = file_hp_count_fmt % number
-        else:
-            self.logger.error('lock timeout {}'.format(lock_path))
-            # In the original source, when generate_random_name() returns
-            # I didn't make it an error if it returned None.
-            name = None
-        filename = '{}.hp'.format(name)
-
-        param['hashname'] = name
-        create_yaml(
-            (self.ws / aiaccel.dict_hp_ready / filename),
-            param,
-            self.dict_lock
+        self.storage.hp.set_any_trial_params(
+            trial_id=self.trial_id.get(),
+            params=params
         )
-        self.hp_ready += 1
 
-        return name
+        self.storage.trial.set_any_trial_state(
+            trial_id=self.trial_id.get(),
+            state='ready'
+        )
 
-    def generate_initial_parameter(self) ->\
-            Union[
-                Dict[str,
-                     List[Dict[str, Union[str, Union[float, List[float]]]]]],
-                None]:
+        self.num_of_generated_parameter += 1
+
+    def generate_initial_parameter(self) -> Union[
+        Dict[str, List[Dict[str, Union[str, Union[float, List[float]]]]]], None
+    ]:
         """Generate a initial parameter.
 
         Returns:
@@ -126,25 +86,21 @@ class AbstractOptimizer(AbstractModule):
                 List[float]]]]], None]: A created initial parameter. It returns
                 None if any parameters are already created.
         """
-        if self.generated_parameter == 0:
-            sample = self.params.sample(initial=True)
-            new_params = []
 
-            for s in sample:
-                new_param = {
-                    'parameter_name': s['name'],
-                    'type': s['type'],
-                    'value': s['value']
-                }
-                new_params.append(new_param)
+        sample = self.params.sample(initial=True)
+        new_params = []
 
-            if len(new_params) == len(self.params.get_parameter_list()):
-                self.generated_parameter += 1
-                return {'parameters': new_params}
+        for s in sample:
+            new_param = {
+                'parameter_name': s['name'],
+                'type': s['type'],
+                'value': s['value']
+            }
+            new_params.append(new_param)
 
-        return None
+        return new_params
 
-    def generate_parameter(self, number: Optional[int] = 1) -> None:
+    def generate_parameter(self) -> list:
         """Generate parameters.
 
         Args:
@@ -165,7 +121,9 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        super().pre_process()
+        self.set_native_random_seed()
+        self.set_numpy_random_seed()
+        self.resume()
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
@@ -173,42 +131,8 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        file_delete(self.alive_optimizer, self.dict_lock)
         self.logger.info('Optimizer delete alive file.')
         self.logger.info('Optimizer finished.')
-
-    def loop_pre_process(self) -> None:
-        """Called before entering a main loop process.
-
-        Returns:
-            None
-        """
-        while not self.check_work_directory():
-            time.sleep(self.sleep_time)
-
-    def loop_post_process(self) -> None:
-        """Called after exiting a main loop process.
-
-        Returns:
-            None
-        """
-        return None
-
-    def inner_loop_pre_process(self) -> bool:
-        """Called before executing a main loop process. This process is
-            repeated every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
-        if not check_alive_file(self.alive_optimizer, self.dict_lock):
-            self.logger.info('The alive file of optimizer is deleted')
-            return False
-
-        if self.check_finished():
-            return False
-
-        return True
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -216,79 +140,99 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
-        self.get_dict_state()
+
+        if self.check_finished():
+            return False
+
+        self.get_each_state_count()
 
         _max_pool_size = self.config.num_node.get()
-        n1 = _max_pool_size - self.hp_running - self.hp_ready
-        n2 = self.hp_total - self.hp_finished - self.hp_running - self.hp_ready
-        pool_size = min(n1, n2)
+        _max_trial_number = self.config.trial_number.get()
 
-        if self.hp_ready < _max_pool_size:
-            self.logger.info(
-                'hp_ready: {}, hp_running: {}, hp_finished: {}, '
-                'total: {}, pool_size: {}'
-                .format(
-                    self.hp_ready,
-                    self.hp_running,
-                    self.hp_finished,
-                    self.hp_total,
-                    pool_size
-                )
-            )
-            self.generate_parameter(number=pool_size)
+        n1 = _max_pool_size - self.hp_running - self.hp_ready
+        n2 = _max_trial_number - self.hp_finished - self.hp_running - self.hp_ready
+        pool_size = min(n1, n2)
+        if pool_size <= 0:
+            return True
+
+        if self.hp_ready >= _max_pool_size:
+            return True
+
+        self.logger.info(
+            f'hp_ready: {self.hp_ready}, '
+            f'hp_running: {self.hp_running}, '
+            f'hp_finished: {self.hp_finished}, '
+            f'total: {_max_trial_number}, '
+            f'pool_size: {pool_size}'
+        )
+
+        if self.num_of_generated_parameter == 0:
+            new_params = self.generate_initial_parameter()
+        else:
+            new_params = self.generate_parameter()
+
+        if new_params is not None and len(new_params) > 0:
+            self.register_new_parameters(new_params)
+
+            self.trial_id.increment()
+            self._serialize(self.trial_id.integer)
+
             if self.all_parameter_generated is True:
-                print("All parameter was generated.")
+                self.logger.info("All parameter was generated.")
                 return False
 
-        return True
-
-    def inner_loop_post_process(self) -> bool:
-        """Called after exiting a main loop process. This process is repeated
-            every main loop.
-
-        Returns:
-            bool: The process succeeds or not. The main loop exits if failed.
-        """
         self.print_dict_state()
+
         return True
 
-    def _serialize(self) -> dict:
+    def _serialize(self, trial_id: int) -> dict:
         """Serialize this module.
-
         Returns:
-            None
+            dict: serialize data.
         """
-        if self.options['nosave'] is True:
-            pass
-        else:
-            self.snapshot.save(
-                self.curr_trial_number,
-                self.loop_count,
-                self.get_native_random_state(),
-                self.get_numpy_random_state(),
-                self.serialize_datas
-            )
-        return self.serialize_datas
 
-    def _deserialize(self, dict_objects: dict) -> None:
-        """Deserialize this module.
+        obj = self.__dict__.copy()
+        del obj['storage']
+        del obj['config']
+        del obj['options']
 
+        _values = list(obj.values())
+        _keys = list(obj.keys())
+
+        self.storage.variable.d['self_values'].set(trial_id, _values)
+        self.storage.variable.d['self_keys'].set(trial_id, _keys)
+
+        # random state
+        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
+        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
+
+    def _deserialize(self, trial_id: int) -> None:
+        """ Deserialize this module.
         Args:
             dict_objects(dict): A dictionary including serialized objects.
+        Returns:
+            None
+        """
+        _values = self.storage.variable.d['self_values'].get(trial_id)
+        _keys = self.storage.variable.d['self_keys'].get(trial_id)
+        self.__dict__.update(dict(zip(_keys, _values)))
+
+        # random state
+        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
+        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
+
+    def resume(self) -> None:
+        """ When in resume mode, load the previous
+                optimization data in advance.
+
+        Args:
+            None
 
         Returns:
             None
         """
-
-        self.generated_parameter = dict_objects['generated_parameter']
-        loop_counts = (
-            self.snapshot.get_inner_loop_counter(self.options['resume'])
-        )
-        if loop_counts is None:
-            return
-
-        self.loop_count = loop_counts['optimizer']
-        print(
-            "({})set inner loop count: {}"
-            .format('optimizer', self.loop_count)
-        )
+        if (
+            self.options['resume'] is not None and
+            self.options['resume'] > 0
+        ):
+            self._deserialize(self.options['resume'])

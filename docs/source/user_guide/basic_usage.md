@@ -1,4 +1,4 @@
-# 基本的な使い方(WIP: based on Aramoto)
+# 基本的な使い方
 
 ## ABCIのセットアップ
 ABCIのセットアップは下記資料を参考ください。
@@ -431,7 +431,7 @@ optimize:
         return y
 
     if __name__ == "__main__":
-        
+
         run = opt.Run()
         run.execute_and_report(func)
 ```
@@ -453,7 +453,7 @@ wrapper.py(任意の名前に変更可能)
     # コマンドライン引数は自動で生成します。
     #  --config
     #  --index
-    #  --x1 (例) 
+    #  --x1 (例)
     #  --・・・
     run.execute_and_report("python user.py")
 ```
@@ -482,10 +482,10 @@ aiaccelでwrapperプログラムを最適化させる場合はコンフィグフ
 
     source /etc/profile.d/modules.sh
     module load gcc/11.2.0
-    module load python/3.8/3.8.13 
+    module load python/3.8/3.8.13
     module load cuda/10.2
     module load cudnn/8.0/8.0.5
-    module load nccl/2.8/2.8.4-1 
+    module load nccl/2.8/2.8.4-1
     source ~/optenv/bin/activate
 
     AIACCELPATH=$HOME/local/aiaccel-dev

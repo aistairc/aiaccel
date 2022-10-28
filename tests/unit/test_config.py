@@ -1,10 +1,12 @@
-from threading import local
-from aiaccel.config import BaseConfig, Config, ConfileWrapper, JsonOrYamlObjectConfig,\
-    load_config
-from tests.base_test import BaseTest
 import dataclasses
-import pytest
 import json
+from threading import local
+
+import pytest
+from aiaccel.config import (BaseConfig, Config, ConfileWrapper,
+                            JsonOrYamlObjectConfig, load_config)
+
+from tests.base_test import BaseTest
 
 
 class TestBaseConfig(object):
@@ -30,7 +32,6 @@ class TestJsonOrYamlObjectConfig(BaseTest):
         with open(config_json, 'r') as f:
             config = json.load(f)
         self.config = JsonOrYamlObjectConfig(config, 'json_object')
-        
 
     def test_init(self):
         try:
@@ -102,11 +103,11 @@ def test_config(config_json):
     config = Config(config_json)
     
     assert config.workspace.get() == "/tmp/work"
-    assert config.job_command.get() == "python wrapper.py"
+    assert config.job_command.get() == "python original_main.py"
     assert config.resource_type.get() == "local"
     assert config.num_node.get() == 4
     assert config.abci_group.get() == "gaa"
-    assert config.search_algorithm.get() == "nelder-mead"
+    assert config.search_algorithm.get() == 'aiaccel.optimizer.NelderMeadOptimizer'
     assert config.goal.get() == "minimize"
     assert config.trial_number.get() == 10
     assert config.name_length.get() == 6
@@ -127,9 +128,7 @@ def test_config(config_json):
     assert config.runner_timeout.get() == 60
     assert config.running_retry.get() == 3
     assert config.running_timeout.get() == 60
-    assert config.sleep_time_master.get() == 1
-    assert config.sleep_time_optimizer.get() == 1
-    assert config.sleep_time_scheduler.get() == 1
+    assert config.sleep_time.get() == 0.01
     assert config.master_logfile.get() == "master.log"
     assert config.master_file_log_level.get() == "DEBUG"
     assert config.master_stream_log_level.get() == "DEBUG"

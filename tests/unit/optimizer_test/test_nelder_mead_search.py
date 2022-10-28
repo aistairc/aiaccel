@@ -1,15 +1,16 @@
-from aiaccel.config import ConfileWrapper
-from aiaccel.optimizer.nelder_mead.sampler import NelderMead
-from aiaccel.optimizer.nelder_mead.search import NelderMeadSearchOptimizer
-from aiaccel.parameter import load_parameter
-from aiaccel.util.filesystem import move_file
-from tests.base_test import BaseTest
-import aiaccel
 import json
+
+import aiaccel
 import pytest
+from aiaccel.config import ConfileWrapper
+from aiaccel.optimizer._nelder_mead import NelderMead
+from aiaccel.optimizer.nelder_mead_optimizer import NelderMeadOptimizer
+from aiaccel.parameter import load_parameter
+
+from tests.base_test import BaseTest
 
 
-class TestNelderMeadSearchOptimizer(BaseTest):
+class TestNelderMeadOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
@@ -17,12 +18,11 @@ class TestNelderMeadSearchOptimizer(BaseTest):
             'config': self.config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'optimizer'
         }
-        self.optimizer = NelderMeadSearchOptimizer(options)
+        self.optimizer = NelderMeadOptimizer(options)
+        self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None
 
@@ -40,19 +40,11 @@ class TestNelderMeadSearchOptimizer(BaseTest):
 
     def test_check_result(self, setup_result, work_dir):
         self.optimizer.pre_process()
+        self.optimizer.generate_initial_parameter()
         setup_result(1)
         # params = self.optimizer.nelder_mead.get_ready_parameters()
         params = self.optimizer.get_ready_parameters()
-        move_file(
-            work_dir.joinpath(
-                aiaccel.dict_result,
-                '001.{}'.format(aiaccel.extension_result)
-            ),
-            work_dir.joinpath(
-                aiaccel.dict_result,
-                '{}.{}'.format(params[0]['name'], aiaccel.extension_result)
-            )
-        )
+        print(params)
         assert self.optimizer.check_result() is None
 
     def test_generate_parameter(
@@ -74,20 +66,7 @@ class TestNelderMeadSearchOptimizer(BaseTest):
         params = self.optimizer.get_ready_parameters()
         assert params is not None
         setup_result(len(params))
-        for i in range(0, len(params)):
-            move_file(
-                work_dir.joinpath(
-                    aiaccel.dict_result,
-                    '{:03}.{}'.format(i+1, aiaccel.extension_result)
-                ),
-                work_dir.joinpath(
-                    aiaccel.dict_result,
-                    '{}.{}'.format(params[i]['name'], aiaccel.extension_result)
-                )
-            )
-        assert self.optimizer.generate_parameter() is None
-        assert self.optimizer.generate_parameter() is None
-        assert self.optimizer.generate_parameter() is None
+        assert len(self.optimizer.generate_parameter()) > 0
 
         self.optimizer.nelder_mead._max_itr = 0
         assert self.optimizer.generate_parameter() is None
@@ -110,59 +89,7 @@ class TestNelderMeadSearchOptimizer(BaseTest):
         # params = self.optimizer.get_ready_parameters()
         params = self.optimizer.nelder_mead._executing
         setup_result(len(params))
-        for i in range(0, len(params)):
-            move_file(
-                work_dir.joinpath(
-                    aiaccel.dict_result,
-                    '{:03}.{}'.format(i+1, aiaccel.extension_result)
-                ),
-                work_dir.joinpath(
-                    aiaccel.dict_result,
-                    '{}.{}'.format(params[i]['name'], aiaccel.extension_result)
-                )
-            )
-        assert self.optimizer.generate_parameter() is None
-        assert self.optimizer.generate_parameter() is None
-
-    def test_set_minimize(
-        self,
-        load_test_config_org,
-        setup_result,
-        work_dir
-    ):
-        self.optimizer.pre_process()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get(
-                'optimize',
-                'parameters_for_TestNelderMead'
-            )
-        )
-        self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
-        )
-        # assert self.nm.set_minimize() is None
-        assert self.optimizer.set_minimize() is None
-
-    def test_set_maximize(
-        self,
-        load_test_config_org,
-        setup_result,
-        work_dir
-    ):
-        self.optimizer.pre_process()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get(
-                'optimize',
-                'parameters_for_TestNelderMead'
-            )
-        )
-        self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
-        )
-        # assert self.nm.set_maximize() is None
-        assert self.optimizer.set_maximize() is None
+        assert len(self.optimizer.generate_parameter()) > 0
 
     def test_update_ready_parameter_name(
         self,
@@ -181,9 +108,9 @@ class TestNelderMeadSearchOptimizer(BaseTest):
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list()
         )
-        self.optimizer.nelder_mead._executing.append({'name': '001'})
+        self.optimizer.nelder_mead._executing.append({'vertex_id': '001'})
         # assert self.nm.update_ready_parameter_name('001', 'new') is None
-        pool_p = {"name": "001"}
+        pool_p = {"vertex_id": "001"}
         assert self.optimizer.update_ready_parameter_name(pool_p, 'new') is None
 
     def test_get_ready_parameters(

@@ -1,4 +1,5 @@
 from aiaccel.scheduler.local_scheduler import LocalScheduler
+
 from tests.base_test import BaseTest
 
 
@@ -9,9 +10,7 @@ class TestLocalScheduler(BaseTest):
             'config': config_json,
             'resume': None,
             'clean': False,
-            'nosave': False,
-            'dbg': False,
-            'graph': False,
+            'fs': False,
             'process_name': 'scheduler'
         }
         scheduler = LocalScheduler(options)
@@ -21,12 +20,26 @@ class TestLocalScheduler(BaseTest):
                 "PID ARGS                          USER          STAT "
                 "STARTED\n"
                 # "1   python wrapper.py -i sample1  root          Ss   Mon Oct "
-                "1   python wrapper.py --index sample1  root          Ss   Mon Oct "
+                "1   python wrapper.py --trial_id 1  root          Ss   Mon Oct "
                 "10 00:00:00 2020\n"
                 # "2   python wrapper.py -i sample2  root          Ss   Mon Oct "
-                "2   python wrapper.py --index sample2  root          Ss   Mon Oct "
+                "2   python wrapper.py --trial_id 2  root          Ss   Mon Oct "
                 "10 00:00:10 2020\n"
             ]
         )
-        scheduler.jobs.append({'hashname': 'sample1', 'thread': None})
+        scheduler.jobs.append({'trial_id': 'sample1', 'thread': None})
         assert scheduler.get_stats() is None
+
+    def test_parse_trial_id(self, config_json):
+        options = {
+            'config': config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+
+        scheduler = LocalScheduler(options)
+        s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
+        trial_id = int(scheduler.parse_trial_id(s['name']))
+        assert trial_id == 5

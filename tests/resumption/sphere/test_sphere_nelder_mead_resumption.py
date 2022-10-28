@@ -1,9 +1,10 @@
-from tests.resumption.resumption_test import ResumptionTest
 import aiaccel
 
+from tests.resumption.resumption_test import ResumptionTest
 
-class TestSphereRandomResumption(ResumptionTest):
+
+class TestSphereNelderMeadResumption(ResumptionTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = aiaccel.search_algorithm_random
+        cls.search_algorithm = "nelder-mead"

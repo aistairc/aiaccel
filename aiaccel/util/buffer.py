@@ -1,6 +1,5 @@
 import copy
-from typing import Union
-from typing import Any
+from typing import Any, Union
 
 
 class _buffer:
@@ -149,9 +148,7 @@ class _buffer:
             if digit is None:
                 return (self.Pre != self.Now)
             else:
-                return (
-                    round(self.Pre, digit) != round(self.Now, digit)
-                )
+                return (round(self.Pre, digit) != round(self.Now, digit))
         else:
             return False
 
