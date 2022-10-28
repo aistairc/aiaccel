@@ -44,8 +44,8 @@ aiaccelドキュメント
    :maxdepth: 2
    :caption: ディベロッパーガイド:
 
-.. developer_guide/architecture.md
    developer_guide/custom_optimizer.md
+.. developer_guide/architecture.md
 
 ..
    toctree::
