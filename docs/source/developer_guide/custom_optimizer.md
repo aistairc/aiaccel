@@ -83,6 +83,8 @@ aiaccelから作成したCustomOptimizerクラスを実行する必要がある�
 
 追加したCustomOptimizerを読み込むように編集します．
 
+***/workspace/aiaccel/work/lib/my_optimizer/__init__.py***
+
 ```diff
 - from .grid_optimizer import GridOptimizer
 - from .nelder_mead_optimizer import NelderMeadOptimizer
@@ -120,7 +122,7 @@ PYTHONPATHに，aiaccelと追加したcustom_optimizer.pyのディレクトリ�
 カスタムオプティマイザを作成したので，実際に実行するユーザーファイルを作成します．
 今回は/workspace/aiaccel/examples/sphereディレクトリをコピーして作成します．
 
-```bash
+~~~bash
 > pwd
 /workspace/aiaccel
 
@@ -134,13 +136,14 @@ PYTHONPATHに，aiaccelと追加したcustom_optimizer.pyのディレクトリ�
 > ls
 config.yaml       job_script_preamble.sh     user.py
 
-```
+~~~
 
 examples/sphereディレクトリをコピーし，sphereディレクトリに移動しました．
 次にコンフィグレーションファイルを編集します．
 オプティマイザに今回作成したカスタムオプティマイザを利用したいのでconfig.yamlを編集します．
 
-***config.yaml***
+***/workspace/aiaccel/work/config.yaml***
+
 ```diff
 -  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
 +  search_algorithm: "my_optimizer.CustomOptimizer"
@@ -148,8 +151,9 @@ examples/sphereディレクトリをコピーし，sphereディレクトリに�
 
 デフォルトのconfig.yamlファイルにはネルダーミードの初期値がリストで設定されているため，これは削除します．
 
-***config.yaml***
-```yml:config.yaml
+***/workspace/aiaccel/work/config.yaml***
+
+```yaml:config.yaml
 generic:
   workspace: "./work"
   job_command: "python user.py"
@@ -198,18 +202,20 @@ optimize:
 
 ```
 
+これでコンフィグレーションファイルの編集は一旦終了です．
 編集したファイルを保存します．
 
 6. 実行の確認
 
 それでは現在のディレクトリで実行してみます．
 
-```bash
+~~~bash
 > pwd
 /workspace/aiaccel/work/sphere
 
 > aiaccel.cli.start --config config.yaml --clean
-```
+
+~~~
 
 正常に実行できれば成功です．
 このカスタムオプティマイザの中身はランダムオプティマイザと同じなので，ランダムにハイパーパラメータが選択されます．
@@ -227,6 +233,8 @@ optimize:
 1. ランダムオプティマイザの確認
 
 前節でコピーしたカスタムオプティマイザのファイルを見てみましょう．
+
+***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
 ```python:custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -273,6 +281,8 @@ self.params.sampleというメソッドを実行しています．
 sampleメソッド内では，さらにHyperParameterインスタンスであるvalueから更にsampleメソッドが呼ばれています．
 この２度目に呼ばれたsampleメソッドはHyperParameterクラスのメソッドであり，中身を見てみるとハイパーパラメータのタイプごとに処理が分かれていますが，例えばFLOAT型の場合np.random.uniformが実行されます．
 
+***/workspace/aiaccel/aiaccel/parameter.py***
+
 ```python:aiaccel/parameter.py
         elif self.type == 'FLOAT':
             value = np.random.uniform(self.lower, self.upper)
@@ -286,6 +296,8 @@ sampleメソッド内では，さらにHyperParameterインスタンスである
 sampleメソッドの他に，get_parameter_listというメソッドがあります．
 このメソッドは，sampleメソッドでハイパーパラメータをランダムに選択する前のハイパーパラメータのリストを返します．
 
+***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
+
 ```diff
 
         new_params = []
@@ -297,6 +309,8 @@ sampleメソッドの他に，get_parameter_listというメソッドがあり�
 
 次に正規分布を用いてハイパーパラメータを生成します．
 aiaccel/parameter.pyのHyperParameterクラスではnumpyのrandom.uniformを実行していましたが，今回は正規分布なのでnumpyのrandom.normalを利用します．
+
+***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
 ```python:aiaccel/optimizer/custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -337,7 +351,9 @@ class RandomOptimizer(AbstractOptimizer):
 
 正規分布で生成したハイパーパラメータが，最大値・最小値を超えないよう修正を加えています．
 
-```python
+***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
+
+```python:custom_optimizer.py
             value = min(max(value, hp.lower), hp.upper)
 ```
 
@@ -364,6 +380,8 @@ class RandomOptimizer(AbstractOptimizer):
 
 まずコンフィグレーションファイルに以下の追加をします．
 
+***/workspace/aiaccel/work/config.yaml***
+
 ```diff
 optimize:
   search_algorithm: "my_optimizer.CustomOptimizer"
@@ -376,6 +394,8 @@ optimize:
 
 muとsigmaが追加されました．
 次にcustom_optimizer.pyを編集して，muとsigmaを取得できるようにします．
+
+***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
 ```python:custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -396,6 +416,8 @@ class CustomOptimizer(AbstractOptimizer):
 
 __init__メソッドを追加し，コンフィグレーションからmuとsigmaを取得し変数として保持しました．
 あとはrandom.normalを呼ぶ際にmuとsigmaを渡します．
+
+***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
 ```python:custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer

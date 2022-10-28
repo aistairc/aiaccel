@@ -19,13 +19,15 @@ aiaccelドキュメント
 
    overview/overview.md
 
-.. toctree::
+..
+   toctree::
    :maxdepth: 2
    :caption: インストール:
 
    installation/installation.md
 
-.. toctree::
+..
+   toctree::
    :maxdepth: 2
    :caption: 利用例:
 
@@ -36,22 +38,24 @@ aiaccelドキュメント
    :caption: ユーザーガイド:
 
    user_guide/basic_usage.md
-   user_guide/configuration_setting.md
+.. user_guide/configuration_setting.md
 
 .. toctree::
    :maxdepth: 2
    :caption: ディベロッパーガイド:
 
-   developer_guide/architecture.md
+.. developer_guide/architecture.md
    developer_guide/custom_optimizer.md
 
-.. toctree::
+..
+   toctree::
    :maxdepth: 2
    :caption: コントリビューションガイド:
 
    contribution_guide/contribution_guide.md
 
-.. toctree::
+..
+   toctree::
    :maxdepth: 2
    :caption: リファレンス:
 
@@ -74,24 +78,3 @@ aiaccelドキュメント
 ====
 * この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。
 * TPEアルゴリズムは Optuna を利用しました。
-
-
-.. API Reference
-   =============
-
-    .. toctree::
-   :maxdepth: 2
-
-   aiaccel.rst
-   aiaccel.abci.rst
-   aiaccel.master.rst
-   aiaccel.optimizer.rst
-   aiaccel.scheduler.rst
-   aiaccel.util.rst
-
-.. Indices and tables
-   ==================
-
-   * :ref:`genindex`
-   * :ref:`modindex`
-   * :ref:`search`
