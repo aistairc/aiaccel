@@ -1,3 +1,4 @@
+import copy
 from typing import Dict, List, Union
 
 from aiaccel.module import AbstractModule
@@ -167,9 +168,9 @@ class AbstractOptimizer(AbstractModule):
         )
 
         if self.num_of_generated_parameter == 0:
-            new_params = self.generate_initial_parameter()
+            new_params = self.cast(self.generate_initial_parameter())
         else:
-            new_params = self.generate_parameter()
+            new_params = self.cast(self.generate_parameter())
 
         if new_params is not None and len(new_params) > 0:
             self.register_new_parameters(new_params)
@@ -237,17 +238,27 @@ class AbstractOptimizer(AbstractModule):
         ):
             self._deserialize(self.options['resume'])
 
-    def cast(self, param: dict) -> dict:
-        _param = copy.deepcopy(param)
-        param_type = _param['type']
-        param_value = _param['value']
+    def cast(self, params: Union[None, list]) -> Union[None, list]:
+        if params is None or len(params) == 0:
+            return params
 
-        try:
-            if param_type.lower() == 'float':
-                _param['value'] = float(param_value)
-            if param_type.lower() == 'int':
-                _param['value'] = int(param_value)
-        except ValueError as e:
-            raise ValueError(e)
+        casted_params = []
 
-        return _param
+        for param in params:
+            _param = copy.deepcopy(param)
+            param_type = _param['type']
+            param_value = _param['value']
+
+            try:
+                if type(_param['value']) == eval(param_type.lower()):
+                    casted_params.append(_param)
+                    continue
+                if param_type.lower() == 'float':
+                    _param['value'] = float(param_value)
+                if param_type.lower() == 'int':
+                    _param['value'] = int(param_value)
+                casted_params.append(_param)
+            except ValueError as e:
+                raise ValueError(e)
+
+        return casted_params

@@ -67,3 +67,22 @@ class TestAbstractOptimizer(BaseTest):
             with patch.object(self.optimizer, 'generate_parameter', return_value=param):
                 with patch.object(self.optimizer, '_serialize', return_value=None):
                     assert self.optimizer.inner_loop_main_process() is True
+
+    def test_cast(self):
+        org_params = [{'parameter_name': 'x1', 'type': 'INT', 'value': 0.1}, {'parameter_name': 'x2', 'type': 'INT', 'value': 1.5}]
+        new_params = self.optimizer.cast(org_params)
+        assert new_params[0]["value"] == 0
+        assert new_params[1]["value"] == 1
+
+        org_params = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1}, {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 1.5}]
+        new_params = self.optimizer.cast(org_params)
+        assert new_params[0]["value"] == 0.1
+        assert new_params[1]["value"] == 1.5
+
+        org_params = []
+        new_params = self.optimizer.cast(org_params)
+        assert new_params == []
+
+        org_params = None
+        new_params = self.optimizer.cast(org_params)
+        assert new_params == None

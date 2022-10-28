@@ -64,7 +64,7 @@ class SobolOptimizer(AbstractOptimizer):
             new_param = {
                 'parameter_name': l_params[i].name,
                 'type': l_params[i].type,
-                'value': float(value)
+                'value': value
             }
             new_params.append(new_param)
 
