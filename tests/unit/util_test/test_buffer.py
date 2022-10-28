@@ -118,11 +118,28 @@ def test_delta():
     assert buff.d['test'].delta() == 4
 
 
-def test_has_difference():
+def test_point_diff():
     buff = Buffer(['test'])
     buff.Add('test', 1)
-    buff.Add('test', 1)
-    assert buff.d['test'].has_difference() is False
+    buff.Add('test', 5)
+    assert buff.d['test'].point_diff(0, 1) == 4
 
-    buff.Add('test', 2)
-    assert buff.d['test'].has_difference() is True
+
+def test_has_difference():
+    buff = Buffer(['test'])
+    assert buff.d['test'].has_difference() == False
+
+    buff.Add('test', 1.12)
+    buff.Add('test', 5.45)
+    assert buff.d['test'].has_difference() == True
+    assert buff.d['test'].has_difference(digit=1) == True
+
+    buff.Add('test', 1.12)
+    buff.Add('test', 1.12)
+    assert buff.d['test'].has_difference() == False
+    assert buff.d['test'].has_difference(digit=1) == False
+
+    buff.Add('test', 1.12)
+    buff.Add('test', 1.13)
+    assert buff.d['test'].has_difference() == True
+    assert buff.d['test'].has_difference(digit=1) == False
