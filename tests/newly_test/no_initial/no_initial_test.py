@@ -1,3 +1,5 @@
+# Test when initial is not set
+
 import subprocess
 from pathlib import Path
 
