@@ -58,6 +58,13 @@ jobs:
           pytest -v tests/resumption/sphere/test_sphere_tpe_resumption.py
           pytest -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
 
+      - name: Newly Test
+        run: |
+          pytest -v tests/newly_test/no_initial/benchmark/test_benchmark_tpe_no_initial.py
+          pytest -v tests/newly_test/no_initial/benchmark/test_benchmark_nelder_mead_no_initial.py
+          pytest -v tests/newly_test/additional_resumption/benchmark/test_benchmark_tpe_resumption.py
+          pytest -v tests/newly_test/additional_resumption/benchmark/test_benchmark_nelder_mead_resumption.py
+
   publish-test-results:
     name: "Publish Tests Results"
     needs: build-and-test
