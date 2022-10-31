@@ -5,7 +5,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 4
 
    aiaccel.abci
    aiaccel.cli
@@ -15,14 +15,6 @@ Subpackages
 
 Submodules
 ----------
-
-aiaccel.argument module
------------------------
-
-.. automodule:: aiaccel.argument
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 aiaccel.common module
 ---------------------

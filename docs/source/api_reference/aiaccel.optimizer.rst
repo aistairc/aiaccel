@@ -1,25 +1,13 @@
 aiaccel.optimizer package
 =========================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   aiaccel.optimizer.grid
-   aiaccel.optimizer.nelder_mead
-   aiaccel.optimizer.random
-   aiaccel.optimizer.sobol
-   aiaccel.optimizer.tpe
-
 Submodules
 ----------
 
-aiaccel.optimizer.abstract module
----------------------------------
+aiaccel.optimizer.abstract\_optimizer module
+--------------------------------------------
 
-.. automodule:: aiaccel.optimizer.abstract
+.. automodule:: aiaccel.optimizer.abstract_optimizer
    :members:
    :undoc-members:
    :show-inheritance:
@@ -28,6 +16,46 @@ aiaccel.optimizer.create module
 -------------------------------
 
 .. automodule:: aiaccel.optimizer.create
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.optimizer.grid\_optimizer module
+----------------------------------------
+
+.. automodule:: aiaccel.optimizer.grid_optimizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.optimizer.nelder\_mead\_optimizer module
+------------------------------------------------
+
+.. automodule:: aiaccel.optimizer.nelder_mead_optimizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.optimizer.random\_optimizer module
+------------------------------------------
+
+.. automodule:: aiaccel.optimizer.random_optimizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.optimizer.sobol\_optimizer module
+-----------------------------------------
+
+.. automodule:: aiaccel.optimizer.sobol_optimizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.optimizer.tpe\_optimizer module
+---------------------------------------
+
+.. automodule:: aiaccel.optimizer.tpe_optimizer
    :members:
    :undoc-members:
    :show-inheritance:

@@ -28,14 +28,6 @@ aiaccel.cli.start module
    :undoc-members:
    :show-inheritance:
 
-aiaccel.cli.stop module
------------------------
-
-.. automodule:: aiaccel.cli.stop
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 aiaccel.cli.view module
 -----------------------
 

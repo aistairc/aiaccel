@@ -4,18 +4,18 @@ aiaccel.master package
 Submodules
 ----------
 
-aiaccel.master.abci module
---------------------------
+aiaccel.master.abci\_master module
+----------------------------------
 
-.. automodule:: aiaccel.master.abci
+.. automodule:: aiaccel.master.abci_master
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.master.abstract module
-------------------------------
+aiaccel.master.abstract\_master module
+--------------------------------------
 
-.. automodule:: aiaccel.master.abstract
+.. automodule:: aiaccel.master.abstract_master
    :members:
    :undoc-members:
    :show-inheritance:
@@ -28,10 +28,10 @@ aiaccel.master.create module
    :undoc-members:
    :show-inheritance:
 
-aiaccel.master.local module
----------------------------
+aiaccel.master.local\_master module
+-----------------------------------
 
-.. automodule:: aiaccel.master.local
+.. automodule:: aiaccel.master.local_master
    :members:
    :undoc-members:
    :show-inheritance:
