@@ -3,6 +3,7 @@ import pathlib
 import subprocess
 import sys
 from subprocess import CompletedProcess
+from textwrap import wrap
 from unittest import mock
 from unittest.mock import patch
 
@@ -10,7 +11,7 @@ import aiaccel
 import numpy as np
 from aiaccel.storage.storage import Storage
 # from aiaccel.util.opt import Wrapper
-from aiaccel.util.aiaccel import Messages, Run
+from aiaccel.util.aiaccel import Messages, Run, WrapperInterface, report
 
 # from aiaccel.util.opt import create_objective
 from tests.base_test import BaseTest
@@ -31,6 +32,14 @@ def test_create_message():
     assert msg.get("test") == "test:1@2@3"
 
 
+def test_out():
+    msg = Messages("test")
+    msg.create_message("test", [1, 2, 3])
+    msg.create_message("test", [1, 2, 3])
+    msg.create_message("test", [1, 2, 3])
+    assert msg.d["test"].out(all=True) is None
+    assert msg.d["test"].out(all=False) is None
+
 def test_parse_result():
     msg = Messages("test")
     assert msg.parse("test", "test:1") == ["1"]
@@ -49,6 +58,9 @@ def main(p):
     y = np.sum(x ** 2)
 
     return float(y)
+
+def invalid_func(p):
+    return [1, 2, 3]
 
 #
 # Run test
@@ -125,6 +137,11 @@ class TestRun(BaseTest):
             run.execute_and_report(main)
             assert run.objective is not None
 
+            assert run.execute_and_report(invalid_func) is None
+
+            with patch.object(run, "args", {'trial_id': 1, 'config':None}):
+                assert run.execute_and_report(invalid_func) is None
+
     # test module: exist_error
     def test_exist_error(self):
         with patch.object(sys, 'argv', self.get_test_args()):
@@ -173,3 +190,17 @@ class TestRun(BaseTest):
             run = Run()
             y = run.execute(main)
             assert y == 3.85
+
+
+#
+# Wrapper Interface
+#
+def wrapper_interface():
+    wrp = WrapperInterface()
+    assert wrp.get_data('objective_y: objective_err:') == (None, None)
+    assert wrp.get_data('objective_y:123 objective_err:err') == ('123', 'err')
+
+def test_report():
+    assert report(objective_y=123, objective_err='error') is None
+    assert report(objective_y=[123], objective_err='') is None
+

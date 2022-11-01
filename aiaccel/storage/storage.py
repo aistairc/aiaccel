@@ -17,17 +17,17 @@ class Storage:
     """ Database
     """
     def __init__(self, ws: PosixPath) -> None:
-        self.db_path = ws / aiaccel.dict_storage / "storage.db"
-        self.alive = Alive(self.db_path)
-        self.pid = Pid(self.db_path)
-        self.trial = Trial(self.db_path)
-        self.hp = Hp(self.db_path)
-        self.result = Result(self.db_path)
-        self.jobstate = JobState(self.db_path)
-        self.serializer = Serializer(self.db_path)
-        self.error = Error(self.db_path)
-        self.timestamp = TimeStamp(self.db_path)
-        self.variable = Serializer(self.db_path)
+        db_path = ws / aiaccel.dict_storage / "storage.db"
+        self.alive = Alive(db_path)
+        self.pid = Pid(db_path)
+        self.trial = Trial(db_path)
+        self.hp = Hp(db_path)
+        self.result = Result(db_path)
+        self.jobstate = JobState(db_path)
+        self.serializer = Serializer(db_path)
+        self.error = Error(db_path)
+        self.timestamp = TimeStamp(db_path)
+        self.variable = Serializer(db_path)
 
     def current_max_trial_number(self) -> int:
         """Get the current maximum number of trials.
