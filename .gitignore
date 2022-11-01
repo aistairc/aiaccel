@@ -110,5 +110,8 @@ work_aiaccel/
 # vscode
 *.code-workspace
 
+# document
+docs/build/html
+
 # IntelliJ
 .idea
