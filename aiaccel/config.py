@@ -157,11 +157,10 @@ def load_config(config_path: str) -> ConfileWrapper:
 
 
 class ConfigEntry:
-    """ A class for defining values in a configuration file
+    """ A class for defining values in a configuration file \
         or for holding read values.
 
-    Exmple:
-        ```
+    Example:
         workspace = ConfigEntry(
             config=config,
             type=[str],
@@ -171,8 +170,6 @@ class ConfigEntry:
             keys=("workspace")
         )
         workspace.get()
-        ```
-
     """
 
     def __init__(
