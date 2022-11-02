@@ -24,3 +24,5 @@ def test_parse_job_list(data_dir, load_test_config):
 
     for i in root.findall('./job_info/job_list'):
         parse_job_list(config, i)
+
+    assert parse_job_list(config, '') == []

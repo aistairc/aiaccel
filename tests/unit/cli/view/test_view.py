@@ -6,7 +6,7 @@ from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
 
-from tests.unit.view.base import config_path, db_path, t_base, ws
+from .base import config_path, db_path, t_base, ws
 
 
 @t_base()
