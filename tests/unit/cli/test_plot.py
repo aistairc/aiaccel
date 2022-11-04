@@ -5,6 +5,8 @@ from aiaccel.cli.plot import Plotter
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
+from unittest.mock import patch
+
 
 ws = Workspace("test_work")
 config_path = pathlib.Path('tests/test_data/config.json')
@@ -60,3 +62,18 @@ def test_plot():
     plotter = Plotter(config)
     assert plotter.plot() is None
 
+    # len(objectives) == 0
+    with patch.object(plotter.storage.result, 'get_objectives', return_value = []):
+        assert plotter.plot() is None
+
+    # len(objectives) != len(bests)
+    with patch.object(plotter.storage.result, 'get_objectives', return_value = [1,2,3]):
+        with patch.object(plotter.storage.result, 'get_bests', return_value = [1,2,3,4]):
+            assert plotter.plot() is None
+
+    # self.cplt.set_colors
+    # self.cplt.caption
+    # self.cplt.line_plot
+    with patch.object(plotter.storage.result, 'get_objectives', return_value = [1,2,3]):
+        with patch.object(plotter.storage.result, 'get_bests', return_value = [1,2,3]):
+            assert plotter.plot() is None
