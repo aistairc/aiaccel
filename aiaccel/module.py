@@ -173,9 +173,6 @@ class AbstractModule(object):
         self.logger.addHandler(fh)
         self.logger.addHandler(ch)
 
-    def remove_logger_handler(self):
-        self.logger = None
-
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
@@ -314,18 +311,6 @@ class AbstractModule(object):
         """
         return True
 
-    @property
-    def current_max_trial_number(self) -> int:
-        """ Get current trial number
-
-        Args:
-            None
-
-        Returns:
-            int: current trial number
-        """
-        return self.storage.current_max_trial_number()
-
     def resume(self) -> None:
         """ When in resume mode, load the previous
                 optimization data in advance.
@@ -341,6 +326,3 @@ class AbstractModule(object):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
-
-    def get_zero_padding_any_trial_id(self, trial_id: int):
-        return self.trial_id.zero_padding_any_trial_id(trial_id)

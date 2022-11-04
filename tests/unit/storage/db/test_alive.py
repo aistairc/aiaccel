@@ -1,7 +1,13 @@
 from aiaccel.storage.storage import Storage
 
 from base import db_path, t_base, ws
+import pytest
+from sqlalchemy.exc import SQLAlchemyError
+from unittest.mock import patch
 
+import sqlalchemy
+
+from unittest.mock import MagicMock
 
 # init_alive
 @t_base()
@@ -18,7 +24,7 @@ def test_init_alive():
 
 # set_any_process_state
 @t_base()
-def test_set_any_provess_state():
+def test_set_any_process_state():
     storage = Storage(ws.path)
     storage.alive.init_alive()
 
@@ -26,6 +32,14 @@ def test_set_any_provess_state():
     alives = storage.alive.get_state()
     assert alives['master'] == 1
 
+# # set_any_process_state : Exception
+# @t_base()
+# @patch("aiaccel.storage.alive.Alive.session.commit", MagicMock(side_effect=SQLAlchemyError()))
+# def test_set_any_process_state_exception():
+#     storage = Storage(ws.path)
+#     # storage.alive.init_alive()
+#     with pytest.raises(SQLAlchemyError):
+#         storage.alive.set_any_process_state('master', 1)
 
 # get_any_process_state
 @t_base()
@@ -37,6 +51,14 @@ def test_get_any_process_state():
     storage.alive.set_any_process_state('master', 1)
     assert storage.alive.get_any_process_state('master') == 1
 
+
+# # get_any_process_state exception
+# @t_base()
+# def test_get_any_process_state_exception():
+#     from aiaccel.storage.alive import Alive
+#     alive = Alive(ws.path / 'storage' / 'storage.db')
+#     with pytest.raises(AssertionError):
+#         alive.get_any_process_state('invalid')
 
 # get_state
 @t_base()
