@@ -60,6 +60,14 @@ class TestAbstractOptimizer(BaseTest):
         assert self.optimizer.post_process() is None
 
     def test_inner_loop_main_process(self):
+        
+        def dummy_register_new_parameters(new_params):
+            return
+        def dummy_increment():
+            return
+        def dummy_serialize(trial_id):
+            return
+        
         initial = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1}, {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.1}]
         param = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.2}, {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.2}]
         
@@ -68,9 +76,66 @@ class TestAbstractOptimizer(BaseTest):
                 with patch.object(self.optimizer, '_serialize', return_value=None):
                     assert self.optimizer.inner_loop_main_process() is True
 
+        with patch.object(self.optimizer, 'check_finished', return_value=True):
+            assert self.optimizer.inner_loop_main_process() is False
+
+        # if pool_size <= 0 or self.hp_ready >= _max_pool_size
+        with patch.object(self.optimizer.config.num_node, 'get', return_value=1):
+            with patch.object(self.optimizer.config.trial_number, 'get', return_value=4):
+                with patch.object(self.optimizer, 'hp_ready', return_value=2):
+                    with patch.object(self.optimizer, 'hp_running', return_value=0):
+                        with patch.object(self.optimizer, 'hp_finished', return_value=0):
+                            assert self.optimizer.inner_loop_main_process() is True
+
+        with patch.object(self.optimizer, 'num_of_generated_parameter', 1):
+            with patch.object(self.optimizer, 'generate_parameter', return_value=None):
+                assert self.optimizer.inner_loop_main_process() is True
+
+        with patch.object(self.optimizer, 'num_of_generated_parameter', 1):
+            with patch.object(self.optimizer, 'generate_parameter', return_value=param):
+                with patch.object(self.optimizer, 'register_new_parameters', dummy_register_new_parameters):
+                    with patch.object(self.optimizer.trial_id, 'increment', dummy_increment):
+                        with patch.object(self.optimizer, '_serialize', dummy_serialize):
+                            with patch.object(self.optimizer, 'all_parameter_generated', False):
+                                assert self.optimizer.inner_loop_main_process() is True
+                            with patch.object(self.optimizer, 'all_parameter_generated', True):
+                                assert self.optimizer.inner_loop_main_process() is False
+
+    def test__serialize(self):
+        assert self.optimizer._serialize(0) is None
+
+    def test__deserialize(self):
+        self.optimizer._serialize(1)
+        assert self.optimizer._deserialize(1) is None
+
+    def test_resume(self):
+        self.optimizer._serialize(0)
+        self.optimizer._serialize(1)
+
+        self.optimizer.options['resume'] = 1
+        assert self.optimizer.resume() is None
+
+        self.optimizer.options['resume'] = None
+        assert self.optimizer.resume() is None
+
     def test_check_error(self):
         self.optimizer.storage.error.all_delete()
         assert self.optimizer.check_error() is True
 
         self.optimizer.storage.error.set_any_trial_error(trial_id=0, error_message="test_error")
         assert self.optimizer.check_error() is False
+
+    def test_generate_initial_parameter(self):
+        with patch.object(self.optimizer.params, 'sample', return_value=[]):
+            assert self.optimizer.generate_initial_parameter() == []
+
+        p = [
+            {'name': "x1", 'type': 'FLOAT', 'value': 1.0},
+            {'name': "x2", 'type': 'FLOAT', 'value': 2.0},
+        ]
+
+        with patch.object(self.optimizer.params, 'sample', return_value=p):
+            assert self.optimizer.generate_initial_parameter() == [
+                {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 1.0},
+                {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 2.0}
+            ]

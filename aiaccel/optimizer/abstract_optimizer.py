@@ -152,10 +152,8 @@ class AbstractOptimizer(AbstractModule):
         n1 = _max_pool_size - self.hp_running - self.hp_ready
         n2 = _max_trial_number - self.hp_finished - self.hp_running - self.hp_ready
         pool_size = min(n1, n2)
-        if pool_size <= 0:
-            return True
 
-        if self.hp_ready >= _max_pool_size:
+        if (pool_size <= 0 or self.hp_ready >= _max_pool_size):
             return True
 
         self.logger.info(
@@ -185,7 +183,7 @@ class AbstractOptimizer(AbstractModule):
 
         return True
 
-    def _serialize(self, trial_id: int) -> dict:
+    def _serialize(self, trial_id: int) -> None:
         """Serialize this module.
         Returns:
             dict: serialize data.
