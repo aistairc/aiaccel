@@ -118,6 +118,35 @@ class TestAbstractOptimizer(BaseTest):
         self.optimizer.options['resume'] = None
         assert self.optimizer.resume() is None
 
+    def test_cast(self):
+        org_params = [{'parameter_name': 'x1', 'type': 'INT', 'value': 0.1}, {'parameter_name': 'x2', 'type': 'INT', 'value': 1.5}]
+        new_params = self.optimizer.cast(org_params)
+        assert new_params[0]["value"] == 0
+        assert new_params[1]["value"] == 1
+
+        org_params = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1}, {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 1.5}]
+        new_params = self.optimizer.cast(org_params)
+        assert new_params[0]["value"] == 0.1
+        assert new_params[1]["value"] == 1.5
+
+        org_params = [{'parameter_name': 'x1', 'type': 'CATEGORICAL', 'value': 'a'}, {'parameter_name': 'x2', 'type': 'CATEGORICAL', 'value': 'b'}]
+        new_params = self.optimizer.cast(org_params)
+        assert new_params[0]["value"] == 'a'
+        assert new_params[1]["value"] == 'b'
+
+        org_params = [{'parameter_name': 'x1', 'type': 'ORDINAL', 'value': [1, 2, 3]}, {'parameter_name': 'x2', 'type': 'ORDINAL', 'value': [4, 5, 6]}]
+        new_params = self.optimizer.cast(org_params)
+        assert new_params[0]["value"] == [1, 2, 3]
+        assert new_params[1]["value"] == [4, 5, 6]
+
+        org_params = []
+        new_params = self.optimizer.cast(org_params)
+        assert new_params == []
+
+        org_params = None
+        new_params = self.optimizer.cast(org_params)
+        assert new_params == None
+
     def test_check_error(self):
         self.optimizer.storage.error.all_delete()
         assert self.optimizer.check_error() is True

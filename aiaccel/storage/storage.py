@@ -142,13 +142,13 @@ class Storage:
         hp = []
         for d in data:
             param_name = d.param_name
-            dtype = d.param_type
+            dtype = d.param_type  # str
             value = d.param_value
 
             if dtype.lower() == "float":
                 value = float(d.param_value)
             elif dtype.lower() == "int":
-                value = int(d.param_value)
+                value = int(float(d.param_value))
             elif dtype.lower() == "categorical":
                 value == str(d.param_value)
 
