@@ -19,6 +19,7 @@ from aiaccel.util.logger import str_to_logging_level
 
 from tests.base_test import BaseTest
 
+import pytest
 
 async def async_function(func):
     loop = asyncio.get_event_loop()
@@ -191,3 +192,21 @@ class TestAbstractModule(BaseTest):
             assert False
         except NotImplementedError:
             assert True
+
+    def test_check_error(self):
+        assert self.module.check_error() is True 
+
+    def test_resume(self):
+        options = {
+            'config': str(self.config_json),
+            'resume': None,
+            'clean': False,
+            'process_name': 'test'
+        }
+
+        self.module = AbstractModule(options)
+        assert self.module.resume() is None
+
+        self.module.options['resume'] = 1
+        with pytest.raises(NotImplementedError):
+            self.module.resume()

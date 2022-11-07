@@ -60,21 +60,3 @@ class AbstractEvaluator(object):
         """
         path = self.ws / aiaccel.dict_result / aiaccel.file_final_result
         create_yaml(path, self.hp_result, self.dict_lock)
-
-    def get_best_parameter(self) -> dict:
-        """Get a best parameter in specified files.
-
-        Args:
-            files (List[Path]): A list of files to find a best.
-            goal (str): Maximize or Minimize.
-            dict_lock (Path): A directory to store lock files.
-
-        Returns:
-            Tuple[Union[float, None], Union[Path, None]]: A best result value and a
-                file path. It returns None if a number of files is less than one.
-        """
-        best_trial_id, best_value = self.storage.get_best_trial(self.goal)
-        return {
-            'trial_id': best_trial_id,
-            'value': best_value
-        }

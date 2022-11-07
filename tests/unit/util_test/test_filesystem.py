@@ -1,10 +1,12 @@
 import shutil
+from pathlib import Path, PosixPath
 
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import (create_yaml, file_create, file_delete,
                                      file_read, get_dict_files,
-                                     get_file_result, load_yaml,
-                                     make_directories, make_directory)
+                                     get_file_result, get_file_result_hp,
+                                     load_yaml, make_directories,
+                                     make_directory)
 
 
 def test_create_yaml(clean_work_dir, work_dir):
@@ -33,6 +35,7 @@ def test_file_delete(clean_work_dir, work_dir):
     file_create(path, 'hello')
     file_delete(path, dict_lock)
     assert not path.exists()
+    assert file_delete(Path('invalid_path')) is None
 
 
 def test_file_read(clean_work_dir, work_dir):
@@ -42,6 +45,7 @@ def test_file_read(clean_work_dir, work_dir):
     file_create(path, 'hello')
     assert file_read(path) == 'hello'
     assert file_read(path, dict_lock) == 'hello'
+    assert file_read(Path('invalid_path')) is None
 
 
 def test_get_dict_files(clean_work_dir, work_dir):
@@ -52,10 +56,15 @@ def test_get_dict_files(clean_work_dir, work_dir):
     assert get_dict_files(alive_dir, '*.yml') == [path]
     assert get_dict_files(alive_dir, '*.yml', dict_lock) == [path]
 
+    assert get_dict_files(Path('invalid_path'), '*.yml', dict_lock) is None
+
+    jobstate = work_dir.joinpath('jobstate')  # unused directory
+    assert get_dict_files(jobstate, '*.jobstate', dict_lock) == []
+
 
 def test_get_file_result(clean_work_dir, setup_result, work_dir):
-    setup_result(1)
     storage = Storage(work_dir)
+    setup_result(1)
     content = storage.get_hp_dict('0')
     create_yaml((work_dir / 'result' / '001.result'), content)
     assert get_file_result(work_dir) == [
@@ -76,6 +85,7 @@ def test_make_directory(clean_work_dir, work_dir):
     dict_lock = work_dir.joinpath('lock')
     assert make_directory(work_dir.joinpath('result')) is None
     assert make_directory(work_dir.joinpath('new'), dict_lock) is None
+    assert make_directory(work_dir.joinpath('new'), dict_lock) is None  # exists
 
 
 def test_make_directories(clean_work_dir, work_dir):
@@ -94,3 +104,13 @@ def test_make_directories(clean_work_dir, work_dir):
     shutil.rmtree(work_dir.joinpath('hp', 'exist'))
     file_create(work_dir.joinpath('hp', 'exist'), 'hello', dict_lock)
     assert make_directories(ds, dict_lock) is None
+
+
+def test_get_file_result_hp(work_dir):
+    # no files
+    assert get_file_result_hp(work_dir) == []
+
+    file_path = work_dir / 'result' / 'test.hp'
+    create_yaml(file_path, {})
+
+    assert get_file_result_hp(work_dir) == [PosixPath('/tmp/work/result/test.hp')]

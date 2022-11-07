@@ -438,30 +438,29 @@ class Run:
         ):
             return
 
-        if self.args["config"] is not None:
-            err = self.err
-            if not type(y) in SUPPORTED_TYPES:
-                y = float("nan")
-                err = f"user function returns invalid type value, {type(y)}({y})."
+        err = self.err
+        if not type(y) in SUPPORTED_TYPES:
+            y = float("nan")
+            err = f"user function returns invalid type value, {type(y)}({y})."
 
-            self.storage.result.set_any_trial_objective(
-                trial_id=int(self.trial_id),
-                objective=y
-            )
-            self.storage.timestamp.set_any_trial_start_time(
-                trial_id=int(self.trial_id),
-                start_time=self.start_time
-            )
-            self.storage.timestamp.set_any_trial_end_time(
-                trial_id=int(self.trial_id),
-                end_time=self.end_time
-            )
+        self.storage.result.set_any_trial_objective(
+            trial_id=int(self.trial_id),
+            objective=y
+        )
+        self.storage.timestamp.set_any_trial_start_time(
+            trial_id=int(self.trial_id),
+            start_time=self.start_time
+        )
+        self.storage.timestamp.set_any_trial_end_time(
+            trial_id=int(self.trial_id),
+            end_time=self.end_time
+        )
 
-            if err != "":
-                self.storage.error.set_any_trial_error(
-                    trial_id=int(self.trial_id),
-                    error_message=err
-                )
+        if err != "":
+            self.storage.error.set_any_trial_error(
+                trial_id=int(self.trial_id),
+                error_message=err
+            )
 
     @singledispatchmethod
     def execute_and_report(self, func: callable):
