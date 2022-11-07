@@ -71,13 +71,13 @@ class EasyVisualizer:
         """
         self.plot_config["height"] = height
 
-    def set_width(self, width: int) -> None:
-        """ Set the width of the horizontal axis.
+    # def set_width(self, width: int) -> None:
+    #     """ Set the width of the horizontal axis.
 
-        Args:
-            wodth (int): width of the horizontal axis.
-        """
-        self.plot_config["width"] = width
+    #     Args:
+    #         wodth (int): width of the horizontal axis.
+    #     """
+    #     self.plot_config["width"] = width
 
     def set_colors(self, colors: list) -> None:
         """ Set the color of line graph.
@@ -133,7 +133,7 @@ class EasyVisualizer:
                 return
             if None in data[i]:
                 return
-            if np.float("nan") in data[i]:
+            if any(np.isnan(data[i])):
                 message = "WARNING: result data has 'nan'"
                 print(f"{yellow}{message}{reset}")
                 return

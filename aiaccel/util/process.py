@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, List, Union
 
 import psutil
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.master.abci_master import AbciMaster
     from aiaccel.master.abstract_master import AbstractMaster
     from aiaccel.master.local_master import LocalMaster
@@ -68,73 +68,6 @@ def subprocess_ps() -> List[dict]:
             'full': stats[s]})
 
     return ret
-
-
-def parse_psaux(outputs: List[bytes]) -> List[dict]:
-    """Parse a list of bytes which got from subprocess.
-
-    Args:
-        outputs (List[bytes]): A result of ps command using subprocess.
-
-    Returns:
-        List[dict]: A parsed result of a ps command.
-    """
-    output = [o.decode('utf-8') for o in outputs if len(o) > 0]
-    headers = [h for h in ' '.join(output[0].strip().split()).split() if h]
-    indexes = [output[0].strip().find(h) for h in headers]
-    split_indexes = [
-        [indexes[i], indexes[i + 1]] if i < len(indexes) - 1
-        else [indexes[i], -1] for i in range(0, len(indexes))
-    ]
-    raw_data = map(
-        lambda s: [s[i[0]:i[1]].strip() for i in split_indexes],
-        output[1:]
-    )
-
-    return [dict(zip(headers, r)) for r in raw_data]
-
-
-'''
-def ps2joblist() -> List[dict]:
-    """Get a ps result and convert to a job list format.
-
-    Returns:
-        List[dict]: A job list of ps result.
-
-    Raises:
-        KeyError: Causes when required keys are not contained in a ps result.
-    """
-    output = subprocess.Popen(
-        ['/bin/ps', '-eo', 'pid,user,stat,lstart,args'],
-        stdout=subprocess.PIPE
-    ).stdout.readlines()
-    output_dict = parse_psaux(output)
-    job_list = []
-    for o in output_dict:
-        d = {
-            'job-ID': o['PID'], 'prior': None, 'user': o['USER'],
-            'state': o['STAT'], 'queue': None, 'jclass': None,
-            'slots': None, 'ja-task-ID': None
-        }
-
-        if 'COMMAND' in o:
-            d['name'] = o['COMMAND']
-        elif 'ARGS' in o:
-            d['name'] = o['ARGS']
-        else:
-            raise KeyError
-
-        if 'START' in o:
-            d['submit/start at'] = o['START']
-        elif 'STARTED' in o:
-            d['submit/start at'] = o['STARTED']
-        else:
-            raise KeyError
-
-        job_list.append(d)
-
-    return job_list
-'''
 
 
 def ps2joblist() -> List[dict]:

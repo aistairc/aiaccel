@@ -1,8 +1,16 @@
+import logging
 import os
 import subprocess
+from pathlib import Path
+from subprocess import PIPE, STDOUT
+from unittest.mock import patch
 
-from aiaccel.util.process import (exec_runner, is_process_running,
-                                  kill_process, ps2joblist, subprocess_ps)
+import psutil
+import pytest
+from aiaccel.master.abstract_master import AbstractMaster
+from aiaccel.util.process import (OutputHandler, exec_runner,
+                                  is_process_running, kill_process, ps2joblist,
+                                  subprocess_ps)
 
 
 def test_exec_runner():
@@ -94,4 +102,37 @@ def test_kill_process():
 
 
 def test_is_process_running():
-    assert is_process_running(os.getpid())
+    assert is_process_running(os.getpid()) is True
+    assert is_process_running(99999999) is False
+
+
+def test_OutputHandler():
+    class dummy:
+        def __init__(self):
+            self.logger = logging.getLogger('root.master')
+
+    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE), 'test')
+
+    _ouputhandler._abort = False
+
+    assert _ouputhandler.abort() is None
+    assert _ouputhandler.run() is None
+
+    _ouputhandler._abort = False
+    assert _ouputhandler.run() is None
+
+
+    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=None), 'test')
+    assert _ouputhandler.run() is None
+
+    o = b'\xe3\x81\x82'
+    e = b'\xe3\x81\x82'
+    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE, stderr=STDOUT), 'test')
+    with patch.object(_ouputhandler._proc, 'communicate', return_value=(o, e)):
+        assert _ouputhandler.run() is None
+
+    o = b'\xe3\x81\x82'
+    e = b'\0'
+    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE, stderr=PIPE), 'test')
+    with patch.object(_ouputhandler._proc, 'communicate', return_value=(o, e)):
+        assert _ouputhandler.run() is None

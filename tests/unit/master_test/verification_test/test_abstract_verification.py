@@ -3,6 +3,7 @@ from aiaccel.master.verification.abstract_verification import \
     AbstractVerification
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import load_yaml
+from unittest.mock import patch
 
 from tests.base_test import BaseTest
 
@@ -54,6 +55,12 @@ class TestAbstractVerification(BaseTest):
         file_path = work_dir / aiaccel.dict_verification / f'1.{aiaccel.extension_verification}'
         assert file_path.exists()
 
+        with patch.object(verification, 'finished_loop', None):
+            assert verification.verify() is None
+
+        with patch.object(verification, 'finished_loop', 65535):
+            assert verification.verify() is None
+
     def test_make_verification(
         self,
         clean_work_dir,
@@ -92,6 +99,19 @@ class TestAbstractVerification(BaseTest):
         for y in yml:
             if y['loop'] == 1 or y['loop'] == 5:
                 assert y['passed']
+
+        d0 = {
+            'result': float('-inf')
+        }
+        d1 = {
+            'result': 0
+        }
+        with patch.object(verification.storage, 'get_best_trial_dict', return_value=d0):
+            with patch.object(verification.storage, 'get_num_finished', return_value=1):
+                assert verification.make_verification(0, 0) is None
+        with patch.object(verification.storage, 'get_best_trial_dict', return_value=d1):
+            with patch.object(verification.storage, 'get_num_finished', return_value=1):
+                assert verification.make_verification(0, 0) is None
 
     def test_print(self):
         options = {
