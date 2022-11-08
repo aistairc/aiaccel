@@ -108,16 +108,6 @@ class TestAbstractOptimizer(BaseTest):
         self.optimizer._serialize(1)
         assert self.optimizer._deserialize(1) is None
 
-    def test_resume(self):
-        self.optimizer._serialize(0)
-        self.optimizer._serialize(1)
-
-        self.optimizer.options['resume'] = 1
-        assert self.optimizer.resume() is None
-
-        self.optimizer.options['resume'] = None
-        assert self.optimizer.resume() is None
-
     def test_cast(self):
         org_params = [{'parameter_name': 'x1', 'type': 'INT', 'value': 0.1}, {'parameter_name': 'x2', 'type': 'INT', 'value': 1.5}]
         new_params = self.optimizer.cast(org_params)

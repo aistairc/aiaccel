@@ -52,6 +52,7 @@ class Trial(Abstract):
 
         if trials is None:
             return None
+
         return [d.trial_id for d in trials]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)

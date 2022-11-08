@@ -51,14 +51,12 @@ def test_get_any_process_state():
     storage.alive.set_any_process_state('master', 1)
     assert storage.alive.get_any_process_state('master') == 1
 
-
-# # get_any_process_state exception
-# @t_base()
-# def test_get_any_process_state_exception():
-#     from aiaccel.storage.alive import Alive
-#     alive = Alive(ws.path / 'storage' / 'storage.db')
-#     with pytest.raises(AssertionError):
-#         alive.get_any_process_state('invalid')
+# get_any_process_state exception
+@t_base()
+def test_get_any_process_state_exception():
+    from aiaccel.storage.alive import Alive
+    alive = Alive(ws.path / 'storage' / 'storage.db')
+    assert alive.get_any_process_state('invalid') is None
 
 # get_state
 @t_base()

@@ -234,6 +234,9 @@ class AbstractOptimizer(AbstractModule):
             self.options['resume'] is not None and
             self.options['resume'] > 0
         ):
+            self.storage.rollback_to_ready(self.options['resume'])
+            self.storage.delete_trial_data_after_this(self.options['resume'])
+            self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])
 
     def cast(self, params: Union[None, list]) -> Union[None, list]:

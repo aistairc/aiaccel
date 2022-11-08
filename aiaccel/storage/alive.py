@@ -76,7 +76,8 @@ class Alive(Abstract):
             )
 
         if data is None:
-            assert False
+            return None
+
         return data.alive_state
 
     def stop_any_process(self, process_name: str) -> None:

@@ -323,7 +323,7 @@ class NelderMead(object):
         elif self.f[-1] <= self._fr:
             self._inside_contract()
         else:  # pragma: no cover
-            pass # not reached
+            pass  # not reached
 
     def _wait_expand(self, results: List[dict]) -> None:
         """Wait 'Expand' executions finished.

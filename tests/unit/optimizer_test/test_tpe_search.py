@@ -5,7 +5,7 @@ from aiaccel.optimizer.tpe_optimizer import (TpeOptimizer, TPESamplerWrapper,
 from aiaccel.parameter import load_parameter
 
 from tests.base_test import BaseTest
-
+from unittest.mock import patch
 
 class TestTPESamplerWrapper(BaseTest):
 
@@ -49,8 +49,28 @@ class TestTpeOptimizer(BaseTest):
         self.optimizer.pre_process()
         assert len(self.optimizer.generate_parameter()) > 0
 
+        # if ((not self.is_startup_trials()) and (len(self.parameter_pool) >= 1))
+        with patch.object(self.optimizer, 'check_result', return_value=None):
+            with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
+                with patch.object(self.optimizer, 'parameter_pool', [{},{},{}]):
+                    assert self.optimizer.generate_parameter() is None
+
+        # if len(self.parameter_pool) >= self.config.num_node.get()
+        with patch.object(self.optimizer.config.num_node, 'get', return_value=0):
+            assert self.optimizer.generate_parameter() is None
+
+    def test_generate_initial_parameter(self):
+        self.optimizer.pre_process()
+        assert len(self.optimizer.generate_initial_parameter()) > 0
+
     def test_create_study(self):
         assert self.optimizer.create_study() is None
+
+        with patch.object(self.optimizer, 'study', None):
+            assert self.optimizer.create_study() is None
+
+        with patch.object(self.optimizer, 'study', object):
+            assert self.optimizer.create_study() is None
 
     def test_serialize(self):
         self.optimizer.create_study()

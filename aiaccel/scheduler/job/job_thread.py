@@ -22,7 +22,7 @@ from aiaccel.util.time_tools import get_time_delta, get_time_now_object
 from aiaccel.util.trialid import TrialId
 from aiaccel.wrapper_tools import create_runner_command
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler.abci_scheduler import AbciScheduler
     from aiaccel.scheduler.local_scheduler import LocalScheduler
 
