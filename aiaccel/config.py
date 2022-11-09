@@ -180,7 +180,7 @@ class ConfigEntry:
         warning: bool,
         group: str,
         keys: tuple
-    ):
+    ) -> None:
         """
         Args:
             config_path (str): A path of configuration file.
@@ -215,7 +215,7 @@ class ConfigEntry:
         """
         return copy.deepcopy(self._value)
 
-    def set(self, value):
+    def set(self, value) -> None:
         """
         Args
             value (any)
@@ -225,7 +225,7 @@ class ConfigEntry:
             raise TypeError
         self._value = value
 
-    def show_warning(self):
+    def show_warning(self) -> None:
         """ If the default value is used, a warning is displayed.
         """
         if self.warning:
@@ -360,13 +360,6 @@ class Config:
             self.workspace.empty_if_error()
 
             self.job_command.empty_if_error()
-
-            if self.goal.get().lower() not in _GOALS:
-                logger.error(f'Invalid goal: {self.goal.get()}')
-
-            if self.resource_type.get().lower() not in _RESOURCE_TYPES:
-                logger.error(f'Invalid resource type: {self.resource_type.get()}.')
-                sys.exit()
 
             if self.resource_type.get().lower() == "abci":
                 self.abci_group.empty_if_error()

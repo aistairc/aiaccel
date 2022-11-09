@@ -141,13 +141,13 @@ class Serializer:
         self.file_name = file_name
         self.d = {}
 
-    def register(self, process_name: str, labels: list):
+    def register(self, process_name: str, labels: list) -> None:
         for i in range(len(labels)):
             if labels[i] not in self.d.keys():
                 self.d[labels[i]] = Value(self.file_name, labels[i])
                 self.d[labels[i]].set_process_name(process_name)
 
-    def delete_any_trial_variable(self, trial_id):
+    def delete_any_trial_variable(self, trial_id) -> None:
         for key in self.d.keys():
             self.d[key].delete(trial_id)
 
