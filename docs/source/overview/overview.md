@@ -29,7 +29,7 @@ pip install git+https://github.com/aistairc/aiaccel.git
     > mkdir your_workspace_directory
     > cd your_workspace_directory
     > git clone https://github.com/aistairc/aiaccel.git 
-    > cp -R cloned_directory/aiaccel/examples .
+    > cp -R ./aiaccel/examples .
     > cd examples
     > ls
     sphere
