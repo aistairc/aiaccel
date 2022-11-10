@@ -131,7 +131,7 @@ PYTHONPATHに，aiaccelと追加したcustom_optimizer.pyのディレクトリ�
 > cd work/sphere
 
 > pwd
-/workspace/aiaccel/sphere
+/workspace/aiaccel/work/sphere
 
 > ls
 config.yaml       job_script_preamble.sh     user.py
@@ -142,7 +142,7 @@ examples/sphereディレクトリをコピーし，sphereディレクトリに�
 次にコンフィグレーションファイルを編集します．
 オプティマイザに今回作成したカスタムオプティマイザを利用したいのでconfig.yamlを編集します．
 
-***/workspace/aiaccel/work/config.yaml***
+***/workspace/aiaccel/work/sphere/config.yaml***
 
 ```diff
 -  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
@@ -151,7 +151,7 @@ examples/sphereディレクトリをコピーし，sphereディレクトリに�
 
 デフォルトのconfig.yamlファイルにはネルダーミードの初期値がリストで設定されているため，これは削除します．
 
-***/workspace/aiaccel/work/config.yaml***
+***/workspace/aiaccel/work/sphere/config.yaml***
 
 ```yaml:config.yaml
 generic:
@@ -213,7 +213,7 @@ optimize:
 > pwd
 /workspace/aiaccel/work/sphere
 
-> aiaccel.cli.start --config config.yaml --clean
+> aiaccel-start --config config.yaml --clean
 
 ~~~
 
@@ -365,7 +365,7 @@ class RandomOptimizer(AbstractOptimizer):
 > pwd
 /workspace/aiaccel/work/sphere
 
-> aiaccel.cli.start --config config.yaml --clean
+> aiaccel-start --config config.yaml --clean
 
 ~~~
 
@@ -380,7 +380,7 @@ class RandomOptimizer(AbstractOptimizer):
 
 まずコンフィグレーションファイルに以下の追加をします．
 
-***/workspace/aiaccel/work/config.yaml***
+***/workspace/aiaccel/work/sphere/config.yaml***
 
 ```diff
 optimize:
@@ -469,7 +469,7 @@ class CustomOptimizer(AbstractOptimizer):
 > pwd
 /workspace/aiaccel/work/sphere
 
-> aiaccel.cli.start --config config.yaml --clean
+> aiaccel-start --config config.yaml --clean
 
 ~~~
 
