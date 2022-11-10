@@ -7,7 +7,7 @@ from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
                                               get_grid_options)
 from aiaccel.parameter import HyperParameter, load_parameter
 from tests.base_test import BaseTest
-
+import pytest
 
 def test_get_grid_options():
     test_data_dir = Path(__file__).resolve().parent.parent.parent.joinpath('test_data')
@@ -24,6 +24,29 @@ def test_get_grid_options():
     except KeyError:
         assert True
 
+    # no step
+    grid_config_json = test_data_dir / 'config_grid_no_step.json'
+    config_grid = Config(grid_config_json)
+    with pytest.raises(KeyError):
+        base, log, step = get_grid_options('x1', config_grid)
+
+    # no log
+    grid_config_json = test_data_dir / 'config_grid_no_log.json'
+    config_grid = Config(grid_config_json)
+    with pytest.raises(KeyError):
+        base, log, step = get_grid_options('x1', config_grid)
+
+    # no base
+    grid_config_json = test_data_dir / 'config_grid_no_base.json'
+    config_grid = Config(grid_config_json)
+    with pytest.raises(KeyError):
+        base, log, step = get_grid_options('x1', config_grid)
+
+    # base true/false
+    grid_config_json = test_data_dir / 'config_grid_base.json'
+    config_grid = Config(grid_config_json)
+    with pytest.raises(KeyError):
+        base, log, step = get_grid_options('x1', config_grid)
 
 def test_generate_grid_points(grid_load_test_config):
     config = grid_load_test_config()
@@ -70,6 +93,19 @@ def test_generate_grid_points(grid_load_test_config):
     except TypeError:
         assert True
 
+    cat_p = HyperParameter(
+        {
+            'name': 'x3',
+            'type': 'ordinal',
+            'choices': ['red', 'green', 'blue'],
+            'log': False,
+            'step': 1,
+            'base': 10,
+            "sequence": [1, 2, 3]
+        }
+    )
+    cat_grid = generate_grid_points(cat_p, config)
+    print(cat_grid)
 
 class TestGridOptimizer(BaseTest):
 
@@ -133,3 +169,19 @@ class TestGridOptimizer(BaseTest):
 
         optimizer.generate_index = 0
         assert len(optimizer.generate_parameter()) == self.config.trial_number.get()
+
+
+    def test_generate_initial_parameter(self):
+        self.workspace.clean()
+        self.workspace.create()
+
+        options = {
+            'config': self.grid_config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'optimizer'
+        }
+        optimizer = GridOptimizer(options)
+        optimizer.pre_process()
+        optimizer.generate_initial_parameter()

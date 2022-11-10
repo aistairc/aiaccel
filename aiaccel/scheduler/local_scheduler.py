@@ -52,4 +52,5 @@ class LocalScheduler(AbstractScheduler):
 
         if trial_id_index is None:
             return None
+
         return args[trial_id_index + index_offset]
