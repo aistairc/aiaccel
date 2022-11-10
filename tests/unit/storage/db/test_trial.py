@@ -1,6 +1,8 @@
 from aiaccel.storage.storage import Storage
-from base import t_base, ws
-
+from base import t_base, ws, init
+from undecorated import undecorated
+from sqlalchemy.exc import SQLAlchemyError
+import pytest
 
 # set_any_trial_state
 @t_base()
@@ -22,6 +24,20 @@ def test_set_any_trial_state():
             state=states[i]
         ) is None
 
+
+# set_any_trial_state exception
+@t_base()
+def test_set_any_trial_state_exception():
+    storage = Storage(ws.path)
+
+    init()
+    with pytest.raises(SQLAlchemyError):
+        set_any_trial_state = undecorated(storage.trial.set_any_trial_state)
+        set_any_trial_state(
+            storage.trial,
+            trial_id=0,
+            state="ready"
+        )
 
 # test_get_any_trial_state
 @t_base()
@@ -54,6 +70,8 @@ def test_get_any_trial_state():
 @t_base()
 def test_get_any_state_list():
     storage = Storage(ws.path)
+
+    assert storage.trial.get_any_state_list("ready") is None
 
     states = [
         "ready",
@@ -108,6 +126,38 @@ def test_all_delete():
 
     for i in range(len(states)):
         assert storage.trial.get_any_trial_state(i) is None
+
+
+# all_delete exception
+@t_base()
+def test_all_delete_exception():
+    storage = Storage(ws.path)
+
+    states = [
+        "ready",
+        "ready",
+        "running",
+        "running",
+        "running",
+        "finished",
+        "finished",
+        "finished",
+        "finished"
+    ]
+
+    for i in range(len(states)):
+        storage.trial.set_any_trial_state(
+            trial_id=i,
+            state=states[i]
+        )
+
+    for i in range(len(states)):
+        assert storage.trial.get_any_trial_state(i) == states[i]
+
+    init()
+    with pytest.raises(SQLAlchemyError):
+        all_delete = undecorated(storage.trial.all_delete)
+        all_delete(storage.trial)
 
 
 # get_ready
@@ -193,6 +243,8 @@ def test_get_finished():
 def test_get_all_trial_id():
     storage = Storage(ws.path)
 
+    assert storage.trial.get_all_trial_id() is None
+
     states = [
         "ready",
         "ready",
@@ -252,3 +304,30 @@ def test_delete_any_trial_state():
     assert storage.trial.get_any_trial_state(trial_id=0) is None
     assert storage.trial.get_any_trial_state(trial_id=1) is None
     assert storage.trial.get_any_trial_state(trial_id=2) is None
+
+
+# delete_any_trial_state exception
+@t_base()
+def test_delete_any_trial_state_exception():
+    storage = Storage(ws.path)
+
+    states = [
+        "ready",
+        "running",
+        "finished",
+    ]
+
+    for i in range(len(states)):
+        storage.trial.set_any_trial_state(
+            trial_id=i,
+            state=states[i]
+        )
+
+    for i in range(len(states)):
+        assert storage.trial.get_any_trial_state(i) == states[i]
+
+    init()
+    with pytest.raises(SQLAlchemyError):
+        delete_any_trial_state = undecorated(storage.trial.delete_any_trial_state)
+        delete_any_trial_state(storage.trial, trial_id=0)
+

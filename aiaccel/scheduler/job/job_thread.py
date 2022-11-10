@@ -641,6 +641,8 @@ class Model(object):
             # confirm whether the result file exists or not (this means the job finished quickly
             with obj.lock:
                 trial_ids = obj.storage.result.get_result_trial_id_list()
+                if trial_ids is None:
+                    return False
             return obj.trial_id in trial_ids
 
     # Result

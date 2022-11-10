@@ -151,6 +151,8 @@ class Storage:
                 value = int(float(d.param_value))
             elif dtype.lower() == "categorical":
                 value == str(d.param_value)
+            else:  # pragma: no cover
+                pass  # not reached
 
             hp.append(
                 {
@@ -171,7 +173,7 @@ class Storage:
         content['start_time'] = start_time
         content['end_time'] = end_time
 
-        if error is not None:
+        if error is not None and len(error) > 0:
             content['error'] = error
 
         return content

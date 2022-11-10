@@ -1,6 +1,8 @@
 from aiaccel.storage.storage import Storage
-from base import db_path, t_base, ws
-
+from base import db_path, t_base, ws, init
+from undecorated import undecorated
+from sqlalchemy.exc import SQLAlchemyError
+import pytest
 
 # set_any_trial_objective
 @t_base()
@@ -21,6 +23,24 @@ def test_set_any_trial_objective():
         trial_id=trial_id,
         objective=objective
     ) is None
+
+# set_any_trial_objective exception
+@t_base()
+def test_set_any_trial_objective_exception():
+    storage = Storage(ws.path)
+
+    trial_id = 0
+    objective = 0.01
+
+    init()
+    with pytest.raises(SQLAlchemyError):
+        set_any_trial_objective = undecorated(storage.result.set_any_trial_objective)
+        set_any_trial_objective(
+            storage.result,
+            trial_id=trial_id,
+            objective=objective
+        )
+
 
 
 # get_any_trial_objective
@@ -100,6 +120,8 @@ def test_get_bests():
 def test_get_result_trial_id_list():
     storage = Storage(ws.path)
 
+    assert storage.result.get_result_trial_id_list() is None
+
     objectives = [1, 2, 3, 1.23]
     ids = range(len(objectives))
 
@@ -129,6 +151,26 @@ def test_all_delete():
     assert storage.result.get_any_trial_objective(0) == 1
     assert storage.result.all_delete() is None
     assert storage.result.get_any_trial_objective(0) is None
+
+
+# all_delete exception
+@t_base()
+def test_all_delete_exception():
+    storage = Storage(ws.path)
+
+    objectives = [1, 2, 3, 1.23]
+    ids = range(len(objectives))
+
+    for i in range(len(objectives)):
+        storage.result.set_any_trial_objective(
+            trial_id=ids[i],
+            objective=objectives[i]
+        )
+
+    init()
+    with pytest.raises(SQLAlchemyError):
+        all_delete = undecorated(storage.result.all_delete)
+        all_delete(storage.result)
 
 
 # delete_any_trial_objective
@@ -163,3 +205,23 @@ def test_delete_any_trial_objective():
     assert storage.result.get_any_trial_objective(ids[0]) is None
     assert storage.result.get_any_trial_objective(ids[1]) is None
     assert storage.result.get_any_trial_objective(ids[2]) is None
+
+
+# delete_any_trial_objective exception
+@t_base()
+def test_delete_any_trial_objective_exception():
+    storage = Storage(ws.path)
+
+    ids = [0, 1, 2]
+    objectives = [0.01, 0.02, 0.03]
+
+    for i in range(len(ids)):
+        storage.result.set_any_trial_objective(
+            trial_id=ids[i],
+            objective=objectives[i]
+        )
+
+    init()
+    with pytest.raises(SQLAlchemyError):
+        delete_any_trial_objective = undecorated(storage.result.delete_any_trial_objective)
+        delete_any_trial_objective(storage.result, trial_id=0)
