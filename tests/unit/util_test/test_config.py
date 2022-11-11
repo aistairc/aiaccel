@@ -234,7 +234,6 @@ def test_config_set(config_json):
     with pytest.raises(TypeError):
         assert config.workspace.set(123)
 
-
 def test_empty_if_error(config_json):
     config = Config(config_json, warn=False, format_check=False)
     config.workspace.set("aaa")
@@ -243,7 +242,6 @@ def test_empty_if_error(config_json):
     with patch.object(sys, 'exit', return_value=None):
         config.workspace.set("")
         config.workspace.empty_if_error()
-
 
 def test_value(config_json):
     config = Config(config_json)

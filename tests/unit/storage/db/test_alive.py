@@ -13,6 +13,10 @@ from undecorated import undecorated
 from aiaccel.storage.storage import Storage
 
 
+with patch('aiaccel.util.retry.retry', lambda function: function):
+    from aiaccel.storage.storage import Storage
+
+
 # init_alive
 @t_base()
 def test_init_alive():

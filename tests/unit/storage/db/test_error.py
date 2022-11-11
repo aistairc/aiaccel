@@ -60,6 +60,8 @@ def test_get_error_trial_id():
     storage = Storage(ws.path)
     assert storage.error.get_error_trial_id() == []
 
+    assert storage.error.get_error_trial_id() == []
+
     ids = [0, 1, 2]
     mess = [
         "hoge_0",
