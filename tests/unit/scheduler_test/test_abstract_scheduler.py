@@ -170,6 +170,13 @@ class TestAbstractScheduler(BaseTest):
             machine.set_state('Success')
             job['thread'].join()
 
+        scheduler = AbstractScheduler(options)
+        with patch.object(scheduler.storage.trial, 'get_running', return_value=[]):
+            assert scheduler.pre_process()is None
+
+        with patch.object(scheduler.storage.trial, 'get_running', return_value=[0, 1, 2]):
+            assert scheduler.pre_process()is None
+
     def test_post_process(self, config_json, database_remove):
         database_remove()
         options = {
@@ -179,8 +186,28 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
+
+        class dummy_job:
+            def __init__(self):
+                pass
+            def stop(self):
+                pass
+            def join(self):
+                pass
+
+        jobs = []
+        for i in range(10):
+            jobs.append({'thread':dummy_job()})
+
         scheduler = AbstractScheduler(options)
         assert scheduler.post_process() is None
+
+        with patch.object(scheduler, 'check_finished', return_value=False):
+            with patch.object(scheduler, 'jobs', jobs):
+                assert scheduler.post_process() is None
+
+        with patch.object(scheduler, 'check_finished', return_value=True):
+            assert scheduler.post_process() is None
 
     def test_inner_loop_main_process(
         self,
@@ -213,6 +240,12 @@ class TestAbstractScheduler(BaseTest):
             machine = job['thread'].get_machine()
             machine.set_state('Success')
             job['thread'].join()
+
+        with patch.object(scheduler, 'check_finished', return_value=True):
+            assert scheduler.inner_loop_main_process() == False
+
+        with patch.object(scheduler, 'all_done', return_value=True):
+            assert scheduler.inner_loop_main_process() == False
 
     def test_serialize(
         self,
@@ -266,3 +299,44 @@ class TestAbstractScheduler(BaseTest):
         trial_id = scheduler.parse_trial_id(s['name'])
         # assert name in '001'
         assert trial_id is None
+
+    def test_check_error(self, config_json, database_remove):
+        database_remove()
+        options = {
+            'config': config_json,
+            'resume': None,
+            'clean': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+        assert scheduler.check_error() is True
+
+        jobstates = [
+            {'trial_id': 0, 'jobstate':'failure'}
+        ]
+
+        with patch.object(scheduler, 'job_status', {1:'failure'}):
+            with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
+                assert scheduler.check_error() is True
+
+        with patch.object(scheduler, 'job_status', {0:'failure'}):
+            with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
+                assert scheduler.check_error() is False
+
+    def test_resume(self, config_json):
+        options = {
+            'config': config_json,
+            'resume': None,
+            'clean': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+        scheduler.pre_process()
+        scheduler._serialize(0)
+        scheduler._serialize(1)
+
+        scheduler.options['resume'] = 1
+        assert scheduler.resume() is None
+
+        scheduler.options['resume'] = None
+        assert scheduler.resume() is None

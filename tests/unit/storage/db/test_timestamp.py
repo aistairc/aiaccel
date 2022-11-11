@@ -1,6 +1,6 @@
 from aiaccel.storage.storage import Storage
 from base import t_base, ws
-
+import pytest
 
 # set_any_trial_start_time
 @t_base()
@@ -50,6 +50,19 @@ def test_set_any_trial_end_time():
     #     end_time=end_time
     # ) is False
 
+# @t_base()
+# def test_set_any_trial_end_time_assersion():
+#     storage = Storage(ws.path)
+
+#     trial_id = 0
+#     end_time = "10:00"
+
+#     with pytest.raises(AssertionError):
+#         storage = Storage(ws.path)
+#         storage.timestamp.set_any_trial_end_time(
+#             trial_id=trial_id,
+#             end_time=end_time
+#         )
 
 # get_any_trial_start_time
 @t_base()
@@ -72,6 +85,20 @@ def test_get_any_trial_start_time():
 
     assert storage.timestamp.get_any_trial_start_time(trial_id) == start_time
     assert storage.timestamp.get_any_trial_start_time(65535) is None
+
+    # if data.start_time == ''
+    trial_id = 1
+    start_time = ""
+    end_time = "10:00"
+    storage.timestamp.set_any_trial_start_time(
+        trial_id=trial_id,
+        start_time=start_time
+    )
+    storage.timestamp.set_any_trial_end_time(
+        trial_id=trial_id,
+        end_time=end_time
+    )
+    assert storage.timestamp.get_any_trial_start_time(trial_id) is None
 
 
 # get_any_trial_end_time

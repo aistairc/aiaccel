@@ -15,6 +15,13 @@ def test_set_any_trial_objective():
         objective=objective
     ) is None
 
+    # update
+    objective = 0.02
+    assert storage.result.set_any_trial_objective(
+        trial_id=trial_id,
+        objective=objective
+    ) is None
+
 
 # get_any_trial_objective
 @t_base()
@@ -73,6 +80,7 @@ def test_get_objectives():
 @t_base()
 def test_get_bests():
     storage = Storage(ws.path)
+    assert storage.result.get_bests('invalid') == []
 
     objectives = [1, -5, 3, 1.23]
     ids = range(len(objectives))

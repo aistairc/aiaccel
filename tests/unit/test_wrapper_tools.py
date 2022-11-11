@@ -57,3 +57,13 @@ class TestCeaterRunnerComand(BaseTest):
             start_time,
             end_time
         ) is None
+
+        assert save_result(
+            work_dir,
+            dict_lock,
+            'name',
+            {},
+            start_time,
+            end_time,
+            err_message='error'
+        ) is None

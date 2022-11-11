@@ -68,10 +68,6 @@ class AbciMaster(AbstractMaster):
         for line in stats:
             lines += line
 
-        # TODO: Confirm whether this line is needed?
-        if stats is None:
-            return
-
         if len(stats) < 1:
             return
 

@@ -14,6 +14,12 @@ def test_set_any_trial_error():
         error_message=message
     ) is None
 
+    # update
+    assert storage.error.set_any_trial_error(
+        trial_id=trial_id,
+        error_message=message
+    ) is None
+
 
 # get_any_trial_error
 @t_base()
@@ -35,6 +41,8 @@ def test_get_any_trial_error():
 @t_base()
 def test_get_error_trial_id():
     storage = Storage(ws.path)
+
+    assert storage.error.get_error_trial_id() == []
 
     ids = [0, 1, 2]
     mess = [

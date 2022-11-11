@@ -15,6 +15,13 @@ def test_set_any_trial_state():
             state=states[i]
         ) is None
 
+    # update
+    for i in range(len(states)):
+        assert storage.trial.set_any_trial_state(
+            trial_id=i,
+            state=states[i]
+        ) is None
+
 
 # test_get_any_trial_state
 @t_base()
