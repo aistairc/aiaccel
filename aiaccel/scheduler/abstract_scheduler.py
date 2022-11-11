@@ -65,6 +65,10 @@ class AbstractScheduler(AbstractModule):
         """
         runnings = self.storage.trial.get_running()
         result_names = self.storage.result.get_result_trial_id_list()
+
+        if result_names is None:
+            return
+
         for running in runnings:
             if running in result_names:
                 self.storage.trial.set_any_trial_state(trial_id=running, state='finished')

@@ -60,13 +60,13 @@ def get_type(parameter: dict) -> str:
         str: A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
             'ORDINAL'.
     """
-    if parameter['type'] == 'uniform_int':
+    if parameter['type'].lower() == 'uniform_int':
         return 'INT'
-    elif parameter['type'] == 'uniform_float':
+    elif parameter['type'].lower() == 'uniform_float':
         return 'FLOAT'
-    elif parameter['type'] == 'categorical':
+    elif parameter['type'].lower() == 'categorical':
         return 'CATEGORICAL'
-    elif parameter['type'] == 'ordinal':
+    elif parameter['type'].lower() == 'ordinal':
         return 'ORDINAL'
     else:
         return parameter['type']
@@ -151,13 +151,13 @@ class HyperParameter(object):
         """
         if initial and self.initial is not None:
             value = self.initial
-        elif self.type == 'INT':
+        elif self.type.lower() == 'int':
             value = np.random.randint(self.lower, self.upper)
-        elif self.type == 'FLOAT':
+        elif self.type.lower() == 'float':
             value = np.random.uniform(self.lower, self.upper)
-        elif self.type == 'CATEGORICAL':
+        elif self.type.lower() == 'categorical':
             value = np.random.choice(self.choices)
-        elif self.type == 'ORDINAL':
+        elif self.type.lower() == 'ordinal':
             value = np.random.choice(self.sequence)
         else:
             raise TypeError(

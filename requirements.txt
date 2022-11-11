@@ -22,6 +22,7 @@ pytest-tornasync
 pytest-trio
 pytest-twisted
 PyYAML==5.4
+undecorated
 scipy
 six==1.12.0
 sphinx

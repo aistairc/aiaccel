@@ -70,7 +70,7 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
         'type': p.type
     }
 
-    if p.type in ['INT', 'FLOAT']:
+    if p.type.lower() in ['int', 'float']:
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
@@ -90,13 +90,13 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
         else:
             new_param['parameters'] = [lower + i * step for i in range(0, n)]
 
-        if p.type == 'INT':
+        if p.type.lower() == 'int':
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
-    elif p.type == 'CATEGORICAL':
+    elif p.type.lower() == 'categorical':
         new_param['parameters'] = list(p.choices)
 
-    elif p.type == 'ORDINAL':
+    elif p.type.lower() == 'ordinal':
         new_param['parameters'] = list(p.sequence)
 
     else:
