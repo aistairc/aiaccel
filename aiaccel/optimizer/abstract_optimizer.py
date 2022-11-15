@@ -36,6 +36,9 @@ class AbstractOptimizer(AbstractModule):
             'Optimizer'
         )
 
+        self.hp_ready = 0
+        self.hp_running = 0
+        self.hp_finished = 0
         self.num_of_generated_parameter = 0
         self.all_parameter_generated = False
         self.params = load_parameter(self.config.hyperparameters.get())
@@ -113,6 +116,30 @@ class AbstractOptimizer(AbstractModule):
         """
         raise NotImplementedError
 
+    def generate_new_parameter(self) -> list:
+        if self.num_of_generated_parameter == 0:
+            new_params = self.cast(self.generate_initial_parameter())
+        else:
+            new_params = self.cast(self.generate_parameter())
+
+        return new_params
+
+    def get_pool_size(self) -> int:
+
+        hp_ready = self.storage.get_num_ready()
+        hp_running = self.storage.get_num_running()
+        hp_finished = self.storage.get_num_finished()
+
+        max_pool_size = self.config.num_node.get()
+        max_trial_number = self.config.trial_number.get()
+
+        n1 = max_pool_size - hp_running - hp_ready
+        n2 = max_trial_number - hp_finished - hp_running - hp_ready
+        pool_size = min(n1, n2)
+
+        return pool_size
+
+
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
@@ -132,30 +159,6 @@ class AbstractOptimizer(AbstractModule):
         self.logger.info('Optimizer delete alive file.')
         self.logger.info('Optimizer finished.')
 
-    def get_pool_size(self) -> int:
-
-        hp_ready = self.storage.get_num_ready()
-        hp_running = self.storage.get_num_running()
-        hp_finished = self.storage.get_num_finished()
-
-        max_pool_size = self.config.num_node.get()
-        max_trial_number = self.config.trial_number.get()
-
-        n1 = max_pool_size - hp_running - hp_ready
-        n2 = max_trial_number - hp_finished - hp_running - hp_ready
-        pool_size = min(n1, n2)
-
-        self.logger.info(
-            f'hp_ready: {hp_ready}, '
-            f'hp_running: {hp_running}, '
-            f'hp_finished: {hp_finished}, '
-            f'total: {max_trial_number}, '
-            f'pool_size: {pool_size}'
-        )
-
-        return pool_size
-
-
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
 
@@ -166,18 +169,27 @@ class AbstractOptimizer(AbstractModule):
         if self.check_finished():
             return False
 
-        max_pool_size = self.config.num_node.get()
-        hp_ready = self.storage.get_num_ready()
-        pool_size = self.get_pool_size()
+        self.get_each_state_count()
 
-        if (pool_size <= 0 or hp_ready >= max_pool_size):
+        _max_pool_size = self.config.num_node.get()
+        _max_trial_number = self.config.trial_number.get()
+
+        n1 = _max_pool_size - self.hp_running - self.hp_ready
+        n2 = _max_trial_number - self.hp_finished - self.hp_running - self.hp_ready
+        pool_size = min(n1, n2)
+
+        if (pool_size <= 0 or self.hp_ready >= _max_pool_size):
             return True
 
-        if self.num_of_generated_parameter == 0:
-            new_params = self.cast(self.generate_initial_parameter())
-        else:
-            new_params = self.cast(self.generate_parameter())
+        self.logger.info(
+            f'hp_ready: {self.hp_ready}, '
+            f'hp_running: {self.hp_running}, '
+            f'hp_finished: {self.hp_finished}, '
+            f'total: {_max_trial_number}, '
+            f'pool_size: {pool_size}'
+        )
 
+        new_params = self.generate_new_parameter()
         if new_params is not None and len(new_params) > 0:
             self.register_new_parameters(new_params)
 

@@ -573,7 +573,6 @@ class NelderMead(object):
         self._result.append(result)
 
     def search(self) -> Union[List[dict], None]:
-        print("search")
         """Proceed a search step. One search method does not increment the
             iteration. It increments when finalize method is called.
 
@@ -640,5 +639,5 @@ class NelderMead(object):
         else:
             self.logger.error(f'Invalid state: {self._state}')
             raise ValueError(f'Invalid state: {self._state}')
-        print(self._state)
+
         return self._executing
