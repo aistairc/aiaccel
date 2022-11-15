@@ -23,7 +23,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         self.parameter_pool = []
         self.order = []
 
-    def generate_initial_parameter(self):
+    def generate_initial_parameter(self) -> list:
         initial_parameter = super().generate_initial_parameter()
 
         if self.nelder_mead is not None:

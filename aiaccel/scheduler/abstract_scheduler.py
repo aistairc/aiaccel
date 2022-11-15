@@ -209,9 +209,7 @@ class AbstractScheduler(AbstractModule):
                 if th.get_state_name() == 'Scheduling':
                     self._serialize(th.trial_id)
                     th.schedule()
-                    self.logger.debug(
-                        f"trial id: {th.trial_id} has been scheduled."
-                    )
+                    self.logger.debug(f"trial id: {th.trial_id} has been scheduled.")
                     selected_threads.remove(th)
 
         for job in self.jobs:

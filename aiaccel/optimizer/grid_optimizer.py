@@ -174,7 +174,7 @@ class GridOptimizer(AbstractOptimizer):
 
         return parameter_index
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(self) -> list:
         """Generate parameters.
 
         Args:
