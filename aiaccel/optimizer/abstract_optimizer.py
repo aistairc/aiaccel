@@ -88,7 +88,7 @@ class AbstractOptimizer(AbstractModule):
                 None if any parameters are already created.
         """
 
-        sample = self.params.sample(initial=True)
+        sample = self.params.sample(initial=True, rng=self._rng)
         new_params = []
 
         for s in sample:

@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from aiaccel.config import Config
 from aiaccel.optimizer.tpe_optimizer import (TpeOptimizer, TPESamplerWrapper,
@@ -88,6 +89,7 @@ class TestTpeOptimizer(BaseTest):
         self.optimizer.create_study()
         self.optimizer.trial_id.initial(num=0)
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
+        self.optimizer._rng = np.random.RandomState(0)
         assert self.optimizer._serialize(trial_id=0) is None
 
     def test_deserialize(self):

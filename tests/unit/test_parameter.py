@@ -1,3 +1,5 @@
+import numpy as np
+
 import aiaccel
 from aiaccel.parameter import get_best_parameter, get_type, load_parameter
 from aiaccel.util.filesystem import create_yaml
@@ -131,7 +133,8 @@ class TestParameter(BaseTest):
             }
         ]
         hp = load_parameter(json_string)
-        p = hp.sample()
+        rng = np.random.RandomState(1)
+        p = hp.sample(rng=rng)
         assert len(p) == 4
 
         # json_string['parameters'].append({'name': 'e', 'type': 'invalid'})
@@ -139,7 +142,7 @@ class TestParameter(BaseTest):
         hp = load_parameter(json_string)
 
         try:
-            hp.sample()
+            hp.sample(rng=rng)
             assert False
         except TypeError:
             assert True

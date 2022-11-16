@@ -17,7 +17,7 @@ class RandomOptimizer(AbstractOptimizer):
         """
 
         new_params = []
-        sample = self.params.sample()
+        sample = self.params.sample(rng=self._rng)
 
         for s in sample:
             new_param = {

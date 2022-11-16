@@ -1,3 +1,4 @@
+import numpy as np
 from pathlib import Path
 from typing import List, Optional
 
@@ -19,12 +20,18 @@ class AbstractSchedulingAlgorithm(object):
         """
         self.config = config
 
-    def select_hp(self, hp_ready: List[Path], num: Optional[int] = 1) -> None:
+    def select_hp(
+        self,
+        hp_ready: List[Path],
+        num: Optional[int] = 1,
+        rng: np.random.RandomState = None
+    ) -> None:
         """Select multiple hyper parameters.
 
         Args:
             hp_ready (List[Path]): A list of path of ready hyper parameters.
             num (Optional[int]): A number to select hyper parameters.
+            rng (np.random.RandomState): A reference to a random generator.
 
         Returns:
             None

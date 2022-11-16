@@ -80,6 +80,8 @@ class AbstractModule(object):
         self.seed = self.config.randseed.get()
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
+        # TODO: Separate the generator if don't want to affect randomness each other.
+        self._rng = None
 
     def get_each_state_count(self) -> None:
         """Updates the number of files in hp(hyper parameter) directories.
@@ -254,7 +256,7 @@ class AbstractModule(object):
             None
         """
         self.logger.debug(f'set numpy random seed: {self.seed}')
-        np.random.seed(seed=self.seed)
+        self._rng = np.random.RandomState(self.seed)
 
     def get_native_random_state(self) -> tuple:
         """ get random state.
@@ -287,7 +289,7 @@ class AbstractModule(object):
         Returns:
             numpy.random.get_state (tuple)
         """
-        return np.random.get_state()
+        return self._rng.get_state()
 
     def set_numpy_random_state(self, state: tuple) -> None:
         """ get random state.
@@ -298,7 +300,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        np.random.set_state(state)
+        self._rng.set_state(state)
 
     def check_error(self) -> bool:
         """ Check to confirm if an error has occurred.
