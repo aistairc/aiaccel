@@ -46,7 +46,7 @@ class AbstractOptimizer(AbstractModule):
 
         self.storage.variable.register(
             process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'self_values', 'self_keys']
+            labels=['native_random_state', 'numpy_random_state', 'state']
         )
 
     def register_new_parameters(self, params: List[dict]) -> None:
@@ -189,19 +189,9 @@ class AbstractOptimizer(AbstractModule):
     def _serialize(self, trial_id: int) -> dict:
         """Serialize this module.
         Returns:
-            dict: serialize data.
+            None
         """
-
-        obj = self.__dict__.copy()
-        del obj['storage']
-        del obj['config']
-        del obj['options']
-
-        _values = list(obj.values())
-        _keys = list(obj.keys())
-
-        self.storage.variable.d['self_values'].set(trial_id, _values)
-        self.storage.variable.d['self_keys'].set(trial_id, _keys)
+        self.storage.variable.d['state'].set(trial_id, self)
 
         # random state
         self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
@@ -209,14 +199,10 @@ class AbstractOptimizer(AbstractModule):
 
     def _deserialize(self, trial_id: int) -> None:
         """ Deserialize this module.
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
         Returns:
             None
         """
-        _values = self.storage.variable.d['self_values'].get(trial_id)
-        _keys = self.storage.variable.d['self_keys'].get(trial_id)
-        self.__dict__.update(dict(zip(_keys, _values)))
+        self.__dict__.update(self.storage.variable.d['state'].get(trial_id).__dict__.copy())
 
         # random state
         self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
@@ -279,3 +265,10 @@ class AbstractOptimizer(AbstractModule):
             self.logger.error(error_message)
 
         return False
+
+    def __getstate__(self):
+        obj = self.__dict__.copy()
+        del obj['storage']
+        del obj['config']
+        del obj['options']
+        return obj
