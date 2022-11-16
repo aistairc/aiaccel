@@ -326,4 +326,6 @@ class AbstractScheduler(AbstractModule):
         obj = self.__dict__.copy()
         del obj['storage']
         del obj['jobs']
+        del obj['config']
+        del obj['options']
         return obj
