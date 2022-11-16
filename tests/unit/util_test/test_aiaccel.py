@@ -161,6 +161,9 @@ class TestRun(BaseTest):
             run = Run()
             with patch.object(run, "err", "has any error"):
                 assert run.trial_stop() is None
+            
+            with patch.object(run, "err", ""):
+                assert run.trial_stop() is None
 
     # test module: set_error
     def test_set_error(self):
@@ -177,6 +180,7 @@ class TestRun(BaseTest):
             run.index = '0001'
             run.set_error("test error")
             assert run.err == "test error"
+            assert run.error == "test error"
 
     # excute
     def test_excute(self):

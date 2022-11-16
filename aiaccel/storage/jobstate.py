@@ -99,7 +99,7 @@ class JobState(Abstract):
                 .all()
             )
 
-        if data is None:
+        if len(data) == 0:
             return [{'trial_id': None, 'jobstate': None}]
 
         jobstates = [

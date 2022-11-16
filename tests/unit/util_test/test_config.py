@@ -7,7 +7,8 @@ from aiaccel.config import (BaseConfig, Config, ConfileWrapper,
                             JsonOrYamlObjectConfig, load_config)
 
 from tests.base_test import BaseTest
-
+from unittest.mock import patch
+import sys
 
 class TestBaseConfig(object):
 
@@ -100,7 +101,10 @@ def test_load_config(config_json, config_yaml):
 
 
 def test_config(config_json):
-    config = Config(config_json)
+    config = Config(config_json, warn=False, format_check=False)
+    config = Config(config_json, warn=False, format_check=True)
+    config = Config(config_json, warn=True, format_check=False)
+    config = Config(config_json, warn=True, format_check=True)
     
     assert config.workspace.get() == "/tmp/work"
     assert config.job_command.get() == "python original_main.py"
@@ -221,3 +225,29 @@ def test_config(config_json):
             "initial": [ 4.03,  3.59, -2.06,  3.03,  3.10, -2.84, -4.57, -0.62, -1.14,  2.15, 1.92]
         }
     ]
+
+
+def test_config_set(config_json):
+    config = Config(config_json, warn=False, format_check=False)
+    assert config.workspace.set("aaa") is None
+    assert config.workspace.get() == "aaa"
+    with pytest.raises(TypeError):
+        assert config.workspace.set(123)
+
+def test_empty_if_error(config_json):
+    config = Config(config_json, warn=False, format_check=False)
+    config.workspace.set("aaa")
+    config.workspace.empty_if_error()
+
+    with patch.object(sys, 'exit', return_value=None):
+        config.workspace.set("")
+        config.workspace.empty_if_error()
+
+def test_value(config_json):
+    config = Config(config_json)
+    config.workspace.Value == "/tmp/work"
+
+
+def test_config_not_exists():
+    with pytest.raises(FileNotFoundError):
+        config = Config("?")

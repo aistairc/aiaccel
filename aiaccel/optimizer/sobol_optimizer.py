@@ -70,7 +70,7 @@ class SobolOptimizer(AbstractOptimizer):
 
         return new_params
 
-    def generate_initial_parameter(self) -> None:
+    def generate_initial_parameter(self) -> list:
         if super().generate_initial_parameter() is not None:
             self.logger.warning(
                 "Initial values cannot be specified for sobol."

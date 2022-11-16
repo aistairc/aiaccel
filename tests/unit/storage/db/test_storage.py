@@ -1,11 +1,13 @@
 from aiaccel.storage.storage import Storage
 from base import t_base, ws
-
+from unittest.mock import patch
 
 # set_any_trial_start_time
 @t_base()
 def test_current_max_trial_number():
     storage = Storage(ws.path)
+
+    assert storage.current_max_trial_number() is None
 
     states = ["test1", "test2", "test3"]
 
@@ -270,43 +272,26 @@ def test_get_hp_dict():
 
     assert storage.get_hp_dict(str(trial_id)) is None
 
-    storage.result.set_any_trial_objective(
-        trial_id=trial_id,
-        objective=objective
-    )
+    storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
 
-    storage.timestamp.set_any_trial_start_time(
-        trial_id=trial_id,
-        start_time=start_time
-    )
+    storage.timestamp.set_any_trial_start_time(trial_id=trial_id, start_time=start_time)
 
-    storage.timestamp.set_any_trial_end_time(
-        trial_id=trial_id,
-        end_time=end_time
-    )
+    storage.timestamp.set_any_trial_end_time(trial_id=trial_id, end_time=end_time)
 
     storage.hp.set_any_trial_param(
-        trial_id=trial_id,
-        param_name=param_name,
-        param_value=param_value,
-        param_type=param_type
+        trial_id=trial_id, param_name=param_name,
+        param_value=param_value, param_type=param_type
     )
 
-    storage.error.set_any_trial_error(
-        trial_id=trial_id,
-        error_message=error
-    )
+    storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
 
     exp = {
         'trial_id': str(trial_id),
-        'parameters': [
-            {
-                "parameter_name": param_name,
-                "type": param_type,
-                "value": param_value
-                
-            }
-        ],
+        'parameters': [{
+            "parameter_name": param_name,
+            "type": param_type,
+            "value": param_value
+        }],
         'result': objective,
         'start_time': start_time,
         'end_time': end_time,
@@ -317,6 +302,148 @@ def test_get_hp_dict():
 
     for key in d.keys():
         assert exp[key] == d[key]
+
+
+# get_hp_dict
+@t_base()
+def test_get_hp_dict_int():
+    storage = Storage(ws.path)
+
+    trial_id = 0
+    objective = 0.01
+    start_time = "00/00/00:00:00"
+    end_time = "11/11/11:11:11"
+    param_name = "x1"
+    param_value = 42
+    param_type = "int"
+    error = "aaaa"
+
+    assert storage.get_hp_dict(str(trial_id)) is None
+
+    storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
+
+    storage.timestamp.set_any_trial_start_time(trial_id=trial_id, start_time=start_time)
+
+    storage.timestamp.set_any_trial_end_time(trial_id=trial_id, end_time=end_time)
+
+    storage.hp.set_any_trial_param(
+        trial_id=trial_id, param_name=param_name,
+        param_value=param_value, param_type=param_type
+    )
+
+    storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
+
+    exp = {
+        'trial_id': str(trial_id),
+        'parameters': [{
+            "parameter_name": param_name,
+            "type": param_type,
+            "value": param_value
+        }],
+        'result': objective,
+        'start_time': start_time,
+        'end_time': end_time,
+        "error": error
+    }
+
+    d = storage.get_hp_dict(str(trial_id))
+
+    for key in d.keys():
+        assert exp[key] == d[key]
+
+
+@t_base()
+def test_get_hp_dict_categorical():
+    storage = Storage(ws.path)
+
+    trial_id = 0
+    objective = 0.01
+    start_time = "00/00/00:00:00"
+    end_time = "11/11/11:11:11"
+    param_name = "x1"
+    param_value = "red"
+    param_type = "categorical"
+    error = ""
+
+    assert storage.get_hp_dict(str(trial_id)) is None
+
+    storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
+
+    storage.timestamp.set_any_trial_start_time(trial_id=trial_id, start_time=start_time)
+
+    storage.timestamp.set_any_trial_end_time(trial_id=trial_id, end_time=end_time)
+
+    storage.hp.set_any_trial_param(
+        trial_id=trial_id, param_name=param_name,
+        param_value=param_value, param_type=param_type
+    )
+
+    storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
+
+    exp = {
+        'trial_id': str(trial_id),
+        'parameters': [{
+            "parameter_name": param_name,
+            "type": param_type,
+            "value": param_value
+        }],
+        'result': objective,
+        'start_time': start_time,
+        'end_time': end_time,
+    }
+
+    d = storage.get_hp_dict(str(trial_id))
+
+    for key in d.keys():
+        assert exp[key] == d[key]
+
+
+@t_base()
+def test_get_hp_dict_invalid_type():
+    storage = Storage(ws.path)
+
+    trial_id = 0
+    objective = 0.01
+    start_time = "00/00/00:00:00"
+    end_time = "11/11/11:11:11"
+    param_name = "x1"
+    param_value = "red"
+    param_type = "invalid"
+    error = ""
+
+    assert storage.get_hp_dict(str(trial_id)) is None
+
+    storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
+
+    storage.timestamp.set_any_trial_start_time(trial_id=trial_id, start_time=start_time)
+
+    storage.timestamp.set_any_trial_end_time(trial_id=trial_id, end_time=end_time)
+
+    storage.hp.set_any_trial_param(
+        trial_id=trial_id, param_name=param_name,
+        param_value=param_value, param_type=param_type
+    )
+
+    storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
+
+    exp = {
+        'trial_id': str(trial_id),
+        'parameters': [{
+            "parameter_name": param_name,
+            "type": param_type,
+            "value": param_value
+        }],
+        'result': objective,
+        'start_time': start_time,
+        'end_time': end_time,
+    }
+
+    d = storage.get_hp_dict(str(trial_id))
+
+    for key in d.keys():
+        assert exp[key] == d[key]
+
+
 
 
 # get_result_and_error
@@ -426,3 +553,35 @@ def test_get_best_trial():
 
     goal = "aaaaaaaaaa"
     assert storage.get_best_trial(goal) == (None, None)
+
+
+# delete_trial_data_after_this
+@t_base()
+def test_delete_trial_data_after_this():
+    storage = Storage(ws.path)
+    assert storage.delete_trial_data_after_this(trial_id=1) is None
+
+    def dummy_delete_trial(trial_id :int) -> None:
+        pass
+
+    with patch.object(storage, 'current_max_trial_number', return_value=10):
+        with patch.object(storage, 'delete_trial', dummy_delete_trial):
+            assert storage.delete_trial_data_after_this(trial_id=1) is None
+
+
+# delete_trial
+@t_base()
+def test_delete_trial():
+    storage = Storage(ws.path)
+    assert storage.delete_trial(trial_id=1) is None
+
+
+# rollback_to_ready
+@t_base()
+def test_rollback_to_ready():
+    storage = Storage(ws.path)
+
+    assert storage.rollback_to_ready(trial_id=1) is None
+
+    with patch.object(storage.hp, 'get_any_trial_params', return_value=object):
+        assert storage.rollback_to_ready(trial_id=1) is None

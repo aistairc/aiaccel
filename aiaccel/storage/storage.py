@@ -151,6 +151,8 @@ class Storage:
                 value = int(float(d.param_value))
             elif dtype.lower() == "categorical":
                 value == str(d.param_value)
+            else:  # pragma: no cover
+                pass  # not reached
 
             hp.append(
                 {
@@ -171,7 +173,7 @@ class Storage:
         content['start_time'] = start_time
         content['end_time'] = end_time
 
-        if error is not None:
+        if error is not None and len(error) > 0:
             content['error'] = error
 
         return content
@@ -240,8 +242,9 @@ class Storage:
 
     def delete_trial_data_after_this(self, trial_id: int) -> None:
         max_trial_id = self.current_max_trial_number()
-        for i in range(trial_id + 1, max_trial_id + 1):
-            self.delete_trial(i)
+        if max_trial_id is not None:
+            for i in range(trial_id + 1, max_trial_id + 1):
+                self.delete_trial(i)
 
     def delete_trial(self, trial_id: int) -> None:
         self.error.delete_any_trial_error(trial_id)

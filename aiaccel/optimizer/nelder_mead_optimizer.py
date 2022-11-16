@@ -226,9 +226,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
         for param in self.params.get_parameter_list():
             i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
 
-            if param.type == 'FLOAT':
+            if param.type.lower() == 'float':
                 value = float(pool_p['parameters'][i]['value'])
-            elif param.type == 'INT':
+            elif param.type.lower() == 'int':
                 value = int(pool_p['parameters'][i]['value'])
             else:
                 raise TypeError(

@@ -65,6 +65,10 @@ class AbstractScheduler(AbstractModule):
         """
         runnings = self.storage.trial.get_running()
         result_names = self.storage.result.get_result_trial_id_list()
+
+        if result_names is None:
+            return
+
         for running in runnings:
             if running in result_names:
                 self.storage.trial.set_any_trial_state(trial_id=running, state='finished')
@@ -316,9 +320,6 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] is not None and
             self.options['resume'] > 0
         ):
-            self.storage.rollback_to_ready(self.options['resume'])
-            self.storage.delete_trial_data_after_this(self.options['resume'])
-            self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])
 
     def __getstate__(self):

@@ -172,19 +172,19 @@ def create_distributions(
     distributions = {}
 
     for p in parameters.get_parameter_list():
-        if p.type == 'FLOAT':
+        if p.type.lower() == 'float':
             if p.log:
                 distributions[p.name] = optuna.distributions.LogUniformDistribution(p.lower, p.upper)
             else:
                 distributions[p.name] = optuna.distributions.UniformDistribution(p.lower, p.upper)
 
-        elif p.type == 'INT':
+        elif p.type.lower() == 'int':
             if p.log:
                 distributions[p.name] = optuna.distributions.IntLogUniformDistribution(p.lower, p.upper)
             else:
                 distributions[p.name] = optuna.distributions.IntUniformDistribution(p.lower, p.upper)
 
-        elif p.type == 'CATEGORICAL':
+        elif p.type.lower() == 'categorical':
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
         else:
             raise 'Unsupported parameter type'

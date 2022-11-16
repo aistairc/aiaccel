@@ -78,7 +78,7 @@ class Error(Abstract):
                 .all()
             )
 
-        if data is None:
+        if data is None or len(data) == 0:
             return []
 
         return [d.trial_id for d in data]

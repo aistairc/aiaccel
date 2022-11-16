@@ -91,6 +91,7 @@ class TimeStamp(Abstract):
             return None
         if data.start_time == '':
             return None
+
         return data.start_time
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -115,6 +116,7 @@ class TimeStamp(Abstract):
             return None
         if data.end_time == '':
             return None
+
         return data.end_time
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
