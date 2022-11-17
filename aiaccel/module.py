@@ -81,6 +81,11 @@ class AbstractModule(object):
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
 
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=['native_random_state', 'numpy_random_state', 'state']
+        )
+
     def get_each_state_count(self) -> None:
         """Updates the number of files in hp(hyper parameter) directories.
 
@@ -207,30 +212,25 @@ class AbstractModule(object):
 
     def _serialize(self, trial_id: int) -> None:
         """Serialize this module.
-
         Returns:
             None
-
-        Raises:
-            NotImplementedError: Causes when the inherited class does not
-                implement.
         """
-        raise NotImplementedError
+        self.storage.variable.d['state'].set(trial_id, self)
+
+        # random state
+        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
+        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
 
     def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-
+        """ Deserialize this module.
         Returns:
             None
-
-        Raises:
-            NotImplementedError: Causes when the inherited class does not
-                implement.
         """
-        raise NotImplementedError
+        self.__dict__.update(self.storage.variable.d['state'].get(trial_id).__dict__.copy())
+
+        # random state
+        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
+        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
     def set_native_random_seed(self) -> None:
         """ set any random seed.
@@ -326,3 +326,10 @@ class AbstractModule(object):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
+
+    def __getstate__(self):
+        obj = self.__dict__.copy()
+        del obj['storage']
+        del obj['config']
+        del obj['options']
+        return obj

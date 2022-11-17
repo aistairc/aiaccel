@@ -180,21 +180,14 @@ class TestAbstractModule(BaseTest):
             assert True
 
     def test_serialize(self):
-        try:
-            self.module._serialize(trial_id=0)
-            assert False
-        except NotImplementedError:
-            assert True
+        assert self.module._serialize(0) is None
 
     def test_deserialize(self):
-        try:
-            self.module._deserialize({})
-            assert False
-        except NotImplementedError:
-            assert True
+        self.module._serialize(1)
+        assert self.module._deserialize(1) is None
 
     def test_check_error(self):
-        assert self.module.check_error() is True 
+        assert self.module.check_error() is True
 
     def test_resume(self):
         options = {
@@ -208,5 +201,5 @@ class TestAbstractModule(BaseTest):
         assert self.module.resume() is None
 
         self.module.options['resume'] = 1
-        with pytest.raises(NotImplementedError):
-            self.module.resume()
+        self.module._serialize(1)
+        assert self.module.resume() is None
