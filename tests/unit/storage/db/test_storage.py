@@ -286,7 +286,7 @@ def test_get_hp_dict():
     storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
 
     exp = {
-        'trial_id': str(trial_id),
+        'trial_id': trial_id,
         'parameters': [{
             "parameter_name": param_name,
             "type": param_type,
@@ -334,7 +334,7 @@ def test_get_hp_dict_int():
     storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
 
     exp = {
-        'trial_id': str(trial_id),
+        'trial_id': trial_id,
         'parameters': [{
             "parameter_name": param_name,
             "type": param_type,
@@ -381,7 +381,7 @@ def test_get_hp_dict_categorical():
     storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
 
     exp = {
-        'trial_id': str(trial_id),
+        'trial_id': trial_id,
         'parameters': [{
             "parameter_name": param_name,
             "type": param_type,
@@ -427,7 +427,7 @@ def test_get_hp_dict_invalid_type():
     storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
 
     exp = {
-        'trial_id': str(trial_id),
+        'trial_id': trial_id,
         'parameters': [{
             "parameter_name": param_name,
             "type": param_type,
@@ -511,7 +511,7 @@ def test_get_best_trial_dict():
     )
 
     exp = {
-        'trial_id': str(trial_id),
+        'trial_id': trial_id,
         'parameters': [
             {
                 "parameter_name": param_name,

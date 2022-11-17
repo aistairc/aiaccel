@@ -139,7 +139,6 @@ class AbstractOptimizer(AbstractModule):
 
         return pool_size
 
-
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 

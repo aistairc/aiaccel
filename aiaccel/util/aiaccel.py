@@ -31,10 +31,12 @@ logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
 
 parser = ArgumentParser()
-parser.add_argument('--config', '-c', type=str, default="config.yml")
+parser.add_argument('--config', type=str, default="")
+parser.add_argument('--trial_id', type=str, required=False)
 parser.add_argument('--resume', type=int, default=None)
 parser.add_argument('--clean', nargs='?', const=True, default=False)
-args = parser.parse_args()
+args = parser.parse_known_args()[0]
+
 
 SUPPORTED_TYPES = [
     int,
@@ -248,13 +250,7 @@ class Abstruct:
     """
 
     def __init__(self) -> None:
-
-        parser = ArgumentParser()
-        parser.add_argument('-i', '--trial_id', type=str, required=False)
-        parser.add_argument('-c', '--config', type=str, required=False)
-        parser.add_argument('--resume', type=int, default=None)
-
-        self.args = vars(parser.parse_known_args()[0])
+        self.args = vars(args)
         self.trial_id = self.args["trial_id"]
         self.config_path = pathlib.Path(self.args["config"])
         self.config = Config(self.config_path)
@@ -297,7 +293,7 @@ class Abstruct:
         Return:
             Objective value.
         """
-        
+
         raise NotImplementedError
 
     def report(

@@ -23,14 +23,9 @@ parser.add_argument('--resume', type=int, default=None)
 parser.add_argument('--clean', nargs='?', const=True, default=False)
 args = parser.parse_args()
 
-import threading
-
 logger = getLogger(__name__)
 logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
-
-from aiaccel.wrapper_tools import create_runner_command
-# from aiaccel.util.process import OutputHandler, exec_runner, kill_process
 
 
 def local(config: Config):
@@ -42,6 +37,7 @@ def local(config: Config):
         commands.append('--resume')
         commands.append(str(args.resume))
     subprocess.run(commands)
+
 
 def abci(config: Config):
     Master = create_master(config.config_path)
