@@ -270,7 +270,7 @@ def test_get_hp_dict():
     param_type = "float"
     error = "aaaa"
 
-    assert storage.get_hp_dict(str(trial_id)) is None
+    assert storage.get_hp_dict(trial_id) is None
 
     storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
 
@@ -298,7 +298,7 @@ def test_get_hp_dict():
         "error": error
     }
 
-    d = storage.get_hp_dict(str(trial_id))
+    d = storage.get_hp_dict(trial_id)
 
     for key in d.keys():
         assert exp[key] == d[key]
@@ -318,7 +318,7 @@ def test_get_hp_dict_int():
     param_type = "int"
     error = "aaaa"
 
-    assert storage.get_hp_dict(str(trial_id)) is None
+    assert storage.get_hp_dict(trial_id) is None
 
     storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
 
@@ -346,7 +346,7 @@ def test_get_hp_dict_int():
         "error": error
     }
 
-    d = storage.get_hp_dict(str(trial_id))
+    d = storage.get_hp_dict(trial_id)
 
     for key in d.keys():
         assert exp[key] == d[key]
@@ -365,7 +365,7 @@ def test_get_hp_dict_categorical():
     param_type = "categorical"
     error = ""
 
-    assert storage.get_hp_dict(str(trial_id)) is None
+    assert storage.get_hp_dict(trial_id) is None
 
     storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
 
@@ -392,7 +392,7 @@ def test_get_hp_dict_categorical():
         'end_time': end_time,
     }
 
-    d = storage.get_hp_dict(str(trial_id))
+    d = storage.get_hp_dict(trial_id)
 
     for key in d.keys():
         assert exp[key] == d[key]
@@ -411,7 +411,7 @@ def test_get_hp_dict_invalid_type():
     param_type = "invalid"
     error = ""
 
-    assert storage.get_hp_dict(str(trial_id)) is None
+    assert storage.get_hp_dict(trial_id) is None
 
     storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
 
@@ -438,7 +438,7 @@ def test_get_hp_dict_invalid_type():
         'end_time': end_time,
     }
 
-    d = storage.get_hp_dict(str(trial_id))
+    d = storage.get_hp_dict(trial_id)
 
     for key in d.keys():
         assert exp[key] == d[key]

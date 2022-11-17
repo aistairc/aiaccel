@@ -1,17 +1,40 @@
-import argparse
-import logging
 import pathlib
 import subprocess
 from functools import singledispatchmethod
 from typing import Any
 
-import numpy as np
-
 import aiaccel
+import numpy as np
+import os
+import pathlib
+import subprocess
+import threading
+
 from aiaccel.config import Config
-from aiaccel.parameter import load_parameter
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
+
+from argparse import ArgumentParser
+from functools import singledispatchmethod
+from logging import StreamHandler, getLogger
+from typing import Union
+
+from aiaccel.config import Config
+from aiaccel.optimizer.create import create_optimizer
+from aiaccel.storage.storage import Storage
+from aiaccel.util.time_tools import get_time_now
+from aiaccel.util.filesystem import create_yaml
+
+
+logger = getLogger(__name__)
+logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+logger.addHandler(StreamHandler())
+
+parser = ArgumentParser()
+parser.add_argument('--config', '-c', type=str, default="config.yml")
+parser.add_argument('--resume', type=int, default=None)
+parser.add_argument('--clean', nargs='?', const=True, default=False)
+args = parser.parse_args()
 
 SUPPORTED_TYPES = [
     int,
@@ -219,149 +242,123 @@ def report(objective_y=None, objective_err=None):
     WrapperInterface().out(objective_y, objective_err)
 
 
-class Run:
+class Abstruct:
     """
         It is assumed to refer to the user program
     """
 
     def __init__(self) -> None:
 
-        parser = argparse.ArgumentParser()
+        parser = ArgumentParser()
         parser.add_argument('-i', '--trial_id', type=str, required=False)
         parser.add_argument('-c', '--config', type=str, required=False)
+        parser.add_argument('--resume', type=int, default=None)
 
         self.args = vars(parser.parse_known_args()[0])
-
-        self.xs = {}
-        self.ys = None
-        self.err = ""
-
         self.trial_id = self.args["trial_id"]
-        self.config = None
-        self.storage = None
-        if self.args["config"] is not None:
-            self.config_path = pathlib.Path(self.args["config"])
-            self.config = Config(self.config_path)
-
-            # create paths
-            # self.workspace = pathlib.Path(self.config.workspace.get())
-            self.workspace = pathlib.Path(self.config.workspace.get()).resolve()
-            self.dict_lock = self.workspace / aiaccel.dict_lock
-
-            # create database
-            self.storage = Storage(self.workspace)
-
-        parameters_config = load_parameter(self.config.hyperparameters.get())
-        for p in parameters_config.get_parameter_list():
-            type_func = str
-            if p.type == "FLOAT":
-                type_func = float
-            elif p.type == "INT":
-                type_func = int
-            # TODO Fix
-            # elif p.type == "ORDINAL":
-            #     type_func = float
-            parser.add_argument(f"--{p.name}", type=type_func)
-        # reparse arguments and load parameters
-        self.args = vars(parser.parse_args())
-        for p in parameters_config.get_parameter_list():
-            self.xs[p.name] = self.args[p.name]
+        self.config_path = pathlib.Path(self.args["config"])
+        self.config = Config(self.config_path)
+        self.workspace = pathlib.Path(self.config.workspace.get()).resolve()
+        self.storage = Storage(self.workspace)
 
         # logger
         log_dir = self.workspace / "log"
         self.log_path = log_dir / f"job_{self.trial_id}.log"
         if not log_dir.exists():
             log_dir.mkdir(parents=True)
-        logging.basicConfig(
-            filename=self.log_path,
-            level=logging.DEBUG
-        )
-
-        # t variables
-        self.start_time = None
-        self.end_time = None
 
         self.com = WrapperInterface()
+        self.max_trial_number = self.config.trial_number.get()
+        self.num_node = self.config.num_node.get()
 
-    # @property
-    # def trial_id(self) -> str:
-    #     """ Get tha trial_id of this trial.
+    def get_any_trial_xs(self, trial_id: int) -> dict:
+        params = self.optimizer.storage.hp.get_any_trial_params(trial_id=trial_id)
+        if params is None:
+            return
 
-    #     Returns:
-    #         index (str): trial_id of this trial.
-    #     """
-    #     return self.index
+        xs = {}
+        for param in params:
+            cast = eval(param.param_type.lower())
+            xs[param.param_name] = cast(param.param_value)
 
-    @property
-    def parameters(self) -> dict:
-        """ Get parameters dictionary.
+        return xs
 
-        Returns
-            xs (dict): Parameters dictionary.
-        """
-        return self.xs
-
-    @property
-    def objective(self) -> Any:
-        """ Get the objective value.
-
-        Returns
-            y (Any): Objective value.
-        """
-        return self.ys
-
-    @property
-    def error(self):
-        """ Get the error message from user program.
+    def generate_commands(self) -> list:
+        """ Generate execution command of user program.
 
         Returns:
-            str: error message.
+            list: execution command.
         """
-        return self.err
+        raise NotImplementedError
 
-    def exist_error(self) -> bool:
-        """ Return True if exist error else False.
+    def execute(self, func: callable) -> None:
+        """ Execution the target function.
 
-        Returns:
-            bool:   True : There is an error.
-                    False: There is no error.
+        Return:
+            Objective value.
         """
-        if self.err is None:
-            return False
-        if self.err != "":
-            return True
-        return False
+        
+        raise NotImplementedError
 
-    def trial_stop(self) -> None:
-        """ Enforce an error to stop this trial.
+    def report(
+        self,
+        trial_id: int,
+        xs: dict,
+        y: any,
+        err: str,
+        start_time: str,
+        end_time: str
+    ) -> None:
+        """ Write the result in yaml format to the result directory.
         """
-        if self.exist_error():
-            pass
-        else:
-            self.set_error("Faital error")
-        self.report(float('nan'))
+        logger.info(f"{trial_id}, {xs, y}, {err}, {start_time}, {end_time}")
 
-    def set_error(self, mess: str) -> None:
-        """ Set any error message.
+        self.optimizer.storage.result.set_any_trial_objective(
+            trial_id=trial_id,
+            objective=y
+        )
+        self.optimizer.storage.timestamp.set_any_trial_start_time(
+            trial_id=trial_id,
+            start_time=start_time
+        )
+        self.optimizer.storage.timestamp.set_any_trial_end_time(
+            trial_id=trial_id,
+            end_time=end_time
+        )
+        if err != "":
+            self.optimizer.storage.error.set_any_trial_error(
+                trial_id=trial_id,
+                error_message=err
+            )
+
+    def execute_and_report(self) -> None:
         """
-        self.err = mess
+        Examples:
+            def obj(p)
+                y = p["x1"]
+                return y
 
-    def _generate_commands(self, command: str, auto_args) -> list:
+            run = aiaccel.Run()
+            run.execute_and_report(obj)
+        """
+
+        raise NotImplementedError
+
+
+class Abci(Abstruct):
+    def generate_commands(self, command: str, xs: list) -> list:
         """ Generate execution command of user program.
 
         Returns:
             list: execution command.
         """
         commands = command.split(" ")
-        if not auto_args:
-            return commands
-
         commands.append(f"--config={str(self.config_path)}")
         commands.append(f"--trial_id={self.trial_id}")
 
-        for key in self.xs:
+        for key in xs:
             name = key
-            value = self.xs[key]
+            value = xs[key]
             if value is not None:
                 command = f"--{name}={value}"
                 commands.append(command)
@@ -369,98 +366,57 @@ class Run:
         return commands
 
     @singledispatchmethod
-    def execute(self, func: callable):
+    def execute(self, func: callable, trial_id: int) -> tuple:
         """ Execution the target function.
 
         Return:
             Objective value.
         """
-        self.start_time = get_time_now()
+
+        xs = self.get_any_trial_xs(trial_id)
+        y = None
+        err = ""
 
         try:
-            self.ys = func(self.xs)
+            y = func(xs)
         except BaseException as e:
-            self.err = str(e)
+            err = str(e)
         finally:
-            self.end_time = get_time_now()
-            self.com.out(objective_y=self.ys, objective_err=self.err)
+            self.com.out(objective_y=y, objective_err=err)
 
-        # stdout
-
-        return self.ys
+        return xs, y, err
 
     @execute.register
-    def _(self, command: str, auto_args: bool = True):
+    def _(self, command: str, trial_id: int):
         """ Execution the user program.
 
         Returns:
             ys (list): This is a list of the return values of the user program.
         """
 
+        xs = self.get_any_trial_xs(trial_id)
+        err = ""
+        y = None
+
         # Make running command of user program
         if command == "":
             self.set_error("Invalid execute command")
-            logging.debug(f"execute(err): {self.err}")
-            self.ys = [float("nan")]
-            return self.ys
+            y = [float("nan")]
+            return xs, y, err
 
-        commands = self._generate_commands(command, auto_args)
-        logging.debug(f"command: {commands}")
-
-        self.start_time = get_time_now()
-        logging.debug(f"start time: {self.start_time}")
+        commands = self.generate_commands(command, xs)
 
         output = subprocess.run(
             commands,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+
         ys, err = self.com.get_data(output)
-        self.ys = float(ys[0])  # todo: do refactoring
-        self.err = ("\n").join(err)
-        logging.debug(f"execute(out): {self.ys}")
-        logging.debug(f"execute(err): {self.err}")
+        y = float(ys[0])  # todo: do refactoring
+        err = ("\n").join(err)
 
-        self.end_time = get_time_now()
-        logging.debug(f"end time: {self.end_time}")
-
-        return self.ys
-
-    def report(self, y):
-        """ Write the result in yaml format to the result directory.
-
-        Args:
-            y (Union): Objective value. (return values of the user program.)
-        """
-        if (
-            self.args["trial_id"] is None or
-            self.args["config"] is None
-        ):
-            return
-
-        err = self.err
-        if not type(y) in SUPPORTED_TYPES:
-            y = float("nan")
-            err = f"user function returns invalid type value, {type(y)}({y})."
-
-        self.storage.result.set_any_trial_objective(
-            trial_id=int(self.trial_id),
-            objective=y
-        )
-        self.storage.timestamp.set_any_trial_start_time(
-            trial_id=int(self.trial_id),
-            start_time=self.start_time
-        )
-        self.storage.timestamp.set_any_trial_end_time(
-            trial_id=int(self.trial_id),
-            end_time=self.end_time
-        )
-
-        if err != "":
-            self.storage.error.set_any_trial_error(
-                trial_id=int(self.trial_id),
-                error_message=err
-            )
+        return xs, y, err
 
     @singledispatchmethod
     def execute_and_report(self, func: callable):
@@ -473,14 +429,159 @@ class Run:
             run = aiaccel.Run()
             run.execute_and_report(obj)
         """
-        self.report(self.execute(func))
+        start_time = get_time_now()
+        xs, y, err = self.execute(func, self.trial_id)
+        end_time = get_time_now()
+
+        self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, auto_args: bool = True):
+    def _(self, command: str):
         """
         Examples:
             run = aiaccel.Run()
             p = run.parameters
             run.execute_and_report(f"echo {p['x1']}", False)
         """
-        self.report(self.execute(command, auto_args))
+        start_time = get_time_now()
+        xs, y, err = self.execute(command, self.trial_id)
+        end_time = get_time_now()
+
+        self.report(self.trial_id, xs, y, err, start_time, end_time)
+
+
+class Local(Abstruct):
+    def __init__(self):
+        super().__init__()
+        Optimizer = create_optimizer(self.args['config'])
+        self.optimizer = Optimizer(self.args)
+
+    @singledispatchmethod
+    def call_func(self, func: callable, xs: dict):
+        y = None
+        err = ""
+
+        try:
+            y = func(xs)
+        except Exception as e:
+            err = e
+
+        return y, err
+
+    @call_func.register
+    def _(self, commands: list):
+
+        output = subprocess.run(
+            commands,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        ys, err = self.com.get_data(output)
+        y = float(ys[0])  # todo: do refactoring
+        err = ("\n").join(err)
+
+        return y, err
+
+    def generate_commands(self, command: str, xs: list) -> list:
+        """ Generate execution command of user program.
+
+        Returns:
+            list: execution command.
+        """
+        commands = command.split(" ")
+        commands.append(f"--config={str(self.config_path)}")
+
+        for key in xs:
+            name = key
+            value = xs[key]
+            if value is not None:
+                command = f"--{name}={value}"
+                commands.append(command)
+
+        return commands
+
+    @singledispatchmethod
+    def execute(self, func: callable, trial_id: int) -> tuple:
+        xs = self.get_any_trial_xs(trial_id)
+        y, err = self.call_func(func, xs)
+
+        return xs, y, err
+
+    @execute.register
+    def _(self, command: str, trial_id: int):
+        xs = self.get_any_trial_xs(trial_id)
+        commands = self.generate_commands(command, xs)
+        y, err = self.call_func(commands)
+
+        return xs, y, err
+
+    def run_once(self, objective: Union[callable, str], trial_id: int):
+        self.optimizer.storage.trial.set_any_trial_state(
+            trial_id=trial_id,
+            state='running'
+        )
+
+        start_time = get_time_now()
+        xs, y, err = self.execute(objective, trial_id)
+        end_time = get_time_now()
+
+        self.optimizer.storage.trial.set_any_trial_state(
+            trial_id=trial_id,
+            state='finished'
+        )
+
+        self.report(trial_id, xs, y, err, start_time, end_time)
+        self.create_result_file(trial_id, y, err)
+
+    def execute_and_report(self, objective: Union[callable, str]):
+        self.optimizer.pre_process()
+
+        while self.optimizer.check_finished() is False:
+            pool_size = self.optimizer.get_pool_size()
+            hp_ready = self.optimizer.storage.get_num_ready()
+
+            if (pool_size <= 0 or hp_ready >= self.num_node):
+                continue
+
+            for _ in range(pool_size):
+                new_params = self.optimizer.generate_new_parameter()
+                if new_params is not None and len(new_params) > 0:
+                    self.optimizer.register_new_parameters(new_params)
+                    self.optimizer.trial_id.increment()
+                    self.optimizer._serialize(self.optimizer.trial_id.integer)
+                else:
+                    continue
+
+            trial_ids = self.optimizer.storage.trial.get_any_state_list('ready')
+            if trial_ids is None:
+                continue
+
+            for trial_id in trial_ids:
+                if self.num_node > 1:
+                    th = threading.Thread(target=self.run_once, args=(objective, trial_id))
+                    th.start()
+                else:
+                    self.run_once(objective, trial_id)
+
+    def create_result_file(self, trial_id: int, y: any, err: str) -> None:
+        content = self.optimizer.storage.get_hp_dict(trial_id)
+        content['result'] = y
+
+        if err is not None:
+            content['error'] = err
+
+        result_file_path = self.workspace / aiaccel.dict_result / (str(trial_id) + '.hp')
+        create_yaml(result_file_path, content)
+
+
+class Run:
+    def __new__(cls):
+        config = Config(args.config)
+        resource_type = config.resource_type.get()
+        if resource_type.lower() == 'abci':
+            logger.info("abci")
+            return Abci()
+        elif resource_type.lower() == 'local':
+            logger.info("local")
+            return Local()

@@ -727,7 +727,7 @@ class Model(object):
         with obj.lock:
             result = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
             error = obj.storage.error.get_any_trial_error(trial_id=obj.trial_id)
-            content = obj.storage.get_hp_dict(trial_id_str=obj.trial_id_str)
+            content = obj.storage.get_hp_dict(trial_id_str=obj.trial_id)
             content['result'] = result
 
             if error is not None:

@@ -38,7 +38,7 @@ class CreationReport:
             return
 
         # write header
-        example = self.storage.get_hp_dict(self.get_zero_padding_trial_id(finished[0]))
+        example = self.storage.get_hp_dict(finished[0])
         header.append('trial_id')
         for param in example['parameters']:
             header.append(param['parameter_name'])
@@ -50,8 +50,7 @@ class CreationReport:
                 writer.writerow(header)
 
         # write result data
-        trial_id_str = [self.get_zero_padding_trial_id(trial_id) for trial_id in finished]
-        results = [self.storage.get_hp_dict(n) for n in trial_id_str]
+        results = [self.storage.get_hp_dict(trial_id) for trial_id in finished]
 
         for contents in results:
             row = []
