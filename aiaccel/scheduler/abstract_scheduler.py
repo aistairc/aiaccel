@@ -51,11 +51,6 @@ class AbstractScheduler(AbstractModule):
         self.algorithm = None
         self.sleep_time = self.config.sleep_time.get()
 
-        self.storage.variable.register(
-            process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'loop_count']
-        )
-
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
             and running files are in running directory.
@@ -223,24 +218,6 @@ class AbstractScheduler(AbstractModule):
 
         return True
 
-    def _serialize(self, trial_id) -> None:
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
-        self.storage.variable.d['loop_count'].set(trial_id, self.loop_count)
-
-    def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-
-        Returns:
-            None
-        """
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
-        self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
-
     def parse_trial_id(self, command: str) -> str:
         """Parse a command string and extract an unique name.
 
@@ -315,3 +292,8 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
+
+    def __getstate__(self):
+        obj = super().__getstate__()
+        del obj['jobs']
+        return obj
