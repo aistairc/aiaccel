@@ -309,20 +309,20 @@ class Abstruct:
         """
         logger.info(f"{trial_id}, {xs, y}, {err}, {start_time}, {end_time}")
 
-        self.optimizer.storage.result.set_any_trial_objective(
+        self.storage.result.set_any_trial_objective(
             trial_id=trial_id,
             objective=y
         )
-        self.optimizer.storage.timestamp.set_any_trial_start_time(
+        self.storage.timestamp.set_any_trial_start_time(
             trial_id=trial_id,
             start_time=start_time
         )
-        self.optimizer.storage.timestamp.set_any_trial_end_time(
+        self.storage.timestamp.set_any_trial_end_time(
             trial_id=trial_id,
             end_time=end_time
         )
         if err != "":
-            self.optimizer.storage.error.set_any_trial_error(
+            self.storage.error.set_any_trial_error(
                 trial_id=trial_id,
                 error_message=err
             )
