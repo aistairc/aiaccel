@@ -46,7 +46,7 @@ class AbstractOptimizer(AbstractModule):
 
         self.storage.variable.register(
             process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'self_values', 'self_keys']
+            labels=['numpy_random_state', 'self_values', 'self_keys']
         )
 
     def register_new_parameters(self, params: List[dict]) -> None:
@@ -122,7 +122,6 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
 
@@ -202,7 +201,6 @@ class AbstractOptimizer(AbstractModule):
         self.storage.variable.d['self_keys'].set(trial_id, _keys)
 
         # random state
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
         self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
 
     def _deserialize(self, trial_id: int) -> None:
@@ -217,7 +215,6 @@ class AbstractOptimizer(AbstractModule):
         self.__dict__.update(dict(zip(_keys, _values)))
 
         # random state
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
         self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
     def resume(self) -> None:

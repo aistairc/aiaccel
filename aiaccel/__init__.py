@@ -32,7 +32,6 @@ from .common import extension_verification
 from .common import file_configspace
 from .common import file_final_result
 from .common import file_hyperparameter
-from .common import file_native_random
 from .common import file_numpy_random
 from .common import file_numpy_random_extension
 from .common import file_hp_count
@@ -91,7 +90,6 @@ __all__ = [
     file_configspace,
     file_final_result,
     file_hyperparameter,
-    file_native_random,
     file_numpy_random,
     file_numpy_random_extension,
     file_hp_count,

@@ -81,7 +81,6 @@ class SerializeTable(Base):
     trial_id = Column(Integer, nullable=False)
     process_name = Column(String(length=128), nullable=False)
     optimization_variable = Column(PickleType, nullable=False)
-    native_random_state = Column(PickleType, nullable=False)
     numpy_random_state = Column(PickleType, nullable=False)
 
 
@@ -90,7 +89,6 @@ class RandomStateTable(Base):
     data_id = Column(Integer, primary_key=True)
     trial_id = Column(Integer, nullable=False)
     process_name = Column(String(length=128), nullable=False)
-    native_random_state = Column(PickleType, nullable=False)
     numpy_random_state = Column(PickleType, nullable=False)
 
 

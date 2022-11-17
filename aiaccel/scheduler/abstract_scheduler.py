@@ -53,7 +53,7 @@ class AbstractScheduler(AbstractModule):
 
         self.storage.variable.register(
             process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'loop_count']
+            labels=['numpy_random_state', 'loop_count']
         )
 
     def change_state_finished_trials(self) -> None:
@@ -139,7 +139,6 @@ class AbstractScheduler(AbstractModule):
             None
         """
         self.trial_id.initial(num=0)
-        self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
 
@@ -227,7 +226,6 @@ class AbstractScheduler(AbstractModule):
         return True
 
     def _serialize(self, trial_id) -> None:
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
         self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
         self.storage.variable.d['loop_count'].set(trial_id, self.loop_count)
 
@@ -240,7 +238,6 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
         self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
         self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
 

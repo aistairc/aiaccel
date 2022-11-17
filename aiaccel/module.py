@@ -1,5 +1,4 @@
 import logging
-import random
 from pathlib import Path
 
 import numpy as np
@@ -234,18 +233,6 @@ class AbstractModule(object):
         """
         raise NotImplementedError
 
-    def set_native_random_seed(self) -> None:
-        """ set any random seed.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.logger.debug(f'set native random seed: {self.seed}')
-        random.seed(self.seed)
-
     def set_numpy_random_seed(self) -> None:
         """ set any random seed.
 
@@ -257,28 +244,6 @@ class AbstractModule(object):
         """
         self.logger.debug(f'set numpy random seed: {self.seed}')
         self._rng = np.random.RandomState(self.seed)
-
-    def get_native_random_state(self) -> tuple:
-        """ get random state.
-
-        Args:
-            None
-
-        Returns:
-            random.getstate (tuple)
-        """
-        return random.getstate()
-
-    def set_native_random_state(self, state: tuple) -> None:
-        """ get random state.
-
-        Args:
-            state (tuple): random state
-
-        Returns:
-            None
-        """
-        random.setstate(state)
 
     def get_numpy_random_state(self) -> tuple:
         """ get random state.
