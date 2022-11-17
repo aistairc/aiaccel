@@ -6,8 +6,6 @@ from typing import Any
 import aiaccel
 import numpy as np
 import os
-import pathlib
-import subprocess
 import threading
 
 from aiaccel.config import Config
@@ -15,14 +13,10 @@ from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
 
 from argparse import ArgumentParser
-from functools import singledispatchmethod
 from logging import StreamHandler, getLogger
 from typing import Union
 
-from aiaccel.config import Config
 from aiaccel.optimizer.create import create_optimizer
-from aiaccel.storage.storage import Storage
-from aiaccel.util.time_tools import get_time_now
 from aiaccel.util.filesystem import create_yaml
 
 
