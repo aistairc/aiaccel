@@ -144,18 +144,6 @@ class TestAbstractMaster(BaseTest):
         master.config.goal.set(aiaccel.goal_maximize)
         assert master.post_process() is None
 
-        master.config = Config(self.config_json)
-        master.goal = 'invalid_goal'
-
-        for i in range(10):
-            master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            
-        try:
-            master.post_process()
-            assert False
-        except ValueError:
-            assert True
-
     def test_print_dict_state(
         self,
         cd_work,

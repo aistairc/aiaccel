@@ -7,21 +7,28 @@ from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.util.trialid import TrialId
 
+from typing import Union
+
 
 class AbstractEvaluator(object):
     """An abstract class for MaximizeEvaluator and MinimizeEvaluator.
 
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config_path: Union[Path, str]) -> None:
         """Initial method for AbstractEvaluator.
 
         Args:
             config (ConfileWrapper): A configuration object.
         """
-        self.options = options
-        self.config_path = Path(self.options['config']).resolve()
-        self.config = Config(str(self.config_path))
+
+        # === Load config file===
+        self.config_path = config_path
+        if type(self.config_path) == str:
+            self.config_path = Path(self.config_path)
+        self.config_path = self.config_path.resolve()
+
+        self.config = Config(self.config_path)
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
         self.hp_result = None
@@ -47,7 +54,7 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        logger = logging.getLogger('root.master.evaluator')
+        logger = logging.getLogger('root.evaluator')
         logger.info('Best hyperparameter is followings:')
         logger.info(self.hp_result)
 

@@ -1,5 +1,5 @@
 import aiaccel
-from aiaccel.master.verification.abstract_verification import \
+from aiaccel.verification.abstract_verification import \
     AbstractVerification
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import load_yaml
@@ -19,7 +19,7 @@ class TestAbstractVerification(BaseTest):
             'process_name': 'master'
         }
         
-        verification = AbstractVerification(options)
+        verification = AbstractVerification(options['config'])
         assert verification.is_verified
 
     def test_verify(self, clean_work_dir, setup_hp_finished, work_dir):
@@ -31,7 +31,7 @@ class TestAbstractVerification(BaseTest):
             'process_name': 'master'
         }
 
-        verification = AbstractVerification(options)
+        verification = AbstractVerification(options['config'])
         verification.is_verified = False
         assert verification.verify() is None
         verification.is_verified = True
@@ -75,7 +75,7 @@ class TestAbstractVerification(BaseTest):
             'process_name': 'master'
         }
 
-        verification = AbstractVerification(options)
+        verification = AbstractVerification(options['config'])
         setup_hp_finished(10)
 
         for i in range(10):
@@ -121,7 +121,7 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
-        verification = AbstractVerification(options)
+        verification = AbstractVerification(options['config'])
         verification.is_verified = False
         assert verification.print() is None
         verification.is_verified = True
@@ -135,7 +135,7 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
-        verification = AbstractVerification(options)
+        verification = AbstractVerification(options['config'])
         verification.is_verified = False
         assert verification.save(1) is None
         verification.is_verified = True

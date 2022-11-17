@@ -1,5 +1,6 @@
 import pathlib
 import subprocess
+
 from functools import singledispatchmethod
 from typing import Any
 
@@ -9,15 +10,18 @@ import os
 import threading
 
 from aiaccel.config import Config
+from aiaccel.optimizer.create import create_optimizer
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
+from aiaccel.util.filesystem import create_yaml
+from aiaccel.evaluator.maximize_evaluator import MaximizeEvaluator
+from aiaccel.evaluator.minimize_evaluator import MinimizeEvaluator
+from aiaccel.verification.abstract_verification import \
+    AbstractVerification
 
 from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
 from typing import Union
-
-from aiaccel.optimizer.create import create_optimizer
-from aiaccel.util.filesystem import create_yaml
 
 
 logger = getLogger(__name__)
@@ -260,6 +264,7 @@ class Abstruct:
         self.com = WrapperInterface()
         self.max_trial_number = self.config.trial_number.get()
         self.num_node = self.config.num_node.get()
+        self.goal = self.config.goal.get()
 
     def get_any_trial_xs(self, trial_id: int) -> dict:
         params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
@@ -445,6 +450,15 @@ class Local(Abstruct):
         super().__init__()
         Optimizer = create_optimizer(self.args['config'])
         self.optimizer = Optimizer(self.args)
+        self.verification = AbstractVerification(self.args['config'])
+
+        if self.goal.lower() == aiaccel.goal_maximize:
+            self.evaluator = MaximizeEvaluator(self.args['config'])
+        elif self.goal.lower() == aiaccel.goal_minimize:
+            self.evaluator = MinimizeEvaluator(self.args['config'])
+        else:
+            self.logger.error(f'Invalid goal: {self.goal}.')
+            raise ValueError(f'Invalid goal: {self.goal}.')
 
     @singledispatchmethod
     def call_func(self, func: callable, xs: dict):
@@ -553,6 +567,14 @@ class Local(Abstruct):
                     th.start()
                 else:
                     self.run_once(objective, trial_id)
+
+        self.evaluator.evaluate()
+        self.evaluator.print()
+        self.evaluator.save()
+
+        # verification
+        self.verification.verify()
+        self.verification.save('final')
 
     def create_result_file(self, trial_id: int, y: any, err: str) -> None:
         content = self.optimizer.storage.get_hp_dict(trial_id)

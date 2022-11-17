@@ -1,5 +1,5 @@
 import aiaccel
-from aiaccel.master.evaluator.abstract_evaluator import AbstractEvaluator
+from aiaccel.evaluator.abstract_evaluator import AbstractEvaluator
 
 from tests.base_test import BaseTest
 
@@ -14,7 +14,7 @@ class TestAbstractEvaluator(BaseTest):
             'fs': False,
             'process_name': 'test'
         }
-        evaluator = AbstractEvaluator(options)
+        evaluator = AbstractEvaluator(options['config'])
         assert evaluator.hp_result is None
 
     def test_evaluate(self):
@@ -25,7 +25,7 @@ class TestAbstractEvaluator(BaseTest):
             'fs': False,
             'process_name': 'test'
         }
-        evaluator = AbstractEvaluator(options)
+        evaluator = AbstractEvaluator(options['config'])
         assert evaluator.evaluate() is None
 
         # try:
@@ -43,7 +43,7 @@ class TestAbstractEvaluator(BaseTest):
             'process_name': 'test'
         }
         
-        evaluator = AbstractEvaluator(options)
+        evaluator = AbstractEvaluator(options['config'])
         setup_hp_finished(1)
         evaluator.hp_result = work_dir.joinpath(
             aiaccel.dict_hp_finished, f'001.{aiaccel.extension_hp}')
@@ -58,7 +58,7 @@ class TestAbstractEvaluator(BaseTest):
             'process_name': 'test'
         }
         
-        evaluator = AbstractEvaluator(options)
+        evaluator = AbstractEvaluator(options['config'])
         setup_hp_finished(1)
         evaluator.hp_result = work_dir.joinpath(
             aiaccel.dict_hp_finished, f'001.{aiaccel.extension_hp}')

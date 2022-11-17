@@ -340,7 +340,7 @@ class Config:
 
     def __init__(
         self,
-        config_path: str,
+        config_path: Union[Path, str],
         warn=False,
         format_check=False
     ):
@@ -350,7 +350,11 @@ class Config:
             warn (bool): A flag of print a warning or not.
             format_check (bool): A flag of do tha check format or not.
         """
-        self.config_path = Path(config_path).resolve()
+        self.config_path = config_path
+        if type(self.config_path) == str:
+            self.config_path = Path(self.config_path)
+        self.config_path = self.config_path.resolve()
+
         if not self.config_path.exists():
             logger.error(f"config file: {config_path} doesn't exist.")
 

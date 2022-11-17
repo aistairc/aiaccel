@@ -1,4 +1,4 @@
-from aiaccel.master.evaluator.abstract_evaluator import AbstractEvaluator
+from aiaccel.evaluator.abstract_evaluator import AbstractEvaluator
 
 
 class MaximizeEvaluator(AbstractEvaluator):

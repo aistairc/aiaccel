@@ -1,4 +1,4 @@
-from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
+from aiaccel.evaluator.minimize_evaluator import MinimizeEvaluator
 
 from tests.base_test import BaseTest
 
@@ -12,6 +12,6 @@ class TestMinimizeEvaluator(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
-        evaluator = MinimizeEvaluator(options)
+        evaluator = MinimizeEvaluator(options['config'])
         evaluator.evaluate()
         assert evaluator.hp_result is None

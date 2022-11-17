@@ -1,4 +1,4 @@
-from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
+from aiaccel.evaluator.maximize_evaluator import MaximizeEvaluator
 
 from tests.base_test import BaseTest
 
@@ -11,6 +11,6 @@ class TestMaximizeEvaluator(BaseTest):
             'clean': False,
             'fs': False,
         }
-        evaluator = MaximizeEvaluator(options)
+        evaluator = MaximizeEvaluator(options['config'])
         evaluator.evaluate()
         assert evaluator.hp_result is None

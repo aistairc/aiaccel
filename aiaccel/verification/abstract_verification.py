@@ -7,21 +7,27 @@ from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 
+from typing import Union
+
 
 class AbstractVerification(object):
     """An abstract class of verification.
 
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config_path: Union[Path, str]) -> None:
         """Initial method for AbstractVerification.
 
         Args:
             config (ConfileWrapper): A configuration object.
         """
         # === Load config file===
-        self.options = options
-        self.config = Config(self.options['config'])
+        self.config_path = config_path
+        if type(self.config_path) == str:
+            self.config_path = Path(self.config_path)
+        self.config_path = self.config_path.resolve()
+
+        self.config = Config(self.config_path)
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
         self.is_verified = None

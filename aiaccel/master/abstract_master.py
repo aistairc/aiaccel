@@ -1,9 +1,9 @@
 import logging
 
 import aiaccel
-from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
-from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
-from aiaccel.master.verification.abstract_verification import \
+from aiaccel.evaluator.maximize_evaluator import MaximizeEvaluator
+from aiaccel.evaluator.minimize_evaluator import MinimizeEvaluator
+from aiaccel.verification.abstract_verification import \
     AbstractVerification
 from aiaccel.module import AbstractModule
 from aiaccel.util.logger import str_to_logging_level
@@ -44,13 +44,22 @@ class AbstractMaster(AbstractModule):
             str_to_logging_level(self.config.master_stream_log_level.get()),
             'Master   '
         )
-
-        self.verification = AbstractVerification(self.options)
-        self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
 
         self.runner_files = []
         self.stats = []
+
+        # evaluator
+        self.goal = self.config.goal.get()
+        if self.goal.lower() == aiaccel.goal_maximize:
+            self.evaluator = MaximizeEvaluator(self.config_path)
+        elif self.goal.lower() == aiaccel.goal_minimize:
+            self.evaluator = MinimizeEvaluator(self.config_path)
+        else:
+            self.logger.error(f'Invalid goal: {self.goal}.')
+            raise ValueError(f'Invalid goal: {self.goal}.')
+
+        self.verification = AbstractVerification(self.config_path)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -78,17 +87,9 @@ class AbstractMaster(AbstractModule):
         if not self.check_finished():
             return
 
-        if self.goal.lower() == aiaccel.goal_maximize:
-            evaluator = MaximizeEvaluator(self.options)
-        elif self.goal.lower() == aiaccel.goal_minimize:
-            evaluator = MinimizeEvaluator(self.options)
-        else:
-            self.logger.error(f'Invalid goal: {self.goal}.')
-            raise ValueError(f'Invalid goal: {self.goal}.')
-
-        evaluator.evaluate()
-        evaluator.print()
-        evaluator.save()
+        self.evaluator.evaluate()
+        self.evaluator.print()
+        self.evaluator.save()
 
         # verification
         self.verification.verify()
