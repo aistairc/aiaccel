@@ -44,11 +44,6 @@ class AbstractOptimizer(AbstractModule):
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
 
-        self.storage.variable.register(
-            process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'state']
-        )
-
     def register_new_parameters(self, params: List[dict]) -> None:
         """Create hyper parameter files.
 
@@ -183,28 +178,6 @@ class AbstractOptimizer(AbstractModule):
         self.print_dict_state()
 
         return True
-
-    def _serialize(self, trial_id: int) -> None:
-        """Serialize this module.
-        Returns:
-            None
-        """
-        self.storage.variable.d['state'].set(trial_id, self)
-
-        # random state
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
-
-    def _deserialize(self, trial_id: int) -> None:
-        """ Deserialize this module.
-        Returns:
-            None
-        """
-        self.__dict__.update(self.storage.variable.d['state'].get(trial_id).__dict__.copy())
-
-        # random state
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
     def resume(self) -> None:
         """ When in resume mode, load the previous

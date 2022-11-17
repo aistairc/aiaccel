@@ -51,11 +51,6 @@ class AbstractScheduler(AbstractModule):
         self.algorithm = None
         self.sleep_time = self.config.sleep_time.get()
 
-        self.storage.variable.register(
-            process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'state']
-        )
-
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
             and running files are in running directory.
@@ -283,28 +278,6 @@ class AbstractScheduler(AbstractModule):
             num_trials += jobstates.count(s)
 
         return (num_trials >= self.config.trial_number.get())
-
-    def _serialize(self, trial_id: int) -> dict:
-        """Serialize this module.
-        Returns:
-            None
-        """
-        self.storage.variable.d['state'].set(trial_id, self)
-
-        # random state
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
-
-    def _deserialize(self, trial_id: int) -> None:
-        """ Deserialize this module.
-        Returns:
-            None
-        """
-        self.__dict__.update(self.storage.variable.d['state'].get(trial_id).__dict__.copy())
-
-        # random state
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
     def resume(self) -> None:
         """ When in resume mode, load the previous
