@@ -268,7 +268,7 @@ class Abstruct:
         self.num_node = self.config.num_node.get()
 
     def get_any_trial_xs(self, trial_id: int) -> dict:
-        params = self.optimizer.storage.hp.get_any_trial_params(trial_id=trial_id)
+        params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
         if params is None:
             return
 
