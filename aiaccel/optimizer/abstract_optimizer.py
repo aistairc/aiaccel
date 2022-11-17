@@ -239,10 +239,3 @@ class AbstractOptimizer(AbstractModule):
             self.logger.error(error_message)
 
         return False
-
-    def __getstate__(self):
-        obj = self.__dict__.copy()
-        del obj['storage']
-        del obj['config']
-        del obj['options']
-        return obj
