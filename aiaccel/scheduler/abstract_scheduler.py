@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Union
 
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm import schdule_sampling
+from aiaccel.scheduler.algorithm import schedule_sampling
 from aiaccel.scheduler.job.job_thread import Job
 from aiaccel.util.logger import str_to_logging_level
 
@@ -134,11 +134,10 @@ class AbstractScheduler(AbstractModule):
             None
         """
         self.trial_id.initial(num=0)
-        self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
 
-        self.algorithm = schdule_sampling.RamsomSampling(self.config)
+        self.algorithm = schedule_sampling.RandomSampling(self.config)
         self.change_state_finished_trials()
 
         runnings = self.storage.trial.get_running()
@@ -196,7 +195,8 @@ class AbstractScheduler(AbstractModule):
 
         selected_threads = self.algorithm.select_hp(
             scheduled_candidates,
-            self.available_resource
+            self.available_resource,
+            rng=self._rng
         )
 
         if len(selected_threads) > 0:

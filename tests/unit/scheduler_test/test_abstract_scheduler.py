@@ -1,4 +1,5 @@
 import asyncio
+import numpy as np
 import os
 import time
 from unittest.mock import patch
@@ -262,6 +263,7 @@ class TestAbstractScheduler(BaseTest):
             'process_name': 'scheduler'
         }
         scheduler = AbstractScheduler(options)
+        scheduler._rng = np.random.RandomState(0)
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         assert scheduler._serialize(trial_id=0) is None
 
@@ -281,6 +283,7 @@ class TestAbstractScheduler(BaseTest):
         }
         scheduler = AbstractScheduler(options)
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
+        scheduler._rng = np.random.RandomState(0)
         scheduler._serialize(trial_id=0)
         assert scheduler._deserialize(trial_id=0) is None
 

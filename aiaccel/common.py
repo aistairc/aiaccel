@@ -43,7 +43,6 @@ extension_verification = 'verification'
 file_configspace = 'configspace'
 file_final_result = 'final_result.result'
 file_hyperparameter = 'hyperparameter.json'
-file_native_random = 'native_random'
 file_numpy_random = 'numpy_random'
 file_numpy_random_extension = 'npy'
 

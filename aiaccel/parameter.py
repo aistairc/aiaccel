@@ -137,11 +137,12 @@ class HyperParameter(object):
         if 'base' in parameter:
             self.step = parameter['base']
 
-    def sample(self, initial: bool = False) -> dict:
+    def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
         """Sample a parameter.
 
         Args:
             initial (bool): This is set, when a initial value is required.
+            rng (np.random.RandomState): A reference to a random generator.
 
         Returns:
             dict: A parameter dictionary.
@@ -152,13 +153,13 @@ class HyperParameter(object):
         if initial and self.initial is not None:
             value = self.initial
         elif self.type.lower() == 'int':
-            value = np.random.randint(self.lower, self.upper)
+            value = rng.randint(self.lower, self.upper)
         elif self.type.lower() == 'float':
-            value = np.random.uniform(self.lower, self.upper)
+            value = rng.uniform([self.lower, self.upper])[0]
         elif self.type.lower() == 'categorical':
-            value = np.random.choice(self.choices)
+            value = rng.choice(self.choices)
         elif self.type.lower() == 'ordinal':
-            value = np.random.choice(self.sequence)
+            value = rng.choice(self.sequence)
         else:
             raise TypeError(
                 f'Invalid hyper parameter type: {self.type}')
@@ -219,11 +220,12 @@ class HyperParameterConfiguration(object):
         """
         return self.hps
 
-    def sample(self, initial: bool = False) -> List[dict]:
+    def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> List[dict]:
         """Sample a hyper parameters set.
 
         Args:
             initial (bool): This is set, when a initial value is required.
+            rng (np.random.RandomState): A reference to a random generator.
 
         Returns:
             dict: A hyper parameters set.
@@ -231,7 +233,7 @@ class HyperParameterConfiguration(object):
         ret = []
 
         for name, value in self.hps.items():
-            ret.append(value.sample(initial))
+            ret.append(value.sample(initial, rng=rng))
 
         return ret
 

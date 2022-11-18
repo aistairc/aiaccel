@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import numpy as np
 import shutil
 import sys
 import time
@@ -180,9 +181,11 @@ class TestAbstractModule(BaseTest):
             assert True
 
     def test_serialize(self):
+        self.module._rng = np.random.RandomState(0)
         assert self.module._serialize(0) is None
 
     def test_deserialize(self):
+        self.module._rng = np.random.RandomState(0)
         self.module._serialize(1)
         assert self.module._deserialize(1) is None
 
@@ -198,6 +201,7 @@ class TestAbstractModule(BaseTest):
         }
 
         self.module = AbstractModule(options)
+        self.module._rng = np.random.RandomState(0)
         assert self.module.resume() is None
 
         self.module.options['resume'] = 1

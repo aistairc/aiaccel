@@ -1,4 +1,5 @@
 import asyncio
+import numpy as np
 import os
 import shutil
 import sys
@@ -102,9 +103,11 @@ class TestAbstractOptimizer(BaseTest):
                                 assert self.optimizer.inner_loop_main_process() is False
 
     def test__serialize(self):
+        self.optimizer._rng = np.random.RandomState(0)
         assert self.optimizer._serialize(0) is None
 
     def test__deserialize(self):
+        self.optimizer._rng = np.random.RandomState(0)
         self.optimizer._serialize(1)
         assert self.optimizer._deserialize(1) is None
 

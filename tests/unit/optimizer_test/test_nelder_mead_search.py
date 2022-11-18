@@ -1,4 +1,5 @@
 import json
+import numpy as np
 
 import aiaccel
 import pytest
@@ -42,7 +43,9 @@ class TestNelderMeadOptimizer(BaseTest):
         ]
 
         _optimizer = NelderMeadOptimizer(self.options)
+        _optimizer._rng = np.random.RandomState(0)
         _nelder_mead = _optimizer.generate_initial_parameter()
+        self.optimizer._rng = np.random.RandomState(0)
 
         with patch.object(self.optimizer, "nelder_mead", None):
             assert self.optimizer.generate_initial_parameter() == expected
@@ -83,8 +86,10 @@ class TestNelderMeadOptimizer(BaseTest):
         self.optimizer.params = load_parameter(
             config.get('optimize',
                        'parameters_for_TestNelderMead'))
+        rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
+            self.optimizer.params.get_parameter_list(),
+            rng=rng
         )
         # params = self.optimizer.nelder_mead.get_ready_parameters()
         params = self.optimizer.get_ready_parameters()
@@ -96,7 +101,7 @@ class TestNelderMeadOptimizer(BaseTest):
         assert self.optimizer.generate_parameter() is None
 
         # if len(self.parameter_pool) == 0:
-        self.optimizer.nelder_mead = NelderMead(self.optimizer.params.get_parameter_list())
+        self.optimizer.nelder_mead = NelderMead(self.optimizer.params.get_parameter_list(), rng=rng)
         self.optimizer.generate_initial_parameter()
         with patch.object(self.optimizer, 'nelder_mead_main', return_value=[]):
             with patch.object(self.optimizer, 'parameter_pool', []):
@@ -114,8 +119,10 @@ class TestNelderMeadOptimizer(BaseTest):
         self.optimizer.params = load_parameter(
             config.get('optimize',
                        'parameters_for_TestNelderMeadSearch'))
+        rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
+            self.optimizer.params.get_parameter_list(),
+            rng=rng
         )
         # params = self.optimizer.nelder_mead.get_ready_parameters()
         # params = self.optimizer.get_ready_parameters()
@@ -137,8 +144,10 @@ class TestNelderMeadOptimizer(BaseTest):
                 'parameters_for_TestNelderMead'
             )
         )
+        rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
+            self.optimizer.params.get_parameter_list(),
+            rng=rng
         )
         self.optimizer.nelder_mead._executing.append({'vertex_id': '001'})
 
@@ -162,14 +171,17 @@ class TestNelderMeadOptimizer(BaseTest):
                 'parameters_for_TestNelderMead'
             )
         )
+        rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
-            self.optimizer.params.get_parameter_list()
+            self.optimizer.params.get_parameter_list(),
+            rng=rng
         )
         # assert len(self.nm.get_ready_parameters()) == 11
         assert len(self.optimizer.get_ready_parameters()) == 3
 
     def test_get_nm_results(self):
-        self.optimizer.nelder_mead = NelderMead(self.optimizer.params.get_parameter_list())
+        rng = np.random.RandomState(0)
+        self.optimizer.nelder_mead = NelderMead(self.optimizer.params.get_parameter_list(), rng=rng)
 
         self.optimizer.get_nm_results()
 
@@ -197,7 +209,8 @@ class TestNelderMeadOptimizer(BaseTest):
                 self.optimizer.get_nm_results()
 
     def test__add_result(self):
-        self.optimizer.nelder_mead = NelderMead(self.optimizer.params.get_parameter_list())
+        rng = np.random.RandomState(0)
+        self.optimizer.nelder_mead = NelderMead(self.optimizer.params.get_parameter_list(), rng=rng)
         self.optimizer.generate_initial_parameter()
         nm_results = [
             {
@@ -231,7 +244,8 @@ class TestNelderMeadOptimizer(BaseTest):
 
 
     def test_nelder_mead_main(self):
-        self.optimizer.nelder_mead = NelderMead(self.optimizer.params.get_parameter_list())
+        rng = np.random.RandomState(0)
+        self.optimizer.nelder_mead = NelderMead(self.optimizer.params.get_parameter_list(), rng=rng)
         self.optimizer.generate_initial_parameter()
         self.optimizer.nelder_mead_main()
 

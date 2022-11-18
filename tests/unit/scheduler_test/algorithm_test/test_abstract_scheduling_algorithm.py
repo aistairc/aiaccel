@@ -1,3 +1,4 @@
+import numpy as np
 from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import \
     AbstractSchedulingAlgorithm
 
@@ -5,9 +6,10 @@ from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import \
 def test_abstract_scheduling_algorithm(load_test_config):
     config = load_test_config()
     algorithm = AbstractSchedulingAlgorithm(config)
+    rng = np.random.RandomState(0)
 
     try:
-        algorithm.select_hp(None, None)
+        algorithm.select_hp(None, None, rng=rng)
         assert False
     except NotImplementedError:
         assert True

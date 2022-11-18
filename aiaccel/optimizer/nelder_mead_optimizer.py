@@ -31,7 +31,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         self.nelder_mead = NelderMead(
             self.params.get_parameter_list(),
-            initial_parameters=initial_parameter
+            initial_parameters=initial_parameter,
+            rng=self._rng
         )
 
         return self.generate_parameter()
