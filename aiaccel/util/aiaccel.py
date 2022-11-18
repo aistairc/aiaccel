@@ -431,7 +431,7 @@ class Abci(Abstruct):
         return xs, y, err
 
     @singledispatchmethod
-    def execute_and_report(self, func: callable, y_data_type: Union[None, str]=None):
+    def execute_and_report(self, func: callable, y_data_type: Union[None, str] = None):
         """
         Examples:
             def obj(p)
@@ -448,7 +448,7 @@ class Abci(Abstruct):
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: Union[None, str]=None):
+    def _(self, command: str, y_data_type: Union[None, str] = None):
         """
         Examples:
             run = aiaccel.Run()
@@ -549,7 +549,7 @@ class Local(Abstruct):
         self.report(trial_id, xs, y, err, start_time, end_time)
         self.create_result_file(trial_id, y, err)
 
-    def execute_and_report(self, objective: Union[callable, str], y_data_type: Union[None, str]=None):
+    def execute_and_report(self, objective: Union[callable, str], y_data_type: Union[None, str] = None):
         self.optimizer.pre_process()
 
         while self.optimizer.check_finished() is False:
