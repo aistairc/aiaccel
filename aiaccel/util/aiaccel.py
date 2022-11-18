@@ -339,6 +339,20 @@ class Abstruct:
 
         raise NotImplementedError
 
+    def cast_y(self, y_value: any, y_data_type: Union[None, str]):
+        if y_data_type is None:
+            y = y_value
+        elif y_data_type.lower() == 'float':
+            y = float(y_value)
+        elif y_data_type.lower() == 'int':
+            y = int(float(y_value))
+        elif y_data_type.lower() == 'str':
+            y = str(y_value)
+        else:
+            TypeError(f'{y_data_type} cannot be specified')
+
+        return y
+
 
 class Abci(Abstruct):
     def generate_commands(self, command: str, xs: list) -> list:
@@ -361,7 +375,7 @@ class Abci(Abstruct):
         return commands
 
     @singledispatchmethod
-    def execute(self, func: callable, trial_id: int) -> tuple:
+    def execute(self, func: callable, trial_id: int, y_data_type: Union[None, str]) -> tuple:
         """ Execution the target function.
 
         Return:
@@ -373,7 +387,7 @@ class Abci(Abstruct):
         err = ""
 
         try:
-            y = func(xs)
+            y = self.cast_y(func(xs), y_data_type)
         except BaseException as e:
             err = str(e)
         finally:
@@ -382,7 +396,7 @@ class Abci(Abstruct):
         return xs, y, err
 
     @execute.register
-    def _(self, command: str, trial_id: int):
+    def _(self, command: str, trial_id: int, y_data_type: Union[None, str]) -> tuple:
         """ Execution the user program.
 
         Returns:
@@ -408,13 +422,16 @@ class Abci(Abstruct):
         )
 
         ys, err = self.com.get_data(output)
-        y = float(ys[0])  # todo: do refactoring
+        if y_data_type is None:
+            y = self.cast_y(ys[0], 'float')
+        else:
+            y = self.cast_y(ys[0], y_data_type)
         err = ("\n").join(err)
 
         return xs, y, err
 
     @singledispatchmethod
-    def execute_and_report(self, func: callable):
+    def execute_and_report(self, func: callable, y_data_type: Union[None, str]):
         """
         Examples:
             def obj(p)
@@ -425,13 +442,13 @@ class Abci(Abstruct):
             run.execute_and_report(obj)
         """
         start_time = get_time_now()
-        xs, y, err = self.execute(func, self.trial_id)
+        xs, y, err = self.execute(func, self.trial_id, y_data_type)
         end_time = get_time_now()
 
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str):
+    def _(self, command: str, y_data_type: Union[None, str]=None):
         """
         Examples:
             run = aiaccel.Run()
@@ -439,7 +456,7 @@ class Abci(Abstruct):
             run.execute_and_report(f"echo {p['x1']}", False)
         """
         start_time = get_time_now()
-        xs, y, err = self.execute(command, self.trial_id)
+        xs, y, err = self.execute(command, self.trial_id, y_data_type)
         end_time = get_time_now()
 
         self.report(self.trial_id, xs, y, err, start_time, end_time)
@@ -460,33 +477,6 @@ class Local(Abstruct):
             self.logger.error(f'Invalid goal: {self.goal}.')
             raise ValueError(f'Invalid goal: {self.goal}.')
 
-    @singledispatchmethod
-    def call_func(self, func: callable, xs: dict):
-        y = None
-        err = ""
-
-        try:
-            y = func(xs)
-        except Exception as e:
-            err = e
-
-        return y, err
-
-    @call_func.register
-    def _(self, commands: list):
-
-        output = subprocess.run(
-            commands,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        ys, err = self.com.get_data(output)
-        y = float(ys[0])  # todo: do refactoring
-        err = ("\n").join(err)
-
-        return y, err
-
     def generate_commands(self, command: str, xs: list) -> list:
         """ Generate execution command of user program.
 
@@ -506,28 +496,49 @@ class Local(Abstruct):
         return commands
 
     @singledispatchmethod
-    def execute(self, func: callable, trial_id: int) -> tuple:
+    def execute(self, func: callable, trial_id: int, y_data_type: Union[None, str]) -> tuple:
         xs = self.get_any_trial_xs(trial_id)
-        y, err = self.call_func(func, xs)
+        y = None
+        err = ""
+
+        try:
+            y = self.cast_y(func(xs), y_data_type)
+        except Exception as e:
+            err = e
 
         return xs, y, err
 
     @execute.register
-    def _(self, command: str, trial_id: int):
+    def _(self, command: str, trial_id: int, y_data_type: Union[None, str]) -> tuple:
         xs = self.get_any_trial_xs(trial_id)
+        y = None
+        err = ""
         commands = self.generate_commands(command, xs)
-        y, err = self.call_func(commands)
+
+        output = subprocess.run(
+            commands,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        ys, err = self.com.get_data(output)
+
+        if y_data_type is None:
+            y = self.cast_y(ys[0], 'float')
+        else:
+            y = self.cast_y(ys[0], y_data_type)
+        err = ("\n").join(err)
 
         return xs, y, err
 
-    def run_once(self, objective: Union[callable, str], trial_id: int):
+    def run_once(self, objective: Union[callable, str], trial_id: int, y_data_type: Union[None, str]):
         self.optimizer.storage.trial.set_any_trial_state(
             trial_id=trial_id,
             state='running'
         )
 
         start_time = get_time_now()
-        xs, y, err = self.execute(objective, trial_id)
+        xs, y, err = self.execute(objective, trial_id, y_data_type)
         end_time = get_time_now()
 
         self.optimizer.storage.trial.set_any_trial_state(
@@ -538,7 +549,7 @@ class Local(Abstruct):
         self.report(trial_id, xs, y, err, start_time, end_time)
         self.create_result_file(trial_id, y, err)
 
-    def execute_and_report(self, objective: Union[callable, str]):
+    def execute_and_report(self, objective: Union[callable, str], y_data_type: Union[None, str]=None):
         self.optimizer.pre_process()
 
         while self.optimizer.check_finished() is False:
@@ -563,10 +574,10 @@ class Local(Abstruct):
 
             for trial_id in trial_ids:
                 if self.num_node > 1:
-                    th = threading.Thread(target=self.run_once, args=(objective, trial_id))
+                    th = threading.Thread(target=self.run_once, args=(objective, trial_id, y_data_type))
                     th.start()
                 else:
-                    self.run_once(objective, trial_id)
+                    self.run_once(objective, trial_id, y_data_type)
 
         self.evaluator.evaluate()
         self.evaluator.print()
