@@ -431,7 +431,7 @@ class Abci(Abstruct):
         return xs, y, err
 
     @singledispatchmethod
-    def execute_and_report(self, func: callable, y_data_type: Union[None, str]):
+    def execute_and_report(self, func: callable, y_data_type: Union[None, str]=None):
         """
         Examples:
             def obj(p)
