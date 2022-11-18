@@ -220,6 +220,7 @@ class BaseTest(object):
         self.config_json = test_data_dir.joinpath('config.json')
         self.grid_config_json = test_data_dir.joinpath('grid_config.json')
         self.config_yaml = test_data_dir.joinpath('config.yml')
+        self.config_abci = test_data_dir.joinpath('config_abci.json')
         work_dir = Path(self.config.workspace.get()).resolve()
         self.work_dir = work_dir
 

@@ -9,9 +9,13 @@ from unittest.mock import patch
 
 import aiaccel
 import numpy as np
+from argparse import ArgumentParser
 from aiaccel.storage.storage import Storage
 # from aiaccel.util.opt import Wrapper
 from aiaccel.util.aiaccel import Messages, Run, WrapperInterface, report
+from aiaccel.util.aiaccel import Abci
+from aiaccel.util.aiaccel import Local
+from aiaccel.util.aiaccel import Abstruct
 
 # from aiaccel.util.opt import create_objective
 from tests.base_test import BaseTest
@@ -67,24 +71,6 @@ def invalid_func(p):
 #
 class TestRun(BaseTest):
 
-    def get_test_args(self):
-        return [
-            "wapper.py",
-            f"--config={self.config_json}",
-            "--trial_id=0001",
-            "--x1=0.1",
-            "--x2=0.2",
-            "--x3=0.3",
-            "--x4=0.4",
-            "--x5=0.5",
-            "--x6=0.6",
-            "--x7=0.7",
-            "--x8=0.8",
-            "--x9=0.9",
-            "--x10=1.0"
-            # "--i=0.0001"
-        ]
-
     @property
     def test_hp(self):
         return [
@@ -107,6 +93,46 @@ class TestRun(BaseTest):
                 "upper": 5
             }
         ]
+
+    def test_init(self):
+        test_argv =["wapper.py", f"--config={str(self.config_json)}", "--trial_id=1"]
+        with patch.object(sys, 'argv', test_argv):
+            print(sys.argv)
+            run = Run()
+            assert type(run) == Local
+
+        test_argv =["wapper.py", f"--config={str(self.config_abci)}", "--trial_id=1"]
+        with patch.object(sys, 'argv', test_argv):
+            run = Run()
+            assert type(run) == Abci
+
+
+class TestAbstruct(BaseTest):
+    def test_cast_y(self):
+        test_argv =["wapper.py", f"--config={str(self.config_json)}", "--trial_id=1"]
+        with patch.object(sys, 'argv', test_argv):
+            parser = ArgumentParser()
+            parser.add_argument('--config', type=str)
+            parser.add_argument('--trial_id', type=str, required=False)
+            parser.add_argument('--resume', type=int, default=None)
+            parser.add_argument('--clean', nargs='?', const=True, default=False)
+            args = parser.parse_known_args()[0]
+            run = Abstruct(args)
+
+            assert run.cast_y(1.23, None) == 1.23
+            assert run.cast_y(1.23, 'float') == 1.23
+            assert run.cast_y(1.23, 'int') == 1
+            assert run.cast_y(1.23, 'str') == '1.23'
+        
+            assert run.cast_y(42, None) == 42
+            assert run.cast_y(42, 'float') == 42.0
+            assert run.cast_y(42, 'int') == 42
+            assert run.cast_y(42, 'str') == '42'
+
+            assert run.cast_y('255', None) == '255'
+            assert run.cast_y('255', 'float') == 255.0
+            assert run.cast_y('255', 'int') == 255
+            assert run.cast_y('255', 'str') == '255'
 
 #
 # Wrapper Interface

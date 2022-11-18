@@ -8,6 +8,7 @@ import aiaccel
 import numpy as np
 import os
 import threading
+import logging
 
 from aiaccel.config import Config
 from aiaccel.optimizer.create import create_optimizer
@@ -24,16 +25,9 @@ from logging import StreamHandler, getLogger
 from typing import Union
 
 
-logger = getLogger(__name__)
-logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
-logger.addHandler(StreamHandler())
-
-parser = ArgumentParser()
-parser.add_argument('--config', type=str, default="")
-parser.add_argument('--trial_id', type=str, required=False)
-parser.add_argument('--resume', type=int, default=None)
-parser.add_argument('--clean', nargs='?', const=True, default=False)
-args = parser.parse_known_args()[0]
+# logger = getLogger(__name__)
+# logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+# logger.addHandler(StreamHandler())
 
 
 SUPPORTED_TYPES = [
@@ -247,7 +241,7 @@ class Abstruct:
         It is assumed to refer to the user program
     """
 
-    def __init__(self) -> None:
+    def __init__(self, args) -> None:
         self.args = vars(args)
         self.trial_id = self.args["trial_id"]
         self.config_path = pathlib.Path(self.args["config"])
@@ -257,9 +251,13 @@ class Abstruct:
 
         # logger
         log_dir = self.workspace / "log"
-        self.log_path = log_dir / f"job_{self.trial_id}.log"
+        log_path = log_dir / f"job_{self.trial_id}.log"
         if not log_dir.exists():
             log_dir.mkdir(parents=True)
+        logging.basicConfig(filename=log_path)
+        self.logger = getLogger(__name__)
+        self.logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+        self.logger.addHandler(StreamHandler())
 
         self.com = WrapperInterface()
         self.max_trial_number = self.config.trial_number.get()
@@ -306,7 +304,7 @@ class Abstruct:
     ) -> None:
         """ Write the result in yaml format to the result directory.
         """
-        logger.info(f"{trial_id}, {xs, y}, {err}, {start_time}, {end_time}")
+        self.logger.info(f"{trial_id}, {xs, y}, {err}, {start_time}, {end_time}")
 
         self.storage.result.set_any_trial_objective(
             trial_id=trial_id,
@@ -355,6 +353,10 @@ class Abstruct:
 
 
 class Abci(Abstruct):
+    def __init__(self, args):
+        super.__init__(args)
+        self.logger.info('ABCI')
+
     def generate_commands(self, command: str, xs: list) -> list:
         """ Generate execution command of user program.
 
@@ -463,8 +465,8 @@ class Abci(Abstruct):
 
 
 class Local(Abstruct):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, args):
+        super().__init__(args)
         Optimizer = create_optimizer(self.args['config'])
         self.optimizer = Optimizer(self.args)
         self.verification = AbstractVerification(self.args['config'])
@@ -476,6 +478,8 @@ class Local(Abstruct):
         else:
             self.logger.error(f'Invalid goal: {self.goal}.')
             raise ValueError(f'Invalid goal: {self.goal}.')
+
+        self.logger.info('Local')
 
     def generate_commands(self, command: str, xs: list) -> list:
         """ Generate execution command of user program.
@@ -600,11 +604,19 @@ class Local(Abstruct):
 
 class Run:
     def __new__(cls):
+        parser = ArgumentParser()
+        parser.add_argument('--config', type=str)
+        parser.add_argument('--trial_id', type=str, required=False)
+        parser.add_argument('--resume', type=int, default=None)
+        parser.add_argument('--clean', nargs='?', const=True, default=False)
+        args = parser.parse_known_args()[0]
+
         config = Config(args.config)
         resource_type = config.resource_type.get()
+
         if resource_type.lower() == 'abci':
-            logger.info("abci")
-            return Abci()
+            return Abci(args)
         elif resource_type.lower() == 'local':
-            logger.info("local")
-            return Local()
+            return Local(args)
+        else:
+            raise ValueError(f"{resource_type} is invalid resource.")
