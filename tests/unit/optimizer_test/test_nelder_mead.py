@@ -21,11 +21,13 @@ class TestNelderMead(object):
         self.config = load_test_config()
         # params = load_parameter(config.get('optimize', 'parameters'))
         params = load_parameter(self.config.hyperparameters.get())
+        rng = np.random.RandomState(0)
         nm_coef = NelderMead(
             params.get_parameter_list(),
-            coef={"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
+            coef={"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5},
+            rng=rng
         )
-        self.nm = NelderMead(params.get_parameter_list())
+        self.nm = NelderMead(params.get_parameter_list(), rng=rng)
         yield
         self.nm = None
 
@@ -48,7 +50,8 @@ class TestNelderMead(object):
             {'parameter_name': 'x9', 'type': 'FLOAT', 'value': 1},
             {'parameter_name': 'x10', 'type': 'FLOAT', 'value': 1},
         ]
-        NelderMead(hps, initial_parameters=initial_parameters)
+        rng = np.random.RandomState(0)
+        NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
 
         initial_parameters = [
             {'parameter_name': 'x1', 'type': 'CATEGORICAL', 'value': '1'},
@@ -63,7 +66,7 @@ class TestNelderMead(object):
             {'parameter_name': 'x10', 'type': 'CATEGORICAL', 'value': '1'},
         ]
         with pytest.raises(TypeError):
-            NelderMead(hps, initial_parameters=initial_parameters)
+            NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
 
 
     def test_add_executing(self):
@@ -357,10 +360,12 @@ def test_nelder_mead_parameters(load_test_config):
         config.hyperparameters.get()
     )
     initial_parameters = None
+    rng = np.random.RandomState(0)
     nelder_mead = NelderMead(
         params.get_parameter_list(), initial_parameters=initial_parameters,
         iteration=100,
-        maximize=(config.goal.get().lower() == 'maximize')
+        maximize=(config.goal.get().lower() == 'maximize'),
+        rng=rng
     )
 
     c_max = 1000

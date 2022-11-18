@@ -108,6 +108,7 @@ venv.bak/
 work_aiaccel/
 
 # vscode
+.vscode
 *.code-workspace
 
 # document
@@ -115,3 +116,7 @@ docs/build/html
 
 # IntelliJ
 .idea
+
+# Docker
+.devcontainer
+Dockerfile
