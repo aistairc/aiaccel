@@ -354,7 +354,7 @@ class Abstruct:
 
 class Abci(Abstruct):
     def __init__(self, args):
-        super.__init__(args)
+        super().__init__(args)
         self.logger.info('ABCI')
 
     def generate_commands(self, command: str, xs: list) -> list:
