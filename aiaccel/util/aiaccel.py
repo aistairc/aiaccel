@@ -263,6 +263,7 @@ class Abstruct:
         self.max_trial_number = self.config.trial_number.get()
         self.num_node = self.config.num_node.get()
         self.goal = self.config.goal.get()
+        self.name_length = self.config.name_length.get()
 
     def get_any_trial_xs(self, trial_id: int) -> dict:
         params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
@@ -592,13 +593,17 @@ class Local(Abstruct):
         self.verification.save('final')
 
     def create_result_file(self, trial_id: int, y: any, err: str) -> None:
+
+        file_hp_count_fmt = f'%0{self.name_length}d'
+        file_name = file_hp_count_fmt % trial_id + '.hp'
+
         content = self.optimizer.storage.get_hp_dict(trial_id)
         content['result'] = y
 
         if err is not None:
             content['error'] = err
 
-        result_file_path = self.workspace / aiaccel.dict_result / (str(trial_id) + '.hp')
+        result_file_path = self.workspace / aiaccel.dict_result / file_name
         create_yaml(result_file_path, content)
 
 
