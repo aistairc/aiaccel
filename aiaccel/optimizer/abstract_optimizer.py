@@ -44,11 +44,6 @@ class AbstractOptimizer(AbstractModule):
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
 
-        self.storage.variable.register(
-            process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'self_values', 'self_keys']
-        )
-
     def register_new_parameters(self, params: List[dict]) -> None:
         """Create hyper parameter files.
 
@@ -88,7 +83,7 @@ class AbstractOptimizer(AbstractModule):
                 None if any parameters are already created.
         """
 
-        sample = self.params.sample(initial=True)
+        sample = self.params.sample(initial=True, rng=self._rng)
         new_params = []
 
         for s in sample:
@@ -122,7 +117,6 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
 
@@ -183,42 +177,6 @@ class AbstractOptimizer(AbstractModule):
         self.print_dict_state()
 
         return True
-
-    def _serialize(self, trial_id: int) -> None:
-        """Serialize this module.
-        Returns:
-            dict: serialize data.
-        """
-
-        obj = self.__dict__.copy()
-        del obj['storage']
-        del obj['config']
-        del obj['options']
-
-        _values = list(obj.values())
-        _keys = list(obj.keys())
-
-        self.storage.variable.d['self_values'].set(trial_id, _values)
-        self.storage.variable.d['self_keys'].set(trial_id, _keys)
-
-        # random state
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
-
-    def _deserialize(self, trial_id: int) -> None:
-        """ Deserialize this module.
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-        Returns:
-            None
-        """
-        _values = self.storage.variable.d['self_values'].get(trial_id)
-        _keys = self.storage.variable.d['self_keys'].get(trial_id)
-        self.__dict__.update(dict(zip(_keys, _values)))
-
-        # random state
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
     def resume(self) -> None:
         """ When in resume mode, load the previous
