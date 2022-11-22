@@ -155,7 +155,7 @@ class HyperParameter(object):
         elif self.type.lower() == 'int':
             value = rng.randint(self.lower, self.upper)
         elif self.type.lower() == 'float':
-            value = rng.uniform([self.lower, self.upper])[0]
+            value = rng.uniform(self.lower, self.upper)
         elif self.type.lower() == 'categorical':
             value = rng.choice(self.choices)
         elif self.type.lower() == 'ordinal':
