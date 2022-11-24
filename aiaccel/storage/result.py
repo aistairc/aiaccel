@@ -77,8 +77,8 @@ class Result(Abstract):
             data = (
                 session.query(ResultTable)
                 .with_for_update(read=True)
+                .order_by(ResultTable.trial_id)
             )
-
         # return [d.objective for d in data]
         return data
 

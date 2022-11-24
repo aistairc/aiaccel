@@ -30,9 +30,8 @@ class RandomOptimizer(AbstractOptimizer):
         return new_params
 
     def generate_initial_parameter(self) -> list:
-        if super().generate_initial_parameter() is not None:
-            self.logger.warning(
-                "Initial values cannot be specified for random."
-                "The set initial value has been invalidated."
-            )
+        self.logger.warning(
+            "Initial values cannot be specified for random."
+            "The set initial value has been invalidated."
+        )
         return self.generate_parameter()
