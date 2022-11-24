@@ -125,7 +125,7 @@ class Storage:
         """
         return trial_id in self.trial.get_finished()
 
-    def get_hp_dict(self, trial_id_str: str) -> Union[None, dict]:
+    def get_hp_dict(self, trial_id) -> Union[None, dict]:
         """Obtain information on a specified trial in dict.
 
         Args:
@@ -134,7 +134,7 @@ class Storage:
         Returns:
             content(dict): Any trials information
         """
-        trial_id = int(trial_id_str)
+
         data = self.hp.get_any_trial_params(trial_id=trial_id)
         if data is None:
             return None
@@ -167,7 +167,7 @@ class Storage:
         error = self.error.get_any_trial_error(trial_id=trial_id)
 
         content = {}
-        content['trial_id'] = trial_id_str
+        content['trial_id'] = trial_id
         content['parameters'] = hp
         content['result'] = result
         content['start_time'] = start_time
@@ -225,7 +225,7 @@ class Storage:
             -(dict): Any trials information
         """
         best_trial_id, _ = self.get_best_trial(goal)
-        return self.get_hp_dict(str(best_trial_id))
+        return self.get_hp_dict(best_trial_id)
 
     def get_result_and_error(self, trial_id: int) -> tuple:
         """Get results and errors for a given trial number.

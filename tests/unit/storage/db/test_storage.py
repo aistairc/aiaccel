@@ -511,7 +511,7 @@ def test_get_best_trial_dict():
     )
 
     exp = {
-        'trial_id': str(trial_id),
+        'trial_id': trial_id,
         'parameters': [
             {
                 "parameter_name": param_name,

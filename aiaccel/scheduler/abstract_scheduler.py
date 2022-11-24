@@ -50,6 +50,7 @@ class AbstractScheduler(AbstractModule):
         self.job_status = {}
         self.algorithm = None
         self.sleep_time = self.config.sleep_time.get()
+        self.num_node = self.config.num_node.get()
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
@@ -212,9 +213,7 @@ class AbstractScheduler(AbstractModule):
         for job in self.jobs:
             self.logger.info(f"name: {job['trial_id']}, state: {job['thread'].get_state_name()}")
 
-        self.get_stats()
         self.update_resource()
-        self.print_dict_state()
         if self.all_done() is True:
             return False
 

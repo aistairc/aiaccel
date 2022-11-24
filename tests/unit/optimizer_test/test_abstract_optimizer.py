@@ -92,15 +92,16 @@ class TestAbstractOptimizer(BaseTest):
             with patch.object(self.optimizer, 'generate_parameter', return_value=None):
                 assert self.optimizer.inner_loop_main_process() is True
 
-        with patch.object(self.optimizer, 'num_of_generated_parameter', 1):
-            with patch.object(self.optimizer, 'generate_parameter', return_value=param):
-                with patch.object(self.optimizer, 'register_new_parameters', dummy_register_new_parameters):
-                    with patch.object(self.optimizer.trial_id, 'increment', dummy_increment):
-                        with patch.object(self.optimizer, '_serialize', dummy_serialize):
-                            with patch.object(self.optimizer, 'all_parameter_generated', False):
-                                assert self.optimizer.inner_loop_main_process() is True
-                            with patch.object(self.optimizer, 'all_parameter_generated', True):
-                                assert self.optimizer.inner_loop_main_process() is False
+        with patch.object(self.optimizer, 'get_pool_size', return_value=1):
+            with patch.object(self.optimizer, 'num_of_generated_parameter', 1):
+                with patch.object(self.optimizer, 'generate_parameter', return_value=param):
+                    with patch.object(self.optimizer, 'register_new_parameters', dummy_register_new_parameters):
+                        with patch.object(self.optimizer.trial_id, 'increment', dummy_increment):
+                            with patch.object(self.optimizer, '_serialize', dummy_serialize):
+                                with patch.object(self.optimizer, 'all_parameter_generated', False):
+                                    assert self.optimizer.inner_loop_main_process() is True
+                                with patch.object(self.optimizer, 'all_parameter_generated', True):
+                                    assert self.optimizer.inner_loop_main_process() is False
 
     def test__serialize(self):
         self.optimizer._rng = np.random.RandomState(0)

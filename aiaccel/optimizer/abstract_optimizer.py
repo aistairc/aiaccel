@@ -111,6 +111,32 @@ class AbstractOptimizer(AbstractModule):
         """
         raise NotImplementedError
 
+    def get_pool_size(self) -> int:
+
+        hp_ready = self.storage.get_num_ready()
+        hp_running = self.storage.get_num_running()
+        hp_finished = self.storage.get_num_finished()
+
+        max_pool_size = self.config.num_node.get()
+        max_trial_number = self.config.trial_number.get()
+
+        n1 = max_pool_size - hp_running - hp_ready
+        n2 = max_trial_number - hp_finished - hp_running - hp_ready
+        pool_size = min(n1, n2)
+
+        if (pool_size <= 0 or hp_ready >= max_pool_size):
+            return 0
+
+        return pool_size
+
+    def generate_new_parameter(self) -> list:
+        if self.num_of_generated_parameter == 0:
+            new_params = self.cast(self.generate_initial_parameter())
+        else:
+            new_params = self.cast(self.generate_parameter())
+
+        return new_params
+
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
@@ -141,38 +167,29 @@ class AbstractOptimizer(AbstractModule):
 
         self.get_each_state_count()
 
-        _max_pool_size = self.config.num_node.get()
-        _max_trial_number = self.config.trial_number.get()
-
-        n1 = _max_pool_size - self.hp_running - self.hp_ready
-        n2 = _max_trial_number - self.hp_finished - self.hp_running - self.hp_ready
-        pool_size = min(n1, n2)
-
-        if (pool_size <= 0 or self.hp_ready >= _max_pool_size):
+        pool_size = self.get_pool_size()
+        if pool_size <= 0:
             return True
 
         self.logger.info(
             f'hp_ready: {self.hp_ready}, '
             f'hp_running: {self.hp_running}, '
             f'hp_finished: {self.hp_finished}, '
-            f'total: {_max_trial_number}, '
+            f'total: {self.config.trial_number.get()}, '
             f'pool_size: {pool_size}'
         )
 
-        if self.num_of_generated_parameter == 0:
-            new_params = self.cast(self.generate_initial_parameter())
-        else:
-            new_params = self.cast(self.generate_parameter())
+        for _ in range(pool_size):
+            new_params = self.generate_new_parameter()
+            if new_params is not None and len(new_params) > 0:
+                self.register_new_parameters(new_params)
 
-        if new_params is not None and len(new_params) > 0:
-            self.register_new_parameters(new_params)
+                self.trial_id.increment()
+                self._serialize(self.trial_id.integer)
 
-            self.trial_id.increment()
-            self._serialize(self.trial_id.integer)
-
-            if self.all_parameter_generated is True:
-                self.logger.info("All parameter was generated.")
-                return False
+        if self.all_parameter_generated is True:
+            self.logger.info("All parameter was generated.")
+            return False
 
         self.print_dict_state()
 
