@@ -57,7 +57,6 @@ def main() -> None:  # pragma: no cover
     Optimizer = create_optimizer(args.config)
     Scheduler = create_scheduler(args.config)
     modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args)), ]
-    # modules = [Scheduler(vars(args)), Optimizer(vars(args))]
 
     time_s = time.time()
 

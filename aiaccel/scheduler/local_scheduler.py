@@ -112,6 +112,3 @@ class LocalScheduler(AbstractScheduler):
 
         result_file_path = self.ws / aiaccel.dict_result / file_name
         create_yaml(result_file_path, content)
-
-    def check_error(self):
-        return True

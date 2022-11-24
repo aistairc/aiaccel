@@ -7,7 +7,7 @@ filelock==3.0.10
 joblib==1.2.0
 monotonic==1.5
 myst_parser >= 0.18.1
-# numpy
+numpy
 pluggy
 py
 pytest
@@ -24,18 +24,18 @@ pytest-twisted
 PyYAML==5.4
 undecorated
 scipy
-# six==1.12.0
+six==1.12.0
 sphinx
 sphinx_fontawesome
 sphinx_rtd_theme
 sphinx-intl
-# SQLAlchemy==1.4.27
+SQLAlchemy==1.4.27
 toml==0.10.0
 transitions==0.8.0
 twisted
 virtualenv==16.4.3
 watchdog==0.10.3
-# optuna==2.6.0
+optuna==2.6.0
 natsort==7.1.1
 importlib_resources
 importlib-metadata

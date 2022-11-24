@@ -213,7 +213,9 @@ class AbstractScheduler(AbstractModule):
         for job in self.jobs:
             self.logger.info(f"name: {job['trial_id']}, state: {job['thread'].get_state_name()}")
 
+        self.get_stats()
         self.update_resource()
+        self.print_dict_state()
         if self.all_done() is True:
             return False
 

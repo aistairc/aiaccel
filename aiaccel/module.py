@@ -119,8 +119,9 @@ class AbstractModule(object):
         Returns:
             bool: All optimization finished or not.
         """
+        self.hp_finished = self.storage.get_num_finished()
 
-        if self.storage.get_num_finished() >= self.config.trial_number.get():
+        if self.hp_finished >= self.config.trial_number.get():
             return True
 
         return False
