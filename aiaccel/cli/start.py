@@ -56,8 +56,9 @@ def main() -> None:  # pragma: no cover
     Master = create_master(args.config)
     Optimizer = create_optimizer(args.config)
     Scheduler = create_scheduler(args.config)
-    modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args)), ]
+    modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
 
+    sleep_time = config.sleep_time.get()
     time_s = time.time()
 
     for module in modules:
@@ -71,6 +72,7 @@ def main() -> None:  # pragma: no cover
                 break
             module.loop_count += 1
         else:
+            time.sleep(sleep_time)
             continue
         break
 
