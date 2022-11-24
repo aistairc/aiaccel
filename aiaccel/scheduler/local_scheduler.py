@@ -71,6 +71,7 @@ class LocalScheduler(AbstractScheduler):
             return True
 
         for trial_id in trial_ids:
+            self._serialize(trial_id)
             if self.num_node > 1:
                 th = threading.Thread(target=self.excute, args=(trial_id,))
                 th.start()

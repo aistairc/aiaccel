@@ -134,7 +134,6 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.trial_id.initial(num=0)
         self.set_numpy_random_seed()
         self.resume()
 

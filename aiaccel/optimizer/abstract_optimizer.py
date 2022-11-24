@@ -182,6 +182,7 @@ class AbstractOptimizer(AbstractModule):
         for _ in range(pool_size):
             new_params = self.generate_new_parameter()
             if new_params is not None and len(new_params) > 0:
+                print(f'trial id: {self.trial_id.integer}, new_params: {new_params}')
                 self.register_new_parameters(new_params)
 
                 self.trial_id.increment()
