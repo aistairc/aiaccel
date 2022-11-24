@@ -45,10 +45,12 @@ SUPPORTED_TYPES = [
 
 class _Message:
     """
+
     Attributes:
         label (str)    : A something like message ID.
         outputs (list) : It will be output messages.
         delimiter (str): The received data will be divided by this symbol.
+
     Example:
         self.m = Message("test")
         self.m.out("hogehoge")
@@ -64,8 +66,10 @@ class _Message:
 
     def create_message(self, message: Any):
         """ Concatenates a label and a message.
+
         Args:
             message (Any): Content to be out to stdout.
+
         Returns:
             None
         """
@@ -78,6 +82,7 @@ class _Message:
 
     def out(self, all=False) -> None:
         """ Output message to stdout.
+
         Args
             all (bool): If its value is true then print all self.output.
         """
@@ -91,6 +96,7 @@ class _Message:
 
     def parse(self, raw_data: str) -> None:
         """
+
         Args:
             raw_data (str): It is assumed the format
             e.g "{label}:{message}".format(
@@ -120,6 +126,7 @@ class Messages:
 
     def create_message(self, label: str, mess: str) -> None:
         """ Create a message with a any label.
+
         Args:
             label (str): Create a message with this label name.
             mess (str) : Message.
@@ -128,6 +135,7 @@ class Messages:
 
     def out(self, label):
         """ Display any labels message.
+
         Args:
             label (str): Displays a message with this label name.
         """
@@ -138,8 +146,10 @@ class Messages:
         Args:
             label (str): Name of the label to be extracted.
             mess (str) : Raw messages.
+
         Note:
             The target data is only in the form of {label}:{message}.
+
         Examples:
             parse("hoge", "hoge:foo")
             -> return "foo"
@@ -152,6 +162,7 @@ class Messages:
 
 class WrapperInterface:
     """ Interface of between Wrapper and User function.
+
     Note:
         user function:
             output  "objective_y: y"
@@ -169,8 +180,10 @@ class WrapperInterface:
 
     def get_data(self, output) -> tuple:
         """ For wrapper side.
+
         Args:
             raw_stdout(str): stdout(UTF-8)
+
         Returns:
             tuple(ys: str, err: str):
                 ys (list) : The return value of user program.
@@ -257,6 +270,7 @@ class Run:
 
     def generate_commands(self, command: str, xs: list) -> list:
         """ Generate execution command of user program.
+
         Returns:
             list: execution command.
         """
@@ -276,6 +290,7 @@ class Run:
     @singledispatchmethod
     def execute(self, func: callable, trial_id: int, y_data_type: Union[None, str]) -> tuple:
         """ Execution the target function.
+
         Return:
             Objective value.
         """
@@ -296,6 +311,7 @@ class Run:
     @execute.register
     def _(self, command: str, trial_id: int, y_data_type: Union[None, str]) -> tuple:
         """ Execution the user program.
+
         Returns:
             ys (list): This is a list of the return values of the user program.
         """
@@ -329,6 +345,7 @@ class Run:
     @singledispatchmethod
     def execute_and_report(self, func: callable, y_data_type: Union[None, str] = None):
         """
+
         Examples:
             def obj(p)
                 y = p["x1"]
@@ -345,6 +362,7 @@ class Run:
     @execute_and_report.register
     def _(self, command: str, y_data_type: Union[None, str] = None):
         """
+
         Examples:
             run = aiaccel.Run()
             p = run.parameters
