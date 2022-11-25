@@ -6,36 +6,9 @@ from functools import singledispatchmethod
 from logging import StreamHandler, getLogger
 from typing import Any, Union
 
-import numpy as np
-
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
-
-
-SUPPORTED_TYPES = [
-    int,
-    float,
-    str,
-    np.int8,
-    np.int16,
-    np.int32,
-    np.int64,
-    np.uint8,
-    np.uint16,
-    np.uint32,
-    np.uint64,
-    np.float16,
-    np.float32,
-    np.float64,
-    np.float128,
-    np.complex64,
-    np.complex128,
-    np.complex256,
-    np.bool,
-    np.unicode,
-    np.object
-]
 
 
 class _Message:
