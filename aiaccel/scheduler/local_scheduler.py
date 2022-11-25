@@ -7,7 +7,6 @@ import aiaccel
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.util.process import ps2joblist
-from aiaccel.wrapper_tools import create_runner_command
 
 
 class LocalScheduler(AbstractScheduler):
@@ -81,14 +80,7 @@ class LocalScheduler(AbstractScheduler):
         return True
 
     def excute(self, trial_id: int) -> None:
-        content = self.storage.get_hp_dict(trial_id)
-        runner_command = create_runner_command(
-            self.config.job_command.get(),
-            content,
-            str(trial_id),
-            str(self.config_path),
-            self.options
-        )
+        runner_command = self.create_runner_command(self.config.job_command.get(), trial_id)
 
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
         subprocess.run(runner_command, stdout=subprocess.PIPE)

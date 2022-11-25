@@ -12,10 +12,6 @@ from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
 
-# logger = getLogger(__name__)
-# logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
-# logger.addHandler(StreamHandler())
-
 
 SUPPORTED_TYPES = [
     int,
@@ -214,14 +210,52 @@ class Run:
     def __init__(self):
         parser = ArgumentParser()
         parser.add_argument('--config', type=str)
-        parser.add_argument('--trial_id', type=str, required=False)
+        parser.add_argument('--workspace', type=str)
+        parser.add_argument('--trial_id', type=str)
+        parser.add_argument('--max_trial_number', type=str, required=False)
+        parser.add_argument('--num_node', type=str, required=False)
+        parser.add_argument('--goal', type=str, required=False)
+        parser.add_argument('--name_length', type=str, required=False)
+
         args = parser.parse_known_args()[0]
 
         self.args = vars(args)
         self.trial_id = self.args["trial_id"]
         self.config_path = pathlib.Path(self.args["config"])
-        self.config = Config(self.config_path)
-        self.workspace = pathlib.Path(self.config.workspace.get()).resolve()
+        self.config = None
+
+        self.max_trial_number = self.args["max_trial_number"]
+        self.num_node = self.args["num_node"]
+        self.goal = self.args["goal"]
+        self.name_length = self.args["name_length"]
+        self.workspace = self.args["workspace"]
+
+        if self.max_trial_number is None:
+            if self.config is None:
+                self.config = Config(self.config_path)
+                self.max_trial_number = self.config.trial_number.get()
+
+        if self.num_node is None:
+            if self.config is None:
+                self.config = Config(self.config_path)
+                self.num_node = self.config.num_node.get()
+
+        if self.goal is None:
+            if self.config is None:
+                self.config = Config(self.config_path)
+                self.goal = self.config.goal.get()
+
+        if self.name_length is None:
+            if self.config is None:
+                self.config = Config(self.config_path)
+                self.name_length = self.config.name_length.get()
+
+        if self.workspace is None:
+            if self.config is None:
+                self.config = Config(self.config_path)
+                self.workspace = self.config.workspace.get()
+
+        self.workspace = pathlib.Path(self.workspace).resolve()
         self.storage = Storage(self.workspace)
 
         # logger
@@ -234,10 +268,7 @@ class Run:
         self.logger.addHandler(StreamHandler())
 
         self.com = WrapperInterface()
-        self.max_trial_number = self.config.trial_number.get()
-        self.num_node = self.config.num_node.get()
-        self.goal = self.config.goal.get()
-        self.name_length = self.config.name_length.get()
+
 
     def generate_commands(self, command: str, xs: list) -> list:
         """ Generate execution command of user program.

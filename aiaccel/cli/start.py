@@ -72,7 +72,7 @@ def main() -> None:  # pragma: no cover
                 break
             module.loop_count += 1
         else:
-            time.sleep(sleep_time)
+            # time.sleep(sleep_time)
             continue
         break
 
