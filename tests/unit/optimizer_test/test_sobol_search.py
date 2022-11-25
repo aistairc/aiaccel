@@ -17,7 +17,6 @@ class TestSobolOptimizer(BaseTest):
             'process_name': 'optimizer'
         }
         self.optimizer = SobolOptimizer(self.options)
-        self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None
 

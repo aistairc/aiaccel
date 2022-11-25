@@ -148,7 +148,7 @@ def test_get_any_trial_params():
     d = storage.hp.get_any_trial_params(trial_id)
     assert d[0].trial_id == trial_id
     assert d[0].param_name == param_name
-    assert d[0].param_value == str(param_value)
+    assert d[0].param_value == param_value
     assert d[0].param_type == param_type
 
     if param_type.lower() == "float":
