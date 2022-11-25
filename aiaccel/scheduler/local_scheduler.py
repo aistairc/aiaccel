@@ -91,7 +91,7 @@ class LocalScheduler(AbstractScheduler):
         )
 
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
-        subprocess.run(runner_command)
+        subprocess.run(runner_command, stdout=subprocess.PIPE)
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
         self.create_result_file(trial_id)
 

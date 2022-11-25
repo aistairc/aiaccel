@@ -1,5 +1,4 @@
 import logging
-import os
 import pathlib
 import subprocess
 from argparse import ArgumentParser
@@ -230,10 +229,8 @@ class Run:
         log_path = log_dir / f"job_{self.trial_id}.log"
         if not log_dir.exists():
             log_dir.mkdir(parents=True)
-        logging.basicConfig(filename=log_path)
-
+        logging.basicConfig(filename=log_path, level=logging.DEBUG)
         self.logger = getLogger(__name__)
-        self.logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
         self.logger.addHandler(StreamHandler())
 
         self.com = WrapperInterface()
@@ -241,6 +238,25 @@ class Run:
         self.num_node = self.config.num_node.get()
         self.goal = self.config.goal.get()
         self.name_length = self.config.name_length.get()
+
+    def generate_commands(self, command: str, xs: list) -> list:
+        """ Generate execution command of user program.
+
+        Returns:
+            list: execution command.
+        """
+        commands = command.split(" ")
+        commands.append(f"--config={str(self.config_path)}")
+        commands.append(f"--trial_id={self.trial_id}")
+
+        for key in xs:
+            name = key
+            value = xs[key]
+            if value is not None:
+                command = f"--{name}={value}"
+                commands.append(command)
+
+        return commands
 
     def get_any_trial_xs(self, trial_id: int) -> dict:
         params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
@@ -267,25 +283,6 @@ class Run:
             TypeError(f'{y_data_type} cannot be specified')
 
         return y
-
-    def generate_commands(self, command: str, xs: list) -> list:
-        """ Generate execution command of user program.
-
-        Returns:
-            list: execution command.
-        """
-        commands = command.split(" ")
-        commands.append(f"--config={str(self.config_path)}")
-        commands.append(f"--trial_id={self.trial_id}")
-
-        for key in xs:
-            name = key
-            value = xs[key]
-            if value is not None:
-                command = f"--{name}={value}"
-                commands.append(command)
-
-        return commands
 
     @singledispatchmethod
     def execute(self, func: callable, trial_id: int, y_data_type: Union[None, str]) -> tuple:
@@ -377,21 +374,10 @@ class Run:
     def report(self, trial_id: int, xs: dict, y: any, err: str, start_time: str, end_time: str) -> None:
         """ Write the result in yaml format to the result directory.
         """
+        self.logger.info(f"{trial_id}, {xs, y}, {err}, {start_time}, {end_time}")
 
-        self.storage.result.set_any_trial_objective(
-            trial_id=trial_id,
-            objective=y
-        )
-        self.storage.timestamp.set_any_trial_start_time(
-            trial_id=trial_id,
-            start_time=start_time
-        )
-        self.storage.timestamp.set_any_trial_end_time(
-            trial_id=trial_id,
-            end_time=end_time
-        )
+        self.storage.result.set_any_trial_objective(trial_id, y)
+        self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
+        self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
         if err != "":
-            self.storage.error.set_any_trial_error(
-                trial_id=trial_id,
-                error_message=err
-            )
+            self.storage.error.set_any_trial_error(trial_id, err)
