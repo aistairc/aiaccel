@@ -28,7 +28,6 @@ class TestTpeOptimizer(BaseTest):
             'process_name': 'optimizer'
         }
         self.optimizer = TpeOptimizer(self.options)
-        self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None
 

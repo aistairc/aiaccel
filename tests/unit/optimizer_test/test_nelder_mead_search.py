@@ -24,7 +24,6 @@ class TestNelderMeadOptimizer(BaseTest):
             'process_name': 'optimizer'
         }
         self.optimizer = NelderMeadOptimizer(self.options)
-        self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None
 

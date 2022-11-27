@@ -14,6 +14,5 @@ class TestRandomOptimizer(BaseTest):
             'process_name': 'optimizer'
         }
         optimizer = RandomOptimizer(options)
-        optimizer.storage.alive.init_alive()
         optimizer.pre_process()
         assert len(optimizer.generate_parameter()) > 0

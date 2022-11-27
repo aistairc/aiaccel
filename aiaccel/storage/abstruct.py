@@ -18,13 +18,13 @@ class Abstract:
             self.url,
             echo=False,
             poolclass=NullPool,
-            connect_args={'check_same_thread': False, 'timeout': 60}
+            connect_args={'timeout': 60}
         )
         self.metadata = MetaData()
         self.metadata.bind = self.engine
         Base.metadata.create_all(self.engine)
         self.session = scoped_session(
-            sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+            sessionmaker(autocommit=False, autoflush=True, bind=self.engine)
         )
         self.lock_file = Path(file_name).resolve().parent / "db_lock"
 
