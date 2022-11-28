@@ -19,22 +19,6 @@ async def start_master(master):
     await loop.run_in_executor(None, master.start)
 
 
-async def wait_finish_wrapper(sleep_time, storage, master):
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, wait_finish, sleep_time, storage, master)
-
-
-def wait_finish(sleep_time, storage, master):
-    time.sleep(sleep_time)
-    while (
-        storage.alive.check_alive(module_name='master') or
-        storage.alive.check_alive(module_name='optimizer') or
-        storage.alive.check_alive(module_name='scheduler')
-    ):
-        time.sleep(sleep_time)
-        master.print_dict_state()
-
-
 class IntegrationTest(BaseTest):
     search_algorithm = None
 

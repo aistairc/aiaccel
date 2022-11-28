@@ -2,11 +2,9 @@ from pathlib import PosixPath
 from typing import Union
 
 import aiaccel
-from aiaccel.storage.alive import Alive
 from aiaccel.storage.error import Error
 from aiaccel.storage.hp import Hp
 from aiaccel.storage.jobstate import JobState
-from aiaccel.storage.pid import Pid
 from aiaccel.storage.result import Result
 from aiaccel.storage.timestamp import TimeStamp
 from aiaccel.storage.trial import Trial
@@ -18,13 +16,10 @@ class Storage:
     """
     def __init__(self, ws: PosixPath) -> None:
         db_path = ws / aiaccel.dict_storage / "storage.db"
-        self.alive = Alive(db_path)
-        self.pid = Pid(db_path)
         self.trial = Trial(db_path)
         self.hp = Hp(db_path)
         self.result = Result(db_path)
         self.jobstate = JobState(db_path)
-        self.serializer = Serializer(db_path)
         self.error = Error(db_path)
         self.timestamp = TimeStamp(db_path)
         self.variable = Serializer(db_path)
