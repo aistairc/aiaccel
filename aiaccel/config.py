@@ -330,8 +330,8 @@ _DEFAULT_HYPERPARAMETERS = []
 _DEFAULT_IS_VERIFIED = False
 _DEFAULT_VERIFI_CONDITION = []
 _DEFAULT_RANDOM_SCHESULING = True
-_RESOURCE_TYPES = ['abci', 'local']
-_GOALS = ['minimize', 'maximize']
+_DEFAULT_PYTHON_FILE = ""
+_DEFAULT_FUNCTION = ""
 
 
 class Config:
@@ -403,6 +403,22 @@ class Config:
             warning=False,
             group="generic",
             keys=("sleep_time")
+        )
+        self.python_file = ConfigEntry(
+            config=config,
+            type=[str],
+            default=_DEFAULT_PYTHON_FILE,
+            warning=False,
+            group="generic",
+            keys=("python_file")
+        )
+        self.function = ConfigEntry(
+            config=config,
+            type=[str],
+            default=_DEFAULT_FUNCTION,
+            warning=False,
+            group="generic",
+            keys=("function")
         )
 
         # === scheduler defalt config===

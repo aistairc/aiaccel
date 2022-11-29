@@ -33,6 +33,7 @@ class Result(Abstract):
                 if data is None:
                     new_row = ResultTable(
                         trial_id=trial_id,
+                        data_type=str(type(objective)),
                         objective=objective
                     )
                     session.add(new_row)

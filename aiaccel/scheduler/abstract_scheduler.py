@@ -1,5 +1,4 @@
 import time
-import re
 from pathlib import Path
 from typing import Union
 
@@ -295,40 +294,6 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
-
-    def create_runner_command(self, command: str, trial_id: int) -> list:
-
-        """Create a list of command strings to run a hyper parameter.
-
-        Args:
-            command (str): A string command.
-            param_content (dict): A hyper parameter content.
-            trial_id (str): A unique name of a hyper parameter.
-
-        Returns:
-            A list of command strings.
-        """
-        commands = re.split(' +', command)
-
-        commands.append('--trial_id')
-        commands.append(str(trial_id))
-
-        commands.append('--config')
-        commands.append(str(self.config.config_path))
-
-        commands.append('--max_trial_number')
-        commands.append(str(self.config.trial_number.get()))
-
-        commands.append('--num_node')
-        commands.append(str(self.config.num_node.get()))
-
-        commands.append('--goal')
-        commands.append(str(self.config.goal.get()))
-
-        commands.append('--name_length')
-        commands.append(str(self.config.name_length.get()))
-
-        return commands
 
     def __getstate__(self):
         obj = super().__getstate__()

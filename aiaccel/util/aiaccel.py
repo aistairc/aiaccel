@@ -1,10 +1,10 @@
 import logging
-import pathlib
 import subprocess
 from argparse import ArgumentParser
 from functools import singledispatchmethod
 from logging import StreamHandler, getLogger
 from typing import Any, Union
+from pathlib import Path
 
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
@@ -84,6 +84,9 @@ class _Message:
             target_data.append("")
         return target_data
 
+    def clear(self):
+        self.outputs = []
+
 
 class Messages:
     def __init__(self, *labels: tuple) -> None:
@@ -108,6 +111,9 @@ class Messages:
             label (str): Displays a message with this label name.
         """
         self.d[label].out()
+
+    def clear(self, label):
+        self.d[label].clear()
 
     def parse(self, label, mess):
         """
@@ -178,57 +184,30 @@ class WrapperInterface:
         self.stdout.out("objective_y")
         self.stdout.out("objective_err")
 
+        self.stdout.clear("objective_y")
+        self.stdout.clear("objective_err")
+
 
 class Run:
-    def __init__(self):
+    def __init__(self, config_path: Union[str, Path, None] = None):
         parser = ArgumentParser()
         parser.add_argument('--config', type=str)
-        parser.add_argument('--workspace', type=str)
-        parser.add_argument('--trial_id', type=str)
-        parser.add_argument('--max_trial_number', type=str, required=False)
-        parser.add_argument('--num_node', type=str, required=False)
-        parser.add_argument('--goal', type=str, required=False)
-        parser.add_argument('--name_length', type=str, required=False)
+        parser.add_argument('--trial_id', type=str, required=False)
 
         args = parser.parse_known_args()[0]
 
         self.args = vars(args)
         self.trial_id = self.args["trial_id"]
-        self.config_path = pathlib.Path(self.args["config"])
-        self.config = None
 
-        self.max_trial_number = self.args["max_trial_number"]
-        self.num_node = self.args["num_node"]
-        self.goal = self.args["goal"]
-        self.name_length = self.args["name_length"]
-        self.workspace = self.args["workspace"]
+        if config_path is not None:
+            self.config_path = config_path
+            if type(self.config_path) == str:
+                self.config_path = Path(self.config_path).resolve()
+        else:
+            self.config_path = Path(self.args["config"])
 
-        if self.max_trial_number is None:
-            if self.config is None:
-                self.config = Config(self.config_path)
-                self.max_trial_number = self.config.trial_number.get()
-
-        if self.num_node is None:
-            if self.config is None:
-                self.config = Config(self.config_path)
-                self.num_node = self.config.num_node.get()
-
-        if self.goal is None:
-            if self.config is None:
-                self.config = Config(self.config_path)
-                self.goal = self.config.goal.get()
-
-        if self.name_length is None:
-            if self.config is None:
-                self.config = Config(self.config_path)
-                self.name_length = self.config.name_length.get()
-
-        if self.workspace is None:
-            if self.config is None:
-                self.config = Config(self.config_path)
-                self.workspace = self.config.workspace.get()
-
-        self.workspace = pathlib.Path(self.workspace).resolve()
+        self.config = Config(self.config_path)
+        self.workspace = Path(self.config.workspace.get()).resolve()
         self.storage = Storage(self.workspace)
 
         # logger
@@ -241,7 +220,6 @@ class Run:
         self.logger.addHandler(StreamHandler())
 
         self.com = WrapperInterface()
-
 
     def generate_commands(self, command: str, xs: list) -> list:
         """ Generate execution command of user program.
@@ -378,8 +356,6 @@ class Run:
     def report(self, trial_id: int, xs: dict, y: any, err: str, start_time: str, end_time: str) -> None:
         """ Write the result in yaml format to the result directory.
         """
-        self.logger.info(f"{trial_id}, {xs, y}, {err}, {start_time}, {end_time}")
-
         self.storage.result.set_any_trial_objective(trial_id, y)
         self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
