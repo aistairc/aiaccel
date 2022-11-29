@@ -330,6 +330,7 @@ _DEFAULT_HYPERPARAMETERS = []
 _DEFAULT_IS_VERIFIED = False
 _DEFAULT_VERIFI_CONDITION = []
 _DEFAULT_RANDOM_SCHESULING = True
+_DEFAULT_SOBOL_SCRAMBLE = True
 _RESOURCE_TYPES = ['abci', 'local']
 _GOALS = ['minimize', 'maximize']
 
@@ -737,6 +738,15 @@ class Config:
             warning=False,
             group="logger",
             keys=("stream_level", "scheduler")
+        )
+
+        self.sobol_scramble = ConfigEntry(
+            config=config,
+            type=[bool],
+            default=_DEFAULT_SOBOL_SCRAMBLE,
+            warning=False,
+            group="optimize",
+            keys=("sobol_scramble")
         )
 
         # === verification ===

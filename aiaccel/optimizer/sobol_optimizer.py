@@ -32,10 +32,13 @@ class SobolOptimizer(AbstractOptimizer):
 
         finished = self.storage.trial.get_finished()
         self.generate_index = len(finished)
-        self.sampler = qmc.Sobol(d=len(self.params.get_parameter_list()), scramble=False, seed=self._rng)
 
-        if self.generate_index is not None and self.generate_index > 0:
-            self.sampler.fast_forward(self.generate_index)
+        if self.options['resume'] is None or self.options['resume'] <= 0:
+            self.sampler = qmc.Sobol(
+                d=len(self.params.get_parameter_list()),
+                scramble=self.config.sobol_scramble.get(),
+                seed=self._rng
+            )
 
     def generate_parameter(self) -> None:
         """Generate parameters.
