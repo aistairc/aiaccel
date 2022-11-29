@@ -56,7 +56,7 @@ class IntegrationTest(BaseTest):
 
             storage = Storage(ws=Path(config.workspace.get()))
 
-            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
+            subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
             self.evaluate(data_dir, work_dir, storage)
 
             new_config_file.unlink()
