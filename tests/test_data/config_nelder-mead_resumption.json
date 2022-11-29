@@ -6,7 +6,7 @@
     "pytho": "python -m aistiot.bin.scheduler"
   },
   "resource": {
-    "type": "local",
+    "type": "python_local",
     "num_node": 4
   },
   "ABCI": {

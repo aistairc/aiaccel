@@ -508,7 +508,12 @@ class Model(object):
         if obj.is_local():
             return
 
-        commands = create_runner_command(obj.trial_id, obj.config.job_command.get())
+        commands = create_runner_command(
+            obj.config.job_command.get(),
+            obj.content,
+            obj.trial_id,
+            obj.config_path
+        )
 
         with obj.lock:
             create_abci_batch_file(
