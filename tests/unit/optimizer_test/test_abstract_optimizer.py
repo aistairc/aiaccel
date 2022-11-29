@@ -34,7 +34,6 @@ class TestAbstractOptimizer(BaseTest):
             'process_name': 'optimizer'
         }
         self.optimizer = AbstractOptimizer(options)
-        self.optimizer.storage.alive.init_alive()
         yield
         self.optimizer = None
 

@@ -68,7 +68,6 @@ class TestAbstractModule(BaseTest):
         }
 
         self.module = AbstractModule(options)
-        self.module.storage.alive.init_alive()
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
