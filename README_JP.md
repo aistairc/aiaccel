@@ -20,7 +20,7 @@
 0. (オプション) Virtualenvをインストールし、仮想環境を作成します。
     ~~~bash
     > python3 -m venv optenv
-    > source work/bin/activate
+    > source optenv/bin/activate
     ~~~
 
 1. `aiaccel`をインストールします
