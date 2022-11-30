@@ -4,6 +4,7 @@ generic:
   python_file: "./user.py"
   function: "main"
   batch_job_timeout: 600
+  #sleep_time: 0.01
 
 resource:
   type: "abci"
@@ -62,10 +63,6 @@ job_setting:
   random_scheduling: false
   #random_scheduling: true
 
-sleep_time:
-  master: 1
-  scheduler: 1
-  optimizer: 1
 
 logger:
   file:
