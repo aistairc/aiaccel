@@ -108,7 +108,7 @@ class TestNelderMead(object):
         #
         print(storage.get_finished())
         print(storage.result.get_all_result())
-        c = storage.get_hp_dict(trial_id_str='000')
+        c = storage.get_hp_dict(trial_id=0)
         assert c is not None
 
         param = copy.copy(params[[p['vertex_id'] for p in params].index('001')])
