@@ -1,3 +1,5 @@
+import aiaccel
+
 from tests.integration.integration_test import IntegrationTest
 
 

@@ -24,11 +24,18 @@ class TestCreateAbciBatchFile(BaseTest):
         config = load_test_config()
         dict_lock = work_dir.joinpath('lock')
         batch_file = work_dir.joinpath('runner', 'run_test.sh')
+        options = {
+            'config': str(self.config_json),
+            'resume': None,
+            'clean': False,
+            'fs': False,
+        }
         commands = create_runner_command(
             config.job_command.get(),
             get_one_parameter(),
             'test',
-            'config.json'
+            'config.json',
+            options
         )
         wrapper_file = data_dir.joinpath(config.job_script_preamble.get())
         create_abci_batch_file(batch_file, wrapper_file, commands, dict_lock)

@@ -2,12 +2,10 @@
   "generic": {
     "workspace": "/tmp/work",
     "job_command": "python /tmp/original_main.py",
-    "python_file": "/tmp/original_main.py",
-    "function": "main",
     "batch_job_timeout": 600
   },
   "resource": {
-    "type": "python_local",
+    "type": "local",
     "num_node": 4
   },
   "ABCI": {
@@ -139,17 +137,17 @@
     "scheduler": 1
   },
   "logger": {
-    "file": {
+    "file":{
       "master": "master.log",
       "scheduler": "scheduler.log",
       "optimizer": "optimizer.log"
     },
-    "log_level": {
+    "log_level":{
       "master": "DEBUG",
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     },
-    "stream_level": {
+    "stream_level":{
       "master": "DEBUG",
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"

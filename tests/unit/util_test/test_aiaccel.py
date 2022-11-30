@@ -1,9 +1,19 @@
+import argparse
+import pathlib
+import subprocess
 import sys
+from subprocess import CompletedProcess
+from textwrap import wrap
+from unittest import mock
 from unittest.mock import patch
 
+import aiaccel
 import numpy as np
-from aiaccel.util.aiaccel import Messages, Run, WrapperInterface
+from aiaccel.storage.storage import Storage
+# from aiaccel.util.opt import Wrapper
+from aiaccel.util.aiaccel import Messages, Run, WrapperInterface, report
 
+# from aiaccel.util.opt import create_objective
 from tests.base_test import BaseTest
 
 
@@ -104,6 +114,88 @@ class TestRun(BaseTest):
             run = Run()
             assert run.trial_id == "0001"
 
+    # test module parameters
+    def test_parameters(self):
+        with patch.object(sys, 'argv', self.get_test_args()):
+            run = Run()
+            assert run.parameters["x1"] == 0.1
+            assert run.parameters["x2"] == 0.2
+            assert run.parameters["x3"] == 0.3
+            assert run.parameters["x4"] == 0.4
+            assert run.parameters["x5"] == 0.5
+            assert run.parameters["x6"] == 0.6
+            assert run.parameters["x7"] == 0.7
+            assert run.parameters["x8"] == 0.8
+            assert run.parameters["x9"] == 0.9
+            assert run.parameters["x10"] == 1.0
+
+    # test module: objective
+    def test_objective(self):
+        with patch.object(sys, 'argv', self.get_test_args()):
+            run = Run()
+            assert run.objective is None
+            run.execute_and_report(main)
+            assert run.objective is not None
+
+            assert run.execute_and_report(invalid_func) is None
+
+            with patch.object(run, "args", {'trial_id': 1, 'config':None}):
+                assert run.execute_and_report(invalid_func) is None
+
+    # test module: exist_error
+    def test_exist_error(self):
+        with patch.object(sys, 'argv', self.get_test_args()):
+            run = Run()
+            with patch.object(run, "err", ""):
+                assert run.exist_error() is False
+
+            with patch.object(run, "err", "hoge"):
+                assert run.exist_error() is True
+
+            with patch.object(run, "err", None):
+                assert run.exist_error() is False
+
+    # test module: trial_stop
+    def test_trial_stop(self):
+        with patch.object(sys, 'argv', self.get_test_args()):
+            run = Run()
+            with patch.object(run, "err", "has any error"):
+                assert run.trial_stop() is None
+            
+            with patch.object(run, "err", ""):
+                assert run.trial_stop() is None
+
+    # test module: set_error
+    def test_set_error(self):
+        # for i in range(10):
+        #     self.storage.result.set_any_trial_objective(
+        #         trial_id=i,
+        #         objective=0.0
+        #     )
+        # self.storage.result.all_delete()
+        # self.storage.timestamp.all_delete()
+        # self.storage.errors.all_delete()
+        with patch.object(sys, 'argv', self.get_test_args()):
+            run = Run()
+            run.index = '0001'
+            run.set_error("test error")
+            assert run.err == "test error"
+            assert run.error == "test error"
+
+    # excute
+    def test_excute(self):
+        # success
+        """
+            objective_y:42
+            ny_data_type:int
+            nobjective_error:
+        """
+        with patch.object(sys, 'argv', self.get_test_args()):
+            run = Run()
+            y = run.execute(main)
+            assert y == 3.85
+
+
 #
 # Wrapper Interface
 #
@@ -111,3 +203,8 @@ def wrapper_interface():
     wrp = WrapperInterface()
     assert wrp.get_data('objective_y: objective_err:') == (None, None)
     assert wrp.get_data('objective_y:123 objective_err:err') == ('123', 'err')
+
+def test_report():
+    assert report(objective_y=123, objective_err='error') is None
+    assert report(objective_y=[123], objective_err='') is None
+
