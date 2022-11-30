@@ -26,7 +26,7 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
 0. (Optional) Install [Virtualenv](https://virtualenv.pypa.io/en/latest/) and create a virtual environment. 
     ~~~bash
     > python3 -m venv optenv
-    > source work/bin/activate
+    > source optenv/bin/activate
     ~~~
 
 1. Install `aiaccel`
