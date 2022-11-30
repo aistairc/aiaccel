@@ -2,13 +2,13 @@ generic:
   workspace: "./work"
   job_command: "python user.py"
   python_file: "./user.py"
-  objective_function: "main"
+  function: "main"
   batch_job_timeout: 600
 
 resource:
   type: "abci"
   #type: "local"
-  #type: "func_local"
+  #type: "python_local"
   num_node: 4
 
 ABCI:
