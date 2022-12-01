@@ -72,15 +72,14 @@ class AbstractOptimizer(AbstractModule):
 
         self.num_of_generated_parameter += 1
 
-    def generate_initial_parameter(self) -> Union[
-        Dict[str, List[Dict[str, Union[str, Union[float, List[float]]]]]], None
+    def generate_initial_parameter(self) -> Dict[
+        str, List[Dict[str, Union[str, Union[float, List[float]]]]]
     ]:
         """Generate a initial parameter.
 
         Returns:
             Union[Dict[str, List[Dict[str, Union[str, Union[float,
-                List[float]]]]], None]: A created initial parameter. It returns
-                None if any parameters are already created.
+                List[float]]]]], None]: A created initial parameter. 
         """
 
         sample = self.params.sample(initial=True, rng=self._rng)
