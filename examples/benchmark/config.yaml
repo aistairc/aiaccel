@@ -1,11 +1,15 @@
 generic:
   workspace: "./work"
   job_command: "python user.py"
+  python_file: "./user.py"
+  function: "main"
   batch_job_timeout: 600
   #sleep_time: 0.01
 
 resource:
-  type: "local"
+  type: "abci"
+  #type: "local"
+  #type: "python_local"
   num_node: 4
 
 ABCI:

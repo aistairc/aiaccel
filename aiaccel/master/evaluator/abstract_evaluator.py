@@ -39,8 +39,7 @@ class AbstractEvaluator(object):
             None
         """
         best_trial_id, _ = self.storage.get_best_trial(self.goal)
-        best_trial_id_str = self.get_zero_padding_any_trial_id(best_trial_id)
-        self.hp_result = self.storage.get_hp_dict(best_trial_id_str)
+        self.hp_result = self.storage.get_hp_dict(best_trial_id)
 
     def print(self) -> None:
         """Print current results.
