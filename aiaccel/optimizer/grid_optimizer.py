@@ -183,7 +183,6 @@ class GridOptimizer(AbstractOptimizer):
         Returns:
             List[dict]: A List of new parameters.
         """
-
         parameter_index = self.get_parameter_index()
         new_params = []
 
