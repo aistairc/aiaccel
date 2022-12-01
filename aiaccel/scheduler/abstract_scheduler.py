@@ -6,6 +6,8 @@ from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schedule_sampling
 from aiaccel.scheduler.job.job_thread import Job
 from aiaccel.util.logger import str_to_logging_level
+from aiaccel.util.filesystem import create_yaml
+from aiaccel import dict_result
 
 
 class AbstractScheduler(AbstractModule):
@@ -50,6 +52,7 @@ class AbstractScheduler(AbstractModule):
         self.job_status = {}
         self.algorithm = None
         self.sleep_time = self.config.sleep_time.get()
+        self.num_node = self.config.num_node.get()
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
@@ -133,7 +136,6 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.trial_id.initial(num=0)
         self.set_numpy_random_seed()
         self.resume()
 
@@ -294,6 +296,31 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
+
+    def create_result_file(self, trial_id: int) -> None:
+        """ Save the results in yaml format.
+
+        Args:
+            trial_id (int): Any trial od
+
+        Returns:
+            None
+        """
+
+        file_hp_count_fmt = f'%0{self.config.name_length.get()}d'
+        file_name = file_hp_count_fmt % trial_id + '.hp'
+
+        content = self.storage.get_hp_dict(trial_id)
+        result = self.storage.result.get_any_trial_objective(trial_id=trial_id)
+        error = self.storage.error.get_any_trial_error(trial_id=trial_id)
+
+        content['result'] = str(result)
+
+        if error is not None:
+            content['error'] = error
+
+        result_file_path = self.ws / dict_result / file_name
+        create_yaml(result_file_path, content)
 
     def __getstate__(self):
         obj = super().__getstate__()

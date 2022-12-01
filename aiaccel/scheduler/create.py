@@ -3,6 +3,7 @@ from typing import Any
 from aiaccel.config import Config
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
 
 
 def create_scheduler(config_path: str) -> Any:
@@ -11,6 +12,9 @@ def create_scheduler(config_path: str) -> Any:
 
     if resource.lower() == "local":
         return LocalScheduler
+
+    elif resource.lower() == "python_local":
+        return PylocalScheduler
 
     elif resource.lower() == "abci":
         return AbciScheduler

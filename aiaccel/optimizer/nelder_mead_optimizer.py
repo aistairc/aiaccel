@@ -219,7 +219,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
         new_params = []
 
         if len(self.parameter_pool) == 0:
-            self.logger.info('All parameters in pool has been generated.')
             return new_params
 
         pool_p = self.parameter_pool.pop(0)

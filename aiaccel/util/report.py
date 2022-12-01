@@ -38,7 +38,7 @@ class CreationReport:
             return
 
         # write header
-        example = self.storage.get_hp_dict(self.get_zero_padding_trial_id(finished[0]))
+        example = self.storage.get_hp_dict(finished[0])
         header.append('trial_id')
         for param in example['parameters']:
             header.append(param['parameter_name'])
