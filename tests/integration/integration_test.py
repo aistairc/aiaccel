@@ -10,6 +10,12 @@ from unittest.mock import patch
 import aiaccel
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
+from aiaccel.master.create import create_master
+from aiaccel.master.local_master import LocalMaster
+from aiaccel.master.pylocal_master import PylocalMaster
+from aiaccel.scheduler.create import create_scheduler
+from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
 
 from tests.base_test import BaseTest
 
@@ -31,6 +37,15 @@ class IntegrationTest(BaseTest):
         with self.create_main():
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             config = Config(config_file)
+
+            # master
+            master = create_master(config_file)
+            assert master == LocalMaster
+
+            # scheduler
+            scheduler = create_scheduler(config_file)
+            assert scheduler == LocalScheduler
+
             storage = Storage(ws=Path(config.workspace.get()))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
             self.evaluate(data_dir, work_dir, storage)
@@ -53,6 +68,14 @@ class IntegrationTest(BaseTest):
 
             config = Config(new_config_file)
             assert config.resource_type.get() == 'python_local'
+
+            # master
+            master = create_master(new_config_file)
+            assert master == PylocalMaster
+
+            # scheduler
+            scheduler = create_scheduler(new_config_file)
+            assert scheduler == PylocalScheduler
 
             storage = Storage(ws=Path(config.workspace.get()))
 
