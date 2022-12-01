@@ -241,6 +241,8 @@ class BaseTest(object):
             name = f"{d['trial_id']}.yml"
             path = work_dir / 'result' / name
             create_yaml(path, d)
+
+        self.result_comparison = []
         
     @contextmanager
     def create_main(self):
