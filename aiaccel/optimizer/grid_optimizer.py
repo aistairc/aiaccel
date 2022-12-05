@@ -174,16 +174,15 @@ class GridOptimizer(AbstractOptimizer):
 
         return parameter_index
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(self) -> List[dict]:
         """Generate parameters.
 
         Args:
             number (Optional[int]): A number of generating parameters.
 
         Returns:
-            None
+            List[dict]: A List of new parameters.
         """
-
         parameter_index = self.get_parameter_index()
         new_params = []
 
@@ -203,7 +202,12 @@ class GridOptimizer(AbstractOptimizer):
 
         return new_params
 
-    def generate_initial_parameter(self) -> None:
+    def generate_initial_parameter(self) -> List[dict]:
+        """Generate initial parameters.
+
+        Returns:
+            List[dict]: A List of new parameters.
+        """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(
                 "Initial values cannot be specified for grid search."
