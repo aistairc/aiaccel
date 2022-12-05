@@ -108,8 +108,8 @@ class AbstractOptimizer(AbstractModule):
 
         return new_params
 
-    def generate_parameter(self) -> List[
-        Dict[str, Union[str, float, List[float]]]
+    def generate_parameter(self) -> Optional[
+        List[Dict[str, Union[str, float, List[float]]]]
     ]:
         """Generate a list of parameters.
 
@@ -140,8 +140,8 @@ class AbstractOptimizer(AbstractModule):
 
         return pool_size
 
-    def generate_new_parameter(self) -> List[
-        Dict[str, Union[str, Union[float, List[float]]]]
+    def generate_new_parameter(self) -> Optional[
+        List[Dict[str, Union[str, Union[float, List[float]]]]]
     ]:
         """Generate a list of parameters.
 
