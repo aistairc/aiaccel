@@ -19,7 +19,7 @@ class AbstractScheduler(AbstractModule):
         available_resource (int): An available current resource number.
         jobs (List[dict]): A list to store job dictionaries.
         job_lock (fastener.lock.ReadWriteLock): A lock object to manage
-            exclusive control of job threads each other.
+            exclusive control of job each other.
         max_resource (int): A max resource number.
         stats (List[dict]): A list of current status which is updated using ps
             command or qstat command.
@@ -79,8 +79,8 @@ class AbstractScheduler(AbstractModule):
         """
         self.get_each_state_count()
 
-    def start_job_thread(self, trial_id: int) -> Union[Job, None]:
-        """Start a new job thread.
+    def start_job(self, trial_id: int) -> Union[Job, None]:
+        """Start a new job.
 
         Args:
             hp (Path): A parameter file path
@@ -91,16 +91,13 @@ class AbstractScheduler(AbstractModule):
         """
         trial_ids = [job['trial_id'] for job in self.jobs]
         if trial_id not in trial_ids:
-            th = Job(self.config, self.options, self, trial_id)
-            self.jobs.append({'trial_id': trial_id, 'thread': th})
+            job = Job(self.config, self.options, self, trial_id)
+            self.jobs.append({'trial_id': trial_id, 'obj': job})
             self.logger.debug(f"Submit a job: {str(trial_id)}")
-            th.start()
-            return th
+            job.run()
+            return job
         else:
-            self.logger.error(
-                f'Specified hyperparemeter file already exists '
-                f'in job threads: {trial_id}'
-            )
+            self.logger.error(f'Specified trial {trial_id} is already running ')
             return None
 
     def update_resource(self) -> None:
@@ -119,16 +116,16 @@ class AbstractScheduler(AbstractModule):
             'Scheduling'
         ]
 
-        succeed_threads = [
-            th for th in self.jobs
-            if th['thread'].get_state_name() == 'Success'
+        succeed_jobs = [
+            job for job in self.jobs
+            if job['obj'].get_state_name() == 'Success'
         ]
-        ready_threads = [
+        ready_jobs = [
             th for th in self.jobs
-            if th['thread'].get_state_name() in state_names
+            if th['obj'].get_state_name() in state_names
         ]
-        num_running_threads = len(self.jobs) - len(ready_threads) - len(succeed_threads)
-        self.available_resource = max(0, self.max_resource - num_running_threads)
+        num_running_jobs = len(self.jobs) - len(ready_jobs) - len(succeed_jobs)
+        self.available_resource = max(0, self.max_resource - num_running_jobs)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -144,7 +141,7 @@ class AbstractScheduler(AbstractModule):
 
         runnings = self.storage.trial.get_running()
         for running in runnings:
-            th = self.start_job_thread(running)
+            th = self.start_job(running)
             self.logger.info(f'restart hp files in previous running directory: {running}')
 
             while th.get_state_name() != 'Scheduling':
@@ -158,13 +155,6 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        if not self.check_finished():
-            for job in self.jobs:
-                job['thread'].stop()
-
-            for job in self.jobs:
-                job['thread'].join()
-
         self.logger.info('Scheduler finished.')
 
     def inner_loop_main_process(self) -> bool:
@@ -175,10 +165,6 @@ class AbstractScheduler(AbstractModule):
         """
 
         if self.check_finished():
-            self.logger.info('All parameters have been done.')
-            self.logger.info('Wait all threads finish...')
-            for job in self.jobs:
-                job['thread'].join()
             return False
 
         self.get_stats()
@@ -188,31 +174,32 @@ class AbstractScheduler(AbstractModule):
         # find a new hp
         for ready in readies:
             if (ready not in [job['trial_id'] for job in self.jobs]):
-                self.start_job_thread(ready)
+                self.start_job(ready)
 
         scheduled_candidates = []
         for job in self.jobs:
-            if job['thread'].get_state_name() == 'Scheduling':
-                scheduled_candidates.append(job['thread'])
+            if job['obj'].get_state_name() == 'Scheduling':
+                scheduled_candidates.append(job['obj'])
 
-        selected_threads = self.algorithm.select_hp(
+        selected_jobs = self.algorithm.select_hp(
             scheduled_candidates,
             self.available_resource,
             rng=self._rng
         )
 
-        if len(selected_threads) > 0:
-            for th in selected_threads:
-                if th.get_state_name() == 'Scheduling':
-                    self._serialize(th.trial_id)
-                    th.schedule()
+        if len(selected_jobs) > 0:
+            for job in selected_jobs:
+                if job.get_state_name() == 'Scheduling':
+                    self._serialize(job.trial_id)
+                    job.schedule()
                     self.logger.debug(
-                        f"trial id: {th.trial_id} has been scheduled."
+                        f"trial id: {job.trial_id} has been scheduled."
                     )
-                    selected_threads.remove(th)
+                    selected_jobs.remove(job)
 
         for job in self.jobs:
-            self.logger.info(f"name: {job['trial_id']}, state: {job['thread'].get_state_name()}")
+            self.job.run()
+            self.logger.info(f"name: {job['trial_id']}, state: {job['obj'].get_state_name()}")
 
         self.get_stats()
         self.update_resource()

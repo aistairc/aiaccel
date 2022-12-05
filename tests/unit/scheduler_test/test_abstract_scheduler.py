@@ -96,7 +96,7 @@ class TestAbstractScheduler(BaseTest):
         scheduler.print_dict_state()
         assert scheduler.get_stats() is None
 
-    def test_start_job_thread(
+    def test_start_job(
         self,
         clean_work_dir,
         config_json,
@@ -116,13 +116,13 @@ class TestAbstractScheduler(BaseTest):
         scheduler.print_dict_state()
         setup_hp_ready(1)
         trial_id = 1
-        scheduler.start_job_thread(trial_id)
-        assert scheduler.start_job_thread(trial_id) is None
+        scheduler.start_job(trial_id)
+        assert scheduler.start_job(trial_id) is None
 
         for job in scheduler.jobs:
-            machine = job['thread'].get_machine()
+            machine = job['obj'].get_machine()
             machine.set_state('Success')
-            job['thread'].join()
+            job['obj'].run()
 
     def test_update_resource(
         self,
