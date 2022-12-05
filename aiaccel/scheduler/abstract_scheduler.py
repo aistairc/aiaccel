@@ -141,13 +141,12 @@ class AbstractScheduler(AbstractModule):
 
         runnings = self.storage.trial.get_running()
         for running in runnings:
-            th = self.start_job(running)
+            job = self.start_job(running)
             self.logger.info(f'restart hp files in previous running directory: {running}')
 
-            while th.get_state_name() != 'Scheduling':
-                time.sleep(self.sleep_time)
-
-            th.schedule()
+            while job.get_state_name() != 'Scheduling':
+                job.run()
+            job.schedule()
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
@@ -198,7 +197,7 @@ class AbstractScheduler(AbstractModule):
                     selected_jobs.remove(job)
 
         for job in self.jobs:
-            self.job.run()
+            job['obj'].run()
             self.logger.info(f"name: {job['trial_id']}, state: {job['obj'].get_state_name()}")
 
         self.get_stats()

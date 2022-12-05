@@ -27,7 +27,7 @@ async def stop_jobs(sleep_time, scheduler):
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, time.sleep, sleep_time)
     for job in scheduler.jobs:
-        machine = job['thread'].get_machine()
+        machine = job['obj'].get_machine()
         machine.set_state('Success')
 
 
@@ -167,9 +167,9 @@ class TestAbstractScheduler(BaseTest):
         scheduler.pre_process()
 
         for job in scheduler.jobs:
-            machine = job['thread'].get_machine()
+            machine = job['obj'].get_machine()
             machine.set_state('Success')
-            job['thread'].join()
+            job['thread'].run()
 
         scheduler = AbstractScheduler(options)
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[]):
@@ -232,15 +232,15 @@ class TestAbstractScheduler(BaseTest):
         assert scheduler.inner_loop_main_process()
 
         for job in scheduler.jobs:
-            machine = job['thread'].get_machine()
+            machine = job['obj'].get_machine()
             machine.set_state('Scheduling')
 
         assert scheduler.inner_loop_main_process()
 
         for job in scheduler.jobs:
-            machine = job['thread'].get_machine()
+            machine = job['obj'].get_machine()
             machine.set_state('Success')
-            job['thread'].join()
+            job['obj'].run()
 
         with patch.object(scheduler, 'check_finished', return_value=True):
             assert scheduler.inner_loop_main_process() == False
