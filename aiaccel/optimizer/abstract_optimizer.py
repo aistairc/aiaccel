@@ -143,7 +143,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.set_numpy_random_seed()
+        self.create_numpy_random_generator()
         self.resume()
 
     def post_process(self) -> None:

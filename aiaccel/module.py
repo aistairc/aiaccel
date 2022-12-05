@@ -233,6 +233,16 @@ class AbstractModule(object):
 
     def set_numpy_random_seed(self) -> None:
         """ set any random seed.
+        Args:
+            None
+        Returns:
+            None
+        """
+        self.logger.debug(f'set numpy random seed: {self.seed}')
+        np.random.seed(seed=self.seed)
+
+    def create_numpy_random_generator(self) -> None:
+        """ create random generator using any random seed.
 
         Args:
             None
@@ -240,7 +250,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(f'set numpy random seed: {self.seed}')
+        self.logger.debug(f'create numpy random generator by seed: {self.seed}')
         self._rng = np.random.RandomState(self.seed)
 
     def get_numpy_random_state(self) -> tuple:
