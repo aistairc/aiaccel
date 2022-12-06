@@ -14,14 +14,15 @@ class RandomGenerationTest(BaseTest):
 
     def test_run(self, cd_work, data_dir, work_dir):
         test_data_dir = Path(__file__).resolve().parent.joinpath('benchmark', 'test_data')
+        python_file = test_data_dir.joinpath('user.py')
 
         # random execution
         config_file = test_data_dir.joinpath('config_random.yaml')
         config = Config(config_file)
 
-        storage = Storage(ws=Path(config.workspace.get()))
-        subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean'],
-                         cwd=test_data_dir).wait()
+        with self.create_main(python_file):
+            storage = Storage(ws=Path(config.workspace.get()))
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
         final_result_random = self.get_final_result(storage)
         print('random', final_result_random)
 
@@ -29,9 +30,9 @@ class RandomGenerationTest(BaseTest):
         config_file = test_data_dir.joinpath('config_tpe.yaml')
         config = Config(config_file)
 
-        storage = Storage(ws=Path(config.workspace.get()))
-        subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean'],
-                         cwd=test_data_dir).wait()
+        with self.create_main(python_file):
+            storage = Storage(ws=Path(config.workspace.get()))
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
         final_result_tpe = self.get_final_result(storage)
         print('tpe', final_result_tpe)
 
@@ -41,9 +42,9 @@ class RandomGenerationTest(BaseTest):
         config_file = test_data_dir.joinpath('config_nelder-mead.yaml')
         config = Config(config_file)
 
-        storage = Storage(ws=Path(config.workspace.get()))
-        subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean'],
-                         cwd=test_data_dir).wait()
+        with self.create_main(python_file):
+            storage = Storage(ws=Path(config.workspace.get()))
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
         final_result_neldermead = self.get_final_result(storage)
         print('nelder-mead', final_result_neldermead)
 

@@ -1,6 +1,6 @@
 generic:
   workspace: "/tmp/work"
-  job_command: "python user.py"
+  job_command: "python original_main.py"
   batch_job_timeout: 600
   sleep_time: 0
 

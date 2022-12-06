@@ -17,9 +17,12 @@ class NoInitialTest(BaseTest):
         test_data_dir = Path(__file__).resolve().parent.joinpath('benchmark', 'test_data')
         config_file = test_data_dir.joinpath('config_{}.yaml'.format(self.search_algorithm))
         self.config = Config(config_file)
-        storage = Storage(ws=Path(self.config.workspace.get()))
-        subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean'],
-                         cwd=test_data_dir).wait(timeout=self.config.batch_job_timeout.get())
+        python_file = test_data_dir.joinpath('user.py')
+
+        with self.create_main(python_file):
+            storage = Storage(ws=Path(self.config.workspace.get()))
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']
+                             ).wait(timeout=self.config.batch_job_timeout.get())
         self.evaluate(work_dir, storage)
 
     def evaluate(self, work_dir, storage):
