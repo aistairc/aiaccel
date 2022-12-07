@@ -1,12 +1,9 @@
-# Linux向けインストールガイド(WIP)
+# インストールガイド(WIP)
 
-# ABCIでのインストールガイド(WIP)
+## Linux向けインストールガイド(WIP)
 
-# Windows向けインストールガイド(WIP)
+## ABCIでのインストールガイド(WIP)
 
-# MacOS向けインストールガイド(WIP)
-numpyのインストール時にエラーで停止する場合、OpenBLASをインストールし以下のパスを環境変数に指定してインストールしてください。
+## Windows向けインストールガイド(WIP)
 
-~~~bash
-OPENBLAS="$(brew --prefix openblas)" pip install -r requirements.txt
-~~~
+## MacOS向けインストールガイド(WIP)
