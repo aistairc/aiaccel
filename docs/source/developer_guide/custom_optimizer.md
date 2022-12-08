@@ -341,7 +341,7 @@ class RandomOptimizer(AbstractOptimizer):
             new_param = {
                 'parameter_name': hp.name,
                 'type': hp.type,
-                'value': np.random.normal(0, 0.1)
+                'value': value
             }
             new_params.append(new_param)
 
