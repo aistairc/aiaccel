@@ -1112,7 +1112,7 @@ class Job:
             state.name in self.expirable_states
         )
 
-    def run(self) -> None:
+    def main(self) -> None:
         """Thread.run method.
 
         Returns:
@@ -1126,10 +1126,7 @@ class Job:
             self.buff.d["state.name"].Len == 1 or
             self.buff.d["state.name"].has_difference()
         ):
-            self.storage.jobstate.set_any_trial_jobstate(
-                trial_id=self.trial_id,
-                state=state.name
-            )
+            self.storage.jobstate.set_any_trial_jobstate(trial_id=self.trial_id, state=state.name)
 
         if state.name == 'Success' or 'Failure' in state.name:
             return

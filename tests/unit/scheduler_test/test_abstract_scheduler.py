@@ -120,9 +120,9 @@ class TestAbstractScheduler(BaseTest):
         assert scheduler.start_job(trial_id) is None
 
         for job in scheduler.jobs:
-            machine = job['obj'].get_machine()
+            machine = job.get_machine()
             machine.set_state('Success')
-            job['obj'].run()
+            job.main()
 
     def test_update_resource(
         self,
@@ -232,15 +232,15 @@ class TestAbstractScheduler(BaseTest):
         assert scheduler.inner_loop_main_process()
 
         for job in scheduler.jobs:
-            machine = job['obj'].get_machine()
+            machine = job.get_machine()
             machine.set_state('Scheduling')
 
         assert scheduler.inner_loop_main_process()
 
         for job in scheduler.jobs:
-            machine = job['obj'].get_machine()
+            machine = job.get_machine()
             machine.set_state('Success')
-            job['obj'].run()
+            job.main()
 
         with patch.object(scheduler, 'check_finished', return_value=True):
             assert scheduler.inner_loop_main_process() == False

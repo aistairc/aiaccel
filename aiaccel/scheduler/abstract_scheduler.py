@@ -88,12 +88,12 @@ class AbstractScheduler(AbstractModule):
             Union[Job, None]: A reference for created job. It returns None if
                 specified hyper parameter file already exists.
         """
-        trial_ids = [job['trial_id'] for job in self.jobs]
+        trial_ids = [job.trial_id for job in self.jobs]
         if trial_id not in trial_ids:
             job = Job(self.config, self.options, self, trial_id)
-            self.jobs.append({'trial_id': trial_id, 'obj': job})
+            self.jobs.append(job)
             self.logger.debug(f"Submit a job: {str(trial_id)}")
-            job.run()
+            job.main()
             return job
         else:
             self.logger.error(f'Specified trial {trial_id} is already running ')
@@ -117,11 +117,11 @@ class AbstractScheduler(AbstractModule):
 
         succeed_jobs = [
             job for job in self.jobs
-            if job['obj'].get_state_name() == 'Success'
+            if job.get_state_name() == 'Success'
         ]
         ready_jobs = [
-            th for th in self.jobs
-            if th['obj'].get_state_name() in state_names
+            job for job in self.jobs
+            if job.get_state_name() in state_names
         ]
         num_running_jobs = len(self.jobs) - len(ready_jobs) - len(succeed_jobs)
         self.available_resource = max(0, self.max_resource - num_running_jobs)
@@ -144,7 +144,7 @@ class AbstractScheduler(AbstractModule):
             self.logger.info(f'restart hp files in previous running directory: {running}')
 
             while job.get_state_name() != 'Scheduling':
-                job.run()
+                job.main()
             job.schedule()
 
     def post_process(self) -> None:
@@ -171,13 +171,13 @@ class AbstractScheduler(AbstractModule):
 
         # find a new hp
         for ready in readies:
-            if (ready not in [job['trial_id'] for job in self.jobs]):
+            if (ready not in [job.trial_id for job in self.jobs]):
                 self.start_job(ready)
 
         scheduled_candidates = []
         for job in self.jobs:
-            if job['obj'].get_state_name() == 'Scheduling':
-                scheduled_candidates.append(job['obj'])
+            if job.get_state_name() == 'Scheduling':
+                scheduled_candidates.append(job)
 
         selected_jobs = self.algorithm.select_hp(
             scheduled_candidates,
@@ -196,8 +196,8 @@ class AbstractScheduler(AbstractModule):
                     selected_jobs.remove(job)
 
         for job in self.jobs:
-            job['obj'].run()
-            self.logger.info(f"name: {job['trial_id']}, state: {job['obj'].get_state_name()}")
+            job.main()
+            self.logger.info(f"name: {job.trial_id}, state: {job.get_state_name()}")
 
         self.get_stats()
         self.update_resource()
