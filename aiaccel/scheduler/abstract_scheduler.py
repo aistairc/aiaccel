@@ -17,8 +17,6 @@ class AbstractScheduler(AbstractModule):
             to select hyper parameters from a parameter pool.
         available_resource (int): An available current resource number.
         jobs (List[dict]): A list to store job dictionaries.
-        job_lock (fastener.lock.ReadWriteLock): A lock object to manage
-            exclusive control of job each other.
         max_resource (int): A max resource number.
         stats (List[dict]): A list of current status which is updated using ps
             command or qstat command.
@@ -50,7 +48,6 @@ class AbstractScheduler(AbstractModule):
         self.jobs = []
         self.job_status = {}
         self.algorithm = None
-        self.sleep_time = self.config.sleep_time.get()
         self.num_node = self.config.num_node.get()
 
     def change_state_finished_trials(self) -> None:
