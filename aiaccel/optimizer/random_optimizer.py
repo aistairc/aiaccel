@@ -6,14 +6,14 @@ class RandomOptimizer(AbstractOptimizer):
 
     """
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(self) -> list:
         """Generate parameters.
 
         Args:
             number (Optional[int]): A number of generating parameters.
 
         Returns:
-            None
+            list: A list of created parameters.
         """
 
         new_params = []
