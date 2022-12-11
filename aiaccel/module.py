@@ -71,7 +71,6 @@ class AbstractModule(object):
         self.fh = None
         self.ch = None
         self.ch_formatter = None
-        self.ch_formatter = None
         self.loop_count = 0
         self.hp_ready = 0
         self.hp_running = 0
