@@ -11,7 +11,7 @@ ABCIのセットアップは下記資料を参考ください。
 venv環境での使用を推奨いたします。このチュートリアルはvenv環境で動作させることを前提としています。
 
 ~~~bash
-python -m venv optenv
+python3 -m venv optenv
 ~~~
 
 ここでは仮想環境の名前を「optenv」とし、以後も当仮想環境を「optenv」と表記します。
@@ -144,23 +144,23 @@ ABCI:
 
 ```yaml
 optimize:
-search_algorithm: "nelder-mead"
-goal: "minimize"
-trial_number: 30
-rand_seed: 42
-parameters:
-    -
-    name: "x1"
-    type: "uniform_float"
-    lower: 0.0
-    upper: 5.0
-    initial: 1.0
-    -
-    name: "x2"
-    type: "uniform_float"
-    lower: 0.0
-    upper: 5.0
-    initial: 1.0
+    search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
+    goal: "minimize"
+    trial_number: 30
+    rand_seed: 42
+    parameters:
+        -
+            name: "x1"
+            type: "uniform_float"
+            lower: 0.0
+            upper: 5.0
+            initial: 1.0
+        -
+            name: "x2"
+            type: "uniform_float"
+            lower: 0.0
+            upper: 5.0
+            initial: 1.0
 ```
 
 - **search_algorithm** - 最適化アルゴリズムを指定します。
@@ -388,7 +388,7 @@ ABCI:
     job_execution_options: ""
 
 optimize:
-    search_algorithm: "nelder-mead"
+    search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
     goal: "minimize"
     trial_number: 30
     rand_seed: 42
@@ -398,16 +398,17 @@ optimize:
             type: "uniform_float"
             lower: 0.0
             upper: 5.0
-            initial: 1.0
+            initial: [0.0, 5.0, 3.0]
         -
             name: "x2"
             type: "uniform_float"
             lower: 0.0
             upper: 5.0
-            initial: 1.0
+            initial: [2.0, 4.0, 1.0]
 ```
 
 3. ユーザープログラムの作成
+
 最適化対象の処理を作成します。ここでは、作成済みモデルをaiaccelで最適化するための変更方法を記述します。
 
 次の関数を最適化させる場合の例を示します。
@@ -437,6 +438,7 @@ optimize:
 ```
 
 4. Wrapperの作成
+
 必要に応じてwrapperプログラムを作成します。aiaccelはユーザープログラムのwrapperを作成するためのAPIを提供します。
 
 **サンプル**
@@ -468,6 +470,7 @@ aiaccelでwrapperプログラムを最適化させる場合はコンフィグフ
 ```
 
 5. job_script_preamble.shの作成
+
 `job_script_preamble.sh` は、ABCIにジョブを投入するためのバッチファイルのベースファイルです。
 このファイルには事前設定を記述します。ここに記述した設定が全てのジョブに適用されます。
 
@@ -493,9 +496,10 @@ aiaccelでwrapperプログラムを最適化させる場合はコンフィグフ
 ~~~
 
 6. 最適化実行
+
 プロジェクトフォルダに移動し、次のコマンドを実行します。
 ~~~bash
-python -m aiaccel.start --config config.yaml
+python -m aiaccel.cli.start --config config.yaml
 ~~~
 
 ```{note}
@@ -509,7 +513,7 @@ python -m aiaccel.start --config config.yaml
 `start` コマンドの後に、追加オプションを指定できます。
 
 ~~~bash
-python -m aiaccel.start
+python -m aiaccel.cli.start
 ~~~
 
 - --clean : workspaceが既に存在する場合、最適化実行前にworkspaceを削除します。
@@ -517,7 +521,7 @@ python -m aiaccel.start
 
 ### 例
 ~~~bash
-python -m aiaccel.start --config config.yaml --clean
+python -m aiaccel.cli.start --config config.yaml --clean
 ~~~
 
 ### ローカル環境での実行方法

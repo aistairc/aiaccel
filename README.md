@@ -88,7 +88,7 @@ This tutorial describes how to run examples/sphere on ABCI.
     > module load gcc/11.2.0
     > module load python/3.8/3.8.13
     > python3 -m venv optenv
-    > source work/bin/activate
+    > source optenv/bin/activate
     ~~~
 
 2. Prepare the workspace by following Steps 1 and 2 in [Running on a local computer](https://github.com/aistairc/aiaccel#Running-on-a-local-computer).
