@@ -111,7 +111,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         Note:
             --------------------------------------------------------------
-            - befor
+            - before
             {
                 'vertex_id': 'CMTrNe5P8a',
                 'parameters': [
