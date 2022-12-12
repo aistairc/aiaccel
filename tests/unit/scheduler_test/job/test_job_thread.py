@@ -10,7 +10,7 @@ with patch('aiaccel.util.retry.retry', lambda function: function):
     import pytest
     from aiaccel.config import ConfileWrapper
     from aiaccel.scheduler.create import create_scheduler
-    from aiaccel.scheduler.job.job_thread import (JOB_STATES, JOB_TRANSITIONS,
+    from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
                                                 CustomMachine, Job, Model)
     from aiaccel.scheduler.local_scheduler import LocalScheduler
     from aiaccel.util.time_tools import get_time_now_object

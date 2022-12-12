@@ -3,7 +3,7 @@ from typing import Union
 
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schedule_sampling
-from aiaccel.scheduler.job.job_thread import Job
+from aiaccel.scheduler.job.job import Job
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.filesystem import create_yaml
 from aiaccel import dict_result
