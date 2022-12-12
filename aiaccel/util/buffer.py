@@ -94,7 +94,7 @@ class _buffer:
         """ Get index if exists duplicate data in list else -1.
 
         Args:
-            value (any):　Check to see if the same value already exists.
+            value (any): Check to see if the same value already exists.
 
         Returns:
             (int): index value or -1.
@@ -119,23 +119,7 @@ class _buffer:
         Returns:
             any: difference between any two points.
         """
-        return self.arr(idx_now) - self.arr(idx_pre)
-
-    def iterable_diff(self):
-        """ Get the difference of iterable object.
-
-        Example:
-            list: A = [1, 2, 3, 4, 5]
-            liat: B = [1, 2, 3]
-            iterable_diff: [4, 5]
-        """
-        if (
-            hasattr(self.Now, "__iter__") and
-            hasattr(self.Pre, "__iter__")
-        ):
-            return list(set(self.Now) - set(self.Pre))
-        else:
-            return []
+        return self.arr[idx_now] - self.arr[idx_pre]
 
     def has_difference(self, digit: Union[int, None] = None) -> bool:
         """ Check there is a difference or not.
@@ -149,29 +133,6 @@ class _buffer:
                 return (self.Pre != self.Now)
             else:
                 return (round(self.Pre, digit) != round(self.Now, digit))
-        else:
-            return False
-
-    def point_difference(
-        self,
-        idx_pre=-2,
-        idx_now=-1,
-        digit: Union[int, None] = None
-    ) -> None:
-        """ Get the difference between any two points.
-
-        Args:
-            index_pre (int): Any index value.
-            index_now (int): Any index value.
-        """
-        if len(self.arr) >= 2:
-            if digit is None:
-                return (self.arr[idx_pre] != self.arr[idx_now])
-            else:
-                return (
-                    round(self.arr[idx_pre], digit) !=
-                    round(self.arr[idx_now], digit)
-                )
         else:
             return False
 

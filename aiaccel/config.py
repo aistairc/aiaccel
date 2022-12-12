@@ -180,7 +180,7 @@ class ConfigEntry:
         warning: bool,
         group: str,
         keys: tuple
-    ):
+    ) -> None:
         """
         Args:
             config_path (str): A path of configuration file.
@@ -215,7 +215,7 @@ class ConfigEntry:
         """
         return copy.deepcopy(self._value)
 
-    def set(self, value):
+    def set(self, value) -> None:
         """
         Args
             value (any)
@@ -225,7 +225,7 @@ class ConfigEntry:
             raise TypeError
         self._value = value
 
-    def show_warning(self):
+    def show_warning(self) -> None:
         """ If the default value is used, a warning is displayed.
         """
         if self.warning:
@@ -330,8 +330,9 @@ _DEFAULT_HYPERPARAMETERS = []
 _DEFAULT_IS_VERIFIED = False
 _DEFAULT_VERIFI_CONDITION = []
 _DEFAULT_RANDOM_SCHESULING = True
-_RESOURCE_TYPES = ['abci', 'local']
-_GOALS = ['minimize', 'maximize']
+_DEFAULT_SOBOL_SCRAMBLE = True
+_DEFAULT_PYTHON_FILE = ""
+_DEFAULT_FUNCTION = ""
 
 
 class Config:
@@ -360,13 +361,6 @@ class Config:
             self.workspace.empty_if_error()
 
             self.job_command.empty_if_error()
-
-            if self.goal.get().lower() not in _GOALS:
-                logger.error(f'Invalid goal: {self.goal.get()}')
-
-            if self.resource_type.get().lower() not in _RESOURCE_TYPES:
-                logger.error(f'Invalid resource type: {self.resource_type.get()}.')
-                sys.exit()
 
             if self.resource_type.get().lower() == "abci":
                 self.abci_group.empty_if_error()
@@ -410,6 +404,22 @@ class Config:
             warning=False,
             group="generic",
             keys=("sleep_time")
+        )
+        self.python_file = ConfigEntry(
+            config=config,
+            type=[str],
+            default=_DEFAULT_PYTHON_FILE,
+            warning=False,
+            group="generic",
+            keys=("python_file")
+        )
+        self.function = ConfigEntry(
+            config=config,
+            type=[str],
+            default=_DEFAULT_FUNCTION,
+            warning=False,
+            group="generic",
+            keys=("function")
         )
 
         # === scheduler defalt config===
@@ -744,6 +754,15 @@ class Config:
             warning=False,
             group="logger",
             keys=("stream_level", "scheduler")
+        )
+
+        self.sobol_scramble = ConfigEntry(
+            config=config,
+            type=[bool],
+            default=_DEFAULT_SOBOL_SCRAMBLE,
+            warning=False,
+            group="optimize",
+            keys=("sobol_scramble")
         )
 
         # === verification ===

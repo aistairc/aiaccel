@@ -3,9 +3,11 @@ from pathlib import Path
 from typing import Union
 
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm import schdule_sampling
+from aiaccel.scheduler.algorithm import schedule_sampling
 from aiaccel.scheduler.job.job_thread import Job
 from aiaccel.util.logger import str_to_logging_level
+from aiaccel.util.filesystem import create_yaml
+from aiaccel import dict_result
 
 
 class AbstractScheduler(AbstractModule):
@@ -50,11 +52,7 @@ class AbstractScheduler(AbstractModule):
         self.job_status = {}
         self.algorithm = None
         self.sleep_time = self.config.sleep_time.get()
-
-        self.storage.variable.register(
-            process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'loop_count']
-        )
+        self.num_node = self.config.num_node.get()
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
@@ -65,6 +63,10 @@ class AbstractScheduler(AbstractModule):
         """
         runnings = self.storage.trial.get_running()
         result_names = self.storage.result.get_result_trial_id_list()
+
+        if result_names is None:
+            return
+
         for running in runnings:
             if running in result_names:
                 self.storage.trial.set_any_trial_state(trial_id=running, state='finished')
@@ -134,12 +136,10 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.trial_id.initial(num=0)
-        self.set_native_random_seed()
         self.set_numpy_random_seed()
         self.resume()
 
-        self.algorithm = schdule_sampling.RamsomSampling(self.config)
+        self.algorithm = schedule_sampling.RandomSampling(self.config)
         self.change_state_finished_trials()
 
         runnings = self.storage.trial.get_running()
@@ -197,7 +197,8 @@ class AbstractScheduler(AbstractModule):
 
         selected_threads = self.algorithm.select_hp(
             scheduled_candidates,
-            self.available_resource
+            self.available_resource,
+            rng=self._rng
         )
 
         if len(selected_threads) > 0:
@@ -220,24 +221,6 @@ class AbstractScheduler(AbstractModule):
             return False
 
         return True
-
-    def _serialize(self, trial_id) -> None:
-        self.storage.variable.d['native_random_state'].set(trial_id, self.get_native_random_state())
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
-        self.storage.variable.d['loop_count'].set(trial_id, self.loop_count)
-
-    def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-
-        Returns:
-            None
-        """
-        self.set_native_random_state(self.storage.variable.d['native_random_state'].get(trial_id))
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
-        self.loop_count = self.storage.variable.d['loop_count'].get(trial_id)
 
     def parse_trial_id(self, command: str) -> str:
         """Parse a command string and extract an unique name.
@@ -312,7 +295,34 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] is not None and
             self.options['resume'] > 0
         ):
-            self.storage.rollback_to_ready(self.options['resume'])
-            self.storage.delete_trial_data_after_this(self.options['resume'])
-            self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])
+
+    def create_result_file(self, trial_id: int) -> None:
+        """ Save the results in yaml format.
+
+        Args:
+            trial_id (int): Any trial od
+
+        Returns:
+            None
+        """
+
+        file_hp_count_fmt = f'%0{self.config.name_length.get()}d'
+        file_name = file_hp_count_fmt % trial_id + '.hp'
+
+        content = self.storage.get_hp_dict(trial_id)
+        result = self.storage.result.get_any_trial_objective(trial_id=trial_id)
+        error = self.storage.error.get_any_trial_error(trial_id=trial_id)
+
+        content['result'] = str(result)
+
+        if error is not None:
+            content['error'] = error
+
+        result_file_path = self.ws / dict_result / file_name
+        create_yaml(result_file_path, content)
+
+    def __getstate__(self):
+        obj = super().__getstate__()
+        del obj['jobs']
+        return obj

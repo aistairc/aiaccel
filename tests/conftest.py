@@ -3,10 +3,11 @@ import shutil
 import time
 from pathlib import Path
 
+import fasteners
 import pytest
 from aiaccel.config import Config, load_config
 from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import clean_directory, load_yaml
+from aiaccel.util.filesystem import load_yaml
 
 WORK_SUB_DIRECTORIES = [
     'abci_output', 'alive', 'hp', 'hp/finished', 'hp/ready', 'hp/running',
@@ -21,6 +22,60 @@ WORK_FILES = [
     'wrapper_abci.sh',
     'grid_config.json'
 ]
+
+
+def clean_directory(path: Path, exclude_dir: list = None,
+                    exclude_file: list = None, dict_lock: Path = None) -> bool:
+    """Remove all files in the directory recursively.
+
+    Args:
+        path (Path): Path for the directory
+        exclude_dir (list): Exclude directories. All files in directories, are
+            not removed.
+        exclude_file (list): Exclude files not to be removed.
+        dict_lock (Path): A directory saving lock files.
+
+    Returns:
+        None
+    """
+    path = to_path(path)
+
+    if not path.is_dir():
+        return False
+
+    if exclude_dir is None:
+        exclude_dir = []
+
+    if exclude_file is None:
+        exclude_file = []
+
+    if dict_lock is None:
+        for p in path.glob('**/*'):
+            if p.is_file():
+                if True not in [p in d.parts for d in
+                                exclude_dir + exclude_file]:
+                    p.unlink()
+    else:
+        with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
+            for p in path.glob('**/*'):
+                if p.is_file():
+                    if True not in [p in d.parts for d in exclude_dir + exclude_file]:
+                        p.unlink()
+
+
+def to_path(path):
+    """Convert to Path object.
+
+    Args:
+        path (Any): An any path object.
+
+    Returns:
+        Path: A converted path object.
+    """
+    if isinstance(path, Path):
+        return path.resolve()
+
+    return Path(path).resolve()
 
 
 @pytest.fixture

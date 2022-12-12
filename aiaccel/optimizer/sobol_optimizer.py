@@ -32,10 +32,13 @@ class SobolOptimizer(AbstractOptimizer):
 
         finished = self.storage.trial.get_finished()
         self.generate_index = len(finished)
-        self.sampler = qmc.Sobol(d=len(self.params.get_parameter_list()), scramble=False)
 
-        if self.generate_index is not None and self.generate_index > 0:
-            self.sampler.fast_forward(self.generate_index)
+        if self.options['resume'] is None or self.options['resume'] <= 0:
+            self.sampler = qmc.Sobol(
+                d=len(self.params.get_parameter_list()),
+                scramble=self.config.sobol_scramble.get(),
+                seed=self._rng
+            )
 
     def generate_parameter(self) -> None:
         """Generate parameters.
@@ -64,13 +67,13 @@ class SobolOptimizer(AbstractOptimizer):
             new_param = {
                 'parameter_name': l_params[i].name,
                 'type': l_params[i].type,
-                'value': float(value)
+                'value': value
             }
             new_params.append(new_param)
 
         return new_params
 
-    def generate_initial_parameter(self) -> None:
+    def generate_initial_parameter(self) -> list:
         if super().generate_initial_parameter() is not None:
             self.logger.warning(
                 "Initial values cannot be specified for sobol."

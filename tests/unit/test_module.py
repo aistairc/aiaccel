@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import numpy as np
 import shutil
 import sys
 import time
@@ -19,6 +20,7 @@ from aiaccel.util.logger import str_to_logging_level
 
 from tests.base_test import BaseTest
 
+import pytest
 
 async def async_function(func):
     loop = asyncio.get_event_loop()
@@ -66,7 +68,6 @@ class TestAbstractModule(BaseTest):
         }
 
         self.module = AbstractModule(options)
-        self.module.storage.alive.init_alive()
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
@@ -179,15 +180,29 @@ class TestAbstractModule(BaseTest):
             assert True
 
     def test_serialize(self):
-        try:
-            self.module._serialize(trial_id=0)
-            assert False
-        except NotImplementedError:
-            assert True
+        self.module._rng = np.random.RandomState(0)
+        assert self.module._serialize(0) is None
 
     def test_deserialize(self):
-        try:
-            self.module._deserialize({})
-            assert False
-        except NotImplementedError:
-            assert True
+        self.module._rng = np.random.RandomState(0)
+        self.module._serialize(1)
+        assert self.module._deserialize(1) is None
+
+    def test_check_error(self):
+        assert self.module.check_error() is True
+
+    def test_resume(self):
+        options = {
+            'config': str(self.config_json),
+            'resume': None,
+            'clean': False,
+            'process_name': 'test'
+        }
+
+        self.module = AbstractModule(options)
+        self.module._rng = np.random.RandomState(0)
+        assert self.module.resume() is None
+
+        self.module.options['resume'] = 1
+        self.module._serialize(1)
+        assert self.module.resume() is None

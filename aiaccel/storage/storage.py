@@ -2,11 +2,9 @@ from pathlib import PosixPath
 from typing import Union
 
 import aiaccel
-from aiaccel.storage.alive import Alive
 from aiaccel.storage.error import Error
 from aiaccel.storage.hp import Hp
 from aiaccel.storage.jobstate import JobState
-from aiaccel.storage.pid import Pid
 from aiaccel.storage.result import Result
 from aiaccel.storage.timestamp import TimeStamp
 from aiaccel.storage.trial import Trial
@@ -18,13 +16,10 @@ class Storage:
     """
     def __init__(self, ws: PosixPath) -> None:
         db_path = ws / aiaccel.dict_storage / "storage.db"
-        self.alive = Alive(db_path)
-        self.pid = Pid(db_path)
         self.trial = Trial(db_path)
         self.hp = Hp(db_path)
         self.result = Result(db_path)
         self.jobstate = JobState(db_path)
-        self.serializer = Serializer(db_path)
         self.error = Error(db_path)
         self.timestamp = TimeStamp(db_path)
         self.variable = Serializer(db_path)
@@ -125,7 +120,7 @@ class Storage:
         """
         return trial_id in self.trial.get_finished()
 
-    def get_hp_dict(self, trial_id_str: str) -> Union[None, dict]:
+    def get_hp_dict(self, trial_id) -> Union[None, dict]:
         """Obtain information on a specified trial in dict.
 
         Args:
@@ -134,7 +129,7 @@ class Storage:
         Returns:
             content(dict): Any trials information
         """
-        trial_id = int(trial_id_str)
+
         data = self.hp.get_any_trial_params(trial_id=trial_id)
         if data is None:
             return None
@@ -142,15 +137,17 @@ class Storage:
         hp = []
         for d in data:
             param_name = d.param_name
-            dtype = d.param_type
+            dtype = d.param_type  # str
             value = d.param_value
 
             if dtype.lower() == "float":
                 value = float(d.param_value)
             elif dtype.lower() == "int":
-                value = int(d.param_value)
+                value = int(float(d.param_value))
             elif dtype.lower() == "categorical":
                 value == str(d.param_value)
+            else:  # pragma: no cover
+                pass  # not reached
 
             hp.append(
                 {
@@ -165,13 +162,13 @@ class Storage:
         error = self.error.get_any_trial_error(trial_id=trial_id)
 
         content = {}
-        content['trial_id'] = trial_id_str
+        content['trial_id'] = trial_id
         content['parameters'] = hp
         content['result'] = result
         content['start_time'] = start_time
         content['end_time'] = end_time
 
-        if error is not None:
+        if error is not None and len(error) > 0:
             content['error'] = error
 
         return content
@@ -223,7 +220,7 @@ class Storage:
             -(dict): Any trials information
         """
         best_trial_id, _ = self.get_best_trial(goal)
-        return self.get_hp_dict(str(best_trial_id))
+        return self.get_hp_dict(best_trial_id)
 
     def get_result_and_error(self, trial_id: int) -> tuple:
         """Get results and errors for a given trial number.
@@ -240,8 +237,9 @@ class Storage:
 
     def delete_trial_data_after_this(self, trial_id: int) -> None:
         max_trial_id = self.current_max_trial_number()
-        for i in range(trial_id + 1, max_trial_id + 1):
-            self.delete_trial(i)
+        if max_trial_id is not None:
+            for i in range(trial_id + 1, max_trial_id + 1):
+                self.delete_trial(i)
 
     def delete_trial(self, trial_id: int) -> None:
         self.error.delete_any_trial_error(trial_id)

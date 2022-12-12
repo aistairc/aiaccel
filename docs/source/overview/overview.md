@@ -29,7 +29,7 @@ pip install git+https://github.com/aistairc/aiaccel.git
     > mkdir your_workspace_directory
     > cd your_workspace_directory
     > git clone https://github.com/aistairc/aiaccel.git 
-    > cp -R cloned_directory/aiaccel/examples .
+    > cp -R ./aiaccel/examples .
     > cd examples
     > ls
     sphere
@@ -68,7 +68,7 @@ pip install git+https://github.com/aistairc/aiaccel.git
 1. まず、[ABCIユーザーズガイド](https://docs.abci.ai/ja/python)に従って、pythonの環境を構築してください。
     ~~~bash
     module load python/3.8/3.8.13
-    python3 -m venv work
+    python3 -m venv optenv
     source work/bin/activate
     ~~~
 

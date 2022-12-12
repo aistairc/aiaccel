@@ -70,7 +70,7 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
         'type': p.type
     }
 
-    if p.type in ['INT', 'FLOAT']:
+    if p.type.lower() in ['int', 'float']:
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
@@ -90,13 +90,13 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
         else:
             new_param['parameters'] = [lower + i * step for i in range(0, n)]
 
-        if p.type == 'INT':
+        if p.type.lower() == 'int':
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
-    elif p.type == 'CATEGORICAL':
+    elif p.type.lower() == 'categorical':
         new_param['parameters'] = list(p.choices)
 
-    elif p.type == 'ORDINAL':
+    elif p.type.lower() == 'ordinal':
         new_param['parameters'] = list(p.sequence)
 
     else:
@@ -174,16 +174,15 @@ class GridOptimizer(AbstractOptimizer):
 
         return parameter_index
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(self) -> List[dict]:
         """Generate parameters.
 
         Args:
             number (Optional[int]): A number of generating parameters.
 
         Returns:
-            None
+            List[dict]: A List of new parameters.
         """
-
         parameter_index = self.get_parameter_index()
         new_params = []
 
@@ -203,7 +202,12 @@ class GridOptimizer(AbstractOptimizer):
 
         return new_params
 
-    def generate_initial_parameter(self) -> None:
+    def generate_initial_parameter(self) -> List[dict]:
+        """Generate initial parameters.
+
+        Returns:
+            List[dict]: A List of new parameters.
+        """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(
                 "Initial values cannot be specified for grid search."

@@ -67,7 +67,8 @@ class NelderMead(object):
         iteration: Optional[float] = float('inf'),
         coef: Optional[Union[dict, None]] = None,
         maximize: Optional[bool] = False,
-        initial_parameters: Optional[hptype] = None
+        initial_parameters: Optional[hptype] = None,
+        rng: np.random.RandomState = None
     ) -> None:
         """Initial method of NelderMead.
 
@@ -77,6 +78,7 @@ class NelderMead(object):
             -coef: A coefficient values.
             -maximize: Evaluate maximize or not.
             -initial_parameters: A initial parameters.
+            rng(np.random.RandomState): A reference to a random generator.
         """
         if coef is None:
             coef = {"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
@@ -86,6 +88,7 @@ class NelderMead(object):
         self.bdrys = np.array([[p.lower, p.upper] for p in self.params])
         self.coef = coef
         self.n_dim = len(self.bdrys)
+        self._rng = rng
 
         self.y = self._create_initial_values(initial_parameters)
 
@@ -128,22 +131,21 @@ class NelderMead(object):
 
     def _create_initial_value(self, initial_parameters, dim, num_of_initials):
         if initial_parameters is not None:
-            if (
-                type(initial_parameters[dim]['value']) is int or
-                type(initial_parameters[dim]['value']) is float
-            ):
+            if type(initial_parameters[dim]['value']) in [int, float, np.float64]:
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
 
             if type(initial_parameters[dim]['value']) is not list:
+                print(initial_parameters)
+                print(type(initial_parameters[dim]['value']))
                 raise TypeError('Default parameter should be set as list.')
 
             if num_of_initials < len(initial_parameters[dim]['value']):
                 return initial_parameters[dim]['value'][num_of_initials]
             else:
-                return self.params[dim].sample()['value']
+                return self.params[dim].sample(rng=self._rng)['value']
 
         else:
-            return self.params[dim].sample()['value']
+            return self.params[dim].sample(rng=self._rng)['value']
 
     def _add_executing(
         self, y: np.ndarray,
@@ -164,7 +166,7 @@ class NelderMead(object):
             out_of_boundary = True
             self.logger.debug(f'_add_executing out of boundary y: {y}')
 
-        vertex_id = generate_random_name()
+        vertex_id = generate_random_name(rng=self._rng)
         params = []
 
         for yi, p in zip(y, self.params):
@@ -322,6 +324,8 @@ class NelderMead(object):
             self._outside_contract()
         elif self.f[-1] <= self._fr:
             self._inside_contract()
+        else:  # pragma: no cover
+            pass  # not reached
 
     def _wait_expand(self, results: List[dict]) -> None:
         """Wait 'Expand' executions finished.

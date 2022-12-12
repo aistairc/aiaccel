@@ -12,14 +12,6 @@ aiaccel.abci.batch module
    :undoc-members:
    :show-inheritance:
 
-aiaccel.abci.error\_message module
-----------------------------------
-
-.. automodule:: aiaccel.abci.error_message
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 aiaccel.abci.qstat module
 -------------------------
 

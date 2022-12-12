@@ -11,26 +11,73 @@ from aiaccel.parameter import load_parameter
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import load_yaml
 
+from unittest.mock import patch
+
 
 class TestNelderMead(object):
 
     @pytest.fixture(autouse=True)
     def setup_nelder_mead(self, load_test_config):
-        config = load_test_config()
+        self.config = load_test_config()
         # params = load_parameter(config.get('optimize', 'parameters'))
-        params = load_parameter(config.hyperparameters.get())
-        self.nm = NelderMead(params.get_parameter_list())
+        params = load_parameter(self.config.hyperparameters.get())
+        rng = np.random.RandomState(0)
+        nm_coef = NelderMead(
+            params.get_parameter_list(),
+            coef={"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5},
+            rng=rng
+        )
+        self.nm = NelderMead(params.get_parameter_list(), rng=rng)
         yield
         self.nm = None
 
     def test_init(self):
         assert type(self.nm) is NelderMead
 
+
+    def test__create_initial_values(self):
+        params = load_parameter(self.config.hyperparameters.get())
+        hps = params.get_parameter_list()
+        initial_parameters = [
+            {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x3', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x4', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x5', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x6', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x7', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x8', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x9', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x10', 'type': 'FLOAT', 'value': 1},
+        ]
+        rng = np.random.RandomState(0)
+        NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
+
+        initial_parameters = [
+            {'parameter_name': 'x1', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x2', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x3', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x4', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x5', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x6', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x7', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x8', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x9', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x10', 'type': 'CATEGORICAL', 'value': '1'},
+        ]
+        with pytest.raises(TypeError):
+            NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
+
+
     def test_add_executing(self):
         assert self.nm._add_executing(self.nm.y[0]) is None
 
         out_y = [[b[0] - 1., b[1] + 1.] for b in self.nm.bdrys]
         assert self.nm._add_executing(out_y[0]) is None
+
+        with patch.object(self.nm, '_is_out_of_boundary', return_value=True):
+            with patch.object(self.nm, '_maximize', True):
+                assert self.nm._add_executing(out_y[0]) is None
 
     def test_add_y_history(self):
         assert self.nm._add_y_history() is None
@@ -61,7 +108,7 @@ class TestNelderMead(object):
         #
         print(storage.get_finished())
         print(storage.result.get_all_result())
-        c = storage.get_hp_dict(trial_id_str='000')
+        c = storage.get_hp_dict(trial_id=0)
         assert c is not None
 
         param = copy.copy(params[[p['vertex_id'] for p in params].index('001')])
@@ -115,6 +162,12 @@ class TestNelderMead(object):
 
         assert self.nm._wait_initialize(results) is None
 
+        with patch.object(self.nm, '_state', 'WaitInitialize'):
+            assert self.nm._wait_initialize(results) is None
+
+        with patch.object(self.nm, '_state', 'Wait'):
+            assert self.nm._wait_initialize(results) is None
+
     def test_initialize(self):
         results = [
             {'state': 'WaitInitialize', 'result': i * .1}
@@ -150,6 +203,14 @@ class TestNelderMead(object):
 
         self.nm._fr = 0.3
         assert self.nm._reflect_branch() is None
+
+        # not applicable
+        self.nm.f[0] = 0.22
+        self.nm.f[-1] = 0.3
+        self.nm.f[-2] = 0.201
+        self.nm._fr = 0.21
+        assert self.nm._reflect_branch() is None
+
 
     def test_wait_expand(self):
         results = [
@@ -208,6 +269,14 @@ class TestNelderMead(object):
         ]
         self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
         assert self.nm._wait_shrink(results) is None
+
+        print(results)
+        with patch.object(self.nm, '_state', 'WaitInitialize'):
+            assert self.nm._wait_shrink(results) is None
+
+        with patch.object(self.nm, '_state', 'InvalidState'):
+            assert self.nm._wait_shrink(results) is None
+
 
     def test_finalize(self):
         self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
@@ -291,10 +360,12 @@ def test_nelder_mead_parameters(load_test_config):
         config.hyperparameters.get()
     )
     initial_parameters = None
+    rng = np.random.RandomState(0)
     nelder_mead = NelderMead(
         params.get_parameter_list(), initial_parameters=initial_parameters,
         iteration=100,
-        maximize=(config.goal.get().lower() == 'maximize')
+        maximize=(config.goal.get().lower() == 'maximize'),
+        rng=rng
     )
 
     c_max = 1000
@@ -355,3 +426,5 @@ def test_nelder_mead_parameters(load_test_config):
         print('out of boundary', c_out_of_boundary)
 
     assert c_out_of_boundary == 0
+
+

@@ -1,6 +1,7 @@
 # aiaccel: an HPO library for ABCI
 [![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
 [![Supported Python version](https://img.shields.io/badge/Python-3.8-blue)](https://github.com/aistairc/aiaccel)
+[![Documentation Status](https://readthedocs.org/projects/aiaccel/badge/?version=latest)](https://aiaccel.readthedocs.io/en/latest/)
 ![CI status](https://github.com/aistairc/aiaccel/actions/workflows/actions.yaml/badge.svg)
 
 [**日本語  (Japanese)**](https://github.com/aistairc/aiaccel/blob/main/README_JP.md)
@@ -24,8 +25,8 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
 
 0. (Optional) Install [Virtualenv](https://virtualenv.pypa.io/en/latest/) and create a virtual environment. 
     ~~~bash
-    > python3 -m venv work
-    > source work/bin/activate
+    > python3 -m venv optenv
+    > source optenv/bin/activate
     ~~~
 
 1. Install `aiaccel`
@@ -86,7 +87,7 @@ This tutorial describes how to run examples/sphere on ABCI.
     ~~~bash
     > module load gcc/11.2.0
     > module load python/3.8/3.8.13
-    > python3 -m venv work
+    > python3 -m venv optenv
     > source work/bin/activate
     ~~~
 

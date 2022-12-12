@@ -1,8 +1,12 @@
 import re
+import subprocess
+import threading
+
 from typing import Union
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.process import ps2joblist
+from aiaccel.wrapper_tools import create_runner_command
 
 
 class LocalScheduler(AbstractScheduler):
@@ -52,4 +56,50 @@ class LocalScheduler(AbstractScheduler):
 
         if trial_id_index is None:
             return None
+
         return args[trial_id_index + index_offset]
+
+    def inner_loop_main_process(self) -> bool:
+        """A main loop process. This process is repeated every main loop.
+
+        Returns:
+            bool: The process succeeds or not. The main loop exits if failed.
+        """
+
+        trial_ids = self.storage.trial.get_ready()
+        if trial_ids is None or len(trial_ids) == 0:
+            return True
+
+        for trial_id in trial_ids:
+            self._serialize(trial_id)
+            if self.num_node > 1:
+                th = threading.Thread(target=self.execute, args=(trial_id,))
+                th.start()
+            else:
+                self.execute(trial_id)
+
+        return True
+
+    def execute(self, trial_id: int) -> None:
+        """ Generates and executes commands to run user programs.
+
+        Args:
+            trial_id (int): Any trial od
+
+        Returns:
+            None
+        """
+        self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
+
+        runner_command = create_runner_command(
+            self.config.job_command.get(),
+            self.storage.get_hp_dict(trial_id),
+            trial_id,
+            self.config_path
+        )
+        subprocess.run(runner_command)
+
+        self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
+        self.create_result_file(trial_id)
+
+        return

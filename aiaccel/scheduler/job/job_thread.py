@@ -22,7 +22,7 @@ from aiaccel.util.time_tools import get_time_delta, get_time_now_object
 from aiaccel.util.trialid import TrialId
 from aiaccel.wrapper_tools import create_runner_command
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler.abci_scheduler import AbciScheduler
     from aiaccel.scheduler.local_scheduler import LocalScheduler
 
@@ -511,9 +511,8 @@ class Model(object):
         commands = create_runner_command(
             obj.config.job_command.get(),
             obj.content,
-            str(obj.trial_id),
-            obj.config_path,
-            obj.options
+            obj.trial_id,
+            obj.config_path
         )
 
         with obj.lock:
@@ -641,6 +640,8 @@ class Model(object):
             # confirm whether the result file exists or not (this means the job finished quickly
             with obj.lock:
                 trial_ids = obj.storage.result.get_result_trial_id_list()
+                if trial_ids is None:
+                    return False
             return obj.trial_id in trial_ids
 
     # Result
@@ -725,7 +726,7 @@ class Model(object):
         with obj.lock:
             result = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
             error = obj.storage.error.get_any_trial_error(trial_id=obj.trial_id)
-            content = obj.storage.get_hp_dict(trial_id_str=obj.trial_id_str)
+            content = obj.storage.get_hp_dict(trial_id=obj.trial_id)
             content['result'] = result
 
             if error is not None:

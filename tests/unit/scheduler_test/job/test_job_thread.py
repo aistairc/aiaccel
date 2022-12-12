@@ -5,16 +5,18 @@ import sys
 import time
 from unittest.mock import patch
 
-import aiaccel
-import pytest
-from aiaccel.config import ConfileWrapper
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.scheduler.job.job_thread import (JOB_STATES, JOB_TRANSITIONS,
-                                              CustomMachine, Job, Model)
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.util.time_tools import get_time_now_object
-from tests.arguments import parse_arguments
-from tests.base_test import BaseTest
+with patch('aiaccel.util.retry.retry', lambda function: function):
+    import aiaccel
+    import pytest
+    from aiaccel.config import ConfileWrapper
+    from aiaccel.scheduler.create import create_scheduler
+    from aiaccel.scheduler.job.job_thread import (JOB_STATES, JOB_TRANSITIONS,
+                                                CustomMachine, Job, Model)
+    from aiaccel.scheduler.local_scheduler import LocalScheduler
+    from aiaccel.util.time_tools import get_time_now_object
+    from tests.arguments import parse_arguments
+    from tests.base_test import BaseTest
+
 
 
 async def async_start_job(job):

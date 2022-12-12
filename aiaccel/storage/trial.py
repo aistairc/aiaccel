@@ -31,6 +31,7 @@ class Trial(Abstract):
 
         if trials is None:
             return None
+
         return trials.state
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -48,10 +49,12 @@ class Trial(Abstract):
                 session.query(TrialTable)
                 .filter(TrialTable.state == state)
                 .with_for_update(read=True)
+                .all()
             )
 
-        if trials is None:
+        if trials is None or len(trials) == 0:
             return None
+
         return [d.trial_id for d in trials]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -172,8 +175,10 @@ class Trial(Abstract):
             trials = (
                 session.query(TrialTable)
                 .with_for_update(read=True)
+                .all()
             )
 
-        if trials is None:
+        if trials is None or len(trials) == 0:
             return None
+
         return [trial.trial_id for trial in trials]

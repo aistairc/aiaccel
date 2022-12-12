@@ -1,4 +1,4 @@
-import copy
+
 from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -23,17 +23,13 @@ class Variable(Abstract):
     ):
         with self.create_session() as session:
             try:
-                data = (
+                query = (
                     session.query(VariableTable)
                     .filter(VariableTable.trial_id == trial_id)
                     .filter(VariableTable.process_name == process_name)
                     .filter(VariableTable.label == label)
-                    .with_for_update(read=True)
-                    .one_or_none()
                 )
-                update_num = 0
-                if data is not None and update_allow is True:
-                    update_num = data.update_num + 1
+                if session.query(query.exists()).scalar() and update_allow is True:
                     self.delete_any_trial_variable(
                         trial_id=trial_id,
                         process_name=process_name,
@@ -44,8 +40,7 @@ class Variable(Abstract):
                     trial_id=trial_id,
                     process_name=process_name,
                     label=label,
-                    value=value,
-                    update_num=update_num
+                    value=value
                 )
 
                 session.add(new_row)
@@ -126,7 +121,7 @@ class Value(Variable):
             process_name=self.process_name,
             label=self.label
         )
-        return copy.deepcopy(self.value)
+        return self.value
 
     def delete(self, trial_id: int):
         self.delete_any_trial_variable(
@@ -141,13 +136,13 @@ class Serializer:
         self.file_name = file_name
         self.d = {}
 
-    def register(self, process_name: str, labels: list):
+    def register(self, process_name: str, labels: list) -> None:
         for i in range(len(labels)):
             if labels[i] not in self.d.keys():
                 self.d[labels[i]] = Value(self.file_name, labels[i])
                 self.d[labels[i]].set_process_name(process_name)
 
-    def delete_any_trial_variable(self, trial_id):
+    def delete_any_trial_variable(self, trial_id) -> None:
         for key in self.d.keys():
             self.d[key].delete(trial_id)
 

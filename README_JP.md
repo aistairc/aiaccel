@@ -1,7 +1,9 @@
 # aiaccel: an HPO library for ABCI
 [![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
 [![Supported Python version](https://img.shields.io/badge/Python-3.8-blue)](https://github.com/aistairc/aiaccel)
+[![Documentation Status](https://readthedocs.org/projects/aiaccel/badge/?version=latest)](https://aiaccel.readthedocs.io/ja/latest/)
 ![CI status](https://github.com/aistairc/aiaccel/actions/workflows/actions.yaml/badge.svg)
+
 
 [AI橋渡しクラウドABCI](https://abci.ai/)向けハイパーパラメータ最適化ライブラリ。
 ランダムサーチ、グリッドサーチ、Sobol列、Nelder-Mead法、およびベイズ最適化法 (TPE)をサポートしています。
@@ -17,8 +19,8 @@
 
 0. (オプション) Virtualenvをインストールし、仮想環境を作成します。
     ~~~bash
-    > python3 -m venv work
-    > source work/bin/activate
+    > python3 -m venv optenv
+    > source optenv/bin/activate
     ~~~
 
 1. `aiaccel`をインストールします
@@ -32,7 +34,7 @@
     > mkdir your_workspace_directory
     > cd your_workspace_directory
     > git clone https://github.com/aistairc/aiaccel.git 
-    > cp -R cloned_directory/aiaccel/examples .
+    > cp -R ./aiaccel/examples .
     > cd examples
     > ls
     sphere
@@ -78,7 +80,7 @@
     ~~~bash
     > module load gcc/11.2.0
     > module load python/3.8/3.8.13
-    > python3 -m venv work
+    > python3 -m venv optenv
     > source work/bin/activate
     ~~~
 

@@ -181,4 +181,3 @@ LocalSchedulerクラスでは，ps コマンドをパースしてジョブの状
 
 inner_loop_main_process メソッドはメインループであり，ジョブをプロセスとして実行する．
 その際の execute メソッドが実行コマンドを生成し実行する．
-

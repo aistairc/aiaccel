@@ -33,6 +33,7 @@ class Result(Abstract):
                 if data is None:
                     new_row = ResultTable(
                         trial_id=trial_id,
+                        data_type=str(type(objective)),
                         objective=objective
                     )
                     session.add(new_row)
@@ -63,6 +64,7 @@ class Result(Abstract):
 
         if data is None:
             return None
+
         return data.objective
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -88,6 +90,7 @@ class Result(Abstract):
             objectives(list): result values
         """
         data = self.get_all_result()
+
         return [d.objective for d in data]
 
     def get_bests(self, goal: str) -> list:
@@ -114,6 +117,7 @@ class Result(Abstract):
                 best_values.append(best_value)
         else:
             return []
+
         return best_values
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -124,10 +128,15 @@ class Result(Abstract):
             objectives(list): result values
         """
         with self.create_session() as session:
-            data = session.query(ResultTable).with_for_update(read=True)
+            data = (
+                session.query(ResultTable)
+                .with_for_update(read=True)
+                .all()
+            )
 
-        if data is None:
+        if data is None or len(data) == 0:
             return None
+
         return [d.trial_id for d in data]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)

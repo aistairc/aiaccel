@@ -20,7 +20,7 @@ logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
 
 
-def main() -> None:
+def main() -> None:  # pragma: no cover
     parser = ArgumentParser()
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     parser.add_argument('--resume', type=int, default=None)
@@ -53,12 +53,10 @@ def main() -> None:
 
     logger.info(f"config: {str(pathlib.Path(args.config).resolve())}")
 
-    time_s = time.time()
-
     Master = create_master(args.config)
     Optimizer = create_optimizer(args.config)
     Scheduler = create_scheduler(args.config)
-    modules = [Master(vars(args)), Scheduler(vars(args)), Optimizer(vars(args))]
+    modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
 
     sleep_time = config.sleep_time.get()
     time_s = time.time()

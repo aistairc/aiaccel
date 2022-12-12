@@ -52,7 +52,7 @@ class Hp(Abstract):
                     HpTable(
                         trial_id=trial_id,
                         param_name=d['parameter_name'],
-                        param_value=str(d['value']),
+                        param_value=d['value'],
                         param_type=d['type']
                     ) for d in params
                 ]

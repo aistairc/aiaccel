@@ -33,8 +33,7 @@ class TestCeaterRunnerComand(BaseTest):
             config.job_command.get(),
             get_one_parameter(),
             'name',
-            'config.json',
-            options
+            'config.json'
         )
         assert commands[0] == 'python'
         assert commands[1] == 'original_main.py'
@@ -56,4 +55,14 @@ class TestCeaterRunnerComand(BaseTest):
             {},
             start_time,
             end_time
+        ) is None
+
+        assert save_result(
+            work_dir,
+            dict_lock,
+            'name',
+            {},
+            start_time,
+            end_time,
+            err_message='error'
         ) is None

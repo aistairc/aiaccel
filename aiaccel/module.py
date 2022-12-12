@@ -1,5 +1,4 @@
 import logging
-import random
 from pathlib import Path
 
 import numpy as np
@@ -80,6 +79,13 @@ class AbstractModule(object):
         self.seed = self.config.randseed.get()
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
+        # TODO: Separate the generator if don't want to affect randomness each other.
+        self._rng = None
+
+        self.storage.variable.register(
+            process_name=self.options['process_name'],
+            labels=['native_random_state', 'numpy_random_state', 'state']
+        )
 
     def get_each_state_count(self) -> None:
         """Updates the number of files in hp(hyper parameter) directories.
@@ -173,9 +179,6 @@ class AbstractModule(object):
         self.logger.addHandler(fh)
         self.logger.addHandler(ch)
 
-    def remove_logger_handler(self):
-        self.logger = None
-
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
@@ -210,42 +213,23 @@ class AbstractModule(object):
 
     def _serialize(self, trial_id: int) -> None:
         """Serialize this module.
-
         Returns:
             None
-
-        Raises:
-            NotImplementedError: Causes when the inherited class does not
-                implement.
         """
-        raise NotImplementedError
+        self.storage.variable.d['state'].set(trial_id, self)
+
+        # random state
+        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
 
     def _deserialize(self, trial_id: int) -> None:
-        """Deserialize this module.
-
-        Args:
-            dict_objects(dict): A dictionary including serialized objects.
-
-        Returns:
-            None
-
-        Raises:
-            NotImplementedError: Causes when the inherited class does not
-                implement.
-        """
-        raise NotImplementedError
-
-    def set_native_random_seed(self) -> None:
-        """ set any random seed.
-
-        Args:
-            None
-
+        """ Deserialize this module.
         Returns:
             None
         """
-        self.logger.debug(f'set native random seed: {self.seed}')
-        random.seed(self.seed)
+        self.__dict__.update(self.storage.variable.d['state'].get(trial_id).__dict__.copy())
+
+        # random state
+        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
     def set_numpy_random_seed(self) -> None:
         """ set any random seed.
@@ -257,29 +241,7 @@ class AbstractModule(object):
             None
         """
         self.logger.debug(f'set numpy random seed: {self.seed}')
-        np.random.seed(seed=self.seed)
-
-    def get_native_random_state(self) -> tuple:
-        """ get random state.
-
-        Args:
-            None
-
-        Returns:
-            random.getstate (tuple)
-        """
-        return random.getstate()
-
-    def set_native_random_state(self, state: tuple) -> None:
-        """ get random state.
-
-        Args:
-            state (tuple): random state
-
-        Returns:
-            None
-        """
-        random.setstate(state)
+        self._rng = np.random.RandomState(self.seed)
 
     def get_numpy_random_state(self) -> tuple:
         """ get random state.
@@ -290,7 +252,7 @@ class AbstractModule(object):
         Returns:
             numpy.random.get_state (tuple)
         """
-        return np.random.get_state()
+        return self._rng.get_state()
 
     def set_numpy_random_state(self, state: tuple) -> None:
         """ get random state.
@@ -301,7 +263,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        np.random.set_state(state)
+        self._rng.set_state(state)
 
     def check_error(self) -> bool:
         """ Check to confirm if an error has occurred.
@@ -313,18 +275,6 @@ class AbstractModule(object):
             True: no error | False: with error.
         """
         return True
-
-    @property
-    def current_max_trial_number(self) -> int:
-        """ Get current trial number
-
-        Args:
-            None
-
-        Returns:
-            int: current trial number
-        """
-        return self.storage.current_max_trial_number()
 
     def resume(self) -> None:
         """ When in resume mode, load the previous
@@ -342,5 +292,9 @@ class AbstractModule(object):
         ):
             self._deserialize(self.options['resume'])
 
-    def get_zero_padding_any_trial_id(self, trial_id: int):
-        return self.trial_id.zero_padding_any_trial_id(trial_id)
+    def __getstate__(self):
+        obj = self.__dict__.copy()
+        del obj['storage']
+        del obj['config']
+        del obj['options']
+        return obj
