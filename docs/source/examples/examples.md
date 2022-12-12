@@ -1,13 +1,24 @@
-# Examplesの例(WIP)
+# Examples(WIP)
 
-## Sphere関数最適化の例(WIP)
+## ランダムオプティマイザのローカル実行例(WIP)
+- examples/local_random
+- 関数はexamples/sphereから
 
-## ResNet50の最適化の例(WIP)
+## グリッドオプティマイザのABCI実行例(WIP)
+- examples/abci_grid
+- 関数はexamples/schwefelから
 
-## Schwefel関数最適化の例(WIP)
+## TPEオプティマイザのローカル例(WIP)
+- examples/local_tpe
+- 関数はexamples/styblinski-tangから
 
-## Styblinkski-Tang関数最適化の例(WIP)
+## ソボルオプティマイザのABCI実行例(WIP)
+- examples/abci_sobol
+- 関数はexamples/benchmarkから
 
-## ベンチマーク関数最適化の例(WIP)
+## ネルダーミードオプティマイザのローカル例(WIP)
+- examples/local_nelder_mead
+- 関数はexamples/resnet50_cifar10から
 
 ## ラッパー関数作成の例(WIP)
+- examples/wrapper_sample
