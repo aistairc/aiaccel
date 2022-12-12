@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
@@ -11,18 +11,29 @@ class AbstractOptimizer(AbstractModule):
     """An abstract class for Optimizer classes.
 
     Attributes:
-        hp_total (int): A total number to generate hyper parameters.
-        pool_size (int): A number to pool hyper parameters.
+        options (Dict[str, Union[str, int, bool]]): A dictionary
+        containing command line options.
+        hp_ready (int): A ready number of hyper parameters.
+        hp_running (int): A running number of hyper prameters.
+        hp_finished (int): A finished number of hyper parameters.
+        num_of_generated_parameter (int): A number of generated hyper
+        paramters.
+        all_parameter_generated (bool): A boolean indicating if all
+        parameters are generated or not.
         params (HyperParameterConfiguration): Loaded hyper parameter
-            configuration object.
-        num_of_generated_parameter (int): A number of generated hyper paramters.
+        configuration object.
+        trial_id (TrialId): TrialId object.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: Dict[str, Union[str, int, bool]]) -> None:
         """Initial method of AbstractOptimizer.
 
         Args:
-            config (str): A file name of a configuration.
+            options (Dict[str, Union[str, int, bool]]): A dictionary
+            containing command line options.
+
+        Returns:
+            None
         """
         self.options = options
         self.options['process_name'] = 'optimizer'
@@ -44,11 +55,14 @@ class AbstractOptimizer(AbstractModule):
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
 
-    def register_new_parameters(self, params: List[dict]) -> None:
+    def register_new_parameters(
+            self,
+            params: List[Dict[str, Union[str, float, List[float]]]]
+    ) -> None:
         """Create hyper parameter files.
 
         Args:
-            params (List[dict]): A list of hyper parameter dictionaries.
+            params (List[Dict]): A list of hyper parameter dictionaries.
 
         Returns:
             None
@@ -72,17 +86,15 @@ class AbstractOptimizer(AbstractModule):
 
         self.num_of_generated_parameter += 1
 
-    def generate_initial_parameter(self) -> Union[
-        Dict[str, List[Dict[str, Union[str, Union[float, List[float]]]]]], None
+    def generate_initial_parameter(self) -> List[
+        Dict[str, Union[str, float, List[float]]]
     ]:
-        """Generate a initial parameter.
+        """Generate a list of initial parameters.
 
         Returns:
-            Union[Dict[str, List[Dict[str, Union[str, Union[float,
-                List[float]]]]], None]: A created initial parameter. It returns
-                None if any parameters are already created.
+            List[Dict[str, Union[str, float, List[float]]]]: A created
+            list of initial parameters.
         """
-
         sample = self.params.sample(initial=True, rng=self._rng)
         new_params = []
 
@@ -96,23 +108,22 @@ class AbstractOptimizer(AbstractModule):
 
         return new_params
 
-    def generate_parameter(self) -> list:
-        """Generate parameters.
-
-        Args:
-            number (Optional[int]): A number of generating parameters.
-
-        Returns:
-            None
+    def generate_parameter(self) -> Optional[
+        List[Dict[str, Union[str, float, List[float]]]]
+    ]:
+        """Generate a list of parameters.
 
         Raises:
             NotImplementedError: Causes when the inherited class does not
-                implement.
+            implement.
+
+        Returns:
+            List[Dict[str, Union[str, float, List[float]]]]: A created
+            list of parameters.
         """
         raise NotImplementedError
 
     def get_pool_size(self) -> int:
-
         hp_ready = self.storage.get_num_ready()
         hp_running = self.storage.get_num_running()
         hp_finished = self.storage.get_num_finished()
@@ -129,7 +140,15 @@ class AbstractOptimizer(AbstractModule):
 
         return pool_size
 
-    def generate_new_parameter(self) -> list:
+    def generate_new_parameter(self) -> Optional[
+        List[Dict[str, Union[str, Union[float, List[float]]]]]
+    ]:
+        """Generate a list of parameters.
+
+        Returns:
+            List[ Dict[str, Union[str, Union[float, List[float]]]] ]: A created
+            list of parameters.
+        """
         if self.num_of_generated_parameter == 0:
             new_params = self.cast(self.generate_initial_parameter())
         else:
@@ -196,8 +215,7 @@ class AbstractOptimizer(AbstractModule):
         return True
 
     def resume(self) -> None:
-        """ When in resume mode, load the previous
-                optimization data in advance.
+        """ When in resume mode, load the previous optimization data in advance.
 
         Args:
             None
@@ -214,7 +232,7 @@ class AbstractOptimizer(AbstractModule):
             self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])
 
-    def cast(self, params: Union[None, list]) -> Union[None, list]:
+    def cast(self, params: Optional[List]) -> Optional[List]:
         if params is None or len(params) == 0:
             return params
 
@@ -226,7 +244,10 @@ class AbstractOptimizer(AbstractModule):
             param_value = _param['value']
 
             try:
-                if param_type.lower() == 'categorical' or param_type.lower() == 'ordinal':
+                if (
+                    param_type.lower() == 'categorical' or
+                    param_type.lower() == 'ordinal'
+                ):
                     casted_params.append(_param)
                     continue
 
@@ -251,7 +272,9 @@ class AbstractOptimizer(AbstractModule):
             return True
 
         for trial_id in error_trial_ids:
-            error_message = self.storage.error.get_any_trial_error(trial_id=trial_id)
+            error_message = self.storage.error.get_any_trial_error(
+                trial_id=trial_id
+            )
             self.logger.error(error_message)
 
         return False

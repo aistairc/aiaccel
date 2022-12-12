@@ -10,7 +10,7 @@ with patch('aiaccel.util.retry.retry', lambda function: function):
     import pytest
     from aiaccel.config import ConfileWrapper
     from aiaccel.scheduler.create import create_scheduler
-    from aiaccel.scheduler.job.job_thread import (JOB_STATES, JOB_TRANSITIONS,
+    from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
                                                 CustomMachine, Job, Model)
     from aiaccel.scheduler.local_scheduler import LocalScheduler
     from aiaccel.util.time_tools import get_time_now_object
@@ -480,7 +480,7 @@ class TestJob(BaseTest):
 
     def test_run_2(self, database_remove):
         self.job.scheduler.pre_process()
-        self.job.start()
+        self.job.main()
         self.job.threshold_timeout = get_time_now_object()
         self.job.threshold_timeout =\
             get_time_now_object() + datetime.timedelta(10)
@@ -488,4 +488,4 @@ class TestJob(BaseTest):
         self.job.count_retry = 100
         self.job.threshold_retry = 10
         self.job.get_machine().set_state('Success')
-        self.job.join()
+        self.job.main()
