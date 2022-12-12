@@ -239,7 +239,9 @@ class AbstractModule(object):
             None
         """
         self.logger.debug(f'set numpy random seed: {self.seed}')
-        np.random.seed(seed=self.seed)
+        if self._rng is None:
+            self.create_numpy_random_generator()
+        np.random.set_state(self.get_numpy_random_state())
 
     def create_numpy_random_generator(self) -> None:
         """ create random generator using any random seed.
