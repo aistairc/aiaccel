@@ -61,11 +61,11 @@ jobs:
 
       - name: Newly Test
         run: |
-          pytest -v tests/newly_test/no_initial/benchmark/test_benchmark_tpe_no_initial.py
-          pytest -v tests/newly_test/no_initial/benchmark/test_benchmark_nelder_mead_no_initial.py
-          pytest -v tests/newly_test/additional_resumption/benchmark/test_benchmark_tpe_resumption.py
-          pytest -v tests/newly_test/additional_resumption/benchmark/test_benchmark_nelder_mead_resumption.py
-          pytest -v tests/newly_test/random_generation/benchmark/test_benchmark_random_generation.py
+          pytest -v tests/newly_test/no_initial_test_benchmark/test_benchmark_tpe_no_initial.py
+          pytest -v tests/newly_test/no_initial_test_benchmark/test_benchmark_nelder_mead_no_initial.py
+          pytest -v tests/newly_test/additional_resumption_test_benchmark/test_benchmark_tpe_resumption.py
+          pytest -v tests/newly_test/additional_resumption_test_benchmark/test_benchmark_nelder_mead_resumption.py
+          pytest -v tests/newly_test/random_generation_test_benchmark/test_benchmark_random_generation.py
 
   publish-test-results:
     name: "Publish Tests Results"
