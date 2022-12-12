@@ -13,7 +13,7 @@ class RandomGenerationTest(BaseTest):
     search_algorithm = None
 
     def test_run(self, cd_work, data_dir, work_dir):
-        test_data_dir = Path(__file__).resolve().parent.joinpath('benchmark', 'test_data')
+        test_data_dir = Path(__file__).resolve().parent.joinpath('random_generation_test_benchmark', 'test_data')
         python_file = test_data_dir.joinpath('user.py')
 
         # random execution
