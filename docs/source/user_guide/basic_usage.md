@@ -174,7 +174,6 @@ parameters:
         - uniform_int
         - categorical
         - ordinal
-        - sequential
 - **lower** - ハイパーパラメータ最小値を設定します。
 - **upper** - ハイパーパラメータ最大値を設定します。
 - **initial** - ハイパーパラメータの初期値を設定します。
@@ -258,7 +257,7 @@ parameters:
 
 ```{note}
 - categorial使用時は `choices` 項目を使用します. `choices` は配列で指定する必要があります。
-- catogoricalを使用できるのは、最適化アルゴリズムが `Random` と `TPE` の場合のみです。
+- catogoricalを使用できるのは、最適化アルゴリズムが `Grid` と `Random` と `TPE` の場合のみです。
 ```
 
 #### Type: ordinalの記述例
@@ -282,7 +281,7 @@ parameters:
 ```{note}
 - ordinal使用時は `sequence` 項目を使用します. `sequence` は配列で指定する必要があります。
 - ordinal使用時は `initial` の設定はできません。
-- ordinalを使用できるのは、最適化アルゴリズムが `RandomSearch` と `TPE` の場合のみです。
+- ordinalを使用できるのは、最適化アルゴリズムが  `Grid` と `Random` の場合のみです。
 ```
 
 ### grid使用時の注意事項
