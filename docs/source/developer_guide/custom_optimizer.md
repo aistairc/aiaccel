@@ -489,22 +489,22 @@ objective_value =  self.storage.result.get_any_trial_objective(n)
 ### 例: 勾配降下法による最適化
 
 勾配降下法では，着目する試行におけるパラメータが与える目的関数の勾配を元に，次のパラメータを決定します．
-一次元の場合，$n$ 試行目のパラメータを $W_n$, 目的関数を $f(W_n)$ と書くと，$n+1$ 試行目のパラメータは
-$$ W_{n+1} = W_n + \gamma f'(W_{n}) $$
-となります．ここで，$\gamma$ は学習率 (パラメータの更新をどの程度行うかの指標)，$ f'(W_n) $ は $W_n$ における目的関数の勾配です．
+一次元の場合， $n$ 試行目のパラメータを $W_n$ とし，目的関数を $f(W_n)$ と書くと， $n+1$ 試行目のパラメータは
+$$W_{n+1} = W_n + \gamma f'(W_{n})$$
+となります．ここで， $\gamma$ は学習率 (パラメータの更新をどの程度行うかの指標)， $f'(W_n)$ は $W_n$ における目的関数の勾配です．
 
 
-ここでは，$f$ の解析的な形が分からない場合に，勾配を差分で置き換えることを考えます．
+ここでは $f$ の解析的な形が分からない場合に，勾配を差分で置き換えることを考えます．
 簡単のため，前進差分のみを考えると，差分を用いた勾配の近似式は
-$$ f'(W_n) \approx \frac{f(W_n + \delta) - f(W_n) } { \delta } $$
-のようになります．
-従って，$n + 1$ 試行目におけるパラメータは
-$$ W_{n + 1} \approx W_n + \gamma \frac{f(W_n + \delta) - f(W_n) } { \delta } $$
+$$f'(W_n) \approx \frac{f(W_n + \delta) - f(W_n) } { \delta }$$
+となります．
+従って $n + 1$ 試行目におけるパラメータは
+$$W_{n + 1} \approx W_n + \gamma \frac{f(W_n + \delta) - f(W_n) } { \delta }$$
 と近似できます．
 
 ### オプティマイザの実装
 
-上の例では，$n + 1$ 試行目のパラメータを決定するために，$f(W_n)$ と $f(W_{n+1})$ という 2 つの目的関数の値を使用しました．
+上の例では $n + 1$ 試行目のパラメータを決定するために， $f(W_n)$ と $f(W_{n+1})$ という 2 つの目的関数の値を使用しました．
 カスタムオプティマイザでは，これらをメソッド `generate_parameter()` 内で取得する必要があります．
 以下に，前進差分を用いたオプティマイザの例を示します．
 
@@ -630,10 +630,10 @@ class SearchState(Enum):
     CALC_NEXT_PARAM = auto()
 ```
 
-オプティマイザが保持する変数は以下のようなものです．
+オプティマイザが保持する変数は以下の通りです．
 - learning_rate: 学習率．
 - delta: 目的関数の前進値を計算するための変分 $\delta$.
-- current_params: 現在 ($n$ 試行目) のパラメータ $W_n$．
+- current_params: 現在 ( $n$ 試行目) のパラメータ $W_n$．
 - num_parameters: 最適化するパラメータの数．
 - forward_objectives: $W_n + \delta$ における目的関数の値 $f(W_n + \delta)$．
 - num_generated_forwards: 既に生成された $W_n + \delta$ の数．
@@ -748,7 +748,7 @@ class SearchState(Enum):
 ただし，呼び出された時点で Storage に値が保存されていなければ，`None` を返却します．
 
 メソッド `self._get_objective()` が目的関数の値を返した場合，オプティマイザの状態を `WAIT_CURRENT_OBJECTIVE` から `WAIR_FORWARD_OBJECTIVE` に変更します．
-この時点で，$f(W_n)$ の値はメンバ変数 `self.current_objective` に保持されています．
+この時点で， $f(W_n)$ の値はメンバ変数 `self.current_objective` に保持されています．
 ```python
             if self.current_objective is not None:
                 self.state = SearchState.WAIT_FORWARD_OBJECTIVE
@@ -800,7 +800,7 @@ class SearchState(Enum):
                         self.num_parameters):
                     self.state = SearchState.CALC_NEXT_PARAM
 ```
-注意: オプティマイザが状態 WAIT_FORWARD_OBJECTIVE のとき，メソッド self.generate_parameters() は少なくとも最適化対象のパラメータの数以上，Storage にすべての目的関数の値が保存されるまで呼ばれます．また，Storage から目的関数の値が読み出せたか否かや，すべての値の読み出しが完了したか否かに依らず，WAIT_FORWARD_OBJECTIVE 状態の self.generate_parameters() は None をメインループに返します．
+注意: オプティマイザが状態 `WAIT_FORWARD_OBJECTIVE` のとき，メソッド `self.generate_parameters()` は少なくとも最適化対象のパラメータの総数以上，Storage にすべての目的関数の値が保存されるまで呼ばれます．また，Storage から目的関数の値が読み出せたか否かや，すべての値の読み出しが完了したか否かに依らず，`WAIT_FORWARD_OBJECTIVE` 状態の `self.generate_parameters()` は `None` をメインループに返します．
 
 #### 状態: CALC_NEXT_PARAM
 
@@ -854,9 +854,9 @@ Storage から読み出した $W_n$ における目的関数の値 $f(W_n)$ (`se
 ### 注意事項
 
 一般に，パラメータの更新ステップ数 $n$ と aiaccel 上のジョブ ID (`trial_id`) は一致しないことに注意してください．
-例えば上の例では，最適化したいパラメータの数が 5 個の場合は，パラメータを１度更新するために目的関数を 5 回計算する必要があります．
+例えば上の例において，最適化したいパラメータの数が 5 個の場合，パラメータを１度更新するために目的関数を 5 回計算する必要があります．
 この場合は 1 回のパラメータ更新で aiaccel の `trial_id` は 5 増加することになります．
-従って，config.yaml で指定した trial_number が，例えば 30 回の場合，初期値を除いて 4 回しかパラメータは更新されません．
+従って，config.yaml で指定した `trial_number` が，例えば 30 回の場合，初期値を除いて 4 回しかパラメータは更新されません．
 
 同様な ID の不一致は NelderMeadOptimizer を用いた際にも起こります．
-Nelder-Mead 法の 1 ステップに相当する処理は，aiaccel 上では (パラメータ数 + 1) ステップとして扱われます．
+Nelder-Mead 法の 1 ステップに相当する処理が終了したとき，aiaccel 上では `trial_id` が **パラメータ数 + 1** だけ増加します．
