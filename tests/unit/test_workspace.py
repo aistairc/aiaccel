@@ -51,8 +51,10 @@ def test_move_completed_data():
     workspace.clean()
     workspace.create()
     # ===  test start ===
+    # 1
     assert type(workspace.move_completed_data()) == pathlib.PosixPath
-    assert workspace.move_completed_data() is None
+    # 2
+    assert type(workspace.move_completed_data()) == pathlib.PosixPath
     # ===  test end ===
     shutil.rmtree("./results")
     workspace.clean()
