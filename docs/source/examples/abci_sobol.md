@@ -20,7 +20,7 @@
 
 ### job_script_preamble.sh
 
-- ABCIで使用するモジュールやジョブ設定を指定するためのシェルスクリプトファイルです．
+- ABCIで使用するモジュール指定やジョブ設定を行うためのシェルスクリプトファイルです．
 
 <br>
 
@@ -168,6 +168,8 @@ aiaccel から関数 main にハイパーパラメータを渡し，`main()` の
 
 ### job_script_preamble.shの作成
 ---
+`job_script_preamble.sh` は、ABCIにジョブを投入するためのバッチファイルのベースファイルです。
+このファイルには事前設定を記述します。ここに記述した設定が全てのジョブに適用されます。
 
 ```bash
 #!/bin/bash
@@ -178,7 +180,7 @@ aiaccel から関数 main にハイパーパラメータを渡し，`main()` の
 #$ -l h_rt=2:00:00
 ```
 
-- ABCIのバッジジョブ実行オプションを指定しています．`#$-l rt_F=1`でFullノードを利用するように設定しています．
+- ABCIのバッチジョブ実行オプションを指定しています．`#$-l rt_F=1`でFullノードを利用するように設定しています．
     - 参考: https://docs.abci.ai/ja/job-execution/#job-execution-options
 
 ```bash
