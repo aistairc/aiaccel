@@ -35,7 +35,7 @@ generic:
 ```
 - **workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．
 - **job_command** - ユーザープログラムを実行するためのコマンドです．
-- **batch_job_timeout** - job のタイムアウト時間を設定します。[単位: 秒]
+- **batch_job_timeout** - job のタイムアウト時間を設定します．[単位: 秒]
 
 #### resource
 ```yaml
