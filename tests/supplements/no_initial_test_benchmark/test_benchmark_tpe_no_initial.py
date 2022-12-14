@@ -1,6 +1,6 @@
 
 
-from tests.newly_test.no_initial_test import NoInitialTest
+from tests.supplements.no_initial_test import NoInitialTest
 
 
 class TestBenchmarkTpeNoInitial(NoInitialTest):
