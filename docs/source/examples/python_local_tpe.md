@@ -1,44 +1,17 @@
 # TPE オプティマイザのローカル実行例
 
-ここでは，TPE オプティマイザを `python_local` モードで実行する方法を説明します．
+ここでは，TPE オプティマイザを `python_local` モードを用いてローカルで実行する方法を説明します．
 例として，ベンチマーク関数の一つである Styblinski-Tang の最適化を行います．
 
-使用するファイルは aiaccel/examples/examples/styblinski-tang に保存されています．
+以下の説明では aiaccel/examples/styblinski-tang に保存されているファイルを編集して使用します．
 
-<!-- ```diff
-generic:
-  workspace: "./work"
-  job_command: "python user.py"
-+ job_command: "python user.py"
-+ python_file: "./user.py"
-  batch_job_timeout: 600
-
-resource:
-- type: "local"
-+ type: "python_local"
-  num_node: 4
-
-ABCI:
-  group: "[group]"
-  job_script_preamble: "./job_script_preamble.sh"
-  job_execution_options: ""
-
-optimize:
--  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
-+ #search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
-  #search_algorithm: "aiaccel.optimizer.RandomOptimizer"
-  #search_algorithm: "aiaccel.optimizer.SobolOptimizer"
-  #search_algorithm: "aiaccel.optimizer.GridOptimizer"
-- #search_algorithm: "aiaccel.optimizer.TpeOptimizer"
-+ search_algorithm: "aiaccel.optimizer.TpeOptimizer"
-``` -->
 
 ## 1. ファイル構成
 
 ### config.yaml
 
 - 最適化およびソフトウェアの設定ファイルです．
-
+- aiaccel/examples/styblinski-tang に存在するファイルは，デフォルトでは Nelder-Mead 法を用いた最適化をローカルで実行する設定になっています．
 
 ### user.py
 
@@ -65,7 +38,7 @@ batch_job_timeout: 600
 - **job_command** - ユーザープログラムを実行するためのコマンドです．`python_local` モードでは使用されませんが，実行時に読み込むため，記述します．
 - **python_file** - python で実装された最適化対象の関数のファイルパスを設定します．
 - **function** - 最適化対象の関数名を設定します．
-- **batch_job_timeout** - job のタイムアウト時間を設定します．[単位: 秒]
+- **batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]
 
 #### resource
 ```yaml
@@ -74,7 +47,7 @@ resource:
   num_node: 4
 ```
 
-- **type** - 実行環境を指定します．`python_local` モード実行するためには `"python_local"` と設定します．
+- **type** - 実行環境を指定します．`python_local` モードを使用してローカルで実行するためには `"python_local"` と設定します．
 - **num_node** - 使用するノード数を指定します．
 
 
@@ -124,7 +97,7 @@ optimize:
 - **rand_seed** - 乱数の生成に使用するシードを設定します．
 - **parameters** - ハイパーパラメータの各種項目を設定します．ここでは 5 次元の Styblinski-Tang の最適化を行うため，5 種類のパラメータを用意しています．5 つのパラメータに対して，以下の項目をそれぞれ設定する必要があります．パラメータの範囲や初期値を，全て同じにする必要はありません．
     - **name** - ハイパーパラメータの名前を設定します．
-    - **type** - ハイパーパタメータのデータ型を設定します．ここでは例として `"uniform_float"` に設定していますが，TPE オプティマイザでは，以下の 3 つのタイプから選択することができます．
+    - **type** - ハイパーパラメータのデータ型を設定します．ここでは例として `"uniform_float"` に設定していますが，TPE オプティマイザでは，以下の 3 つのタイプから選択することができます．
         - uniform_float - 浮動小数点数
         - uniform_int - 整数
         - categorical - カテゴリカル変数
@@ -166,7 +139,7 @@ from aiaccel.util import aiaccel
 
 必要なモジュールをインポートします．
 
-- numpy - ベンチマーク関数 Styblinski-Tang を計算するために使用します．
+- numpy - 関数 Styblinski-Tang を計算するために使用します．
 - aiaccel.util.aiaccel - ユーザープログラム内で定義される関数 `main()` と aiaccelとの間のインターフェイスを提供します．
 
 
@@ -182,7 +155,7 @@ def main(p):
     y = 0.5 * (t1 + t2 + t3)
     return float(y)
 ```
-最適化対象のメイン関数で，aiaccel はこの関数の `return` 値を最小化します．
+最適化対象の関数で，aiaccel はこの関数の `return` 値を最小化します．
 引数にハイパーパラメータの辞書型オブジェクトを取ります．
 この例では，与えられたパラメータに対してベンチマーク関数 Styblinski-Tang の値を計算し，返却します．
 
@@ -192,19 +165,23 @@ if __name__ == "__main__":
     run = aiaccel.Run()
     run.execute_and_report(main)
 ```
-aiaccel から関数 `main()` にハイパーパラメータを渡し，`main()` の返却値を Storage に保存します．`run` はそのインターフェイスとなるインスタンスです．メソッド `execute_and_report()` の内部で `main()` が呼ばれ，Styblinski-Tang の値を計算し，Storage に計算結果が保存されます．
+aiaccel から関数 `main()` にハイパーパラメータを渡し，`main()` の返却値を Storage に保存します．
+`run` はそのインターフェイスとなるインスタンスです．
+メソッド `execute_and_report()` の内部で `main()` が値を計算し，Storage に計算結果が保存されます．
 
 
 <br>
 
 ## 3. 実行
 
-ファイルの作成が終了したら，下記のコマンドで aiaccel を起動してください．
+作成した config.yaml と user.py が保存されているディレクトリに移動し，下記のコマンドで aiaccel を起動してください．
 
 ```console
 > aiaccel-start --config config.yaml --clean
 ```
-注意：config.yaml は参照可能なコンフィグファイルのパスを指定します．
+- コマンドラインオプション引数
+    - `--config` - 設定ファイルを読み込むためのオプション引数です．読み込むコンフィグのパスを記述します．
+    - `--clean` - aiaccel の起動ディレクトリ内に config.yaml の `workspace` で指定したディレクトリが存在する場合，削除してから実行するためのオプション引数です．
 
 <br>
 
