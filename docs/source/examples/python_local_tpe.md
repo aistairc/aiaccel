@@ -56,7 +56,7 @@ resource:
 optimize:
   search_algorithm: 'aiaccel.optimizer.TpeOptimizer'
   goal: "minimize"
-  trial_number: 100
+  trial_number: 30
   rand_seed: 42
   parameters:
     -
@@ -64,30 +64,31 @@ optimize:
       type: "uniform_float"
       lower: -5.0
       upper: 5.0
-      initial: -5.0
+      initial: 0.0
     -
       name: "x2"
       type: "uniform_float"
-      lower: -3.0
+      lower: -5.0
       upper: 5.0
-      initial: -3.0
+      initial: 0.0
     -
       name: "x3"
       type: "uniform_float"
       lower: -5.0
-      upper: 2.7
-      initial: 2.2
+      upper: 5.0
+      initial: 0.0
     -
       name: "x4"
       type: "uniform_float"
       lower: -5.0
-      upper: 4.5
-      initial: 4.0
+      upper: 5.0
+      initial: 0.0
     -
       name: "x5"
       type: "uniform_float"
-      lower: -7.0
-      upper: 6.0
+      lower: -5.0
+      upper: 5.0
+      initial: 0.0
 ```
 
 - **search_algorithm** - 最適化アルゴリズムを設定します．この例では TPE オプティマイザを設定しています．
@@ -102,7 +103,7 @@ optimize:
         - uniform_int - 整数
         - categorical - カテゴリカル変数
     - **lower / upper** - ハイパーパラメータ最小値 / 最大値を設定します．
-    - **initial** - ハイパーパラメータの初期値を設定します．上の例の `"x5"` の場合のように `initial` の項目がない場合，実行時にランダムな初期値が自動で設定されます．
+    - **initial** - ハイパーパラメータの初期値を設定します．
 
 ### user.py の作成
 ---
@@ -115,8 +116,6 @@ from aiaccel.util import aiaccel
 
 def main(p):
     x = np.array([p["x1"], p["x2"], p["x3"], p["x4"], p["x5"]])
-    
-    # Styblinski-Tang
     t1 = np.sum(x ** 4)
     t2 = -16 * np.sum(x ** 2)
     t3 = 5 * np.sum(x)
@@ -205,22 +204,22 @@ aiaccel から関数 `main()` にハイパーパラメータを渡し，`main()`
 
     - デフォルトパラメータ
         ```
-        x1 = -5.0
-        x2 = -3.0
-        x3 = 2.2
-        x4 = 4.0
-        x5 = -2.1309784549842874 (自動生成)
+        x1 = 0.0
+        x2 = 0.0
+        x3 = 0.0
+        x4 = 0.0
+        x5 = 0.0
 
-        result = 59.38106917560722
+        result = 0.0
         ```
 
     - 最適化結果
         ```
-        x1 = -0.2652822921943434
-        x2 = -1.6143850407198785
-        x3 = -1.6593423008676074
-        x4 = -1.2142050232249524
-        x5 = 1.0060512746788142
-
-        result = 7.916463631408188
+        x1 = -3.930303675338723
+        x2 =  2.640453540706446
+        x3 = -2.954080362853035
+        x4 = -2.359296335376299
+        x5 =  2.690131733893075
+        
+        result = -138.00660281690844
         ```
