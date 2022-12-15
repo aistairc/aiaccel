@@ -74,12 +74,12 @@ optimize:
     -
       name: "x1"
       type: "uniform_float"
-      lower: -5.0
+      lower: 0.0
       upper: 5.0
     -
       name: "x2"
       type: "uniform_float"
-      lower: -3.0
+      lower: 0.0
       upper: 5.0
 ```
 
@@ -92,6 +92,7 @@ optimize:
     - **name** - ハイパーパラメータの名前を設定します．
     - **type** - ハイパーパラメータのデータ型を設定します．
     - **lower / upper** - ハイパーパラメータ最小値 / 最大値を設定します．
+    - **initial** - SobolOptimizer では，inital値は必要ありません．
 
 ### user.py の作成
 ---
@@ -208,11 +209,8 @@ aiaccel-start --config config.yaml --clean
 
     - 最適化結果
         ```
-        x1 = 3.260071873664856
-        x2 = 2.4069037437438965
-        x3 = -4.1577182993292805
-        x4 = -2.7267021164298058
-        x5 = -4.344712510704994
+        x1 = 3.134656548500061
+        x2 = 1.9281481206417084
 
-        polynomial = -6.872616182892372
+        polynomial = -6.967029595301102
         ```
