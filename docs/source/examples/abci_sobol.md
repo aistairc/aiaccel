@@ -1,9 +1,8 @@
-# ソボルオプティマイザのABCI環境での実行例
+# ソボルオプティマイザの ABCI 環境での実行例
 
 ここでは，ソボルオプティマイザをABCI環境で実行する方法を説明します．例として，以下 user.py の main 内で定義されている多項式をベンチマーク関数として最適化を行います．
 
-以下で説明するファイルは github から入手することも可能です．
-
+以下の説明では aiaccel/examples/benchmark に保存されているファイルを編集して使用します．
 
 
 ## 1. ファイル構成
@@ -11,7 +10,7 @@
 ### config.yaml
 
 - 最適化およびソフトウェアの設定ファイルです．
-
+- aiaccel/examples/benchmark に存在するファイルは，デフォルトでは Nelder-Mead 法を用いた最適化をローカルで実行する設定になっています．
 
 ### user.py
 
@@ -82,21 +81,6 @@ optimize:
       type: "uniform_float"
       lower: -3.0
       upper: 5.0
-    -
-      name: "x3"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 2.7
-    -
-      name: "x4"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 4.5
-    -
-      name: "x5"
-      type: "uniform_float"
-      lower: -7.0
-      upper: 6.0
 ```
 
 - **search_algorithm** - 最適化アルゴリズムを設定します．この例ではソボルオプティマイザを設定しています．
@@ -163,8 +147,9 @@ aiaccel から関数 main にハイパーパラメータを渡し，`main()` の
 
 ### job_script_preamble.shの作成
 ---
-`job_script_preamble.sh` は、ABCIにジョブを投入するためのバッチファイルのベースファイルです。
-このファイルには事前設定を記述します。ここに記述した設定が全てのジョブに適用されます。
+`job_script_preamble.sh` は、ABCIにジョブを投入するためのバッチファイルのベースファイルです．
+このファイルには事前設定を記述します．
+ここに記述した設定が全てのジョブに適用されます．
 
 ```bash
 #!/bin/bash
@@ -192,14 +177,14 @@ source /path/to/optenv/bin/activate
 
 ## 3. 実行
 
-ファイルの作成が終了したら，下記のコマンドで aiaccel を起動してください．
+作成した config.yaml と user.py が保存されているディレクトリに移動し，下記のコマンドで aiaccel を起動してください．
 
 ```bash
 aiaccel-start --config config.yaml --clean
 ```
 - コマンドラインオプション引数
-    - `--clean` - ワークスペース内に既にworkディレクトリが存在する場合に初期化して実行するためのオプション引数．
-    - `--config` - 設定ファイルを読み込むためのオプション引数．
+    - `--config` - 設定ファイルを読み込むためのオプション引数です．読み込むコンフィグのパスを記述します．
+    - `--clean` - aiaccel の起動ディレクトリ内に config.yaml の `workspace` で指定したディレクトリが存在する場合，削除してから実行するためのオプション引数です．
 
 
 
@@ -211,10 +196,6 @@ aiaccel-start --config config.yaml --clean
 
     - x1
     - x2
-    - x3
-    - x4
-    - x5
-
 - 評価値
 
     - polynomial

@@ -1,4 +1,4 @@
-# TPE オプティマイザのローカル実行例
+# TPE オプティマイザのローカル環境での実行例
 
 ここでは，TPE オプティマイザを `python_local` モードを用いてローカルで実行する方法を説明します．
 例として，ベンチマーク関数の一つである Styblinski-Tang の最適化を行います．
@@ -148,7 +148,6 @@ from aiaccel.util import aiaccel
 ```python
 def main(p):
     x = np.array([p["x1"], p["x2"], p["x3"], p["x4"], p["x5"]])
-    # Styblinski-Tang
     t1 = np.sum(x ** 4)
     t2 = -16 * np.sum(x ** 2)
     t3 = 5 * np.sum(x)
