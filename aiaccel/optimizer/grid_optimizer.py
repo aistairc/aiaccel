@@ -89,7 +89,6 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
             while x < upper_x or math.isclose(x, upper_x, abs_tol=1e-10):
                 new_param['parameters'].append(x)
                 x *= step_x
-            new_param['parameters'].append(upper)
         else:
             n = int((upper - lower) / step) + 1
             new_param['parameters'] = [lower + i * step for i in range(0, n)]
