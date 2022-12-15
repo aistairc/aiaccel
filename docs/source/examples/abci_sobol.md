@@ -77,25 +77,21 @@ optimize:
       type: "uniform_float"
       lower: -5.0
       upper: 5.0
-      initial: -5.0
     -
       name: "x2"
       type: "uniform_float"
       lower: -3.0
       upper: 5.0
-      initial: -3.0
     -
       name: "x3"
       type: "uniform_float"
       lower: -5.0
       upper: 2.7
-      initial: 2.2
     -
       name: "x4"
       type: "uniform_float"
       lower: -5.0
       upper: 4.5
-      initial: 4.0
     -
       name: "x5"
       type: "uniform_float"
@@ -112,7 +108,6 @@ optimize:
     - **name** - ハイパーパラメータの名前を設定します．
     - **type** - ハイパーパラメータのデータ型を設定します．
     - **lower / upper** - ハイパーパラメータ最小値 / 最大値を設定します．
-    - **initial** - ハイパーパラメータの初期値を設定します．上の例の `"x5"` の場合のように `initial` の項目がない場合，実行時にランダムな初期値が自動で設定されます．
 
 ### user.py の作成
 ---
@@ -174,18 +169,18 @@ aiaccel から関数 main にハイパーパラメータを渡し，`main()` の
 ```bash
 #!/bin/bash
 
-#$-l rt_F=1
+#$-l rt_C.small=1
 #$-j y
 #$-cwd
-#$ -l h_rt=2:00:00
 ```
 
-- ABCIのバッチジョブ実行オプションを指定しています．`#$-l rt_F=1`でFullノードを利用するように設定しています．
+- ABCIのバッチジョブ実行オプションを指定しています．
     - 参考: https://docs.abci.ai/ja/job-execution/#job-execution-options
 
 ```bash
 source /etc/profile.d/modules.sh
-module load gcc/11.2.0 python/3.8/3.8.13 cuda/10.1/10.1.243 cudnn/7.6/7.6.5
+module load gcc/11.2.0
+module load python/3.8/3.8.13
 source /path/to/optenv/bin/activate
 ```
 - ユーザプログラム実行に必要なモジュールの読み込みと仮想環境のactivateを行います．
@@ -225,28 +220,18 @@ aiaccel-start --config config.yaml --clean
     - polynomial
 
 - 最適化手法
+
     - Sobol
 
 - 結果比較
 
-    - デフォルトパラメータ
-        ```
-        x1 = -5.0
-        x2 = -3.0
-        x3 = 2.2
-        x4 = 4.0
-        x5 = 
-
-        polynomial = 
-        ```
-
     - 最適化結果
         ```
-        x1 = -5.0
-        x2 = -3.0
-        x3 = 2.2
-        x4 = 4.0
-        x5 = 
+        x1 = 3.260071873664856
+        x2 = 2.4069037437438965
+        x3 = -4.1577182993292805
+        x4 = -2.7267021164298058
+        x5 = -4.344712510704994
 
-        polynomial = 
+        polynomial = -6.872616182892372
         ```
