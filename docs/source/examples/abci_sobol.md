@@ -158,7 +158,7 @@ if __name__ == "__main__":
     run = aiaccel.Run()
     run.execute_and_report(main)
 ```
-aiaccel から関数 main にハイパーパラメータを渡し，`main()` の返却値を Storage に保存します．`run` はそのインターフェイスとなるインスタンスです．メソッド `execute_and_report()` の内部で `main()` が呼ばれ，sphere の値を計算し，Storage に計算結果が保存されます．
+aiaccel から関数 main にハイパーパラメータを渡し，`main()` の返却値を Storage に保存します．`run` はそのインターフェイスとなるインスタンスです．メソッド `execute_and_report()` の内部で `main()` が呼ばれ，目的関数の値を計算し，Storage に計算結果が保存されます．
 
 
 ### job_script_preamble.shの作成
