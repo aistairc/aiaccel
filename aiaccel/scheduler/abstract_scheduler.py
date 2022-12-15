@@ -129,7 +129,7 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.set_numpy_random_seed()
+        self.create_numpy_random_generator()
         self.resume()
 
         self.algorithm = schedule_sampling.RandomSampling(self.config)
