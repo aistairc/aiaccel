@@ -246,7 +246,7 @@ class AbstractOptimizer(AbstractModule):
             param_value = _param['value']
 
             # None: str to NoneType
-            if type(_param['value']) == str or type(_param['value']) == str_:
+            if type(_param['value']) in [str, str_]:
                 if _param['value'].lower() == 'none':
                     _param['value'] = None
                     _param['type'] = str(type(None))
