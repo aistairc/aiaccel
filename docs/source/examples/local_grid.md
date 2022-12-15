@@ -96,7 +96,6 @@ optimize:
       step: 10
       log: false
       base: 10
-
 ```
 
 - **search_algorithm** - 最適化アルゴリズムを設定します．この例ではグリッドオプティマイザを設定しています．
