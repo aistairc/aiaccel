@@ -87,7 +87,7 @@ class AbstractScheduler(AbstractModule):
         """
         trial_ids = [job.trial_id for job in self.jobs]
         if trial_id not in trial_ids:
-            job = Job(self.config, self.options, self, trial_id)
+            job = Job(self.config, self, trial_id)
             self.jobs.append(job)
             self.logger.debug(f"Submit a job: {str(trial_id)}")
             job.main()
