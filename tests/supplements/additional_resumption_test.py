@@ -18,30 +18,33 @@ class AdditionalResumptionTest(IntegrationTest):
     search_algorithm = None
 
     def test_run(self, cd_work, data_dir, work_dir):
-        test_data_dir = Path(__file__).resolve().parent.joinpath('benchmark', 'test_data')
+        test_data_dir = Path(__file__).resolve().parent.joinpath('additional_resumption_test_benchmark', 'test_data')
         config_file = test_data_dir.joinpath('config_{}.yaml'.format(self.search_algorithm))
         config = Config(config_file)
+        python_file = test_data_dir.joinpath('user.py')
 
         # normal execution
-        storage = Storage(ws=Path(config.workspace.get()))
-        subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean'],
-                         cwd=test_data_dir).wait()
-        final_result_at_one_time = self.get_final_result(storage)
+        with self.create_main(python_file):
+            storage = Storage(ws=Path(config.workspace.get()))
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
+            final_result_at_one_time = self.get_final_result(storage)
         print('at one time', final_result_at_one_time)
 
         # resume from initial point
-        storage = Storage(ws=Path(config.workspace.get()))
-        subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--resume', '2'], cwd=test_data_dir).wait()
-        final_result_resumption_in_initial = self.get_final_result(storage)
+        with self.create_main(python_file):
+            storage = Storage(ws=Path(config.workspace.get()))
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--resume', '2']).wait()
+            final_result_resumption_in_initial = self.get_final_result(storage)
         print('resumption steps in initial point finished', final_result_resumption_in_initial)
 
         assert final_result_at_one_time == final_result_resumption_in_initial
 
         # resume after initial point
-        storage = Storage(ws=Path(config.workspace.get()))
-        subprocess.Popen(['aiaccel-start', '--config', str(config_file),
-                          '--resume', '11'], cwd=test_data_dir).wait()
-        final_result_resumption = self.get_final_result(storage)
+        with self.create_main(python_file):
+            storage = Storage(ws=Path(config.workspace.get()))
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file),
+                              '--resume', '11']).wait()
+            final_result_resumption = self.get_final_result(storage)
         print('resumption steps finished', final_result_resumption)
 
         assert final_result_at_one_time == final_result_resumption
