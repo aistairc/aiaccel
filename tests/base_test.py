@@ -5,6 +5,7 @@ import pytest
 from aiaccel.config import Config
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.workspace import Workspace
+import shutil
 
 d0 = {
     "end_time": "11/03/2020 16:07:45",
@@ -188,22 +189,6 @@ d2 = {
     "start_time": "11/03/2020 16:07:40"
 }
 
-original_main = [
-    "import numpy as np",
-    "from aiaccel.util import aiaccel",
-    "def main(p):",
-    "    x = np.array([",
-    "        p['x1'], p['x2'], p['x3'], p['x4'], p['x5'],",
-    "        p['x6'], p['x7'], p['x8'], p['x9'], p['x10']",
-    "    ])",
-    "    # Sphere",
-    "    y = np.sum(x ** 2)",
-    "    return float(y)",
-    "if __name__ == '__main__':",
-    "    run = aiaccel.Run()",
-    "    run.execute_and_report(main)"
-]
-
 
 class BaseTest(object):
 
@@ -243,15 +228,17 @@ class BaseTest(object):
             create_yaml(path, d)
 
         self.result_comparison = []
-        
+
     @contextmanager
-    def create_main(self):
-        file_path = Path('/tmp/original_main.py')
-        with open(file_path, 'w', encoding='UTF-8') as f:
-            for line in original_main:
-                f.write(line + '\n')
+    def create_main(self, from_file_path=None):
+        if from_file_path is None:
+            from_file_path = self.test_data_dir.joinpath('original_main.py')
+        to_file_path = Path('/tmp/original_main.py')
+        shutil.copy(from_file_path, to_file_path)
         yield
-        file_path.unlink()
+        to_file_path.unlink()
+        results_file = Path('/tmp/results')
+        shutil.rmtree(results_file)
 
     def get_workspace_path(self):
         return self.work_dir
