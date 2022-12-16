@@ -301,6 +301,9 @@ class AbstractScheduler(AbstractModule):
         if error is not None:
             content['error'] = error
 
+        for i in range(len(content['parameters'])):
+            content['parameters'][i]['value'] = str(content['parameters'][i]['value'])
+
         result_file_path = self.ws / dict_result / file_name
         create_yaml(result_file_path, content)
 
