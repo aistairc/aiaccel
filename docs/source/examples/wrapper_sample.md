@@ -97,14 +97,15 @@ if __name__ == "__main__":
     print(f"objective_y:{y}")
 ```
 
-パーサを作成し，コマンドライン引数を受け取ります．
-この例にある最適化対象の関数では，コンフィグのパスとジョブの ID は使用しないため，パラメータ (`x1`, `x2`) のみを取得するような処理が行われています．
+以下の部分でパーサを作成し，コマンドライン引数を受け取ります．
 ```python
     parser = argparse.ArgumentParser()
     parser.add_argument('--x1', type=float)
     parser.add_argument('--x2', type=float)
     args = vars(parser.parse_known_args()[0])
 ```
+この例にある最適化対象の関数では，コンフィグのパスとジョブの ID は使用しないため，パラメータ (`x1` と `x2`) のみを取得するような処理が行われています．
+
 
 パラメータを最適化対象の関数 (`main()`) に渡し，値を計算します．
 ```python
@@ -118,7 +119,7 @@ if __name__ == "__main__":
 ```
 
 この python で実装されたプログラムの名前を user.py とすると，ユーザープログラムの起動コマンドは，`python user.py` となります．
-例えばコンフィグのパスが `config.yaml`，ジョブの ID が 0，パラメータ `x1` が 1， `x2` が 2 の場合の実行コマンドは次の通りです．
+例えばコンフィグのパスが `config.yaml`，ジョブの ID が 0，パラメータ `x1` が 1， パラメータ `x2` が 2 の場合，実行コマンドは次の通りです．
 ```console
 > python user.py --config=condig.yaml --trial_id=0 --x1=1 --x2=2
 ```
@@ -138,25 +139,25 @@ objective_y:-3.0
     run.execute_and_report("python user.py")
 ```
 
-モジュール
+#### モジュール
 ```python
     from aiaccel.util import aiaccel
 ```
-- **aiaccel.util.aiaccel** - wrapper オブジェクトを提供するモジュールです．
+- **aiaccel.util.aiaccel** - wrapper オブジェクトを作成するためのモジュールです．
 
-Wrapper オブジェクトの作成
+#### Wrapper オブジェクトの作成
 ```python
     run = aiaccel.Run()
 ```
 aiaccel が提供する wrapper オブジェクトを作成します．
 
-ユーザープログラムの実行
+#### ユーザープログラムの実行
 ```python
     run.execute_and_report("python user.py")
 ```
 ユーザープログラムを実行します．
 - `"python user.py"` の部分は，自身のプログラムを実行するためのコマンドを記述してください．
-- config, trial_id, パラメータといったコマンドライン引数は自動で生成されます．
+- コマンドライン引数として渡される config, trial_id, パラメータは， ***`run.execute_and_report()` の内部で自動的に追加されます***．そのため，ここに記述する必要はありません．
 
 
 ### config.yaml の作成
@@ -170,7 +171,8 @@ aiaccel が提供する wrapper オブジェクトを作成します．
         batch_job_timeout: 600
 ```
 
-aiaccel で wrapper プログラムを最適化させる場合は，`job_command` を変更します作成した wrapper.py の実行コマンドに変更します．
+aiaccel で wrapper プログラムを最適化させる場合は，`job_command` に作成した wrapper の実行コマンドを設定します．
+作成した python ファイルの名前が wrapper.py であれば，実行コマンドは `python wrapper.py` です．
 
 
 #### resource
@@ -179,5 +181,5 @@ resource:
   type: "local"
   num_node: 4
 ```
-wrapper プログラムの最適化を行う場合，指定可能な実行タイプは `"local"` または `"ABCI"` です．
+wrapper プログラムを最適化する場合，指定可能な実行タイプは `"local"` または `"ABCI"` です．
 `"python_local"` は選べません．

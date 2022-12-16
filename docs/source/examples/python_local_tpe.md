@@ -1,4 +1,4 @@
-# TPE オプティマイザのローカル環境での実行例
+# TPE オプティマイザのローカル環境 (python_local モード) での実行例
 
 ここでは，TPE オプティマイザを `python_local` モードを用いてローカルで実行する方法を説明します．
 例として，ベンチマーク関数の一つである Styblinski-Tang の最適化を行います．
@@ -11,7 +11,7 @@
 ### config.yaml
 
 - 最適化およびソフトウェアの設定ファイルです．
-- aiaccel/examples/styblinski-tang に存在するファイルは，デフォルトでは Nelder-Mead 法を用いた最適化をローカルで実行する設定になっています．
+- aiaccel/examples/styblinski-tang に存在するファイルは，デフォルトではネルダーミード法を用いた最適化をローカルで実行する設定になっています．
 
 ### user.py
 
@@ -96,14 +96,14 @@ optimize:
     - ベンチマーク関数 Styblinski-Tang を最小化することが目的であるため，`"minimize"` を設定しています．
 - **trial_number** - 試行回数を設定します．
 - **rand_seed** - 乱数の生成に使用するシードを設定します．
-- **parameters** - ハイパーパラメータの各種項目を設定します．ここでは 5 次元の Styblinski-Tang の最適化を行うため，5 種類のパラメータを用意しています．5 つのパラメータに対して，以下の項目をそれぞれ設定する必要があります．パラメータの範囲や初期値を，全て同じにする必要はありません．
-    - **name** - ハイパーパラメータの名前を設定します．
-    - **type** - ハイパーパラメータのデータ型を設定します．ここでは例として `"uniform_float"` に設定していますが，TPE オプティマイザでは，以下の 3 つのタイプから選択することができます．
+- **parameters** - ハイパパラメータの各種項目を設定します．ここでは 5 次元の Styblinski-Tang の最適化を行うため，5 種類のパラメータを用意しています．5 つのパラメータに対して，以下の項目をそれぞれ設定する必要があります．パラメータの範囲や初期値を，全て同じにする必要はありません．
+    - **name** - ハイパパラメータの名前を設定します．
+    - **type** - ハイパパラメータのデータ型を設定します．ここでは例として `"uniform_float"` に設定していますが，TPE オプティマイザでは，以下の 3 つのタイプから選択することができます．
         - uniform_float - 浮動小数点数
         - uniform_int - 整数
         - categorical - カテゴリカル変数
-    - **lower / upper** - ハイパーパラメータ最小値 / 最大値を設定します．
-    - **initial** - ハイパーパラメータの初期値を設定します．
+    - **lower / upper** - ハイパパラメータ最小値 / 最大値を設定します．
+    - **initial** - ハイパパラメータの初期値を設定します．
 
 ### user.py の作成
 ---
@@ -111,7 +111,6 @@ optimize:
 `user.py` は以下のように記述します．
 ```python
 import numpy as np
-from aiaccel.util import aiaccel
 
 
 def main(p):
@@ -122,24 +121,17 @@ def main(p):
     y = 0.5 * (t1 + t2 + t3)
     return float(y)
 
-
-if __name__ == "__main__":
-    run = aiaccel.Run()
-    run.execute_and_report(main)
-
 ```
 
 #### モジュール
 
 ```python
 import numpy as np
-from aiaccel.util import aiaccel
 ```
 
 必要なモジュールをインポートします．
 
 - numpy - 関数 Styblinski-Tang を計算するために使用します．
-- aiaccel.util.aiaccel - ユーザープログラム内で定義される関数 `main()` と aiaccelとの間のインターフェイスを提供します．
 
 
 #### main
@@ -154,18 +146,12 @@ def main(p):
     return float(y)
 ```
 最適化対象の関数で，aiaccel はこの関数の `return` 値を最小化します．
-引数にハイパーパラメータの辞書型オブジェクトを取ります．
+引数にハイパパラメータの辞書型オブジェクトを取ります．
 この例では，与えられたパラメータに対してベンチマーク関数 Styblinski-Tang の値を計算し，返却します．
 
-#### 実行部分
-```python
-if __name__ == "__main__":
-    run = aiaccel.Run()
-    run.execute_and_report(main)
-```
-aiaccel から関数 `main()` にハイパーパラメータを渡し，`main()` の返却値を Storage に保存します．
-`run` はそのインターフェイスとなるインスタンスです．
-メソッド `execute_and_report()` の内部で `main()` が値を計算し，Storage に計算結果が保存されます．
+#### 注意
+`python_local` モードで実行する場合，aiaccel は user.py から `main()` をインポートして使用します．
+そのため，`local` や `abci` の場合のように，user.py の内部で `aiaccel.util.aiaccel.Run` などを用いて関数の実行と Storage への結果の保存を行う必要はありません．
 
 
 <br>
@@ -198,7 +184,7 @@ result/{trial_id}.hp は，{trial_id} 回目の試行のパラメータと関数
 
 上で実行した最適化の結果は以下のようになります．
 
-- ハイパーパラメータ
+- ハイパパラメータ
 
     - x1
     - x2
