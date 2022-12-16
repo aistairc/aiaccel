@@ -193,20 +193,18 @@ d2 = {
 class BaseTest(object):
 
     @pytest.fixture(autouse=True)
-    def _setup(self):
+    def _setup(self, tmpdir, work_dir, create_tmp_config, cd_work):
         test_data_dir = Path(__file__).resolve().parent.joinpath('test_data')
         self.test_data_dir = test_data_dir
-        test_config_json = test_data_dir.joinpath('config.json')
         self.config_random_path = test_data_dir.joinpath('config_random.json')
         self.config_sobol_path = test_data_dir.joinpath('config_sobol.json')
-        self.config = Config(test_config_json)
         self.config_random = Config(self.config_random_path)
         self.config_sobol = Config(self.config_sobol_path)
         self.config_json = test_data_dir.joinpath('config.json')
         self.grid_config_json = test_data_dir.joinpath('grid_config.json')
         self.config_yaml = test_data_dir.joinpath('config.yml')
-        work_dir = Path(self.config.workspace.get()).resolve()
-        self.work_dir = work_dir
+
+        self.tmpdir_path = tmpdir
 
         self.dict_lock = work_dir.joinpath('lock')
 
@@ -229,16 +227,16 @@ class BaseTest(object):
 
         self.result_comparison = []
 
+        self.config_json = create_tmp_config(self.config_json)
+        self.config = Config(self.config_json)
+
     @contextmanager
     def create_main(self, from_file_path=None):
         if from_file_path is None:
             from_file_path = self.test_data_dir.joinpath('original_main.py')
-        to_file_path = Path('/tmp/original_main.py')
+        to_file_path = self.tmpdir_path.joinpath('original_main.py')
         shutil.copy(from_file_path, to_file_path)
         yield
-        to_file_path.unlink()
-        results_file = Path('/tmp/results')
-        shutil.rmtree(results_file)
 
     def get_workspace_path(self):
         return self.work_dir

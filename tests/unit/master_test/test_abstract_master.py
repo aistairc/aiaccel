@@ -42,17 +42,13 @@ class TestAbstractMaster(BaseTest):
 
     def test_pre_process(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        work_dir,
         database_remove
     ):
         database_remove()
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
 
         with patch.object(sys, 'argv', commandline_args):
@@ -66,18 +62,13 @@ class TestAbstractMaster(BaseTest):
 
     def test_pre_process_2(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        fake_process,
-        work_dir,
         database_remove
     ):
         database_remove()
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
         with patch.object(sys, 'argv', commandline_args):
             options = parse_arguments()
@@ -91,11 +82,7 @@ class TestAbstractMaster(BaseTest):
 
     def test_pre_process_3(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
         setup_hp_finished,
-        work_dir,
         database_remove
     ):
         database_remove()
@@ -112,10 +99,6 @@ class TestAbstractMaster(BaseTest):
 
     def test_post_process(
         self,
-        cd_work,
-        clean_work_dir,
-        setup_hp_finished,
-        work_dir,
         database_remove
     ):
         database_remove()
@@ -127,7 +110,7 @@ class TestAbstractMaster(BaseTest):
             'process_name': 'master'
         }
         master = AbstractMaster(options)
-        
+
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
             master.storage.result.set_any_trial_objective(trial_id=i, objective=(i * 10.0))
@@ -149,7 +132,7 @@ class TestAbstractMaster(BaseTest):
 
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            
+
         try:
             master.post_process()
             assert False
@@ -158,9 +141,6 @@ class TestAbstractMaster(BaseTest):
 
     def test_print_dict_state(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
         setup_hp_finished,
         database_remove
     ):
@@ -168,7 +148,7 @@ class TestAbstractMaster(BaseTest):
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
@@ -188,20 +168,16 @@ class TestAbstractMaster(BaseTest):
 
     def test_inner_loop_main_process(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        setup_hp_finished,
         database_remove
     ):
         database_remove()
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -210,7 +186,7 @@ class TestAbstractMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             options = parse_arguments()
             master = AbstractMaster(options)
-        
+
         master.pre_process()
         assert master.inner_loop_main_process()
 
