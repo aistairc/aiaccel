@@ -1,7 +1,7 @@
 import math
 from functools import reduce
 from operator import mul
-from typing import List, Tuple, Union
+from typing import List, Tuple, Optional
 
 from aiaccel.config import Config
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -11,8 +11,7 @@ from aiaccel.parameter import HyperParameter
 def get_grid_options(
     parameter_name: str,
     config: Config
-) -> Tuple[Union[int, None], bool, Union[int, None]]:
-
+) -> Tuple[Optional[int], bool, Optional[int]]:
     """Get options about grid search.
 
     Args:
@@ -20,9 +19,9 @@ def get_grid_options(
         config (ConfileWrapper): A config object.
 
     Returns:
-        Tuple[Union[int, None], bool, Union[int, None]]: The first one is a
-            base of logarithm parameter. The second one is logarithm parameter
-            or not. The third one is a step of the grid.
+        Tuple[Optional[int], bool, Optional[int]]: The first one is a base of
+            logarithm parameter. The second one is logarithm parameter or not.
+            The third one is a step of the grid.
 
     Raises:
         KeyError: Causes when step is not specified.
@@ -36,11 +35,17 @@ def get_grid_options(
     for g in grid_options:
         if g['name'] == parameter_name:
             if 'step' not in g.keys():
-                raise KeyError(f'No grid option `step` for parameter: {parameter_name}')
+                raise KeyError(
+                    f'No grid option `step` for parameter: {parameter_name}'
+                )
             if 'log' not in g.keys():
-                raise KeyError(f'No grid option `log` for parameter: {parameter_name}')
+                raise KeyError(
+                    f'No grid option `log` for parameter: {parameter_name}'
+                )
             if 'base' not in g.keys():
-                raise KeyError(f'No grid option `base` for parameter: {parameter_name}')
+                raise KeyError(
+                    f'No grid option `base` for parameter: {parameter_name}'
+                )
 
             step = float(g['step'])
             log = bool(g['log'])
@@ -74,22 +79,19 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict:
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
-        n = int((upper - lower) / step) + 1
 
         if log:
-            lower_x = lower ** base
-            upper_x = upper ** base
+            lower_x = base ** lower
+            upper_x = base ** upper
+            step_x = base ** step
             x = lower_x
             new_param['parameters'] = []
-
             while x < upper_x or math.isclose(x, upper_x, abs_tol=1e-10):
-                new_param['parameters'].append(math.log(x, base))
-                x += step
-
-            new_param['parameters'].append(upper)
+                new_param['parameters'].append(x)
+                x *= step_x
         else:
+            n = int((upper - lower) / step) + 1
             new_param['parameters'] = [lower + i * step for i in range(0, n)]
-
         if p.type.lower() == 'int':
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
@@ -142,11 +144,11 @@ class GridOptimizer(AbstractOptimizer):
             self.storage.get_num_finished()
         )
 
-    def get_parameter_index(self) -> Union[List[int], None]:
+    def get_parameter_index(self) -> Optional[List[int]]:
         """Get a next parameter index.
 
         Returns:
-            Union[List[int], None]: It returns None if all parameters are
+            Optional[List[int]]: It returns None if all parameters are
                 already generated.
         """
         parameter_lengths = [len(i['parameters']) for i in self.ready_params]
