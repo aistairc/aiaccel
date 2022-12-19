@@ -10,8 +10,10 @@ with patch('aiaccel.util.retry.retry', lambda function: function):
     import pytest
     from aiaccel.config import ConfileWrapper
     from aiaccel.scheduler.create import create_scheduler
-    from aiaccel.scheduler.job.job_thread import (JOB_STATES, JOB_TRANSITIONS,
-                                                CustomMachine, Job, Model)
+    from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
+                                                CustomMachine, Job, create_model)
+    from aiaccel.scheduler.job.model.abci_model import AbciModel
+    from aiaccel.scheduler.job.model.local_model import LocalModel
     from aiaccel.scheduler.local_scheduler import LocalScheduler
     from aiaccel.util.time_tools import get_time_now_object
     from tests.arguments import parse_arguments
@@ -29,18 +31,6 @@ async def async_stop_job_after_sleep(job, sleep_time):
     await loop.run_in_executor(None, time.sleep, sleep_time)
     job.get_machine().set_state('Sucess')
     job.join()
-
-
-def test_custom_machine():
-    machine = CustomMachine(
-        model=Model(),
-        states=JOB_STATES,
-        transitions=JOB_TRANSITIONS,
-        initial=JOB_STATES[0]['name'],
-        auto_transitions=False,
-        ordered_transitions=False
-    )
-    assert type(machine) is CustomMachine
 
 
 class TestModel(BaseTest):
@@ -75,11 +65,10 @@ class TestModel(BaseTest):
         trial_id = 0
         self.job = Job(
             self.config,
-            options,
             scheduler,
             trial_id
         )
-        self.model = Model()
+        self.model = create_model(self.config.resource_type.get())
         yield
         self.job = None
         self.model = None
@@ -114,7 +103,6 @@ class TestModel(BaseTest):
         self.abci_job = Job(
             # json_object_config,
             self.config,
-            options,
             scheduler,
             trial_id
         )
@@ -420,7 +408,6 @@ class TestJob(BaseTest):
         trial_id = 1
         self.job = Job(
             self.config,
-            options,
             scheduler,
             trial_id
         )
@@ -450,7 +437,6 @@ class TestJob(BaseTest):
         trial_id = 1
         job = Job(
             self.config,
-            options,
             scheduler,
             trial_id
         )
@@ -463,7 +449,7 @@ class TestJob(BaseTest):
         assert type(self.job.get_machine()) is CustomMachine
 
     def test_get_model(self, database_remove):
-        assert type(self.job.get_model()) is Model
+        assert type(self.job.get_model()) is LocalModel or AbciModel
 
     def test_get_state(self, database_remove):
         assert self.job.get_state().name == 'Init'
@@ -471,16 +457,13 @@ class TestJob(BaseTest):
     def test_get_state_name(self, database_remove):
         assert self.job.get_state_name() == 'Init'
 
-    def test_is_local(self, database_remove):
-        assert self.job.is_local()
-
     def test_schedule(self, database_remove):
         self.job.get_machine().set_state('Scheduling')
         assert self.job.schedule() is None
 
     def test_run_2(self, database_remove):
         self.job.scheduler.pre_process()
-        self.job.start()
+        self.job.main()
         self.job.threshold_timeout = get_time_now_object()
         self.job.threshold_timeout =\
             get_time_now_object() + datetime.timedelta(10)
@@ -488,4 +471,4 @@ class TestJob(BaseTest):
         self.job.count_retry = 100
         self.job.threshold_retry = 10
         self.job.get_machine().set_state('Success')
-        self.job.join()
+        self.job.main()

@@ -1,6 +1,6 @@
 generic:
   workspace: "/tmp/work"
-  job_command: "python user.py"
+  job_command: "python original_main.py"
   batch_job_timeout: 600
   sleep_time: 0
 
@@ -15,9 +15,9 @@ ABCI:
   runner_search_pattern:
 
 optimize:
-  search_algorithm: "aiaccel.optimizer.RandomOptimizer"
+  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
   goal: "minimize"
-  trial_number: 10
+  trial_number: 20
   rand_seed: 42
   parameters:
     -
@@ -25,46 +25,13 @@ optimize:
       type: "uniform_float"
       lower: 0.0
       upper: 5.0
+      initial: 1.0
     -
       name: "x2"
       type: "uniform_float"
       lower: 0.0
       upper: 5.0
-    -
-      name: "x3"
-      type: "uniform_float"
-      lower: 0.0
-      upper: 5.0
-    -
-      name: "x4"
-      type: "uniform_float"
-      lower: 0.0
-      upper: 5.0
-    -
-      name: "x5"
-      type: "uniform_float"
-      lower: 0.0
-      upper: 5.0
-    -
-      name: "x6"
-      type: "uniform_float"
-      lower: 0.0
-      upper: 5.0
-    -
-      name: "x7"
-      type: "uniform_float"
-      lower: 0.0
-      upper: 5.0
-    -
-      name: "x8"
-      type: "uniform_float"
-      lower: 0.0
-      upper: 5.0
-    -
-      name: "x9"
-      type: "uniform_float"
-      lower: 0.0
-      upper: 5.0
+      initial: 1.0
 
 job_setting:
   cancel_retry: 3
@@ -89,9 +56,9 @@ job_setting:
   #random_scheduling: true
 
 # sleep_time: 0
-  # master: 0
-  # scheduler: 0
-  # optimizer: 0
+  # master: 1
+  # scheduler: 1
+  # optimizer: 1
 
 logger:
   file:

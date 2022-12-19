@@ -27,7 +27,7 @@ async def stop_jobs(sleep_time, scheduler):
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, time.sleep, sleep_time)
     for job in scheduler.jobs:
-        machine = job['thread'].get_machine()
+        machine = job['obj'].get_machine()
         machine.set_state('Success')
 
 
@@ -96,7 +96,7 @@ class TestAbstractScheduler(BaseTest):
         scheduler.print_dict_state()
         assert scheduler.get_stats() is None
 
-    def test_start_job_thread(
+    def test_start_job(
         self,
         clean_work_dir,
         config_json,
@@ -116,13 +116,13 @@ class TestAbstractScheduler(BaseTest):
         scheduler.print_dict_state()
         setup_hp_ready(1)
         trial_id = 1
-        scheduler.start_job_thread(trial_id)
-        assert scheduler.start_job_thread(trial_id) is None
+        scheduler.start_job(trial_id)
+        assert scheduler.start_job(trial_id) is None
 
         for job in scheduler.jobs:
-            machine = job['thread'].get_machine()
+            machine = job.get_machine()
             machine.set_state('Success')
-            job['thread'].join()
+            job.main()
 
     def test_update_resource(
         self,
@@ -167,9 +167,9 @@ class TestAbstractScheduler(BaseTest):
         scheduler.pre_process()
 
         for job in scheduler.jobs:
-            machine = job['thread'].get_machine()
+            machine = job['obj'].get_machine()
             machine.set_state('Success')
-            job['thread'].join()
+            job['thread'].run()
 
         scheduler = AbstractScheduler(options)
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[]):
@@ -232,15 +232,15 @@ class TestAbstractScheduler(BaseTest):
         assert scheduler.inner_loop_main_process()
 
         for job in scheduler.jobs:
-            machine = job['thread'].get_machine()
+            machine = job.get_machine()
             machine.set_state('Scheduling')
 
         assert scheduler.inner_loop_main_process()
 
         for job in scheduler.jobs:
-            machine = job['thread'].get_machine()
+            machine = job.get_machine()
             machine.set_state('Success')
-            job['thread'].join()
+            job.main()
 
         with patch.object(scheduler, 'check_finished', return_value=True):
             assert scheduler.inner_loop_main_process() == False

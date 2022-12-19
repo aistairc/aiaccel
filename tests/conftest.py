@@ -81,7 +81,7 @@ def to_path(path):
 @pytest.fixture
 def cd_work(work_dir):
     cwd = Path.cwd().resolve()
-    os.chdir(work_dir)
+    os.chdir(work_dir.parent)
     yield
     os.chdir(cwd)
 

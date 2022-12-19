@@ -1,6 +1,6 @@
 generic:
   workspace: "/tmp/work"
-  job_command: "python user.py"
+  job_command: "python original_main.py"
   batch_job_timeout: 600
   sleep_time: 0
 
@@ -17,7 +17,7 @@ ABCI:
 optimize:
   search_algorithm: "aiaccel.optimizer.TpeOptimizer"
   goal: "minimize"
-  trial_number: 40
+  trial_number: 20
   rand_seed: 42
   parameters:
     -
@@ -25,13 +25,11 @@ optimize:
       type: "uniform_float"
       lower: 0.0
       upper: 5.0
-      initial: 1.0
     -
       name: "x2"
       type: "uniform_float"
       lower: 0.0
       upper: 5.0
-      initial: 1.0
 
 job_setting:
   cancel_retry: 3

@@ -81,7 +81,7 @@
     > module load gcc/11.2.0
     > module load python/3.8/3.8.13
     > python3 -m venv optenv
-    > source work/bin/activate
+    > source optenv/bin/activate
     ~~~
 
 2. ワークスペースを用意します．ここからの作業は、[ローカル環境で実行する場合](https://github.com/aistairc/aiaccel/blob/main/README_JP.md#%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E7%92%B0%E5%A2%83%E3%81%A7%E5%AE%9F%E8%A1%8C%E3%81%99%E3%82%8B%E5%A0%B4%E5%90%88)の1,2と同じです。
