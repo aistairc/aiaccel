@@ -93,9 +93,9 @@ _CURRENTLY NOT USED_
 ---
 最適化アルゴリズムを設定します．
 aiaccel では以下のアルゴリズムをサポートしています．
-- "aiaccel.optimizer.NelderMeadOptimizer" - ネルダーミード法でパラメータの探索を行います．
+- "aiaccel.optimizer.NelderMeadOptimizer" - Nelder-Mead 法でパラメータの探索を行います．
 - "aiaccel.optimizer.RandomOptimizer" - パラメータをランダムに生成します，
-- "aiaccel.optimizer.SobolOptimizer" - ソボル列を用いてパラメータを生成します．
+- "aiaccel.optimizer.SobolOptimizer" - Sobol' 列を用いてパラメータを生成します．
 - "aiaccel.optimizer.GridOptimizer" - 分割した探索空間からパラメータを選びます．
 - "aiaccel.optimizer.TpeOptimizer" - ベイズ最適化を用いてパラメータの探索を行います．
 
@@ -146,14 +146,14 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *sequence* - データ型が ordinal の場合に，選択肢のリストを設定します．
 - *comment* - コメントを設定します．
 
-```
+<br>
+
+
 それぞれのアルゴリズムとデータ型で必要なパラメータは以下の通りです．
 
-**ネルダーミード法 ("aiaccel.optimizer.NelderMeadOptimizer")**
----
+**Nelder-Mead 法 ("aiaccel.optimizer.NelderMeadOptimizer")**
 
 設定可能なデータ型は "uniform_float" と "uniform_int" です．
-
 - *name*
 - *type ("uniform_float", "uniform_int")*
 - *lower*
@@ -161,7 +161,6 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *initial* - 要素数が **パラメータ数 + 1** の配列を設定します．initial の項目が存在しない場合，aiaccel はランダムに初期値の配列を設定します．また，設定された配列の要素数が **パラメータ数 + 1** より少ない場合，aiaccel は足りない初期値をランダムに生成し補います．
 
 **ランダムオプティマイザ ("aiaccel.optimizer.RandomOptimizer")**
----
 
 設定可能なデータ型は "uniform_float", "uniform_int", "categorical", および "ordinal" です．
 
@@ -175,28 +174,25 @@ aiaccel では以下のアルゴリズムをサポートしています．
 ***"categorical" の場合***
 - *name*
 - *type ("categorical")*
-- *choices* - 選択肢の配列を設定します．配列の要素は float, int, または string 型です．
+- *choices* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
 - *initial*
 
 ***"ordinal" の場合***
 - *name*
 - *type ("ordinal")*
-- *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または string 型です．
+- *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
 - *initial*
 
 **ソボルオプティマイザ ("aiaccel.optimizer.SobolOptimizer")**
----
 
 設定可能なデータ型は "uniform_float" と "uniform_int" です．
 データ型に依らず，初期値は設定できません．
-
 - *name*
 - *type ("uniform_float", "uniform_int")*
 - *lower*
 - *upper*
 
 **グリッドオプティマイザ ("aiaccel.optimizer.GridOptimizer")**
----
 
 設定可能なデータ型は "uniform_float", "uniform_int", "categorical", および "ordinal" です．
 データ型に依らず，初期値は設定できません．
@@ -210,15 +206,14 @@ aiaccel では以下のアルゴリズムをサポートしています．
 ***"categorical" の場合***
 - *name*
 - *type ("categorical")*
-- *choices* - 選択肢の配列を設定します．配列の要素は float, int, または string 型です．
+- *choices* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
 
 ***"ordinal" の場合***
 - *name*
 - *type ("ordinal")*
-- *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または string 型です．
+- *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
 
 **TPE オプティマイザ ("aiaccel.optimizer.TpeOptimizer")**
----
 
 設定可能なデータ型は "uniform_float", "uniform_int", および "categorical" です．
 
@@ -232,9 +227,9 @@ aiaccel では以下のアルゴリズムをサポートしています．
 ***"categorical" の場合***
 - *name*
 - *type ("categorical")*
-- *choices* - 選択肢の配列を設定します．配列の要素は float, int, または string 型です．
+- *choices* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
 - *initial*
-```
+
 
 
 <br>
@@ -340,6 +335,8 @@ _[CURRENTLY NOT USED]_
 _Defaults to true._
 
 
+<br>
+
 ## **logger**
 
 
@@ -420,6 +417,9 @@ Defaults to "DEBUG".
 
 A logging level for a stream output of scheduler module.
 Defaults to "DEBUG".
+
+
+<br>
 
 ## **verification**
 
