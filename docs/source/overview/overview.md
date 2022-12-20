@@ -87,9 +87,3 @@ pip install git+https://github.com/aistairc/aiaccel.git
     ~~~
 
 5. 実行中のジョブを確認したい場合は、[ABCIユーザーズガイド](https://docs.abci.ai/ja/)を参照してください。
-
-
-# 開発中の機能wdについて
-ABCI上で `aiaccel` を実行する場合、HPOを管理する `master` プログラムが常時実行している必要があり、目的関数を計算している間も待機のためにポイントを消費してしまいます。
-`./experimental/wd` (watch dog) と呼ばれる開発中の機能を用いれば、このような不必要な消費を抑制することができます。
-詳細は[experimental/README_JP.md](https://github.com/aistairc/aiaccel/experimental/README_JP.md)をご参照ください。
