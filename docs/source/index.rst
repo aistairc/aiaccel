@@ -19,15 +19,13 @@ aiaccelドキュメント
 
    overview/overview.md
 
-..
-   toctree::
+.. toctree::
    :maxdepth: 2
    :caption: インストール:
 
    installation/installation.md
 
-..
-   toctree::
+.. toctree::
    :maxdepth: 2
    :caption: 利用例:
 
@@ -38,24 +36,29 @@ aiaccelドキュメント
    :caption: ユーザーガイド:
 
    user_guide/basic_usage.md
-.. user_guide/configuration_setting.md
+   user_guide/configuration_setting.md
 
 .. toctree::
    :maxdepth: 2
    :caption: ディベロッパーガイド:
 
+   developer_guide/architecture.md
    developer_guide/custom_optimizer.md
-.. developer_guide/architecture.md
 
-..
-   toctree::
+.. toctree::
    :maxdepth: 2
    :caption: コントリビューションガイド:
 
    contribution_guide/contribution_guide.md
 
-..
-   toctree::
+.. toctree::
+   :maxdepth: 2
+   :caption: Tips:
+
+   tips/qrsh-inherit.md
+   tips/rsync-localdir.md
+
+.. toctree::
    :maxdepth: 2
    :caption: リファレンス:
 
@@ -65,7 +68,7 @@ aiaccelドキュメント
    :maxdepth: 2
    :caption: コードリファレンス
 
-   api_reference/aiaccel
+   api_reference/modules
 
 索引と検索
 ==========

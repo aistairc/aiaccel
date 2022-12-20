@@ -249,8 +249,7 @@ class Run:
 
         xs = {}
         for param in params:
-            cast = eval(param.param_type.lower())
-            xs[param.param_name] = cast(param.param_value)
+            xs[param.param_name] = param.param_value
 
         return xs
 

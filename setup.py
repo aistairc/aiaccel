@@ -24,6 +24,7 @@ setup(
         'aiaccel.scheduler',
         'aiaccel.scheduler.algorithm',
         'aiaccel.scheduler.job',
+        'aiaccel.scheduler.job.model',
         'aiaccel.util',
         'aiaccel.cli',
         'aiaccel.storage'

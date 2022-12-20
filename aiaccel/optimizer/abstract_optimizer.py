@@ -9,6 +9,8 @@ from aiaccel.parameter import load_parameter
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.trialid import TrialId
 
+from numpy import str_
+
 
 class AbstractOptimizer(AbstractModule):
     """An abstract class for Optimizer classes.
@@ -244,15 +246,17 @@ class AbstractOptimizer(AbstractModule):
             param_type = _param['type']
             param_value = _param['value']
 
+            # None: str to NoneType
+            if type(_param['value']) in [str, str_]:
+                if _param['value'].lower() == 'none':
+                    _param['value'] = None
+                    _param['type'] = str(type(None))
+
             try:
                 if (
                     param_type.lower() == 'categorical' or
                     param_type.lower() == 'ordinal'
                 ):
-                    casted_params.append(_param)
-                    continue
-
-                if type(_param['value']) == eval(param_type.lower()):
                     casted_params.append(_param)
                     continue
 

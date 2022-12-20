@@ -87,7 +87,7 @@ class AbstractScheduler(AbstractModule):
         """
         trial_ids = [job.trial_id for job in self.jobs]
         if trial_id not in trial_ids:
-            job = Job(self.config, self.options, self, trial_id)
+            job = Job(self.config, self, trial_id)
             self.jobs.append(job)
             self.logger.debug(f"Submit a job: {str(trial_id)}")
             job.main()
@@ -300,6 +300,9 @@ class AbstractScheduler(AbstractModule):
 
         if error is not None:
             content['error'] = error
+
+        for i in range(len(content['parameters'])):
+            content['parameters'][i]['value'] = str(content['parameters'][i]['value'])
 
         result_file_path = self.ws / dict_result / file_name
         create_yaml(result_file_path, content)

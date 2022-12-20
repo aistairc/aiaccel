@@ -36,6 +36,14 @@ aiaccel.master.local\_master module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.master.pylocal\_master module
+-------------------------------------
+
+.. automodule:: aiaccel.master.pylocal_master
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
