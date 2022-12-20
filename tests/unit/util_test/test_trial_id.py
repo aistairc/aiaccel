@@ -1,13 +1,13 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from aiaccel.config import Config
+from aiaccel.config import load_config
 from aiaccel.util.trialid import TrialId
 
 config_path = Path('tests/test_data/config.json')
-config = Config(config_path)
+config = load_config(config_path)
 
-workspace = Path(config.workspace.get())
+workspace = Path(config.generic.workspace)
 if (workspace / 'hp' / 'count.txt').exists():
     (workspace / 'hp' / 'count.txt').unlink()
 if (workspace / 'hp' / 'count.lock').exists():

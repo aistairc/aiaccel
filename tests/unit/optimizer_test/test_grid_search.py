@@ -1,7 +1,7 @@
 import functools
 from pathlib import Path
 
-from aiaccel.config import Config
+from aiaccel.config import load_config
 from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
                                               generate_grid_points,
                                               get_grid_options)
@@ -26,25 +26,25 @@ def test_get_grid_options():
 
     # no step
     grid_config_json = test_data_dir / 'config_grid_no_step.json'
-    config_grid = Config(grid_config_json)
+    config_grid = load_config(grid_config_json)
     with pytest.raises(KeyError):
         base, log, step = get_grid_options('x1', config_grid)
 
     # no log
     grid_config_json = test_data_dir / 'config_grid_no_log.json'
-    config_grid = Config(grid_config_json)
+    config_grid = load_config(grid_config_json)
     with pytest.raises(KeyError):
         base, log, step = get_grid_options('x1', config_grid)
 
     # no base
     grid_config_json = test_data_dir / 'config_grid_no_base.json'
-    config_grid = Config(grid_config_json)
+    config_grid = load_config(grid_config_json)
     with pytest.raises(KeyError):
         base, log, step = get_grid_options('x1', config_grid)
 
     # base true/false
     grid_config_json = test_data_dir / 'config_grid_base.json'
-    config_grid = Config(grid_config_json)
+    config_grid = load_config(grid_config_json)
     with pytest.raises(KeyError):
         base, log, step = get_grid_options('x1', config_grid)
 

@@ -6,8 +6,6 @@ from logging import StreamHandler, getLogger
 from typing import Any, Union
 from pathlib import Path
 
-from omegaconf.dictconfig import DictConfig
-
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now

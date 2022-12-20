@@ -2,7 +2,7 @@ import pathlib
 from functools import wraps
 
 from aiaccel.cli.plot import Plotter
-from aiaccel.config import Config
+from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
 from unittest.mock import patch
@@ -41,7 +41,7 @@ def t_base():
 @t_base()
 def test_plot():
     storage = Storage(ws.path)
-    config = Config(config_path)
+    config = load_config(config_path)
 
     goal = "minimize"
     config.goal.set(goal)

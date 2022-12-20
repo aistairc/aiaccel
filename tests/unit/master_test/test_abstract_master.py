@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import aiaccel
 from aiaccel import workspace
-from aiaccel.config import Config, ConfileWrapper
+from aiaccel.config import load_config
 from aiaccel.master.abstract_master import AbstractMaster
 from aiaccel.master.create import create_master
 from aiaccel.util.filesystem import get_dict_files
@@ -140,11 +140,11 @@ class TestAbstractMaster(BaseTest):
                 )
         assert master.post_process() is None
 
-        master.config = Config(self.config_json)
+        master.config = load_config(self.config_json)
         master.config.goal.set(aiaccel.goal_maximize)
         assert master.post_process() is None
 
-        master.config = Config(self.config_json)
+        master.config = load_config(self.config_json)
         master.goal = 'invalid_goal'
 
         for i in range(10):

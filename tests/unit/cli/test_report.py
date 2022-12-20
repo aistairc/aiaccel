@@ -1,6 +1,5 @@
 from aiaccel.util.report import CreationReport
 from aiaccel.workspace import Workspace
-from aiaccel.config import Config
 import pathlib
 from unittest.mock import patch
 from aiaccel.cli.report import main

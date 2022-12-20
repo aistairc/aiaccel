@@ -8,7 +8,8 @@ from unittest.mock import patch
 with patch('aiaccel.util.retry.retry', lambda function: function):
     import aiaccel
     import pytest
-    from aiaccel.config import ConfileWrapper
+    from aiaccel.config import load_config
+
     from aiaccel.scheduler.create import create_scheduler
     from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
                                                 CustomMachine, Job, create_model)
@@ -85,7 +86,7 @@ class TestModel(BaseTest):
             json_object = json.load(f)
 
         json_object['resource']['type'] = 'ABCI'
-        json_object_config = ConfileWrapper(json_object, 'json_object')
+        json_object_config = load_config(json_object, 'json_object')
         
         commandline_args = [
             "start.py",

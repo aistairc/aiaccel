@@ -7,7 +7,6 @@ import aiaccel
 from aiaccel.config import load_config
 
 
-
 class TrialId:
     def __init__(self, config_path: str):
         self.config_path = Path(config_path).resolve()

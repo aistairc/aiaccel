@@ -5,7 +5,7 @@ from pathlib import Path
 
 import fasteners
 import pytest
-from aiaccel.config import Config, load_config
+from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import load_yaml
 
@@ -120,7 +120,7 @@ def get_one_parameter(data_dir):
 def load_test_config(config_json):
 
     def _load_test_config():
-        return Config(config_json)
+        return load_config(config_json)
 
     return _load_test_config
 
@@ -138,7 +138,7 @@ def load_test_config_org(config_json):
 def grid_load_test_config(grid_config_json):
 
     def _load_test_config():
-        return Config(grid_config_json)
+        return load_config(grid_config_json)
 
     return _load_test_config
 
@@ -152,7 +152,7 @@ def root_dir():
 @pytest.fixture(scope="session")
 def work_dir(load_test_config, data_dir):
     test_config = load_test_config()
-    return Path(test_config.workspace.get()).resolve()
+    return Path(test_config.generic.workspace).resolve()
 
 
 @pytest.fixture(scope="session")

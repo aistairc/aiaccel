@@ -11,7 +11,6 @@ from numpy import maximum
 
 class Viewer:
     def __init__(self, config: DictConfig):
-        self.config_path = config.config_path
         self.workspace = Path(config.generic.workspace).resolve()
         self.storage = Storage(self.workspace)
 

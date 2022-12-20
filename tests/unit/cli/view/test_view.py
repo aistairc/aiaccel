@@ -1,12 +1,10 @@
-import pathlib
-from functools import wraps
 
 from aiaccel.cli.view import Viewer
-from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.workspace import Workspace
+from aiaccel.config import load_config
 
-from .base import config_path, db_path, t_base, ws
+from aiaccel.storage.storage import Storage
+
+from .base import config_path, t_base, ws
 
 
 @t_base()
@@ -59,6 +57,6 @@ def test_view():
     storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
     storage.error.set_any_trial_error(trial_id=trial_id, error_message=error)
 
-    config = Config(config_path)
+    config = load_config(config_path)
     viewer = Viewer(config)
     assert viewer.view() is None

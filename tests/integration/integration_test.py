@@ -8,7 +8,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import aiaccel
-from aiaccel.config import Config
+from aiaccel.config import load_config
+
 from aiaccel.storage.storage import Storage
 from aiaccel.master.create import create_master
 from aiaccel.master.local_master import LocalMaster
@@ -36,7 +37,7 @@ class IntegrationTest(BaseTest):
         #
         with self.create_main():
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
-            config = Config(config_file)
+            config = load_config(config_file)
 
             # master
             master = create_master(config_file)
@@ -46,7 +47,7 @@ class IntegrationTest(BaseTest):
             scheduler = create_scheduler(config_file)
             assert scheduler == LocalScheduler
 
-            storage = Storage(ws=Path(config.workspace.get()))
+            storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
             self.evaluate(data_dir, work_dir, storage)
 
@@ -66,8 +67,8 @@ class IntegrationTest(BaseTest):
             with open(new_config_file, 'w') as f:
                 f.write(yaml.dump(yml, default_flow_style=False))
 
-            config = Config(new_config_file)
-            assert config.resource_type.get() == 'python_local'
+            config = load_config(new_config_file)
+            assert config.resource.type == 'python_local'
 
             # master
             master = create_master(new_config_file)
@@ -77,7 +78,7 @@ class IntegrationTest(BaseTest):
             scheduler = create_scheduler(new_config_file)
             assert scheduler == PylocalScheduler
 
-            storage = Storage(ws=Path(config.workspace.get()))
+            storage = Storage(ws=Path(config.generic.workspace))
 
             subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
             self.evaluate(data_dir, work_dir, storage)

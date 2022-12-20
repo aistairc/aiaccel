@@ -4,7 +4,6 @@ from omegaconf.dictconfig import DictConfig
 from pathlib import Path
 
 
-
 default_config = {
     'generic': {
         'workspace': './work',
@@ -18,7 +17,7 @@ default_config = {
         'type': 'local',
         'num_node': 1
     },
-    'ABCI':{
+    'ABCI': {
         'group': '[group]',
         'job_script_preamble': './job_script_preamble.sh',
         'job_execution_options': '',

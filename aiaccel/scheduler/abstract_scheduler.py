@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from omegaconf.dictconfig import DictConfig
 
 from typing import Union

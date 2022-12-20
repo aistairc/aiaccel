@@ -17,7 +17,7 @@ def test_create_qsub_command(load_test_config):
     qsub_command = create_qsub_command(config, optimizer_file)
     assert type(qsub_command) is list
 
-    path = Path(config.workspace.get()).resolve()
+    path = Path(config.generic.workspace).resolve()
     command = [
         'qsub',
         '-g', f'{config.abci_group.get()}',

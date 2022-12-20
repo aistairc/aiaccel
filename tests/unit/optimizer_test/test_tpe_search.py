@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from aiaccel.config import Config
+from aiaccel.config import load_config
 from aiaccel.optimizer.tpe_optimizer import (TpeOptimizer, TPESamplerWrapper,
                                              create_distributions)
 from aiaccel.parameter import load_parameter
@@ -100,18 +100,18 @@ class TestTpeOptimizer(BaseTest):
 
 
 def test_create_distributions(data_dir):
-    config = Config(data_dir / 'config_tpe_2.json')
+    config = load_config(data_dir / 'config_tpe_2.json')
     params = load_parameter(config.hyperparameters.get())
     dist = create_distributions(params)
     assert type(dist) is dict
 
-    config = Config(data_dir / 'config_tpe_categorical.json')
+    config = load_config(data_dir / 'config_tpe_categorical.json')
     params = load_parameter(config.hyperparameters.get())
     dist = create_distributions(params)
     assert type(dist) is dict
 
 
-    config = Config(data_dir / 'config_tpe_invalid_type.json')
+    config = load_config(data_dir / 'config_tpe_invalid_type.json')
     params = load_parameter(config.hyperparameters.get())
     with pytest.raises(TypeError):
         create_distributions(params)

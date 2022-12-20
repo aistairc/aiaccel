@@ -2,7 +2,9 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
-from aiaccel.config import Config
+
+from aiaccel.config import load_config
+
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.workspace import Workspace
 import shutil
@@ -199,18 +201,18 @@ class BaseTest(object):
         test_config_json = test_data_dir.joinpath('config.json')
         self.config_random_path = test_data_dir.joinpath('config_random.json')
         self.config_sobol_path = test_data_dir.joinpath('config_sobol.json')
-        self.config = Config(test_config_json)
-        self.config_random = Config(self.config_random_path)
-        self.config_sobol = Config(self.config_sobol_path)
+        self.config = load_config(test_config_json)
+        self.config_random = load_config(self.config_random_path)
+        self.config_sobol = load_config(self.config_sobol_path)
         self.config_json = test_data_dir.joinpath('config.json')
         self.grid_config_json = test_data_dir.joinpath('grid_config.json')
         self.config_yaml = test_data_dir.joinpath('config.yml')
-        work_dir = Path(self.config.workspace.get()).resolve()
+        work_dir = Path(self.config.generic.workspace).resolve()
         self.work_dir = work_dir
 
         self.dict_lock = work_dir.joinpath('lock')
 
-        self.config_grid = Config(self.grid_config_json)
+        self.config_grid = load_config(self.grid_config_json)
 
         self.workspace = Workspace(str(work_dir))
         if self.workspace.path.exists():
