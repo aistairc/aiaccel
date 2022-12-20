@@ -1,22 +1,19 @@
 from typing import Any
 
-from aiaccel.config import Config
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
 
 
-def create_scheduler(config_path: str) -> Any:
-    config = Config(config_path)
-    resource = config.resource_type.get()
+def create_scheduler(resource_type: str) -> Any:
 
-    if resource.lower() == "local":
+    if resource_type.lower() == "local":
         return LocalScheduler
 
-    elif resource.lower() == "python_local":
+    elif resource_type.lower() == "python_local":
         return PylocalScheduler
 
-    elif resource.lower() == "abci":
+    elif resource_type.lower() == "abci":
         return AbciScheduler
 
     else:

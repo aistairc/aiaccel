@@ -7,6 +7,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
 import fasteners
+
+from omegaconf.dictconfig import DictConfig
+
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
@@ -25,7 +28,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler.abci_scheduler import AbciScheduler
     from aiaccel.scheduler.local_scheduler import LocalScheduler
 
-from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 
 JOB_STATES = [
@@ -504,7 +506,7 @@ class Model(object):
             return
 
         commands = create_runner_command(
-            obj.config.job_command.get(),
+            obj.config.generic.job_command,
             obj.content,
             obj.trial_id,
             obj.config_path
@@ -590,7 +592,7 @@ class Model(object):
         """
         if obj.is_local():
             runner_command = create_runner_command(
-                obj.config.job_command.get(),
+                obj.config.generic.job_command,
                 obj.content,
                 str(obj.trial_id),
                 obj.config_path,
@@ -852,7 +854,7 @@ class Job:
         expire. Retry expire works well?
 
     Attributes:
-        - config (ConfileWrapper): A configuration object.
+        - config (DictConfig): A configuration object.
 
         - ws (Path): A path of a workspace.
 
@@ -963,7 +965,7 @@ class Job:
 
     def __init__(
         self,
-        config: Config,
+        config: DictConfig,
         options: dict,
         scheduler: Union[AbciScheduler, LocalScheduler],
         trial_id: int
@@ -980,27 +982,26 @@ class Job:
         # === Load config file===
         self.config = config
         self.config_path = self.config.config_path
-        self.options = options
         # === Get config parameter values ===
-        self.workspace = self.config.workspace.get()
-        self.cancel_retry = self.config.cancel_retry.get()
-        self.cancel_timeout = self.config.cancel_timeout.get()
-        self.expire_retry = self.config.expire_retry.get()
-        self.expire_timeout = self.config.expire_timeout.get()
-        self.finished_retry = self.config.finished_retry.get()
-        self.finished_timeout = self.config.finished_timeout.get()
-        self.job_loop_duration = self.config.job_loop_duration.get()
-        self.job_retry = self.config.job_retry.get()
-        self.job_timeout = self.config.job_timeout.get()
-        self.kill_retry = self.config.kill_retry.get()
-        self.kill_timeout = self.config.kill_timeout.get()
-        self.result_retry = self.config.result_retry.get()
-        self.batch_job_timeout = self.config.batch_job_timeout.get()
-        self.runner_retry = self.config.runner_retry.get()
-        self.runner_timeout = self.config.runner_timeout.get()
-        self.running_retry = self.config.running_retry.get()
-        self.running_timeout = self.config.running_timeout.get()
-        self.resource_type = self.config.resource_type.get()
+        self.workspace = self.config.generic.workspace
+        self.cancel_retry = self.config.job_setting.cancel_retry
+        self.cancel_timeout = self.config.job_setting.cancel_timeout
+        self.expire_retry = self.config.job_setting.expire_retry
+        self.expire_timeout = self.config.job_setting.expire_timeout
+        self.finished_retry = self.config.job_setting.finished_retry
+        self.finished_timeout = self.config.job_setting.finished_timeout
+        self.job_loop_duration = self.config.job_setting.job_loop_duration
+        self.job_retry = self.config.job_setting.job_retry
+        self.job_timeout = self.config.job_setting.job_timeout
+        self.kill_retry = self.config.job_setting.kill_retry
+        self.kill_timeout = self.config.job_setting.kill_timeout
+        self.result_retry = self.config.job_setting.result_retry
+        self.batch_job_timeout = self.config.generic.batch_job_timeout
+        self.runner_retry = self.config.job_setting.runner_retry
+        self.runner_timeout = self.config.job_setting.runner_timeout
+        self.running_retry = self.config.job_setting.running_retry
+        self.running_timeout = self.config.job_setting.running_timeout
+        self.resource_type = self.config.job_setting.resource_type
 
         self.threshold_timeout = None
         self.threshold_retry = None
@@ -1021,8 +1022,6 @@ class Job:
         )
         self.loop_count = 0
         self.scheduler = scheduler
-
-        self.config_path = str(self.config_path)
         self.trial_id = trial_id
         self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
         self.from_file = None

@@ -7,7 +7,7 @@ from logging import StreamHandler, getLogger
 
 import aiaccel
 from aiaccel import parameter as pt
-from aiaccel.config import Config
+from aiaccel.config import load_config
 from aiaccel.master.create import create_master
 from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
@@ -27,17 +27,20 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--clean', nargs='?', const=True, default=False)
     args = parser.parse_args()
 
-    config = Config(args.config, warn=True, format_check=True)
+    config = load_config(args.config)
     if config is None:
         logger.error(f"Invalid workspace: {args.workspace} or config: {args.config}")
         return
 
-    workspace = Workspace(config.workspace.get())
-    goal = config.goal.get()
+    config.config_path = args.config
+    config.resume = args.resume
+    config.clean = args.clean
+
+    workspace = Workspace(config.generic.workspace)
     dict_lock = workspace.path / aiaccel.dict_lock
 
-    if args.resume is None:
-        if args.clean is True:
+    if config.resume is None:
+        if config.clean is True:
             logger.info("Cleaning workspace")
             workspace.clean()
             logger.info(f'Workspace directory {str(workspace.path)} is cleaned.')
@@ -51,14 +54,13 @@ def main() -> None:  # pragma: no cover
         logger.error("Creating workspace is Failed.")
         return
 
-    logger.info(f"config: {str(pathlib.Path(args.config).resolve())}")
+    logger.info(f"config: {str(pathlib.Path(config.config_path).resolve())}")
 
-    Master = create_master(args.config)
-    Optimizer = create_optimizer(args.config)
-    Scheduler = create_scheduler(args.config)
-    modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
+    Master = create_master(config.resource.type)
+    Optimizer = create_optimizer(config.optimize.search_algorithm)
+    Scheduler = create_scheduler(config.resource.type)
+    modules = [Master(config), Optimizer(config), Scheduler(config)]
 
-    sleep_time = config.sleep_time.get()
     time_s = time.time()
 
     for module in modules:
@@ -72,24 +74,24 @@ def main() -> None:  # pragma: no cover
                 break
             module.loop_count += 1
         else:
-            time.sleep(sleep_time)
+            time.sleep(config.generic.sleep_time)
             continue
         break
 
     for module in modules:
         module.post_process()
 
-    report = CreationReport(args.config)
+    report = CreationReport(config)
     report.create()
 
     logger.info("moving...")
     dst = workspace.move_completed_data()
 
-    config_name = pathlib.Path(args.config).name
-    shutil.copy(pathlib.Path(args.config), dst / config_name)
+    config_name = pathlib.Path(config.config_path).name
+    shutil.copy(pathlib.Path(config.config_path), dst / config_name)
 
     files = fs.get_file_result_hp(dst)
-    best, best_file = pt.get_best_parameter(files, goal, dict_lock)
+    best, best_file = pt.get_best_parameter(files, config.optimize.goal, dict_lock)
 
     logger.info(f"Best result    : {best_file}")
     logger.info(f"               : {best}")

@@ -1,8 +1,11 @@
 import logging
 from pathlib import Path
 
-import aiaccel
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel import dict_lock
+from aiaccel import dict_result
+from aiaccel import file_final_result
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.util.trialid import TrialId
@@ -13,20 +16,19 @@ class AbstractEvaluator(object):
 
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method for AbstractEvaluator.
 
         Args:
             config (ConfileWrapper): A configuration object.
         """
-        self.options = options
-        self.config_path = Path(self.options['config']).resolve()
-        self.config = Config(str(self.config_path))
-        self.ws = Path(self.config.workspace.get()).resolve()
-        self.dict_lock = self.ws / aiaccel.dict_lock
+        self.config = config
+        self.config_path = Path(self.config.config_path).resolve()
+        self.ws = Path(self.config.generic.workspace).resolve()
+        self.dict_lock = self.ws / dict_lock
         self.hp_result = None
         self.storage = Storage(self.ws)
-        self.goal = self.config.goal.get()
+        self.goal = self.config.optimize.goal
         self.trial_id = TrialId(str(self.config_path))
 
     def get_zero_padding_any_trial_id(self, trial_id: int):
@@ -57,5 +59,5 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        path = self.ws / aiaccel.dict_result / aiaccel.file_final_result
+        path = self.ws / dict_result / file_final_result
         create_yaml(path, self.hp_result, self.dict_lock)

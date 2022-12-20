@@ -30,7 +30,7 @@ class TestCeaterRunnerComand(BaseTest):
         }
 
         commands = create_runner_command(
-            config.job_command.get(),
+            config.generic.job_command,
             get_one_parameter(),
             'name',
             'config.json'

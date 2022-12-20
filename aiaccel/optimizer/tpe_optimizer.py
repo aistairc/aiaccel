@@ -1,5 +1,7 @@
 from typing import Optional
 
+from omegaconf.dictconfig import DictConfig
+
 import aiaccel.parameter
 import optuna
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -16,13 +18,13 @@ class TPESamplerWrapper(optuna.samplers.TPESampler):
 
 
 class TpeOptimizer(AbstractOptimizer):
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method of TpeOptimizer.
 
         Args:
-            options (dict): A file name of a configuration.
+            options (DictConfig): A configuration object.
         """
-        super().__init__(options)
+        super().__init__(config)
         self.parameter_pool = {}
         self.parameter_list = []
         self.study_name = "distributed-tpe"

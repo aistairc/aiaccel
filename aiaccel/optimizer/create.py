@@ -1,12 +1,9 @@
 from importlib import import_module
 from typing import Any
 
-from aiaccel.config import Config
 
-
-def create_optimizer(config_path: str) -> Any:
-    config = Config(config_path)
-    return import_and_getattr(config.search_algorithm.get())
+def create_optimizer(search_algorithm: str) -> Any:
+    return import_and_getattr(search_algorithm)
 
 
 def import_and_getattr(name: str) -> Any:

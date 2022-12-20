@@ -23,7 +23,7 @@ class LocalScheduler(AbstractScheduler):
         super().get_stats()
 
         res = ps2joblist()
-        command = self.config.job_command.get()
+        command = self.config.generic.job_command
         self.stats = []
         trial_id_list = [job['trial_id'] for job in self.jobs]
 
@@ -92,7 +92,7 @@ class LocalScheduler(AbstractScheduler):
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
 
         runner_command = create_runner_command(
-            self.config.job_command.get(),
+            self.config.generic.job_command,
             self.storage.get_hp_dict(trial_id),
             trial_id,
             self.config_path

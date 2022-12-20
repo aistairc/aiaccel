@@ -2,8 +2,11 @@ import copy
 import logging
 from pathlib import Path
 
-import aiaccel
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel import dict_lock
+from aiaccel import dict_verification
+from aiaccel import extension_verification
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 
@@ -13,17 +16,16 @@ class AbstractVerification(object):
 
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method for AbstractVerification.
 
         Args:
             config (ConfileWrapper): A configuration object.
         """
         # === Load config file===
-        self.options = options
-        self.config = Config(self.options['config'])
-        self.ws = Path(self.config.workspace.get()).resolve()
-        self.dict_lock = self.ws / aiaccel.dict_lock
+        self.config = config
+        self.ws = Path(self.config.generic.workspace).resolve()
+        self.dict_lock = self.ws / dict_lock
         self.is_verified = None
         self.finished_loop = None
         self.condition = None
@@ -86,7 +88,7 @@ class AbstractVerification(object):
 
         # self.save(loop)
 
-        best_trial = self.storage.get_best_trial_dict(self.config.goal.get().lower())
+        best_trial = self.storage.get_best_trial_dict(self.config.optimize.goal.lower())
 
         if (
             best_trial['result'] < self.condition[index]['minimum'] or
@@ -103,8 +105,8 @@ class AbstractVerification(object):
         Returns:
             None
         """
-        self.is_verified = self.config.is_verified.get()
-        self.condition = self.config.condition.get()
+        self.is_verified = self.config.verification.is_verified
+        self.condition = self.config.verification.condition
         self.verification_result = copy.copy(self.condition)
 
     def print(self) -> None:
@@ -132,7 +134,7 @@ class AbstractVerification(object):
         if not self.is_verified:
             return None
 
-        path = self.ws / aiaccel.dict_verification / f'{name}.{aiaccel.extension_verification}'
+        path = self.ws / dict_verification / f'{name}.{extension_verification}'
         create_yaml(path, self.verification_result, self.dict_lock)
         logger = logging.getLogger('root.master.verification')
-        logger.info(f'Save verifiation file: {name}.{aiaccel.extension_verification}')
+        logger.info(f'Save verifiation file: {name}.{extension_verification}')

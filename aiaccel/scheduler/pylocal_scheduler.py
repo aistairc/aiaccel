@@ -1,6 +1,8 @@
 import threading
 import importlib
 
+from omegaconf.dictconfig import DictConfig
+
 from typing import Union
 from pathlib import Path
 
@@ -14,15 +16,15 @@ class PylocalScheduler(AbstractScheduler):
 
     """
 
-    def __init__(self, options: dict) -> None:
-        super().__init__(options)
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
 
         self.run = None
         self.user_func = None
 
         self.user_func = self.get_callable_object(
-            self.config.python_file.get(),
-            self.config.function.get()
+            self.config.generic.python_file,
+            self.config.generic.function
         )
         self.run = Run(self.config_path)
 

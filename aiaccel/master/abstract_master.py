@@ -1,6 +1,8 @@
 import logging
 
-import aiaccel
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel import goal_maximize, goal_minimize
 from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
 from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
 from aiaccel.master.verification.abstract_verification import \
@@ -22,32 +24,32 @@ class AbstractMaster(AbstractModule):
         verification (AbstractVerification): A verification object.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method of AbstractMaster.
 
         Args:
             config (str): A file name of a configuration.
         """
+        super().__init__(config)
+
         self.start_time = get_time_now_object()
         self.loop_start_time = None
-        self.options = options
-        self.options['process_name'] = 'master'
 
-        super().__init__(self.options)
+        self.module_name = 'master'
         self.logger = logging.getLogger('root.master')
         self.logger.setLevel(logging.DEBUG)
 
         self.set_logger(
             'root.master',
-            self.dict_log / self.config.master_logfile.get(),
-            str_to_logging_level(self.config.master_file_log_level.get()),
-            str_to_logging_level(self.config.master_stream_log_level.get()),
+            self.dict_log / self.config.logger.file.master,
+            str_to_logging_level(self.config.logger.log_level.master),
+            str_to_logging_level(self.config.logger.stream_level.master),
             'Master   '
         )
 
-        self.verification = AbstractVerification(self.options)
-        self.goal = self.config.goal.get()
-        self.trial_number = self.config.trial_number.get()
+        self.verification = AbstractVerification(self.config)
+        self.goal = self.config.optimize.goal
+        self.trial_number = self.config.optimize.trial_number
 
         self.runner_files = []
         self.stats = []
@@ -78,10 +80,10 @@ class AbstractMaster(AbstractModule):
         if not self.check_finished():
             return
 
-        if self.goal.lower() == aiaccel.goal_maximize:
-            evaluator = MaximizeEvaluator(self.options)
-        elif self.goal.lower() == aiaccel.goal_minimize:
-            evaluator = MinimizeEvaluator(self.options)
+        if self.goal.lower() == goal_maximize:
+            evaluator = MaximizeEvaluator(self.config)
+        elif self.goal.lower() == goal_minimize:
+            evaluator = MinimizeEvaluator(self.config)
         else:
             self.logger.error(f'Invalid goal: {self.goal}.')
             raise ValueError(f'Invalid goal: {self.goal}.')

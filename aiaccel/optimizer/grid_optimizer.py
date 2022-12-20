@@ -3,14 +3,15 @@ from functools import reduce
 from operator import mul
 from typing import List, Tuple, Union
 
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 
 def get_grid_options(
     parameter_name: str,
-    config: Config
+    config: DictConfig
 ) -> Tuple[Union[int, None], bool, Union[int, None]]:
 
     """Get options about grid search.
@@ -31,7 +32,7 @@ def get_grid_options(
     log = False
     step = None
 
-    grid_options = config.hyperparameters.get()
+    grid_options = config.optimize.parameters
 
     for g in grid_options:
         if g['name'] == parameter_name:
@@ -52,12 +53,12 @@ def get_grid_options(
     raise KeyError(f'Invalid parameter name: {parameter_name}')
 
 
-def generate_grid_points(p: HyperParameter, config: Config) -> dict:
+def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict:
     """Make a list of all parameters for this grid.
 
     Args:
         p (HyperParameter): A hyper parameter object.
-        config (ConfileWrapper): A configuration object.
+        config (DictConfig): A configuration object.
 
     Returns:
         dict: A dictionary including all grid parameters.
@@ -113,13 +114,13 @@ class GridOptimizer(AbstractOptimizer):
         generate_index (int): A number of generated hyper parameters.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method of GridOptimizer.
 
         Args:
             config (str): A file name of a configuration.
         """
-        super().__init__(options)
+        super().__init__(config)
         self.ready_params = None
         self.generate_index = None
 

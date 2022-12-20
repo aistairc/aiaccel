@@ -4,16 +4,17 @@ from typing import Union
 import fasteners
 
 import aiaccel
-from aiaccel.config import Config
+from aiaccel.config import load_config
+
 
 
 class TrialId:
     def __init__(self, config_path: str):
         self.config_path = Path(config_path).resolve()
-        self.config = Config(str(self.config_path))
+        self.config = load_config(str(self.config_path))
 
-        self.ws = Path(self.config.workspace.get()).resolve()
-        self.name_length = self.config.name_length.get()
+        self.ws = Path(self.config.generic.workspace).resolve()
+        self.name_length = self.config.job_setting.name_length
         self.file_hp_count_fmt = f'%0{self.name_length}d'
         self.dict_hp = self.ws / aiaccel.dict_hp
 

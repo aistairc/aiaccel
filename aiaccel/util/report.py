@@ -5,7 +5,8 @@ from logging import StreamHandler, getLogger
 
 from fasteners import InterProcessLock
 
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+
 from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
 
@@ -15,11 +16,11 @@ logger.addHandler(StreamHandler())
 
 
 class CreationReport:
-    def __init__(self, config_path: str):
-        self.config = Config(config_path)
-        self.ws = pathlib.Path(self.config.workspace.get()).resolve()
+    def __init__(self, config: DictConfig):
+        self.config = config
+        self.ws = pathlib.Path(self.config.generic.workspace).resolve()
         self.fp = self.ws / 'results.csv'
-        self.trialid = TrialId(str(config_path))
+        self.trialid = TrialId(str(self.config.config_path))
         self.storage = Storage(self.ws)
         self.lock_file = {
             'result_txt': str(self.ws / 'lock' / 'result_txt')

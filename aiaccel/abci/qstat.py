@@ -2,7 +2,6 @@ import xml.etree.ElementTree as ElementTree
 from typing import List
 from xml.etree.ElementTree import Element
 
-from aiaccel.config import Config
 
 ''' Example of stat
 stat = {
@@ -20,7 +19,7 @@ stat = {
 '''
 
 
-def parse_qstat(config: Config, qstat: str) -> List[dict]:
+def parse_qstat(qstat: str) -> List[dict]:
     """Parse ABCI 'qstat' command result.
 
     Args:
@@ -34,15 +33,15 @@ def parse_qstat(config: Config, qstat: str) -> List[dict]:
     stat_list = []
 
     for i in root.findall('./queue_info/job_list'):
-        stat_list += parse_job_list(config, i)
+        stat_list += parse_job_list(i)
 
     for i in root.findall('./job_info/job_list'):
-        stat_list += parse_job_list(config, i)
+        stat_list += parse_job_list(i)
 
     return stat_list
 
 
-def parse_job_list(config: Config, job_list: Element) -> List[dict]:
+def parse_job_list(job_list: Element) -> List[dict]:
     """Parse from XML element of 'qstat' to a job list.
 
     Args:

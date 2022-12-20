@@ -1,6 +1,8 @@
 import subprocess
 
-import aiaccel
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel import dict_runner
 from aiaccel.abci.qstat import parse_qstat
 from aiaccel.master.abstract_master import AbstractMaster
 from aiaccel.util.filesystem import get_dict_files
@@ -15,13 +17,13 @@ class AbciMaster(AbstractMaster):
         stats (Anystr): A result string of 'qstat' command.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method of AbciMaster.
 
         Args:
-            config (str): A file name of a configuration.
+            config (DictConfig): A configuration object.
         """
-        super().__init__(options)
+        super().__init__(config)
         self.runner_files = []
         self.stats = []
 
@@ -40,7 +42,7 @@ class AbciMaster(AbstractMaster):
         #     # self.config.runner_search_pattern().get
         # )
         self.runner_files = get_dict_files(
-            self.ws / aiaccel.dict_runner,
+            self.ws / dict_runner,
             "run_*.sh"
         )
 

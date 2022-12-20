@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import aiaccel
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+
 
 ''' Example of stat
 stat = {
@@ -19,7 +20,7 @@ stat = {
 '''
 
 
-def create_qsub_command(config: Config, runner_file: Path) -> list:
+def create_qsub_command(config: DictConfig, runner_file: Path) -> list:
     """Create ABCI 'qsub' command.
 
     Args:
@@ -29,12 +30,12 @@ def create_qsub_command(config: Config, runner_file: Path) -> list:
     Returns:
         list: A list to run 'qsub' command.
     """
-    path = Path(config.workspace.get()).resolve()
-    job_execution_options = config.job_execution_options.get()
+    path = Path(config.generic.workspace).resolve()
+    job_execution_options = config.ABCI.job_execution_options
 
     command = [
         'qsub',
-        '-g', f'{config.abci_group.get()}',
+        '-g', f'{config.ABCI.group}',
         '-j', 'y',
         '-o', f'{path / aiaccel.dict_output}',
 

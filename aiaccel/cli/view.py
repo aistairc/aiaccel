@@ -1,16 +1,18 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
 from numpy import maximum
 
 
 class Viewer:
-    def __init__(self, config: Config):
+    def __init__(self, config: DictConfig):
         self.config_path = config.config_path
-        self.workspace = Path(config.workspace.get()).resolve()
+        self.workspace = Path(config.generic.workspace).resolve()
         self.storage = Storage(self.workspace)
 
     def view(self) -> None:
@@ -94,8 +96,8 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
-    config = Config(args.config)
-    workspace = config.workspace.get()
+    config = load_config(args.config)
+    workspace = config.generic.workspace
 
     ws = Workspace(workspace)
     if ws.exists() is False:

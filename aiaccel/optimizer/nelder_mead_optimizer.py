@@ -1,5 +1,7 @@
 import copy
 
+from omegaconf.dictconfig import DictConfig
+
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
@@ -12,13 +14,13 @@ class NelderMeadOptimizer(AbstractOptimizer):
         parameter_pool ():
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method of NelderMeadOptimizer.
 
         Args:
             config (str): A file name of a configuration.
         """
-        super().__init__(options)
+        super().__init__(config)
         self.nelder_mead = None
         self.parameter_pool = []
         self.order = []

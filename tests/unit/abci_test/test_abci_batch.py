@@ -25,7 +25,7 @@ class TestCreateAbciBatchFile(BaseTest):
         dict_lock = work_dir.joinpath('lock')
         batch_file = work_dir.joinpath('runner', 'run_test.sh')
         commands = create_runner_command(
-            config.job_command.get(),
+            config.generic.job_command,
             get_one_parameter(),
             'test',
             'config.json'

@@ -3,8 +3,9 @@ from pathlib import Path
 
 import numpy as np
 
+from omegaconf.dictconfig import DictConfig
+
 import aiaccel
-from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
 
@@ -37,16 +38,14 @@ class AbstractModule(object):
         ws (Path): A path to a current workspace.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """
         Args:
             config (str): A file name of a configuration.
         """
-        # === Load config file===
-        self.options = options
-        self.config_path = Path(self.options['config']).resolve()
-        self.config = Config(self.config_path)
-        self.ws = Path(self.config.workspace.get()).resolve()
+        self.config = config
+        self.config_path = Path(self.config.config_path).resolve()
+        self.ws = Path(self.config.generic.workspace).resolve()
 
         # working directory
         self.dict_alive = self.ws / aiaccel.dict_alive
@@ -75,14 +74,15 @@ class AbstractModule(object):
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
-        self.seed = self.config.randseed.get()
+        self.seed = self.config.optimize.rand_seed
         self.storage = Storage(self.ws)
-        self.trial_id = TrialId(self.options['config'])
+        self.trial_id = TrialId(self.config.config_path)
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng = None
+        self.module_name = 'abstract'
 
         self.storage.variable.register(
-            process_name=self.options['process_name'],
+            process_name=self.module_name,
             labels=['native_random_state', 'numpy_random_state', 'state']
         )
 
@@ -120,7 +120,7 @@ class AbstractModule(object):
         """
         self.hp_finished = self.storage.get_num_finished()
 
-        if self.hp_finished >= self.config.trial_number.get():
+        if self.hp_finished >= self.config.optimize.trial_number:
             return True
 
         return False
@@ -132,7 +132,7 @@ class AbstractModule(object):
             None
         """
         self.logger.info(
-            f'{self.hp_finished}/{self.config.trial_number.get()}, '
+            f'{self.hp_finished}/{self.config.optimize.trial_number}, '
             f'finished, '
             f'ready: {self.hp_ready}, '
             f'running: {self.hp_running}'
@@ -298,14 +298,13 @@ class AbstractModule(object):
             None
         """
         if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
+            self.config.resume is not None and
+            self.config.resume > 0
         ):
-            self._deserialize(self.options['resume'])
+            self._deserialize(self.config.resume)
 
     def __getstate__(self):
         obj = self.__dict__.copy()
         del obj['storage']
         del obj['config']
-        del obj['options']
         return obj

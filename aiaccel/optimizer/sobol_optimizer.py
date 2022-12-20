@@ -1,3 +1,5 @@
+from omegaconf.dictconfig import DictConfig
+
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from scipy.stats import qmc
 
@@ -12,13 +14,13 @@ class SobolOptimizer(AbstractOptimizer):
         number of FINISHED PARAMETER FILES. Confirm whether the current code resumes for any timings of quits.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method of SobolOptimizer.
 
         Args:
-            config (str): A file name of a configuration.
+            config (DictConfig): A configuration object.
         """
-        super().__init__(options)
+        super().__init__(config)
         self.generate_index = None
         self.sampler = None
 

@@ -6,7 +6,9 @@ from logging import StreamHandler, getLogger
 from typing import Any, Union
 from pathlib import Path
 
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
 
@@ -206,8 +208,8 @@ class Run:
         else:
             self.config_path = Path(self.args["config"])
 
-        self.config = Config(self.config_path)
-        self.workspace = Path(self.config.workspace.get()).resolve()
+        self.config = load_config(self.config_path)
+        self.workspace = Path(self.config.generic.workspace).resolve()
         self.storage = Storage(self.workspace)
 
         # logger

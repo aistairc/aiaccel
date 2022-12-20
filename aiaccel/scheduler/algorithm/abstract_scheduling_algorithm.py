@@ -2,7 +2,7 @@ import numpy as np
 from pathlib import Path
 from typing import List, Optional
 
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
 
 
 class AbstractSchedulingAlgorithm(object):
@@ -12,7 +12,7 @@ class AbstractSchedulingAlgorithm(object):
         config (ConfileWrapper): A configuration object.
     """
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method for AbstractSchedulingAlgorithm.
 
         Args:

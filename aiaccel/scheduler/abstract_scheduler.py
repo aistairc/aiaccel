@@ -1,4 +1,7 @@
 from pathlib import Path
+
+from omegaconf.dictconfig import DictConfig
+
 from typing import Union
 
 from aiaccel.module import AbstractModule
@@ -22,33 +25,30 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method for AbstractScheduler.
 
         Args:
             config (str): A file name of a configuration.
         """
-        self.options = options
-        self.options['process_name'] = 'scheduler'
-        super().__init__(self.options)
-
-        self.config_path = Path(self.options['config']).resolve()
+        super().__init__(config)
+        self.module_name = 'scheduler'
 
         self.set_logger(
             'root.scheduler',
-            self.dict_log / self.config.scheduler_logfile.get(),
-            str_to_logging_level(self.config.scheduler_file_log_level.get()),
-            str_to_logging_level(self.config.scheduler_stream_log_level.get()),
+            self.dict_log / self.config.logger.file.scheduler,
+            str_to_logging_level(self.config.logger.log_level.scheduler),
+            str_to_logging_level(self.config.logger.stream_level.scheduler),
             'Scheduler'
         )
 
-        self.max_resource = self.config.num_node.get()
+        self.max_resource = self.config.resource.num_node
         self.available_resource = self.max_resource
         self.stats = []
         self.jobs = []
         self.job_status = {}
         self.algorithm = None
-        self.num_node = self.config.num_node.get()
+        self.num_node = self.config.resource.num_node
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
@@ -274,10 +274,10 @@ class AbstractScheduler(AbstractModule):
             None
         """
         if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
+            self.config.resume is not None and
+            self.config.resume > 0
         ):
-            self._deserialize(self.options['resume'])
+            self._deserialize(self.config.resume)
 
     def create_result_file(self, trial_id: int) -> None:
         """ Save the results in yaml format.
@@ -289,7 +289,7 @@ class AbstractScheduler(AbstractModule):
             None
         """
 
-        file_hp_count_fmt = f'%0{self.config.name_length.get()}d'
+        file_hp_count_fmt = f'%0{self.config.job_setting.name_length}d'
         file_name = file_hp_count_fmt % trial_id + '.hp'
 
         content = self.storage.get_hp_dict(trial_id)
