@@ -1,0 +1,302 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-12-07 23:40+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/developer_guide/custom_optimizer.md:1
+msgid "カスタムオプティマイザー作成ガイド"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:3
+msgid ""
+"オプティマイザは，ハイパーパラメータを生成する機能を担うためどのハイパーパラメータの組を選択するかのアルゴリズムにより，最適化のパフォーマンスは大きく変わってきます．"
+" 本稿では，ユーザーがaiaccelを用いた独自のオプティマイザを開発するための方法について解説します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:6
+msgid "カスタムオプティマイザの実行確認"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:8
+msgid ""
+"それでは，まずカスタムオプティマイザを実行するための動作を確かめてみましょう． 所謂Hello, Worldの位置づけです． "
+"ここで解説する内容は簡単にまとめると下記のようになります．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:12
+msgid "カスタムオプティマイザのソースファイルを作成する"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:13
+msgid "カスタムオプティマイザのソースファイルをaiaccelが読み込めるようにする"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:14
+msgid "コンフィグレーションファイルを編集し，カスタムオプティマイザを実行できるようにする"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:16
+msgid ""
+"カスタムオプティマイザをどのように実行するかは環境に依存しますが，今回は自分で作成したワークスペースディレクトリに追加して実行してみます． "
+"その他にはソースコードに追加するなど，環境次第でやり方は異なりますので各自の環境に合わせて設定してください．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:19
+msgid "開発環境の確認"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:21
+msgid ""
+"まず環境の確認からします． 本ガイドでは，各種インストールは終了しaiaccelが実行できる状態から始めます． "
+"インストールが未だの方はインストールガイドを参照してください． 各ディレクトリ・ファイルは以下のとおりとします． "
+"皆さんの環境に読み替えて参考にしてください．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:27
+msgid "aiaccelのソースディレクトリ: /workspace/aiaccel"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:28
+msgid "ワークスペースディレクトリ: /workspace/aiaccel/work"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:29
+msgid ""
+"例えばランダムオプティマイザのファイル: "
+"/workspace/aiaccel/aiaccel/optimizer/random_optimizer.py"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:31
+msgid "カスタムオプティマイザファイルの作成"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:33
+msgid "カスタムオプティマイザのソースファイルを作成します． 今回はランダムオプティマイザをコピーします．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:46
+msgid "これでcustom_optimizer.pyが作成されました．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:48
+msgid "ファイルの編集"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:50
+msgid "このままではcustom_optimizer.pyの内容はランダムオプティマイザと同じですので，少しだけ編集します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:52
+#: ../../source/developer_guide/custom_optimizer.md:237
+#: ../../source/developer_guide/custom_optimizer.md:299
+#: ../../source/developer_guide/custom_optimizer.md:313
+#: ../../source/developer_guide/custom_optimizer.md:354
+#: ../../source/developer_guide/custom_optimizer.md:398
+#: ../../source/developer_guide/custom_optimizer.md:420
+msgid "***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:66
+msgid ""
+"上記はdiff表記で削除された行頭に - 追加された行頭に + が付いています． "
+"クラス名をRandomOptimizerからCustomOptimizerに変更しました． 変更したファイルは保存します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:70
+msgid "パスの設定"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:72
+msgid ""
+"今custom_optimizer.pyにはランダムオプティマイザを全く同じ動作をするCustomOptimizerを定義しました． "
+"aiaccelから作成したCustomOptimizerクラスを実行する必要があるので，まず__init__.pyファイルを作成します． "
+"ここではaiaccel/optimizerにある__init__.pyを編集して利用します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:84
+msgid "追加したCustomOptimizerを読み込むように編集します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:86
+msgid "***/workspace/aiaccel/work/lib/my_optimizer/__init__.py***"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:107
+msgid "次にパスの設定を行います． PYTHONPATHに，aiaccelと追加したcustom_optimizer.pyのディレクトリを追加します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:120
+msgid "ユーザーファイルの作成"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:122
+msgid ""
+"カスタムオプティマイザを作成したので，実際に実行するユーザーファイルを作成します． "
+"今回は/workspace/aiaccel/examples/sphereディレクトリをコピーして作成します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:141
+msgid ""
+"examples/sphereディレクトリをコピーし，sphereディレクトリに移動しました． 次にコンフィグレーションファイルを編集します． "
+"オプティマイザに今回作成したカスタムオプティマイザを利用したいのでconfig.yamlを編集します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:145
+#: ../../source/developer_guide/custom_optimizer.md:154
+#: ../../source/developer_guide/custom_optimizer.md:383
+msgid "***/workspace/aiaccel/work/sphere/config.yaml***"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:152
+msgid "デフォルトのconfig.yamlファイルにはネルダーミードの初期値がリストで設定されているため，これは削除します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:205
+msgid "これでコンフィグレーションファイルの編集は一旦終了です． 編集したファイルを保存します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:208
+msgid "実行の確認"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:210
+#: ../../source/developer_guide/custom_optimizer.md:362
+#: ../../source/developer_guide/custom_optimizer.md:466
+msgid "それでは現在のディレクトリで実行してみます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:220
+msgid "正常に実行できれば成功です． このカスタムオプティマイザの中身はランダムオプティマイザと同じなので，ランダムにハイパーパラメータが選択されます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:223
+msgid "ここまででカスタムオプティマイザが実行できることが確認できたので，次節ではオプティマイザのソースコードを編集して実行する点を解説します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:225
+msgid "カスタムオプティマイザの編集"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:227
+msgid ""
+"前節でカスタムオプティマイザの実行確認を行いました． 本節では，前節で作成したカスタムオプティマイザを編集しシンプルなアルゴリズムを実装します． "
+"簡単のため前節で作成したワークスペースを流用し５つのfloat型のハイパーパラメータに対し正規分布でハイパーパラメータを生成するオプティマイザを作成してみましょう．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:231
+msgid "既存のオプティマイザには，ランダム・ソボル列・グリッド・ネルダーミード・TPEがサポートされていますが，ランダムオプティマイザをコピーしたソースファイルから編集を始めます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:233
+msgid "ランダムオプティマイザの確認"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:235
+msgid "前節でコピーしたカスタムオプティマイザのファイルを見てみましょう．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:273
+msgid ""
+"CustomOptimizerクラスはAbstractOptimizerを継承し，generate_parameterメソッドのみを実装しています．"
+" "
+"generate_parameter以外のオプティマイザとしての機能はAbstractOptimizerに実装されているので，generate_parameterメソッドを実装すれば簡単なオプティマイザなら実装することができます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:276
+msgid "ハイパーパラメータのソースコードの確認"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:278
+msgid ""
+"generate_parameterメソッドを見てみましょう． self.params.sampleというメソッドを実行しています． "
+"このメソッドは，aiaccel/parameter.pyのHyperParameterConfigurationインスタンスであるself.paramsのsampleメソッドです．"
+" sampleメソッド内では，さらにHyperParameterインスタンスであるvalueから更にsampleメソッドが呼ばれています． "
+"この２度目に呼ばれたsampleメソッドはHyperParameterクラスのメソッドであり，中身を見てみるとハイパーパラメータのタイプごとに処理が分かれていますが，例えばFLOAT型の場合np.random.uniformが実行されます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:284
+msgid "***/workspace/aiaccel/aiaccel/parameter.py***"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:291
+msgid "こうして生成されたランダムなハイパーパラメータを返すことがgenerate_parameterメソッドの役割となります．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:293
+msgid "正規分布オプティマイザの作成"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:295
+msgid ""
+"ではaiaccel/parameter.pyのHyperParameterConfigurationクラスをもう少し詳しく見てみましょう． "
+"sampleメソッドの他に，get_parameter_listというメソッドがあります． "
+"このメソッドは，sampleメソッドでハイパーパラメータをランダムに選択する前のハイパーパラメータのリストを返します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:310
+msgid ""
+"次に正規分布を用いてハイパーパラメータを生成します． "
+"aiaccel/parameter.pyのHyperParameterクラスではnumpyのrandom.uniformを実行していましたが，今回は正規分布なのでnumpyのrandom.normalを利用します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:352
+msgid "正規分布で生成したハイパーパラメータが，最大値・最小値を超えないよう修正を加えています．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:360
+#: ../../source/developer_guide/custom_optimizer.md:464
+msgid "正規分布オプティマイザの実行確認"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:372
+msgid "正常に終了すれば成功です．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:374
+msgid "オプティマイザへの変数の導入"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:376
+msgid ""
+"正規分布のオプティマイザの平均と分散の値はハードコーディングしていました． "
+"このようなオプティマイザに利用する変数はコンフィグレーションファイルや引数として渡したい値です．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:379
+msgid "ここでは平均と分散をコンフィグレーションファイルから与える方法について解説します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:381
+msgid "まずコンフィグレーションファイルに以下の追加をします．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:395
+msgid "muとsigmaが追加されました． 次にcustom_optimizer.pyを編集して，muとsigmaを取得できるようにします．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:417
+msgid ""
+"__init__メソッドを追加し，コンフィグレーションからmuとsigmaを取得し変数として保持しました． "
+"あとはrandom.normalを呼ぶ際にmuとsigmaを渡します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:476
+msgid ""
+"/workspace/aiaccel/work/sphere/workディレクトリに実行結果が保存されます． "
+"前回事項した結果と異なることを確認してみてください．"
+msgstr ""
+
