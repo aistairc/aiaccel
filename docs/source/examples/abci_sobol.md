@@ -10,7 +10,6 @@
 ### config.yaml
 
 - 最適化およびソフトウェアの設定ファイルです．
-- aiaccel/examples/benchmark に存在するファイルは，デフォルトではネルダーミード法を用いた最適化を ABCI 環境で実行する設定になっています．
 
 ### user.py
 
