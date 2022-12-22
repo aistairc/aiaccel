@@ -20,7 +20,7 @@ class CreationReport:
         self.config = config
         self.ws = pathlib.Path(self.config.generic.workspace).resolve()
         self.fp = self.ws / 'results.csv'
-        self.trialid = TrialId(str(self.config.config_path))
+        self.trialid = TrialId(self.config.config_path)
         self.storage = Storage(self.ws)
         self.lock_file = {
             'result_txt': str(self.ws / 'lock' / 'result_txt')

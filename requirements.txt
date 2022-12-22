@@ -8,6 +8,7 @@ joblib==1.2.0
 monotonic==1.5
 myst_parser >= 0.18.1
 numpy
+omegaconf
 pluggy
 py
 pytest

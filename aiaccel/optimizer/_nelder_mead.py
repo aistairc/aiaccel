@@ -1,5 +1,6 @@
 import logging
 from typing import Dict, List, Optional, Union
+from omegaconf.listconfig import ListConfig
 
 import numpy as np
 from aiaccel.parameter import HyperParameter
@@ -134,7 +135,7 @@ class NelderMead(object):
             if type(initial_parameters[dim]['value']) in [int, float, np.float64]:
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
 
-            if type(initial_parameters[dim]['value']) is not list:
+            if type(initial_parameters[dim]['value']) not in [list, ListConfig]:
                 print(initial_parameters)
                 print(type(initial_parameters[dim]['value']))
                 raise TypeError('Default parameter should be set as list.')

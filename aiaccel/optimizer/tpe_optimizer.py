@@ -31,7 +31,7 @@ class TpeOptimizer(AbstractOptimizer):
         self.study = None
         self.distributions = None
         self.trial_pool = {}
-        self.randseed = self.config.randseed.get()
+        self.randseed = self.config.optimize.rand_seed
 
     def pre_process(self) -> None:
         """Pre-Procedure before executing optimize processes.
@@ -94,7 +94,7 @@ class TpeOptimizer(AbstractOptimizer):
         ):
             return None
 
-        if len(self.parameter_pool) >= self.config.num_node.get():
+        if len(self.parameter_pool) >= self.config.resource.num_node:
             return None
 
         new_params = []
@@ -155,7 +155,7 @@ class TpeOptimizer(AbstractOptimizer):
             self.study = optuna.create_study(
                 sampler=TPESamplerWrapper(seed=self.randseed),
                 study_name=self.study_name,
-                direction=self.config.goal.get().lower()
+                direction=self.config.optimize.goal.lower()
             )
 
 

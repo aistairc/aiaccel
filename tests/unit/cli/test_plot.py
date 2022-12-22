@@ -43,8 +43,7 @@ def test_plot():
     storage = Storage(ws.path)
     config = load_config(config_path)
 
-    goal = "minimize"
-    config.goal.set(goal)
+    config.optimize.goal = "minimize"
 
     # データ無しの場合
     plotter = Plotter(config)

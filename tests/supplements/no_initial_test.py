@@ -23,14 +23,14 @@ class NoInitialTest(BaseTest):
         with self.create_main(python_file):
             storage = Storage(ws=Path(self.config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']
-                             ).wait(timeout=self.config.batch_job_timeout.get())
+                             ).wait(timeout=self.config.generic.batch_job_timeout)
         self.evaluate(work_dir, storage)
 
     def evaluate(self, work_dir, storage):
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
-        assert finished == self.config.optimize.trial_number.get()
+        assert finished == self.config.optimize.trial_number
         assert ready == 0
         assert running == 0
         final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)

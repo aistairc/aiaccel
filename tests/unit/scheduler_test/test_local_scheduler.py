@@ -1,19 +1,15 @@
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.job.job import Job
+from aiaccel.config import load_config
+
 from tests.base_test import BaseTest
 
 
 class TestLocalScheduler(BaseTest):
 
     def test_get_stats(self, clean_work_dir, config_json, fake_process):
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'scheduler'
-        }
-        scheduler = LocalScheduler(options)
+        config = load_config(config_json)
+        scheduler = LocalScheduler(config)
         fake_process.register_subprocess(
             ['/bin/ps', '-eo', 'pid,user,stat,lstart,args'],
             stdout=[
@@ -34,15 +30,8 @@ class TestLocalScheduler(BaseTest):
         assert scheduler.get_stats() is None
 
     def test_parse_trial_id(self, config_json):
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'scheduler'
-        }
-
-        scheduler = LocalScheduler(options)
+        config = load_config(config_json)
+        scheduler = LocalScheduler(config)
         s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5

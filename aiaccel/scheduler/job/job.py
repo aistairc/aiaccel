@@ -543,7 +543,6 @@ class Job:
         super(Job, self).__init__()
         # === Load config file===
         self.config = config
-        self.config_path = self.config.config_path
         # === Get config parameter values ===
         self.workspace = self.config.generic.workspace
         self.cancel_retry = self.config.job_setting.cancel_retry
@@ -552,7 +551,6 @@ class Job:
         self.expire_timeout = self.config.job_setting.expire_timeout
         self.finished_retry = self.config.job_setting.finished_retry
         self.finished_timeout = self.config.job_setting.finished_timeout
-        self.job_loop_duration = self.config.job_setting.job_loop_duration
         self.job_retry = self.config.job_setting.job_retry
         self.job_timeout = self.config.job_setting.job_timeout
         self.kill_retry = self.config.job_setting.kill_retry
@@ -563,7 +561,7 @@ class Job:
         self.runner_timeout = self.config.job_setting.runner_timeout
         self.running_retry = self.config.job_setting.running_retry
         self.running_timeout = self.config.job_setting.running_timeout
-        self.resource_type = self.config.job_setting.resource_type
+        self.resource_type = self.config.resource.type
 
         self.threshold_timeout = None
         self.threshold_retry = None
@@ -584,7 +582,7 @@ class Job:
         self.loop_count = 0
         self.scheduler = scheduler
         self.trial_id = trial_id
-        self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
+        self.trial_id_str = TrialId(self.config.config_path).zero_padding_any_trial_id(self.trial_id)
         self.from_file = None
         self.to_file = None
         self.next_state = None

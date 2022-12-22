@@ -20,16 +20,13 @@ class LocalModel(AbstractModel):
 
     def before_job_submitted(self, obj: 'Job') -> None:
         runner_command = create_runner_command(
-            obj.config.job_command.get(),
+            obj.config.generic.job_command,
             obj.content,
             str(obj.trial_id),
-            obj.config_path
+            obj.config.config_path
         )
 
-        obj.proc = exec_runner(
-            runner_command,
-            bool(obj.config.silent_mode.get())
-        )
+        obj.proc = exec_runner(runner_command)
 
         obj.th_oh = OutputHandler(
             obj.scheduler,

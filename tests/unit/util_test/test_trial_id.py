@@ -25,7 +25,7 @@ def test_trial_id_init():
 def test_zero_padding_any_trial_id():
     trial_id = TrialId(config_path)
 
-    name_length = config.name_length.get()
+    name_length = config.job_setting.name_length
     file_hp_count_fmt = f'%0{name_length}d'
     assert trial_id.zero_padding_any_trial_id(trial_id=1) == file_hp_count_fmt % 1
 
@@ -67,7 +67,7 @@ def test_integer():
 
 
 def test_string():
-    name_length = config.name_length.get()
+    name_length = config.job_setting.name_length
     file_hp_count_fmt = f'%0{name_length}d'
 
     trial_id = TrialId(config_path)

@@ -21,15 +21,15 @@ class AbciModel(AbstractModel):
 
     def before_runner_create(self, obj: 'Job') -> None:
         commands = create_runner_command(
-            obj.config.job_command.get(),
+            obj.config.generic.job_command,
             obj.content,
             obj.trial_id,
-            obj.config_path
+            obj.config.config_path
         )
 
         create_abci_batch_file(
             obj.to_file,
-            obj.config.job_script_preamble.get(),
+            obj.config.ABCI.job_script_preamble,
             commands,
             obj.dict_lock
         )
@@ -47,10 +47,7 @@ class AbciModel(AbstractModel):
             str(runner_file)
         )
 
-        obj.proc = exec_runner(
-            runner_command,
-            bool(obj.config.silent_mode.get())
-        )
+        obj.proc = exec_runner(runner_command)
 
         obj.th_oh = OutputHandler(
             obj.scheduler,

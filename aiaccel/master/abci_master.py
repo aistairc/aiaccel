@@ -73,4 +73,4 @@ class AbciMaster(AbstractMaster):
         if len(stats) < 1:
             return
 
-        self.stats = parse_qstat(self.config, stats)
+        self.stats = parse_qstat(stats)

@@ -6,13 +6,16 @@ from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
                                               generate_grid_points,
                                               get_grid_options)
 from aiaccel.parameter import HyperParameter, load_parameter
+from aiaccel.config import load_config
+
 from tests.base_test import BaseTest
 import pytest
 
 def test_get_grid_options():
     test_data_dir = Path(__file__).resolve().parent.parent.parent.joinpath('test_data')
     grid_config_json = test_data_dir.joinpath('grid_config.json')
-    config_grid = Config(grid_config_json)
+    config_grid = load_config(grid_config_json)
+    config_grid.resume = None
 
     base, log, step = get_grid_options('x1', config_grid)
     assert base == 10
@@ -27,30 +30,38 @@ def test_get_grid_options():
     # no step
     grid_config_json = test_data_dir / 'config_grid_no_step.json'
     config_grid = load_config(grid_config_json)
+    config_grid.resume = None
+
     with pytest.raises(KeyError):
         base, log, step = get_grid_options('x1', config_grid)
 
     # no log
     grid_config_json = test_data_dir / 'config_grid_no_log.json'
     config_grid = load_config(grid_config_json)
+    config_grid.resume = None
+
     with pytest.raises(KeyError):
         base, log, step = get_grid_options('x1', config_grid)
 
     # no base
     grid_config_json = test_data_dir / 'config_grid_no_base.json'
     config_grid = load_config(grid_config_json)
+    config_grid.resume = None
+
     with pytest.raises(KeyError):
         base, log, step = get_grid_options('x1', config_grid)
 
     # base true/false
     grid_config_json = test_data_dir / 'config_grid_base.json'
     config_grid = load_config(grid_config_json)
+    config_grid.resume = None
+
     with pytest.raises(KeyError):
         base, log, step = get_grid_options('x1', config_grid)
 
 def test_generate_grid_points(grid_load_test_config):
     config = grid_load_test_config()
-    params = load_parameter(config.hyperparameters.get())
+    params = load_parameter(config.optimize.parameters)
     for p in params.get_parameter_list():
         generate_grid_points(p, config)
 
@@ -113,28 +124,14 @@ class TestGridOptimizer(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
+        optimizer = GridOptimizer(self.configs['config_grid.json'])
         optimizer.pre_process()
 
     def test_get_parameter_index(self, clean_work_dir):
         self.workspace.clean()
         self.workspace.create()
 
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
+        optimizer = GridOptimizer(self.configs['config_grid.json'])
         optimizer.pre_process()
         assert optimizer.get_parameter_index() == [0 for _ in range(0, 10)]
 
@@ -149,14 +146,7 @@ class TestGridOptimizer(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
+        optimizer = GridOptimizer(self.configs['config_grid.json'])
         optimizer.pre_process()
         max_index = functools.reduce(
             lambda x, y: x*y,
@@ -168,20 +158,13 @@ class TestGridOptimizer(BaseTest):
         assert len(optimizer.generate_parameter()) == 0
 
         optimizer.generate_index = 0
-        assert len(optimizer.generate_parameter()) == self.config.trial_number.get()
+        assert len(optimizer.generate_parameter()) == self.config.optimize.trial_number
 
 
     def test_generate_initial_parameter(self):
         self.workspace.clean()
         self.workspace.create()
 
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
+        optimizer = GridOptimizer(self.configs['config_grid.json'])
         optimizer.pre_process()
         optimizer.generate_initial_parameter()

@@ -26,7 +26,7 @@ class PylocalScheduler(AbstractScheduler):
             self.config.generic.python_file,
             self.config.generic.function
         )
-        self.run = Run(self.config_path)
+        self.run = Run(self.config.config_path)
 
     def get_callable_object(self, file_path: Union[str, Path], attr_name: str) -> callable:
         """ Loads the specified module from the specified python program.

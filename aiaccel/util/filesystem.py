@@ -5,6 +5,7 @@ import fasteners
 import yaml
 
 import aiaccel
+from omegaconf import OmegaConf
 
 
 def create_yaml(path: Path, content: dict, dict_lock: Path = None) -> None:
@@ -18,14 +19,12 @@ def create_yaml(path: Path, content: dict, dict_lock: Path = None) -> None:
     Returns:
         None
     """
+
     if dict_lock is None:
-        with open(path, 'w') as f:
-            f.write(yaml.dump(content, default_flow_style=False))
+        OmegaConf.save(content, path)
     else:
-        with fasteners.InterProcessLock(
-                interprocess_lock_file(path, dict_lock)):
-            with open(path, 'w') as f:
-                f.write(yaml.dump(content, default_flow_style=False))
+        with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
+            OmegaConf.save(content, path)
 
 
 def file_create(path: Path, content: str, dict_lock: Path = None) -> None:

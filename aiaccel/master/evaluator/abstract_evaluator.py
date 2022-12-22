@@ -23,13 +23,12 @@ class AbstractEvaluator(object):
             config (ConfileWrapper): A configuration object.
         """
         self.config = config
-        self.config_path = Path(self.config.config_path).resolve()
         self.ws = Path(self.config.generic.workspace).resolve()
         self.dict_lock = self.ws / dict_lock
         self.hp_result = None
         self.storage = Storage(self.ws)
         self.goal = self.config.optimize.goal
-        self.trial_id = TrialId(str(self.config_path))
+        self.trial_id = TrialId(self.config.config_path)
 
     def get_zero_padding_any_trial_id(self, trial_id: int):
         return self.trial_id.zero_padding_any_trial_id(trial_id)
@@ -42,6 +41,8 @@ class AbstractEvaluator(object):
         """
         best_trial_id, _ = self.storage.get_best_trial(self.goal)
         self.hp_result = self.storage.get_hp_dict(best_trial_id)
+        if self.hp_result is not None:
+            self.hp_result['result'] = str(self.hp_result['result'])
 
     def print(self) -> None:
         """Print current results.

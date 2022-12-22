@@ -2,6 +2,7 @@ from pathlib import Path
 
 import aiaccel
 from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
 
 
 ''' Example of stat
@@ -59,7 +60,7 @@ def create_qsub_command(config: DictConfig, runner_file: Path) -> list:
     if type(job_execution_options) == str:
         for cmd in job_execution_options.split(' '):
             command_tmp.insert(-1, cmd)
-    elif type(job_execution_options) == list:
+    elif type(job_execution_options) == list or type(job_execution_options) == ListConfig:
         for option in job_execution_options:
             for cmd in option.split(' '):
                 command_tmp.insert(-1, cmd)

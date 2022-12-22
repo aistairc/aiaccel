@@ -26,7 +26,7 @@ class AbciScheduler(AbstractScheduler):
         if len(stats) < 1:
             return
 
-        self.stats = parse_qstat(self.config, stats)
+        self.stats = parse_qstat(stats)
 
         for stat in self.stats:
             self.logger.info(

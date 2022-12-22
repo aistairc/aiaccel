@@ -44,7 +44,6 @@ class AbstractModule(object):
             config (str): A file name of a configuration.
         """
         self.config = config
-        self.config_path = Path(self.config.config_path).resolve()
         self.ws = Path(self.config.generic.workspace).resolve()
 
         # working directory

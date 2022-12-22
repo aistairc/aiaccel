@@ -22,12 +22,6 @@ class TestCeaterRunnerComand(BaseTest):
 
         config = load_test_config()
         dict_lock = work_dir.joinpath('lock')
-        options = {
-            'config': str(self.config_json),
-            'resume': None,
-            'clean': False,
-            'fs': False,
-        }
 
         commands = create_runner_command(
             config.generic.job_command,

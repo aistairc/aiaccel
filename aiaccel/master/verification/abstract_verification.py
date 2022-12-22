@@ -73,7 +73,7 @@ class AbstractVerification(object):
 
         # best, best_file = get_best_parameter(
         #     hp_finished_files,
-        #     self.config.goal.get(),
+        #     self.config.optimize.goal,
         #     self.dict_lock
         # )
         # self.verification_result[index]['best'] = best

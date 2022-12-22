@@ -259,7 +259,7 @@ class AbstractScheduler(AbstractModule):
         for s in done_states:
             num_trials += jobstates.count(s)
 
-        return (num_trials >= self.config.trial_number.get())
+        return (num_trials >= self.config.optimize.trial_number)
 
     def resume(self) -> None:
         """ When in resume mode, load the previous

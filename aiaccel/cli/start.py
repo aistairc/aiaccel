@@ -32,7 +32,6 @@ def main() -> None:  # pragma: no cover
         logger.error(f"Invalid workspace: {args.workspace} or config: {args.config}")
         return
 
-    config.config_path = args.config
     config.resume = args.resume
     config.clean = args.clean
 

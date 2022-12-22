@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 import pytest
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.config import load_config
+
 from tests.base_test import BaseTest
 
 
@@ -26,14 +28,7 @@ class TestAbstractOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': 0,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        self.optimizer = AbstractOptimizer(options)
+        self.optimizer = AbstractOptimizer(self.configs["config.json"])
         yield
         self.optimizer = None
 
@@ -80,8 +75,8 @@ class TestAbstractOptimizer(BaseTest):
             assert self.optimizer.inner_loop_main_process() is False
 
         # if pool_size <= 0 or self.hp_ready >= _max_pool_size
-        with patch.object(self.optimizer.config.num_node, 'get', return_value=1):
-            with patch.object(self.optimizer.config.trial_number, 'get', return_value=4):
+        with patch.object(self.optimizer.config.resource, 'num_node', 1):
+            with patch.object(self.optimizer.config.optimize, 'trial_number', 4):
                 with patch.object(self.optimizer, 'hp_ready', return_value=2):
                     with patch.object(self.optimizer, 'hp_running', return_value=0):
                         with patch.object(self.optimizer, 'hp_finished', return_value=0):

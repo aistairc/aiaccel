@@ -4,6 +4,7 @@ import json
 import sys
 import time
 from unittest.mock import patch
+from aiaccel.config import load_config
 
 with patch('aiaccel.util.retry.retry', lambda function: function):
     import aiaccel
@@ -49,27 +50,17 @@ class TestModel(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
+        config = self.configs['config.json']
+        scheduler = create_scheduler(config.resource.type)(config)
 
-        with patch.object(sys, 'argv', commandline_args):
-            # from aiaccel import start
-            # scheduler = start.Scheduler()
-            options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
-        # scheduler = LocalScheduler(config_json)
-        # config = load_test_config()
         setup_hp_ready(1)
         trial_id = 0
         self.job = Job(
-            self.config,
+            config,
             scheduler,
             trial_id
         )
-        self.model = create_model(self.config.resource_type.get())
+        self.model = create_model(config.resource.type)
         yield
         self.job = None
         self.model = None
@@ -86,24 +77,16 @@ class TestModel(BaseTest):
             json_object = json.load(f)
 
         json_object['resource']['type'] = 'ABCI'
-        json_object_config = load_config(json_object, 'json_object')
         
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
+        config = load_config(config_json)
+        config.resource.type = 'ABCI'
 
-        with patch.object(sys, 'argv', commandline_args):
-            # from aiaccel import start
-            # scheduler = start.Scheduler()
-            options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
+        scheduler = create_scheduler(config.resource.type)(config)
+
         # scheduler = LocalScheduler(config_json)
         trial_id = 1
         self.abci_job = Job(
-            # json_object_config,
-            self.config,
+            config,
             scheduler,
             trial_id
         )
@@ -393,22 +376,13 @@ class TestJob(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        with patch.object(sys, 'argv', commandline_args):
-            # from aiaccel import start
-            # scheduler = start.Scheduler()
-            options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
-        # scheduler = LocalScheduler(config_json)
-        # config = load_test_config()
+        config = self.configs['config.json']
+        scheduler = create_scheduler(config.resource.type)(config)
+
         setup_hp_ready(1)
         trial_id = 1
         self.job = Job(
-            self.config,
+            config,
             scheduler,
             trial_id
         )
@@ -432,12 +406,14 @@ class TestJob(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = LocalScheduler(options)
+
+        config = self.configs['config.json']
+        scheduler = LocalScheduler(config)
         # config = load_test_config()
         setup_hp_ready(1)
         trial_id = 1
         job = Job(
-            self.config,
+            config,
             scheduler,
             trial_id
         )

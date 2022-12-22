@@ -49,15 +49,9 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
 
-        with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
-            master = AbstractMaster(options)
+        config = load_config(config_json)
+        master = AbstractMaster(config)
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
             loop_pre_process(master)
@@ -74,14 +68,9 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
-            master = AbstractMaster(options)
+
+        config = load_config(config_json)
+        master = AbstractMaster(config)
 
         try:
             master.pre_process()
@@ -99,14 +88,8 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        master = AbstractMaster(options)
+
+        master = AbstractMaster(self.configs["config.json"])
         setup_hp_finished(10)
         assert master.pre_process() is None
 
@@ -119,14 +102,8 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        master = AbstractMaster(options)
+
+        master = AbstractMaster(self.configs["config.json"])
         
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
@@ -140,12 +117,10 @@ class TestAbstractMaster(BaseTest):
                 )
         assert master.post_process() is None
 
-        master.config = load_config(self.config_json)
-        master.config.goal.set(aiaccel.goal_maximize)
+        master.config.optimize.goal = aiaccel.goal_maximize
         assert master.post_process() is None
 
-        master.config = load_config(self.config_json)
-        master.goal = 'invalid_goal'
+        master.config.optimize.goal = 'invalid_goal'
 
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
@@ -165,18 +140,10 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        with patch.object(sys, 'argv', commandline_args):
-            # from aiaccel import start
-            # master = start.Master()
-            options = parse_arguments()
-            master = AbstractMaster(options)
 
-        # master = AbstractMaster(config_json)
+        config = load_config(config_json)
+        master = AbstractMaster(config)
+
         assert master.print_dict_state() is None
 
         master.loop_start_time = get_time_now_object()
@@ -195,22 +162,10 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(config_json)
-        ]
-        options = {
-            'config': config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
-            master = AbstractMaster(options)
-        
+
+        config = load_config(config_json)
+        master = AbstractMaster(config)
+
         master.pre_process()
         assert master.inner_loop_main_process()
 

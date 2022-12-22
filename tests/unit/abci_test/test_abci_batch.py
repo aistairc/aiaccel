@@ -30,6 +30,6 @@ class TestCreateAbciBatchFile(BaseTest):
             'test',
             'config.json'
         )
-        wrapper_file = data_dir.joinpath(config.job_script_preamble.get())
+        wrapper_file = data_dir.joinpath(config.ABCI.job_script_preamble)
         create_abci_batch_file(batch_file, wrapper_file, commands, dict_lock)
         assert work_dir.joinpath('runner/run_test.sh').exists()

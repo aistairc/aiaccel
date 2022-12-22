@@ -73,7 +73,7 @@ class TestParameter(BaseTest):
         hp = load_parameter(
             # self.config.get('hyperparameter', 'ConfigSpace_hyperparameter'))
             # self.config.get('optimize', 'parameters')
-            self.config.hyperparameters.get()
+            self.config.optimize.parameters
         )
         assert hp.__class__.__name__ == 'HyperParameterConfiguration'
 
@@ -81,7 +81,7 @@ class TestParameter(BaseTest):
         hp = load_parameter(
             # self.config.get('hyperparameter', 'ConfigSpace_hyperparameter'))
             # self.config.get('optimize', 'parameters')
-            self.config.hyperparameters.get()
+            self.config.optimize.parameters
 
         )
         p = hp.get_parameter_list()
@@ -91,7 +91,7 @@ class TestParameter(BaseTest):
         hp = load_parameter(
             # self.config.get('hyperparameter', 'ConfigSpace_hyperparameter'))
             # self.config.get('optimize', 'parameters')
-            self.config.hyperparameters.get()
+            self.config.optimize.parameters
         )
         ps = hp.get_hyperparameter('x3')
         assert ps.name == 'x3'

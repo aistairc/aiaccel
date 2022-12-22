@@ -80,9 +80,9 @@ class AbstractMaster(AbstractModule):
         if not self.check_finished():
             return
 
-        if self.goal.lower() == goal_maximize:
+        if self.config.optimize.goal.lower() == goal_maximize:
             evaluator = MaximizeEvaluator(self.config)
-        elif self.goal.lower() == goal_minimize:
+        elif self.config.optimize.goal.lower() == goal_minimize:
             evaluator = MinimizeEvaluator(self.config)
         else:
             self.logger.error(f'Invalid goal: {self.goal}.')

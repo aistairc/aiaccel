@@ -20,7 +20,7 @@ class TestNelderMead(object):
     def setup_nelder_mead(self, load_test_config):
         self.config = load_test_config()
         # params = load_parameter(config.get('optimize', 'parameters'))
-        params = load_parameter(self.config.hyperparameters.get())
+        params = load_parameter(self.config.optimize.parameters)
         rng = np.random.RandomState(0)
         nm_coef = NelderMead(
             params.get_parameter_list(),
@@ -36,7 +36,7 @@ class TestNelderMead(object):
 
 
     def test__create_initial_values(self):
-        params = load_parameter(self.config.hyperparameters.get())
+        params = load_parameter(self.config.optimize.parameters)
         hps = params.get_parameter_list()
         initial_parameters = [
             {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 1},
@@ -357,14 +357,14 @@ def test_nelder_mead_parameters(load_test_config):
     config = load_test_config()
     params = load_parameter(
         # config.get('optimize', 'parameters')
-        config.hyperparameters.get()
+        config.optimize.parameters
     )
     initial_parameters = None
     rng = np.random.RandomState(0)
     nelder_mead = NelderMead(
         params.get_parameter_list(), initial_parameters=initial_parameters,
         iteration=100,
-        maximize=(config.goal.get().lower() == 'maximize'),
+        maximize=(config.optimize.goal.lower() == 'maximize'),
         rng=rng
     )
 

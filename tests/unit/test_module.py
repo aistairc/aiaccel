@@ -17,6 +17,8 @@ from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
+from aiaccel.config import load_config
+
 
 from tests.base_test import BaseTest
 
@@ -37,37 +39,11 @@ def dummy_break():
     import sys
     sys.exit()
 
-
-# def test_make_work_directory_exit(config_json, work_dir):
-#     options = {
-#         'config': config_json,
-#         'process_name': 'test'
-#     }
-#     module = AbstractModule(options)
-#     module.logger = logging.getLogger(__name__)
-#     shutil.rmtree(work_dir)
-#     file_create(work_dir.parent.joinpath('work'), "")
-
-#     try:
-#         module.make_work_directory()
-#         assert False
-#     except NotADirectoryError:
-#         assert True
-
-
 class TestAbstractModule(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_module(self, clean_work_dir):
-        options = {
-            'config': str(self.config_json),
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'test'
-        }
-
-        self.module = AbstractModule(options)
+        self.module = AbstractModule(self.configs["config.json"])
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
@@ -82,45 +58,17 @@ class TestAbstractModule(BaseTest):
         module_type = self.module.get_module_type()
         assert module_type is None
 
-        options = {
-            'config': str(self.config_json),
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        commandline_args = [
-            "start.py",
-            "--config",
-            str(self.config_json)
-        ]
+        master = LocalMaster(self.configs["config.json"])
+        module_type = master.get_module_type()
+        assert module_type == aiaccel.module_type_master
 
-        with patch.object(sys, 'argv', commandline_args):
-            master = LocalMaster(options)
-            module_type = master.get_module_type()
-            assert module_type == aiaccel.module_type_master
+        optimizer = RandomOptimizer(self.configs["config.json"])
+        module_type = optimizer.get_module_type()
+        assert module_type == aiaccel.module_type_optimizer
 
-            options = {
-                'config': str(self.config_json),
-                'resume': None,
-                'clean': False,
-                'fs': False,
-                'process_name': 'optimizer'
-            }
-            optimizer = RandomOptimizer(options)
-            module_type = optimizer.get_module_type()
-            assert module_type == aiaccel.module_type_optimizer
-
-            options = {
-                'config': str(self.config_json),
-                'resume': None,
-                'clean': False,
-                'fs': False,
-                'process_name': 'scheduler'
-            }
-            scheduler = LocalScheduler(options)
-            module_type = scheduler.get_module_type()
-            assert module_type == aiaccel.module_type_scheduler
+        scheduler = LocalScheduler(self.configs["config.json"])
+        module_type = scheduler.get_module_type()
+        assert module_type == aiaccel.module_type_scheduler
 
     def test_check_finished(self, setup_hp_finished):
         assert not self.module.check_finished()
@@ -128,7 +76,7 @@ class TestAbstractModule(BaseTest):
         setup_hp_finished(
             # int(self.module.config.get('hyperparameter', 'trial_number'))
             # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-            int(self.module.config.trial_number.get())
+            int(self.module.config.optimize.trial_number)
         )
 
         assert self.module.check_finished()
@@ -143,17 +91,17 @@ class TestAbstractModule(BaseTest):
                 self.module.dict_log,
                 # self.config.get('logger', 'optimizer_logfile')
                 # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
-                self.module.config.optimizer_logfile.get()
+                self.module.config.logger.file.optimizer
             ),
             str_to_logging_level(
                 # self.module.config.get('logger', 'optimizer_file_log_level')
                 # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
-                self.module.config.optimizer_file_log_level.get()
+                self.module.config.logger.log_level.optimizer
             ),
             str_to_logging_level(
                 # self.module.config.get('logger', 'optimizer_stream_log_level')
                 # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-                self.module.config.optimizer_stream_log_level.get()
+                self.module.config.logger.stream_level.optimizer
             ),
             'Optimizer'
         ) is None
@@ -192,17 +140,20 @@ class TestAbstractModule(BaseTest):
         assert self.module.check_error() is True
 
     def test_resume(self):
-        options = {
-            'config': str(self.config_json),
-            'resume': None,
-            'clean': False,
-            'process_name': 'test'
-        }
-
-        self.module = AbstractModule(options)
+        self.module = AbstractModule(self.configs["config.json"])
         self.module._rng = np.random.RandomState(0)
         assert self.module.resume() is None
 
-        self.module.options['resume'] = 1
+        config = self.configs["config.json"]
+        config.resume = 1
+        self.module = AbstractModule(config)
+        self.module.set_logger(
+            'root.abstract',
+            self.module.dict_log / self.module.config.logger.file.master,
+            str_to_logging_level(self.module.config.logger.log_level.master),
+            str_to_logging_level(self.module.config.logger.stream_level.master),
+            'Abstract   '
+        )
+        self.module.create_numpy_random_generator()
         self.module._serialize(1)
         assert self.module.resume() is None

@@ -40,11 +40,11 @@ class IntegrationTest(BaseTest):
             config = load_config(config_file)
 
             # master
-            master = create_master(config_file)
+            master = create_master(config.resource.type)
             assert master == LocalMaster
 
             # scheduler
-            scheduler = create_scheduler(config_file)
+            scheduler = create_scheduler(config.resource.type)
             assert scheduler == LocalScheduler
 
             storage = Storage(ws=Path(config.generic.workspace))
@@ -71,11 +71,11 @@ class IntegrationTest(BaseTest):
             assert config.resource.type == 'python_local'
 
             # master
-            master = create_master(new_config_file)
+            master = create_master(config.resource.type)
             assert master == PylocalMaster
 
             # scheduler
-            scheduler = create_scheduler(new_config_file)
+            scheduler = create_scheduler(config.resource.type)
             assert scheduler == PylocalScheduler
 
             storage = Storage(ws=Path(config.generic.workspace))
@@ -97,7 +97,7 @@ class IntegrationTest(BaseTest):
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
-        assert finished == self.config.trial_number.get()
+        assert finished == self.config.optimize.trial_number
         assert ready == 0
         assert running == 0
         final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)

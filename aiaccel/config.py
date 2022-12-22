@@ -28,7 +28,7 @@ default_config = {
         'goal': 'minimize',
         'trial_number': 30,
         'rand_seed': 42,
-        'sobol_scranble': True,
+        'sobol_scramble': True,
         'parameters': []
     },
     'job_setting': {
@@ -93,5 +93,6 @@ def load_config(config_path: str) -> Union[None, DictConfig]:
     customize = OmegaConf.load(path)
 
     config = OmegaConf.merge(default, customize)
+    config.config_path = str(path)
 
     return config
