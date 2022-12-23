@@ -1,6 +1,5 @@
 {
   "generic": {
-    "config_path": "config.json",
     "init_fail_count": 10,
     "$name_length": 32,
     "name_length": 3,
