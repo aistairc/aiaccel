@@ -11,7 +11,6 @@
 ### config.yaml
 
 - 最適化およびソフトウェアの設定ファイルです．
-- aiaccel/examples/styblinski-tang に存在するファイルは，デフォルトではネルダーミード法を用いた最適化をローカルで実行する設定になっています．
 
 ### user.py
 
