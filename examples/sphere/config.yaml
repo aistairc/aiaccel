@@ -1,14 +1,14 @@
 generic:
   workspace: "./work"
   job_command: "python user.py"
-  python_file: "./user.py"
-  function: "main"
+  # python_file: "./user.py"
+  # function: "main"
   batch_job_timeout: 600
 
 resource:
+  # type: "abci"
   type: "local"
-  #type: "ABCI"
-  #type: "python_local"
+  # type: "python_local"
   num_node: 4
 
 ABCI:
@@ -17,13 +17,13 @@ ABCI:
   job_execution_options: ""
 
 optimize:
-  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
-  #search_algorithm: "aiaccel.optimizer.RandomOptimizer"
-  #search_algorithm: "aiaccel.optimizer.SobolOptimizer"
-  #search_algorithm: "aiaccel.optimizer.GridOptimizer"
-  #search_algorithm: "aiaccel.optimizer.TpeOptimizer"
+  # search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
+  search_algorithm: "aiaccel.optimizer.RandomOptimizer"
+  # search_algorithm: "aiaccel.optimizer.SobolOptimizer"
+  # search_algorithm: "aiaccel.optimizer.GridOptimizer"
+  # search_algorithm: "aiaccel.optimizer.TpeOptimizer"
   goal: "minimize"
-  trial_number: 30
+  trial_number: 100
   rand_seed: 42
   parameters:
     -
@@ -31,28 +31,28 @@ optimize:
       type: "uniform_float"
       lower: -5.0
       upper: 5.0
-      initial: [0.74,  1.69,  1.22,  2.09, -3.24, -3.58]
+      initial: -5.0
     -
       name: "x2"
       type: "uniform_float"
       lower: -5.0
       upper: 5.0
-      initial: [2.98,  2.27,  1.41, -2.10, -3.29, -0.35]
+      initial: -5.0
     -
       name: "x3"
       type: "uniform_float"
       lower: -5.0
       upper: 5.0
-      initial: [3.62,  4.38, -0.40,  2.94,  2.23, -3.07]
+      initial: -5.0
     -
       name: "x4"
       type: "uniform_float"
       lower: -5.0
       upper: 5.0
-      initial: [0.90,  2.00,  4.29, -1.43, -4.02,  2.25]
+      initial: -5.0
     -
       name: "x5"
       type: "uniform_float"
       lower: -5.0
       upper: 5.0
-      initial: [1.99,  3.90,  3.10,  0.06, -3.83,  1.16]
+      # initial: -5.0

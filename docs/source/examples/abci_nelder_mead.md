@@ -167,10 +167,10 @@ optimize:
 ```bash
 source /etc/profile.d/modules.sh
 module load gcc/11.2.0 python/3.8/3.8.13 cuda/10.1/10.1.243 cudnn/7.6/7.6.5
-source /path/to/optenv/bin/activate
+source ~/optenv/bin/activate
 ```
 - ユーザプログラム実行に必要なモジュールの読み込みと仮想環境の activate を行います．
-- /path/to/optenv には aiaccel をインストールした仮想環境のパスを設定します．
+- ~/optenv には aiaccel をインストールした仮想環境のパスを設定します．
 
 
 <br>
