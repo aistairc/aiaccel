@@ -185,7 +185,7 @@ python3 setup.py install
 
 ### 準備1: Git のインストール
 
-github 経由で aiaccel をインストールする場合，[git](https://gitforwindows.org/) がインストールされている必要があります．
+GitHub 経由で aiaccel をインストールする場合，[git](https://gitforwindows.org/) がインストールされている必要があります．
 あらかじめインストールしてください．
 
 ### 準備2: Execution Polisy の設定
