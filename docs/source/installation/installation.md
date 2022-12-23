@@ -191,6 +191,7 @@ GitHub 経由で aiaccel をインストールする場合，[git](https://gitfo
 ### 準備2: Execution Polisy の設定
 
 PowerShell を使用して仮想環境を作る場合，セキュリティ設定によって仮想環境をアクティベートするスクリプトが実行できないことがあります．
+***以下の手順でセキュリティ設定を変更することが可能ですが，セキュリティリスクが上がることに十分注意してください．詳細は[こちら](https://learn.microsoft.com/ja-jp/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.3)をご確認ください．***
 
 以下のコマンドを実行して，PowerShell の設定を確認します．
 ```console
