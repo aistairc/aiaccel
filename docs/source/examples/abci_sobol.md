@@ -168,10 +168,10 @@ aiaccel から関数 `main()` にハイパーパラメータを渡し，`main()`
 source /etc/profile.d/modules.sh
 module load gcc/11.2.0
 module load python/3.8/3.8.13
-source /path/to/optenv/bin/activate
+source ~/optenv/bin/activate
 ```
 - ユーザプログラム実行に必要なモジュールの読み込みと仮想環境のactivateを行います．
-- /path/to/optenv には aiaccel をインストールした仮想環境のパスを設定します．
+- ~/optenv には aiaccel をインストールした仮想環境のパスを設定します．
 
 
 
