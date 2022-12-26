@@ -1,4 +1,4 @@
-import threading
+from multiprocessing import Process
 import importlib
 
 from typing import Union
@@ -55,11 +55,8 @@ class PylocalScheduler(AbstractScheduler):
 
         for trial_id in trial_ids:
             self._serialize(trial_id)
-            if self.num_node > 1:
-                th = threading.Thread(target=self.execute, args=(trial_id,))
-                th.start()
-            else:
-                self.execute(trial_id)
+            pro = Process(target=self.execute, args=(trial_id,))
+            pro.start()
 
         return True
 

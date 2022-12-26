@@ -210,15 +210,6 @@ class Run:
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.storage = Storage(self.workspace)
 
-        # logger
-        log_dir = self.workspace / "log"
-        log_path = log_dir / f"job_{self.trial_id}.log"
-        if not log_dir.exists():
-            log_dir.mkdir(parents=True)
-        logging.basicConfig(filename=log_path, level=logging.DEBUG)
-        self.logger = getLogger(__name__)
-        self.logger.addHandler(StreamHandler())
-
         self.com = WrapperInterface()
 
     def generate_commands(self, command: str, xs: list) -> list:
@@ -265,6 +256,13 @@ class Run:
 
         return y
 
+    def set_logging_basicConfig(self, trial_id):
+        log_dir = self.workspace / "log"
+        log_path = log_dir / f"job_{trial_id}.log"
+        if not log_dir.exists():
+            log_dir.mkdir(parents=True)
+        logging.basicConfig(filename=log_path, level=logging.DEBUG)
+
     @singledispatchmethod
     def execute(self, func: callable, trial_id: int, y_data_type: Union[None, str]) -> tuple:
         """ Execution the target function.
@@ -272,6 +270,8 @@ class Run:
         Return:
             Objective value.
         """
+
+        self.set_logging_basicConfig(trial_id)
 
         xs = self.get_any_trial_xs(trial_id)
         y = None
@@ -293,6 +293,8 @@ class Run:
         Returns:
             ys (list): This is a list of the return values of the user program.
         """
+
+        self.set_logging_basicConfig(trial_id)
 
         xs = self.get_any_trial_xs(trial_id)
         err = ""
