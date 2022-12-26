@@ -133,27 +133,27 @@ objective_y:-3.0
 
 以下のような wrapper プログラムを python で実装します．
 ```python
-    from aiaccel.util import aiaccel
+from aiaccel.util import aiaccel
 
-    run = aiaccel.Run()
-    run.execute_and_report("python user.py")
+run = aiaccel.Run()
+run.execute_and_report("python user.py")
 ```
 
 #### モジュール
 ```python
-    from aiaccel.util import aiaccel
+from aiaccel.util import aiaccel
 ```
 - **aiaccel.util.aiaccel** - wrapper オブジェクトを作成するためのモジュールです．
 
 #### Wrapper オブジェクトの作成
 ```python
-    run = aiaccel.Run()
+run = aiaccel.Run()
 ```
 aiaccel が提供する wrapper オブジェクトを作成します．
 
 #### ユーザープログラムの実行
 ```python
-    run.execute_and_report("python user.py")
+run.execute_and_report("python user.py")
 ```
 ユーザープログラムを実行します．
 - `"python user.py"` の部分は，自身のプログラムを実行するためのコマンドを記述してください．
@@ -165,10 +165,10 @@ aiaccel が提供する wrapper オブジェクトを作成します．
 
 #### generic
 ```yaml
-    generic:
-        workspace: "./work"
-        job_command: "python wrapper.py"
-        batch_job_timeout: 600
+generic:
+    workspace: "./work"
+    job_command: "python wrapper.py"
+    batch_job_timeout: 600
 ```
 
 aiaccel で wrapper プログラムを最適化させる場合は，`job_command` に作成した wrapper の実行コマンドを設定します．
