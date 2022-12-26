@@ -29,9 +29,7 @@ class AbstractScheduler(AbstractModule):
         Args:
             config (str): A file name of a configuration.
         """
-        super().__init__(config)
-        self.module_name = 'scheduler'
-
+        super().__init__(config, 'scheduler')
         self.set_logger(
             'root.scheduler',
             self.dict_log / self.config.logger.file.scheduler,

@@ -30,15 +30,11 @@ class AbstractMaster(AbstractModule):
         Args:
             config (str): A file name of a configuration.
         """
-        super().__init__(config)
-
+        super().__init__(config, 'master')
         self.start_time = get_time_now_object()
         self.loop_start_time = None
-
-        self.module_name = 'master'
         self.logger = logging.getLogger('root.master')
         self.logger.setLevel(logging.DEBUG)
-
         self.set_logger(
             'root.master',
             self.dict_log / self.config.logger.file.master,

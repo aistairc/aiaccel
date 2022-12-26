@@ -43,7 +43,7 @@ class TestAbstractModule(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_module(self, clean_work_dir):
-        self.module = AbstractModule(self.configs["config.json"])
+        self.module = AbstractModule(self.configs["config.json"], 'abstract')
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
@@ -140,13 +140,13 @@ class TestAbstractModule(BaseTest):
         assert self.module.check_error() is True
 
     def test_resume(self):
-        self.module = AbstractModule(self.configs["config.json"])
+        self.module = AbstractModule(self.configs["config.json"], 'abstract')
         self.module._rng = np.random.RandomState(0)
         assert self.module.resume() is None
 
         config = self.configs["config.json"]
         config.resume = 1
-        self.module = AbstractModule(config)
+        self.module = AbstractModule(config, 'abstract')
         self.module.set_logger(
             'root.abstract',
             self.module.dict_log / self.module.config.logger.file.master,

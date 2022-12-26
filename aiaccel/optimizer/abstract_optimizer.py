@@ -40,8 +40,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        super().__init__(config)
-        self.module_name = 'optimizer'
+        super().__init__(config, 'optimizer')
         self.set_logger(
             'root.optimizer',
             self.dict_log / self.config.logger.file.optimizer,

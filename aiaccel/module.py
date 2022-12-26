@@ -38,7 +38,7 @@ class AbstractModule(object):
         ws (Path): A path to a current workspace.
     """
 
-    def __init__(self, config: DictConfig) -> None:
+    def __init__(self, config: DictConfig, module_name: str) -> None:
         """
         Args:
             config (str): A file name of a configuration.
@@ -78,7 +78,7 @@ class AbstractModule(object):
         self.trial_id = TrialId(self.config.config_path)
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng = None
-        self.module_name = 'abstract'
+        self.module_name = module_name
 
         self.storage.variable.register(
             process_name=self.module_name,
