@@ -101,7 +101,6 @@
     "expire_timeout": 60,
     "finished_retry": 3,
     "finished_timeout": 60,
-    "job_loop_duration": 0.5,
     "job_retry": 2,
     "job_timeout": 60,
     "kill_retry": 3,
@@ -111,11 +110,6 @@
     "runner_timeout": 60,
     "running_retry": 3,
     "running_timeout": 60
-  },
-  "sleep_time": {
-    "master": 1,
-    "optimizer": 1,
-    "scheduler": 1
   },
   "logger": {
     "file": {
@@ -133,9 +127,6 @@
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     }
-  },
-  "ui": {
-    "silent_mode": true
   },
   "verification": {
     "is_verified": true,

@@ -69,8 +69,8 @@ class TestNelderMeadOptimizer(BaseTest):
     ):
         self.optimizer.pre_process()
         # config = load_test_config()
-        config = self.configs["config.json"]
-        self.optimizer.params = load_parameter(config.optimize.parameters_for_TestNelderMead)
+        config = self.configs["config_nelder_mead.json"]
+        self.optimizer.params = load_parameter(config.optimize.parameters)
         rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list(),
@@ -101,7 +101,7 @@ class TestNelderMeadOptimizer(BaseTest):
     ):
         self.optimizer.pre_process()
         config = self.configs["config.json"]
-        self.optimizer.params = load_parameter(config.optimize.parameters_for_TestNelderMeadSearch)
+        self.optimizer.params = load_parameter(config.optimize.parameters)
         rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list(),
@@ -121,7 +121,7 @@ class TestNelderMeadOptimizer(BaseTest):
     ):
         self.optimizer.pre_process()
         config = self.configs["config.json"]
-        self.optimizer.params = load_parameter(config.optimize.parameters_for_TestNelderMeadSearch)
+        self.optimizer.params = load_parameter(config.optimize.parameters)
         rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list(),
@@ -144,15 +144,14 @@ class TestNelderMeadOptimizer(BaseTest):
         self.optimizer.pre_process()
         config = load_test_config_org()
         config = self.configs["config.json"]
-        self.optimizer.params = load_parameter(config.optimize.parameters_for_TestNelderMeadSearch)
+        self.optimizer.params = load_parameter(config.optimize.parameters)
 
         rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list(),
             rng=rng
         )
-        # assert len(self.nm.get_ready_parameters()) == 11
-        assert len(self.optimizer.get_ready_parameters()) == 3
+        assert len(self.optimizer.get_ready_parameters()) == 11
 
     def test_get_nm_results(self):
         rng = np.random.RandomState(0)

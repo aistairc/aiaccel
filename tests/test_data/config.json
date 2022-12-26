@@ -1,20 +1,11 @@
 {
   "generic": {
-    "$name_length": 32,
-    "name_length": 3,
-    "project_name": "sphere",
-    "randseed": 1,
-    "silent_mode": false,
     "workspace": "/tmp/work",
     "job_command": "python original_main.py"
   },
   "resource": {
     "type": "local",
-    "num_node": 4,
-    "$comment1": "Followings are ABCI settings.",
-    "$type": "ABCI",
-    "$comment2": "num_node is the number how many nodes can be used to allocate a job.",
-    "$num_node": 4
+    "num_node": 4
   },
   "ABCI": {
     "job_script_preamble": "wrapper_abci.sh",
@@ -222,86 +213,6 @@
           1.92
         ]
       }
-    ],
-    "parameters_for_TestNelderMead": [
-      {
-        "name": "x1",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -1.0,
-        "upper": 1.0,
-        "initial": [
-          0.81,
-          0.72,
-          -0.41
-        ]
-      },
-      {
-        "name": "x2",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -1.0,
-        "upper": 1.0,
-        "initial": [
-          0.61,
-          0.62,
-          -0.56
-        ]
-      }
-    ],
-    "parameters_for_TestNelderMeadSearch": [
-      {
-        "name": "x1",
-        "type": "uniform_int",
-        "log": false,
-        "lower": -10,
-        "upper": 10,
-        "initial": [
-          4,
-          2,
-          -3
-        ]
-      },
-      {
-        "name": "x2",
-        "type": "uniform_int",
-        "log": false,
-        "lower": -10,
-        "upper": 10,
-        "initial": [
-          -1,
-          9,
-          -3
-        ]
-      }
-    ],
-    "parameters_for_TestTPESampler": [
-      {
-        "name": "x1",
-        "type": "uniform_int",
-        "log": false,
-        "lower": -10,
-        "upper": 10,
-        "initial": 5
-      },
-      {
-        "name": "x2",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -1.0,
-        "upper": 1.0,
-        "initial": 0.5
-      },
-      {
-        "name": "x3",
-        "type": "categorical",
-        "choices": [
-          "red",
-          "green",
-          "blue"
-        ],
-        "initial": "red"
-      }
     ]
   },
   "job_setting": {
@@ -312,7 +223,6 @@
     "expire_timeout": 60,
     "finished_retry": 3,
     "finished_timeout": 60,
-    "job_loop_duration": 0.5,
     "job_retry": 2,
     "job_timeout": 60,
     "kill_retry": 3,
@@ -322,11 +232,6 @@
     "runner_timeout": 60,
     "running_retry": 3,
     "running_timeout": 60
-  },
-  "sleep_time": {
-    "master": 1,
-    "optimizer": 1,
-    "scheduler": 1
   },
   "logger": {
     "file": {
@@ -344,9 +249,6 @@
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     }
-  },
-  "ui": {
-    "silent_mode": true
   },
   "verification": {
     "is_verified": true,

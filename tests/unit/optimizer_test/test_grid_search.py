@@ -8,6 +8,7 @@ from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
 from aiaccel.parameter import HyperParameter, load_parameter
 from aiaccel.config import load_config
 
+from omegaconf.errors import MissingMandatoryValue
 from tests.base_test import BaseTest
 import pytest
 
@@ -32,7 +33,7 @@ def test_get_grid_options():
     config_grid = load_config(grid_config_json)
     config_grid.resume = None
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingMandatoryValue):
         base, log, step = get_grid_options('x1', config_grid)
 
     # no log
@@ -40,7 +41,7 @@ def test_get_grid_options():
     config_grid = load_config(grid_config_json)
     config_grid.resume = None
 
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingMandatoryValue):
         base, log, step = get_grid_options('x1', config_grid)
 
     # no base
@@ -48,15 +49,7 @@ def test_get_grid_options():
     config_grid = load_config(grid_config_json)
     config_grid.resume = None
 
-    with pytest.raises(KeyError):
-        base, log, step = get_grid_options('x1', config_grid)
-
-    # base true/false
-    grid_config_json = test_data_dir / 'config_grid_base.json'
-    config_grid = load_config(grid_config_json)
-    config_grid.resume = None
-
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingMandatoryValue):
         base, log, step = get_grid_options('x1', config_grid)
 
 def test_generate_grid_points(grid_load_test_config):

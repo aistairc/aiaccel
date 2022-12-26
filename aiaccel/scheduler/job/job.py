@@ -498,8 +498,6 @@ class Job:
         - count_retry (int):
             A current retry count. This is compared with threshold_retry.
 
-        - job_loop_duration (int): A sleep time each job loop.
-
         - model (Model): A model object of state transitions.
 
         - machine (CustomMachine): A state machine object.

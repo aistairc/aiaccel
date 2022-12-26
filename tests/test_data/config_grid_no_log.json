@@ -22,7 +22,6 @@
       {
         "name": "x1",
         "type": "uniform_float",
-        "$log": true,
         "step": 0.1,
         "base": 10,
         "lower": 0.1,

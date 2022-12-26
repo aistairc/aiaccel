@@ -266,14 +266,6 @@ Defaults to 3.
 Timeout seconds to transit the state from HpFinishedChecking to HpFinishedFailed.
 Defaults to 60.
 
-### job_loop_duration (float, optional):
----
-スケジューラジョブスレッドのループ 1 周あたりのスリープ時間を秒単位で指定します．
-デフォルトでは 0.5 (秒) に設定されています．
-
-A sleep time each job loop.
-Defaults to 0.5.
-
 ### job_retry (int, optional):
 ---
 Max retry counts to transit the state from HpCancelFailed to HpCancelFailure.

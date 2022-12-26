@@ -53,8 +53,10 @@ class TestTpeOptimizer(BaseTest):
                     assert self.optimizer.generate_parameter() is None
 
         # if len(self.parameter_pool) >= self.config.resource.num_node
-        with patch.object(self.optimizer.config.resource, 'num_node', 0):
-            assert self.optimizer.generate_parameter() is None
+        _tmp_num_node = self.optimizer.config.resource.num_node
+        self.optimizer.config.resource.num_node = 0
+        assert self.optimizer.generate_parameter() is None
+        self.optimizer.config.resource.num_node = _tmp_num_node
 
     def test_generate_initial_parameter(self):
         optimizer = TpeOptimizer(self.configs['config_tpe_2.json'])

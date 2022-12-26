@@ -16,17 +16,19 @@ class GenericConfig:
     batch_job_timeout: int
     sleep_time: Union[float, int]
 
+
 @dataclass
 class ResourceConifig:
     type: str
     num_node: int
 
+
 @dataclass
 class AbciConifig:
     group: str
     job_script_preamble: str
-    job_execution_options: str
-    runner_search_pattern: str
+    job_execution_options: Optional[str]
+    runner_search_pattern: Optional[str]
 
 
 @dataclass
@@ -52,8 +54,8 @@ class OptimizeConifig:
     trial_number: int
     rand_seed: int
     sobol_scramble: bool
-    parameters: List
     parameters: List[ParameterConfig]
+
 
 @dataclass
 class JobConifig:
@@ -76,11 +78,13 @@ class JobConifig:
     name_length: int
     random_scheduling: bool
 
+
 @dataclass
 class LoggingItemConifig:
     master: str
     optimizer: str
     scheduler: str
+
 
 @dataclass
 class LoggerConfig:
@@ -88,15 +92,20 @@ class LoggerConfig:
     log_level: LoggingItemConifig
     stream_level: LoggingItemConifig
 
+
 @dataclass
 class ConditionConfig:
     loop: int
     minimum: Union[float, int]
     maximum: Union[float, int]
+    passed: bool
+
+
 @dataclass
 class VerificationConfig:
     is_verified: bool
     condition: List[ConditionConfig]
+
 
 @dataclass
 class Config:
@@ -105,11 +114,12 @@ class Config:
     ABCI: AbciConifig
     optimize: OptimizeConifig
     job_setting: JobConifig
-    logger: LoggerConfig
-    verification: VerificationConfig
+    logger: Optional[LoggerConfig]
+    verification: Optional[VerificationConfig]
     clean: Optional[bool]
     resume: Optional[Union[None, int, bool]]
     config_path: Optional[Union[None, Path, str]]
+
 
 def load_config(config_path: str) -> Union[None, DictConfig]:
     """

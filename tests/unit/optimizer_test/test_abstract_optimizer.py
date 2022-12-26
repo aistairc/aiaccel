@@ -75,12 +75,22 @@ class TestAbstractOptimizer(BaseTest):
             assert self.optimizer.inner_loop_main_process() is False
 
         # if pool_size <= 0 or self.hp_ready >= _max_pool_size
-        with patch.object(self.optimizer.config.resource, 'num_node', 1):
-            with patch.object(self.optimizer.config.optimize, 'trial_number', 4):
-                with patch.object(self.optimizer, 'hp_ready', return_value=2):
-                    with patch.object(self.optimizer, 'hp_running', return_value=0):
-                        with patch.object(self.optimizer, 'hp_finished', return_value=0):
-                            assert self.optimizer.inner_loop_main_process() is True
+
+        _tmp_num_node = self.optimizer.config.resource
+        _tmp_trial_number = self.optimizer.config.optimize.trial_number
+        self.optimizer.config.resource.num_node = 1
+        self.optimizer.config.optimize.trial_number = 4
+
+        with patch.object(self.optimizer, 'hp_ready', return_value=2):
+            with patch.object(self.optimizer, 'hp_running', return_value=0):
+                with patch.object(self.optimizer, 'hp_finished', return_value=0):
+                    assert self.optimizer.inner_loop_main_process() is True
+
+        with patch.object(self.optimizer, 'hp_ready', return_value=2):
+            with patch.object(self.optimizer, 'hp_running', return_value=0):
+                with patch.object(self.optimizer, 'hp_finished', return_value=0):
+                    assert self.optimizer.inner_loop_main_process() is True
+
 
         with patch.object(self.optimizer, 'num_of_generated_parameter', 1):
             with patch.object(self.optimizer, 'generate_parameter', return_value=None):
@@ -96,6 +106,9 @@ class TestAbstractOptimizer(BaseTest):
                                     assert self.optimizer.inner_loop_main_process() is True
                                 with patch.object(self.optimizer, 'all_parameter_generated', True):
                                     assert self.optimizer.inner_loop_main_process() is False
+
+        self.optimizer.config.resource = _tmp_num_node
+        self.optimizer.config.optimize.trial_number = _tmp_trial_number
 
     def test__serialize(self):
         self.optimizer._rng = np.random.RandomState(0)

@@ -1,110 +1,49 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python /tmp/original_main.py",
-    "python_file": "/tmp/original_main.py",
-    "function": "main"
+    "job_command": "python original_main.py"
   },
   "resource": {
     "type": "local",
     "num_node": 4
   },
   "ABCI": {
-    "group": "[group]",
-    "job_script_preamble": "./job_script_preamble.sh",
-    "job_execution_options": ""
+    "job_script_preamble": "wrapper_abci.sh",
+    "group": "gaa"
   },
   "optimize": {
-    "search_algorithm": "aiaccel.optimizer.SobolOptimizer",
+    "search_algorithm": "aiaccel.optimizer.NelderMeadOptimizer",
     "goal": "minimize",
     "trial_number": 10,
-    "rand_seed": 42,
     "parameters": [
       {
         "name": "x1",
         "type": "uniform_float",
         "log": false,
-        "lower": 0.1,
+        "lower": -1.0,
         "upper": 1.0,
-        "initial": 0.5
+        "initial": [
+          0.81,
+          0.72,
+          -0.41
+        ]
       },
       {
         "name": "x2",
         "type": "uniform_float",
         "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
-      },
-      {
-        "name": "x3",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
-      },
-      {
-        "name": "x4",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
-      },
-      {
-        "name": "x5",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
-      },
-      {
-        "name": "x6",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
-      },
-      {
-        "name": "x7",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
-      },
-      {
-        "name": "x8",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
-      },
-      {
-        "name": "x9",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
-      },
-      {
-        "name": "x10",
-        "type": "uniform_float",
-        "log": false,
-        "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "lower": -1.0,
+        "upper": 1.0,
+        "initial": [
+          0.61,
+          0.62,
+          -0.56
+        ]
       }
     ]
   },
   "job_setting": {
     "name_length": 6,
-    "init_fail_count": 100,
     "cancel_retry": 3,
     "cancel_timeout": 60,
     "expire_retry": 3,
