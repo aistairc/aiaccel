@@ -2,7 +2,6 @@ import logging
 import subprocess
 from argparse import ArgumentParser
 from functools import singledispatchmethod
-from logging import StreamHandler, getLogger
 from typing import Any, Union
 from pathlib import Path
 
