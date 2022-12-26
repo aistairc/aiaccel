@@ -1,5 +1,5 @@
 generic:
-    workspace: ./work
+    workspace: ''
     job_command: ''
     python_file: ''
     function: ''

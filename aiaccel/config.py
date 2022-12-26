@@ -117,7 +117,7 @@ class Config:
     logger: Optional[LoggerConfig]
     verification: Optional[VerificationConfig]
     clean: Optional[bool]
-    resume: Optional[Union[None, int, bool]]
+    resume: Optional[Union[None, int]]
     config_path: Optional[Union[None, Path, str]]
 
 
