@@ -173,16 +173,14 @@ def create_distributions(
 
     for p in parameters.get_parameter_list():
         if p.type.lower() == 'float':
-            if p.log:
-                distributions[p.name] = optuna.distributions.LogUniformDistribution(p.lower, p.upper)
-            else:
-                distributions[p.name] = optuna.distributions.UniformDistribution(p.lower, p.upper)
+            distributions[p.name] = optuna.distributions.FloatDistribution(
+                p.lower, p.upper, log=p.log
+            )
 
         elif p.type.lower() == 'int':
-            if p.log:
-                distributions[p.name] = optuna.distributions.IntLogUniformDistribution(p.lower, p.upper)
-            else:
-                distributions[p.name] = optuna.distributions.IntUniformDistribution(p.lower, p.upper)
+            distributions[p.name] = optuna.distributions.IntDistribution(
+                p.lower, p.upper, log=p.log
+            )
 
         elif p.type.lower() == 'categorical':
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
