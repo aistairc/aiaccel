@@ -47,7 +47,7 @@ class TestAbstractScheduler(BaseTest):
 
     def test_init(self, config_json):
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -57,15 +57,12 @@ class TestAbstractScheduler(BaseTest):
 
     def test_change_state_finished_trials(
         self,
-        clean_work_dir,
-        config_json,
         setup_hp_running,
         setup_result,
-        work_dir,
         database_remove
     ):
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -80,13 +77,11 @@ class TestAbstractScheduler(BaseTest):
 
     def test_get_stats(
         self,
-        config_json,
-        work_dir,
         database_remove
     ):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -98,15 +93,12 @@ class TestAbstractScheduler(BaseTest):
 
     def test_start_job(
         self,
-        clean_work_dir,
-        config_json,
         setup_hp_ready,
-        work_dir,
         database_remove
     ):
         database_remove()
         options = {
-            'config': str(config_json),
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -126,13 +118,11 @@ class TestAbstractScheduler(BaseTest):
 
     def test_update_resource(
         self,
-        config_json,
-        work_dir,
         database_remove
     ):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -144,16 +134,13 @@ class TestAbstractScheduler(BaseTest):
 
     def test_pre_process(
         self,
-        clean_work_dir,
-        config_json,
         setup_hp_running,
         setup_result,
-        work_dir,
         database_remove
     ):
         database_remove()
         options = {
-            'config': str(config_json),
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -167,21 +154,21 @@ class TestAbstractScheduler(BaseTest):
         scheduler.pre_process()
 
         for job in scheduler.jobs:
-            machine = job['obj'].get_machine()
+            machine = job.get_machine()
             machine.set_state('Success')
-            job['thread'].run()
+            job.main()
 
         scheduler = AbstractScheduler(options)
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[]):
-            assert scheduler.pre_process()is None
+            assert scheduler.pre_process() is None
 
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[0, 1, 2]):
-            assert scheduler.pre_process()is None
+            assert scheduler.pre_process() is None
 
-    def test_post_process(self, config_json, database_remove):
+    def test_post_process(self, database_remove):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -191,14 +178,16 @@ class TestAbstractScheduler(BaseTest):
         class dummy_job:
             def __init__(self):
                 pass
+
             def stop(self):
                 pass
+
             def join(self):
                 pass
 
         jobs = []
         for i in range(10):
-            jobs.append({'thread':dummy_job()})
+            jobs.append({'thread': dummy_job()})
 
         scheduler = AbstractScheduler(options)
         assert scheduler.post_process() is None
@@ -219,7 +208,7 @@ class TestAbstractScheduler(BaseTest):
     ):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -256,7 +245,7 @@ class TestAbstractScheduler(BaseTest):
     ):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -275,7 +264,7 @@ class TestAbstractScheduler(BaseTest):
     ):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -290,7 +279,7 @@ class TestAbstractScheduler(BaseTest):
     def test_parse_trial_id(self, config_json, database_remove):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -306,7 +295,7 @@ class TestAbstractScheduler(BaseTest):
     def test_check_error(self, config_json, database_remove):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'process_name': 'scheduler'
@@ -315,20 +304,20 @@ class TestAbstractScheduler(BaseTest):
         assert scheduler.check_error() is True
 
         jobstates = [
-            {'trial_id': 0, 'jobstate':'failure'}
+            {'trial_id': 0, 'jobstate': 'failure'}
         ]
 
-        with patch.object(scheduler, 'job_status', {1:'failure'}):
+        with patch.object(scheduler, 'job_status', {1: 'failure'}):
             with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
                 assert scheduler.check_error() is True
 
-        with patch.object(scheduler, 'job_status', {0:'failure'}):
+        with patch.object(scheduler, 'job_status', {0: 'failure'}):
             with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
                 assert scheduler.check_error() is False
 
     def test_resume(self, config_json):
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'process_name': 'scheduler'

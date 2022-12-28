@@ -8,6 +8,7 @@ from aiaccel.parameter import load_parameter
 from tests.base_test import BaseTest
 from unittest.mock import patch
 
+
 class TestTPESamplerWrapper(BaseTest):
 
     def test_get_startup_trials(self):
@@ -18,10 +19,11 @@ class TestTPESamplerWrapper(BaseTest):
 class TestTpeOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
-    def setup_optimizer(self, clean_work_dir, data_dir):
+    def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
+        self.config_tpe_path = create_tmp_config(self.data_dir / 'config_tpe.json')
         self.options = {
-            'config': self.data_dir / 'config_tpe.json',
+            'config': self.config_tpe_path,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -38,7 +40,7 @@ class TestTpeOptimizer(BaseTest):
         self.optimizer.pre_process()
         assert self.optimizer.post_process() is None
 
-    def test_check_result(self, setup_hp_finished, setup_result, work_dir):
+    def test_check_result(self):
         self.optimizer.pre_process()
         self.optimizer.inner_loop_main_process()
         with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=1):
@@ -55,16 +57,16 @@ class TestTpeOptimizer(BaseTest):
         # if ((not self.is_startup_trials()) and (len(self.parameter_pool) >= 1))
         with patch.object(self.optimizer, 'check_result', return_value=None):
             with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
-                with patch.object(self.optimizer, 'parameter_pool', [{},{},{}]):
+                with patch.object(self.optimizer, 'parameter_pool', [{}, {}, {}]):
                     assert self.optimizer.generate_parameter() is None
 
         # if len(self.parameter_pool) >= self.config.num_node.get()
         with patch.object(self.optimizer.config.num_node, 'get', return_value=0):
             assert self.optimizer.generate_parameter() is None
 
-    def test_generate_initial_parameter(self):
+    def test_generate_initial_parameter(self, create_tmp_config):
         options = self.options.copy()
-        options['config'] = self.data_dir / 'config_tpe_2.json'
+        self.config_tpe_path = create_tmp_config(self.data_dir / 'config_tpe_2.json')
         optimizer = TpeOptimizer(self.options)
         (optimizer.ws / 'storage' / 'storage.db').unlink()
 
@@ -109,7 +111,6 @@ def test_create_distributions(data_dir):
     params = load_parameter(config.hyperparameters.get())
     dist = create_distributions(params)
     assert type(dist) is dict
-
 
     config = Config(data_dir / 'config_tpe_invalid_type.json')
     params = load_parameter(config.hyperparameters.get())
