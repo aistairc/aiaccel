@@ -47,14 +47,13 @@ class AbciModel(AbstractModel):
             str(runner_file)
         )
 
-        obj.proc = exec_runner(
-            runner_command,
-            bool(obj.config.silent_mode.get())
-        )
+        obj.proc = exec_runner(runner_command)
 
         obj.th_oh = OutputHandler(
             obj.scheduler,
             obj.proc,
-            'Job'
+            'Job',
+            trial_id=obj.trial_id,
+            storage=obj.storage
         )
         obj.th_oh.start()
