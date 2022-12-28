@@ -5,20 +5,18 @@ import sys
 import time
 from unittest.mock import patch
 
-with patch('aiaccel.util.retry.retry', lambda function: function):
-    import aiaccel
-    import pytest
-    from aiaccel.config import ConfileWrapper
-    from aiaccel.scheduler.create import create_scheduler
-    from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
-                                                CustomMachine, Job, create_model)
-    from aiaccel.scheduler.job.model.abci_model import AbciModel
-    from aiaccel.scheduler.job.model.local_model import LocalModel
-    from aiaccel.scheduler.local_scheduler import LocalScheduler
-    from aiaccel.util.time_tools import get_time_now_object
-    from tests.arguments import parse_arguments
-    from tests.base_test import BaseTest
-
+import aiaccel
+import pytest
+from aiaccel.config import ConfileWrapper
+from aiaccel.scheduler.create import create_scheduler
+from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
+                                       CustomMachine, Job, create_model)
+from aiaccel.scheduler.job.model.abci_model import AbciModel
+from aiaccel.scheduler.job.model.local_model import LocalModel
+from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.util.time_tools import get_time_now_object
+from tests.arguments import parse_arguments
+from tests.base_test import BaseTest
 
 
 async def async_start_job(job):
@@ -51,7 +49,7 @@ class TestModel(BaseTest):
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
 
         with patch.object(sys, 'argv', commandline_args):
@@ -86,11 +84,11 @@ class TestModel(BaseTest):
 
         json_object['resource']['type'] = 'ABCI'
         json_object_config = ConfileWrapper(json_object, 'json_object')
-        
+
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
 
         with patch.object(sys, 'argv', commandline_args):
@@ -200,7 +198,7 @@ class TestModel(BaseTest):
         # self.job.scheduler.stats.append({'name': '001'})
         # self.job.scheduler.stats.append({'name': 0})
         self.job.scheduler.stats.append(
-            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0',}
+            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0', }
         )
         assert self.model.conditions_job_confirmed(self.job)
 
@@ -378,6 +376,7 @@ class TestModel(BaseTest):
         setup_hp_running(1)
         assert self.model.after_cancel(self.job) is None
 
+
 class TestJob(BaseTest):
 
     @pytest.fixture(autouse=True)
@@ -395,7 +394,7 @@ class TestJob(BaseTest):
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
@@ -425,7 +424,7 @@ class TestJob(BaseTest):
     ):
 
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,

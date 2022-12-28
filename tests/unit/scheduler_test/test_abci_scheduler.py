@@ -42,7 +42,7 @@ class TestAbciScheduler(BaseTest):
     ):
         database_remove()
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,

@@ -6,12 +6,20 @@ from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
 
-from .base import config_path, db_path, t_base, ws
+from pathlib import Path
 
 
-@t_base()
-def test_view():
-    storage = Storage(ws.path)
+def test_view(clean_work_dir, work_dir, create_tmp_config):
+    clean_work_dir()
+    workspace = Workspace(str(work_dir))
+    if workspace.path.exists():
+        workspace.clean()
+    workspace.create()
+
+    config_path = pathlib.Path('tests/test_data/config.json')
+    config_path = create_tmp_config(config_path)
+    config = Config(config_path)
+    storage = Storage(ws=Path(config.workspace.get()))
 
     trial_id = 5
     objective = 42.0
@@ -20,13 +28,11 @@ def test_view():
     jobstate = "test_state"
     state = "ready"
 
-
     storage.trial.set_any_trial_state(trial_id=trial_id, state=state)
     storage.timestamp.set_any_trial_start_time(trial_id=trial_id, start_time=start_time)
     storage.timestamp.set_any_trial_end_time(trial_id=trial_id, end_time=end_time)
     storage.jobstate.set_any_trial_jobstate(trial_id=trial_id, state=jobstate)
     storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
-
 
     trial_id = 6
     objective = 45.0
@@ -42,7 +48,6 @@ def test_view():
     storage.jobstate.set_any_trial_jobstate(trial_id=trial_id, state=jobstate)
     storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
     storage.error.set_any_trial_error(trial_id=trial_id, error_message=error)
-
 
     trial_id = 7
     objective = 50.0

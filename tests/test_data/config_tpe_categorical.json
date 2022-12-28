@@ -1,7 +1,7 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python /tmp/original_main.py"
+    "job_command": "python original_main.py"
   },
   "resource": {
     "type": "local",
@@ -22,13 +22,21 @@
         "name": "x1",
         "type": "categorical",
         "log": false,
-        "choices": ["r", "g", "b"]
+        "choices": [
+          "r",
+          "g",
+          "b"
+        ]
       },
       {
         "name": "x2",
         "type": "categorical",
         "log": false,
-        "choices": ["r", "g", "b"]
+        "choices": [
+          "r",
+          "g",
+          "b"
+        ]
       }
     ]
   }

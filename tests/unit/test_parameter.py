@@ -10,10 +10,10 @@ class TestParameter(BaseTest):
 
     def test_get_best_parameters(
         self,
-        clean_work_dir,
-        get_one_parameter,
-        work_dir
+        work_dir,
+        clean_work_dir
     ):
+        clean_work_dir()
 
         files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
         best, best_file = get_best_parameter(
