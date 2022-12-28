@@ -137,11 +137,11 @@ class EasyVisualizer:
                 message = "WARNING: result data has 'nan'"
                 print(f"{yellow}{message}{reset}")
                 return
-            if np.float("inf") in data[i]:
+            if float("inf") in data[i]:
                 message = "WARNING: result data has 'inf'"
                 print(f"{yellow}{message}{reset}")
                 return
-            if np.float("-inf") in data[i]:
+            if float("-inf") in data[i]:
                 message = "WARNING: result data has '-inf'"
                 print(f"{yellow}{message}{reset}")
                 return

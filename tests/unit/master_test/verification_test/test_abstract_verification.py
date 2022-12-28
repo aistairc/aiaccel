@@ -18,11 +18,11 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
-        
+
         verification = AbstractVerification(options)
         assert verification.is_verified
 
-    def test_verify(self, clean_work_dir, setup_hp_finished, work_dir):
+    def test_verify(self, setup_hp_finished, work_dir):
         options = {
             'config': self.config_json,
             'resume': None,
@@ -63,7 +63,6 @@ class TestAbstractVerification(BaseTest):
 
     def test_make_verification(
         self,
-        clean_work_dir,
         setup_hp_finished,
         work_dir
     ):
@@ -127,7 +126,7 @@ class TestAbstractVerification(BaseTest):
         verification.is_verified = True
         assert verification.print() is None
 
-    def test_save(self, clean_work_dir, setup_hp_finished, work_dir):
+    def test_save(self, work_dir):
         options = {
             'config': self.config_json,
             'resume': None,
@@ -145,7 +144,7 @@ class TestAbstractVerification(BaseTest):
             verification.storage.result.set_any_trial_objective(
                 trial_id=i,
                 objective=i * 1.0
-            
+
             )
             for j in range(2):
                 verification.storage.hp.set_any_trial_param(
