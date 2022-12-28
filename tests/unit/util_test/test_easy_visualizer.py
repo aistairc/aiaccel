@@ -1,6 +1,5 @@
 import shutil
 
-import numpy as np
 import pytest
 from aiaccel.util.easy_visualizer import EasyVisualizer
 
@@ -51,7 +50,7 @@ def test_line_plot():
     none_data = [1, None, 2, 3, 4]
     assert cplot.line_plot([none_data]) is None
 
-    nan_data = [1, np.float('nan'), 2, 3, 4]
+    nan_data = [1, float('nan'), 2, 3, 4]
     assert cplot.line_plot([nan_data]) is None
 
     inf_data = [1, float('inf'), 2, 3, 4]
@@ -81,4 +80,3 @@ def test_sort():
 
     goal = "invalid"
     assert cplot.sort(data, goal) == []
-
