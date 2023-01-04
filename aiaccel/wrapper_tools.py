@@ -29,7 +29,6 @@ def create_runner_command(
     commands.append(str(trial_id))
     commands.append('--config')
     commands.append(config_path)
-    
 
     for param in params:
         # Fix a bug related a negative exponential parameters
