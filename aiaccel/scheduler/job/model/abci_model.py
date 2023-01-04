@@ -24,7 +24,8 @@ class AbciModel(AbstractModel):
             obj.config.job_command.get(),
             obj.content,
             obj.trial_id,
-            obj.config_path
+            str(obj.config_path),
+            str(obj.command_error_output)
         )
 
         create_abci_batch_file(
@@ -47,7 +48,7 @@ class AbciModel(AbstractModel):
             str(runner_file)
         )
 
-        obj.logger.info(f'runner command: {runner_command}')
+        obj.logger.info(f'runner command: {" ".join(runner_command)}')
         obj.proc = exec_runner(runner_command)
 
         obj.th_oh = OutputHandler(
