@@ -27,7 +27,6 @@ dict_lock = 'lock'
 dict_log = 'log'
 dict_error = 'error'
 dict_output = 'abci_output'
-dict_a
 dict_jobstate = 'jobstate'
 dict_result = 'result'
 dict_runner = 'runner'

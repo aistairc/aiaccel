@@ -47,6 +47,7 @@ class AbciModel(AbstractModel):
             str(runner_file)
         )
 
+        obj.logger.info(f'runner command: {runner_command}')
         obj.proc = exec_runner(runner_command)
 
         obj.th_oh = OutputHandler(
