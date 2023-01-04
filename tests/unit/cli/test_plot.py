@@ -1,47 +1,25 @@
 import pathlib
-from functools import wraps
 
 from aiaccel.cli.plot import Plotter
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
 from unittest.mock import patch
+from pathlib import Path
 
 
-ws = Workspace("test_work")
-config_path = pathlib.Path('tests/test_data/config.json')
+def test_plot(clean_work_dir, work_dir, create_tmp_config):
 
+    clean_work_dir()
+    workspace = Workspace(str(work_dir))
+    if workspace.path.exists():
+        workspace.clean()
+    workspace.create()
 
-def init():
-    if ws.exists():
-        ws.clean()
-    # if ws.path.exists():
-    #     ws.path.unlink()
-
-
-def create():
-    ws.create()
-
-
-def t_base():
-    def _test_base(func):
-        @wraps(func)
-        def _wrapper(*wrgs, **kwargs):
-            init()
-            create()
-            try:
-                func(*wrgs, **kwargs)
-            finally:
-                init()
-            return
-        return _wrapper
-    return _test_base
-
-
-@t_base()
-def test_plot():
-    storage = Storage(ws.path)
+    config_path = pathlib.Path('tests/test_data/config.json')
+    config_path = create_tmp_config(config_path)
     config = Config(config_path)
+    storage = Storage(ws=Path(config.workspace.get()))
 
     goal = "minimize"
     config.goal.set(goal)
@@ -63,17 +41,17 @@ def test_plot():
     assert plotter.plot() is None
 
     # len(objectives) == 0
-    with patch.object(plotter.storage.result, 'get_objectives', return_value = []):
+    with patch.object(plotter.storage.result, 'get_objectives', return_value=[]):
         assert plotter.plot() is None
 
     # len(objectives) != len(bests)
-    with patch.object(plotter.storage.result, 'get_objectives', return_value = [1,2,3]):
-        with patch.object(plotter.storage.result, 'get_bests', return_value = [1,2,3,4]):
+    with patch.object(plotter.storage.result, 'get_objectives', return_value=[1, 2, 3]):
+        with patch.object(plotter.storage.result, 'get_bests', return_value=[1, 2, 3, 4]):
             assert plotter.plot() is None
 
     # self.cplt.set_colors
     # self.cplt.caption
     # self.cplt.line_plot
-    with patch.object(plotter.storage.result, 'get_objectives', return_value = [1,2,3]):
-        with patch.object(plotter.storage.result, 'get_bests', return_value = [1,2,3]):
+    with patch.object(plotter.storage.result, 'get_objectives', return_value=[1, 2, 3]):
+        with patch.object(plotter.storage.result, 'get_bests', return_value=[1, 2, 3]):
             assert plotter.plot() is None

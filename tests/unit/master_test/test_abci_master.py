@@ -29,11 +29,9 @@ class TestAbciMaster(BaseTest):
         return config_path
 
     @pytest.fixture(autouse=True)
-    def setup_master(self, clean_work_dir):
-        config_path = str(self.config_json).split("/")
-        config_path.pop(-1)
-        config_path.append("config_abci.json")
-        config_path = str(pathlib.Path("/".join(config_path)))
+    def setup_master(self, create_tmp_config):
+        self.config_path = self.test_data_dir.joinpath('config_abci.json')
+        self.config_path = create_tmp_config(self.config_path)
 
         self.workspace.clean()
         self.workspace.create()
@@ -41,7 +39,7 @@ class TestAbciMaster(BaseTest):
         commandline_args = [
             "start.py",
             "--config",
-            config_path
+            str(self.config_path)
         ]
 
         with patch.object(sys, 'argv', commandline_args):
@@ -57,14 +55,13 @@ class TestAbciMaster(BaseTest):
     def test_pre_process(
         self,
         cd_work,
-        work_dir,
         database_remove
     ):
         database_remove()
         commandline_args = [
             "start.py",
             "--config",
-            self.get_confit_path()
+            str(self.config_path)
         ]
         with patch.object(sys, 'argv', commandline_args):
             options = parse_arguments()
@@ -83,7 +80,7 @@ class TestAbciMaster(BaseTest):
         commandline_args = [
             "start.py",
             "--config",
-            self.get_confit_path()
+            str(self.config_path)
         ]
         with patch.object(sys, 'argv', commandline_args):
             options = parse_arguments()

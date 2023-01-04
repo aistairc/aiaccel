@@ -10,10 +10,11 @@ class TestCeaterRunnerComand(BaseTest):
     def test_create_runner_command(
         self,
         clean_work_dir,
+        work_dir,
         get_one_parameter,
-        load_test_config,
-        work_dir
+        load_test_config
     ):
+        clean_work_dir()
 
         for d in self.test_result_data:
             name = f"{d['trial_id']}.yml"

@@ -83,7 +83,7 @@ def ps2joblist() -> List[dict]:
         d = {
             'job-ID': p_info.info['pid'], 'prior': None, 'user': p_info.info['username'],
             'state': p_info.info['status'], 'queue': None, 'jclass': None,
-            'slots': None, 'ja-task-ID': None, 'name': " ".join(p_info.info['cmdline']),
+            'slots': None, 'ja-task-ID': None, 'name': " ".join(p_info.info['cmdline'] or []),
             'submit/start at': datetime.datetime.fromtimestamp(
                 p_info.info['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         }
