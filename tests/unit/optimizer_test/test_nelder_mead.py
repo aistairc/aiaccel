@@ -12,9 +12,10 @@ from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import load_yaml
 
 from unittest.mock import patch
+from tests.base_test import BaseTest
 
 
-class TestNelderMead(object):
+class TestNelderMead(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_nelder_mead(self, load_test_config):
@@ -33,7 +34,6 @@ class TestNelderMead(object):
 
     def test_init(self):
         assert type(self.nm) is NelderMead
-
 
     def test__create_initial_values(self):
         params = load_parameter(self.config.hyperparameters.get())
@@ -68,7 +68,6 @@ class TestNelderMead(object):
         with pytest.raises(TypeError):
             NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
 
-
     def test_add_executing(self):
         assert self.nm._add_executing(self.nm.y[0]) is None
 
@@ -82,7 +81,7 @@ class TestNelderMead(object):
     def test_add_y_history(self):
         assert self.nm._add_y_history() is None
 
-    def test_pop_result(self, clean_work_dir, setup_hp_finished, work_dir):
+    def test_pop_result(self, work_dir, setup_hp_finished):
         assert self.nm._pop_result() is None
 
         # params = self.nm.get_ready_parameters()
@@ -211,7 +210,6 @@ class TestNelderMead(object):
         self.nm._fr = 0.21
         assert self.nm._reflect_branch() is None
 
-
     def test_wait_expand(self):
         results = [
             {'state': 'WaitInitialize', 'result': i * .1}
@@ -276,7 +274,6 @@ class TestNelderMead(object):
 
         with patch.object(self.nm, '_state', 'InvalidState'):
             assert self.nm._wait_shrink(results) is None
-
 
     def test_finalize(self):
         self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
@@ -426,5 +423,3 @@ def test_nelder_mead_parameters(load_test_config):
         print('out of boundary', c_out_of_boundary)
 
     assert c_out_of_boundary == 0
-
-
