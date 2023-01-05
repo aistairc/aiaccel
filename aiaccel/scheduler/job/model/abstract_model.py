@@ -277,7 +277,7 @@ class AbstractModel(object):
         result = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
         error = obj.storage.error.get_any_trial_error(trial_id=obj.trial_id)
         content = obj.storage.get_hp_dict(trial_id=obj.trial_id)
-        content['result'] = result
+        content['result'] = str(result)
 
         if error is not None:
             content['error'] = error
