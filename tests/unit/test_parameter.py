@@ -24,13 +24,13 @@ class TestParameter(BaseTest):
         assert best is None
         assert best_file is None
 
-        results = [120, 101., 140.]
+        results = [120, 101., np.float64(140.)]
 
         for i in range(len(self.test_result_data)):
             d = self.test_result_data[i]
             name = f"{d['trial_id']}.yml"
             path = work_dir / 'result' / name
-            d['result'] = results[i]
+            d['result'] = str(results[i])
             create_yaml(path, d)
 
         files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
