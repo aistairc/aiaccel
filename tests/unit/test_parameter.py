@@ -30,7 +30,7 @@ class TestParameter(BaseTest):
             d = self.test_result_data[i]
             name = f"{d['trial_id']}.yml"
             path = work_dir / 'result' / name
-            d['result'] = str(results[i])
+            d['result'] = results[i]
             create_yaml(path, d)
 
         files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
