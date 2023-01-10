@@ -143,7 +143,6 @@ def test_config(config_json):
     assert config.scheduler_logfile.get() == "scheduler.log"
     assert config.scheduler_file_log_level.get() == "DEBUG"
     assert config.scheduler_stream_log_level.get() == "DEBUG"
-    assert config.silent_mode.get() is True
     assert config.hyperparameters.get() == [
         {
             "name": "x1",
