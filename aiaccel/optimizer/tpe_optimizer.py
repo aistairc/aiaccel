@@ -186,6 +186,7 @@ def create_distributions(
 
         elif p.type.lower() == 'categorical':
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
+
         else:
             raise 'Unsupported parameter type'
 
