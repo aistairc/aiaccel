@@ -10,10 +10,11 @@ class TestCeaterRunnerComand(BaseTest):
     def test_create_runner_command(
         self,
         clean_work_dir,
+        work_dir,
         get_one_parameter,
-        load_test_config,
-        work_dir
+        load_test_config
     ):
+        clean_work_dir()
 
         for d in self.test_result_data:
             name = f"{d['trial_id']}.yml"
@@ -22,23 +23,27 @@ class TestCeaterRunnerComand(BaseTest):
 
         config = load_test_config()
         dict_lock = work_dir.joinpath('lock')
+<<<<<<< HEAD
+=======
+        error_output = str(work_dir / 'error' / f"{d['trial_id']}.txt")
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
         commands = create_runner_command(
             config.generic.job_command,
             get_one_parameter(),
             'name',
-            'config.json'
+            'config.json',
+            error_output
         )
         assert commands[0] == 'python'
         assert commands[1] == 'original_main.py'
-        # assert commands[2] == '-i'
-        assert commands[2] == '--trial_id'
-        assert commands[3] == 'name'
-        # assert commands[4] == '-c'
-        assert commands[4] == '--config'
-        assert commands[5] == 'config.json'
-        # assert commands[6] == '-x1=0.9932890709584586'
-        assert commands[6] == '--x1=0.9932890709584586'
+        assert commands[2] == '2>'
+        assert commands[3] == error_output
+        assert commands[4] == '--trial_id'
+        assert commands[5] == 'name'
+        assert commands[6] == '--config'
+        assert commands[7] == 'config.json'
+        assert commands[8] == '--x1=0.9932890709584586'
 
         start_time = get_time_now()
         end_time = get_time_now()

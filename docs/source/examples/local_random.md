@@ -36,6 +36,10 @@ generic:
 - **job_command** - ユーザープログラムを実行するためのコマンドです．
 - **batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]
 
+```{note}
+Windows では，仮想環境の python で実行するためには `job_command` の欄を `"optenv/Scripts/python.exe"` のように設定する必要があります．
+```
+
 #### resource
 ```yaml
 resource:

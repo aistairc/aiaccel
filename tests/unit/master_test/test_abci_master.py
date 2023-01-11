@@ -23,11 +23,33 @@ def callback_return():
 class TestAbciMaster(BaseTest):
 
     @pytest.fixture(autouse=True)
+<<<<<<< HEAD
     def setup_master(self, clean_work_dir):
         self.workspace.clean()
         self.workspace.create()
 
         self.master = AbciMaster(self.configs["config_abci_json"])
+=======
+    def setup_master(self, create_tmp_config):
+        self.config_path = self.test_data_dir.joinpath('config_abci.json')
+        self.config_path = create_tmp_config(self.config_path)
+
+        self.workspace.clean()
+        self.workspace.create()
+
+        commandline_args = [
+            "start.py",
+            "--config",
+            str(self.config_path)
+        ]
+
+        with patch.object(sys, 'argv', commandline_args):
+            # from aiaccel import start
+            # self.master = start.Master()
+            options = parse_arguments()
+            # self.master = create_master(options['config'])(options)
+            self.master = AbciMaster(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
         yield
         self.master = None
@@ -35,12 +57,22 @@ class TestAbciMaster(BaseTest):
     def test_pre_process(
         self,
         cd_work,
-        work_dir,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
 
         master = AbciMaster(self.configs["config_abci_json"])
+=======
+        commandline_args = [
+            "start.py",
+            "--config",
+            str(self.config_path)
+        ]
+        with patch.object(sys, 'argv', commandline_args):
+            options = parse_arguments()
+            master = AbciMaster(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         master.pre_process()
         assert type(master.runner_files) is list
 
@@ -52,8 +84,19 @@ class TestAbciMaster(BaseTest):
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
 
         master = AbciMaster(self.configs["config_abci_json"])
+=======
+        commandline_args = [
+            "start.py",
+            "--config",
+            str(self.config_path)
+        ]
+        with patch.object(sys, 'argv', commandline_args):
+            options = parse_arguments()
+            master = AbciMaster(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
         xml_path = data_dir.joinpath('qstat.xml')
         fake_process.register_subprocess(

@@ -180,11 +180,11 @@ def load_yaml(path: Path, dict_lock: Path = None) -> dict:
     """
     if dict_lock is None:
         with open(path, 'r') as f:
-            yml = yaml.load(f, Loader=yaml.SafeLoader)
+            yml = yaml.load(f, Loader=yaml.UnsafeLoader)
     else:
         with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
             with open(path, 'r') as f:
-                yml = yaml.load(f, Loader=yaml.SafeLoader)
+                yml = yaml.load(f, Loader=yaml.UnsafeLoader)
     return yml
 
 

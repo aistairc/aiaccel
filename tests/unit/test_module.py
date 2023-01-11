@@ -24,6 +24,7 @@ from tests.base_test import BaseTest
 
 import pytest
 
+
 async def async_function(func):
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, func)
@@ -42,8 +43,21 @@ def dummy_break():
 class TestAbstractModule(BaseTest):
 
     @pytest.fixture(autouse=True)
+<<<<<<< HEAD
     def setup_module(self, clean_work_dir):
         self.module = AbstractModule(self.configs["config.json"], 'abstract')
+=======
+    def setup_module(self):
+        options = {
+            'config': str(self.config_json),
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'test'
+        }
+
+        self.module = AbstractModule(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
@@ -54,7 +68,7 @@ class TestAbstractModule(BaseTest):
         assert self.module.hp_running == 0
         assert self.module.hp_finished == 0
 
-    def test_get_module_type(self, work_dir):
+    def test_get_module_type(self):
         module_type = self.module.get_module_type()
         assert module_type is None
 
@@ -106,7 +120,7 @@ class TestAbstractModule(BaseTest):
             'Optimizer'
         ) is None
 
-    def test_pre_process(self, work_dir):
+    def test_pre_process(self):
         try:
             self.module.pre_process()
             assert False

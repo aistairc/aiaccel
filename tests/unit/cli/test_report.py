@@ -9,9 +9,24 @@ from aiaccel.config import load_config
 ws = Workspace("test_work")
 config_path = pathlib.Path('tests/test_data/config.json')
 
+<<<<<<< HEAD
 def test_report():
     # config = Config(config_path)
     report = CreationReport(load_config(config_path))
+=======
+
+def test_report(clean_work_dir, work_dir, create_tmp_config):
+    clean_work_dir()
+    workspace = Workspace(str(work_dir))
+    if workspace.path.exists():
+        workspace.clean()
+    workspace.create()
+
+    config_path = pathlib.Path('tests/test_data/config.json')
+    config_path = create_tmp_config(config_path)
+
+    report = CreationReport(config_path)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
     assert report.get_zero_padding_trial_id(1) == '000001'
     assert report.create() is None
@@ -32,9 +47,10 @@ def test_report():
         ],
         'result': -0.2433042724186567
     }
-    with patch.object(report.storage.trial, 'get_finished', return_value = [0]):
-        with patch.object(report.storage, 'get_hp_dict', return_value = hp):
+    with patch.object(report.storage.trial, 'get_finished', return_value=[0]):
+        with patch.object(report.storage, 'get_hp_dict', return_value=hp):
             assert report.create() is None
+
 
 def test_report_():
     try:

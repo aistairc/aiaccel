@@ -52,7 +52,7 @@ class TestNelderMeadOptimizer(BaseTest):
         self.optimizer.post_process()
         assert self.optimizer.pre_process() is None
 
-    def test_check_result(self, setup_result, work_dir):
+    def test_check_result(self, setup_result):
         self.optimizer.pre_process()
         self.optimizer.generate_initial_parameter()
         setup_result(1)
@@ -64,8 +64,7 @@ class TestNelderMeadOptimizer(BaseTest):
     def test_generate_parameter(
         self,
         load_test_config_org,
-        setup_result,
-        work_dir
+        setup_result
     ):
         self.optimizer.pre_process()
         # config = load_test_config()
@@ -92,12 +91,10 @@ class TestNelderMeadOptimizer(BaseTest):
             with patch.object(self.optimizer, 'parameter_pool', []):
                 assert self.optimizer.generate_parameter() == []
 
-
     def test_generate_parameter2(
         self,
         load_test_config_org,
-        setup_result,
-        work_dir
+        setup_result
     ):
         self.optimizer.pre_process()
         config = self.configs["config.json"]
@@ -115,9 +112,7 @@ class TestNelderMeadOptimizer(BaseTest):
 
     def test_update_ready_parameter_name(
         self,
-        load_test_config_org,
-        setup_result,
-        work_dir
+        load_test_config_org
     ):
         self.optimizer.pre_process()
         config = self.configs["config.json"]
@@ -137,9 +132,7 @@ class TestNelderMeadOptimizer(BaseTest):
 
     def test_get_ready_parameters(
         self,
-        load_test_config_org,
-        setup_result,
-        work_dir
+        load_test_config_org
     ):
         self.optimizer.pre_process()
         config = load_test_config_org()
@@ -177,7 +170,7 @@ class TestNelderMeadOptimizer(BaseTest):
             }
         ]
 
-        result_content = {'trial_id':0, 'result':123}
+        result_content = {'trial_id': 0, 'result': 123}
         with patch.object(self.optimizer.nelder_mead, '_executing', expected):
             with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=result_content):
                 self.optimizer.get_nm_results()
@@ -198,13 +191,13 @@ class TestNelderMeadOptimizer(BaseTest):
         ]
         order = [
             {
-                'vertex_id':'0001',
+                'vertex_id': '0001',
                 'parameters': [{'parameter_name': 'x1', 'value': -4.87}, {'parameter_name': 'x2', 'value': -0.71}]
             }
         ]
         order2 = [
             {
-                'vertex_id':'invalid',
+                'vertex_id': 'invalid',
                 'parameters': [{'parameter_name': 'x1', 'value': -4.87}, {'parameter_name': 'x2', 'value': -0.71}]
             }
         ]
@@ -215,7 +208,6 @@ class TestNelderMeadOptimizer(BaseTest):
 
         with patch.object(self.optimizer, 'order', order2):
             assert self.optimizer._add_result(nm_results) is None
-
 
     def test_nelder_mead_main(self):
         rng = np.random.RandomState(0)

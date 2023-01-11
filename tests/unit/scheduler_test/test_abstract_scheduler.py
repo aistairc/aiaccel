@@ -47,18 +47,36 @@ class TestAbstractScheduler(BaseTest):
     #  logging modules are generated each method.
 
     def test_init(self, config_json):
+<<<<<<< HEAD
         assert type(AbstractScheduler(self.configs['config.json'])) is AbstractScheduler
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        assert type(AbstractScheduler(options)) is AbstractScheduler
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
     def test_change_state_finished_trials(
         self,
-        clean_work_dir,
-        config_json,
         setup_hp_running,
         setup_result,
-        work_dir,
         database_remove
     ):
+<<<<<<< HEAD
 
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         database_remove()
         scheduler = AbstractScheduler(self.configs['config.json'])
         scheduler.print_dict_state()
@@ -68,25 +86,42 @@ class TestAbstractScheduler(BaseTest):
 
     def test_get_stats(
         self,
-        config_json,
-        work_dir,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         scheduler.print_dict_state()
         assert scheduler.get_stats() is None
 
     def test_start_job(
         self,
-        clean_work_dir,
-        config_json,
         setup_hp_ready,
-        work_dir,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         scheduler.print_dict_state()
         setup_hp_ready(1)
         trial_id = 1
@@ -100,26 +135,43 @@ class TestAbstractScheduler(BaseTest):
 
     def test_update_resource(
         self,
-        config_json,
-        work_dir,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         scheduler.print_dict_state()
         assert scheduler.update_resource() is None
 
     def test_pre_process(
         self,
-        clean_work_dir,
-        config_json,
         setup_hp_running,
         setup_result,
-        work_dir,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         scheduler.print_dict_state()
         setup_hp_running(2)
         setup_result(1)
@@ -127,30 +179,43 @@ class TestAbstractScheduler(BaseTest):
         scheduler.pre_process()
 
         for job in scheduler.jobs:
-            machine = job['obj'].get_machine()
+            machine = job.get_machine()
             machine.set_state('Success')
-            job['thread'].run()
+            job.main()
 
         scheduler = AbstractScheduler(self.configs['config.json'])
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[]):
-            assert scheduler.pre_process()is None
+            assert scheduler.pre_process() is None
 
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[0, 1, 2]):
-            assert scheduler.pre_process()is None
+            assert scheduler.pre_process() is None
 
-    def test_post_process(self, config_json, database_remove):
+    def test_post_process(self, database_remove):
         database_remove()
+<<<<<<< HEAD
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         class dummy_job:
             def __init__(self):
                 pass
+
             def stop(self):
                 pass
+
             def join(self):
                 pass
 
         jobs = []
         for i in range(10):
-            jobs.append({'thread':dummy_job()})
+            jobs.append({'thread': dummy_job()})
 
         scheduler = AbstractScheduler(self.configs['config.json'])
         assert scheduler.post_process() is None
@@ -170,7 +235,18 @@ class TestAbstractScheduler(BaseTest):
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         scheduler.pre_process()
         setup_hp_ready(1)
 
@@ -200,7 +276,18 @@ class TestAbstractScheduler(BaseTest):
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         scheduler._rng = np.random.RandomState(0)
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         assert scheduler._serialize(trial_id=0) is None
@@ -212,7 +299,18 @@ class TestAbstractScheduler(BaseTest):
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         scheduler._rng = np.random.RandomState(0)
         scheduler._serialize(trial_id=0)
@@ -220,7 +318,18 @@ class TestAbstractScheduler(BaseTest):
 
     def test_parse_trial_id(self, config_json, database_remove):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         s = "python wrapper.py --trial_id 001"
         s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
         trial_id = scheduler.parse_trial_id(s['name'])
@@ -229,23 +338,43 @@ class TestAbstractScheduler(BaseTest):
 
     def test_check_error(self, config_json, database_remove):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         assert scheduler.check_error() is True
 
         jobstates = [
-            {'trial_id': 0, 'jobstate':'failure'}
+            {'trial_id': 0, 'jobstate': 'failure'}
         ]
 
-        with patch.object(scheduler, 'job_status', {1:'failure'}):
+        with patch.object(scheduler, 'job_status', {1: 'failure'}):
             with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
                 assert scheduler.check_error() is True
 
-        with patch.object(scheduler, 'job_status', {0:'failure'}):
+        with patch.object(scheduler, 'job_status', {0: 'failure'}):
             with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
                 assert scheduler.check_error() is False
 
     def test_resume(self, config_json):
+<<<<<<< HEAD
         scheduler = AbstractScheduler(self.configs['config.json'])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         scheduler.pre_process()
         scheduler._serialize(0)
         scheduler._serialize(1)

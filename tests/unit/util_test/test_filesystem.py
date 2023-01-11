@@ -1,3 +1,4 @@
+from aiaccel.workspace import Workspace
 import shutil
 from pathlib import Path, PosixPath
 
@@ -10,6 +11,7 @@ from aiaccel.util.filesystem import (create_yaml, file_create, file_delete,
 
 
 def test_create_yaml(clean_work_dir, work_dir):
+    clean_work_dir()
     dict_lock = work_dir.joinpath('lock')
     alive_dir = work_dir.joinpath('alive')
     path = alive_dir.joinpath('master.yml')
@@ -19,6 +21,7 @@ def test_create_yaml(clean_work_dir, work_dir):
 
 
 def test_file_create(clean_work_dir, work_dir):
+    clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
     path = alive_dir.joinpath('master.yml')
     file_create(path, 'hello')
@@ -26,6 +29,7 @@ def test_file_create(clean_work_dir, work_dir):
 
 
 def test_file_delete(clean_work_dir, work_dir):
+    clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
     path = alive_dir.joinpath('master.yml')
     dict_lock = work_dir.joinpath('lock')
@@ -39,6 +43,7 @@ def test_file_delete(clean_work_dir, work_dir):
 
 
 def test_file_read(clean_work_dir, work_dir):
+    clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
     path = alive_dir.joinpath('master.yml')
     dict_lock = work_dir.joinpath('lock')
@@ -49,6 +54,7 @@ def test_file_read(clean_work_dir, work_dir):
 
 
 def test_get_dict_files(clean_work_dir, work_dir):
+    clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
     path = alive_dir.joinpath('master.yml')
     dict_lock = work_dir.joinpath('lock')
@@ -58,12 +64,21 @@ def test_get_dict_files(clean_work_dir, work_dir):
 
     assert get_dict_files(Path('invalid_path'), '*.yml', dict_lock) is None
 
-    jobstate = work_dir.joinpath('jobstate')  # unused directory
-    assert get_dict_files(jobstate, '*.jobstate', dict_lock) == []
-
 
 def test_get_file_result(clean_work_dir, setup_result, work_dir):
+<<<<<<< HEAD
     content = {}
+=======
+    clean_work_dir()
+    workspace = Workspace(str(work_dir))
+    if workspace.path.exists():
+        workspace.clean()
+    workspace.create()
+
+    storage = Storage(work_dir)
+    setup_result(1)
+    content = storage.get_hp_dict('0')
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
     create_yaml((work_dir / 'result' / '001.result'), content)
     assert get_file_result(work_dir) == [
         work_dir.joinpath('result/001.result')
@@ -71,6 +86,7 @@ def test_get_file_result(clean_work_dir, setup_result, work_dir):
 
 
 def test_load_yaml(clean_work_dir, work_dir):
+    clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
     path = alive_dir.joinpath('master.yml')
     dict_lock = work_dir.joinpath('lock')
@@ -80,6 +96,7 @@ def test_load_yaml(clean_work_dir, work_dir):
 
 
 def test_make_directory(clean_work_dir, work_dir):
+    clean_work_dir()
     dict_lock = work_dir.joinpath('lock')
     assert make_directory(work_dir.joinpath('result')) is None
     assert make_directory(work_dir.joinpath('new'), dict_lock) is None
@@ -87,6 +104,7 @@ def test_make_directory(clean_work_dir, work_dir):
 
 
 def test_make_directories(clean_work_dir, work_dir):
+    clean_work_dir()
     dict_lock = work_dir.joinpath('lock')
     ds = [
         work_dir.joinpath('hp', 'ready'),
@@ -111,4 +129,4 @@ def test_get_file_result_hp(work_dir):
     file_path = work_dir / 'result' / 'test.hp'
     create_yaml(file_path, {})
 
-    assert get_file_result_hp(work_dir) == [PosixPath('/tmp/work/result/test.hp')]
+    assert get_file_result_hp(work_dir) == [PosixPath(file_path)]

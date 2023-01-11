@@ -1,5 +1,13 @@
 generic:
+<<<<<<< HEAD
   workspace: "./hoge"
+=======
+  project_name: "sphere"
+  debug: True
+  name_length: 32
+  init_fail_count: 50
+  randseed: 1
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 logger:
   file:
     master: "master.log"

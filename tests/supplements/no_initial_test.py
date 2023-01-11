@@ -14,10 +14,15 @@ from tests.base_test import BaseTest
 class NoInitialTest(BaseTest):
     search_algorithm = None
 
-    def test_run(self, cd_work, data_dir, work_dir):
+    def test_run(self, work_dir, create_tmp_config):
         test_data_dir = Path(__file__).resolve().parent.joinpath('no_initial_test_benchmark', 'test_data')
         config_file = test_data_dir.joinpath('config_{}.yaml'.format(self.search_algorithm))
+<<<<<<< HEAD
         self.config = load_config(config_file)
+=======
+        config_file = create_tmp_config(config_file)
+        self.config = Config(config_file)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         python_file = test_data_dir.joinpath('user.py')
 
         with self.create_main(python_file):

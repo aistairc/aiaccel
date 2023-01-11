@@ -1,9 +1,9 @@
 from pathlib import Path
 
-import aiaccel
 from omegaconf.dictconfig import DictConfig
 from omegaconf.listconfig import ListConfig
 
+from aiaccel import dict_output
 
 ''' Example of stat
 stat = {
@@ -38,8 +38,7 @@ def create_qsub_command(config: DictConfig, runner_file: Path) -> list:
         'qsub',
         '-g', f'{config.ABCI.group}',
         '-j', 'y',
-        '-o', f'{path / aiaccel.dict_output}',
-
+        '-o', f'{path / dict_output}',
         str(runner_file)
     ]
 

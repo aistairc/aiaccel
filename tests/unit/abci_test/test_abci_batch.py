@@ -24,11 +24,14 @@ class TestCreateAbciBatchFile(BaseTest):
         config = load_test_config()
         dict_lock = work_dir.joinpath('lock')
         batch_file = work_dir.joinpath('runner', 'run_test.sh')
+        error_output = str(work_dir / 'error' / f"{d['trial_id']}.txt")
+
         commands = create_runner_command(
             config.generic.job_command,
             get_one_parameter(),
             'test',
-            'config.json'
+            'config.json',
+            error_output
         )
         wrapper_file = data_dir.joinpath(config.ABCI.job_script_preamble)
         create_abci_batch_file(batch_file, wrapper_file, commands, dict_lock)

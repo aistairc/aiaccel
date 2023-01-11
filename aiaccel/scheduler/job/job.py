@@ -13,6 +13,7 @@ from transitions.extensions.states import Tags, add_state_features
 
 from aiaccel import dict_lock
 from aiaccel import dict_result
+from aiaccel import dict_error
 from aiaccel import resource_type_abci
 from aiaccel import resource_type_local
 from aiaccel.util.buffer import Buffer
@@ -597,6 +598,8 @@ class Job:
 
         self.logger = logging.getLogger('root.scheduler.job')
 
+        self.command_error_output = self.ws / dict_error / f'{self.trial_id}.txt'
+
     def get_machine(self) -> CustomMachine:
         """Get a state machine object.
 
@@ -657,6 +660,17 @@ class Job:
             state.name in self.expirable_states
         )
 
+    def check_job_command_error(self):
+        if self.command_error_output.exists() is False:
+            return True
+
+        err = self.command_error_output.read_text()
+        if len(err) > 0:
+            self.storage.error.set_any_trial_error(trial_id=self.trial_id, error_message=err)
+            return False
+
+        return True
+
     def main(self) -> None:
         """Thread.run method.
 
@@ -703,5 +717,7 @@ class Job:
             f'state: {state.name} ,'
             f'count retry: {self.count_retry}'
         )
+
+        self.check_job_command_error()
 
         return

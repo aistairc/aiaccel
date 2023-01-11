@@ -1,11 +1,5 @@
 # コンフィグレーションの設定ガイド (WIP)
 
-## **ui**
-### _silent_mode [CURRENTLY NOT USED]:_
----
-_CURRENTLY NOT USED_
-_Defaults to true._
-
 
 <br>
 
@@ -79,10 +73,6 @@ ABCI の設定を記述したシェルスクリプトのファイルを指定し
 ---
 aiaccel が ABCI の計算ノード上にジョブを投入する際に付加されるオプションのコマンドです．
 デフォルトでは "" (空の文字列) が設定されています．
-
-### _runner_search_pattern [CURRENTLY NOT USED]:_
----
-_CURRENTLY NOT USED_
 
 
 <br>
@@ -320,11 +310,6 @@ Defaults to 100.
 文字列としてのジョブ ID の長さです．
 この文字列は，結果を .hp ファイルに保存する際にファイル名として使用されます．
 デフォルトでは 6 に設定されています．
-
-### _random_scheduling (bool, optional) [CURRENTLY NOT USED]:_
----
-_[CURRENTLY NOT USED]_
-_Defaults to true._
 
 
 <br>

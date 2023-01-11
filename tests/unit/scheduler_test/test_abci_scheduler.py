@@ -35,7 +35,18 @@ class TestAbciScheduler(BaseTest):
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
         scheduler = AbciScheduler(self.configs["config.json"])
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbciScheduler(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         s = {"name": "run_000005.sh"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5

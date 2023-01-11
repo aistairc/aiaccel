@@ -42,16 +42,24 @@ class TestAbstractMaster(BaseTest):
 
     def test_pre_process(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        work_dir,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
 
         config = load_config(config_json)
         master = AbstractMaster(config)
+=======
+        commandline_args = [
+            "start.py",
+            "--config",
+            format(self.config_json)
+        ]
+
+        with patch.object(sys, 'argv', commandline_args):
+            options = parse_arguments()
+            master = AbstractMaster(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
             loop_pre_process(master)
@@ -60,17 +68,23 @@ class TestAbstractMaster(BaseTest):
 
     def test_pre_process_2(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        fake_process,
-        work_dir,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
 
         config = load_config(config_json)
         master = AbstractMaster(config)
+=======
+        commandline_args = [
+            "start.py",
+            "--config",
+            format(self.config_json)
+        ]
+        with patch.object(sys, 'argv', commandline_args):
+            options = parse_arguments()
+            master = AbstractMaster(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
         try:
             master.pre_process()
@@ -80,11 +94,7 @@ class TestAbstractMaster(BaseTest):
 
     def test_pre_process_3(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
         setup_hp_finished,
-        work_dir,
         database_remove
     ):
         database_remove()
@@ -95,16 +105,24 @@ class TestAbstractMaster(BaseTest):
 
     def test_post_process(
         self,
-        cd_work,
-        clean_work_dir,
-        setup_hp_finished,
-        work_dir,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
 
         master = AbstractMaster(self.configs["config.json"])
         
+=======
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'master'
+        }
+        master = AbstractMaster(options)
+
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
             master.storage.result.set_any_trial_objective(trial_id=i, objective=(i * 10.0))
@@ -124,7 +142,7 @@ class TestAbstractMaster(BaseTest):
 
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            
+
         try:
             master.post_process()
             assert False
@@ -133,17 +151,29 @@ class TestAbstractMaster(BaseTest):
 
     def test_print_dict_state(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
         setup_hp_finished,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
 
         config = load_config(config_json)
         master = AbstractMaster(config)
 
+=======
+        commandline_args = [
+            "start.py",
+            "--config",
+            format(self.config_json)
+        ]
+        with patch.object(sys, 'argv', commandline_args):
+            # from aiaccel import start
+            # master = start.Master()
+            options = parse_arguments()
+            master = AbstractMaster(options)
+
+        # master = AbstractMaster(config_json)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         assert master.print_dict_state() is None
 
         master.loop_start_time = get_time_now_object()
@@ -155,16 +185,30 @@ class TestAbstractMaster(BaseTest):
 
     def test_inner_loop_main_process(
         self,
-        cd_work,
-        clean_work_dir,
-        config_json,
-        setup_hp_finished,
         database_remove
     ):
         database_remove()
+<<<<<<< HEAD
 
         config = load_config(config_json)
         master = AbstractMaster(config)
+=======
+        commandline_args = [
+            "start.py",
+            "--config",
+            format(self.config_json)
+        ]
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'master'
+        }
+        with patch.object(sys, 'argv', commandline_args):
+            options = parse_arguments()
+            master = AbstractMaster(options)
+>>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
         master.pre_process()
         assert master.inner_loop_main_process()

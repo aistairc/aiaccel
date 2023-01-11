@@ -12,7 +12,6 @@ ABCI:
   group: "[group]"
   job_script_preamble: "./job_script_preamble.sh"
   job_execution_options: ""
-  runner_search_pattern:
 
 optimize:
   search_algorithm: "aiaccel.optimizer.TpeOptimizer"
@@ -49,8 +48,6 @@ job_setting:
   running_timeout: 60
   init_fail_count: 100
   name_length: 6
-  random_scheduling: false
-  #random_scheduling: true
 
 # sleep_time: 0
   # master: 0
