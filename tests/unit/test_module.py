@@ -43,21 +43,8 @@ def dummy_break():
 class TestAbstractModule(BaseTest):
 
     @pytest.fixture(autouse=True)
-<<<<<<< HEAD
     def setup_module(self, clean_work_dir):
         self.module = AbstractModule(self.configs["config.json"], 'abstract')
-=======
-    def setup_module(self):
-        options = {
-            'config': str(self.config_json),
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'test'
-        }
-
-        self.module = AbstractModule(options)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None

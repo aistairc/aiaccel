@@ -9,11 +9,6 @@ from aiaccel.config import load_config
 ws = Workspace("test_work")
 config_path = pathlib.Path('tests/test_data/config.json')
 
-<<<<<<< HEAD
-def test_report():
-    # config = Config(config_path)
-    report = CreationReport(load_config(config_path))
-=======
 
 def test_report(clean_work_dir, work_dir, create_tmp_config):
     clean_work_dir()
@@ -24,9 +19,8 @@ def test_report(clean_work_dir, work_dir, create_tmp_config):
 
     config_path = pathlib.Path('tests/test_data/config.json')
     config_path = create_tmp_config(config_path)
-
-    report = CreationReport(config_path)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+    config = load_config(config_path)
+    report = CreationReport(config)
 
     assert report.get_zero_padding_trial_id(1) == '000001'
     assert report.create() is None

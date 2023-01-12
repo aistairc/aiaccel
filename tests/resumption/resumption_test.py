@@ -13,14 +13,10 @@ class ResumptionTest(IntegrationTest):
     def test_run(self, data_dir, create_tmp_config):
         with self.create_main():
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
-<<<<<<< HEAD
-            config = load_config(config_file)
-            storage = Storage(ws=Path(config.generic.workspace))
-=======
             config_file = create_tmp_config(config_file)
-            config = Config(config_file)
-            storage = Storage(ws=Path(config.workspace.get()))
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+            config = load_config(config_file)
+
+            storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
             final_result_at_one_time = self.get_final_result(storage)
             print('at one time', final_result_at_one_time)
@@ -34,12 +30,9 @@ class ResumptionTest(IntegrationTest):
         # resume
         with self.create_main():
             config_file = data_dir.joinpath(f'config_{self.search_algorithm}.json')
-<<<<<<< HEAD
-            storage = Storage(ws=Path(config.generic.workspace))
-=======
             config_file = create_tmp_config(config_file)
-            storage = Storage(ws=Path(config.workspace.get()))
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+            storage = Storage(ws=Path(config.generic.workspace))
+
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--resume', '4']).wait()
             final_result_resumption = self.get_final_result(storage)
             print('resumption steps finished', final_result_resumption)

@@ -23,10 +23,7 @@ class TestCeaterRunnerComand(BaseTest):
 
         config = load_test_config()
         dict_lock = work_dir.joinpath('lock')
-<<<<<<< HEAD
-=======
         error_output = str(work_dir / 'error' / f"{d['trial_id']}.txt")
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
         commands = create_runner_command(
             config.generic.job_command,

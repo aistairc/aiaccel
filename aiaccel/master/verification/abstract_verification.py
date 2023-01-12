@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 
 from omegaconf.dictconfig import DictConfig
+from omegaconf import OmegaConf
 
 from aiaccel import dict_lock
 from aiaccel import dict_verification
@@ -13,12 +14,10 @@ from aiaccel.util.filesystem import create_yaml
 
 class AbstractVerification(object):
     """An abstract class of verification.
-
     """
 
     def __init__(self, config: DictConfig) -> None:
         """Initial method for AbstractVerification.
-
         Args:
             config (ConfileWrapper): A configuration object.
         """
@@ -36,7 +35,6 @@ class AbstractVerification(object):
     def verify(self) -> None:
         """Run a verification. The trigger to run a verification, is described
             in configuration file 'verification' > 'conditions'.
-
         Returns:
             None
         """
@@ -58,11 +56,9 @@ class AbstractVerification(object):
 
     def make_verification(self, index: int, loop: int) -> None:
         """Run a verification and save the result.
-
         Args:
             index (int): An index of verifications.
             loop (int): A loop count of Master.
-
         Returns:
             None
         """
@@ -89,6 +85,8 @@ class AbstractVerification(object):
         # self.save(loop)
 
         best_trial = self.storage.get_best_trial_dict(self.config.optimize.goal.lower())
+        if best_trial is None:
+            return
 
         if (
             best_trial['result'] < self.condition[index]['minimum'] or
@@ -101,17 +99,15 @@ class AbstractVerification(object):
 
     def load_verification_config(self) -> None:
         """Load configurations about verification.
-
         Returns:
             None
         """
         self.is_verified = self.config.verification.is_verified
         self.condition = self.config.verification.condition
-        self.verification_result = copy.copy(self.condition)
+        self.verification_result = OmegaConf.to_container(copy.copy(self.condition))
 
     def print(self) -> None:
         """Print current verifications result.
-
         Returns:
             None
         """
@@ -124,10 +120,8 @@ class AbstractVerification(object):
 
     def save(self, name: int) -> None:
         """Save current verifications result to a file.
-
         Args:
             name (int):
-
         Returns:
             None
         """

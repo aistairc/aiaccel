@@ -21,12 +21,8 @@ class AdditionalResumptionTest(IntegrationTest):
     def test_run(self, create_tmp_config):
         test_data_dir = Path(__file__).resolve().parent.joinpath('additional_resumption_test_benchmark', 'test_data')
         config_file = test_data_dir.joinpath('config_{}.yaml'.format(self.search_algorithm))
-<<<<<<< HEAD
-        config = load_config(config_file)
-=======
         config_file = create_tmp_config(config_file)
-        config = Config(config_file)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+        config = load_config(config_file)
         python_file = test_data_dir.joinpath('user.py')
 
         # normal execution

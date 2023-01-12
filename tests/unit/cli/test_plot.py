@@ -16,43 +16,10 @@ def test_plot(clean_work_dir, work_dir, create_tmp_config):
         workspace.clean()
     workspace.create()
 
-<<<<<<< HEAD
-def init():
-    if ws.exists():
-        ws.clean()
-    # if ws.path.exists():
-    #     ws.path.unlink()
-
-
-def create():
-    ws.create()
-
-
-def t_base():
-    def _test_base(func):
-        @wraps(func)
-        def _wrapper(*wrgs, **kwargs):
-            init()
-            create()
-            try:
-                func(*wrgs, **kwargs)
-            finally:
-                init()
-            return
-        return _wrapper
-    return _test_base
-
-
-@t_base()
-def test_plot():
-    storage = Storage(ws.path)
-    config = load_config(config_path)
-=======
     config_path = pathlib.Path('tests/test_data/config.json')
     config_path = create_tmp_config(config_path)
-    config = Config(config_path)
-    storage = Storage(ws=Path(config.workspace.get()))
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+    config = load_config(config_path)
+    storage = Storage(ws=Path(config.generic.workspace))
 
     config.optimize.goal = "minimize"
 

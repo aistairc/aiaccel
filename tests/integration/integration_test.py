@@ -32,13 +32,8 @@ class IntegrationTest(BaseTest):
         # local test
         #
         with self.create_main():
-            config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
-<<<<<<< HEAD
-            config = load_config(config_file)
-=======
-            config_file = create_tmp_config(config_file)
-            config = Config(config_file)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+            config = self.configs['config_{}.json'.format(self.search_algorithm)]
+            config_file = create_tmp_config(self.test_data_dir.joinpath('config_{}.json'.format(self.search_algorithm)))
 
             # master
             master = create_master(config.resource.type)
@@ -50,7 +45,7 @@ class IntegrationTest(BaseTest):
 
             storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage)
+            self.evaluate(work_dir, storage, config)
 
             self.result_comparison.append(storage.result.get_objectives())
 
@@ -68,14 +63,9 @@ class IntegrationTest(BaseTest):
             with open(new_config_file, 'w') as f:
                 f.write(yaml.dump(yml, default_flow_style=False))
 
-<<<<<<< HEAD
+            new_config_file = create_tmp_config(new_config_file)
             config = load_config(new_config_file)
             assert config.resource.type == 'python_local'
-=======
-            new_config_file = create_tmp_config(new_config_file)
-            config = Config(new_config_file)
-            assert config.resource_type.get() == 'python_local'
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
             # master
             master = create_master(config.resource.type)
@@ -88,7 +78,7 @@ class IntegrationTest(BaseTest):
             storage = Storage(ws=Path(config.generic.workspace))
 
             subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage)
+            self.evaluate(work_dir, storage, config)
 
             print(storage.result.get_objectives())
             self.result_comparison.append(storage.result.get_objectives())
@@ -99,11 +89,11 @@ class IntegrationTest(BaseTest):
         for i in range(len(data_0)):
             assert data_0[i] == data_1[i]
 
-    def evaluate(self, work_dir, storage):
+    def evaluate(self, work_dir, storage, config):
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
-        assert finished == self.config.optimize.trial_number
+        assert finished == config.optimize.trial_number
         assert ready == 0
         assert running == 0
         final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)

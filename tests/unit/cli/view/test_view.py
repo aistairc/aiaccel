@@ -2,13 +2,10 @@
 from aiaccel.cli.view import Viewer
 from aiaccel.config import load_config
 
-from aiaccel.storage.storage import Storage
+from aiaccel.workspace import Workspace
 
-<<<<<<< HEAD
-from .base import config_path, t_base, ws
-=======
+from aiaccel.storage.storage import Storage
 from pathlib import Path
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
 
 def test_view(clean_work_dir, work_dir, create_tmp_config):
@@ -18,10 +15,10 @@ def test_view(clean_work_dir, work_dir, create_tmp_config):
         workspace.clean()
     workspace.create()
 
-    config_path = pathlib.Path('tests/test_data/config.json')
+    config_path = Path('tests/test_data/config.json')
     config_path = create_tmp_config(config_path)
-    config = Config(config_path)
-    storage = Storage(ws=Path(config.workspace.get()))
+    config = load_config(config_path)
+    storage = Storage(ws=Path(config.generic.workspace))
 
     trial_id = 5
     objective = 42.0

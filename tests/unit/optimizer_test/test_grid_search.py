@@ -120,40 +120,14 @@ class TestGridOptimizer(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-<<<<<<< HEAD
         optimizer = GridOptimizer(self.configs['config_grid.json'])
-=======
-        self.grid_config_json = create_tmp_config(self.grid_config_json)
-
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         optimizer.pre_process()
 
     def test_get_parameter_index(self, create_tmp_config):
         self.workspace.clean()
         self.workspace.create()
 
-<<<<<<< HEAD
         optimizer = GridOptimizer(self.configs['config_grid.json'])
-=======
-        self.grid_config_json = create_tmp_config(self.grid_config_json)
-
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         optimizer.pre_process()
         assert optimizer.get_parameter_index() == [0 for _ in range(0, 10)]
 
@@ -168,20 +142,7 @@ class TestGridOptimizer(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-<<<<<<< HEAD
         optimizer = GridOptimizer(self.configs['config_grid.json'])
-=======
-        self.grid_config_json = create_tmp_config(self.grid_config_json)
-
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         optimizer.pre_process()
         max_index = functools.reduce(
             lambda x, y: x*y,
@@ -193,25 +154,12 @@ class TestGridOptimizer(BaseTest):
         assert len(optimizer.generate_parameter()) == 0
 
         optimizer.generate_index = 0
-        assert len(optimizer.generate_parameter()) == self.config.optimize.trial_number
+        assert len(optimizer.generate_parameter()) == self.configs['config_grid.json'].optimize.trial_number
 
     def test_generate_initial_parameter(self, create_tmp_config):
         self.workspace.clean()
         self.workspace.create()
 
-<<<<<<< HEAD
         optimizer = GridOptimizer(self.configs['config_grid.json'])
-=======
-        self.grid_config_json = create_tmp_config(self.grid_config_json)
-
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
         optimizer.pre_process()
         optimizer.generate_initial_parameter()

@@ -98,7 +98,8 @@ class ConditionConfig:
     loop: int
     minimum: Union[float, int]
     maximum: Union[float, int]
-    passed: bool
+    passed: Optional[bool]
+    best: Optional[Union[float, int]]
 
 
 @dataclass

@@ -5,36 +5,33 @@ import fasteners
 import yaml
 
 import aiaccel
-from omegaconf import OmegaConf
 
 
 def create_yaml(path: Path, content: dict, dict_lock: Path = None) -> None:
     """Create a yaml file.
-
     Args:
         path (Path): The path of the created yaml file.
         content (dict): The content of the created yaml file.
         dict_lock (Path): The path to store lock files.
-
     Returns:
         None
     """
-
     if dict_lock is None:
-        OmegaConf.save(content, path)
+        with open(path, 'w') as f:
+            f.write(yaml.dump(content, default_flow_style=False))
     else:
-        with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
-            OmegaConf.save(content, path)
+        with fasteners.InterProcessLock(
+                interprocess_lock_file(path, dict_lock)):
+            with open(path, 'w') as f:
+                f.write(yaml.dump(content, default_flow_style=False))
 
 
 def file_create(path: Path, content: str, dict_lock: Path = None) -> None:
     """Create a text file.
-
     Args:
         path (Path): The path of the created file.
         content (str): The content of the created file.
         dict_lock (Path): The path to store lock files.
-
     Returns:
         None
     """
@@ -50,11 +47,9 @@ def file_create(path: Path, content: str, dict_lock: Path = None) -> None:
 
 def file_delete(path: Path, dict_lock: Path = None) -> None:
     """Delete a file.
-
     Args:
         path (Path): A deleted file path.
         dict_lock (Path): A path to store lock files.
-
     Returns:
         None
     """
@@ -69,11 +64,9 @@ def file_delete(path: Path, dict_lock: Path = None) -> None:
 
 def file_read(path: Path, dict_lock: Path = None) -> str:
     """Read a file.
-
     Args:
         path (Path): A path of reading file.
         dict_lock (Path): A path to store lock files.
-
     Returns:
         str: A content of read file.
     """
@@ -94,12 +87,10 @@ def file_read(path: Path, dict_lock: Path = None) -> str:
 def get_dict_files(directory: Path, pattern: str, dict_lock: Path = None) ->\
         List[Path]:
     """Get files matching a pattern in a directory.
-
     Args:
         directory (Path): A directory to search files.
         pattern (str): A regular expression.
         dict_lock (Path): A directory to store lock files.
-
     Returns:
         list: Matched files.
     """
@@ -120,11 +111,9 @@ def get_dict_files(directory: Path, pattern: str, dict_lock: Path = None) ->\
 
 def get_file_result(path, dict_lock=None):
     """Get files in result directory.
-
     Args:
         path (Path): A path to result directory.
         dict_lock (Path): A directory to store lock files.
-
     Returns:
         list: Files in result directory.
     """
@@ -138,11 +127,9 @@ def get_file_result(path, dict_lock=None):
 
 def get_file_result_hp(path, dict_lock=None):
     """Get files in result directory.
-
     Args:
         path (Path): A path to result directory.
         dict_lock (Path): A directory to store lock files.
-
     Returns:
         list: Files in result directory.
     """
@@ -156,12 +143,10 @@ def get_file_result_hp(path, dict_lock=None):
 
 def interprocess_lock_file(path: Path, dict_lock: Path) -> Path:
     """Get a directory of storing lock files.
-
     Args:
         path (Path): This base name directory will be created in a
             dict_lock directory.
         dict_lock (Path): A directory to store lock files.
-
     Returns:
         Path: A directory which path and dict_lock is joined.
     """
@@ -170,11 +155,9 @@ def interprocess_lock_file(path: Path, dict_lock: Path) -> Path:
 
 def load_yaml(path: Path, dict_lock: Path = None) -> dict:
     """Load a content of a yaml file.
-
     Args:
         path (Path): A path of a yaml file.
         dict_lock (Path): A directory to store lock files.
-
     Returns:
         dict: A loaded content.
     """
@@ -190,11 +173,9 @@ def load_yaml(path: Path, dict_lock: Path = None) -> dict:
 
 def make_directory(d: Path, dict_lock: Path = None) -> None:
     """Make a directory.
-
     Args:
         d (Path): A path of making directory.
         dict_lock (Path): A directory to store lock files.
-
     Returns:
         None
     """
@@ -209,11 +190,9 @@ def make_directory(d: Path, dict_lock: Path = None) -> None:
 
 def make_directories(ds: list, dict_lock: Path = None) -> None:
     """Make directories.
-
     Args:
         ds (List[Path]): A list of making directories.
         dict_lock (Path): A directory to store lock files.
-
     Returns:
         None
     """

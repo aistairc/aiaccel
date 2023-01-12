@@ -19,12 +19,8 @@ class RandomGenerationTest(BaseTest):
 
         # random execution
         config_file = test_data_dir.joinpath('config_random.yaml')
-<<<<<<< HEAD
-        config = load_config(config_file)
-=======
         config_file = create_tmp_config(config_file)
-        config = Config(config_file)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+        config = load_config(config_file)
 
         with self.create_main(python_file):
             storage = Storage(ws=Path(config.generic.workspace))
@@ -34,12 +30,8 @@ class RandomGenerationTest(BaseTest):
 
         # tpe execution
         config_file = test_data_dir.joinpath('config_tpe.yaml')
-<<<<<<< HEAD
-        config = load_config(config_file)
-=======
         config_file = create_tmp_config(config_file)
-        config = Config(config_file)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+        config = load_config(config_file)
 
         with self.create_main(python_file):
             storage = Storage(ws=Path(config.generic.workspace))
@@ -51,12 +43,8 @@ class RandomGenerationTest(BaseTest):
 
         # nelder-mead execution
         config_file = test_data_dir.joinpath('config_nelder-mead.yaml')
-<<<<<<< HEAD
-        config = load_config(config_file)
-=======
         config_file = create_tmp_config(config_file)
-        config = Config(config_file)
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
+        config = load_config(config_file)
 
         with self.create_main(python_file):
             storage = Storage(ws=Path(config.generic.workspace))

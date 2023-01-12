@@ -7,6 +7,7 @@ from pathlib import Path
 import fasteners
 import pytest
 from aiaccel.config import load_config
+from aiaccel.workspace import Workspace
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml, load_yaml
 import json
@@ -150,11 +151,6 @@ def root_dir():
 
 
 @pytest.fixture(scope="session")
-<<<<<<< HEAD
-def work_dir(load_test_config, data_dir):
-    test_config = load_test_config()
-    return Path(test_config.generic.workspace).resolve()
-=======
 def work_dir(tmpdir):
     return tmpdir.joinpath('work')
 
@@ -185,10 +181,12 @@ def create_tmp_config(data_dir, tmpdir, work_dir):
             with open(tmp_conf_path, 'w') as f:
                 json.dump(json_obj, f)
 
+        ws = Workspace(str(work_dir))
+        ws.create()
+
         return tmp_conf_path
 
     return _create_tmp_config
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
 
 
 @pytest.fixture(scope="session")

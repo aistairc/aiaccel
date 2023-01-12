@@ -196,54 +196,29 @@ class BaseTest(object):
 
     @pytest.fixture(autouse=True)
     def _setup(self, tmpdir, work_dir, create_tmp_config, cd_work):
-        test_data_dir = Path(__file__).resolve().parent.joinpath('test_data')
-        self.test_data_dir = test_data_dir
-<<<<<<< HEAD
-        test_config_json = test_data_dir.joinpath('config.json')
-        self.config = load_config(test_config_json)
-
-=======
-        self.config_random_path = test_data_dir.joinpath('config_random.json')
-        self.config_sobol_path = test_data_dir.joinpath('config_sobol.json')
-        self.config_random = Config(self.config_random_path)
-        self.config_sobol = Config(self.config_sobol_path)
-        self.config_json = test_data_dir.joinpath('config.json')
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
-        self.grid_config_json = test_data_dir.joinpath('grid_config.json')
-        # self.config_random = load_config(self.config_random_path)
-        self.config_json = test_data_dir.joinpath('config.json')
-        # self.config_grid = load_config(self.grid_config_json)
+        self.test_data_dir = Path(__file__).resolve().parent.joinpath('test_data')
+        self.config_json_path = create_tmp_config(self.test_data_dir.joinpath('config.json'))
 
         self.configs = {
-            "config.json": load_config(test_data_dir.joinpath('config.json')), 
-            "config_random.json": load_config(test_data_dir.joinpath('config_random.json')),
-            "config_grid.json": load_config(test_data_dir.joinpath('grid_config.json')),
-            "config_sobol.json": load_config(test_data_dir.joinpath('config_sobol.json')),
-            "config_sobol_no_initial.json": load_config(test_data_dir.joinpath('config_sobol_no_initial.json')),
-            "config_tpe.json": load_config(test_data_dir.joinpath('config_tpe.json')),
-            "config_tpe_2.json": load_config(test_data_dir.joinpath('config_tpe_2.json')),
-            "config_abci_json": load_config(test_data_dir.joinpath('config_abci.json')),
-            "config_nelder_mead.json": load_config(test_data_dir.joinpath('config_nelder_mead.json'))
+            "config.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config.json'))), 
+            "config_random.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_random.json'))),
+            "config_grid.json": load_config(create_tmp_config(self.test_data_dir.joinpath('grid_config.json'))),
+            "config_sobol.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol.json'))),
+            "config_sobol_no_initial.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol_no_initial.json'))),
+            "config_tpe.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe.json'))),
+            "config_tpe_2.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe_2.json'))),
+            "config_abci_json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_abci.json'))),
+            "config_nelder_mead.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead.json')))
         }
+
+        self.tmpdir_path = tmpdir
 
         for label in self.configs.keys():
             self.configs[label].resume = None
             self.configs[label].clean = None
+            self.configs[label].generic.workspace = self.tmpdir_path / 'work'
 
-        self.config_yaml = test_data_dir.joinpath('config.yml')
-<<<<<<< HEAD
-        work_dir = Path(self.config.generic.workspace).resolve()
-        self.work_dir = work_dir
-=======
-
-        self.tmpdir_path = tmpdir
->>>>>>> 392d1634b3b761e737cfcbca38507b668d7ab129
-
-        self.dict_lock = work_dir.joinpath('lock')
-
-        
-
-        self.workspace = Workspace(str(work_dir))
+        self.workspace = Workspace(str(self.tmpdir_path / 'work'))
         if self.workspace.path.exists():
             self.workspace.clean()
         self.workspace.create()
@@ -260,9 +235,6 @@ class BaseTest(object):
 
         self.result_comparison = []
 
-        self.config_json = create_tmp_config(self.config_json)
-        self.config = Config(self.config_json)
-
     @contextmanager
     def create_main(self, from_file_path=None):
         if from_file_path is None:
@@ -270,6 +242,3 @@ class BaseTest(object):
         to_file_path = self.tmpdir_path.joinpath('original_main.py')
         shutil.copy(from_file_path, to_file_path)
         yield
-
-    def get_workspace_path(self):
-        return self.work_dir
