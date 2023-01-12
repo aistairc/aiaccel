@@ -29,8 +29,9 @@ class TestLocalScheduler(BaseTest):
         scheduler.jobs.append(job)
         assert scheduler.get_stats() is None
 
-    def test_parse_trial_id(self, config_json):
-        config = load_config(config_json)
+    def test_parse_trial_id(self, config_json, database_remove):
+        database_remove()
+        config = self.configs['config.json']
         scheduler = LocalScheduler(config)
         s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
