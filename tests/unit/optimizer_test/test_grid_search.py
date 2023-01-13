@@ -15,7 +15,7 @@ import pytest
 
 def test_get_grid_options():
     test_data_dir = Path(__file__).resolve().parent.parent.parent.joinpath('test_data')
-    grid_config_json = test_data_dir.joinpath('grid_config.json')
+    grid_config_json = test_data_dir.joinpath('config_grid.json')
     config_grid = load_config(grid_config_json)
     config_grid.resume = None
 

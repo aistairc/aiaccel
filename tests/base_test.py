@@ -202,13 +202,18 @@ class BaseTest(object):
         self.configs = {
             "config.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config.json'))), 
             "config_random.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_random.json'))),
-            "config_grid.json": load_config(create_tmp_config(self.test_data_dir.joinpath('grid_config.json'))),
+            "config_grid.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_grid.json'))),
             "config_sobol.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol.json'))),
             "config_sobol_no_initial.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol_no_initial.json'))),
             "config_tpe.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe.json'))),
             "config_tpe_2.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe_2.json'))),
             "config_abci_json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_abci.json'))),
-            "config_nelder_mead.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead.json')))
+            "config_nelder_mead.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead.json'))),
+            "config_nelder_mead_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead_resumption.json'))),
+            "config_random_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_random_resumption.json'))),
+            "config_sobol_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol_resumption.json'))),
+            "config_tpe_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe_resumption.json'))),
+            "config_grid_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_grid_resumption.json'))),
         }
 
         self.tmpdir_path = tmpdir

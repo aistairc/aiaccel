@@ -23,7 +23,7 @@ WORK_FILES = [
     'original_main.py',
     'wrapper.py',
     'wrapper_abci.sh',
-    'grid_config.json'
+    'config_grid.json'
 ]
 
 
@@ -96,7 +96,7 @@ def config_json(data_dir):
 
 @pytest.fixture(scope="session")
 def grid_config_json(data_dir):
-    return data_dir.joinpath('grid_config.json')
+    return data_dir.joinpath('config_grid.json')
 
 
 @pytest.fixture
@@ -167,17 +167,17 @@ def create_tmp_config(data_dir, tmpdir, work_dir):
     def _create_tmp_config(conf_path=None):
         if conf_path is None:
             conf_path = data_dir.joinpath('config.yaml')
-
+        conf_path.name
         if conf_path.suffix == ".yaml" or conf_path.suffix == ".yml":
             yml = load_yaml(conf_path)
             yml['generic']['workspace'] = str(work_dir)
-            tmp_conf_path = tmpdir.joinpath('config.yaml')
+            tmp_conf_path = tmpdir.joinpath(conf_path.name)
             create_yaml(tmp_conf_path, yml)
         elif conf_path.suffix == ".json":
             with open(conf_path, 'r') as f:
                 json_obj = json.load(f)
                 json_obj['generic']['workspace'] = str(work_dir)
-                tmp_conf_path = tmpdir.joinpath('config.json')
+                tmp_conf_path = tmpdir.joinpath(conf_path.name)
             with open(tmp_conf_path, 'w') as f:
                 json.dump(json_obj, f)
 

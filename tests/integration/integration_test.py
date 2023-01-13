@@ -32,8 +32,8 @@ class IntegrationTest(BaseTest):
         # local test
         #
         with self.create_main():
+            print(self.search_algorithm)
             config = self.configs['config_{}.json'.format(self.search_algorithm)]
-            config_file = create_tmp_config(self.test_data_dir.joinpath('config_{}.json'.format(self.search_algorithm)))
 
             # master
             master = create_master(config.resource.type)
@@ -44,8 +44,10 @@ class IntegrationTest(BaseTest):
             assert scheduler == LocalScheduler
 
             storage = Storage(ws=Path(config.generic.workspace))
-            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage, config)
+            print(f'\n{config.config_path}\n')
+            subprocess.Popen(['cat', str(config.config_path)]).wait()
+            subprocess.Popen(['aiaccel-start', '--config', str(config.config_path), '--clean']).wait()
+            self.evaluate(config)
 
             self.result_comparison.append(storage.result.get_objectives())
 
@@ -53,18 +55,18 @@ class IntegrationTest(BaseTest):
         # pylocal test
         #
         with self.create_main():
-            config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
-            new_config_file = tmpdir.joinpath('config_{}_pylocal.yaml'.format(self.search_algorithm))
+            config = self.configs['config_{}.json'.format(self.search_algorithm)]
+            base_dir = Path(config.config_path).parent
+            new_config_file_path = base_dir / f'config_{self.search_algorithm}_pylocal.yaml'
 
-            with open(config_file, 'r') as f:
+            with open(config.config_path, 'r') as f:
                 yml = yaml.load(f, Loader=yaml.SafeLoader)
             yml['resource']['type'] = 'python_local'
 
-            with open(new_config_file, 'w') as f:
+            with open(new_config_file_path, 'w') as f:
                 f.write(yaml.dump(yml, default_flow_style=False))
 
-            new_config_file = create_tmp_config(new_config_file)
-            config = load_config(new_config_file)
+            config = load_config(create_tmp_config(new_config_file_path))
             assert config.resource.type == 'python_local'
 
             # master
@@ -77,8 +79,10 @@ class IntegrationTest(BaseTest):
 
             storage = Storage(ws=Path(config.generic.workspace))
 
-            subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage, config)
+            subprocess.Popen(['cat', str(config.config_path)]).wait()
+            subprocess.Popen(['aiaccel-start', '--config', str(new_config_file_path), '--clean']).wait()
+
+            self.evaluate(config)
 
             print(storage.result.get_objectives())
             self.result_comparison.append(storage.result.get_objectives())
@@ -89,7 +93,10 @@ class IntegrationTest(BaseTest):
         for i in range(len(data_0)):
             assert data_0[i] == data_1[i]
 
-    def evaluate(self, work_dir, storage, config):
+    def evaluate(self, config):
+        storage = Storage(ws=Path(config.generic.workspace))
+        work_dir = Path(config.generic.workspace)
+
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
