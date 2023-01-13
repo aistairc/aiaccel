@@ -18,14 +18,18 @@ logger.addHandler(StreamHandler())
 
 
 class BaseConfig(metaclass=ABCMeta):
-    """
-    Fork by confile: https://github.com/777nancy/confile
+    """An interface for all config classes.
 
-    This is an interface for all config classes.
+    Fork by confile: https://github.com/777nancy/confile
     """
 
     @abstractmethod
     def get_property(self, key, *keys):
+        """_summary_
+
+        Args:
+            key (_type_): _description_
+        """
         pass
 
     @abstractmethod

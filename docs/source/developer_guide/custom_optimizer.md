@@ -153,7 +153,7 @@ examples/sphereディレクトリをコピーし，sphereディレクトリに�
 
 ***/workspace/aiaccel/work/sphere/config.yaml***
 
-```yaml:config.yaml
+```yaml :config.yaml
 generic:
   workspace: "./work"
   job_command: "python user.py"
@@ -236,7 +236,7 @@ optimize:
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:custom_optimizer.py
+```python :custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -283,7 +283,7 @@ sampleメソッド内では，さらにHyperParameterインスタンスである
 
 ***/workspace/aiaccel/aiaccel/parameter.py***
 
-```python:aiaccel/parameter.py
+```python :aiaccel/parameter.py
         elif self.type == 'FLOAT':
             value = np.random.uniform(self.lower, self.upper)
 ```
@@ -312,7 +312,7 @@ aiaccel/parameter.pyのHyperParameterクラスではnumpyのrandom.uniformを実
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:aiaccel/optimizer/custom_optimizer.py
+```python :aiaccel/optimizer/custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 import numpy as np
 
@@ -353,7 +353,7 @@ class RandomOptimizer(AbstractOptimizer):
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:custom_optimizer.py
+```python :custom_optimizer.py
             value = min(max(value, hp.lower), hp.upper)
 ```
 
@@ -397,7 +397,7 @@ muとsigmaが追加されました．
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:custom_optimizer.py
+```python :custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 import numpy as np
 
@@ -419,7 +419,7 @@ __init__メソッドを追加し，コンフィグレーションからmuとsigm
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:custom_optimizer.py
+```python :custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 import numpy as np
 

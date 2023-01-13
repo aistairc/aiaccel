@@ -14,16 +14,16 @@ class AbstractOptimizer(AbstractModule):
 
     Attributes:
         options (Dict[str, Union[str, int, bool]]): A dictionary
-        containing command line options.
+            containing command line options.
         hp_ready (int): A ready number of hyper parameters.
         hp_running (int): A running number of hyper prameters.
         hp_finished (int): A finished number of hyper parameters.
         num_of_generated_parameter (int): A number of generated hyper
-        paramters.
+            paramters.
         all_parameter_generated (bool): A boolean indicating if all
-        parameters are generated or not.
+            parameters are generated or not.
         params (HyperParameterConfiguration): Loaded hyper parameter
-        configuration object.
+            configuration object.
         trial_id (TrialId): TrialId object.
     """
 
@@ -32,7 +32,7 @@ class AbstractOptimizer(AbstractModule):
 
         Args:
             options (Dict[str, Union[str, int, bool]]): A dictionary
-            containing command line options.
+                containing command line options.
 
         Returns:
             None
