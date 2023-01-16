@@ -5,9 +5,9 @@ from .sobol_optimizer import SobolOptimizer
 from .tpe_optimizer import TpeOptimizer
 
 __all__ = [
-    GridOptimizer,
-    RandomOptimizer,
-    SobolOptimizer,
-    NelderMeadOptimizer,
-    TpeOptimizer
+    'GridOptimizer',
+    'RandomOptimizer',
+    'SobolOptimizer',
+    'NelderMeadOptimizer',
+    'TpeOptimizer'
 ]
