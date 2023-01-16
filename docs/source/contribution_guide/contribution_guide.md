@@ -130,9 +130,7 @@
 ## 注意事項
 ### ブランチ名
 - ブランチ名は feature/* としてください．
-### 気にしすぎない
-- ルールはあくまで目安です．
-- 型に嵌めようとするあまり，本来の目的を見失ったり，アイデアの共有をためらったりしないでください．
+
 
 
 # ドキュメンテーション (WIP)
@@ -189,85 +187,26 @@ pytest tests/unit/optimizer_test/test_abstract_optimizer.py
     - [aiaccel-specific なスタイル](#aiaccel-specific-なスタイル)についても確認してください．
 - aiaccel では型ヒントの検証は行いませんが，できる限り型ヒントを記述してください．
     - aiaccel ではバージョン 3.8 の Python をサポートするため，ビルトインな "`list`" などを型ヒントに使用する際は，future-import を行ってください．
-    - 上記と同様の理由で `typing.Optional` や `typing.Union` をバーティカルバー "`|`" で置き換えることはできません．
 
 
 ## aiaccel-specific なスタイル
 
 ### プレフィックス `_` の追加 (プライベートなメソッド，関数，フィールド，及びクラスの名前)
+
 #### Example
-```python
-class PublicClass:  # 外部ライブラリから参照可能なクラス
-    def __init__(self):
-        self.public_field = 10            # 外部ライブラリから参照可
-        self._package_private_field = 20  # 同一ライブラリ内からのみ参照可
-        self._private_field = 30          # 同一クラス内からのみ参照可
-
-    def public_method(self):
-        pass
-
-    def _package_private_method(self):
-        pass
-
-    def _private_method(self):
-        pass
-
-
-class _PackagePrivateClass:  # 同一ライブラリからのみ参照可能なクラス
-    def __init__(self):
-        self.package_private_field = 10  # 同一ライブラリ内からのみ参照可
-        self._private_field = 20         # 同一クラス内からのみ参照可
-
-    def package_private_method(self):
-        pass
-
-    def _private_method(self):
-        pass
-
-
-class _PrivateClass:  # 同一モジュールからしか参照できないクラス
-    def __init__(self):
-        self.package_private_field = 10  # 同一モジュール内からのみ参照可
-        self._private_field = 20         # 同一クラス内からのみ参照可
-
-    def package_private_method(self):
-        pass
-
-    def _private_method(self):
-        pass
-
-
-def _package_private_function():  # 同一ライブラリ内からのみ参照可能な関数
-    pass
-
-
-def _private_function():  # 同一モジュール内からのみ参照可能な関数
-    pass
-```
 
 
 ### テスト
 
-Prefer pytest unittest with standard assertions over unittest tests.
-
 #### Good Example
-```python
-def test_foo():
-    ...
-    assert actual == expected
-```
+
 #### Bad Example
-```python
-def TestFoo(unittest.Testcase):
-    def test_foo(self):
-        ...
-        self.assertEqual(actual, expected)
-```
+
 
 
 ### Docstrings
 
-基本的には [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) に準拠する形で Docstrings を記述します．
+基本的には [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) に準拠する形で docstrings を記述します．
 ただし，以下の例外についても注意してください．
 
 - 各モジュールの docstrings は必須ではありません．
@@ -277,106 +216,4 @@ def TestFoo(unittest.Testcase):
 - Python オブジェクトへのリンクは *sphinx-style* なリンクを使用します.
 
 #### Example
-```python
-def example_function(param1: int, param2: str) -> bool:
-    """An example of function docstrings.
-    
-    Example:
-        Using `testsetup` and `testcode`.
 
-        .. testsetup::
-            import numpy as np
-                
-        .. testcode::
-            x = np.zeros(10)
-
-    Args:
-        param1 (int): The first parameter.
-        param2 (str): The second parameter.
-
-    Returns:
-        bool: `True` if success, `False` otherwise.
-
-    """
-    return True
-```
-```python
-class ExampleClass(object):
-    """The summary line for a class docstring should fit on one line.
-
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section.
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    The `__init__` method must be documented in the class level docstring,
-    not as a docstring on the `__init__` method.
-
-    Args:
-        param1:
-            Description of `param1`.
-        param2:
-            Description of `param2`. Multiple
-            lines are supported.
-
-    Attributes:
-        attr1:
-            Description of `attr1`.
-        attr2:
-            Description of `attr2`.
-
-    """
-
-    def __init__(self, param1: str, param2: Optional[int] = 0):
-        self.attr1 = param1
-        self.attr2 = param2
-
-    @property
-    def readonly_property(self) -> str:
-        """Properties should be documented in their getter method."""
-        return "readonly_property"
-
-    @property
-    def readwrite_property(self) -> List[str]:
-        """Properties with both a getter and setter
-        should only be documented in their getter method.
-
-        If the setter method contains notable behavior, it should be
-        mentioned here.
-        """
-        return ["readwrite_property"]
-
-    @readwrite_property.setter
-    def readwrite_property(self, value: int) -> int:
-        value
-
-    def example_method(self, param1: str, param2: int) -> bool:
-        """Class methods are similar to regular functions.
-
-        Example:
-            Using `testsetup` and `testcode`.
-
-            .. testsetup::
-                import numpy as np
-                
-            .. testcode::
-                x = np.zeros(10)
-
-        Note:
-            Do not include the `self` parameter in the ``Args`` section.
-            (Instead of ``Note:``, you can use ``.. note::``.)
-
-        Args:
-            param1:
-                The first parameter.
-            param2:
-                The second parameter.
-
-        Returns:
-            :obj:`True` if successful, :obj:`False` otherwise.
-
-        """
-        return True
-```
