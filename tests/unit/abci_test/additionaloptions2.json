@@ -4,7 +4,6 @@
     "name_length": 6,
     "project_name": "sphere",
     "randseed": 1,
-    "silent_mode": false,
     "workspace": "./work",
     "user_program_name": "user.py",
     "objective_function_name": "main"

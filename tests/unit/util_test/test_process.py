@@ -14,8 +14,8 @@ from aiaccel.util.process import (OutputHandler, exec_runner,
 
 
 def test_exec_runner():
-    assert type(exec_runner(['ps'], True)) is subprocess.Popen
-    assert type(exec_runner(['ps'], True)) is subprocess.Popen
+    assert type(exec_runner(['ps'])) is subprocess.Popen
+    assert type(exec_runner(['ps'])) is subprocess.Popen
 
 
 def test_subprocess_ps():
@@ -111,7 +111,8 @@ def test_OutputHandler():
         def __init__(self):
             self.logger = logging.getLogger('root.master')
 
-    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE), 'test')
+    trial_id = 0
+    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE), 'test', trial_id)
 
     _ouputhandler._abort = False
 
@@ -122,17 +123,19 @@ def test_OutputHandler():
     assert _ouputhandler.run() is None
 
 
-    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=None), 'test')
+    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=None), 'test', trial_id)
     assert _ouputhandler.run() is None
 
     o = b'\xe3\x81\x82'
     e = b'\xe3\x81\x82'
-    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE, stderr=STDOUT), 'test')
+    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE, stderr=STDOUT), 'test', trial_id)
     with patch.object(_ouputhandler._proc, 'communicate', return_value=(o, e)):
-        assert _ouputhandler.run() is None
+        with pytest.raises(RuntimeError):
+            assert _ouputhandler.run() is None
 
     o = b'\xe3\x81\x82'
     e = b'\0'
-    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE, stderr=PIPE), 'test')
+    _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE, stderr=PIPE), 'test', trial_id)
     with patch.object(_ouputhandler._proc, 'communicate', return_value=(o, e)):
-        assert _ouputhandler.run() is None
+        with pytest.raises(RuntimeError):
+            assert _ouputhandler.run() is None

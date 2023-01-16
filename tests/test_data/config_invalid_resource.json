@@ -6,7 +6,6 @@
     "name_length": 3,
     "project_name": "sphere",
     "randseed": 1,
-    "silent_mode": false,
     "workspace": "/tmp/work",
     "job_command": "python original_main.py"
   },
