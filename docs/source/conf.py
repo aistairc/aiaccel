@@ -74,7 +74,6 @@ myst_enable_extensions = [
 html_theme = 'sphinx_rtd_theme'
 html_show_sourcelink = False
 html_show_sphinx = False
-todo_include_todos = True
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -84,3 +83,7 @@ todo_include_todos = True
 gettext_compact = False
 locale_dirs = ['locale/']
 language = 'ja'
+
+# -- Extension configuration -------------------------------------------------
+todo_include_todos = True
+# autoclass_content = "both"

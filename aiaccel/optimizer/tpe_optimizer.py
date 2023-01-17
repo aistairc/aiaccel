@@ -19,6 +19,10 @@ class TPESamplerWrapper(optuna.samplers.TPESampler):
 class TpeOptimizer(AbstractOptimizer):
     """An optimizer class based on optuna.samplers.TPESampler.
 
+    Args:
+        options (dict[str, Union[str, int, bool]]): A dictionary
+            containing command line options.
+
     Attributes:
         parameter_pool (dict[int, list[dict[str, Union[float, int, str]]]]):
             A dictionary of parameters.
