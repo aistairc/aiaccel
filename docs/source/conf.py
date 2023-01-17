@@ -45,6 +45,25 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# Add optional syntaxes for MyST-Parser which are disabled by default.
+myst_enable_extensions = [
+    # "amsmath",
+    # "attrs_inline",
+    # "colon_fence",
+    # "deflist",
+    "dollarmath",
+    # "fieldlist",
+    # "html_admonition",
+    # "html_image",
+    # "inv_link",
+    # "linkify",
+    # "replacements",
+    # "smartquotes",
+    # "strikethrough",
+    # "substitution",
+    # "tasklist",
+]
+
 
 # -- Options for HTML output -------------------------------------------------
 
