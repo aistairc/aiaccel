@@ -135,7 +135,7 @@ class HyperParameter(object):
             self.step = parameter['step']
 
         if 'base' in parameter:
-            self.step = parameter['base']
+            self.base = parameter['base']
 
     def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
         """Sample a parameter.

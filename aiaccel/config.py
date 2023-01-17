@@ -291,7 +291,6 @@ class ConfigEntry:
 _DEFAULT_INIT_FAIL_COUNT = 100
 _DEFAULT_NAME_LENGTH = 6
 _DEFAULT_RAND_SEED = None
-_DEFAULT_SILENT_MODE = True
 _DEFAULT_WORKSPACE = "./work"
 _DEFAULT_MASTER_LOGFILE = "master.log"
 _DEFAULT_MASTER_FILE_LOG_LEVEL = "DEBUG"
@@ -327,7 +326,6 @@ _DEFAULT_NUM_NODE = 1
 _DEFAULT_JOB_SCRIPT_PREAMBLE = ""
 _DEFAULT_ABCI_GROUP = ""
 _DEFAULT_JOB_EXECUTION_OPTIONS = ""
-_DEFAULT_RUNNER_SEARCH_PATTERN = "run_*.sh"
 _DEFAULT_GOAL = "minimize"
 _DEFAULT_MAX_TRIAL_NUMBER = 0
 _DEFAULT_HYPERPARAMETERS = []
@@ -377,14 +375,6 @@ class Config:
     def define_items(self, config: ConfileWrapper, warn: bool):
         """ Define the configuration of the configuration file
         """
-        self.silent_mode = ConfigEntry(
-            config=config,
-            type=[bool],
-            default=_DEFAULT_SILENT_MODE,
-            warning=False,
-            group="ui",
-            keys=("silent_mode")
-        )
         self.workspace = ConfigEntry(
             config=config,
             type=[str],
@@ -580,18 +570,6 @@ class Config:
             group="job_setting",
             keys=("name_length")
         )
-        # Randomize the scheduling (default=False).
-        # This is probably not needed, but we'll keep it just in case.
-        # random_scheduling = True for random scheduling.
-        self.random_scheduling = ConfigEntry(
-            config=config,
-            type=[bool],
-            default=_DEFAULT_RANDOM_SCHESULING,
-            warning=False,
-            group="job_setting",
-            keys=("random_scheduling")
-        )
-
         # === resource defalt config ===
         self.resource_type = ConfigEntry(
             config=config,
@@ -634,14 +612,6 @@ class Config:
             warning=warn,
             group="ABCI",
             keys=("job_execution_options")
-        )
-        self.runner_search_pattern = ConfigEntry(
-            config=config,
-            type=[str],
-            default=_DEFAULT_RUNNER_SEARCH_PATTERN,
-            warning=False,
-            group="ABCI",
-            keys=("runner_search_pattern")
         )
 
         # === hyperparameter defalt config ===

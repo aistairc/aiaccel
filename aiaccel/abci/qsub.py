@@ -1,7 +1,7 @@
 from pathlib import Path
 
-import aiaccel
 from aiaccel.config import Config
+from aiaccel import dict_output
 
 ''' Example of stat
 stat = {
@@ -36,8 +36,7 @@ def create_qsub_command(config: Config, runner_file: Path) -> list:
         'qsub',
         '-g', f'{config.abci_group.get()}',
         '-j', 'y',
-        '-o', f'{path / aiaccel.dict_output}',
-
+        '-o', f'{path / dict_output}',
         str(runner_file)
     ]
 

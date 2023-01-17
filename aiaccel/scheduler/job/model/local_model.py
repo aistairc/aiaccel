@@ -22,18 +22,19 @@ class LocalModel(AbstractModel):
         runner_command = create_runner_command(
             obj.config.job_command.get(),
             obj.content,
-            str(obj.trial_id),
-            obj.config_path
+            obj.trial_id,
+            str(obj.config_path),
+            str(obj.command_error_output)
         )
 
-        obj.proc = exec_runner(
-            runner_command,
-            bool(obj.config.silent_mode.get())
-        )
+        obj.logger.info(f'runner command: {" ".join(runner_command)}')
+        obj.proc = exec_runner(runner_command)
 
         obj.th_oh = OutputHandler(
             obj.scheduler,
             obj.proc,
-            'Job'
+            'Job',
+            trial_id=obj.trial_id,
+            storage=obj.storage
         )
         obj.th_oh.start()

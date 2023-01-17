@@ -3,7 +3,7 @@ from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstruct import Abstract
+from aiaccel.storage.abstract import Abstract
 from aiaccel.storage.model import VariableTable
 from aiaccel.util.retry import retry
 
