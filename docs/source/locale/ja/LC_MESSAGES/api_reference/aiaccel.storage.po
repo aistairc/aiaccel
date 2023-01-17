@@ -26,10 +26,10 @@ msgid "Submodules"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.storage.rst:8
-msgid "aiaccel.storage.abstruct module"
+msgid "aiaccel.storage.abstract module"
 msgstr ""
 
-#: aiaccel.storage.abstruct.Abstract:1 aiaccel.storage.storage.Storage:1
+#: aiaccel.storage.abstract.Abstract:1 aiaccel.storage.storage.Storage:1
 #: aiaccel.storage.variable.Serializer:1 of
 msgid "ベースクラス: :py:class:`object`"
 msgstr ""
@@ -42,7 +42,7 @@ msgstr ""
 #: aiaccel.storage.jobstate.JobState:1 aiaccel.storage.result.Result:1
 #: aiaccel.storage.timestamp.TimeStamp:1 aiaccel.storage.trial.Trial:1
 #: aiaccel.storage.variable.Variable:1 of
-msgid "ベースクラス: :py:class:`~aiaccel.storage.abstruct.Abstract`"
+msgid "ベースクラス: :py:class:`~aiaccel.storage.abstract.Abstract`"
 msgstr ""
 
 #: aiaccel.storage.error.Error.all_delete:1 aiaccel.storage.hp.Hp.all_delete:1

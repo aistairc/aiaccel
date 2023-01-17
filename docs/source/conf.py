@@ -32,6 +32,7 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
+    'sphinx.ext.todo',
     'sphinx_rtd_theme',
     'sphinx_fontawesome',
     'myst_parser',
@@ -73,6 +74,7 @@ myst_enable_extensions = [
 html_theme = 'sphinx_rtd_theme'
 html_show_sourcelink = False
 html_show_sphinx = False
+todo_include_todos = True
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

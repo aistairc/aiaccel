@@ -25,11 +25,6 @@ class BaseConfig(metaclass=ABCMeta):
 
     @abstractmethod
     def get_property(self, key, *keys):
-        """_summary_
-
-        Args:
-            key (_type_): _description_
-        """
         pass
 
     @abstractmethod
@@ -165,15 +160,18 @@ class ConfigEntry:
         or for holding read values.
 
     Example:
-        workspace = ConfigEntry(
-            config=config,
-            type=[str],
-            default=_DEFAULT_WORKSPACE,
-            warning=warn,
-            group="generic",
-            keys=("workspace")
-        )
-        workspace.get()
+        ::
+
+            workspace = ConfigEntry(
+                config=config,
+                type=[str],
+                default=_DEFAULT_WORKSPACE,
+                warning=warn,
+                group="generic",
+                keys=("workspace")
+            )
+            workspace.get()
+
     """
 
     def __init__(

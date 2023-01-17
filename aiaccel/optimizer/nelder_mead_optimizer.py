@@ -11,7 +11,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     Attributes:
         nelder_mead (NelderMead): A class object implementing Nelder-Mead
-        method.
+            method.
         parameter_pool (list): A pool of parameters waiting for the process.
         order (list): A list of parameters being processed.
     """

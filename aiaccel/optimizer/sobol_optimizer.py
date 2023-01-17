@@ -11,8 +11,10 @@ class SobolOptimizer(AbstractOptimizer):
         generate_index (int): A number of generated hyper parameters.
         sampler (Sobol): Engine for generating (scrambled) Sobol' sequences.
 
-    ToDo: Make it clear to resume this optimizer with Sobol sampler. Current code resume the sampler counts with a
-        number of FINISHED PARAMETER FILES. Confirm whether the current code resumes for any timings of quits.
+    Todo:
+        Make it clear to resume this optimizer with Sobol sampler. Currentcode
+        resume the sampler counts with a number of FINISHED PARAMETER FILES.
+        Confirm whether the current code resumes for any timings of quits.
     """
 
     def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
