@@ -1,19 +1,15 @@
 from __future__ import annotations
-from aiaccel.util.time_tools import get_time_now
-from aiaccel.storage.storage import Storage
-from aiaccel.config import Config
-from pathlib import Path
-from collections.abc import Callable
-from typing import Any, Dict, Tuple, Union, Optional
-from logging import StreamHandler, getLogger
-from typing import Any, Union
 import logging
 import subprocess
 from argparse import ArgumentParser
 from functools import singledispatchmethod
-<< << << < HEAD
-== == == =
->>>>>> > ee1c9363def0f303270dde9929e8497b2547af77
+from typing import Any, Dict, Tuple, Union, Optional
+from collections.abc import Callable
+from pathlib import Path
+
+from aiaccel.config import Config
+from aiaccel.storage.storage import Storage
+from aiaccel.util.time_tools import get_time_now
 
 
 class _Message:
@@ -388,6 +384,7 @@ class Run:
             Optional[Union[float, int, str]], str]: A dictionary of parameters,
             a casted objective value, and error string.
         """
+        self.set_logging_basicConfig(trial_id)
         xs = self.get_any_trial_xs(trial_id)
         y = None
         err = ""
