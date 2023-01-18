@@ -260,7 +260,7 @@ class Run:
         log_path = log_dir / f"job_{trial_id}.log"
         if not log_dir.exists():
             log_dir.mkdir(parents=True)
-        logging.basicConfig(filename=log_path, level=logging.DEBUG)
+        logging.basicConfig(filename=log_path, level=logging.DEBUG, force=True)
 
     @singledispatchmethod
     def execute(self, func: callable, trial_id: int, y_data_type: Union[None, str]) -> tuple:

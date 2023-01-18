@@ -1,4 +1,4 @@
-from multiprocessing import Process
+from multiprocessing import Pool
 import importlib
 
 from typing import Union
@@ -8,6 +8,9 @@ from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
 from aiaccel.util.time_tools import get_time_now
 
+from aiaccel.storage.storage import Storage
+from aiaccel.config import Config
+
 
 class PylocalScheduler(AbstractScheduler):
     """A scheduler class running on a local computer.
@@ -16,15 +19,12 @@ class PylocalScheduler(AbstractScheduler):
 
     def __init__(self, options: dict) -> None:
         super().__init__(options)
-
-        self.run = None
-        self.user_func = None
-
+        self.pool = Pool(self.num_node)
+        self.run = Run(self.config_path)
         self.user_func = self.get_callable_object(
             self.config.python_file.get(),
             self.config.function.get()
         )
-        self.run = Run(self.config_path)
 
     def get_callable_object(self, file_path: Union[str, Path], attr_name: str) -> callable:
         """ Loads the specified module from the specified python program.
@@ -55,8 +55,11 @@ class PylocalScheduler(AbstractScheduler):
 
         for trial_id in trial_ids:
             self._serialize(trial_id)
-            pro = Process(target=self.execute, args=(trial_id,))
-            pro.start()
+            if self.num_node <= 1:
+                self.execute(trial_id)
+
+        if self.num_node > 1:
+            self.pool.map(self.execute_wrapper, trial_ids)
 
         return True
 
@@ -81,8 +84,21 @@ class PylocalScheduler(AbstractScheduler):
 
         return
 
+    def execute_wrapper(self, trial_id: int) -> None:
+        # Redefinition of variables to be removed by pickle conversion
+        self.config = Config(self.config_path)
+        self.storage = Storage(self.ws)
+        self.run = Run(self.config_path)
+        self.user_func = self.get_callable_object(
+            self.config.python_file.get(),
+            self.config.function.get()
+        )
+
+        return self.execute(trial_id)
+
     def __getstate__(self):
         obj = super().__getstate__()
         del obj['run']
         del obj['user_func']
+        del obj['pool']
         return obj
