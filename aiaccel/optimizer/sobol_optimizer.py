@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Union
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from scipy.stats import qmc
 
@@ -7,16 +9,18 @@ class SobolOptimizer(AbstractOptimizer):
 
     Attributes:
         generate_index (int): A number of generated hyper parameters.
+        sampler (Sobol): Engine for generating (scrambled) Sobol' sequences.
 
     ToDo: Make it clear to resume this optimizer with Sobol sampler. Current code resume the sampler counts with a
         number of FINISHED PARAMETER FILES. Confirm whether the current code resumes for any timings of quits.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
         """Initial method of SobolOptimizer.
 
         Args:
-            config (str): A file name of a configuration.
+            options (dict[str, Union[str, int, bool]]): A dictionary
+            containing command line options.
         """
         super().__init__(options)
         self.generate_index = None
@@ -40,14 +44,11 @@ class SobolOptimizer(AbstractOptimizer):
                 seed=self._rng
             )
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(self) -> list[dict[str, Union[float, int, str]]]:
         """Generate parameters.
 
-        Args:
-            number (Optional[int]): A number of generating parameters.
-
         Returns:
-            None
+            list[dict[str, Union[float, int, str]]]: A list of new parameters.
         """
         l_params = self.params.get_parameter_list()
         n_params = len(l_params)
@@ -73,7 +74,14 @@ class SobolOptimizer(AbstractOptimizer):
 
         return new_params
 
-    def generate_initial_parameter(self) -> list:
+    def generate_initial_parameter(
+        self
+    ) -> list[dict[str, Union[float, int, str]]]:
+        """Generate initial parameters.
+
+        Returns:
+            list[dict[str, Union[float, int, str]]]: A list of new parameters.
+        """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(
                 "Initial values cannot be specified for sobol."

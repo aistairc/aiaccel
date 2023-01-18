@@ -192,6 +192,14 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *type ("uniform_float", "uniform_int")*
 - *lower*
 - *upper*
+- *step*
+- *log*
+- *base*
+
+(注意) `log` が `true` の場合，`lower`，`upper`，および `step` は対数スケールでの値として参照されます．
+即ち，探索の下限は ${base}^{lower}$，上限は ${base}^{upper}$ と解釈され， $n\ (=0, 1, \cdots)$ 番目の点は ${base}^{lower} {base}^{n \times step}$ で与えられます．
+一方で `log` が `false` の場合，`lower`，`upper`，および `step` は，それぞれ探索の下限，上限，およびステップに直接対応します．
+この場合，`base` の値は使用されませんが，何も値を設定していないとエラーが生じます．
 
 ***"categorical" の場合***
 - *name*
@@ -213,6 +221,7 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *lower*
 - *upper*
 - *initial*
+- *log*
 
 ***"categorical" の場合***
 - *name*

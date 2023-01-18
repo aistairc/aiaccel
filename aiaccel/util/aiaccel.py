@@ -1,13 +1,19 @@
+from __future__ import annotations
+from aiaccel.util.time_tools import get_time_now
+from aiaccel.storage.storage import Storage
+from aiaccel.config import Config
+from pathlib import Path
+from collections.abc import Callable
+from typing import Any, Dict, Tuple, Union, Optional
+from logging import StreamHandler, getLogger
+from typing import Any, Union
 import logging
 import subprocess
 from argparse import ArgumentParser
 from functools import singledispatchmethod
-from typing import Any, Union
-from pathlib import Path
-
-from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.time_tools import get_time_now
+<< << << < HEAD
+== == == =
+>>>>>> > ee1c9363def0f303270dde9929e8497b2547af77
 
 
 class _Message:
@@ -134,7 +140,7 @@ class Messages:
 
 
 class WrapperInterface:
-    """ Interface of between Wrapper and User function.
+    """Interface between Wrapper and User function.
 
     Note:
         user function:
@@ -151,29 +157,47 @@ class WrapperInterface:
             "objective_err"
         )
 
-    def get_data(self, output) -> tuple:
-        """ For wrapper side.
+    def get_data(self, output: subprocess.CompletedProcess[bytes]) -> tuple:
+        """For wrapper side, gets stdout and stderr of user program.
 
         Args:
-            raw_stdout(str): stdout(UTF-8)
+            output (CompletedProcess[str]): A CompletedProcess instance which
+            have attributes args, returncode, stdout and stderr.
 
         Returns:
             tuple(ys: str, err: str):
-                ys (list) : The return value of user program.
+                ys (list): The return value of user program.
                 err (list): The error message of user program.
         """
-        ys = self.stdout.parse("objective_y", output.stdout.decode("UTF-8"))
+        ys = self.stdout.parse(
+            "objective_y", output.stdout.decode("UTF-8")
+        )
         if ys is None:
-            ys = self.stdout.parse("objective_y", output.stderr.decode("UTF-8"))
+            ys = self.stdout.parse(
+                "objective_y", output.stderr.decode("UTF-8")
+            )
 
-        err = self.stdout.parse("objective_err", output.stdout.decode("UTF-8"))
+        err = self.stdout.parse(
+            "objective_err", output.stdout.decode("UTF-8")
+        )
         if err is None:
-            err = self.stdout.parse("objective_err", output.stderr.decode("UTF-8"))
+            err = self.stdout.parse(
+                "objective_err", output.stderr.decode("UTF-8")
+            )
 
         return (ys, err)
 
-    def out(self, objective_y=None, objective_err=None):
-        """ For user program side.
+    def out(
+        self, objective_y: Union[float, int, str] = None,
+        objective_err: str = None
+    ) -> None:
+        """For user program side, outputs the objective value and error message
+        generated in the user-defined function.
+
+        Args:
+            objective_y (Union[float, int, str], optional): Objective value
+            returned from the user-defined function. Defaults to None.
+            objective_err (str, optional): Error message. Defaults to None.
         """
         y = objective_y if objective_y is not None else float("nan")
         e = objective_err if objective_err is not None else ""
@@ -188,7 +212,57 @@ class WrapperInterface:
 
 
 class Run:
-    def __init__(self, config_path: Union[str, Path, None] = None):
+    """An Interface between user program or python function and Storage object.
+
+    Attributes:
+        args (dict): A dictionary object which contains command line arguments
+        given by aiaccel.
+        trial_id (int): Trial Id.
+        config_path (Path): A Path object which points to the configuration
+        file.
+        config (Config): A Config object.
+        workspace (Path): A Path object which points to the workspace.
+        storage (Storage): A Storage object.
+        logger (Logger): A Logger object.
+        com (WrapperInterface): A WrapperInterface object.
+
+    Examples:
+        *User program*
+
+        ```
+        from aiaccel.util import aiaccel
+
+        run = aiaccel.Run()
+        run.execute_and_report("execute user_program")
+        ```
+        Note that `execute user_program` is a command to execute a user
+        program.
+        See :doc:`docs/source/examples/wrapper_sample`.
+
+        *Python function*
+
+        ```
+        from aiaccel.util import aiaccel
+
+        def func(p: dict[str, Any]) -> float:
+            # Write your operation to calculate objective value.
+
+            return objective_y
+
+        if __name__ == "__main__":
+            run = aiaccel.Run()
+            run.execute_and_report(func)
+        ```
+
+    """
+
+    def __init__(self, config_path: Optional[Union[str, Path]] = None) -> None:
+        """Initial method for Run.
+
+        Args:
+            config_path (Optional[Union[str, Path]], optional): A path to
+            configration file. Defaults to None.
+        """
         parser = ArgumentParser()
         parser.add_argument('--config', type=str)
         parser.add_argument('--trial_id', type=str, required=False)
@@ -211,11 +285,19 @@ class Run:
 
         self.com = WrapperInterface()
 
-    def generate_commands(self, command: str, xs: list) -> list:
+    def generate_commands(
+        self, command: str, xs: dict[str, Optional[Union[float, int, str]]]
+    ) -> list[str]:
         """ Generate execution command of user program.
 
+        Args:
+            command (str): An Execution command to calculate objective value.
+            xs (dict[str, Optional[Union[float, int, str]]]): A dictionary of
+            parameters of which key is parameter name and value is parameter
+            value.
+
         Returns:
-            list: execution command.
+            List: A list of execution command and options.
         """
         commands = command.split(" ")
         commands.append(f"--config={str(self.config_path)}")
@@ -230,7 +312,16 @@ class Run:
 
         return commands
 
-    def get_any_trial_xs(self, trial_id: int) -> dict:
+    def get_any_trial_xs(self, trial_id: int) -> Optional[dict[str]]:
+        """Gets a parameter list of specific trial ID from Storage object.
+
+        Args:
+            trial_id (int): Trial ID.
+
+        Returns:
+            Optional[dict]: A dictionary of parameters. None if the parameter
+            specified by the given trial ID is not registered.
+        """
         params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
         if params is None:
             return
@@ -241,7 +332,22 @@ class Run:
 
         return xs
 
-    def cast_y(self, y_value: any, y_data_type: Union[None, str]):
+    def cast_y(
+        self, y_value: Any, y_data_type: Optional[str]
+    ) -> Union[float, int, str]:
+        """Casts y to the appropriate data type.
+
+        Args:
+            y_value (Any): y value to be casted.
+            y_data_type (Optional[str]): Name of data type of objective value.
+
+        Returns:
+            Union[float, int, str]: Casted y value.
+
+        Raises:
+            TypeError: Occurs when given `y_data_type` is other than `float`,
+            `int`, or `str`.
+        """
         if y_data_type is None:
             y = y_value
         elif y_data_type.lower() == 'float':
@@ -263,15 +369,25 @@ class Run:
         logging.basicConfig(filename=log_path, level=logging.DEBUG, force=True)
 
     @singledispatchmethod
-    def execute(self, func: callable, trial_id: int, y_data_type: Union[None, str]) -> tuple:
-        """ Execution the target function.
+    def execute(
+        self, func: Callable[[dict[str, Union[float, int, str]]], float],
+        trial_id: int, y_data_type: Optional[str]
+    ) -> tuple[Optional[dict[str, Union[float, int, str]]],
+               Optional[Union[float, int, str]],
+               str]:
+        """Executes the target function.
 
-        Return:
-            Objective value.
+        Args:
+            func (Callable[[dict[str, Union[float, int, str]]], float]):
+            User-defined python function.
+            trial_id (int): Trial ID.
+            y_data_type (Optional[str]): Name of data type of objective value.
+
+        Returns:
+            tuple[Optional[dict[str, Union[float, int, str]]],
+            Optional[Union[float, int, str]], str]: A dictionary of parameters,
+            a casted objective value, and error string.
         """
-
-        self.set_logging_basicConfig(trial_id)
-
         xs = self.get_any_trial_xs(trial_id)
         y = None
         err = ""
@@ -286,11 +402,22 @@ class Run:
         return xs, y, err
 
     @execute.register
-    def _(self, command: str, trial_id: int, y_data_type: Union[None, str]) -> tuple:
-        """ Execution the user program.
+    def _(
+        self, command: str, trial_id: int, y_data_type: Optional[str]
+    ) -> Tuple[Optional[Dict[str, Union[float, int, str]]],
+               Optional[Union[float, int, str]],
+               str]:
+        """ Executes the user program.
+
+        Args:
+            command (str): An Execution command to calculate objective value.
+            trial_id (int): Trial ID.
+            y_data_type (Optional[str]): Name of data type of objective value.
 
         Returns:
-            ys (list): This is a list of the return values of the user program.
+            tuple[Optional[dict[str, Union[float, int, str]]],
+            Optional[Union[float, int, str]], str]: A dictionary of parameters,
+            a casted objective value, and error string.
         """
 
         self.set_logging_basicConfig(trial_id)
@@ -322,15 +449,29 @@ class Run:
         return xs, y, err
 
     @singledispatchmethod
-    def execute_and_report(self, func: callable, y_data_type: Union[None, str] = None):
-        """
+    def execute_and_report(
+        self, func: Callable[[dict[str, Union[float, int, str]]], float],
+        y_data_type: Optional[str] = None
+    ) -> None:
+        """Executes the target function and report the results.
+
+        Args:
+            func (Callable[[dict[str, Union[float, int, str]]], float]):
+            User-defined python function.
+            y_data_type (Optional[str], optional): Name of data type of
+            objective value. Defaults to None.
 
         Examples:
-            def obj(p)
-                y = p["x1"]
-                return y
-            run = aiaccel.Run()
-            run.execute_and_report(obj)
+            from aiaccel.util import aiaccel
+
+            def func(p: dict[str, Any]) -> float:
+                # Write your operation to calculate objective value.
+
+                return objective_y
+
+            if __name__ == "__main__":
+                run = aiaccel.Run()
+                run.execute_and_report(func)
         """
         start_time = get_time_now()
         xs, y, err = self.execute(func, self.trial_id, y_data_type)
@@ -339,13 +480,18 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: Union[None, str] = None):
-        """
+    def _(self, command: str, y_data_type: Optional[str] = None):
+        """Executes the user program.
+
+        Args:
+            command (str): An Execution command to calculate objective value.
+            y_data_type (Optional[str], optional): Name of data type of
+            objective value. Defaults to None.
 
         Examples:
+            from aiaccel.util import aiaccel
             run = aiaccel.Run()
-            p = run.parameters
-            run.execute_and_report(f"echo {p['x1']}", False)
+            run.execute_and_report("execute user_program")
         """
         start_time = get_time_now()
         xs, y, err = self.execute(command, self.trial_id, y_data_type)
@@ -353,8 +499,19 @@ class Run:
 
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
-    def report(self, trial_id: int, xs: dict, y: any, err: str, start_time: str, end_time: str) -> None:
-        """ Write the result in yaml format to the result directory.
+    def report(
+        self, trial_id: int, xs: dict, y: any, err: str, start_time: str,
+        end_time: str
+    ) -> None:
+        """Saves results in the Storage object.
+
+        Args:
+            trial_id (int): Trial ID.
+            xs (dict): A dictionary of parameters.
+            y (any): Objective value.
+            err (str): Error string.
+            start_time (str): Execution start time.
+            end_time (str): Execution end time.
         """
         self.storage.result.set_any_trial_objective(trial_id, y)
         self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
