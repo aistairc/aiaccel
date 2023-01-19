@@ -135,8 +135,6 @@ class NelderMead(object):
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
 
             if type(initial_parameters[dim]['value']) is not list:
-                print(initial_parameters)
-                print(type(initial_parameters[dim]['value']))
                 raise TypeError('Default parameter should be set as list.')
 
             if num_of_initials < len(initial_parameters[dim]['value']):

@@ -135,7 +135,7 @@ class HyperParameter(object):
             self.step = parameter['step']
 
         if 'base' in parameter:
-            self.step = parameter['base']
+            self.base = parameter['base']
 
     def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
         """Sample a parameter.
@@ -159,7 +159,8 @@ class HyperParameter(object):
         elif self.type.lower() == 'categorical':
             value = rng.choice(self.choices)
         elif self.type.lower() == 'ordinal':
-            value = rng.choice(self.sequence)
+            # value = rng.choice(self.sequence)
+            value = self.sequence.pop(0)
         else:
             raise TypeError(
                 f'Invalid hyper parameter type: {self.type}')
