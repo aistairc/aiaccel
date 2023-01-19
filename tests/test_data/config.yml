@@ -2,7 +2,6 @@ generic:
   project_name: "sphere"
   debug: True
   name_length: 32
-  silent_mode: False
   init_fail_count: 50
   randseed: 1
 logger:

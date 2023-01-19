@@ -6,7 +6,6 @@
     "name_length": 3,
     "project_name": "sphere",
     "randseed": 1,
-    "silent_mode": false,
     "workspace": "/tmp/work_db",
     "job_command": "python wrapper.py"
   },
@@ -210,9 +209,6 @@
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     }
-  },
-  "ui": {
-    "silent_mode": true
   },
   "verification": {
     "is_verified": true,

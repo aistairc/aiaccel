@@ -1,11 +1,5 @@
 # コンフィグレーションの設定ガイド (WIP)
 
-## **ui**
-### _silent_mode [CURRENTLY NOT USED]:_
----
-_CURRENTLY NOT USED_
-_Defaults to true._
-
 
 <br>
 
@@ -79,10 +73,6 @@ ABCI の設定を記述したシェルスクリプトのファイルを指定し
 ---
 aiaccel が ABCI の計算ノード上にジョブを投入する際に付加されるオプションのコマンドです．
 デフォルトでは "" (空の文字列) が設定されています．
-
-### _runner_search_pattern [CURRENTLY NOT USED]:_
----
-_CURRENTLY NOT USED_
 
 
 <br>
@@ -202,6 +192,14 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *type ("uniform_float", "uniform_int")*
 - *lower*
 - *upper*
+- *step*
+- *log*
+- *base*
+
+(注意) `log` が `true` の場合，`lower`，`upper`，および `step` は対数スケールでの値として参照されます．
+即ち，探索の下限は ${base}^{lower}$，上限は ${base}^{upper}$ と解釈され， $n\ (=0, 1, \cdots)$ 番目の点は ${base}^{lower} {base}^{n \times step}$ で与えられます．
+一方で `log` が `false` の場合，`lower`，`upper`，および `step` は，それぞれ探索の下限，上限，およびステップに直接対応します．
+この場合，`base` の値は使用されませんが，何も値を設定していないとエラーが生じます．
 
 ***"categorical" の場合***
 - *name*
@@ -223,6 +221,7 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *lower*
 - *upper*
 - *initial*
+- *log*
 
 ***"categorical" の場合***
 - *name*
@@ -328,11 +327,6 @@ Defaults to 100.
 文字列としてのジョブ ID の長さです．
 この文字列は，結果を .hp ファイルに保存する際にファイル名として使用されます．
 デフォルトでは 6 に設定されています．
-
-### _random_scheduling (bool, optional) [CURRENTLY NOT USED]:_
----
-_[CURRENTLY NOT USED]_
-_Defaults to true._
 
 
 <br>

@@ -162,9 +162,6 @@
       "optimizer": "DEBUG"
     }
   },
-  "ui": {
-    "silent_mode": true
-  },
   "verification": {
     "is_verified": false,
     "condition": [
