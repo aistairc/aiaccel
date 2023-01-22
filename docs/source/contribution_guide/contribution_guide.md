@@ -28,67 +28,31 @@
 コードの実装が必要であると判断された場合，コードの作成を行います．
 プルリクエストを行う際には，以下に注意してください．
 
-- [ドキュメンテーション](#ドキュメンテーション-wip)
-    - 実装した関数の基本的な説明，パラメータや返却値の型と意味，使用例を docstring として記述します．
-    [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) に準拠する形で記述してください．
-    これは，インタープリタやリファレンスガイドで読まれることになります．
-    - 大規模な機能の追加があった場合，ドキュメントを準備してください．
-    ドキュメントのソースファイルは docs の下のディレクトリにマークダウン形式で作成します．
-- [ユニットテスト](#テスト-wip)
-    - 実装した全てのコードをテストするテストコードを作成します．
-    - Python のバージョンや OS に依らず動くことをローカル環境で確認します．
-- コーディングスタイル
-    - ソースコードは Python で実装してください．
-    - Python のソースコードは PEP8 に準拠して記述してください．
-    - aiaccel では flake8 でコーディングスタイルを検証します．
-- その他の注意事項
-    - [注意事項](#注意事項)にまとめた事項を確認してください．
-
-
 ## 手順
+
 ### 初めて開発に参加する場合
 - まず，GitHub 上で aiaccel をフォークします．
 - フォークした後，aiaccel をダウンロードし，インストールします．
     ```bash
     git clone https://github.com/[YOUR USERNAME]/aiaccel.git
     ```
-- ディレクトリを移動し，upstream のリポジトリを追加します．
-    ```bash
-    cd aiaccel
-    git remote add upstream gttps://github.com/aistaic/aiaccel.git
-    ```
+
 ### 開発
 - ローカルのリポジトリを最新の状態に更新します．
     ```bash
     git checkout main
     git pull upstream main
     ```
-
 - ブランチを作成します．
     ```bash
     git checkout -b feature/add-new-feature
     ```
-
 - 進行に合わせてローカルでコミットします (`git add` および `git commit` を使用)．
 
     コミットメッセージでは，変更の動機，バグの性質，または拡張機能の詳細を説明します．
     メッセージは，コードを見なくても内容を理解できるように記述する必要があります．
-    Numpy で利用されている以下のような [acronyms](https://numpy.org/doc/stable/dev/development_workflow.html#writing-the-commit-message) を活用すると，分かりやすいかもしれません．
-    > ```
-    >API: an (incompatible) API change
-    >BENCH: changes to the benchmark suite
-    >BLD: change related to building SciPy
-    >BUG: bug fix
-    >DEP: deprecate something, or remove a deprecated object
-    >DEV: development tool or utility
-    >DOC: documentation
-    >ENH: enhancement
-    >MAINT: maintenance commit (refactoring, typos, etc.)
-    >REV: revert an earlier commit
-    >STY: style fix (whitespace, PEP8)
-    >TST: addition or modification of tests
-    >REL: related to releasing SciPy
-    >```
+
+
 
 
 ### 投稿
@@ -112,28 +76,31 @@
     git push origin feature/add-new-optimizer
     ```
 - GitHub のユーザーネームとパスワードを入力します．
-
 - GitHub に移動します．以下に注意しながらタイトルとメッセージを記述します．
-
-    **タイトル**
-    - 変更を反映した簡単な説明を行うこと．
-    - コードはバックフォートでラップすること．
-    - ピリオドで終了しないこと．
-
-    **説明**
-    - 動機を書くこと．
-    - 変更点を書くこと．
-    - 作業が進行中 (work-in-progress) であるなら，残りのタスクを書くこと．
-
+    - **タイトル**
+        - 変更を反映した簡単な説明を行うこと．
+        - コードはバックフォートでラップすること．
+        - ピリオドで終了しないこと．
+    - **説明**
+        - 動機を書くこと．
+        - 変更点を書くこと．
+        - 作業が進行中 (work-in-progress) であるなら，残りのタスクを書くこと．
 - プルリクエストを送信します．
 
-## 注意事項
-### ブランチ名
-- ブランチ名は feature/* としてください．
+
+## レビュープロセス
+- 他の開発者は，プルリクエストの実装，ドキュメント，コーディングスタイルを改善するためのコメントを投稿します．
+- プルリクエストしたコードの更新を行う際は，ローカルリポジトリで変更をコミットし，ローカル環境でのテストが成功した場合にのみフォークへプッシュします．
+- aiaccel の開発チームのメンバー 1 人以上がプルリクエストを検証し，承認された場合に main ブランチへマージされます．
+
+## クロスリファレンス
+- プルリクエストに関係する issues がある場合，クロスリファレンスを付けることが可能です．
+- `close` などの GitHub で定義されたキーワードも使用することができます．
 
 
 
 # ドキュメンテーション (WIP)
+
 ## docstrings
 - 実装した関数の基本的な説明，パラメータや返却値の型と意味，使用例を docstrings として記述します．
 - [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) に準拠する形で記述してください．
@@ -141,30 +108,35 @@
 
 
 ## ドキュメント
-- ドキュメントのソースファイルは docs の下のディレクトリにマークダウン形式で作成します．
+
+- aiaccel のドキュメントの形式には，マークダウン形式を推奨しています．
+- ドキュメントのソースファイルは docs の下のディレクトリに作成します．
 - 大規模な機能の追加があった場合，ドキュメントを準備してください．
 
 
 ## レンダリングの確認
+
 ドキュメントの追加や変更・修正があった場合には，ローカル環境でレンダリングが正常に行われるかを確認してください．
 レンダリングの確認には aiaccel/docs に移動し，HTML ファイルのビルドを行います．
 ```bash
 cd aiaccel/docs
 make html
 ```
-docs/build/html の下に，HTML 形式のファイルが生成されます．
+ビルドされた HTML 形式のファイルは docs/build/html の下に生成されます．
 
 
 # テスト (WIP)
 
 ## テストの追加
 - ユニットテストは tests の下のディレクトリに作成します．
+    - iaccel/tests/unit 以下のディレクトリ構造は，config.py などの一部のモジュールを除いて，aiaccel/aiaccel 以下の構造に対応します． 例えば，aiaccel/aiaccel/optimizer/abstract_optimizer.py のテストは aiaccel/tests/unit/optimzier_test/test_abstract_optimizer.py です．
+    - 
 - 新たな機能の追加, またはバグの修正を行った場合，テストコードを準備してください．
 - aiaccel では pytest を用いてテストを行います．
 - [コーディング規約](#コーディング規約-wip)  も参考にしてください．
 
-## テストの実行
 
+## テストの実行
 ローカル環境ですべてのテストコードを実行するには，aiaccel または aiaccel/tests に移動し，以下のコマンドを実行します．
 ```bash
 cd aiaccel/tests
@@ -176,6 +148,26 @@ pytest tests/unit/optimizer_test/test_abstract_optimizer.py
 ```
 
 
+## 追加コードに対するカバレッジ
+
+コードカバレッジの厳密な基準は設定されていませんが，テストを設計する際にはこの値を十分に考慮します．
+特に，以下のような場合は注意が必要です．
+- 全体的なスコアが大幅に低下する場合．
+- あるクラスやモジュールのカバレッジが異常に低い場合．
+- テストが if 文の特定の分岐をカバーしていない場合．
+
+### カバレッジの測定
+C0 カバレッジを測定するには，オプション `--cov` を使用して pytest を実行します．
+```bash
+pytest --cov=aiaccel
+```
+特定のテストコードのみのカバレッジを測定するには，aiaccel の部分を置き換えます．
+
+C1 カバレッジを測定するには，オプション `--cov` に加えて `--cov-branch` を使用して pytest を実行します．
+```bash
+pytest --cov=aiaccel --cov-branch
+```
+
 # コーディング規約 (WIP)
 
 ## 基本的なルール
@@ -183,6 +175,7 @@ pytest tests/unit/optimizer_test/test_abstract_optimizer.py
 - aiaccel のソースコードは Python で作成します．
 - コーディングスタイルは PEP8 に従います．
     - aiaccel では flake8 を用いてコーディングスタイルの検証を行います．
+    - オートフォーマッタとして pylint や black の使用を推奨しています．
 - いくつかの例外が存在します．
     - [aiaccel-specific なスタイル](#aiaccel-specific-なスタイル)についても確認してください．
 - aiaccel では型ヒントの検証は行いませんが，できる限り型ヒントを記述してください．
@@ -194,14 +187,70 @@ pytest tests/unit/optimizer_test/test_abstract_optimizer.py
 ### プレフィックス `_` の追加 (プライベートなメソッド，関数，フィールド，及びクラスの名前)
 
 #### Example
+```python
+class PublicClass:
+    def __init__(self):
+        self.public_field = 1
+        self._package_private_field = 2
+        self._private_field = 3
 
+    def public_method(self):
+        ...
+    
+    def _package_private_method(self):
+        ...
+    
+    def _private_method(self):
+        ...
+
+
+class _PackagePrivateClass:
+    def __init__(self):
+        self.package_private_field = 1
+        self._private_field = 2
+    
+    def package_private_method(self):
+        ...
+
+    def _private_method(self):
+        ...
+
+
+class _PrivateClass:
+    def __init__(self):
+        self.package_private_field = 1
+        self._private_fiald = 2
+    
+    def package_private_method(self):
+        ...
+
+    def _private_method(self):
+        ...
+
+
+def public_function():
+    ...
+
+
+def _package_private_fuction():
+    ...
+
+
+def _private_function():
+    ...
+
+```
 
 ### テスト
-
+- 
+- 
 #### Good Example
+```
+```
 
 #### Bad Example
-
+```
+```
 
 
 ### Docstrings
@@ -217,3 +266,43 @@ pytest tests/unit/optimizer_test/test_abstract_optimizer.py
 
 #### Example
 
+```python
+class ExampleClass:
+    """Summary of class.
+
+    There can be additional description(s) of this class.
+
+    Args:
+        param1 (type_of_param1): Description of `param1` which
+            is given when __init__ method is called.
+        param2 (type_of_param2): Description of `param2`.
+
+    Attributions:
+        param1 (type_of_param1): Description of `param1`.
+        param2 (type_of_param2): Description of `param2`.
+        param3 (type_of_param3): Description of 'param3`. 
+    """
+
+    def __init__(self, param1: type_of_param1, param2: type_of_param2):
+        self.param1 = param1
+        self.param2 = param2
+        self.param3 = generate_param3()
+
+    def method(self, arg1: type_of_arg1) -> type_of_return:
+        """Recieves `type_of_arg1` object and returns return_of_method. 
+
+        Args:
+            arg1 (type_of_arg1): Description of `arg1`.
+        
+        Returns:
+            type_of_return: Description of return value. If this method
+            returns nothing, this section can be omitted.
+        
+        Raise:
+            TypeOfException: Description of Exception.
+
+        """
+        ...
+        return return_of_method
+
+```
