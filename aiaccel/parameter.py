@@ -106,7 +106,6 @@ class HyperParameter(object):
         self.upper = None
         self.choices = None
         self.sequence = None
-        self.sequence_index = None
         self.initial = None
         self.q = None
         self.step = None
@@ -125,7 +124,6 @@ class HyperParameter(object):
 
         if 'sequence' in parameter:
             self.sequence = parameter['sequence']
-            self.sequence_index = list(range(len(self.sequence)))
 
         if 'initial' in parameter:
             self.initial = parameter['initial']
@@ -162,7 +160,6 @@ class HyperParameter(object):
             value = rng.choice(self.choices)
         elif self.type.lower() == 'ordinal':
             value = rng.choice(self.sequence)
-            # value = self.sequence.pop(0)
         else:
             raise TypeError(
                 f'Invalid hyper parameter type: {self.type}')
