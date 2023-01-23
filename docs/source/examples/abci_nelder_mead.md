@@ -33,7 +33,6 @@
 ## 2. ファイル作成手順
 
 ### config.yaml の作成
----
 
 #### generic
 ```yaml
@@ -128,7 +127,6 @@ optimize:
 
 
 ### user.py の作成
----
 
 `user.py` は以下のような構成になっています．
 
@@ -146,7 +144,6 @@ optimize:
 
 
 ### job_script_preamble.shの作成
----
 
 `job_script_preamble.sh` は、ABCI にジョブを投入するためのバッチファイルのベースファイルです．
 このファイルには事前設定を記述します．

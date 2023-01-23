@@ -18,10 +18,9 @@ logger.addHandler(StreamHandler())
 
 
 class BaseConfig(metaclass=ABCMeta):
-    """
-    Fork by confile: https://github.com/777nancy/confile
+    """An interface for all config classes.
 
-    This is an interface for all config classes.
+    Fork by confile: https://github.com/777nancy/confile
     """
 
     @abstractmethod
@@ -161,15 +160,18 @@ class ConfigEntry:
         or for holding read values.
 
     Example:
-        workspace = ConfigEntry(
-            config=config,
-            type=[str],
-            default=_DEFAULT_WORKSPACE,
-            warning=warn,
-            group="generic",
-            keys=("workspace")
-        )
-        workspace.get()
+        ::
+
+            workspace = ConfigEntry(
+                config=config,
+                type=[str],
+                default=_DEFAULT_WORKSPACE,
+                warning=warn,
+                group="generic",
+                keys=("workspace")
+            )
+            workspace.get()
+
     """
 
     def __init__(

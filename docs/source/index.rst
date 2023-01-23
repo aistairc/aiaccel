@@ -29,7 +29,13 @@ aiaccelドキュメント
    :maxdepth: 2
    :caption: 利用例:
 
-   examples/examples.md
+   examples/prepare_files.md
+   examples/local_random.md
+   examples/local_grid.md
+   examples/python_local_tpe.md
+   examples/abci_sobol.md
+   examples/abci_nelder_mead.md
+   examples/wrapper_sample.md
 
 .. toctree::
    :maxdepth: 2

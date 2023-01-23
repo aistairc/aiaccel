@@ -14,17 +14,17 @@ class AbstractOptimizer(AbstractModule):
     """An abstract class for Optimizer classes.
 
     Attributes:
-        options (dict[str, Union[str, int, bool]]): A dictionary
-        containing command line options.
+        options (dict[str, Union[str, int, bool]]): A dictionary containing
+            command line options.
         hp_ready (int): A ready number of hyper parameters.
         hp_running (int): A running number of hyper prameters.
         hp_finished (int): A finished number of hyper parameters.
         num_of_generated_parameter (int): A number of generated hyper
-        paramters.
-        all_parameter_generated (bool): A boolean indicating if all
-        parameters are generated or not.
+            paramters.
+        all_parameter_generated (bool): A boolean indicating if all parameters
+            are generated or not.
         params (HyperParameterConfiguration): Loaded hyper parameter
-        configuration object.
+            configuration object.
         trial_id (TrialId): TrialId object.
     """
 
@@ -33,7 +33,7 @@ class AbstractOptimizer(AbstractModule):
 
         Args:
             options (dict[str, Union[str, int, bool]]): A dictionary
-            containing command line options.
+                containing command line options.
 
         Returns:
             None
@@ -72,11 +72,14 @@ class AbstractOptimizer(AbstractModule):
             None
 
         Note:
-            param = {
-                'parameter_name': ...,
-                'type': ...,
-                'value': ...
-            }
+            ::
+
+                param = {
+                    'parameter_name': ...,
+                    'type': ...,
+                    'value': ...
+                }
+
         """
         self.storage.hp.set_any_trial_params(
             trial_id=self.trial_id.get(),
