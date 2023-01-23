@@ -19,17 +19,21 @@ class TPESamplerWrapper(optuna.samplers.TPESampler):
 class TpeOptimizer(AbstractOptimizer):
     """An optimizer class based on optuna.samplers.TPESampler.
 
+    Args:
+        options (dict[str, Union[str, int, bool]]): A dictionary
+            containing command line options.
+
     Attributes:
         parameter_pool (dict[int, list[dict[str, Union[float, int, str]]]]):
-        A dictionary of parameters.
+            A dictionary of parameters.
         parameter_list (list[HyperParameter]): A list of HyperParameter
-        objects.
+            objects.
         study_name (str): Study name.
         study (str): optuna.study.Study object.
         distributions (dict[str, optuna.distributions]): A dictionary of
-        optuna.distributions objects defined for individual parameters.
+            optuna.distributions objects defined for individual parameters.
         trial_pool (dict[int, optuna.trial.Trial]): A dictionary of
-        optuna.trial.Trial objects.
+            optuna.trial.Trial objects.
         randseed (int): Random seed.
     """
 
@@ -38,7 +42,7 @@ class TpeOptimizer(AbstractOptimizer):
 
         Args:
             options (dict[str, Union[str, int, bool]]): A dictionary
-            containing command line options.
+                containing command line options.
         """
         super().__init__(options)
         self.parameter_pool = {}
@@ -101,7 +105,7 @@ class TpeOptimizer(AbstractOptimizer):
 
         Args:
             number (Optional[int]): A number of generating parameters. Defaults
-            to 1.
+                to 1.
 
         Returns:
             Optional[list[dict[str, Union[float, int, str]]]]: A list of

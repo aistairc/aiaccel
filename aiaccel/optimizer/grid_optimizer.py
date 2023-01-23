@@ -21,8 +21,8 @@ def get_grid_options(
 
     Returns:
         tuple[Optional[int], bool, Optional[int]]: The first one is a base of
-            logarithm parameter. The second one is logarithm parameter or not.
-            The third one is a step of the grid.
+        logarithm parameter. The second one is logarithm parameter or not.
+        The third one is a step of the grid.
 
     Raises:
         KeyError: Causes when step is not specified.

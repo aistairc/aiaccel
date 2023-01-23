@@ -32,6 +32,7 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
+    'sphinx.ext.todo',
     'sphinx_rtd_theme',
     'sphinx_fontawesome',
     'myst_parser',
@@ -44,6 +45,25 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+
+# Add optional syntaxes for MyST-Parser which are disabled by default.
+myst_enable_extensions = [
+    # "amsmath",
+    # "attrs_inline",
+    # "colon_fence",
+    # "deflist",
+    "dollarmath",
+    # "fieldlist",
+    # "html_admonition",
+    # "html_image",
+    # "inv_link",
+    # "linkify",
+    # "replacements",
+    # "smartquotes",
+    # "strikethrough",
+    # "substitution",
+    # "tasklist",
+]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -63,3 +83,7 @@ html_show_sphinx = False
 gettext_compact = False
 locale_dirs = ['locale/']
 language = 'ja'
+
+# -- Extension configuration -------------------------------------------------
+todo_include_todos = True
+# autoclass_content = "both"

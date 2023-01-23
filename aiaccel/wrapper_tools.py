@@ -12,12 +12,13 @@ def create_runner_command(
     config_path: str,
     command_error_output: str
 ) -> list:
-
     """Create a list of command strings to run a hyper parameter.
+
     Args:
         command (str): A string command.
         param_content (dict): A hyper parameter content.
         trial_id (str): A unique name of a hyper parameter.
+
     Returns:
         A list of command strings.
     """
