@@ -6,7 +6,6 @@ here = Path(__file__).resolve().parent
 
 with codecs.open(here / 'requirements.txt', 'r') as fh:
     requirements = [line.replace('\n', '') for line in fh.readlines()]
-    requirements = [line.split('==')[0] for line in requirements]
 
 setup(
     name='aiaccel',
