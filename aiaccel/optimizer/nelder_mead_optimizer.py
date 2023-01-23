@@ -11,7 +11,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     Attributes:
         nelder_mead (NelderMead): A class object implementing Nelder-Mead
-        method.
+            method.
         parameter_pool (list): A pool of parameters waiting for the process.
         order (list): A list of parameters being processed.
     """
@@ -123,33 +123,34 @@ class NelderMeadOptimizer(AbstractOptimizer):
             None
 
         Note:
-            --------------------------------------------------------------
-            - before
-            {
-                'vertex_id': 'CMTrNe5P8a',
-                'parameters': [
-                    {'parameter_name': 'x1', 'value': 3.37640289751353},
-                    {'parameter_name': 'x2', 'value': 1.6556037243290205}
-                ],
-                'state': 'WaitExpand',
-                'itr': 5,
-                'index': None,
-                'out_of_boundary': False
-            }
-            --------------------------------------------------------------
-            - after
-            {
-                'vertex_id': '000014', <---- replace to trial_id
-                'parameters': [
-                    {'parameter_name': 'x1', 'value': 3.37640289751353},
-                    {'parameter_name': 'x2', 'value': 1.6556037243290205}
-                ],
-                'state': 'WaitExpand',
-                'itr': 5,
-                'index': None,
-                'out_of_boundary': False
-            }
-            --------------------------------------------------------------
+            - before::
+
+                {
+                    'vertex_id': 'CMTrNe5P8a',
+                    'parameters': [
+                        {'parameter_name': 'x1', 'value': 3.37640289751353},
+                        {'parameter_name': 'x2', 'value': 1.6556037243290205}
+                    ],
+                    'state': 'WaitExpand',
+                    'itr': 5,
+                    'index': None,
+                    'out_of_boundary': False
+                }
+
+            - after::
+
+                {
+                    'vertex_id': '000014', <---- replace to trial_id
+                    'parameters': [
+                        {'parameter_name': 'x1', 'value': 3.37640289751353},
+                        {'parameter_name': 'x2', 'value': 1.6556037243290205}
+                    ],
+                    'state': 'WaitExpand',
+                    'itr': 5,
+                    'index': None,
+                    'out_of_boundary': False
+                }
+
         """
         old_param_name = pool_p['vertex_id']
         new_param_name = name
