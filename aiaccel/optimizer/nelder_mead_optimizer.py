@@ -213,15 +213,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             TypeError: Causes when an invalid parameter type is set.
         """
 
-        results = self.get_nm_results()
-        if len(results) > 0 and self.params.get_parameter_list()[0].type.lower() == 'ordinal':
-            for i in range(len(results)):
-                # When converting from objective value to index, which list is the target?
-                # Each hyperparameter has an ordinal list. In this code,
-                # the ordinal list of the first hyperparameter defined is targeted.
-                seq = self.params.get_parameter_list()[0].sequence
-                results[i]['result'] = self.get_index_of_nearest_values(seq, results[i]['result'])
-        self._add_result(results)
+        self._add_result(self.get_nm_results())
 
         searched_params = self.nelder_mead_main()
 
@@ -234,8 +226,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 p['vertex_id'] not in self._get_current_names()
             ):
                 self.parameter_pool.append(copy.copy(p))
-
-        # self._generate_hp_ready(number)
 
         new_params = []
 
@@ -251,7 +241,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
             elif param.type.lower() == 'int':
                 value = int(pool_p['parameters'][i]['value'])
             elif param.type.lower() == 'ordinal':
-                # value = pool_p['parameters'][i]['value']
                 index = int(pool_p['parameters'][i]['value'])
                 value = param.sequence[index]
             else:
@@ -278,14 +267,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         return new_params
 
-    def get_index_of_nearest_values(self, sequence: list, value: float) -> int:
-        index = 0
-        for i in range(len(sequence)):
-            if abs(sequence[i] - value) < abs(sequence[index] - value):
-                index = i
-
-        return index
-
     def special_settings_when_using_ordinal(self, params: HyperParameterConfiguration) -> HyperParameterConfiguration:
         """
             When using ordinal types in NelderMead, the array index is predicted.
@@ -303,4 +284,5 @@ class NelderMeadOptimizer(AbstractOptimizer):
                         'upper': len(param.sequence) - 1,
                         'sequence': param.sequence
                     })
+
         return new_params
