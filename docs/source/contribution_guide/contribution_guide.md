@@ -1,4 +1,4 @@
-# イシュー (WIP)
+# イシュー
 
 問題を発見した場合や，機能のリクエストがあった場合，まずリポジトリにある既存のイシューを確認してください．
 同様のテーマが話し合われていない場合，新しいイシューを作成してください．
@@ -15,7 +15,7 @@
 
 ## 機能リクエスト (Feature request)
 
-機能リクエストでは，以下の内容についての明確かつ簡潔な説明を含めることを推奨します．
+機能リクエストを行う際には，以下の内容についての明確かつ簡潔な説明を含めることを推奨します．
 
 - バグが関連する場合，バグの内容
 - 実現したい機能の説明
@@ -23,7 +23,7 @@
 
 
 
-# プルリクエスト (WIP)
+# プルリクエスト
 
 コードの実装が必要であると判断された場合，コードの作成を行います．
 プルリクエストを行う際には，以下に注意してください．
@@ -47,10 +47,9 @@
     ```bash
     git checkout -b feature/add-new-feature
     ```
-- 進行に合わせてローカルでコミットします (`git add` および `git commit` を使用)．
-
-    コミットメッセージでは，変更の動機，バグの性質，または拡張機能の詳細を説明します．
-    メッセージは，コードを見なくても内容を理解できるように記述する必要があります．
+- `git add` および `git commit` を使用し，進行に合わせてローカルでコミットします．
+    - コミットメッセージでは，変更の動機，バグの性質，または拡張機能の詳細を説明します．
+    - メッセージは，コードを見なくても内容を理解できるように記述する必要があります．
 
 
 
@@ -59,13 +58,13 @@
 
 *プルリクエストを行う前に，以下を確認してください*：
 - MIT ライセンスで配布できるか？
-- 適切な[ユニットテスト](#テストwip)は存在するか？
-- [ユニットテスト](#テストwip)をローカル環境で実行できたか？
+- 適切な[ユニットテスト](#テスト)は存在するか？
+- [ユニットテスト](#テスト)をローカル環境で実行できたか？
 - パブリックな関数は docstring を持っているか？
 - [ドキュメンテーション](#ドキュメンテーション-wip)は正しくレンダリングされるか？
-- [コーディングスタイル](#コーディング規約wip)は適切か？
+- [コーディングスタイル](#コーディング規約)は適切か？
 - コミットメッセージは適切か？
-- 大規模な追加の場合，チュートリアル (docs/source/tutorial) やモジュールレベルの説明はあるか？
+- 大規模な追加の場合，例 (docs/source/examples) やモジュールレベルの説明はあるか？
 - コンパイル済みのコードを追加する場合，setup.py を変更したか？
 
 
@@ -104,14 +103,14 @@
 ## docstrings
 - 実装した関数の基本的な説明，パラメータや返却値の型と意味，使用例を docstrings として記述します．
 - [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) に準拠する形で記述してください．
-- [コーディング規約](#コーディング規約-wip) も参考にしてください．
+- [コーディング規約](#コーディング規約) も参考にしてください．
 
 
 ## ドキュメント
 
-- aiaccel のドキュメントの形式には，マークダウン形式を推奨しています．
 - ドキュメントのソースファイルは docs の下のディレクトリに作成します．
-- 大規模な機能の追加があった場合，ドキュメントを準備してください．
+- ドキュメントのファイル形式はマークダウン形式を推奨しています．
+- 大規模な機能の追加があった場合，ドキュメントを作成してください．
 
 
 ## レンダリングの確認
@@ -125,18 +124,16 @@ make html
 ビルドされた HTML 形式のファイルは docs/build/html の下に生成されます．
 
 
-# テスト (WIP)
+# テスト
 
 ## テストの追加
 - ユニットテストは tests の下のディレクトリに作成します．
     - iaccel/tests/unit 以下のディレクトリ構造は，config.py などの一部のモジュールを除いて，aiaccel/aiaccel 以下の構造に対応します． 例えば，aiaccel/aiaccel/optimizer/abstract_optimizer.py のテストは aiaccel/tests/unit/optimzier_test/test_abstract_optimizer.py です．
-    - 
-- 新たな機能の追加, またはバグの修正を行った場合，テストコードを準備してください．
+- 新たな機能の追加, またはバグの修正を行った場合，テストコードを作成してください．
 - aiaccel では pytest を用いてテストを行います．
-- [コーディング規約](#コーディング規約-wip)  も参考にしてください．
 
 
-## テストの実行
+## テストの実行 (WIP)
 ローカル環境ですべてのテストコードを実行するには，aiaccel または aiaccel/tests に移動し，以下のコマンドを実行します．
 ```bash
 cd aiaccel/tests
@@ -161,97 +158,28 @@ C0 カバレッジを測定するには，オプション `--cov` を使用し�
 ```bash
 pytest --cov=aiaccel
 ```
-特定のテストコードのみのカバレッジを測定するには，aiaccel の部分を置き換えます．
+特定のテストコードのみのカバレッジを測定するには，aiaccel の部分を適切なパスに置き換えます．
 
 C1 カバレッジを測定するには，オプション `--cov` に加えて `--cov-branch` を使用して pytest を実行します．
 ```bash
 pytest --cov=aiaccel --cov-branch
 ```
 
-# コーディング規約 (WIP)
+# コーディング規約
 
 ## 基本的なルール
 
 - aiaccel のソースコードは Python で作成します．
 - コーディングスタイルは PEP8 に従います．
     - aiaccel では flake8 を用いてコーディングスタイルの検証を行います．
-    - オートフォーマッタとして pylint や black の使用を推奨しています．
-- いくつかの例外が存在します．
+    <!-- - オートフォーマッタとして pylint や black の使用を推奨しています． -->
     - [aiaccel-specific なスタイル](#aiaccel-specific-なスタイル)についても確認してください．
 - aiaccel では型ヒントの検証は行いませんが，できる限り型ヒントを記述してください．
     - aiaccel ではバージョン 3.8 の Python をサポートするため，ビルトインな "`list`" などを型ヒントに使用する際は，future-import を行ってください．
+- ランダムな値の生成には [`numpy.random.RandomState`](https://numpy.org/doc/1.16/reference/generated/numpy.random.RandomState.html) を使用して下さい．これは aiaccel が利用しているライブラリ [optuna](https://github.com/optuna/optuna) との互換性を保つためです．
 
 
 ## aiaccel-specific なスタイル
-
-### プレフィックス `_` の追加 (プライベートなメソッド，関数，フィールド，及びクラスの名前)
-
-#### Example
-```python
-class PublicClass:
-    def __init__(self):
-        self.public_field = 1
-        self._package_private_field = 2
-        self._private_field = 3
-
-    def public_method(self):
-        ...
-    
-    def _package_private_method(self):
-        ...
-    
-    def _private_method(self):
-        ...
-
-
-class _PackagePrivateClass:
-    def __init__(self):
-        self.package_private_field = 1
-        self._private_field = 2
-    
-    def package_private_method(self):
-        ...
-
-    def _private_method(self):
-        ...
-
-
-class _PrivateClass:
-    def __init__(self):
-        self.package_private_field = 1
-        self._private_fiald = 2
-    
-    def package_private_method(self):
-        ...
-
-    def _private_method(self):
-        ...
-
-
-def public_function():
-    ...
-
-
-def _package_private_fuction():
-    ...
-
-
-def _private_function():
-    ...
-
-```
-
-### テスト
-- 
-- 
-#### Good Example
-```
-```
-
-#### Bad Example
-```
-```
-
 
 ### Docstrings
 
@@ -259,10 +187,11 @@ def _private_function():
 ただし，以下の例外についても注意してください．
 
 - 各モジュールの docstrings は必須ではありません．
-- `Args` セクションでは，パラメータ名の後ろにパラメータの型を括弧で括って記述します．
+- `Args:` セクションでは，パラメータ名の後ろにパラメータの型を括弧で括って記述します．
 - 必要に応じて `Example:` セクションを追加します．
 - `__init__` メソッドはクラスの docstring に含めます．`__init__` メソッドには記述しません．
 - Python オブジェクトへのリンクは *sphinx-style* なリンクを使用します.
+- エディタとして vscode を利用する場合，[autoDocstring](https://marketplace.visualstudio.com/items?itemName=njpwerner.autodocstring) が docstring 生成の役に立ちます．
 
 #### Example
 
