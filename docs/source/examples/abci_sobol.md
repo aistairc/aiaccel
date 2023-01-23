@@ -25,7 +25,6 @@
 ## 2. ファイル作成手順
 
 ### config.yaml の作成
----
 
 #### generic
 ```yaml
@@ -96,8 +95,6 @@ optimize:
 
 ### user.py の作成
 
----
-
 `user.py` は以下のように記述します．
 ```python
 from aiaccel.util import aiaccel
@@ -148,7 +145,7 @@ aiaccel から関数 `main()` にハイパーパラメータを渡し，`main()`
 
 
 ### job_script_preamble.shの作成
----
+
 `job_script_preamble.sh` は、ABCI にジョブを投入するためのバッチファイルのベースファイルです．
 このファイルには事前設定を記述します．
 ここに記述した設定が全てのジョブに適用されます．

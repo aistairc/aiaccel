@@ -4,10 +4,10 @@ aiaccel.storage package
 Submodules
 ----------
 
-aiaccel.storage.abstruct module
+aiaccel.storage.abstract module
 -------------------------------
 
-.. automodule:: aiaccel.storage.abstruct
+.. automodule:: aiaccel.storage.abstract
    :members:
    :undoc-members:
    :show-inheritance:

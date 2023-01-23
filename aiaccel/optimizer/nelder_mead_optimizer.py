@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Union, Optional
 import copy
 
 from aiaccel.optimizer._nelder_mead import NelderMead
@@ -8,22 +10,33 @@ class NelderMeadOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
 
     Attributes:
-        nelder_mead ():
-        parameter_pool ():
+        nelder_mead (NelderMead): A class object implementing Nelder-Mead
+            method.
+        parameter_pool (list): A pool of parameters waiting for the process.
+        order (list): A list of parameters being processed.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
         """Initial method of NelderMeadOptimizer.
 
         Args:
-            config (str): A file name of a configuration.
+            options (dict[str, Union[str, int, bool]]): A dictionary
+            containing command line options.
         """
         super().__init__(options)
         self.nelder_mead = None
         self.parameter_pool = []
         self.order = []
 
-    def generate_initial_parameter(self):
+    def generate_initial_parameter(
+        self
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+        """Generate initial parameters.
+
+        Returns:
+            Optional[list[dict[str, Union[float, int, str]]]]: A List of new
+            parameters. None if `self.nelder_mead` is already defined.
+        """
         initial_parameter = super().generate_initial_parameter()
 
         if self.nelder_mead is not None:
@@ -110,33 +123,34 @@ class NelderMeadOptimizer(AbstractOptimizer):
             None
 
         Note:
-            --------------------------------------------------------------
-            - before
-            {
-                'vertex_id': 'CMTrNe5P8a',
-                'parameters': [
-                    {'parameter_name': 'x1', 'value': 3.37640289751353},
-                    {'parameter_name': 'x2', 'value': 1.6556037243290205}
-                ],
-                'state': 'WaitExpand',
-                'itr': 5,
-                'index': None,
-                'out_of_boundary': False
-            }
-            --------------------------------------------------------------
-            - after
-            {
-                'vertex_id': '000014', <---- replace to trial_id
-                'parameters': [
-                    {'parameter_name': 'x1', 'value': 3.37640289751353},
-                    {'parameter_name': 'x2', 'value': 1.6556037243290205}
-                ],
-                'state': 'WaitExpand',
-                'itr': 5,
-                'index': None,
-                'out_of_boundary': False
-            }
-            --------------------------------------------------------------
+            - before::
+
+                {
+                    'vertex_id': 'CMTrNe5P8a',
+                    'parameters': [
+                        {'parameter_name': 'x1', 'value': 3.37640289751353},
+                        {'parameter_name': 'x2', 'value': 1.6556037243290205}
+                    ],
+                    'state': 'WaitExpand',
+                    'itr': 5,
+                    'index': None,
+                    'out_of_boundary': False
+                }
+
+            - after::
+
+                {
+                    'vertex_id': '000014', <---- replace to trial_id
+                    'parameters': [
+                        {'parameter_name': 'x1', 'value': 3.37640289751353},
+                        {'parameter_name': 'x2', 'value': 1.6556037243290205}
+                    ],
+                    'state': 'WaitExpand',
+                    'itr': 5,
+                    'index': None,
+                    'out_of_boundary': False
+                }
+
         """
         old_param_name = pool_p['vertex_id']
         new_param_name = name
@@ -168,9 +182,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Get trial_ids from DB: 'result', 'finished', 'running', 'ready'
 
         Returns:
-            List: trial_id
+            list: trial_id
         """
-
         trial_id = self.storage.trial.get_all_trial_id()
         if trial_id is None:
             return []
@@ -186,15 +199,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
         # WARN: Always empty.
         return [p['vertex_id'] for p in self.parameter_pool]
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(
+        self
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
         """Generate parameters.
 
-        Args:
-            number (Optional[int]):
-                A number of generating parameters.
-
         Returns:
-            None
+            Optional[list[dict[str, Union[float, int, str]]]]: A list of
+            created parameters.
 
         Raises:
             TypeError: Causes when an invalid parameter type is set.
