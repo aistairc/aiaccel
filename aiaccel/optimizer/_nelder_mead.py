@@ -131,19 +131,27 @@ class NelderMead(object):
 
     def _create_initial_value(self, initial_parameters, dim, num_of_initials):
         if initial_parameters is not None:
-            if type(initial_parameters[dim]['value']) in [int, float, np.float64]:
+            if isinstance(initial_parameters[dim]['value'], (int, float, np.integer, np.floating)):
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
 
             if type(initial_parameters[dim]['value']) is not list:
                 raise TypeError('Default parameter should be set as list.')
 
             if num_of_initials < len(initial_parameters[dim]['value']):
-                return initial_parameters[dim]['value'][num_of_initials]
+                val = initial_parameters[dim]['value'][num_of_initials]
+                if self.params[dim].type.lower() == 'ordinal':
+                    val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
+                return val
             else:
-                return self.params[dim].sample(rng=self._rng)['value']
-
+                val = self.params[dim].sample(rng=self._rng)['value']
+                if self.params[dim].type.lower() == 'ordinal':
+                    val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
+                return val
         else:
-            return self.params[dim].sample(rng=self._rng)['value']
+            val = self.params[dim].sample(rng=self._rng)['value']
+            if self.params[dim].type.lower() == 'ordinal':
+                val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
+            return val
 
     def _add_executing(
         self, y: np.ndarray,
