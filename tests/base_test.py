@@ -200,10 +200,11 @@ class BaseTest(object):
         self.config_json_path = create_tmp_config(self.test_data_dir.joinpath('config.json'))
 
         self.configs = {
-            "config.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config.json'))), 
+            "config.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config.json'))),
             "config_random.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_random.json'))),
             "config_grid.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_grid.json'))),
             "config_sobol.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol.json'))),
+            "config_sobol_int.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol_int.json'))),
             "config_sobol_no_initial.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol_no_initial.json'))),
             "config_tpe.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe.json'))),
             "config_tpe_2.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe_2.json'))),
