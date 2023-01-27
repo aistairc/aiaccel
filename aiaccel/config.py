@@ -5,6 +5,7 @@ from typing import Union, List, Optional, Any
 
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
+from omegaconf import open_dict
 
 
 @dataclass
@@ -141,6 +142,7 @@ def load_config(config_path: str) -> Union[None, DictConfig]:
     customize = OmegaConf.load(path)
     customize.config_path = str(path)
 
-    config = OmegaConf.merge(base, default, customize)
+    with open_dict(base):
+        config = OmegaConf.merge(base, default, customize)
 
     return config
