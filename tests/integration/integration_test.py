@@ -34,7 +34,15 @@ class IntegrationTest(BaseTest):
         #
         # local test
         #
-        with self.create_main():
+        config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+        config = Config(config_file)
+
+        if isinstance(config.goal.get(), list):
+            user_main_file = self.test_data_dir / 'original_main_mo.py'
+        else:
+            user_main_file = None
+            
+        with self.create_main(user_main_file):
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             config = Config(config_file)
 
@@ -55,7 +63,7 @@ class IntegrationTest(BaseTest):
         #
         # pylocal test
         #
-        with self.create_main():
+        with self.create_main(user_main_file):
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             new_config_file = data_dir.joinpath('config_{}_pylocal.yaml'.format(self.search_algorithm))
 
@@ -99,8 +107,11 @@ class IntegrationTest(BaseTest):
         assert finished == self.config.trial_number.get()
         assert ready == 0
         assert running == 0
-        final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
-        assert final_result.exists()
+        config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+        config = Config(config_file)
+        if not isinstance(config.goal.get(), list):
+            final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
+            assert final_result.exists()
         '''
         testr = load_yaml(
             work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result))

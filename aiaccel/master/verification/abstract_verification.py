@@ -86,6 +86,9 @@ class AbstractVerification(object):
 
         # self.save(loop)
 
+        if isinstance(self.config.goal.get(), list):
+            return
+
         best_trial = self.storage.get_best_trial_dict(self.config.goal.get().lower())
 
         if (

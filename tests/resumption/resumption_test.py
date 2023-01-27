@@ -11,7 +11,15 @@ class ResumptionTest(IntegrationTest):
     search_algorithm = None
 
     def test_run(self, cd_work, data_dir, work_dir):
-        with self.create_main():
+        config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+        config = Config(config_file)
+
+        if isinstance(config.goal.get(), list):
+            user_main_file = self.test_data_dir / 'original_main_mo.py'
+        else:
+            user_main_file = None
+
+        with self.create_main(user_main_file):
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             config = Config(config_file)
             storage = Storage(ws=Path(config.workspace.get()))
@@ -20,12 +28,12 @@ class ResumptionTest(IntegrationTest):
             print('at one time', final_result_at_one_time)
 
         # max trial 5
-        with self.create_main():
+        with self.create_main(user_main_file):
             config_file = data_dir / f'config_{self.search_algorithm}_resumption.json'
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
 
         # resume
-        with self.create_main():
+        with self.create_main(user_main_file):
             config_file = data_dir.joinpath(f'config_{self.search_algorithm}.json')
             storage = Storage(ws=Path(config.workspace.get()))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--resume', '4']).wait()

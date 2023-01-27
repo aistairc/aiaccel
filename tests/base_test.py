@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+import shutil
 from aiaccel.config import Config
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.workspace import Workspace
@@ -245,11 +246,15 @@ class BaseTest(object):
         self.result_comparison = []
         
     @contextmanager
-    def create_main(self):
-        file_path = Path('/tmp/original_main.py')
-        with open(file_path, 'w', encoding='UTF-8') as f:
-            for line in original_main:
-                f.write(line + '\n')
+    def create_main(self, src_file: Path = None):
+        if src_file is None:
+            file_path = Path('/tmp/original_main.py')
+            with open(file_path, 'w', encoding='UTF-8') as f:
+                for line in original_main:
+                    f.write(line + '\n')
+        else:
+            file_path = Path('/tmp') / src_file.name
+            shutil.copy(src_file, file_path)
         yield
         file_path.unlink()
 

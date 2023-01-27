@@ -89,10 +89,12 @@ def main() -> None:  # pragma: no cover
     shutil.copy(pathlib.Path(args.config), dst / config_name)
 
     files = fs.get_file_result_hp(dst)
-    best, best_file = pt.get_best_parameter(files, goal, dict_lock)
 
-    logger.info(f"Best result    : {best_file}")
-    logger.info(f"               : {best}")
+    if not isinstance(goal, list):
+        best, best_file = pt.get_best_parameter(files, goal, dict_lock)
+        logger.info(f"Best result    : {best_file}")
+        logger.info(f"               : {best}")
+
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
     logger.info("Done.")
     return

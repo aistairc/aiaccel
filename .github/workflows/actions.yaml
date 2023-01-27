@@ -43,6 +43,7 @@ jobs:
           pytest -v tests/integration/sphere/test_sphere_sobol_int.py
           pytest -v tests/integration/sphere/test_sphere_tpe.py
           pytest -v tests/integration/sphere/test_sphere_nelder_mead.py
+          pytest -v tests/integration/sphere/test_sphere_motpe.py
 
       - name: Resume Test
         run: |
@@ -51,6 +52,7 @@ jobs:
           pytest -v tests/resumption/sphere/test_sphere_sobol_resumption.py
           pytest -v tests/resumption/sphere/test_sphere_tpe_resumption.py
           pytest -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
+          pytest -v tests/resumption/sphere/test_sphere_motpe_resumption.py
 
       - name: Newly Test
         run: |

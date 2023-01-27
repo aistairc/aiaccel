@@ -643,7 +643,7 @@ class Config:
         # === hyperparameter defalt config ===
         self.goal = ConfigEntry(
             config=config,
-            type=[str],
+            type=[str, list],
             default=_DEFAULT_GOAL,
             warning=warn,
             group="optimize",
