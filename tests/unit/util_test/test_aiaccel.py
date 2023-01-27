@@ -98,12 +98,6 @@ class TestRun(BaseTest):
             }
         ]
 
-    # test module: trial_id
-    def test_trial_id(self):
-        with patch.object(sys, 'argv', self.get_test_args()):
-            run = Run()
-            assert run.trial_id == "0001"
-
 #
 # Wrapper Interface
 #

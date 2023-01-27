@@ -6,7 +6,6 @@ from pathlib import Path
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
-from aiaccel.util.time_tools import get_time_now
 
 
 class PylocalScheduler(AbstractScheduler):
@@ -74,9 +73,8 @@ class PylocalScheduler(AbstractScheduler):
         """
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
 
-        start_time = get_time_now()
-        xs, y, err = self.run.execute(self.user_func, trial_id, y_data_type=None)
-        end_time = get_time_now()
+        xs = self.run.get_any_trial_xs(trial_id)
+        xs, y, err, start_time, end_time = self.run.execute(self.user_func, xs, y_data_type=None)
         self.run.report(trial_id, xs, y, err, start_time, end_time)
 
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')

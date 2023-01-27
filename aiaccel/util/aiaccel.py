@@ -1,9 +1,7 @@
 from __future__ import annotations
-import logging
 import subprocess
 from argparse import ArgumentParser
 from functools import singledispatchmethod
-from logging import StreamHandler, getLogger
 from typing import Any, Dict, Tuple, Union, Optional
 from collections.abc import Callable
 from pathlib import Path
@@ -11,6 +9,62 @@ from pathlib import Path
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
+from aiaccel.parameter import load_parameter
+
+
+class CommandLineArgs:
+    def __init__(self):
+        self.parser = ArgumentParser()
+        self.parser.add_argument('--trial_id', type=int, required=False)
+        self.parser.add_argument('--config', type=str, required=False)
+        self.args = self.parser.parse_known_args()[0]
+
+        self.trial_id = None
+        self.config_path = None
+        self.config = None
+
+        if self.args.trial_id is not None:
+            self.trial_id = self.args.trial_id
+        if self.args.config is not None:
+            self.config_path = Path(self.args.config).resolve()
+            self.config = Config(self.config_path)
+            self.parameters_config = load_parameter(self.config.hyperparameters.get())
+
+            for p in self.parameters_config.get_parameter_list():
+                if p.type.lower() == "float":
+                    self.parser.add_argument(f"--{p.name}", type=float)
+                elif p.type.lower() == "int":
+                    self.parser.add_argument(f"--{p.name}", type=int)
+                elif p.type.lower() == "choice":
+                    self.parser.add_argument(f"--{p.name}", type=str)
+                elif p.type.lower() == "ordinal":
+                    self.parser.add_argument(f"--{p.name}", type=float)
+                else:
+                    raise ValueError(f"Unknown parameter type: {p.type}")
+            self.args = self.parser.parse_known_args()[0]
+        else:
+            unknown_args_list = self.parser.parse_known_args()[1]
+            for unknown_arg in unknown_args_list:
+                if unknown_arg.startswith("--"):
+                    name = unknown_arg.replace("--", "")
+                    self.parser.add_argument(f"--{name}", type=float)
+            self.args = self.parser.parse_known_args()[0]
+
+    def get_args_list(self) -> list:
+        args_dict = vars(self.args)
+        args_list = []
+        for key in args_dict:
+            args_list.append(f"--{key}")
+            args_list.append(args_dict[key])
+
+        return args_list
+
+    def get_xs(self) -> dict:
+        xs = vars(self.args)
+        del xs["trial_id"]
+        del xs["config"]
+
+        return xs
 
 
 class _Message:
@@ -260,39 +314,24 @@ class Run:
             config_path (Optional[Union[str, Path]], optional): A path to
             configration file. Defaults to None.
         """
-        parser = ArgumentParser()
-        parser.add_argument('--config', type=str)
-        parser.add_argument('--trial_id', type=str, required=False)
 
-        args = parser.parse_known_args()[0]
+        self.config_path = None
+        self.config = None
+        self.workspace = None
+        self.storage = None
 
-        self.args = vars(args)
-        self.trial_id = self.args["trial_id"]
-
-        if config_path is not None:
-            self.config_path = config_path
-            if type(self.config_path) == str:
-                self.config_path = Path(self.config_path).resolve()
-        else:
-            self.config_path = Path(self.args["config"])
-
-        self.config = Config(self.config_path)
-        self.workspace = Path(self.config.workspace.get()).resolve()
-        self.storage = Storage(self.workspace)
-
-        # logger
-        log_dir = self.workspace / "log"
-        log_path = log_dir / f"job_{self.trial_id}.log"
-        if not log_dir.exists():
-            log_dir.mkdir(parents=True)
-        logging.basicConfig(filename=log_path, level=logging.DEBUG)
-        self.logger = getLogger(__name__)
-        self.logger.addHandler(StreamHandler())
-
+        self.args = CommandLineArgs()
+        self.config_path = self.args.config_path or config_path
+        self.config = self.args.config
+        if self.config is not None:
+            self.workspace = Path(self.config.workspace.get()).resolve()
+            self.storage = Storage(self.workspace)
         self.com = WrapperInterface()
 
     def generate_commands(
-        self, command: str, xs: dict[str, Optional[Union[float, int, str]]]
+        self,
+        command: str,
+        xs: dict[str, Optional[Union[float, int, str]]]
     ) -> list[str]:
         """ Generate execution command of user program.
 
@@ -305,16 +344,19 @@ class Run:
         Returns:
             List: A list of execution command and options.
         """
+
         commands = command.split(" ")
-        commands.append(f"--config={str(self.config_path)}")
-        commands.append(f"--trial_id={self.trial_id}")
+        # commands.append(f"--config={str(config_path)}")
+        # commands.append(f"--trial_id={trial_id}")
 
         for key in xs:
             name = key
             value = xs[key]
             if value is not None:
-                command = f"--{name}={value}"
-                commands.append(command)
+                # command = f"--{name} {value}"
+                # commands.append(command)
+                commands.append(f"--{name}")
+                commands.append(f"{value}")
 
         return commands
 
@@ -369,8 +411,10 @@ class Run:
 
     @singledispatchmethod
     def execute(
-        self, func: Callable[[dict[str, Union[float, int, str]]], float],
-        trial_id: int, y_data_type: Optional[str]
+        self,
+        func: Callable[[dict[str, Union[float, int, str]]], float],
+        xs: Optional[Dict[str, Union[float, int, str]]],
+        y_data_type: Optional[str]
     ) -> tuple[Optional[dict[str, Union[float, int, str]]],
                Optional[Union[float, int, str]],
                str]:
@@ -387,9 +431,11 @@ class Run:
             Optional[Union[float, int, str]], str]: A dictionary of parameters,
             a casted objective value, and error string.
         """
-        xs = self.get_any_trial_xs(trial_id)
+
         y = None
         err = ""
+
+        start_time = get_time_now()
 
         try:
             y = self.cast_y(func(xs), y_data_type)
@@ -398,11 +444,15 @@ class Run:
         finally:
             self.com.out(objective_y=y, objective_err=err)
 
-        return xs, y, err
+        end_time = get_time_now()
+
+        return xs, y, err, start_time, end_time
 
     @execute.register
     def _(
-        self, command: str, trial_id: int, y_data_type: Optional[str]
+        self, command: str,
+        xs: Optional[Dict[str, Union[float, int, str]]],
+        y_data_type: Optional[str]
     ) -> Tuple[Optional[Dict[str, Union[float, int, str]]],
                Optional[Union[float, int, str]],
                str]:
@@ -419,9 +469,10 @@ class Run:
             a casted objective value, and error string.
         """
 
-        xs = self.get_any_trial_xs(trial_id)
         err = ""
         y = None
+
+        start_time = get_time_now()
 
         # Make running command of user program
         if command == "":
@@ -433,7 +484,7 @@ class Run:
         output = subprocess.run(
             commands,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
 
         ys, err = self.com.get_data(output)
@@ -443,7 +494,9 @@ class Run:
             y = self.cast_y(ys[0], y_data_type)
         err = ("\n").join(err)
 
-        return xs, y, err
+        end_time = get_time_now()
+
+        return xs, y, err, start_time, end_time
 
     @singledispatchmethod
     def execute_and_report(
@@ -470,11 +523,12 @@ class Run:
                 run = aiaccel.Run()
                 run.execute_and_report(func)
         """
-        start_time = get_time_now()
-        xs, y, err = self.execute(func, self.trial_id, y_data_type)
-        end_time = get_time_now()
+        trial_id = self.args.trial_id
+        # xs = self.get_any_trial_xs(self.trial_id)
+        xs = self.args.get_xs()
+        xs, y, err, start_time, end_time = self.execute(func, xs, y_data_type)
 
-        self.report(self.trial_id, xs, y, err, start_time, end_time)
+        self.report(trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
     def _(self, command: str, y_data_type: Optional[str] = None):
@@ -490,11 +544,11 @@ class Run:
             run = aiaccel.Run()
             run.execute_and_report("execute user_program")
         """
-        start_time = get_time_now()
-        xs, y, err = self.execute(command, self.trial_id, y_data_type)
-        end_time = get_time_now()
+        trial_id = self.args.trial_id
+        xs = self.args.get_xs()
+        xs, y, err, start_time, end_time = self.execute(command, xs, y_data_type)
 
-        self.report(self.trial_id, xs, y, err, start_time, end_time)
+        self.report(trial_id, xs, y, err, start_time, end_time)
 
     def report(
         self, trial_id: int, xs: dict, y: any, err: str, start_time: str,
@@ -510,8 +564,21 @@ class Run:
             start_time (str): Execution start time.
             end_time (str): Execution end time.
         """
-        self.storage.result.set_any_trial_objective(trial_id, y)
-        self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
-        self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
-        if err != "":
-            self.storage.error.set_any_trial_error(trial_id, err)
+
+        if self.storage is not None:
+            self.storage.result.set_any_trial_objective(trial_id, y)
+            self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
+            self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
+            if err != "":
+                self.storage.error.set_any_trial_error(trial_id, err)
+        else:
+            print(
+                {
+                    'trial_id': trial_id,
+                    'params': xs,
+                    'objective': y,
+                    'error': err,
+                    'start_time': start_time,
+                    'end_time': end_time
+                }
+            )
