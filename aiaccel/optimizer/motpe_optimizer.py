@@ -1,6 +1,3 @@
-from typing import Optional
-
-import aiaccel.parameter
 import optuna
 from aiaccel.optimizer.tpe_optimizer import TpeOptimizer, TPESamplerWrapper
 
