@@ -1,36 +1,39 @@
+from __future__ import annotations
 import copy
-from typing import Dict, List, Union, Optional
+from typing import Union, Optional
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.trialid import TrialId
 
+from numpy import str_
+
 
 class AbstractOptimizer(AbstractModule):
     """An abstract class for Optimizer classes.
 
     Attributes:
-        options (Dict[str, Union[str, int, bool]]): A dictionary
-        containing command line options.
+        options (dict[str, Union[str, int, bool]]): A dictionary containing
+            command line options.
         hp_ready (int): A ready number of hyper parameters.
         hp_running (int): A running number of hyper prameters.
         hp_finished (int): A finished number of hyper parameters.
         num_of_generated_parameter (int): A number of generated hyper
-        paramters.
-        all_parameter_generated (bool): A boolean indicating if all
-        parameters are generated or not.
+            paramters.
+        all_parameter_generated (bool): A boolean indicating if all parameters
+            are generated or not.
         params (HyperParameterConfiguration): Loaded hyper parameter
-        configuration object.
+            configuration object.
         trial_id (TrialId): TrialId object.
     """
 
-    def __init__(self, options: Dict[str, Union[str, int, bool]]) -> None:
+    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
         """Initial method of AbstractOptimizer.
 
         Args:
-            options (Dict[str, Union[str, int, bool]]): A dictionary
-            containing command line options.
+            options (dict[str, Union[str, int, bool]]): A dictionary
+                containing command line options.
 
         Returns:
             None
@@ -57,22 +60,26 @@ class AbstractOptimizer(AbstractModule):
 
     def register_new_parameters(
             self,
-            params: List[Dict[str, Union[str, float, List[float]]]]
+            params: list[dict[str, Union[float, int, str]]]
     ) -> None:
         """Create hyper parameter files.
 
         Args:
-            params (List[Dict]): A list of hyper parameter dictionaries.
+            params (list[dict[str, Union[float, int, str]]]):
+            A list of hyper parameter dictionaries.
 
         Returns:
             None
 
         Note:
-            param = {
-                'parameter_name': ...,
-                'type': ...,
-                'value': ...
-            }
+            ::
+
+                param = {
+                    'parameter_name': ...,
+                    'type': ...,
+                    'value': ...
+                }
+
         """
         self.storage.hp.set_any_trial_params(
             trial_id=self.trial_id.get(),
@@ -86,14 +93,14 @@ class AbstractOptimizer(AbstractModule):
 
         self.num_of_generated_parameter += 1
 
-    def generate_initial_parameter(self) -> List[
-        Dict[str, Union[str, float, List[float]]]
-    ]:
+    def generate_initial_parameter(
+        self
+    ) -> list[dict[str, Union[float, int, str]]]:
         """Generate a list of initial parameters.
 
         Returns:
-            List[Dict[str, Union[str, float, List[float]]]]: A created
-            list of initial parameters.
+            list[dict[str, Union[float, int, str]]]: A created list of initial
+            parameters.
         """
         sample = self.params.sample(initial=True, rng=self._rng)
         new_params = []
@@ -108,9 +115,9 @@ class AbstractOptimizer(AbstractModule):
 
         return new_params
 
-    def generate_parameter(self) -> Optional[
-        List[Dict[str, Union[str, float, List[float]]]]
-    ]:
+    def generate_parameter(
+        self
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
         """Generate a list of parameters.
 
         Raises:
@@ -118,8 +125,8 @@ class AbstractOptimizer(AbstractModule):
             implement.
 
         Returns:
-            List[Dict[str, Union[str, float, List[float]]]]: A created
-            list of parameters.
+            Optional[list[dict[str, Union[float, int, str]]]]: A created list
+            of parameters.
         """
         raise NotImplementedError
 
@@ -140,14 +147,14 @@ class AbstractOptimizer(AbstractModule):
 
         return pool_size
 
-    def generate_new_parameter(self) -> Optional[
-        List[Dict[str, Union[str, Union[float, List[float]]]]]
-    ]:
+    def generate_new_parameter(
+        self
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
         """Generate a list of parameters.
 
         Returns:
-            List[ Dict[str, Union[str, Union[float, List[float]]]] ]: A created
-            list of parameters.
+            Optional[list[dict[str, Union[float, int, str]]]]: A created list
+            of parameters.
         """
         if self.num_of_generated_parameter == 0:
             new_params = self.cast(self.generate_initial_parameter())
@@ -162,7 +169,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.set_numpy_random_seed()
+        self.create_numpy_random_generator()
         self.resume()
 
     def post_process(self) -> None:
@@ -232,7 +239,7 @@ class AbstractOptimizer(AbstractModule):
             self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])
 
-    def cast(self, params: Optional[List]) -> Optional[List]:
+    def cast(self, params: Optional[list]) -> Optional[list]:
         if params is None or len(params) == 0:
             return params
 
@@ -243,15 +250,17 @@ class AbstractOptimizer(AbstractModule):
             param_type = _param['type']
             param_value = _param['value']
 
+            # None: str to NoneType
+            if type(_param['value']) in [str, str_]:
+                if _param['value'].lower() == 'none':
+                    _param['value'] = None
+                    _param['type'] = str(type(None))
+
             try:
                 if (
                     param_type.lower() == 'categorical' or
                     param_type.lower() == 'ordinal'
                 ):
-                    casted_params.append(_param)
-                    continue
-
-                if type(_param['value']) == eval(param_type.lower()):
                     casted_params.append(_param)
                     continue
 

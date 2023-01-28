@@ -10,10 +10,10 @@ class TestParameter(BaseTest):
 
     def test_get_best_parameters(
         self,
-        clean_work_dir,
-        get_one_parameter,
-        work_dir
+        work_dir,
+        clean_work_dir
     ):
+        clean_work_dir()
 
         files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
         best, best_file = get_best_parameter(
@@ -24,7 +24,7 @@ class TestParameter(BaseTest):
         assert best is None
         assert best_file is None
 
-        results = [120, 101., 140.]
+        results = [120, 101., np.float64(140.)]
 
         for i in range(len(self.test_result_data)):
             d = self.test_result_data[i]

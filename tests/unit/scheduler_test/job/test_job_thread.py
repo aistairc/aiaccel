@@ -5,18 +5,18 @@ import sys
 import time
 from unittest.mock import patch
 
-with patch('aiaccel.util.retry.retry', lambda function: function):
-    import aiaccel
-    import pytest
-    from aiaccel.config import ConfileWrapper
-    from aiaccel.scheduler.create import create_scheduler
-    from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
-                                                CustomMachine, Job, Model)
-    from aiaccel.scheduler.local_scheduler import LocalScheduler
-    from aiaccel.util.time_tools import get_time_now_object
-    from tests.arguments import parse_arguments
-    from tests.base_test import BaseTest
-
+import aiaccel
+import pytest
+from aiaccel.config import ConfileWrapper
+from aiaccel.scheduler.create import create_scheduler
+from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
+                                       CustomMachine, Job, create_model)
+from aiaccel.scheduler.job.model.abci_model import AbciModel
+from aiaccel.scheduler.job.model.local_model import LocalModel
+from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.util.time_tools import get_time_now_object
+from tests.arguments import parse_arguments
+from tests.base_test import BaseTest
 
 
 async def async_start_job(job):
@@ -29,18 +29,6 @@ async def async_stop_job_after_sleep(job, sleep_time):
     await loop.run_in_executor(None, time.sleep, sleep_time)
     job.get_machine().set_state('Sucess')
     job.join()
-
-
-def test_custom_machine():
-    machine = CustomMachine(
-        model=Model(),
-        states=JOB_STATES,
-        transitions=JOB_TRANSITIONS,
-        initial=JOB_STATES[0]['name'],
-        auto_transitions=False,
-        ordered_transitions=False
-    )
-    assert type(machine) is CustomMachine
 
 
 class TestModel(BaseTest):
@@ -61,7 +49,7 @@ class TestModel(BaseTest):
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
 
         with patch.object(sys, 'argv', commandline_args):
@@ -75,11 +63,10 @@ class TestModel(BaseTest):
         trial_id = 0
         self.job = Job(
             self.config,
-            options,
             scheduler,
             trial_id
         )
-        self.model = Model()
+        self.model = create_model(self.config.resource_type.get())
         yield
         self.job = None
         self.model = None
@@ -97,11 +84,11 @@ class TestModel(BaseTest):
 
         json_object['resource']['type'] = 'ABCI'
         json_object_config = ConfileWrapper(json_object, 'json_object')
-        
+
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
 
         with patch.object(sys, 'argv', commandline_args):
@@ -114,7 +101,6 @@ class TestModel(BaseTest):
         self.abci_job = Job(
             # json_object_config,
             self.config,
-            options,
             scheduler,
             trial_id
         )
@@ -212,7 +198,7 @@ class TestModel(BaseTest):
         # self.job.scheduler.stats.append({'name': '001'})
         # self.job.scheduler.stats.append({'name': 0})
         self.job.scheduler.stats.append(
-            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0',}
+            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0', }
         )
         assert self.model.conditions_job_confirmed(self.job)
 
@@ -390,6 +376,7 @@ class TestModel(BaseTest):
         setup_hp_running(1)
         assert self.model.after_cancel(self.job) is None
 
+
 class TestJob(BaseTest):
 
     @pytest.fixture(autouse=True)
@@ -407,7 +394,7 @@ class TestJob(BaseTest):
         commandline_args = [
             "start.py",
             "--config",
-            format(config_json)
+            format(self.config_json)
         ]
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
@@ -420,7 +407,6 @@ class TestJob(BaseTest):
         trial_id = 1
         self.job = Job(
             self.config,
-            options,
             scheduler,
             trial_id
         )
@@ -438,7 +424,7 @@ class TestJob(BaseTest):
     ):
 
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -450,7 +436,6 @@ class TestJob(BaseTest):
         trial_id = 1
         job = Job(
             self.config,
-            options,
             scheduler,
             trial_id
         )
@@ -463,16 +448,13 @@ class TestJob(BaseTest):
         assert type(self.job.get_machine()) is CustomMachine
 
     def test_get_model(self, database_remove):
-        assert type(self.job.get_model()) is Model
+        assert type(self.job.get_model()) is LocalModel or AbciModel
 
     def test_get_state(self, database_remove):
         assert self.job.get_state().name == 'Init'
 
     def test_get_state_name(self, database_remove):
         assert self.job.get_state_name() == 'Init'
-
-    def test_is_local(self, database_remove):
-        assert self.job.is_local()
 
     def test_schedule(self, database_remove):
         self.job.get_machine().set_state('Scheduling')

@@ -6,26 +6,26 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
-import fasteners
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
-import aiaccel
-from aiaccel.abci.batch import create_abci_batch_file
-from aiaccel.abci.qsub import create_qsub_command
+from aiaccel import dict_lock
+from aiaccel import dict_result
+from aiaccel import dict_error
+from aiaccel import resource_type_abci
+from aiaccel import resource_type_local
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.buffer import Buffer
-from aiaccel.util.filesystem import create_yaml, interprocess_lock_file
-from aiaccel.util.process import OutputHandler, exec_runner, kill_process
-from aiaccel.util.retry import retry
-from aiaccel.util.time_tools import get_time_delta, get_time_now_object
+from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
-from aiaccel.wrapper_tools import create_runner_command
+from aiaccel.scheduler.job.model.abci_model import AbciModel
+from aiaccel.scheduler.job.model.local_model import LocalModel
 
 if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler.abci_scheduler import AbciScheduler
     from aiaccel.scheduler.local_scheduler import LocalScheduler
+
 
 
 JOB_STATES = [
@@ -402,447 +402,12 @@ class CustomMachine(Machine):
     pass
 
 
-class Model(object):
-
-    # Common
-    def after_confirmed(self, obj: 'Job') -> None:
-        """State transition of 'after_confirmed'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        obj.from_file = None
-        obj.to_file = None
-        obj.threshold_timeout = None
-        obj.threshold_retry = None
-        obj.count_retry = 0
-
-    def before_failed(self, obj: 'Job') -> None:
-        """State transition of 'before_failed'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        obj.count_retry += 1
-
-    def conditions_confirmed(self, obj) -> bool:
-        """State transition of 'conditions_confirmed'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            bool: A target file exists or not.
-        """
-        any_trial_state = obj.storage.trial.get_any_trial_state(trial_id=obj.trial_id)
-        return (obj.next_state == any_trial_state)
-
-    def change_trial_state(self, obj: 'Job') -> None:
-        """State transition of 'change_trial_state'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        obj.storage.trial.set_any_trial_state(
-            trial_id=obj.trial_id,
-            state=obj.next_trial_state
-        )
-        return
-
-    def get_runner_file(self, obj: 'Job') -> None:
-        return obj.ws / aiaccel.dict_runner / f'run_{obj.trial_id_str}.sh'
-
-    # Runner
-    def after_runner(self, obj: 'Job') -> None:
-        """State transition of 'after_runner'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        obj.to_file = self.get_runner_file(obj)
-        obj.next_state = 'running'
-        obj.threshold_timeout = (
-            get_time_now_object() +
-            get_time_delta(obj.runner_timeout)
-        )
-        obj.threshold_retry = obj.runner_retry
-
-    def before_runner_create(self, obj: 'Job') -> None:
-        """State transition of 'before_runner_create'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        if obj.is_local():
-            return
-
-        commands = create_runner_command(
-            obj.config.job_command.get(),
-            obj.content,
-            obj.trial_id,
-            obj.config_path
-        )
-
-        create_abci_batch_file(
-            obj.to_file,
-            obj.config.job_script_preamble.get(),
-            commands,
-            obj.dict_lock
-        )
-
-    def conditions_runner_confirmed(self, obj: 'Job') -> bool:
-        """State transition of 'conditions_runner_confirmed'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            bool: A target file exists or not. But always true if local
-                execution.
-        """
-        if obj.is_local():
-            return True
-
-        @retry(_MAX_NUM=60, _DELAY=1.0)
-        def _conditions_runner_confirmed(_obj):
-
-            lockpath = interprocess_lock_file(_obj.to_file, _obj.dict_lock)
-            with fasteners.InterProcessLock(lockpath):
-                return _obj.to_file.exists()
-
-        return _conditions_runner_confirmed(obj)
-
-    # HpRunning
-    def after_running(self, obj: 'Job') -> None:
-        """State transition of 'after_running'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        obj.next_state = "running"
-        obj.threshold_timeout = (
-            get_time_now_object() + get_time_delta(obj.running_timeout)
-        )
-        obj.threshold_retry = obj.running_retry
-
-    # JobRun
-    def after_job(self, obj: 'Job') -> None:
-        """State transition of 'after_job'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        self.after_confirmed(obj)
-        obj.threshold_timeout = (
-            get_time_now_object() + get_time_delta(obj.job_timeout)
-        )
-        obj.threshold_retry = obj.job_retry
-
-    def before_job_submitted(self, obj: 'Job') -> None:
-        """State transition of 'before_job_submitted'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        if obj.is_local():
-            runner_command = create_runner_command(
-                obj.config.job_command.get(),
-                obj.content,
-                str(obj.trial_id),
-                obj.config_path,
-                obj.options
-            )
-        else:
-            runner_file = self.get_runner_file(obj)
-            runner_command = create_qsub_command(
-                obj.config,
-                str(runner_file)
-            )
-
-        obj.proc = exec_runner(
-            runner_command,
-            bool(obj.config.silent_mode.get())
-        )
-
-        obj.th_oh = OutputHandler(
-            obj.scheduler,
-            obj.proc,
-            'Job'
-        )
-        obj.th_oh.start()
-
-    def conditions_job_confirmed(self, obj: 'Job') -> bool:
-        """State transition of 'conditions_job_confirmed'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            bool: A target job is finished or not.
-        """
-        for state in obj.scheduler.stats:
-            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
-            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
-                return True
-        else:
-            # confirm whether the result file exists or not (this means the job finished quickly
-            trial_ids = obj.storage.result.get_result_trial_id_list()
-            if trial_ids is None:
-                return False
-            return obj.trial_id in trial_ids
-
-    # Result
-    def after_result(self, obj: 'Job') -> None:
-        """State transition of 'after_result'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        self.after_confirmed(obj)
-
-    def after_wait_result(self, obj: 'Job') -> None:
-        """State transition of 'after_wait_result'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        self.after_confirmed(obj)
-        obj.threshold_timeout = (get_time_now_object() + get_time_delta(obj.batch_job_timeout))
-        obj.threshold_retry = obj.result_retry
-
-    def conditions_result(self, obj: 'Job') -> bool:
-        """State transition of 'conditions_result'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            bool: A target is in result files or not.
-        """
-        objective = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
-        return (objective is not None)
-
-    # Finished
-    def after_finished(self, obj: 'Job') -> None:
-        """State transition of 'after_finished'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        self.after_confirmed(obj)
-        # obj.from_file = obj.ws / aiaccel.dict_hp_running / obj.hp_file.name
-        # obj.to_file = obj.ws / aiaccel.dict_hp_finished / obj.hp_file.name
-        obj.next_state = 'finished'
-        obj.threshold_timeout = (
-            get_time_now_object() + get_time_delta(obj.finished_timeout)
-        )
-        obj.threshold_retry = obj.finished_retry
-
-    def before_finished(self, obj: 'Job') -> None:
-        """State transition of 'before_finished'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-
-        self.change_state(obj)
-
-        result = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
-        error = obj.storage.error.get_any_trial_error(trial_id=obj.trial_id)
-        content = obj.storage.get_hp_dict(trial_id=obj.trial_id)
-        content['result'] = result
-
-        if error is not None:
-            content['error'] = error
-
-        create_yaml(obj.result_file_path, content)
-
-    # Expire
-    def after_expire(self, obj: 'Job') -> None:
-        """State transition of 'after_expire'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-
-        obj.next_state = "ready"
-        obj.threshold_timeout = (
-            get_time_now_object() + get_time_delta(obj.expire_timeout)
-        )
-        obj.threshold_retry = obj.expire_retry
-
-    # Kill
-    def after_kill(self, obj: 'Job') -> None:
-        """State transition of 'after_kill'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        obj.threshold_timeout = (
-            get_time_now_object() + get_time_delta(obj.kill_timeout)
-        )
-        obj.threshold_retry = obj.kill_retry
-
-    def before_kill_submitted(self, obj: 'Job') -> None:
-        """State transition of 'before_kill_submitted'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): Ab object.
-
-        Returns:
-            None
-        """
-        for state in obj.scheduler.stats:
-            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
-            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
-                kill_process(state['job-ID'])
-        else:
-            obj.logger.warning(f'Not matched job trial_id: {obj.trial_id}')
-
-    def conditions_kill_confirmed(self, obj: 'Job') -> bool:
-        """State transition of 'conditions_kill_confirmed'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            bool: A target is killed or not.
-        """
-        for state in obj.scheduler.stats:
-            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
-            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
-                return False
-        else:
-            return True
-
-    # Check result
-    def after_check_result(self, obj: 'Job') -> None:
-        """State transition of 'after_check_result'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        self.after_confirmed(obj)
-        obj.threshold_timeout = (
-            get_time_now_object() + get_time_delta(obj.batch_job_timeout)
-        )
-        obj.threshold_retry = obj.result_retry
-
-    # Cancel
-    def after_cancel(self, obj: 'Job') -> None:
-        """State transition of 'after_cancel'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-
-        if (
-            obj.storage.is_ready(obj.trial_id) or
-            obj.storage.is_running(obj.trial_id)
-        ):
-            obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state='ready')
-        else:
-            obj.logger.warning(f'Could not find any trial_id: {obj.trial_id}')
-
-        obj.threshold_timeout = (
-            get_time_now_object() + get_time_delta(obj.expire_timeout)
-        )
-        obj.threshold_retry = obj.expire_retry
-
-    def change_state(self, obj: 'Job'):
-        obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state=obj.next_state)
+def create_model(resource_type: str):
+    if resource_type.lower() == resource_type_abci:
+        model = AbciModel()
+    elif resource_type.lower() == resource_type_local:
+        model = LocalModel()
+    return model
 
 
 class Job:
@@ -964,7 +529,6 @@ class Job:
     def __init__(
         self,
         config: Config,
-        options: dict,
         scheduler: Union[AbciScheduler, LocalScheduler],
         trial_id: int
     ) -> None:
@@ -980,7 +544,6 @@ class Job:
         # === Load config file===
         self.config = config
         self.config_path = self.config.config_path
-        self.options = options
         # === Get config parameter values ===
         self.workspace = self.config.workspace.get()
         self.cancel_retry = self.config.cancel_retry.get()
@@ -1007,10 +570,9 @@ class Job:
         self.count_retry = 0
 
         self.ws = Path(self.workspace).resolve()
-        self.abci_output_path = self.ws / aiaccel.dict_output
-        self.dict_lock = self.ws / aiaccel.dict_lock
+        self.dict_lock = self.ws / dict_lock
 
-        self.model = Model()
+        self.model = create_model(self.resource_type)
         self.machine = CustomMachine(
             model=self.model,
             states=JOB_STATES,
@@ -1033,13 +595,15 @@ class Job:
         self.stop_flag = False
         self.storage = Storage(self.ws)
         self.content = self.storage.get_hp_dict(self.trial_id)
-        self.result_file_path = self.ws / aiaccel.dict_result / (self.trial_id_str + '.hp')
+        self.result_file_path = self.ws / dict_result / (self.trial_id_str + '.hp')
         self.expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt["trigger"] == "expire"]
 
         self.buff = Buffer(['state.name'])
         self.buff.d['state.name'].set_max_len(2)
 
         self.logger = logging.getLogger('root.scheduler.job')
+
+        self.command_error_output = self.ws / dict_error / f'{self.trial_id}.txt'
 
     def get_machine(self) -> CustomMachine:
         """Get a state machine object.
@@ -1049,7 +613,7 @@ class Job:
         """
         return self.machine
 
-    def get_model(self) -> Model:
+    def get_model(self) -> Union[AbciModel, LocalModel]:
         """Get a state transition model object.
 
         Returns:
@@ -1074,14 +638,6 @@ class Job:
         state = self.get_state()
         return state.name
 
-    def is_local(self) -> bool:
-        """Is the execution on a local computer or not(ABCI).
-
-        Returns:
-            bool: Is the execution on a local computer or not(ABCI).
-        """
-        return self.resource_type == aiaccel.resource_type_local
-
     def schedule(self) -> None:
         """Schedule to run this execution.
 
@@ -1089,9 +645,6 @@ class Job:
             None
         """
         self.model.schedule(self)
-
-    def stop(self):
-        self.stop_flag = True
 
     def is_timeout(self) -> bool:
         state = self.machine.get_state(self.model.state)
@@ -1111,6 +664,17 @@ class Job:
             self.count_retry >= self.threshold_retry and
             state.name in self.expirable_states
         )
+
+    def check_job_command_error(self):
+        if self.command_error_output.exists() is False:
+            return True
+
+        err = self.command_error_output.read_text()
+        if len(err) > 0:
+            self.storage.error.set_any_trial_error(trial_id=self.trial_id, error_message=err)
+            return False
+
+        return True
 
     def main(self) -> None:
         """Thread.run method.
@@ -1158,5 +722,7 @@ class Job:
             f'state: {state.name} ,'
             f'count retry: {self.count_retry}'
         )
+
+        self.check_job_command_error()
 
         return

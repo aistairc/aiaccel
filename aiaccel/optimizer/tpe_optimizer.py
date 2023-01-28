@@ -1,4 +1,5 @@
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, Union
 
 import aiaccel.parameter
 import optuna
@@ -16,11 +17,32 @@ class TPESamplerWrapper(optuna.samplers.TPESampler):
 
 
 class TpeOptimizer(AbstractOptimizer):
-    def __init__(self, options: dict) -> None:
+    """An optimizer class based on optuna.samplers.TPESampler.
+
+    Args:
+        options (dict[str, Union[str, int, bool]]): A dictionary
+            containing command line options.
+
+    Attributes:
+        parameter_pool (dict[int, list[dict[str, Union[float, int, str]]]]):
+            A dictionary of parameters.
+        parameter_list (list[HyperParameter]): A list of HyperParameter
+            objects.
+        study_name (str): Study name.
+        study (str): optuna.study.Study object.
+        distributions (dict[str, optuna.distributions]): A dictionary of
+            optuna.distributions objects defined for individual parameters.
+        trial_pool (dict[int, optuna.trial.Trial]): A dictionary of
+            optuna.trial.Trial objects.
+        randseed (int): Random seed.
+    """
+
+    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
         """Initial method of TpeOptimizer.
 
         Args:
-            options (dict): A file name of a configuration.
+            options (dict[str, Union[str, int, bool]]): A dictionary
+                containing command line options.
         """
         super().__init__(options)
         self.parameter_pool = {}
@@ -76,14 +98,23 @@ class TpeOptimizer(AbstractOptimizer):
         n_startup_trials = self.study.sampler.get_startup_trials()
         return self.num_of_generated_parameter < n_startup_trials
 
-    def generate_parameter(self, number: Optional[int] = 1) -> None:
+    def generate_parameter(
+        self, number: Optional[int] = 1
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
         """Generate parameters.
 
         Args:
-            number (Optional[int]): A number of generating parameters.
+            number (Optional[int]): A number of generating parameters. Defaults
+                to 1.
+
+        Returns:
+            Optional[list[dict[str, Union[float, int, str]]]]: A list of
+            created parameters.
         """
         self.check_result()
-        self.logger.debug(f'number: {number}, pool: {len(self.parameter_pool)} losses')
+        self.logger.debug(
+            f'number: {number}, pool: {len(self.parameter_pool)} losses'
+        )
 
         # TPE has to be sequential.
         if (
@@ -113,8 +144,15 @@ class TpeOptimizer(AbstractOptimizer):
 
         return new_params
 
-    def generate_initial_parameter(self):
+    def generate_initial_parameter(
+        self
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+        """Generate initial parameters.
 
+        Returns:
+            Optional[list[dict[str, Union[float, int, str]]]]: A List of new
+            parameters. None if `self.nelder_mead` is already defined.
+        """
         enqueue_trial = {}
         for hp in self.params.hps.values():
             if hp.initial is not None:
@@ -186,6 +224,7 @@ def create_distributions(
 
         elif p.type.lower() == 'categorical':
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
+
         else:
             raise 'Unsupported parameter type'
 

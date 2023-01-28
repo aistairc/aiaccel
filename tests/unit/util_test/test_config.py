@@ -10,6 +10,7 @@ from tests.base_test import BaseTest
 from unittest.mock import patch
 import sys
 
+
 class TestBaseConfig(object):
 
     def test_base_config(self):
@@ -73,12 +74,12 @@ class TestConfileWrapper(BaseTest):
         json_object_config = ConfileWrapper(json_object, 'json_object')
         assert json_object_config.get('generic', 'project_name') == 'sphere'
 
-    def test_get(self):
+    def test_get(self, work_dir):
         # value = self.config.get('generic', 'project_name')
         # assert value == 'sphere'
         # assert self.config.get('invalid_key') is None
         value = self.config.workspace.get()
-        assert value == '/tmp/work'
+        assert value == str(work_dir)
 
 
 def test_load_config(config_json, config_yaml):
@@ -105,7 +106,7 @@ def test_config(config_json):
     config = Config(config_json, warn=False, format_check=True)
     config = Config(config_json, warn=True, format_check=False)
     config = Config(config_json, warn=True, format_check=True)
-    
+
     assert config.workspace.get() == "/tmp/work"
     assert config.job_command.get() == "python original_main.py"
     assert config.resource_type.get() == "local"
@@ -141,8 +142,7 @@ def test_config(config_json):
     assert config.optimizer_stream_log_level.get() == "DEBUG"
     assert config.scheduler_logfile.get() == "scheduler.log"
     assert config.scheduler_file_log_level.get() == "DEBUG"
-    assert config.scheduler_stream_log_level.get() == "DEBUG" 
-    assert config.silent_mode.get() is True
+    assert config.scheduler_stream_log_level.get() == "DEBUG"
     assert config.hyperparameters.get() == [
         {
             "name": "x1",
@@ -150,7 +150,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 0.74,  1.69,  1.22,  2.09, -3.24, -3.58,  4.13,  2.08]
+            "initial": [0.74,  1.69,  1.22,  2.09, -3.24, -3.58,  4.13,  2.08]
         },
         {
             "name": "x2",
@@ -158,7 +158,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 2.98,  2.27,  1.41, -2.10, -3.29, -0.35,  3.87,  4.66,  3.54,  1.17, 3.10]
+            "initial": [2.98,  2.27,  1.41, -2.10, -3.29, -0.35,  3.87,  4.66,  3.54,  1.17, 3.10]
         },
         {
             "name": "x3",
@@ -166,7 +166,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 3.62,  4.38, -0.40,  2.94,  2.23, -3.07, -2.35, -1.15,  0.89,  2.01, -0.58]
+            "initial": [3.62,  4.38, -0.40,  2.94,  2.23, -3.07, -2.35, -1.15,  0.89,  2.01, -0.58]
         },
         {
             "name": "x4",
@@ -174,7 +174,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 0.90,  2.00,  4.29, -1.43, -4.02,  2.25,  0.28, -3.00, -0.18,  0.96, -2.09]
+            "initial": [0.90,  2.00,  4.29, -1.43, -4.02,  2.25,  0.28, -3.00, -0.18,  0.96, -2.09]
         },
         {
             "name": "x5",
@@ -182,7 +182,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 1.99,  3.90,  3.10,  0.06, -3.83,  1.16,  0.93,  0.01, -3.89, -2.04, 0.33]
+            "initial": [1.99,  3.90,  3.10,  0.06, -3.83,  1.16,  0.93,  0.01, -3.89, -2.04, 0.33]
         },
         {
             "name": "x6",
@@ -198,7 +198,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 1.00, -2.20,  1.82,  0.52, -3.82,  3.23,  3.16,  2.41,  4.99, -2.01, 2.05]
+            "initial": [1.00, -2.20,  1.82,  0.52, -3.82,  3.23,  3.16,  2.41,  4.99, -2.01, 2.05]
         },
         {
             "name": "x8",
@@ -206,7 +206,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 4.97,  4.77, -0.60, -1.75, -0.68,  2.16,  3.70, -0.86, -2.32, -4.90, -1.4]
+            "initial": [4.97,  4.77, -0.60, -1.75, -0.68,  2.16,  3.70, -0.86, -2.32, -4.90, -1.4]
         },
         {
             "name": "x9",
@@ -214,7 +214,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 1.98, -3.66, -3.17,  2.95,  2.27, -3.19, -1.18, -1.60,  4.96, -2.39, 1.64]
+            "initial": [1.98, -3.66, -3.17,  2.95,  2.27, -3.19, -1.18, -1.60,  4.96, -2.39, 1.64]
         },
         {
             "name": "x10",
@@ -222,7 +222,7 @@ def test_config(config_json):
             "log": False,
             "lower": -5.0,
             "upper": 5.0,
-            "initial": [ 4.03,  3.59, -2.06,  3.03,  3.10, -2.84, -4.57, -0.62, -1.14,  2.15, 1.92]
+            "initial": [4.03,  3.59, -2.06,  3.03,  3.10, -2.84, -4.57, -0.62, -1.14,  2.15, 1.92]
         }
     ]
 
@@ -234,6 +234,7 @@ def test_config_set(config_json):
     with pytest.raises(TypeError):
         assert config.workspace.set(123)
 
+
 def test_empty_if_error(config_json):
     config = Config(config_json, warn=False, format_check=False)
     config.workspace.set("aaa")
@@ -242,6 +243,7 @@ def test_empty_if_error(config_json):
     with patch.object(sys, 'exit', return_value=None):
         config.workspace.set("")
         config.workspace.empty_if_error()
+
 
 def test_value(config_json):
     config = Config(config_json)

@@ -12,8 +12,9 @@ from aiaccel.storage.variable import Serializer
 
 
 class Storage:
-    """ Database
+    """Database
     """
+
     def __init__(self, ws: PosixPath) -> None:
         db_path = ws / aiaccel.dict_storage / "storage.db"
         self.trial = Trial(db_path)
@@ -30,7 +31,8 @@ class Storage:
         Returns:
             trial_id (int): Any trial id
 
-        TODO: Refuctoring
+        Todo:
+            Refuctoring
         """
 
         trial_ids = self.trial.get_all_trial_id()

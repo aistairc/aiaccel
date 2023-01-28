@@ -1,8 +1,8 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python /tmp/original_main.py",
-    "python_file": "/tmp/original_main.py",
+    "job_command": "python original_main.py",
+    "python_file": "original_main.py",
     "function": "main",
     "batch_job_timeout": 600
   },
@@ -154,9 +154,6 @@
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     }
-  },
-  "ui": {
-    "silent_mode": true
   },
   "verification": {
     "is_verified": true,

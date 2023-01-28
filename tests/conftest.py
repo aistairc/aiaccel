@@ -1,3 +1,4 @@
+import tempfile
 import os
 import shutil
 import time
@@ -7,7 +8,8 @@ import fasteners
 import pytest
 from aiaccel.config import Config, load_config
 from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import load_yaml
+from aiaccel.util.filesystem import create_yaml, load_yaml
+import json
 
 WORK_SUB_DIRECTORIES = [
     'abci_output', 'alive', 'hp', 'hp/finished', 'hp/ready', 'hp/running',
@@ -79,9 +81,9 @@ def to_path(path):
 
 
 @pytest.fixture
-def cd_work(work_dir):
+def cd_work(tmpdir):
     cwd = Path.cwd().resolve()
-    os.chdir(work_dir)
+    os.chdir(tmpdir)
     yield
     os.chdir(cwd)
 
@@ -107,10 +109,9 @@ def data_dir(root_dir):
 
 
 @pytest.fixture(scope="session")
-def get_one_parameter(data_dir):
+def get_one_parameter(work_dir):
     def _get_one_parameter():
-        # path = data_dir.joinpath('work/hp/finished/001.hp')
-        path = Path('/tmp/work/result/0.yml')
+        path = work_dir.joinpath('result/0.yml')
         return load_yaml(path)
 
     return _get_one_parameter
@@ -132,7 +133,7 @@ def load_test_config_org(config_json):
         return load_config(config_json)
 
     return _load_test_config
-    
+
 
 @pytest.fixture(scope="session")
 def grid_load_test_config(grid_config_json):
@@ -143,20 +144,49 @@ def grid_load_test_config(grid_config_json):
     return _load_test_config
 
 
-
 @pytest.fixture(scope="session")
 def root_dir():
     return Path(__file__).resolve().parent
 
 
 @pytest.fixture(scope="session")
-def work_dir(load_test_config, data_dir):
-    test_config = load_test_config()
-    return Path(test_config.workspace.get()).resolve()
+def work_dir(tmpdir):
+    return tmpdir.joinpath('work')
 
 
 @pytest.fixture(scope="session")
-def setup_hp_files(data_dir, work_dir):
+def tmpdir():
+    tmpdir = tempfile.TemporaryDirectory()
+    yield Path(tmpdir.name).resolve()
+    tmpdir.cleanup()
+
+
+@pytest.fixture(scope="session")
+def create_tmp_config(data_dir, tmpdir, work_dir):
+    def _create_tmp_config(conf_path=None):
+        if conf_path is None:
+            conf_path = data_dir.joinpath('config.yaml')
+
+        if conf_path.suffix == ".yaml" or conf_path.suffix == ".yml":
+            yml = load_yaml(conf_path)
+            yml['generic']['workspace'] = str(work_dir)
+            tmp_conf_path = tmpdir.joinpath('config.yaml')
+            create_yaml(tmp_conf_path, yml)
+        elif conf_path.suffix == ".json":
+            with open(conf_path, 'r') as f:
+                json_obj = json.load(f)
+                json_obj['generic']['workspace'] = str(work_dir)
+                tmp_conf_path = tmpdir.joinpath('config.json')
+            with open(tmp_conf_path, 'w') as f:
+                json.dump(json_obj, f)
+
+        return tmp_conf_path
+
+    return _create_tmp_config
+
+
+@pytest.fixture(scope="session")
+def setup_hp_files(work_dir):
     def _setup_hp_files(hp_type, n=1):
         if hp_type not in ['ready', 'running', 'finished']:
             hp_type = 'ready'
@@ -201,7 +231,7 @@ def setup_hp_finished(setup_hp_files):
 
 
 @pytest.fixture(scope="session")
-def setup_result(data_dir: Path, work_dir: Path):
+def setup_result(work_dir):
     def _setup_result(n=1):
         storage = Storage(work_dir)
         running = storage.get_running()
@@ -214,7 +244,7 @@ def setup_result(data_dir: Path, work_dir: Path):
 
 
 @pytest.fixture(scope="session")
-def database_remove(work_dir: Path):
+def database_remove(work_dir):
     def _database_remove():
         p = work_dir / 'storage' / 'storage.db'
         if p.exists():
@@ -222,21 +252,9 @@ def database_remove(work_dir: Path):
     return _database_remove
 
 
-@pytest.fixture(scope="session", autouse=True)
-def setup_session_work_dir(base_clean_work_dir, data_dir, work_dir):
-    base_clean_work_dir()
-    for wf in WORK_FILES:
-        shutil.copyfile(data_dir.joinpath(wf), work_dir.joinpath(wf))
-
-
-@pytest.fixture(scope="session", autouse=True)
-def teardown_session_work_dir(base_clean_work_dir):
-    base_clean_work_dir()
-
-
-@pytest.fixture(scope="session")
-def base_clean_work_dir(data_dir, work_dir):
-    def _base_clean_work_dir():
+@pytest.fixture
+def clean_work_dir(work_dir, data_dir):
+    def _clean_work_dir():
         while not work_dir.is_dir():
             if not work_dir.exists():
                 work_dir.mkdir()
@@ -273,12 +291,4 @@ def base_clean_work_dir(data_dir, work_dir):
             if not work_dir.joinpath(wf).exists():
                 shutil.copyfile(data_dir.joinpath(wf), work_dir.joinpath(wf))
 
-    return _base_clean_work_dir
-
-
-@pytest.fixture
-def clean_work_dir(work_dir, base_clean_work_dir):
-    base_clean_work_dir()
-    yield
-    base_clean_work_dir()
-
+    return _clean_work_dir

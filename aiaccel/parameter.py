@@ -19,7 +19,7 @@ def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
 
     Returns:
         Tuple[Union[float, None], Union[Path, None]]: A best result value and a
-            file path. It returns None if a number of files is less than one.
+        file path. It returns None if a number of files is less than one.
 
     Raises:
         ValueError: Causes when an invalid goal is set.
@@ -58,7 +58,7 @@ def get_type(parameter: dict) -> str:
 
     Returns:
         str: A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
-            'ORDINAL'.
+        'ORDINAL'.
     """
     if parameter['type'].lower() == 'uniform_int':
         return 'INT'
@@ -135,7 +135,7 @@ class HyperParameter(object):
             self.step = parameter['step']
 
         if 'base' in parameter:
-            self.step = parameter['base']
+            self.base = parameter['base']
 
     def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
         """Sample a parameter.

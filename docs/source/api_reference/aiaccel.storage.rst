@@ -4,18 +4,10 @@ aiaccel.storage package
 Submodules
 ----------
 
-aiaccel.storage.abstruct module
+aiaccel.storage.abstract module
 -------------------------------
 
-.. automodule:: aiaccel.storage.abstruct
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-aiaccel.storage.alive module
-----------------------------
-
-.. automodule:: aiaccel.storage.alive
+.. automodule:: aiaccel.storage.abstract
    :members:
    :undoc-members:
    :show-inheritance:
@@ -48,22 +40,6 @@ aiaccel.storage.model module
 ----------------------------
 
 .. automodule:: aiaccel.storage.model
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-aiaccel.storage.output module
------------------------------
-
-.. automodule:: aiaccel.storage.output
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-aiaccel.storage.pid module
---------------------------
-
-.. automodule:: aiaccel.storage.pid
    :members:
    :undoc-members:
    :show-inheritance:

@@ -31,14 +31,7 @@ class AbciMaster(AbstractMaster):
         Returns:
             None
         """
-        #
-        # In job_thread.after_runner, use 'run_{}.sh'.
-        # match this one too.
-        #
-        # self.runner_files = get_dict_files(
-        #     self.ws / aiaccel.dict_runner,
-        #     # self.config.runner_search_pattern().get
-        # )
+
         self.runner_files = get_dict_files(
             self.ws / aiaccel.dict_runner,
             "run_*.sh"

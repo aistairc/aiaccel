@@ -1,11 +1,6 @@
 import asyncio
-import copy
-import os
 import subprocess
-import sys
-import time
 from pathlib import Path
-from unittest.mock import patch
 
 import aiaccel
 from aiaccel.config import Config
@@ -21,6 +16,7 @@ from tests.base_test import BaseTest
 
 import yaml
 
+
 async def start_master(master):
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, master.start)
@@ -29,7 +25,7 @@ async def start_master(master):
 class IntegrationTest(BaseTest):
     search_algorithm = None
 
-    def test_run(self, cd_work, data_dir, work_dir):
+    def test_run(self, data_dir, create_tmp_config, tmpdir, work_dir):
 
         #
         # local test
@@ -44,6 +40,7 @@ class IntegrationTest(BaseTest):
             
         with self.create_main(user_main_file):
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+            config_file = create_tmp_config(config_file)
             config = Config(config_file)
 
             # master
@@ -56,7 +53,7 @@ class IntegrationTest(BaseTest):
 
             storage = Storage(ws=Path(config.workspace.get()))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
-            self.evaluate(data_dir, work_dir, storage)
+            self.evaluate(work_dir, storage)
 
             self.result_comparison.append(storage.result.get_objectives())
 
@@ -65,15 +62,16 @@ class IntegrationTest(BaseTest):
         #
         with self.create_main(user_main_file):
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
-            new_config_file = data_dir.joinpath('config_{}_pylocal.yaml'.format(self.search_algorithm))
+            new_config_file = tmpdir.joinpath('config_{}_pylocal.yaml'.format(self.search_algorithm))
 
             with open(config_file, 'r') as f:
                 yml = yaml.load(f, Loader=yaml.SafeLoader)
             yml['resource']['type'] = 'python_local'
-            
+
             with open(new_config_file, 'w') as f:
                 f.write(yaml.dump(yml, default_flow_style=False))
 
+            new_config_file = create_tmp_config(new_config_file)
             config = Config(new_config_file)
             assert config.resource_type.get() == 'python_local'
 
@@ -88,19 +86,18 @@ class IntegrationTest(BaseTest):
             storage = Storage(ws=Path(config.workspace.get()))
 
             subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
-            self.evaluate(data_dir, work_dir, storage)
+            self.evaluate(work_dir, storage)
 
-            new_config_file.unlink()
             print(storage.result.get_objectives())
             self.result_comparison.append(storage.result.get_objectives())
-        
+
         data_0 = self.result_comparison[0]  # local result
         data_1 = self.result_comparison[1]  # pylocal result
-        assert len(data_0) == len(data_1) 
+        assert len(data_0) == len(data_1)
         for i in range(len(data_0)):
             assert data_0[i] == data_1[i]
 
-    def evaluate(self, data_dir, work_dir, storage):
+    def evaluate(self, work_dir, storage):
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()

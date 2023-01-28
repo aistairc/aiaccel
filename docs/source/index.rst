@@ -19,43 +19,52 @@ aiaccelドキュメント
 
    overview/overview.md
 
-..
-   toctree::
+.. toctree::
    :maxdepth: 2
    :caption: インストール:
 
    installation/installation.md
 
-..
-   toctree::
+.. toctree::
    :maxdepth: 2
    :caption: 利用例:
 
-   examples/examples.md
+   examples/prepare_files.md
+   examples/local_random.md
+   examples/local_grid.md
+   examples/python_local_tpe.md
+   examples/abci_sobol.md
+   examples/abci_nelder_mead.md
+   examples/wrapper_sample.md
 
 .. toctree::
    :maxdepth: 2
    :caption: ユーザーガイド:
 
    user_guide/basic_usage.md
-.. user_guide/configuration_setting.md
+   user_guide/configuration_setting.md
 
 .. toctree::
    :maxdepth: 2
    :caption: ディベロッパーガイド:
 
+   developer_guide/architecture.md
    developer_guide/custom_optimizer.md
-.. developer_guide/architecture.md
 
-..
-   toctree::
+.. toctree::
    :maxdepth: 2
    :caption: コントリビューションガイド:
 
    contribution_guide/contribution_guide.md
 
-..
-   toctree::
+.. toctree::
+   :maxdepth: 2
+   :caption: Tips:
+
+   tips/qrsh-inherit.md
+   tips/rsync-localdir.md
+
+.. toctree::
    :maxdepth: 2
    :caption: リファレンス:
 
@@ -65,7 +74,7 @@ aiaccelドキュメント
    :maxdepth: 2
    :caption: コードリファレンス
 
-   api_reference/aiaccel
+   api_reference/modules
 
 索引と検索
 ==========

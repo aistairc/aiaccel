@@ -1,13 +1,13 @@
 from aiaccel.scheduler.local_scheduler import LocalScheduler
-
+from aiaccel.scheduler.job.job import Job
 from tests.base_test import BaseTest
 
 
 class TestLocalScheduler(BaseTest):
 
-    def test_get_stats(self, clean_work_dir, config_json, fake_process):
+    def test_get_stats(self, fake_process):
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,
@@ -27,12 +27,15 @@ class TestLocalScheduler(BaseTest):
                 "10 00:00:10 2020\n"
             ]
         )
-        scheduler.jobs.append({'trial_id': 'sample1', 'thread': None})
+
+        trial_id = 1
+        job = Job(self.config, scheduler, trial_id)
+        scheduler.jobs.append(job)
         assert scheduler.get_stats() is None
 
-    def test_parse_trial_id(self, config_json):
+    def test_parse_trial_id(self):
         options = {
-            'config': config_json,
+            'config': self.config_json,
             'resume': None,
             'clean': False,
             'fs': False,

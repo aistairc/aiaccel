@@ -13,13 +13,16 @@ class AbstractModule(object):
     """An abstract class for Master, Optimizer and Scheduler.
 
     The procedure of this class is as follows:
-        1. At first, deserialize() is called.
-        2. start() is called.
-        3. pre_process() is called.
-        4. loop() is called.
-            4-1. in while loop, inner_loop_main_process() is called.
-            4-2. in while loop, loop_count is incremented.
-        5. call post_process()
+
+    1. At first, deserialize() is called.
+    2. start() is called.
+    3. pre_process() is called.
+    4. loop() is called.
+
+        | 4-1. in while loop, inner_loop_main_process() is called.
+        | 4-2. in while loop, loop_count is incremented.
+
+    5. call post_process()
 
     Attributes:
         config (ConfileWrapper): A config object.
@@ -232,6 +235,18 @@ class AbstractModule(object):
 
     def set_numpy_random_seed(self) -> None:
         """ set any random seed.
+        Args:
+            None
+        Returns:
+            None
+        """
+        self.logger.debug(f'set numpy random seed: {self.seed}')
+        if self._rng is None:
+            self.create_numpy_random_generator()
+        np.random.set_state(self.get_numpy_random_state())
+
+    def create_numpy_random_generator(self) -> None:
+        """ create random generator using any random seed.
 
         Args:
             None
@@ -239,7 +254,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(f'set numpy random seed: {self.seed}')
+        self.logger.debug(f'create numpy random generator by seed: {self.seed}')
         self._rng = np.random.RandomState(self.seed)
 
     def get_numpy_random_state(self) -> tuple:

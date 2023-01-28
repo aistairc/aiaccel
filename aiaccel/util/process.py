@@ -13,9 +13,10 @@ if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.master.abci_master import AbciMaster
     from aiaccel.master.abstract_master import AbstractMaster
     from aiaccel.master.local_master import LocalMaster
+    from aiaccel.storage.storage import Storage
 
 
-def exec_runner(command: list, silent: bool = True) -> Popen:
+def exec_runner(command: list) -> Popen:
     """Execute a subprocess with command.
 
     Args:
@@ -25,16 +26,10 @@ def exec_runner(command: list, silent: bool = True) -> Popen:
     Returns:
         Popen: An opened process object.
     """
-    # if silent:
-    #     return subprocess.Popen(command, stdout=subprocess.DEVNULL,
-    #                             stderr=subprocess.DEVNULL)
-    # else:
-    #     return subprocess.Popen(command, stdout=subprocess.PIPE,
-    #                             stderr=subprocess.STDOUT)
     return subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT
+        stderr=subprocess.PIPE
     )
 
 
@@ -87,7 +82,7 @@ def ps2joblist() -> List[dict]:
         d = {
             'job-ID': p_info.info['pid'], 'prior': None, 'user': p_info.info['username'],
             'state': p_info.info['status'], 'queue': None, 'jclass': None,
-            'slots': None, 'ja-task-ID': None, 'name': " ".join(p_info.info['cmdline']),
+            'slots': None, 'ja-task-ID': None, 'name': " ".join(p_info.info['cmdline'] or []),
             'submit/start at': datetime.datetime.fromtimestamp(
                 p_info.info['create_time']).strftime("%Y-%m-%d %H:%M:%S")
         }
@@ -126,8 +121,8 @@ class OutputHandler(threading.Thread):
         parent: Union[AbciMaster, AbstractMaster, LocalMaster],
         proc: subprocess.Popen,
         module_name: str,
-        # resource_name: str,
-        # storage: Storage
+        trial_id: int,
+        storage: Union[Storage, None] = None
     ) -> None:
         """Initial method for OutputHandler.
 
@@ -144,6 +139,9 @@ class OutputHandler(threading.Thread):
         self._module_name = module_name
         self._sleep_time = 1
         self._abort = False
+        self.error_message = None
+        self.trial_id = trial_id
+        self.storage = storage
 
     def abort(self) -> None:
         self._abort = True
@@ -169,9 +167,14 @@ class OutputHandler(threading.Thread):
 
                 if o:
                     print(o.decode().strip(), flush=True)
-
                 if e:
-                    print(e.decode().strip(), flush=True)
+                    error_message = e.decode().strip()
+                    if self.storage is not None:
+                        self.storage.error.set_any_trial_error(
+                            trial_id=self.trial_id,
+                            error_message=error_message
+                        )
+                    raise RuntimeError(error_message)
                 break
 
             if self._abort:

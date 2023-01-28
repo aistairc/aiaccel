@@ -174,7 +174,6 @@ optimize:
         - uniform_int
         - categorical
         - ordinal
-        - sequential
 - **lower** - ハイパーパラメータ最小値を設定します。
 - **upper** - ハイパーパラメータ最大値を設定します。
 - **initial** - ハイパーパラメータの初期値を設定します。
@@ -258,7 +257,7 @@ parameters:
 
 ```{note}
 - categorial使用時は `choices` 項目を使用します. `choices` は配列で指定する必要があります。
-- catogoricalを使用できるのは、最適化アルゴリズムが `Random` と `TPE` の場合のみです。
+- catogoricalを使用できるのは、最適化アルゴリズムが `Random`, `Grid', および `TPE` の場合のみです。
 ```
 
 #### Type: ordinalの記述例
@@ -282,7 +281,7 @@ parameters:
 ```{note}
 - ordinal使用時は `sequence` 項目を使用します. `sequence` は配列で指定する必要があります。
 - ordinal使用時は `initial` の設定はできません。
-- ordinalを使用できるのは、最適化アルゴリズムが `RandomSearch` と `TPE` の場合のみです。
+- ordinalを使用できるのは、最適化アルゴリズムが `Random` と `Grid` の場合のみです。
 ```
 
 ### grid使用時の注意事項
@@ -423,7 +422,7 @@ optimize:
 これを、aiaccelで最適化させるには次のように変更します。
 
 ```python
-    from aiaccel.util import opt
+    from aiaccel.util import aiaccel
 
     def func(p):
         x1 = p["x1"]
@@ -433,7 +432,7 @@ optimize:
 
     if __name__ == "__main__":
 
-        run = opt.Run()
+        run = aiaccel.Run()
         run.execute_and_report(func)
 ```
 

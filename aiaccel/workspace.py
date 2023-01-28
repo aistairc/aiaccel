@@ -96,6 +96,7 @@ class Workspace:
                 return False
         return True
 
+    @retry(_MAX_NUM=10, _DELAY=1.0)
     def move_completed_data(self) -> Union[None, pathlib.PosixPath]:
         """ Move workspace to under of results directory when finished.
         """
@@ -105,7 +106,7 @@ class Workspace:
             self.results.mkdir()
 
         if dst.exists():
-            return
+            raise FileExistsError
 
         shutil.copytree(self.path, dst)
         return dst
