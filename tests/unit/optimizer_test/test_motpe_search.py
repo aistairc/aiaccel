@@ -11,17 +11,18 @@ from unittest.mock import patch
 class TestMOTpeOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
-    def setup_optimizer(self, clean_work_dir, data_dir):
+    def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
+        self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe.json')
         self.options = {
-            'config': self.data_dir / 'config_tpe.json',
+            'config': self.config_motpe_path,
             'resume': None,
             'clean': False,
             'fs': False,
             'process_name': 'optimizer',
         }
         self.optimizer = MOTpeOptimizer(self.options)
-        self.optimizer.config.goal.set(['minimize'])
+        #self.optimizer.config.goal.set(['minimize'])
         yield
         self.optimizer = None
 
@@ -58,12 +59,12 @@ class TestMOTpeOptimizer(BaseTest):
 
     def test_generate_initial_parameter(self):
         options = self.options.copy()
-        options['config'] = self.data_dir / 'config_tpe_2.json'
+        options['config'] = self.data_dir / 'config_motpe_no_initial_params.json'
         optimizer = MOTpeOptimizer(self.options)
         (optimizer.ws / 'storage' / 'storage.db').unlink()
 
         optimizer.__init__(options)
-        optimizer.config.goal.set(['minimize'])
+        #optimizer.config.goal.set(['minimize'])
         optimizer.pre_process()
         assert len(optimizer.generate_initial_parameter()) > 0
 

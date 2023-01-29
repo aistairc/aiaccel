@@ -6,7 +6,7 @@
     "function": "main"
   },
   "resource": {
-    "type": "python_local",
+    "type": "local",
     "num_node": 4
   },
   "ABCI": {
@@ -17,7 +17,7 @@
   "optimize": {
     "search_algorithm": "aiaccel.optimizer.MOTpeOptimizer",
     "goal": ["minimize", "minimize"],
-    "trial_number": 5,
+    "trial_number": 10,
     "rand_seed": 42,
     "parameters": [
       {
@@ -25,80 +25,70 @@
         "type": "uniform_float",
         "log": false,
         "lower": 0.1,
-        "upper": 1.0,
-        "initial": 0.5
+        "upper": 1.0
       },
       {
         "name": "x2",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       },
       {
         "name": "x3",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       },
       {
         "name": "x4",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       },
       {
         "name": "x5",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       },
       {
         "name": "x6",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       },
       {
         "name": "x7",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       },
       {
         "name": "x8",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       },
       {
         "name": "x9",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       },
       {
         "name": "x10",
         "type": "uniform_float",
         "log": false,
         "lower": -5.0,
-        "upper": 5.0,
-        "initial": 0.0
+        "upper": 5.0
       }
     ]
   },

@@ -25,7 +25,8 @@
         "type": "uniform_float",
         "log": false,
         "lower": 0.1,
-        "upper": 1.0
+        "upper": 1.0,
+        "initial": 0.5
       },
       {
         "name": "x2",
