@@ -57,14 +57,13 @@ class TestMOTpeOptimizer(BaseTest):
         with patch.object(self.optimizer.config.num_node, 'get', return_value=0):
             assert self.optimizer.generate_parameter() is None
 
-    def test_generate_initial_parameter(self):
+    def test_generate_initial_parameter(self, create_tmp_config):
         options = self.options.copy()
-        options['config'] = self.data_dir / 'config_motpe_no_initial_params.json'
+        self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe_no_initial_params.json')
         optimizer = MOTpeOptimizer(self.options)
         (optimizer.ws / 'storage' / 'storage.db').unlink()
 
         optimizer.__init__(options)
-        #optimizer.config.goal.set(['minimize'])
         optimizer.pre_process()
         assert len(optimizer.generate_initial_parameter()) > 0
 
@@ -88,7 +87,6 @@ class TestMOTpeOptimizer(BaseTest):
         assert self.optimizer._serialize(trial_id=0) is None
 
     def test_deserialize(self):
-        #self.optimizer.config.goal.set(['minimize'])
         self.optimizer.pre_process()
         self.optimizer.trial_id.initial(num=0)
         self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
