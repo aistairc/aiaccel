@@ -35,11 +35,11 @@ class IntegrationTest(BaseTest):
         is_multi_objective = isinstance(config.goal.get(), list)
 
         if is_multi_objective:
-            user_main_file = self.test_data_dir / 'original_main_mo.py'
+            user_main_file = self.test_data_dir.joinpath('original_main_mo.py')
         else:
             user_main_file = None
             
-        with self.create_main(user_main_file):
+        with self.create_main(from_file_path=user_main_file):
             config_file = create_tmp_config(config_file)
             config = Config(config_file)
 
