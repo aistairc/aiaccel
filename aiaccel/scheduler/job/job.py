@@ -27,7 +27,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler.local_scheduler import LocalScheduler
 
 
-
 JOB_STATES = [
     {'name': 'Init'},
     {'name': 'RunnerReady'},
