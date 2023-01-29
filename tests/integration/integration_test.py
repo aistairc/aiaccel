@@ -40,7 +40,6 @@ class IntegrationTest(BaseTest):
             user_main_file = None
             
         with self.create_main(user_main_file):
-            #config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             config_file = create_tmp_config(config_file)
             config = Config(config_file)
 

@@ -1,8 +1,8 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python /tmp/original_main_mo.py",
-    "python_file": "/tmp/original_main_mo.py",
+    "job_command": "python /tmp/original_main.py",
+    "python_file": "/tmp/original_main.py",
     "function": "main"
   },
   "resource": {
