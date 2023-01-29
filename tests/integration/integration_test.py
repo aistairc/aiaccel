@@ -32,14 +32,15 @@ class IntegrationTest(BaseTest):
         #
         config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
         config = Config(config_file)
+        is_multi_objective = isinstance(config.goal.get(), list)
 
-        if isinstance(config.goal.get(), list):
+        if is_multi_objective:
             user_main_file = self.test_data_dir / 'original_main_mo.py'
         else:
             user_main_file = None
             
         with self.create_main(user_main_file):
-            config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+            #config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             config_file = create_tmp_config(config_file)
             config = Config(config_file)
 
@@ -53,7 +54,7 @@ class IntegrationTest(BaseTest):
 
             storage = Storage(ws=Path(config.workspace.get()))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage)
+            self.evaluate(work_dir, storage, is_multi_objective)
 
             self.result_comparison.append(storage.result.get_objectives())
 
@@ -86,7 +87,7 @@ class IntegrationTest(BaseTest):
             storage = Storage(ws=Path(config.workspace.get()))
 
             subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage)
+            self.evaluate(work_dir, storage, is_multi_objective)
 
             print(storage.result.get_objectives())
             self.result_comparison.append(storage.result.get_objectives())
@@ -97,16 +98,15 @@ class IntegrationTest(BaseTest):
         for i in range(len(data_0)):
             assert data_0[i] == data_1[i]
 
-    def evaluate(self, work_dir, storage):
+    def evaluate(self, work_dir, storage, is_multi_objective=False):
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
         assert finished == self.config.trial_number.get()
         assert ready == 0
         assert running == 0
-        config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
-        config = Config(config_file)
-        if not isinstance(config.goal.get(), list):
+
+        if not is_multi_objective:
             final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
             assert final_result.exists()
         '''
