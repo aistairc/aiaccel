@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Any
 
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schedule_sampling
@@ -22,13 +22,15 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict, Model: Any = None) -> None:
         """Initial method for AbstractScheduler.
 
         Args:
-            config (str): A file name of a configuration.
+            options (dict): A dictionary of options.
+            Model (Any): A job model class.
         """
         self.options = options
+        self.Model = Model
         self.options['process_name'] = 'scheduler'
         super().__init__(self.options)
 
@@ -277,7 +279,9 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] is not None and
             self.options['resume'] > 0
         ):
+            Model = self.Model
             self._deserialize(self.options['resume'])
+            self.Model = Model
 
     def create_result_file(self, trial_id: int) -> None:
         """ Save the results in yaml format.

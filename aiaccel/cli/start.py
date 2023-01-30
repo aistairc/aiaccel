@@ -11,6 +11,7 @@ from aiaccel.config import Config
 from aiaccel.master.create import create_master
 from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
+from aiaccel.scheduler.job.model.create import create_model
 from aiaccel.util import filesystem as fs
 from aiaccel.util.report import CreationReport
 from aiaccel.workspace import Workspace
@@ -56,7 +57,12 @@ def main() -> None:  # pragma: no cover
     Master = create_master(args.config)
     Optimizer = create_optimizer(args.config)
     Scheduler = create_scheduler(args.config)
-    modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
+    Model = create_model(args.config)
+    if Model is not None:
+        scheduler = Scheduler(vars(args), Model)
+    else:
+        scheduler = Scheduler(vars(args))
+    modules = [Master(vars(args)), Optimizer(vars(args)), scheduler]
 
     sleep_time = config.sleep_time.get()
     time_s = time.time()

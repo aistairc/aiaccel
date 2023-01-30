@@ -12,8 +12,6 @@ from transitions.extensions.states import Tags, add_state_features
 from aiaccel import dict_lock
 from aiaccel import dict_result
 from aiaccel import dict_error
-from aiaccel import resource_type_abci
-from aiaccel import resource_type_local
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
@@ -402,14 +400,6 @@ class CustomMachine(Machine):
     pass
 
 
-def create_model(resource_type: str):
-    if resource_type.lower() == resource_type_abci:
-        model = AbciModel()
-    elif resource_type.lower() == resource_type_local:
-        model = LocalModel()
-    return model
-
-
 class Job:
     """A job thread to manage running jobs on local computer or ABCI.
 
@@ -572,7 +562,8 @@ class Job:
         self.ws = Path(self.workspace).resolve()
         self.dict_lock = self.ws / dict_lock
 
-        self.model = create_model(self.resource_type)
+        self.scheduler = scheduler
+        self.model = self.scheduler.Model()
         self.machine = CustomMachine(
             model=self.model,
             states=JOB_STATES,
@@ -582,7 +573,6 @@ class Job:
             ordered_transitions=False
         )
         self.loop_count = 0
-        self.scheduler = scheduler
 
         self.config_path = str(self.config_path)
         self.trial_id = trial_id

@@ -10,7 +10,8 @@ import pytest
 from aiaccel.config import ConfileWrapper
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
-                                       CustomMachine, Job, create_model)
+                                       CustomMachine, Job)
+from aiaccel.scheduler.job.model.create import create_model
 from aiaccel.scheduler.job.model.abci_model import AbciModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.scheduler.local_scheduler import LocalScheduler
@@ -56,7 +57,7 @@ class TestModel(BaseTest):
             # from aiaccel import start
             # scheduler = start.Scheduler()
             options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
+            scheduler = create_scheduler(options['config'])(options, create_model(options['config']))
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
         setup_hp_ready(1)
@@ -66,7 +67,7 @@ class TestModel(BaseTest):
             scheduler,
             trial_id
         )
-        self.model = create_model(self.config.resource_type.get())
+        self.model = scheduler.Model()
         yield
         self.job = None
         self.model = None
@@ -95,7 +96,7 @@ class TestModel(BaseTest):
             # from aiaccel import start
             # scheduler = start.Scheduler()
             options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
+            scheduler = create_scheduler(options['config'])(options, create_model(options['config']))
         # scheduler = LocalScheduler(config_json)
         trial_id = 1
         self.abci_job = Job(
@@ -400,7 +401,7 @@ class TestJob(BaseTest):
             # from aiaccel import start
             # scheduler = start.Scheduler()
             options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
+            scheduler = create_scheduler(options['config'])(options, create_model(options['config']))
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
         setup_hp_ready(1)
@@ -430,7 +431,7 @@ class TestJob(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = LocalScheduler(options)
+        scheduler = LocalScheduler(options, create_model(options['config']))
         # config = load_test_config()
         setup_hp_ready(1)
         trial_id = 1

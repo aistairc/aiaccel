@@ -1,4 +1,5 @@
 from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.scheduler.job.model.create import create_model
 from aiaccel.scheduler.job.job import Job
 from tests.base_test import BaseTest
 
@@ -13,7 +14,7 @@ class TestLocalScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = LocalScheduler(options)
+        scheduler = LocalScheduler(options, create_model(options['config']))
         fake_process.register_subprocess(
             ['/bin/ps', '-eo', 'pid,user,stat,lstart,args'],
             stdout=[
@@ -42,7 +43,7 @@ class TestLocalScheduler(BaseTest):
             'process_name': 'scheduler'
         }
 
-        scheduler = LocalScheduler(options)
+        scheduler = LocalScheduler(options, create_model(options['config']))
         s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5

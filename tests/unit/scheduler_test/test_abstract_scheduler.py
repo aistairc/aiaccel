@@ -8,6 +8,7 @@ import aiaccel
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.scheduler.job.model.create import create_model
 
 from tests.base_test import BaseTest
 
@@ -53,7 +54,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        assert type(AbstractScheduler(options)) is AbstractScheduler
+        assert type(AbstractScheduler(options, create_model(options['config']))) is AbstractScheduler
 
     def test_change_state_finished_trials(
         self,
@@ -69,7 +70,7 @@ class TestAbstractScheduler(BaseTest):
             'process_name': 'scheduler'
         }
         database_remove()
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler.print_dict_state()
         setup_hp_running(1)
         setup_result(1)
@@ -87,7 +88,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler.print_dict_state()
         assert scheduler.get_stats() is None
 
@@ -104,7 +105,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler.print_dict_state()
         setup_hp_ready(1)
         trial_id = 1
@@ -128,7 +129,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler.print_dict_state()
         assert scheduler.update_resource() is None
 
@@ -146,7 +147,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler.print_dict_state()
         setup_hp_running(2)
         setup_result(1)
@@ -158,7 +159,7 @@ class TestAbstractScheduler(BaseTest):
             machine.set_state('Success')
             job.main()
 
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[]):
             assert scheduler.pre_process() is None
 
@@ -189,7 +190,7 @@ class TestAbstractScheduler(BaseTest):
         for i in range(10):
             jobs.append({'thread': dummy_job()})
 
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         assert scheduler.post_process() is None
 
         with patch.object(scheduler, 'check_finished', return_value=False):
@@ -214,7 +215,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler.pre_process()
         setup_hp_ready(1)
 
@@ -251,7 +252,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler._rng = np.random.RandomState(0)
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         assert scheduler._serialize(trial_id=0) is None
@@ -270,7 +271,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         scheduler._rng = np.random.RandomState(0)
         scheduler._serialize(trial_id=0)
@@ -285,7 +286,7 @@ class TestAbstractScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         s = "python wrapper.py --trial_id 001"
         s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
         trial_id = scheduler.parse_trial_id(s['name'])
@@ -300,7 +301,7 @@ class TestAbstractScheduler(BaseTest):
             'clean': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         assert scheduler.check_error() is True
 
         jobstates = [
@@ -322,7 +323,7 @@ class TestAbstractScheduler(BaseTest):
             'clean': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbstractScheduler(options)
+        scheduler = AbstractScheduler(options, create_model(options['config']))
         scheduler.pre_process()
         scheduler._serialize(0)
         scheduler._serialize(1)
