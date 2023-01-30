@@ -57,9 +57,9 @@ def main() -> None:  # pragma: no cover
     Master = create_master(args.config)
     Optimizer = create_optimizer(args.config)
     Scheduler = create_scheduler(args.config)
-    Model = create_model(args.config)
-    if Model is not None:
-        scheduler = Scheduler(vars(args), Model)
+    StateTransitionModel = create_model(args.config)
+    if StateTransitionModel is not None:
+        scheduler = Scheduler(vars(args), StateTransitionModel)
     else:
         scheduler = Scheduler(vars(args))
     modules = [Master(vars(args)), Optimizer(vars(args)), scheduler]

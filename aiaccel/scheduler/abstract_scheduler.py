@@ -279,9 +279,7 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] is not None and
             self.options['resume'] > 0
         ):
-            Model = self.Model
             self._deserialize(self.options['resume'])
-            self.Model = Model
 
     def create_result_file(self, trial_id: int) -> None:
         """ Save the results in yaml format.
@@ -314,4 +312,5 @@ class AbstractScheduler(AbstractModule):
     def __getstate__(self):
         obj = super().__getstate__()
         del obj['jobs']
+        del obj['Model']
         return obj
