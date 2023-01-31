@@ -1,16 +1,10 @@
 from aiaccel.util import aiaccel
 
+# Create a wrapper
+run = aiaccel.Run()
 
-def main():
-    # Create a wrapper
-    run = aiaccel.Run()
-
-    # Optimization
-    run.execute_and_report("sh user.sh", y_data_type="float")
-
-
-if __name__ == "__main__":
-    main()
+# Optimization
+run.execute_and_report("sh user.sh", y_data_type="float")
 
 
 """
