@@ -2,9 +2,10 @@ import sys
 from unittest.mock import patch
 
 import numpy as np
-from aiaccel.util.aiaccel import Messages, Run, WrapperInterface
+from aiaccel.util.aiaccel import Messages, Run, WrapperInterface, CommandLineArgs
 
 from tests.base_test import BaseTest
+import pytest
 
 
 def test_create_message():
@@ -105,3 +106,72 @@ def wrapper_interface():
     wrp = WrapperInterface()
     assert wrp.get_data('objective_y: objective_err:') == (None, None)
     assert wrp.get_data('objective_y:123 objective_err:err') == ('123', 'err')
+
+
+class TestCommandLineArgs(BaseTest):
+
+    def test_command_line_args(self):
+        commandline_args = [
+                "wapper.py",
+                "--trial_id","1",
+                "--x1", "0.1",
+                "--x2", "0.2",
+                "--x3", "0.3",
+                "--x4", "0.4",
+                "--x5", "0.5",
+                "--x6", "0.6",
+                "--x7", "0.7",
+                "--x8", "0.8",
+                "--x9", "0.9",
+                "--x10", "1.0"
+        ]
+
+        with patch.object(sys, 'argv', commandline_args):
+            args = CommandLineArgs()
+
+            assert args.args.trial_id == 1
+            assert args.args.x1 == 0.1
+            assert args.args.x2 == 0.2
+            assert args.args.x3 == 0.3
+            assert args.args.x4 == 0.4
+            assert args.args.x5 == 0.5
+            assert args.args.x6 == 0.6
+            assert args.args.x7 == 0.7
+            assert args.args.x8 == 0.8
+            assert args.args.x9 == 0.9
+            assert args.args.x10 == 1.0
+
+            with pytest.raises(AttributeError):
+                args.args.i
+
+
+    def test_get_xs(self):
+        commandline_args = [
+                "wapper.py",
+                "--trial_id","1",
+                "--x1", "0.1",
+                "--x2", "0.2",
+                "--x3", "0.3",
+                "--x4", "0.4",
+                "--x5", "0.5",
+                "--x6", "0.6",
+                "--x7", "0.7",
+                "--x8", "0.8",
+                "--x9", "0.9",
+                "--x10", "1.0"
+        ]
+
+        with patch.object(sys, 'argv', commandline_args):
+            args = CommandLineArgs()
+            assert args.get_xs() == {
+                "x1": 0.1,
+                "x2": 0.2,
+                "x3": 0.3,
+                "x4": 0.4,
+                "x5": 0.5,
+                "x6": 0.6,
+                "x7": 0.7,
+                "x8": 0.8,
+                "x9": 0.9,
+                "x10": 1.0
+            }

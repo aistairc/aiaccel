@@ -50,15 +50,6 @@ class CommandLineArgs:
                     self.parser.add_argument(f"--{name}", type=float)
             self.args = self.parser.parse_known_args()[0]
 
-    def get_args_list(self) -> list:
-        args_dict = vars(self.args)
-        args_list = []
-        for key in args_dict:
-            args_list.append(f"--{key}")
-            args_list.append(args_dict[key])
-
-        return args_list
-
     def get_xs(self) -> dict:
         xs = vars(self.args)
         del xs["trial_id"]
@@ -481,6 +472,8 @@ class Run:
 
         commands = self.generate_commands(command, xs)
 
+        print(commands)
+
         output = subprocess.run(
             commands,
             stdout=subprocess.PIPE,
@@ -524,7 +517,6 @@ class Run:
                 run.execute_and_report(func)
         """
         trial_id = self.args.trial_id
-        # xs = self.get_any_trial_xs(self.trial_id)
         xs = self.args.get_xs()
         xs, y, err, start_time, end_time = self.execute(func, xs, y_data_type)
 
