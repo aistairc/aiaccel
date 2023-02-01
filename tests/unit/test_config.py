@@ -1,4 +1,3 @@
-# from pathlib import Path
 from aiaccel.config import load_config
 from tests.base_test import BaseTest
 import omegaconf
@@ -7,6 +6,7 @@ import omegaconf
 class TestConfig(BaseTest):
 
     def test_load_config(self):
+        # default
         config_path = self.test_data_dir.joinpath('config.json')
         config = load_config(str(config_path))
         assert type(config) is omegaconf.dictconfig.DictConfig
@@ -17,9 +17,9 @@ class TestConfig(BaseTest):
             load_config(str(config_typo_path))
             assert False
         except omegaconf.errors.ValidationError:
-            pass
+            assert True
 
-        # user option
+        # customize config (user option)
         config_user_option_path = self.test_data_dir.joinpath('config_user_option.json')
         config = load_config(str(config_user_option_path))
         assert type(config) is omegaconf.dictconfig.DictConfig
