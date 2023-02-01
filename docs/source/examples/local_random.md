@@ -23,7 +23,6 @@
 ## 2. ファイル作成手順
 
 ### config.yaml の作成
----
 
 #### generic
 ```yaml
@@ -35,6 +34,10 @@ generic:
 - **workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．
 - **job_command** - ユーザープログラムを実行するためのコマンドです．
 - **batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]
+
+```{note}
+Windows では，仮想環境の python で実行するためには `job_command` の欄を `"optenv/Scripts/python.exe"` のように設定する必要があります．
+```
 
 #### resource
 ```yaml
@@ -102,7 +105,6 @@ optimize:
     - **initial** - ハイパパラメータの初期値を設定します．上の例の `"x5"` の場合のように `initial` の項目がない場合，実行時にランダムな初期値が自動で設定されます．
 
 ### user.py の作成
----
 
 `user.py` は以下のように記述します．
 ```python

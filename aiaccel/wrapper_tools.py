@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-import aiaccel
+from aiaccel import dict_result
 from aiaccel.util.filesystem import create_yaml
 
 
@@ -9,23 +9,27 @@ def create_runner_command(
     command: str,
     param_content: dict,
     trial_id: int,
-    config_path: str
+    config_path: str,
+    command_error_output: str
 ) -> list:
-
     """Create a list of command strings to run a hyper parameter.
+
     Args:
         command (str): A string command.
         param_content (dict): A hyper parameter content.
         trial_id (str): A unique name of a hyper parameter.
+
     Returns:
         A list of command strings.
     """
     commands = re.split(' +', command)
     params = param_content['parameters']
+    commands.append('2>')
+    commands.append(command_error_output)
     commands.append('--trial_id')
     commands.append(str(trial_id))
     commands.append('--config')
-    commands.append(str(config_path))
+    commands.append(config_path)
 
     for param in params:
         # Fix a bug related a negative exponential parameters
@@ -61,7 +65,7 @@ def save_result(
     Returns:
         None
     """
-    result_file = ws / aiaccel.dict_result / f'{trial_id_str}.result'
+    result_file = ws / dict_result / f'{trial_id_str}.result'
 
     contents = {
         'result': result,
