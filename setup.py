@@ -6,7 +6,10 @@ here = Path(__file__).resolve().parent
 
 with codecs.open(here / 'requirements.txt', 'r') as fh:
     requirements = [line.replace('\n', '') for line in fh.readlines()]
-    requirements = [line.split('==')[0] for line in requirements]
+
+with codecs.open(here / 'extensions.txt', 'r') as fh:
+    extensions = [line.replace('\n', '') for line in fh.readlines()]
+
 
 setup(
     name='aiaccel',
@@ -31,6 +34,7 @@ setup(
     ],
     install_requires=requirements,
     zip_safe=False,
+    extensions=extensions,
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "pytest-cov"],
     entry_points={
