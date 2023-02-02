@@ -108,5 +108,7 @@ class Workspace:
         if dst.exists():
             raise FileExistsError
 
-        shutil.copytree(self.path, dst)
+        ignptn = shutil.ignore_patterns('*-journal')
+
+        shutil.copytree(self.path, dst, ignore=ignptn)
         return dst
