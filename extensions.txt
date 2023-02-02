@@ -1,0 +1,1 @@
+sphinx_fontawesome==0.0.6

@@ -29,7 +29,14 @@ def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
         return None, None
 
     yml = load_yaml(files[0], dict_lock)
-    best = float(yml['result'])
+
+    try:
+        best = float(yml['result'])
+    except TypeError:
+        logger = logging.getLogger('root.master.parameter')
+        logger.error(f'Invalid result: {yml["result"]}.')
+        return None, None
+
     best_file = files[0]
 
     for f in files[1:]:
