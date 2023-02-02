@@ -4,6 +4,7 @@ import copy
 
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 
 
 class NelderMeadOptimizer(AbstractOptimizer):
@@ -38,9 +39,10 @@ class NelderMeadOptimizer(AbstractOptimizer):
             parameters. None if `self.nelder_mead` is already defined.
         """
         initial_parameter = super().generate_initial_parameter()
-
         if self.nelder_mead is not None:
             return
+
+        self.params = self.special_settings_when_using_ordinal(self.params)
 
         self.nelder_mead = NelderMead(
             self.params.get_parameter_list(),
@@ -76,11 +78,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
             except KeyError:
                 continue
 
-            result_content = self.storage.result.get_any_trial_objective(index)
+            result = self.storage.result.get_any_trial_objective(index)
 
-            if result_content is not None:
+            if result is not None:
                 nm_result = copy.copy(p)
-                nm_result['result'] = result_content
+                nm_result['result'] = result
                 nm_results.append(nm_result)
 
         return nm_results
@@ -226,8 +228,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
             ):
                 self.parameter_pool.append(copy.copy(p))
 
-        # self._generate_hp_ready(number)
-
         new_params = []
 
         if len(self.parameter_pool) == 0:
@@ -237,11 +237,13 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         for param in self.params.get_parameter_list():
             i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
-
             if param.type.lower() == 'float':
                 value = float(pool_p['parameters'][i]['value'])
             elif param.type.lower() == 'int':
                 value = int(pool_p['parameters'][i]['value'])
+            elif param.type.lower() == 'ordinal':
+                index = int(pool_p['parameters'][i]['value'])
+                value = param.sequence[index]
             else:
                 raise TypeError(
                     'Invalid parameter type for NelderMeadSearch.'
@@ -263,5 +265,25 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 'parameters': new_params
             }
         )
+
+        return new_params
+
+    def special_settings_when_using_ordinal(self, params: HyperParameterConfiguration) -> HyperParameterConfiguration:
+        """
+            When using ordinal types in NelderMead, the array index is predicted.
+            https://github.com/aistairc/aiaccel/issues/175
+        """
+        new_params = copy.deepcopy(params)
+        for param in params.get_parameter_list():
+            if param.type.lower() == 'ordinal':
+                if param.name not in new_params.hps.keys():
+                    assert False
+                new_params.hps[param.name] = HyperParameter({
+                        'name': param.name,
+                        'type': 'ordinal',
+                        'lower': 0,
+                        'upper': len(param.sequence) - 1,
+                        'sequence': param.sequence
+                    })
 
         return new_params
