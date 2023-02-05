@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Any
+from typing import Union, Type
 
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schedule_sampling
@@ -22,12 +22,12 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict, Model: Any = None) -> None:
+    def __init__(self, options: dict, Model: Type = None) -> None:
         """Initial method for AbstractScheduler.
 
         Args:
             options (dict): A dictionary of options.
-            Model (Any): A job model class.
+            Model (Type): A job model class.
         """
         self.options = options
         self.Model = Model

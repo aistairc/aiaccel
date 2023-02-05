@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Type
 
 from aiaccel.config import Config
 from aiaccel import resource_type_abci
@@ -7,7 +7,7 @@ from aiaccel.scheduler.job.model.abci_model import AbciModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 
 
-def create_model(config_path: str) -> Any:
+def create_model(config_path: str) -> Type:
     config = Config(config_path)
     resource = config.resource_type.get()
 
