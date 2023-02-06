@@ -1,11 +1,11 @@
 # イシュー
 
-問題を発見した場合や，機能のリクエストがあった場合，まずリポジトリにある既存のイシューを確認してください．
+問題を発見した場合や追加機能の要望がある場合，すでに同様のイシューが投稿されていないか確認をお願いします．
 同様のテーマが話し合われていない場合，新しいイシューを作成してください．
 
 ## バグの報告 (Bug report)
 
-バグの報告を行う際には，以下の内容についての明確かつ簡潔な説明を含めることを推奨します．
+バグの報告では，以下の内容についての明確かつ簡潔な説明を含めてください．
 
 - バグの内容
 - バグを再現する手順
@@ -25,14 +25,14 @@
 
 # プルリクエスト
 
-コードの実装が必要であると判断された場合，コードの作成を行います．
+aiaccelのコードを修正しリポジトリに反映して欲しい場合，プルリクエストを実行してください．
 プルリクエストを行う際には，以下に注意してください．
 
 ## 手順
 
 ### 初めて開発に参加する場合
 - まず，GitHub 上で aiaccel をフォークします．
-- フォークした後，aiaccel をダウンロードし，インストールします．
+- フォークした後，aiaccel のリポジトリをcloneします．
     ```bash
     git clone https://github.com/[YOUR USERNAME]/aiaccel.git
     ```
@@ -50,10 +50,6 @@
 - `git add` および `git commit` を使用し，進行に合わせてローカルでコミットします．
     - コミットメッセージでは，変更の動機，バグの性質，または拡張機能の詳細を説明します．
     - メッセージは，コードを見なくても内容を理解できるように記述する必要があります．
-
-
-
-
 ### 投稿
 
 *プルリクエストを行う前に，以下を確認してください*：
@@ -179,9 +175,7 @@ pytest --cov=aiaccel --cov-branch
 - ランダムな値の生成には [`numpy.random.RandomState`](https://numpy.org/doc/1.16/reference/generated/numpy.random.RandomState.html) を使用して下さい．これは aiaccel が利用しているライブラリ [optuna](https://github.com/optuna/optuna) との互換性を保つためです．
 
 
-## aiaccel-specific なスタイル
-
-### Docstrings
+## Docstrings
 
 基本的には [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) に準拠する形で docstrings を記述します．
 ただし，以下の例外についても注意してください．
