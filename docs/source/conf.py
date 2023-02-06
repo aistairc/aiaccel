@@ -65,6 +65,14 @@ myst_enable_extensions = [
     # "tasklist",
 ]
 
+# Auto-generated header anchors
+# The MyST Parser can automatically generate label “slugs” for header anchors
+# so that you can reference them from markdown links. For example, you can use
+# header bookmark links, locally; [](#header-anchor), or cross-file
+# [](path/to/file.md#header-anchor). To achieve this, use the
+# myst_heading_anchors = DEPTH configuration option, where DEPTH is the depth
+# of header levels for which you wish to generate links.
+myst_heading_anchors = 3
 
 # -- Options for HTML output -------------------------------------------------
 

@@ -110,34 +110,50 @@ Pull request を行う際には，以下に注意してください．
 ## レンダリングの確認
 
 ドキュメントの追加や変更・修正があった場合には，ローカル環境でレンダリングが正常に行われるかを確認してください．
-レンダリングの確認には aiaccel/docs に移動し，HTML ファイルのビルドを行います．
+
+API リファレンスの生成を行うには，aiaccel に移動し，以下のコマンドを実行します．
 ```bash
-cd aiaccel/docs
+cd aiaccel
+sphinx-apidoc -f -o docs/source/api_reference aiaccel
+```
+ドキュメンテーションのレンダリングを確認するには，aiaccel/docs に移動し，HTML ファイルのビルドを行います．
+```bash
+cd docs
 make html
 ```
 ビルドされた HTML 形式のファイルは docs/build/html の下に生成されます．
+
+多言語ドキュメントの生成を行うには，aiaccel/docs で以下のコマンドを実行します．
+```bash
+make gettext
+sphinx-intl update -p build/gettext -l en -l ja
+```
 
 
 # テスト
 
 ## テストの追加
 - ユニットテストは tests の下のディレクトリに作成します．
-    - iaccel/tests/unit 以下のディレクトリ構造は，config.py などの一部のモジュールを除いて，aiaccel/aiaccel 以下の構造に対応します． 例えば，aiaccel/aiaccel/optimizer/abstract_optimizer.py のテストは aiaccel/tests/unit/optimzier_test/test_abstract_optimizer.py です．
+    - aiaccel/tests/unit 以下のディレクトリ構造は，config.py などの一部のモジュールを除いて，aiaccel/aiaccel 以下の構造に対応します． 例えば，aiaccel/aiaccel/optimizer/abstract_optimizer.py のテストは aiaccel/tests/unit/optimzier_test/test_abstract_optimizer.py です．
 - 新たな機能の追加, またはバグの修正を行った場合，テストコードを作成してください．
 - aiaccel では pytest を用いてテストを行います．
 
 
 ## テストの実行 (WIP)
-ローカル環境ですべてのテストコードを実行するには，aiaccel または aiaccel/tests に移動し，以下のコマンドを実行します．
+ローカル環境ですべてのテストコードを実行するには，aiaccel に移動し，以下のコマンドを実行します．
 ```bash
-cd aiaccel/tests
+cd aiaccel
 pytest
 ```
-または，特定のテストコードのみを実行するには，ファイル名を引数として指定します．
+さらに，コーディングスタイルのチェックを行うため，以下のコマンドを実行します．
+```bash
+pytest -v --pycodestyle aiaccel examples
+pytest -v --flake8 aiaccel examples 
+```
+特定のテストコードのみを実行したい場合には，ファイル名を引数として指定します．
 ```bash
 pytest tests/unit/optimizer_test/test_abstract_optimizer.py
 ```
-
 
 ## 追加コードに対するカバレッジ
 
@@ -167,7 +183,7 @@ pytest --cov=aiaccel --cov-branch
 - コーディングスタイルは PEP8 に従います．
     - aiaccel では flake8 を用いてコーディングスタイルの検証を行います．
     <!-- - オートフォーマッタとして pylint や black の使用を推奨しています． -->
-    - [aiaccel-specific なスタイル](#aiaccel-specific-なスタイル)についても確認してください．
+    - 下記の Docstrings についても確認してください．
 - aiaccel では型ヒントの検証は行いませんが，できる限り型ヒントを記述してください．
     - aiaccel ではバージョン 3.8 の Python をサポートするため，ビルトインな "`list`" などを型ヒントに使用する際は，future-import を行ってください．
 - ランダムな値の生成には [`numpy.random.RandomState`](https://numpy.org/doc/1.16/reference/generated/numpy.random.RandomState.html) を使用して下さい．これは aiaccel が利用しているライブラリ [optuna](https://github.com/optuna/optuna) との互換性を保つためです．
@@ -184,8 +200,8 @@ pytest --cov=aiaccel --cov-branch
 - `__init__` メソッドはクラスの docstring に含めます．`__init__` メソッドには記述しません．
 - Python オブジェクトへのリンクは *sphinx-style* なリンクを使用します.
 - エディタとして vscode を利用する場合，[autoDocstring](https://marketplace.visualstudio.com/items?itemName=njpwerner.autodocstring) が docstring 生成の役に立ちます．
-
-#### Example
+ 
+### Example
 
 ```python
 class ExampleClass:

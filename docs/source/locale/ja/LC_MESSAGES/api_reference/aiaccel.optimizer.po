@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:40+0000\n"
+"POT-Creation-Date: 2023-02-06 17:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,38 +37,71 @@ msgstr ""
 msgid "An abstract class for Optimizer classes."
 msgstr ""
 
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:5 of
-msgid "A total number to generate hyper parameters."
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:5
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:3 of
+msgid "A dictionary containing command line options."
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer of
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer of
 msgid "type"
 msgstr ""
 
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:7
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:13
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:8 of
+msgid "dict[str, Union[str, int, bool]]"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:12 of
+msgid "A ready number of hyper parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:14
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:20
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:26
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:33
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer:13
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer:7 of
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer:7
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:50 of
 msgid "int"
 msgstr ""
 
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:11 of
-msgid "A number to pool hyper parameters."
-msgstr ""
-
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:17 of
-msgid "Loaded hyper parameter configuration object."
-msgstr ""
-
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:20 of
-msgid "HyperParameterConfiguration"
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:18 of
+msgid "A running number of hyper prameters."
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:24 of
+msgid "A finished number of hyper parameters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:30 of
 msgid "A number of generated hyper paramters."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:37 of
+msgid "A boolean indicating if all parameters are generated or not."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:40 of
+msgid "bool"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:44 of
+msgid "Loaded hyper parameter configuration object."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:47 of
+msgid "HyperParameterConfiguration"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:51 of
+msgid "TrialId object."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer:53 of
+msgid "TrialId"
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.check_error:1 of
@@ -76,17 +109,14 @@ msgid "Check to confirm if an error has occurred."
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.check_error
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.register_new_parameters
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.resume
-#: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_parameter
+#: aiaccel.optimizer.create.import_and_getattr
 #: aiaccel.optimizer.grid_optimizer.generate_grid_points
 #: aiaccel.optimizer.grid_optimizer.get_grid_options
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.nelder_mead_main
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name
-#: aiaccel.optimizer.random_optimizer.RandomOptimizer.generate_parameter
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_parameter
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_parameter
 #: aiaccel.optimizer.tpe_optimizer.create_distributions of
 msgid "パラメータ"
@@ -94,12 +124,15 @@ msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.check_error
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_new_parameter
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.get_pool_size
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_main_process
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.post_process
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.pre_process
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.register_new_parameters
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.resume
+#: aiaccel.optimizer.create.import_and_getattr
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_initial_parameter
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_parameter
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.get_parameter_index
@@ -120,6 +153,7 @@ msgstr ""
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.check_result
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.create_study
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_initial_parameter
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_parameter
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.is_startup_trials
 #: aiaccel.optimizer.tpe_optimizer.create_distributions of
 msgid "戻り値"
@@ -130,85 +164,52 @@ msgid "no error | False: with error."
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.check_error
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_new_parameter
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.get_pool_size
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_main_process
+#: aiaccel.optimizer.create.import_and_getattr
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_initial_parameter
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_parameter
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.get_parameter_index
 #: aiaccel.optimizer.grid_optimizer.generate_grid_points
 #: aiaccel.optimizer.grid_optimizer.get_grid_options
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_initial_parameter
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.get_nm_results
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.nelder_mead_main
+#: aiaccel.optimizer.random_optimizer.RandomOptimizer.generate_parameter
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_initial_parameter
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_parameter
 #: aiaccel.optimizer.tpe_optimizer.TPESamplerWrapper.get_startup_trials
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_initial_parameter
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_parameter
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.is_startup_trials
 #: aiaccel.optimizer.tpe_optimizer.create_distributions of
 msgid "戻り値の型"
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter:1
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_initial_parameter:1
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_initial_parameter:1
-#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_initial_parameter:1 of
-msgid "Generate a initial parameter."
+#: of
+msgid "Generate a list of initial parameters."
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter:3
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_initial_parameter:3
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_initial_parameter:3
-#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_initial_parameter:3 of
-msgid ""
-"Union[Dict[str, List[Dict[str, Union[str, Union[float,     "
-"List[float]]]]], None]: A created initial parameter. It returns     None "
-"if any parameters are already created."
+#: of
+msgid "A created list of initial parameters."
 msgstr ""
 
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter:6
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_initial_parameter:6
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_initial_parameter:6
-#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_initial_parameter:6 of
-msgid "Union[Dict[str, List[Dict[str, Union[str, Union[float,"
-msgstr ""
-
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_initial_parameter:6
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_initial_parameter:6
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_initial_parameter:6
-#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_initial_parameter:6 of
-msgid ""
-"List[float]]]]], None]: A created initial parameter. It returns None if "
-"any parameters are already created."
-msgstr ""
-
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_new_parameter:1
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:1
-#: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_parameter:1
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter:1
-#: aiaccel.optimizer.random_optimizer.RandomOptimizer.generate_parameter:1
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_parameter:1
-#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_parameter:1 of
-msgid "Generate parameters."
+#: of
+msgid "Generate a list of parameters."
 msgstr ""
 
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:3
-#: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_parameter:3
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter:3
-#: aiaccel.optimizer.random_optimizer.RandomOptimizer.generate_parameter:3
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_parameter:3
-#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_parameter:3 of
-msgid "A number of generating parameters."
-msgstr ""
-
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_new_parameter:3
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:6
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.post_process:3
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.pre_process:3
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.register_new_parameters:6
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.resume:6
-#: aiaccel.optimizer.grid_optimizer.GridOptimizer.pre_process:3
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter:6
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:8
-#: aiaccel.optimizer.random_optimizer.RandomOptimizer.generate_parameter:6
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_parameter:6
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.pre_process:3
-#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.check_result:3
-#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.create_study:3 of
-msgid "None"
+#: of
+msgid "A created list of parameters."
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter
@@ -219,9 +220,17 @@ msgstr ""
 msgid "例外"
 msgstr ""
 
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:8
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.generate_parameter:3
 #: of
-msgid "Causes when the inherited class does not     implement."
+msgid "Causes when the inherited class does not"
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.get_pool_size:1 of
+msgid "Returns pool size."
+msgstr ""
+
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.get_pool_size:3 of
+msgid "Pool size."
 msgstr ""
 
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.inner_loop_main_process:1
@@ -239,6 +248,18 @@ msgstr ""
 msgid "Post-procedure after executed processes."
 msgstr ""
 
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.post_process:3
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.pre_process:3
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.register_new_parameters:7
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.resume:5
+#: aiaccel.optimizer.grid_optimizer.GridOptimizer.pre_process:3
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:8
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.pre_process:3
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.check_result:3
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.create_study:3 of
+msgid "None"
+msgstr ""
+
 #: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.pre_process:1
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.pre_process:1
 #: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.pre_process:1 of
@@ -250,32 +271,8 @@ msgstr ""
 msgid "Create hyper parameter files."
 msgstr ""
 
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.register_new_parameters:3
-#: of
-msgid "A list of hyper parameter dictionaries."
-msgstr ""
-
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.register_new_parameters:12
-#: of
-msgid "param = {"
-msgstr ""
-
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.register_new_parameters:11
-#: of
-msgid "'parameter_name': ..., 'type': ..., 'value': ..."
-msgstr ""
-
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.register_new_parameters:14
-#: of
-msgid "}"
-msgstr ""
-
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.resume:2 of
-msgid "When in resume mode, load the previous"
-msgstr ""
-
-#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.resume:2 of
-msgid "optimization data in advance."
+#: aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.resume:1 of
+msgid "When in resume mode, load the previous optimization data in advance."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.optimizer.rst:16
@@ -283,27 +280,15 @@ msgid "aiaccel.optimizer.create module"
 msgstr ""
 
 #: aiaccel.optimizer.create.import_and_getattr:1 of
-msgid "Imports the specified Optimizer class. -"
+msgid "Imports the specified Optimizer class."
 msgstr ""
 
-#: aiaccel.optimizer.create.import_and_getattr:4 of
-msgid "Args:"
-msgstr ""
-
-#: aiaccel.optimizer.create.import_and_getattr:4 of
-msgid "name(str): Optimizer class name"
-msgstr ""
-
-#: aiaccel.optimizer.create.import_and_getattr:5 of
-msgid "(e.g.) aiaccel.optimizer.NelderMeadOptimizer"
+#: aiaccel.optimizer.create.import_and_getattr:3 of
+msgid "Optimizer class name (e.g.) aiaccel.optimizer.NelderMeadOptimizer"
 msgstr ""
 
 #: aiaccel.optimizer.create.import_and_getattr:7 of
-msgid "Returns:"
-msgstr ""
-
-#: aiaccel.optimizer.create.import_and_getattr:8 of
-msgid "Any: <Optimizer class>"
+msgid "<Optimizer class>"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.optimizer.rst:24
@@ -329,7 +314,7 @@ msgid "A list of ready hyper parameters."
 msgstr ""
 
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer:7 of
-msgid "List[dict]"
+msgid "list[dict]"
 msgstr ""
 
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer:11
@@ -338,13 +323,29 @@ msgid "A number of generated hyper parameters."
 msgstr ""
 
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_initial_parameter:1
-#: of
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_initial_parameter:1
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_initial_parameter:1
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_initial_parameter:1 of
 msgid "Generate initial parameters."
 msgstr ""
 
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_initial_parameter:3
-#: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_parameter:6 of
+#: of
 msgid "A List of new parameters."
+msgstr ""
+
+#: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_parameter:1
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter:1
+#: aiaccel.optimizer.random_optimizer.RandomOptimizer.generate_parameter:1
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_parameter:1
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_parameter:1 of
+msgid "Generate parameters."
+msgstr ""
+
+#: aiaccel.optimizer.grid_optimizer.GridOptimizer.generate_parameter:3
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_initial_parameter:3
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer.generate_parameter:3 of
+msgid "A list of new parameters."
 msgstr ""
 
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.get_parameter_index:1 of
@@ -352,15 +353,7 @@ msgid "Get a next parameter index."
 msgstr ""
 
 #: aiaccel.optimizer.grid_optimizer.GridOptimizer.get_parameter_index:3 of
-msgid "It returns None if all parameters are     already generated."
-msgstr ""
-
-#: aiaccel.optimizer.grid_optimizer.GridOptimizer.get_parameter_index:5 of
-msgid "It returns None if all parameters are"
-msgstr ""
-
-#: aiaccel.optimizer.grid_optimizer.GridOptimizer.get_parameter_index:6 of
-msgid "already generated."
+msgid "It returns None if all parameters are already generated."
 msgstr ""
 
 #: aiaccel.optimizer.grid_optimizer.generate_grid_points:1 of
@@ -371,16 +364,17 @@ msgstr ""
 msgid "A hyper parameter object."
 msgstr ""
 
-#: aiaccel.optimizer.grid_optimizer.generate_grid_points:5 of
-msgid "A configuration object."
+#: aiaccel.optimizer.grid_optimizer.generate_grid_points:5
+#: aiaccel.optimizer.grid_optimizer.get_grid_options:5 of
+msgid "A config object."
 msgstr ""
 
 #: aiaccel.optimizer.grid_optimizer.generate_grid_points:8 of
 msgid "A dictionary including all grid parameters."
 msgstr ""
 
-#: aiaccel.optimizer.grid_optimizer.generate_grid_points:11
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter:8
+#: aiaccel.optimizer.grid_optimizer.generate_grid_points:12
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter:7
 #: of
 msgid "Causes when an invalid parameter type is set."
 msgstr ""
@@ -393,27 +387,13 @@ msgstr ""
 msgid "A parameter name to get its options."
 msgstr ""
 
-#: aiaccel.optimizer.grid_optimizer.get_grid_options:5 of
-msgid "A config object."
-msgstr ""
-
 #: aiaccel.optimizer.grid_optimizer.get_grid_options:8 of
 msgid ""
-"The first one is a     base of logarithm parameter. The second one is "
-"logarithm parameter     or not. The third one is a step of the grid."
+"The first one is a base of logarithm parameter. The second one is "
+"logarithm parameter or not. The third one is a step of the grid."
 msgstr ""
 
-#: aiaccel.optimizer.grid_optimizer.get_grid_options:11 of
-msgid "The first one is a"
-msgstr ""
-
-#: aiaccel.optimizer.grid_optimizer.get_grid_options:11 of
-msgid ""
-"base of logarithm parameter. The second one is logarithm parameter or "
-"not. The third one is a step of the grid."
-msgstr ""
-
-#: aiaccel.optimizer.grid_optimizer.get_grid_options:15 of
+#: aiaccel.optimizer.grid_optimizer.get_grid_options:13 of
 msgid "Causes when step is not specified."
 msgstr ""
 
@@ -423,6 +403,40 @@ msgstr ""
 
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer:1 of
 msgid "An optimizer class with nelder mead algorithm."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer:5 of
+msgid "A class object implementing Nelder-Mead method."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer:8 of
+msgid "NelderMead"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer:12 of
+msgid "A pool of parameters waiting for the process."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer:14
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer:20
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.get_ready_parameters:3
+#: of
+msgid "list"
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer:18 of
+msgid "A list of parameters being processed."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_initial_parameter:3
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_initial_parameter:3 of
+msgid "A List of new parameters. None if `self.nelder_mead` is already defined."
+msgstr ""
+
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter:3
+#: aiaccel.optimizer.random_optimizer.RandomOptimizer.generate_parameter:3
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_parameter:7 of
+msgid "A list of created parameters."
 msgstr ""
 
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.get_nm_results:1
@@ -438,11 +452,6 @@ msgstr ""
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.get_ready_parameters:1
 #: of
 msgid "Get the list of ready parameters."
-msgstr ""
-
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.get_ready_parameters:3
-#: of
-msgid "list"
 msgstr ""
 
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.nelder_mead_main:1
@@ -470,46 +479,14 @@ msgstr ""
 msgid "New parameter name"
 msgstr ""
 
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:13
+#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:12
 #: of
-msgid "befor"
-msgstr ""
-
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:22
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:35
-#: of
-msgid "{"
-msgstr ""
-
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:15
-#: of
-msgid "'vertex_id': 'CMTrNe5P8a', 'parameters': ["
-msgstr ""
-
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:17
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:30
-#: of
-msgid ""
-"{'parameter_name': 'x1', 'value': 3.37640289751353}, {'parameter_name': "
-"'x2', 'value': 1.6556037243290205}"
-msgstr ""
-
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:19
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:32
-#: of
-msgid ""
-"], 'state': 'WaitExpand', 'itr': 5, 'index': None, 'out_of_boundary': "
-"False"
+msgid "before::"
 msgstr ""
 
 #: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:26
 #: of
-msgid "after"
-msgstr ""
-
-#: aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.update_ready_parameter_name:28
-#: of
-msgid "'vertex_id': '000014', <---- replace to trial_id 'parameters': ["
+msgid "after::"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.optimizer.rst:40
@@ -529,15 +506,22 @@ msgid "An optimizer class with sobol algorithm."
 msgstr ""
 
 #: aiaccel.optimizer.sobol_optimizer.SobolOptimizer:11 of
-msgid ""
-"ToDo: Make it clear to resume this optimizer with Sobol sampler. Current "
-"code resume the sampler counts with a"
+msgid "Engine for generating (scrambled) Sobol' sequences."
 msgstr ""
 
-#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer:10 of
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer:13 of
+msgid "Sobol"
+msgstr ""
+
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer:15 of
+msgid "課題"
+msgstr ""
+
+#: aiaccel.optimizer.sobol_optimizer.SobolOptimizer:17 of
 msgid ""
-"number of FINISHED PARAMETER FILES. Confirm whether the current code "
-"resumes for any timings of quits."
+"Make it clear to resume this optimizer with Sobol sampler. Currentcode "
+"resume the sampler counts with a number of FINISHED PARAMETER FILES. "
+"Confirm whether the current code resumes for any timings of quits."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.optimizer.rst:56
@@ -556,12 +540,71 @@ msgstr ""
 msgid "A number of startup trials."
 msgstr ""
 
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:1 of
+msgid "An optimizer class based on optuna.samplers.TPESampler."
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:9 of
+msgid "A dictionary of parameters."
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:11 of
+msgid "dict[int, list[dict[str, Union[float, int, str]]]]"
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:15 of
+msgid "A list of HyperParameter objects."
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:18 of
+msgid "list[HyperParameter]"
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:22 of
+msgid "Study name."
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:24
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:30 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:28 of
+msgid "optuna.study.Study object."
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:34 of
+msgid ""
+"A dictionary of optuna.distributions objects defined for individual "
+"parameters."
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:37 of
+msgid "dict[str, optuna.distributions]"
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:41 of
+msgid "A dictionary of optuna.trial.Trial objects."
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:44 of
+msgid "dict[int, optuna.trial.Trial]"
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer:48 of
+msgid "Random seed."
+msgstr ""
+
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.check_result:1 of
 msgid "Check the result files and add it to sampler object."
 msgstr ""
 
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.create_study:1 of
 msgid "Create the optuna.study object and store it."
+msgstr ""
+
+#: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.generate_parameter:3 of
+msgid "A number of generating parameters. Defaults to 1."
 msgstr ""
 
 #: aiaccel.optimizer.tpe_optimizer.TpeOptimizer.is_startup_trials:1
@@ -588,4 +631,144 @@ msgstr ""
 #: ../../source/api_reference/aiaccel.optimizer.rst:64
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "A total number to generate hyper parameters."
+#~ msgstr ""
+
+#~ msgid "A number to pool hyper parameters."
+#~ msgstr ""
+
+#~ msgid "Generate a initial parameter."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Union[Dict[str, List[Dict[str, Union[str, "
+#~ "Union[float,     List[float]]]]], None]: A "
+#~ "created initial parameter. It returns     "
+#~ "None if any parameters are already "
+#~ "created."
+#~ msgstr ""
+
+#~ msgid "Union[Dict[str, List[Dict[str, Union[str, Union[float,"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "List[float]]]]], None]: A created initial "
+#~ "parameter. It returns None if any "
+#~ "parameters are already created."
+#~ msgstr ""
+
+#~ msgid "A number of generating parameters."
+#~ msgstr ""
+
+#~ msgid "Causes when the inherited class does not     implement."
+#~ msgstr ""
+
+#~ msgid "A list of hyper parameter dictionaries."
+#~ msgstr ""
+
+#~ msgid "param = {"
+#~ msgstr ""
+
+#~ msgid "'parameter_name': ..., 'type': ..., 'value': ..."
+#~ msgstr ""
+
+#~ msgid "}"
+#~ msgstr ""
+
+#~ msgid "When in resume mode, load the previous"
+#~ msgstr ""
+
+#~ msgid "optimization data in advance."
+#~ msgstr ""
+
+#~ msgid "Imports the specified Optimizer class. -"
+#~ msgstr ""
+
+#~ msgid "Args:"
+#~ msgstr ""
+
+#~ msgid "name(str): Optimizer class name"
+#~ msgstr ""
+
+#~ msgid "(e.g.) aiaccel.optimizer.NelderMeadOptimizer"
+#~ msgstr ""
+
+#~ msgid "Returns:"
+#~ msgstr ""
+
+#~ msgid "Any: <Optimizer class>"
+#~ msgstr ""
+
+#~ msgid "List[dict]"
+#~ msgstr ""
+
+#~ msgid "It returns None if all parameters are     already generated."
+#~ msgstr ""
+
+#~ msgid "It returns None if all parameters are"
+#~ msgstr ""
+
+#~ msgid "already generated."
+#~ msgstr ""
+
+#~ msgid "A configuration object."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The first one is a     base of "
+#~ "logarithm parameter. The second one is"
+#~ " logarithm parameter     or not. The "
+#~ "third one is a step of the "
+#~ "grid."
+#~ msgstr ""
+
+#~ msgid "The first one is a"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "base of logarithm parameter. The second"
+#~ " one is logarithm parameter or not."
+#~ " The third one is a step of "
+#~ "the grid."
+#~ msgstr ""
+
+#~ msgid "befor"
+#~ msgstr ""
+
+#~ msgid "{"
+#~ msgstr ""
+
+#~ msgid "'vertex_id': 'CMTrNe5P8a', 'parameters': ["
+#~ msgstr ""
+
+#~ msgid ""
+#~ "{'parameter_name': 'x1', 'value': 3.37640289751353},"
+#~ " {'parameter_name': 'x2', 'value': "
+#~ "1.6556037243290205}"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "], 'state': 'WaitExpand', 'itr': 5, "
+#~ "'index': None, 'out_of_boundary': False"
+#~ msgstr ""
+
+#~ msgid "after"
+#~ msgstr ""
+
+#~ msgid "'vertex_id': '000014', <---- replace to trial_id 'parameters': ["
+#~ msgstr ""
+
+#~ msgid ""
+#~ "ToDo: Make it clear to resume this"
+#~ " optimizer with Sobol sampler. Current "
+#~ "code resume the sampler counts with "
+#~ "a"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "number of FINISHED PARAMETER FILES. "
+#~ "Confirm whether the current code resumes"
+#~ " for any timings of quits."
+#~ msgstr ""
 
