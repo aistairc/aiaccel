@@ -4,7 +4,7 @@ import re
 import subprocess
 import threading
 from subprocess import Popen
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING
 
 import psutil
 
@@ -22,7 +22,6 @@ def exec_runner(command: list) -> Popen:
 
     Args:
         command (list): A command list
-        silent (bool): An option for silent
 
     Returns:
         Popen: An opened process object.
@@ -34,11 +33,11 @@ def exec_runner(command: list) -> Popen:
     )
 
 
-def subprocess_ps() -> List[dict]:
+def subprocess_ps() -> list[dict]:
     """Get a ps result as a list.
 
     Returns:
-        List[dict]: A ps result.
+        list[dict]: A ps result.
     """
     commands = ['ps', 'xu']
     res = subprocess.run(commands, stdout=subprocess.PIPE)
@@ -65,11 +64,11 @@ def subprocess_ps() -> List[dict]:
     return ret
 
 
-def ps2joblist() -> List[dict]:
+def ps2joblist() -> list[dict]:
     """Get a ps result and convert to a job list format.
 
     Returns:
-        List[dict]: A job list of ps result.
+        list[dict]: A job list of ps result.
 
     Raises:
         KeyError: Causes when required keys are not contained in a ps result.
@@ -108,6 +107,16 @@ def kill_process(pid: int) -> None:
 class OutputHandler(threading.Thread):
     """A class to print subprocess outputs.
 
+    Args:
+        parent (AbciMaster | AbstractMaster | LocalMaster): A
+            reference for the caller object.
+        proc (Popen): A reference for subprocess.Popen.
+        module_name (str): A module name which the subprocess is attached.
+            For example, 'Optimizer'.
+        trial_id (int): Trial id.
+        storage (Storage | None, optional): Storage object. Defaults to
+            None.
+
     Attributes:
         _parent (Union[AbciMaster, AbstractMaster, LocalMaster]): A reference
             for the caller object.
@@ -119,21 +128,12 @@ class OutputHandler(threading.Thread):
 
     def __init__(
         self,
-        parent: Union[AbciMaster, AbstractMaster, LocalMaster],
+        parent: AbciMaster | AbstractMaster | LocalMaster,
         proc: subprocess.Popen,
         module_name: str,
         trial_id: int,
-        storage: Union[Storage, None] = None
+        storage: Storage | None = None
     ) -> None:
-        """Initial method for OutputHandler.
-
-        Args:
-            parent (Union[AbciMaster, AbstractMaster, LocalMaster]): A
-                reference for the caller object.
-            proc (Popen): A reference for subprocess.Popen.
-            module_name (str): A module name which the subprocess is attached.
-                For example, 'Optimizer'.
-        """
         super(OutputHandler, self).__init__()
         self._parent = parent
         self._proc = proc

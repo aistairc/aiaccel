@@ -12,6 +12,7 @@ Subpackages
    aiaccel.master
    aiaccel.optimizer
    aiaccel.storage
+   aiaccel.util
 
 Submodules
 ----------

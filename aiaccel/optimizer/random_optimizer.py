@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Union
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -8,12 +7,11 @@ class RandomOptimizer(AbstractOptimizer):
 
     """
 
-    def generate_parameter(self) -> list[dict[str, Union[float, int, str]]]:
+    def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
         Returns:
-            list[dict[str, Union[float, int, str]]]: A list of created
-            parameters.
+            list[dict[str, float | int | str]]: A list of created parameters.
         """
         new_params = []
         sample = self.params.sample(rng=self._rng)

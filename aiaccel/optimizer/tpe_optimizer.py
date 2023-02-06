@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import Optional, Union
+
+import optuna
 
 import aiaccel.parameter
-import optuna
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -37,13 +37,7 @@ class TpeOptimizer(AbstractOptimizer):
         randseed (int): Random seed.
     """
 
-    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
-        """Initial method of TpeOptimizer.
-
-        Args:
-            options (dict[str, Union[str, int, bool]]): A dictionary
-                containing command line options.
-        """
+    def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
         self.parameter_pool = {}
         self.parameter_list = []
@@ -99,17 +93,18 @@ class TpeOptimizer(AbstractOptimizer):
         return self.num_of_generated_parameter < n_startup_trials
 
     def generate_parameter(
-        self, number: Optional[int] = 1
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+        self,
+        number: int | None = 1
+    ) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
         Args:
-            number (Optional[int]): A number of generating parameters. Defaults
-                to 1.
+            number (int | None, optional): A number of generating parameters.
+            Defaults to 1.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A list of
-            created parameters.
+            list[dict[str, float | int | str]] | None: A list of created
+            parameters.
         """
         self.check_result()
         self.logger.debug(
@@ -146,11 +141,11 @@ class TpeOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(
         self
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+    ) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A List of new
+            list[dict[str, float | int | str]] | None: A List of new
             parameters. None if `self.nelder_mead` is already defined.
         """
         enqueue_trial = {}
@@ -203,6 +198,10 @@ def create_distributions(
     Args:
         parameters(aiaccel.parameter.HyperParameterConfiguration): A
             parameter configuration object.
+
+    Raises:
+        ValueError: Occurs when parameter type is other than 'float', 'int',
+            'categorical', or 'ordinal'.
 
     Returns:
         (dict): An optuna.distributions object.

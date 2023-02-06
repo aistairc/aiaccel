@@ -1,6 +1,7 @@
-from typing import Union
+from __future__ import annotations
 
 from sqlalchemy.exc import SQLAlchemyError
+from typing import Literal
 
 from aiaccel.storage.abstract import Abstract
 from aiaccel.storage.model import TrialTable
@@ -12,14 +13,14 @@ class Trial(Abstract):
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_state(self, trial_id: int) -> Union[None, str]:
+    def get_any_trial_state(self, trial_id: int) -> Literal['ready', 'running', 'finished'] | None:
         """Get any trials state.
 
         Args:
             trial_id (int): Any trial id
 
         Returns:
-            trials state(str): ready, running, finished
+            Literal['ready', 'running', 'finished'] | None: Trial state.
         """
         with self.create_session() as session:
             trials = (
@@ -35,14 +36,15 @@ class Trial(Abstract):
         return trials.state
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_state_list(self, state: str) -> Union[None, list]:
+    def get_any_state_list(self, state: Literal['ready', 'running', 'finished']) -> list[int] | None:
         """Get any trials numbers.
 
         Args:
-            trials state(str): ready, running, finished
+            state (Literal['ready', 'running', 'finished'): Trial state.
 
         Returns:
-            trial ids(list[int])
+            list[int] | None: A List of trial ids. None if no trials match the
+            specified state.
         """
         with self.create_session() as session:
             trials = (
@@ -58,12 +60,12 @@ class Trial(Abstract):
         return [d.trial_id for d in trials]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def set_any_trial_state(self, trial_id: int, state: str) -> None:
+    def set_any_trial_state(self, trial_id: int, state: Literal['ready', 'running', 'finished']) -> None:
         """Set any trials numbers.
 
         Args:
             trial_id (int): Any trial id
-            trials state(str): ready, running, finished
+            state (Literal['ready', 'running', 'finished']): Trial state.
 
         Returns:
             None
@@ -115,7 +117,7 @@ class Trial(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_ready(self) -> list:
+    def get_ready(self) -> list[int]:
         """Get the trial id whose status is ready.
 
         Returns:
@@ -132,7 +134,7 @@ class Trial(Abstract):
         return [trial.trial_id for trial in trials]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_running(self) -> list:
+    def get_running(self) -> list[int]:
         """Get the trial id whose status is running.
 
         Returns:
@@ -166,10 +168,10 @@ class Trial(Abstract):
         return [trial.trial_id for trial in trials]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_all_trial_id(self) -> Union[None, list]:
+    def get_all_trial_id(self) -> list[int] | None:
         """
         Returns:
-            trial ids(list[int])
+            list[int] | None: A list of trial ids.
         """
         with self.create_session() as session:
             trials = (

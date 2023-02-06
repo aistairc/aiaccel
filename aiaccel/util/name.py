@@ -1,22 +1,24 @@
+from __future__ import annotations
+
 import logging
-import numpy as np
 import string
-from typing import Union
+
+import numpy as np
 
 
 def generate_random_name(
     length: int = 10,
-    rng: np.random.RandomState = None
-) -> Union[str, None]:
+    rng: np.random.RandomState | None = None
+) -> str | None:
     """
     Generate random name using alphanumeric.
 
     Args:
-        length(int): A length of the name
-        rng(np.random.RandomState): A reference to a random generator.
+        length (int): A length of the name.
+        rng (np.random.RandomState): A reference to a random generator.
 
     Returns:
-        (Union[str, None]): A generated name.
+        str | None: A generated name.
     """
 
     if length < 1:
@@ -25,6 +27,9 @@ def generate_random_name(
 
         return None
 
-    rands = [rng.choice(list(string.ascii_letters + string.digits))[0] for _ in range(length)]
+    rands = [
+        rng.choice(list(string.ascii_letters + string.digits))[0]
+        for _ in range(length)
+    ]
 
     return ''.join(rands)
