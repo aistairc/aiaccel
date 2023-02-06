@@ -1,5 +1,4 @@
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.scheduler.job.model.create import create_model
 
 from tests.base_test import BaseTest
 
@@ -22,7 +21,7 @@ class TestAbciScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbciScheduler(options, create_model(options['config']))
+        scheduler = AbciScheduler(options)
         xml_path = data_dir.joinpath('qstat.xml')
         fake_process.register_subprocess(['qstat', '-xml'], stdout=[])
         assert scheduler.get_stats() is None
@@ -49,7 +48,7 @@ class TestAbciScheduler(BaseTest):
             'fs': False,
             'process_name': 'scheduler'
         }
-        scheduler = AbciScheduler(options, create_model(options['config']))
+        scheduler = AbciScheduler(options)
         s = {"name": "run_000005.sh"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5

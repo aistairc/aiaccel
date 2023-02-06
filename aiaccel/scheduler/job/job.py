@@ -15,8 +15,6 @@ from aiaccel import dict_error
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
-from aiaccel.scheduler.job.model.abci_model import AbciModel
-from aiaccel.scheduler.job.model.local_model import LocalModel
 
 if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler.abci_scheduler import AbciScheduler
@@ -563,7 +561,7 @@ class Job:
         self.dict_lock = self.ws / dict_lock
 
         self.scheduler = scheduler
-        self.model = self.scheduler.Model()
+        self.model = self.scheduler.create_model()
         self.machine = CustomMachine(
             model=self.model,
             states=JOB_STATES,

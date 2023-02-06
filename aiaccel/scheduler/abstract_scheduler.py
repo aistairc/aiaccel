@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Type
+from typing import Union
 
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schedule_sampling
@@ -7,6 +7,7 @@ from aiaccel.scheduler.job.job import Job
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.filesystem import create_yaml
 from aiaccel import dict_result
+from aiaccel.scheduler.job.model.local_model import LocalModel
 
 
 class AbstractScheduler(AbstractModule):
@@ -22,15 +23,13 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict, Model: Type = None) -> None:
+    def __init__(self, options: dict) -> None:
         """Initial method for AbstractScheduler.
 
         Args:
-            options (dict): A dictionary of options.
-            Model (Type): A job model class.
+            config (str): A file name of a configuration.
         """
         self.options = options
-        self.Model = Model
         self.options['process_name'] = 'scheduler'
         super().__init__(self.options)
 
@@ -312,5 +311,7 @@ class AbstractScheduler(AbstractModule):
     def __getstate__(self):
         obj = super().__getstate__()
         del obj['jobs']
-        del obj['Model']
         return obj
+
+    def create_model(self):
+        return LocalModel()

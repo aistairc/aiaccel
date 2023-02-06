@@ -14,7 +14,6 @@ from aiaccel.master.local_master import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer.random_optimizer import RandomOptimizer
 from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.job.model.create import create_model
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
@@ -120,7 +119,7 @@ class TestAbstractModule(BaseTest):
                 'fs': False,
                 'process_name': 'scheduler'
             }
-            scheduler = LocalScheduler(options, create_model(options['config']))
+            scheduler = LocalScheduler(options)
             module_type = scheduler.get_module_type()
             assert module_type == aiaccel.module_type_scheduler
 
