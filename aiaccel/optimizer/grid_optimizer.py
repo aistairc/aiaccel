@@ -1,7 +1,8 @@
+from __future__ import annotations
 import math
 from functools import reduce
 from operator import mul
-from typing import List, Tuple, Optional
+from typing import Optional, Union, Tuple
 
 from omegaconf.dictconfig import DictConfig
 
@@ -17,12 +18,12 @@ def get_grid_options(
 
     Args:
         parameter_name (str): A parameter name to get its options.
-        config (ConfileWrapper): A config object.
+        config (Config): A config object.
 
     Returns:
-        Tuple[Optional[int], bool, Optional[int]]: The first one is a base of
-            logarithm parameter. The second one is logarithm parameter or not.
-            The third one is a step of the grid.
+        tuple[Optional[int], bool, Optional[int]]: The first one is a base of
+        logarithm parameter. The second one is logarithm parameter or not.
+        The third one is a step of the grid.
 
     Raises:
         KeyError: Causes when step is not specified.
@@ -66,7 +67,8 @@ def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict:
         config (DictConfig): A configuration object.
 
     Returns:
-        dict: A dictionary including all grid parameters.
+        dict[str, Union[str, list[float, int, str]]]: A dictionary including
+        all grid parameters.
 
     Raises:
         TypeError: Causes when an invalid parameter type is set.
@@ -112,7 +114,7 @@ class GridOptimizer(AbstractOptimizer):
     """An optimizer class with grid search algorithm.
 
     Attributes:
-        ready_params (List[dict]): A list of ready hyper parameters.
+        ready_params (list[dict]): A list of ready hyper parameters.
         generate_index (int): A number of generated hyper parameters.
     """
 
@@ -120,7 +122,8 @@ class GridOptimizer(AbstractOptimizer):
         """Initial method of GridOptimizer.
 
         Args:
-            config (str): A file name of a configuration.
+            options (dict[str, Union[str, int, bool]]): A dictionary
+            containing command line options.
         """
         super().__init__(config)
         self.ready_params = None
@@ -145,12 +148,12 @@ class GridOptimizer(AbstractOptimizer):
             self.storage.get_num_finished()
         )
 
-    def get_parameter_index(self) -> Optional[List[int]]:
+    def get_parameter_index(self) -> Optional[list[int]]:
         """Get a next parameter index.
 
         Returns:
-            Optional[List[int]]: It returns None if all parameters are
-                already generated.
+            Optional[list[int]]: It returns None if all parameters are
+            already generated.
         """
         parameter_lengths = [len(i['parameters']) for i in self.ready_params]
         remain = self.generate_index
@@ -177,14 +180,11 @@ class GridOptimizer(AbstractOptimizer):
 
         return parameter_index
 
-    def generate_parameter(self) -> List[dict]:
+    def generate_parameter(self) -> list[dict[str, Union[float, int, str]]]:
         """Generate parameters.
 
-        Args:
-            number (Optional[int]): A number of generating parameters.
-
         Returns:
-            List[dict]: A List of new parameters.
+            list[dict[str, Union[float, int, str]]]: A list of new parameters.
         """
         parameter_index = self.get_parameter_index()
         new_params = []
@@ -205,11 +205,13 @@ class GridOptimizer(AbstractOptimizer):
 
         return new_params
 
-    def generate_initial_parameter(self) -> List[dict]:
+    def generate_initial_parameter(
+        self
+    ) -> list[dict[str, Union[float, int, str]]]:
         """Generate initial parameters.
 
         Returns:
-            List[dict]: A List of new parameters.
+            list[dict[str, Union[float, int, str]]]: A List of new parameters.
         """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(

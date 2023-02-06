@@ -1,35 +1,50 @@
+from __future__ import annotations
+from typing import Union, Optional
 import copy
 
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 
 
 class NelderMeadOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
 
     Attributes:
-        nelder_mead ():
-        parameter_pool ():
+        nelder_mead (NelderMead): A class object implementing Nelder-Mead
+            method.
+        parameter_pool (list): A pool of parameters waiting for the process.
+        order (list): A list of parameters being processed.
     """
 
     def __init__(self, config: DictConfig) -> None:
         """Initial method of NelderMeadOptimizer.
 
         Args:
-            config (str): A file name of a configuration.
+            options (dict[str, Union[str, int, bool]]): A dictionary
+            containing command line options.
         """
         super().__init__(config)
         self.nelder_mead = None
         self.parameter_pool = []
         self.order = []
 
-    def generate_initial_parameter(self):
-        initial_parameter = super().generate_initial_parameter()
+    def generate_initial_parameter(
+        self
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+        """Generate initial parameters.
 
+        Returns:
+            Optional[list[dict[str, Union[float, int, str]]]]: A List of new
+            parameters. None if `self.nelder_mead` is already defined.
+        """
+        initial_parameter = super().generate_initial_parameter()
         if self.nelder_mead is not None:
             return
+
+        self.params = self.special_settings_when_using_ordinal(self.params)
 
         self.nelder_mead = NelderMead(
             self.params.get_parameter_list(),
@@ -65,11 +80,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
             except KeyError:
                 continue
 
-            result_content = self.storage.result.get_any_trial_objective(index)
+            result = self.storage.result.get_any_trial_objective(index)
 
-            if result_content is not None:
+            if result is not None:
                 nm_result = copy.copy(p)
-                nm_result['result'] = result_content
+                nm_result['result'] = result
                 nm_results.append(nm_result)
 
         return nm_results
@@ -112,33 +127,34 @@ class NelderMeadOptimizer(AbstractOptimizer):
             None
 
         Note:
-            --------------------------------------------------------------
-            - before
-            {
-                'vertex_id': 'CMTrNe5P8a',
-                'parameters': [
-                    {'parameter_name': 'x1', 'value': 3.37640289751353},
-                    {'parameter_name': 'x2', 'value': 1.6556037243290205}
-                ],
-                'state': 'WaitExpand',
-                'itr': 5,
-                'index': None,
-                'out_of_boundary': False
-            }
-            --------------------------------------------------------------
-            - after
-            {
-                'vertex_id': '000014', <---- replace to trial_id
-                'parameters': [
-                    {'parameter_name': 'x1', 'value': 3.37640289751353},
-                    {'parameter_name': 'x2', 'value': 1.6556037243290205}
-                ],
-                'state': 'WaitExpand',
-                'itr': 5,
-                'index': None,
-                'out_of_boundary': False
-            }
-            --------------------------------------------------------------
+            - before::
+
+                {
+                    'vertex_id': 'CMTrNe5P8a',
+                    'parameters': [
+                        {'parameter_name': 'x1', 'value': 3.37640289751353},
+                        {'parameter_name': 'x2', 'value': 1.6556037243290205}
+                    ],
+                    'state': 'WaitExpand',
+                    'itr': 5,
+                    'index': None,
+                    'out_of_boundary': False
+                }
+
+            - after::
+
+                {
+                    'vertex_id': '000014', <---- replace to trial_id
+                    'parameters': [
+                        {'parameter_name': 'x1', 'value': 3.37640289751353},
+                        {'parameter_name': 'x2', 'value': 1.6556037243290205}
+                    ],
+                    'state': 'WaitExpand',
+                    'itr': 5,
+                    'index': None,
+                    'out_of_boundary': False
+                }
+
         """
         old_param_name = pool_p['vertex_id']
         new_param_name = name
@@ -170,9 +186,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
         Get trial_ids from DB: 'result', 'finished', 'running', 'ready'
 
         Returns:
-            List: trial_id
+            list: trial_id
         """
-
         trial_id = self.storage.trial.get_all_trial_id()
         if trial_id is None:
             return []
@@ -188,15 +203,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
         # WARN: Always empty.
         return [p['vertex_id'] for p in self.parameter_pool]
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(
+        self
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
         """Generate parameters.
 
-        Args:
-            number (Optional[int]):
-                A number of generating parameters.
-
         Returns:
-            None
+            Optional[list[dict[str, Union[float, int, str]]]]: A list of
+            created parameters.
 
         Raises:
             TypeError: Causes when an invalid parameter type is set.
@@ -216,8 +230,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
             ):
                 self.parameter_pool.append(copy.copy(p))
 
-        # self._generate_hp_ready(number)
-
         new_params = []
 
         if len(self.parameter_pool) == 0:
@@ -227,11 +239,13 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         for param in self.params.get_parameter_list():
             i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
-
             if param.type.lower() == 'float':
                 value = float(pool_p['parameters'][i]['value'])
             elif param.type.lower() == 'int':
                 value = int(pool_p['parameters'][i]['value'])
+            elif param.type.lower() == 'ordinal':
+                index = int(pool_p['parameters'][i]['value'])
+                value = param.sequence[index]
             else:
                 raise TypeError(
                     'Invalid parameter type for NelderMeadSearch.'
@@ -253,5 +267,25 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 'parameters': new_params
             }
         )
+
+        return new_params
+
+    def special_settings_when_using_ordinal(self, params: HyperParameterConfiguration) -> HyperParameterConfiguration:
+        """
+            When using ordinal types in NelderMead, the array index is predicted.
+            https://github.com/aistairc/aiaccel/issues/175
+        """
+        new_params = copy.deepcopy(params)
+        for param in params.get_parameter_list():
+            if param.type.lower() == 'ordinal':
+                if param.name not in new_params.hps.keys():
+                    assert False
+                new_params.hps[param.name] = HyperParameter({
+                        'name': param.name,
+                        'type': 'ordinal',
+                        'lower': 0,
+                        'upper': len(param.sequence) - 1,
+                        'sequence': param.sequence
+                    })
 
         return new_params

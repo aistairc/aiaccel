@@ -11,7 +11,7 @@ from tests.base_test import BaseTest
 from aiaccel.config import load_config
 
 
-def callback_qstat():
+def callback_qstat(fake_process):
     time.sleep(2)
     raise subprocess.TimeoutExpired
 
@@ -73,6 +73,7 @@ class TestAbciMaster(BaseTest):
         fake_process.register_subprocess(
             ['qstat', '-xml'], callback=callback_qstat
         )
+        fake_process.keep_last_process(True)
         # with pytest.raises(subprocess.TimeoutExpired):
         #    master.get_stats()
         master.get_stats()

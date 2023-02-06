@@ -19,7 +19,7 @@ def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
 
     Returns:
         Tuple[Union[float, None], Union[Path, None]]: A best result value and a
-            file path. It returns None if a number of files is less than one.
+        file path. It returns None if a number of files is less than one.
 
     Raises:
         ValueError: Causes when an invalid goal is set.
@@ -29,7 +29,14 @@ def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
         return None, None
 
     yml = load_yaml(files[0], dict_lock)
-    best = float(yml['result'])
+
+    try:
+        best = float(yml['result'])
+    except TypeError:
+        logger = logging.getLogger('root.master.parameter')
+        logger.error(f'Invalid result: {yml["result"]}.')
+        return None, None
+
     best_file = files[0]
 
     for f in files[1:]:
@@ -58,7 +65,7 @@ def get_type(parameter: dict) -> str:
 
     Returns:
         str: A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
-            'ORDINAL'.
+        'ORDINAL'.
     """
     if parameter['type'].lower() == 'uniform_int':
         return 'INT'

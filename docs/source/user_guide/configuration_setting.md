@@ -1,37 +1,27 @@
 # コンフィグレーションの設定ガイド (WIP)
-
-
-<br>
-
-
-## **generic**
+## **generic:**
 ### workspace (str, optional):
----
+
 aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．
 デフォルトでは "./work" に設定されています．
 
 ### job_command (str):
----
 ユーザープログラムを実行するためのコマンドです．
 
 ### python_file (str, optional):
----
 ローカル実行のモードの一つである python_local モードを用いる場合に，最適化対象の関数が実装されている python のファイルパスを指定します．
 実行モードが ABCI または通常の Local の場合には指定する必要はありません．
 
 ### function (str, optional):
----
 ローカル実行のモードの一つである python_local モードを用いる場合に，最適化対象の関数名を指定します．
 aiaccel は実行時，python_file に書かれたファイルから，ここで指定された名前の関数をインポートします．
 実行モードが ABCI または通常の Local の場合には指定する必要はありません．
 
 ### batch_job_timeout (int, optional):
----
 ジョブのタイムアウト時間を秒単位で設定します．
 デフォルトでは 600 (秒) に設定されています．
 
 ### sleep_time (float, optional):
----
 最適化実行のメインループ 1 周あたりのスリープ時間を秒単位で指定します．
 デフォルトでは 0.01 (秒) に設定されています．
 
@@ -39,10 +29,9 @@ aiaccel は実行時，python_file に書かれたファイルから，ここで
 <br>
 
 
-## **resource**
+## **resource:**
 
 ### type (str):
----
 実行環境を指定します．
 aiaccel は以下の 3 つの環境での実行をサポートしています．
 - "abci" - ABCI 上で最適化を実行します．
@@ -51,7 +40,6 @@ aiaccel は以下の 3 つの環境での実行をサポートしています．
 デフォルトでは "local" に設定されています．
 
 ###  num_node (int):
---- 
 使用するノード数を指定します．
 デフォルトでは 1 に設定されています．
 
@@ -59,18 +47,15 @@ aiaccel は以下の 3 つの環境での実行をサポートしています．
 <br>
 
 
-## **ABCI**
+## **ABCI:**
 
 ### group (str):
----
 ユーザーが所属する ABCI のグループを指定します．
 
 ### job_script_preamble (str):
----
 ABCI の設定を記述したシェルスクリプトのファイルを指定します．
 
 ### job_execution_options (str | list[str], optional):
----
 aiaccel が ABCI の計算ノード上にジョブを投入する際に付加されるオプションのコマンドです．
 デフォルトでは "" (空の文字列) が設定されています．
 
@@ -78,9 +63,8 @@ aiaccel が ABCI の計算ノード上にジョブを投入する際に付加さ
 <br>
 
 
-## **optimize**
+## **optimize:**
 ### search_algorithm (str, optional):
----
 最適化アルゴリズムを設定します．
 aiaccel では以下のアルゴリズムをサポートしています．
 - "aiaccel.optimizer.NelderMeadOptimizer" - Nelder-Mead 法でパラメータの探索を行います．
@@ -92,7 +76,6 @@ aiaccel では以下のアルゴリズムをサポートしています．
 デフォルトでは "aiaccel.optimizer.NelderMeadOptimizer" に設定されています．
 
 ### goal (str, optional):
----
 最適化の向きを決定します．
 - "minimize" - 目的関数が小さくなるようにパラメータを最適化します．
 - "maximize" - 目的関数が大きくなるようにパラメータを最適化します．
@@ -100,21 +83,17 @@ aiaccel では以下のアルゴリズムをサポートしています．
 デフォルトでは "minimize" に設定されています．
 
 ### trial_number (int):
----
 試行回数を設定します．
 
 ### rand_seed (int, optional):
----
 乱数生成に用いるシードを設定します．設定可能な値の範囲は `numpy.random.default_rng` が取り得る範囲に一致します．
 デフォルトでは None に設定されています．
 
 ### sobol_scramble (bool, optional):
----
 ソボルオプティマイザを使用する際に，[スクランブル](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.Sobol.html#scipy-stats-qmc-sobol)を使用するかを指定します．
 デフォルトでは true に設定されています．
 
 ### parameters (list):
----
 パラメータの探索条件をまとめたリストを設定します．
 最適化アルゴルズムとパラメータのデータ型に応じて，各要素には以下の項目が含まれます．
 
@@ -192,6 +171,14 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *type ("uniform_float", "uniform_int")*
 - *lower*
 - *upper*
+- *step*
+- *log*
+- *base*
+
+(注意) `log` が `true` の場合，`lower`，`upper`，および `step` は対数スケールでの値として参照されます．
+即ち，探索の下限は ${base}^{lower}$，上限は ${base}^{upper}$ と解釈され， $n\ (=0, 1, \cdots)$ 番目の点は ${base}^{lower} {base}^{n \times step}$ で与えられます．
+一方で `log` が `false` の場合，`lower`，`upper`，および `step` は，それぞれ探索の下限，上限，およびステップに直接対応します．
+この場合，`base` の値は使用されませんが，何も値を設定していないとエラーが生じます．
 
 ***"categorical" の場合***
 - *name*
@@ -213,6 +200,7 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *lower*
 - *upper*
 - *initial*
+- *log*
 
 ***"categorical" の場合***
 - *name*
@@ -225,88 +213,78 @@ aiaccel では以下のアルゴリズムをサポートしています．
 <br>
 
 
-## **job_setting**
+## **job_setting:**
 ### cancel_retry (int, optional):
----
 Max retry counts to transit the state from HpCancelFailed to HpCancelFailure.
 Defaults to 3.
 
 ### cancel_timeout (int, optional): 
----
 Timeout seconds to transit the state from HpCancelChecking to HpCancelFailed.
 Defaults to 60.
 
 ### expire_retry (int, optional):
----
 Max retry counts to transit the state from HpExpireFailed to HpExpireFailure.
 Defaults to 3.
 
 ### expire_timeout (int, optional):
----
 Timeout seconds to transit the state from HpExpireChecking to HpExpireFailed.
 Defaults to 60.
 
 ### finished_retry (int, optional):
----
 Max retry counts to transit the state from HpFinishedFailed to HpFinishedFailure.
 Defaults to 3.
 
 ### finished_timeout (int, optional):
----
 Timeout seconds to transit the state from HpFinishedChecking to HpFinishedFailed.
 Defaults to 60.
 
+### job_loop_duration (float, optional):
+スケジューラジョブスレッドのループ 1 周あたりのスリープ時間を秒単位で指定します．
+デフォルトでは 0.5 (秒) に設定されています．
+
+A sleep time each job loop.
+Defaults to 0.5.
+
 ### job_retry (int, optional):
----
 Max retry counts to transit the state from HpCancelFailed to HpCancelFailure.
 Defaults to 2.
 
 ### job_timeout (int, optional):
----
 Timeout seconds to transit the state from JobChecking to JobFailed.
 Defaults to 60.
 
 ### kill_retry (int, optional):
----
 Max retry counts to transit the state from KillFailed to KillFailure.
 Defaults to 3.
 
 ### kill_timeout (int, optional):
----
 Timeout seconds to transit the state from KillChecking to KillFailed.
 Defaults to 60.
 
 ### result_retry (int, optional):
----
 Max retry counts to transit the state from RunnerFailed to RunnerFailure.
 Defaults to 1.
 
 ### runner_retry (int, optional): 
----
 Max retry counts to transit the state from RunnerFailed to RunnerFailure.
 Defaults to 3.
 
 ### runner_timeout (int, optional):
----
 Timeout seconds to transit the state from RunnerChecking to RunnerFailed.
 Defaults to 60.
 
 ### running_retry (int, optional):
----
 Max retry counts to transit the state from HpRunningFailed to HpRunningFailure.
 Defaults to 3.
 
 ### running_timeout (int, optional):
----
 Timeout seconds to transit the state from HpRunningChecking to HpRunningFailed.
 Defaults to 60.
 
 ### init_fail_count (int, optional):
----
 Defaults to 100.
 
 ### name_length (int, optional):
----
 文字列としてのジョブ ID の長さです．
 この文字列は，結果を .hp ファイルに保存する際にファイル名として使用されます．
 デフォルトでは 6 に設定されています．
@@ -314,11 +292,10 @@ Defaults to 100.
 
 <br>
 
-## **logger**
+## **logger:**
 
 
 ### file:
----
 実行ログの保存先を設定します．
 
 #### master (str, optional): 
@@ -334,7 +311,6 @@ Defaults to 100.
 デフォルトでは "scheduler.log" に設定されています．
 
 ### log_level:
----
 #### master (str):
 マスターモジュールからのログファイル出力のログレベルを設定します．
 以下の文字列が設定可能です．
@@ -373,7 +349,6 @@ A logging level for a log file output of scheduler module.
 Defaults to "DEBUG".
 
 ### stream_level:
----
 #### master (str, optional):
 マスターモジュールからのストリーム出力のログレベルを設定します．
 デフォルトでは "DEBUG" に設定されています．
@@ -398,17 +373,15 @@ Defaults to "DEBUG".
 
 <br>
 
-## **verification**
+## **verification:**
 
 ### is_verified (bool, optional):
----
 最適化結果の verification を行うかを設定します．
 デフォルトでは flase が設定されています．
 
 Defaults to false.
 
 ### condition (list, optional):
----
 Verification の条件の配列を設定します．
 配列の各要素には，以下の項目が設定されている必要があります．
 - **loop** - Verification 対象となるジョブの ID です．

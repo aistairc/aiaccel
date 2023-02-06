@@ -33,13 +33,13 @@ class CreationReport:
         data = []
         header = []
 
-        finished = self.storage.trial.get_finished()
-        if len(finished) == 0:
-            logger.info('No data.')
+        trial_ids = self.storage.trial.get_all_trial_id()
+
+        if trial_ids is None or len(trial_ids) == 0:
             return
 
         # write header
-        example = self.storage.get_hp_dict(finished[0])
+        example = self.storage.get_hp_dict(trial_ids[0])
         header.append('trial_id')
         for param in example['parameters']:
             header.append(param['parameter_name'])
@@ -51,7 +51,7 @@ class CreationReport:
                 writer.writerow(header)
 
         # write result data
-        trial_id_str = [self.get_zero_padding_trial_id(trial_id) for trial_id in finished]
+        trial_id_str = [self.get_zero_padding_trial_id(trial_id) for trial_id in trial_ids]
         results = [self.storage.get_hp_dict(n) for n in trial_id_str]
 
         for contents in results:

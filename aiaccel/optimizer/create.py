@@ -8,11 +8,11 @@ def create_optimizer(search_algorithm: str) -> Any:
 
 def import_and_getattr(name: str) -> Any:
     """ Imports the specified Optimizer class.
--
+
     Args:
         name(str): Optimizer class name
             (e.g.) aiaccel.optimizer.NelderMeadOptimizer
--
+
     Returns:
         Any: <Optimizer class>
     """

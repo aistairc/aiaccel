@@ -1,4 +1,5 @@
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, Union
 
 from omegaconf.dictconfig import DictConfig
 
@@ -78,14 +79,23 @@ class TpeOptimizer(AbstractOptimizer):
         n_startup_trials = self.study.sampler.get_startup_trials()
         return self.num_of_generated_parameter < n_startup_trials
 
-    def generate_parameter(self, number: Optional[int] = 1) -> None:
+    def generate_parameter(
+        self, number: Optional[int] = 1
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
         """Generate parameters.
 
         Args:
-            number (Optional[int]): A number of generating parameters.
+            number (Optional[int]): A number of generating parameters. Defaults
+                to 1.
+
+        Returns:
+            Optional[list[dict[str, Union[float, int, str]]]]: A list of
+            created parameters.
         """
         self.check_result()
-        self.logger.debug(f'number: {number}, pool: {len(self.parameter_pool)} losses')
+        self.logger.debug(
+            f'number: {number}, pool: {len(self.parameter_pool)} losses'
+        )
 
         # TPE has to be sequential.
         if (
@@ -115,8 +125,15 @@ class TpeOptimizer(AbstractOptimizer):
 
         return new_params
 
-    def generate_initial_parameter(self):
+    def generate_initial_parameter(
+        self
+    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+        """Generate initial parameters.
 
+        Returns:
+            Optional[list[dict[str, Union[float, int, str]]]]: A List of new
+            parameters. None if `self.nelder_mead` is already defined.
+        """
         enqueue_trial = {}
         for hp in self.params.hps.values():
             if hp.initial is not None:
@@ -175,19 +192,20 @@ def create_distributions(
 
     for p in parameters.get_parameter_list():
         if p.type.lower() == 'float':
-            if p.log:
-                distributions[p.name] = optuna.distributions.LogUniformDistribution(p.lower, p.upper)
-            else:
-                distributions[p.name] = optuna.distributions.UniformDistribution(p.lower, p.upper)
+            distributions[p.name] = optuna.distributions.FloatDistribution(
+                p.lower, p.upper, log=p.log
+            )
 
         elif p.type.lower() == 'int':
-            if p.log:
-                distributions[p.name] = optuna.distributions.IntLogUniformDistribution(p.lower, p.upper)
-            else:
-                distributions[p.name] = optuna.distributions.IntUniformDistribution(p.lower, p.upper)
+            distributions[p.name] = optuna.distributions.IntDistribution(
+                p.lower, p.upper, log=p.log
+            )
 
         elif p.type.lower() == 'categorical':
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
+
+        elif p.type.lower() == 'ordinal':
+            distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
 
         else:
             raise 'Unsupported parameter type'

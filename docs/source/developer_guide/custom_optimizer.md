@@ -153,7 +153,7 @@ examples/sphereディレクトリをコピーし，sphereディレクトリに�
 
 ***/workspace/aiaccel/work/sphere/config.yaml***
 
-```yaml:config.yaml
+```yaml :config.yaml
 generic:
   workspace: "./work"
   job_command: "python user.py"
@@ -236,7 +236,7 @@ optimize:
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:custom_optimizer.py
+```python :custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -283,7 +283,7 @@ sampleメソッド内では，さらにHyperParameterインスタンスである
 
 ***/workspace/aiaccel/aiaccel/parameter.py***
 
-```python:aiaccel/parameter.py
+```python :aiaccel/parameter.py
         elif self.type == 'FLOAT':
             value = np.random.uniform(self.lower, self.upper)
 ```
@@ -312,7 +312,7 @@ aiaccel/parameter.pyのHyperParameterクラスではnumpyのrandom.uniformを実
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:aiaccel/optimizer/custom_optimizer.py
+```python :aiaccel/optimizer/custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 import numpy as np
 
@@ -353,7 +353,7 @@ class RandomOptimizer(AbstractOptimizer):
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:custom_optimizer.py
+```python :custom_optimizer.py
             value = min(max(value, hp.lower), hp.upper)
 ```
 
@@ -397,7 +397,7 @@ muとsigmaが追加されました．
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:custom_optimizer.py
+```python :custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 import numpy as np
 
@@ -419,7 +419,7 @@ __init__メソッドを追加し，コンフィグレーションからmuとsigm
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
-```python:custom_optimizer.py
+```python :custom_optimizer.py
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 import numpy as np
 
@@ -490,16 +490,22 @@ objective_value =  self.storage.result.get_any_trial_objective(n)
 
 勾配降下法では，着目する試行におけるパラメータが与える目的関数の勾配を元に，次のパラメータを決定します．
 一次元の場合， $n$ 試行目のパラメータを $W_n$ とし，目的関数を $f(W_n)$ と書くと， $n+1$ 試行目のパラメータは
-$$W_{n+1} = W_n + \gamma f'(W_{n})$$
+
+$$ W_{n+1} = W_n + \gamma f'(W_{n}) $$
+
 となります．ここで， $\gamma$ は学習率 (パラメータの更新をどの程度行うかの指標)， $f'(W_n)$ は $W_n$ における目的関数の勾配です．
 
 
 ここでは $f$ の解析的な形が分からない場合に，勾配を差分で置き換えることを考えます．
 簡単のため，前進差分のみを考えると，差分を用いた勾配の近似式は
+
 $$f'(W_n) \approx \frac{f(W_n + \delta) - f(W_n) } { \delta }$$
+
 となります．
 従って $n + 1$ 試行目におけるパラメータは
+
 $$W_{n + 1} \approx W_n + \gamma \frac{f(W_n + \delta) - f(W_n) } { \delta }$$
+
 と近似できます．
 
 ### オプティマイザの実装

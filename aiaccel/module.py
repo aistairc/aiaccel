@@ -14,13 +14,16 @@ class AbstractModule(object):
     """An abstract class for Master, Optimizer and Scheduler.
 
     The procedure of this class is as follows:
-        1. At first, deserialize() is called.
-        2. start() is called.
-        3. pre_process() is called.
-        4. loop() is called.
-            4-1. in while loop, inner_loop_main_process() is called.
-            4-2. in while loop, loop_count is incremented.
-        5. call post_process()
+
+    1. At first, deserialize() is called.
+    2. start() is called.
+    3. pre_process() is called.
+    4. loop() is called.
+
+        | 4-1. in while loop, inner_loop_main_process() is called.
+        | 4-2. in while loop, loop_count is incremented.
+
+    5. call post_process()
 
     Attributes:
         config (ConfileWrapper): A config object.
