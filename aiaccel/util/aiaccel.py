@@ -17,7 +17,11 @@ class CommandLineArgs:
         self.parser = ArgumentParser()
         self.parser.add_argument('--trial_id', type=int, required=False)
         self.parser.add_argument('--config', type=str, required=False)
+        self.parser.add_argument('--use_db', type=bool, required=False,
+                                 default=False, nargs='?', const=True)
         self.args = self.parser.parse_known_args()[0]
+
+        self.use_db = self.args.use_db
 
         self.trial_id = None
         self.config_path = None
@@ -50,10 +54,12 @@ class CommandLineArgs:
                     self.parser.add_argument(f"--{name}", type=float)
             self.args = self.parser.parse_known_args()[0]
 
-    def get_xs(self) -> dict:
+    def get_xs_from_args(self) -> dict:
         xs = vars(self.args)
-        del xs["trial_id"]
-        del xs["config"]
+        delete_keys = ["trial_id", "config", "use_db"]
+        for key in delete_keys:
+            if key in xs.keys():
+                del xs[key]
 
         return xs
 
@@ -363,11 +369,31 @@ class Run:
         """
         params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
         if params is None:
-            return
+            return {}
 
         xs = {}
         for param in params:
             xs[param.param_name] = param.param_value
+
+        return xs
+
+    def _get_xs(self, trial_id: Union[int, None]) -> Optional[dict[str]]:
+        """Gets a parameter list  from Storage object or command line arguments.
+
+        Args:
+            trial_id (Union[int, None]): Trial ID.
+
+        Returns:
+            Optional[dict]: A dictionary of parameters. None if the parameter
+            specified by the given trial ID is not registered.
+        """
+
+        if self.args.use_db is True:
+            if trial_id is None:
+                raise ValueError("trial_id is not specified")
+            xs = self.get_any_trial_xs(trial_id=trial_id)
+        else:
+            xs = self.args.get_xs_from_args()
 
         return xs
 
@@ -516,8 +542,9 @@ class Run:
                 run = aiaccel.Run()
                 run.execute_and_report(func)
         """
+
         trial_id = self.args.trial_id
-        xs = self.args.get_xs()
+        xs = self._get_xs(trial_id)
         xs, y, err, start_time, end_time = self.execute(func, xs, y_data_type)
 
         self.report(trial_id, xs, y, err, start_time, end_time)
@@ -536,8 +563,9 @@ class Run:
             run = aiaccel.Run()
             run.execute_and_report("execute user_program")
         """
+
         trial_id = self.args.trial_id
-        xs = self.args.get_xs()
+        xs = self._get_xs(trial_id)
         xs, y, err, start_time, end_time = self.execute(command, xs, y_data_type)
 
         self.report(trial_id, xs, y, err, start_time, end_time)
@@ -564,13 +592,11 @@ class Run:
             if err != "":
                 self.storage.error.set_any_trial_error(trial_id, err)
         else:
-            print(
-                {
-                    'trial_id': trial_id,
-                    'params': xs,
-                    'objective': y,
-                    'error': err,
-                    'start_time': start_time,
-                    'end_time': end_time
-                }
-            )
+            print({
+                'trial_id': trial_id,
+                'params': xs,
+                'objective': y,
+                'error': err,
+                'start_time': start_time,
+                'end_time': end_time
+            })

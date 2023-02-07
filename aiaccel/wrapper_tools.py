@@ -30,6 +30,7 @@ def create_runner_command(
     commands.append(str(trial_id))
     commands.append('--config')
     commands.append(config_path)
+    commands.append('--use_db')
 
     for param in params:
         # Fix a bug related a negative exponential parameters

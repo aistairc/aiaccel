@@ -65,11 +65,6 @@ class AbstractModule(object):
         self.dict_hp_finished = self.ws / aiaccel.dict_hp_finished
         self.dict_storage = self.ws / aiaccel.dict_storage
 
-        # alive file
-        self.alive_master = self.dict_alive / aiaccel.alive_master
-        self.alive_optimizer = self.dict_alive / aiaccel.alive_optimizer
-        self.alive_scheduler = self.dict_alive / aiaccel.alive_scheduler
-
         self.logger = None
         self.fh = None
         self.ch = None

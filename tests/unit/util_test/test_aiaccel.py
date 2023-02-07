@@ -163,7 +163,7 @@ class TestCommandLineArgs(BaseTest):
 
         with patch.object(sys, 'argv', commandline_args):
             args = CommandLineArgs()
-            assert args.get_xs() == {
+            assert args.get_xs_from_args() == {
                 "x1": 0.1,
                 "x2": 0.2,
                 "x3": 0.3,
