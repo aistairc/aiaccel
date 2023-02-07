@@ -20,11 +20,11 @@ class TpeOptimizer(AbstractOptimizer):
     """An optimizer class based on optuna.samplers.TPESampler.
 
     Args:
-        options (dict[str, Union[str, int, bool]]): A dictionary
+        options (dict[str, str | int | bool]): A dictionary
             containing command line options.
 
     Attributes:
-        parameter_pool (dict[int, list[dict[str, Union[float, int, str]]]]):
+        parameter_pool (dict[int, list[dict[str, float | int | str]]]):
             A dictionary of parameters.
         parameter_list (list[HyperParameter]): A list of HyperParameter
             objects.
@@ -100,7 +100,7 @@ class TpeOptimizer(AbstractOptimizer):
 
         Args:
             number (int | None, optional): A number of generating parameters.
-            Defaults to 1.
+                Defaults to 1.
 
         Returns:
             list[dict[str, float | int | str]] | None: A list of created
@@ -145,7 +145,7 @@ class TpeOptimizer(AbstractOptimizer):
         """Generate initial parameters.
 
         Returns:
-            list[dict[str, float | int | str]] | None: A List of new
+            list[dict[str, float | int | str]] | None: A list of new
             parameters. None if `self.nelder_mead` is already defined.
         """
         enqueue_trial = {}

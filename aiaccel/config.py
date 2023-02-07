@@ -34,25 +34,23 @@ class BaseConfig(metaclass=ABCMeta):
 
 
 class JsonOrYamlObjectConfig(BaseConfig):
-    """
+    """A wrapper for confile to support json, yaml object.
+
     Fork by confile: https://github.com/777nancy/confile
+
+    Args:
+        config (dict): A json or yaml object
+        file_type (str): 'json_object' or 'yaml_object'.
     """
 
     def __init__(self, config: dict, file_type: str) -> None:
-        """A wrapper for confile to support json, yaml object.
-
-        Args:
-            config (dict): A json or yaml object
-            file_type (str): 'json_object' or 'yaml_object'
-        """
         if file_type in ['json_object', 'yaml_object']:
             self._config_dict = config
         else:
             raise TypeError(f'Unknown file type {file_type}')
 
     def get_property(self, key: str, *keys: str) -> str | list | dict | None:
-        """
-        Get a property for specified keys.
+        """Get a property for specified keys.
 
         Args:
             key (str): A key to get a property.
@@ -94,15 +92,13 @@ class ConfileWrapper(object):
     Thins wrapper class supports to load a configuration file in JSON object,
     JSON file and YAML format. It provides a simple method 'get' to get a
     property for the specified keys.
+
+    Args:
+        config (Any): A file path to configuration file.
+        config_type (str): A file path to default configuration file.
     """
 
     def __init__(self, config: Any, config_type: str) -> None:
-        """
-
-        Args:
-            config (Any): A file path to configuration file.
-            config_type (str): A file path to default configuration file.
-        """
         config_types = [
             'json_file',
             'yaml_file',

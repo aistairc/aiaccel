@@ -412,7 +412,7 @@ class Run:
         Args:
             command (str): An Execution command to calculate objective value.
             trial_id (int): Trial ID.
-            y_data_type (Optional[str]): Name of data type of objective value.
+            y_data_type (str | None): Name of data type of objective value.
 
         Returns:
             tuple[dict[str, float | int | str] | None, float | int | str | None, str]:

@@ -118,7 +118,7 @@ class OutputHandler(threading.Thread):
             None.
 
     Attributes:
-        _parent (Union[AbciMaster, AbstractMaster, LocalMaster]): A reference
+        _parent (AbciMaster | AbstractMaster | LocalMaster): A reference
             for the caller object.
         _proc (Popen): A reference for subprocess.Popen.
         _module_name (str): A module name which the subprocess is attached.

@@ -43,7 +43,7 @@ class Trial(Abstract):
             state (Literal['ready', 'running', 'finished'): Trial state.
 
         Returns:
-            list[int] | None: A List of trial ids. None if no trials match the
+            list[int] | None: A list of trial ids. None if no trials match the
             specified state.
         """
         with self.create_session() as session:

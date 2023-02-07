@@ -17,7 +17,7 @@ class AbstractVerification(object):
         options (dict[str, str | int | bool]): A dictionary containing
             command line options as well as process name.
 
-    Attribution:
+    Attributes:
         options (dict[str, str | int | bool]): A dictionary containing
             command line options as well as process name.
         config (Config): Config object
@@ -25,7 +25,7 @@ class AbstractVerification(object):
         dict_lock (Path): Path to "lock", i.e. `ws`/lock.
         is_verified (bool): Whether verified or not.
         finished_loop (int): The last loop number verified.
-        condition (list[dict[str, int | float]]): list of verification
+        condition (list[dict[str, int | float]]): A list of verification
             conditions. Each element dict has keys 'loop', 'minimum', and
             'maximum' with values as int, float, and float, respectively.
             The verification is `True` if the optimized result of which the

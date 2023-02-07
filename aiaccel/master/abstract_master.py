@@ -29,7 +29,6 @@ class AbstractMaster(AbstractModule):
         start_time (datetime.datetime): A stored starting time.
         verification (AbstractVerification): A verification object.
         logger (logging.Logger): Logger object.
-        verification (AbstractVerification): Verificator.
         goal (str): Goal of optimization ('minimize' or 'maximize').
         trial_number (int): The number of trials.
         runner_files (list):

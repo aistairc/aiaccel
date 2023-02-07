@@ -39,11 +39,11 @@ class NelderMead(object):
 
     Attributes:
         bdrys (np.ndarray): A list of boundaries.
-        coef (Dict[str, float]): A dictionary of coefficients.
+        coef (dict[str, float]): A dictionary of coefficients.
         f (np.ndarray): A list of evaluated parameter results.
         logger (logging.Logger): A logger object.
         params (list[HyperParameter]): A list of hyper parameters.
-        storage (Dict[str, float | None]): A dictionary to store temporal
+        storage (dict[str, float | None]): A dictionary to store temporal
             calculation results.
         y (np.ndarray): A list of current evaluated parameters.
         yc (float): A current centroid value of y.
@@ -54,7 +54,7 @@ class NelderMead(object):
         _fic (float): A temporal result of Inside Contraction.
         _foc (float): A temporal result of Outside Contraction.
         _fr (float): A temporal result of Reflection
-        _history (Dict[str, list[float | str]]): A storage of execution
+        _history (dict[str, list[float | str]]): A storage of execution
             history of each value and operator.
         _maximize (bool): Evaluate the result as maximize or minimize.
         _max_itr (int): A number of max iterations. This is compared with

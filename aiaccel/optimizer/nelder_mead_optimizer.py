@@ -32,7 +32,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """Generate initial parameters.
 
         Returns:
-            list[dict[str, float | int | str]] | None: A List of new
+            list[dict[str, float | int | str]] | None: A list of new
             parameters. None if `self.nelder_mead` is already defined.
         """
         initial_parameter = super().generate_initial_parameter()
@@ -276,11 +276,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 if param.name not in new_params.hps.keys():
                     assert False
                 new_params.hps[param.name] = HyperParameter({
-                        'name': param.name,
-                        'type': 'ordinal',
-                        'lower': 0,
-                        'upper': len(param.sequence) - 1,
-                        'sequence': param.sequence
-                    })
+                    'name': param.name,
+                    'type': 'ordinal',
+                    'lower': 0,
+                    'upper': len(param.sequence) - 1,
+                    'sequence': param.sequence
+                })
 
         return new_params

@@ -521,7 +521,7 @@ class Job:
 
         - c (int): A loop counter.
 
-        - scheduler (Union[LocalScheduler, AbciScheduler]):
+        - scheduler (LocalScheduler | AbciScheduler):
             A reference for scheduler object.
 
         - hp_file (Path): A hyper parameter file for this job.
@@ -640,7 +640,7 @@ class Job:
         """Get a current state name.
 
         Returns:
-            Union[str, Enum]: A current state name.
+            str | Enum: A current state name.
         """
         state = self.get_state()
         return state.name
