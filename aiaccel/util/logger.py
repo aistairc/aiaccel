@@ -5,10 +5,10 @@ def str_to_logging_level(s: str) -> int:
     """Convert from a input string to a logging level.
 
     Args:
-        s(str): A string that specify a logging level.
+        s (str): A string that specify a logging level.
 
     Returns:
-        (int): It returns a logging level.
+        int: It returns a logging level.
 
     Raises:
         ValueError: Causes when an invalid argument s is given.

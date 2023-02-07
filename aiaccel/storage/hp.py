@@ -1,4 +1,7 @@
-from typing import Any, Union
+from __future__ import annotations
+
+from typing import Any
+from pathlib import PosixPath
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -8,7 +11,7 @@ from aiaccel.util.retry import retry
 
 
 class Hp(Abstract):
-    def __init__(self, file_name) -> None:
+    def __init__(self, file_name: PosixPath) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -63,14 +66,14 @@ class Hp(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_params(self, trial_id: int) -> Union[None, list]:
+    def get_any_trial_params(self, trial_id: int) -> list[HpTable] | None:
         """ Obtain the set parameter information for any given trial.
 
         Args:
             trial_id(int): Any trial id.
 
         Returns:
-            list[HpTable]
+            list[HpTable] | None:
         """
         with self.create_session() as session:
             hp = (
