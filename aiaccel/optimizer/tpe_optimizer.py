@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import Optional, Union
+
+import optuna
 
 import aiaccel.parameter
-import optuna
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -20,11 +20,11 @@ class TpeOptimizer(AbstractOptimizer):
     """An optimizer class based on optuna.samplers.TPESampler.
 
     Args:
-        options (dict[str, Union[str, int, bool]]): A dictionary
+        options (dict[str, str | int | bool]): A dictionary
             containing command line options.
 
     Attributes:
-        parameter_pool (dict[int, list[dict[str, Union[float, int, str]]]]):
+        parameter_pool (dict[int, list[dict[str, float | int | str]]]):
             A dictionary of parameters.
         parameter_list (list[HyperParameter]): A list of HyperParameter
             objects.
@@ -37,13 +37,7 @@ class TpeOptimizer(AbstractOptimizer):
         randseed (int): Random seed.
     """
 
-    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
-        """Initial method of TpeOptimizer.
-
-        Args:
-            options (dict[str, Union[str, int, bool]]): A dictionary
-                containing command line options.
-        """
+    def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
         self.parameter_pool = {}
         self.parameter_list = []
@@ -99,17 +93,18 @@ class TpeOptimizer(AbstractOptimizer):
         return self.num_of_generated_parameter < n_startup_trials
 
     def generate_parameter(
-        self, number: Optional[int] = 1
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+        self,
+        number: int | None = 1
+    ) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
         Args:
-            number (Optional[int]): A number of generating parameters. Defaults
-                to 1.
+            number (int | None, optional): A number of generating parameters.
+                Defaults to 1.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A list of
-            created parameters.
+            list[dict[str, float | int | str]] | None: A list of created
+            parameters.
         """
         self.check_result()
         self.logger.debug(
@@ -146,11 +141,11 @@ class TpeOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(
         self
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+    ) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A List of new
+            list[dict[str, float | int | str]] | None: A list of new
             parameters. None if `self.nelder_mead` is already defined.
         """
         enqueue_trial = {}
@@ -204,6 +199,10 @@ def create_distributions(
         parameters(aiaccel.parameter.HyperParameterConfiguration): A
             parameter configuration object.
 
+    Raises:
+        ValueError: Occurs when parameter type is other than 'float', 'int',
+            'categorical', or 'ordinal'.
+
     Returns:
         (dict): An optuna.distributions object.
     """
@@ -211,19 +210,20 @@ def create_distributions(
 
     for p in parameters.get_parameter_list():
         if p.type.lower() == 'float':
-            if p.log:
-                distributions[p.name] = optuna.distributions.LogUniformDistribution(p.lower, p.upper)
-            else:
-                distributions[p.name] = optuna.distributions.UniformDistribution(p.lower, p.upper)
+            distributions[p.name] = optuna.distributions.FloatDistribution(
+                p.lower, p.upper, log=p.log
+            )
 
         elif p.type.lower() == 'int':
-            if p.log:
-                distributions[p.name] = optuna.distributions.IntLogUniformDistribution(p.lower, p.upper)
-            else:
-                distributions[p.name] = optuna.distributions.IntUniformDistribution(p.lower, p.upper)
+            distributions[p.name] = optuna.distributions.IntDistribution(
+                p.lower, p.upper, log=p.log
+            )
 
         elif p.type.lower() == 'categorical':
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
+
+        elif p.type.lower() == 'ordinal':
+            distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
 
         else:
             raise 'Unsupported parameter type'

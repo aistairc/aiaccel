@@ -1,7 +1,8 @@
+from __future__ import annotations
 import logging
-from typing import Dict, List, Optional, Union
 
 import numpy as np
+
 from aiaccel.parameter import HyperParameter
 from aiaccel.util.name import generate_random_name
 
@@ -19,33 +20,41 @@ STATES = [
     'WaitShrink'
 ]
 
-hptype = Union[
-    List[Dict[str, Union[str, Union[float, List[float]]]]],
-    None
-]
-
 
 class NelderMead(object):
     """A class implementing Nelder-Mead method.
 
+    Args:
+        params (list[HyperParameter]): A list of hyper parameter objects.
+        iteration (float | None, optional): A max iteration counts.
+            Defaults to float('inf').
+        coef (dict | None, optional): A coefficient values. Defaults to None.
+        maximize (bool | None, optional): Evaluate maximize or not. Defaults
+            to False.
+        initial_parameters (list[dict[str, str  |  float  |  list[float]]] | None, optional):
+            A initial parameters. Defaults to None.
+        rng (np.random.RandomState | None, optional): A reference to a random
+            generator. Defaults to None.
+
+
     Attributes:
         bdrys (np.ndarray): A list of boundaries.
-        coef (Dict[str, float]): A dictionary of coefficients.
+        coef (dict[str, float]): A dictionary of coefficients.
         f (np.ndarray): A list of evaluated parameter results.
         logger (logging.Logger): A logger object.
-        params (List[HyperParameter]): A list of hyper parameters.
-        storage (Dict[str, Union[float, None]]): A dictionary to store temporal
+        params (list[HyperParameter]): A list of hyper parameters.
+        storage (dict[str, float | None]): A dictionary to store temporal
             calculation results.
         y (np.ndarray): A list of current evaluated parameters.
         yc (float): A current centroid value of y.
         _evaluated_itr (int): A count of evaluation each loop.
-        _executing (List[dict]): A list to store candidates to be executed.
+        _executing (list[dict]): A list to store candidates to be executed.
         _executing_index (int): A number to be added to executing list.
         _fe (float): A temporal result of Expand.
         _fic (float): A temporal result of Inside Contraction.
         _foc (float): A temporal result of Outside Contraction.
         _fr (float): A temporal result of Reflection
-        _history (Dict[str, List[Union[float, str]]]): A storage of execution
+        _history (dict[str, list[float | str]]): A storage of execution
             history of each value and operator.
         _maximize (bool): Evaluate the result as maximize or minimize.
         _max_itr (int): A number of max iterations. This is compared with
@@ -53,33 +62,24 @@ class NelderMead(object):
         _num_shrink (int): A number of Shrink.
         _out_of_boundary (bool): Is a current iteration out of boundaries or
             not.
-        _result (List[float]): A list of results for _executing.
+        _result (list[float]): A list of results for _executing.
         _state (str): A current state.
         _total_itr (int): A number of iterations. Currently same with
             _evaluated_itr. It's different if counts out of boundaries.
 
-    ToDo: Fix float comparison errors.
+    Todo:
+        Fix float comparison errors.
     """
 
     def __init__(
         self,
-        params: List[HyperParameter],
-        iteration: Optional[float] = float('inf'),
-        coef: Optional[Union[dict, None]] = None,
-        maximize: Optional[bool] = False,
-        initial_parameters: Optional[hptype] = None,
-        rng: np.random.RandomState = None
+        params: list[HyperParameter],
+        iteration: float | None = float('inf'),
+        coef: dict | None = None,
+        maximize: bool | None = False,
+        initial_parameters: list[dict[str, str | float | list[float]]] | None = None,
+        rng: np.random.RandomState | None = None
     ) -> None:
-        """Initial method of NelderMead.
-
-        Args:
-            -params: A list of hyper parameter objects.
-            -iteration: A max iteration counts.
-            -coef: A coefficient values.
-            -maximize: Evaluate maximize or not.
-            -initial_parameters: A initial parameters.
-            rng(np.random.RandomState): A reference to a random generator.
-        """
         if coef is None:
             coef = {"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
 
@@ -121,7 +121,11 @@ class NelderMead(object):
         for y in self.y:
             self._add_executing(y)
 
-    def _create_initial_values(self, initial_parameters) -> list:
+    def _create_initial_values(
+        self,
+        initial_parameters: list[dict[str, int | np.integer | float |
+                                      np.floating | list[int | np.integer | float | np.floating | str]]]
+    ) -> np.ndarray:
         initial_values = [
             [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
             for num_of_initials in range(self.n_dim + 1)
@@ -129,27 +133,39 @@ class NelderMead(object):
 
         return np.array(initial_values)
 
-    def _create_initial_value(self, initial_parameters, dim, num_of_initials):
+    def _create_initial_value(
+        self,
+        initial_parameters: list[
+            dict[str, int | np.integer | float | np.floating | list[int | np.integer | float | np.floating | str]]],
+        dim: int,
+        num_of_initials: int
+    ) -> int | np.integer | float | np.floating | list[int | np.integer | float | np.floating | str]:
         if initial_parameters is not None:
-            if type(initial_parameters[dim]['value']) in [int, float, np.float64]:
+            if isinstance(initial_parameters[dim]['value'], (int, float, np.integer, np.floating)):
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
 
             if type(initial_parameters[dim]['value']) is not list:
-                print(initial_parameters)
-                print(type(initial_parameters[dim]['value']))
                 raise TypeError('Default parameter should be set as list.')
 
             if num_of_initials < len(initial_parameters[dim]['value']):
-                return initial_parameters[dim]['value'][num_of_initials]
+                val = initial_parameters[dim]['value'][num_of_initials]
+                if self.params[dim].type.lower() == 'ordinal':
+                    val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
+                return val
             else:
-                return self.params[dim].sample(rng=self._rng)['value']
-
+                val = self.params[dim].sample(rng=self._rng)['value']
+                if self.params[dim].type.lower() == 'ordinal':
+                    val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
+                return val
         else:
-            return self.params[dim].sample(rng=self._rng)['value']
+            val = self.params[dim].sample(rng=self._rng)['value']
+            if self.params[dim].type.lower() == 'ordinal':
+                val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
+            return val
 
     def _add_executing(
         self, y: np.ndarray,
-        index: Optional[int] = None
+        index: int | None = None
     ) -> None:
         """Add a parameter set to an execution candidate.
 
@@ -212,11 +228,11 @@ class NelderMead(object):
             self._history['evaluated_y'].append(self.y)
         self._history['total_y'].append(self.y)
 
-    def _pop_result(self) -> Union[dict, None]:
+    def _pop_result(self) -> dict | None:
         """Pop a result.
 
         Returns:
-            Union[dict, None]: It returns a result if exists. Otherwise, it
+            dict | None: It returns a result if exists. Otherwise, it
                 returns None.
 
         Raises:
@@ -268,11 +284,11 @@ class NelderMead(object):
 
         self._state = state
 
-    def _wait_initialize(self, results: List[dict]) -> None:
+    def _wait_initialize(self, results: list[dict]) -> None:
         """Wait first parameter results are finished.
 
         Args:
-            results (List[dict]): A list of execution results.
+            results (list[dict]): A list of execution results.
 
         Returns:
             None
@@ -294,11 +310,11 @@ class NelderMead(object):
         self._centroid()
         self._reflect()
 
-    def _wait_reflect(self, results: List[dict]) -> None:
+    def _wait_reflect(self, results: list[dict]) -> None:
         """Wait Reflect calculations are finished.
 
         Args:
-            results (List[dict]): A list of execution results.
+            results (list[dict]): A list of execution results.
 
         Returns:
             None
@@ -327,11 +343,11 @@ class NelderMead(object):
         else:  # pragma: no cover
             pass  # not reached
 
-    def _wait_expand(self, results: List[dict]) -> None:
+    def _wait_expand(self, results: list[dict]) -> None:
         """Wait 'Expand' executions finished.
 
         Args:
-            results (List[dict]): A list of execution results.
+            results (list[dict]): A list of execution results.
 
         Returns:
             None
@@ -355,11 +371,11 @@ class NelderMead(object):
             self.f[-1] = self._fr
         self._finalize()
 
-    def _wait_outside_contract(self, results: List[dict]) -> None:
+    def _wait_outside_contract(self, results: list[dict]) -> None:
         """Wait the 'OutsideContract' execution finished.
 
         Args:
-            results (List[dict]): A list of execution results.
+            results (list[dict]): A list of execution results.
 
         Returns:
             None
@@ -382,11 +398,11 @@ class NelderMead(object):
         else:
             self._shrink()
 
-    def _wait_inside_contract(self, results: List[dict]) -> None:
+    def _wait_inside_contract(self, results: list[dict]) -> None:
         """Wait the 'InsideContract' execution finished.
 
         Args:
-            results (List[dict]): A list of execution results.
+            results (list[dict]): A list of execution results.
 
         Returns:
             None
@@ -410,11 +426,11 @@ class NelderMead(object):
         else:
             self._shrink()
 
-    def _wait_shrink(self, results) -> None:
+    def _wait_shrink(self, results: list[dict]) -> None:
         """Wait the 'Shrink' execution finished.
 
         Args:
-            results (List[dict]): A list of execution results.
+            results (list[dict]): A list of execution results.
 
         Returns:
             None
@@ -574,7 +590,7 @@ class NelderMead(object):
         """
         self._result.append(result)
 
-    def search(self) -> Union[List[dict], None]:
+    def search(self) -> list[dict] | None:
         """Proceed a search step. One search method does not increment the
             iteration. It increments when finalize method is called.
 

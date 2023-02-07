@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import shutil
-from typing import Union
 
 import numpy as np
 from asciichartpy import (black, blue, cyan, darkgray, green, lightblue,
@@ -9,11 +10,14 @@ from asciichartpy import (black, blue, cyan, darkgray, green, lightblue,
 
 
 class EasyVisualizer:
-    """
-        Example:
-            cplt = EasyVisualizer()
-            cplt.set_colors(["red"])
-            cplt.line_plot([values: list])
+    """Visualizer
+
+    Example:
+     ::
+
+        cplt = EasyVisualizer()
+        cplt.set_colors(["red"])
+        cplt.line_plot([values: list])
     """
 
     def __init__(self):
@@ -83,11 +87,11 @@ class EasyVisualizer:
         """ Set the color of line graph.
 
         Args:
-            colors (list): The number of list item is
-                            same as the number of line.
+            colors (list): The number of list item is same as the number of
+                line.
 
         Raises:
-            Exception is thrown when an out-of-target color is specified.
+            Exception: An out-of-target color is specified.
         """
         if not type(colors) == list:
             raise Exception
@@ -100,7 +104,10 @@ class EasyVisualizer:
                 raise Exception
 
     def caption(self, *labels: tuple) -> None:
-        """ Set the any caption.
+        """Set the any caption.
+
+        Args:
+            labels (tuple):
         """
         labels = list(labels)[0]
         for i in range(len(labels)):
@@ -108,13 +115,13 @@ class EasyVisualizer:
             print(f'{color}{list(labels)[i]}{reset}')
 
     def line_plot(self, *data: tuple) -> None:
-        """ Plot the any datas.
+        """ Plot the any data.
 
         Args:
-            *data (tuple): Target datas.
+            data (tuple): Target data.
 
         Note:
-            *data = ([plot_data_1[], plot_data_2[],...)
+            data = ([plot_data_1[], plot_data_2[],...)
         """
         terminal_size = shutil.get_terminal_size().columns
         plot_width_max = terminal_size - 15
@@ -154,7 +161,7 @@ class EasyVisualizer:
                 self.plot_datas.append(data[i])
         print(plot(series=self.plot_datas, cfg=self.plot_config))
 
-    def sort(self, data: list, goal: str) -> Union[list, None]:
+    def sort(self, data: list, goal: str) -> list | None:
         """ Sort the any data to maximize or minimize.
 
         Args:
@@ -190,7 +197,7 @@ class EasyVisualizer:
             print(f"min_value:{min_value}")
 
         else:
-            """Usually Not reached."""
+            # Usually Not reached.
             pass
 
         return best_values

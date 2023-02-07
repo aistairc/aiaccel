@@ -1,6 +1,6 @@
+from __future__ import annotations
 import pathlib
 import shutil
-from typing import Union
 
 import aiaccel
 from aiaccel.util import filesystem as fs
@@ -9,6 +9,35 @@ from aiaccel.util.suffix import Suffix
 
 
 class Workspace:
+    """Provides interface to workspace.
+
+    Args:
+        base_path (str): Path to the workspace.
+
+    Attributes:
+        path (Path): Path to the workspace.
+        alive (Path): Path to "alive", i.e. `path`/alive.
+        error (Path): Path to "error", i.e. 'path`/error.
+        hp (Path): Path to "hp", i.e. `path`/hp.
+        hp_ready (Path): Path to "ready", i.e. `path`/hp/ready.
+        hp_running (Path): Path to "running", i.e. `path`/hp/running.
+        hp_finished (Path): Path to "finished", i.e. `path`/hp/finished.
+        jobstate (Path): Path to "jobstate", i.e. `path`/jobstate.
+        lock (Path): Path to "lock", i.e. `path`/lock.
+        log (Path): Path to "log", i.e. `path`/log.
+        output (Path): Path to "abci_output", i.e. `path`/abci_output.
+        pid (Path): Path to "pid", i.e. `path`/pid.
+        result (Path): Path to "result", i.e. `path`/result.
+        runner (Path): Path to "runner", i.e. `path`/runner.
+        storage (Path): Path to "storage", i.e. `path`/storage.
+        timestamp (Path): Path to "timestamp", i.e. `path`/timestamp.
+        verification (Path): Path to "verification", i.e. `path`/verification.
+        consists (list[Path]): A list of pathes under the workspace.
+        results (Path): Path to the results which is prepared in the execution
+            directory, i.e. "./results".
+
+    """
+
     def __init__(self, base_path: str):
         self.path = pathlib.Path(base_path).resolve()
 
@@ -56,8 +85,8 @@ class Workspace:
             None
 
         Raises:
-            NotADirectoryError: It raises if a workspace argument (self.path) is
-            not a directory.
+            NotADirectoryError: It raises if a workspace argument (self.path)
+                is not a directory.
         """
         if self.exists():
             return False
@@ -68,7 +97,12 @@ class Workspace:
         )
         return True
 
-    def exists(self):
+    def exists(self) -> bool:
+        """Returns whether workspace exists or not.
+
+        Returns:
+            bool: True if the workspace exists.
+        """
         return self.path.exists()
 
     @retry(_MAX_NUM=300, _DELAY=1.0)
@@ -97,8 +131,15 @@ class Workspace:
         return True
 
     @retry(_MAX_NUM=10, _DELAY=1.0)
-    def move_completed_data(self) -> Union[None, pathlib.PosixPath]:
+    def move_completed_data(self) -> pathlib.PosixPath | None:
         """ Move workspace to under of results directory when finished.
+
+        Raises:
+            FileExistsError: Occurs if destination directory already exists
+                when the method is called.
+
+        Returns:
+            PosixPath | None: Path of destination.
         """
 
         dst = self.results / Suffix.date()
@@ -108,5 +149,7 @@ class Workspace:
         if dst.exists():
             raise FileExistsError
 
-        shutil.copytree(self.path, dst)
+        ignptn = shutil.ignore_patterns('*-journal')
+
+        shutil.copytree(self.path, dst, ignore=ignptn)
         return dst

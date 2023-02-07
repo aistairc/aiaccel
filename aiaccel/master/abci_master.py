@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import subprocess
 
 import aiaccel
@@ -10,17 +12,16 @@ from aiaccel.util.retry import retry
 class AbciMaster(AbstractMaster):
     """A master class running on ABCI environment.
 
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options.
+
     Attributes:
-        runner_files (List[Path]): A list of path of runner files.
-        stats (Anystr): A result string of 'qstat' command.
+        runner_files (list[Path]): A list of path of runner files.
+        stats (list[dict]): A result string of 'qstat' command.
     """
 
-    def __init__(self, options: dict) -> None:
-        """Initial method of AbciMaster.
-
-        Args:
-            config (str): A file name of a configuration.
-        """
+    def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
         self.runner_files = []
         self.stats = []
