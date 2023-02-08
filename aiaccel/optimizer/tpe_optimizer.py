@@ -67,18 +67,12 @@ class TpeOptimizer(AbstractOptimizer):
             self.resume_trial()
 
         self.create_study()
-        self.logger.debug('---DataFrame before run')
-        df = self.study.trials_dataframe(attrs=("number", "value", "params", "state"))
-        self.logger.debug(df)
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
         """
         self.check_result()
         super().post_process()
-        self.logger.debug('---DataFrame after run')
-        df = self.study.trials_dataframe(attrs=("number", "value", "params", "state"))
-        self.logger.debug(df)
 
     def check_result(self) -> None:
         """Check the result files and add it to sampler object.
