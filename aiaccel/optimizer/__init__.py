@@ -11,5 +11,5 @@ __all__ = [
     SobolOptimizer,
     NelderMeadOptimizer,
     TpeOptimizer,
-    MOTpeOptimizer,
+    MOTpeOptimizer
 ]

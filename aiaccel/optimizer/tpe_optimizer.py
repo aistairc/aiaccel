@@ -60,7 +60,8 @@ class TpeOptimizer(AbstractOptimizer):
 
         self.parameter_list = self.params.get_parameter_list()
         self.create_study()
-        self.distributions = create_distributions(self.params)
+        if self.distributions is None:
+            self.distributions = create_distributions(self.params)
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
@@ -80,14 +81,14 @@ class TpeOptimizer(AbstractOptimizer):
             objective = self.storage.result.get_any_trial_objective(trial_id)
             if objective is not None:
                 trial = self.trial_pool[trial_id]
-                self.study.tell(trial, objective)
+                self.study.tell(trial, objective, skip_if_finished=True)
                 del_keys.append(trial_id)
 
         for key in del_keys:
             self.parameter_pool.pop(key)
             self.logger.info(f'trial_id {key} is deleted from parameter_pool')
 
-        self.logger.debug(f'current pool {[k for k, v in self.parameter_pool.items()]}')
+        self.logger.debug(f'end check_result current pool {[k for k, v in self.parameter_pool.items()]}')
 
     def is_startup_trials(self) -> bool:
         """Is a current trial startup trial or not.
@@ -123,9 +124,6 @@ class TpeOptimizer(AbstractOptimizer):
         ):
             return None
 
-        if len(self.parameter_pool) >= self.config.num_node.get():
-            return None
-
         new_params = []
         trial = self.study.ask(self.distributions)
 
@@ -140,7 +138,7 @@ class TpeOptimizer(AbstractOptimizer):
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        self.logger.info(f'new parameter {trial_id} is added to parameter_pool')
 
         return new_params
 
@@ -178,7 +176,7 @@ class TpeOptimizer(AbstractOptimizer):
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        self.logger.info(f'new initial parameter {trial_id} is added to parameter_pool')
         return new_params
 
     def create_study(self) -> None:
@@ -187,13 +185,18 @@ class TpeOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        if self.study is None:
-            self.study = optuna.create_study(
-                sampler=TPESamplerWrapper(seed=self.randseed),
-                study_name=self.study_name,
-                direction=self.config.goal.get().lower()
-            )
+        storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
+        storage = optuna.storages.RDBStorage(url=storage_path)
+        load_if_exists = self.options['resume'] is not None
 
+        self.study = optuna.create_study(
+            sampler=TPESamplerWrapper(seed=self.randseed),
+            storage=storage,
+            study_name=self.study_name,
+            load_if_exists=load_if_exists,
+            direction=self.config.goal.get().lower()
+        )
+        self.study._rng = self._rng
 
 def create_distributions(
         parameters: aiaccel.parameter.HyperParameterConfiguration
