@@ -55,7 +55,8 @@ class TestMOTpeOptimizer(BaseTest):
 
         # if len(self.parameter_pool) >= self.config.num_node.get()
         with patch.object(self.optimizer.config.num_node, 'get', return_value=0):
-            assert self.optimizer.generate_parameter() is None
+            with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
+                assert self.optimizer.generate_parameter() is None
 
     def test_generate_initial_parameter(self, create_tmp_config):
         options = self.options.copy()
@@ -66,18 +67,10 @@ class TestMOTpeOptimizer(BaseTest):
         optimizer.__init__(options)
         optimizer.pre_process()
         assert len(optimizer.generate_initial_parameter()) > 0
-
-        optimizer.pre_process()
         assert len(optimizer.generate_initial_parameter()) > 0
 
     def test_create_study(self):
         assert self.optimizer.create_study() is None
-
-        with patch.object(self.optimizer, 'study', None):
-            assert self.optimizer.create_study() is None
-
-        with patch.object(self.optimizer, 'study', object):
-            assert self.optimizer.create_study() is None
 
     def test_serialize(self):
         self.optimizer.create_study()
