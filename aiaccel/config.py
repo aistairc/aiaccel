@@ -1,10 +1,11 @@
+from __future__ import annotations
 import copy
 import os
 import sys
 from abc import ABCMeta, abstractmethod
 from logging import StreamHandler, getLogger
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 import confile
 
@@ -33,35 +34,32 @@ class BaseConfig(metaclass=ABCMeta):
 
 
 class JsonOrYamlObjectConfig(BaseConfig):
-    """
+    """A wrapper for confile to support json, yaml object.
+
     Fork by confile: https://github.com/777nancy/confile
+
+    Args:
+        config (dict): A json or yaml object
+        file_type (str): 'json_object' or 'yaml_object'.
     """
 
     def __init__(self, config: dict, file_type: str) -> None:
-        """A wrapper for confile to support json, yaml object.
-
-        Args:
-            config (dict): A json or yaml object
-            file_type (str): 'json_object' or 'yaml_object'
-        """
         if file_type in ['json_object', 'yaml_object']:
             self._config_dict = config
         else:
             raise TypeError(f'Unknown file type {file_type}')
 
-    def get_property(self, key: str, *keys: str) ->\
-            Union[str, list, dict, None]:
-        """
-        Get a property for specified keys.
+    def get_property(self, key: str, *keys: str) -> str | list | dict | None:
+        """Get a property for specified keys.
 
         Args:
             key (str): A key to get a property.
             *keys (str): Keys to get a property.
 
         Returns:
-            Union[str, list, dict, None]: A property for the keys.
+            str | list | dict | None: A property for the keys.
         """
-        if type(self._config_dict) is list:
+        if isinstance(self._config_dict, list):
             return None
 
         sub_config_dict = self._config_dict.get(key)
@@ -94,15 +92,13 @@ class ConfileWrapper(object):
     Thins wrapper class supports to load a configuration file in JSON object,
     JSON file and YAML format. It provides a simple method 'get' to get a
     property for the specified keys.
+
+    Args:
+        config (Any): A file path to configuration file.
+        config_type (str): A file path to default configuration file.
     """
 
     def __init__(self, config: Any, config_type: str) -> None:
-        """
-
-        Args:
-            config (Any): A file path to configuration file.
-            config_type (str): A file path to default configuration file.
-        """
         config_types = [
             'json_file',
             'yaml_file',
@@ -117,7 +113,7 @@ class ConfileWrapper(object):
         elif config_type in ['json_object', 'yaml_object']:
             self.config = JsonOrYamlObjectConfig(config, config_type)
 
-    def get(self, key: str, *keys: str) -> Union[str, list, dict, None]:
+    def get(self, key: str, *keys: str) -> str | list | dict | None:
         """Get a property with specified keys.
 
         Args:
@@ -125,7 +121,7 @@ class ConfileWrapper(object):
             *keys (list): Nested eys for the property
 
         Returns:
-            Union[str, list, dict, None]: A property for the specified keys.
+            str | list | dict | None: A property for the specified keys.
         """
         p = self.config.get_property(key, *keys)
         return p
@@ -159,6 +155,15 @@ class ConfigEntry:
     """ A class for defining values in a configuration file \
         or for holding read values.
 
+    Args:
+        config_path (str): A path of configuration file.
+        type (list): A data type.
+        default (Any): A default value.
+        warning (bool): A flag of print a warning or not.
+        group (str): A name of the group to which the parameter belongs.
+        keys (tuple): A key to access the value For example,
+            a parameter under 'generic' would be written as ('generic')
+
     Example:
         ::
 
@@ -181,22 +186,8 @@ class ConfigEntry:
         default: Any,
         warning: bool,
         group: str,
-        keys: tuple
+        keys: list | tuple | str
     ) -> None:
-        """
-        Args:
-            config_path (str): A path of configuration file.
-            type (list): A data type.
-            default (any): A default value.
-            warning (bool): A flag of print a warning or not.
-            group (str): A name of the group to which the parameter belongs.
-            keys (tuple): A key to access the value For example,
-                a parameter under 'generic' would be written as ('generic')
-
-        Returns:
-            None
-
-        """
         self.config = config
         self.group = group
         self.type = type
@@ -231,7 +222,7 @@ class ConfigEntry:
         """ If the default value is used, a warning is displayed.
         """
         if self.warning:
-            item = []
+            item: list[Any] = []
             item.append(self.group)
             if (
                 type(self.keys) is list or
@@ -242,9 +233,8 @@ class ConfigEntry:
             else:
                 item.append(self.keys)
 
-            item = ".".join(item)
             logger.warning(
-                f"{item} is not found in the configuration file, "
+                f"{'.'.join(item)} is not found in the configuration file, "
                 f"the default value will be applied.(default: {self.default})"
             )
 
@@ -279,7 +269,7 @@ class ConfigEntry:
             self.set(value)
             self.read_values_from_config_file = True
 
-    @property
+    @ property
     def Value(self):
         return self._value
 
@@ -326,9 +316,9 @@ _DEFAULT_ABCI_GROUP = ""
 _DEFAULT_JOB_EXECUTION_OPTIONS = ""
 _DEFAULT_GOAL = "minimize"
 _DEFAULT_MAX_TRIAL_NUMBER = 0
-_DEFAULT_HYPERPARAMETERS = []
+_DEFAULT_HYPERPARAMETERS: list = []
 _DEFAULT_IS_VERIFIED = False
-_DEFAULT_VERIFI_CONDITION = []
+_DEFAULT_VERIFI_CONDITION: list = []
 _DEFAULT_RANDOM_SCHESULING = True
 _DEFAULT_SOBOL_SCRAMBLE = True
 _DEFAULT_PYTHON_FILE = ""
@@ -336,26 +326,32 @@ _DEFAULT_FUNCTION = ""
 
 
 class Config:
-    """ A Class for defining the configuration of a configuration file.
+    """Defines the configuration of a configuration file.
+
+    Args:
+        config_path (str | Path): A path of configuration file.
+        warn (bool, optional): A flag of print a warning or not. Defaults to
+            False.
+        format_check (bool, optional): A flag of do tha check format or not.
+            Defaults to None.
+
+    Attributes:
+        config_path (Path): Path to the configuration file.
+        config (ConfileWrapper):
+        workspace (ConfigEntry):
     """
 
     def __init__(
         self,
-        config_path: str,
-        warn=False,
-        format_check=False
+        config_path: str | Path,
+        warn: bool = False,
+        format_check: bool = False
     ):
-        """
-        Args:
-            config_path (str): A path of configuration file.
-            warn (bool): A flag of print a warning or not.
-            format_check (bool): A flag of do tha check format or not.
-        """
         self.config_path = Path(config_path).resolve()
         if not self.config_path.exists():
             logger.error(f"config file: {config_path} doesn't exist.")
 
-        self.config = load_config(self.config_path)
+        self.config = load_config(config_path)
         self.define_items(self.config, warn)
         if format_check:
             self.workspace.empty_if_error()
@@ -370,8 +366,13 @@ class Config:
                     sys.exit()
             # self.hps_format_check()
 
-    def define_items(self, config: ConfileWrapper, warn: bool):
+    def define_items(self, config: ConfileWrapper, warn: bool) -> None:
         """ Define the configuration of the configuration file
+
+        Args:
+            config (ConfileWrapper):
+            warn (bool): A flag of print a warning or not. Defaults to
+                False.
         """
         self.workspace = ConfigEntry(
             config=config,

@@ -1,6 +1,6 @@
 import csv
 import os
-import pathlib
+from pathlib import Path
 from logging import StreamHandler, getLogger
 
 from fasteners import InterProcessLock
@@ -15,9 +15,23 @@ logger.addHandler(StreamHandler())
 
 
 class CreationReport:
-    def __init__(self, config_path: str):
+    """Provides report creation method.
+
+    Args:
+        config_path (str): Path to the config file.
+
+    Attributes:
+        config (Config): Config object.
+        ws (Path): Directory path to the workspace.
+        fp (Path): File path to the csv file named 'results.csv'.
+        trialid (TrialId): TrialId object.
+        storage (Storage): Storage object related to the workspace.
+        lock_file (dict[str, str]): Dict object containing string path to lock.
+    """
+
+    def __init__(self, config_path: str) -> None:
         self.config = Config(config_path)
-        self.ws = pathlib.Path(self.config.workspace.get()).resolve()
+        self.ws = Path(self.config.workspace.get()).resolve()
         self.fp = self.ws / 'results.csv'
         self.trialid = TrialId(str(config_path))
         self.storage = Storage(self.ws)
@@ -25,20 +39,30 @@ class CreationReport:
             'result_txt': str(self.ws / 'lock' / 'result_txt')
         }
 
-    def get_zero_padding_trial_id(self, trial_id: int):
+    def get_zero_padding_trial_id(self, trial_id: int) -> str:
+        """Gets string of trial id padded by zeros.
+
+        Args:
+            trial_id (int): Target trial id.
+
+        Returns:
+            str: Trial id padded by zeros.
+        """
         return self.trialid.zero_padding_any_trial_id(trial_id)
 
-    def create(self):
+    def create(self) -> None:
+        """Creates repoprt.
+        """
         data = []
         header = []
 
-        finished = self.storage.trial.get_finished()
-        if len(finished) == 0:
-            logger.info('No data.')
+        trial_ids = self.storage.trial.get_all_trial_id()
+
+        if trial_ids is None or len(trial_ids) == 0:
             return
 
         # write header
-        example = self.storage.get_hp_dict(finished[0])
+        example = self.storage.get_hp_dict(trial_ids[0])
         header.append('trial_id')
         for param in example['parameters']:
             header.append(param['parameter_name'])
@@ -50,7 +74,7 @@ class CreationReport:
                 writer.writerow(header)
 
         # write result data
-        trial_id_str = [self.get_zero_padding_trial_id(trial_id) for trial_id in finished]
+        trial_id_str = [self.get_zero_padding_trial_id(trial_id) for trial_id in trial_ids]
         results = [self.storage.get_hp_dict(n) for n in trial_id_str]
 
         for contents in results:

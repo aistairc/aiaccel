@@ -24,15 +24,18 @@ class MOTpeOptimizer(TpeOptimizer):
         Returns:
             None
         """
+
+        sampler = TPESamplerWrapper()
+        sampler._rng = self._rng
+        sampler._random_sampler._rng = self._rng
         storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
         load_if_exists = self.options['resume'] is not None
 
         self.study = optuna.create_study(
-            sampler=TPESamplerWrapper(seed=self.randseed),
+            sampler=sampler,
             storage=storage,
             study_name=self.study_name,
             load_if_exists=load_if_exists,
             directions=self.config.goal.get()
         )
-        self.study._rng = self._rng

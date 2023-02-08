@@ -1,8 +1,12 @@
 from __future__ import annotations
-from typing import Optional, Union
+
+import optuna
+from optuna.storages._rdb import models
+
+import sqlalchemy
+import sqlalchemy.orm as sqlalchemy_orm
 
 import aiaccel.parameter
-import optuna
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -20,11 +24,11 @@ class TpeOptimizer(AbstractOptimizer):
     """An optimizer class based on optuna.samplers.TPESampler.
 
     Args:
-        options (dict[str, Union[str, int, bool]]): A dictionary
+        options (dict[str, str | int | bool]): A dictionary
             containing command line options.
 
     Attributes:
-        parameter_pool (dict[int, list[dict[str, Union[float, int, str]]]]):
+        parameter_pool (dict[int, list[dict[str, float | int | str]]]):
             A dictionary of parameters.
         parameter_list (list[HyperParameter]): A list of HyperParameter
             objects.
@@ -37,13 +41,7 @@ class TpeOptimizer(AbstractOptimizer):
         randseed (int): Random seed.
     """
 
-    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
-        """Initial method of TpeOptimizer.
-
-        Args:
-            options (dict[str, Union[str, int, bool]]): A dictionary
-                containing command line options.
-        """
+    def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
         self.parameter_pool = {}
         self.parameter_list = []
@@ -52,22 +50,35 @@ class TpeOptimizer(AbstractOptimizer):
         self.distributions = None
         self.trial_pool = {}
         self.randseed = self.config.randseed.get()
+        self.resumed_list = []
 
     def pre_process(self) -> None:
         """Pre-Procedure before executing optimize processes.
         """
+
         super().pre_process()
 
         self.parameter_list = self.params.get_parameter_list()
-        self.create_study()
+
         if self.distributions is None:
             self.distributions = create_distributions(self.params)
+
+        if self.options['resume'] is not None and self.options['resume'] > 0:
+            self.resume_trial()
+
+        self.create_study()
+        self.logger.debug('---DataFrame before run')
+        df = self.study.trials_dataframe(attrs=("number", "value", "params", "state"))
+        self.logger.debug(df)
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
         """
         self.check_result()
         super().post_process()
+        self.logger.debug('---DataFrame after run')
+        df = self.study.trials_dataframe(attrs=("number", "value", "params", "state"))
+        self.logger.debug(df)
 
     def check_result(self) -> None:
         """Check the result files and add it to sampler object.
@@ -76,19 +87,12 @@ class TpeOptimizer(AbstractOptimizer):
             None
         """
 
-        del_keys = []
-        for trial_id, param in self.parameter_pool.items():
+        for trial_id in list(self.parameter_pool.keys()):
             objective = self.storage.result.get_any_trial_objective(trial_id)
+
             if objective is not None:
-                trial = self.trial_pool[trial_id]
-                self.study.tell(trial, objective, skip_if_finished=True)
-                del_keys.append(trial_id)
-
-        for key in del_keys:
-            self.parameter_pool.pop(key)
-            self.logger.info(f'trial_id {key} is deleted from parameter_pool')
-
-        self.logger.debug(f'end check_result current pool {[k for k, v in self.parameter_pool.items()]}')
+                self.study.tell(trial_id, objective, skip_if_finished=True)
+                del self.parameter_pool[trial_id]
 
     def is_startup_trials(self) -> bool:
         """Is a current trial startup trial or not.
@@ -100,22 +104,22 @@ class TpeOptimizer(AbstractOptimizer):
         return self.num_of_generated_parameter < n_startup_trials
 
     def generate_parameter(
-        self, number: Optional[int] = 1
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+        self,
+        number: int | None = 1
+    ) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
         Args:
-            number (Optional[int]): A number of generating parameters. Defaults
-                to 1.
+            number (int | None, optional): A number of generating parameters.
+                Defaults to 1.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A list of
-            created parameters.
+            list[dict[str, float | int | str]] | None: A list of created
+            parameters.
         """
+
         self.check_result()
-        self.logger.debug(
-            f'number: {number}, pool: {len(self.parameter_pool)} losses'
-        )
+        self.logger.debug(f'generate_parameter requests {number} params, pool length: {len(self.parameter_pool)}')
 
         # TPE has to be sequential.
         if (
@@ -124,8 +128,8 @@ class TpeOptimizer(AbstractOptimizer):
         ):
             return None
 
-        new_params = []
         trial = self.study.ask(self.distributions)
+        new_params = []
 
         for param in self.params.get_parameter_list():
             new_param = {
@@ -138,17 +142,17 @@ class TpeOptimizer(AbstractOptimizer):
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'new parameter {trial_id} is added to parameter_pool')
+        self.logger.info(f'new parameter {trial_id} is added to parameter_pool {new_params}')
 
         return new_params
 
     def generate_initial_parameter(
         self
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+    ) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A List of new
+            list[dict[str, float | int | str]] | None: A list of new
             parameters. None if `self.nelder_mead` is already defined.
         """
         enqueue_trial = {}
@@ -162,7 +166,6 @@ class TpeOptimizer(AbstractOptimizer):
 
         self.study.enqueue_trial(enqueue_trial)
         trial = self.study.ask(self.distributions)
-
         new_params = []
 
         for name, value in trial.params.items():
@@ -176,7 +179,7 @@ class TpeOptimizer(AbstractOptimizer):
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'new initial parameter {trial_id} is added to parameter_pool')
+        self.logger.info(f'new initial parameter {trial_id} is added to parameter_pool {new_params}')
         return new_params
 
     def create_study(self) -> None:
@@ -185,18 +188,43 @@ class TpeOptimizer(AbstractOptimizer):
         Returns:
             None
         """
+
+        sampler = TPESamplerWrapper()
+        sampler._rng = self._rng
+        sampler._random_sampler._rng = self._rng
         storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
         load_if_exists = self.options['resume'] is not None
-
         self.study = optuna.create_study(
-            sampler=TPESamplerWrapper(seed=self.randseed),
+            sampler=sampler,
             storage=storage,
             study_name=self.study_name,
             load_if_exists=load_if_exists,
             direction=self.config.goal.get().lower()
         )
-        self.study._rng = self._rng
+
+    def resume_trial(self):
+        optuna_trials = self.study.get_trials()
+        storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
+        engine = sqlalchemy.create_engine(storage_path, echo=False)
+        Session = sqlalchemy_orm.sessionmaker(bind=engine)
+        session = Session()
+
+        for optuna_trial in optuna_trials:
+            if optuna_trial.number >= self.options['resume']:
+                self.resumed_list.append(optuna_trial)
+                resumed_trial = session.query(models.TrialModel).filter_by(number=optuna_trial.number).first()
+                session.delete(resumed_trial)
+                self.logger.info(f'resume_trial deletes the trial number {resumed_trial.number} from optuna db.')
+
+        session.commit()
+
+        for trial_id in list(self.parameter_pool.keys()):
+            objective = self.storage.result.get_any_trial_objective(trial_id)
+            if objective is not None:
+                del self.parameter_pool[trial_id]
+                self.logger.info(f'resume_trial trial_id {trial_id} is deleted from parameter_pool')
+
 
 def create_distributions(
         parameters: aiaccel.parameter.HyperParameterConfiguration
@@ -207,6 +235,10 @@ def create_distributions(
         parameters(aiaccel.parameter.HyperParameterConfiguration): A
             parameter configuration object.
 
+    Raises:
+        ValueError: Occurs when parameter type is other than 'float', 'int',
+            'categorical', or 'ordinal'.
+
     Returns:
         (dict): An optuna.distributions object.
     """
@@ -214,21 +246,22 @@ def create_distributions(
 
     for p in parameters.get_parameter_list():
         if p.type.lower() == 'float':
-            if p.log:
-                distributions[p.name] = optuna.distributions.LogUniformDistribution(p.lower, p.upper)
-            else:
-                distributions[p.name] = optuna.distributions.UniformDistribution(p.lower, p.upper)
+            distributions[p.name] = optuna.distributions.FloatDistribution(
+                p.lower, p.upper, log=p.log
+            )
 
         elif p.type.lower() == 'int':
-            if p.log:
-                distributions[p.name] = optuna.distributions.IntLogUniformDistribution(p.lower, p.upper)
-            else:
-                distributions[p.name] = optuna.distributions.IntUniformDistribution(p.lower, p.upper)
+            distributions[p.name] = optuna.distributions.IntDistribution(
+                p.lower, p.upper, log=p.log
+            )
 
         elif p.type.lower() == 'categorical':
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
 
+        elif p.type.lower() == 'ordinal':
+            distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
+
         else:
-            raise 'Unsupported parameter type'
+            raise TypeError('Unsupported parameter type')
 
     return distributions

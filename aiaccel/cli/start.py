@@ -21,6 +21,8 @@ logger.addHandler(StreamHandler())
 
 
 def main() -> None:  # pragma: no cover
+    """Parses command line options and executes optimization.
+    """
     parser = ArgumentParser()
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     parser.add_argument('--resume', type=int, default=None)
