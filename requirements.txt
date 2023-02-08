@@ -20,7 +20,7 @@ pytest-tornasync
 pytest-trio
 pluggy
 pytest
-py==1.11.0
+py>1.11.0
 PyYAML==5.4
 undecorated
 scipy
