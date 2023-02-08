@@ -22,32 +22,14 @@ class PylocalScheduler(AbstractScheduler):
 
     def __init__(self, options: dict) -> None:
         super().__init__(options)
-        self.pool = Pool(self.num_node)
+        self.pool = Pool(self.num_node, initializer=initializer(self.config_path))
         self.run = Run(self.config_path)
-        self.user_func = self.get_callable_object(
+        self.user_func = get_callable_object(
             self.config.python_file.get(),
             self.config.function.get()
         )
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.com = WrapperInterface()
-
-    def get_callable_object(self, file_path: str | Path, attr_name: str
-                            ) -> Callable[[dict], float]:
-        """ Loads the specified module from the specified python program.
-
-        Args:
-            file_path (str, pathlib.Path): A user program file path (python
-            file only).
-            attr_name (str): A name of objective function in user program.
-
-        Returns:
-            Callable[[dict], float]:
-        """
-        spec = importlib.util.spec_from_file_location("user_module", file_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        return getattr(module, attr_name)
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -109,13 +91,6 @@ class PylocalScheduler(AbstractScheduler):
         return xs, y, err, start_time, end_time
 
     def user_func_wrapper(self, trial_id: int, xs):
-        # Redefinition of variables to be removed by pickle conversion
-        config = Config(self.config_path)
-        user_func = self.get_callable_object(
-            config.python_file.get(),
-            config.function.get()
-        )
-
         set_logging_basicConfig(self.workspace, trial_id)
         y = None
         err = ""
@@ -135,3 +110,32 @@ class PylocalScheduler(AbstractScheduler):
         del obj['user_func']
         del obj['pool']
         return obj
+
+
+def initializer(config_path):
+    # Redefinition of variables to be removed by pickle conversion
+    global user_func
+    config = Config(config_path)
+    user_func = get_callable_object(
+        config.python_file.get(),
+        config.function.get()
+    )
+
+
+def get_callable_object(file_path: str | Path, attr_name: str
+                        ) -> Callable[[dict], float]:
+    """ Loads the specified module from the specified python program.
+
+    Args:
+        file_path (str, pathlib.Path): A user program file path (python
+        file only).
+        attr_name (str): A name of objective function in user program.
+
+    Returns:
+        Callable[[dict], float]:
+    """
+    spec = importlib.util.spec_from_file_location("user_module", file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    return getattr(module, attr_name)
