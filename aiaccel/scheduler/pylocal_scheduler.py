@@ -90,7 +90,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return xs, y, err, start_time, end_time
 
-    def user_func_wrapper(self, trial_id: int, xs):
+    def user_func_wrapper(self, trial_id: int, xs: dict):
         set_logging_basicConfig(self.workspace, trial_id)
         y = None
         err = ""
@@ -112,7 +112,7 @@ class PylocalScheduler(AbstractScheduler):
         return obj
 
 
-def initializer(config_path):
+def initializer(config_path: str | Path):
     # Redefinition of variables to be removed by pickle conversion
     global user_func
     config = Config(config_path)
