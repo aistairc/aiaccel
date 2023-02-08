@@ -1,5 +1,6 @@
-from typing import Union
+from __future__ import annotations
 
+from pathlib import PosixPath
 from sqlalchemy.exc import SQLAlchemyError
 
 from aiaccel.storage.abstract import Abstract
@@ -8,7 +9,7 @@ from aiaccel.util.retry import retry
 
 
 class JobState(Abstract):
-    def __init__(self, file_name) -> None:
+    def __init__(self, file_name: PosixPath) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -69,14 +70,14 @@ class JobState(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_jobstate(self, trial_id: int) -> Union[None, str]:
+    def get_any_trial_jobstate(self, trial_id: int) -> str | None:
         """Get the job status of any trial.
 
         Args:
             trial_id (int): Any trial id
 
         Returns:
-            str: Some kind of jobstate
+            str | None: Some kind of jobstate
         """
         with self.create_session() as session:
             data = (

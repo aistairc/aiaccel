@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
-from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -8,17 +9,17 @@ import aiaccel
 from aiaccel.util.filesystem import load_yaml
 
 
-def get_best_parameter(files: List[Path], goal: str, dict_lock: Path) ->\
-        Tuple[Union[float, None], Union[Path, None]]:
+def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
+                       ) -> tuple[float | None, Path | None]:
     """Get a best parameter in specified files.
 
     Args:
-        files (List[Path]): A list of files to find a best.
+        files (list[Path]): A list of files to find a best.
         goal (str): Maximize or Minimize.
         dict_lock (Path): A directory to store lock files.
 
     Returns:
-        Tuple[Union[float, None], Union[Path, None]]: A best result value and a
+        tuple[float | None, Path | None]: A best result value and a
         file path. It returns None if a number of files is less than one.
 
     Raises:
@@ -83,28 +84,27 @@ class HyperParameter(object):
     """
     A hyper parameter class.
 
+    Args:
+        parameter (dict): A parameter dictionary in a configuration file.
+
     Attributes:
         _raw_dict (dict): A parameter dictionary in a configuration file.
         name (str): A parameter name.
         type (str): A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
             'ORDINAL'.
         log (bool): A parameter is logarithm or not.
-        lower (Union[float, int]): A lower value of a parameter.
-        upper (Union[float, int]): A upper value of a parameter.
-        choices (List[float, int, str]): This is set as a list of a parameter,
+        lower (float | int): A lower value of a parameter.
+        upper (float | int): A upper value of a parameter.
+        choices (list[float, int, str]): This is set as a list of a parameter,
             when a parameter type is 'CATEGORICAL'.
-        sequence (List[float, int, str]): This is set as a list of a parameter,
+        sequence (list[float, int, str]): This is set as a list of a parameter,
             when a parameter type is 'ORDINAL'.
-        initial (Union[float, int, str]): A initial value. If this is set, this
+        initial (float | int | str): A initial value. If this is set, this
             value is evaluated at first run.
-        q (Union[float, int]): A quantization factor.
+        q (float | int): A quantization factor.
     """
 
-    def __init__(self, parameter):
-        """
-        Args:
-            parameter (dict): A parameter dictionary in a configuration file.
-        """
+    def __init__(self, parameter: dict[str, bool | int | float | list]) -> None:
         self._raw_dict = parameter
         self.name = parameter['name']
         self.type = get_type(parameter)
@@ -177,19 +177,17 @@ class HyperParameter(object):
 class HyperParameterConfiguration(object):
     """A configuration of hyper parameters.
 
+    Args:
+        json_string (dict): A configuration dictionary of hyper parameters.
+
     Attributes:
         json_string (dict): A configuration dictionary of hyper parameters.
         hps (dict): Hyper parameters.
     """
 
     def __init__(self, json_string: dict) -> None:
-        """__init__ method.
-
-        Args:
-            json_string (dict): A configuration dictionary of hyper parameters.
-        """
         self.json_string = json_string
-        self.hps = {}
+        self.hps: dict[str, HyperParameter] = {}
 
         for hps in self.json_string:
             self.hps[hps['name']] = HyperParameter(hps)
@@ -211,11 +209,11 @@ class HyperParameterConfiguration(object):
         else:
             raise KeyError(f'The parameter name {name} does not exist.')
 
-    def get_parameter_list(self) -> List[HyperParameter]:
+    def get_parameter_list(self) -> list[HyperParameter]:
         """Get a list of hyper parameter objects.
 
         Returns:
-            List[HyperParameter]: A list of hyper parameter objects.
+            list[HyperParameter]: A list of hyper parameter objects.
         """
         return list(self.hps.values())
 
@@ -227,21 +225,21 @@ class HyperParameterConfiguration(object):
         """
         return self.hps
 
-    def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> List[dict]:
+    def sample(self, initial: bool = False, rng: np.random.RandomState = None
+               ) -> list[dict]:
         """Sample a hyper parameters set.
 
         Args:
-            initial (bool): This is set, when a initial value is required.
+            initial (bool, optional): This is set, when a initial value is
+                required.
             rng (np.random.RandomState): A reference to a random generator.
 
         Returns:
-            dict: A hyper parameters set.
+            list[dict]: A hyper parameters set.
         """
         ret = []
-
         for name, value in self.hps.items():
             ret.append(value.sample(initial, rng=rng))
-
         return ret
 
 

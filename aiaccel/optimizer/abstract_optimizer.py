@@ -1,6 +1,5 @@
 from __future__ import annotations
 import copy
-from typing import Union, Optional
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
@@ -13,8 +12,12 @@ from numpy import str_
 class AbstractOptimizer(AbstractModule):
     """An abstract class for Optimizer classes.
 
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options.
+
     Attributes:
-        options (dict[str, Union[str, int, bool]]): A dictionary containing
+        options (dict[str, str | int | bool]): A dictionary containing
             command line options.
         hp_ready (int): A ready number of hyper parameters.
         hp_running (int): A running number of hyper prameters.
@@ -28,16 +31,7 @@ class AbstractOptimizer(AbstractModule):
         trial_id (TrialId): TrialId object.
     """
 
-    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
-        """Initial method of AbstractOptimizer.
-
-        Args:
-            options (dict[str, Union[str, int, bool]]): A dictionary
-                containing command line options.
-
-        Returns:
-            None
-        """
+    def __init__(self, options: dict[str, str | int | bool]) -> None:
         self.options = options
         self.options['process_name'] = 'optimizer'
         super().__init__(self.options)
@@ -59,14 +53,14 @@ class AbstractOptimizer(AbstractModule):
         self.trial_id = TrialId(str(self.config_path))
 
     def register_new_parameters(
-            self,
-            params: list[dict[str, Union[float, int, str]]]
+        self,
+        params: list[dict[str, float | int | str]]
     ) -> None:
         """Create hyper parameter files.
 
         Args:
-            params (list[dict[str, Union[float, int, str]]]):
-            A list of hyper parameter dictionaries.
+            params (list[dict[str, float | int | str]]): A list of hyper
+                parameter dictionaries.
 
         Returns:
             None
@@ -95,11 +89,11 @@ class AbstractOptimizer(AbstractModule):
 
     def generate_initial_parameter(
         self
-    ) -> list[dict[str, Union[float, int, str]]]:
+    ) -> list[dict[str, float | int | str]]:
         """Generate a list of initial parameters.
 
         Returns:
-            list[dict[str, Union[float, int, str]]]: A created list of initial
+            list[dict[str, float | int | str]]: A created list of initial
             parameters.
         """
         sample = self.params.sample(initial=True, rng=self._rng)
@@ -115,9 +109,7 @@ class AbstractOptimizer(AbstractModule):
 
         return new_params
 
-    def generate_parameter(
-        self
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+    def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate a list of parameters.
 
         Raises:
@@ -125,8 +117,8 @@ class AbstractOptimizer(AbstractModule):
             implement.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A created list
-            of parameters.
+            list[dict[str, float | int | str]] | None: A created list of
+            parameters.
         """
         raise NotImplementedError
 
@@ -147,14 +139,12 @@ class AbstractOptimizer(AbstractModule):
 
         return pool_size
 
-    def generate_new_parameter(
-        self
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+    def generate_new_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate a list of parameters.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A created list
-            of parameters.
+            list[dict[str, float | int | str]] | None: A created list of
+            parameters.
         """
         if self.num_of_generated_parameter == 0:
             new_params = self.cast(self.generate_initial_parameter())
@@ -239,7 +229,19 @@ class AbstractOptimizer(AbstractModule):
             self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])
 
-    def cast(self, params: Optional[list]) -> Optional[list]:
+    def cast(self, params: list[dict[str, str | float | int]]) -> list | None:
+        """Casts types of parameter values to appropriate tepes.
+
+        Args:
+            params (list | None): list of parameters.
+
+        Raises:
+            ValueError: Occurs if any of parameter value could not be casted.
+
+        Returns:
+            list | None: A list of parameters with casted values. None if given
+                `params` is None.
+        """
         if params is None or len(params) == 0:
             return params
 
@@ -276,6 +278,11 @@ class AbstractOptimizer(AbstractModule):
         return casted_params
 
     def check_error(self) -> bool:
+        """Checks errors.
+
+        Returns:
+            bool: True if there is no error.
+        """
         error_trial_ids = self.storage.error.get_error_trial_id()
         if len(error_trial_ids) == 0:
             return True

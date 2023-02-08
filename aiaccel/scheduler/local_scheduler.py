@@ -1,6 +1,6 @@
-import re
+from __future__ import annotations
 
-from typing import Union
+import re
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.process import ps2joblist
@@ -33,14 +33,14 @@ class LocalScheduler(AbstractScheduler):
                 else:
                     self.logger.warning(f'**** Unknown process: {r}')
 
-    def parse_trial_id(self, command: str) -> Union[None, str]:
+    def parse_trial_id(self, command: str) -> str | None:
         """Parse a command string and extract an unique name.
 
         Args:
             command (str): A command string from ps command.
 
         Returns:
-            str: An unique name.
+            str | None: An unique name.
         """
         args = re.split(' +', command)
         # args:

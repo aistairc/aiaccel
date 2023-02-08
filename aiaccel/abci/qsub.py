@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 from aiaccel.config import Config
@@ -19,11 +21,11 @@ stat = {
 '''
 
 
-def create_qsub_command(config: Config, runner_file: Path) -> list:
+def create_qsub_command(config: Config, runner_file: Path) -> list[str]:
     """Create ABCI 'qsub' command.
 
     Args:
-        config (ConfileWrapper): A configuration object.
+        config (Config): A Config object.
         runner_file (Path): A path of 'qsub' batch file.
 
     Returns:

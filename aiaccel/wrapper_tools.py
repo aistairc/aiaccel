@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from pathlib import Path
 
@@ -11,7 +13,7 @@ def create_runner_command(
     trial_id: int,
     config_path: str,
     command_error_output: str
-) -> list:
+) -> list[str]:
     """Create a list of command strings to run a hyper parameter.
 
     Args:
@@ -20,7 +22,7 @@ def create_runner_command(
         trial_id (str): A unique name of a hyper parameter.
 
     Returns:
-        A list of command strings.
+        list[str]: A list of command strings.
     """
     commands = re.split(' +', command)
     params = param_content['parameters']

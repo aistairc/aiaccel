@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import threading
 import importlib
-
-from typing import Union
+from collections.abc import Callable
 from pathlib import Path
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
@@ -25,15 +26,17 @@ class PylocalScheduler(AbstractScheduler):
         )
         self.run = Run(self.config_path)
 
-    def get_callable_object(self, file_path: Union[str, Path], attr_name: str) -> callable:
+    def get_callable_object(self, file_path: str | Path, attr_name: str
+                            ) -> Callable[[dict], float]:
         """ Loads the specified module from the specified python program.
 
         Args:
-            file_path (str, pathlib.Path): A user program file path.(python file only)
+            file_path (str, pathlib.Path): A user program file path (python
+            file only).
             attr_name (str): A name of objective function in user program.
 
         Returns:
-            callable
+            Callable[[dict], float]:
         """
         spec = importlib.util.spec_from_file_location("user_module", file_path)
         module = importlib.util.module_from_spec(spec)
