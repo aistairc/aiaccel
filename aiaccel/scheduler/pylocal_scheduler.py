@@ -71,8 +71,9 @@ class PylocalScheduler(AbstractScheduler):
                 self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
                 xs = self.run.get_any_trial_xs(trial_id)
                 args.append([trial_id, xs])
-            results = self.pool.map(self.execute_wrapper, args)
-            for trial_id, (xs, y, err, start_time, end_time) in zip(trial_ids, results):
+            for trial_id, (xs, y, err, start_time, end_time) in zip(
+                    trial_ids,
+                    self.pool.imap_unordered(self.execute_wrapper, args)):
                 self.run.report(trial_id, xs, y, err, start_time, end_time)
                 self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
                 self.create_result_file(trial_id)
