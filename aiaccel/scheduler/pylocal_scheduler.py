@@ -7,9 +7,11 @@ from pathlib import Path
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
+from aiaccel.util.aiaccel import WrapperInterface
+from aiaccel.util.aiaccel import cast_y
+from aiaccel.util.aiaccel import set_logging_basicConfig
 from aiaccel.util.time_tools import get_time_now
 
-from aiaccel.storage.storage import Storage
 from aiaccel.config import Config
 
 
@@ -26,6 +28,8 @@ class PylocalScheduler(AbstractScheduler):
             self.config.python_file.get(),
             self.config.function.get()
         )
+        self.workspace = Path(self.config.workspace.get()).resolve()
+        self.com = WrapperInterface()
 
     def get_callable_object(self, file_path: str | Path, attr_name: str
                             ) -> Callable[[dict], float]:
@@ -62,7 +66,16 @@ class PylocalScheduler(AbstractScheduler):
                 self.execute(trial_id)
 
         if self.num_node > 1:
-            self.pool.map(self.execute_wrapper, trial_ids)
+            args = []
+            for trial_id in trial_ids:
+                self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
+                xs = self.run.get_any_trial_xs(trial_id)
+                args.append([trial_id, xs])
+            results = self.pool.map(self.execute_wrapper, args)
+            for trial_id, (xs, y, err, start_time, end_time) in zip(trial_ids, results):
+                self.run.report(trial_id, xs, y, err, start_time, end_time)
+                self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
+                self.create_result_file(trial_id)
 
         return True
 
@@ -87,17 +100,33 @@ class PylocalScheduler(AbstractScheduler):
 
         return
 
-    def execute_wrapper(self, trial_id: int) -> None:
+    def execute_wrapper(self, args) -> None:
+        start_time = get_time_now()
+        xs, y, err = self.user_func_wrapper(*args)
+        end_time = get_time_now()
+
+        return xs, y, err, start_time, end_time
+
+    def user_func_wrapper(self, trial_id: int, xs):
         # Redefinition of variables to be removed by pickle conversion
-        self.config = Config(self.config_path)
-        self.storage = Storage(self.ws)
-        self.run = Run(self.config_path)
-        self.user_func = self.get_callable_object(
-            self.config.python_file.get(),
-            self.config.function.get()
+        config = Config(self.config_path)
+        user_func = self.get_callable_object(
+            config.python_file.get(),
+            config.function.get()
         )
 
-        return self.execute(trial_id)
+        set_logging_basicConfig(self.workspace, trial_id)
+        y = None
+        err = ""
+
+        try:
+            y = cast_y(user_func(xs), y_data_type=None)
+        except BaseException as e:
+            err = str(e)
+        finally:
+            self.com.out(objective_y=y, objective_err=err)
+
+        return xs, y, err
 
     def __getstate__(self):
         obj = super().__getstate__()

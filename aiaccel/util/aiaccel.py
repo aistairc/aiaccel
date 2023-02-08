@@ -330,41 +330,6 @@ class Run:
 
         return xs
 
-    def cast_y(
-            self, y_value: Any, y_data_type: str | None) -> float | int | str:
-        """Casts y to the appropriate data type.
-
-        Args:
-            y_value (Any): y value to be casted.
-            y_data_type (str | None): Name of data type of objective value.
-
-        Returns:
-            float | int | str: Casted y value.
-
-        Raises:
-            TypeError: Occurs when given `y_data_type` is other than `float`,
-                 `int`, or `str`.
-        """
-        if y_data_type is None:
-            y = y_value
-        elif y_data_type.lower() == 'float':
-            y = float(y_value)
-        elif y_data_type.lower() == 'int':
-            y = int(float(y_value))
-        elif y_data_type.lower() == 'str':
-            y = str(y_value)
-        else:
-            TypeError(f'{y_data_type} cannot be specified')
-
-        return y
-
-    def set_logging_basicConfig(self, trial_id):
-        log_dir = self.workspace / "log"
-        log_path = log_dir / f"job_{trial_id}.log"
-        if not log_dir.exists():
-            log_dir.mkdir(parents=True)
-        logging.basicConfig(filename=log_path, level=logging.DEBUG, force=True)
-
     @singledispatchmethod
     def execute(
         self,
@@ -387,13 +352,13 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
-        self.set_logging_basicConfig(trial_id)
+        set_logging_basicConfig(self.workspace, trial_id)
         xs = self.get_any_trial_xs(trial_id)
         y = None
         err = ""
 
         try:
-            y = self.cast_y(func(xs), y_data_type)
+            y = cast_y(func(xs), y_data_type)
         except BaseException as e:
             err = str(e)
         finally:
@@ -418,7 +383,7 @@ class Run:
                 string.
         """
 
-        self.set_logging_basicConfig(trial_id)
+        set_logging_basicConfig(self.workspace, trial_id)
 
         xs = self.get_any_trial_xs(trial_id)
         err = ""
@@ -439,9 +404,9 @@ class Run:
 
         ys, err = self.com.get_data(output)
         if y_data_type is None:
-            y = self.cast_y(ys[0], 'float')
+            y = cast_y(ys[0], 'float')
         else:
-            y = self.cast_y(ys[0], y_data_type)
+            y = cast_y(ys[0], y_data_type)
         err = ("\n").join(err)
 
         return xs, y, err
@@ -521,3 +486,40 @@ class Run:
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
         if err != "":
             self.storage.error.set_any_trial_error(trial_id, err)
+
+
+def cast_y(
+        y_value: Any, y_data_type: str | None) -> float | int | str:
+    """Casts y to the appropriate data type.
+
+    Args:
+        y_value (Any): y value to be casted.
+        y_data_type (str | None): Name of data type of objective value.
+
+    Returns:
+        float | int | str: Casted y value.
+
+    Raises:
+        TypeError: Occurs when given `y_data_type` is other than `float`,
+                `int`, or `str`.
+    """
+    if y_data_type is None:
+        y = y_value
+    elif y_data_type.lower() == 'float':
+        y = float(y_value)
+    elif y_data_type.lower() == 'int':
+        y = int(float(y_value))
+    elif y_data_type.lower() == 'str':
+        y = str(y_value)
+    else:
+        TypeError(f'{y_data_type} cannot be specified')
+
+    return y
+
+
+def set_logging_basicConfig(workspace, trial_id):
+    log_dir = workspace / "log"
+    log_path = log_dir / f"job_{trial_id}.log"
+    if not log_dir.exists():
+        log_dir.mkdir(parents=True)
+    logging.basicConfig(filename=log_path, level=logging.DEBUG, force=True)
