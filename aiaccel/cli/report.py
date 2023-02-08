@@ -9,7 +9,9 @@ logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
 
 
-def main():  # pragma: no cover
+def main() -> None:  # pragma: no cover
+    """Parses command line options and reports the result.
+    """
     parser = ArgumentParser()
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
