@@ -15,7 +15,7 @@ class TestAbciScheduler(BaseTest):
         database_remove
     ):
         database_remove()
-        scheduler = AbciScheduler(self.configs["config.json"])
+        scheduler = AbciScheduler(self.load_config_for_test(self.configs["config.json"]))
         xml_path = data_dir.joinpath('qstat.xml')
         fake_process.register_subprocess(['qstat', '-xml'], stdout=[])
         assert scheduler.get_stats() is None
@@ -35,7 +35,7 @@ class TestAbciScheduler(BaseTest):
         database_remove
     ):
         database_remove()
-        scheduler = AbciScheduler(self.configs["config.json"])
+        scheduler = AbciScheduler(self.load_config_for_test(self.configs["config.json"]))
         s = {"name": "run_000005.sh"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5

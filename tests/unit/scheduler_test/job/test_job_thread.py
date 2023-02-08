@@ -46,7 +46,7 @@ class TestModel(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        config = self.configs['config.json']
+        config = self.load_config_for_test(self.configs['config.json'])
         scheduler = create_scheduler(config.resource.type)(config)
 
         setup_hp_ready(1)
@@ -68,7 +68,7 @@ class TestModel(BaseTest):
         work_dir,
         database_remove
     ):
-        config = self.configs['config.json']
+        config = self.load_config_for_test(self.configs['config.json'])
         config.resource.type = 'ABCI'
 
         scheduler = create_scheduler(config.resource.type)(config)
@@ -366,7 +366,7 @@ class TestJob(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        config = self.configs['config.json']
+        config = self.load_config_for_test(self.configs['config.json'])
         scheduler = create_scheduler(config.resource.type)(config)
 
         setup_hp_ready(1)
@@ -388,7 +388,7 @@ class TestJob(BaseTest):
         work_dir,
         database_remove
     ):
-        config = self.configs['config.json']
+        config = self.load_config_for_test(self.configs['config.json'])
         scheduler = LocalScheduler(config)
         # config = load_test_config()
         setup_hp_ready(1)

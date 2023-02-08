@@ -12,7 +12,9 @@ class ResumptionTest(IntegrationTest):
 
     def test_run(self, data_dir, create_tmp_config):
         with self.create_main():
-            config = self.configs['config_{}.json'.format(self.search_algorithm)]
+            config = self.load_config_for_test(
+                self.configs['config_{}.json'.format(self.search_algorithm)]
+            )
             storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config.config_path), '--clean']).wait()
             final_result_at_one_time = self.get_final_result(storage)
@@ -20,12 +22,16 @@ class ResumptionTest(IntegrationTest):
 
         # max trial 5
         with self.create_main():
-            config = self.configs['config_{}_resumption.json'.format(self.search_algorithm)]
+            config = self.load_config_for_test(
+                self.configs['config_{}_resumption.json'.format(self.search_algorithm)]
+            )
             subprocess.Popen(['aiaccel-start', '--config', str(config.config_path), '--clean']).wait()
 
         # resume
         with self.create_main():
-            config = self.configs['config_{}.json'.format(self.search_algorithm)]
+            config = self.load_config_for_test(
+                self.configs['config_{}.json'.format(self.search_algorithm)]
+            )
             storage = Storage(ws=Path(config.generic.workspace))
 
             subprocess.Popen(['aiaccel-start', '--config', str(config.config_path), '--resume', '4']).wait()

@@ -46,7 +46,7 @@ class TestAbstractMaster(BaseTest):
     ):
         database_remove()
 
-        master = AbstractMaster(self.configs['config.json'])
+        master = AbstractMaster(self.load_config_for_test(self.configs['config.json']))
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
             loop_pre_process(master)
@@ -59,7 +59,7 @@ class TestAbstractMaster(BaseTest):
     ):
         database_remove()
 
-        master = AbstractMaster(self.configs['config.json'])
+        master = AbstractMaster(self.load_config_for_test(self.configs['config.json']))
 
         try:
             master.pre_process()
@@ -74,7 +74,7 @@ class TestAbstractMaster(BaseTest):
     ):
         database_remove()
 
-        master = AbstractMaster(self.configs["config.json"])
+        master = AbstractMaster(self.load_config_for_test(self.configs["config.json"]))
         setup_hp_finished(10)
         assert master.pre_process() is None
 
@@ -84,7 +84,7 @@ class TestAbstractMaster(BaseTest):
     ):
         database_remove()
 
-        master = AbstractMaster(self.configs["config.json"])
+        master = AbstractMaster(self.load_config_for_test(self.configs["config.json"]))
         
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
@@ -119,7 +119,7 @@ class TestAbstractMaster(BaseTest):
     ):
         database_remove()
 
-        master = AbstractMaster(self.configs['config.json'])
+        master = AbstractMaster(self.load_config_for_test(self.configs['config.json']))
 
         assert master.print_dict_state() is None
 
@@ -136,7 +136,7 @@ class TestAbstractMaster(BaseTest):
     ):
         database_remove()
 
-        master = AbstractMaster(self.configs['config.json'])
+        master = AbstractMaster(self.load_config_for_test(self.configs['config.json']))
 
         master.pre_process()
         assert master.inner_loop_main_process()

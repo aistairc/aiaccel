@@ -33,7 +33,9 @@ class IntegrationTest(BaseTest):
         #
         with self.create_main():
             print(self.search_algorithm)
-            config = self.configs['config_{}.json'.format(self.search_algorithm)]
+            config = self.load_config_for_test(
+                self.configs['config_{}.json'.format(self.search_algorithm)]
+            )
 
             # master
             master = create_master(config.resource.type)
@@ -55,7 +57,9 @@ class IntegrationTest(BaseTest):
         # pylocal test
         #
         with self.create_main():
-            config = self.configs['config_{}.json'.format(self.search_algorithm)]
+            config = self.load_config_for_test(
+                self.configs['config_{}.json'.format(self.search_algorithm)]
+            )
             base_dir = Path(config.config_path).parent
             new_config_file_path = base_dir / f'config_{self.search_algorithm}_pylocal.yaml'
 

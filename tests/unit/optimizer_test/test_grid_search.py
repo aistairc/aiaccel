@@ -120,14 +120,14 @@ class TestGridOptimizer(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        optimizer = GridOptimizer(self.configs['config_grid.json'])
+        optimizer = GridOptimizer(self.load_config_for_test(self.configs['config_grid.json']))
         optimizer.pre_process()
 
     def test_get_parameter_index(self, create_tmp_config):
         self.workspace.clean()
         self.workspace.create()
 
-        optimizer = GridOptimizer(self.configs['config_grid.json'])
+        optimizer = GridOptimizer(self.load_config_for_test(self.configs['config_grid.json']))
         optimizer.pre_process()
         assert optimizer.get_parameter_index() == [0 for _ in range(0, 10)]
 
@@ -142,7 +142,7 @@ class TestGridOptimizer(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        optimizer = GridOptimizer(self.configs['config_grid.json'])
+        optimizer = GridOptimizer(self.load_config_for_test(self.configs['config_grid.json']))
         optimizer.pre_process()
         max_index = functools.reduce(
             lambda x, y: x*y,
@@ -154,12 +154,12 @@ class TestGridOptimizer(BaseTest):
         assert len(optimizer.generate_parameter()) == 0
 
         optimizer.generate_index = 0
-        assert len(optimizer.generate_parameter()) == self.configs['config_grid.json'].optimize.trial_number
+        assert len(optimizer.generate_parameter()) == self.load_config_for_test(self.configs['config_grid.json']).optimize.trial_number
 
     def test_generate_initial_parameter(self, create_tmp_config):
         self.workspace.clean()
         self.workspace.create()
 
-        optimizer = GridOptimizer(self.configs['config_grid.json'])
+        optimizer = GridOptimizer(self.load_config_for_test(self.configs['config_grid.json']))
         optimizer.pre_process()
         optimizer.generate_initial_parameter()

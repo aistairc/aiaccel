@@ -200,29 +200,29 @@ class BaseTest(object):
         self.config_json_path = create_tmp_config(self.test_data_dir.joinpath('config.json'))
 
         self.configs = {
-            "config.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config.json'))),
-            "config_random.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_random.json'))),
-            "config_grid.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_grid.json'))),
-            "config_sobol.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol.json'))),
-            "config_sobol_int.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol_int.json'))),
-            "config_sobol_no_initial.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol_no_initial.json'))),
-            "config_tpe.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe.json'))),
-            "config_tpe_2.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe_2.json'))),
-            "config_abci_json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_abci.json'))),
-            "config_nelder_mead.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead.json'))),
-            "config_nelder_mead_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead_resumption.json'))),
-            "config_random_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_random_resumption.json'))),
-            "config_sobol_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_sobol_resumption.json'))),
-            "config_tpe_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_tpe_resumption.json'))),
-            "config_grid_resumption.json": load_config(create_tmp_config(self.test_data_dir.joinpath('config_grid_resumption.json'))),
+            "config.json": create_tmp_config(self.test_data_dir.joinpath('config.json')),
+            "config_random.json": create_tmp_config(self.test_data_dir.joinpath('config_random.json')),
+            "config_grid.json": create_tmp_config(self.test_data_dir.joinpath('config_grid.json')),
+            "config_sobol.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol.json')),
+            "config_sobol_int.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_int.json')),
+            "config_sobol_no_initial.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_no_initial.json')),
+            "config_tpe.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe.json')),
+            "config_tpe_2.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe_2.json')),
+            "config_abci_json": create_tmp_config(self.test_data_dir.joinpath('config_abci.json')),
+            "config_nelder_mead.json": create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead.json')),
+            "config_nelder_mead_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead_resumption.json')),
+            "config_random_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_random_resumption.json')),
+            "config_sobol_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_resumption.json')),
+            "config_tpe_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe_resumption.json')),
+            "config_grid_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_grid_resumption.json')),
         }
 
         self.tmpdir_path = tmpdir
 
-        for label in self.configs.keys():
-            self.configs[label].resume = None
-            self.configs[label].clean = None
-            self.configs[label].generic.workspace = self.tmpdir_path / 'work'
+        # for label in self.configs.keys():
+        #     self.configs[label].resume = None
+        #     self.configs[label].clean = None
+        #     self.configs[label].generic.workspace = self.tmpdir_path / 'work'
 
         self.workspace = Workspace(str(self.tmpdir_path / 'work'))
         if self.workspace.path.exists():
@@ -240,6 +240,14 @@ class BaseTest(object):
             create_yaml(path, d)
 
         self.result_comparison = []
+
+    def load_config_for_test(self, path):
+        config = load_config(path)
+        config.resume = None
+        config.clean = None
+        config.generic.workspace = self.tmpdir_path / 'work'
+
+        return config
 
     @contextmanager
     def create_main(self, from_file_path=None):

@@ -28,7 +28,7 @@ class TestAbstractOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
-        self.optimizer = AbstractOptimizer(self.configs["config.json"])
+        self.optimizer = AbstractOptimizer(self.load_config_for_test(self.configs["config.json"]))
         yield
         self.optimizer = None
 

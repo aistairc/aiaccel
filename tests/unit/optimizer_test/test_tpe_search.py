@@ -22,7 +22,7 @@ class TestTpeOptimizer(BaseTest):
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
-        self.optimizer = TpeOptimizer(self.configs['config_tpe.json'])
+        self.optimizer = TpeOptimizer(self.load_config_for_test(self.configs['config_tpe.json']))
         yield
         self.optimizer = None
 
@@ -60,10 +60,10 @@ class TestTpeOptimizer(BaseTest):
         self.optimizer.config.resource.num_node = _tmp_num_node
 
     def test_generate_initial_parameter(self):
-        optimizer = TpeOptimizer(self.configs['config_tpe_2.json'])
+        optimizer = TpeOptimizer(self.load_config_for_test(self.configs['config_tpe_2.json']))
         (optimizer.ws / 'storage' / 'storage.db').unlink()
 
-        optimizer.__init__(self.configs['config_tpe_2.json'])
+        optimizer.__init__(self.load_config_for_test(self.configs['config_tpe_2.json']))
         optimizer.pre_process()
         assert len(optimizer.generate_initial_parameter()) > 0
 

@@ -70,16 +70,16 @@ class TestParameter(BaseTest):
         assert get_type(other_p) == 'invalid'
 
     def test_load_parameter(self):
-        hp = load_parameter(self.configs["config.json"].optimize.parameters)
+        hp = load_parameter(self.load_config_for_test(self.configs["config.json"]).optimize.parameters)
         assert hp.__class__.__name__ == 'HyperParameterConfiguration'
 
     def test_get_parameter_list(self):
-        hp = load_parameter(self.configs["config.json"].optimize.parameters)
+        hp = load_parameter(self.load_config_for_test(self.configs["config.json"]).optimize.parameters)
         p = hp.get_parameter_list()
         assert len(p) == 10
 
     def test_get_hyperparameter(self):
-        hp = load_parameter(self.configs["config.json"].optimize.parameters)
+        hp = load_parameter(self.load_config_for_test(self.configs["config.json"]).optimize.parameters)
         ps = hp.get_hyperparameter('x3')
         assert ps.name == 'x3'
 

@@ -5,6 +5,6 @@ from tests.base_test import BaseTest
 
 class TestMinimizeEvaluator(BaseTest):
     def test_maximize_evaluator(self):
-        evaluator = MinimizeEvaluator(self.configs["config.json"])
+        evaluator = MinimizeEvaluator(self.load_config_for_test(self.configs["config.json"]))
         evaluator.evaluate()
         assert evaluator.hp_result is None

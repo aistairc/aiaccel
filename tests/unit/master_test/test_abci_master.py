@@ -27,7 +27,7 @@ class TestAbciMaster(BaseTest):
         self.workspace.clean()
         self.workspace.create()
 
-        self.master = AbciMaster(self.configs["config_abci_json"])
+        self.master = AbciMaster(self.load_config_for_test(self.configs["config_abci_json"]))
 
         yield
         self.master = None
@@ -39,7 +39,7 @@ class TestAbciMaster(BaseTest):
     ):
         database_remove()
 
-        master = AbciMaster(self.configs["config_abci_json"])
+        master = AbciMaster(self.load_config_for_test(self.configs["config_abci_json"]))
         master.pre_process()
         assert type(master.runner_files) is list
 
@@ -52,7 +52,7 @@ class TestAbciMaster(BaseTest):
     ):
         database_remove()
 
-        master = AbciMaster(self.configs["config_abci_json"])
+        master = AbciMaster(self.load_config_for_test(self.configs["config_abci_json"]))
 
         xml_path = data_dir.joinpath('qstat.xml')
         fake_process.register_subprocess(

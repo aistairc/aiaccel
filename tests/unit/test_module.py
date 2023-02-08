@@ -44,7 +44,7 @@ class TestAbstractModule(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_module(self, clean_work_dir):
-        self.module = AbstractModule(self.configs["config.json"], 'abstract')
+        self.module = AbstractModule(self.load_config_for_test(self.configs["config.json"]), 'abstract')
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
@@ -59,15 +59,15 @@ class TestAbstractModule(BaseTest):
         module_type = self.module.get_module_type()
         assert module_type is None
 
-        master = LocalMaster(self.configs["config.json"])
+        master = LocalMaster(self.load_config_for_test(self.configs["config.json"]))
         module_type = master.get_module_type()
         assert module_type == aiaccel.module_type_master
 
-        optimizer = RandomOptimizer(self.configs["config.json"])
+        optimizer = RandomOptimizer(self.load_config_for_test(self.configs["config.json"]))
         module_type = optimizer.get_module_type()
         assert module_type == aiaccel.module_type_optimizer
 
-        scheduler = LocalScheduler(self.configs["config.json"])
+        scheduler = LocalScheduler(self.load_config_for_test(self.configs["config.json"]))
         module_type = scheduler.get_module_type()
         assert module_type == aiaccel.module_type_scheduler
 
@@ -141,11 +141,11 @@ class TestAbstractModule(BaseTest):
         assert self.module.check_error() is True
 
     def test_resume(self):
-        self.module = AbstractModule(self.configs["config.json"], 'abstract')
+        self.module = AbstractModule(self.load_config_for_test(self.configs["config.json"]), 'abstract')
         self.module._rng = np.random.RandomState(0)
         assert self.module.resume() is None
 
-        config = self.configs["config.json"]
+        config = self.load_config_for_test(self.configs["config.json"])
         config.resume = 1
         self.module = AbstractModule(config, 'abstract')
         self.module.set_logger(
