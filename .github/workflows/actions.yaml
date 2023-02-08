@@ -30,10 +30,10 @@ jobs:
         run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit
 
       - name: Pycodestyle Test
-        run: pytest -v --pycodestyle aiaccel examples
+        run: pycodestyle aiaccel examples
 
-      - name: Flack8 Test
-        run: pytest -v --flake8 aiaccel examples
+      - name: Flake8 Test
+        run: flake8 aiaccel examples
 
       - name: Optimizer Algorithm Test
         run: |
@@ -52,7 +52,7 @@ jobs:
           pytest -v tests/resumption/sphere/test_sphere_tpe_resumption.py
           pytest -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
 
-      - name: Newly Test
+      - name: Supplemental Test
         run: |
           pytest -v tests/supplements/no_initial_test_benchmark/test_benchmark_tpe_no_initial.py
           pytest -v tests/supplements/no_initial_test_benchmark/test_benchmark_nelder_mead_no_initial.py
