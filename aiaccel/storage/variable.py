@@ -1,4 +1,7 @@
 
+from __future__ import annotations
+
+from pathlib import PosixPath
 from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -9,7 +12,7 @@ from aiaccel.util.retry import retry
 
 
 class Variable(Abstract):
-    def __init__(self, file_name) -> None:
+    def __init__(self, file_name: PosixPath) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -97,16 +100,16 @@ class Variable(Abstract):
 
 
 class Value(Variable):
-    def __init__(self, file_name, label: str):
+    def __init__(self, file_name: PosixPath, label: str) -> None:
         super().__init__(file_name)
         self.process_name = None
         self.label = label
         self.value = None
 
-    def set_process_name(self, process_name: str):
+    def set_process_name(self, process_name: str) -> None:
         self.process_name = process_name
 
-    def set(self, trial_id: int, value: Any, update_allow: bool = True):
+    def set(self, trial_id: int, value: Any, update_allow: bool = True) -> None:
         self.set_any_trial_variable(
             trial_id=trial_id,
             process_name=self.process_name,
@@ -115,7 +118,7 @@ class Value(Variable):
             update_allow=update_allow
         )
 
-    def get(self, trial_id: int):
+    def get(self, trial_id: int) -> Any | None:
         self.value = self.get_any_trial_variable(
             trial_id=trial_id,
             process_name=self.process_name,
@@ -123,7 +126,7 @@ class Value(Variable):
         )
         return self.value
 
-    def delete(self, trial_id: int):
+    def delete(self, trial_id: int) -> None:
         self.delete_any_trial_variable(
             trial_id=trial_id,
             process_name=self.process_name,
@@ -132,9 +135,9 @@ class Value(Variable):
 
 
 class Serializer:
-    def __init__(self, file_name: str):
-        self.file_name = file_name
-        self.d = {}
+    def __init__(self, file_name: PosixPath) -> None:
+        self.file_name: PosixPath = file_name
+        self.d: dict[str, Value] = {}
 
     def register(self, process_name: str, labels: list) -> None:
         for i in range(len(labels)):

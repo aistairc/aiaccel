@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from importlib.resources import read_text
 from pathlib import Path
@@ -123,7 +125,7 @@ class Config:
     config_path: Optional[Union[None, Path, str]]
 
 
-def load_config(config_path: str) -> Union[None, DictConfig]:
+def load_config(config_path: str) -> DictConfig | None:
     """
     Load any configuration files, return the DictConfig object.
     Args:

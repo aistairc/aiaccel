@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Union, Optional
 import copy
 
 from omegaconf.dictconfig import DictConfig
@@ -12,6 +11,10 @@ from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 class NelderMeadOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
 
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+        command line options.
+
     Attributes:
         nelder_mead (NelderMead): A class object implementing Nelder-Mead
             method.
@@ -20,12 +23,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
     """
 
     def __init__(self, config: DictConfig) -> None:
-        """Initial method of NelderMeadOptimizer.
-
-        Args:
-            options (dict[str, Union[str, int, bool]]): A dictionary
-            containing command line options.
-        """
         super().__init__(config)
         self.nelder_mead = None
         self.parameter_pool = []
@@ -33,11 +30,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(
         self
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+    ) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A List of new
+            list[dict[str, float | int | str]] | None: A list of new
             parameters. None if `self.nelder_mead` is already defined.
         """
         initial_parameter = super().generate_initial_parameter()
@@ -58,18 +55,18 @@ class NelderMeadOptimizer(AbstractOptimizer):
         pass
 
     def get_ready_parameters(self) -> list:
-        """ Get the list of ready parameters.
+        """Get the list of ready parameters.
 
         Returns:
             list
         """
         return self.nelder_mead._executing
 
-    def get_nm_results(self) -> list:
+    def get_nm_results(self) -> list[dict[str, str | int | list | bool]]:
         """ Get the list of Nelder-Mead result.
 
         Returns:
-            list[dict]: Results per trial.
+            list[dict[str, str | int | list | bool]]: Results per trial.
         """
         nm_results = []
         for p in self.get_ready_parameters():
@@ -194,23 +191,23 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         return trial_id
 
-    def _get_current_names(self):
-        """ get parameter trial_id.
+    def _get_current_names(self) -> list:
+        """Get parameter trial_id.
 
         Returns:
-            parameter names in parameter_pool (list)
+            list: A list og parameter names in parameter_pool
         """
         # WARN: Always empty.
         return [p['vertex_id'] for p in self.parameter_pool]
 
     def generate_parameter(
         self
-    ) -> Optional[list[dict[str, Union[float, int, str]]]]:
+    ) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
         Returns:
-            Optional[list[dict[str, Union[float, int, str]]]]: A list of
-            created parameters.
+            list[dict[str, float | int | str]] | None: A list of created
+            parameters.
 
         Raises:
             TypeError: Causes when an invalid parameter type is set.
@@ -281,11 +278,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 if param.name not in new_params.hps.keys():
                     assert False
                 new_params.hps[param.name] = HyperParameter({
-                        'name': param.name,
-                        'type': 'ordinal',
-                        'lower': 0,
-                        'upper': len(param.sequence) - 1,
-                        'sequence': param.sequence
-                    })
+                    'name': param.name,
+                    'type': 'ordinal',
+                    'lower': 0,
+                    'upper': len(param.sequence) - 1,
+                    'sequence': param.sequence
+                })
 
         return new_params

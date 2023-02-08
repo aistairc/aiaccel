@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import re
 import subprocess
-from typing import Union
 
 from aiaccel.abci.qstat import parse_qstat
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
@@ -35,14 +36,14 @@ class AbciScheduler(AbstractScheduler):
                 f'state: {stat["state"]}'
             )
 
-    def parse_trial_id(self, command: str) -> Union[None, str]:
+    def parse_trial_id(self, command: str) -> str | None:
         """Parse a command string and extract an unique name.
 
         Args:
             command (str): A command string from ps command.
 
         Returns:
-            str: An unique name.
+            str | None: An unique name.
         """
         self.logger.debug(f"command: {command}")
         full = re.compile(r'run_\d{1,65535}.sh')

@@ -1,16 +1,28 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
+from numpy import maximum
+
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
-from numpy import maximum
 
 
 class Viewer:
-    def __init__(self, config: DictConfig):
+    """Provides a method to print database information.
+
+    Args:
+        config (Config): Config object.
+
+    Attributes:
+        config_path (Path): Path to the config file.
+        workspace (Path): Path to the workspace.
+        storage (Storage): Storage object.
+    """
+
+    def __init__(self, config: DictConfig) -> None:
         self.workspace = Path(config.generic.workspace).resolve()
         self.storage = Storage(self.workspace)
 
@@ -91,6 +103,9 @@ class Viewer:
 
 
 def main() -> None:  # pragma: no cover
+    """Parses command line options and prints database information on
+    theterminal.
+    """
     parser = ArgumentParser()
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()

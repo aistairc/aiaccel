@@ -1,5 +1,5 @@
+from __future__ import annotations
 import xml.etree.ElementTree as ElementTree
-from typing import List
 from xml.etree.ElementTree import Element
 
 
@@ -19,15 +19,15 @@ stat = {
 '''
 
 
-def parse_qstat(qstat: str) -> List[dict]:
+def parse_qstat(qstat: str) -> list[dict]:
     """Parse ABCI 'qstat' command result.
 
     Args:
-        config (ConfileWrapper): A configuration object.
+        config (Config): A Config object.
         qstat (str): A 'qstat' result.
 
     Returns:
-        List[dict]: A parsed job list from ABCI 'qstat' command.
+        list[dict]: A parsed job list from ABCI 'qstat' command.
     """
     root = ElementTree.fromstring(qstat)
     stat_list = []
@@ -41,15 +41,15 @@ def parse_qstat(qstat: str) -> List[dict]:
     return stat_list
 
 
-def parse_job_list(job_list: Element) -> List[dict]:
+def parse_job_list(job_list: Element) -> list[dict]:
     """Parse from XML element of 'qstat' to a job list.
 
     Args:
-        config (ConfileWrapper): A configuration object.
+        config (Config): A Config object.
         job_list (Element): A XML element of 'qstat' command.
 
     Returns:
-        A job list converted from a XML element of 'qstat' command.
+        list: A job list converted from a XML element of 'qstat' command.
     """
     stat_list = []
     job_id = None

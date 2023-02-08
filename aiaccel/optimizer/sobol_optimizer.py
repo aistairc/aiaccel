@@ -1,15 +1,18 @@
-
 from __future__ import annotations
 
 from omegaconf.dictconfig import DictConfig
 
-from typing import Union
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from scipy.stats import qmc
+
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
 class SobolOptimizer(AbstractOptimizer):
     """An optimizer class with sobol algorithm.
+
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+        command line options.
 
     Attributes:
         generate_index (int): A number of generated hyper parameters.
@@ -22,11 +25,6 @@ class SobolOptimizer(AbstractOptimizer):
     """
 
     def __init__(self, config: DictConfig) -> None:
-        """Initial method of SobolOptimizer.
-
-        Args:
-            config (DictConfig): A configuration object.
-        """
         super().__init__(config)
         self.generate_index = None
         self.sampler = None
@@ -49,11 +47,11 @@ class SobolOptimizer(AbstractOptimizer):
                 seed=self._rng
             )
 
-    def generate_parameter(self) -> list[dict[str, Union[float, int, str]]]:
+    def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
         Returns:
-            list[dict[str, Union[float, int, str]]]: A list of new parameters.
+            list[dict[str, float | int | str]]: A list of new parameters.
         """
         l_params = self.params.get_parameter_list()
         n_params = len(l_params)
@@ -81,11 +79,11 @@ class SobolOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(
         self
-    ) -> list[dict[str, Union[float, int, str]]]:
+    ) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
 
         Returns:
-            list[dict[str, Union[float, int, str]]]: A list of new parameters.
+            list[dict[str, float | int | str]]: A list of new parameters.
         """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(

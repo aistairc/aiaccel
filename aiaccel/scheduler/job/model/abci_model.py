@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 
 
 class AbciModel(AbstractModel):
-
     def before_runner_create(self, obj: 'Job') -> None:
         commands = create_runner_command(
             obj.config.generic.job_command,

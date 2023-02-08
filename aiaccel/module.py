@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
 
@@ -25,8 +27,16 @@ class AbstractModule(object):
 
     5. call post_process()
 
+     Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options.
+
     Attributes:
-        config (ConfileWrapper): A config object.
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options.
+        config_path (Path): Path to the configuration file.
+        config (Config): A config object.
+        ws (Path): A path to a current workspace.
         dict_hp (Path): A path to hp directory.
         dict_lock (Path): A path to lock directory.
         dict_log (Path): A path to log directory.
@@ -38,14 +48,9 @@ class AbstractModule(object):
         hp_running (int): A number of files in hp/running directory.
         logger (logging.Logger): A logger object.
         loop_count (int): A loop count that is incremented in loop method.
-        ws (Path): A path to a current workspace.
     """
 
     def __init__(self, config: DictConfig, module_name: str) -> None:
-        """
-        Args:
-            config (str): A file name of a configuration.
-        """
         self.config = config
         self.ws = Path(self.config.generic.workspace).resolve()
 
@@ -80,7 +85,7 @@ class AbstractModule(object):
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.config.config_path)
         # TODO: Separate the generator if don't want to affect randomness each other.
-        self._rng = None
+        self._rng: np.random.RandomState | None = None
         self.module_name = module_name
 
         self.storage.variable.register(
@@ -98,11 +103,11 @@ class AbstractModule(object):
         self.hp_running = self.storage.get_num_running()
         self.hp_finished = self.storage.get_num_finished()
 
-    def get_module_type(self) -> str:
+    def get_module_type(self) -> str | None:
         """Get this module type.
 
         Returns:
-            str: This module type(name).
+            str: Name of this module type.
         """
 
         if aiaccel.class_master in self.__class__.__name__:
@@ -153,7 +158,8 @@ class AbstractModule(object):
         Args:
             logger_name (str): A name of a logger.
             logfile (Path): A path to a log file.
-            file_level (int): A logging level for a log file output. For example logging.DEBUG
+            file_level (int): A logging level for a log file output. For
+                example logging.DEBUG
             stream_level (int): A logging level for a stream output.
             module_type (str): A module type of a caller.
 
@@ -200,7 +206,7 @@ class AbstractModule(object):
         """
         raise NotImplementedError
 
-    def inner_loop_main_process(self) -> None:
+    def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
 
         Returns:
@@ -214,6 +220,7 @@ class AbstractModule(object):
 
     def _serialize(self, trial_id: int) -> None:
         """Serialize this module.
+
         Returns:
             None
         """
@@ -224,6 +231,7 @@ class AbstractModule(object):
 
     def _deserialize(self, trial_id: int) -> None:
         """ Deserialize this module.
+
         Returns:
             None
         """
@@ -234,8 +242,10 @@ class AbstractModule(object):
 
     def set_numpy_random_seed(self) -> None:
         """ set any random seed.
+
         Args:
             None
+
         Returns:
             None
         """

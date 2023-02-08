@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
 
@@ -14,8 +16,23 @@ from aiaccel.util.trialid import TrialId
 class AbstractEvaluator(object):
     """An abstract class for MaximizeEvaluator and MinimizeEvaluator.
 
-    """
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options as well as process name.
 
+    Attributes:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options as well as process name.
+        config_path (Path): Path to the configuration file.
+        config (Config): Config object.
+        ws (Path): Path to the workspace.
+        dict_lock (Path): Path to "lock', i.e. `ws`/lock.
+        hp_result (dict): A dict object of the best optimized result.
+        storage (Storage): Storage object.
+        goal (str): Goal of optimization ('minimize' or 'maximize').
+        trial_id (TrialId): TrialId object.
+
+    """
     def __init__(self, config: DictConfig) -> None:
         """Initial method for AbstractEvaluator.
 
@@ -30,7 +47,15 @@ class AbstractEvaluator(object):
         self.goal = self.config.optimize.goal
         self.trial_id = TrialId(self.config.config_path)
 
-    def get_zero_padding_any_trial_id(self, trial_id: int):
+    def get_zero_padding_any_trial_id(self, trial_id: int) -> str:
+        """Returns string of trial id padded by zeros.
+
+        Args:
+            trial_id (int): Trial id.
+
+        Returns:
+            str: Trial id padded by zeros.
+        """
         return self.trial_id.zero_padding_any_trial_id(trial_id)
 
     def evaluate(self) -> None:

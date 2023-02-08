@@ -1,6 +1,6 @@
-from omegaconf.dictconfig import DictConfig
+from __future__ import annotations
 
-from typing import Union
+from omegaconf.dictconfig import DictConfig
 
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schedule_sampling
@@ -13,22 +13,23 @@ from aiaccel import dict_result
 class AbstractScheduler(AbstractModule):
     """An abstract class for AbciScheduler and LocalScheduler.
 
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options.
+
     Attributes:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options.
         algorithm (RandomSamplingSchedulingAlgorithm): A scheduling algorithm
             to select hyper parameters from a parameter pool.
         available_resource (int): An available current resource number.
-        jobs (List[dict]): A list to store job dictionaries.
+        jobs (list[dict]): A list to store job dictionaries.
         max_resource (int): A max resource number.
-        stats (List[dict]): A list of current status which is updated using ps
+        stats (list[dict]): A list of current status which is updated using ps
             command or qstat command.
     """
 
     def __init__(self, config: DictConfig) -> None:
-        """Initial method for AbstractScheduler.
-
-        Args:
-            config (str): A file name of a configuration.
-        """
         super().__init__(config, 'scheduler')
         self.set_logger(
             'root.scheduler',
@@ -71,14 +72,14 @@ class AbstractScheduler(AbstractModule):
         """
         self.get_each_state_count()
 
-    def start_job(self, trial_id: int) -> Union[Job, None]:
+    def start_job(self, trial_id: int) -> Job | None:
         """Start a new job.
 
         Args:
             hp (Path): A parameter file path
 
         Returns:
-            Union[Job, None]: A reference for created job. It returns None if
+            Job | None: A reference for created job. It returns None if
                 specified hyper parameter file already exists.
         """
         trial_ids = [job.trial_id for job in self.jobs]
@@ -211,7 +212,7 @@ class AbstractScheduler(AbstractModule):
         """
         pass
 
-    def check_error(self):
+    def check_error(self) -> bool:
 
         # Check state machin
         jobstates = self.storage.jobstate.get_all_trial_jobstate()
@@ -239,7 +240,7 @@ class AbstractScheduler(AbstractModule):
                     return False
         return True
 
-    def all_done(self):
+    def all_done(self) -> bool:
         done_states = [
             'Success',
             'HpCancelFailure',

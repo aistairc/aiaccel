@@ -1,6 +1,6 @@
 import csv
 import os
-import pathlib
+from pathlib import Path
 from logging import StreamHandler, getLogger
 
 from fasteners import InterProcessLock
@@ -16,9 +16,23 @@ logger.addHandler(StreamHandler())
 
 
 class CreationReport:
+    """Provides report creation method.
+
+    Args:
+        config (DictConfig): Config object.
+
+    Attributes:
+        config (Config): Config object.
+        ws (Path): Directory path to the workspace.
+        fp (Path): File path to the csv file named 'results.csv'.
+        trialid (TrialId): TrialId object.
+        storage (Storage): Storage object related to the workspace.
+        lock_file (dict[str, str]): Dict object containing string path to lock.
+    """
+
     def __init__(self, config: DictConfig):
         self.config = config
-        self.ws = pathlib.Path(self.config.generic.workspace).resolve()
+        self.ws = Path(self.config.generic.workspace).resolve()
         self.fp = self.ws / 'results.csv'
         self.trialid = TrialId(self.config.config_path)
         self.storage = Storage(self.ws)
@@ -26,10 +40,20 @@ class CreationReport:
             'result_txt': str(self.ws / 'lock' / 'result_txt')
         }
 
-    def get_zero_padding_trial_id(self, trial_id: int):
+    def get_zero_padding_trial_id(self, trial_id: int) -> str:
+        """Gets string of trial id padded by zeros.
+
+        Args:
+            trial_id (int): Target trial id.
+
+        Returns:
+            str: Trial id padded by zeros.
+        """
         return self.trialid.zero_padding_any_trial_id(trial_id)
 
-    def create(self):
+    def create(self) -> None:
+        """Creates repoprt.
+        """
         data = []
         header = []
 

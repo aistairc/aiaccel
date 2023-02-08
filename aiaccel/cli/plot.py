@@ -9,6 +9,18 @@ from aiaccel.util.easy_visualizer import EasyVisualizer
 
 
 class Plotter:
+    """Provides method to prints a graph on a terminal.
+
+    Args:
+        config (Config): Config object.
+
+    Attributes:
+        workspace (Path): Path to the workspace.
+        storage (Storage): Storage object.
+        goar (str): Goal of optimization ('minimize' or 'maximize').
+        cplt (EasyVisualizer): EasyVisualizer object.
+    """
+
     def __init__(self, config: DictConfig):
         self.workspace = Path(config.generic.workspace).resolve()
 
@@ -17,7 +29,8 @@ class Plotter:
         self.cplt = EasyVisualizer()
 
     def plot(self) -> None:
-        """Retrieves information from the database and prints a graph on the terminal.
+        """Retrieves information from the database and prints a graph on the
+        terminal.
 
         Returns:
             None
@@ -55,6 +68,8 @@ class Plotter:
 
 
 def main() -> None:  # pragma: no cover
+    """Parses command line options and plots a graph on the terminal.
+    """
     parser = ArgumentParser()
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()

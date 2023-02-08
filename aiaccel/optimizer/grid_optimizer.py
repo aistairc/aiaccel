@@ -2,7 +2,6 @@ from __future__ import annotations
 import math
 from functools import reduce
 from operator import mul
-from typing import Optional, Union, Tuple
 
 from omegaconf.dictconfig import DictConfig
 
@@ -13,7 +12,7 @@ from aiaccel.parameter import HyperParameter
 def get_grid_options(
     parameter_name: str,
     config: DictConfig
-) -> Tuple[Optional[int], bool, Optional[int]]:
+) -> tuple[int | None, bool, int | None]:
     """Get options about grid search.
 
     Args:
@@ -21,16 +20,16 @@ def get_grid_options(
         config (Config): A config object.
 
     Returns:
-        tuple[Optional[int], bool, Optional[int]]: The first one is a base of
+        tuple[int | None, bool, int | None]: The first one is a base of
         logarithm parameter. The second one is logarithm parameter or not.
         The third one is a step of the grid.
 
     Raises:
         KeyError: Causes when step is not specified.
     """
-    base = None
-    log = False
-    step = None
+    base: float | None = None
+    log: bool = False
+    step: float | None = None
 
     grid_options = config.optimize.parameters
 
@@ -59,7 +58,9 @@ def get_grid_options(
     raise KeyError(f'Invalid parameter name: {parameter_name}')
 
 
-def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict:
+def generate_grid_points(
+    p: HyperParameter, config: DictConfig
+) -> dict[str, float | int | str | list[float, int, str]]:
     """Make a list of all parameters for this grid.
 
     Args:
@@ -67,8 +68,8 @@ def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict:
         config (DictConfig): A configuration object.
 
     Returns:
-        dict[str, Union[str, list[float, int, str]]]: A dictionary including
-        all grid parameters.
+        dict[str, str | list[float, int, str]]: A dictionary including all grid
+        parameters.
 
     Raises:
         TypeError: Causes when an invalid parameter type is set.
@@ -113,18 +114,16 @@ def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict:
 class GridOptimizer(AbstractOptimizer):
     """An optimizer class with grid search algorithm.
 
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+        command line options.
+
     Attributes:
         ready_params (list[dict]): A list of ready hyper parameters.
         generate_index (int): A number of generated hyper parameters.
     """
 
     def __init__(self, config: DictConfig) -> None:
-        """Initial method of GridOptimizer.
-
-        Args:
-            options (dict[str, Union[str, int, bool]]): A dictionary
-            containing command line options.
-        """
         super().__init__(config)
         self.ready_params = None
         self.generate_index = None
@@ -148,11 +147,11 @@ class GridOptimizer(AbstractOptimizer):
             self.storage.get_num_finished()
         )
 
-    def get_parameter_index(self) -> Optional[list[int]]:
+    def get_parameter_index(self) -> list[int] | None:
         """Get a next parameter index.
 
         Returns:
-            Optional[list[int]]: It returns None if all parameters are
+            list[int] | None: It returns None if all parameters are
             already generated.
         """
         parameter_lengths = [len(i['parameters']) for i in self.ready_params]
@@ -180,11 +179,11 @@ class GridOptimizer(AbstractOptimizer):
 
         return parameter_index
 
-    def generate_parameter(self) -> list[dict[str, Union[float, int, str]]]:
+    def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
         Returns:
-            list[dict[str, Union[float, int, str]]]: A list of new parameters.
+            list[dict[str, float | int | str]]: A list of new parameters.
         """
         parameter_index = self.get_parameter_index()
         new_params = []
@@ -207,11 +206,11 @@ class GridOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(
         self
-    ) -> list[dict[str, Union[float, int, str]]]:
+    ) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
 
         Returns:
-            list[dict[str, Union[float, int, str]]]: A List of new parameters.
+            list[dict[str, float | int | str]]: A list of new parameters.
         """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(

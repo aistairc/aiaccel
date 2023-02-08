@@ -249,7 +249,7 @@ class CustomOptimizer(AbstractOptimizer):
         """Generate parameters.
 
         Args:
-            number (Optional[int]): A number of generating parameters.
+            number (int | None): A number of generating parameters.
 
         Returns:
             None
@@ -326,7 +326,7 @@ class RandomOptimizer(AbstractOptimizer):
         """Generate parameters.
 
         Args:
-            number (Optional[int]): A number of generating parameters.
+            number (int | None): A number of generating parameters.
 
         Returns:
             None
@@ -438,7 +438,7 @@ class CustomOptimizer(AbstractOptimizer):
         """Generate parameters.
 
         Args:
-            number (Optional[int]): A number of generating parameters.
+            number (int | None): A number of generating parameters.
 
         Returns:
             None
@@ -515,8 +515,8 @@ $$W_{n + 1} \approx W_n + \gamma \frac{f(W_n + \delta) - f(W_n) } { \delta }$$
 以下に，前進差分を用いたオプティマイザの例を示します．
 
 ```python
+from __future__ import annotations
 from enum import Enum, auto
-from typing import Dict, List, Optional, Union
 import copy
 
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -531,7 +531,7 @@ class SearchState(Enum):
 
 
 class GradientDescent(AbstractOptimizer):
-    def __init__(self, options: Dict) -> None:
+    def __init__(self, options: dict) -> None:
         super().__init__(options)
 
         self.learning_rate = self.config.config.get(
@@ -539,17 +539,17 @@ class GradientDescent(AbstractOptimizer):
         self.delta: float = 1e-03
 
         self.current_id: int = 0
-        self.current_params: List[Dict[str, Union[str, float]]
+        self.current_params: list[dict[str, str | float]
                                   ] = self.generate_initial_parameter()
         self.num_parameters = len(self.current_params)
-        self.forward_objectives: List[float] = []
+        self.forward_objectives: list[float] = []
         self.num_generated_forwards: int = 0
         self.num_calculated_forward_objectives: int = 0
-        self.forward_ids: List[int] = []
+        self.forward_ids: list[int] = []
         self.state: SearchState = SearchState.CALC_FORWARD
 
     def generate_parameter(self
-                           ) -> Optional[List[Dict[str, Union[str, float]]]]:
+                           ) -> list[dict[str, str | float]] | None:
         if self.state == SearchState.PREPARE:
             self.current_id = self.current_trial_id - 1
             self.forward_objectives = []
@@ -594,7 +594,7 @@ class GradientDescent(AbstractOptimizer):
             return None
 
         if self.state == SearchState.CALC_NEXT_PARAM:
-            new_params: List[Dict[str, Union[str, float]]] = []
+            new_params: list[dict[str, str | float]] = []
             for param, forward_objective in zip(self.current_params,
                                                 self.forward_objectives):
                 grad = (forward_objective - self.current_objective
@@ -812,7 +812,7 @@ class SearchState(Enum):
 
 ```python
         if self.state == SearchState.CALC_NEXT_PARAM:
-            new_params: List[Dict[str, Union[str, float]]] = []
+            new_params: list[dict[str, str | float]] = []
             for param, forward_objective in zip(self.current_params,
                                                 self.forward_objectives):
                 grad = (forward_objective - self.current_objective
@@ -832,14 +832,14 @@ class SearchState(Enum):
 
 Storage から読み出した $W_n$ における目的関数の値 $f(W_n)$ (`self.current_params`) と $W_{n+1}$ における目的関数の値 $f(W_{n+1})$ (`self.forward_objectives`) を用いて勾配を計算します．
 ```python
-            new_params: List[Dict[str, Union[str, float]]] = []
+            new_params: list[dict[str, str | float]] = []
             for param, forward_objective in zip(self.current_params,
                                                 self.forward_objectives):
                 grad = (forward_objective - self.current_objective
                         ) / self.delta
 ```
 
-計算した勾配を用いて次のパラメータ $W_{n+1}$ を計算して `Dict` 型オブジェクトを作成し，リストに保持します．
+計算した勾配を用いて次のパラメータ $W_{n+1}$ を計算して `dict` 型オブジェクトを作成し，リストに保持します．
 ```python
                 value = param['value'] - self.learning_rate * grad
                 new_param = {

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 from omegaconf.dictconfig import DictConfig
@@ -16,20 +18,26 @@ from aiaccel.util.time_tools import (get_time_now_object,
 class AbstractMaster(AbstractModule):
     """An abstract class for AbciMaster and LocalMaster.
 
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options.
+
     Attributes:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options as well as process name.
         loop_start_time (datetime.datetime): A stored loop starting time.
         optimizer_proc (subprocess.Popen): A reference for a subprocess of
             Optimizer.
         start_time (datetime.datetime): A stored starting time.
         verification (AbstractVerification): A verification object.
+        logger (logging.Logger): Logger object.
+        goal (str): Goal of optimization ('minimize' or 'maximize').
+        trial_number (int): The number of trials.
+        runner_files (list):
+        stats (list):
     """
 
     def __init__(self, config: DictConfig) -> None:
-        """Initial method of AbstractMaster.
-
-        Args:
-            config (str): A file name of a configuration.
-        """
         super().__init__(config, 'master')
         self.start_time = get_time_now_object()
         self.loop_start_time = None
@@ -93,9 +101,9 @@ class AbstractMaster(AbstractModule):
         self.verification.save('final')
         self.logger.info('Master finished.')
 
-    def print_dict_state(self):
-        """ Display the number of yaml files in 'ready' 'running'
-            and 'finished' directries in hp directory.
+    def print_dict_state(self) -> None:
+        """Display the number of yaml files in 'ready', 'running', and
+        'finished' directries in hp directory.
 
         Returns:
             None
@@ -155,6 +163,6 @@ class AbstractMaster(AbstractModule):
             None
 
         Returns:
-            True: no error | False: with error.
+            bool: True if no error. False if with error.
         """
         return True

@@ -1,10 +1,9 @@
-from typing import Any
-
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import Column
 from sqlalchemy.types import (Integer, PickleType, String, Text)
+from sqlalchemy.ext.declarative import DeclarativeMeta
 
-Base: Any = declarative_base()
+Base: DeclarativeMeta = declarative_base()
 
 
 # models

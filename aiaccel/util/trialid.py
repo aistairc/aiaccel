@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Union
 
 import fasteners
 
@@ -8,7 +9,25 @@ from aiaccel.config import load_config
 
 
 class TrialId:
-    def __init__(self, config_path: str):
+    """Provides interface to current trial id.
+
+    Args:
+        config_path (str): Path to the config file.
+
+    Attributes:
+        config_path (str): Path to the config file.
+        config (Config): Config object.
+        ws (Path): Path to the workspace.
+        name_length (int): Name length of hp files.
+        file_hp_count_fmt (str): String format of hp file name.
+        dict_hp (Path): Path to "hp", i.e. `ws`/hp.
+        count_path (Path): Path to "count.txt" containing current trial id,
+            i.e. `ws`/hp/count.txt.
+        lock_path (Path): Path to "count.lock", i.e. `ws`/hp/count.lock.
+        lock (fasteners.InterProcessLock): An interprocess lock.
+    """
+
+    def __init__(self, config_path: str) -> None:
         self.config_path = Path(config_path).resolve()
         self.config = load_config(str(self.config_path))
 
@@ -24,10 +43,20 @@ class TrialId:
         if self.get() is None:
             self.initial()
 
-    def zero_padding_any_trial_id(self, trial_id: int):
+    def zero_padding_any_trial_id(self, trial_id: int) -> str:
+        """Returns string of trial id padded by zeros.
+
+        Args:
+            trial_id (int): Trial id.
+
+        Returns:
+            str: Trial id padded by zeros.
+        """
         return self.file_hp_count_fmt % trial_id
 
-    def increment(self):
+    def increment(self) -> None:
+        """Increments trial id.
+        """
         if self.lock.acquire(timeout=aiaccel.file_hp_count_lock_timeout):
             trial_id = 0
             if self.count_path.exists():
@@ -36,21 +65,35 @@ class TrialId:
             self.count_path.write_text('%d' % trial_id)
             self.lock.release()
 
-    def get(self) -> Union[None, int]:
+    def get(self) -> int | None:
+        """Returns trial id.
+
+        Returns:
+            int | None: Trial id. None if count.txt does not exist.
+        """
         if self.count_path.exists() is False:
             return None
         return int(self.count_path.read_text())
 
     def initial(self, num: int = 0) -> None:
+        """Initialize trial id.
+
+        Args:
+            num (int, optional): _description_. Defaults to 0.
+        """
         if self.lock.acquire(timeout=aiaccel.file_hp_count_lock_timeout):
             trial_id = num
             self.count_path.write_text('%d' % trial_id)
             self.lock.release()
 
     @property
-    def integer(self) -> None:
+    def integer(self) -> int | None:
+        """Trial id.
+        """
         return self.get()
 
     @property
-    def string(self) -> None:
+    def string(self) -> str:
+        """Formatted trial id.
+        """
         return self.file_hp_count_fmt % self.get()

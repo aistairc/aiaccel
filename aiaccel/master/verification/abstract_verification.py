@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import logging
 from pathlib import Path
@@ -14,13 +16,30 @@ from aiaccel.util.filesystem import create_yaml
 
 class AbstractVerification(object):
     """An abstract class of verification.
+
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options as well as process name.
+
+    Attributes:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options as well as process name.
+        config (Config): Config object
+        ws (Path): Path to the workspace.
+        dict_lock (Path): Path to "lock", i.e. `ws`/lock.
+        is_verified (bool): Whether verified or not.
+        finished_loop (int): The last loop number verified.
+        condition (list[dict[str, int | float]]): A list of verification
+            conditions. Each element dict has keys 'loop', 'minimum', and
+            'maximum' with values as int, float, and float, respectively.
+            The verification is `True` if the optimized result of which the
+            trial id is the given 'loop' is greater than or equal to
+            'minimum' as well as is less than or equal to the 'maximum'.
+        verification_result (list[dict]): Deepcopy object of condition.
+        storage (Storage): Storage object.
     """
 
     def __init__(self, config: DictConfig) -> None:
-        """Initial method for AbstractVerification.
-        Args:
-            config (ConfileWrapper): A configuration object.
-        """
         # === Load config file===
         self.config = config
         self.ws = Path(self.config.generic.workspace).resolve()
@@ -33,8 +52,11 @@ class AbstractVerification(object):
         self.storage = Storage(self.ws)
 
     def verify(self) -> None:
-        """Run a verification. The trigger to run a verification, is described
-            in configuration file 'verification' > 'conditions'.
+        """Run a verification.
+
+        The trigger to run a verification, is described in configuration file
+        'verification' > 'conditions'.
+
         Returns:
             None
         """
