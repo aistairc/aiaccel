@@ -145,15 +145,16 @@ sphinx-intl update -p build/gettext -l en -l ja
 cd aiaccel
 pytest
 ```
-さらに，コーディングスタイルのチェックを行うため，以下のコマンドを実行します．
-```bash
-pytest -v --pycodestyle aiaccel examples
-pytest -v --flake8 aiaccel examples 
-```
 特定のテストコードのみを実行したい場合には，ファイル名を引数として指定します．
 ```bash
 pytest tests/unit/optimizer_test/test_abstract_optimizer.py
 ```
+さらに，コーディングスタイルのチェックを行うため，以下のコマンドを実行します．
+```bash
+pycodestyle aiaccel examples
+flake8 aiaccel examples 
+```
+
 
 ## 追加コードに対するカバレッジ
 
