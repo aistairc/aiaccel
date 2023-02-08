@@ -226,6 +226,6 @@ def create_distributions(
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
 
         else:
-            raise 'Unsupported parameter type'
+            raise TypeError('Unsupported parameter type')
 
     return distributions
