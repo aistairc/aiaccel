@@ -53,9 +53,7 @@ class PylocalScheduler(AbstractScheduler):
                 self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
                 xs = self.run.get_any_trial_xs(trial_id)
                 args.append([trial_id, xs])
-            for trial_id, (xs, y, err, start_time, end_time) in zip(
-                    trial_ids,
-                    self.pool.imap_unordered(self.execute_wrapper, args)):
+            for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(self.execute_wrapper, args):
                 self.run.report(trial_id, xs, y, err, start_time, end_time)
                 self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
                 self.create_result_file(trial_id)
@@ -84,11 +82,12 @@ class PylocalScheduler(AbstractScheduler):
         return
 
     def execute_wrapper(self, args) -> None:
+        trial_id, xs = args[0], args[1]
         start_time = get_time_now()
-        xs, y, err = self.user_func_wrapper(*args)
+        xs, y, err = self.user_func_wrapper(trial_id, xs)
         end_time = get_time_now()
 
-        return xs, y, err, start_time, end_time
+        return trial_id, xs, y, err, start_time, end_time
 
     def user_func_wrapper(self, trial_id: int, xs: dict):
         set_logging_basicConfig(self.workspace, trial_id)
