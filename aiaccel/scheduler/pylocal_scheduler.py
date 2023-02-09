@@ -8,7 +8,7 @@ from pathlib import Path
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
 from aiaccel.util.aiaccel import WrapperInterface
-from aiaccel.util.aiaccel import set_logging_basicConfig
+from aiaccel.util.aiaccel import set_logging_file_for_trial_id
 from aiaccel.util.time_tools import get_time_now
 from aiaccel.util.cast import cast_y
 
@@ -58,7 +58,7 @@ class PylocalScheduler(AbstractScheduler):
         trial_id, xs = args
         start_time = get_time_now()
 
-        set_logging_basicConfig(self.workspace, trial_id)
+        set_logging_file_for_trial_id(self.workspace, trial_id)
         y = None
         err = ""
 

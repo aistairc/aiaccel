@@ -353,7 +353,7 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
-        set_logging_basicConfig(self.workspace, trial_id)
+        set_logging_file_for_trial_id(self.workspace, trial_id)
         xs = self.get_any_trial_xs(trial_id)
         y = None
         err = ""
@@ -384,7 +384,7 @@ class Run:
                 string.
         """
 
-        set_logging_basicConfig(self.workspace, trial_id)
+        set_logging_file_for_trial_id(self.workspace, trial_id)
 
         xs = self.get_any_trial_xs(trial_id)
         err = ""
