@@ -134,7 +134,7 @@ PYTHONPATHに，aiaccelと追加したcustom_optimizer.pyのディレクトリ�
 /workspace/aiaccel/work/sphere
 
 > ls
-config.yaml       job_script_preamble.sh     user.py
+config.yaml       user.py
 
 ~~~
 
@@ -145,61 +145,13 @@ examples/sphereディレクトリをコピーし，sphereディレクトリに�
 ***/workspace/aiaccel/work/sphere/config.yaml***
 
 ```diff
--  search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
-+  search_algorithm: "my_optimizer.CustomOptimizer"
-```
-
-デフォルトのconfig.yamlファイルにはネルダーミードの初期値がリストで設定されているため，これは削除します．
-
-***/workspace/aiaccel/work/sphere/config.yaml***
-
-```yaml :config.yaml
-generic:
-  workspace: "./work"
-  job_command: "python user.py"
-  batch_job_timeout: 600
-
-resource:
-  type: "local"
-  num_node: 4
-
-ABCI:
-  group: "[group]"
-  job_script_preamble: "./job_script_preamble.sh"
-  job_execution_options: ""
-
 optimize:
-  search_algorithm: "my_optimizer.CustomOptimizer"
+- search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
++ search_algorithm: "my_optimizer.CustomOptimizer"
   goal: "minimize"
   trial_number: 30
   rand_seed: 42
   parameters:
-    -
-      name: "x1"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-    -
-      name: "x2"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-    -
-      name: "x3"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-    -
-      name: "x4"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-    -
-      name: "x5"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-
 ```
 
 これでコンフィグレーションファイルの編集は一旦終了です．
@@ -228,7 +180,7 @@ optimize:
 本節では，前節で作成したカスタムオプティマイザを編集しシンプルなアルゴリズムを実装します．
 簡単のため前節で作成したワークスペースを流用し５つのfloat型のハイパーパラメータに対し正規分布でハイパーパラメータを生成するオプティマイザを作成してみましょう．
 
-既存のオプティマイザには，ランダム・ソボル列・グリッド・ネルダーミード・TPEがサポートされていますが，ランダムオプティマイザをコピーしたソースファイルから編集を始めます．
+既存のオプティマイザには，ランダム・Sobol’列・グリッド・NelderMead・TPEがサポートされていますが，ランダムオプティマイザをコピーしたソースファイルから編集を始めます．
 
 1. ランダムオプティマイザの確認
 
@@ -237,6 +189,7 @@ optimize:
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
 ```python :custom_optimizer.py
+from __future__ import annotations
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -245,18 +198,14 @@ class CustomOptimizer(AbstractOptimizer):
 
     """
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
-        Args:
-            number (int | None): A number of generating parameters.
-
         Returns:
-            None
+            list[dict[str, float | int | str]]: A list of created parameters.
         """
-
         new_params = []
-        sample = self.params.sample()
+        sample = self.params.sample(rng=self._rng)
 
         for s in sample:
             new_param = {
@@ -270,31 +219,32 @@ class CustomOptimizer(AbstractOptimizer):
 
 ```
 
-CustomOptimizerクラスはAbstractOptimizerを継承し，generate_parameterメソッドのみを実装しています．
-generate_parameter以外のオプティマイザとしての機能はAbstractOptimizerに実装されているので，generate_parameterメソッドを実装すれば簡単なオプティマイザなら実装することができます．
+`CustomOptimizer` クラスは` AbstractOptimizer` を継承し，`generate_parameter` メソッドのみを実装しています．
+`generate_parameter` 以外のオプティマイザとしての機能は `AbstractOptimizer` に実装されているので，`generate_parameter` メソッドを実装すれば簡単なオプティマイザなら実装することができます．
 
 2. ハイパーパラメータのソースコードの確認
 
-generate_parameterメソッドを見てみましょう．
-self.params.sampleというメソッドを実行しています．
-このメソッドは，aiaccel/parameter.pyのHyperParameterConfigurationインスタンスであるself.paramsのsampleメソッドです．
-sampleメソッド内では，さらにHyperParameterインスタンスであるvalueから更にsampleメソッドが呼ばれています．
-この２度目に呼ばれたsampleメソッドはHyperParameterクラスのメソッドであり，中身を見てみるとハイパーパラメータのタイプごとに処理が分かれていますが，例えばFLOAT型の場合np.random.uniformが実行されます．
+`generate_parameter` メソッドを見てみましょう．
+`self.params.sample` というメソッドを実行しています．
+このメソッドは，aiaccel/parameter.py の `HyperParameterConfiguration` インスタンスである `self.params` の `sample` メソッドです．
+引数として与えられている `self._rng` は 継承元の `AbstractOptimizer` が持つ `numpy.random.RandomState` オブジェクトです．
+`sample` メソッド内では，さらに `HyperParameter` インスタンスである `value` から更に `sample` メソッドが呼ばれています．
+この２度目に呼ばれた `sample` メソッドは `HyperParameter` クラスのメソッドであり，中身を見てみるとハイパーパラメータのタイプごとに処理が分かれていますが，例えば `FLOAT` 型の場合 `numpy.random.RandomState.uniform` が実行されます．
 
 ***/workspace/aiaccel/aiaccel/parameter.py***
 
 ```python :aiaccel/parameter.py
-        elif self.type == 'FLOAT':
-            value = np.random.uniform(self.lower, self.upper)
+        elif self.type.lower() == 'float':
+            value = rng.uniform(self.lower, self.upper)
 ```
 
-こうして生成されたランダムなハイパーパラメータを返すことがgenerate_parameterメソッドの役割となります．
+こうして生成されたランダムなハイパーパラメータを返すことが `generate_parameter` メソッドの役割となります．
 
 3. 正規分布オプティマイザの作成
 
-ではaiaccel/parameter.pyのHyperParameterConfigurationクラスをもう少し詳しく見てみましょう．
-sampleメソッドの他に，get_parameter_listというメソッドがあります．
-このメソッドは，sampleメソッドでハイパーパラメータをランダムに選択する前のハイパーパラメータのリストを返します．
+では，aiaccel/parameter.py の `HyperParameterConfiguration` クラスをもう少し詳しく見てみましょう．
+`sample` メソッドの他に，`get_parameter_list` というメソッドがあります．
+このメソッドは，`sample` メソッドでハイパーパラメータをランダムに選択する前のハイパーパラメータのリストを返します．
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
@@ -302,41 +252,37 @@ sampleメソッドの他に，get_parameter_listというメソッドがあり�
 
         new_params = []
 +       hp_list = self.params.get_parameter_list()
--       sample = self.params.sample()
+-       sample = self.params.sample(rng=self._rng)
 
         for s in sample:
 ```
 
 次に正規分布を用いてハイパーパラメータを生成します．
-aiaccel/parameter.pyのHyperParameterクラスではnumpyのrandom.uniformを実行していましたが，今回は正規分布なのでnumpyのrandom.normalを利用します．
+aiaccel/parameter.py の `HyperParameter` クラスでは numpy の `random.RandomState.uniform` を実行していましたが，今回は正規分布なので numpy の `random.RandomState.normal` を利用します．
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
 ```python :aiaccel/optimizer/custom_optimizer.py
+from __future__ import annotations
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-import numpy as np
 
 
-class RandomOptimizer(AbstractOptimizer):
+class CustomOptimizer(AbstractOptimizer):
     """An optimizer class with a random algorithm.
 
     """
 
-    def generate_parameter(self) -> None:
+    def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
-        Args:
-            number (int | None): A number of generating parameters.
-
         Returns:
-            None
+            list[dict[str, float | int | str]]: A list of created parameters.
         """
-
         new_params = []
         hp_list = self.params.get_parameter_list()
 
         for hp in hp_list:
-            value = np.random.normal(0, 0.1)
+            value = self._rng.normal(0, 0.1)
             value = min(max(value, hp.lower), hp.upper)
             new_param = {
                 'parameter_name': hp.name,
@@ -392,8 +338,8 @@ optimize:
 + sigma: 0.1
 ```
 
-muとsigmaが追加されました．
-次にcustom_optimizer.pyを編集して，muとsigmaを取得できるようにします．
+mu と sigma が追加されました．
+次に custom_optimizer.py を編集して，mu と sigma を取得できるようにします．
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
@@ -414,8 +360,8 @@ class CustomOptimizer(AbstractOptimizer):
 
 ```
 
-__init__メソッドを追加し，コンフィグレーションからmuとsigmaを取得し変数として保持しました．
-あとはrandom.normalを呼ぶ際にmuとsigmaを渡します．
+__init__ メソッドを追加し，コンフィグレーションから mu と sigma を取得し変数として保持しました．
+あとは `self._rng.normal` を呼ぶ際に mu と sigma を渡します．
 
 ***/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py***
 
@@ -448,7 +394,7 @@ class CustomOptimizer(AbstractOptimizer):
         hp_list = self.params.get_parameter_list()
 
         for hp in hp_list:
-            value = np.random.normal(self.mu, self.sigma)
+            value = value = self._rng.normal(self.mu, self.sigma)
             value = min(max(value, hp.lower), hp.upper)
             new_param = {
                 'parameter_name': hp.name,
