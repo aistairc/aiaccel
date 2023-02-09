@@ -47,6 +47,7 @@ class PylocalScheduler(AbstractScheduler):
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
             xs = self.run.get_any_trial_xs(trial_id)
             args.append([trial_id, xs])
+            self._serialize(trial_id)
         for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(self.execute, args):
             self.run.report(trial_id, xs, y, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
