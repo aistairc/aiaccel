@@ -82,14 +82,9 @@ class PylocalScheduler(AbstractScheduler):
         return
 
     def execute_wrapper(self, args) -> None:
-        trial_id, xs = args[0], args[1]
+        trial_id, xs = args
         start_time = get_time_now()
-        xs, y, err = self.user_func_wrapper(trial_id, xs)
-        end_time = get_time_now()
 
-        return trial_id, xs, y, err, start_time, end_time
-
-    def user_func_wrapper(self, trial_id: int, xs: dict):
         set_logging_basicConfig(self.workspace, trial_id)
         y = None
         err = ""
@@ -101,7 +96,9 @@ class PylocalScheduler(AbstractScheduler):
         finally:
             self.com.out(objective_y=y, objective_err=err)
 
-        return xs, y, err
+        end_time = get_time_now()
+
+        return trial_id, xs, y, err, start_time, end_time
 
     def __getstate__(self):
         obj = super().__getstate__()
