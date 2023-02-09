@@ -8,9 +8,9 @@ from pathlib import Path
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
 from aiaccel.util.aiaccel import WrapperInterface
-from aiaccel.util.aiaccel import cast_y
 from aiaccel.util.aiaccel import set_logging_basicConfig
 from aiaccel.util.time_tools import get_time_now
+from aiaccel.util.cast import cast_y
 
 from aiaccel.config import Config
 

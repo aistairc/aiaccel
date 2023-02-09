@@ -11,6 +11,7 @@ from pathlib import Path, PosixPath
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
+from aiaccel.util.cast import cast_y
 
 
 class _Message:
@@ -486,35 +487,6 @@ class Run:
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
         if err != "":
             self.storage.error.set_any_trial_error(trial_id, err)
-
-
-def cast_y(
-        y_value: Any, y_data_type: str | None) -> float | int | str:
-    """Casts y to the appropriate data type.
-
-    Args:
-        y_value (Any): y value to be casted.
-        y_data_type (str | None): Name of data type of objective value.
-
-    Returns:
-        float | int | str: Casted y value.
-
-    Raises:
-        TypeError: Occurs when given `y_data_type` is other than `float`,
-                `int`, or `str`.
-    """
-    if y_data_type is None:
-        y = y_value
-    elif y_data_type.lower() == 'float':
-        y = float(y_value)
-    elif y_data_type.lower() == 'int':
-        y = int(float(y_value))
-    elif y_data_type.lower() == 'str':
-        y = str(y_value)
-    else:
-        TypeError(f'{y_data_type} cannot be specified')
-
-    return y
 
 
 def set_logging_basicConfig(workspace, trial_id):
