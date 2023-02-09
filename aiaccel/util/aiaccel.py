@@ -489,7 +489,7 @@ class Run:
             self.storage.error.set_any_trial_error(trial_id, err)
 
 
-def set_logging_basicConfig(workspace, trial_id):
+def set_logging_file_for_trial_id(workspace, trial_id):
     log_dir = workspace / "log"
     log_path = log_dir / f"job_{trial_id}.log"
     if not log_dir.exists():
