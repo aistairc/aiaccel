@@ -6,10 +6,10 @@ from .tpe_optimizer import TpeOptimizer
 from .motpe_optimizer import MOTpeOptimizer
 
 __all__ = [
-    GridOptimizer,
-    RandomOptimizer,
-    SobolOptimizer,
-    NelderMeadOptimizer,
-    TpeOptimizer,
-    MOTpeOptimizer
+    'GridOptimizer',
+    'RandomOptimizer',
+    'SobolOptimizer',
+    'NelderMeadOptimizer',
+    'TpeOptimizer',
+    'MOTpeOptimizer'
 ]
