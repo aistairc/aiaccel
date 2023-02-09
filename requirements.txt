@@ -37,4 +37,5 @@ myst-parser==0.18.1
 sphinx==5.3.0
 sphinxcontrib.jquery>=3.0.0
 sphinx-intl
+sphinx_fontawesome
 sphinx_rtd_theme==1.1.1
