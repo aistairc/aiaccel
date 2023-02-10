@@ -315,6 +315,12 @@ class TestAbstractScheduler(BaseTest):
             with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
                 assert scheduler.check_error() is False
 
+        self.optimizer.storage.exitstatus.all_delete()
+        assert self.optimizer.check_error() is True
+
+        self.optimizer.storage.exitstatus.set_any_trial_exitstatus(trial_id=0, state=1)
+        assert self.optimizer.check_error() is False
+
     def test_resume(self, config_json):
         options = {
             'config': self.config_json,
