@@ -1,11 +1,16 @@
 from __future__ import annotations
-from typing import Union
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+
 from scipy.stats import qmc
+
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
 class SobolOptimizer(AbstractOptimizer):
     """An optimizer class with sobol algorithm.
+
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+        command line options.
 
     Attributes:
         generate_index (int): A number of generated hyper parameters.
@@ -17,13 +22,7 @@ class SobolOptimizer(AbstractOptimizer):
         Confirm whether the current code resumes for any timings of quits.
     """
 
-    def __init__(self, options: dict[str, Union[str, int, bool]]) -> None:
-        """Initial method of SobolOptimizer.
-
-        Args:
-            options (dict[str, Union[str, int, bool]]): A dictionary
-            containing command line options.
-        """
+    def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
         self.generate_index = None
         self.sampler = None
@@ -46,11 +45,11 @@ class SobolOptimizer(AbstractOptimizer):
                 seed=self._rng
             )
 
-    def generate_parameter(self) -> list[dict[str, Union[float, int, str]]]:
+    def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
         Returns:
-            list[dict[str, Union[float, int, str]]]: A list of new parameters.
+            list[dict[str, float | int | str]]: A list of new parameters.
         """
         l_params = self.params.get_parameter_list()
         n_params = len(l_params)
@@ -78,11 +77,11 @@ class SobolOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(
         self
-    ) -> list[dict[str, Union[float, int, str]]]:
+    ) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
 
         Returns:
-            list[dict[str, Union[float, int, str]]]: A list of new parameters.
+            list[dict[str, float | int | str]]: A list of new parameters.
         """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(

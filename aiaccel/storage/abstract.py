@@ -1,8 +1,9 @@
 from contextlib import contextmanager
-from pathlib import Path
+from pathlib import Path, PosixPath
+from typing import Generator
 
 from sqlalchemy import MetaData, create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker, Session
 from sqlalchemy.pool import NullPool
 
 from aiaccel.storage.model import Base
@@ -12,7 +13,7 @@ from aiaccel.util.retry import retry
 class Abstract:
 
     @retry(_MAX_NUM=6, _DELAY=1.0)
-    def __init__(self, file_name):
+    def __init__(self, file_name: PosixPath):
         self.url = f'sqlite:///{file_name}'
         self.engine = create_engine(
             self.url,
@@ -29,7 +30,7 @@ class Abstract:
         self.lock_file = Path(file_name).resolve().parent / "db_lock"
 
     @contextmanager
-    def create_session(self):
+    def create_session(self) -> Generator[Session, None, None]:
         session = self.session()
         yield session
         session.close()

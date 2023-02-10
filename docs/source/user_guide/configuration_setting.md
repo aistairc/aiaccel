@@ -122,11 +122,19 @@ aiaccel では以下のアルゴリズムをサポートしています．
 
 **Nelder-Mead 法 ("aiaccel.optimizer.NelderMeadOptimizer")**
 
-設定可能なデータ型は "uniform_float" と "uniform_int" です．
+設定可能なデータ型は "uniform_float"，"uniform_int"，および "ordinal" です．
+
+***"uniform_float" または "uniform_int" の場合***
 - *name*
 - *type ("uniform_float", "uniform_int")*
 - *lower*
 - *upper*
+- *initial* - 要素数が **パラメータ数 + 1** の配列を設定します．initial の項目が存在しない場合，aiaccel はランダムに初期値の配列を設定します．また，設定された配列の要素数が **パラメータ数 + 1** より少ない場合，aiaccel は足りない初期値をランダムに生成し補います．
+
+***"ordinal" の場合***
+- *name*
+- *type ("ordinal")*
+- *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
 - *initial* - 要素数が **パラメータ数 + 1** の配列を設定します．initial の項目が存在しない場合，aiaccel はランダムに初期値の配列を設定します．また，設定された配列の要素数が **パラメータ数 + 1** より少ない場合，aiaccel は足りない初期値をランダムに生成し補います．
 
 **ランダムオプティマイザ ("aiaccel.optimizer.RandomOptimizer")**
@@ -192,7 +200,7 @@ aiaccel では以下のアルゴリズムをサポートしています．
 
 **TPE オプティマイザ ("aiaccel.optimizer.TpeOptimizer")**
 
-設定可能なデータ型は "uniform_float", "uniform_int", および "categorical" です．
+設定可能なデータ型は "uniform_float", "uniform_int", "categorical", および "ordinal" です．
 
 ***"uniform_float" または "uniform_int" の場合***
 - *name*
@@ -208,7 +216,11 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *choices* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
 - *initial*
 
-
+***"ordinal" の場合***
+- *name*
+- *type ("ordinal")*
+- *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
+- *initial*
 
 <br>
 
