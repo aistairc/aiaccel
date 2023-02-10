@@ -75,9 +75,9 @@ class PylocalScheduler(AbstractScheduler):
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
 
         start_time = get_time_now()
-        xs, y, err = self.run.execute(self.user_func, trial_id, y_data_type=None)
+        xs, y, err, exitstatus = self.run.execute(self.user_func, trial_id, y_data_type=None)
         end_time = get_time_now()
-        self.run.report(trial_id, xs, y, err, start_time, end_time)
+        self.run.report(trial_id, xs, y, err, exitstatus, start_time, end_time)
 
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
         self.create_result_file(trial_id)
