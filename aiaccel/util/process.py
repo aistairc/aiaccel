@@ -175,7 +175,6 @@ class OutputHandler(threading.Thread):
                             trial_id=self.trial_id,
                             error_message=error_message
                         )
-                    raise RuntimeError(error_message)
                 break
 
             if self._abort:

@@ -390,15 +390,17 @@ class Run:
         xs = self.get_any_trial_xs(trial_id)
         y = None
         err = ""
+        exitstatus = 0
 
         try:
             y = self.cast_y(func(xs), y_data_type)
         except BaseException as e:
             err = str(e)
+            exitstatus = 1
         finally:
             self.com.out(objective_y=y, objective_err=err)
 
-        return xs, y, err
+        return xs, y, err, exitstatus
 
     @execute.register
     def _(
@@ -443,7 +445,9 @@ class Run:
             y = self.cast_y(ys[0], y_data_type)
         err = ("\n").join(err)
 
-        return xs, y, err
+        exitstatus = output.returncode
+
+        return xs, y, err, exitstatus
 
     @singledispatchmethod
     def execute_and_report(
@@ -471,10 +475,10 @@ class Run:
                 run.execute_and_report(func)
         """
         start_time = get_time_now()
-        xs, y, err = self.execute(func, self.trial_id, y_data_type)
+        xs, y, err, exitstatus = self.execute(func, self.trial_id, y_data_type)
         end_time = get_time_now()
 
-        self.report(self.trial_id, xs, y, err, start_time, end_time)
+        self.report(self.trial_id, xs, y, err, exitstatus, start_time, end_time)
 
     @execute_and_report.register
     def _(self, command: str, y_data_type: Optional[str] = None):
@@ -497,8 +501,8 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     def report(
-        self, trial_id: int, xs: dict, y: any, err: str, start_time: str,
-        end_time: str
+        self, trial_id: int, xs: dict, y: any, err: str, exitstatus: int,
+        start_time: str, end_time: str
     ) -> None:
         """Saves results in the Storage object.
 
@@ -513,5 +517,6 @@ class Run:
         self.storage.result.set_any_trial_objective(trial_id, y)
         self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
+        self.storage.exitstatus.set_any_trial_exitstatus(trial_id, exitstatus)
         if err != "":
             self.storage.error.set_any_trial_error(trial_id, err)

@@ -56,3 +56,9 @@ class VariableTable(Base):
     process_name = Column(String(length=128), nullable=False)
     label = Column(String(length=128), nullable=False)
     value = Column(PickleType, nullable=False)
+
+
+class ExitStatusTable(Base):
+    __tablename__ = 'exit_status'
+    trial_id = Column(Integer, primary_key=True, nullable=False)
+    state = Column(Integer, nullable=True)

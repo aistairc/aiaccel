@@ -9,6 +9,7 @@ from aiaccel.storage.result import Result
 from aiaccel.storage.timestamp import TimeStamp
 from aiaccel.storage.trial import Trial
 from aiaccel.storage.variable import Serializer
+from aiaccel.storage.exitstatus import ExitStatus
 
 
 class Storage:
@@ -24,6 +25,7 @@ class Storage:
         self.error = Error(db_path)
         self.timestamp = TimeStamp(db_path)
         self.variable = Serializer(db_path)
+        self.exitstatus = ExitStatus(db_path)
 
     def current_max_trial_number(self) -> int:
         """Get the current maximum number of trials.

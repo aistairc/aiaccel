@@ -241,6 +241,11 @@ class AbstractScheduler(AbstractModule):
                         f"{'running_timeout'}"
                     )
                     return False
+
+        # Check exit status
+        exitstatus = self.storage.exitstatus.get_exitstatus_trial_id(state=1)
+        if len(exitstatus) > 0:
+            return False
         return True
 
     def all_done(self):
