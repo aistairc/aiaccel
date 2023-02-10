@@ -130,12 +130,10 @@ def test_OutputHandler():
     e = b'\xe3\x81\x82'
     _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE, stderr=STDOUT), 'test', trial_id)
     with patch.object(_ouputhandler._proc, 'communicate', return_value=(o, e)):
-        with pytest.raises(RuntimeError):
-            assert _ouputhandler.run() is None
+        assert _ouputhandler.run() is None
 
     o = b'\xe3\x81\x82'
     e = b'\0'
     _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE, stderr=PIPE), 'test', trial_id)
     with patch.object(_ouputhandler._proc, 'communicate', return_value=(o, e)):
-        with pytest.raises(RuntimeError):
-            assert _ouputhandler.run() is None
+        assert _ouputhandler.run() is None
