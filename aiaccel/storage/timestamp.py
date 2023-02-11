@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from pathlib import PosixPath
+
 from sqlalchemy.exc import SQLAlchemyError
 
 from aiaccel.storage.abstract import Abstract
@@ -6,7 +10,7 @@ from aiaccel.util.retry import retry
 
 
 class TimeStamp(Abstract):
-    def __init__(self, file_name) -> None:
+    def __init__(self, file_name: PosixPath) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -70,7 +74,7 @@ class TimeStamp(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_start_time(self, trial_id: int) -> str:
+    def get_any_trial_start_time(self, trial_id: int) -> str | None:
         """Obtains the start time of the specified trial.
 
         Args:
@@ -95,7 +99,7 @@ class TimeStamp(Abstract):
         return data.start_time
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_end_time(self, trial_id: int) -> str:
+    def get_any_trial_end_time(self, trial_id: int) -> str | None:
         """Obtains the end time of the specified trial.
 
         Args:

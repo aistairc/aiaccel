@@ -1,5 +1,6 @@
-from pathlib import PosixPath
-from typing import Union
+from __future__ import annotations
+
+from pathlib import Path
 
 import aiaccel
 from aiaccel.storage.error import Error
@@ -15,7 +16,7 @@ class Storage:
     """Database
     """
 
-    def __init__(self, ws: PosixPath) -> None:
+    def __init__(self, ws: Path) -> None:
         db_path = ws / aiaccel.dict_storage / "storage.db"
         self.trial = Trial(db_path)
         self.hp = Hp(db_path)
@@ -25,7 +26,7 @@ class Storage:
         self.timestamp = TimeStamp(db_path)
         self.variable = Serializer(db_path)
 
-    def current_max_trial_number(self) -> int:
+    def current_max_trial_number(self) -> int | None:
         """Get the current maximum number of trials.
 
         Returns:
@@ -122,14 +123,14 @@ class Storage:
         """
         return trial_id in self.trial.get_finished()
 
-    def get_hp_dict(self, trial_id) -> Union[None, dict]:
+    def get_hp_dict(self, trial_id: int) -> dict | None:
         """Obtain information on a specified trial in dict.
 
         Args:
             trial_id_str(str): trial id
 
         Returns:
-            content(dict): Any trials information
+            dict | None: Any trials information
         """
 
         data = self.hp.get_any_trial_params(trial_id=trial_id)
@@ -163,7 +164,7 @@ class Storage:
         end_time = self.timestamp.get_any_trial_end_time(trial_id=trial_id)
         error = self.error.get_any_trial_error(trial_id=trial_id)
 
-        content = {}
+        content: dict[str, str | int | float | list] = {}
         content['trial_id'] = trial_id
         content['parameters'] = hp
         content['result'] = result
@@ -175,7 +176,7 @@ class Storage:
 
         return content
 
-    def get_best_trial(self, goal: str) -> tuple:
+    def get_best_trial(self, goal: str) -> tuple[int | None, float | None]:
         """Get best trial number and best value.
 
         Args:
@@ -212,7 +213,7 @@ class Storage:
 
         return (best_trial_id, best_value)
 
-    def get_best_trial_dict(self, goal: str) -> dict:
+    def get_best_trial_dict(self, goal: str) -> dict | None:
         """Get best trial information in dict format.
 
         Args:

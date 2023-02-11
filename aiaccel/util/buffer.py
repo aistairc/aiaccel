@@ -1,5 +1,6 @@
+from __future__ import annotations
 import copy
-from typing import Any, Union
+from typing import Any
 
 
 class _buffer:
@@ -9,7 +10,7 @@ class _buffer:
             labal (str): A name of list.
         """
         self.label = label
-        self.arr = []
+        self.arr: list = []
         self._max_size = 65535
 
     def __call__(self, index: int):
@@ -94,10 +95,10 @@ class _buffer:
         """ Get index if exists duplicate data in list else -1.
 
         Args:
-            value (any): Check to see if the same value already exists.
+            value (Any): Check to see if the same value already exists.
 
         Returns:
-            (int): index value or -1.
+            int: index value or -1.
         """
         for i in range(len(self.arr)):
             if self.arr[i] == value:
@@ -109,7 +110,7 @@ class _buffer:
         """
         return self.Now - self.Pre
 
-    def point_diff(self, idx_pre, idx_now) -> Any:
+    def point_diff(self, idx_pre: int, idx_now: int) -> Any:
         """ Get the difference between any two points.
 
         Args:
@@ -121,12 +122,12 @@ class _buffer:
         """
         return self.arr[idx_now] - self.arr[idx_pre]
 
-    def has_difference(self, digit: Union[int, None] = None) -> bool:
-        """ Check there is a difference or not.
+    def has_difference(self, digit: int | None = None) -> bool:
+        """Check there is a difference or not.
 
         Args:
-            [optional] digit (int): If this value is set, the value is
-                                    rounded to the specified digit.
+            digit (int | None, optional): If this value is set, the value is
+                rounded to the specified digit. Defaults to None.
         """
         if len(self.arr) >= 2:
             if digit is None:
@@ -140,12 +141,17 @@ class _buffer:
 class Buffer:
     """ Buffer
 
-    Attributes:
-        labels (list) : A list of buffer data names.
-        num_buff (int): A length of labels.
-        d (dict)      : A dictionary for accessing arbitrary buffer data
+    Args:
+        labels (tuple) : Label names.
 
-    Example
+    Attributes:
+        labels (list): A list of buffer data names.
+        num_buff (int): A length of labels.
+        d (dict): A dictionary for accessing arbitrary buffer data
+
+    Example:
+     ::
+
         # create buffer
         buff = Buffer(["data1", "data2", "data3"])
 
@@ -153,23 +159,20 @@ class Buffer:
         buff.d["data1"].Add(x)
         buff.d["data2"].Add(x)
         buff.d["data3"].Add(x)
-        or
+        # or
         buff.Add("data1", x)
         buff.Add("data2", x)
         buff.Add("data3", x)
     """
-    def __init__(self, *labels):
-        """
-        Args:
-            *labels (tuple) : Label names.
-        """
+
+    def __init__(self, *labels: tuple) -> None:
         self.labels = labels[0]
         self.num_buff = len(self.labels)
         self.d = {}
         for i in range(self.num_buff):
             self.d[self.labels[i]] = _buffer(self.labels[i])
 
-    def Add(self, label: str, value: Any):
+    def Add(self, label: str, value: Any) -> None:
         """ Add a data to any buffer.
 
         Args:

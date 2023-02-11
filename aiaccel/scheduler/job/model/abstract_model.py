@@ -44,7 +44,7 @@ class AbstractModel(object):
         """
         obj.count_retry += 1
 
-    def conditions_confirmed(self, obj) -> bool:
+    def conditions_confirmed(self, obj: 'Job') -> bool:
         """State transition of 'conditions_confirmed'.
 
         Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.

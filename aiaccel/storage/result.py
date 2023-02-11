@@ -1,4 +1,6 @@
-from typing import Any, Union
+from __future__ import annotations
+from typing import Any
+from pathlib import PosixPath
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -8,7 +10,7 @@ from aiaccel.util.retry import retry
 
 
 class Result(Abstract):
-    def __init__(self, file_name) -> None:
+    def __init__(self, file_name: PosixPath) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -45,14 +47,14 @@ class Result(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_objective(self, trial_id) -> Union[None, int, float]:
+    def get_any_trial_objective(self, trial_id: int) -> int | float | None:
         """Obtain the results of an arbitrary trial.
 
         Args:
             trial_id (int): Any trial id
 
         Returns:
-            Any
+            int | float | None:
         """
         with self.create_session() as session:
             data = (
@@ -72,7 +74,7 @@ class Result(Abstract):
         """Get all results
 
         Returns:
-            Any
+            list
         """
         with self.create_session() as session:
             data = (
@@ -87,7 +89,7 @@ class Result(Abstract):
         """Get all results in list.
 
         Returns:
-            objectives(list): result values
+           list: result values
         """
         data = self.get_all_result()
 
@@ -97,7 +99,7 @@ class Result(Abstract):
         """Obtains the sorted result.
 
         Returns:
-            objectives(list): result values
+            list: result values
         """
         goal = goal.lower()
         objectives = self.get_objectives()
@@ -121,11 +123,11 @@ class Result(Abstract):
         return best_values
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_result_trial_id_list(self) -> Union[None, list]:
+    def get_result_trial_id_list(self) -> list | None:
         """Obtains the sorted result.
 
         Returns:
-            objectives(list): result values
+            list | None: result values
         """
         with self.create_session() as session:
             data = (
@@ -155,10 +157,14 @@ class Result(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def delete_any_trial_objective(self, trial_id) -> None:
-        """
-        Returns:
-            None
+    def delete_any_trial_objective(self, trial_id: int) -> None:
+        """_summary_
+
+        Args:
+            trial_id (int): _description_
+
+        Raises:
+            e: _description_
         """
         with self.create_session() as session:
             try:

@@ -4,7 +4,7 @@ import logging
 
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Literal
 
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
@@ -403,8 +403,15 @@ class CustomMachine(Machine):
 class Job:
     """A job thread to manage running jobs on local computer or ABCI.
 
-    ToDo: Confirm the state transition especially timeout expire and retry
+    Todo:
+        Confirm the state transition especially timeout expire and retry
         expire. Retry expire works well?
+
+    Args:
+        config (ConfileWrapper): A configuration object.
+        scheduler (LocalScheduler | AbciScheduler): A reference for
+            scheduler object.
+        hp_file (Path): A hyper parameter file for this job.
 
     Attributes:
         - config (ConfileWrapper): A configuration object.
@@ -496,7 +503,7 @@ class Job:
 
         - c (int): A loop counter.
 
-        - scheduler (Union[LocalScheduler, AbciScheduler]):
+        - scheduler (LocalScheduler | AbciScheduler):
             A reference for scheduler object.
 
         - hp_file (Path): A hyper parameter file for this job.
@@ -519,17 +526,9 @@ class Job:
     def __init__(
         self,
         config: Config,
-        scheduler: Union[AbciScheduler, LocalScheduler],
+        scheduler: AbciScheduler | LocalScheduler,
         trial_id: int
     ) -> None:
-        """Initial method for Job class.
-
-        Args:
-            config (ConfileWrapper): A configuration object.
-            scheduler (Union[LocalScheduler, AbciScheduler]): A reference for
-                scheduler object.
-            hp_file (Path): A hyper parameter file for this job.
-        """
         super(Job, self).__init__()
         # === Load config file===
         self.config = config
@@ -603,7 +602,7 @@ class Job:
         """
         return self.machine
 
-    def get_model(self) -> Union[AbciModel, LocalModel]:
+    def get_model(self) -> AbciModel | LocalModel:
         """Get a state transition model object.
 
         Returns:
@@ -619,11 +618,11 @@ class Job:
         """
         return self.machine.get_state(self.model.state)
 
-    def get_state_name(self) -> Union[str, Enum]:
+    def get_state_name(self) -> str | Enum:
         """Get a current state name.
 
         Returns:
-            Union[str, Enum]: A current state name.
+            str | Enum: A current state name.
         """
         state = self.get_state()
         return state.name
@@ -655,7 +654,7 @@ class Job:
             state.name in self.expirable_states
         )
 
-    def check_job_command_error(self):
+    def check_job_command_error(self) -> bool:
         if self.command_error_output.exists() is False:
             return True
 
