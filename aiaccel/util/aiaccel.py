@@ -355,13 +355,13 @@ class Run:
         """
         set_logging_file_for_trial_id(self.workspace, trial_id)
         xs = self.get_any_trial_xs(trial_id)
-        y = None
-        err = ""
-
         try:
             y = cast_y(func(xs), y_data_type)
         except BaseException as e:
             err = str(e)
+            y = None
+        else:
+            err = ""
         finally:
             self.com.out(objective_y=y, objective_err=err)
 
