@@ -9,7 +9,7 @@
 
 - バグの内容
 - バグを再現する手順
-- あなたが起こる期待したこと
+- あなたが起こると期待したこと
 - 実行環境
 
 
@@ -32,7 +32,7 @@ Pull request を行う際には，以下に注意してください．
 
 ### 初めて開発に参加する場合
 - まず，GitHub 上で aiaccel をフォークします．
-- フォークした後，aiaccel のリポジトリをcloneします．
+- フォークした後，aiaccel のリポジトリを clone します．
     ```bash
     git clone https://github.com/[YOUR USERNAME]/aiaccel.git
     ```
@@ -67,7 +67,6 @@ Pull request を行う際には，以下に注意してください．
 
 *上記を確認した後*:
 - GitHub 上のフォークに変更をプッシュします．
-
     ```bash
     git push origin feature/add-new-optimizer
     ```
@@ -80,7 +79,7 @@ Pull request を行う際には，以下に注意してください．
     - **説明**
         - 動機を書くこと．
         - 変更点を書くこと．
-        - 関連する issue がある場合，`Close #N` で issue を閉じること．
+        - 関連する issue を閉じることができる場合，`Close #N` で issue を閉じること．
         - 作業が進行中 (work-in-progress) であるなら，残りのタスクを書くこと．
 - Pull request を送信します．
 
@@ -133,10 +132,10 @@ sphinx-intl update -p build/gettext -l en -l ja
 # テスト
 
 ## テストの追加
+- aiaccel では pytest を用いてテストを行います．
 - ユニットテストは tests の下のディレクトリに作成します．
     - aiaccel/tests/unit 以下のディレクトリ構造は，config.py などの一部のモジュールを除いて，aiaccel/aiaccel 以下の構造に対応します． 例えば，aiaccel/aiaccel/optimizer/abstract_optimizer.py のテストは aiaccel/tests/unit/optimzier_test/test_abstract_optimizer.py です．
-- 新たな機能の追加, またはバグの修正を行った場合，テストコードを作成してください．
-- aiaccel では pytest を用いてテストを行います．
+- 新たな機能の追加，またはバグの修正を行った場合，テストコードを作成してください．
 
 
 ## テストの実行 (WIP)
@@ -182,7 +181,7 @@ pytest --cov=aiaccel --cov-branch
 
 - aiaccel のソースコードは Python で作成します．
 - コーディングスタイルは PEP8 に従います．
-    - aiaccel では flake8 を用いてコーディングスタイルの検証を行います．
+    - aiaccel では pycodestyle と flake8 を用いてコーディングスタイルの検証を行います．
     <!-- - オートフォーマッタとして pylint や black の使用を推奨しています． -->
     - 下記の Docstrings についても確認してください．
 - aiaccel では型ヒントの検証は行いませんが，できる限り型ヒントを記述してください．
