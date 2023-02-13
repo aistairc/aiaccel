@@ -24,10 +24,8 @@ class PylocalScheduler(AbstractScheduler):
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.com = WrapperInterface()
 
-        if self.num_node > 1:
-            self.pool = Pool(self.num_node, initializer=initializer, initargs=(self.config_path,))
-        else:
-            self.pool = ThreadPool(self.num_node, initializer=initializer, initargs=(self.config_path,))
+        Pool_ = Pool if self.num_node > 1 else ThreadPool
+        self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config_path,))
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
