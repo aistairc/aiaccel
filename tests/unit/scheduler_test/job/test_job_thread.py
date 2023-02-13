@@ -64,6 +64,7 @@ class TestModel(BaseTest):
         self.job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         self.model = scheduler.create_model()
@@ -102,6 +103,7 @@ class TestModel(BaseTest):
             # json_object_config,
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         yield
@@ -408,6 +410,7 @@ class TestJob(BaseTest):
         self.job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         yield
@@ -437,6 +440,7 @@ class TestJob(BaseTest):
         job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         assert type(job) is Job

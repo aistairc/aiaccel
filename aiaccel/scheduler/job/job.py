@@ -4,7 +4,7 @@ import logging
 
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
@@ -411,7 +411,12 @@ class Job:
         config (ConfileWrapper): A configuration object.
         scheduler (LocalScheduler | AbciScheduler): A reference for
             scheduler object.
+        model (LocalModel | AbciModel): A reference for
+            model object of state machine.
         hp_file (Path): A hyper parameter file for this job.
+
+    Raises:
+        ValueError: When model is None.
 
     Attributes:
         - config (ConfileWrapper): A configuration object.
@@ -527,6 +532,7 @@ class Job:
         self,
         config: Config,
         scheduler: AbciScheduler | LocalScheduler,
+        model: AbciModel | LocalModel,
         trial_id: int
     ) -> None:
         super(Job, self).__init__()
@@ -562,7 +568,15 @@ class Job:
         self.dict_lock = self.ws / dict_lock
 
         self.scheduler = scheduler
-        self.model = self.scheduler.create_model()
+        self.model = model
+        if self.model is None:
+            raise ValueError(
+                "model is None. "
+                "Be sure to specify the model to use in the Job class. "
+                "For example, PylocalScheduler doesn't use model. "
+                "Therefore, Job class cannot be used."
+            )
+
         self.machine = CustomMachine(
             model=self.model,
             states=JOB_STATES,

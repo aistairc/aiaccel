@@ -53,5 +53,10 @@ class AbciScheduler(AbstractScheduler):
             return None
         return numbers.search(command).group()
 
-    def create_model(self):
+    def create_model(self) -> AbciModel:
+        """Creates model object of state machine.
+
+        Returns:
+            AbciModel: Model object.
+        """
         return AbciModel()

@@ -92,3 +92,11 @@ class PylocalScheduler(AbstractScheduler):
         del obj['run']
         del obj['user_func']
         return obj
+
+    def create_model(self) -> None:
+        """Creates model object of state machine.
+
+        Returns:
+            None: Because it does not use the state transition model.
+        """
+        return None
