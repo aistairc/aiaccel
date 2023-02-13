@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from multiprocessing import Pool
-from multiprocessing.pool import ThreadPool
+from multiprocessing.pool import Pool, ThreadPool
 import importlib
 from pathlib import Path
 
