@@ -1,4 +1,4 @@
-import pathlib
+from pathlib import Path
 import shutil
 
 from aiaccel.workspace import Workspace
@@ -52,9 +52,9 @@ def test_move_completed_data():
     workspace.create()
     # ===  test start ===
     # 1
-    assert type(workspace.move_completed_data()) == pathlib.PosixPath
+    assert isinstance(workspace.move_completed_data(), Path)
     # 2
-    assert type(workspace.move_completed_data()) == pathlib.PosixPath
+    assert isinstance(workspace.move_completed_data(), Path)
     # ===  test end ===
     shutil.rmtree("./results")
     workspace.clean()
