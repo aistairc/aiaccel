@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from pathlib import PosixPath
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -12,7 +12,7 @@ from aiaccel.util.retry import retry
 
 
 class Variable(Abstract):
-    def __init__(self, file_name: PosixPath) -> None:
+    def __init__(self, file_name: Path) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -100,7 +100,7 @@ class Variable(Abstract):
 
 
 class Value(Variable):
-    def __init__(self, file_name: PosixPath, label: str) -> None:
+    def __init__(self, file_name: Path, label: str) -> None:
         super().__init__(file_name)
         self.process_name = None
         self.label = label
@@ -135,8 +135,8 @@ class Value(Variable):
 
 
 class Serializer:
-    def __init__(self, file_name: PosixPath) -> None:
-        self.file_name: PosixPath = file_name
+    def __init__(self, file_name: Path) -> None:
+        self.file_name: Path = file_name
         self.d: dict[str, Value] = {}
 
     def register(self, process_name: str, labels: list) -> None:
