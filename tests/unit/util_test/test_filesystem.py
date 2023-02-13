@@ -1,6 +1,6 @@
 from aiaccel.workspace import Workspace
 import shutil
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import (create_yaml, file_create, file_delete,
@@ -117,4 +117,4 @@ def test_get_file_result_hp(work_dir):
     file_path = work_dir / 'result' / 'test.hp'
     create_yaml(file_path, {})
 
-    assert get_file_result_hp(work_dir) == [PosixPath(file_path)]
+    assert get_file_result_hp(work_dir) == [Path(file_path)]

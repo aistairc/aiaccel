@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
-from pathlib import PosixPath
+from pathlib import Path
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -11,7 +11,7 @@ from aiaccel.util.retry import retry
 
 
 class Hp(Abstract):
-    def __init__(self, file_name: PosixPath) -> None:
+    def __init__(self, file_name: Path) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
