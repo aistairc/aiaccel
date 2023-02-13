@@ -56,8 +56,6 @@ class PylocalScheduler(AbstractScheduler):
         start_time = get_time_now()
 
         set_logging_file_for_trial_id(self.workspace, trial_id)
-        y = None
-        err = ""
 
         try:
             y = cast_y(user_func(xs), y_data_type=None)
