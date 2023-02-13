@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import optuna
-from optuna.storages._rdb import models
-
 import sqlalchemy
 import sqlalchemy.orm as sqlalchemy_orm
+from optuna.storages._rdb import models
 
 import aiaccel.parameter
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -199,7 +198,7 @@ class TpeOptimizer(AbstractOptimizer):
 
     def resume_trial(self):
         optuna_trials = self.study.get_trials()
-        storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
+        storage_path = f"sqlite:///{self.ws}/optuna-{self.study_name}.db"
         engine = sqlalchemy.create_engine(storage_path, echo=False)
         Session = sqlalchemy_orm.sessionmaker(bind=engine)
         session = Session()

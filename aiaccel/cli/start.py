@@ -7,7 +7,7 @@ from logging import StreamHandler, getLogger
 
 import aiaccel
 from aiaccel import parameter as pt
-from aiaccel.config import Config
+from aiaccel.config import Config, is_multi_objective
 from aiaccel.master.create import create_master
 from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
@@ -92,7 +92,7 @@ def main() -> None:  # pragma: no cover
 
     files = fs.get_file_result_hp(dst)
 
-    if not isinstance(goal, list):
+    if is_multi_objective(config) is False:
         best, best_file = pt.get_best_parameter(files, goal, dict_lock)
         logger.info(f"Best result    : {best_file}")
         logger.info(f"               : {best}")

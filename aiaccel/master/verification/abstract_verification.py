@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 
 import aiaccel
-from aiaccel.config import Config
+from aiaccel.config import Config, is_multi_objective
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 
@@ -105,7 +105,7 @@ class AbstractVerification(object):
 
         # self.save(loop)
 
-        if isinstance(self.config.goal.get(), list):
+        if is_multi_objective(self.config):
             return
 
         best_trial = self.storage.get_best_trial_dict(self.config.goal.get().lower())

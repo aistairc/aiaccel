@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import copy
 import os
 import sys
@@ -755,3 +756,15 @@ class Config:
             group="verification",
             keys=("condition")
         )
+
+
+def is_multi_objective(config: Config) -> bool:
+    """Is the multi-objective option set in the configuration.
+
+    Args:
+        config (Config): A configuration object.
+
+    Returns:
+        bool: Is the multi--objective option set in the configuration or not.
+    """
+    return isinstance(config.goal.get(), list)

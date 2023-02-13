@@ -1,14 +1,15 @@
 import dataclasses
 import json
+import sys
 from threading import local
+from unittest.mock import patch
 
 import pytest
-from aiaccel.config import (BaseConfig, Config, ConfileWrapper,
-                            JsonOrYamlObjectConfig, load_config)
 
+from aiaccel.config import (BaseConfig, Config, ConfileWrapper,
+                            JsonOrYamlObjectConfig, is_multi_objective,
+                            load_config)
 from tests.base_test import BaseTest
-from unittest.mock import patch
-import sys
 
 
 class TestBaseConfig(object):
@@ -253,3 +254,8 @@ def test_value(config_json):
 def test_config_not_exists():
     with pytest.raises(FileNotFoundError):
         config = Config("?")
+
+
+def test_is_multi_objective(config_json):
+    config = Config(config_json)
+    assert is_multi_objective(config) is False

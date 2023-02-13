@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 
 import aiaccel
+from aiaccel.config import is_multi_objective
 from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
 from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
 from aiaccel.master.verification.abstract_verification import \
@@ -86,7 +87,7 @@ class AbstractMaster(AbstractModule):
         if not self.check_finished():
             return
 
-        if isinstance(self.goal, list):
+        if is_multi_objective(self.goal):
             self.logger.info('Multi-objective optimization does not run an evaluation process.')
         elif self.goal.lower() == aiaccel.goal_maximize:
             evaluator = MaximizeEvaluator(self.options)
@@ -96,7 +97,7 @@ class AbstractMaster(AbstractModule):
             self.logger.error(f'Invalid goal: {self.goal}.')
             raise ValueError(f'Invalid goal: {self.goal}.')
 
-        if not isinstance(self.goal, list):
+        if is_multi_objective(self.goal) is False:
             evaluator.evaluate()
             evaluator.print()
             evaluator.save()

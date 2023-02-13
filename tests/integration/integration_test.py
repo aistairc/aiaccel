@@ -2,19 +2,18 @@ import asyncio
 import subprocess
 from pathlib import Path
 
+import yaml
+
 import aiaccel
-from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
+from aiaccel.config import Config, is_multi_objective
 from aiaccel.master.create import create_master
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.master.pylocal_master import PylocalMaster
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
-
+from aiaccel.storage.storage import Storage
 from tests.base_test import BaseTest
-
-import yaml
 
 
 async def start_master(master):
@@ -32,9 +31,9 @@ class IntegrationTest(BaseTest):
         #
         config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
         config = Config(config_file)
-        is_multi_objective = isinstance(config.goal.get(), list)
+        #is_multi_objective = isinstance(config.goal.get(), list)
 
-        if is_multi_objective:
+        if is_multi_objective(config):
             user_main_file = self.test_data_dir.joinpath('original_main_mo.py')
         else:
             user_main_file = None
@@ -53,7 +52,7 @@ class IntegrationTest(BaseTest):
 
             storage = Storage(ws=Path(config.workspace.get()))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage, is_multi_objective)
+            self.evaluate(work_dir, storage, is_multi_objective(config))
 
             self.result_comparison.append(storage.result.get_objectives())
 
@@ -86,7 +85,7 @@ class IntegrationTest(BaseTest):
             storage = Storage(ws=Path(config.workspace.get()))
 
             subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage, is_multi_objective)
+            self.evaluate(work_dir, storage, is_multi_objective(config))
 
             print(storage.result.get_objectives())
             self.result_comparison.append(storage.result.get_objectives())
