@@ -63,6 +63,9 @@ class PylocalScheduler(AbstractScheduler):
             y = cast_y(user_func(xs), y_data_type=None)
         except BaseException as e:
             err = str(e)
+            y = None
+        else:
+            err = ""
         finally:
             self.com.out(objective_y=y, objective_err=err)
 
