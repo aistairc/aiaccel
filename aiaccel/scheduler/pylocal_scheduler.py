@@ -21,7 +21,6 @@ class PylocalScheduler(AbstractScheduler):
     def __init__(self, options: dict) -> None:
         super().__init__(options)
         self.run = Run(self.config_path)
-        self.workspace = Path(self.config.workspace.get()).resolve()
         self.com = WrapperInterface()
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
@@ -44,32 +43,13 @@ class PylocalScheduler(AbstractScheduler):
             xs = self.run.get_any_trial_xs(trial_id)
             args.append([trial_id, xs])
             self._serialize(trial_id)
-        for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(self.execute, args):
+        for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
+            self.com.out(objective_y=y, objective_err=err)
             self.run.report(trial_id, xs, y, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
             self.create_result_file(trial_id)
 
         return True
-
-    def execute(self, args) -> None:
-        trial_id, xs = args
-        start_time = get_time_now()
-
-        set_logging_file_for_trial_id(self.workspace, trial_id)
-
-        try:
-            y = cast_y(user_func(xs), y_data_type=None)
-        except BaseException as e:
-            err = str(e)
-            y = None
-        else:
-            err = ""
-        finally:
-            self.com.out(objective_y=y, objective_err=err)
-
-        end_time = get_time_now()
-
-        return trial_id, xs, y, err, start_time, end_time
 
     def __getstate__(self):
         obj = super().__getstate__()
@@ -79,7 +59,7 @@ class PylocalScheduler(AbstractScheduler):
 
 
 def initializer(config_path: str | Path):
-    global user_func
+    global user_func, workspace
     config = Config(config_path)
 
     # Loads the specified module from the specified python program.
@@ -88,3 +68,24 @@ def initializer(config_path: str | Path):
     spec.loader.exec_module(module)
 
     user_func = getattr(module, config.function.get())
+
+    workspace = Path(config.workspace.get()).resolve()
+
+
+def execute(args):
+    trial_id, xs = args
+    start_time = get_time_now()
+
+    set_logging_file_for_trial_id(workspace, trial_id)
+
+    try:
+        y = cast_y(user_func(xs), y_data_type=None)
+    except BaseException as e:
+        err = str(e)
+        y = None
+    else:
+        err = ""
+
+    end_time = get_time_now()
+
+    return trial_id, xs, y, err, start_time, end_time
