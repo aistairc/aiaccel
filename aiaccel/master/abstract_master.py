@@ -87,7 +87,7 @@ class AbstractMaster(AbstractModule):
         if not self.check_finished():
             return
 
-        if is_multi_objective(self.goal):
+        if is_multi_objective(self.config):
             self.logger.info('Multi-objective optimization does not run an evaluation process.')
         elif self.goal.lower() == aiaccel.goal_maximize:
             evaluator = MaximizeEvaluator(self.options)
@@ -97,7 +97,7 @@ class AbstractMaster(AbstractModule):
             self.logger.error(f'Invalid goal: {self.goal}.')
             raise ValueError(f'Invalid goal: {self.goal}.')
 
-        if is_multi_objective(self.goal) is False:
+        if is_multi_objective(self.config) is False:
             evaluator.evaluate()
             evaluator.print()
             evaluator.save()
