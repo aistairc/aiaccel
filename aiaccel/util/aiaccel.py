@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 from functools import singledispatchmethod
 from typing import Any
 from collections.abc import Callable
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
@@ -227,10 +227,10 @@ class Run:
         args (dict): A dictionary object which contains command line arguments
             given by aiaccel.
         trial_id (int): Trial Id.
-        config_path (PosixPath): A Path object which points to the
+        config_path (Path): A Path object which points to the
             configuration file.
         config (Config): A Config object.
-        workspace (PosixPath): A Path object which points to the workspace.
+        workspace (Path): A Path object which points to the workspace.
         storage (Storage): A Storage object.
         logger (Logger): A Logger object.
         com (WrapperInterface): A WrapperInterface object.
@@ -261,7 +261,7 @@ class Run:
                 run.execute_and_report(func)
     """
 
-    def __init__(self, config_path: str | PosixPath | None = None) -> None:
+    def __init__(self, config_path: str | Path | None = None) -> None:
         parser = ArgumentParser()
         parser.add_argument('--config', type=str)
         parser.add_argument('--trial_id', type=str, required=False)
