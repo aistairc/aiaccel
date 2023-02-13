@@ -5,6 +5,7 @@ from pathlib import Path
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import schedule_sampling
 from aiaccel.scheduler.job.job import Job
+from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.filesystem import create_yaml
@@ -316,7 +317,7 @@ class AbstractScheduler(AbstractModule):
         del obj['jobs']
         return obj
 
-    def create_model(self) -> LocalModel:
+    def create_model(self) -> AbstractModel | None:
         """Creates model object of state machine.
 
         Override with a Scheduler that uses a Model.
