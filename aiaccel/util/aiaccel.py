@@ -9,8 +9,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.time_tools import get_time_now
+from aiaccel.storage import Storage
+from aiaccel.util import get_time_now
 from aiaccel.util.cast import cast_y
 
 

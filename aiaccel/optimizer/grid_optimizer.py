@@ -4,7 +4,7 @@ from functools import reduce
 from operator import mul
 
 from aiaccel.config import Config
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 

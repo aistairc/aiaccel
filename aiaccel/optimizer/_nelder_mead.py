@@ -4,7 +4,7 @@ import logging
 import numpy as np
 
 from aiaccel.parameter import HyperParameter
-from aiaccel.util.name import generate_random_name
+from aiaccel.util import generate_random_name
 
 STATES = [
     'WaitInitialize',

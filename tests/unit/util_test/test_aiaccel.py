@@ -30,6 +30,7 @@ def test_out():
     assert msg.d["test"].out(all=True) is None
     assert msg.d["test"].out(all=False) is None
 
+
 def test_parse_result():
     msg = Messages("test")
     assert msg.parse("test", "test:1") == ["1"]
@@ -49,12 +50,15 @@ def main(p):
 
     return float(y)
 
+
 def invalid_func(p):
     return [1, 2, 3]
 
 #
 # Run test
 #
+
+
 class TestRun(BaseTest):
 
     def get_test_args(self):
@@ -107,6 +111,8 @@ class TestRun(BaseTest):
 #
 # Wrapper Interface
 #
+
+
 def wrapper_interface():
     wrp = WrapperInterface()
     assert wrp.get_data('objective_y: objective_err:') == (None, None)

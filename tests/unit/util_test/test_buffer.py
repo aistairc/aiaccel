@@ -1,4 +1,4 @@
-from aiaccel.util.buffer import Buffer
+from aiaccel.util import Buffer
 
 
 def test_set_max_len():
@@ -89,7 +89,7 @@ def test_Value():
     buff = Buffer(['test'])
     buff.Add('test', 1)
     buff.Add('test', 2)
-    assert buff.d['test'].Value(0) == 1 
+    assert buff.d['test'].Value(0) == 1
     assert buff.d['test'].Value(1) == 2
 
 

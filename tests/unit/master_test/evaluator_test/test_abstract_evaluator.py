@@ -1,6 +1,8 @@
-import aiaccel
+from aiaccel.common import dict_hp_finished
+from aiaccel.common import dict_result
+from aiaccel.common import extension_hp
+from aiaccel.common import file_final_result
 from aiaccel.master.evaluator.abstract_evaluator import AbstractEvaluator
-
 from tests.base_test import BaseTest
 
 
@@ -46,7 +48,7 @@ class TestAbstractEvaluator(BaseTest):
         evaluator = AbstractEvaluator(options)
         setup_hp_finished(1)
         evaluator.hp_result = work_dir.joinpath(
-            aiaccel.dict_hp_finished, f'001.{aiaccel.extension_hp}')
+            dict_hp_finished, f'001.{extension_hp}')
         assert evaluator.print() is None
 
     def test_save(self, setup_hp_finished, work_dir):
@@ -61,6 +63,6 @@ class TestAbstractEvaluator(BaseTest):
         evaluator = AbstractEvaluator(options)
         setup_hp_finished(1)
         evaluator.hp_result = work_dir.joinpath(
-            aiaccel.dict_hp_finished, f'001.{aiaccel.extension_hp}')
+            dict_hp_finished, f'001.{extension_hp}')
         evaluator.save()
-        assert work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result).exists()
+        assert work_dir.joinpath(dict_result, file_final_result).exists()

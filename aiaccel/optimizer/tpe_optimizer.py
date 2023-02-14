@@ -3,7 +3,7 @@ from __future__ import annotations
 import optuna
 
 import aiaccel.parameter
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):

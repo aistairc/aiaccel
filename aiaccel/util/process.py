@@ -12,7 +12,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.master.abci_master import AbciMaster
     from aiaccel.master.abstract_master import AbstractMaster
     from aiaccel.master.local_master import LocalMaster
-    from aiaccel.storage.storage import Storage
+    from aiaccel.storage import Storage
 
 import datetime
 

@@ -1,6 +1,8 @@
-from aiaccel.storage.storage import Storage
-from base import t_base, ws
 from unittest.mock import patch
+
+from aiaccel.storage import Storage
+from base import t_base, ws
+
 
 # set_any_trial_start_time
 @t_base()
@@ -38,7 +40,7 @@ def test_get_ready():
             trial_id=i,
             state=states[i]
         )
-    
+
     assert storage.get_ready() == [0, 1]
 
 
@@ -61,7 +63,7 @@ def test_get_running():
             trial_id=i,
             state=states[i]
         )
-    
+
     assert storage.get_running() == [2, 3]
 
 
@@ -84,7 +86,7 @@ def test_get_finished():
             trial_id=i,
             state=states[i]
         )
-    
+
     assert storage.get_finished() == [4, 5]
 
 
@@ -110,7 +112,7 @@ def test_get_num_ready():
             trial_id=i,
             state=states[i]
         )
-    
+
     assert storage.get_num_ready() == 2
 
 
@@ -136,7 +138,7 @@ def test_get_num_running():
             trial_id=i,
             state=states[i]
         )
-    
+
     assert storage.get_num_running() == 3
 
 
@@ -162,7 +164,7 @@ def test_get_num_finished():
             trial_id=i,
             state=states[i]
         )
-    
+
     assert storage.get_num_finished() == 4
 
 
@@ -188,7 +190,7 @@ def test_is_ready():
             trial_id=i,
             state=states[i]
         )
-    
+
     for i in range(len(states)):
         if states[i] == "ready":
             assert storage.is_ready(i) is True
@@ -218,7 +220,7 @@ def test_is_running():
             trial_id=i,
             state=states[i]
         )
-    
+
     for i in range(len(states)):
         if states[i] == "running":
             assert storage.is_running(i) is True
@@ -248,12 +250,12 @@ def test_is_finished():
             trial_id=i,
             state=states[i]
         )
-    
+
     for i in range(len(states)):
         if states[i] == "finished":
             assert storage.is_finished(i) is True
         else:
-            assert storage.is_finished(i) is False  
+            assert storage.is_finished(i) is False
 
 
 # get_hp_dict
@@ -283,7 +285,7 @@ def test_get_hp_dict():
         param_value=param_value, param_type=param_type
     )
 
-    storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
+    storage.error.set_any_trial_error(trial_id=trial_id, error_message=error)
 
     exp = {
         'trial_id': str(trial_id),
@@ -331,7 +333,7 @@ def test_get_hp_dict_int():
         param_value=param_value, param_type=param_type
     )
 
-    storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
+    storage.error.set_any_trial_error(trial_id=trial_id, error_message=error)
 
     exp = {
         'trial_id': str(trial_id),
@@ -378,7 +380,7 @@ def test_get_hp_dict_categorical():
         param_value=param_value, param_type=param_type
     )
 
-    storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
+    storage.error.set_any_trial_error(trial_id=trial_id, error_message=error)
 
     exp = {
         'trial_id': str(trial_id),
@@ -424,7 +426,7 @@ def test_get_hp_dict_invalid_type():
         param_value=param_value, param_type=param_type
     )
 
-    storage.error.set_any_trial_error(trial_id=trial_id,error_message=error)
+    storage.error.set_any_trial_error(trial_id=trial_id, error_message=error)
 
     exp = {
         'trial_id': str(trial_id),
@@ -442,8 +444,6 @@ def test_get_hp_dict_invalid_type():
 
     for key in d.keys():
         assert exp[key] == d[key]
-
-
 
 
 # get_result_and_error
@@ -517,7 +517,7 @@ def test_get_best_trial_dict():
                 "parameter_name": param_name,
                 "type": param_type,
                 "value": param_value
-                
+
             }
         ],
         'result': objective,
@@ -561,7 +561,7 @@ def test_delete_trial_data_after_this():
     storage = Storage(ws.path)
     assert storage.delete_trial_data_after_this(trial_id=1) is None
 
-    def dummy_delete_trial(trial_id :int) -> None:
+    def dummy_delete_trial(trial_id: int) -> None:
         pass
 
     with patch.object(storage, 'current_max_trial_number', return_value=10):

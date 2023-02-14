@@ -1,11 +1,10 @@
-import pathlib
+from pathlib import Path
+from unittest.mock import patch
 
 from aiaccel.cli.plot import Plotter
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
+from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
-from unittest.mock import patch
-from pathlib import Path
 
 
 def test_plot(clean_work_dir, work_dir, create_tmp_config):
@@ -16,7 +15,7 @@ def test_plot(clean_work_dir, work_dir, create_tmp_config):
         workspace.clean()
     workspace.create()
 
-    config_path = pathlib.Path('tests/test_data/config.json')
+    config_path = Path('tests/test_data/config.json')
     config_path = create_tmp_config(config_path)
     config = Config(config_path)
     storage = Storage(ws=Path(config.workspace.get()))

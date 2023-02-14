@@ -1,17 +1,12 @@
-#from ConfigSpace.read_and_write import json as configspace_json
 import copy
-import json
-from re import T
+from unittest.mock import patch
 
-import aiaccel
 import numpy as np
 import pytest
+
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.parameter import load_parameter
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import load_yaml
-
-from unittest.mock import patch
+from aiaccel.storage import Storage
 from tests.base_test import BaseTest
 
 
@@ -103,7 +98,7 @@ class TestNelderMead(BaseTest):
                 )
         storage.trial.set_any_trial_state(trial_id=1, state='finished')
         #
-        # c = load_yaml(work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp'))
+        # c = load_yaml(work_dir.joinpath(dict_hp_finished, '001.hp'))
         #
         print(storage.get_finished())
         print(storage.result.get_all_result())

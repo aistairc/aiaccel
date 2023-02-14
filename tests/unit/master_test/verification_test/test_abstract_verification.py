@@ -1,10 +1,10 @@
-import aiaccel
-from aiaccel.master.verification.abstract_verification import \
-    AbstractVerification
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import load_yaml
 from unittest.mock import patch
 
+from aiaccel.common import dict_verification
+from aiaccel.common import extension_verification
+from aiaccel.master.verification.abstract_verification import \
+    AbstractVerification
+from aiaccel.util import load_yaml
 from tests.base_test import BaseTest
 
 
@@ -52,7 +52,7 @@ class TestAbstractVerification(BaseTest):
             )
 
         verification.verify()
-        file_path = work_dir / aiaccel.dict_verification / f'1.{aiaccel.extension_verification}'
+        file_path = work_dir / dict_verification / f'1.{extension_verification}'
         assert file_path.exists()
 
         with patch.object(verification, 'finished_loop', None):
@@ -92,7 +92,7 @@ class TestAbstractVerification(BaseTest):
                 )
 
         verification.verify()
-        file_path = work_dir / aiaccel.dict_verification / f'5.{aiaccel.extension_verification}'
+        file_path = work_dir / dict_verification / f'5.{extension_verification}'
         assert file_path.exists()
         yml = load_yaml(file_path)
         for y in yml:
@@ -156,8 +156,8 @@ class TestAbstractVerification(BaseTest):
 
         verification.verify()
         path = work_dir.joinpath(
-            aiaccel.dict_verification,
-            f'1.{aiaccel.extension_verification}'
+            dict_verification,
+            f'1.{extension_verification}'
         )
 
         if path.exists():

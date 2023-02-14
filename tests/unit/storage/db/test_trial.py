@@ -1,8 +1,10 @@
-from aiaccel.storage.storage import Storage
-from base import t_base, ws, init
+import pytest
 from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
-import pytest
+
+from aiaccel.storage import Storage
+from base import t_base, ws, init
+
 
 # set_any_trial_state
 @t_base()
@@ -40,6 +42,8 @@ def test_set_any_trial_state_exception():
         )
 
 # test_get_any_trial_state
+
+
 @t_base()
 def test_get_any_trial_state():
     storage = Storage(ws.path)
@@ -330,4 +334,3 @@ def test_delete_any_trial_state_exception():
     with pytest.raises(SQLAlchemyError):
         delete_any_trial_state = undecorated(storage.trial.delete_any_trial_state)
         delete_any_trial_state(storage.trial, trial_id=0)
-

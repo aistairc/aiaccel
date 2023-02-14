@@ -1,12 +1,11 @@
-from pathlib import Path
 import numpy as np
-from base import db_path, t_base, ws, init
-
-from aiaccel.storage.variable import Serializer
-from aiaccel.storage.storage import Storage
-from undecorated import undecorated
-from sqlalchemy.exc import SQLAlchemyError
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
+
+from aiaccel.storage import Storage
+from base import t_base, ws, init
+
 
 @t_base()
 def test_serialize():
@@ -32,13 +31,13 @@ def test_serialize():
     storage.variable.d['hoge'].set(trial_id=1, value=rs)
     storage.variable.d['hoge'].set(trial_id=1, value=rs)
 
-
     d = storage.variable.d['hoge'].get(trial_id=1)
     for i in range(len(d)):
         if type(d[i]) is np.ndarray:
             assert all(d[i] == rs[i])
         else:
             assert d[i] == rs[i]
+
 
 @t_base()
 def test_set_exception():
@@ -57,6 +56,7 @@ def test_set_exception():
             update_allow=True
         )
 
+
 @t_base()
 def test_get():
     storage = Storage(ws.path)
@@ -66,11 +66,13 @@ def test_get():
     assert storage.variable.d['hoge'].get(trial_id=1) == 1.1
     assert storage.variable.d['hoge'].get(trial_id=2) is None
 
+
 @t_base()
 def test_all_delete():
     storage = Storage(ws.path)
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
     assert storage.variable.d['hoge'].all_delete() is None
+
 
 @t_base()
 def test_all_delete_exception():
@@ -81,6 +83,7 @@ def test_all_delete_exception():
     with pytest.raises(SQLAlchemyError):
         all_delete = undecorated(storage.variable.d['hoge'].all_delete)
         all_delete(storage.variable.d['hoge'])
+
 
 @t_base()
 def test_delete_any_trial_variable():

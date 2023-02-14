@@ -1,11 +1,13 @@
-from aiaccel.storage.storage import Storage
-from base import db_path, t_base, ws, init
-from sqlalchemy.exc import SQLAlchemyError
-
-from undecorated import undecorated
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
+
+from aiaccel.storage import Storage
+from base import t_base, ws, init
 
 # set_any_trial_error
+
+
 @t_base()
 def test_set_any_trial_error():
     storage = Storage(ws.path)

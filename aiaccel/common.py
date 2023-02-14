@@ -1,7 +1,9 @@
 """Common variables and methods.
 
-    * Import this as follows:
-    * import aiaccel
+Example:
+
+    from aiaccel.common import alive_master
+
 """
 
 alive_master = 'master.yml'

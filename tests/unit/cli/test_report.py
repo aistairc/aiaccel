@@ -1,4 +1,4 @@
-from aiaccel.util.report import CreationReport
+from aiaccel.cli.report_creator import CreationReport
 from aiaccel.workspace import Workspace
 from aiaccel.config import Config
 import pathlib

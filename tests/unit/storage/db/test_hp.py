@@ -1,11 +1,13 @@
-from aiaccel.storage.storage import Storage
-from base import db_path, t_base, ws
+import pytest
 from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
 
-import pytest
+from aiaccel.storage import Storage
+from base import t_base, ws
 
 # set_any_trial_param
+
+
 @t_base()
 def test_set_any_trial_param():
     storage = Storage(ws.path)
@@ -182,7 +184,6 @@ def test_all_delete():
     assert storage.hp.get_any_trial_params(trial_id) is None
 
 
-
 # all_delete exception
 @t_base()
 def test_all_delete_exception():
@@ -206,6 +207,8 @@ def test_all_delete_exception():
         all_delete(storage.hp)
 
 # delete_any_trial_params
+
+
 @t_base()
 def test_delete_any_trial_params():
     storage = Storage(ws.path)

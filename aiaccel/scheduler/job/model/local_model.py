@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from aiaccel.util.process import OutputHandler, exec_runner
+from aiaccel.util import OutputHandler, exec_runner
 from aiaccel.wrapper_tools import create_runner_command
 from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 

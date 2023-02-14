@@ -1,8 +1,8 @@
 import json
 import numpy as np
-
-import aiaccel
 import pytest
+
+from aiaccel.common import goal_maximize
 from aiaccel.config import ConfileWrapper
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.nelder_mead_optimizer import NelderMeadOptimizer
@@ -57,9 +57,9 @@ class TestNelderMeadOptimizer(BaseTest):
 
         with open(self.config_json, 'r') as f:
             json_obj = json.load(f)
-        json_obj['optimize']['goal'] = aiaccel.goal_maximize
+        json_obj['optimize']['goal'] = goal_maximize
         config = ConfileWrapper(json_obj, 'json_object')
-        json_obj['optimize']['goal'] = aiaccel.goal_maximize
+        json_obj['optimize']['goal'] = goal_maximize
         self.optimizer.config = config
         self.optimizer.post_process()
         assert self.optimizer.pre_process() is None

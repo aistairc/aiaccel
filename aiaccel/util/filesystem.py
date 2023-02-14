@@ -5,7 +5,9 @@ from pathlib import Path
 import fasteners
 import yaml
 
-import aiaccel
+from aiaccel.common import dict_result
+from aiaccel.common import extension_result
+from aiaccel.common import extension_hp
 
 
 def create_yaml(path: Path, content: dict, dict_lock: Path | None = None) -> None:
@@ -142,8 +144,8 @@ def get_file_result(path: Path, dict_lock: Path | None = None
     """
 
     return get_dict_files(
-        path / aiaccel.dict_result,
-        f'*.{aiaccel.extension_result}',
+        path / dict_result,
+        f'*.{extension_result}',
         dict_lock=dict_lock
     )
 
@@ -162,8 +164,8 @@ def get_file_result_hp(path: Path, dict_lock: Path | None = None
     """
 
     return get_dict_files(
-        path / aiaccel.dict_result,
-        f'*.{aiaccel.extension_hp}',
+        path / dict_result,
+        f'*.{extension_hp}',
         dict_lock=dict_lock
     )
 

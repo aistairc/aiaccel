@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from scipy.stats import qmc
 
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 
 
 class SobolOptimizer(AbstractOptimizer):

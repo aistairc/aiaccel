@@ -6,8 +6,8 @@ from logging import StreamHandler, getLogger
 from fasteners import InterProcessLock
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.trialid import TrialId
+from aiaccel.storage import Storage
+from aiaccel.util import TrialId
 
 logger = getLogger(__name__)
 logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))

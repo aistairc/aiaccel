@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.util.process import ps2joblist
+from aiaccel.util import ps2joblist
 
 
 class LocalScheduler(AbstractScheduler):
