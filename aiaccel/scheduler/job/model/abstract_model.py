@@ -1,15 +1,14 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 
 from aiaccel.common import dict_runner
 from aiaccel.util import create_yaml
 from aiaccel.util import kill_process
 from aiaccel.util import get_time_delta
 from aiaccel.util import get_time_now_object
-
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job.job import Job
+    from aiaccel.scheduler.job import Job
 
 
 class AbstractModel(object):

@@ -5,7 +5,7 @@ import time
 from unittest.mock import patch
 
 
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler import AbstractScheduler
 
 from tests.base_test import BaseTest
 

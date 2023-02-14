@@ -1,7 +1,8 @@
 
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.create import create_scheduler
+from aiaccel.scheduler import AbciScheduler
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler import create_scheduler
+
 
 def test_create():
     config_abci = "tests/test_data/config_abci.json"

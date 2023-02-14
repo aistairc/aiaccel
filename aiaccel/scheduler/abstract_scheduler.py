@@ -4,8 +4,8 @@ from pathlib import Path
 
 from aiaccel.common import dict_result
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm import schedule_sampling
-from aiaccel.scheduler.job.job import Job
+from aiaccel.scheduler.algorithm import RandomSampling
+from aiaccel.scheduler.job import Job
 from aiaccel.util import str_to_logging_level
 from aiaccel.util import create_yaml
 
@@ -21,7 +21,7 @@ class AbstractScheduler(AbstractModule):
         options (dict[str, str | int | bool]): A dictionary containing
             command line options.
         config_path (Path): Path to the configuration file.
-        algorithm (RandomSamplingSchedulingAlgorithm): A scheduling algorithm
+        algorithm (RandomSampling): A scheduling algorithm
             to select hyper parameters from a parameter pool.
         available_resource (int): An available current resource number.
         jobs (list[dict]): A list to store job dictionaries.
@@ -135,7 +135,7 @@ class AbstractScheduler(AbstractModule):
         self.create_numpy_random_generator()
         self.resume()
 
-        self.algorithm = schedule_sampling.RandomSampling(self.config)
+        self.algorithm = RandomSampling(self.config)
         self.change_state_finished_trials()
 
         runnings = self.storage.trial.get_running()

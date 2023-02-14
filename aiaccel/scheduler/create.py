@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from aiaccel.config import Config
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
+from aiaccel.scheduler import AbciScheduler
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler import PylocalScheduler
 
 
 def create_scheduler(config_path: str) -> type | None:

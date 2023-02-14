@@ -3,7 +3,7 @@ from __future__ import annotations
 import subprocess
 
 from aiaccel.common import dict_runner
-from aiaccel.abci.qstat import parse_qstat
+from aiaccel.abci import parse_qstat
 from aiaccel.master import AbstractMaster
 from aiaccel.util import get_dict_files
 from aiaccel.util import retry

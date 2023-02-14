@@ -9,9 +9,9 @@ from aiaccel.storage import Storage
 from aiaccel.master.create import create_master
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.master.pylocal_master import PylocalMaster
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
+from aiaccel.scheduler import create_scheduler
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler import PylocalScheduler
 
 from tests.base_test import BaseTest
 

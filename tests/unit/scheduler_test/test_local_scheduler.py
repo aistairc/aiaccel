@@ -1,5 +1,5 @@
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.job.job import Job
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler.job import Job
 from tests.base_test import BaseTest
 
 

@@ -15,7 +15,7 @@ from aiaccel.common import module_type_scheduler
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import RandomOptimizer
-from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.scheduler import LocalScheduler
 from aiaccel.util import str_to_logging_level
 
 from tests.base_test import BaseTest

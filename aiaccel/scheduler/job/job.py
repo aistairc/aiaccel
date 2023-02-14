@@ -17,12 +17,11 @@ from aiaccel.common import resource_type_local
 from aiaccel.util import Buffer
 from aiaccel.util import get_time_now_object
 from aiaccel.util import TrialId
-from aiaccel.scheduler.job.model.abci_model import AbciModel
-from aiaccel.scheduler.job.model.local_model import LocalModel
-
+from aiaccel.scheduler.job.model import AbciModel
+from aiaccel.scheduler.job.model import LocalModel
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.scheduler.abci_scheduler import AbciScheduler
-    from aiaccel.scheduler.local_scheduler import LocalScheduler
+    from aiaccel.scheduler import AbciScheduler
+    from aiaccel.scheduler import LocalScheduler
 
 from aiaccel.config import Config
 from aiaccel.storage import Storage

@@ -1,9 +1,10 @@
 from __future__ import annotations
-import numpy as np
+
 from pathlib import Path
 
-from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import \
-    AbstractSchedulingAlgorithm
+import numpy as np
+
+from aiaccel.scheduler.algorithm import AbstractSchedulingAlgorithm
 
 
 class RandomSamplingSchedulingAlgorithm(AbstractSchedulingAlgorithm):

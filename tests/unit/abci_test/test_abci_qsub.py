@@ -6,8 +6,7 @@ import pytest
 
 from aiaccel.common import dict_runner
 from aiaccel.common import dict_output
-from aiaccel.abci.qsub import create_qsub_command
-from aiaccel.config import load_config
+from aiaccel.abci import create_qsub_command
 
 
 def test_create_qsub_command(load_test_config):

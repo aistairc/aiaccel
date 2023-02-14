@@ -4,7 +4,7 @@ from multiprocessing.pool import Pool, ThreadPool
 import importlib
 from pathlib import Path
 
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
 from aiaccel.util.aiaccel import WrapperInterface
 from aiaccel.util.aiaccel import set_logging_file_for_trial_id
