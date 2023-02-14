@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:40+0000\n"
+"POT-Creation-Date: 2023-02-06 17:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -298,5 +298,316 @@ msgstr ""
 msgid ""
 "/workspace/aiaccel/work/sphere/workディレクトリに実行結果が保存されます． "
 "前回事項した結果と異なることを確認してみてください．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:479
+msgid "オプティマイザ内部からの目的関数の値の参照"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:481
+msgid ""
+"この節では，オプティマイザの内部から過去に計算した目的関数の値を参照して，次のパラメータを決定する方法を確認します． aiaccel 上のジョブの"
+" ID が  `n` のときの目的関数の値は，`AbstractOptimizer` "
+"を継承して作成したカスタムオプティマイザの内部から，次のようにして取得できます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:486
+msgid ""
+"この処理の後，`objective_value` は `n` で指定した目的関数の値か `None` を保持します． `None` "
+"が保持されるのは，`self.storage.result.get_any_trial_objective()` "
+"が呼ばれた時点で，目的関数の値を計算する user program が Storage に 計算結果を保存していない場合です．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:489
+msgid "例: 勾配降下法による最適化"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:491
+msgid ""
+"勾配降下法では，着目する試行におけるパラメータが与える目的関数の勾配を元に，次のパラメータを決定します． 一次元の場合， $n$ "
+"試行目のパラメータを $W_n$ とし，目的関数を $f(W_n)$ と書くと， $n+1$ 試行目のパラメータは"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:494
+msgid " W_{n+1} = W_n + \\gamma f'(W_{n}) "
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:496
+msgid ""
+"となります．ここで， $\\gamma$ は学習率 (パラメータの更新をどの程度行うかの指標)， $f'(W_n)$ は $W_n$ "
+"における目的関数の勾配です．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:499
+msgid ""
+"ここでは $f$ の解析的な形が分からない場合に，勾配を差分で置き換えることを考えます． "
+"簡単のため，前進差分のみを考えると，差分を用いた勾配の近似式は"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:502
+msgid "f'(W_n) \\approx \\frac{f(W_n + \\delta) - f(W_n) } { \\delta }"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:504
+msgid "となります． 従って $n + 1$ 試行目におけるパラメータは"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:507
+msgid ""
+"W_{n + 1} \\approx W_n + \\gamma \\frac{f(W_n + \\delta) - f(W_n) } { "
+"\\delta }"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:509
+msgid "と近似できます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:511
+msgid "オプティマイザの実装"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:513
+msgid ""
+"上の例では $n + 1$ 試行目のパラメータを決定するために， $f(W_n)$ と $f(W_{n+1})$ という 2 "
+"つの目的関数の値を使用しました． カスタムオプティマイザでは，これらをメソッド `generate_parameter()` "
+"内で取得する必要があります． 以下に，前進差分を用いたオプティマイザの例を示します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:622
+msgid "このオプティマイザは以下で説明する 4 つの状態を取ります．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:623
+msgid "PREPARE: オプティマイザが保持する変数やリストの初期化を行います．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:624
+msgid "CALC_FORWARD: $W_n + \\delta$ を計算します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:625
+msgid "WAIT_CURRENT_OBJECTIVE: Storage に $W_n$ のときの目的関数の値が保存されるまで待機します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:626
+msgid "WAIT_FORWARD_OBJECTIVE: Storage に $W_n + \\delta$ のときの目的関数の値が保存されるまで待機します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:627
+msgid "CALC_NEXT_PARAM: $n+1$ 試行目のパラメータを計算します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:629
+msgid "これらの状態を `Enum` モジュールを用いて実装しています．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:639
+msgid "オプティマイザが保持する変数は以下の通りです．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:640
+msgid "learning_rate: 学習率．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:641
+msgid "delta: 目的関数の前進値を計算するための変分 $\\delta$."
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:642
+msgid "current_params: 現在 ( $n$ 試行目) のパラメータ $W_n$．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:643
+msgid "num_parameters: 最適化するパラメータの数．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:644
+msgid "forward_objectives: $W_n + \\delta$ における目的関数の値 $f(W_n + \\delta)$．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:645
+msgid "num_generated_forwards: 既に生成された $W_n + \\delta$ の数．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:646
+msgid "num_calculated_forward_objectives: 計算が完了した $f(W_n + \\delta)$ の数．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:647
+msgid "forward_ids: $f(W_n + \\delta)$ の計算が実行される aiaccel 上のジョブ ID (`trial_id`)."
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:649
+msgid "`generate_parameter()` 内の処理の流れ"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:651
+msgid "状態: PREPARE"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:665
+msgid ""
+"オプティマイザが保持する変数やリストの初期化を行います． 初期化を行った後，オプティマイザの状態を `PREPARE` から "
+"`CALC_FORWARD` に変更します． この状態では，メソッド `self.generate_parameters()` は必ず "
+"`None` を返却します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:670
+msgid "状態: CALC_FORWARD"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:689
+msgid ""
+"パラメータの前進値 $W_n + \\delta$ を ***1 回の呼び出しで 1 つだけ***計算し，aiaccel "
+"のメインループに値を返却します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:691
+msgid "まず，パラメータのリストから前進値を計算するパラメータを一つずつ取り出します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:696
+msgid "ここで `self.num_generated_forwards` は，既に生成されたパラメータの前進値の総数を表します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:698
+msgid "続いて，項目 `value` を $W_n + \\delta$ で置き換えます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:708
+msgid "同時に，返却するパラメータの前進値を計算する aiaccel 上のジョブ ID (`trial_id`) を保持します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:712
+msgid "`self.current_id` は，この***カスタムオプティマイザ内で***以下のように定義されるプロパティです．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:719
+msgid "計算された前進値の数 `self.num_generated_forwards` をインクリメントします．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:724
+msgid ""
+"全てのパラメータについて，その前進値が計算されたとき，オプティマイザの状態を `CALC_FORWARD` から "
+"`WAIT_CURRENT_OBJECTIVE` に変更します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:731
+msgid ""
+"注意: オプティマイザの状態が `CALC_FORWARD` のとき，メソッド `generate_parameters()` "
+"は最適化するパラメータの数と同じ回数だけ aiaccel のメインループに呼ばれます．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:734
+msgid "状態: WAIT_CURRENT_OBJECTIVE"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:744
+msgid "現在のパラメータ $W_n$ における目的関数の値 $f(W_n)$ が Storage に保存されるまで待ち，その値を取得します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:748
+msgid "`self._get_objective()` は***カスタムオプティマイザ内***で以下のように定義されるメソッドです．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:753
+msgid ""
+"このメソッドは，取得したい目的関数の値の `trial_id` (aiaccel 上のジョブ ID) を引数に取り，Storage "
+"から値を読み出します． ただし，呼び出された時点で Storage に値が保存されていなければ，`None` を返却します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:756
+msgid ""
+"メソッド `self._get_objective()` が目的関数の値を返した場合，オプティマイザの状態を "
+"`WAIT_CURRENT_OBJECTIVE` から `WAIR_FORWARD_OBJECTIVE` に変更します． この時点で， "
+"$f(W_n)$ の値はメンバ変数 `self.current_objective` に保持されています．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:763
+msgid ""
+"注意: オプティマイザが状態 `WAIT_CURRENT_OBJECTIVE` のとき，メソッド "
+"`self.generate_parameters()` は 1 回以上，Storage に対象とする目的関数の値が保存されるまで呼ばれます． "
+"また，Storage から目的関数の値を読み出せたか否かに関わらず，`WAIT_CURRENT_OBJECTIVE` 状態の "
+"`self.generate_parameters()` は `None` をメインループに返します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:766
+msgid "状態: WAIT_FORWARD_OBJECTIVE"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:782
+msgid ""
+"パラメータの前進値 $W_{n} + \\delta$ における目的関数の値 $f(W_n + \\delta)$ が Storage "
+"に保存されるのを待ち，その値を取得します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:784
+msgid "まず，取得する目的関数の aiaccel 上のジョブ ID (`trial_id`) をリストから読み出します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:789
+msgid "ここで，`self.num_calculated_forward_objectives` は取得済みの前進値に対する目的関数の値の総数です．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:791
+msgid "続いて，メソッド `self._get_objective()` に読み出した ID を渡して，Storage から目的関数の値を読み出します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:796
+msgid ""
+"正常な値が返却された場合，返却された値をリストに保持し，取得済みの値の総数 "
+"`self.num_calculated_forward_objectives` をインクリメントします．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:803
+msgid ""
+"このとき，すべての目的関数の値が取得できていれば，オプティマイザの状態を `WAIT_FORWARD_OBJECTIVE` から "
+"`CALC_NEXT_PARAM` に変更します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:809
+msgid ""
+"注意: オプティマイザが状態 `WAIT_FORWARD_OBJECTIVE` のとき，メソッド "
+"`self.generate_parameters()` は少なくとも最適化対象のパラメータの総数以上，Storage "
+"にすべての目的関数の値が保存されるまで呼ばれます．また，Storage "
+"から目的関数の値が読み出せたか否かや，すべての値の読み出しが完了したか否かに依らず，`WAIT_FORWARD_OBJECTIVE` 状態の "
+"`self.generate_parameters()` は `None` をメインループに返します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:811
+msgid "状態: CALC_NEXT_PARAM"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:833
+msgid ""
+"Storage から読み出した $W_n$ における目的関数の値 $f(W_n)$ (`self.current_params`) と "
+"$W_{n+1}$ における目的関数の値 $f(W_{n+1})$ (`self.forward_objectives`) "
+"を用いて勾配を計算します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:842
+msgid "計算した勾配を用いて次のパラメータ $W_{n+1}$ を計算して `Dict` 型オブジェクトを作成し，リストに保持します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:853
+msgid "オプティマイザの状態を `CALC_NEXT_PARAM` から `PREPARE` に変更し，作成した次のパラメータをメインループに返却します．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:860
+msgid "注意事項"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:862
+msgid ""
+"一般に，パラメータの更新ステップ数 $n$ と aiaccel 上のジョブ ID (`trial_id`) は一致しないことに注意してください． "
+"例えば上の例において，最適化したいパラメータの数が 5 個の場合，パラメータを１度更新するために目的関数を 5 回計算する必要があります． "
+"この場合は 1 回のパラメータ更新で aiaccel の `trial_id` は 5 増加することになります． 従って，config.yaml "
+"で指定した `trial_number` が，例えば 30 回の場合，初期値を除いて 4 回しかパラメータは更新されません．"
+msgstr ""
+
+#: ../../source/developer_guide/custom_optimizer.md:867
+msgid ""
+"同様な ID の不一致は NelderMeadOptimizer を用いた際にも起こります． Nelder-Mead 法の 1 "
+"ステップに相当する処理が終了したとき，aiaccel 上では `trial_id` が **パラメータ数 + 1** だけ増加します．"
 msgstr ""
 

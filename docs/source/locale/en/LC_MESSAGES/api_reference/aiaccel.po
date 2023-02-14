@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:40+0000\n"
+"POT-Creation-Date: 2023-02-06 17:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,12 +57,12 @@ msgstr ""
 msgid "ベースクラス: :py:class:`object`"
 msgstr ""
 
-#: aiaccel.config.BaseConfig:1 aiaccel.config.JsonOrYamlObjectConfig:1 of
-msgid "Fork by confile: https://github.com/777nancy/confile"
+#: aiaccel.config.BaseConfig:1 of
+msgid "An interface for all config classes."
 msgstr ""
 
-#: aiaccel.config.BaseConfig:3 of
-msgid "This is an interface for all config classes."
+#: aiaccel.config.BaseConfig:3 aiaccel.config.JsonOrYamlObjectConfig:1 of
+msgid "Fork by confile: https://github.com/777nancy/confile"
 msgstr ""
 
 #: aiaccel.config.Config:1 of
@@ -83,20 +83,6 @@ msgstr ""
 msgid "サンプル"
 msgstr ""
 
-#: aiaccel.config.ConfigEntry:10 of
-msgid "workspace = ConfigEntry("
-msgstr ""
-
-#: aiaccel.config.ConfigEntry:6 of
-msgid ""
-"config=config, type=[str], default=_DEFAULT_WORKSPACE, warning=warn, "
-"group=\"generic\", keys=(\"workspace\")"
-msgstr ""
-
-#: aiaccel.config.ConfigEntry:12 of
-msgid ") workspace.get()"
-msgstr ""
-
 #: aiaccel.config.ConfigEntry.empty_if_error:1 of
 msgid "If the value is not set, it will force an error to occur."
 msgstr ""
@@ -106,6 +92,7 @@ msgstr ""
 #: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
+#: aiaccel.module.AbstractModule.create_numpy_random_generator
 #: aiaccel.module.AbstractModule.get_each_state_count
 #: aiaccel.module.AbstractModule.get_module_type
 #: aiaccel.module.AbstractModule.get_numpy_random_state
@@ -168,16 +155,17 @@ msgstr ""
 #: aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
 #: aiaccel.module.AbstractModule.check_error
+#: aiaccel.module.AbstractModule.create_numpy_random_generator
 #: aiaccel.module.AbstractModule.get_numpy_random_state
 #: aiaccel.module.AbstractModule.resume
 #: aiaccel.module.AbstractModule.set_logger
-#: aiaccel.module.AbstractModule.set_numpy_random_seed
 #: aiaccel.module.AbstractModule.set_numpy_random_state
 #: aiaccel.parameter.HyperParameter.sample
 #: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
 #: aiaccel.parameter.HyperParameterConfiguration.sample
 #: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_type
-#: aiaccel.parameter.load_parameter aiaccel.wrapper_tools.save_result of
+#: aiaccel.parameter.load_parameter aiaccel.wrapper_tools.create_runner_command
+#: aiaccel.wrapper_tools.save_result of
 msgid "パラメータ"
 msgstr ""
 
@@ -256,19 +244,19 @@ msgstr ""
 msgid "An abstract class for Master, Optimizer and Scheduler."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:10 of
+#: aiaccel.module.AbstractModule:3 of
 msgid "The procedure of this class is as follows:"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:4 of
+#: aiaccel.module.AbstractModule:5 of
 msgid "At first, deserialize() is called."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:5 of
+#: aiaccel.module.AbstractModule:6 of
 msgid "start() is called."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:6 of
+#: aiaccel.module.AbstractModule:7 of
 msgid "pre_process() is called."
 msgstr ""
 
@@ -276,17 +264,19 @@ msgstr ""
 msgid "loop() is called."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:8 of
-msgid ""
-"4-1. in while loop, inner_loop_main_process() is called. 4-2. in while "
-"loop, loop_count is incremented."
+#: aiaccel.module.AbstractModule of
+msgid "4-1. in while loop, inner_loop_main_process() is called."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:10 of
+#: aiaccel.module.AbstractModule of
+msgid "4-2. in while loop, loop_count is incremented."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:13 of
 msgid "call post_process()"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:14 of
+#: aiaccel.module.AbstractModule:17 of
 msgid "A config object."
 msgstr ""
 
@@ -295,71 +285,71 @@ msgstr ""
 msgid "type"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:16 of
+#: aiaccel.module.AbstractModule:19 of
 msgid "ConfileWrapper"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:20 of
+#: aiaccel.module.AbstractModule:23 of
 msgid "A path to hp directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:22 aiaccel.module.AbstractModule:28
-#: aiaccel.module.AbstractModule:34 aiaccel.module.AbstractModule:40
-#: aiaccel.module.AbstractModule:46 aiaccel.module.AbstractModule:52
-#: aiaccel.module.AbstractModule:88 of
+#: aiaccel.module.AbstractModule:25 aiaccel.module.AbstractModule:31
+#: aiaccel.module.AbstractModule:37 aiaccel.module.AbstractModule:43
+#: aiaccel.module.AbstractModule:49 aiaccel.module.AbstractModule:55
+#: aiaccel.module.AbstractModule:91 of
 msgid "Path"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:26 of
+#: aiaccel.module.AbstractModule:29 of
 msgid "A path to lock directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:32 of
+#: aiaccel.module.AbstractModule:35 of
 msgid "A path to log directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:38 of
+#: aiaccel.module.AbstractModule:41 of
 msgid "A path to output directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:44 of
+#: aiaccel.module.AbstractModule:47 of
 msgid "A path to runner directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:50 of
+#: aiaccel.module.AbstractModule:53 of
 msgid "A path to verification directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:56 of
+#: aiaccel.module.AbstractModule:59 of
 msgid "A number of files in hp/finished directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:58 aiaccel.module.AbstractModule:64
-#: aiaccel.module.AbstractModule:70 aiaccel.module.AbstractModule:82 of
+#: aiaccel.module.AbstractModule:61 aiaccel.module.AbstractModule:67
+#: aiaccel.module.AbstractModule:73 aiaccel.module.AbstractModule:85 of
 msgid "int"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:62 of
+#: aiaccel.module.AbstractModule:65 of
 msgid "A number of files in hp/ready directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:68 of
+#: aiaccel.module.AbstractModule:71 of
 msgid "A number of files in hp/running directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:74 of
+#: aiaccel.module.AbstractModule:77 of
 msgid "A logger object."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:76 of
+#: aiaccel.module.AbstractModule:79 of
 msgid "logging.Logger"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:80 of
+#: aiaccel.module.AbstractModule:83 of
 msgid "A loop count that is incremented in loop method."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:86 of
+#: aiaccel.module.AbstractModule:89 of
 msgid "A path to a current workspace."
 msgstr ""
 
@@ -379,10 +369,11 @@ msgstr ""
 msgid "All optimization finished or not."
 msgstr ""
 
-#: aiaccel.module.AbstractModule.get_each_state_count:1 of
-msgid "Updates the number of files in hp(hyper parameter) directories."
+#: aiaccel.module.AbstractModule.create_numpy_random_generator:1 of
+msgid "create random generator using any random seed."
 msgstr ""
 
+#: aiaccel.module.AbstractModule.create_numpy_random_generator:5
 #: aiaccel.module.AbstractModule.get_each_state_count:3
 #: aiaccel.module.AbstractModule.inner_loop_main_process:3
 #: aiaccel.module.AbstractModule.post_process:3
@@ -390,10 +381,14 @@ msgstr ""
 #: aiaccel.module.AbstractModule.print_dict_state:3
 #: aiaccel.module.AbstractModule.resume:6
 #: aiaccel.module.AbstractModule.set_logger:14
-#: aiaccel.module.AbstractModule.set_numpy_random_seed:5
+#: aiaccel.module.AbstractModule.set_numpy_random_seed:4
 #: aiaccel.module.AbstractModule.set_numpy_random_state:6
 #: aiaccel.workspace.Workspace.create:3 aiaccel.wrapper_tools.save_result:18 of
 msgid "None"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_each_state_count:1 of
+msgid "Updates the number of files in hp(hyper parameter) directories."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.get_module_type:1 of
@@ -478,7 +473,7 @@ msgid "A module type of a caller."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.set_numpy_random_seed:1 of
-msgid "set any random seed."
+msgid "set any random seed. :param None:"
 msgstr ""
 
 #: aiaccel.module.AbstractModule.set_numpy_random_state:3 of
@@ -511,7 +506,7 @@ msgstr ""
 msgid "str"
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter:17 of
+#: aiaccel.parameter.HyperParameter:17 aiaccel.parameter.get_type:6 of
 msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and 'ORDINAL'."
 msgstr ""
 
@@ -655,36 +650,16 @@ msgstr ""
 
 #: aiaccel.parameter.get_best_parameter:10 of
 msgid ""
-"A best result value and a     file path. It returns None if a number of "
-"files is less than one."
+"A best result value and a file path. It returns None if a number of files"
+" is less than one."
 msgstr ""
 
-#: aiaccel.parameter.get_best_parameter:12 of
-msgid "A best result value and a"
-msgstr ""
-
-#: aiaccel.parameter.get_best_parameter:13 of
-msgid "file path. It returns None if a number of files is less than one."
-msgstr ""
-
-#: aiaccel.parameter.get_best_parameter:16 of
+#: aiaccel.parameter.get_best_parameter:14 of
 msgid "Causes when an invalid goal is set."
 msgstr ""
 
 #: aiaccel.parameter.get_type:1 of
 msgid "Get a type of a specified parameter."
-msgstr ""
-
-#: aiaccel.parameter.get_type:6 of
-msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and     'ORDINAL'."
-msgstr ""
-
-#: aiaccel.parameter.get_type:8 of
-msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and"
-msgstr ""
-
-#: aiaccel.parameter.get_type:9 of
-msgid "'ORDINAL'."
 msgstr ""
 
 #: aiaccel.parameter.load_parameter:1 of
@@ -732,14 +707,22 @@ msgid "aiaccel.wrapper\\_tools module"
 msgstr ""
 
 #: aiaccel.wrapper_tools.create_runner_command:1 of
-msgid ""
-"Create a list of command strings to run a hyper parameter. :param "
-"command: A string command. :type command: str :param param_content: A "
-"hyper parameter content. :type param_content: dict :param trial_id: A "
-"unique name of a hyper parameter. :type trial_id: str"
+msgid "Create a list of command strings to run a hyper parameter."
 msgstr ""
 
-#: aiaccel.wrapper_tools.create_runner_command:9 of
+#: aiaccel.wrapper_tools.create_runner_command:3 of
+msgid "A string command."
+msgstr ""
+
+#: aiaccel.wrapper_tools.create_runner_command:5 of
+msgid "A hyper parameter content."
+msgstr ""
+
+#: aiaccel.wrapper_tools.create_runner_command:7 of
+msgid "A unique name of a hyper parameter."
+msgstr ""
+
+#: aiaccel.wrapper_tools.create_runner_command:10 of
 msgid "A list of command strings."
 msgstr ""
 
@@ -774,4 +757,61 @@ msgstr ""
 #: ../../source/api_reference/aiaccel.rst:68
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "This is an interface for all config classes."
+#~ msgstr ""
+
+#~ msgid "workspace = ConfigEntry("
+#~ msgstr ""
+
+#~ msgid ""
+#~ "config=config, type=[str], default=_DEFAULT_WORKSPACE, "
+#~ "warning=warn, group=\"generic\", keys=(\"workspace\")"
+#~ msgstr ""
+
+#~ msgid ") workspace.get()"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "4-1. in while loop, inner_loop_main_process()"
+#~ " is called. 4-2. in while loop, "
+#~ "loop_count is incremented."
+#~ msgstr ""
+
+#~ msgid "set any random seed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A best result value and a     file"
+#~ " path. It returns None if a "
+#~ "number of files is less than one."
+#~ msgstr ""
+
+#~ msgid "A best result value and a"
+#~ msgstr ""
+
+#~ msgid "file path. It returns None if a number of files is less than one."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A parameter type any of 'INT', "
+#~ "'FLOAT', 'CATEGORICAL' and     'ORDINAL'."
+#~ msgstr ""
+
+#~ msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and"
+#~ msgstr ""
+
+#~ msgid "'ORDINAL'."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Create a list of command strings "
+#~ "to run a hyper parameter. :param "
+#~ "command: A string command. :type "
+#~ "command: str :param param_content: A "
+#~ "hyper parameter content. :type param_content:"
+#~ " dict :param trial_id: A unique name"
+#~ " of a hyper parameter. :type "
+#~ "trial_id: str"
+#~ msgstr ""
 
