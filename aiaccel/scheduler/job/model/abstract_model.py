@@ -8,7 +8,7 @@ from aiaccel.util import kill_process
 from aiaccel.util import get_time_delta
 from aiaccel.util import get_time_now_object
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job import Job
+    from aiaccel.scheduler import Job
 
 
 class AbstractModel(object):

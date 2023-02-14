@@ -13,11 +13,11 @@ from aiaccel.common import dict_hp_running
 from aiaccel.common import dict_runner
 from aiaccel.config import ConfileWrapper
 from aiaccel.scheduler import create_scheduler
-from aiaccel.scheduler.job.model import CustomMachine
-from aiaccel.scheduler.job import Job
-from aiaccel.scheduler.job import create_model
-from aiaccel.scheduler.job.model import AbciModel
-from aiaccel.scheduler.job.model import LocalModel
+from aiaccel.scheduler import CustomMachine
+from aiaccel.scheduler import Job
+from aiaccel.scheduler import create_model
+from aiaccel.scheduler import AbciModel
+from aiaccel.scheduler import LocalModel
 from aiaccel.scheduler import LocalScheduler
 from aiaccel.util import get_time_now_object
 from tests.arguments import parse_arguments

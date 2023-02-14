@@ -6,9 +6,9 @@ from aiaccel.common import dict_result
 from aiaccel.common import file_final_result
 from aiaccel.config import Config
 from aiaccel.storage import Storage
-from aiaccel.master.create import create_master
-from aiaccel.master.local_master import LocalMaster
-from aiaccel.master.pylocal_master import PylocalMaster
+from aiaccel.master import create_master
+from aiaccel.master import LocalMaster
+from aiaccel.master import PylocalMaster
 from aiaccel.scheduler import create_scheduler
 from aiaccel.scheduler import LocalScheduler
 from aiaccel.scheduler import PylocalScheduler

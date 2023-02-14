@@ -7,7 +7,7 @@ from aiaccel.util import exec_runner
 from aiaccel.wrapper_tools import create_runner_command
 from aiaccel.scheduler.job.model import AbstractModel
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job import Job
+    from aiaccel.scheduler import Job
 
 
 class LocalModel(AbstractModel):

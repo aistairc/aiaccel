@@ -4,8 +4,8 @@ from pathlib import Path
 
 from aiaccel.common import dict_result
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm import RandomSampling
-from aiaccel.scheduler.job import Job
+from aiaccel.scheduler import RandomSampling
+from aiaccel.scheduler import Job
 from aiaccel.util import str_to_logging_level
 from aiaccel.util import create_yaml
 

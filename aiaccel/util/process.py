@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING
 import psutil
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.master.abci_master import AbciMaster
-    from aiaccel.master.abstract_master import AbstractMaster
-    from aiaccel.master.local_master import LocalMaster
+    from aiaccel.master import AbciMaster
+    from aiaccel.master import AbstractMaster
+    from aiaccel.master import LocalMaster
     from aiaccel.storage import Storage
 
 import datetime

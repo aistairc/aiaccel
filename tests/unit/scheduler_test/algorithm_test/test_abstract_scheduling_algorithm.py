@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from aiaccel.scheduler.algorithm import AbstractSchedulingAlgorithm
+from aiaccel.scheduler import AbstractSchedulingAlgorithm
 
 
 def test_abstract_scheduling_algorithm(load_test_config):
