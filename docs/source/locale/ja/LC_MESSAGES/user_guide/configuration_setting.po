@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:40+0000\n"
+"POT-Creation-Date: 2023-02-06 17:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,6 +18,826 @@ msgstr ""
 "Generated-By: Babel 2.11.0\n"
 
 #: ../../source/user_guide/configuration_setting.md:1
-msgid "コンフィグレーションの設定ガイド(WIP)"
+msgid "コンフィグレーションの設定ガイド (WIP)"
 msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:2
+msgid "**generic:**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:3
+msgid "workspace (str, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:5
+msgid "aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します． デフォルトでは \"./work\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:8
+msgid "job_command (str):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:9
+msgid "ユーザープログラムを実行するためのコマンドです．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:11
+msgid "python_file (str, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:12
+msgid ""
+"ローカル実行のモードの一つである python_local モードを用いる場合に，最適化対象の関数が実装されている python "
+"のファイルパスを指定します． 実行モードが ABCI または通常の Local の場合には指定する必要はありません．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:15
+msgid "function (str, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:16
+msgid ""
+"ローカル実行のモードの一つである python_local モードを用いる場合に，最適化対象の関数名を指定します． aiaccel "
+"は実行時，python_file に書かれたファイルから，ここで指定された名前の関数をインポートします． 実行モードが ABCI または通常の "
+"Local の場合には指定する必要はありません．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:20
+msgid "batch_job_timeout (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:21
+msgid "ジョブのタイムアウト時間を秒単位で設定します． デフォルトでは 600 (秒) に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:24
+msgid "sleep_time (float, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:25
+msgid "最適化実行のメインループ 1 周あたりのスリープ時間を秒単位で指定します． デフォルトでは 0.01 (秒) に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:32
+msgid "**resource:**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:34
+msgid "type (str):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:35
+msgid "実行環境を指定します． aiaccel は以下の 3 つの環境での実行をサポートしています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:37
+msgid "\"abci\" - ABCI 上で最適化を実行します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:38
+msgid "\"local\" - ローカル環境で最適化を実行します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:39
+msgid ""
+"\"python_local\" - ローカル環境で最適化を実行します．最適化対象の関数が python "
+"で実装されている必要がありますが，通常のローカル実行よりも高速に最適化を実行することが可能です． デフォルトでは \"local\" "
+"に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:42
+msgid "num_node (int):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:43
+msgid "使用するノード数を指定します． デフォルトでは 1 に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:50
+msgid "**ABCI:**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:52
+msgid "group (str):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:53
+msgid "ユーザーが所属する ABCI のグループを指定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:55
+msgid "job_script_preamble (str):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:56
+msgid "ABCI の設定を記述したシェルスクリプトのファイルを指定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:58
+msgid "job_execution_options (str | list[str], optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:59
+msgid ""
+"aiaccel が ABCI の計算ノード上にジョブを投入する際に付加されるオプションのコマンドです． デフォルトでは \"\" (空の文字列) "
+"が設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:66
+msgid "**optimize:**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:67
+msgid "search_algorithm (str, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:68
+msgid "最適化アルゴリズムを設定します． aiaccel では以下のアルゴリズムをサポートしています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:70
+msgid "\"aiaccel.optimizer.NelderMeadOptimizer\" - Nelder-Mead 法でパラメータの探索を行います．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:71
+msgid "\"aiaccel.optimizer.RandomOptimizer\" - パラメータをランダムに生成します，"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:72
+msgid "\"aiaccel.optimizer.SobolOptimizer\" - Sobol' 列を用いてパラメータを生成します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:73
+msgid "\"aiaccel.optimizer.GridOptimizer\" - 分割した探索空間からパラメータを選びます．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:74
+msgid "\"aiaccel.optimizer.TpeOptimizer\" - ベイズ最適化を用いてパラメータの探索を行います．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:76
+msgid "デフォルトでは \"aiaccel.optimizer.NelderMeadOptimizer\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:78
+msgid "goal (str, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:79
+msgid "最適化の向きを決定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:80
+msgid "\"minimize\" - 目的関数が小さくなるようにパラメータを最適化します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:81
+msgid "\"maximize\" - 目的関数が大きくなるようにパラメータを最適化します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:83
+msgid "デフォルトでは \"minimize\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:85
+msgid "trial_number (int):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:86
+msgid "試行回数を設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:88
+msgid "rand_seed (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:89
+msgid ""
+"乱数生成に用いるシードを設定します．設定可能な値の範囲は `numpy.random.default_rng` が取り得る範囲に一致します． "
+"デフォルトでは None に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:92
+msgid "sobol_scramble (bool, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:93
+msgid ""
+"ソボルオプティマイザを使用する際に，[スクランブル](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.Sobol.html"
+"#scipy-stats-qmc-sobol)を使用するかを指定します． デフォルトでは true に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:96
+msgid "parameters (list):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:97
+msgid "パラメータの探索条件をまとめたリストを設定します． 最適化アルゴルズムとパラメータのデータ型に応じて，各要素には以下の項目が含まれます．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:100
+msgid "*name* - パラメータの名前を設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:102
+msgid "*type* - パラメータのデータ型を設定します．aiaccel は次のデータ型をサポートします．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:103
+msgid "\"uniform_float\" - 浮動小数点数型"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:104
+msgid "\"uniform_int\" - 整数型"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:105
+msgid "\"categorical\" - カテゴリカル型"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:106
+msgid "\"ordinal\" - オーディナル型"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:108
+msgid "*lower* - パラメータの最小値を設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:109
+msgid "*upper* - パラメータの最大値を設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:110
+msgid "*initial* - パラメータの初期値を設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:111
+msgid "*step* - パラメータの分解能を設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:112
+msgid ""
+"*log* - パラメータの探索空間を対数スケールで分割するかを指定します．対数スケールを使用する場合は `true` を，使用しない場合は "
+"`false` を設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:113
+msgid "*base* - 対数スケールでパラメータの探索空間を分割する場合の対数の基数を指定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:114
+msgid "*choices* - データ型が categorical の場合に，選択肢のリストを設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:115
+msgid "*sequence* - データ型が ordinal の場合に，選択肢のリストを設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:116
+msgid "*comment* - コメントを設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:121
+msgid "それぞれのアルゴリズムとデータ型で必要なパラメータは以下の通りです．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:123
+msgid "**Nelder-Mead 法 (\"aiaccel.optimizer.NelderMeadOptimizer\")**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:125
+msgid "設定可能なデータ型は \"uniform_float\" と \"uniform_int\" です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:126
+#: ../../source/user_guide/configuration_setting.md:137
+#: ../../source/user_guide/configuration_setting.md:144
+#: ../../source/user_guide/configuration_setting.md:150
+#: ../../source/user_guide/configuration_setting.md:159
+#: ../../source/user_guide/configuration_setting.md:170
+#: ../../source/user_guide/configuration_setting.md:184
+#: ../../source/user_guide/configuration_setting.md:189
+#: ../../source/user_guide/configuration_setting.md:198
+#: ../../source/user_guide/configuration_setting.md:206
+msgid "*name*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:127
+#: ../../source/user_guide/configuration_setting.md:138
+#: ../../source/user_guide/configuration_setting.md:160
+#: ../../source/user_guide/configuration_setting.md:171
+msgid "*type (\"uniform_float\", \"uniform_int\")*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:128
+#: ../../source/user_guide/configuration_setting.md:139
+#: ../../source/user_guide/configuration_setting.md:161
+#: ../../source/user_guide/configuration_setting.md:172
+#: ../../source/user_guide/configuration_setting.md:200
+msgid "*lower*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:129
+#: ../../source/user_guide/configuration_setting.md:140
+#: ../../source/user_guide/configuration_setting.md:162
+#: ../../source/user_guide/configuration_setting.md:173
+#: ../../source/user_guide/configuration_setting.md:201
+msgid "*upper*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:130
+msgid ""
+"*initial* - 要素数が **パラメータ数 + 1** の配列を設定します．initial の項目が存在しない場合，aiaccel "
+"はランダムに初期値の配列を設定します．また，設定された配列の要素数が **パラメータ数 + 1** より少ない場合，aiaccel "
+"は足りない初期値をランダムに生成し補います．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:132
+msgid "**ランダムオプティマイザ (\"aiaccel.optimizer.RandomOptimizer\")**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:134
+msgid ""
+"設定可能なデータ型は \"uniform_float\", \"uniform_int\", \"categorical\", および "
+"\"ordinal\" です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:136
+#: ../../source/user_guide/configuration_setting.md:169
+#: ../../source/user_guide/configuration_setting.md:197
+msgid "***\"uniform_float\" または \"uniform_int\" の場合***"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:141
+#: ../../source/user_guide/configuration_setting.md:147
+#: ../../source/user_guide/configuration_setting.md:153
+#: ../../source/user_guide/configuration_setting.md:202
+#: ../../source/user_guide/configuration_setting.md:209
+msgid "*initial*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:143
+#: ../../source/user_guide/configuration_setting.md:183
+#: ../../source/user_guide/configuration_setting.md:205
+msgid "***\"categorical\" の場合***"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:145
+#: ../../source/user_guide/configuration_setting.md:185
+#: ../../source/user_guide/configuration_setting.md:207
+msgid "*type (\"categorical\")*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:146
+#: ../../source/user_guide/configuration_setting.md:186
+#: ../../source/user_guide/configuration_setting.md:208
+msgid "*choices* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:149
+#: ../../source/user_guide/configuration_setting.md:188
+msgid "***\"ordinal\" の場合***"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:151
+#: ../../source/user_guide/configuration_setting.md:190
+msgid "*type (\"ordinal\")*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:152
+#: ../../source/user_guide/configuration_setting.md:191
+msgid "*sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:155
+msgid "**ソボルオプティマイザ (\"aiaccel.optimizer.SobolOptimizer\")**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:157
+msgid "設定可能なデータ型は \"uniform_float\" と \"uniform_int\" です． データ型に依らず，初期値は設定できません．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:164
+msgid "**グリッドオプティマイザ (\"aiaccel.optimizer.GridOptimizer\")**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:166
+msgid ""
+"設定可能なデータ型は \"uniform_float\", \"uniform_int\", \"categorical\", および "
+"\"ordinal\" です． データ型に依らず，初期値は設定できません．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:174
+msgid "*step*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:175
+#: ../../source/user_guide/configuration_setting.md:203
+msgid "*log*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:176
+msgid "*base*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:178
+msgid ""
+"(注意) `log` が `true` の場合，`lower`，`upper`，および `step` は対数スケールでの値として参照されます． "
+"即ち，探索の下限は ${base}^{lower}$，上限は ${base}^{upper}$ と解釈され， $n\\ (=0, 1, "
+"\\cdots)$ 番目の点は ${base}^{lower} {base}^{n \\times step}$ で与えられます． 一方で "
+"`log` が `false` の場合，`lower`，`upper`，および `step` "
+"は，それぞれ探索の下限，上限，およびステップに直接対応します． この場合，`base` "
+"の値は使用されませんが，何も値を設定していないとエラーが生じます．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:193
+msgid "**TPE オプティマイザ (\"aiaccel.optimizer.TpeOptimizer\")**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:195
+msgid "設定可能なデータ型は \"uniform_float\", \"uniform_int\", および \"categorical\" です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:199
+msgid "*type (\"unform_float\", \"uniform_int\")*"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:216
+msgid "**job_setting:**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:217
+msgid "cancel_retry (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:218
+msgid ""
+"Max retry counts to transit the state from HpCancelFailed to "
+"HpCancelFailure. Defaults to 3."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:221
+msgid "cancel_timeout (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:222
+msgid ""
+"Timeout seconds to transit the state from HpCancelChecking to "
+"HpCancelFailed. Defaults to 60."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:225
+msgid "expire_retry (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:226
+msgid ""
+"Max retry counts to transit the state from HpExpireFailed to "
+"HpExpireFailure. Defaults to 3."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:229
+msgid "expire_timeout (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:230
+msgid ""
+"Timeout seconds to transit the state from HpExpireChecking to "
+"HpExpireFailed. Defaults to 60."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:233
+msgid "finished_retry (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:234
+msgid ""
+"Max retry counts to transit the state from HpFinishedFailed to "
+"HpFinishedFailure. Defaults to 3."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:237
+msgid "finished_timeout (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:238
+msgid ""
+"Timeout seconds to transit the state from HpFinishedChecking to "
+"HpFinishedFailed. Defaults to 60."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:241
+msgid "job_loop_duration (float, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:242
+msgid "スケジューラジョブスレッドのループ 1 周あたりのスリープ時間を秒単位で指定します． デフォルトでは 0.5 (秒) に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:245
+msgid "A sleep time each job loop. Defaults to 0.5."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:248
+msgid "job_retry (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:249
+msgid ""
+"Max retry counts to transit the state from HpCancelFailed to "
+"HpCancelFailure. Defaults to 2."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:252
+msgid "job_timeout (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:253
+msgid ""
+"Timeout seconds to transit the state from JobChecking to JobFailed. "
+"Defaults to 60."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:256
+msgid "kill_retry (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:257
+msgid ""
+"Max retry counts to transit the state from KillFailed to KillFailure. "
+"Defaults to 3."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:260
+msgid "kill_timeout (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:261
+msgid ""
+"Timeout seconds to transit the state from KillChecking to KillFailed. "
+"Defaults to 60."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:264
+msgid "result_retry (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:265
+msgid ""
+"Max retry counts to transit the state from RunnerFailed to RunnerFailure."
+" Defaults to 1."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:268
+msgid "runner_retry (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:269
+msgid ""
+"Max retry counts to transit the state from RunnerFailed to RunnerFailure."
+" Defaults to 3."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:272
+msgid "runner_timeout (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:273
+msgid ""
+"Timeout seconds to transit the state from RunnerChecking to RunnerFailed."
+" Defaults to 60."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:276
+msgid "running_retry (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:277
+msgid ""
+"Max retry counts to transit the state from HpRunningFailed to "
+"HpRunningFailure. Defaults to 3."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:280
+msgid "running_timeout (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:281
+msgid ""
+"Timeout seconds to transit the state from HpRunningChecking to "
+"HpRunningFailed. Defaults to 60."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:284
+msgid "init_fail_count (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:285
+msgid "Defaults to 100."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:287
+msgid "name_length (int, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:288
+msgid ""
+"文字列としてのジョブ ID の長さです． この文字列は，結果を .hp ファイルに保存する際にファイル名として使用されます． デフォルトでは 6 "
+"に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:295
+msgid "**logger:**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:298
+msgid "file:"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:299
+msgid "実行ログの保存先を設定します．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:301
+#: ../../source/user_guide/configuration_setting.md:352
+msgid "master (str, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:302
+msgid "マスターモジュールのログの保存先を設定します． デフォルトでは \"master.log\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:305
+#: ../../source/user_guide/configuration_setting.md:337
+#: ../../source/user_guide/configuration_setting.md:359
+msgid "optimizer (str, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:306
+msgid "オプティマイザモジュールのログの保存先を設定します． デフォルトでは \"optimizer.log\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:309
+#: ../../source/user_guide/configuration_setting.md:344
+#: ../../source/user_guide/configuration_setting.md:366
+msgid "scheduler (str, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:310
+msgid "スケジューラモジュールのログの保存先を設定します． デフォルトでは \"scheduler.log\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:313
+msgid "log_level:"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:314
+msgid "master (str):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:315
+msgid "マスターモジュールからのログファイル出力のログレベルを設定します． 以下の文字列が設定可能です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:317
+#: ../../source/user_guide/configuration_setting.md:328
+msgid "'DEBUG'"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:318
+#: ../../source/user_guide/configuration_setting.md:329
+msgid "'INFO'"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:319
+#: ../../source/user_guide/configuration_setting.md:330
+msgid "'WARNING'"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:320
+#: ../../source/user_guide/configuration_setting.md:331
+msgid "'WARN'"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:321
+#: ../../source/user_guide/configuration_setting.md:332
+msgid "'ERROR'"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:322
+#: ../../source/user_guide/configuration_setting.md:333
+msgid "'CRITICAL"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:324
+msgid "デフォルトでは \"DEBUG\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:326
+msgid ""
+"A logging level for a log file output of master module. Following strings"
+" are available;"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:335
+msgid "Defaults to \"DEBUG\"."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:338
+#: ../../source/user_guide/configuration_setting.md:345
+msgid "オプティマイザモジュールからのログファイル出力のログレベルを設定します． デフォルトでは \"DEBUG\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:341
+msgid ""
+"A logging level for a log file output of optimizer module. Defaults to "
+"\"DEBUG\"."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:348
+msgid ""
+"A logging level for a log file output of scheduler module. Defaults to "
+"\"DEBUG\"."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:351
+msgid "stream_level:"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:353
+msgid "マスターモジュールからのストリーム出力のログレベルを設定します． デフォルトでは \"DEBUG\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:356
+msgid ""
+"A logging level for a stream output of master module. Defaults to "
+"\"DEBUG\"."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:360
+msgid "オプティマイザモジュールからのストリーム出力のログレベルを設定します． デフォルトでは \"DEBUG\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:363
+msgid ""
+"A logging level for a stream output of optimizer module. Defaults to "
+"\"DEBUG\"."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:367
+msgid "スケジューラモジュールからのストリーム出力のログレベルを設定します． デフォルトでは \"DEBUG\" に設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:370
+msgid ""
+"A logging level for a stream output of scheduler module. Defaults to "
+"\"DEBUG\"."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:376
+msgid "**verification:**"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:378
+msgid "is_verified (bool, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:379
+msgid "最適化結果の verification を行うかを設定します． デフォルトでは flase が設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:382
+msgid "Defaults to false."
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:384
+msgid "condition (list, optional):"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:385
+msgid "Verification の条件の配列を設定します． 配列の各要素には，以下の項目が設定されている必要があります．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:387
+msgid "**loop** - Verification 対象となるジョブの ID です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:388
+msgid "**minimum** - 試行回数 loop 回までに計算された最も良い目的関数の値として許容される値の下限です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:389
+msgid "**maximum** - 試行回数 loop 回までに計算された最も良い目的関数の値として許容される値の下限です．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:391
+msgid "デフォルトでは，[] (空の配列) が設定されています．"
+msgstr ""
+
+#: ../../source/user_guide/configuration_setting.md:393
+msgid "Defaults to [] (an empty list)."
+msgstr ""
+
+#~ msgid "コンフィグレーションの設定ガイド(WIP)"
+#~ msgstr ""
 
