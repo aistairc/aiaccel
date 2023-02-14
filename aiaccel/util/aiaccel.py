@@ -367,10 +367,8 @@ class Run:
 
         return xs, y, err
 
-    @ execute.register
-    def _(
-        self, command: str, trial_id: int, y_data_type: 'str | None'
-    ) -> 'tuple[dict[str, float | int | str] | None, float | int | str | None, str]':
+    @execute.register
+    def _(self, command: str, trial_id: int, y_data_type: str) -> tuple:
         """ Executes the user program.
 
         Args:
@@ -447,7 +445,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: 'str | None' = None) -> None:
+    def _(self, command: str, y_data_type: str = None) -> None:
         """Executes the user program.
 
         Args:
