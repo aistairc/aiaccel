@@ -40,13 +40,14 @@ class PylocalScheduler(AbstractScheduler):
         args = []
         for trial_id in trial_ids:
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
-            xs = self.run.get_any_trial_xs(trial_id)
-            args.append([trial_id, xs])
+            args.append([trial_id, self.run.get_any_trial_xs(trial_id)])
             self._serialize(trial_id)
+
         for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
             self.com.out(objective_y=y, objective_err=err)
             self.run.report(trial_id, xs, y, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
+
             self.create_result_file(trial_id)
 
         return True
@@ -57,12 +58,21 @@ class PylocalScheduler(AbstractScheduler):
         del obj['pool']
         return obj
 
+    def create_model(self) -> None:
+        """Creates model object of state machine.
+
+        Returns:
+            None: Because it does not use the state transition model.
+        """
+        return None
+
 
 def initializer(config_path: str | Path):
     global user_func, workspace
+
     config = Config(config_path)
 
-    # Loads the specified module from the specified python program.
+    # Load the specified module from the specified python program.
     spec = importlib.util.spec_from_file_location("user_module", config.python_file.get())
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -74,8 +84,8 @@ def initializer(config_path: str | Path):
 
 def execute(args):
     trial_id, xs = args
-    start_time = get_time_now()
 
+    start_time = get_time_now()
     set_logging_file_for_trial_id(workspace, trial_id)
 
     try:
