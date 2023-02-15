@@ -182,7 +182,7 @@ class NelderMead(object):
             out_of_boundary = True
             self.logger.debug(f'_add_executing out of boundary y: {y}')
 
-        vertex_id = generate_random_name(rng=self._rng)
+        vertex_id = generate_random_name(self._rng)
         params = []
 
         for yi, p in zip(y, self.params):

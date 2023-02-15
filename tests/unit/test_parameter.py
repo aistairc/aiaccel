@@ -145,9 +145,7 @@ class TestParameter(BaseTest):
         p = hp.sample(rng)
         assert len(p) == 4
 
-        # json_string['parameters'].append({'name': 'e', 'type': 'invalid'})
         json_string.append({'name': 'e', 'type': 'invalid'})
-        hp = load_parameter(json_string)
-
+        hp_with_invalid_type = load_parameter(json_string)
         with pytest.raises(TypeError):
-            hp.sample(rng)
+            hp_with_invalid_type.sample(rng)

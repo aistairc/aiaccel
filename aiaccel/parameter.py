@@ -148,7 +148,7 @@ class HyperParameter(object):
         """Sample a parameter.
 
         Args:
-            rng (np.random.RandomState): A random generator.
+            rng (RandomState): A random generator.
             initial (bool, optional): Whether to require a initial value. If
                 True, returns the initial value. Defaults to False.
 
@@ -230,7 +230,7 @@ class HyperParameterConfiguration(object):
         """Sample a hyper parameters set.
 
         Args:
-            rng (np.random.RandomState): A random generator.
+            rng (RandomState): A random generator.
             initial (bool, optional): Whether to require a initial value. If
                 True, returns the initial value. Defaults to False.
 
