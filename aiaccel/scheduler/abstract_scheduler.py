@@ -55,7 +55,7 @@ class AbstractScheduler(AbstractModule):
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
-            and running files are in running directory.
+        and running files are in running directory.
 
         Returns:
             None
@@ -86,7 +86,7 @@ class AbstractScheduler(AbstractModule):
 
         Returns:
             Job | None: A reference for created job. It returns None if
-                specified hyper parameter file already exists.
+            specified hyper parameter file already exists.
         """
         trial_ids = [job.trial_id for job in self.jobs]
         if trial_id not in trial_ids:
@@ -267,8 +267,7 @@ class AbstractScheduler(AbstractModule):
         return (num_trials >= self.config.trial_number.get())
 
     def resume(self) -> None:
-        """ When in resume mode, load the previous
-                optimization data in advance.
+        """ When in resume mode, load the previous optimization data in advance.
 
         Args:
             None

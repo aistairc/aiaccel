@@ -405,7 +405,7 @@ def create_model(resource_type: Literal['abci', 'local']) -> AbciModel | LocalMo
     """Creates model object of state machine.
 
     Args:
-        resource_type (str): Resource type ('abci' or 'local')
+        resource_type (str): Resource type ('abci' or 'local').
 
     Returns:
         AbciModel | LocalModel: Model object.
@@ -431,113 +431,113 @@ class Job:
         hp_file (Path): A hyper parameter file for this job.
 
     Attributes:
-        - config (ConfileWrapper): A configuration object.
+        config (ConfileWrapper): A configuration object.
 
-        - ws (Path): A path of a workspace.
+        ws (Path): A path of a workspace.
 
-        - dict_lock (Path): A directory to store lock files.
+        dict_lock (Path): A directory to store lock files.
 
-        - runner_timeout (int):
+        runner_timeout (int):
             Timeout seconds to transit the state
             from RunnerChecking to RunnerFailed.
 
-        - running_timeout (int):
+        running_timeout (int):
             Timeout seconds to transit the state
             from HpRunningChecking to HpRunningFailed.
 
-        - job_timeout (int):
+        job_timeout (int):
             Timeout seconds to transit the state
             from JobChecking to JobFailed.
 
-        - batch_job_timeout (int):
+        batch_job_timeout (int):
             Timeout seconds to transit the state
             from WaitResult to HpExpireReady.
 
-        - finished_timeout (int):
+        finished_timeout (int):
             Timeout seconds to transit the state
             from HpFinishedChecking to HpFinishedFailed.
 
-        - kill_timeout (int):
+        kill_timeout (int):
             Timeout seconds to transit the state
             from KillChecking to KillFailed.
 
-        - cancel_timeout (int):
+        cancel_timeout (int):
             Timeout seconds to transit the state
             from HpCancelChecking to HpCancelFailed.
 
-        - expire_timeout (int):
+        expire_timeout (int):
             Timeout seconds to transit the state
             from HpExpireChecking to HpExpireFailed.
 
-        - runner_retry (int):
+        runner_retry (int):
             Max retry counts to transit the state
             from RunnerFailed to RunnerFailure.
 
-        - running_retry (int):
+        running_retry (int):
             Max retry counts to transit the state
             from HpRunningFailed to HpRunningFailure.
 
-        - job_retry (int):
+        job_retry (int):
             Max retry counts to transit the state
             from JobFailed to JobFailure.
 
-        - result_retry (int):
+        result_retry (int):
             Max retry counts to transit the state
             from RunnerFailed to RunnerFailure.
 
-        - finished_retry (int):
+        finished_retry (int):
             Max retry counts to transit the state
             from HpFinishedFailed to HpFinishedFailure.
 
-        - kill_retry (int):
+        kill_retry (int):
             Max retry counts to transit the state
             from KillFailed to KillFailure.
 
-        - cancel_retry (int):
+        cancel_retry (int):
             Max retry counts to transit the state
             from HpCancelFailed to HpCancelFailure.
 
-        - expire_retry (int):
+        expire_retry (int):
             Max retry counts to transit the state
             from HpExpireFailed to HpExpireFailure.
 
-        - threshold_timeout (int):
+        threshold_timeout (int):
             A timeout threshold for each state.
             A new value is stored each state transition if necessary.
 
-        - threshold_retry (int):
+        threshold_retry (int):
             A retry threshold for each state.
             A new value is stored each state transition if necessary.
 
-        - count_retry (int):
+        count_retry (int):
             A current retry count. This is compared with threshold_retry.
 
-        - job_loop_duration (int): A sleep time each job loop.
+        job_loop_duration (int): A sleep time each job loop.
 
-        - model (Model): A model object of state transitions.
+        model (Model): A model object of state transitions.
 
-        - machine (CustomMachine): A state machine object.
+        machine (CustomMachine): A state machine object.
 
-        - c (int): A loop counter.
+        c (int): A loop counter.
 
-        - scheduler (LocalScheduler | AbciScheduler):
+        scheduler (LocalScheduler | AbciScheduler):
             A reference for scheduler object.
 
-        - hp_file (Path): A hyper parameter file for this job.
+        hp_file (Path): A hyper parameter file for this job.
 
-        - trial_id (str): A unique name of this job.
+        trial_id (str): A unique name of this job.
 
-        - from_file (Path):
+        from_file (Path):
             A temporal file path to be used for each state transition.
-            For example, it's used for file moving.
+            For example, it is used for file moving.
 
-        - to_file (Path):
+        to_file (Path):
             A temporal file path to be used for each state transition.
             Usage is same with form_file.
 
-        - proc (subprocess.Popen): A running process.
+        proc (subprocess.Popen): A running process.
 
-        - th_oh (OutputHandler): An output handler for subprocess.
+        th_oh (OutputHandler): An output handler for subprocess.
     """
 
     def __init__(

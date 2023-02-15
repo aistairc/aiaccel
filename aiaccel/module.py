@@ -316,7 +316,7 @@ class AbstractModule(object):
             None
 
         Returns:
-            True: no error | False: with error.
+            bool: True if no error, False if with error.
         """
         return True
 

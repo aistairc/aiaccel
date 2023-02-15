@@ -115,7 +115,7 @@ class GridOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         ready_params (list[dict]): A list of ready hyper parameters.

@@ -13,5 +13,4 @@ __all__ = [
     'LocalModel',
     'Job',
     'create_model',
-    'model',
 ]

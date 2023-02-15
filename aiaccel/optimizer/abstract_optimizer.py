@@ -114,7 +114,7 @@ class AbstractOptimizer(AbstractModule):
 
         Raises:
             NotImplementedError: Causes when the inherited class does not
-            implement.
+                implement.
 
         Returns:
             list[dict[str, float | int | str]] | None: A created list of
@@ -245,7 +245,7 @@ class AbstractOptimizer(AbstractModule):
 
         Returns:
             list | None: A list of parameters with casted values. None if given
-                `params` is None.
+            `params` is None.
         """
         if params is None or len(params) == 0:
             return params

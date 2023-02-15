@@ -10,7 +10,7 @@ class SobolOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         generate_index (int): A number of generated hyper parameters.

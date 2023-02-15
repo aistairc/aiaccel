@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 
 class LocalModel(AbstractModel):
-
     def before_runner_create(self, obj: Job) -> None:
         return None
 

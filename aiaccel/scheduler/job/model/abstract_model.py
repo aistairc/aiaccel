@@ -121,7 +121,7 @@ class AbstractModel(object):
 
         Returns:
             bool: A target file exists or not. But always true if local
-                execution.
+            execution.
         """
         raise NotImplementedError
 

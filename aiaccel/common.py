@@ -1,6 +1,6 @@
 """Common variables and methods.
 
-Example:
+Example: ::
 
     from aiaccel.common import alive_master
 
