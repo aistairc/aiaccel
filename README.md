@@ -1,3 +1,5 @@
+<div align="center"><img src="https://raw.githubusercontent.com/aistairc/aiaccel/master/docs/image/logo_aiaccel.png" width="400"/></div>
+
 # aiaccel: a HPO library for ABCI
 [![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
 [![Supported Python version](https://img.shields.io/badge/Python-3.8-blue)](https://github.com/aistairc/aiaccel)
