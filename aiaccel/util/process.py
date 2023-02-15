@@ -165,9 +165,14 @@ class OutputHandler(threading.Thread):
             if not line and self._proc.poll() is not None:
                 self._parent.logger.debug(f'{self._module_name} process finished.')
                 o, e = self._proc.communicate()
-
                 if o:
-                    print(o.decode().strip(), flush=True)
+                    objective = o.decode().strip()
+                    print(objective, flush=True)
+                    if self.storage is not None:
+                        self.storage.result.set_any_trial_objective(
+                            trial_id=self.trial_id,
+                            value=float(objective)
+                        )
                 if e:
                     error_message = e.decode().strip()
                     if self.storage is not None:

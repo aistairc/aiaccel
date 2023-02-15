@@ -197,9 +197,11 @@ class TestModel(BaseTest):
 
         # self.job.scheduler.stats.append({'name': '001'})
         # self.job.scheduler.stats.append({'name': 0})
-        self.job.scheduler.stats.append(
-            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0', }
-        )
+        # self.job.scheduler.stats.append(
+        #     {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0', }
+        # )
+        self.job.trial_id = 99
+        self.job.scheduler.storage.trial.set_any_trial_state(self.job.trial_id, 'running')
         assert self.model.conditions_job_confirmed(self.job)
 
     def test_after_result(self, database_remove):

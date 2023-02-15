@@ -153,3 +153,32 @@ class Workspace:
 
         shutil.copytree(self.path, dst, ignore=ignptn)
         return dst
+
+    def get_any_result_file_path(self, trial_id: int) -> pathlib.PosixPath:
+        """Get result file path.
+
+        Returns:
+            PosixPath: Path to result file.
+        """
+        return self.result / f"{trial_id}.{aiaccel.extension_hp}"
+
+    def result_file_exists(self, trial_id: int) -> bool:
+        """Check result file exists or not.
+
+        Returns:
+            bool: True if result file exists.
+        """
+        path = self.get_any_result_file_path(trial_id)
+        return path.exists()
+
+    @retry(_MAX_NUM=10, _DELAY=1.0)
+    def get_any_trial_result(self, trial_id: int) -> dict | None:
+        """Get any trial result.
+
+        Returns:
+            dict: Trial result.
+        """
+        path = self.get_any_result_file_path(trial_id)
+        if path.exists() is False:
+            return None
+        return fs.load_yaml(path)

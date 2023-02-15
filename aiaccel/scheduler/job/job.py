@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 
 from enum import Enum
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from transitions import Machine
@@ -17,6 +16,7 @@ from aiaccel import resource_type_local
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
+from aiaccel.workspace import Workspace
 from aiaccel.scheduler.job.model.abci_model import AbciModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 
@@ -195,6 +195,7 @@ JOB_TRANSITIONS = [
         'source': 'WaitResult',
         'dest': 'Result',
         'conditions': 'conditions_result',
+        'before': 'before_result',
         'after': 'after_result'
     },
     {
@@ -552,7 +553,6 @@ class Job:
         self.config = config
         self.config_path = self.config.config_path
         # === Get config parameter values ===
-        self.workspace = self.config.workspace.get()
         self.cancel_retry = self.config.cancel_retry.get()
         self.cancel_timeout = self.config.cancel_timeout.get()
         self.expire_retry = self.config.expire_retry.get()
@@ -576,7 +576,8 @@ class Job:
         self.threshold_retry = None
         self.count_retry = 0
 
-        self.ws = Path(self.workspace).resolve()
+        self.workspace = Workspace(self.config.workspace.get())
+        self.ws = self.workspace.path
         self.dict_lock = self.ws / dict_lock
 
         self.model = create_model(self.resource_type)
@@ -699,15 +700,21 @@ class Job:
         ):
             self.storage.jobstate.set_any_trial_jobstate(trial_id=self.trial_id, state=state.name)
 
-        if state.name == 'Success' or 'Failure' in state.name:
+        if state.name.lower() == 'success':
             return
 
-        now = get_time_now_object()
+        if 'failure' in state.name.lower():
+            if self.storage.error.get_any_trial_error(trial_id=self.trial_id) is None:
+                self.storage.error.set_any_trial_error(
+                    trial_id=self.trial_id,
+                    error_message=state.name
+                )
+            return
 
         if self.is_timeout():
             self.logger.debug(
                 f'Timeout expire state: {state.name}, '
-                f'now: {now}, '
+                f'now: {get_time_now_object()}, '
                 f'timeout: {self.threshold_timeout}'
             )
             self.model.expire(self)
@@ -720,7 +727,7 @@ class Job:
             )
             self.model.expire(self)
 
-        elif state.name != 'Scheduling':
+        elif state.name.lower() != 'scheduling':
             self.model.next(self)
 
         self.logger.debug(

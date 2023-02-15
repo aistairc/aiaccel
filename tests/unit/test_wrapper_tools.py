@@ -40,8 +40,7 @@ class TestCeaterRunnerComand(BaseTest):
         assert commands[5] == 'name'
         assert commands[6] == '--config'
         assert commands[7] == 'config.json'
-        assert commands[8] == '--use_db'
-        assert commands[9] == '--x1=0.9932890709584586'
+        assert commands[8] == '--x1=0.9932890709584586'
 
         start_time = get_time_now()
         end_time = get_time_now()

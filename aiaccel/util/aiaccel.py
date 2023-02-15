@@ -8,9 +8,11 @@ from collections.abc import Callable
 from pathlib import Path, PosixPath
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
 from aiaccel.parameter import load_parameter
+from aiaccel import dict_result
+from aiaccel import extension_hp
+from aiaccel.util.filesystem import create_yaml
 
 
 class CommandLineArgs:
@@ -18,12 +20,7 @@ class CommandLineArgs:
         self.parser = ArgumentParser()
         self.parser.add_argument('--trial_id', type=int, required=False)
         self.parser.add_argument('--config', type=str, required=False)
-        self.parser.add_argument('--use_db', type=bool, required=False,
-                                 default=False, nargs='?', const=True)
         self.args = self.parser.parse_known_args()[0]
-
-        self.use_db = self.args.use_db
-
         self.trial_id = None
         self.config_path = None
         self.config = None
@@ -57,7 +54,7 @@ class CommandLineArgs:
 
     def get_xs_from_args(self) -> dict:
         xs = vars(self.args)
-        delete_keys = ["trial_id", "config", "use_db"]
+        delete_keys = ["trial_id", "config"]
         for key in delete_keys:
             if key in xs.keys():
                 del xs[key]
@@ -268,7 +265,7 @@ class WrapperInterface:
 
 
 class Run:
-    """An Interface between user program or python function and Storage object.
+    """An Interface between user program or python function object.
 
     Args:
         config_path (str | Path | None, optional): A path to configration file.
@@ -282,7 +279,6 @@ class Run:
             configuration file.
         config (Config): A Config object.
         workspace (PosixPath): A Path object which points to the workspace.
-        storage (Storage): A Storage object.
         logger (Logger): A Logger object.
         com (WrapperInterface): A WrapperInterface object.
 
@@ -317,15 +313,24 @@ class Run:
         self.config_path = None
         self.config = None
         self.workspace = None
-        self.storage = None
 
         self.args = CommandLineArgs()
         self.config_path = self.args.config_path or config_path
         self.config = self.args.config
         if self.config is not None:
             self.workspace = Path(self.config.workspace.get()).resolve()
-            self.storage = Storage(self.workspace)
         self.com = WrapperInterface()
+
+    def get_result_file_path(self, trial_id: int) -> PosixPath:
+        """Get a path to the result file.
+
+        Args:
+            trial_id (int): Trial Id.
+
+        Returns:
+            PosixPath: A Path object which points to the result file.
+        """
+        return self.workspace / dict_result / f"{trial_id}.{extension_hp}"
 
     def generate_commands(
         self,
@@ -358,46 +363,6 @@ class Run:
                 commands.append(f"{value}")
 
         return commands
-
-    def get_any_trial_xs(self, trial_id: int) -> dict | None:
-        """Gets a parameter list of specific trial ID from Storage object.
-
-        Args:
-            trial_id (int): Trial ID.
-
-        Returns:
-            dict | None: A dictionary of parameters. None if the parameter
-                specified by the given trial ID is not registered.
-        """
-        params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
-        if params is None:
-            return {}
-
-        xs = {}
-        for param in params:
-            xs[param.param_name] = param.param_value
-
-        return xs
-
-    def _get_xs(self, trial_id: int | None) -> dict[str, int | float | str]:
-        """Gets a parameter list  from Storage object or command line arguments.
-
-        Args:
-            trial_id (int | None): Trial ID.
-
-        Returns:
-            Optional[dict]: A dictionary of parameters. None if the parameter
-            specified by the given trial ID is not registered.
-        """
-
-        if self.args.use_db is True:
-            if trial_id is None:
-                raise ValueError("trial_id is not specified")
-            xs = self.get_any_trial_xs(trial_id=trial_id)
-        else:
-            xs = self.args.get_xs_from_args()
-
-        return xs
 
     def cast_y(
             self, y_value: Any, y_data_type: str | None) -> float | int | str:
@@ -546,7 +511,7 @@ class Run:
         """
 
         trial_id = self.args.trial_id
-        xs = self._get_xs(trial_id)
+        xs = self.args.get_xs_from_args()
         xs, y, err, start_time, end_time = self.execute(func, xs, y_data_type)
 
         self.report(trial_id, xs, y, err, start_time, end_time)
@@ -569,7 +534,7 @@ class Run:
         """
 
         trial_id = self.args.trial_id
-        xs = self._get_xs(trial_id)
+        xs = self.args.get_xs_from_args()
         xs, y, err, start_time, end_time = self.execute(command, xs, y_data_type)
 
         self.report(trial_id, xs, y, err, start_time, end_time)
@@ -578,7 +543,7 @@ class Run:
         self, trial_id: int, xs: dict, y: any, err: str, start_time: str,
         end_time: str
     ) -> None:
-        """Saves results in the Storage object.
+        """Save the results to a text file.
 
         Args:
             trial_id (int): Trial ID.
@@ -589,18 +554,13 @@ class Run:
             end_time (str): Execution end time.
         """
 
-        if self.storage is not None:
-            self.storage.result.set_any_trial_objective(trial_id, y)
-            self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
-            self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
-            if err != "":
-                self.storage.error.set_any_trial_error(trial_id, err)
-        else:
-            print({
-                'trial_id': trial_id,
-                'params': xs,
-                'objective': y,
-                'error': err,
-                'start_time': start_time,
-                'end_time': end_time
-            })
+        result = {
+            'trial_id': trial_id,
+            'paramerters': xs,
+            'result': y,
+            'error': err,
+            'start_time': start_time,
+            'end_time': end_time
+        }
+
+        create_yaml(self.get_result_file_path(trial_id), result)

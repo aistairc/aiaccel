@@ -65,6 +65,26 @@ class PylocalScheduler(AbstractScheduler):
 
         return True
 
+    def get_any_trial_xs(self, trial_id: int) -> dict | None:
+        """Gets a parameter list of specific trial ID from Storage object.
+
+        Args:
+            trial_id (int): Trial ID.
+
+        Returns:
+            dict | None: A dictionary of parameters. None if the parameter
+                specified by the given trial ID is not registered.
+        """
+        params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
+        if params is None:
+            return {}
+
+        xs = {}
+        for param in params:
+            xs[param.param_name] = param.param_value
+
+        return xs
+
     def execute(self, trial_id: int) -> None:
         """ Executes the loaded callable object.
 
@@ -76,14 +96,35 @@ class PylocalScheduler(AbstractScheduler):
         """
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
 
-        xs = self.run.get_any_trial_xs(trial_id)
-        xs, y, err, start_time, end_time = self.run.execute(self.user_func, xs, y_data_type=None)
-        self.run.report(trial_id, xs, y, err, start_time, end_time)
+        xs = self.get_any_trial_xs(trial_id)
+        _, y, err, start_time, end_time = self.run.execute(self.user_func, xs, y_data_type=None)
+        self.report(trial_id, y, err, start_time, end_time)
 
         self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
         self.create_result_file(trial_id)
 
         return
+
+    def report(
+        self, trial_id: int, y: any, err: str, start_time: str,
+        end_time: str
+    ) -> None:
+        """Saves results in the Storage object.
+
+        Args:
+            trial_id (int): Trial ID.
+            xs (dict): A dictionary of parameters.
+            y (any): Objective value.
+            err (str): Error string.
+            start_time (str): Execution start time.
+            end_time (str): Execution end time.
+        """
+
+        self.storage.result.set_any_trial_objective(trial_id, y)
+        self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
+        self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
+        if err != "":
+            self.storage.error.set_any_trial_error(trial_id, err)
 
     def __getstate__(self):
         obj = super().__getstate__()
