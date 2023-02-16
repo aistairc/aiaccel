@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from pathlib import Path
 import shutil
 
@@ -154,7 +155,7 @@ class Workspace:
         shutil.copytree(self.path, dst, ignore=ignptn)
         return dst
 
-    def get_any_result_file_path(self, trial_id: int) -> pathlib.PosixPath:
+    def get_any_result_file_path(self, trial_id: int) -> Path:
         """Get result file path.
 
         Returns:

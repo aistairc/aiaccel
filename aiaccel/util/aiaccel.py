@@ -16,6 +16,7 @@ from aiaccel import extension_hp
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.util.cast import cast_y
 
+
 class CommandLineArgs:
     def __init__(self):
         self.parser = ArgumentParser()

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
+from aiaccel.util.aiaccel import WrapperInterface
 from aiaccel.util.aiaccel import set_logging_file_for_trial_id
 from aiaccel.util.time_tools import get_time_now
 from aiaccel.util.cast import cast_y
@@ -42,8 +43,9 @@ class PylocalScheduler(AbstractScheduler):
             args.append([trial_id, self.get_any_trial_xs(trial_id)])
             self._serialize(trial_id)
 
-        for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
-            self.report(trial_id, xs, y, err, start_time, end_time)
+        for trial_id, _, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
+            self.com.out(objective_y=y, objective_err=err)
+            self.report(trial_id, y, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
 
             self.create_result_file(trial_id)
@@ -107,7 +109,7 @@ class PylocalScheduler(AbstractScheduler):
 
 def initializer(config_path: str | Path) -> None:
     """Initializer for multiprocessing.Pool.
-    
+
     Args:
         config_path (str | Path): Path to the configuration file.
     Returns:
@@ -129,6 +131,7 @@ def initializer(config_path: str | Path) -> None:
 
 def execute(args: list) -> tuple:
     """Executes the specified function with the specified arguments.
+
     Args:
         args (list): Arguments.
     Returns:
