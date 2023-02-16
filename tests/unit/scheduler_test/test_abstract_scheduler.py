@@ -8,6 +8,7 @@ import aiaccel
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.scheduler.job.model.local_model import LocalModel
 
 from tests.base_test import BaseTest
 
@@ -332,3 +333,14 @@ class TestAbstractScheduler(BaseTest):
 
         scheduler.options['resume'] = None
         assert scheduler.resume() is None
+
+    def test_create_model(self):
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+        assert type(scheduler.create_model()) is LocalModel

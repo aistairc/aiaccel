@@ -1,5 +1,5 @@
 from __future__ import annotations
-import pathlib
+from pathlib import Path
 import shutil
 
 import aiaccel
@@ -39,7 +39,7 @@ class Workspace:
     """
 
     def __init__(self, base_path: str):
-        self.path = pathlib.Path(base_path).resolve()
+        self.path = Path(base_path).resolve()
 
         self.alive = self.path / aiaccel.dict_alive
         self.error = self.path / aiaccel.dict_error
@@ -76,7 +76,7 @@ class Workspace:
             self.timestamp,
             self.verification
         ]
-        self.results = pathlib.Path("./results")
+        self.results = Path("./results")
 
     def create(self) -> bool:
         """Create a work directory.
@@ -131,7 +131,7 @@ class Workspace:
         return True
 
     @retry(_MAX_NUM=10, _DELAY=1.0)
-    def move_completed_data(self) -> pathlib.PosixPath | None:
+    def move_completed_data(self) -> Path | None:
         """ Move workspace to under of results directory when finished.
 
         Raises:
@@ -139,7 +139,7 @@ class Workspace:
                 when the method is called.
 
         Returns:
-            PosixPath | None: Path of destination.
+            Path | None: Path of destination.
         """
 
         dst = self.results / Suffix.date()

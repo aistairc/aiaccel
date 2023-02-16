@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import logging
 import subprocess
 from argparse import ArgumentParser
 from functools import singledispatchmethod
 from typing import Any
 from collections.abc import Callable
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 from aiaccel.config import Config
 from aiaccel.util.time_tools import get_time_now
@@ -13,7 +14,7 @@ from aiaccel.parameter import load_parameter
 from aiaccel import dict_result
 from aiaccel import extension_hp
 from aiaccel.util.filesystem import create_yaml
-
+from aiaccel.util.cast import cast_y
 
 class CommandLineArgs:
     def __init__(self):
@@ -275,10 +276,10 @@ class Run:
         args (dict): A dictionary object which contains command line arguments
             given by aiaccel.
         trial_id (int): Trial Id.
-        config_path (PosixPath): A Path object which points to the
+        config_path (Path): A Path object which points to the
             configuration file.
         config (Config): A Config object.
-        workspace (PosixPath): A Path object which points to the workspace.
+        workspace (Path): A Path object which points to the workspace.
         logger (Logger): A Logger object.
         com (WrapperInterface): A WrapperInterface object.
 
@@ -308,8 +309,7 @@ class Run:
                 run.execute_and_report(func)
     """
 
-    def __init__(self, config_path: str | PosixPath | None = None) -> None:
-
+    def __init__(self, config_path: str | Path | None = None) -> None:
         self.config_path = None
         self.config = None
         self.workspace = None
@@ -321,7 +321,7 @@ class Run:
             self.workspace = Path(self.config.workspace.get()).resolve()
         self.com = WrapperInterface()
 
-    def get_result_file_path(self, trial_id: int) -> PosixPath:
+    def get_result_file_path(self, trial_id: int) -> Path:
         """Get a path to the result file.
 
         Args:
@@ -364,34 +364,6 @@ class Run:
 
         return commands
 
-    def cast_y(
-            self, y_value: Any, y_data_type: str | None) -> float | int | str:
-        """Casts y to the appropriate data type.
-
-        Args:
-            y_value (Any): y value to be casted.
-            y_data_type (str | None): Name of data type of objective value.
-
-        Returns:
-            float | int | str: Casted y value.
-
-        Raises:
-            TypeError: Occurs when given `y_data_type` is other than `float`,
-                 `int`, or `str`.
-        """
-        if y_data_type is None:
-            y = y_value
-        elif y_data_type.lower() == 'float':
-            y = float(y_value)
-        elif y_data_type.lower() == 'int':
-            y = int(float(y_value))
-        elif y_data_type.lower() == 'str':
-            y = str(y_value)
-        else:
-            TypeError(f'{y_data_type} cannot be specified')
-
-        return y
-
     @singledispatchmethod
     def execute(
         self,
@@ -414,6 +386,7 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
+        set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
 
         y = None
         err = ""
@@ -421,9 +394,12 @@ class Run:
         start_time = get_time_now()
 
         try:
-            y = self.cast_y(func(xs), y_data_type)
+            y = cast_y(func(xs), y_data_type)
         except BaseException as e:
             err = str(e)
+            y = None
+        else:
+            err = ""
         finally:
             self.com.out(objective_y=y, objective_err=err)
 
@@ -436,7 +412,7 @@ class Run:
         self, command: str,
         xs: 'dict[str, float | int | str]',
         y_data_type: 'str | None'
-    ) -> 'tuple[dict[str, float | int | str] | None, float | int | str | None, str]':
+    ) -> tuple:
         """ Executes the user program.
 
         Args:
@@ -449,6 +425,8 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
+
+        set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
 
         err = ""
         y = None
@@ -472,9 +450,9 @@ class Run:
 
         ys, err = self.com.get_data(output)
         if y_data_type is None:
-            y = self.cast_y(ys[0], 'float')
+            y = cast_y(ys[0], 'float')
         else:
-            y = self.cast_y(ys[0], y_data_type)
+            y = cast_y(ys[0], y_data_type)
         err = ("\n").join(err)
 
         end_time = get_time_now()
@@ -517,7 +495,7 @@ class Run:
         self.report(trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: 'str | None' = None) -> None:
+    def _(self, command: str, y_data_type: str = None) -> None:
         """Executes the user program.
 
         Args:
@@ -564,3 +542,11 @@ class Run:
         }
 
         create_yaml(self.get_result_file_path(trial_id), result)
+
+
+def set_logging_file_for_trial_id(workspace, trial_id):
+    log_dir = workspace / "log"
+    log_path = log_dir / f"job_{trial_id}.log"
+    if not log_dir.exists():
+        log_dir.mkdir(parents=True)
+    logging.basicConfig(filename=log_path, level=logging.DEBUG, force=True)

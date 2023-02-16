@@ -10,7 +10,7 @@ import pytest
 from aiaccel.config import ConfileWrapper
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
-                                       CustomMachine, Job, create_model)
+                                       CustomMachine, Job)
 from aiaccel.scheduler.job.model.abci_model import AbciModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.scheduler.local_scheduler import LocalScheduler
@@ -64,9 +64,10 @@ class TestModel(BaseTest):
         self.job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
-        self.model = create_model(self.config.resource_type.get())
+        self.model = scheduler.create_model()
         yield
         self.job = None
         self.model = None
@@ -102,6 +103,7 @@ class TestModel(BaseTest):
             # json_object_config,
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         yield
@@ -410,6 +412,7 @@ class TestJob(BaseTest):
         self.job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         yield
@@ -439,6 +442,7 @@ class TestJob(BaseTest):
         job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         assert type(job) is Job

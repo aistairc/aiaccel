@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:44+0000\n"
+"POT-Creation-Date: 2023-02-06 17:28+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -357,7 +357,11 @@ msgid "Get the current maximum number of trials."
 msgstr ""
 
 #: aiaccel.storage.storage.Storage.current_max_trial_number:6 of
-msgid "TODO: Refuctoring"
+msgid "課題"
+msgstr ""
+
+#: aiaccel.storage.storage.Storage.current_max_trial_number:6 of
+msgid "Refuctoring"
 msgstr ""
 
 #: aiaccel.storage.storage.Storage.get_best_trial:1 of
@@ -532,4 +536,7 @@ msgstr ""
 #: ../../source/api_reference/aiaccel.storage.rst:88
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "TODO: Refuctoring"
+#~ msgstr ""
 
