@@ -163,7 +163,7 @@ class OutputHandler(threading.Thread):
                 print(line, flush=True)
 
             if not line and self._proc.poll() is not None:
-                self._parent.logger.debug(f'{self._module_name} process finished.')
+                self._parent.set_debug_log(f'{self._module_name} process finished.')
                 o, e = self._proc.communicate()
 
                 if o:

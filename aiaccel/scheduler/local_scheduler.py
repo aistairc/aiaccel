@@ -32,7 +32,7 @@ class LocalScheduler(AbstractScheduler):
                 if trial_id in trial_id_list:
                     self.stats.append(r)
                 else:
-                    self.logger.warning(f'**** Unknown process: {r}')
+                    self._logger.warning(f'**** Unknown process: {r}')
 
     def parse_trial_id(self, command: str) -> str | None:
         """Parse a command string and extract an unique name.

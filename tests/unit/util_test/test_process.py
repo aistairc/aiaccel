@@ -109,7 +109,10 @@ def test_is_process_running():
 def test_OutputHandler():
     class dummy:
         def __init__(self):
-            self.logger = logging.getLogger('root.master')
+            self._logger = logging.getLogger('root.master')
+
+        def set_debug_log(self, message: str) -> None:
+            self._logger.debug(message)
 
     trial_id = 0
     _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=PIPE), 'test', trial_id)
@@ -121,7 +124,6 @@ def test_OutputHandler():
 
     _ouputhandler._abort = False
     assert _ouputhandler.run() is None
-
 
     _ouputhandler = OutputHandler(dummy(), subprocess.Popen('ls', stdout=None), 'test', trial_id)
     assert _ouputhandler.run() is None

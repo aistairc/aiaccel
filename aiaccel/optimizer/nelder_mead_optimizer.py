@@ -169,7 +169,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         searched_params = self.nelder_mead.search()
         if searched_params is None:
-            self.logger.info('generate_parameter(): reached to max iteration.')
+            self._logger.info('generate_parameter(): reached to max iteration.')
             return None
         if len(searched_params) == 0:
             return None

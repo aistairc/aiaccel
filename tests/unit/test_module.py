@@ -1,26 +1,19 @@
 import asyncio
 import logging
-import numpy as np
-import shutil
 import sys
 import time
-from contextlib import ExitStack
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
+
+import numpy as np
+import pytest
 
 import aiaccel
-import pytest
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer.random_optimizer import RandomOptimizer
 from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import file_create
-from aiaccel.util.logger import str_to_logging_level
 
 from tests.base_test import BaseTest
-
-import pytest
 
 
 async def async_function(func):
@@ -64,12 +57,12 @@ class TestAbstractModule(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
-            'process_name': 'test'
+            # 'fs': False,
+            'process_name': 'test',
+            'logger_name': __name__
         }
 
         self.module = AbstractModule(options)
-        self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
 
@@ -87,8 +80,8 @@ class TestAbstractModule(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'fs': False,
-            'process_name': 'master'
+            # 'fs': False,
+            # 'process_name': 'master'
         }
         commandline_args = [
             "start.py",
@@ -105,8 +98,8 @@ class TestAbstractModule(BaseTest):
                 'config': str(self.config_json),
                 'resume': None,
                 'clean': False,
-                'fs': False,
-                'process_name': 'optimizer'
+                # 'fs': False,
+                # 'process_name': 'optimizer'
             }
             optimizer = RandomOptimizer(options)
             module_type = optimizer.get_module_type()
@@ -116,8 +109,8 @@ class TestAbstractModule(BaseTest):
                 'config': str(self.config_json),
                 'resume': None,
                 'clean': False,
-                'fs': False,
-                'process_name': 'scheduler'
+                # 'fs': False,
+                # 'process_name': 'scheduler'
             }
             scheduler = LocalScheduler(options)
             module_type = scheduler.get_module_type()
@@ -136,28 +129,6 @@ class TestAbstractModule(BaseTest):
 
     def test_print_dict_state(self):
         assert self.module.print_dict_state() is None
-
-    def test_set_logger(self, work_dir):
-        assert self.module.set_logger(
-            'root.optimizer',
-            work_dir.joinpath(
-                self.module.dict_log,
-                # self.config.get('logger', 'optimizer_logfile')
-                # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
-                self.module.config.optimizer_logfile.get()
-            ),
-            str_to_logging_level(
-                # self.module.config.get('logger', 'optimizer_file_log_level')
-                # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
-                self.module.config.optimizer_file_log_level.get()
-            ),
-            str_to_logging_level(
-                # self.module.config.get('logger', 'optimizer_stream_log_level')
-                # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-                self.module.config.optimizer_stream_log_level.get()
-            ),
-            'Optimizer'
-        ) is None
 
     def test_pre_process(self):
         try:
@@ -197,7 +168,8 @@ class TestAbstractModule(BaseTest):
             'config': str(self.config_json),
             'resume': None,
             'clean': False,
-            'process_name': 'test'
+            'process_name': 'test',
+            'logger_name': 'root.optimizer'
         }
 
         self.module = AbstractModule(options)
@@ -207,3 +179,51 @@ class TestAbstractModule(BaseTest):
         self.module.options['resume'] = 1
         self.module._serialize(1)
         assert self.module.resume() is None
+
+    def test_create_log_file_handler(self, work_dir) -> None:
+        log_file = work_dir.joinpath(
+            self.module.dict_log,
+            self.module.config.optimizer_logfile.get()
+        )
+        file_level = self.module.config.optimizer_file_log_level.get()
+        file_handler = self.module._create_log_file_handler(log_file, file_level)
+        assert file_handler.baseFilename == str(log_file)
+        assert file_handler.level == logging.__getattribute__(file_level)
+        assert file_handler.formatter._fmt == (
+            '%(asctime)s %(levelname)-8s %(filename)-12s line '
+            '%(lineno)-4s %(message)s'
+        )
+
+    def test_create_stream_file_handler(self):
+        stream_level = self.module.config.optimizer_stream_log_level.get()
+        stream_handler = self.module._create_log_stream_handler(stream_level)
+        assert stream_handler.level == logging.__getattribute__(stream_level)
+        assert stream_handler.formatter._fmt == 'Test      %(levelname)-8s %(message)s'
+
+    def test_set_log_handlers(self, work_dir):
+        log_file = work_dir.joinpath(
+            self.module.dict_log,
+            self.module.config.optimizer_logfile.get()
+        )
+        file_level = self.module.config.optimizer_file_log_level.get()
+        stream_level = self.module.config.optimizer_stream_log_level.get()
+        assert self.module._set_log_handlers(log_file, file_level, stream_level) is None
+        assert self.module._logger.name == __name__
+        assert self.module._logger.handlers[0].baseFilename == str(log_file)
+        if isinstance(file_level, str):
+            assert self.module._logger.handlers[0].level == logging.__getattribute__(file_level)
+        elif isinstance(file_level, int):
+            assert self.module._logger.handlers[0].level == file_level
+        else:
+            assert False
+        assert self.module._logger.handlers[0].formatter._fmt == (
+            '%(asctime)s %(levelname)-8s %(filename)-12s line '
+            '%(lineno)-4s %(message)s'
+        )
+        if isinstance(stream_level, str):
+            assert self.module._logger.handlers[0].level == logging.__getattribute__(stream_level)
+        elif isinstance(stream_level, int):
+            assert self.module._logger.handlers[0].level == file_level
+        else:
+            assert False
+        assert self.module._logger.handlers[1].formatter._fmt == 'Test      %(levelname)-8s %(message)s'

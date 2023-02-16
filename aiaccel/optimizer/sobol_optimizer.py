@@ -84,7 +84,7 @@ class SobolOptimizer(AbstractOptimizer):
             list[dict[str, float | int | str]]: A list of new parameters.
         """
         if super().generate_initial_parameter() is not None:
-            self.logger.warning(
+            self._logger.warning(
                 "Initial values cannot be specified for sobol."
                 "The set initial value has been invalidated."
             )

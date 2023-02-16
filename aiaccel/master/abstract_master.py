@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-import logging
-
 import aiaccel
 from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
 from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
 from aiaccel.master.verification.abstract_verification import \
     AbstractVerification
 from aiaccel.module import AbstractModule
-from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.time_tools import (get_time_now_object,
                                      get_time_string_from_object)
 
@@ -28,7 +25,6 @@ class AbstractMaster(AbstractModule):
             Optimizer.
         start_time (datetime.datetime): A stored starting time.
         verification (AbstractVerification): A verification object.
-        logger (logging.Logger): Logger object.
         goal (str): Goal of optimization ('minimize' or 'maximize').
         trial_number (int): The number of trials.
         runner_files (list):
@@ -40,17 +36,12 @@ class AbstractMaster(AbstractModule):
         self.loop_start_time = None
         self.options = options
         self.options['process_name'] = 'master'
-
+        self.options['logger_name'] = 'root.master'
         super().__init__(self.options)
-        self.logger = logging.getLogger('root.master')
-        self.logger.setLevel(logging.DEBUG)
-
-        self.set_logger(
-            'root.master',
-            self.dict_log / self.config.master_logfile.get(),
-            str_to_logging_level(self.config.master_file_log_level.get()),
-            str_to_logging_level(self.config.master_stream_log_level.get()),
-            'Master   '
+        self._set_log_handlers(
+            log_file=self.dict_log / self.config.master_logfile.get(),
+            file_level=self.config.master_file_log_level.get(),
+            stream_level=self.config.master_stream_log_level.get()
         )
 
         self.verification = AbstractVerification(self.options)
@@ -91,7 +82,7 @@ class AbstractMaster(AbstractModule):
         elif self.goal.lower() == aiaccel.goal_minimize:
             evaluator = MinimizeEvaluator(self.options)
         else:
-            self.logger.error(f'Invalid goal: {self.goal}.')
+            self._logger.error(f'Invalid goal: {self.goal}.')
             raise ValueError(f'Invalid goal: {self.goal}.')
 
         evaluator.evaluate()
@@ -101,7 +92,7 @@ class AbstractMaster(AbstractModule):
         # verification
         self.verification.verify()
         self.verification.save('final')
-        self.logger.info('Master finished.')
+        self._logger.info('Master finished.')
 
     def print_dict_state(self) -> None:
         """Display the number of yaml files in 'ready', 'running', and
@@ -125,7 +116,7 @@ class AbstractMaster(AbstractModule):
             else:
                 end_estimated_time = 'Unknown'
 
-        self.logger.info(
+        self._logger.info(
             f'{self.hp_finished}/{self.trial_number} finished, '
             f'ready: {self.hp_ready} ,'
             f'running: {self.hp_running}, '

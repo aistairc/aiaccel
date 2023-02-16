@@ -31,7 +31,7 @@ class AbciScheduler(AbstractScheduler):
         self.stats = parse_qstat(self.config, stats)
 
         for stat in self.stats:
-            self.logger.info(
+            self._logger.info(
                 f'stat job-ID: {stat["job-ID"]}, '
                 f'name: {stat["name"]}, '
                 f'state: {stat["state"]}'
@@ -46,7 +46,7 @@ class AbciScheduler(AbstractScheduler):
         Returns:
             str | None: An unique name.
         """
-        self.logger.debug(f"command: {command}")
+        self._logger.debug(f"command: {command}")
         full = re.compile(r'run_\d{1,65535}.sh')
         numbers = re.compile(r'\d{1,65535}')
         if full.search(command) is None:

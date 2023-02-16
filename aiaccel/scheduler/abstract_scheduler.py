@@ -7,7 +7,6 @@ from aiaccel.scheduler.algorithm import schedule_sampling
 from aiaccel.scheduler.job.job import Job
 from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
-from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.filesystem import create_yaml
 from aiaccel import dict_result
 
@@ -35,18 +34,14 @@ class AbstractScheduler(AbstractModule):
     def __init__(self, options: dict) -> None:
         self.options = options
         self.options['process_name'] = 'scheduler'
+        self.options['logger_name'] = 'root.scheduler'
         super().__init__(self.options)
-
-        self.config_path = Path(self.options['config']).resolve()
-
-        self.set_logger(
-            'root.scheduler',
+        self._set_log_handlers(
             self.dict_log / self.config.scheduler_logfile.get(),
-            str_to_logging_level(self.config.scheduler_file_log_level.get()),
-            str_to_logging_level(self.config.scheduler_stream_log_level.get()),
-            'Scheduler'
+            self.config.scheduler_file_log_level.get(),
+            self.config.scheduler_stream_log_level.get()
         )
-
+        self.config_path = Path(self.options['config']).resolve()
         self.max_resource = self.config.num_node.get()
         self.available_resource = self.max_resource
         self.stats = []
@@ -94,11 +89,11 @@ class AbstractScheduler(AbstractModule):
         if trial_id not in trial_ids:
             job = Job(self.config, self, self.create_model(), trial_id)
             self.jobs.append(job)
-            self.logger.debug(f"Submit a job: {str(trial_id)}")
+            self._logger.debug(f"Submit a job: {str(trial_id)}")
             job.main()
             return job
         else:
-            self.logger.error(f'Specified trial {trial_id} is already running ')
+            self._logger.error(f'Specified trial {trial_id} is already running ')
             return None
 
     def update_resource(self) -> None:
@@ -143,7 +138,7 @@ class AbstractScheduler(AbstractModule):
         runnings = self.storage.trial.get_running()
         for running in runnings:
             job = self.start_job(running)
-            self.logger.info(f'restart hp files in previous running directory: {running}')
+            self._logger.info(f'restart hp files in previous running directory: {running}')
 
             while job.get_state_name() != 'Scheduling':
                 job.main()
@@ -155,7 +150,7 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.logger.info('Scheduler finished.')
+        self._logger.info('Scheduler finished.')
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -192,14 +187,14 @@ class AbstractScheduler(AbstractModule):
                 if job.get_state_name() == 'Scheduling':
                     self._serialize(job.trial_id)
                     job.schedule()
-                    self.logger.debug(
+                    self._logger.debug(
                         f"trial id: {job.trial_id} has been scheduled."
                     )
                     selected_jobs.remove(job)
 
         for job in self.jobs:
             job.main()
-            self.logger.info(f"name: {job.trial_id}, state: {job.get_state_name()}")
+            self._logger.info(f"name: {job.trial_id}, state: {job.get_state_name()}")
 
         self.get_stats()
         self.update_resource()
@@ -230,7 +225,7 @@ class AbstractScheduler(AbstractModule):
                     jobstate['trial_id'] == trial_id and
                     "failure" in jobstate['jobstate'].lower()
                 ):
-                    self.logger.info(
+                    self._logger.info(
                         f"Job: {trial_id} is Failed.({self.job_status[trial_id]})\n"
                         f"This is a fatal internal error. "
                         f"Please review the configuration file. "

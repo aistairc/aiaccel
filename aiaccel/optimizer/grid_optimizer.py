@@ -158,7 +158,7 @@ class GridOptimizer(AbstractOptimizer):
         max_index = reduce(mul, parameter_lengths)
 
         if self.generate_index >= max_index:
-            self.logger.warning('All parameters were generated.')
+            self._logger.warning('All parameters were generated.')
             return None
 
         parameter_index = []
@@ -188,7 +188,7 @@ class GridOptimizer(AbstractOptimizer):
         new_params = []
 
         if parameter_index is None:
-            self.logger.info('Generated all of parameters.')
+            self._logger.info('Generated all of parameters.')
             self.all_parameter_generated = True
             return new_params
 
@@ -212,7 +212,7 @@ class GridOptimizer(AbstractOptimizer):
             list[dict[str, float | int | str]]: A list of new parameters.
         """
         if super().generate_initial_parameter() is not None:
-            self.logger.warning(
+            self._logger.warning(
                 "Initial values cannot be specified for grid search."
                 "The set initial value has been invalidated."
             )

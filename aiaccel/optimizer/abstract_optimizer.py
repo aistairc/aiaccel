@@ -3,7 +3,6 @@ import copy
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
-from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.trialid import TrialId
 
 from numpy import str_
@@ -34,16 +33,13 @@ class AbstractOptimizer(AbstractModule):
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         self.options = options
         self.options['process_name'] = 'optimizer'
+        self.options['logger_name'] = 'root.optimizer'
         super().__init__(self.options)
-
-        self.set_logger(
-            'root.optimizer',
-            self.dict_log / self.config.optimizer_logfile.get(),
-            str_to_logging_level(self.config.optimizer_file_log_level.get()),
-            str_to_logging_level(self.config.optimizer_stream_log_level.get()),
-            'Optimizer'
+        self._set_log_handlers(
+            log_file=self.dict_log / self.config.optimizer_logfile.get(),
+            file_level=self.config.optimizer_file_log_level.get(),
+            stream_level=self.config.optimizer_stream_log_level.get()
         )
-
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
@@ -173,8 +169,8 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.logger.info('Optimizer delete alive file.')
-        self.logger.info('Optimizer finished.')
+        self._logger.info('Optimizer delete alive file.')
+        self._logger.info('Optimizer finished.')
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -192,7 +188,7 @@ class AbstractOptimizer(AbstractModule):
         if pool_size <= 0:
             return True
 
-        self.logger.info(
+        self._logger.info(
             f'hp_ready: {self.hp_ready}, '
             f'hp_running: {self.hp_running}, '
             f'hp_finished: {self.hp_finished}, '
@@ -209,7 +205,7 @@ class AbstractOptimizer(AbstractModule):
                 self._serialize(self.trial_id.integer)
 
         if self.all_parameter_generated is True:
-            self.logger.info("All parameter was generated.")
+            self._logger.info("All parameter was generated.")
             return False
 
         self.print_dict_state()
@@ -296,6 +292,6 @@ class AbstractOptimizer(AbstractModule):
             error_message = self.storage.error.get_any_trial_error(
                 trial_id=trial_id
             )
-            self.logger.error(error_message)
+            self._logger.error(error_message)
 
         return False

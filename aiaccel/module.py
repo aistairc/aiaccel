@@ -75,10 +75,8 @@ class AbstractModule(object):
         self.alive_optimizer = self.dict_alive / aiaccel.alive_optimizer
         self.alive_scheduler = self.dict_alive / aiaccel.alive_scheduler
 
-        self.logger = None
-        self.fh = None
-        self.ch = None
-        self.ch_formatter = None
+        self._logger = logging.getLogger(self.options['logger_name'])
+        self._logger.setLevel(logging.DEBUG)
         self.loop_count = 0
         self.hp_ready = 0
         self.hp_running = 0
@@ -139,53 +137,12 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.info(
+        self._logger.info(
             f'{self.hp_finished}/{self.config.trial_number.get()}, '
             f'finished, '
             f'ready: {self.hp_ready}, '
             f'running: {self.hp_running}'
         )
-
-    def set_logger(
-        self,
-        logger_name: str,
-        logfile: Path,
-        file_level: int,
-        stream_level: int,
-        module_type: str
-    ) -> None:
-        """Set a default logger options.
-
-        Args:
-            logger_name (str): A name of a logger.
-            logfile (Path): A path to a log file.
-            file_level (int): A logging level for a log file output. For
-                example logging.DEBUG
-            stream_level (int): A logging level for a stream output.
-            module_type (str): A module type of a caller.
-
-        Returns:
-            None
-        """
-        self.logger = logging.getLogger(logger_name)
-        self.logger.setLevel(logging.DEBUG)
-        fh = logging.FileHandler(logfile, mode='w')
-        fh_formatter = (
-            '%(asctime)s %(levelname)-8s %(filename)-12s line '
-            '%(lineno)-4s %(message)s'
-        )
-        fh_formatter = logging.Formatter(fh_formatter)
-        fh.setFormatter(fh_formatter)
-        fh.setLevel(file_level)
-
-        ch = logging.StreamHandler()
-        ch_formatter = (f'{module_type} %(levelname)-8s %(message)s')
-        ch_formatter = logging.Formatter(ch_formatter)
-        ch.setFormatter(ch_formatter)
-        ch.setLevel(stream_level)
-
-        self.logger.addHandler(fh)
-        self.logger.addHandler(ch)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -250,7 +207,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(f'set numpy random seed: {self.seed}')
+        self._logger.debug(f'set numpy random seed: {self.seed}')
         if self._rng is None:
             self.create_numpy_random_generator()
         np.random.set_state(self.get_numpy_random_state())
@@ -264,7 +221,7 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(f'create numpy random generator by seed: {self.seed}')
+        self._logger.debug(f'create numpy random generator by seed: {self.seed}')
         self._rng = np.random.RandomState(self.seed)
 
     def get_numpy_random_state(self) -> tuple:
@@ -315,6 +272,67 @@ class AbstractModule(object):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
+
+    def _create_log_file_handler(
+        self, log_file: Path, file_level: int | str
+    ) -> logging.FileHandler:
+        """Creates a FileHandler object.
+
+        Args:
+            log_file (Path): A path to log file.
+            file_level (int | str): Logging level.
+
+        Returns:
+            logging.FileHandler: A new FileHandler object.
+        """
+        file_handler = logging.FileHandler(log_file, mode='w')
+        file_handler_formatter = logging.Formatter(
+            '%(asctime)s %(levelname)-8s %(filename)-12s line '
+            '%(lineno)-4s %(message)s'
+        )
+        file_handler.setFormatter(file_handler_formatter)
+        file_handler.setLevel(file_level)
+        return file_handler
+
+    def _create_log_stream_handler(
+        self, stream_level: int | str
+    ) -> logging.StreamHandler:
+        """Creates a StreamHandler object.
+
+        Args:
+            stream_level (int | str): Logging level.
+
+        Returns:
+            logging.StreamHandler: A new StreamHandler object.
+        """
+        stream_handler = logging.StreamHandler()
+        stream_handler_formatter = logging.Formatter(
+            f'{self.options["process_name"].capitalize():<9} '
+            '%(levelname)-8s %(message)s'
+        )
+        stream_handler.setFormatter(stream_handler_formatter)
+        stream_handler.setLevel(stream_level)
+        return stream_handler
+
+    def _set_log_handlers(
+        self, log_file: Path, file_level: int | str, stream_level: int | str
+    ) -> None:
+        """Sets log handlers.
+
+        Args:
+            log_file (Path): A path to log file.
+            file_level (int | str): Logging level for file output.
+            stream_level (int | str): Logging level for stream output.
+        """
+        self._logger.addHandler(
+            self._create_log_file_handler(log_file, file_level)
+        )
+        self._logger.addHandler(
+            self._create_log_stream_handler(stream_level)
+        )
+
+    def set_debug_log(self, message: str):
+        self._logger.debug(message)
 
     def __getstate__(self):
         obj = self.__dict__.copy()

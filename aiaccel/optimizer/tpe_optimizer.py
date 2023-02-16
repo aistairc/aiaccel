@@ -79,9 +79,9 @@ class TpeOptimizer(AbstractOptimizer):
 
         for key in del_keys:
             self.parameter_pool.pop(key)
-            self.logger.info(f'trial_id {key} is deleted from parameter_pool')
+            self._logger.info(f'trial_id {key} is deleted from parameter_pool')
 
-        self.logger.debug(f'current pool {[k for k, v in self.parameter_pool.items()]}')
+        self._logger.debug(f'current pool {[k for k, v in self.parameter_pool.items()]}')
 
     def is_startup_trials(self) -> bool:
         """Is a current trial startup trial or not.
@@ -107,7 +107,7 @@ class TpeOptimizer(AbstractOptimizer):
             parameters.
         """
         self.check_result()
-        self.logger.debug(
+        self._logger.debug(
             f'number: {number}, pool: {len(self.parameter_pool)} losses'
         )
 
@@ -135,7 +135,7 @@ class TpeOptimizer(AbstractOptimizer):
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        self._logger.info(f'newly added name: {trial_id} to parameter_pool')
 
         return new_params
 
@@ -173,7 +173,7 @@ class TpeOptimizer(AbstractOptimizer):
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        self._logger.info(f'newly added name: {trial_id} to parameter_pool')
         return new_params
 
     def create_study(self) -> None:
