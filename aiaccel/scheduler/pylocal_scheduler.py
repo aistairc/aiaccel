@@ -43,9 +43,9 @@ class PylocalScheduler(AbstractScheduler):
             xs = self.run.get_any_trial_xs(trial_id)
             args.append([trial_id, xs])
             self._serialize(trial_id)
-        for trial_id, xs, y, err, exitstatus, start_time, end_time in self.pool.imap_unordered(execute, args):
+        for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
             self.com.out(objective_y=y, objective_err=err)
-            self.run.report(trial_id, xs, y, err, exitstatus, start_time, end_time)
+            self.run.report(trial_id, xs, y, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
             self.create_result_file(trial_id)
 
@@ -83,11 +83,9 @@ def execute(args):
     except BaseException as e:
         err = str(e)
         y = None
-        exitstatus = 1
     else:
         err = ""
-        exitstatus = 0
 
     end_time = get_time_now()
 
-    return trial_id, xs, y, err, exitstatus, start_time, end_time
+    return trial_id, xs, y, err, start_time, end_time

@@ -168,13 +168,6 @@ class OutputHandler(threading.Thread):
 
                 if o:
                     print(o.decode().strip(), flush=True)
-                if e:
-                    error_message = e.decode().strip()
-                    if self.storage is not None:
-                        self.storage.error.set_any_trial_error(
-                            trial_id=self.trial_id,
-                            error_message=error_message
-                        )
                 break
 
             if self._abort:

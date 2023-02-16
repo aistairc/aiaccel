@@ -245,15 +245,6 @@ class AbstractScheduler(AbstractModule):
                     )
                     return False
 
-        # Check exit status
-        exit_trial_ids = self.storage.exitstatus.get_exitstatus_trial_id(state=1)
-        if len(exit_trial_ids) > 0:
-            for trial_id in exit_trial_ids:
-                error_message = self.storage.error.get_any_trial_error(
-                    trial_id=trial_id
-                )
-                self.logger.error(error_message)
-            return False
         return True
 
     def all_done(self) -> bool:
