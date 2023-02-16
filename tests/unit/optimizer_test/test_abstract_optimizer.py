@@ -140,6 +140,13 @@ class TestAbstractOptimizer(BaseTest):
         new_params = self.optimizer.cast(org_params)
         assert new_params == None
 
+    def test_check_error(self):
+        self.optimizer.storage.error.all_delete()
+        assert self.optimizer.check_error() is True
+
+        self.optimizer.storage.error.set_any_trial_error(trial_id=0, error_message="test_error")
+        assert self.optimizer.check_error() is False
+
     def test_generate_initial_parameter(self):
         with patch.object(self.optimizer.params, 'sample', return_value=[]):
             assert self.optimizer.generate_initial_parameter() == []
