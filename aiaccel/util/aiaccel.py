@@ -128,21 +128,32 @@ class _Message:
                 label="HOGE",
                 message="hoge@hoge@hoge"
             )
+            or numeric
         """
-        raw_data = raw_data.split("\n")
-        target_data = []
-        for line in raw_data:
+        raw_datas = raw_data.split("\n")
+        d = []
+        for line in raw_datas:
+            if self.label == "objective_y" and self.is_numeric(line):
+                d.append(line)
+                continue
             label = line.split(":")[0]
             if label != self.label:
                 continue
-            target_data = line.split(":")[1].split(self.delimiter)
+            d = line.split(":")[1].split(self.delimiter)
             break
-        if len(target_data) == 0:
-            target_data.append("")
-        return target_data
+        if len(d) == 0:
+            d.append("")
+        return d
 
     def clear(self):
         self.outputs = []
+
+    def is_numeric(self, s: str) -> bool:
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
 
 
 class Messages:
@@ -441,8 +452,6 @@ class Run:
 
         commands = self.generate_commands(command, xs)
 
-        print(commands)
-
         output = subprocess.run(
             commands,
             stdout=subprocess.PIPE,
@@ -457,6 +466,8 @@ class Run:
         err = ("\n").join(err)
 
         end_time = get_time_now()
+
+        self.com.out(objective_y=y, objective_err=err)
 
         return xs, y, err, start_time, end_time
 

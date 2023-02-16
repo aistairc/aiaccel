@@ -26,7 +26,6 @@ class LocalModel(AbstractModel):
             str(obj.config_path),
             str(obj.command_error_output)
         )
-
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
         obj.proc = exec_runner(runner_command)
 

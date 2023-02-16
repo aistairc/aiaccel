@@ -59,3 +59,4 @@ jobs:
           pytest -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_tpe_resumption.py
           pytest -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_nelder_mead_resumption.py
           pytest -v tests/supplements/random_generation_test_benchmark/test_benchmark_random_generation.py
+          pytest -v tests/supplements/wrapper_test/wrapper_test.py
