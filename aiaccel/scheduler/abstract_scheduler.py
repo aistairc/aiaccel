@@ -246,7 +246,6 @@ class AbstractScheduler(AbstractModule):
                         f"{'running_timeout'}"
                     )
                     return False
-
         return True
 
     def all_done(self) -> bool:

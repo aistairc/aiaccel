@@ -284,6 +284,7 @@ class AbstractOptimizer(AbstractModule):
 
     def check_error(self) -> bool:
         """Checks errors.
+
         Returns:
             bool: True if there is no error.
         """
