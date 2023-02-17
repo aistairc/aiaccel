@@ -164,7 +164,7 @@ class GridOptimizer(AbstractOptimizer):
         parameter_index = []
         div = [
             reduce(
-                lambda x, y: x * y, parameter_lengths[0:-1 - i]
+                lambda x, y: (x * y), parameter_lengths[i + 1:]
             ) for i in range(0, len(parameter_lengths) - 1)
         ]
 
@@ -189,7 +189,8 @@ class GridOptimizer(AbstractOptimizer):
 
         if parameter_index is None:
             self.logger.info('Generated all of parameters.')
-            self.all_parameter_generated = True
+            if self.storage.get_num_finished() >= self.generate_index:
+                self.all_parameter_generated = True
             return new_params
 
         for i in range(0, len(self.ready_params)):
