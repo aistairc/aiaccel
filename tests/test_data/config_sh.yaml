@@ -1,6 +1,6 @@
 generic:
   workspace: ./work
-  job_command: sh user.sh
+  job_command: python wrapper.py
   python_file: ""
   function: ""
   batch_job_timeout: 600
