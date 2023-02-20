@@ -398,7 +398,8 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
-        set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
+        if self.workspace is not None:
+            set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
 
         y = None
         err = ""
@@ -437,8 +438,8 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
-
-        set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
+        if self.workspace is not None:
+            set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
 
         err = ""
         y = None
@@ -552,8 +553,8 @@ class Run:
             'start_time': start_time,
             'end_time': end_time
         }
-
-        create_yaml(self.get_result_file_path(trial_id), result)
+        if self.workspace is not None:
+            create_yaml(self.get_result_file_path(trial_id), result)
 
 
 def set_logging_file_for_trial_id(workspace, trial_id):
