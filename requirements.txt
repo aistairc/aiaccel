@@ -1,5 +1,5 @@
 PyYAML>=5.4
-SQLAlchemy
+SQLAlchemy==1.4.27
 asciichartpy
 confile
 coverage
