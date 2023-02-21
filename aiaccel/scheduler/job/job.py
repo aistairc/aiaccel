@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 
+from pathlib import Path
+
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -11,6 +13,7 @@ from transitions.extensions.states import Tags, add_state_features
 from aiaccel import dict_lock
 from aiaccel import dict_result
 from aiaccel import dict_error
+from aiaccel import extension_hp
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
@@ -679,6 +682,17 @@ class Job:
             return False
 
         return True
+
+    def get_result_file_path(self) -> Path:
+        """Get a path to the result file.
+
+        Args:
+            trial_id (int): Trial Id.
+
+        Returns:
+            PosixPath: A Path object which points to the result file.
+        """
+        return self.workspace.path / dict_result / f"{self.trial_id}.{extension_hp}"
 
     def main(self) -> None:
         """Thread.run method.

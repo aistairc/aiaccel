@@ -3,6 +3,10 @@ from __future__ import annotations
 
 import fasteners
 
+from pathlib import Path
+
+from aiaccel import dict_result
+from aiaccel import extension_hp
 from aiaccel.abci.batch import create_abci_batch_file
 from aiaccel.abci.qsub import create_qsub_command
 from aiaccel.util.filesystem import interprocess_lock_file
@@ -28,7 +32,11 @@ class AbciModel(AbstractModel):
         )
 
         create_abci_batch_file(
-            obj.to_file,
+            obj.trial_id,
+            obj.content,
+            obj.get_result_file_path(), # output_file_path
+            obj.config_path,
+            obj.to_file, # batch_file
             obj.config.job_script_preamble.get(),
             commands,
             obj.dict_lock
