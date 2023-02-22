@@ -23,24 +23,24 @@ if TYPE_CHECKING:
 
 class AbciModel(AbstractModel):
     def before_runner_create(self, obj: 'Job') -> None:
-        commands = create_runner_command(
-            obj.config.job_command.get(),
-            obj.content,
-            obj.trial_id,
-            str(obj.config_path),
-            str(obj.command_error_output)
-        )
+        # commands = create_runner_command(
+        #     obj.config.job_command.get(),
+        #     obj.content,
+        #     obj.trial_id,
+        #     str(obj.config_path),
+        #     str(obj.command_error_output)
+        # )
 
         create_abci_batch_file(
-            obj.trial_id,
-            obj.content,
-            obj.get_result_file_path(), # output_file_path
-            obj.command_error_output,
-            obj.config_path,
-            obj.to_file, # batch_file
-            obj.config.job_script_preamble.get(),
-            commands,
-            obj.dict_lock
+            trial_id = obj.trial_id,
+            param_content = obj.content,
+            output_file_path = obj.get_result_file_path(),
+            error_file_path = obj.command_error_output,
+            config_file_path = obj.config_path,
+            batch_file = obj.to_file,
+            job_script_preamble = obj.config.job_script_preamble.get(),
+            command = obj.config.job_command.get(),
+            dict_lock = obj.dict_lock
         )
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
