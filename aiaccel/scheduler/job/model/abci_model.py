@@ -35,6 +35,7 @@ class AbciModel(AbstractModel):
             obj.trial_id,
             obj.content,
             obj.get_result_file_path(), # output_file_path
+            obj.command_error_output,
             obj.config_path,
             obj.to_file, # batch_file
             obj.config.job_script_preamble.get(),

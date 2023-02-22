@@ -9,6 +9,7 @@ def create_abci_batch_file(
     trial_id: int,
     param_content: dict,
     output_file_path: Path | str,
+    error_file_path: Path | str,
     config_file_path: Path | str,
     batch_file: Path,
     job_script_preamble: str,
@@ -42,20 +43,46 @@ def create_abci_batch_file(
     params = param_content['parameters']
     for param in params:
         if 'parameter_name' in param.keys() and 'value' in param.keys():
-            lines += f'export {param["parameter_name"]}={param["value"]}\n'
+            lines += f'{param["parameter_name"]}={param["value"]}\n'
     
     lines += f'trial_id={trial_id}\n'
     lines += 'start_time=`date "+%Y-%m-%d %H:%M:%S"`\n'
 
-    lines += f'result=`{command_text}`\n' 
+    lines += f'result=`{command_text}`\n'
+    lines += f'error=`cat {str(error_file_path)}`\n'
 
     lines += 'end_time=`date "+%Y-%m-%d %H:%M:%S"`\n'
 
-    lines += f'aiaccel-set-result --file {str(output_file_path)} --trial_id {trial_id} \
-        --config {str(config_file_path)} --start_time $start_time --end_time $end_time\
-        --objective $result --error $error '
+    lines +=f'if [ -n "$error" ]; then\n'
+    lines += (
+        '\t'
+        f'aiaccel-set-result --file {str(output_file_path)} '
+        f'--trial_id {trial_id} '
+        f'--config {str(config_file_path)} '
+        f'--start_time $start_time '
+        f'--end_time $end_time '
+        f'--objective $result '
+        f'--error $error '
+    )
     for param in params:
         if 'parameter_name' in param.keys() and 'value' in param.keys():
-            lines += f'--{param["parameter_name"]} {param["value"]} '
+            lines += f'--{param["parameter_name"]} ${param["parameter_name"]} '
+    lines += '\n'
+    lines += 'else\n'
+    lines += (
+        '\t'
+        f'aiaccel-set-result --file {str(output_file_path)} '
+        f'--trial_id {trial_id} '
+        f'--config {str(config_file_path)} '
+        f'--start_time $start_time '
+        f'--end_time $end_time '
+        f'--objective $result '
+    )
+    for param in params:
+        if 'parameter_name' in param.keys() and 'value' in param.keys():
+            lines += f'--{param["parameter_name"]} ${param["parameter_name"]} '
+    lines += '\n'
+    lines += 'fi\n'
+    lines += '\n'
 
     file_create(batch_file, lines, dict_lock)
