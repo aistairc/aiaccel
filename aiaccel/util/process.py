@@ -144,6 +144,8 @@ class OutputHandler(threading.Thread):
         self.trial_id = trial_id
         self.storage = storage
 
+        self.is_ignore_warning = True
+
     def abort(self) -> None:
         self._abort = True
 
@@ -168,10 +170,29 @@ class OutputHandler(threading.Thread):
 
                 if o:
                     print(o.decode().strip(), flush=True)
+                if e:
+                    error_message = e.decode().strip()
+                    if self.storage is not None:
+                        self.storage.error.set_any_trial_error(
+                            trial_id=self.trial_id,
+                            error_message=error_message
+                        )
+
                 break
 
             if self._abort:
                 break
+
+        if e and not self.is_ignore_warning:
+            self.storage.returncode.set_any_trial_return_code(
+                trial_id=self.trial_id,
+                return_code=1
+            )
+        elif self._proc.returncode == 1:
+            self.storage.returncode.set_any_trial_return_code(
+                trial_id=self.trial_id,
+                return_code=1
+            )
 
 
 def is_process_running(pid: int) -> bool:

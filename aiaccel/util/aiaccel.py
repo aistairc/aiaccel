@@ -487,6 +487,7 @@ class Run:
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
         if err != "":
             self.storage.error.set_any_trial_error(trial_id, err)
+            self.storage.returncode.set_any_trial_return_code(trial_id, 1)
 
 
 def set_logging_file_for_trial_id(workspace, trial_id):
