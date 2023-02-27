@@ -1,21 +1,19 @@
 from __future__ import annotations
 
+from pathlib import Path
+from subprocess import PIPE, Popen
+from typing import TYPE_CHECKING
 
 import fasteners
 
-from pathlib import Path
-
-from aiaccel import dict_result
-from aiaccel import extension_hp
+from aiaccel import dict_result, extension_hp
 from aiaccel.abci.batch import create_abci_batch_file
 from aiaccel.abci.qsub import create_qsub_command
+from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.util.filesystem import interprocess_lock_file
 from aiaccel.util.process import OutputHandler, exec_runner
 from aiaccel.util.retry import retry
 from aiaccel.wrapper_tools import create_runner_command
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from aiaccel.scheduler.job.job import Job
@@ -32,15 +30,15 @@ class AbciModel(AbstractModel):
         # )
 
         create_abci_batch_file(
-            trial_id = obj.trial_id,
-            param_content = obj.content,
-            output_file_path = obj.get_result_file_path(),
-            error_file_path = obj.command_error_output,
-            config_file_path = obj.config_path,
-            batch_file = obj.to_file,
-            job_script_preamble = obj.config.job_script_preamble.get(),
-            command = obj.config.job_command.get(),
-            dict_lock = obj.dict_lock
+            trial_id=obj.trial_id,
+            param_content=obj.content,
+            output_file_path=obj.get_result_file_path(),
+            error_file_path=obj.command_error_output,
+            config_file_path=obj.config_path,
+            batch_file=obj.to_file,
+            job_script_preamble=obj.config.job_script_preamble.get(),
+            command=obj.config.job_command.get(),
+            dict_lock=obj.dict_lock
         )
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -57,13 +55,7 @@ class AbciModel(AbstractModel):
         )
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
-        obj.proc = exec_runner(runner_command)
+        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE)
 
-        obj.th_oh = OutputHandler(
-            obj.scheduler,
-            obj.proc,
-            'Job',
-            trial_id=obj.trial_id,
-            storage=obj.storage
-        )
+        obj.th_oh = OutputHandler(obj.proc)
         obj.th_oh.start()

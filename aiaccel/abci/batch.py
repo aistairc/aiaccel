@@ -6,7 +6,6 @@ from pathlib import Path
 from aiaccel.util.filesystem import file_create
 from aiaccel.wrapper_tools import create_runner_command
 
-
 # def create_abci_batch_file(
 #     trial_id: int,
 #     param_content: dict,
@@ -188,10 +187,10 @@ def create_abci_batch_file(
     code.add_line(f'error_file_path={str(error_file_path)}')
     code.add_line('start_time=`date "+%Y-%m-%d %H:%M:%S"`')
     code.add_line(f'result=`{" ".join(commands)}`')
-    code.add_line(f'error=`cat $error_file_path`')
+    code.add_line('error=`cat $error_file_path`')
     code.add_line('end_time=`date "+%Y-%m-%d %H:%M:%S"`')
 
-    code.add_line(f'if [ -n "$error" ]; then')
+    code.add_line('if [ -n "$error" ]; then')
     code.indent()
     code.add_line(_generate_command_line(
         command='aiaccel-set-result',
@@ -230,6 +229,7 @@ def create_abci_batch_file(
 
 def _generate_command_line(command: str, args: list[str]) -> str:
     return f'{command} {" ".join(args)}'
+
 
 def _generate_param_args(params: list[dict]) -> str:
     param_args = ''
