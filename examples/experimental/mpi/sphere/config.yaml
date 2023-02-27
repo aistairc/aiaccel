@@ -1,0 +1,67 @@
+generic:
+  workspace: "./work"
+  job_command: "python user.py"
+  python_file: "./user.py"
+  function: "main"
+  batch_job_timeout: 600
+
+resource:
+  type: "mpi"
+  #type: "local"
+  #type: "ABCI"
+  #type: "python_local"
+  num_node: 1
+  mpi_npernode: 1
+  mpi_enviroment: "ABCI"
+  mpi_bat_rt_type: "C.small"
+  mpi_bat_rt_num: 1
+  mpi_bat_h_rt: "2:00:00"
+  mpi_bat_venv_dir: "~/work/mpienv"
+  mpi_bat_aiaccel_dir: "~/work/aiaccel"
+  mpi_bat_aiaccel_dir: "~/work/aiaccel"
+  mpi_bat_config_dir: "~/work/aiaccel/examples/experimental/mpi/sphere"
+  mpi_bat_file: "./qsub.sh"
+  mpi_hostfile: "./hostfile"
+  mpi_gpu_mode: False
+  mpi_bat_make_file: True
+
+ABCI:
+  group: "[group-name]"
+  job_script_preamble: "./job_script_preamble.sh"
+  job_execution_options: ""
+
+optimize:
+  #search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
+  search_algorithm: "aiaccel.optimizer.RandomOptimizer"
+  #search_algorithm: "aiaccel.optimizer.SobolOptimizer"
+  #search_algorithm: "aiaccel.optimizer.GridOptimizer"
+  #search_algorithm: "aiaccel.optimizer.TpeOptimizer"
+  goal: "minimize"
+  trial_number: 1
+  rand_seed: 42
+  parameters:
+    -
+      name: "x1"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+    -
+      name: "x2"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+    -
+      name: "x3"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+    -
+      name: "x4"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+    -
+      name: "x5"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
