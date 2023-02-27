@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Any
+
 from pathlib import PosixPath
+from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -33,11 +34,7 @@ class Result(Abstract):
                     .one_or_none()
                 )
                 if data is None:
-                    new_row = ResultTable(
-                        trial_id=trial_id,
-                        data_type=str(type(objective)),
-                        objective=objective
-                    )
+                    new_row = ResultTable(trial_id=trial_id, data_type=str(type(objective)), objective=objective)
                     session.add(new_row)
                 else:
                     data.objective = objective
@@ -77,10 +74,7 @@ class Result(Abstract):
             list
         """
         with self.create_session() as session:
-            data = (
-                session.query(ResultTable)
-                .with_for_update(read=True)
-            )
+            data = session.query(ResultTable).with_for_update(read=True)
 
         # return [d.objective for d in data]
         return data
@@ -130,11 +124,7 @@ class Result(Abstract):
             list | None: result values
         """
         with self.create_session() as session:
-            data = (
-                session.query(ResultTable)
-                .with_for_update(read=True)
-                .all()
-            )
+            data = session.query(ResultTable).with_for_update(read=True).all()
 
         if data is None or len(data) == 0:
             return None

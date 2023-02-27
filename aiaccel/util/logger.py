@@ -13,17 +13,17 @@ def str_to_logging_level(s: str) -> int:
     Raises:
         ValueError: Causes when an invalid argument s is given.
     """
-    if 'DEBUG' in s:
+    if "DEBUG" in s:
         return logging.DEBUG
-    elif 'INFO' in s:
+    elif "INFO" in s:
         return logging.INFO
-    elif 'WARNING' in s:
+    elif "WARNING" in s:
         return logging.WARNING
-    elif 'WARN' in s:
+    elif "WARN" in s:
         return logging.WARNING
-    elif 'ERROR' in s:
+    elif "ERROR" in s:
         return logging.ERROR
-    elif 'CRITICAL' in s:
+    elif "CRITICAL" in s:
         return logging.CRITICAL
     else:
-        raise ValueError(f'Invalid logging level: {s}, {type(s)}')
+        raise ValueError(f"Invalid logging level: {s}, {type(s)}")

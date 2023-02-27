@@ -1,0 +1,14 @@
+[tool.black]
+target-version = ['py38']
+line-length = 120
+
+[tool.isort]
+profile = "black"
+py_version = 38
+line_length = 120
+
+[tool.flake8]
+max-line-length = 120
+ignore = "E203, W503"
+# E203: whitespace before ':'
+# W503: Line break occurred before a binary operator

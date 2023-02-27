@@ -33,7 +33,7 @@ class TrialId:
 
         self.ws = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
-        self.file_hp_count_fmt = f'%0{self.name_length}d'
+        self.file_hp_count_fmt = f"%0{self.name_length}d"
         self.dict_hp = self.ws / aiaccel.dict_hp
 
         self.count_path = self.dict_hp / aiaccel.file_hp_count
@@ -55,14 +55,13 @@ class TrialId:
         return self.file_hp_count_fmt % trial_id
 
     def increment(self) -> None:
-        """Increments trial id.
-        """
+        """Increments trial id."""
         if self.lock.acquire(timeout=aiaccel.file_hp_count_lock_timeout):
             trial_id = 0
             if self.count_path.exists():
                 trial_id = int(self.count_path.read_text())
                 trial_id += 1
-            self.count_path.write_text('%d' % trial_id)
+            self.count_path.write_text("%d" % trial_id)
             self.lock.release()
 
     def get(self) -> int | None:
@@ -83,17 +82,15 @@ class TrialId:
         """
         if self.lock.acquire(timeout=aiaccel.file_hp_count_lock_timeout):
             trial_id = num
-            self.count_path.write_text('%d' % trial_id)
+            self.count_path.write_text("%d" % trial_id)
             self.lock.release()
 
     @property
     def integer(self) -> int | None:
-        """Trial id.
-        """
+        """Trial id."""
         return self.get()
 
     @property
     def string(self) -> str:
-        """Formatted trial id.
-        """
+        """Formatted trial id."""
         return self.file_hp_count_fmt % self.get()

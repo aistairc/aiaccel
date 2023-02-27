@@ -13,8 +13,7 @@ from aiaccel.storage.variable import Serializer
 
 
 class Storage:
-    """Database
-    """
+    """Database"""
 
     def __init__(self, ws: Path) -> None:
         db_path = ws / aiaccel.dict_storage / "storage.db"
@@ -152,27 +151,21 @@ class Storage:
             else:  # pragma: no cover
                 pass  # not reached
 
-            hp.append(
-                {
-                    'parameter_name': param_name,
-                    'type': dtype,
-                    'value': value
-                }
-            )
+            hp.append({"parameter_name": param_name, "type": dtype, "value": value})
         result = self.result.get_any_trial_objective(trial_id=trial_id)
         start_time = self.timestamp.get_any_trial_start_time(trial_id=trial_id)
         end_time = self.timestamp.get_any_trial_end_time(trial_id=trial_id)
         error = self.error.get_any_trial_error(trial_id=trial_id)
 
         content: dict[str, str | int | float | list] = {}
-        content['trial_id'] = trial_id
-        content['parameters'] = hp
-        content['result'] = result
-        content['start_time'] = start_time
-        content['end_time'] = end_time
+        content["trial_id"] = trial_id
+        content["parameters"] = hp
+        content["result"] = result
+        content["start_time"] = start_time
+        content["end_time"] = end_time
 
         if error is not None and len(error) > 0:
-            content['error'] = error
+            content["error"] = error
 
         return content
 
@@ -186,9 +179,9 @@ class Storage:
             best(tuple): (trial_id, value)
         """
 
-        best_value = float('inf')
-        if goal.lower() == 'maximize':
-            best_value = float('-inf')
+        best_value = float("inf")
+        if goal.lower() == "maximize":
+            best_value = float("-inf")
 
         best_trial_id = 0
 
@@ -198,12 +191,12 @@ class Storage:
             value = d.objective
             trial_id = d.trial_id
 
-            if goal.lower() == 'maximize':
+            if goal.lower() == "maximize":
                 if best_value < value:
                     best_value = value
                     best_trial_id = trial_id
 
-            elif goal.lower() == 'minimize':
+            elif goal.lower() == "minimize":
                 if best_value > value:
                     best_value = value
                     best_trial_id = trial_id

@@ -31,7 +31,7 @@ class Viewer:
         Returns:
             None
         """
-        symbols = ['─', '╰', '╭', '╮', '╯', '│']
+        symbols = ["─", "╰", "╭", "╮", "╯", "│"]
         infos = []
         len_margin = 2
         trial_ids = self.storage.trial.get_all_trial_id()
@@ -71,10 +71,7 @@ class Viewer:
             if len(max_column_width) == 0:
                 max_column_width = maximum(width, header_width).tolist()
             else:
-                max_column_width = maximum(
-                    max_column_width,
-                    maximum(width, header_width).tolist()
-                ).tolist()
+                max_column_width = maximum(max_column_width, maximum(width, header_width).tolist()).tolist()
 
         max_width = sum(max_column_width)
         print("\n")
@@ -106,7 +103,7 @@ def main() -> None:  # pragma: no cover
     theterminal.
     """
     parser = ArgumentParser()
-    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument("--config", "-c", type=str, default="config.yml")
     args = parser.parse_args()
 
     config = Config(args.config)

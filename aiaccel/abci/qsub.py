@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from aiaccel.config import Config
 from aiaccel import dict_output
+from aiaccel.config import Config
 
-''' Example of stat
+""" Example of stat
 stat = {
     'job-ID': 12345,
     'prior': 0.25586,
@@ -18,7 +18,7 @@ stat = {
     'slots': 80,
     'ja-task-ID': ''
 }
-'''
+"""
 
 
 def create_qsub_command(config: Config, runner_file: Path) -> list[str]:
@@ -34,13 +34,7 @@ def create_qsub_command(config: Config, runner_file: Path) -> list[str]:
     path = Path(config.workspace.get()).resolve()
     job_execution_options = config.job_execution_options.get()
 
-    command = [
-        'qsub',
-        '-g', f'{config.abci_group.get()}',
-        '-j', 'y',
-        '-o', f'{path / dict_output}',
-        str(runner_file)
-    ]
+    command = ["qsub", "-g", f"{config.abci_group.get()}", "-j", "y", "-o", f"{path / dict_output}", str(runner_file)]
 
     #
     # additional option
@@ -50,22 +44,20 @@ def create_qsub_command(config: Config, runner_file: Path) -> list[str]:
     command_tmp = command.copy()
     if job_execution_options is None:
         return command
-    if job_execution_options == '':
+    if job_execution_options == "":
         return command
     if job_execution_options == []:
         return command
 
     # add option
     if type(job_execution_options) == str:
-        for cmd in job_execution_options.split(' '):
+        for cmd in job_execution_options.split(" "):
             command_tmp.insert(-1, cmd)
     elif type(job_execution_options) == list:
         for option in job_execution_options:
-            for cmd in option.split(' '):
+            for cmd in option.split(" "):
                 command_tmp.insert(-1, cmd)
     else:
-        raise ValueError(
-            f"job_execution_options: {job_execution_options} is invalid value"
-        )
+        raise ValueError(f"job_execution_options: {job_execution_options} is invalid value")
 
     return command_tmp

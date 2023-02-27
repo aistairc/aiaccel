@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import threading
 import importlib
+import threading
 from collections.abc import Callable
 from pathlib import Path
 
@@ -11,9 +11,7 @@ from aiaccel.util.time_tools import get_time_now
 
 
 class PylocalScheduler(AbstractScheduler):
-    """A scheduler class running on a local computer.
-
-    """
+    """A scheduler class running on a local computer."""
 
     def __init__(self, options: dict) -> None:
         super().__init__(options)
@@ -21,15 +19,11 @@ class PylocalScheduler(AbstractScheduler):
         self.run = None
         self.user_func = None
 
-        self.user_func = self.get_callable_object(
-            self.config.python_file.get(),
-            self.config.function.get()
-        )
+        self.user_func = self.get_callable_object(self.config.python_file.get(), self.config.function.get())
         self.run = Run(self.config_path)
 
-    def get_callable_object(self, file_path: str | Path, attr_name: str
-                            ) -> Callable[[dict], float]:
-        """ Loads the specified module from the specified python program.
+    def get_callable_object(self, file_path: str | Path, attr_name: str) -> Callable[[dict], float]:
+        """Loads the specified module from the specified python program.
 
         Args:
             file_path (str, pathlib.Path): A user program file path (python
@@ -67,7 +61,7 @@ class PylocalScheduler(AbstractScheduler):
         return True
 
     def execute(self, trial_id: int) -> None:
-        """ Executes the loaded callable object.
+        """Executes the loaded callable object.
 
         Args:
             trial_id (int): Any trial od
@@ -75,20 +69,20 @@ class PylocalScheduler(AbstractScheduler):
         Returns:
             None
         """
-        self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
+        self.storage.trial.set_any_trial_state(trial_id=trial_id, state="running")
 
         start_time = get_time_now()
         xs, y, err = self.run.execute(self.user_func, trial_id, y_data_type=None)
         end_time = get_time_now()
         self.run.report(trial_id, xs, y, err, start_time, end_time)
 
-        self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
+        self.storage.trial.set_any_trial_state(trial_id=trial_id, state="finished")
         self.create_result_file(trial_id)
 
         return
 
     def __getstate__(self):
         obj = super().__getstate__()
-        del obj['run']
-        del obj['user_func']
+        del obj["run"]
+        del obj["user_func"]
         return obj

@@ -48,8 +48,7 @@ class TpeOptimizer(AbstractOptimizer):
         self.randseed = self.config.randseed.get()
 
     def pre_process(self) -> None:
-        """Pre-Procedure before executing optimize processes.
-        """
+        """Pre-Procedure before executing optimize processes."""
         super().pre_process()
 
         self.parameter_list = self.params.get_parameter_list()
@@ -57,8 +56,7 @@ class TpeOptimizer(AbstractOptimizer):
         self.distributions = create_distributions(self.params)
 
     def post_process(self) -> None:
-        """Post-procedure after executed processes.
-        """
+        """Post-procedure after executed processes."""
         self.check_result()
         super().post_process()
 
@@ -79,9 +77,9 @@ class TpeOptimizer(AbstractOptimizer):
 
         for key in del_keys:
             self.parameter_pool.pop(key)
-            self.logger.info(f'trial_id {key} is deleted from parameter_pool')
+            self.logger.info(f"trial_id {key} is deleted from parameter_pool")
 
-        self.logger.debug(f'current pool {[k for k, v in self.parameter_pool.items()]}')
+        self.logger.debug(f"current pool {[k for k, v in self.parameter_pool.items()]}")
 
     def is_startup_trials(self) -> bool:
         """Is a current trial startup trial or not.
@@ -92,10 +90,7 @@ class TpeOptimizer(AbstractOptimizer):
         n_startup_trials = self.study.sampler.get_startup_trials()
         return self.num_of_generated_parameter < n_startup_trials
 
-    def generate_parameter(
-        self,
-        number: int | None = 1
-    ) -> list[dict[str, float | int | str]] | None:
+    def generate_parameter(self, number: int | None = 1) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
         Args:
@@ -107,15 +102,10 @@ class TpeOptimizer(AbstractOptimizer):
             parameters.
         """
         self.check_result()
-        self.logger.debug(
-            f'number: {number}, pool: {len(self.parameter_pool)} losses'
-        )
+        self.logger.debug(f"number: {number}, pool: {len(self.parameter_pool)} losses")
 
         # TPE has to be sequential.
-        if (
-            (not self.is_startup_trials()) and
-            (len(self.parameter_pool) >= 1)
-        ):
+        if (not self.is_startup_trials()) and (len(self.parameter_pool) >= 1):
             return None
 
         if len(self.parameter_pool) >= self.config.num_node.get():
@@ -125,23 +115,17 @@ class TpeOptimizer(AbstractOptimizer):
         trial = self.study.ask(self.distributions)
 
         for param in self.params.get_parameter_list():
-            new_param = {
-                'parameter_name': param.name,
-                'type': param.type,
-                'value': trial.params[param.name]
-            }
+            new_param = {"parameter_name": param.name, "type": param.type, "value": trial.params[param.name]}
             new_params.append(new_param)
 
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        self.logger.info(f"newly added name: {trial_id} to parameter_pool")
 
         return new_params
 
-    def generate_initial_parameter(
-        self
-    ) -> list[dict[str, float | int | str]] | None:
+    def generate_initial_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
 
         Returns:
@@ -163,17 +147,13 @@ class TpeOptimizer(AbstractOptimizer):
         new_params = []
 
         for name, value in trial.params.items():
-            new_param = {
-                'parameter_name': name,
-                'type': self.params.hps[name].type,
-                'value': value
-            }
+            new_param = {"parameter_name": name, "type": self.params.hps[name].type, "value": value}
             new_params.append(new_param)
 
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        self.logger.info(f"newly added name: {trial_id} to parameter_pool")
         return new_params
 
     def create_study(self) -> None:
@@ -186,13 +166,11 @@ class TpeOptimizer(AbstractOptimizer):
             self.study = optuna.create_study(
                 sampler=TPESamplerWrapper(seed=self.randseed),
                 study_name=self.study_name,
-                direction=self.config.goal.get().lower()
+                direction=self.config.goal.get().lower(),
             )
 
 
-def create_distributions(
-        parameters: aiaccel.parameter.HyperParameterConfiguration
-) -> dict:
+def create_distributions(parameters: aiaccel.parameter.HyperParameterConfiguration) -> dict:
     """Create an optuna.distributions dictionary for the parameters.
 
     Args:
@@ -209,23 +187,19 @@ def create_distributions(
     distributions = {}
 
     for p in parameters.get_parameter_list():
-        if p.type.lower() == 'float':
-            distributions[p.name] = optuna.distributions.FloatDistribution(
-                p.lower, p.upper, log=p.log
-            )
+        if p.type.lower() == "float":
+            distributions[p.name] = optuna.distributions.FloatDistribution(p.lower, p.upper, log=p.log)
 
-        elif p.type.lower() == 'int':
-            distributions[p.name] = optuna.distributions.IntDistribution(
-                p.lower, p.upper, log=p.log
-            )
+        elif p.type.lower() == "int":
+            distributions[p.name] = optuna.distributions.IntDistribution(p.lower, p.upper, log=p.log)
 
-        elif p.type.lower() == 'categorical':
+        elif p.type.lower() == "categorical":
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
 
-        elif p.type.lower() == 'ordinal':
+        elif p.type.lower() == "ordinal":
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
 
         else:
-            raise TypeError('Unsupported parameter type')
+            raise TypeError("Unsupported parameter type")
 
     return distributions

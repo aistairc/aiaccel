@@ -52,7 +52,7 @@ class AbstractModule(object):
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         # === Load config file===
         self.options = options
-        self.config_path = Path(self.options['config']).resolve()
+        self.config_path = Path(self.options["config"]).resolve()
         self.config = Config(self.config_path)
         self.ws = Path(self.config.workspace.get()).resolve()
 
@@ -85,13 +85,12 @@ class AbstractModule(object):
         self.hp_finished = 0
         self.seed = self.config.randseed.get()
         self.storage = Storage(self.ws)
-        self.trial_id = TrialId(self.options['config'])
+        self.trial_id = TrialId(self.options["config"])
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng: np.random.RandomState | None = None
 
         self.storage.variable.register(
-            process_name=self.options['process_name'],
-            labels=['native_random_state', 'numpy_random_state', 'state']
+            process_name=self.options["process_name"], labels=["native_random_state", "numpy_random_state", "state"]
         )
 
     def get_each_state_count(self) -> None:
@@ -140,20 +139,13 @@ class AbstractModule(object):
             None
         """
         self.logger.info(
-            f'{self.hp_finished}/{self.config.trial_number.get()}, '
-            f'finished, '
-            f'ready: {self.hp_ready}, '
-            f'running: {self.hp_running}'
+            f"{self.hp_finished}/{self.config.trial_number.get()}, "
+            f"finished, "
+            f"ready: {self.hp_ready}, "
+            f"running: {self.hp_running}"
         )
 
-    def set_logger(
-        self,
-        logger_name: str,
-        logfile: Path,
-        file_level: int,
-        stream_level: int,
-        module_type: str
-    ) -> None:
+    def set_logger(self, logger_name: str, logfile: Path, file_level: int, stream_level: int, module_type: str) -> None:
         """Set a default logger options.
 
         Args:
@@ -169,17 +161,14 @@ class AbstractModule(object):
         """
         self.logger = logging.getLogger(logger_name)
         self.logger.setLevel(logging.DEBUG)
-        fh = logging.FileHandler(logfile, mode='w')
-        fh_formatter = (
-            '%(asctime)s %(levelname)-8s %(filename)-12s line '
-            '%(lineno)-4s %(message)s'
-        )
+        fh = logging.FileHandler(logfile, mode="w")
+        fh_formatter = "%(asctime)s %(levelname)-8s %(filename)-12s line " "%(lineno)-4s %(message)s"
         fh_formatter = logging.Formatter(fh_formatter)
         fh.setFormatter(fh_formatter)
         fh.setLevel(file_level)
 
         ch = logging.StreamHandler()
-        ch_formatter = (f'{module_type} %(levelname)-8s %(message)s')
+        ch_formatter = f"{module_type} %(levelname)-8s %(message)s"
         ch_formatter = logging.Formatter(ch_formatter)
         ch.setFormatter(ch_formatter)
         ch.setLevel(stream_level)
@@ -225,24 +214,24 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.storage.variable.d['state'].set(trial_id, self)
+        self.storage.variable.d["state"].set(trial_id, self)
 
         # random state
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
+        self.storage.variable.d["numpy_random_state"].set(trial_id, self.get_numpy_random_state())
 
     def _deserialize(self, trial_id: int) -> None:
-        """ Deserialize this module.
+        """Deserialize this module.
 
         Returns:
             None
         """
-        self.__dict__.update(self.storage.variable.d['state'].get(trial_id).__dict__.copy())
+        self.__dict__.update(self.storage.variable.d["state"].get(trial_id).__dict__.copy())
 
         # random state
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
+        self.set_numpy_random_state(self.storage.variable.d["numpy_random_state"].get(trial_id))
 
     def set_numpy_random_seed(self) -> None:
-        """ set any random seed.
+        """set any random seed.
 
         Args:
             None
@@ -250,13 +239,13 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(f'set numpy random seed: {self.seed}')
+        self.logger.debug(f"set numpy random seed: {self.seed}")
         if self._rng is None:
             self.create_numpy_random_generator()
         np.random.set_state(self.get_numpy_random_state())
 
     def create_numpy_random_generator(self) -> None:
-        """ create random generator using any random seed.
+        """create random generator using any random seed.
 
         Args:
             None
@@ -264,11 +253,11 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.logger.debug(f'create numpy random generator by seed: {self.seed}')
+        self.logger.debug(f"create numpy random generator by seed: {self.seed}")
         self._rng = np.random.RandomState(self.seed)
 
     def get_numpy_random_state(self) -> tuple:
-        """ get random state.
+        """get random state.
 
         Args:
             None
@@ -279,7 +268,7 @@ class AbstractModule(object):
         return self._rng.get_state()
 
     def set_numpy_random_state(self, state: tuple) -> None:
-        """ get random state.
+        """get random state.
 
         Args:
             state (tuple): random state
@@ -290,7 +279,7 @@ class AbstractModule(object):
         self._rng.set_state(state)
 
     def check_error(self) -> bool:
-        """ Check to confirm if an error has occurred.
+        """Check to confirm if an error has occurred.
 
         Args:
             None
@@ -301,7 +290,7 @@ class AbstractModule(object):
         return True
 
     def resume(self) -> None:
-        """ When in resume mode, load the previous
+        """When in resume mode, load the previous
                 optimization data in advance.
 
         Args:
@@ -310,15 +299,12 @@ class AbstractModule(object):
         Returns:
             None
         """
-        if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
-        ):
-            self._deserialize(self.options['resume'])
+        if self.options["resume"] is not None and self.options["resume"] > 0:
+            self._deserialize(self.options["resume"])
 
     def __getstate__(self):
         obj = self.__dict__.copy()
-        del obj['storage']
-        del obj['config']
-        del obj['options']
+        del obj["storage"]
+        del obj["config"]
+        del obj["options"]
         return obj

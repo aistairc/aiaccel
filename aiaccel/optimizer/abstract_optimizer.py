@@ -1,12 +1,13 @@
 from __future__ import annotations
+
 import copy
+
+from numpy import str_
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.trialid import TrialId
-
-from numpy import str_
 
 
 class AbstractOptimizer(AbstractModule):
@@ -33,15 +34,15 @@ class AbstractOptimizer(AbstractModule):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         self.options = options
-        self.options['process_name'] = 'optimizer'
+        self.options["process_name"] = "optimizer"
         super().__init__(self.options)
 
         self.set_logger(
-            'root.optimizer',
+            "root.optimizer",
             self.dict_log / self.config.optimizer_logfile.get(),
             str_to_logging_level(self.config.optimizer_file_log_level.get()),
             str_to_logging_level(self.config.optimizer_stream_log_level.get()),
-            'Optimizer'
+            "Optimizer",
         )
 
         self.hp_ready = 0
@@ -52,10 +53,7 @@ class AbstractOptimizer(AbstractModule):
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
 
-    def register_new_parameters(
-        self,
-        params: list[dict[str, float | int | str]]
-    ) -> None:
+    def register_new_parameters(self, params: list[dict[str, float | int | str]]) -> None:
         """Create hyper parameter files.
 
         Args:
@@ -75,21 +73,13 @@ class AbstractOptimizer(AbstractModule):
                 }
 
         """
-        self.storage.hp.set_any_trial_params(
-            trial_id=self.trial_id.get(),
-            params=params
-        )
+        self.storage.hp.set_any_trial_params(trial_id=self.trial_id.get(), params=params)
 
-        self.storage.trial.set_any_trial_state(
-            trial_id=self.trial_id.get(),
-            state='ready'
-        )
+        self.storage.trial.set_any_trial_state(trial_id=self.trial_id.get(), state="ready")
 
         self.num_of_generated_parameter += 1
 
-    def generate_initial_parameter(
-        self
-    ) -> list[dict[str, float | int | str]]:
+    def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate a list of initial parameters.
 
         Returns:
@@ -100,11 +90,7 @@ class AbstractOptimizer(AbstractModule):
         new_params = []
 
         for s in sample:
-            new_param = {
-                'parameter_name': s['name'],
-                'type': s['type'],
-                'value': s['value']
-            }
+            new_param = {"parameter_name": s["name"], "type": s["type"], "value": s["value"]}
             new_params.append(new_param)
 
         return new_params
@@ -134,7 +120,7 @@ class AbstractOptimizer(AbstractModule):
         n2 = max_trial_number - hp_finished - hp_running - hp_ready
         pool_size = min(n1, n2)
 
-        if (pool_size <= 0 or hp_ready >= max_pool_size):
+        if pool_size <= 0 or hp_ready >= max_pool_size:
             return 0
 
         return pool_size
@@ -168,8 +154,8 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.logger.info('Optimizer delete alive file.')
-        self.logger.info('Optimizer finished.')
+        self.logger.info("Optimizer delete alive file.")
+        self.logger.info("Optimizer finished.")
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -188,11 +174,11 @@ class AbstractOptimizer(AbstractModule):
             return True
 
         self.logger.info(
-            f'hp_ready: {self.hp_ready}, '
-            f'hp_running: {self.hp_running}, '
-            f'hp_finished: {self.hp_finished}, '
-            f'total: {self.config.trial_number.get()}, '
-            f'pool_size: {pool_size}'
+            f"hp_ready: {self.hp_ready}, "
+            f"hp_running: {self.hp_running}, "
+            f"hp_finished: {self.hp_finished}, "
+            f"total: {self.config.trial_number.get()}, "
+            f"pool_size: {pool_size}"
         )
 
         for _ in range(pool_size):
@@ -212,7 +198,7 @@ class AbstractOptimizer(AbstractModule):
         return True
 
     def resume(self) -> None:
-        """ When in resume mode, load the previous optimization data in advance.
+        """When in resume mode, load the previous optimization data in advance.
 
         Args:
             None
@@ -220,14 +206,11 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
-        ):
-            self.storage.rollback_to_ready(self.options['resume'])
-            self.storage.delete_trial_data_after_this(self.options['resume'])
-            self.trial_id.initial(num=self.options['resume'])
-            self._deserialize(self.options['resume'])
+        if self.options["resume"] is not None and self.options["resume"] > 0:
+            self.storage.rollback_to_ready(self.options["resume"])
+            self.storage.delete_trial_data_after_this(self.options["resume"])
+            self.trial_id.initial(num=self.options["resume"])
+            self._deserialize(self.options["resume"])
 
     def cast(self, params: list[dict[str, str | float | int]]) -> list | None:
         """Casts types of parameter values to appropriate tepes.
@@ -249,27 +232,24 @@ class AbstractOptimizer(AbstractModule):
 
         for param in params:
             _param = copy.deepcopy(param)
-            param_type = _param['type']
-            param_value = _param['value']
+            param_type = _param["type"]
+            param_value = _param["value"]
 
             # None: str to NoneType
-            if type(_param['value']) in [str, str_]:
-                if _param['value'].lower() == 'none':
-                    _param['value'] = None
-                    _param['type'] = str(type(None))
+            if type(_param["value"]) in [str, str_]:
+                if _param["value"].lower() == "none":
+                    _param["value"] = None
+                    _param["type"] = str(type(None))
 
             try:
-                if (
-                    param_type.lower() == 'categorical' or
-                    param_type.lower() == 'ordinal'
-                ):
+                if param_type.lower() == "categorical" or param_type.lower() == "ordinal":
                     casted_params.append(_param)
                     continue
 
-                if param_type.lower() == 'float':
-                    _param['value'] = float(param_value)
-                if param_type.lower() == 'int':
-                    _param['value'] = int(param_value)
+                if param_type.lower() == "float":
+                    _param["value"] = float(param_value)
+                if param_type.lower() == "int":
+                    _param["value"] = int(param_value)
                 casted_params.append(_param)
 
             except ValueError as e:
@@ -288,9 +268,7 @@ class AbstractOptimizer(AbstractModule):
             return True
 
         for trial_id in error_trial_ids:
-            error_message = self.storage.error.get_any_trial_error(
-                trial_id=trial_id
-            )
+            error_message = self.storage.error.get_any_trial_error(trial_id=trial_id)
             self.logger.error(error_message)
 
         return False

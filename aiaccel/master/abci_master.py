@@ -33,10 +33,7 @@ class AbciMaster(AbstractMaster):
             None
         """
 
-        self.runner_files = get_dict_files(
-            self.ws / aiaccel.dict_runner,
-            "run_*.sh"
-        )
+        self.runner_files = get_dict_files(self.ws / aiaccel.dict_runner, "run_*.sh")
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_stats(self) -> None:
@@ -45,7 +42,7 @@ class AbciMaster(AbstractMaster):
         Returns:
             None
         """
-        commands = 'qstat -xml'
+        commands = "qstat -xml"
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
 
         try:
@@ -54,10 +51,10 @@ class AbciMaster(AbstractMaster):
             p.kill()
             stats, errs = p.communicate()
 
-        stats = stats.decode('utf-8')
+        stats = stats.decode("utf-8")
 
         # Write qstat result
-        lines = ''
+        lines = ""
 
         for line in stats:
             lines += line

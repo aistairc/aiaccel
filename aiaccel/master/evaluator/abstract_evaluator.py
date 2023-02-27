@@ -33,7 +33,7 @@ class AbstractEvaluator(object):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         self.options = options
-        self.config_path = Path(self.options['config']).resolve()
+        self.config_path = Path(self.options["config"]).resolve()
         self.config = Config(str(self.config_path))
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
@@ -68,8 +68,8 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        logger = logging.getLogger('root.master.evaluator')
-        logger.info('Best hyperparameter is followings:')
+        logger = logging.getLogger("root.master.evaluator")
+        logger.info("Best hyperparameter is followings:")
         logger.info(self.hp_result)
 
     def save(self) -> None:

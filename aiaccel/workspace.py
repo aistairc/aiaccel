@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import pathlib
 import shutil
 
@@ -74,7 +75,7 @@ class Workspace:
             self.runner,
             self.storage,
             self.timestamp,
-            self.verification
+            self.verification,
         ]
         self.results = pathlib.Path("./results")
 
@@ -91,10 +92,7 @@ class Workspace:
         if self.exists():
             return False
 
-        fs.make_directories(
-            ds=self.consists,
-            dict_lock=(self.lock)
-        )
+        fs.make_directories(ds=self.consists, dict_lock=(self.lock))
         return True
 
     def exists(self) -> bool:
@@ -107,7 +105,7 @@ class Workspace:
 
     @retry(_MAX_NUM=300, _DELAY=1.0)
     def clean(self) -> None:
-        """ Delete a workspace.
+        """Delete a workspace.
 
         It is assumed to be the first one to be executed.
         """
@@ -132,7 +130,7 @@ class Workspace:
 
     @retry(_MAX_NUM=10, _DELAY=1.0)
     def move_completed_data(self) -> pathlib.PosixPath | None:
-        """ Move workspace to under of results directory when finished.
+        """Move workspace to under of results directory when finished.
 
         Raises:
             FileExistsError: Occurs if destination directory already exists
@@ -149,7 +147,7 @@ class Workspace:
         if dst.exists():
             raise FileExistsError
 
-        ignptn = shutil.ignore_patterns('*-journal')
+        ignptn = shutil.ignore_patterns("*-journal")
 
         shutil.copytree(self.path, dst, ignore=ignptn)
         return dst

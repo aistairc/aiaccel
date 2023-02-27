@@ -1,7 +1,7 @@
 import csv
 import os
-from pathlib import Path
 from logging import StreamHandler, getLogger
+from pathlib import Path
 
 from fasteners import InterProcessLock
 
@@ -10,7 +10,7 @@ from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
 
 logger = getLogger(__name__)
-logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 logger.addHandler(StreamHandler())
 
 
@@ -32,12 +32,10 @@ class CreationReport:
     def __init__(self, config_path: str) -> None:
         self.config = Config(config_path)
         self.ws = Path(self.config.workspace.get()).resolve()
-        self.fp = self.ws / 'results.csv'
+        self.fp = self.ws / "results.csv"
         self.trialid = TrialId(str(config_path))
         self.storage = Storage(self.ws)
-        self.lock_file = {
-            'result_txt': str(self.ws / 'lock' / 'result_txt')
-        }
+        self.lock_file = {"result_txt": str(self.ws / "lock" / "result_txt")}
 
     def get_zero_padding_trial_id(self, trial_id: int) -> str:
         """Gets string of trial id padded by zeros.
@@ -51,8 +49,7 @@ class CreationReport:
         return self.trialid.zero_padding_any_trial_id(trial_id)
 
     def create(self) -> None:
-        """Creates repoprt.
-        """
+        """Creates repoprt."""
         data = []
         header = []
 
@@ -63,14 +60,14 @@ class CreationReport:
 
         # write header
         example = self.storage.get_hp_dict(trial_ids[0])
-        header.append('trial_id')
-        for param in example['parameters']:
-            header.append(param['parameter_name'])
-        header.append('objective')
+        header.append("trial_id")
+        for param in example["parameters"]:
+            header.append(param["parameter_name"])
+        header.append("objective")
 
-        with InterProcessLock(self.lock_file['result_txt']):
-            with open(self.fp, 'w') as f:
-                writer = csv.writer(f, lineterminator='\n')
+        with InterProcessLock(self.lock_file["result_txt"]):
+            with open(self.fp, "w") as f:
+                writer = csv.writer(f, lineterminator="\n")
                 writer.writerow(header)
 
         # write result data
@@ -79,13 +76,13 @@ class CreationReport:
 
         for contents in results:
             row = []
-            row.append(str(contents['trial_id']))
-            for param in contents['parameters']:
-                row.append(param['value'])
-            row.append(contents['result'])
+            row.append(str(contents["trial_id"]))
+            for param in contents["parameters"]:
+                row.append(param["value"])
+            row.append(contents["result"])
             data.append(row)
 
-        with InterProcessLock(self.lock_file['result_txt']):
-            with open(self.fp, 'a') as f:
-                writer = csv.writer(f, lineterminator='\n')
+        with InterProcessLock(self.lock_file["result_txt"]):
+            with open(self.fp, "a") as f:
+                writer = csv.writer(f, lineterminator="\n")
                 writer.writerows(data)

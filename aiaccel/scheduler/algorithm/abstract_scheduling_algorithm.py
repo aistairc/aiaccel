@@ -1,6 +1,8 @@
 from __future__ import annotations
-import numpy as np
+
 from pathlib import Path
+
+import numpy as np
 
 from aiaccel.config import Config
 
@@ -18,12 +20,7 @@ class AbstractSchedulingAlgorithm(object):
     def __init__(self, config: Config) -> None:
         self.config = config
 
-    def select_hp(
-        self,
-        hp_ready: list[Path],
-        num: int = 1,
-        rng: np.random.RandomState | None = None
-    ) -> None:
+    def select_hp(self, hp_ready: list[Path], num: int = 1, rng: np.random.RandomState | None = None) -> None:
         """Select multiple hyper parameters.
 
         Args:

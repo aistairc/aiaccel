@@ -6,10 +6,7 @@ import string
 import numpy as np
 
 
-def generate_random_name(
-    length: int = 10,
-    rng: np.random.RandomState | None = None
-) -> str | None:
+def generate_random_name(length: int = 10, rng: np.random.RandomState | None = None) -> str | None:
     """
     Generate random name using alphanumeric.
 
@@ -22,14 +19,11 @@ def generate_random_name(
     """
 
     if length < 1:
-        logger = logging.getLogger('root.optimizer.name')
-        logger.error('Name length should be greater than 0.')
+        logger = logging.getLogger("root.optimizer.name")
+        logger.error("Name length should be greater than 0.")
 
         return None
 
-    rands = [
-        rng.choice(list(string.ascii_letters + string.digits))[0]
-        for _ in range(length)
-    ]
+    rands = [rng.choice(list(string.ascii_letters + string.digits))[0] for _ in range(length)]
 
-    return ''.join(rands)
+    return "".join(rands)

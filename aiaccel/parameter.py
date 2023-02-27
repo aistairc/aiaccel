@@ -9,8 +9,7 @@ import aiaccel
 from aiaccel.util.filesystem import load_yaml
 
 
-def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
-                       ) -> tuple[float | None, Path | None]:
+def get_best_parameter(files: list[Path], goal: str, dict_lock: Path) -> tuple[float | None, Path | None]:
     """Get a best parameter in specified files.
 
     Args:
@@ -32,9 +31,9 @@ def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
     yml = load_yaml(files[0], dict_lock)
 
     try:
-        best = float(yml['result'])
+        best = float(yml["result"])
     except TypeError:
-        logger = logging.getLogger('root.master.parameter')
+        logger = logging.getLogger("root.master.parameter")
         logger.error(f'Invalid result: {yml["result"]}.')
         return None, None
 
@@ -42,7 +41,7 @@ def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
 
     for f in files[1:]:
         yml = load_yaml(f, dict_lock)
-        result = float(yml['result'])
+        result = float(yml["result"])
 
         if goal.lower() == aiaccel.goal_maximize:
             if best < result:
@@ -51,9 +50,9 @@ def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
             if best > result:
                 best, best_file = result, f
         else:
-            logger = logging.getLogger('root.master.parameter')
-            logger.error(f'Invalid goal: {goal}.')
-            raise ValueError(f'Invalid goal: {goal}.')
+            logger = logging.getLogger("root.master.parameter")
+            logger.error(f"Invalid goal: {goal}.")
+            raise ValueError(f"Invalid goal: {goal}.")
 
     return best, best_file
 
@@ -68,16 +67,16 @@ def get_type(parameter: dict) -> str:
         str: A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
         'ORDINAL'.
     """
-    if parameter['type'].lower() == 'uniform_int':
-        return 'INT'
-    elif parameter['type'].lower() == 'uniform_float':
-        return 'FLOAT'
-    elif parameter['type'].lower() == 'categorical':
-        return 'CATEGORICAL'
-    elif parameter['type'].lower() == 'ordinal':
-        return 'ORDINAL'
+    if parameter["type"].lower() == "uniform_int":
+        return "INT"
+    elif parameter["type"].lower() == "uniform_float":
+        return "FLOAT"
+    elif parameter["type"].lower() == "categorical":
+        return "CATEGORICAL"
+    elif parameter["type"].lower() == "ordinal":
+        return "ORDINAL"
     else:
-        return parameter['type']
+        return parameter["type"]
 
 
 class HyperParameter(object):
@@ -106,7 +105,7 @@ class HyperParameter(object):
 
     def __init__(self, parameter: dict[str, bool | int | float | list]) -> None:
         self._raw_dict = parameter
-        self.name = parameter['name']
+        self.name = parameter["name"]
         self.type = get_type(parameter)
         self.log = False
         self.lower = None
@@ -117,32 +116,32 @@ class HyperParameter(object):
         self.q = None
         self.step = None
 
-        if 'log' in parameter:
-            self.log = parameter['log']
+        if "log" in parameter:
+            self.log = parameter["log"]
 
-        if 'lower' in parameter:
-            self.lower = parameter['lower']
+        if "lower" in parameter:
+            self.lower = parameter["lower"]
 
-        if 'upper' in parameter:
-            self.upper = parameter['upper']
+        if "upper" in parameter:
+            self.upper = parameter["upper"]
 
-        if 'choices' in parameter:
-            self.choices = parameter['choices']
+        if "choices" in parameter:
+            self.choices = parameter["choices"]
 
-        if 'sequence' in parameter:
-            self.sequence = parameter['sequence']
+        if "sequence" in parameter:
+            self.sequence = parameter["sequence"]
 
-        if 'initial' in parameter:
-            self.initial = parameter['initial']
+        if "initial" in parameter:
+            self.initial = parameter["initial"]
 
-        if 'q' in parameter:
-            self.q = parameter['q']
+        if "q" in parameter:
+            self.q = parameter["q"]
 
-        if 'step' in parameter:
-            self.step = parameter['step']
+        if "step" in parameter:
+            self.step = parameter["step"]
 
-        if 'base' in parameter:
-            self.base = parameter['base']
+        if "base" in parameter:
+            self.base = parameter["base"]
 
     def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
         """Sample a parameter.
@@ -159,19 +158,18 @@ class HyperParameter(object):
         """
         if initial and self.initial is not None:
             value = self.initial
-        elif self.type.lower() == 'int':
+        elif self.type.lower() == "int":
             value = rng.randint(self.lower, self.upper)
-        elif self.type.lower() == 'float':
+        elif self.type.lower() == "float":
             value = rng.uniform(self.lower, self.upper)
-        elif self.type.lower() == 'categorical':
+        elif self.type.lower() == "categorical":
             value = rng.choice(self.choices)
-        elif self.type.lower() == 'ordinal':
+        elif self.type.lower() == "ordinal":
             value = rng.choice(self.sequence)
         else:
-            raise TypeError(
-                f'Invalid hyper parameter type: {self.type}')
+            raise TypeError(f"Invalid hyper parameter type: {self.type}")
 
-        return {'name': self.name, 'type': self.type, 'value': value}
+        return {"name": self.name, "type": self.type, "value": value}
 
 
 class HyperParameterConfiguration(object):
@@ -190,7 +188,7 @@ class HyperParameterConfiguration(object):
         self.hps: dict[str, HyperParameter] = {}
 
         for hps in self.json_string:
-            self.hps[hps['name']] = HyperParameter(hps)
+            self.hps[hps["name"]] = HyperParameter(hps)
 
     def get_hyperparameter(self, name: str) -> HyperParameter:
         """Get a hyper parameter with a name.
@@ -207,7 +205,7 @@ class HyperParameterConfiguration(object):
         if name in self.hps:
             return self.hps[name]
         else:
-            raise KeyError(f'The parameter name {name} does not exist.')
+            raise KeyError(f"The parameter name {name} does not exist.")
 
     def get_parameter_list(self) -> list[HyperParameter]:
         """Get a list of hyper parameter objects.
@@ -225,8 +223,7 @@ class HyperParameterConfiguration(object):
         """
         return self.hps
 
-    def sample(self, initial: bool = False, rng: np.random.RandomState = None
-               ) -> list[dict]:
+    def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> list[dict]:
         """Sample a hyper parameters set.
 
         Args:

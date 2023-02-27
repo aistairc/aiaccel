@@ -21,4 +21,4 @@ jobs:
         run: |
           flake8 aiaccel
           isort --check --diff aiaccel
-          # black --check --line-length 120 aiaccel
+          black --check --line-length 120 aiaccel

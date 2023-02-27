@@ -2,15 +2,14 @@ import datetime
 
 
 class Suffix:
-    """ Create suffix with datetime.
-    """
+    """Create suffix with datetime."""
 
     def __init__(self):
         pass
 
     @classmethod
     def date(cls) -> str:
-        """ Get the now datetime.
+        """Get the now datetime.
 
         Returns:
             str

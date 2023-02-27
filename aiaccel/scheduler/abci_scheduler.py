@@ -8,8 +8,7 @@ from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 
 
 class AbciScheduler(AbstractScheduler):
-    """A scheduler class running on ABCI environment.
-    """
+    """A scheduler class running on ABCI environment."""
 
     def get_stats(self) -> None:
         """Get a current status and update.
@@ -19,10 +18,10 @@ class AbciScheduler(AbstractScheduler):
         """
         super().get_stats()
 
-        commands = 'qstat -xml'
+        commands = "qstat -xml"
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
         stats = p.communicate()[0]
-        stats = stats.decode('utf-8')
+        stats = stats.decode("utf-8")
 
         if len(stats) < 1:
             return
@@ -30,11 +29,7 @@ class AbciScheduler(AbstractScheduler):
         self.stats = parse_qstat(self.config, stats)
 
         for stat in self.stats:
-            self.logger.info(
-                f'stat job-ID: {stat["job-ID"]}, '
-                f'name: {stat["name"]}, '
-                f'state: {stat["state"]}'
-            )
+            self.logger.info(f'stat job-ID: {stat["job-ID"]}, ' f'name: {stat["name"]}, ' f'state: {stat["state"]}')
 
     def parse_trial_id(self, command: str) -> str | None:
         """Parse a command string and extract an unique name.
@@ -46,8 +41,8 @@ class AbciScheduler(AbstractScheduler):
             str | None: An unique name.
         """
         self.logger.debug(f"command: {command}")
-        full = re.compile(r'run_\d{1,65535}.sh')
-        numbers = re.compile(r'\d{1,65535}')
+        full = re.compile(r"run_\d{1,65535}.sh")
+        numbers = re.compile(r"\d{1,65535}")
         if full.search(command) is None:
             return None
         return numbers.search(command).group()

@@ -9,6 +9,7 @@ def retry(_MAX_NUM=60, _DELAY=1.0):
         _MAX_NUM (int, optional): Maximum number of retries. Defaults to 60.
         _DELAY (float, optional): Retry interval in seconds. Defaults to 1.0.
     """
+
     def _retry(func):
         @wraps(func)
         def _wrapper(*args, **kwargs):
@@ -20,5 +21,7 @@ def retry(_MAX_NUM=60, _DELAY=1.0):
                         raise e
                     time.sleep(_DELAY)
                     continue
+
         return _wrapper
+
     return _retry

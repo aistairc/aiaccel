@@ -3,11 +3,11 @@ from __future__ import annotations
 import logging
 import subprocess
 from argparse import ArgumentParser
+from collections.abc import Callable
 from functools import singledispatchmethod
 from logging import StreamHandler, getLogger
-from typing import Any
-from collections.abc import Callable
 from pathlib import Path, PosixPath
+from typing import Any
 
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
@@ -36,7 +36,7 @@ class _Message:
         self.delimiter = "@"
 
     def create_message(self, message: Any):
-        """ Concatenates a label and a message.
+        """Concatenates a label and a message.
 
         Args:
             message (Any): Content to be out to stdout.
@@ -52,7 +52,7 @@ class _Message:
         self.outputs.append(f"{self.label}:{tmp}")
 
     def out(self, all: bool = False) -> None:
-        """ Output message to stdout.
+        """Output message to stdout.
 
         Args
             all (bool): If its value is true then print all self.output.
@@ -103,7 +103,7 @@ class Messages:
             self.d[label] = _Message(label)
 
     def create_message(self, label: str, mess: str) -> None:
-        """ Create a message with a any label.
+        """Create a message with a any label.
 
         Args:
             label (str): Create a message with this label name.
@@ -112,7 +112,7 @@ class Messages:
         self.d[label].create_message(mess)
 
     def out(self, label: str) -> None:
-        """ Display any labels message.
+        """Display any labels message.
 
         Args:
             label (str): Displays a message with this label name.
@@ -155,10 +155,7 @@ class WrapperInterface:
     """
 
     def __init__(self):
-        self.stdout = Messages(
-            "objective_y",
-            "objective_err"
-        )
+        self.stdout = Messages("objective_y", "objective_err")
 
     def get_data(self, output: subprocess.CompletedProcess[bytes]) -> tuple:
         """For wrapper side, gets stdout and stderr of user program.
@@ -172,29 +169,17 @@ class WrapperInterface:
                 ys (list): The return value of user program.
                 err (list): The error message of user program.
         """
-        ys = self.stdout.parse(
-            "objective_y", output.stdout.decode("UTF-8")
-        )
+        ys = self.stdout.parse("objective_y", output.stdout.decode("UTF-8"))
         if ys is None:
-            ys = self.stdout.parse(
-                "objective_y", output.stderr.decode("UTF-8")
-            )
+            ys = self.stdout.parse("objective_y", output.stderr.decode("UTF-8"))
 
-        err = self.stdout.parse(
-            "objective_err", output.stdout.decode("UTF-8")
-        )
+        err = self.stdout.parse("objective_err", output.stdout.decode("UTF-8"))
         if err is None:
-            err = self.stdout.parse(
-                "objective_err", output.stderr.decode("UTF-8")
-            )
+            err = self.stdout.parse("objective_err", output.stderr.decode("UTF-8"))
 
         return (ys, err)
 
-    def out(
-        self,
-        objective_y: float | int | str | None = None,
-        objective_err: str | None = None
-    ) -> None:
+    def out(self, objective_y: float | int | str | None = None, objective_err: str | None = None) -> None:
         """For user program side, outputs the objective value and error message
         generated in the user-defined function.
 
@@ -263,8 +248,8 @@ class Run:
 
     def __init__(self, config_path: str | PosixPath | None = None) -> None:
         parser = ArgumentParser()
-        parser.add_argument('--config', type=str)
-        parser.add_argument('--trial_id', type=str, required=False)
+        parser.add_argument("--config", type=str)
+        parser.add_argument("--trial_id", type=str, required=False)
 
         args = parser.parse_known_args()[0]
 
@@ -293,10 +278,8 @@ class Run:
 
         self.com = WrapperInterface()
 
-    def generate_commands(
-        self, command: str, xs: dict[str, float | int | str | None]
-    ) -> list[str]:
-        """ Generate execution command of user program.
+    def generate_commands(self, command: str, xs: dict[str, float | int | str | None]) -> list[str]:
+        """Generate execution command of user program.
 
         Args:
             command (str): An Execution command to calculate objective value.
@@ -340,8 +323,7 @@ class Run:
 
         return xs
 
-    def cast_y(
-            self, y_value: Any, y_data_type: str | None) -> float | int | str:
+    def cast_y(self, y_value: Any, y_data_type: str | None) -> float | int | str:
         """Casts y to the appropriate data type.
 
         Args:
@@ -357,26 +339,21 @@ class Run:
         """
         if y_data_type is None:
             y = y_value
-        elif y_data_type.lower() == 'float':
+        elif y_data_type.lower() == "float":
             y = float(y_value)
-        elif y_data_type.lower() == 'int':
+        elif y_data_type.lower() == "int":
             y = int(float(y_value))
-        elif y_data_type.lower() == 'str':
+        elif y_data_type.lower() == "str":
             y = str(y_value)
         else:
-            TypeError(f'{y_data_type} cannot be specified')
+            TypeError(f"{y_data_type} cannot be specified")
 
         return y
 
     @singledispatchmethod
     def execute(
-        self,
-        func: Callable[[dict[str, float | int | str]], float],
-        trial_id: int,
-        y_data_type: str | None
-    ) -> tuple[dict[str, float | int | str] | None,
-               float | int | str | None,
-               str]:
+        self, func: Callable[[dict[str, float | int | str]], float], trial_id: int, y_data_type: str | None
+    ) -> tuple[dict[str, float | int | str] | None, float | int | str | None, str]:
         """Executes the target function.
 
         Args:
@@ -403,11 +380,11 @@ class Run:
 
         return xs, y, err
 
-    @ execute.register
+    @execute.register
     def _(
-        self, command: str, trial_id: int, y_data_type: 'str | None'
-    ) -> 'tuple[dict[str, float | int | str] | None, float | int | str | None, str]':
-        """ Executes the user program.
+        self, command: str, trial_id: int, y_data_type: "str | None"
+    ) -> "tuple[dict[str, float | int | str] | None, float | int | str | None, str]":
+        """Executes the user program.
 
         Args:
             command (str): An Execution command to calculate objective value.
@@ -439,7 +416,7 @@ class Run:
 
         ys, err = self.com.get_data(output)
         if y_data_type is None:
-            y = self.cast_y(ys[0], 'float')
+            y = self.cast_y(ys[0], "float")
         else:
             y = self.cast_y(ys[0], y_data_type)
         err = ("\n").join(err)
@@ -448,9 +425,7 @@ class Run:
 
     @singledispatchmethod
     def execute_and_report(
-        self,
-        func: Callable[[dict[str, float | int | str]], float],
-        y_data_type: str | None = None
+        self, func: Callable[[dict[str, float | int | str]], float], y_data_type: str | None = None
     ) -> None:
         """Executes the target function and report the results.
 
@@ -481,7 +456,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: 'str | None' = None) -> None:
+    def _(self, command: str, y_data_type: "str | None" = None) -> None:
         """Executes the user program.
 
         Args:
@@ -502,10 +477,7 @@ class Run:
 
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
-    def report(
-        self, trial_id: int, xs: dict, y: any, err: str, start_time: str,
-        end_time: str
-    ) -> None:
+    def report(self, trial_id: int, xs: dict, y: any, err: str, start_time: str, end_time: str) -> None:
         """Saves results in the Storage object.
 
         Args:

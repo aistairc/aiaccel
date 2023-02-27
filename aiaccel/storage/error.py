@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import PosixPath
+
 from sqlalchemy.exc import SQLAlchemyError
 
 from aiaccel.storage.abstract import Abstract
@@ -73,11 +74,7 @@ class Error(Abstract):
             trial_ids(list): trial id list
         """
         with self.create_session() as session:
-            data = (
-                session.query(ErrorTable)
-                .with_for_update(read=True)
-                .all()
-            )
+            data = session.query(ErrorTable).with_for_update(read=True).all()
 
         if data is None or len(data) == 0:
             return []

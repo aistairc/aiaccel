@@ -16,17 +16,16 @@ from aiaccel.util.report import CreationReport
 from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
-logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 logger.addHandler(StreamHandler())
 
 
 def main() -> None:  # pragma: no cover
-    """Parses command line options and executes optimization.
-    """
+    """Parses command line options and executes optimization."""
     parser = ArgumentParser()
-    parser.add_argument('--config', '-c', type=str, default="config.yml")
-    parser.add_argument('--resume', type=int, default=None)
-    parser.add_argument('--clean', nargs='?', const=True, default=False)
+    parser.add_argument("--config", "-c", type=str, default="config.yml")
+    parser.add_argument("--resume", type=int, default=None)
+    parser.add_argument("--clean", nargs="?", const=True, default=False)
     args = parser.parse_args()
 
     config = Config(args.config, warn=True, format_check=True)
@@ -42,7 +41,7 @@ def main() -> None:  # pragma: no cover
         if args.clean is True:
             logger.info("Cleaning workspace")
             workspace.clean()
-            logger.info(f'Workspace directory {str(workspace.path)} is cleaned.')
+            logger.info(f"Workspace directory {str(workspace.path)} is cleaned.")
         else:
             if workspace.exists():
                 logger.info("workspace exists.")

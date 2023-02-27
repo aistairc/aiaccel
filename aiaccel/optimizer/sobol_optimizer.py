@@ -38,11 +38,9 @@ class SobolOptimizer(AbstractOptimizer):
         finished = self.storage.trial.get_finished()
         self.generate_index = len(finished)
 
-        if self.options['resume'] is None or self.options['resume'] <= 0:
+        if self.options["resume"] is None or self.options["resume"] <= 0:
             self.sampler = qmc.Sobol(
-                d=len(self.params.get_parameter_list()),
-                scramble=self.config.sobol_scramble.get(),
-                seed=self._rng
+                d=len(self.params.get_parameter_list()), scramble=self.config.sobol_scramble.get(), seed=self._rng
             )
 
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
@@ -66,18 +64,12 @@ class SobolOptimizer(AbstractOptimizer):
             min_value = l_params[i].lower
             max_value = l_params[i].upper
             value = (max_value - min_value) * vec[i] + min_value
-            new_param = {
-                'parameter_name': l_params[i].name,
-                'type': l_params[i].type,
-                'value': value
-            }
+            new_param = {"parameter_name": l_params[i].name, "type": l_params[i].type, "value": value}
             new_params.append(new_param)
 
         return new_params
 
-    def generate_initial_parameter(
-        self
-    ) -> list[dict[str, float | int | str]]:
+    def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
 
         Returns:
@@ -85,7 +77,6 @@ class SobolOptimizer(AbstractOptimizer):
         """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(
-                "Initial values cannot be specified for sobol."
-                "The set initial value has been invalidated."
+                "Initial values cannot be specified for sobol." "The set initial value has been invalidated."
             )
         return self.generate_parameter()

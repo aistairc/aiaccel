@@ -38,7 +38,7 @@ class AbstractVerification(object):
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         # === Load config file===
         self.options = options
-        self.config = Config(self.options['config'])
+        self.config = Config(self.options["config"])
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
         self.is_verified: bool = None
@@ -65,13 +65,10 @@ class AbstractVerification(object):
         #     hp_finished_files = get_file_hp_finished(self.ws)
 
         for i, c in enumerate(self.condition):
-            if self.storage.get_num_finished() >= c['loop']:
-                if (
-                    self.finished_loop is None or
-                    c['loop'] > self.finished_loop
-                ):
-                    self.make_verification(i, c['loop'])
-                    self.finished_loop = c['loop']
+            if self.storage.get_num_finished() >= c["loop"]:
+                if self.finished_loop is None or c["loop"] > self.finished_loop:
+                    self.make_verification(i, c["loop"])
+                    self.finished_loop = c["loop"]
 
     def make_verification(self, index: int, loop: int) -> None:
         """Run a verification and save the result.
@@ -108,12 +105,12 @@ class AbstractVerification(object):
         best_trial = self.storage.get_best_trial_dict(self.config.goal.get().lower())
 
         if (
-            best_trial['result'] < self.condition[index]['minimum'] or
-            best_trial['result'] > self.condition[index]['maximum']
+            best_trial["result"] < self.condition[index]["minimum"]
+            or best_trial["result"] > self.condition[index]["maximum"]
         ):
-            self.verification_result[index]['passed'] = False
+            self.verification_result[index]["passed"] = False
         else:
-            self.verification_result[index]['passed'] = True
+            self.verification_result[index]["passed"] = True
         self.save(loop)
 
     def load_verification_config(self) -> None:
@@ -135,9 +132,9 @@ class AbstractVerification(object):
         if not self.is_verified:
             return None
 
-        logger = logging.getLogger('root.master.verification')
-        logger.info('Current verification is followings:')
-        logger.info(f'{self.verification_result}')
+        logger = logging.getLogger("root.master.verification")
+        logger.info("Current verification is followings:")
+        logger.info(f"{self.verification_result}")
 
     def save(self, name: int) -> None:
         """Save current verifications result to a file.
@@ -151,7 +148,7 @@ class AbstractVerification(object):
         if not self.is_verified:
             return None
 
-        path = self.ws / aiaccel.dict_verification / f'{name}.{aiaccel.extension_verification}'
+        path = self.ws / aiaccel.dict_verification / f"{name}.{aiaccel.extension_verification}"
         create_yaml(path, self.verification_result, self.dict_lock)
-        logger = logging.getLogger('root.master.verification')
-        logger.info(f'Save verifiation file: {name}.{aiaccel.extension_verification}')
+        logger = logging.getLogger("root.master.verification")
+        logger.info(f"Save verifiation file: {name}.{aiaccel.extension_verification}")

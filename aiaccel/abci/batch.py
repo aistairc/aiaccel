@@ -3,12 +3,7 @@ from pathlib import Path
 from aiaccel.util.filesystem import file_create
 
 
-def create_abci_batch_file(
-    batch_file: Path,
-    wrapper_file: str,
-    commands: list,
-    dict_lock: Path
-) -> None:
+def create_abci_batch_file(batch_file: Path, wrapper_file: str, commands: list, dict_lock: Path) -> None:
     """Create a ABCI batch file.
 
     The 'wrapper_file' is a base of the ABCI batch file. At first, loads
@@ -24,11 +19,11 @@ def create_abci_batch_file(
     Returns:
         None
     """
-    with open(wrapper_file, 'r') as f:
+    with open(wrapper_file, "r") as f:
         wrapper_lines = f.readlines()
 
-    command_text = ' '.join(commands)
-    lines = ''
+    command_text = " ".join(commands)
+    lines = ""
 
     for line in wrapper_lines:
         lines += line
