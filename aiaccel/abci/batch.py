@@ -103,6 +103,7 @@ def create_abci_batch_file(
     code.add_line(f'error_file_path={str(error_file_path)}')
     code.add_line('start_time=`date "+%Y-%m-%d %H:%M:%S"`')
     code.add_line(f'result=`{" ".join(commands)}`')
+    code.add_line('exitcode=$?')
     code.add_line('error=`cat $error_file_path`')
     code.add_line('end_time=`date "+%Y-%m-%d %H:%M:%S"`')
 
@@ -118,6 +119,7 @@ def create_abci_batch_file(
             '--end_time $end_time',
             '--objective $result',
             '--error $error',
+            '--exitcode $exitcode',
             _generate_param_args(param_content['parameters'])
         ])
     )
@@ -133,6 +135,7 @@ def create_abci_batch_file(
             '--start_time $start_time',
             '--end_time $end_time',
             '--objective $result',
+            '--exitcode $exitcode',
             _generate_param_args(param_content['parameters'])
         ])
     )

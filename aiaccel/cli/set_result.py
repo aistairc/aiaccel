@@ -18,6 +18,8 @@ def main():
     parser.add_argument('--end_time', type=str, default='', required=True)
     parser.add_argument('--objective', type=float, default=None)
     parser.add_argument('--error', type=str, default='')
+    parser.add_argument('--exitcode', type=int, default=None)
+
     args = parser.parse_known_args()[0]
 
     config_path = None
@@ -56,7 +58,8 @@ def main():
         "start_time",
         "end_time",
         "objective",
-        "error"
+        "error",
+        "exitcode"
     ]
 
     for key in delete_keys:
@@ -65,12 +68,16 @@ def main():
 
     contents = {
         'trial_id': args.trial_id,
-        'paramerters': xs,
         'result': args.objective,
-        'error': args.error,
+        'paramerters': xs,
         'start_time': args.start_time,
-        'end_time': args.end_time
+        'end_time': args.end_time,
+        'exitcode': args.exitcode,
+        'error': args.error
     }
+
+    if args.error == '':
+        del contents['error']
 
     print(contents)
 

@@ -49,6 +49,7 @@ class LocalModel(AbstractModel):
         stderrs = obj.th_oh.get_stderrs()
         start_time = str(obj.th_oh.get_start_time())
         end_time = str(obj.th_oh.get_end_time())
+        exitcode = str(obj.th_oh.get_returncode())
         params = obj.content['parameters']
 
         objective = stdouts[-1]  # TODO: fix
@@ -63,7 +64,8 @@ class LocalModel(AbstractModel):
             'start_time': start_time,
             'end_time': end_time,
             'objective': objective,
-            'error': error
+            'error': error,
+            'exitcode': str(exitcode)
         }
 
         if len(error) == 0:
