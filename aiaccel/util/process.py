@@ -141,17 +141,18 @@ class OutputHandler(threading.Thread):
             if self._proc.stdout is None:
                 break
 
-            if self._proc.stderr is not None:
-                stdout = self._proc.stdout.readline().decode().strip()
-                if stdout:
-                    self._stdouts.append(stdout)
+            stdout = self._proc.stdout.readline().decode().strip()
+            if stdout:
+                self._stdouts.append(stdout)
 
             if self._proc.stderr is not None:
                 stderr = self._proc.stderr.readline().decode().strip()
                 if stderr:
                     self._stderrs.append(stderr)
+            else:
+                stderr = None
 
-            if self.get_returncode() is not None:
+            if not (stdout or stderr) and self.get_returncode() is not None:
                 break
 
             if self._abort:
