@@ -5,7 +5,7 @@ from importlib import import_module
 from aiaccel.config import Config
 
 
-def create_optimizer(config_path: str) -> type | None:
+def create_optimizer(config_path: str) -> type:
     """Returns master type.
 
     Args:
@@ -18,7 +18,7 @@ def create_optimizer(config_path: str) -> type | None:
     return import_and_getattr(config.search_algorithm.get())
 
 
-def import_and_getattr(name: str) -> type | None:
+def import_and_getattr(name: str) -> type:
     """Imports the specified Optimizer class.
 
     Args:

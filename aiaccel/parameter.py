@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -104,15 +105,15 @@ class HyperParameter(object):
         q (float | int): A quantization factor.
     """
 
-    def __init__(self, parameter: dict[str, bool | int | float | list]) -> None:
+    def __init__(self, parameter: dict[str, Any]) -> None:
         self._raw_dict = parameter
         self.name = parameter['name']
         self.type = get_type(parameter)
-        self.log = False
-        self.lower = None
-        self.upper = None
-        self.choices = None
-        self.sequence = None
+        self.log = parameter.get('log', False)
+        # self.lower = None
+        # self.upper = None
+        # self.choices = None
+        # self.sequence = None
         self.initial = None
         self.q = None
         self.step = None
@@ -120,17 +121,22 @@ class HyperParameter(object):
         if 'log' in parameter:
             self.log = parameter['log']
 
-        if 'lower' in parameter:
-            self.lower = parameter['lower']
+        # if 'upper' in parameter:
+        #     self.upper = parameter['lower']
 
-        if 'upper' in parameter:
-            self.upper = parameter['upper']
+        # if 'upper' in parameter:
+        #     self.upper = parameter['upper']
 
-        if 'choices' in parameter:
-            self.choices = parameter['choices']
+        # if 'choices' in parameter:
+        #     self.choices = parameter['choices']
 
-        if 'sequence' in parameter:
-            self.sequence = parameter['sequence']
+        # if 'sequence' in parameter:
+        #     self.sequence = parameter['sequence']
+
+        self.lower = parameter.get('lower', None)
+        self.upper = parameter.get('upper', None)
+        self.choices = parameter.get('choices', None)
+        self.sequence = parameter.get('sequence', None)
 
         if 'initial' in parameter:
             self.initial = parameter['initial']
@@ -144,7 +150,7 @@ class HyperParameter(object):
         if 'base' in parameter:
             self.base = parameter['base']
 
-    def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
+    def sample(self, initial: bool = False, rng: Any = None) -> dict:
         """Sample a parameter.
 
         Args:
@@ -225,7 +231,7 @@ class HyperParameterConfiguration(object):
         """
         return self.hps
 
-    def sample(self, initial: bool = False, rng: np.random.RandomState = None
+    def sample(self, initial: bool = False, rng: Any = None
                ) -> list[dict]:
         """Sample a hyper parameters set.
 

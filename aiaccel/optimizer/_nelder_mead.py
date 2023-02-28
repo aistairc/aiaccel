@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import logging
+from typing import Any
 
 import numpy as np
 
@@ -74,10 +76,10 @@ class NelderMead(object):
     def __init__(
         self,
         params: list[HyperParameter],
-        iteration: float | None = float('inf'),
+        iteration: float = float('inf'),
         coef: dict | None = None,
         maximize: bool | None = False,
-        initial_parameters: list[dict[str, str | float | list[float]]] | None = None,
+        initial_parameters: list[dict[str, Any]] | None = None,
         rng: np.random.RandomState | None = None
     ) -> None:
         if coef is None:
@@ -92,14 +94,14 @@ class NelderMead(object):
 
         self.y = self._create_initial_values(initial_parameters)
 
-        self.f = []
+        self.f: Any = []  # np.ndarray is assigned in self._wait_initialize().
         self.yc = None
         self._storage = {
             "r": None, "ic": None, "oc": None, "e": None, "s": None}
         self._max_itr = iteration
         self._total_itr = 0         # included out of boundary
         self._evaluated_itr = 0     # not included out of boundary
-        self._history = {
+        self._history: dict[str, list[Any]] = {
             'total_y': [],              # y each loop
             'evaluated_y': [],          # y each loop not included out of boundary
             'op': [],                   # operations such as 'reflect' and so on.
@@ -108,23 +110,22 @@ class NelderMead(object):
             'fyr_order': []             # order of f(yr) in self.f
         }
         self._executing_index = 0
-        self._executing = []
-        self._fr = None
-        self._fe = None
-        self._fic = None
-        self._foc = None
+        self._executing: list[Any] = []
+        self._fr: Any  # treated as "float" until self._finalize() where "None" is assigned.
+        self._fe: Any
+        self._fic: Any
+        self._foc: Any
         self._maximize = maximize
         self._num_shrink = 0
         self._state = 'WaitInitialize'
         self._out_of_boundary = False
-        self._result = []
+        self._result: list[Any] = []
         for y in self.y:
             self._add_executing(y)
 
     def _create_initial_values(
         self,
-        initial_parameters: list[dict[str, int | np.integer | float |
-                                      np.floating | list[int | np.integer | float | np.floating | str]]]
+        initial_parameters: list[dict[str, Any]]
     ) -> np.ndarray:
         initial_values = [
             [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
@@ -135,8 +136,7 @@ class NelderMead(object):
 
     def _create_initial_value(
         self,
-        initial_parameters: list[
-            dict[str, int | np.integer | float | np.floating | list[int | np.integer | float | np.floating | str]]],
+        initial_parameters: Any,
         dim: int,
         num_of_initials: int
     ) -> int | np.integer | float | np.floating | list[int | np.integer | float | np.floating | str]:

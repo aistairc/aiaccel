@@ -22,8 +22,8 @@ class AbciScheduler(AbstractScheduler):
 
         commands = 'qstat -xml'
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
-        stats = p.communicate()[0]
-        stats = stats.decode('utf-8')
+        stdout_data, _ = p.communicate()
+        stats = stdout_data.decode('utf-8')
 
         if len(stats) < 1:
             return

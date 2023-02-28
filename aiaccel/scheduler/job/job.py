@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import logging
-
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from subprocess import Popen
+from typing import Any
 from typing import TYPE_CHECKING
 
 from transitions import Machine
@@ -13,6 +15,7 @@ from aiaccel import dict_lock
 from aiaccel import dict_result
 from aiaccel import dict_error
 from aiaccel.util.buffer import Buffer
+from aiaccel.util.process import OutputHandler
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
 from aiaccel.scheduler.job.model.abci_model import AbciModel
@@ -538,7 +541,6 @@ class Job:
         super(Job, self).__init__()
         # === Load config file===
         self.config = config
-        self.config_path = self.config.config_path
         # === Get config parameter values ===
         self.workspace = self.config.workspace.get()
         self.cancel_retry = self.config.cancel_retry.get()
@@ -560,7 +562,7 @@ class Job:
         self.running_timeout = self.config.running_timeout.get()
         self.resource_type = self.config.resource_type.get()
 
-        self.threshold_timeout = None
+        self.threshold_timeout: datetime | None
         self.threshold_retry = None
         self.count_retry = 0
 
@@ -587,14 +589,14 @@ class Job:
         )
         self.loop_count = 0
 
-        self.config_path = str(self.config_path)
+        self.config_path = str(self.config.config_path)
         self.trial_id = trial_id
         self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
-        self.from_file = None
-        self.to_file = None
-        self.next_state = None
-        self.proc = None
-        self.th_oh = None
+        self.from_file: Path | None
+        self.to_file: Path | None
+        self.next_state: str
+        self.proc: Popen
+        self.th_oh: OutputHandler
         self.stop_flag = False
         self.storage = Storage(self.ws)
         self.content = self.storage.get_hp_dict(self.trial_id)
@@ -624,7 +626,7 @@ class Job:
         """
         return self.model
 
-    def get_state(self) -> Machine:
+    def get_state(self) -> Any:
         """Get a current state.
 
         Returns:

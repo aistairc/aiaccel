@@ -102,7 +102,7 @@ class Variable(Abstract):
 class Value(Variable):
     def __init__(self, file_name: Path, label: str) -> None:
         super().__init__(file_name)
-        self.process_name = None
+        self.process_name: str
         self.label = label
         self.value = None
 

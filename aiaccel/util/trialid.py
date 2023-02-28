@@ -27,7 +27,7 @@ class TrialId:
         lock (fasteners.InterProcessLock): An interprocess lock.
     """
 
-    def __init__(self, config_path: str) -> None:
+    def __init__(self, config_path: str | Path) -> None:
         self.config_path = Path(config_path).resolve()
         self.config = Config(str(self.config_path))
 

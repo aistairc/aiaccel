@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import fasteners
 import yaml
@@ -8,7 +9,7 @@ import yaml
 import aiaccel
 
 
-def create_yaml(path: Path, content: dict, dict_lock: Path | None = None) -> None:
+def create_yaml(path: Path, content: Any, dict_lock: Path | None = None) -> None:
     """Create a yaml file.
 
     Args:

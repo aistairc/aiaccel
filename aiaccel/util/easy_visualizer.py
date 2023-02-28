@@ -103,7 +103,7 @@ class EasyVisualizer:
             else:
                 raise Exception
 
-    def caption(self, *labels: tuple) -> None:
+    def caption(self, *labels) -> None:
         """Set the any caption.
 
         Args:
@@ -114,7 +114,7 @@ class EasyVisualizer:
             color = self.line_colors[self.color_priority[i]]
             print(f'{color}{list(labels)[i]}{reset}')
 
-    def line_plot(self, *data: tuple) -> None:
+    def line_plot(self, *data) -> None:
         """ Plot the any data.
 
         Args:
@@ -172,7 +172,7 @@ class EasyVisualizer:
             Sorted list, or None.
         """
         if not type(data) == list:
-            return
+            return None
 
         best_values = []
 

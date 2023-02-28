@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm import schedule_sampling
+from aiaccel.scheduler.algorithm.schedule_sampling import RandomSampling
+from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import AbstractSchedulingAlgorithm
 from aiaccel.scheduler.job.job import Job
 from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
@@ -49,10 +51,10 @@ class AbstractScheduler(AbstractModule):
 
         self.max_resource = self.config.num_node.get()
         self.available_resource = self.max_resource
-        self.stats = []
-        self.jobs = []
-        self.job_status = {}
-        self.algorithm = None
+        self.stats: list[Any] = []
+        self.jobs: list[Any] = []
+        self.job_status: dict[Any, Any] = {}
+        self.algorithm: AbstractSchedulingAlgorithm
         self.num_node = self.config.num_node.get()
 
     def change_state_finished_trials(self) -> None:
@@ -137,7 +139,7 @@ class AbstractScheduler(AbstractModule):
         self.create_numpy_random_generator()
         self.resume()
 
-        self.algorithm = schedule_sampling.RandomSampling(self.config)
+        self.algorithm = RandomSampling(self.config)
         self.change_state_finished_trials()
 
         runnings = self.storage.trial.get_running()
@@ -209,7 +211,7 @@ class AbstractScheduler(AbstractModule):
 
         return True
 
-    def parse_trial_id(self, command: str) -> str:
+    def parse_trial_id(self, command: str) -> str | None:
         """Parse a command string and extract an unique name.
 
         Args:

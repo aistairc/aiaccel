@@ -41,8 +41,8 @@ def subprocess_ps() -> list[dict]:
     """
     commands = ['ps', 'xu']
     res = subprocess.run(commands, stdout=subprocess.PIPE)
-    res = res.stdout.decode('utf-8')
-    stats = res.split('\n')
+    message = res.stdout.decode('utf-8')
+    stats = message.split('\n')
     stats_zero = re.split(' +', stats[0])
     stats_zero = [s for s in stats_zero if s != '']
     pid_order = stats_zero.index('PID')

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+from collections.abc import Callable
 
 from aiaccel import dict_runner
 from aiaccel.util.filesystem import create_yaml
@@ -12,8 +14,13 @@ if TYPE_CHECKING:
 
 
 class AbstractModel(object):
+    state: str
+    expire: Callable
+    schedule: Callable
+    next: Callable
 
     # Common
+
     def after_confirmed(self, obj: 'Job') -> None:
         """State transition of 'after_confirmed'.
 
@@ -71,11 +78,11 @@ class AbstractModel(object):
         """
         obj.storage.trial.set_any_trial_state(
             trial_id=obj.trial_id,
-            state=obj.next_trial_state
+            state=obj.next_state
         )
         return
 
-    def get_runner_file(self, obj: 'Job') -> None:
+    def get_runner_file(self, obj: 'Job') -> Path:
         return obj.ws / dict_runner / f'run_{obj.trial_id_str}.sh'
 
     # Runner

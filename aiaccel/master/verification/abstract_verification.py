@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 from pathlib import Path
+from typing import Any
 
 import aiaccel
 from aiaccel.config import Config
@@ -35,16 +36,16 @@ class AbstractVerification(object):
         storage (Storage): Storage object.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         # === Load config file===
         self.options = options
         self.config = Config(self.options['config'])
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
-        self.is_verified: bool = None
+        self.is_verified: bool = False
         self.finished_loop = None
-        self.condition = None
-        self.verification_result = None
+        self.condition: list[dict[str, Any]]
+        self.verification_result: list[dict[str, Any]]
         self.load_verification_config()
         self.storage = Storage(self.ws)
 

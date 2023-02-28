@@ -39,12 +39,12 @@ class TpeOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.parameter_pool = {}
-        self.parameter_list = []
+        self.parameter_pool: dict = {}
+        self.parameter_list: list = []
         self.study_name = "distributed-tpe"
-        self.study = None
-        self.distributions = None
-        self.trial_pool = {}
+        self.study: optuna.Study
+        self.distributions: dict
+        self.trial_pool: dict = {}
         self.randseed = self.config.randseed.get()
 
     def pre_process(self) -> None:
@@ -206,7 +206,7 @@ def create_distributions(
     Returns:
         (dict): An optuna.distributions object.
     """
-    distributions = {}
+    distributions: dict[str, optuna.distributions.BaseDistribution] = {}
 
     for p in parameters.get_parameter_list():
         if p.type.lower() == 'float':

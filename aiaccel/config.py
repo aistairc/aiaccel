@@ -351,7 +351,7 @@ class Config:
         if not self.config_path.exists():
             logger.error(f"config file: {config_path} doesn't exist.")
 
-        self.config = load_config(config_path)
+        self.config = load_config(str(config_path))
         self.define_items(self.config, warn)
         if format_check:
             self.workspace.empty_if_error()

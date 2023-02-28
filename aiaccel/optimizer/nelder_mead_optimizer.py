@@ -1,5 +1,6 @@
 from __future__ import annotations
 import copy
+from typing import Any
 
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -22,9 +23,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.nelder_mead = None
-        self.parameter_pool = []
-        self.order = []
+        self.nelder_mead: NelderMead
+        self.parameter_pool: list[dict[str, Any]] = []
+        self.order: list[Any] = []
 
     def generate_initial_parameter(
         self
@@ -37,7 +38,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         initial_parameter = super().generate_initial_parameter()
         if self.nelder_mead is not None:
-            return
+            return None
 
         self.params = self.special_settings_when_using_ordinal(self.params)
 
@@ -109,8 +110,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def update_ready_parameter_name(
         self,
-        pool_p: str,  # old_param_name
-        name: str     # new_param_name
+        pool_p: dict[str, Any],  # old_param_name
+        name: Any     # new_param_name
     ) -> None:
         """ Update hyperparameter's names.
 
@@ -158,7 +159,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 e['vertex_id'] = new_param_name
                 break
 
-    def nelder_mead_main(self) -> list:
+    def nelder_mead_main(self) -> list | None:
         """ Nelder Mead's main module.
 
         Args:
@@ -225,7 +226,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             ):
                 self.parameter_pool.append(copy.copy(p))
 
-        new_params = []
+        new_params: list[Any] = []
 
         if len(self.parameter_pool) == 0:
             return new_params

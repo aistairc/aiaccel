@@ -66,7 +66,7 @@ class Hp(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_params(self, trial_id: int) -> list[HpTable] | None:
+    def get_any_trial_params(self, trial_id: Any) -> list[HpTable] | None:
         """ Obtain the set parameter information for any given trial.
 
         Args:

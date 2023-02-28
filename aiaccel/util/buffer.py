@@ -165,7 +165,7 @@ class Buffer:
         buff.Add("data3", x)
     """
 
-    def __init__(self, *labels: tuple) -> None:
+    def __init__(self, *labels) -> None:
         self.labels = labels[0]
         self.num_buff = len(self.labels)
         self.d = {}

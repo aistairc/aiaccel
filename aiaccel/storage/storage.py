@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import aiaccel
 from aiaccel.storage.error import Error
@@ -123,7 +124,7 @@ class Storage:
         """
         return trial_id in self.trial.get_finished()
 
-    def get_hp_dict(self, trial_id: int) -> dict | None:
+    def get_hp_dict(self, trial_id: Any) -> dict | None:
         """Obtain information on a specified trial in dict.
 
         Args:
@@ -209,9 +210,9 @@ class Storage:
                     best_trial_id = trial_id
 
             else:
-                return (None, None)
+                return None, None
 
-        return (best_trial_id, best_value)
+        return best_trial_id, best_value
 
     def get_best_trial_dict(self, goal: str) -> dict | None:
         """Get best trial information in dict format.
