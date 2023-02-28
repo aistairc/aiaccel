@@ -4,8 +4,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-
 import aiaccel
 from aiaccel.util.filesystem import load_yaml
 

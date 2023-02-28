@@ -150,7 +150,7 @@ def get_file_result(path: Path, dict_lock: Path | None = None
 
 
 def get_file_result_hp(path: Path, dict_lock: Path | None = None
-                       ) -> list[Path] | None:
+                       ) -> Any:
     """Get files in result directory.
 
     Args:

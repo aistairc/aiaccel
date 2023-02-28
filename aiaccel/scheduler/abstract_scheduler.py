@@ -82,7 +82,7 @@ class AbstractScheduler(AbstractModule):
         """
         self.get_each_state_count()
 
-    def start_job(self, trial_id: int) -> Job | None:
+    def start_job(self, trial_id: int) -> Any:
         """Start a new job.
 
         Args:
@@ -319,7 +319,7 @@ class AbstractScheduler(AbstractModule):
         del obj['jobs']
         return obj
 
-    def create_model(self) -> AbstractModel | None:
+    def create_model(self) -> Any:
         """Creates model object of state machine.
 
         Override with a Scheduler that uses a Model.

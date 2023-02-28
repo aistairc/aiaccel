@@ -124,7 +124,7 @@ class Storage:
         """
         return trial_id in self.trial.get_finished()
 
-    def get_hp_dict(self, trial_id: Any) -> dict | None:
+    def get_hp_dict(self, trial_id: Any) -> Any:
         """Obtain information on a specified trial in dict.
 
         Args:
@@ -214,7 +214,7 @@ class Storage:
 
         return best_trial_id, best_value
 
-    def get_best_trial_dict(self, goal: str) -> dict | None:
+    def get_best_trial_dict(self, goal: str) -> Any:
         """Get best trial information in dict format.
 
         Args:

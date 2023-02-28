@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import fasteners
 
@@ -65,7 +66,7 @@ class TrialId:
             self.count_path.write_text('%d' % trial_id)
             self.lock.release()
 
-    def get(self) -> int | None:
+    def get(self) -> Any:
         """Returns trial id.
 
         Returns:
@@ -87,7 +88,7 @@ class TrialId:
             self.lock.release()
 
     @property
-    def integer(self) -> int | None:
+    def integer(self) -> Any:
         """Trial id.
         """
         return self.get()

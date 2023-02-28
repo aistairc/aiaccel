@@ -22,8 +22,8 @@ from aiaccel.scheduler.job.model.abci_model import AbciModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.scheduler.abci_scheduler import AbciScheduler
-    from aiaccel.scheduler.local_scheduler import LocalScheduler
+    from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+    from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
@@ -76,7 +76,7 @@ JOB_STATES = [
     {'name': 'Success'},
 ]
 
-JOB_TRANSITIONS = [
+JOB_TRANSITIONS: list[dict[str, str | list[str]]] = [
     {
         'trigger': 'next',
         'source': 'Init',
@@ -534,8 +534,8 @@ class Job:
     def __init__(
         self,
         config: Config,
-        scheduler: AbciScheduler | LocalScheduler,
-        model: AbciModel | LocalModel,
+        scheduler: AbstractScheduler,
+        model: AbstractModel,
         trial_id: int
     ) -> None:
         super(Job, self).__init__()
@@ -593,7 +593,7 @@ class Job:
         self.trial_id = trial_id
         self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
         self.from_file: Path | None
-        self.to_file: Path | None
+        self.to_file: Any
         self.next_state: str
         self.proc: Popen
         self.th_oh: OutputHandler
@@ -618,7 +618,7 @@ class Job:
         """
         return self.machine
 
-    def get_model(self) -> AbciModel | LocalModel:
+    def get_model(self) -> AbstractModel:
         """Get a state transition model object.
 
         Returns:

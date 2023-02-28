@@ -140,7 +140,7 @@ class AbstractVerification(object):
         logger.info('Current verification is followings:')
         logger.info(f'{self.verification_result}')
 
-    def save(self, name: int) -> None:
+    def save(self, name: str | int) -> None:
         """Save current verifications result to a file.
 
         Args:

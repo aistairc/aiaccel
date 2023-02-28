@@ -9,9 +9,7 @@ from typing import TYPE_CHECKING
 import psutil
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.master.abci_master import AbciMaster
-    from aiaccel.master.abstract_master import AbstractMaster
-    from aiaccel.master.local_master import LocalMaster
+    from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
     from aiaccel.storage.storage import Storage
 
 import datetime
@@ -128,7 +126,7 @@ class OutputHandler(threading.Thread):
 
     def __init__(
         self,
-        parent: AbciMaster | AbstractMaster | LocalMaster,
+        parent: AbstractScheduler,
         proc: subprocess.Popen,
         module_name: str,
         trial_id: int,

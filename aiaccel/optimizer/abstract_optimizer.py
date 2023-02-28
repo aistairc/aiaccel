@@ -90,7 +90,7 @@ class AbstractOptimizer(AbstractModule):
 
     def generate_initial_parameter(
         self
-    ) -> list[dict[str, Any]] | None:
+    ) -> Any:
         """Generate a list of initial parameters.
 
         Returns:
@@ -110,7 +110,7 @@ class AbstractOptimizer(AbstractModule):
 
         return new_params
 
-    def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
+    def generate_parameter(self) -> Any:
         """Generate a list of parameters.
 
         Raises:

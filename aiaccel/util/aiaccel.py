@@ -311,7 +311,7 @@ class Run:
 
         return commands
 
-    def get_any_trial_xs(self, trial_id: int) -> dict | None:
+    def get_any_trial_xs(self, trial_id: int) -> Any:
         """Gets a parameter list of specific trial ID from Storage object.
 
         Args:

@@ -79,7 +79,7 @@ class NelderMead(object):
         iteration: float = float('inf'),
         coef: dict | None = None,
         maximize: bool | None = False,
-        initial_parameters: list[dict[str, Any]] | None = None,
+        initial_parameters: Any = None,
         rng: np.random.RandomState | None = None
     ) -> None:
         if coef is None:
