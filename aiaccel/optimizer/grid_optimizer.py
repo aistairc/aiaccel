@@ -2,112 +2,148 @@ from __future__ import annotations
 import math
 from functools import reduce
 from operator import mul
+from typing import Any
+
+import numpy as np
 
 from aiaccel.config import Config
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 
-def get_grid_options(
-    parameter_name: str,
-    config: Config
-) -> tuple[int | None, bool, int | None]:
-    """Get options about grid search.
+def _count_fixed_grid_points(hyperparameters: list[HyperParameter]) -> list[int]:
+    nums_fixed_grid_points: list[int] = []
+    for hyperparameter in hyperparameters:
+        if hyperparameter.type in ('INT', 'FLOAT'):
+            if isinstance(hyperparameter.num_grid_points, int):
+                nums_fixed_grid_points.append(hyperparameter.num_grid_points)
+            else:
+                nums_fixed_grid_points.append(0)
+        elif hyperparameter.type == 'CATEGORICAL':
+            nums_fixed_grid_points.append(len(hyperparameter.choices))
+        elif hyperparameter.type == 'ORDINAL':
+            nums_fixed_grid_points.append(len(hyperparameter.sequence))
+    return nums_fixed_grid_points
+
+
+def _suggest_grid_points(
+    grid_space_size: int,
+    least_grid_space_size: int,
+    num_point_free_parameter: int,
+) -> list[int]:
+    upper_points = 1
+    while (
+        least_grid_space_size *
+        upper_points ** num_point_free_parameter < grid_space_size
+    ):
+        upper_points += 1
+    lower_points = upper_points - 1
+
+    num_lower_points_parameter = 0
+    num_upper_points_parameter = num_point_free_parameter
+    while (
+        least_grid_space_size *
+        lower_points ** (num_lower_points_parameter + 1) *
+        upper_points ** (num_upper_points_parameter - 1) > grid_space_size
+    ):
+        num_lower_points_parameter += 1
+        num_upper_points_parameter -= 1
+
+    calculated_grid_points = (
+        [lower_points] * num_lower_points_parameter +
+        [upper_points] * num_upper_points_parameter
+    )
+    return calculated_grid_points
+
+
+def _generate_all_grid_points(
+    hyperparameters: list[HyperParameter], calculated_grid_points: list
+) -> list[np.ndarray | list]:
+    grid_points: list[np.ndarray | list] = []
+    for hyperparameter in hyperparameters:
+        if hyperparameter.type in ('INT', 'FLOAT'):
+            if isinstance(hyperparameter.num_grid_points, int):
+                num = hyperparameter.num_grid_points
+            else:
+                num = calculated_grid_points.pop()
+            if hyperparameter.log:
+                grid_points.append(
+                    np.geomspace(hyperparameter.lower, hyperparameter.upper, num)
+                )
+            else:
+                grid_points.append(
+                    np.linspace(hyperparameter.lower, hyperparameter.upper, num)
+                )
+        elif hyperparameter.type == 'CATEGORICAL':
+            grid_points.append(hyperparameter.choices)
+        elif hyperparameter.type == 'ORDINAL':
+            grid_points.append(hyperparameter.sequence)
+    return grid_points
+
+
+def _select_grid_points(point_lists: list, trial_number: int) -> list[Any]:
+    num_generated_grid_point = len()
+    selected_grid_point_ids = np.linspace(
+        0, num_generated_grid_point - 1, trial_number, dtype=int
+    )
+    selected_grid_points = []
+    for i in selected_grid_point_ids:
+        selected_grid_points.append(grid_points[i])
+
+    return selected_grid_points
+
+
+class _GridPoints:
+    def __init__(self, point_list: list[np.ndarray | list]) -> None:
+        self._point_list = point_list
+
+    def __call__(self, index: int) -> list[Any]:
+        return _select_grid_points(self._point_list, index)
+
+
+def _generate_grid_points(
+    hyperparameters: list[HyperParameter],
+    trial_number: int
+) -> list:
+    """Makes a list of grid points.
 
     Args:
-        parameter_name (str): A parameter name to get its options.
-        config (Config): A config object.
+        hyperparameters (list[HyperParameter]): A list of A hyper parameters.
+        trial_number (int): The number of total trials.
 
     Returns:
-        tuple[int | None, bool, int | None]: The first one is a base of
-        logarithm parameter. The second one is logarithm parameter or not.
-        The third one is a step of the grid.
+        list: A list of grid points.
 
     Raises:
-        KeyError: Causes when step is not specified.
+        ValueError: Causes when trial_num is smaller than the number of grid
+            point in the least space composed of parameters with fixed grid
+            values.
     """
-    base: float | None = None
-    log: bool = False
-    step: float | None = None
 
-    grid_options = config.hyperparameters.get()
+    nums_fixed_grid_points = _count_fixed_grid_points(hyperparameters)
+    least_grid_space_size = np.prod(
+        nums_fixed_grid_points, where=np.array(nums_fixed_grid_points) != 0
+    )
 
-    for g in grid_options:
-        if g['name'] == parameter_name:
-            if 'step' not in g.keys():
-                raise KeyError(
-                    f'No grid option `step` for parameter: {parameter_name}'
-                )
-            if 'log' not in g.keys():
-                raise KeyError(
-                    f'No grid option `log` for parameter: {parameter_name}'
-                )
-            if 'base' not in g.keys():
-                raise KeyError(
-                    f'No grid option `base` for parameter: {parameter_name}'
-                )
+    if trial_number < least_grid_space_size:
+        raise ValueError(
+            'Too small "trial_num": Grid search can not be completed'
+        )
 
-            step = float(g['step'])
-            log = bool(g['log'])
-            if log:
-                base = int(g['base'])
+    suggeted_grid_points = _suggest_grid_points(
+        grid_space_size=trial_number,
+        least_grid_space_size=least_grid_space_size,
+        num_parameter=nums_fixed_grid_points.count(0),
+    )
 
-            return base, log, step
+    point_list = _generate_all_grid_points(
+        hyperparameters, suggeted_grid_points
+    )
 
-    raise KeyError(f'Invalid parameter name: {parameter_name}')
+    # grid_points = _GridPoints(point_list)
+    # return grid_points
 
-
-def generate_grid_points(
-    p: HyperParameter, config: Config
-) -> dict[str, float | int | str | list[float, int, str]]:
-    """Make a list of all parameters for this grid.
-
-    Args:
-        p (HyperParameter): A hyper parameter object.
-        config (Config): A config object.
-
-    Returns:
-        dict[str, str | list[float, int, str]]: A dictionary including all grid
-        parameters.
-
-    Raises:
-        TypeError: Causes when an invalid parameter type is set.
-    """
-    new_param = {
-        'parameter_name': p.name,
-        'type': p.type
-    }
-
-    if p.type.lower() in ['int', 'float']:
-        base, log, step = get_grid_options(p.name, config)
-        lower = p.lower
-        upper = p.upper
-
-        if log:
-            lower_x = base ** lower
-            upper_x = base ** upper
-            step_x = base ** step
-            x = lower_x
-            new_param['parameters'] = []
-            while x < upper_x or math.isclose(x, upper_x, abs_tol=1e-10):
-                new_param['parameters'].append(x)
-                x *= step_x
-        else:
-            n = int((upper - lower) / step) + 1
-            new_param['parameters'] = [lower + i * step for i in range(0, n)]
-        if p.type.lower() == 'int':
-            new_param['parameters'] = [int(i) for i in new_param['parameters']]
-
-    elif p.type.lower() == 'categorical':
-        new_param['parameters'] = list(p.choices)
-
-    elif p.type.lower() == 'ordinal':
-        new_param['parameters'] = list(p.sequence)
-
-    else:
-        raise TypeError(f'Invalid parameter type: {p.type}')
-
-    return new_param
+    return point_list
 
 
 class GridOptimizer(AbstractOptimizer):
@@ -124,8 +160,15 @@ class GridOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.ready_params = None
-        self.generate_index = None
+        # self.ready_params = _generate_grid_points(
+        #     self.params.get_parameter_list(), self.config.trial_number.get()
+        # )
+        self._grid_points = _generate_grid_points(
+            self.params.get_parameter_list(), self.config.trial_number.get()
+        )
+
+        # self.generate_index = 0
+        self._num_generated_grid_points = 0
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -135,12 +178,12 @@ class GridOptimizer(AbstractOptimizer):
         """
         super().pre_process()
 
-        self.ready_params = []
-
-        for param in self.params.get_parameter_list():
-            self.ready_params.append(generate_grid_points(param, self.config))
-
-        self.generate_index = (
+        # self.generate_index = (
+        #     self.storage.get_num_ready() +
+        #     self.storage.get_num_running() +
+        #     self.storage.get_num_finished()
+        # )
+        self._num_generated_grid_points = (
             self.storage.get_num_ready() +
             self.storage.get_num_running() +
             self.storage.get_num_finished()
