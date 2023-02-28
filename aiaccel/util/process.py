@@ -1,20 +1,16 @@
 from __future__ import annotations
 
+import copy
+import datetime
 import re
 import subprocess
 import threading
 from subprocess import Popen
-from typing import TYPE_CHECKING
 
 import psutil
 
-if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.master.abci_master import AbciMaster
-    from aiaccel.master.abstract_master import AbstractMaster
-    from aiaccel.master.local_master import LocalMaster
-    from aiaccel.storage.storage import Storage
-
-import datetime
+from aiaccel.util.time_tools import (get_time_now_object,
+                                     get_time_string_from_object)
 
 
 def exec_runner(command: list) -> Popen:
@@ -108,41 +104,25 @@ class OutputHandler(threading.Thread):
     """A class to print subprocess outputs.
 
     Args:
-        parent (AbciMaster | AbstractMaster | LocalMaster): A
-            reference for the caller object.
         proc (Popen): A reference for subprocess.Popen.
-        module_name (str): A module name which the subprocess is attached.
             For example, 'Optimizer'.
-        trial_id (int): Trial id.
-        storage (Storage | None, optional): Storage object. Defaults to
-            None.
-
     Attributes:
-        _parent (AbciMaster | AbstractMaster | LocalMaster): A reference
-            for the caller object.
         _proc (Popen): A reference for subprocess.Popen.
-        _module_name (str): A module name which the subprocess is attached.
             For example, 'Optimizer'.
         _sleep_time (int): A sleep time each loop.
     """
 
-    def __init__(
-        self,
-        parent: AbciMaster | AbstractMaster | LocalMaster,
-        proc: subprocess.Popen,
-        module_name: str,
-        trial_id: int,
-        storage: Storage | None = None
-    ) -> None:
+    def __init__(self, proc: subprocess.Popen) -> None:
         super(OutputHandler, self).__init__()
-        self._parent = parent
         self._proc = proc
-        self._module_name = module_name
         self._sleep_time = 1
         self._abort = False
-        self.error_message = None
-        self.trial_id = trial_id
-        self.storage = storage
+
+        self._returncode = None
+        self._stdouts = []
+        self._stderrs = []
+        self._start_time = None
+        self._end_time = None
 
     def abort(self) -> None:
         self._abort = True
@@ -153,37 +133,47 @@ class OutputHandler(threading.Thread):
         Returns:
             None
         """
+        self._start_time = get_time_now_object()
+        self._stdouts = []
+        self._stderrs = []
+
         while True:
             if self._proc.stdout is None:
                 break
 
-            line = self._proc.stdout.readline().decode().strip()
+            stdout = self._proc.stdout.readline().decode().strip()
+            if stdout:
+                self._stdouts.append(stdout)
 
-            if line:
-                print(line, flush=True)
+            if self._proc.stderr is not None:
+                stderr = self._proc.stderr.readline().decode().strip()
+                if stderr:
+                    self._stderrs.append(stderr)
+            else:
+                stderr = None
 
-            if not line and self._proc.poll() is not None:
-                self._parent.logger.debug(f'{self._module_name} process finished.')
-                o, e = self._proc.communicate()
-                if o:
-                    objective = o.decode().strip()
-                    if self.storage is not None:
-                        self.storage.result.set_any_trial_objective(
-                            trial_id=self.trial_id,
-                            value=float(objective)
-                        )
-                if e:
-                    error_message = e.decode().strip()
-                    if self.storage is not None:
-                        self.storage.error.set_any_trial_error(
-                            trial_id=self.trial_id,
-                            error_message=error_message
-                        )
-                    raise RuntimeError(error_message)
+            if not (stdout or stderr) and self.get_returncode() is not None:
                 break
 
             if self._abort:
                 break
+
+        self._end_time = get_time_now_object()
+
+    def get_stdouts(self) -> list[str]:
+        return copy.deepcopy(self._stdouts)
+
+    def get_stderrs(self) -> list[str]:
+        return copy.deepcopy(self._stderrs)
+
+    def get_start_time(self) -> str:
+        return get_time_string_from_object(self._start_time)
+
+    def get_end_time(self) -> str:
+        return get_time_string_from_object(self._end_time)
+
+    def get_returncode(self):
+        return self._proc.poll()
 
 
 def is_process_running(pid: int) -> bool:

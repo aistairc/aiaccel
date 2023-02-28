@@ -3,10 +3,12 @@ import datetime
 import json
 import sys
 import time
+from subprocess import Popen
 from unittest.mock import patch
 
-import aiaccel
 import pytest
+
+import aiaccel
 from aiaccel.config import ConfileWrapper
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
@@ -14,6 +16,7 @@ from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
 from aiaccel.scheduler.job.model.abci_model import AbciModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.util.process import OutputHandler
 from aiaccel.util.time_tools import get_time_now_object
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
@@ -213,6 +216,7 @@ class TestModel(BaseTest):
         assert self.model.after_wait_result(self.job) is None
 
     def test_conditions_result(self, database_remove):
+        self.job.th_oh = OutputHandler(Popen(['ls']))
         assert not self.model.conditions_result(self.job)
 
     def test_after_finished(self, database_remove):

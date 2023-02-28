@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
-import aiaccel
+from aiaccel import (dict_alive, dict_error, dict_finished, dict_hp,
+                     dict_jobstate, dict_lock, dict_log, dict_output, dict_pid,
+                     dict_ready, dict_result, dict_runner, dict_running,
+                     dict_storage, dict_timestamp, dict_verification,
+                     extension_hp)
 from aiaccel.util import filesystem as fs
 from aiaccel.util.retry import retry
 from aiaccel.util.suffix import Suffix
@@ -42,22 +46,23 @@ class Workspace:
     def __init__(self, base_path: str):
         self.path = Path(base_path).resolve()
 
-        self.alive = self.path / aiaccel.dict_alive
-        self.error = self.path / aiaccel.dict_error
-        self.hp = self.path / aiaccel.dict_hp
-        self.hp_ready = self.path / aiaccel.dict_hp / aiaccel.dict_ready
-        self.hp_running = self.path / aiaccel.dict_hp / aiaccel.dict_running
-        self.hp_finished = self.path / aiaccel.dict_hp / aiaccel.dict_finished
-        self.jobstate = self.path / aiaccel.dict_jobstate
-        self.lock = self.path / aiaccel.dict_lock
-        self.log = self.path / aiaccel.dict_log
-        self.output = self.path / aiaccel.dict_output
-        self.pid = self.path / aiaccel.dict_pid
-        self.result = self.path / aiaccel.dict_result
-        self.runner = self.path / aiaccel.dict_runner
-        self.storage = self.path / aiaccel.dict_storage
-        self.timestamp = self.path / aiaccel.dict_timestamp
-        self.verification = self.path / aiaccel.dict_verification
+        # dict_*
+        self.alive = self.path / dict_alive
+        self.error = self.path / dict_error
+        self.hp = self.path / dict_hp
+        self.hp_ready = self.path / dict_hp / dict_ready
+        self.hp_running = self.path / dict_hp / dict_running
+        self.hp_finished = self.path / dict_hp / dict_finished
+        self.jobstate = self.path / dict_jobstate
+        self.lock = self.path / dict_lock
+        self.log = self.path / dict_log
+        self.output = self.path / dict_output
+        self.pid = self.path / dict_pid
+        self.result = self.path / dict_result
+        self.runner = self.path / dict_runner
+        self.storage = self.path / dict_storage
+        self.timestamp = self.path / dict_timestamp
+        self.verification = self.path / dict_verification
 
         self.consists = [
             self.alive,
@@ -78,6 +83,7 @@ class Workspace:
             self.verification
         ]
         self.results = Path("./results")
+        self.retults_csv_file = self.path / "results.csv"
 
     def create(self) -> bool:
         """Create a work directory.
@@ -161,7 +167,7 @@ class Workspace:
         Returns:
             PosixPath: Path to result file.
         """
-        return self.result / f"{trial_id}.{aiaccel.extension_hp}"
+        return self.result / f"{trial_id}.{extension_hp}"
 
     def result_file_exists(self, trial_id: int) -> bool:
         """Check result file exists or not.

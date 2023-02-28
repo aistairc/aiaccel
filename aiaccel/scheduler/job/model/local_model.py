@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from aiaccel.util.process import OutputHandler, exec_runner
-from aiaccel.wrapper_tools import create_runner_command
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
-
+from subprocess import PIPE, Popen, run
 from typing import TYPE_CHECKING
+
+from aiaccel.scheduler.job.model.abstract_model import AbstractModel
+from aiaccel.util.process import OutputHandler
+from aiaccel.wrapper_tools import create_runner_command
 
 if TYPE_CHECKING:
     from aiaccel.scheduler.job.job import Job
@@ -27,13 +28,62 @@ class LocalModel(AbstractModel):
             str(obj.command_error_output)
         )
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
-        obj.proc = exec_runner(runner_command)
+        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE)
 
-        obj.th_oh = OutputHandler(
-            obj.scheduler,
-            obj.proc,
-            'Job',
-            trial_id=obj.trial_id,
-            storage=obj.storage
-        )
+        obj.th_oh = OutputHandler(obj.proc)
         obj.th_oh.start()
+
+    def conditions_result(self, obj: 'Job') -> bool:
+        if super().conditions_result(obj):
+            return True
+
+        if obj.th_oh.get_returncode() is None:
+            return False
+        else:
+            self.create_result_file(obj)
+            return False
+
+    def create_result_file(self, obj: 'Job') -> None:
+        trial_id = obj.trial_id
+        stdouts = obj.th_oh.get_stdouts()
+        stderrs = obj.th_oh.get_stderrs()
+        start_time = str(obj.th_oh.get_start_time())
+        end_time = str(obj.th_oh.get_end_time())
+        exitcode = str(obj.th_oh.get_returncode())
+        params = obj.content['parameters']
+
+        objective = stdouts[-1]  # TODO: fix
+        error = '\n'.join(stderrs)
+        output_file_path = str(obj.get_result_file_path())
+        config_file_path = str(obj.config_path)
+
+        args = {
+            'file': output_file_path,
+            'trial_id': str(trial_id),
+            'config': config_file_path,
+            'start_time': start_time,
+            'end_time': end_time,
+            'objective': objective,
+            'error': error,
+            'exitcode': str(exitcode)
+        }
+
+        if len(error) == 0:
+            del args['error']
+
+        if objective == 'None':
+            del args['objective']
+
+        commands = ['aiaccel-set-result']
+        for key in args.keys():
+            commands.append('--' + key)
+            commands.append(args[key])
+
+        for param in params:
+            if 'parameter_name' in param.keys() and 'value' in param.keys():
+                commands.append('--' + param['parameter_name'])
+                commands.append(str(param['value']))
+
+        run(commands)
+
+        return None

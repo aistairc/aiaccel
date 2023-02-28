@@ -1,12 +1,13 @@
+from unittest.mock import patch
+
 import numpy as np
 import pytest
+
 from aiaccel.config import Config
 from aiaccel.optimizer.tpe_optimizer import (TpeOptimizer, TPESamplerWrapper,
                                              create_distributions)
 from aiaccel.parameter import load_parameter
-
 from tests.base_test import BaseTest
-from unittest.mock import patch
 
 
 class TestTPESamplerWrapper(BaseTest):
@@ -68,7 +69,7 @@ class TestTpeOptimizer(BaseTest):
         options = self.options.copy()
         self.config_tpe_path = create_tmp_config(self.data_dir / 'config_tpe_2.json')
         optimizer = TpeOptimizer(self.options)
-        (optimizer.ws / 'storage' / 'storage.db').unlink()
+        (optimizer.workspace.storage / 'storage.db').unlink()
 
         optimizer.__init__(options)
         optimizer.pre_process()

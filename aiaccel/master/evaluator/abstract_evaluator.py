@@ -8,6 +8,7 @@ from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.util.trialid import TrialId
+from aiaccel.workspace import Workspace
 
 
 class AbstractEvaluator(object):
@@ -22,8 +23,6 @@ class AbstractEvaluator(object):
             command line options as well as process name.
         config_path (Path): Path to the configuration file.
         config (Config): Config object.
-        ws (Path): Path to the workspace.
-        dict_lock (Path): Path to "lock', i.e. `ws`/lock.
         hp_result (dict): A dict object of the best optimized result.
         storage (Storage): Storage object.
         goal (str): Goal of optimization ('minimize' or 'maximize').
@@ -35,23 +34,11 @@ class AbstractEvaluator(object):
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
         self.config = Config(str(self.config_path))
-        self.ws = Path(self.config.workspace.get()).resolve()
-        self.dict_lock = self.ws / aiaccel.dict_lock
+        self.workspace = Workspace(self.config.workspace.get())
         self.hp_result = None
-        self.storage = Storage(self.ws)
+        self.storage = Storage(self.workspace.path)
         self.goal = self.config.goal.get()
         self.trial_id = TrialId(str(self.config_path))
-
-    def get_zero_padding_any_trial_id(self, trial_id: int) -> str:
-        """Returns string of trial id padded by zeros.
-
-        Args:
-            trial_id (int): Trial id.
-
-        Returns:
-            str: Trial id padded by zeros.
-        """
-        return self.trial_id.zero_padding_any_trial_id(trial_id)
 
     def evaluate(self) -> None:
         """Run an evaluation.
@@ -78,5 +65,5 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        path = self.ws / aiaccel.dict_result / aiaccel.file_final_result
-        create_yaml(path, self.hp_result, self.dict_lock)
+        path = self.workspace.result / aiaccel.file_final_result
+        create_yaml(path, self.hp_result, self.workspace.lock)

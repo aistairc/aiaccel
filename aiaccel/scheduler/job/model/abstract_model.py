@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 
-from aiaccel import dict_runner
 from aiaccel.util.process import kill_process
 from aiaccel.util.time_tools import get_time_delta, get_time_now_object
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from aiaccel.scheduler.job.job import Job
 
@@ -75,7 +74,7 @@ class AbstractModel(object):
         return
 
     def get_runner_file(self, obj: 'Job') -> None:
-        return obj.ws / dict_runner / f'run_{obj.trial_id_str}.sh'
+        return obj.workspace.runner / f'run_{obj.trial_id_str}.sh'
 
     # Runner
     def after_runner(self, obj: 'Job') -> None:
@@ -406,5 +405,5 @@ class AbstractModel(object):
         obj.storage.result.set_any_trial_objective(trial_id, result['result'])
         obj.storage.timestamp.set_any_trial_start_time(trial_id, result['start_time'])
         obj.storage.timestamp.set_any_trial_end_time(trial_id, result['end_time'])
-        if result['error'] != "":
+        if 'error' in result.keys() and result['error'] != "":
             obj.storage.error.set_any_trial_error(trial_id, result['error'])

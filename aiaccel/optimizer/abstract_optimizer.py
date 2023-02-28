@@ -1,12 +1,13 @@
 from __future__ import annotations
+
 import copy
+
+from numpy import str_
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.trialid import TrialId
-
-from numpy import str_
 
 
 class AbstractOptimizer(AbstractModule):
@@ -38,7 +39,7 @@ class AbstractOptimizer(AbstractModule):
 
         self.set_logger(
             'root.optimizer',
-            self.dict_log / self.config.optimizer_logfile.get(),
+            self.workspace.log / self.config.optimizer_logfile.get(),
             str_to_logging_level(self.config.optimizer_file_log_level.get()),
             str_to_logging_level(self.config.optimizer_stream_log_level.get()),
             'Optimizer'

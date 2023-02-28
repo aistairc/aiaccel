@@ -2,45 +2,10 @@ import sys
 from unittest.mock import patch
 
 import numpy as np
-from aiaccel.util.aiaccel import Messages, Run, WrapperInterface, CommandLineArgs
-
-from tests.base_test import BaseTest
 import pytest
 
-
-def test_create_message():
-    msg = Messages("test")
-    msg.create_message("test", "hoge")
-    assert msg.get("test") == "test:hoge"
-
-    msg.create_message("test", "")
-    assert msg.get("test") == "test:"
-
-    msg.create_message("test", 123)
-    assert msg.get("test") == "test:123"
-
-    msg.create_message("test", [1, 2, 3])
-    assert msg.get("test") == "test:1@2@3"
-
-
-def test_out():
-    msg = Messages("test")
-    msg.create_message("test", [1, 2, 3])
-    msg.create_message("test", [1, 2, 3])
-    msg.create_message("test", [1, 2, 3])
-    assert msg.d["test"].out(all=True) is None
-    assert msg.d["test"].out(all=False) is None
-
-def test_parse_result():
-    msg = Messages("test")
-    assert msg.parse("test", "test:1") == ["1"]
-    assert msg.parse("test", "aa\ntest:123\nbbbbb") == ["123"]
-    assert msg.parse("test", "test1:1") == [""]
-    assert msg.parse("test", "test:1@2@3") == ["1", "2", "3"]
-    assert msg.parse("test", "test:1@2@3@[4,5,6]") == ["1", "2", "3", "[4,5,6]"]
-    assert msg.parse("test", "test:1@2@3@(4,5,6)") == ["1", "2", "3", "(4,5,6)"]
-    assert msg.parse("test", "") == [""]
-    assert msg.parse("test", "test:None") == ["None"]
+from aiaccel.util.aiaccel import CommandLineArgs, Run
+from tests.base_test import BaseTest
 
 
 def main(p):
@@ -98,15 +63,6 @@ class TestRun(BaseTest):
                 "upper": 5
             }
         ]
-
-#
-# Wrapper Interface
-#
-def wrapper_interface():
-    wrp = WrapperInterface()
-    assert wrp.get_data('objective_y: objective_err:') == (None, None)
-    assert wrp.get_data('objective_y:123 objective_err:err') == ('123', 'err')
-
 
 class TestCommandLineArgs(BaseTest):
 

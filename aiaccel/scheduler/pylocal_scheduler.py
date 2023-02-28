@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from multiprocessing.pool import Pool, ThreadPool
 import importlib
+from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
+from subprocess import run
 
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.util.aiaccel import Run
-from aiaccel.util.aiaccel import WrapperInterface
-from aiaccel.util.aiaccel import set_logging_file_for_trial_id
-from aiaccel.util.time_tools import get_time_now
-from aiaccel.util.cast import cast_y
 from aiaccel.config import Config
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
+from aiaccel.util.cast import cast_y
+from aiaccel.util.time_tools import get_time_now
 
 
 class PylocalScheduler(AbstractScheduler):
@@ -21,7 +20,6 @@ class PylocalScheduler(AbstractScheduler):
     def __init__(self, options: dict) -> None:
         super().__init__(options)
         self.run = Run(self.config_path)
-        self.com = WrapperInterface()
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
         self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config_path,))
@@ -43,12 +41,11 @@ class PylocalScheduler(AbstractScheduler):
             args.append([trial_id, self.get_any_trial_xs(trial_id)])
             self._serialize(trial_id)
 
-        for trial_id, _, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
-            self.com.out(objective_y=y, objective_err=err)
+        for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
             self.report(trial_id, y, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
 
-            self.create_result_file(trial_id)
+            self.create_result_file(trial_id, xs, y, err, start_time, end_time)
 
         return True
 
@@ -98,6 +95,55 @@ class PylocalScheduler(AbstractScheduler):
         Returns:
             None: Because it does not use the state transition model.
         """
+        return None
+
+    def get_result_file_path(self) -> Path:
+        """Get a path to the result file.
+
+        Args:
+            trial_id (int): Trial Id.
+
+        Returns:
+            PosixPath: A Path object which points to the result file.
+        """
+        return self.workspace.get_any_result_file_path(self.trial_id)
+
+    def create_result_file(
+            self,
+            trial_id: int,
+            xs: dict,
+            objective: any,
+            error: str,
+            start_time,
+            end_time
+    ) -> None:
+        args = {
+            'file': self.workspace.get_any_result_file_path(trial_id),
+            'trial_id': str(trial_id),
+            'config': self.config_path,
+            'start_time': start_time,
+            'end_time': end_time,
+            'objective': str(objective),
+            'error': error
+        }
+
+        if len(error) == 0:
+            del args['error']
+
+        if objective == 'None':
+            del args['objective']
+
+        commands = ['aiaccel-set-result']
+        for key in args.keys():
+            commands.append('--' + key)
+            commands.append(args[key])
+
+        for key in xs.keys():
+            commands.append('--' + key)
+            commands.append(str(xs[key]))
+
+        run(commands)
+
         return None
 
     def __getstate__(self):

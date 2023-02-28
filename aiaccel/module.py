@@ -9,6 +9,7 @@ import aiaccel
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
+from aiaccel.workspace import Workspace
 
 
 class AbstractModule(object):
@@ -38,7 +39,6 @@ class AbstractModule(object):
         ws (Path): A path to a current workspace.
         dict_hp (Path): A path to hp directory.
         dict_lock (Path): A path to lock directory.
-        dict_log (Path): A path to log directory.
         dict_output (Path): A path to output directory.
         dict_runner (Path): A path to runner directory.
         dict_verification (Path): A path to verification directory.
@@ -54,21 +54,7 @@ class AbstractModule(object):
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
         self.config = Config(self.config_path)
-        self.ws = Path(self.config.workspace.get()).resolve()
-
-        # working directory
-        self.dict_alive = self.ws / aiaccel.dict_alive
-        self.dict_hp = self.ws / aiaccel.dict_hp
-        self.dict_lock = self.ws / aiaccel.dict_lock
-        self.dict_log = self.ws / aiaccel.dict_log
-        self.dict_output = self.ws / aiaccel.dict_output
-        self.dict_result = self.ws / aiaccel.dict_result
-        self.dict_runner = self.ws / aiaccel.dict_runner
-        self.dict_verification = self.ws / aiaccel.dict_verification
-        self.dict_hp_ready = self.ws / aiaccel.dict_hp_ready
-        self.dict_hp_running = self.ws / aiaccel.dict_hp_running
-        self.dict_hp_finished = self.ws / aiaccel.dict_hp_finished
-        self.dict_storage = self.ws / aiaccel.dict_storage
+        self.workspace = Workspace(self.config.workspace.get())
 
         self.logger = None
         self.fh = None
@@ -79,7 +65,7 @@ class AbstractModule(object):
         self.hp_running = 0
         self.hp_finished = 0
         self.seed = self.config.randseed.get()
-        self.storage = Storage(self.ws)
+        self.storage = Storage(self.workspace.path)
         self.trial_id = TrialId(self.options['config'])
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng: np.random.RandomState | None = None
