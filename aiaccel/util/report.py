@@ -1,6 +1,5 @@
 import csv
 import os
-from pathlib import Path
 from logging import StreamHandler, getLogger
 
 from fasteners import InterProcessLock
@@ -8,6 +7,7 @@ from fasteners import InterProcessLock
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
+from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
 logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
@@ -22,7 +22,7 @@ class CreationReport:
 
     Attributes:
         config (Config): Config object.
-        ws (Path): Directory path to the workspace.
+        workspace (Workspace): Workspace object.
         fp (Path): File path to the csv file named 'results.csv'.
         trialid (TrialId): TrialId object.
         storage (Storage): Storage object related to the workspace.
@@ -31,13 +31,11 @@ class CreationReport:
 
     def __init__(self, config_path: str) -> None:
         self.config = Config(config_path)
-        self.ws = Path(self.config.workspace.get()).resolve()
-        self.fp = self.ws / 'results.csv'
+        self.workspace = Workspace(self.config.workspace.get())
+        self.fp = self.workspace.retults_csv_file
         self.trialid = TrialId(str(config_path))
-        self.storage = Storage(self.ws)
-        self.lock_file = {
-            'result_txt': str(self.ws / 'lock' / 'result_txt')
-        }
+        self.storage = Storage(self.workspace.path)
+        self.lock_file = {'result_txt': str(self.workspace.lock / 'result_txt')}
 
     def get_zero_padding_trial_id(self, trial_id: int) -> str:
         """Gets string of trial id padded by zeros.

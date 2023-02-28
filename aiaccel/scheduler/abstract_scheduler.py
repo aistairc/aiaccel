@@ -8,8 +8,6 @@ from aiaccel.scheduler.job.job import Job
 from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.filesystem import create_yaml
-from aiaccel import dict_result
 
 
 class AbstractScheduler(AbstractModule):
@@ -41,7 +39,7 @@ class AbstractScheduler(AbstractModule):
 
         self.set_logger(
             'root.scheduler',
-            self.dict_log / self.config.scheduler_logfile.get(),
+            self.workspace.log / self.config.scheduler_logfile.get(),
             str_to_logging_level(self.config.scheduler_file_log_level.get()),
             str_to_logging_level(self.config.scheduler_stream_log_level.get()),
             'Scheduler'
@@ -309,7 +307,7 @@ class AbstractScheduler(AbstractModule):
     #     for i in range(len(content['parameters'])):
     #         content['parameters'][i]['value'] = content['parameters'][i]['value']
 
-    #     result_file_path = self.ws / dict_result / file_name
+    #     result_file_path = self.workspace.result / file_name
     #     create_yaml(result_file_path, content)
 
     def __getstate__(self):

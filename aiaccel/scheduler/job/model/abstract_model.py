@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from aiaccel import dict_runner
 from aiaccel.util.process import kill_process
 from aiaccel.util.time_tools import get_time_delta, get_time_now_object
 
@@ -75,7 +74,7 @@ class AbstractModel(object):
         return
 
     def get_runner_file(self, obj: 'Job') -> None:
-        return obj.ws / dict_runner / f'run_{obj.trial_id_str}.sh'
+        return obj.workspace.runner / f'run_{obj.trial_id_str}.sh'
 
     # Runner
     def after_runner(self, obj: 'Job') -> None:

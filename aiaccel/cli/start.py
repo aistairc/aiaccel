@@ -5,7 +5,6 @@ import time
 from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
 
-import aiaccel
 from aiaccel import parameter as pt
 from aiaccel.config import Config
 from aiaccel.master.create import create_master
@@ -36,7 +35,6 @@ def main() -> None:  # pragma: no cover
 
     workspace = Workspace(config.workspace.get())
     goal = config.goal.get()
-    dict_lock = workspace.path / aiaccel.dict_lock
 
     if args.resume is None:
         if args.clean is True:
@@ -91,7 +89,7 @@ def main() -> None:  # pragma: no cover
     shutil.copy(pathlib.Path(args.config), dst / config_name)
 
     files = fs.get_file_result_hp(dst)
-    best, best_file = pt.get_best_parameter(files, goal, dict_lock)
+    best, best_file = pt.get_best_parameter(files, goal, workspace.lock)
 
     logger.info(f"Best result    : {best_file}")
     logger.info(f"               : {best}")

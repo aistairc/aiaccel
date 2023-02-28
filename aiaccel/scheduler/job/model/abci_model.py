@@ -1,19 +1,16 @@
 from __future__ import annotations
 
-from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import TYPE_CHECKING
 
 import fasteners
 
-from aiaccel import dict_result, extension_hp
 from aiaccel.abci.batch import create_abci_batch_file
 from aiaccel.abci.qsub import create_qsub_command
 from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.util.filesystem import interprocess_lock_file
-from aiaccel.util.process import OutputHandler, exec_runner
+from aiaccel.util.process import OutputHandler
 from aiaccel.util.retry import retry
-from aiaccel.wrapper_tools import create_runner_command
 
 if TYPE_CHECKING:
     from aiaccel.scheduler.job.job import Job
@@ -38,12 +35,12 @@ class AbciModel(AbstractModel):
             batch_file=obj.to_file,
             job_script_preamble=obj.config.job_script_preamble.get(),
             command=obj.config.job_command.get(),
-            dict_lock=obj.dict_lock
+            dict_lock=obj.workspace.lock
         )
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def conditions_runner_confirmed(self, obj: 'Job') -> bool:
-        lockpath = interprocess_lock_file(obj.to_file, obj.dict_lock)
+        lockpath = interprocess_lock_file(obj.to_file, obj.workspace.lock)
         with fasteners.InterProcessLock(lockpath):
             return obj.to_file.exists()
 

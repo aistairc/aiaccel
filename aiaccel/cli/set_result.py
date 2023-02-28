@@ -4,7 +4,6 @@ import copy
 from argparse import ArgumentParser
 from pathlib import Path
 
-from aiaccel import dict_result, extension_hp
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
 from aiaccel.util.filesystem import create_yaml
@@ -17,7 +16,7 @@ def main():
     parser.add_argument('--config', type=str, required=True)
     parser.add_argument('--start_time', type=str, default='', required=True)
     parser.add_argument('--end_time', type=str, default='', required=True)
-    parser.add_argument('--objective', type=float, required=True)
+    parser.add_argument('--objective', type=float, default=None)
     parser.add_argument('--error', type=str, default='')
     args = parser.parse_known_args()[0]
 
@@ -72,6 +71,8 @@ def main():
         'start_time': args.start_time,
         'end_time': args.end_time
     }
+
+    print(contents)
 
     create_yaml(args.file, contents)
 

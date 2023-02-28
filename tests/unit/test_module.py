@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import numpy as np
 import shutil
 import sys
 import time
@@ -8,8 +7,10 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
-import aiaccel
+import numpy as np
 import pytest
+
+import aiaccel
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer.random_optimizer import RandomOptimizer
@@ -17,10 +18,7 @@ from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
-
 from tests.base_test import BaseTest
-
-import pytest
 
 
 async def async_function(func):
@@ -141,7 +139,7 @@ class TestAbstractModule(BaseTest):
         assert self.module.set_logger(
             'root.optimizer',
             work_dir.joinpath(
-                self.module.dict_log,
+                self.module.workspace.log,
                 # self.config.get('logger', 'optimizer_logfile')
                 # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
                 self.module.config.optimizer_logfile.get()

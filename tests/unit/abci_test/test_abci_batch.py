@@ -1,7 +1,6 @@
 from aiaccel.abci.batch import create_abci_batch_file
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.wrapper_tools import create_runner_command
-
 from tests.base_test import BaseTest
 
 
@@ -24,18 +23,43 @@ class TestCreateAbciBatchFile(BaseTest):
         config = load_test_config()
         dict_lock = work_dir.joinpath('lock')
         batch_file = work_dir.joinpath('runner', 'run_test.sh')
-        error_output = str(work_dir / 'error' / f"{d['trial_id']}.txt")
-
-        commands = create_runner_command(
-            config.job_command.get(),
-            get_one_parameter(),
-            'test',
-            'config.json',
-            error_output
-        )
+        command = config.job_command.get()
         trial_id = 99
+
+        output_file_path = work_dir.joinpath('result', f'{trial_id}.yml')
+        error_file_path = work_dir.joinpath('error', f'{trial_id}.txt')
+        config_file_path = self.config_json
 
         job_script_preamble = data_dir.joinpath(config.job_script_preamble.get())
         create_abci_batch_file(
-            trial_id,batch_file, job_script_preamble, commands, dict_lock)
+            trial_id,
+            self.parameters(),
+            output_file_path,
+            error_file_path,
+            config_file_path,
+            batch_file,
+            job_script_preamble,
+            command,
+            dict_lock
+        )
         assert work_dir.joinpath('runner/run_test.sh').exists()
+
+    def parameters(self):
+        return {
+            'trial_id': 99,
+            'parameters': [
+                {
+                    'parameter_name': 'x1',
+                    'type': 'FLOAT',
+                    'value': -4.716525234779937
+                },
+                {
+                    'parameter_name': 'x2',
+                    'type': 'FLOAT',
+                    'value': 123456
+                }
+            ],
+            'result': 74.70862563400767,
+            'start_time': '11/03/2020 16:07:40',
+            'end_time': '11/03/2020 16:07:40'
+        }

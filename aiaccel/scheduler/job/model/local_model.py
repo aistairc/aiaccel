@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.util.process import OutputHandler
-#from aiaccel.util.process import exec_runner
 from aiaccel.wrapper_tools import create_runner_command
 
 if TYPE_CHECKING:
@@ -50,33 +49,38 @@ class LocalModel(AbstractModel):
         stderrs = obj.th_oh.get_stderrs()
         start_time = str(obj.th_oh.get_start_time())
         end_time = str(obj.th_oh.get_end_time())
+        params = obj.content['parameters']
 
-        objective = stdouts[-1]  # todo
+        objective = stdouts[-1]  # TODO: fix
         error = '\n'.join(stderrs)
         output_file_path = str(obj.get_result_file_path())
         config_file_path = str(obj.config_path)
 
-        if len(stderrs) == 0:
-            commands = [
-                'aiaccel-set-result',
-                '--file', output_file_path,
-                '--trial_id', str(trial_id),
-                '--config', config_file_path,
-                '--start_time', start_time,
-                '--end_time', end_time,
-                '--objective', objective
-            ]
-        else:
-            commands = [
-                'aiaccel-set-error',
-                '--file', output_file_path,
-                '--trial_id', str(trial_id),
-                '--config', config_file_path,
-                '--start_time', start_time,
-                '--end_time', end_time,
-                '--objective', objective,
-                '--error', error
-            ]
+        args = {
+            'file': output_file_path,
+            'trial_id': str(trial_id),
+            'config': config_file_path,
+            'start_time': start_time,
+            'end_time': end_time,
+            'objective': objective,
+            'error': error
+        }
+
+        if len(error) == 0:
+            del args['error']
+
+        if objective == 'None':
+            del args['objective']
+
+        commands = ['aiaccel-set-result']
+        for key in args.keys():
+            commands.append('--' + key)
+            commands.append(args[key])
+
+        for param in params:
+            if 'parameter_name' in param.keys() and 'value' in param.keys():
+                commands.append('--' + param['parameter_name'])
+                commands.append(str(param['value']))
 
         run(commands)
 

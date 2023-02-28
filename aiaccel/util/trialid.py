@@ -4,8 +4,10 @@ from pathlib import Path
 
 import fasteners
 
-import aiaccel
+from aiaccel import (file_hp_count, file_hp_count_lock,
+                     file_hp_count_lock_timeout)
 from aiaccel.config import Config
+from aiaccel.workspace import Workspace
 
 
 class TrialId:
@@ -31,13 +33,12 @@ class TrialId:
         self.config_path = Path(config_path).resolve()
         self.config = Config(str(self.config_path))
 
-        self.ws = Path(self.config.workspace.get()).resolve()
+        self.workspace = Workspace(self.config.workspace.get())
         self.name_length = self.config.name_length.get()
         self.file_hp_count_fmt = f'%0{self.name_length}d'
-        self.dict_hp = self.ws / aiaccel.dict_hp
 
-        self.count_path = self.dict_hp / aiaccel.file_hp_count
-        self.lock_path = self.dict_hp / aiaccel.file_hp_count_lock
+        self.count_path = self.workspace.hp / file_hp_count
+        self.lock_path = self.workspace.hp / file_hp_count_lock
         self.lock = fasteners.InterProcessLock(str(self.lock_path))
 
         if self.get() is None:
@@ -57,7 +58,7 @@ class TrialId:
     def increment(self) -> None:
         """Increments trial id.
         """
-        if self.lock.acquire(timeout=aiaccel.file_hp_count_lock_timeout):
+        if self.lock.acquire(timeout=file_hp_count_lock_timeout):
             trial_id = 0
             if self.count_path.exists():
                 trial_id = int(self.count_path.read_text())
@@ -81,7 +82,7 @@ class TrialId:
         Args:
             num (int, optional): _description_. Defaults to 0.
         """
-        if self.lock.acquire(timeout=aiaccel.file_hp_count_lock_timeout):
+        if self.lock.acquire(timeout=file_hp_count_lock_timeout):
             trial_id = num
             self.count_path.write_text('%d' % trial_id)
             self.lock.release()
