@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from multiprocessing.pool import Pool, ThreadPool
-import importlib
+from importlib.util import spec_from_file_location
+from importlib.util import module_from_spec
 from pathlib import Path
+from typing import Any
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
@@ -11,6 +13,13 @@ from aiaccel.util.aiaccel import set_logging_file_for_trial_id
 from aiaccel.util.time_tools import get_time_now
 from aiaccel.util.cast import cast_y
 from aiaccel.config import Config
+
+
+# These are for avoiding mypy-errors from initializer().
+# `global` does not work well.
+# https://github.com/python/mypy/issues/5732
+user_func: Any
+workspace: Path
 
 
 class PylocalScheduler(AbstractScheduler):
@@ -73,12 +82,14 @@ def initializer(config_path: str | Path):
     config = Config(config_path)
 
     # Load the specified module from the specified python program.
-    spec = importlib.util.spec_from_file_location("user_module", config.python_file.get())
-    module = importlib.util.module_from_spec(spec)
+    spec = spec_from_file_location("user_module", config.python_file.get())
+    if spec is None:
+        raise ValueError("Invalid python_path.")
+    module = module_from_spec(spec)
+    if spec.loader is None:
+        raise ValueError("spec.loader not defined.")
     spec.loader.exec_module(module)
-
     user_func = getattr(module, config.function.get())
-
     workspace = Path(config.workspace.get()).resolve()
 
 

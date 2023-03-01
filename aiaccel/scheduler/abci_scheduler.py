@@ -51,7 +51,10 @@ class AbciScheduler(AbstractScheduler):
         numbers = re.compile(r'\d{1,65535}')
         if full.search(command) is None:
             return None
-        return numbers.search(command).group()
+        if match := numbers.search(command):
+            return match.group()
+        else:
+            return None
 
     def create_model(self) -> AbciModel:
         """Creates model object of state machine.

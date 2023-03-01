@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import optuna
 
 import aiaccel.parameter
@@ -42,7 +44,7 @@ class TpeOptimizer(AbstractOptimizer):
         self.parameter_pool: dict = {}
         self.parameter_list: list = []
         self.study_name = "distributed-tpe"
-        self.study: optuna.Study
+        self.study: Any = None
         self.distributions: dict
         self.trial_pool: dict = {}
         self.randseed = self.config.randseed.get()
