@@ -6,7 +6,7 @@ from pathlib import Path
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.config import Config
+from aiaccel.config import load_config
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import (Run, WrapperInterface,
                                   set_logging_file_for_trial_id)
@@ -21,11 +21,11 @@ class PylocalScheduler(AbstractScheduler):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
-        self.run = Run(self.config_path)
+        self.run = Run(self.config.config_path)
         self.com = WrapperInterface()
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
-        self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config_path,))
+        self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config.config_path,))
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -71,16 +71,16 @@ class PylocalScheduler(AbstractScheduler):
 def initializer(config_path: str | Path):
     global user_func, workspace
 
-    config = Config(config_path)
+    config = load_config(config_path)
 
     # Load the specified module from the specified python program.
-    spec = importlib.util.spec_from_file_location("user_module", config.python_file.get())
+    spec = importlib.util.spec_from_file_location("user_module", config.generic.python_file)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    user_func = getattr(module, config.function.get())
+    user_func = getattr(module, config.generic.function)
 
-    workspace = Path(config.workspace.get()).resolve()
+    workspace = Path(config.generic.workspace).resolve()
 
 
 def execute(args):
