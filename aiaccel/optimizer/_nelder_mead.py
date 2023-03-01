@@ -139,7 +139,7 @@ class NelderMead(object):
         initial_parameters: Any,
         dim: int,
         num_of_initials: int
-    ) -> int | np.integer[Any] | float | np.floating[Any] | list[int | np.integer[Any] | float | np.floating[Any] | str]:
+    ) -> Any:
         if initial_parameters is not None:
             if isinstance(initial_parameters[dim]['value'], (int, float, np.integer, np.floating)):
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
