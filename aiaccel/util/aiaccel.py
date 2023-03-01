@@ -440,7 +440,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: str | None = None) -> None:
+    def _(self, command: str, y_data_type: Any = None) -> None:
         """Executes the user program.
 
         Args:

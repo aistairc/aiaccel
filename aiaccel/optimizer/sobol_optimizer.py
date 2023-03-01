@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from scipy.stats import qmc
 
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -24,7 +26,7 @@ class SobolOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.generate_index: int
+        self.generate_index: Any = None
         self.sampler: qmc.Sobol
 
     def pre_process(self) -> None:

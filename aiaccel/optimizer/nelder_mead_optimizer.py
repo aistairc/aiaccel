@@ -23,7 +23,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.nelder_mead: NelderMead
+        self.nelder_mead: Any = None
         self.parameter_pool: list[dict[str, Any]] = []
         self.order: list[Any] = []
 

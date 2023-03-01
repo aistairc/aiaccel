@@ -88,7 +88,7 @@ class AbstractModule(object):
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
         # TODO: Separate the generator if don't want to affect randomness each other.
-        self._rng: np.random.RandomState
+        self._rng: Any = None
 
         self.storage.variable.register(
             process_name=self.options['process_name'],

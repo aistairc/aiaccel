@@ -1,21 +1,23 @@
 from __future__ import annotations
 
+from typing import Any
+
 from aiaccel.config import Config
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
 
 
-def create_scheduler(config_path: str) -> type:
+def create_scheduler(config_path: str) -> Any:
     """Returns scheduler type.
 
     Args:
         config_path (str): Path to configuration file.
 
     Returns:
-        type: `LocalScheduler`, `PylocalScheduler`, or `AbciScheduler`
+        type | None: `LocalScheduler`, `PylocalScheduler`, or `AbciScheduler`
             if resource type is 'local', 'python_local', or 'abci',
-            respectively.
+            respectively. Other cases, None.
     """
     config = Config(config_path)
     resource = config.resource_type.get()
@@ -30,4 +32,4 @@ def create_scheduler(config_path: str) -> type:
         return AbciScheduler
 
     else:
-        raise ValueError("Resource type is 'local', 'python_local', or 'abci'")
+        return None

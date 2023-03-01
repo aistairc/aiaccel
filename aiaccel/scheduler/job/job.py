@@ -4,7 +4,6 @@ import logging
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from subprocess import Popen
 from typing import Any
 from typing import TYPE_CHECKING
 
@@ -15,11 +14,8 @@ from aiaccel import dict_lock
 from aiaccel import dict_result
 from aiaccel import dict_error
 from aiaccel.util.buffer import Buffer
-from aiaccel.util.process import OutputHandler
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
-from aiaccel.scheduler.job.model.abci_model import AbciModel
-from aiaccel.scheduler.job.model.local_model import LocalModel
 
 if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
@@ -562,7 +558,7 @@ class Job:
         self.running_timeout = self.config.running_timeout.get()
         self.resource_type = self.config.resource_type.get()
 
-        self.threshold_timeout: datetime | None
+        self.threshold_timeout: datetime | None = None
         self.threshold_retry = None
         self.count_retry = 0
 
@@ -592,11 +588,11 @@ class Job:
         self.config_path = str(self.config.config_path)
         self.trial_id = trial_id
         self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
-        self.from_file: Path | None
-        self.to_file: Any
-        self.next_state: str
-        self.proc: Popen
-        self.th_oh: OutputHandler
+        self.from_file: Any = None
+        self.to_file: Any = None
+        self.next_state: Any = None
+        self.proc: Any = None
+        self.th_oh: Any = None
         self.stop_flag = False
         self.storage = Storage(self.ws)
         self.content = self.storage.get_hp_dict(self.trial_id)

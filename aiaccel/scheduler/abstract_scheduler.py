@@ -7,7 +7,6 @@ from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm.schedule_sampling import RandomSampling
 from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import AbstractSchedulingAlgorithm
 from aiaccel.scheduler.job.job import Job
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.filesystem import create_yaml
