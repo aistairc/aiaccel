@@ -1,39 +1,98 @@
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 from pathlib import Path
 
 from aiaccel.util.filesystem import file_create
 
 
 class JobScrGenerator:
+    """A class to generate a job script for ABCI.
+    """
     def __init__(self):
         self.codetxt = ""
         self.indent_level = 0
 
-    def new_line(self):
+    def new_line(self) -> NotImplemented:
+        """Add a new line to the code text.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self.codetxt += "\n"
 
     def add_line(self, line: str):
+        """Add a line to the code text.
+
+        Args:
+            line (str): A line to add.
+
+        Returns:
+            None
+        """
         for _ in range(self.indent_level):
             self.codetxt += "    "
         self.codetxt += line + "\n"
 
     def add_lines(self, lines: list[str]):
+        """Add lines to the code text.
+
+        Args:
+            lines (list[str]): A list of lines to add.
+
+        Returns:
+            None
+        """
         for line in lines:
             self.add_line(line)
 
-    def indent(self):
+    def indent(self) -> None:
+        """Increase the indent level.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self.indent_level += 1
 
-    def unindent(self):
+    def unindent(self) -> None:
+        """Decrease the indent level.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self.indent_level -= 1
 
-    def reset_indent_level(self):
+    def reset_indent_level(self) -> None:
+        """Reset the indent level.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self.indent_level = 0
 
-    def get_code(self):
-        return self.codetxt
+    def get_code(self) -> str:
+        """Get the code text.
+
+        Args:
+            None
+
+        Returns:
+            str: The code text.
+        """
+        return deepcopy(self.codetxt)
 
 
 def create_abci_batch_file(
@@ -69,9 +128,6 @@ def create_abci_batch_file(
     """
 
     commands = re.split(' +', command)
-    # for key in param_content.keys():
-    #     commands.append(f'--{key}')
-    #     commands.append(f'${key}')
 
     for param in param_content['parameters']:
         if 'parameter_name' in param.keys() and 'value' in param.keys():
@@ -104,6 +160,8 @@ def create_abci_batch_file(
     code.add_line('start_time=`date "+%Y-%m-%d %H:%M:%S"`')
     code.add_line(f'result=`{" ".join(commands)}`')
     code.add_line('exitcode=$?')
+    code.add_line('result_array=($result)')
+    code.add_line('y=${result_array[${#result_array[@]}-1]}')
     code.add_line('error=`cat $error_file_path`')
     code.add_line('end_time=`date "+%Y-%m-%d %H:%M:%S"`')
 
@@ -117,7 +175,7 @@ def create_abci_batch_file(
             '--config $config_file_path',
             '--start_time $start_time',
             '--end_time $end_time',
-            '--objective $result',
+            '--objective $y',
             '--error $error',
             '--exitcode $exitcode',
             _generate_param_args(param_content['parameters'])
@@ -134,7 +192,7 @@ def create_abci_batch_file(
             '--config $config_file_path',
             '--start_time $start_time',
             '--end_time $end_time',
-            '--objective $result',
+            '--objective $y',
             '--exitcode $exitcode',
             _generate_param_args(param_content['parameters'])
         ])

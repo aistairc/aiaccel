@@ -10,6 +10,9 @@ from aiaccel.util.filesystem import create_yaml
 
 
 def main():
+    """Writes the result of a trial to a file.
+    """
+
     parser = ArgumentParser()
     parser.add_argument('--file', type=str, required=True)
     parser.add_argument('--trial_id', type=int, required=True)

@@ -44,6 +44,14 @@ class LocalModel(AbstractModel):
             return False
 
     def create_result_file(self, obj: 'Job') -> None:
+        """Create result file.
+
+        Args:
+            obj (Job): Job object.
+
+        Returns:
+            None
+        """
         trial_id = obj.trial_id
         stdouts = obj.th_oh.get_stdouts()
         stderrs = obj.th_oh.get_stderrs()
