@@ -48,7 +48,7 @@ class Hp(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def set_any_trial_params(self, trial_id: int, params: list) -> None:
+    def set_any_trial_params(self, trial_id: int, params: list[dict[str, Any]]) -> None:
         with self.create_session() as session:
             try:
                 hps = [

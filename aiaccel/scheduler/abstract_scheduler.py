@@ -32,7 +32,7 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         self.options = options
         self.options['process_name'] = 'scheduler'
         super().__init__(self.options)
@@ -312,7 +312,7 @@ class AbstractScheduler(AbstractModule):
         result_file_path = self.ws / dict_result / file_name
         create_yaml(result_file_path, content)
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['jobs']
         return obj

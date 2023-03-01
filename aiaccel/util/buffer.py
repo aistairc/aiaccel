@@ -10,10 +10,10 @@ class _buffer:
             labal (str): A name of list.
         """
         self.label = label
-        self.arr: list = []
+        self.arr: list[Any] = []
         self._max_size = 65535
 
-    def __call__(self, index: int):
+    def __call__(self, index: int) -> Any:
         return self.arr[index]
 
     def set_max_len(self, value: int) -> None:
@@ -48,7 +48,7 @@ class _buffer:
         """
         self.arr = []
 
-    def Replace(self, arr: list) -> None:
+    def Replace(self, arr: list[Any]) -> None:
         """ Replace to any list data.
         """
         self.Clear()
@@ -61,7 +61,7 @@ class _buffer:
         return len(self.arr)
 
     @property
-    def Data(self) -> list:
+    def Data(self) -> list[Any]:
         """ Get the list data itself.
         """
         return self.arr
@@ -165,7 +165,7 @@ class Buffer:
         buff.Add("data3", x)
     """
 
-    def __init__(self, *labels) -> None:
+    def __init__(self, *labels: Any) -> None:
         self.labels = labels[0]
         self.num_buff = len(self.labels)
         self.d = {}

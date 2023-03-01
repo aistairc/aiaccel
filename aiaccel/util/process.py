@@ -4,6 +4,7 @@ import re
 import subprocess
 import threading
 from subprocess import Popen
+from typing import Any
 from typing import TYPE_CHECKING
 
 import psutil
@@ -15,7 +16,7 @@ if TYPE_CHECKING:  # pragma: no cover
 import datetime
 
 
-def exec_runner(command: list) -> Popen:
+def exec_runner(command: list[Any]) -> Popen[bytes]:
     """Execute a subprocess with command.
 
     Args:
@@ -31,7 +32,7 @@ def exec_runner(command: list) -> Popen:
     )
 
 
-def subprocess_ps() -> list[dict]:
+def subprocess_ps() -> list[dict[str, Any]]:
     """Get a ps result as a list.
 
     Returns:
@@ -62,7 +63,7 @@ def subprocess_ps() -> list[dict]:
     return ret
 
 
-def ps2joblist() -> list[dict]:
+def ps2joblist() -> list[dict[str, Any]]:
     """Get a ps result and convert to a job list format.
 
     Returns:
@@ -127,7 +128,7 @@ class OutputHandler(threading.Thread):
     def __init__(
         self,
         parent: AbstractScheduler,
-        proc: subprocess.Popen,
+        proc: subprocess.Popen[bytes],
         module_name: str,
         trial_id: int,
         storage: Storage | None = None

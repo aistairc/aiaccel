@@ -27,7 +27,7 @@ class PylocalScheduler(AbstractScheduler):
 
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         super().__init__(options)
         self.run = Run(self.config_path)
         self.com = WrapperInterface()
@@ -61,7 +61,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return True
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['run']
         del obj['pool']
@@ -76,7 +76,7 @@ class PylocalScheduler(AbstractScheduler):
         return None
 
 
-def initializer(config_path: str | Path):
+def initializer(config_path: str | Path) -> None:
     global user_func, workspace
 
     config = Config(config_path)
@@ -93,7 +93,7 @@ def initializer(config_path: str | Path):
     workspace = Path(config.workspace.get()).resolve()
 
 
-def execute(args):
+def execute(args: Any) -> Any:
     trial_id, xs = args
 
     start_time = get_time_now()

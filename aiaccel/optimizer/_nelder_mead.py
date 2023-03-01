@@ -77,7 +77,7 @@ class NelderMead(object):
         self,
         params: list[HyperParameter],
         iteration: float = float('inf'),
-        coef: dict | None = None,
+        coef: dict[str, Any] | None = None,
         maximize: bool | None = False,
         initial_parameters: Any = None,
         rng: np.random.RandomState | None = None
@@ -126,7 +126,7 @@ class NelderMead(object):
     def _create_initial_values(
         self,
         initial_parameters: list[dict[str, Any]]
-    ) -> np.ndarray:
+    ) -> np.ndarray[Any, Any]:
         initial_values = [
             [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
             for num_of_initials in range(self.n_dim + 1)
@@ -139,7 +139,7 @@ class NelderMead(object):
         initial_parameters: Any,
         dim: int,
         num_of_initials: int
-    ) -> int | np.integer | float | np.floating | list[int | np.integer | float | np.floating | str]:
+    ) -> int | np.integer[Any] | float | np.floating[Any] | list[int | np.integer[Any] | float | np.floating[Any] | str]:
         if initial_parameters is not None:
             if isinstance(initial_parameters[dim]['value'], (int, float, np.integer, np.floating)):
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
@@ -164,7 +164,7 @@ class NelderMead(object):
             return val
 
     def _add_executing(
-        self, y: np.ndarray,
+        self, y: np.ndarray[Any, Any],
         index: int | None = None
     ) -> None:
         """Add a parameter set to an execution candidate.
@@ -228,7 +228,7 @@ class NelderMead(object):
             self._history['evaluated_y'].append(self.y)
         self._history['total_y'].append(self.y)
 
-    def _pop_result(self) -> dict | None:
+    def _pop_result(self) -> dict[str, Any] | None:
         """Pop a result.
 
         Returns:
@@ -284,7 +284,7 @@ class NelderMead(object):
 
         self._state = state
 
-    def _wait_initialize(self, results: list[dict]) -> None:
+    def _wait_initialize(self, results: list[dict[str, Any]]) -> None:
         """Wait first parameter results are finished.
 
         Args:
@@ -310,7 +310,7 @@ class NelderMead(object):
         self._centroid()
         self._reflect()
 
-    def _wait_reflect(self, results: list[dict]) -> None:
+    def _wait_reflect(self, results: list[dict[str, Any]]) -> None:
         """Wait Reflect calculations are finished.
 
         Args:
@@ -343,7 +343,7 @@ class NelderMead(object):
         else:  # pragma: no cover
             pass  # not reached
 
-    def _wait_expand(self, results: list[dict]) -> None:
+    def _wait_expand(self, results: list[dict[str, Any]]) -> None:
         """Wait 'Expand' executions finished.
 
         Args:
@@ -371,7 +371,7 @@ class NelderMead(object):
             self.f[-1] = self._fr
         self._finalize()
 
-    def _wait_outside_contract(self, results: list[dict]) -> None:
+    def _wait_outside_contract(self, results: list[dict[str, Any]]) -> None:
         """Wait the 'OutsideContract' execution finished.
 
         Args:
@@ -398,7 +398,7 @@ class NelderMead(object):
         else:
             self._shrink()
 
-    def _wait_inside_contract(self, results: list[dict]) -> None:
+    def _wait_inside_contract(self, results: list[dict[str, Any]]) -> None:
         """Wait the 'InsideContract' execution finished.
 
         Args:
@@ -426,7 +426,7 @@ class NelderMead(object):
         else:
             self._shrink()
 
-    def _wait_shrink(self, results: list[dict]) -> None:
+    def _wait_shrink(self, results: list[dict[str, Any]]) -> None:
         """Wait the 'Shrink' execution finished.
 
         Args:
@@ -564,7 +564,7 @@ class NelderMead(object):
 
         self._history['op'].append('s')
 
-    def _is_out_of_boundary(self, y: np.ndarray) -> bool:
+    def _is_out_of_boundary(self, y: np.ndarray[Any, Any]) -> bool:
         """Is points out of boundary or not.
 
         Args:
@@ -579,7 +579,7 @@ class NelderMead(object):
 
         return False
 
-    def add_result_parameters(self, result: dict) -> None:
+    def add_result_parameters(self, result: dict[str, Any]) -> None:
         """Add a new result.
 
         Args:
@@ -590,7 +590,7 @@ class NelderMead(object):
         """
         self._result.append(result)
 
-    def search(self) -> list[dict] | None:
+    def search(self) -> list[dict[str, Any]] | None:
         """Proceed a search step. One search method does not increment the
             iteration. It increments when finalize method is called.
 

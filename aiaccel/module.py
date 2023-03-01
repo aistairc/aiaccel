@@ -317,7 +317,7 @@ class AbstractModule(object):
         ):
             self._deserialize(self.options['resume'])
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = self.__dict__.copy()
         del obj['storage']
         del obj['config']

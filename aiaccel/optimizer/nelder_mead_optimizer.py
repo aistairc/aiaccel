@@ -53,7 +53,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
     def check_result(self) -> None:
         pass
 
-    def get_ready_parameters(self) -> list:
+    def get_ready_parameters(self) -> list[Any]:
         """Get the list of ready parameters.
 
         Returns:
@@ -61,7 +61,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         return self.nelder_mead._executing
 
-    def get_nm_results(self) -> list[dict[str, str | int | list | bool]]:
+    def get_nm_results(self) -> list[dict[str, str | int | list[Any] | bool]]:
         """ Get the list of Nelder-Mead result.
 
         Returns:
@@ -85,7 +85,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         return nm_results
 
-    def _add_result(self, nm_results: list) -> None:
+    def _add_result(self, nm_results: list[Any]) -> None:
         """  Add a result parameter.
 
         Args:
@@ -159,7 +159,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 e['vertex_id'] = new_param_name
                 break
 
-    def nelder_mead_main(self) -> list | None:
+    def nelder_mead_main(self) -> list[Any] | None:
         """ Nelder Mead's main module.
 
         Args:
@@ -176,7 +176,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             return None
         return searched_params
 
-    def _get_all_trial_id(self) -> list:
+    def _get_all_trial_id(self) -> list[Any]:
         """_get_all_trial_id.
 
         Get trial_ids from DB: 'result', 'finished', 'running', 'ready'
@@ -190,7 +190,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         return trial_id
 
-    def _get_current_names(self) -> list:
+    def _get_current_names(self) -> list[Any]:
         """Get parameter trial_id.
 
         Returns:

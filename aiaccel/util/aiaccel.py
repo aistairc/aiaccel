@@ -35,7 +35,7 @@ class _Message:
         self.outputs: list[str] = []
         self.delimiter = "@"
 
-    def create_message(self, message: Any):
+    def create_message(self, message: Any) -> None:
         """ Concatenates a label and a message.
 
         Args:
@@ -91,12 +91,12 @@ class _Message:
             target_data.append("")
         return target_data
 
-    def clear(self):
+    def clear(self) -> None:
         self.outputs = []
 
 
 class Messages:
-    def __init__(self, *labels) -> None:
+    def __init__(self, *labels: Any) -> None:
         list_of_labels = list(labels)
         self.d: dict[str, _Message] = {}
         for label in list_of_labels:
@@ -154,13 +154,13 @@ class WrapperInterface:
                     "objective_err: err" -> err
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.stdout = Messages(
             "objective_y",
             "objective_err"
         )
 
-    def get_data(self, output: subprocess.CompletedProcess[bytes]) -> tuple:
+    def get_data(self, output: subprocess.CompletedProcess[bytes]) -> tuple[Any, Any]:
         """For wrapper side, gets stdout and stderr of user program.
 
         Args:
@@ -192,7 +192,7 @@ class WrapperInterface:
 
     def out(
         self,
-        objective_y: float | int | str | None = None,
+        objective_y: Any | None = None,
         objective_err: str | None = None
     ) -> None:
         """For user program side, outputs the objective value and error message
@@ -337,7 +337,7 @@ class Run:
         func: Callable[[Any], Any],
         trial_id: int,
         y_data_type: str | None
-    ) -> tuple:
+    ) -> Any:
         """Executes the target function.
 
         Args:
@@ -366,7 +366,7 @@ class Run:
         return xs, y, err
 
     @execute.register
-    def _(self, command: str, trial_id: int, y_data_type: str) -> tuple:
+    def _(self, command: str, trial_id: int, y_data_type: str) -> Any:
         """ Executes the user program.
 
         Args:
@@ -462,7 +462,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     def report(
-        self, trial_id: int, xs: dict, y: Any, err: str, start_time: str,
+        self, trial_id: int, xs: dict[str, Any], y: Any, err: str, start_time: str,
         end_time: str
     ) -> None:
         """Saves results in the Storage object.
@@ -482,7 +482,7 @@ class Run:
             self.storage.error.set_any_trial_error(trial_id, err)
 
 
-def set_logging_file_for_trial_id(workspace, trial_id):
+def set_logging_file_for_trial_id(workspace: Path, trial_id: int) -> None:
     log_dir = workspace / "log"
     log_path = log_dir / f"job_{trial_id}.log"
     if not log_dir.exists():

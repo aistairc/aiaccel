@@ -162,7 +162,7 @@ class AbstractMaster(AbstractModule):
         """
         return None
 
-    def check_error(self):
+    def check_error(self) -> bool:
         """ Check to confirm if an error has occurred.
 
         Args:

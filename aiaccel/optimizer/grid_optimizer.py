@@ -125,8 +125,8 @@ class GridOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.ready_params: list
-        self.generate_index: int
+        self.ready_params: Any = None
+        self.generate_index: Any = None
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.

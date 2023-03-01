@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
 from collections.abc import Callable
+from pathlib import Path
+from typing import Any
 
 from aiaccel import dict_runner
 from aiaccel.util.filesystem import create_yaml
@@ -15,9 +16,9 @@ if TYPE_CHECKING:
 
 class AbstractModel(object):
     state: str
-    expire: Callable
-    schedule: Callable
-    next: Callable
+    expire: Callable[[Any], Any]
+    schedule: Callable[[Any], Any]
+    next: Callable[[Any], Any]
 
     # Common
 
@@ -407,5 +408,5 @@ class AbstractModel(object):
         )
         obj.threshold_retry = obj.expire_retry
 
-    def change_state(self, obj: 'Job'):
+    def change_state(self, obj: 'Job') -> None:
         obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state=obj.next_state)

@@ -43,7 +43,7 @@ class Storage:
 
         return max(trial_ids)
 
-    def get_ready(self) -> list:
+    def get_ready(self) -> list[Any]:
         """Get a trial number for the ready state.
 
         Returns:
@@ -51,7 +51,7 @@ class Storage:
         """
         return self.trial.get_ready()
 
-    def get_running(self) -> list:
+    def get_running(self) -> list[Any]:
         """Get a trial number for the running state.
 
         Returns:
@@ -59,7 +59,7 @@ class Storage:
         """
         return self.trial.get_running()
 
-    def get_finished(self) -> list:
+    def get_finished(self) -> list[Any]:
         """Get a trial number for the finished state.
 
         Returns:
@@ -165,7 +165,7 @@ class Storage:
         end_time = self.timestamp.get_any_trial_end_time(trial_id=trial_id)
         error = self.error.get_any_trial_error(trial_id=trial_id)
 
-        content: dict[str, str | int | float | list] = {}
+        content: dict[str, str | int | float | list[Any]] = {}
         content['trial_id'] = trial_id
         content['parameters'] = hp
         content['result'] = result
@@ -226,7 +226,7 @@ class Storage:
         best_trial_id, _ = self.get_best_trial(goal)
         return self.get_hp_dict(best_trial_id)
 
-    def get_result_and_error(self, trial_id: int) -> tuple:
+    def get_result_and_error(self, trial_id: int) -> tuple[Any, Any]:
         """Get results and errors for a given trial number.
 
         Args:

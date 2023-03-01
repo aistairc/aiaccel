@@ -41,12 +41,12 @@ class TpeOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.parameter_pool: dict = {}
-        self.parameter_list: list = []
+        self.parameter_pool: dict[str, Any] = {}
+        self.parameter_list: list[Any] = []
         self.study_name = "distributed-tpe"
         self.study: Any = None
         self.distributions: Any = None
-        self.trial_pool: dict = {}
+        self.trial_pool: dict[str, Any] = {}
         self.randseed = self.config.randseed.get()
 
     def pre_process(self) -> None:
@@ -194,7 +194,7 @@ class TpeOptimizer(AbstractOptimizer):
 
 def create_distributions(
         parameters: aiaccel.parameter.HyperParameterConfiguration
-) -> dict:
+) -> dict[str, Any]:
     """Create an optuna.distributions dictionary for the parameters.
 
     Args:
