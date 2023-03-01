@@ -45,7 +45,7 @@ class TpeOptimizer(AbstractOptimizer):
         self.parameter_list: list = []
         self.study_name = "distributed-tpe"
         self.study: Any = None
-        self.distributions: dict
+        self.distributions: Any = None
         self.trial_pool: dict = {}
         self.randseed = self.config.randseed.get()
 

@@ -111,10 +111,10 @@ class NelderMead(object):
         }
         self._executing_index = 0
         self._executing: list[Any] = []
-        self._fr: Any  # treated as "float" until self._finalize() where "None" is assigned.
-        self._fe: Any
-        self._fic: Any
-        self._foc: Any
+        self._fr: Any = None  # treated as "float" until self._finalize() where "None" is assigned.
+        self._fe: Any = None
+        self._fic: Any = None
+        self._foc: Any = None
         self._maximize = maximize
         self._num_shrink = 0
         self._state = 'WaitInitialize'

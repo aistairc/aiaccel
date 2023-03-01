@@ -44,8 +44,8 @@ class AbstractVerification(object):
         self.dict_lock = self.ws / aiaccel.dict_lock
         self.is_verified: bool = False
         self.finished_loop = None
-        self.condition: list[dict[str, Any]]
-        self.verification_result: list[dict[str, Any]]
+        self.condition: Any = None
+        self.verification_result: Any = None
         self.load_verification_config()
         self.storage = Storage(self.ws)
 

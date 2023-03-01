@@ -76,10 +76,10 @@ class AbstractModule(object):
         self.alive_optimizer = self.dict_alive / aiaccel.alive_optimizer
         self.alive_scheduler = self.dict_alive / aiaccel.alive_scheduler
 
-        self.logger: logging.Logger
-        self.fh = None
-        self.ch = None
-        self.ch_formatter = None
+        self.logger: Any = None
+        self.fh: Any = None
+        self.ch: Any = None
+        self.ch_formatter: Any = None
         self.loop_count = 0
         self.hp_ready = 0
         self.hp_running = 0

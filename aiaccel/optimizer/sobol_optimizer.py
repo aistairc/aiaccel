@@ -27,7 +27,7 @@ class SobolOptimizer(AbstractOptimizer):
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
         self.generate_index: Any = None
-        self.sampler: qmc.Sobol
+        self.sampler: Any = None
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
