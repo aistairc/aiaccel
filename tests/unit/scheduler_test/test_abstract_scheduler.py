@@ -1,15 +1,12 @@
 import asyncio
-import numpy as np
 import os
 import time
 from unittest.mock import patch
 
-import aiaccel
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.config import load_config
+import numpy as np
 
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler.job.model.local_model import LocalModel
 from tests.base_test import BaseTest
 
 

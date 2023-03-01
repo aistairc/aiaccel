@@ -122,6 +122,11 @@ class AbstractOptimizer(AbstractModule):
         raise NotImplementedError
 
     def get_pool_size(self) -> int:
+        """Returns pool size.
+
+        Returns:
+            int: Pool size.
+        """
         hp_ready = self.storage.get_num_ready()
         hp_running = self.storage.get_num_running()
         hp_finished = self.storage.get_num_finished()

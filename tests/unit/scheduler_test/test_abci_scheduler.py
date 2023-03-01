@@ -1,6 +1,4 @@
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.config import load_config
-
 from tests.base_test import BaseTest
 
 

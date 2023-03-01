@@ -4,7 +4,6 @@ import logging
 import subprocess
 from argparse import ArgumentParser
 from functools import singledispatchmethod
-from logging import StreamHandler, getLogger
 from typing import Any
 from collections.abc import Callable
 from pathlib import Path
@@ -12,6 +11,7 @@ from pathlib import Path
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.time_tools import get_time_now
+from aiaccel.util.cast import cast_y
 
 
 class _Message:
@@ -282,15 +282,6 @@ class Run:
         self.workspace = Path(self.config.generic.workspace).resolve()
         self.storage = Storage(self.workspace)
 
-        # logger
-        log_dir = self.workspace / "log"
-        log_path = log_dir / f"job_{self.trial_id}.log"
-        if not log_dir.exists():
-            log_dir.mkdir(parents=True)
-        logging.basicConfig(filename=log_path, level=logging.DEBUG)
-        self.logger = getLogger(__name__)
-        self.logger.addHandler(StreamHandler())
-
         self.com = WrapperInterface()
 
     def generate_commands(
@@ -340,34 +331,6 @@ class Run:
 
         return xs
 
-    def cast_y(
-            self, y_value: Any, y_data_type: str | None) -> float | int | str:
-        """Casts y to the appropriate data type.
-
-        Args:
-            y_value (Any): y value to be casted.
-            y_data_type (str | None): Name of data type of objective value.
-
-        Returns:
-            float | int | str: Casted y value.
-
-        Raises:
-            TypeError: Occurs when given `y_data_type` is other than `float`,
-                 `int`, or `str`.
-        """
-        if y_data_type is None:
-            y = y_value
-        elif y_data_type.lower() == 'float':
-            y = float(y_value)
-        elif y_data_type.lower() == 'int':
-            y = int(float(y_value))
-        elif y_data_type.lower() == 'str':
-            y = str(y_value)
-        else:
-            TypeError(f'{y_data_type} cannot be specified')
-
-        return y
-
     @singledispatchmethod
     def execute(
         self,
@@ -390,23 +353,22 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
+        set_logging_file_for_trial_id(self.workspace, trial_id)
         xs = self.get_any_trial_xs(trial_id)
-        y = None
-        err = ""
-
         try:
-            y = self.cast_y(func(xs), y_data_type)
+            y = cast_y(func(xs), y_data_type)
         except BaseException as e:
             err = str(e)
+            y = None
+        else:
+            err = ""
         finally:
             self.com.out(objective_y=y, objective_err=err)
 
         return xs, y, err
 
-    @ execute.register
-    def _(
-        self, command: str, trial_id: int, y_data_type: 'str | None'
-    ) -> 'tuple[dict[str, float | int | str] | None, float | int | str | None, str]':
+    @execute.register
+    def _(self, command: str, trial_id: int, y_data_type: str) -> tuple:
         """ Executes the user program.
 
         Args:
@@ -419,6 +381,8 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
+
+        set_logging_file_for_trial_id(self.workspace, trial_id)
 
         xs = self.get_any_trial_xs(trial_id)
         err = ""
@@ -439,9 +403,9 @@ class Run:
 
         ys, err = self.com.get_data(output)
         if y_data_type is None:
-            y = self.cast_y(ys[0], 'float')
+            y = cast_y(ys[0], 'float')
         else:
-            y = self.cast_y(ys[0], y_data_type)
+            y = cast_y(ys[0], y_data_type)
         err = ("\n").join(err)
 
         return xs, y, err
@@ -481,7 +445,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: 'str | None' = None) -> None:
+    def _(self, command: str, y_data_type: str = None) -> None:
         """Executes the user program.
 
         Args:
@@ -521,3 +485,11 @@ class Run:
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
         if err != "":
             self.storage.error.set_any_trial_error(trial_id, err)
+
+
+def set_logging_file_for_trial_id(workspace, trial_id):
+    log_dir = workspace / "log"
+    log_path = log_dir / f"job_{trial_id}.log"
+    if not log_dir.exists():
+        log_dir.mkdir(parents=True)
+    logging.basicConfig(filename=log_path, level=logging.DEBUG, force=True)

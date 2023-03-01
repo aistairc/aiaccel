@@ -2,6 +2,7 @@ from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.job.job import Job
 from aiaccel.config import load_config
 
+from aiaccel.scheduler.job.model.local_model import LocalModel
 from tests.base_test import BaseTest
 
 
@@ -25,7 +26,7 @@ class TestLocalScheduler(BaseTest):
         )
 
         trial_id = 1
-        job = Job(config, scheduler, trial_id)
+        job = Job(config, scheduler, scheduler.create_model(), trial_id)
         scheduler.jobs.append(job)
         assert scheduler.get_stats() is None
 

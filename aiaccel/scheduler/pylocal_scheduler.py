@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-import threading
 import importlib
+from multiprocessing.pool import Pool, ThreadPool
+from pathlib import Path
 
 from omegaconf.dictconfig import DictConfig
 
-from collections.abc import Callable
-from pathlib import Path
-
+from aiaccel.config import Config
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.util.aiaccel import Run
+from aiaccel.util.aiaccel import (Run, WrapperInterface,
+                                  set_logging_file_for_trial_id)
+from aiaccel.util.cast import cast_y
 from aiaccel.util.time_tools import get_time_now
 
 
@@ -20,33 +21,11 @@ class PylocalScheduler(AbstractScheduler):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
+        self.run = Run(self.config_path)
+        self.com = WrapperInterface()
 
-        self.run = None
-        self.user_func = None
-
-        self.user_func = self.get_callable_object(
-            self.config.generic.python_file,
-            self.config.generic.function
-        )
-        self.run = Run(self.config.config_path)
-
-    def get_callable_object(self, file_path: str | Path, attr_name: str
-                            ) -> Callable[[dict], float]:
-        """ Loads the specified module from the specified python program.
-
-        Args:
-            file_path (str, pathlib.Path): A user program file path (python
-            file only).
-            attr_name (str): A name of objective function in user program.
-
-        Returns:
-            Callable[[dict], float]:
-        """
-        spec = importlib.util.spec_from_file_location("user_module", file_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        return getattr(module, attr_name)
+        Pool_ = Pool if self.num_node > 1 else ThreadPool
+        self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config_path,))
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -59,39 +38,65 @@ class PylocalScheduler(AbstractScheduler):
         if trial_ids is None or len(trial_ids) == 0:
             return True
 
+        args = []
         for trial_id in trial_ids:
+            self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
+            args.append([trial_id, self.run.get_any_trial_xs(trial_id)])
             self._serialize(trial_id)
-            if self.num_node > 1:
-                th = threading.Thread(target=self.execute, args=(trial_id,))
-                th.start()
-            else:
-                self.execute(trial_id)
+
+        for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
+            self.com.out(objective_y=y, objective_err=err)
+            self.run.report(trial_id, xs, y, err, start_time, end_time)
+            self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
+
+            self.create_result_file(trial_id)
 
         return True
-
-    def execute(self, trial_id: int) -> None:
-        """ Executes the loaded callable object.
-
-        Args:
-            trial_id (int): Any trial od
-
-        Returns:
-            None
-        """
-        self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
-
-        start_time = get_time_now()
-        xs, y, err = self.run.execute(self.user_func, trial_id, y_data_type=None)
-        end_time = get_time_now()
-        self.run.report(trial_id, xs, y, err, start_time, end_time)
-
-        self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
-        self.create_result_file(trial_id)
-
-        return
 
     def __getstate__(self):
         obj = super().__getstate__()
         del obj['run']
-        del obj['user_func']
+        del obj['pool']
         return obj
+
+    def create_model(self) -> None:
+        """Creates model object of state machine.
+
+        Returns:
+            None: Because it does not use the state transition model.
+        """
+        return None
+
+
+def initializer(config_path: str | Path):
+    global user_func, workspace
+
+    config = Config(config_path)
+
+    # Load the specified module from the specified python program.
+    spec = importlib.util.spec_from_file_location("user_module", config.python_file.get())
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    user_func = getattr(module, config.function.get())
+
+    workspace = Path(config.workspace.get()).resolve()
+
+
+def execute(args):
+    trial_id, xs = args
+
+    start_time = get_time_now()
+    set_logging_file_for_trial_id(workspace, trial_id)
+
+    try:
+        y = cast_y(user_func(xs), y_data_type=None)
+    except BaseException as e:
+        err = str(e)
+        y = None
+    else:
+        err = ""
+
+    end_time = get_time_now()
+
+    return trial_id, xs, y, err, start_time, end_time

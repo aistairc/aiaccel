@@ -4,13 +4,14 @@ import json
 import sys
 import time
 from unittest.mock import patch
-from aiaccel.config import load_config
+
+import pytest
 
 import aiaccel
-import pytest
+from aiaccel.config import load_config
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
-                                       CustomMachine, Job, create_model)
+                                       CustomMachine, Job)
 from aiaccel.scheduler.job.model.abci_model import AbciModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.scheduler.local_scheduler import LocalScheduler
@@ -54,9 +55,10 @@ class TestModel(BaseTest):
         self.job = Job(
             config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
-        self.model = create_model(config.resource.type)
+        self.model = scheduler.create_model()
         yield
         self.job = None
         self.model = None
@@ -77,6 +79,7 @@ class TestModel(BaseTest):
         self.abci_job = Job(
             config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         yield
@@ -374,6 +377,7 @@ class TestJob(BaseTest):
         self.job = Job(
             config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         yield
@@ -396,6 +400,7 @@ class TestJob(BaseTest):
         job = Job(
             config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         assert type(job) is Job
