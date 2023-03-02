@@ -288,7 +288,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             bool: True if there is no error.
         """
-        error_trial_ids = self.storage.returncode.get_return_code_trial_id(1)
+        error_trial_ids = self.storage.returncode.get_return_code_trial_id()
         if len(error_trial_ids) == 0:
             return True
 
