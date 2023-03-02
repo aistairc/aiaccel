@@ -144,7 +144,7 @@ class TestAbstractOptimizer(BaseTest):
         self.optimizer.storage.error.all_delete()
         assert self.optimizer.check_error() is True
 
-        self.optimizer.storage.error.set_any_trial_error(trial_id=0, error_message="test_error")
+        self.optimizer.storage.returncode.set_any_trial_return_code(trial_id=0, return_code=1)
         assert self.optimizer.check_error() is False
 
     def test_generate_initial_parameter(self):
