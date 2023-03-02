@@ -35,6 +35,7 @@ class LocalModel(AbstractModel):
             obj.proc,
             'Job',
             trial_id=obj.trial_id,
-            storage=obj.storage
+            storage=obj.storage,
+            is_ignore_warning=obj.config.is_ignore_warning.get()
         )
         obj.th_oh.start()

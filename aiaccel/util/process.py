@@ -132,7 +132,8 @@ class OutputHandler(threading.Thread):
         proc: subprocess.Popen,
         module_name: str,
         trial_id: int,
-        storage: Storage | None = None
+        storage: Storage | None = None,
+        is_ignore_warning: bool = False,
     ) -> None:
         super(OutputHandler, self).__init__()
         self._parent = parent
@@ -144,7 +145,7 @@ class OutputHandler(threading.Thread):
         self.trial_id = trial_id
         self.storage = storage
 
-        self.is_ignore_warning = True
+        self.is_ignore_warning = is_ignore_warning
 
     def abort(self) -> None:
         self._abort = True
@@ -183,11 +184,16 @@ class OutputHandler(threading.Thread):
             if self._abort:
                 break
 
-        if e and not self.is_ignore_warning:
-            self.storage.returncode.set_any_trial_return_code(
-                trial_id=self.trial_id,
-                return_code=1
-            )
+        if not self.is_ignore_warning:
+            if self.storage is not None:
+                err = self.storage.error.get_any_trial_error(
+                        trial_id=self.trial_id
+                    )
+                if err is not None:
+                    self.storage.returncode.set_any_trial_return_code(
+                        trial_id=self.trial_id,
+                        return_code=1
+                    )
         elif self._proc.returncode == 1:
             self.storage.returncode.set_any_trial_return_code(
                 trial_id=self.trial_id,

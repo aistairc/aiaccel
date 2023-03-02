@@ -323,6 +323,7 @@ _DEFAULT_RANDOM_SCHESULING = True
 _DEFAULT_SOBOL_SCRAMBLE = True
 _DEFAULT_PYTHON_FILE = ""
 _DEFAULT_FUNCTION = ""
+_DEFAULT_IS_IGNORE_WARNING = True
 
 
 class Config:
@@ -568,6 +569,14 @@ class Config:
             warning=False,
             group="job_setting",
             keys=("name_length")
+        )
+        self.is_ignore_warning = ConfigEntry(
+            config=config,
+            type=[bool],
+            default=_DEFAULT_IS_IGNORE_WARNING,
+            warning=False,
+            group="generic",
+            keys=("is_ignore_warning")
         )
         # === resource defalt config ===
         self.resource_type = ConfigEntry(
