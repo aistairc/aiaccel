@@ -186,12 +186,6 @@ class GridPointGenerator:
         self._trial_number = trial_number
         self._sampling_method = sampling_method
         self._num_generated_points = 0
-        print(self._parameter_lengths)
-        print(self._grid_space_size)
-        print(self._digits)
-        print(self._trial_number)
-        print(self._sampling_method)
-        print(self._num_generated_points)
 
         if (
             self._sampling_method == 'RANDOM' or

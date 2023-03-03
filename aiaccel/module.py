@@ -94,11 +94,9 @@ class AbstractModule(object):
             labels=['native_random_state', 'numpy_random_state', 'state']
         )
 
-    def get_each_state_count(self) -> None:
-        """Updates the number of files in hp(hyper parameter) directories.
-
-        Returns:
-            None
+    def update_each_state_count(self) -> None:
+        """Updates hyperparameter counters for ready, runnning, and finished
+        states.
         """
         self.hp_ready = self.storage.get_num_ready()
         self.hp_running = self.storage.get_num_running()
@@ -121,10 +119,10 @@ class AbstractModule(object):
             return None
 
     def check_finished(self) -> bool:
-        """Check whether all optimization finished or not.
+        """Checks whether all optimization finished.
 
         Returns:
-            bool: All optimization finished or not.
+            bool: True if all optimizations are finished.
         """
         self.hp_finished = self.storage.get_num_finished()
 

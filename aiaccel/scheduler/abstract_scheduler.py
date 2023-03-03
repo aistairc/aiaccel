@@ -78,7 +78,7 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.get_each_state_count()
+        self.update_each_state_count()
 
     def start_job(self, trial_id: int) -> Job | None:
         """Start a new job.
