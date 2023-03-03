@@ -115,7 +115,7 @@ class HyperParameter(object):
         self.sequence = parameter.get('sequence', None)
         self.initial = parameter.get('initial', None)
         self.q = parameter.get('q', 1)
-        self.num_grid_points = parameter.get('num_grid_grid_points', None)
+        self.num_grid_points = parameter.get('num_grid_points', None)
 
     def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
         """Sample a parameter.

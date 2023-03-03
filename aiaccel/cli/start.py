@@ -27,6 +27,7 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     parser.add_argument('--resume', type=int, default=None)
     parser.add_argument('--clean', nargs='?', const=True, default=False)
+    parser.add_argument('--accept-small-trial-number', nargs='?', const=True, default=False)
     args = parser.parse_args()
 
     config = Config(args.config, warn=True, format_check=True)

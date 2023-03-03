@@ -292,6 +292,8 @@ _DEFAULT_SCHDULER_STREAM_LOG_LEBEL = "DEBUG"
 _DEFAULT_JOB_COMMAND = ""
 _DEFAULT_SLEEP_TIME = 0.01
 _DEFAULT_SEARCH_ALGORITHM = search_algorithm_nelder_mead
+_DEFAULT_GRID_ACCEPT_SMALL_TRIAL_NUMBER = False
+_DEFAULT_GRID_SAMPLING_METHOD = 'IN_ORDER'
 _DEFAULT_CANCEL_RETRY = 3
 _DEFAULT_CANCEL_TIMEOUT = 60
 _DEFAULT_EXPIRE_RETRY = 3
@@ -653,6 +655,22 @@ class Config:
             warning=warn,
             group="optimize",
             keys=("search_algorithm")
+        )
+        self.grid_accept_small_trial_number = ConfigEntry(
+            config=config,
+            type=[bool],
+            default=_DEFAULT_GRID_ACCEPT_SMALL_TRIAL_NUMBER,
+            warning=False,
+            group='optimize',
+            keys=('grid_accept_small_trial_number')
+        )
+        self.grid_sampling_method = ConfigEntry(
+            config=config,
+            type=[str],
+            default=_DEFAULT_GRID_SAMPLING_METHOD,
+            warning=False,
+            group='optimize',
+            keys=('grid_sampling_method')
         )
 
         # === logger defalt config===
