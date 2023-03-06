@@ -7,6 +7,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.8']
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -27,16 +28,16 @@ jobs:
       - name: Type check
         run: |
           mypy aiaccel \
-          --ignore-missing-imports \
-          --warn-unused-configs \
-          --disallow-any-generics \
-          --disallow-untyped-calls \
-          --disallow-untyped-defs \
-          --disallow-incomplete-defs \
-          --check-untyped-defs \
-          --disallow-untyped-decorators \
-          --warn-redundant-casts \
-          --warn-unused-ignores \
-          --no-implicit-reexport \
-          --strict-equality \
-          --strict-concatenate
+            --ignore-missing-imports \
+            --warn-unused-configs \
+            --disallow-any-generics \
+            --disallow-untyped-calls \
+            --disallow-untyped-defs \
+            --disallow-incomplete-defs \
+            --check-untyped-defs \
+            --disallow-untyped-decorators \
+            --warn-redundant-casts \
+            --warn-unused-ignores \
+            --no-implicit-reexport \
+            --strict-equality \
+            --strict-concatenate
