@@ -3,12 +3,12 @@ on: [push, pull_request]
 
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
+    
     strategy:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.8']
-
-    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
