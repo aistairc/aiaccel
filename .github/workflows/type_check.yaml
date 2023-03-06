@@ -28,6 +28,8 @@ jobs:
       - name: Type check
         run: |
           mypy aiaccel \
+            --install-types \
+            --non-interactive \
             --ignore-missing-imports \
             --warn-unused-configs \
             --disallow-any-generics \
