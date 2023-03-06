@@ -189,8 +189,7 @@ class GridOptimizer(AbstractOptimizer):
 
         if parameter_index is None:
             self.logger.info('Generated all of parameters.')
-            if self.storage.get_num_finished() >= self.generate_index:
-                self.all_parameters_generated = True
+            self.all_parameter_generated = True
             return new_params
 
         for i in range(0, len(self.ready_params)):
