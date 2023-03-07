@@ -14,8 +14,7 @@ GridValueType = Union[float, int, str]
 SamplingMethodType = Literal['IN_ORDER', 'THIN_OUT', 'RANDOM', 'DUPLICATABLE_RANDOM']
 
 
-def _count_fixed_grid_points(hyperparameters: list[HyperParameter]
-                             ) -> list[int]:
+def _count_fixed_grid_points(hyperparameters: list[HyperParameter]) -> list[int]:
     nums_fixed_grid_points: list[int] = []
     for hyperparameter in hyperparameters:
         if hyperparameter.type in ('INT', 'FLOAT'):
