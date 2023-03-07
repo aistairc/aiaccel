@@ -195,10 +195,9 @@ class Run:
             err (str): Error string.
         """
 
-        sys.stdout.write(f"{y}")
+        sys.stdout.write(f"{y}\n")
         if err != "":
-            sys.stderr.write(f"{err}")
-        sys.stdout.write("\n")
+            sys.stderr.write(f"{err}\n")
 
 
 def set_logging_file_for_trial_id(workspace, trial_id):
