@@ -32,6 +32,8 @@ sphinx
 sphinx_fontawesome
 sphinx_rtd_theme
 sphinxcontrib.jquery>=3.0.0
+tensorboard
+tensorboardx
 toml
 transitions
 twisted
