@@ -96,7 +96,7 @@ class GridOptimizer(AbstractOptimizer):
             return new_params
 == == == =
             if self.storage.get_num_finished() >= self.generate_index:
-                self.all_parameter_generated = True
+                self.all_parameters_generated = True
             return new_params
 
         for i in range(0, len(self.ready_params)):
