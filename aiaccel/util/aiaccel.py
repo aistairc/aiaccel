@@ -34,7 +34,7 @@ class CommandLineArgs:
                     self.parser.add_argument(f"--{p.name}", type=float)
                 elif p.type.lower() == "int":
                     self.parser.add_argument(f"--{p.name}", type=int)
-                elif p.type.lower() == "choice":
+                elif p.type.lower() == "categorical":
                     self.parser.add_argument(f"--{p.name}", type=str)
                 elif p.type.lower() == "ordinal":
                     self.parser.add_argument(f"--{p.name}", type=float)
@@ -198,6 +198,7 @@ class Run:
         sys.stdout.write(f"{y}")
         if err != "":
             sys.stderr.write(f"{err}")
+        sys.stdout.write("\n")
 
 
 def set_logging_file_for_trial_id(workspace, trial_id):

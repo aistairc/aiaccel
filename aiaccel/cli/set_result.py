@@ -38,7 +38,7 @@ def main():
                 parser.add_argument(f"--{p.name}", type=float)
             elif p.type.lower() == "int":
                 parser.add_argument(f"--{p.name}", type=int)
-            elif p.type.lower() == "choice":
+            elif p.type.lower() == "categorical":
                 parser.add_argument(f"--{p.name}", type=str)
             elif p.type.lower() == "ordinal":
                 parser.add_argument(f"--{p.name}", type=float)

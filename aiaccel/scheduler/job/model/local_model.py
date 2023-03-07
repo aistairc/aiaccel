@@ -60,7 +60,10 @@ class LocalModel(AbstractModel):
         exitcode = str(obj.th_oh.get_returncode())
         params = obj.content['parameters']
 
-        objective = stdouts[-1]  # TODO: fix
+        if len(stdouts) == 0:
+            objective = float('nan')
+        else:
+            objective = stdouts[-1]  # TODO: fix
         error = '\n'.join(stderrs)
         output_file_path = str(obj.get_result_file_path())
         config_file_path = str(obj.config_path)
