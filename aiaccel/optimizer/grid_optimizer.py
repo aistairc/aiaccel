@@ -1,8 +1,113 @@
 from __future__ import annotations
+import math
+from functools import reduce
+from operator import mul
 
 from aiaccel.config import Config
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from aiaccel.optimizer._grid_point_generator import GridPointGenerator
+from aiaccel.parameter import HyperParameter
+
+
+def get_grid_options(
+    parameter_name: str,
+    config: Config
+) -> tuple[int | None, bool, int | None]:
+    """Get options about grid search.
+
+    Args:
+        parameter_name (str): A parameter name to get its options.
+        config (Config): A config object.
+
+    Returns:
+        tuple[int | None, bool, int | None]: The first one is a base of
+        logarithm parameter. The second one is logarithm parameter or not.
+        The third one is a step of the grid.
+
+    Raises:
+        KeyError: Causes when step is not specified.
+    """
+    base: float | None = None
+    log: bool = False
+    step: float | None = None
+
+    grid_options = config.hyperparameters.get()
+
+    for g in grid_options:
+        if g['name'] == parameter_name:
+            if 'step' not in g.keys():
+                raise KeyError(
+                    f'No grid option `step` for parameter: {parameter_name}'
+                )
+            if 'log' not in g.keys():
+                raise KeyError(
+                    f'No grid option `log` for parameter: {parameter_name}'
+                )
+            if 'base' not in g.keys():
+                raise KeyError(
+                    f'No grid option `base` for parameter: {parameter_name}'
+                )
+
+            step = float(g['step'])
+            log = bool(g['log'])
+            if log:
+                base = int(g['base'])
+
+            return base, log, step
+
+    raise KeyError(f'Invalid parameter name: {parameter_name}')
+
+
+def generate_grid_points(
+    p: HyperParameter, config: Config
+) -> dict[str, float | int | str | list[float, int, str]]:
+    """Make a list of all parameters for this grid.
+
+    Args:
+        p (HyperParameter): A hyper parameter object.
+        config (Config): A config object.
+
+    Returns:
+        dict[str, str | list[float, int, str]]: A dictionary including all grid
+        parameters.
+
+    Raises:
+        TypeError: Causes when an invalid parameter type is set.
+    """
+    new_param = {
+        'parameter_name': p.name,
+        'type': p.type
+    }
+
+    if p.type.lower() in ['int', 'float']:
+        base, log, step = get_grid_options(p.name, config)
+        lower = p.lower
+        upper = p.upper
+
+        if log:
+            lower_x = base ** lower
+            upper_x = base ** upper
+            step_x = base ** step
+            x = lower_x
+            new_param['parameters'] = []
+            while x < upper_x or math.isclose(x, upper_x, abs_tol=1e-10):
+                new_param['parameters'].append(x)
+                x *= step_x
+        else:
+            n = int((upper - lower) / step) + 1
+            new_param['parameters'] = [lower + i * step for i in range(0, n)]
+        if p.type.lower() == 'int':
+            new_param['parameters'] = [int(i) for i in new_param['parameters']]
+
+    elif p.type.lower() == 'categorical':
+        new_param['parameters'] = list(p.choices)
+
+    elif p.type.lower() == 'ordinal':
+        new_param['parameters'] = list(p.sequence)
+
+    else:
+        raise TypeError(f'Invalid parameter type: {p.type}')
+
+    return new_param
 
 
 class GridOptimizer(AbstractOptimizer):
@@ -19,31 +124,30 @@ class GridOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
+        self.ready_params = None
+        self.generate_index = None
 
-        option_accept_small_trial_number = options.get('accept_small_trial_number', False)
-        config_accept_small_trial_number = self.config.grid_accept_small_trial_number.get()
-        accept_small_trial_number = option_accept_small_trial_number or config_accept_small_trial_number
+    def pre_process(self) -> None:
+        """Pre-procedure before executing processes.
 
-        if accept_small_trial_number:
-            self.logger.warning(
-                'The option "accept_small_trial_number" is valid. '
-                'Some of grid points may be not seached.'
-            )
+        Returns:
+            None
+        """
+        super().pre_process()
 
-        try:
-            self._grid_point_generator = GridPointGenerator(
-                self.params.get_parameter_list(),
-                self.config.trial_number.get(),
-                sampling_method=self.config.grid_sampling_method.get().upper(),
-                rng=self._rng,
-                accept_small_trial_number=accept_small_trial_number
-            )
-        except ValueError as exception:
-            self.logger.error(exception)
-            raise exception
+        self.ready_params = []
 
-    def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
-        """Generates parameters.
+        for param in self.params.get_parameter_list():
+            self.ready_params.append(generate_grid_points(param, self.config))
+
+        self.generate_index = (
+            self.storage.get_num_ready() +
+            self.storage.get_num_running() +
+            self.storage.get_num_finished()
+        )
+
+    def get_parameter_index(self) -> list[int] | None:
+        """Get a next parameter index.
 
         Returns:
             list[int] | None: It returns None if all parameters are
@@ -60,11 +164,7 @@ class GridOptimizer(AbstractOptimizer):
         parameter_index = []
         div = [
             reduce(
-<< << << < HEAD
-                lambda x, y: x * y, parameter_lengths[0:-1 - i]
-== == == =
                 lambda x, y: x * y, parameter_lengths[i + 1:]
->> >>>> > 8d45583(separates grid optimizers)
             ) for i in range(0, len(parameter_lengths) - 1)
         ]
 
@@ -89,12 +189,6 @@ class GridOptimizer(AbstractOptimizer):
 
         if parameter_index is None:
             self.logger.info('Generated all of parameters.')
-
-
-<< << << < HEAD
-            self.all_parameter_generated = True
-            return new_params
-== == == =
             if self.storage.get_num_finished() >= self.generate_index:
                 self.all_parameter_generated = True
             return new_params

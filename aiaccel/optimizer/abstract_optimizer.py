@@ -19,13 +19,12 @@ class AbstractOptimizer(AbstractModule):
     Attributes:
         options (dict[str, str | int | bool]): A dictionary containing
             command line options.
-        hp_ready (int): A ready number of hyper parameters.
-        hp_running (int): A running number of hyper prameters.
-        hp_finished (int): A finished number of hyper parameters.
-        num_of_generated_parameter (int): A number of generated hyper
-            paramters.
-        all_parameter_generated (bool): A boolean indicating if all parameters
-            are generated or not.
+        hp_ready (int): A ready number of hyperparameters.
+        hp_running (int): A running number of hyperprameters.
+        hp_finished (int): A finished number of hyperparameters.
+        num_of_generated_parameter (int): A number of generated hyperparamters.
+        all_parameters_generated (bool): Whether all parameters are generated.
+            True if all parameters are generated.
         params (HyperParameterConfiguration): Loaded hyper parameter
             configuration object.
         trial_id (TrialId): TrialId object.
@@ -51,6 +50,33 @@ class AbstractOptimizer(AbstractModule):
         self.num_of_generated_parameter = 0
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
+        self.all_parameters_generated = False
+
+    def all_parameters_processed(self) -> bool:
+        """Checks whether any unprocessed parameters are left.
+
+        This method is beneficial for the case that the maximum number of
+        parameter generation is limited by algorithm (e.g. grid search).
+        To make this method effective, the algorithm with the parameter
+        generation limit should turn `all_parameters_generated` True when all
+        of available parameters are generated.
+
+        Returns:
+            bool: True if all parameters are generated and are processed.
+        """
+        return self.hp_ready == 0 and self.hp_running == 0 and self.all_parameters_generated
+
+    def all_parameters_registered(self) -> bool:
+        """Checks whether all parameters that can be generated with the given
+        number of trials are registered.
+
+        This method does not check whether the registered parameters have been
+        processed.
+
+        Returns:
+            bool: True if all parameters are registerd.
+        """
+        return self.trial_number - self.hp_finished - self.hp_ready - self.hp_running == 0
 
     def register_new_parameters(
         self,
@@ -177,7 +203,11 @@ class AbstractOptimizer(AbstractModule):
         if self.check_finished():
             return False
 
-        self.get_each_state_count()
+        if self.all_parameters_processed():
+            return False
+
+        if self.all_parameters_registered():
+            return True
 
         pool_size = self.get_pool_size()
         if pool_size == 0:
