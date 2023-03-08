@@ -129,11 +129,11 @@ class Result(Abstract):
         Returns:
             list: result values
         """
-        bests = self.get_bests(goal)
-        if len(bests) == 0:
+        best_values = self.get_bests(goal)
+        if len(best_values) == 0:
             return None
 
-        return bests[-1]
+        return best_values[-1]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_result_trial_id_list(self) -> list | None:

@@ -9,7 +9,7 @@ from aiaccel.util.trialid import TrialId
 
 class TensorBoard(AbstractModule):
     """A class for TensorBoard.
-    
+
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
 
@@ -59,13 +59,14 @@ class TensorBoard(AbstractModule):
             self.writer.add_scalar('objective', objective_y, trial_id)
 
             # best
-            bast_value = self.storage.result.get_best_objective(self.goal)
-            if bast_value is not None:
-                self.writer.add_scalar(self.goal, bast_value, trial_id)
+            bast_values = self.storage.result.get_bests(self.goal)
+            if len(bast_values) > 0:
+                self.writer.add_scalar(self.goal, bast_values[trial_id], trial_id)
 
             # hyperparameters
             params = self.storage.hp.get_any_trial_params_dict(trial_id)
             _trial_id = TrialId(self.config).zero_padding_any_trial_id(trial_id)
+
             self.writer.add_hparams(
                 params, {'objective': objective_y}, name=_trial_id
             )
