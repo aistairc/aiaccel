@@ -187,16 +187,16 @@ class GridPointGenerator:
         self._sampling_method = sampling_method
         self._num_generated_points = 0
 
-        if (
-            self._sampling_method == 'RANDOM' or
-            self._sampling_method == 'DUPLICATABLE_RANDOM'
-        ):
-            if rng is None:
-                self._rng = RandomState(None)
-            else:
-                self._rng = rng
+        if rng is None:
+            self._rng = RandomState(None)
+        else:
+            self._rng = rng
+
+        if self._sampling_method == 'RANDOM':
             self._grid_point_stack = list(product(*self._point_list))
-            self._generated_grid_point_stack: list[tuple[GridValueType]] = []
+        else:
+            self._grid_point_stack = []
+        self._generated_grid_point_stack: list[tuple[GridValueType]] = []
 
     def all_grid_points_generated(self) -> bool:
         """Whether all grid points are generated.

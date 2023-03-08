@@ -65,15 +65,23 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
             )
         return new_params
 
-    def generate_initial_parameter(self) -> list[dict[str, float | int | str]] | None:
+    def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
         """Generates initial parameters.
 
+        Raises:
+            ValueError: _description_
+
         Returns:
-            list[dict[str, float | int | str]] | None: A list of new parameters.
+            list[dict[str, float | int | str]]: A list of new parameters.
         """
-        if super().generate_initial_parameter() is not None:
-            self.logger.warning(
-                "Initial values cannot be specified for grid search. "
-                "The set initial value has been invalidated."
-            )
-        return self.generate_parameter()
+
+        for hyperparameter in self.params.get_parameter_list():
+            if hyperparameter.initial is not None:
+                self.logger.warning(
+                    "Initial values cannot be specified for grid search. "
+                    "The set initial value has been invalidated."
+                )
+        if initial_parameter := self.generate_parameter():
+            return initial_parameter
+        else:
+            raise ValueError('Initial parameter could not be generated.')

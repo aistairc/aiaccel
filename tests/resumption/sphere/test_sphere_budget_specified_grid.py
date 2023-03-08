@@ -5,4 +5,4 @@ class TestSphereGridResumption(ResumptionTest):
 
     @classmethod
     def setup_class(cls):
-        cls.search_algorithm = "grid"
+        cls.search_algorithm = "budget-specified-grid"

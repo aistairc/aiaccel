@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from collections.abc import Generator
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 import pytest
@@ -18,17 +19,50 @@ from aiaccel.parameter import load_parameter
 from tests.base_test import BaseTest
 
 
+condition_key = 'parameter_type, num_grid_point, choices, sequence, expect'
+parameter_conditions = [
+    ('FLOAT', None, None, None, [0]),
+    ('FLOAT', 10, None, None, [10]),
+    ('INT', None, None, None, [0]),
+    ('INT', 10, None, None, [10]),
+    ('CATEGORICAL', None, ['a', 'b'], None, [2]),
+    ('ORDINAL', None, None, [1, 2], [2]),
+    ('INVALID', None, None, None, [])
+]
+
+sampling_condition_key = 'sampling_method, rng'
+sampling_methods = [
+    ('IN_ORDER', None),
+    ('THIN_OUT', None),
+    ('RANDOM', RandomState(42)),
+    ('DUPLICATABLE_RANDOM', RandomState(42))
+]
+
+
+@pytest.mark.parametrize(condition_key, parameter_conditions)
 def test_count_fixed_grid_points(
     data_dir: Path,
-    create_tmp_config: Callable[[Path], Path]
+    create_tmp_config: Callable[[Path], Path],
+    parameter_type: Literal['FLOAT', 'INT', 'CATEGORICAL', 'ORDINAL', 'INVALID'],
+    num_grid_point: int | None,
+    choices: list[str] | None,
+    sequence: list[int] | None,
+    expect: list[int]
 ) -> None:
     config_path = create_tmp_config(
-        data_dir / 'config_budget_specified_grid.json'
+        data_dir / 'config_budget-specified-grid.json'
     )
     config = Config(config_path)
     params = config.hyperparameters.get()
     hyperparameters = load_parameter(params).get_parameter_list()
-    assert len(_count_fixed_grid_points(hyperparameters)) > 0
+
+    for hyperparameter in hyperparameters:
+        hyperparameter.type = parameter_type
+        hyperparameter.num_grid_points = num_grid_point
+        hyperparameter.choices = choices
+        hyperparameter.sequence = sequence
+    nums_grid_points = _count_fixed_grid_points(hyperparameters)
+    assert nums_grid_points == expect * len(hyperparameters)
 
 
 def test_suggest_nums_grid_points() -> None:
@@ -42,18 +76,38 @@ def test_suggest_nums_grid_points() -> None:
     )
     assert nums_grid_points == [10]
 
+    nums_grid_points = _suggest_nums_grid_points(
+        grid_space_size,
+        least_grid_space_size,
+        num_parameter=0
+    )
+    assert nums_grid_points == []
 
+
+@pytest.mark.parametrize(condition_key, parameter_conditions)
 def test_generate_all_grid_points(
     data_dir: Path,
-    create_tmp_config: Callable[[Path], Path]
+    create_tmp_config: Callable[[Path], Path],
+    parameter_type: Literal['FLOAT', 'INT', 'CATEGORICAL', 'ORDINAL', 'INVALID'],
+    num_grid_point: int | None,
+    choices: list[str] | None,
+    sequence: list[int] | None,
+    expect: list[int]
 ) -> None:
     config_path = create_tmp_config(
-        data_dir / 'config_budget_specified_grid.json'
+        data_dir / 'config_budget-specified-grid.json'
     )
     config = Config(config_path)
     trial_number = config.trial_number.get()
     params = config.hyperparameters.get()
+
     hyperparameters = load_parameter(params).get_parameter_list()
+
+    for hyperparameter in hyperparameters:
+        hyperparameter.type = parameter_type
+        hyperparameter.num_grid_points = num_grid_point
+        hyperparameter.choices = choices
+        hyperparameter.sequence = sequence
 
     num_fixed_hyperparameters = _count_fixed_grid_points(hyperparameters)
     least_grid_space_size = np.prod(
@@ -65,19 +119,21 @@ def test_generate_all_grid_points(
         least_grid_space_size,
         num_fixed_hyperparameters.count(0)
     )
-    assert len(_generate_all_grid_points(hyperparameters, nums_grid_points)) > 0
+
+    all_grid_points = _generate_all_grid_points(hyperparameters, nums_grid_points)
+    assert len(all_grid_points) == len(expect) * len(hyperparameters)
 
 
 class TestGridPointGenerator(BaseTest):
     @pytest.fixture(autouse=True)
-    def setup_optimizer(
+    def setup_grid_point_generator(
         self,
         data_dir: Path,
         create_tmp_config: Callable[[Path], Path]
     ) -> Generator[None, None, None]:
         self.data_dir = data_dir
         self.config_path = create_tmp_config(
-            self.data_dir / 'config_budget_specified_grid.json'
+            self.data_dir / 'config_budget-specified-grid.json'
         )
 
         config = Config(self.config_path)
@@ -108,51 +164,22 @@ class TestGridPointGenerator(BaseTest):
         grid_point_generator = GridPointGenerator(
             hyperparameters=self.hyperparameters,
             trial_number=self.trial_number,
-            sampling_method='IN_ORDER'
+            sampling_method='IN_ORDER',
+            rng=None,
+            accept_small_trial_number=False
         )
-        with pytest.raises(AttributeError):
-            grid_point_generator._rng
-
-        grid_point_generator = GridPointGenerator(
-            hyperparameters=self.hyperparameters,
-            trial_number=self.trial_number,
-            sampling_method='THIN_OUT'
-        )
-        with pytest.raises(AttributeError):
-            grid_point_generator._rng
+        assert len(grid_point_generator._grid_point_stack) == 0
+        assert len(grid_point_generator._generated_grid_point_stack) == 0
 
         grid_point_generator = GridPointGenerator(
             hyperparameters=self.hyperparameters,
             trial_number=self.trial_number,
             sampling_method='RANDOM',
-            rng=None
+            rng=None,
+            accept_small_trial_number=False
         )
-        assert isinstance(grid_point_generator._rng, RandomState)
-
-        rng = RandomState(seed=42)
-        grid_point_generator = GridPointGenerator(
-            hyperparameters=self.hyperparameters,
-            trial_number=self.trial_number,
-            sampling_method='RANDOM',
-            rng=rng
-        )
-        assert grid_point_generator._rng == rng
-
-        grid_point_generator = GridPointGenerator(
-            hyperparameters=self.hyperparameters,
-            trial_number=self.trial_number,
-            sampling_method='DUPLICATABLE_RANDOM',
-            rng=None
-        )
-        assert isinstance(grid_point_generator._rng, RandomState)
-
-        grid_point_generator = GridPointGenerator(
-            hyperparameters=self.hyperparameters,
-            trial_number=self.trial_number,
-            sampling_method='DUPLICATABLE_RANDOM',
-            rng=rng
-        )
-        assert grid_point_generator._rng == rng
+        assert len(grid_point_generator._grid_point_stack) > 0
+        assert len(grid_point_generator._generated_grid_point_stack) == 0
 
     def test_all_grid_points_generated(
         self, monkeypatch: pytest.MonkeyPatch
@@ -167,8 +194,19 @@ class TestGridPointGenerator(BaseTest):
             )
             assert self.grid_point_generator.all_grid_points_generated()
 
-    def test_get_next_grid_point(self) -> None:
-        next_grid_point = self.grid_point_generator.get_next_grid_point()
+    @pytest.mark.parametrize(sampling_condition_key, sampling_methods)
+    def test_get_next_grid_point(
+        self,
+        sampling_method: Literal['IN_ORDER', 'THIN_OUT', 'RANDOM', 'DUPLICATABLE_RANDOM'],
+        rng: RandomState
+    ) -> None:
+        grid_point_generator = GridPointGenerator(
+            self.hyperparameters,
+            self.trial_number,
+            sampling_method=sampling_method,
+            rng=rng
+        )
+        next_grid_point = grid_point_generator.get_next_grid_point()
         assert len(next_grid_point) > 0
 
     def test_get_grid_point_in_order(self) -> None:
