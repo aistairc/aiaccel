@@ -51,6 +51,7 @@ class TensorBoard(AbstractModule):
             trial_ids = self.buff.d['finished'].Now
         else:
             trial_ids = list(set(self.buff.d['finished'].Now) - set(self.buff.d['finished'].Pre))
+            trial_ids.sort()
 
         for trial_id in trial_ids:
 
