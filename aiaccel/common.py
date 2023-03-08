@@ -33,6 +33,7 @@ dict_runner = 'runner'
 dict_timestamp = 'timestamp'
 dict_verification = 'verification'
 dict_storage = 'storage'
+dict_tensorboard = 'tensorboard'
 
 extension_hp = 'hp'
 extension_pickle = 'pickle'

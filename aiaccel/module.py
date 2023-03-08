@@ -85,7 +85,7 @@ class AbstractModule(object):
         self.hp_finished = 0
         self.seed = self.config.randseed.get()
         self.storage = Storage(self.ws)
-        self.trial_id = TrialId(self.options['config'])
+        self.trial_id = TrialId(self.config)
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng: np.random.RandomState | None = None
 

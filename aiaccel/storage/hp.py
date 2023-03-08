@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -86,6 +86,23 @@ class Hp(Abstract):
         if len(hp) == 0:
             return None
         return hp
+
+    def get_any_trial_params_dict(
+        self, trial_id: int
+    ) -> dict[str, int | float | str] | None:
+        """ Obtain the set parameter information for any given trial.
+
+        Args:
+            trial_id(int): Any trial id.
+
+        Returns:
+            list[HpTable] | None:
+        """
+        params = self.get_any_trial_params(trial_id)
+        if params is None:
+            return None
+
+        return {p.param_name: p.param_value for p in params}
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def all_delete(self) -> None:

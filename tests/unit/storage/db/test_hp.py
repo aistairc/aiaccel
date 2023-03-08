@@ -1,9 +1,10 @@
-from aiaccel.storage.storage import Storage
-from base import db_path, t_base, ws
-from undecorated import undecorated
-from sqlalchemy.exc import SQLAlchemyError
-
 import pytest
+from base import db_path, t_base, ws
+from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
+
+from aiaccel.storage.storage import Storage
+
 
 # set_any_trial_param
 @t_base()
@@ -159,6 +160,43 @@ def test_get_any_trial_params():
         value == str(d[0].param_value)
     else:
         assert False
+
+
+# get_any_trial_params_dict
+@t_base()
+def test_get_any_trial_params_dict():
+    storage = Storage(ws.path)
+
+    trial_id = 0
+    param_name = "x1"
+    param_value = 0.01
+    param_type = "float"
+
+    storage.hp.set_any_trial_param(
+        trial_id=trial_id,
+        param_name=param_name,
+        param_value=param_value,
+        param_type=param_type
+    )
+
+    trial_id = 0
+    param_name = "x2"
+    param_value = 0.02
+    param_type = "float"
+
+    storage.hp.set_any_trial_param(
+        trial_id=trial_id,
+        param_name=param_name,
+        param_value=param_value,
+        param_type=param_type
+    )
+
+    d = storage.hp.get_any_trial_params_dict(trial_id)
+    assert d["x1"] == 0.01
+    assert d["x2"] == 0.02
+
+    d = storage.hp.get_any_trial_params_dict(1)
+    assert d is None
 
 
 # all_delete

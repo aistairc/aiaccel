@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Any
+
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -121,6 +122,18 @@ class Result(Abstract):
             return []
 
         return best_values
+
+    def get_best_objective(self, goal: str) -> int | float | None:
+        """Obtains the sorted result.
+
+        Returns:
+            list: result values
+        """
+        bests = self.get_bests(goal)
+        if len(bests) == 0:
+            return None
+
+        return bests[-1]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_result_trial_id_list(self) -> list | None:

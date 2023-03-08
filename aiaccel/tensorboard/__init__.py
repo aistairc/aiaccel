@@ -1,5 +1,3 @@
-from .abstract import AbstractTensorBoard
+from .tensorboard import TensorBoard
 
-__all__ = [
-    'AbstractTensorBoard'
-]
+__all__ = ['TensorBoard']

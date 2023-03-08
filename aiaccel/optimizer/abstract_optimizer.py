@@ -50,7 +50,7 @@ class AbstractOptimizer(AbstractModule):
         self.num_of_generated_parameter = 0
         self.all_parameter_generated = False
         self.params = load_parameter(self.config.hyperparameters.get())
-        self.trial_id = TrialId(str(self.config_path))
+        self.trial_id = TrialId(self.config)
 
     def register_new_parameters(
         self,

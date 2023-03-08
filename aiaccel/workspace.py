@@ -1,6 +1,7 @@
 from __future__ import annotations
-from pathlib import Path
+
 import shutil
+from pathlib import Path
 
 import aiaccel
 from aiaccel.util import filesystem as fs
@@ -41,39 +42,27 @@ class Workspace:
     def __init__(self, base_path: str):
         self.path = Path(base_path).resolve()
 
-        self.alive = self.path / aiaccel.dict_alive
         self.error = self.path / aiaccel.dict_error
         self.hp = self.path / aiaccel.dict_hp
-        self.hp_ready = self.path / aiaccel.dict_hp / aiaccel.dict_ready
-        self.hp_running = self.path / aiaccel.dict_hp / aiaccel.dict_running
-        self.hp_finished = self.path / aiaccel.dict_hp / aiaccel.dict_finished
-        self.jobstate = self.path / aiaccel.dict_jobstate
         self.lock = self.path / aiaccel.dict_lock
         self.log = self.path / aiaccel.dict_log
         self.output = self.path / aiaccel.dict_output
-        self.pid = self.path / aiaccel.dict_pid
         self.result = self.path / aiaccel.dict_result
         self.runner = self.path / aiaccel.dict_runner
         self.storage = self.path / aiaccel.dict_storage
-        self.timestamp = self.path / aiaccel.dict_timestamp
+        self.tensorboard = self.path / aiaccel.dict_tensorboard
         self.verification = self.path / aiaccel.dict_verification
 
         self.consists = [
-            self.alive,
             self.error,
             self.hp,
-            self.hp_ready,
-            self.hp_running,
-            self.hp_finished,
-            self.jobstate,
             self.lock,
             self.log,
             self.output,
-            self.pid,
             self.result,
             self.runner,
             self.storage,
-            self.timestamp,
+            self.tensorboard,
             self.verification
         ]
         self.results = Path("./results")

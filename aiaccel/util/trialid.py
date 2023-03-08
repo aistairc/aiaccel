@@ -15,7 +15,6 @@ class TrialId:
         config_path (str): Path to the config file.
 
     Attributes:
-        config_path (str): Path to the config file.
         config (Config): Config object.
         ws (Path): Path to the workspace.
         name_length (int): Name length of hp files.
@@ -27,15 +26,15 @@ class TrialId:
         lock (fasteners.InterProcessLock): An interprocess lock.
     """
 
-    def __init__(self, config_path: str) -> None:
-        self.config_path = Path(config_path).resolve()
-        self.config = Config(str(self.config_path))
-
+    def __init__(self, config: Config) -> None:
+        self.config = config
         self.ws = Path(self.config.workspace.get()).resolve()
         self.name_length = self.config.name_length.get()
         self.file_hp_count_fmt = f'%0{self.name_length}d'
         self.dict_hp = self.ws / aiaccel.dict_hp
 
+        # TODO: I think this path is inappropriate.
+        #       It should be changed to something other than "hp".
         self.count_path = self.dict_hp / aiaccel.file_hp_count
         self.lock_path = self.dict_hp / aiaccel.file_hp_count_lock
         self.lock = fasteners.InterProcessLock(str(self.lock_path))

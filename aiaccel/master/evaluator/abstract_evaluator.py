@@ -40,7 +40,7 @@ class AbstractEvaluator(object):
         self.hp_result = None
         self.storage = Storage(self.ws)
         self.goal = self.config.goal.get()
-        self.trial_id = TrialId(str(self.config_path))
+        self.trial_id = TrialId(self.config)
 
     def get_zero_padding_any_trial_id(self, trial_id: int) -> str:
         """Returns string of trial id padded by zeros.

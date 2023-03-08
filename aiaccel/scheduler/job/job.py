@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -9,14 +8,12 @@ from typing import TYPE_CHECKING
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
-from aiaccel import dict_lock
-from aiaccel import dict_result
-from aiaccel import dict_error
+from aiaccel import dict_error, dict_lock, dict_result
+from aiaccel.scheduler.job.model.abci_model import AbciModel
+from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
-from aiaccel.scheduler.job.model.abci_model import AbciModel
-from aiaccel.scheduler.job.model.local_model import LocalModel
 
 if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler.abci_scheduler import AbciScheduler
@@ -24,7 +21,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
-
 
 JOB_STATES = [
     {'name': 'Init'},
@@ -589,7 +585,7 @@ class Job:
 
         self.config_path = str(self.config_path)
         self.trial_id = trial_id
-        self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
+        self.trial_id_str = TrialId(self.config).zero_padding_any_trial_id(self.trial_id)
         self.from_file = None
         self.to_file = None
         self.next_state = None
