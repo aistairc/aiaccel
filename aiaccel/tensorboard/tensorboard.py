@@ -61,6 +61,7 @@ class TensorBoard(AbstractModule):
             # best
             bast_values = self.storage.result.get_bests(self.goal)
             if len(bast_values) > 0:
+                print(bast_values, trial_id)
                 self.writer.add_scalar(self.goal, bast_values[trial_id], trial_id)
 
             # hyperparameters
