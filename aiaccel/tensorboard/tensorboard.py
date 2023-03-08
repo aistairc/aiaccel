@@ -8,6 +8,19 @@ from aiaccel.util.trialid import TrialId
 
 
 class TensorBoard(AbstractModule):
+    """A class for TensorBoard.
+    
+    Args:
+        options (dict[str, str | int | bool]): A dictionary containing
+
+    Attributes:
+        options (dict[str, str | int | bool]): A dictionary containing
+            command line options.
+        goal (str): A goal of optimization.
+        writer (SummaryWriter): A SummaryWriter object.
+        buff (Buffer): A Buffer object.
+
+    """
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         self.options = options
         super().__init__(self.options)
