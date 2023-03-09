@@ -25,7 +25,7 @@ class TensorBoard(AbstractModule):
         self.options = options
         super().__init__(self.options)
 
-        self.goal = self.config.goal.get()
+        self.goal = self.config.goal.get().lower()
 
         self.writer = SummaryWriter(str(self.ws / 'tensorboard'))
 
@@ -51,19 +51,19 @@ class TensorBoard(AbstractModule):
             trial_ids = self.buff.d['finished'].Now
         else:
             trial_ids = list(set(self.buff.d['finished'].Now) - set(self.buff.d['finished'].Pre))
-            trial_ids.sort()
 
         for trial_id in trial_ids:
 
-            # objective
-            objective_y = self.storage.result.get_any_trial_objective(trial_id)
-            self.writer.add_scalar('objective', objective_y, trial_id)
+            # objective, best_value
+            objective_y, best_value = self.storage.result.get_any_trial_objective_and_best_value(
+                trial_id, self.goal
+            )
 
-            # best
-            bast_values = self.storage.result.get_bests(self.goal)
-            if len(bast_values) > 0:
-                print(bast_values, trial_id)
-                self.writer.add_scalar(self.goal, bast_values[trial_id], trial_id)
+            if objective_y is None or best_value is None:
+                return True
+
+            self.writer.add_scalar('objective', objective_y, trial_id)
+            self.writer.add_scalar(self.goal, best_value, trial_id)
 
             # hyperparameters
             params = self.storage.hp.get_any_trial_params_dict(trial_id)
@@ -72,6 +72,8 @@ class TensorBoard(AbstractModule):
             self.writer.add_hparams(
                 params, {'objective': objective_y}, name=_trial_id
             )
+
+            self.writer.flush()
 
         self.writer.close()
 

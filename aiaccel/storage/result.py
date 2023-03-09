@@ -136,6 +136,51 @@ class Result(Abstract):
         return best_values[-1]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
+    def get_any_trial_objective_and_best_value(self, trial_id: int, goal: str) -> tuple[any, any]:
+        """Obtains the sorted result.
+
+        Returns:
+            tuple: objective, best_value
+        """
+        with self.create_session() as session:
+            data = (
+                session.query(ResultTable)
+                .with_for_update(read=True)
+            )
+
+        if data is None:
+            return None, None
+
+        objective_and_best_value = {}
+
+        if goal.lower() == "maximize":
+            best_value = float("-inf")
+            for d in data:
+                if best_value < d.objective:
+                    best_value = d.objective
+                objective_and_best_value[d.trial_id] = {
+                    'objective': d.objective, 'best_value': best_value
+                }
+        elif goal.lower() == "minimize":
+            best_value = float("inf")
+            for d in data:
+                if best_value > d.objective:
+                    best_value = d.objective
+                objective_and_best_value[d.trial_id] = {
+                    'objective': d.objective, 'best_value': best_value
+                }
+        else:
+            return None, None
+
+        if trial_id not in objective_and_best_value:
+            return None, None
+
+        return (
+            objective_and_best_value[trial_id]['objective'],
+            objective_and_best_value[trial_id]['best_value']
+        )
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_result_trial_id_list(self) -> list | None:
         """Obtains the sorted result.
 
