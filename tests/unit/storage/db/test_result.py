@@ -134,6 +134,25 @@ def test_get_best_objective():
     assert storage.result.get_best_objective('minimize') == -5
     assert storage.result.get_best_objective('maximize') == 3
 
+
+# get_any_trial_objective_and_best_value
+@t_base()
+def test_get_any_trial_objective_and_best_value():
+    storage = Storage(ws.path)
+
+    objectives = [1, -5, 3, 1.23]
+    ids = range(len(objectives))
+
+    for i in range(len(objectives)):
+        storage.result.set_any_trial_objective(
+            trial_id=ids[i],
+            objective=objectives[i]
+        )
+
+    assert storage.result.get_any_trial_objective_and_best_value(2, 'minimize') == (3, -5)
+    assert storage.result.get_any_trial_objective_and_best_value(3, 'maximize') == (1.23, 3)
+
+
 # get_result_trial_id_list
 @t_base()
 def test_get_result_trial_id_list():
