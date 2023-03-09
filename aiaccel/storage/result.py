@@ -146,6 +146,7 @@ class Result(Abstract):
             data = (
                 session.query(ResultTable)
                 .with_for_update(read=True)
+                .order_by(ResultTable.trial_id)
             )
 
         if data is None:

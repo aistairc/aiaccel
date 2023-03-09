@@ -62,8 +62,8 @@ class TensorBoard(AbstractModule):
             if objective_y is None or best_value is None:
                 return True
 
-            self.writer.add_scalar('objective', objective_y, trial_id)
-            self.writer.add_scalar(self.goal, best_value, trial_id)
+            self.writer.add_scalar(tag='objective', scalar_value=objective_y, global_step=trial_id)
+            self.writer.add_scalar(tag=self.goal, scalar_value=best_value, global_step=trial_id)
 
             # hyperparameters
             params = self.storage.hp.get_any_trial_params_dict(trial_id)
