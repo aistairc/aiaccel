@@ -3,7 +3,7 @@ import pathlib
 from unittest.mock import patch
 
 from aiaccel.cli.report import main
-from aiaccel.cli.creation_report import CreationReport
+from aiaccel.cli.cvs_writer import CsvWriter
 from aiaccel.workspace import Workspace
 
 
@@ -21,10 +21,10 @@ def test_report(clean_work_dir, work_dir, create_tmp_config):
     config_path = pathlib.Path('tests/test_data/config.json')
     config_path = create_tmp_config(config_path)
 
-    report = CreationReport(config_path)
+    csv_writer = CsvWriter(config_path)
 
-    assert report.get_zero_padding_trial_id(1) == '000001'
-    assert report.create() is None
+    assert csv_writer._get_zero_padding_trial_id(1) == '000001'
+    assert csv_writer.create() is None
 
     hp = {
         'trial_id': '000000',
@@ -42,9 +42,9 @@ def test_report(clean_work_dir, work_dir, create_tmp_config):
         ],
         'result': -0.2433042724186567
     }
-    with patch.object(report.storage.trial, 'get_finished', return_value=[0]):
-        with patch.object(report.storage, 'get_hp_dict', return_value=hp):
-            assert report.create() is None
+    with patch.object(csv_writer.storage.trial, 'get_finished', return_value=[0]):
+        with patch.object(csv_writer.storage, 'get_hp_dict', return_value=hp):
+            assert csv_writer.create() is None
 
 
 def test_report_():

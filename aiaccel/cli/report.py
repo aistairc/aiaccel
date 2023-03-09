@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
 
-from aiaccel.cli import CreationReport
+from aiaccel.cli import CsvWriter
 
 logger = getLogger(__name__)
 logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
@@ -16,8 +16,8 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
-    report = CreationReport(args.config)
-    report.create()
+    csv_writer = CsvWriter(args.config)
+    csv_writer.create()
 
 
 if __name__ == "__main__":  # pragma: no cover

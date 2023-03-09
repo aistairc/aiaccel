@@ -16,7 +16,7 @@ from aiaccel.optimizer import create_optimizer
 from aiaccel.scheduler import create_scheduler
 from aiaccel.util import load_yaml
 from aiaccel.util import get_file_result_hp
-from aiaccel.cli import CreationReport
+from aiaccel.cli import CsvWriter
 from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
@@ -134,8 +134,8 @@ def main() -> None:  # pragma: no cover
     for module in modules:
         module.post_process()
 
-    report = CreationReport(args.config)
-    report.create()
+    csv_writer = CsvWriter(args.config)
+    csv_writer.create()
 
     logger.info("moving...")
     dst = workspace.move_completed_data()
