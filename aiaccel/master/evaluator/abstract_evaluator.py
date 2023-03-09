@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+
 import aiaccel
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
@@ -60,8 +61,9 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        best_trial_id, _ = self.storage.get_best_trial(self.goal)
-        self.hp_result = self.storage.get_hp_dict(best_trial_id)
+        # best_trial_id, _ = self.storage.get_best_trial(self.goal)
+        # self.hp_result = self.storage.get_hp_dict(best_trial_id)
+        self.hp_result = self.storage.get_best_trial_dict(self.goal)
 
     def print(self) -> None:
         """Print current results.
@@ -70,8 +72,11 @@ class AbstractEvaluator(object):
             None
         """
         logger = logging.getLogger('root.master.evaluator')
-        logger.info('Best hyperparameter is followings:')
-        logger.info(self.hp_result)
+        if self.hp_result:
+            logger.info('Best hyperparameter is followings:')
+            logger.info(self.hp_result)
+        else:
+            logger.info('Evaluation not available (no results in stirage.db).')
 
     def save(self) -> None:
         """Save current results to a file.
@@ -79,5 +84,6 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        path = self.ws / aiaccel.dict_result / aiaccel.file_final_result
-        create_yaml(path, self.hp_result, self.dict_lock)
+        if self.hp_result:
+            path = self.ws / aiaccel.dict_result / aiaccel.file_final_result
+            create_yaml(path, self.hp_result, self.dict_lock)

@@ -86,8 +86,8 @@ class AbstractMaster(AbstractModule):
         Raises:
             ValueError: Causes when an invalid goal is set.
         """
-        if not self.check_finished():
-            return
+        # if not self.check_finished():
+        #     return
 
         evaluator: MaximizeEvaluator | MinimizeEvaluator
         if self.goal.lower() == aiaccel.goal_maximize:
