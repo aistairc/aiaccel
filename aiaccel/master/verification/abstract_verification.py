@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 from pathlib import Path
+from typing import Literal
 
 import aiaccel
 from aiaccel.config import Config
@@ -24,7 +25,6 @@ class AbstractVerification(object):
         ws (Path): Path to the workspace.
         dict_lock (Path): Path to "lock", i.e. `ws`/lock.
         is_verified (bool): Whether verified or not.
-        finished_loop (int): The last loop number verified.
         condition (list[dict[str, int | float]]): A list of verification
             conditions. Each element dict has keys 'loop', 'minimum', and
             'maximum' with values as int, float, and float, respectively.
@@ -41,80 +41,89 @@ class AbstractVerification(object):
         self.config = Config(self.options['config'])
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / aiaccel.dict_lock
-        self.is_verified: bool = None
-        self.finished_loop = None
-        self.condition = None
-        self.verification_result = None
-        self.load_verification_config()
+        self.is_verified = self.config.is_verified.get()
+        self.condition = self.config.condition.get()
+        self.verification_result = copy.copy(self.condition)
         self.storage = Storage(self.ws)
+
+        if self.config.goal.get().lower() == 'minimize':
+            self._current_best_start = float('inf')
+            self._comparator = min
+        else:
+            self._current_best_start = float('-inf')
+            self._comparator = max
+        self._verified_loops = []
+        self._verified_trial_ids = []
 
     def verify(self) -> None:
         """Run a verification.
 
         The trigger to run a verification, is described in configuration file
         'verification' > 'conditions'.
-
-        Returns:
-            None
         """
         if not self.is_verified:
             return
 
-        # with fasteners.InterProcessLock(interprocess_lock_file(
-        #         (self.ws / aiaccel.dict_hp), self.dict_lock)):
-        #     hp_finished_files = get_file_hp_finished(self.ws)
+        # TODO: Flatten following for-loop if main process is flatten.
+        for condition_id, target_condition in enumerate(self.condition):
+            loop = target_condition['loop']
+            if not self._is_loop_verifiable(loop):
+                continue
+            if self._is_loop_verified(loop):
+                continue
+            finished_trial_ids = self.storage.get_finished()
+            finished_trial_ids.sort()
+            current_best = self._find_best_objective_before_target_loop(
+                finished_trial_ids,
+                loop
+            )
+            if self._make_verification(current_best, condition_id) == 'verified':
+                self._verified_loops.append(loop)
+                self.save(loop)
 
-        for i, c in enumerate(self.condition):
-            if self.storage.get_num_finished() >= c['loop']:
-                if (
-                    self.finished_loop is None or
-                    c['loop'] > self.finished_loop
-                ):
-                    self.make_verification(i, c['loop'])
-                    self.finished_loop = c['loop']
+    def _is_loop_verifiable(self, loop: int) -> bool:
+        return loop < self.config.trial_number.get()
 
-    def make_verification(self, index: int, loop: int) -> None:
-        """Run a verification and save the result.
+    def _is_loop_verified(self, loop: int) -> bool:
+        return loop in self._verified_loops
+
+    def _find_best_objective_before_target_loop(
+        self,
+        finished_trial_ids: list[int],
+        loop: int
+    ) -> float:
+        current_best = self._current_best_start
+        self._verified_trial_ids = []
+        for trial_id in finished_trial_ids:
+            if trial_id > loop:
+                break
+            result = self.storage.result.get_any_trial_objective(trial_id)
+            current_best = self._comparator(current_best, result)
+            self._verified_trial_ids.append(trial_id)
+        return current_best
+
+    def _make_verification(self, current_best: float, condition_id: int) -> Literal['verified', '']:
+        """Run a verification.
 
         Args:
-            index (int): An index of verifications.
-            loop (int): A loop count of Master.
+            current_best (float): Best objective before target loop.
+            condition_id (int): Index of target condition.
 
         Returns:
-            None
+            str: String which indicates whether verification was made.
+                'verified' if verification was made, and '' if it was not.
         """
-        # with fasteners.InterProcessLock(
-        #     interprocess_lock_file((self.ws / aiaccel.dict_hp), self.dict_lock)
-        # ):
-        #     hp_finished_files = get_file_hp_finished(self.ws)
-
-        # best, best_file = get_best_parameter(
-        #     hp_finished_files,
-        #     self.config.goal.get(),
-        #     self.dict_lock
-        # )
-        # self.verification_result[index]['best'] = best
-
-        # if (
-        #     best < self.condition[index]['minimum'] or
-        #     best > self.condition[index]['maximum']
-        # ):
-        #     self.verification_result[index]['passed'] = False
-        # else:
-        #     self.verification_result[index]['passed'] = True
-
-        # self.save(loop)
-
-        best_trial = self.storage.get_best_trial_dict(self.config.goal.get().lower())
-
-        if (
-            best_trial['result'] < self.condition[index]['minimum'] or
-            best_trial['result'] > self.condition[index]['maximum']
-        ):
-            self.verification_result[index]['passed'] = False
+        loop = self.condition[condition_id]['loop']
+        lower = self.condition[condition_id]['minimum']
+        upper = self.condition[condition_id]['maximum']
+        if lower <= current_best <= upper:
+            self.verification_result[condition_id]['passed'] = True
+            return 'verified'
+        elif len(self._verified_trial_ids) == loop + 1:
+            self.verification_result[condition_id]['passed'] = False
+            return 'verified'
         else:
-            self.verification_result[index]['passed'] = True
-        self.save(loop)
+            return ''
 
     def load_verification_config(self) -> None:
         """Load configurations about verification.

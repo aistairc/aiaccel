@@ -1,16 +1,22 @@
-import aiaccel
-from aiaccel.master.verification.abstract_verification import \
-    AbstractVerification
-from aiaccel.storage.storage import Storage
+from __future__ import annotations
+
+from collections.abc import Generator
+from pathlib import Path
+
+import pytest
+
+from aiaccel import dict_verification
+from aiaccel import extension_verification
+from aiaccel.master.verification.abstract_verification import AbstractVerification
 from aiaccel.util.filesystem import load_yaml
-from unittest.mock import patch
 
 from tests.base_test import BaseTest
 
 
 class TestAbstractVerification(BaseTest):
 
-    def test_init(self):
+    @pytest.fixture(autouse=True)
+    def setupt_verifier(self) -> Generator[None, None, None]:
         options = {
             'config': self.config_json,
             'resume': None,
@@ -18,11 +24,11 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
+        self.verifier = AbstractVerification(options)
+        yield
+        self.verifier = None
 
-        verification = AbstractVerification(options)
-        assert verification.is_verified
-
-    def test_verify(self, setup_hp_finished, work_dir):
+    def test_init(self) -> None:
         options = {
             'config': self.config_json,
             'resume': None,
@@ -30,138 +36,179 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
+        verifier = AbstractVerification(options)
+        assert verifier.is_verified
 
-        verification = AbstractVerification(options)
-        verification.is_verified = False
-        assert verification.verify() is None
-        verification.is_verified = True
-        setup_hp_finished(10)
+    def test_verify(self, monkeypatch: pytest.MonkeyPatch, work_dir: Path) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.verifier, 'is_verified', False)
+            assert self.verifier.verify() is None
 
-        for i in range(10):
-            verification.storage.result.set_any_trial_objective(
-                trial_id=i,
-                objective=(i * 1.0)
-            )
-            verification.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            verification.storage.hp.set_any_trial_params(
-                trial_id=i,
-                params=[
-                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
-                    for j in range(2)
-                ]
-            )
+            m.setattr(self.verifier, 'is_verified', True)
 
-        verification.verify()
-        file_path = work_dir / aiaccel.dict_verification / f'1.{aiaccel.extension_verification}'
-        assert file_path.exists()
+            m.setattr(self.verifier, '_is_loop_verifiable', lambda _: False)
+            m.setattr(self.verifier, '_verified_loops', dummy_verified_loops := [])
+            assert self.verifier.verify() is None
+            assert len(dummy_verified_loops) == 0
 
-        with patch.object(verification, 'finished_loop', None):
-            assert verification.verify() is None
+            m.setattr(self.verifier, '_is_loop_verifiable', lambda _: True)
 
-        with patch.object(verification, 'finished_loop', 65535):
-            assert verification.verify() is None
+            m.setattr(self.verifier, '_is_loop_verified', lambda _: True)
+            m.setattr(self.verifier, '_verified_loops', dummy_verified_loops := [])
+            assert self.verifier.verify() is None
+            assert len(dummy_verified_loops) == 0
 
-    def test_make_verification(
-        self,
-        setup_hp_finished,
-        work_dir
-    ):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+            m.setattr(self.verifier, '_is_loop_verified', lambda _: False)
 
-        verification = AbstractVerification(options)
-        setup_hp_finished(10)
+            m.setattr(self.verifier, '_find_best_objective_before_target_loop', lambda *_: 0)
+            m.setattr(self.verifier, '_make_verification', lambda *_: 'verified')
+            m.setattr(self.verifier, '_verified_loops', dummy_verified_loops := [])
+            assert self.verifier.verify() is None
+            assert len(dummy_verified_loops) == len(self.verifier.condition)
 
-        for i in range(10):
-            verification.storage.result.set_any_trial_objective(
-                trial_id=i,
-                objective=(i * 1.0)
-            )
-            verification.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            for j in range(2):
-                verification.storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f'x{j+1}',
-                    param_value=0.0,
-                    param_type='float'
+            m.setattr(self.verifier, '_make_verification', lambda *_: '')
+            m.setattr(self.verifier, '_verified_loops', dummy_verified_loops := [])
+            assert self.verifier.verify() is None
+            assert len(dummy_verified_loops) == 0
+
+        with monkeypatch.context() as m:
+            for trial_id in range(10):
+                self.verifier.storage.result.set_any_trial_objective(
+                    trial_id=trial_id,
+                    objective=trial_id * 1.0
                 )
+                self.verifier.storage.trial.set_any_trial_state(
+                    trial_id=trial_id,
+                    state='finished'
+                )
+                for j in range(1, 3):
+                    self.verifier.storage.hp.set_any_trial_param(
+                        trial_id=trial_id,
+                        param_name=f'x{j}',
+                        param_value=0.0,
+                        param_type='float'
+                    )
+            self.verifier.verify()
+            file_path = work_dir / dict_verification / f'5.{extension_verification}'
+            assert file_path.exists()
+            yml = load_yaml(file_path)
+            for y in yml:
+                if y['loop'] == 1 or y['loop'] == 5:
+                    assert y['passed']
 
-        verification.verify()
-        file_path = work_dir / aiaccel.dict_verification / f'5.{aiaccel.extension_verification}'
-        assert file_path.exists()
-        yml = load_yaml(file_path)
-        for y in yml:
-            if y['loop'] == 1 or y['loop'] == 5:
-                assert y['passed']
+        with monkeypatch.context() as m:
+            m.setattr(
+                self.verifier, '_verified_loops', dummy_verified_loops := []
+            )
+            m.setattr(
+                self.verifier.storage, 'get_finished',
+                lambda: [5, 6, 7, 8, 9]
+            )
+            m.setattr(
+                self.verifier.storage.result, 'get_any_trial_objective',
+                lambda x: [None, None, None, None, None, 0, 0, 0, 0, 0][x]
+            )
+            assert self.verifier.verify() is None
+            assert dummy_verified_loops == [5]
 
-        d0 = {
-            'result': float('-inf')
-        }
-        d1 = {
-            'result': 0
-        }
-        with patch.object(verification.storage, 'get_best_trial_dict', return_value=d0):
-            with patch.object(verification.storage, 'get_num_finished', return_value=1):
-                assert verification.make_verification(0, 0) is None
-        with patch.object(verification.storage, 'get_best_trial_dict', return_value=d1):
-            with patch.object(verification.storage, 'get_num_finished', return_value=1):
-                assert verification.make_verification(0, 0) is None
+        with monkeypatch.context() as m:
+            m.setattr(
+                self.verifier, '_verified_loops', dummy_verified_loops := []
+            )
+            m.setattr(
+                self.verifier.storage, 'get_finished',
+                lambda: [5, 6, 7, 8, 9]
+            )
+            m.setattr(
+                self.verifier.storage.result, 'get_any_trial_objective',
+                lambda x: [None, None, None, None, None, 65, 65, 65, 65, 65][x]
+            )
+            assert self.verifier.verify() is None
+            assert dummy_verified_loops == []
+
+    def test_is_loop_verifiable(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.verifier.config.trial_number, 'get', lambda: 1)
+            assert self.verifier._is_loop_verifiable(0) is True
+            assert self.verifier._is_loop_verifiable(2) is False
+
+    def test_is_loop_verified(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.verifier, '_verified_loops', [0])
+            assert self.verifier._is_loop_verified(0) is True
+            assert self.verifier._is_loop_verified(1) is False
+
+    def test_find_best_objective_before_target_loop(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.verifier.storage.result, 'get_any_trial_objective', lambda _: 0)
+            current_best = self.verifier._find_best_objective_before_target_loop([1], 0)
+            assert current_best == self.verifier._current_best_start
+            assert self.verifier._verified_trial_ids == []
+
+            current_best = self.verifier._find_best_objective_before_target_loop([0], 0)
+            assert current_best == 0
+            assert self.verifier._verified_trial_ids == [0]
+
+    def test_make_verification(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(
+                self.verifier,
+                'verification_result',
+                dummy_verification_result := [{}] * len(self.verifier.condition)
+            )
+            assert self.verifier._make_verification(0, 0) == 'verified'
+            assert dummy_verification_result[0]['passed'] is True
+
+        with monkeypatch.context() as m:
+            m.setattr(self.verifier, '_verified_trial_ids', [0, 1])
+            m.setattr(
+                self.verifier,
+                'verification_result',
+                dummy_verification_result := [{}] * len(self.verifier.condition)
+            )
+            assert self.verifier._make_verification(-1, 0) == 'verified'
+            assert dummy_verification_result[0]['passed'] is False
+
+        with monkeypatch.context() as m:
+            m.setattr(self.verifier, '_verified_trial_ids', [])
+            m.setattr(
+                self.verifier,
+                'verification_result',
+                dummy_verification_result := [{}] * len(self.verifier.condition)
+            )
+            assert self.verifier._make_verification(-1, 0) == ''
+            assert hasattr(dummy_verification_result, 'passed') is False
 
     def test_print(self):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        verification = AbstractVerification(options)
-        verification.is_verified = False
-        assert verification.print() is None
-        verification.is_verified = True
-        assert verification.print() is None
+        self.verifier.is_verified = False
+        assert self.verifier.print() is None
+        self.verifier.is_verified = True
+        assert self.verifier.print() is None
 
-    def test_save(self, work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        verification = AbstractVerification(options)
-        verification.is_verified = False
-        assert verification.save(1) is None
-        verification.is_verified = True
+    def test_save(self, work_dir: Path) -> None:
+        self.verifier.is_verified = False
+        assert self.verifier.save(1) is None
+        self.verifier.is_verified = True
         # setup_hp_finished(1)
 
         for i in range(1):
-            verification.storage.result.set_any_trial_objective(
+            self.verifier.storage.result.set_any_trial_objective(
                 trial_id=i,
                 objective=i * 1.0
 
             )
             for j in range(2):
-                verification.storage.hp.set_any_trial_param(
+                self.verifier.storage.hp.set_any_trial_param(
                     trial_id=i,
                     param_name=f"x{j}",
                     param_value=0.0,
                     param_type='float'
                 )
 
-        verification.verify()
-        path = work_dir.joinpath(
-            aiaccel.dict_verification,
-            f'1.{aiaccel.extension_verification}'
-        )
-
+        self.verifier.verify()
+        path = work_dir / dict_verification / f'1.{extension_verification}'
         if path.exists():
             path.unlink()
 
-        verification.save(1)
+        self.verifier.save(1)
         assert path.exists()
