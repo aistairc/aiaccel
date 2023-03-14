@@ -19,7 +19,10 @@ from aiaccel.scheduler import create_model
 from aiaccel.scheduler import AbciModel
 from aiaccel.scheduler import LocalModel
 from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler.job.job import JOB_STATES
+from aiaccel.scheduler.job.job import JOB_TRANSITIONS
 from aiaccel.util import get_time_now_object
+
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
@@ -69,9 +72,10 @@ class TestModel(BaseTest):
         self.job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
-        self.model = create_model(self.config.resource_type.get())
+        self.model = scheduler.create_model()
         yield
         self.job = None
         self.model = None
@@ -107,6 +111,7 @@ class TestModel(BaseTest):
             # json_object_config,
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         yield
@@ -413,6 +418,7 @@ class TestJob(BaseTest):
         self.job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         yield
@@ -442,6 +448,7 @@ class TestJob(BaseTest):
         job = Job(
             self.config,
             scheduler,
+            scheduler.create_model(),
             trial_id
         )
         assert type(job) is Job

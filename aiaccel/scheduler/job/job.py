@@ -4,7 +4,7 @@ import logging
 
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
@@ -14,17 +14,17 @@ from aiaccel.common import dict_result
 from aiaccel.common import dict_error
 from aiaccel.common import resource_type_abci
 from aiaccel.common import resource_type_local
+from aiaccel.config import Config
 from aiaccel.util import Buffer
 from aiaccel.util import get_time_now_object
 from aiaccel.util import TrialId
 from aiaccel.scheduler.job.model import AbciModel
 from aiaccel.scheduler.job.model import LocalModel
+from aiaccel.storage import Storage
+
 if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler import AbciScheduler
     from aiaccel.scheduler import LocalScheduler
-
-from aiaccel.config import Config
-from aiaccel.storage import Storage
 
 
 JOB_STATES = [
@@ -401,22 +401,6 @@ class CustomMachine(Machine):
     pass
 
 
-def create_model(resource_type: Literal['abci', 'local']) -> AbciModel | LocalModel:
-    """Creates model object of state machine.
-
-    Args:
-        resource_type (str): Resource type ('abci' or 'local').
-
-    Returns:
-        AbciModel | LocalModel: Model object.
-    """
-    if resource_type.lower() == resource_type_abci:
-        model = AbciModel()
-    elif resource_type.lower() == resource_type_local:
-        model = LocalModel()
-    return model
-
-
 class Job:
     """A job thread to manage running jobs on local computer or ABCI.
 
@@ -428,7 +412,12 @@ class Job:
         config (ConfileWrapper): A configuration object.
         scheduler (LocalScheduler | AbciScheduler): A reference for
             scheduler object.
+        model (LocalModel | AbciModel): A reference for
+            model object of state machine.
         hp_file (Path): A hyper parameter file for this job.
+
+    Raises:
+        ValueError: When model is None.
 
     Attributes:
         config (ConfileWrapper): A configuration object.
@@ -544,6 +533,7 @@ class Job:
         self,
         config: Config,
         scheduler: AbciScheduler | LocalScheduler,
+        model: AbciModel | LocalModel,
         trial_id: int
     ) -> None:
         super(Job, self).__init__()
@@ -578,7 +568,16 @@ class Job:
         self.ws = Path(self.workspace).resolve()
         self.dict_lock = self.ws / dict_lock
 
-        self.model = create_model(self.resource_type)
+        self.scheduler = scheduler
+        self.model = model
+        if self.model is None:
+            raise ValueError(
+                "model is None. "
+                "Be sure to specify the model to use in the Job class. "
+                "For example, PylocalScheduler doesn't use model. "
+                "Therefore, Job class cannot be used."
+            )
+
         self.machine = CustomMachine(
             model=self.model,
             states=JOB_STATES,
@@ -588,7 +587,6 @@ class Job:
             ordered_transitions=False
         )
         self.loop_count = 0
-        self.scheduler = scheduler
 
         self.config_path = str(self.config_path)
         self.trial_id = trial_id

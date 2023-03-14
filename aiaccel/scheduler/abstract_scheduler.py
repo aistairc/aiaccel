@@ -90,7 +90,7 @@ class AbstractScheduler(AbstractModule):
         """
         trial_ids = [job.trial_id for job in self.jobs]
         if trial_id not in trial_ids:
-            job = Job(self.config, self, trial_id)
+            job = Job(self.config, self, self.create_model(), trial_id)
             self.jobs.append(job)
             self.logger.debug(f"Submit a job: {str(trial_id)}")
             job.main()
@@ -313,3 +313,21 @@ class AbstractScheduler(AbstractModule):
         obj = super().__getstate__()
         del obj['jobs']
         return obj
+
+    def create_model(self) -> AbstractModel | None:
+        """Creates model object of state machine.
+
+        Override with a Scheduler that uses a Model.
+        For example, LocalScheduler, AbciScheduler, etc.
+        By the way, PylocalScheduler does not use Model.
+
+        Returns:
+            LocalModel: LocalModel object.
+
+            Should return None.
+            For that purpose, it is necessary to modify TestAbstractScheduler etc significantly.
+            So it returns LocalModel.
+
+            # TODO: Fix TestAbstractScheduler etc to return None.
+        """
+        return LocalModel()

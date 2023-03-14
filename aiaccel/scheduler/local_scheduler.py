@@ -4,6 +4,7 @@ import re
 
 from aiaccel.scheduler import AbstractScheduler
 from aiaccel.util import ps2joblist
+from aiaccel.scheduler import LocalModel
 
 
 class LocalScheduler(AbstractScheduler):
@@ -55,3 +56,11 @@ class LocalScheduler(AbstractScheduler):
             return None
 
         return args[trial_id_index + index_offset]
+
+    def create_model(self) -> LocalModel:
+        """Creates model object of state machine.
+
+        Returns:
+            LocalModel: Model object.
+        """
+        return LocalModel()

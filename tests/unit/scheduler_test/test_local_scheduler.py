@@ -1,5 +1,7 @@
-from aiaccel.scheduler import LocalScheduler
 from aiaccel.scheduler import Job
+from aiaccel.scheduler import LocalModel
+from aiaccel.scheduler import LocalScheduler
+
 from tests.base_test import BaseTest
 
 
@@ -29,7 +31,7 @@ class TestLocalScheduler(BaseTest):
         )
 
         trial_id = 1
-        job = Job(self.config, scheduler, trial_id)
+        job = Job(self.config, scheduler, scheduler.create_model(), trial_id)
         scheduler.jobs.append(job)
         assert scheduler.get_stats() is None
 
@@ -46,3 +48,14 @@ class TestLocalScheduler(BaseTest):
         s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5
+
+    def test_create_model(self):
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = LocalScheduler(options)
+        assert type(scheduler.create_model()) is LocalModel

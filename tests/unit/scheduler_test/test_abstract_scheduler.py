@@ -4,8 +4,10 @@ import os
 import time
 from unittest.mock import patch
 
-
+from aiaccel.scheduler import AbciScheduler
 from aiaccel.scheduler import AbstractScheduler
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler import LocalModel
 
 from tests.base_test import BaseTest
 
@@ -330,3 +332,14 @@ class TestAbstractScheduler(BaseTest):
 
         scheduler.options['resume'] = None
         assert scheduler.resume() is None
+
+    def test_create_model(self):
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+        assert type(scheduler.create_model()) is LocalModel

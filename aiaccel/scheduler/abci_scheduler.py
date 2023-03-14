@@ -5,6 +5,7 @@ import subprocess
 
 from aiaccel.abci import parse_qstat
 from aiaccel.scheduler import AbstractScheduler
+from aiaccel.scheduler import AbciModel
 
 
 class AbciScheduler(AbstractScheduler):
@@ -51,3 +52,11 @@ class AbciScheduler(AbstractScheduler):
         if full.search(command) is None:
             return None
         return numbers.search(command).group()
+
+    def create_model(self) -> AbciModel:
+        """Creates model object of state machine.
+
+        Returns:
+            AbciModel: Model object.
+        """
+        return AbciModel()
