@@ -9,6 +9,7 @@ from aiaccel.config import Config, load_config
 from aiaccel.storage import Storage
 from aiaccel.util import create_yaml
 from aiaccel.util import load_yaml
+from aiaccel.util import interprocess_lock_file
 import json
 
 WORK_SUB_DIRECTORIES = [

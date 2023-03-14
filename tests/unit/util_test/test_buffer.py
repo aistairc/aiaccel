@@ -127,19 +127,19 @@ def test_point_diff():
 
 def test_has_difference():
     buff = Buffer(['test'])
-    assert buff.d['test'].has_difference() == False
+    assert buff.d['test'].has_difference() is False
 
     buff.Add('test', 1.12)
     buff.Add('test', 5.45)
-    assert buff.d['test'].has_difference() == True
-    assert buff.d['test'].has_difference(digit=1) == True
+    assert buff.d['test'].has_difference() is True
+    assert buff.d['test'].has_difference(digit=1) is True
 
     buff.Add('test', 1.12)
     buff.Add('test', 1.12)
-    assert buff.d['test'].has_difference() == False
-    assert buff.d['test'].has_difference(digit=1) == False
+    assert buff.d['test'].has_difference() is False
+    assert buff.d['test'].has_difference(digit=1) is False
 
     buff.Add('test', 1.12)
     buff.Add('test', 1.13)
-    assert buff.d['test'].has_difference() == True
-    assert buff.d['test'].has_difference(digit=1) == False
+    assert buff.d['test'].has_difference() is True
+    assert buff.d['test'].has_difference(digit=1) is False

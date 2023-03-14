@@ -4,7 +4,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from aiaccel.optimizer._nelder_mead import NelderMead
+from aiaccel.optimizer import NelderMead
 from aiaccel.parameter import load_parameter
 from aiaccel.storage import Storage
 from tests.base_test import BaseTest
@@ -18,11 +18,11 @@ class TestNelderMead(BaseTest):
         # params = load_parameter(config.get('optimize', 'parameters'))
         params = load_parameter(self.config.hyperparameters.get())
         rng = np.random.RandomState(0)
-        nm_coef = NelderMead(
-            params.get_parameter_list(),
-            coef={"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5},
-            rng=rng
-        )
+        # nm_coef = NelderMead(
+        #     params.get_parameter_list(),
+        #     coef={"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5},
+        #     rng=rng
+        # )
         self.nm = NelderMead(params.get_parameter_list(), rng=rng)
         yield
         self.nm = None

@@ -12,7 +12,7 @@ from aiaccel.common import module_type_optimizer
 from aiaccel.common import module_type_scheduler
 
 
-from aiaccel.master.local_master import LocalMaster
+from aiaccel.master import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import RandomOptimizer
 from aiaccel.scheduler import LocalScheduler

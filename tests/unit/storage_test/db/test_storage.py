@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from aiaccel.storage import Storage
-from base import t_base, ws
+from tests.unit.storage_test.db.base import t_base, ws
 
 
 # set_any_trial_start_time

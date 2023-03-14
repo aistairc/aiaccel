@@ -3,7 +3,7 @@ from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
 
 from aiaccel.storage import Storage
-from base import t_base, ws
+from tests.unit.storage_test.db.base import t_base, ws
 
 # set_any_trial_param
 

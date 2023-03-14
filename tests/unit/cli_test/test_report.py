@@ -3,7 +3,7 @@ import pathlib
 from unittest.mock import patch
 
 from aiaccel.cli.report import main
-from aiaccel.cli.csv_writer import CsvWriter
+from aiaccel.cli import CsvWriter
 from aiaccel.workspace import Workspace
 
 

@@ -2,9 +2,9 @@ import functools
 from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
-                                              generate_grid_points,
-                                              get_grid_options)
+from aiaccel.optimizer import GridOptimizer
+from aiaccel.optimizer import generate_grid_points
+from aiaccel.optimizer import get_grid_options
 from aiaccel.parameter import HyperParameter, load_parameter
 from tests.base_test import BaseTest
 import pytest

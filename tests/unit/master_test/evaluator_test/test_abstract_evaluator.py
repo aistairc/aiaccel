@@ -2,7 +2,7 @@ from aiaccel.common import dict_hp_finished
 from aiaccel.common import dict_result
 from aiaccel.common import extension_hp
 from aiaccel.common import file_final_result
-from aiaccel.master.evaluator.abstract_evaluator import AbstractEvaluator
+from aiaccel.master import AbstractEvaluator
 from tests.base_test import BaseTest
 
 

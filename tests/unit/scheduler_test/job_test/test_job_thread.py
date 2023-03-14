@@ -11,16 +11,12 @@ from aiaccel.common import dict_hp_finished
 from aiaccel.common import dict_hp_ready
 from aiaccel.common import dict_hp_running
 from aiaccel.common import dict_runner
-from aiaccel.config import ConfileWrapper
 from aiaccel.scheduler import create_scheduler
 from aiaccel.scheduler import CustomMachine
 from aiaccel.scheduler import Job
-from aiaccel.scheduler import create_model
 from aiaccel.scheduler import AbciModel
 from aiaccel.scheduler import LocalModel
 from aiaccel.scheduler import LocalScheduler
-from aiaccel.scheduler.job.job import JOB_STATES
-from aiaccel.scheduler.job.job import JOB_TRANSITIONS
 from aiaccel.util import get_time_now_object
 
 from tests.arguments import parse_arguments
@@ -92,7 +88,6 @@ class TestModel(BaseTest):
             json_object = json.load(f)
 
         json_object['resource']['type'] = 'ABCI'
-        json_object_config = ConfileWrapper(json_object, 'json_object')
 
         commandline_args = [
             "start.py",

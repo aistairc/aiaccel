@@ -2,8 +2,7 @@ from unittest.mock import patch
 
 from aiaccel.common import dict_verification
 from aiaccel.common import extension_verification
-from aiaccel.master.verification.abstract_verification import \
-    AbstractVerification
+from aiaccel.master import AbstractVerification
 from aiaccel.util import load_yaml
 from tests.base_test import BaseTest
 

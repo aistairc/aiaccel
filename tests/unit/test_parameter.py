@@ -4,7 +4,7 @@ from aiaccel.common import goal_maximize
 from aiaccel.common import goal_minimize
 from aiaccel.common import dict_lock
 from aiaccel.common import dict_result
-from aiaccel.cli.start import get_best_parameter
+from aiaccel.cli import get_best_parameter
 from aiaccel.parameter import get_type
 from aiaccel.parameter import load_parameter
 from aiaccel.util import create_yaml

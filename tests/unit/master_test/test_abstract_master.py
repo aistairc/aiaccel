@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from aiaccel.common import goal_maximize
 from aiaccel.config import Config
-from aiaccel.master.abstract_master import AbstractMaster
+from aiaccel.master import AbstractMaster
 from aiaccel.util import get_time_now_object
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest

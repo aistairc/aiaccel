@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from aiaccel.cli.plot import Plotter
+from aiaccel.cli import Plotter
 from aiaccel.config import Config
 from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
