@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import logging
 import string
-
-import numpy as np
+from typing import Any
 
 
 def generate_random_name(
     length: int = 10,
-    rng: np.random.RandomState | None = None
+    rng: Any = None
 ) -> str | None:
     """
     Generate random name using alphanumeric.
