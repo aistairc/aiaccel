@@ -12,8 +12,6 @@ from transitions.extensions.states import Tags, add_state_features
 from aiaccel.common import dict_lock
 from aiaccel.common import dict_result
 from aiaccel.common import dict_error
-from aiaccel.common import resource_type_abci
-from aiaccel.common import resource_type_local
 from aiaccel.config import Config
 from aiaccel.util import Buffer
 from aiaccel.util import get_time_now_object
