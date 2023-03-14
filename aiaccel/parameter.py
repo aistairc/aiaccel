@@ -58,28 +58,6 @@ def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
     return best, best_file
 
 
-def get_type(parameter: dict) -> str:
-    """Get a type of a specified parameter.
-
-    Args:
-        parameter (dict): A parameter dictionary in a configuration file.
-
-    Returns:
-        str: A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
-        'ORDINAL'.
-    """
-    if parameter['type'].lower() == 'uniform_int':
-        return 'INT'
-    elif parameter['type'].lower() == 'uniform_float':
-        return 'FLOAT'
-    elif parameter['type'].lower() == 'categorical':
-        return 'CATEGORICAL'
-    elif parameter['type'].lower() == 'ordinal':
-        return 'ORDINAL'
-    else:
-        return parameter['type']
-
-
 class HyperParameter(object):
     """
     A hyper parameter class.
@@ -90,15 +68,15 @@ class HyperParameter(object):
     Attributes:
         _raw_dict (dict): A parameter dictionary in a configuration file.
         name (str): A parameter name.
-        type (str): A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
-            'ORDINAL'.
+        type (str): A parameter type any of 'uniform_int', 'uniform_float',
+            'categorical' and 'ordinal'.
         log (bool): A parameter is logarithm or not.
         lower (float | int): A lower value of a parameter.
         upper (float | int): A upper value of a parameter.
         choices (list[float, int, str]): This is set as a list of a parameter,
-            when a parameter type is 'CATEGORICAL'.
+            when a parameter type is 'categorical'.
         sequence (list[float, int, str]): This is set as a list of a parameter,
-            when a parameter type is 'ORDINAL'.
+            when a parameter type is 'ordinal'.
         initial (float | int | str): A initial value. If this is set, this
             value is evaluated at first run.
         q (float | int): A quantization factor.
@@ -107,7 +85,7 @@ class HyperParameter(object):
     def __init__(self, parameter: dict[str, bool | int | float | list]) -> None:
         self._raw_dict = parameter
         self.name = parameter['name']
-        self.type = get_type(parameter)
+        self.type = parameter['type']
         self.log = False
         self.lower = None
         self.upper = None
@@ -159,9 +137,9 @@ class HyperParameter(object):
         """
         if initial and self.initial is not None:
             value = self.initial
-        elif self.type.lower() == 'int':
+        elif self.type.lower() == 'uniform_int':
             value = rng.randint(self.lower, self.upper)
-        elif self.type.lower() == 'float':
+        elif self.type.lower() == 'uniform_float':
             value = rng.uniform(self.lower, self.upper)
         elif self.type.lower() == 'categorical':
             value = rng.choice(self.choices)
@@ -241,15 +219,3 @@ class HyperParameterConfiguration(object):
         for name, value in self.hps.items():
             ret.append(value.sample(initial, rng=rng))
         return ret
-
-
-def load_parameter(json_string: dict) -> HyperParameterConfiguration:
-    """Load HyperParameterConfiguration object from a configuration file.
-
-    Args:
-        json_string (dict): A hyper parameter configuration.
-
-    Returns:
-        HyperParameterConfiguration: A hyper parameter configuration.
-    """
-    return HyperParameterConfiguration(json_string)

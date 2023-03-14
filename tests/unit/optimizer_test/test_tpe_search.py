@@ -1,13 +1,13 @@
+from unittest.mock import patch
+
 import numpy as np
 import pytest
+
 from aiaccel.config import load_config
 from aiaccel.optimizer.tpe_optimizer import (TpeOptimizer, TPESamplerWrapper,
                                              create_distributions)
-from aiaccel.parameter import load_parameter
-from aiaccel.config import load_config
-
+from aiaccel.parameter import HyperParameterConfiguration
 from tests.base_test import BaseTest
-from unittest.mock import patch
 
 
 class TestTPESamplerWrapper(BaseTest):
@@ -96,17 +96,16 @@ class TestTpeOptimizer(BaseTest):
 
 def test_create_distributions(data_dir):
     config = load_config(data_dir / 'config_tpe_2.json')
-    params = load_parameter(config.optimize.parameters)
+    params = HyperParameterConfiguration(config.optimize.parameters)
     dist = create_distributions(params)
     assert type(dist) is dict
 
     config = load_config(data_dir / 'config_tpe_categorical.json')
-    params = load_parameter(config.optimize.parameters)
+    params = HyperParameterConfiguration(config.optimize.parameters)
     dist = create_distributions(params)
     assert type(dist) is dict
 
-
     config = load_config(data_dir / 'config_tpe_invalid_type.json')
-    params = load_parameter(config.optimize.parameters)
+    params = HyperParameterConfiguration(config.optimize.parameters)
     with pytest.raises(TypeError):
         create_distributions(params)

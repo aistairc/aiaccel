@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import copy
 
 from omegaconf.dictconfig import DictConfig
@@ -236,9 +237,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         for param in self.params.get_parameter_list():
             i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
-            if param.type.lower() == 'float':
+            if param.type.lower() == 'uniform_float':
                 value = float(pool_p['parameters'][i]['value'])
-            elif param.type.lower() == 'int':
+            elif param.type.lower() == 'uniform_int':
                 value = int(pool_p['parameters'][i]['value'])
             elif param.type.lower() == 'ordinal':
                 index = int(pool_p['parameters'][i]['value'])

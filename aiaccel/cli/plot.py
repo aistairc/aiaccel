@@ -25,7 +25,7 @@ class Plotter:
         self.workspace = Path(config.generic.workspace).resolve()
 
         self.storage = Storage(self.workspace)
-        self.goal = config.optimize.goal.lower()
+        self.goal = config.optimize.goal.value
         self.cplt = EasyVisualizer()
 
     def plot(self) -> None:

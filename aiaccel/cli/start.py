@@ -57,9 +57,9 @@ def main() -> None:  # pragma: no cover
 
     logger.info(f"config: {str(pathlib.Path(config.config_path).resolve())}")
 
-    Master = create_master(config.resource.type)
+    Master = create_master(config.resource.type.value)
     Optimizer = create_optimizer(config.optimize.search_algorithm)
-    Scheduler = create_scheduler(config.resource.type)
+    Scheduler = create_scheduler(config.resource.type.value)
     modules = [Master(config), Optimizer(config), Scheduler(config)]
 
     time_s = time.time()
@@ -92,7 +92,8 @@ def main() -> None:  # pragma: no cover
     shutil.copy(pathlib.Path(config.config_path), dst / config_name)
 
     files = fs.get_file_result_hp(dst)
-    best, best_file = pt.get_best_parameter(files, config.optimize.goal, dict_lock)
+    goal = config.optimize.goal.value.lower()
+    best, best_file = pt.get_best_parameter(files, goal, dict_lock)
 
     logger.info(f"Best result    : {best_file}")
     logger.info(f"               : {best}")

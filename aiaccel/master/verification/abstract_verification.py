@@ -4,12 +4,10 @@ import copy
 import logging
 from pathlib import Path
 
-from omegaconf.dictconfig import DictConfig
 from omegaconf import OmegaConf
+from omegaconf.dictconfig import DictConfig
 
-from aiaccel import dict_lock
-from aiaccel import dict_verification
-from aiaccel import extension_verification
+from aiaccel import dict_lock, dict_verification, extension_verification
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 
@@ -106,7 +104,7 @@ class AbstractVerification(object):
 
         # self.save(loop)
 
-        best_trial = self.storage.get_best_trial_dict(self.config.optimize.goal.lower())
+        best_trial = self.storage.get_best_trial_dict(self.config.optimize.goal.value.lower())
         if best_trial is None:
             return
 

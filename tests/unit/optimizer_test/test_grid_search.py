@@ -1,16 +1,15 @@
 import functools
 from pathlib import Path
 
+import pytest
+from omegaconf.errors import MissingMandatoryValue
+
 from aiaccel.config import load_config
 from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
                                               generate_grid_points,
                                               get_grid_options)
-from aiaccel.parameter import HyperParameter, load_parameter
-from aiaccel.config import load_config
-
-from omegaconf.errors import MissingMandatoryValue
+from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 from tests.base_test import BaseTest
-import pytest
 
 
 def test_get_grid_options():
@@ -56,7 +55,7 @@ def test_get_grid_options():
 
 def test_generate_grid_points(grid_load_test_config):
     config = grid_load_test_config()
-    params = load_parameter(config.optimize.parameters)
+    params = HyperParameterConfiguration(config.optimize.parameters)
     for p in params.get_parameter_list():
         generate_grid_points(p, config)
 
@@ -94,7 +93,7 @@ def test_generate_grid_points(grid_load_test_config):
             self.type = type_name
 
     try:
-        generate_grid_points(FakeParameter('1', 'uniform_int'), config)
+        generate_grid_points(FakeParameter('1', 'INT'), config)
         assert False
     except TypeError:
         assert True

@@ -1,13 +1,32 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from importlib.resources import read_text
 from pathlib import Path
-from typing import Union, List, Optional, Any
+from typing import Any, List, Optional, Union
 
-from omegaconf import OmegaConf
+from omegaconf import OmegaConf, open_dict
 from omegaconf.dictconfig import DictConfig
-from omegaconf import open_dict
+
+
+class ResourceType(Enum):
+    abci: str = 'abci'
+    local: str = 'local'
+    python_local: str = 'python_local'
+
+    @classmethod
+    def _missing_(cls, value):
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
+
+
+class OptimizerDirection(Enum):
+    minimize: str = 'minimize'
+    maximize: str = 'maximize'
 
 
 @dataclass
@@ -22,7 +41,7 @@ class GenericConfig:
 
 @dataclass
 class ResourceConifig:
-    type: str
+    type: ResourceType
     num_node: int
 
 
@@ -53,7 +72,7 @@ class ParameterConfig:
 @dataclass
 class OptimizeConifig:
     search_algorithm: str
-    goal: str
+    goal: OptimizerDirection
     trial_number: int
     rand_seed: int
     sobol_scramble: bool

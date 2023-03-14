@@ -52,7 +52,7 @@ class AbstractMaster(AbstractModule):
         )
 
         self.verification = AbstractVerification(self.config)
-        self.goal = self.config.optimize.goal
+        self.goal = self.config.optimize.goal.value
         self.trial_number = self.config.optimize.trial_number
 
         self.runner_files = []
@@ -84,9 +84,9 @@ class AbstractMaster(AbstractModule):
         if not self.check_finished():
             return
 
-        if self.config.optimize.goal.lower() == goal_maximize:
+        if self.config.optimize.goal.value.lower() == goal_maximize:
             evaluator = MaximizeEvaluator(self.config)
-        elif self.config.optimize.goal.lower() == goal_minimize:
+        elif self.config.optimize.goal.value.lower() == goal_minimize:
             evaluator = MinimizeEvaluator(self.config)
         else:
             self.logger.error(f'Invalid goal: {self.goal}.')

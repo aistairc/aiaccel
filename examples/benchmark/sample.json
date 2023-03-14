@@ -45,7 +45,7 @@
   },
   "resource": {
     "resource_name": "abci1",
-    "type": "ABCI",
+    "type": "abci",
     "num_node": 4
   },
   "ABCI": {

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import math
 from functools import reduce
 from operator import mul
@@ -79,7 +80,7 @@ def generate_grid_points(
         'type': p.type
     }
 
-    if p.type.lower() in ['int', 'float']:
+    if p.type.lower() in ['uniform_int', 'uniform_float']:
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
@@ -96,7 +97,7 @@ def generate_grid_points(
         else:
             n = int((upper - lower) / step) + 1
             new_param['parameters'] = [lower + i * step for i in range(0, n)]
-        if p.type.lower() == 'int':
+        if p.type.lower() == 'uniform_int':
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
     elif p.type.lower() == 'categorical':
