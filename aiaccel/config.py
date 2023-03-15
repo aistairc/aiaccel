@@ -28,6 +28,14 @@ class OptimizerDirection(Enum):
     minimize: str = 'minimize'
     maximize: str = 'maximize'
 
+    @classmethod
+    def _missing_(cls, value):
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
+
 
 @dataclass
 class GenericConfig:
@@ -80,7 +88,7 @@ class OptimizeConifig:
 
 
 @dataclass
-class JobConifig:
+class JobConfig:
     cancel_retry: int
     cancel_timeout: int
     expire_retry: int
@@ -136,7 +144,7 @@ class Config:
     resource: ResourceConifig
     ABCI: AbciConifig
     optimize: OptimizeConifig
-    job_setting: JobConifig
+    job_setting: JobConfig
     logger: Optional[LoggerConfig]
     verification: Optional[VerificationConfig]
     clean: Optional[bool]
