@@ -5,6 +5,7 @@ import subprocess
 
 from aiaccel.abci.qstat import parse_qstat
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler.job.model.abci_model import AbciModel
 
 
 class AbciScheduler(AbstractScheduler):
@@ -21,8 +22,8 @@ class AbciScheduler(AbstractScheduler):
 
         commands = 'qstat -xml'
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
-        stats = p.communicate()[0]
-        stats = stats.decode('utf-8')
+        stdout_data, _ = p.communicate()
+        stats = stdout_data.decode('utf-8')
 
         if len(stats) < 1:
             return
@@ -50,4 +51,15 @@ class AbciScheduler(AbstractScheduler):
         numbers = re.compile(r'\d{1,65535}')
         if full.search(command) is None:
             return None
-        return numbers.search(command).group()
+        if match := numbers.search(command):
+            return match.group()
+        else:
+            return None
+
+    def create_model(self) -> AbciModel:
+        """Creates model object of state machine.
+
+        Returns:
+            AbciModel: Model object.
+        """
+        return AbciModel()

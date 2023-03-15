@@ -2,6 +2,7 @@ from __future__ import annotations
 import math
 from functools import reduce
 from operator import mul
+from typing import Any
 
 from aiaccel.config import Config
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -11,7 +12,7 @@ from aiaccel.parameter import HyperParameter
 def get_grid_options(
     parameter_name: str,
     config: Config
-) -> tuple[int | None, bool, int | None]:
+) -> tuple[Any, bool, Any]:
     """Get options about grid search.
 
     Args:
@@ -59,7 +60,7 @@ def get_grid_options(
 
 def generate_grid_points(
     p: HyperParameter, config: Config
-) -> dict[str, float | int | str | list[float, int, str]]:
+) -> dict[str, Any]:
     """Make a list of all parameters for this grid.
 
     Args:
@@ -124,8 +125,8 @@ class GridOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.ready_params = None
-        self.generate_index = None
+        self.ready_params: Any = None
+        self.generate_index: Any = None
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -164,7 +165,7 @@ class GridOptimizer(AbstractOptimizer):
         parameter_index = []
         div = [
             reduce(
-                lambda x, y: x * y, parameter_lengths[0:-1 - i]
+                lambda x, y: x * y, parameter_lengths[i + 1:]
             ) for i in range(0, len(parameter_lengths) - 1)
         ]
 
@@ -185,11 +186,12 @@ class GridOptimizer(AbstractOptimizer):
             list[dict[str, float | int | str]]: A list of new parameters.
         """
         parameter_index = self.get_parameter_index()
-        new_params = []
+        new_params: list[Any] = []
 
         if parameter_index is None:
             self.logger.info('Generated all of parameters.')
-            self.all_parameter_generated = True
+            if self.storage.get_num_finished() >= self.generate_index:
+                self.all_parameter_generated = True
             return new_params
 
         for i in range(0, len(self.ready_params)):

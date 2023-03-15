@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from multiprocessing.pool import Pool, ThreadPool
-import importlib
+from importlib.util import spec_from_file_location
+from importlib.util import module_from_spec
 from pathlib import Path
+from typing import Any
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
@@ -13,12 +15,19 @@ from aiaccel.util.cast import cast_y
 from aiaccel.config import Config
 
 
+# These are for avoiding mypy-errors from initializer().
+# `global` does not work well.
+# https://github.com/python/mypy/issues/5732
+user_func: Any
+workspace: Path
+
+
 class PylocalScheduler(AbstractScheduler):
     """A scheduler class running on a local computer.
 
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         super().__init__(options)
         self.run = Run(self.config_path)
         self.com = WrapperInterface()
@@ -40,42 +49,54 @@ class PylocalScheduler(AbstractScheduler):
         args = []
         for trial_id in trial_ids:
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
-            xs = self.run.get_any_trial_xs(trial_id)
-            args.append([trial_id, xs])
+            args.append([trial_id, self.run.get_any_trial_xs(trial_id)])
             self._serialize(trial_id)
+
         for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
             self.com.out(objective_y=y, objective_err=err)
             self.run.report(trial_id, xs, y, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
+
             self.create_result_file(trial_id)
 
         return True
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['run']
         del obj['pool']
         return obj
 
+    def create_model(self) -> None:
+        """Creates model object of state machine.
 
-def initializer(config_path: str | Path):
+        Returns:
+            None: Because it does not use the state transition model.
+        """
+        return None
+
+
+def initializer(config_path: str | Path) -> None:
     global user_func, workspace
+
     config = Config(config_path)
 
-    # Loads the specified module from the specified python program.
-    spec = importlib.util.spec_from_file_location("user_module", config.python_file.get())
-    module = importlib.util.module_from_spec(spec)
+    # Load the specified module from the specified python program.
+    spec = spec_from_file_location("user_module", config.python_file.get())
+    if spec is None:
+        raise ValueError("Invalid python_path.")
+    module = module_from_spec(spec)
+    if spec.loader is None:
+        raise ValueError("spec.loader not defined.")
     spec.loader.exec_module(module)
-
     user_func = getattr(module, config.function.get())
-
     workspace = Path(config.workspace.get()).resolve()
 
 
-def execute(args):
+def execute(args: Any) -> Any:
     trial_id, xs = args
-    start_time = get_time_now()
 
+    start_time = get_time_now()
     set_logging_file_for_trial_id(workspace, trial_id)
 
     try:

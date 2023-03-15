@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import logging
-
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import Any
+from typing import TYPE_CHECKING
 
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
@@ -12,17 +13,13 @@ from transitions.extensions.states import Tags, add_state_features
 from aiaccel import dict_lock
 from aiaccel import dict_result
 from aiaccel import dict_error
-from aiaccel import resource_type_abci
-from aiaccel import resource_type_local
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.time_tools import get_time_now_object
 from aiaccel.util.trialid import TrialId
-from aiaccel.scheduler.job.model.abci_model import AbciModel
-from aiaccel.scheduler.job.model.local_model import LocalModel
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.scheduler.abci_scheduler import AbciScheduler
-    from aiaccel.scheduler.local_scheduler import LocalScheduler
+    from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+    from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
@@ -75,7 +72,7 @@ JOB_STATES = [
     {'name': 'Success'},
 ]
 
-JOB_TRANSITIONS = [
+JOB_TRANSITIONS: list[dict[str, str | list[str]]] = [
     {
         'trigger': 'next',
         'source': 'Init',
@@ -402,22 +399,6 @@ class CustomMachine(Machine):
     pass
 
 
-def create_model(resource_type: Literal['abci', 'local']) -> AbciModel | LocalModel:
-    """Creates model object of state machine.
-
-    Args:
-        resource_type (str): Resource type ('abci' or 'local')
-
-    Returns:
-        AbciModel | LocalModel: Model object.
-    """
-    if resource_type.lower() == resource_type_abci:
-        model = AbciModel()
-    elif resource_type.lower() == resource_type_local:
-        model = LocalModel()
-    return model
-
-
 class Job:
     """A job thread to manage running jobs on local computer or ABCI.
 
@@ -429,7 +410,12 @@ class Job:
         config (ConfileWrapper): A configuration object.
         scheduler (LocalScheduler | AbciScheduler): A reference for
             scheduler object.
+        model (LocalModel | AbciModel): A reference for
+            model object of state machine.
         hp_file (Path): A hyper parameter file for this job.
+
+    Raises:
+        ValueError: When model is None.
 
     Attributes:
         - config (ConfileWrapper): A configuration object.
@@ -544,13 +530,13 @@ class Job:
     def __init__(
         self,
         config: Config,
-        scheduler: AbciScheduler | LocalScheduler,
+        scheduler: AbstractScheduler,
+        model: AbstractModel,
         trial_id: int
     ) -> None:
         super(Job, self).__init__()
         # === Load config file===
         self.config = config
-        self.config_path = self.config.config_path
         # === Get config parameter values ===
         self.workspace = self.config.workspace.get()
         self.cancel_retry = self.config.cancel_retry.get()
@@ -572,14 +558,23 @@ class Job:
         self.running_timeout = self.config.running_timeout.get()
         self.resource_type = self.config.resource_type.get()
 
-        self.threshold_timeout = None
+        self.threshold_timeout: datetime | None = None
         self.threshold_retry = None
         self.count_retry = 0
 
         self.ws = Path(self.workspace).resolve()
         self.dict_lock = self.ws / dict_lock
 
-        self.model = create_model(self.resource_type)
+        self.scheduler = scheduler
+        self.model = model
+        if self.model is None:
+            raise ValueError(
+                "model is None. "
+                "Be sure to specify the model to use in the Job class. "
+                "For example, PylocalScheduler doesn't use model. "
+                "Therefore, Job class cannot be used."
+            )
+
         self.machine = CustomMachine(
             model=self.model,
             states=JOB_STATES,
@@ -589,16 +584,15 @@ class Job:
             ordered_transitions=False
         )
         self.loop_count = 0
-        self.scheduler = scheduler
 
-        self.config_path = str(self.config_path)
+        self.config_path = str(self.config.config_path)
         self.trial_id = trial_id
         self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
-        self.from_file = None
-        self.to_file = None
-        self.next_state = None
-        self.proc = None
-        self.th_oh = None
+        self.from_file: Any = None
+        self.to_file: Any = None
+        self.next_state: Any = None
+        self.proc: Any = None
+        self.th_oh: Any = None
         self.stop_flag = False
         self.storage = Storage(self.ws)
         self.content = self.storage.get_hp_dict(self.trial_id)
@@ -620,7 +614,7 @@ class Job:
         """
         return self.machine
 
-    def get_model(self) -> AbciModel | LocalModel:
+    def get_model(self) -> AbstractModel:
         """Get a state transition model object.
 
         Returns:
@@ -628,7 +622,7 @@ class Job:
         """
         return self.model
 
-    def get_state(self) -> Machine:
+    def get_state(self) -> Any:
         """Get a current state.
 
         Returns:

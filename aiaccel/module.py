@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -49,7 +50,7 @@ class AbstractModule(object):
         loop_count (int): A loop count that is incremented in loop method.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         # === Load config file===
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
@@ -75,10 +76,10 @@ class AbstractModule(object):
         self.alive_optimizer = self.dict_alive / aiaccel.alive_optimizer
         self.alive_scheduler = self.dict_alive / aiaccel.alive_scheduler
 
-        self.logger = None
-        self.fh = None
-        self.ch = None
-        self.ch_formatter = None
+        self.logger: Any = None
+        self.fh: Any = None
+        self.ch: Any = None
+        self.ch_formatter: Any = None
         self.loop_count = 0
         self.hp_ready = 0
         self.hp_running = 0
@@ -87,7 +88,7 @@ class AbstractModule(object):
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
         # TODO: Separate the generator if don't want to affect randomness each other.
-        self._rng: np.random.RandomState | None = None
+        self._rng: Any = None
 
         self.storage.variable.register(
             process_name=self.options['process_name'],
@@ -170,17 +171,17 @@ class AbstractModule(object):
         self.logger = logging.getLogger(logger_name)
         self.logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler(logfile, mode='w')
-        fh_formatter = (
+        fh_formatter = logging.Formatter(
             '%(asctime)s %(levelname)-8s %(filename)-12s line '
             '%(lineno)-4s %(message)s'
         )
-        fh_formatter = logging.Formatter(fh_formatter)
         fh.setFormatter(fh_formatter)
         fh.setLevel(file_level)
 
         ch = logging.StreamHandler()
-        ch_formatter = (f'{module_type} %(levelname)-8s %(message)s')
-        ch_formatter = logging.Formatter(ch_formatter)
+        ch_formatter = logging.Formatter(
+            f'{module_type} %(levelname)-8s %(message)s'
+        )
         ch.setFormatter(ch_formatter)
         ch.setLevel(stream_level)
 
@@ -267,7 +268,7 @@ class AbstractModule(object):
         self.logger.debug(f'create numpy random generator by seed: {self.seed}')
         self._rng = np.random.RandomState(self.seed)
 
-    def get_numpy_random_state(self) -> tuple:
+    def get_numpy_random_state(self) -> Any:
         """ get random state.
 
         Args:
@@ -278,7 +279,7 @@ class AbstractModule(object):
         """
         return self._rng.get_state()
 
-    def set_numpy_random_state(self, state: tuple) -> None:
+    def set_numpy_random_state(self, state: Any) -> None:
         """ get random state.
 
         Args:
@@ -316,7 +317,7 @@ class AbstractModule(object):
         ):
             self._deserialize(self.options['resume'])
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = self.__dict__.copy()
         del obj['storage']
         del obj['config']

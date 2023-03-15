@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.process import ps2joblist
+from aiaccel.scheduler.job.model.local_model import LocalModel
 
 
 class LocalScheduler(AbstractScheduler):
@@ -33,7 +35,7 @@ class LocalScheduler(AbstractScheduler):
                 else:
                     self.logger.warning(f'**** Unknown process: {r}')
 
-    def parse_trial_id(self, command: str) -> str | None:
+    def parse_trial_id(self, command: str) -> Any:
         """Parse a command string and extract an unique name.
 
         Args:
@@ -55,3 +57,11 @@ class LocalScheduler(AbstractScheduler):
             return None
 
         return args[trial_id_index + index_offset]
+
+    def create_model(self) -> LocalModel:
+        """Creates model object of state machine.
+
+        Returns:
+            LocalModel: Model object.
+        """
+        return LocalModel()

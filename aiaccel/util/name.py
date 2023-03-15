@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import string
+from typing import Any
 
 from numpy.random import RandomState
 
@@ -15,7 +16,7 @@ def generate_random_name(rng: RandomState, length: int = 10) -> str:
             greater than 0. Defaults to 10.
 
     Raises:
-        ValueError: _description_
+        ValueError: Occurs if the specified length is less than 1.
 
     Returns:
         str: A generated name.
