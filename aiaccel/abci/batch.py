@@ -98,9 +98,8 @@ class JobScrGenerator:
 def create_abci_batch_file(
     trial_id: int,
     param_content: dict,
-    output_file_path: Path | str,
+    workspace: Path | str,
     error_file_path: Path | str,
-    config_file_path: Path | str,
     batch_file: Path,
     job_script_preamble: Path | str | None,
     command: str,
@@ -154,8 +153,7 @@ def create_abci_batch_file(
         if 'parameter_name' in param.keys() and 'value' in param.keys():
             code.add_line(f'{param["parameter_name"]}={param["value"]}')
     code.add_line(f'trial_id={trial_id}')
-    code.add_line(f'config_file_path={str(config_file_path)}')
-    code.add_line(f'output_file_path={str(output_file_path)}')
+    code.add_line(f'workspace={str(workspace)}')
     code.add_line(f'error_file_path={str(error_file_path)}')
     code.add_line('start_time=`date "+%Y-%m-%d %H:%M:%S"`')
     code.add_line(f'result=`{" ".join(commands)}`')
@@ -170,9 +168,8 @@ def create_abci_batch_file(
     code.add_line(_generate_command_line(
         command='aiaccel-set-result',
         args=[
-            '--file $output_file_path',
+            '--workspace $workspace',
             '--trial_id $trial_id',
-            '--config $config_file_path',
             '--start_time $start_time',
             '--end_time $end_time',
             '--objective $y',
@@ -187,9 +184,8 @@ def create_abci_batch_file(
     code.add_line(_generate_command_line(
         command='aiaccel-set-result',
         args=[
-            '--file $output_file_path',
+            '--workspace $workspace',
             '--trial_id $trial_id',
-            '--config $config_file_path',
             '--start_time $start_time',
             '--end_time $end_time',
             '--objective $y',

@@ -65,13 +65,10 @@ class LocalModel(AbstractModel):
         else:
             objective = stdouts[-1]  # TODO: fix
         error = '\n'.join(stderrs)
-        output_file_path = str(obj.get_result_file_path())
-        config_file_path = str(obj.config_path)
 
         args = {
-            'file': output_file_path,
+            'workspace': str(obj.workspace.path),
             'trial_id': str(trial_id),
-            'config': config_file_path,
             'start_time': start_time,
             'end_time': end_time,
             'objective': objective,

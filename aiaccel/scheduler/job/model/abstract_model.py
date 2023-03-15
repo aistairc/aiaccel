@@ -211,7 +211,7 @@ class AbstractModel(object):
         Returns:
             None
         """
-        self.write_results_to_database(obj)
+        pass
 
     def after_wait_result(self, obj: 'Job') -> None:
         """State transition of 'after_wait_result'.
@@ -239,9 +239,9 @@ class AbstractModel(object):
         Returns:
             bool: A target is in result files or not.
         """
-        # objective = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
-        # return (objective is not None)
-        return obj.workspace.result_file_exists(trial_id=obj.trial_id)
+        objective = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
+        return (objective is not None)
+        # return obj.workspace.result_file_exists(trial_id=obj.trial_id)
 
     # Finished
     def after_finished(self, obj: 'Job') -> None:
@@ -395,15 +395,3 @@ class AbstractModel(object):
 
     def change_state(self, obj: 'Job'):
         obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state=obj.next_state)
-
-    def write_results_to_database(self, obj: 'Job'):
-        trial_id = obj.trial_id
-        result = obj.workspace.get_any_trial_result(trial_id=trial_id)
-        if result is None:
-            raise Exception("Could not get result")
-
-        obj.storage.result.set_any_trial_objective(trial_id, result['result'])
-        obj.storage.timestamp.set_any_trial_start_time(trial_id, result['start_time'])
-        obj.storage.timestamp.set_any_trial_end_time(trial_id, result['end_time'])
-        if 'error' in result.keys() and result['error'] != "":
-            obj.storage.error.set_any_trial_error(trial_id, result['error'])

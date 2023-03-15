@@ -118,9 +118,8 @@ class PylocalScheduler(AbstractScheduler):
             end_time
     ) -> None:
         args = {
-            'file': self.workspace.get_any_result_file_path(trial_id),
+            'workspace': str(self.workspace.path),
             'trial_id': str(trial_id),
-            'config': self.config_path,
             'start_time': start_time,
             'end_time': end_time,
             'objective': str(objective),
