@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -49,7 +50,7 @@ class AbstractModule(object):
         loop_count (int): A loop count that is incremented in loop method.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         # === Load config file===
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
@@ -85,7 +86,7 @@ class AbstractModule(object):
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
         # TODO: Separate the generator if don't want to affect randomness each other.
-        self._rng: np.random.RandomState | None = None
+        self._rng: Any = None
 
         self.storage.variable.register(
             process_name=self.options['process_name'],
@@ -224,7 +225,7 @@ class AbstractModule(object):
         self._logger.debug(f'create numpy random generator by seed: {self.seed}')
         self._rng = np.random.RandomState(self.seed)
 
-    def get_numpy_random_state(self) -> tuple:
+    def get_numpy_random_state(self) -> Any:
         """ get random state.
 
         Args:
@@ -235,7 +236,7 @@ class AbstractModule(object):
         """
         return self._rng.get_state()
 
-    def set_numpy_random_state(self, state: tuple) -> None:
+    def set_numpy_random_state(self, state: Any) -> None:
         """ get random state.
 
         Args:
@@ -334,7 +335,7 @@ class AbstractModule(object):
     def set_debug_log(self, message: str):
         self._logger.debug(message)
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = self.__dict__.copy()
         del obj['storage']
         del obj['config']

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import copy
+from typing import Any
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
@@ -85,7 +86,7 @@ class AbstractOptimizer(AbstractModule):
 
     def generate_initial_parameter(
         self
-    ) -> list[dict[str, float | int | str]]:
+    ) -> Any:
         """Generate a list of initial parameters.
 
         Returns:
@@ -105,7 +106,7 @@ class AbstractOptimizer(AbstractModule):
 
         return new_params
 
-    def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
+    def generate_parameter(self) -> Any:
         """Generate a list of parameters.
 
         Raises:
@@ -230,7 +231,7 @@ class AbstractOptimizer(AbstractModule):
             self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])
 
-    def cast(self, params: list[dict[str, str | float | int]]) -> list | None:
+    def cast(self, params: list[dict[str, Any]]) -> list[Any] | None:
         """Casts types of parameter values to appropriate tepes.
 
         Args:
