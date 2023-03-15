@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from transitions import Machine
@@ -593,14 +592,12 @@ class Job:
         self.stop_flag = False
         self.storage = Storage(self.workspace.path)
         self.content = self.storage.get_hp_dict(self.trial_id)
-        self.result_file_path = self.workspace.result / (self.trial_id_str + '.hp')
         self.expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt["trigger"] == "expire"]
 
         self.buff = Buffer(['state.name'])
         self.buff.d['state.name'].set_max_len(2)
 
         self.logger = logging.getLogger('root.scheduler.job')
-
         self.command_error_output = self.workspace.error / f'{self.trial_id}.txt'
 
     def get_machine(self) -> CustomMachine:
@@ -673,17 +670,6 @@ class Job:
             return False
 
         return True
-
-    def get_result_file_path(self) -> Path:
-        """Get a path to the result file.
-
-        Args:
-            trial_id (int): Trial Id.
-
-        Returns:
-            PosixPath: A Path object which points to the result file.
-        """
-        return self.workspace.get_any_result_file_path(trial_id=self.trial_id)
 
     def main(self) -> None:
         """Thread.run method.

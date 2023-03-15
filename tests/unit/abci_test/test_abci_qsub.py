@@ -1,11 +1,11 @@
 import os
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 
 import aiaccel
 from aiaccel.abci.qsub import create_qsub_command
-from aiaccel.config import load_config
-from unittest.mock import patch
-from pathlib import Path
-import pytest
 
 
 def test_create_qsub_command(load_test_config):

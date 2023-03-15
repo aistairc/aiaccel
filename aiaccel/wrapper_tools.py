@@ -1,10 +1,6 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
-
-from aiaccel import dict_result
-from aiaccel.util.filesystem import create_yaml
 
 
 def create_runner_command(
@@ -39,44 +35,3 @@ def create_runner_command(
     commands.append('2>')
     commands.append(command_error_output)
     return commands
-
-
-def save_result(
-    ws: Path,
-    dict_lock: Path,
-    trial_id_str: str,
-    result: float,
-    start_time: str,
-    end_time: str,
-    err_message: str = ""
-) -> None:
-    """Save a result file.
-
-    Args:
-        ws (Path): A path of a workspace.
-        dict_lock (Path): A directory to store lock files.
-        trial_id_str (str): An unique name of a parameter set.
-        result (float): A result of a parameter set.
-        start_time (str): A start time string.
-        end_time (str): An end time string.
-        err_message (str): Error message from Wrapper (user program)
-
-    Returns:
-        None
-    """
-    result_file = ws / dict_result / f'{trial_id_str}.result'
-
-    contents = {
-        'result': result,
-        'start_time': start_time,
-        'end_time': end_time
-    }
-
-    if len(err_message) > 0:
-        contents["error"] = err_message
-
-    create_yaml(
-        result_file,
-        contents,
-        dict_lock
-    )

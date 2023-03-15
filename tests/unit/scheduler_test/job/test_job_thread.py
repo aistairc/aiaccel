@@ -217,7 +217,8 @@ class TestModel(BaseTest):
 
     def test_conditions_result(self, database_remove):
         self.job.th_oh = OutputHandler(Popen(['ls']))
-        assert not self.model.conditions_result(self.job)
+        with patch.object(self.model, 'create_result_file', return_value=None):
+            assert not self.model.conditions_result(self.job)
 
     def test_after_finished(self, database_remove):
         assert self.model.after_finished(self.job) is None

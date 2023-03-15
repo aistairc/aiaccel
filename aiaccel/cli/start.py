@@ -5,12 +5,11 @@ import time
 from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
 
-from aiaccel import parameter as pt
 from aiaccel.config import Config
 from aiaccel.master.create import create_master
 from aiaccel.optimizer.create import create_optimizer
 from aiaccel.scheduler.create import create_scheduler
-from aiaccel.util import filesystem as fs
+from aiaccel.storage.storage import Storage
 from aiaccel.util.report import CreationReport
 from aiaccel.workspace import Workspace
 
@@ -34,7 +33,6 @@ def main() -> None:  # pragma: no cover
         return
 
     workspace = Workspace(config.workspace.get())
-    goal = config.goal.get()
 
     if args.resume is None:
         if args.clean is True:
@@ -50,6 +48,8 @@ def main() -> None:  # pragma: no cover
     if workspace.check_consists() is False:
         logger.error("Creating workspace is Failed.")
         return
+
+    storage = Storage(workspace.path)
 
     logger.info(f"config: {str(pathlib.Path(args.config).resolve())}")
 
@@ -82,17 +82,16 @@ def main() -> None:  # pragma: no cover
     report = CreationReport(args.config)
     report.create()
 
+    best_result = storage.get_best_trial_dict(config.goal.get())
+
     logger.info("moving...")
     dst = workspace.move_completed_data()
 
     config_name = pathlib.Path(args.config).name
     shutil.copy(pathlib.Path(args.config), dst / config_name)
 
-    files = fs.get_file_result_hp(dst)
-    best, best_file = pt.get_best_parameter(files, goal, workspace.lock)
-
-    logger.info(f"Best result    : {best_file}")
-    logger.info(f"               : {best}")
+    logger.info(f"Best result    : {best_result}")
+    logger.info(f"               : {dst}")
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
     logger.info("Done.")
     return

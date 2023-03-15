@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-import aiaccel
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
@@ -65,5 +64,5 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        path = self.workspace.result / aiaccel.file_final_result
+        path = self.workspace.path / "best_result.yaml"
         create_yaml(path, self.hp_result, self.workspace.lock)

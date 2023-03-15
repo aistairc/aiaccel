@@ -2,19 +2,18 @@ import asyncio
 import subprocess
 from pathlib import Path
 
+import yaml
+
 import aiaccel
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
 from aiaccel.master.create import create_master
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.master.pylocal_master import PylocalMaster
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
-
+from aiaccel.storage.storage import Storage
 from tests.base_test import BaseTest
-
-import yaml
 
 
 async def start_master(master):
@@ -96,7 +95,7 @@ class IntegrationTest(BaseTest):
         assert finished == self.config.trial_number.get()
         assert ready == 0
         assert running == 0
-        final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
+        final_result = work_dir.joinpath("best_result.yaml")
         assert final_result.exists()
         '''
         testr = load_yaml(

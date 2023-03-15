@@ -1,61 +1,6 @@
 from __future__ import annotations
 
-import logging
-from pathlib import Path
-
 import numpy as np
-
-import aiaccel
-from aiaccel.util.filesystem import load_yaml
-
-
-def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
-                       ) -> tuple[float | None, Path | None]:
-    """Get a best parameter in specified files.
-
-    Args:
-        files (list[Path]): A list of files to find a best.
-        goal (str): Maximize or Minimize.
-        dict_lock (Path): A directory to store lock files.
-
-    Returns:
-        tuple[float | None, Path | None]: A best result value and a
-        file path. It returns None if a number of files is less than one.
-
-    Raises:
-        ValueError: Causes when an invalid goal is set.
-    """
-
-    if len(files) < 1:
-        return None, None
-
-    yml = load_yaml(files[0], dict_lock)
-
-    try:
-        best = float(yml['result'])
-    except TypeError:
-        logger = logging.getLogger('root.master.parameter')
-        logger.error(f'Invalid result: {yml["result"]}.')
-        return None, None
-
-    best_file = files[0]
-
-    for f in files[1:]:
-        yml = load_yaml(f, dict_lock)
-        result = float(yml['result'])
-
-        if goal.lower() == aiaccel.goal_maximize:
-            if best < result:
-                best, best_file = result, f
-        elif goal.lower() == aiaccel.goal_minimize:
-            if best > result:
-                best, best_file = result, f
-        else:
-            logger = logging.getLogger('root.master.parameter')
-            logger.error(f'Invalid goal: {goal}.')
-            raise ValueError(f'Invalid goal: {goal}.')
-
-    return best, best_file
 
 
 def get_type(parameter: dict) -> str:

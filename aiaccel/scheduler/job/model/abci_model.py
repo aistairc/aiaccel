@@ -29,9 +29,8 @@ class AbciModel(AbstractModel):
         create_abci_batch_file(
             trial_id=obj.trial_id,
             param_content=obj.content,
-            output_file_path=obj.get_result_file_path(),
+            workspace=obj.workspace.path,
             error_file_path=obj.command_error_output,
-            config_file_path=obj.config_path,
             batch_file=obj.to_file,
             job_script_preamble=obj.config.job_script_preamble.get(),
             command=obj.config.job_command.get(),

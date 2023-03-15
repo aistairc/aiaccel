@@ -1,61 +1,10 @@
 import numpy as np
 
-import aiaccel
-from aiaccel.parameter import get_best_parameter, get_type, load_parameter
-from aiaccel.util.filesystem import create_yaml
+from aiaccel.parameter import get_type, load_parameter
 from tests.base_test import BaseTest
 
 
 class TestParameter(BaseTest):
-
-    def test_get_best_parameters(
-        self,
-        work_dir,
-        clean_work_dir
-    ):
-        clean_work_dir()
-
-        files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
-        best, best_file = get_best_parameter(
-            files,
-            aiaccel.goal_maximize,
-            work_dir.joinpath(aiaccel.dict_lock)
-        )
-        assert best is None
-        assert best_file is None
-
-        results = [120, 101., np.float64(140.)]
-
-        for i in range(len(self.test_result_data)):
-            d = self.test_result_data[i]
-            name = f"{d['trial_id']}.yml"
-            path = work_dir / 'result' / name
-            d['result'] = results[i]
-            create_yaml(path, d)
-
-        files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
-        files.sort()
-        best, best_file = get_best_parameter(
-            files,
-            aiaccel.goal_maximize,
-            work_dir.joinpath(aiaccel.dict_lock)
-        )
-        assert best == 140.
-        best, best_file = get_best_parameter(
-            files,
-            aiaccel.goal_minimize,
-            work_dir.joinpath(aiaccel.dict_lock)
-        )
-        assert best == 101.
-        try:
-            _, _ = get_best_parameter(
-                files,
-                'invalid_goal',
-                work_dir.joinpath(aiaccel.dict_lock)
-            )
-            assert False
-        except ValueError:
-            assert True
 
     def test_get_type(self):
         int_p = {'type': 'uniform_int'}

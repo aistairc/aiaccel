@@ -97,17 +97,6 @@ class PylocalScheduler(AbstractScheduler):
         """
         return None
 
-    def get_result_file_path(self) -> Path:
-        """Get a path to the result file.
-
-        Args:
-            trial_id (int): Trial Id.
-
-        Returns:
-            PosixPath: A Path object which points to the result file.
-        """
-        return self.workspace.get_any_result_file_path(self.trial_id)
-
     def create_result_file(
             self,
             trial_id: int,

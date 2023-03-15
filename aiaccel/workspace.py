@@ -3,11 +3,8 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from aiaccel import (dict_alive, dict_error, dict_finished, dict_hp,
-                     dict_jobstate, dict_lock, dict_log, dict_output, dict_pid,
-                     dict_ready, dict_result, dict_runner, dict_running,
-                     dict_storage, dict_timestamp, dict_verification,
-                     extension_hp)
+from aiaccel import (dict_error, dict_hp, dict_lock, dict_log, dict_output,
+                     dict_runner, dict_storage, dict_verification)
 from aiaccel.util import filesystem as fs
 from aiaccel.util.retry import retry
 from aiaccel.util.suffix import Suffix
@@ -47,39 +44,23 @@ class Workspace:
         self.path = Path(base_path).resolve()
 
         # dict_*
-        self.alive = self.path / dict_alive
         self.error = self.path / dict_error
         self.hp = self.path / dict_hp
-        self.hp_ready = self.path / dict_hp / dict_ready
-        self.hp_running = self.path / dict_hp / dict_running
-        self.hp_finished = self.path / dict_hp / dict_finished
-        self.jobstate = self.path / dict_jobstate
         self.lock = self.path / dict_lock
         self.log = self.path / dict_log
         self.output = self.path / dict_output
-        self.pid = self.path / dict_pid
-        self.result = self.path / dict_result
         self.runner = self.path / dict_runner
         self.storage = self.path / dict_storage
-        self.timestamp = self.path / dict_timestamp
         self.verification = self.path / dict_verification
 
         self.consists = [
-            self.alive,
             self.error,
             self.hp,
-            self.hp_ready,
-            self.hp_running,
-            self.hp_finished,
-            self.jobstate,
             self.lock,
             self.log,
             self.output,
-            self.pid,
-            self.result,
             self.runner,
             self.storage,
-            self.timestamp,
             self.verification
         ]
         self.results = Path("./results")
@@ -160,32 +141,3 @@ class Workspace:
 
         shutil.copytree(self.path, dst, ignore=ignptn)
         return dst
-
-    def get_any_result_file_path(self, trial_id: int) -> Path:
-        """Get result file path.
-
-        Returns:
-            PosixPath: Path to result file.
-        """
-        return self.result / f"{trial_id}.{extension_hp}"
-
-    def result_file_exists(self, trial_id: int) -> bool:
-        """Check result file exists or not.
-
-        Returns:
-            bool: True if result file exists.
-        """
-        path = self.get_any_result_file_path(trial_id)
-        return path.exists()
-
-    @retry(_MAX_NUM=10, _DELAY=1.0)
-    def get_any_trial_result(self, trial_id: int) -> dict | None:
-        """Get any trial result.
-
-        Returns:
-            dict: Trial result.
-        """
-        path = self.get_any_result_file_path(trial_id)
-        if path.exists() is False:
-            return None
-        return fs.load_yaml(path)

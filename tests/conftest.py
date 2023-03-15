@@ -1,15 +1,16 @@
-import tempfile
+import json
 import os
 import shutil
+import tempfile
 import time
 from pathlib import Path
 
 import fasteners
 import pytest
+
 from aiaccel.config import Config, load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml, load_yaml
-import json
 
 WORK_SUB_DIRECTORIES = [
     'abci_output', 'alive', 'hp', 'hp/finished', 'hp/ready', 'hp/running',
@@ -106,15 +107,6 @@ def config_yaml(data_dir):
 @pytest.fixture(scope="session")
 def data_dir(root_dir):
     return root_dir.joinpath('test_data')
-
-
-@pytest.fixture(scope="session")
-def get_one_parameter(work_dir):
-    def _get_one_parameter():
-        path = work_dir.joinpath('result/0.yml')
-        return load_yaml(path)
-
-    return _get_one_parameter
 
 
 @pytest.fixture(scope="session")

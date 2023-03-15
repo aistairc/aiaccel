@@ -1,11 +1,12 @@
+import shutil
 from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+
 from aiaccel.config import Config
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.workspace import Workspace
-import shutil
 
 d0 = {
     "end_time": "11/03/2020 16:07:45",
@@ -219,11 +220,6 @@ class BaseTest(object):
         self.test_result_data.append(d0)
         self.test_result_data.append(d1)
         self.test_result_data.append(d2)
-
-        for d in self.test_result_data:
-            name = f"{d['trial_id']}.yml"
-            path = work_dir / 'result' / name
-            create_yaml(path, d)
 
         self.result_comparison = []
 

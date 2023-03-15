@@ -1,13 +1,11 @@
-from aiaccel.workspace import Workspace
 import shutil
 from pathlib import Path
 
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import (create_yaml, file_create, file_delete,
-                                     file_read, get_dict_files,
-                                     get_file_result, get_file_result_hp,
-                                     load_yaml, make_directories,
-                                     make_directory)
+                                     file_read, get_dict_files, load_yaml,
+                                     make_directories, make_directory)
+from aiaccel.workspace import Workspace
 
 
 def test_create_yaml(clean_work_dir, work_dir):
@@ -65,22 +63,6 @@ def test_get_dict_files(clean_work_dir, work_dir):
     assert get_dict_files(Path('invalid_path'), '*.yml', dict_lock) is None
 
 
-def test_get_file_result(clean_work_dir, setup_result, work_dir):
-    clean_work_dir()
-    workspace = Workspace(str(work_dir))
-    if workspace.path.exists():
-        workspace.clean()
-    workspace.create()
-
-    storage = Storage(work_dir)
-    setup_result(1)
-    content = storage.get_hp_dict('0')
-    create_yaml((work_dir / 'result' / '001.result'), content)
-    assert get_file_result(work_dir) == [
-        work_dir.joinpath('result/001.result')
-    ]
-
-
 def test_load_yaml(clean_work_dir, work_dir):
     clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
@@ -116,13 +98,3 @@ def test_make_directories(clean_work_dir, work_dir):
     shutil.rmtree(work_dir.joinpath('hp', 'exist'))
     file_create(work_dir.joinpath('hp', 'exist'), 'hello', dict_lock)
     assert make_directories(ds, dict_lock) is None
-
-
-def test_get_file_result_hp(work_dir):
-    # no files
-    assert get_file_result_hp(work_dir) == []
-
-    file_path = work_dir / 'result' / 'test.hp'
-    create_yaml(file_path, {})
-
-    assert get_file_result_hp(work_dir) == [Path(file_path)]

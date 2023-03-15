@@ -1,11 +1,8 @@
 import asyncio
 import logging
-import shutil
 import sys
 import time
-from contextlib import ExitStack
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -15,8 +12,6 @@ from aiaccel.master.local_master import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer.random_optimizer import RandomOptimizer
 from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import file_create
 from aiaccel.util.logger import str_to_logging_level
 from tests.base_test import BaseTest
 

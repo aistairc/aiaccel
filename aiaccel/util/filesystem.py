@@ -5,8 +5,6 @@ from pathlib import Path
 import fasteners
 import yaml
 
-import aiaccel
-
 
 def create_yaml(path: Path, content: dict, dict_lock: Path | None = None) -> None:
     """Create a yaml file.
@@ -126,46 +124,6 @@ def get_dict_files(directory: Path, pattern: str,
                 return files
     else:
         return None
-
-
-def get_file_result(path: Path, dict_lock: Path | None = None
-                    ) -> list[Path] | None:
-    """Get files in result directory.
-
-    Args:
-        path (Path): A path to result directory.
-        dict_lock (Path | None, optional): A directory to store lock files.
-            Defaults to None.
-
-    Returns:
-        list: Files in result directory.
-    """
-
-    return get_dict_files(
-        path / aiaccel.dict_result,
-        f'*.{aiaccel.extension_result}',
-        dict_lock=dict_lock
-    )
-
-
-def get_file_result_hp(path: Path, dict_lock: Path | None = None
-                       ) -> list[Path] | None:
-    """Get files in result directory.
-
-    Args:
-        path (Path): A path to result directory.
-        dict_lock (Path | None, optional): A directory to store lock files.
-            Defaults to None.
-
-    Returns:
-        list: Files in result directory.
-    """
-
-    return get_dict_files(
-        path / aiaccel.dict_result,
-        f'*.{aiaccel.extension_hp}',
-        dict_lock=dict_lock
-    )
 
 
 def interprocess_lock_file(path: Path, dict_lock: Path) -> Path:
