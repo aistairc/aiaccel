@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm import schedule_sampling
+from aiaccel.scheduler.algorithm.schedule_sampling import RandomSampling
 from aiaccel.scheduler.job.job import Job
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.filesystem import create_yaml
@@ -32,7 +32,7 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         self.options = options
         self.options['process_name'] = 'scheduler'
         super().__init__(self.options)
@@ -49,10 +49,10 @@ class AbstractScheduler(AbstractModule):
 
         self.max_resource = self.config.num_node.get()
         self.available_resource = self.max_resource
-        self.stats = []
-        self.jobs = []
-        self.job_status = {}
-        self.algorithm = None
+        self.stats: list[Any] = []
+        self.jobs: list[Any] = []
+        self.job_status: dict[Any, Any] = {}
+        self.algorithm: Any = None
         self.num_node = self.config.num_node.get()
 
     def change_state_finished_trials(self) -> None:
@@ -80,7 +80,7 @@ class AbstractScheduler(AbstractModule):
         """
         self.get_each_state_count()
 
-    def start_job(self, trial_id: int) -> Job | None:
+    def start_job(self, trial_id: int) -> Any:
         """Start a new job.
 
         Args:
@@ -137,7 +137,7 @@ class AbstractScheduler(AbstractModule):
         self.create_numpy_random_generator()
         self.resume()
 
-        self.algorithm = schedule_sampling.RandomSampling(self.config)
+        self.algorithm = RandomSampling(self.config)
         self.change_state_finished_trials()
 
         runnings = self.storage.trial.get_running()
@@ -209,7 +209,7 @@ class AbstractScheduler(AbstractModule):
 
         return True
 
-    def parse_trial_id(self, command: str) -> str:
+    def parse_trial_id(self, command: str) -> str | None:
         """Parse a command string and extract an unique name.
 
         Args:
@@ -312,12 +312,12 @@ class AbstractScheduler(AbstractModule):
         result_file_path = self.ws / dict_result / file_name
         create_yaml(result_file_path, content)
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['jobs']
         return obj
 
-    def create_model(self) -> AbstractModel | None:
+    def create_model(self) -> Any:
         """Creates model object of state machine.
 
         Override with a Scheduler that uses a Model.

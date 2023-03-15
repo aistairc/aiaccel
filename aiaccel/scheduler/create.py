@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from typing import Any
+
 from aiaccel.config import Config
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
 
 
-def create_scheduler(config_path: str) -> type | None:
+def create_scheduler(config_path: str) -> Any:
     """Returns scheduler type.
 
     Args:

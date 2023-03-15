@@ -4,6 +4,7 @@ import copy
 import logging
 from pathlib import Path
 from typing import Literal
+from typing import Any
 
 import aiaccel
 from aiaccel.config import Config
@@ -35,7 +36,7 @@ class AbstractVerification(object):
         storage (Storage): Storage object.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         # === Load config file===
         self.options = options
         self.config = Config(self.options['config'])
@@ -148,7 +149,7 @@ class AbstractVerification(object):
         logger.info('Current verification is followings:')
         logger.info(f'{self.verification_result}')
 
-    def save(self, name: int) -> None:
+    def save(self, name: str | int) -> None:
         """Save current verifications result to a file.
 
         Args:
