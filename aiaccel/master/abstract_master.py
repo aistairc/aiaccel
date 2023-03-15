@@ -38,7 +38,7 @@ class AbstractMaster(AbstractModule):
         stats (list):
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         self.start_time = get_time_now_object()
         self.loop_start_time: datetime | None = None
         self.options = options

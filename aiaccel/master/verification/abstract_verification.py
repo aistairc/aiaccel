@@ -53,8 +53,8 @@ class AbstractVerification(object):
         else:
             self._current_best_start = float('-inf')
             self._comparator = max
-        self._verified_loops = []
-        self._verified_trial_ids = []
+        self._verified_loops: list[int] = []
+        self._verified_trial_ids: list[int] = []
 
     def verify(self) -> None:
         """Run a verification.
