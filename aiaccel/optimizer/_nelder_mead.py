@@ -90,6 +90,11 @@ class NelderMead(object):
         self.bdrys = np.array([[p.lower, p.upper] for p in self.params])
         self.coef = coef
         self.n_dim = len(self.bdrys)
+
+        if rng is None:
+            raise ValueError(
+                'rng (RandomState) is required to randomly generate initial parameters.'
+            )
         self._rng = rng
 
         self.y = self._create_initial_values(initial_parameters)

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import string
-from typing import Any
 
 from numpy.random import RandomState
 

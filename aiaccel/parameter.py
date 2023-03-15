@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from numpy.random import RandomState
+
 import aiaccel
 from aiaccel.util.filesystem import load_yaml
 
@@ -148,7 +150,7 @@ class HyperParameter(object):
         if 'base' in parameter:
             self.base = parameter['base']
 
-    def sample(self, rng: np.random.RandomState, initial: bool = False) -> dict[str, Any]:
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         """Sample a parameter.
 
         Args:
@@ -230,7 +232,7 @@ class HyperParameterConfiguration(object):
         """
         return self.hps
 
-    def sample(self, rng: np.random.RandomState, initial: bool = False) -> list[dict[str, Any]]:
+    def sample(self, rng: RandomState, initial: bool = False) -> list[dict[str, Any]]:
         """Sample a hyper parameters set.
 
         Args:
