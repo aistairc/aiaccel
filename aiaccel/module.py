@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import Any
+from typing import TextIO
 
 import numpy as np
 
@@ -297,7 +298,7 @@ class AbstractModule(object):
 
     def _create_log_stream_handler(
         self, stream_level: int | str
-    ) -> logging.StreamHandler:
+    ) -> logging.StreamHandler[TextIO]:
         """Creates a StreamHandler object.
 
         Args:
@@ -332,7 +333,7 @@ class AbstractModule(object):
             self._create_log_stream_handler(stream_level)
         )
 
-    def set_debug_log(self, message: str):
+    def set_debug_log(self, message: str) -> None:
         self._logger.debug(message)
 
     def __getstate__(self) -> dict[str, Any]:
