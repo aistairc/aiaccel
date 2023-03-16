@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from multiprocessing.pool import Pool, ThreadPool
-import importlib
+from importlib.util import spec_from_file_location
+from importlib.util import module_from_spec
 from pathlib import Path
+from typing import Any
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
@@ -13,12 +15,19 @@ from aiaccel.util.cast import cast_y
 from aiaccel.config import Config
 
 
+# These are for avoiding mypy-errors from initializer().
+# `global` does not work well.
+# https://github.com/python/mypy/issues/5732
+user_func: Any
+workspace: Path
+
+
 class PylocalScheduler(AbstractScheduler):
     """A scheduler class running on a local computer.
 
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         super().__init__(options)
         self.run = Run(self.config_path)
         self.com = WrapperInterface()
@@ -52,7 +61,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return True
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['run']
         del obj['pool']
@@ -67,22 +76,24 @@ class PylocalScheduler(AbstractScheduler):
         return None
 
 
-def initializer(config_path: str | Path):
+def initializer(config_path: str | Path) -> None:
     global user_func, workspace
 
     config = Config(config_path)
 
     # Load the specified module from the specified python program.
-    spec = importlib.util.spec_from_file_location("user_module", config.python_file.get())
-    module = importlib.util.module_from_spec(spec)
+    spec = spec_from_file_location("user_module", config.python_file.get())
+    if spec is None:
+        raise ValueError("Invalid python_path.")
+    module = module_from_spec(spec)
+    if spec.loader is None:
+        raise ValueError("spec.loader not defined.")
     spec.loader.exec_module(module)
-
     user_func = getattr(module, config.function.get())
-
     workspace = Path(config.workspace.get()).resolve()
 
 
-def execute(args):
+def execute(args: Any) -> Any:
     trial_id, xs = args
 
     start_time = get_time_now()

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-
-import numpy as np
+from typing import Any
 
 import aiaccel
 from aiaccel.util.filesystem import load_yaml
@@ -58,7 +57,7 @@ def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
     return best, best_file
 
 
-def get_type(parameter: dict) -> str:
+def get_type(parameter: dict[str, Any]) -> str:
     """Get a type of a specified parameter.
 
     Args:
@@ -104,7 +103,7 @@ class HyperParameter(object):
         q (float | int): A quantization factor.
     """
 
-    def __init__(self, parameter: dict[str, bool | int | float | list]) -> None:
+    def __init__(self, parameter: dict[str, Any]) -> None:
         self._raw_dict = parameter
         self.name = parameter['name']
         self.type = get_type(parameter)
@@ -115,9 +114,11 @@ class HyperParameter(object):
         self.sequence = parameter.get('sequence', None)
         self.initial = parameter.get('initial', None)
         self.q = parameter.get('q', 1)
+        self.step = parameter.get('step', None)
+        self.base = parameter.get('base', None)
         self.num_grid_points = parameter.get('num_grid_points', None)
 
-    def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
+    def sample(self, initial: bool = False, rng: Any = None) -> dict[str, Any]:
         """Sample a parameter.
 
         Args:
@@ -158,7 +159,7 @@ class HyperParameterConfiguration(object):
         hps (dict): Hyper parameters.
     """
 
-    def __init__(self, json_string: dict) -> None:
+    def __init__(self, json_string: Any) -> None:
         self.json_string = json_string
         self.hps: dict[str, HyperParameter] = {}
 
@@ -190,7 +191,7 @@ class HyperParameterConfiguration(object):
         """
         return list(self.hps.values())
 
-    def get_parameter_dict(self) -> dict:
+    def get_parameter_dict(self) -> dict[str, Any]:
         """Get a dictionary of hyper parameters.
 
         Returns:
@@ -198,8 +199,8 @@ class HyperParameterConfiguration(object):
         """
         return self.hps
 
-    def sample(self, initial: bool = False, rng: np.random.RandomState = None
-               ) -> list[dict]:
+    def sample(self, initial: bool = False, rng: Any = None
+               ) -> list[dict[str, Any]]:
         """Sample a hyper parameters set.
 
         Args:
@@ -216,7 +217,7 @@ class HyperParameterConfiguration(object):
         return ret
 
 
-def load_parameter(json_string: dict) -> HyperParameterConfiguration:
+def load_parameter(json_string: dict[str, Any]) -> HyperParameterConfiguration:
     """Load HyperParameterConfiguration object from a configuration file.
 
     Args:
