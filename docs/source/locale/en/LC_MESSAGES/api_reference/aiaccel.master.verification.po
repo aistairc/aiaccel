@@ -1,0 +1,191 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-16 14:18+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/api_reference/aiaccel.master.verification.rst:2
+msgid "aiaccel.master.verification package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verification.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verification.rst:8
+msgid "aiaccel.master.verification.abstract\\_verification module"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:1 of
+msgid "An abstract class of verification."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.save
+#: of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:3
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:9 of
+msgid "A dictionary containing command line options as well as process name."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification of
+msgid "type"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:12 of
+msgid "dict[str, str | int | bool]"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:16 of
+msgid "Config object"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:18 of
+msgid "Config"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:22 of
+msgid "Path to the workspace."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:24
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:30 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:28 of
+msgid "Path to \"lock\", i.e. `ws`/lock."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:34 of
+msgid "Whether verified or not."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:36 of
+msgid "bool"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:40 of
+msgid "The last loop number verified."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:42 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:46 of
+msgid ""
+"A list of verification conditions. Each element dict has keys 'loop', "
+"'minimum', and 'maximum' with values as int, float, and float, "
+"respectively. The verification is `True` if the optimized result of which"
+" the trial id is the given 'loop' is greater than or equal to 'minimum' "
+"as well as is less than or equal to the 'maximum'."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:53 of
+msgid "list[dict[str, int | float]]"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:57 of
+msgid "Deepcopy object of condition."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:59 of
+msgid "list[dict]"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:63 of
+msgid "Storage object."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification:65 of
+msgid "Storage"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.load_verification_config:1
+#: of
+msgid "Load configurations about verification."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.load_verification_config
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.print
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.save
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.verify
+#: of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.load_verification_config:3
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification:8
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.print:3
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.save:6
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.verify:6
+#: of
+msgid "None"
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification:1
+#: of
+msgid "Run a verification and save the result."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification:3
+#: of
+msgid "An index of verifications."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification:5
+#: of
+msgid "A loop count of Master."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.print:1
+#: of
+msgid "Print current verifications result."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.save:1
+#: of
+msgid "Save current verifications result to a file."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.verify:1
+#: of
+msgid "Run a verification."
+msgstr ""
+
+#: aiaccel.master.verification.abstract_verification.AbstractVerification.verify:3
+#: of
+msgid ""
+"The trigger to run a verification, is described in configuration file "
+"'verification' > 'conditions'."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verification.rst:16
+msgid "Module contents"
+msgstr ""
+

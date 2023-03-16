@@ -1,0 +1,572 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-16 14:25+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:1
+msgid "バジェット指定型グリッドオプティマイザのローカル環境での実行例"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:3
+msgid ""
+"ここでは，バジェット指定型グリッドオプティマイザをローカルで実行する方法を説明します． 例として，ベンチマーク関数の一つである Schwefel "
+"の最適化を行います．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:6
+msgid "以下の説明では aiaccel/examples/budget_specified_grid に保存されているファイルを編集して使用します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:8
+msgid "1. 生成したグリッド点を順番にサンプリングする場合"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:10
+msgid "1. ファイル構成"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:12
+msgid ""
+"ファイルは aiaccel/examples/budget_specified_grid/1_sampling_in_order "
+"に保存されています．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:14
+msgid "config.yaml"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:16
+msgid "最適化およびソフトウェアの設定ファイルです．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:18
+msgid "user.py"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:20
+msgid "与えられたパラメータからベンチマーク関数 Schwefel の値を計算し，aiaccel の Storage に保存するユーザプログラムです．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:25
+msgid "2. ファイル作成手順"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:27
+msgid "config.yaml の作成"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:29
+msgid "**generic**"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:36
+msgid "**workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:37
+msgid "**job_command** - ユーザープログラムを実行するためのコマンドです．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:38
+msgid "**batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:41
+msgid ""
+"Windows では，仮想環境の python で実行するためには `job_command` の欄を "
+"`\"optenv/Scripts/python.exe\"` のように設定する必要があります．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:44
+msgid "**resource**"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:51
+msgid "**type** - 実行環境を指定します．ローカル環境で実行するためには `\"local\"` で設定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:52
+msgid "**num_node** - 使用するノード数を指定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:55
+msgid "**ABCI**"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:57
+msgid "ローカル実行なので使用しません．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:59
+msgid "**optimize**"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:94
+msgid "**search_algorithm** - 最適化アルゴリズムを設定します．この例ではバジェット指定型グリッドオプティマイザを設定しています．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:95
+msgid "**goal** - 最適化の方向を設定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:96
+msgid "関数 Schwefel を最小化することが目的であるため，`\"minimize\"` を設定しています．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:97
+msgid "**trial_number** - 試行回数を設定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:98
+msgid "**rand_seed** - 乱数の生成に使用するシードを設定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:99
+msgid ""
+"**parameters** - ハイパパラメータの各種項目を設定します．ここでは 5 次元の Schwefel の最適化を行うため，5 "
+"種類のパラメータを用意しています．5 "
+"つのパラメータに対して，以下の項目をそれぞれ設定する必要があります．パラメータの範囲や初期値を，全て同じにする必要はありません．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:100
+msgid "**name** - ハイパパラメータの名前を設定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:101
+msgid ""
+"**type** - ハイパパラメータのデータ型を設定します．ここでは例として `\"uniform_float\"` "
+"に設定していますが，グリッドオプティマイザでは，以下の 4 つから選択することができます．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:102
+msgid "uniform_float - 浮動小数点数"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:103
+msgid "uniform_int - 整数"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:104
+msgid "categorical - カテゴリカル変数"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:105
+msgid "ordinal - オーディナル変数"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:106
+msgid "**lower / upper** - ハイパパラメータ最小値 / 最大値を設定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:107
+msgid "**log** -  対数スケールでパラメータ空間を分割するかを `true` または `false` で設定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:109
+msgid "**注意**: バジェット指定型グリッドオプティマイザでは，パラメータの初期値を設定することができません．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:111
+msgid "user.py の作成"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:113
+msgid "`user.py` は以下のように記述します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:131
+msgid "**モジュール**"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:137
+msgid "必要なモジュールをインポートします．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:139
+msgid "numpy - 関数 Schwefel を計算するために使用します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:140
+msgid ""
+"aiaccel.util.aiaccel - ユーザープログラム内で定義される関数 `main()` と "
+"aiaccelとの間のインターフェイスを提供します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:143
+msgid "**main**"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:150
+msgid ""
+"最適化対象の関数で，aiaccel はこの関数の `return` 値を最小化します． 引数にハイパパラメータの辞書型オブジェクトを取ります， "
+"この例では，関数 Schwefel の値を計算し，返却します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:154
+msgid "**実行部分**"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:160
+msgid ""
+"aiaccel から関数 `main()` にハイパパラメータを渡し，`main()` の返却値を Storage に保存します． `run` "
+"はそのインターフェイスとなるインスタンスです． メソッド `execute_and_report()` の内部で `main()` "
+"が値を計算し，Storage に計算結果が保存されます．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:167
+msgid "3. 実行"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:169
+msgid "作成した config.yaml と user.py が保存されているディレクトリに移動し，下記のコマンドで aiaccel を起動してください．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:175
+msgid "コマンドラインオプション引数"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:176
+msgid "`--config` - 設定ファイルを読み込むためのオプション引数です．読み込むコンフィグのパスを記述します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:177
+msgid ""
+"`--clean` - aiaccel の起動ディレクトリ内に config.yaml の workspace "
+"で指定したディレクトリが存在する場合，削除してから実行するためのオプション引数です．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:181
+msgid "4. 結果の確認"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:183
+msgid "aiaccel の正常終了後，最適化の結果は以下の 2 か所に保存されます．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:185
+msgid "./work/results.csv"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:186
+msgid "./work/result/{trial_id}.hp"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:188
+msgid "ここで，./work はコンフィグファイルの workspace に設定したディレクトリです．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:190
+msgid ""
+"results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています． "
+"result/{trial_id}.hp は，{trial_id} 回目の試行のパラメータと関数の値が YAML 形式で保存されています． "
+"さらに，同じフォルダには final_result.result というファイルが作成され，全試行中で最良のパラメータと目的関数の値が YAML "
+"形式で保存されます．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:194
+msgid "上で実行した最適化の結果は以下のようになります．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:196
+msgid "trial_id: 0"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:197
+msgid "parameters:"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:198
+msgid "x1 (FLOAT) = -500.0"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:199
+msgid "x2 (FLOAT) = 50.0"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:200
+msgid "x3 (INT) = -500"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:201
+msgid "x4 (CATEGORICAL) = -500"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:202
+msgid "x5 (ORDINAL) = -500"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:203
+msgid "result: -757.799698717469"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:206
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:252
+msgid "グリッド点のサンプリング"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:208
+msgid "グリッド点の生成"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:209
+msgid ""
+"試行回数 $n$ からグリッド点の位置を決定するため，選択肢の数が指定されていない `float` 型または `int` 型のパラメータには $ "
+"x $ 個または $ x - 1 $ 個の選択肢が割り当てられます．`num_grid_point` が指定された `float` や "
+"`int`，或いはカテゴリカルやオーディナルな変数がそれぞれ $c_i$ 個の選択肢をあらかじめ与えられていた場合は，サイズが $ m = "
+"\\prod c_i $ の探索空間を除いた $ n' = n / m $ を選択肢の数が未指定のパラメータに割り当てます．このとき，$x$ は "
+"$ x^q (x - 1)^{p - q} \\geq n' $ を満たす最小の値として決定されます．ここで， $p$ "
+"は選択肢の数が未指定なパラメータの数， $q$ は $0 < q \\leq p $ を満たす整数です．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:211
+msgid ""
+"例えば，試行回数が $n = 12$ のとき，2 つのパラメータ $x_1,\\ x_2$ "
+"を，グリッド点数を指定せずに最適化しようとした場合，それぞれのパラメータは 4 つと 3 つの選択肢から選択されることになります．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:213
+msgid ""
+"自動・手動に関わらず，選択肢の数が決定した後，パラメータの候補を生成するために，aiaccel では numpy の関数を活用します． "
+"具体的には，対数スケールでの探索が無効の場合 (`log = false`)，`numpy.linspace` "
+"で，対数スケールでの探索が友好の場合 (`log = true`)，`numpy.geomspace` でパラメータの選択肢を生成します． "
+"このとき，指定された `lower` と `upper` はこれら 2 つの関数の引数 _start_ および _stop_ "
+"にそれぞれ渡されます． また，`int` 型のパラメータの場合には，これらの関数の引数 _dtype_ に `int` を指定します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:218
+msgid "例として，以下のような設定を考えると，"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:239
+msgid "`x1`，`x2`，`x3` の選択肢は，"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:245
+msgid "となります．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:247
+msgid ""
+"`x3` では，設定した選択肢の数 (`num_grid_points = 5`) よりも生成された選択肢の数 ( `= 2`) "
+"の方が少ないです． これは，選択肢を生成する過程で，浮動小数点数を整数に変換する際に発生した重複を除いたためです． このように，`int` "
+"型のパラメータでは選択肢の数に注意する必要があります．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:254
+msgid ""
+"[グリッド点の生成](#グリッド点の生成)で述べたように，自由に割り当てられる試行回数が $n'$ のとき，各パラメータの選択肢の数 $x$ と "
+"$x - 1$ は $ x^q (x - 1)^{p - q} \\geq n' $ を満たすように決まります． "
+"従って，生成されるグリッド点の数は，試行回数よりも多い場合があります． このような場合，全てのグリッド点から一部を選択 (サンプリング) "
+"して探索することになります．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:258
+msgid "aiaccel では 4 つのサンプリング手法を用いることができます． 即ち"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:260
+msgid "IN_ORDER"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:261
+msgid "UNIFORM"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:262
+msgid "DUPRECATABLE_RANDOM"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:263
+msgid "RANDOM"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:265
+msgid "の 4 つです．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:267
+msgid "以下では，例として，次のような設定の場合に，どのグリッド点を探索することになるかを説明します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:285
+msgid ""
+"この例では，試行回数が 10 回と指定されているため， 2 つのパラメータ `x1` と `x2` にはそれぞれ 4 つと 3 "
+"つの選択肢が割り当てられます ( $4 \\times 3 = 12 > 10 (= {\\rm trial\\_number})$ )． "
+"従って，生成されるグリッド点は 12 点になりますが，試行回数がこれより少ないため， 2 点は探索されないことになります．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:289
+msgid ""
+"探索されるグリッド点を `x1` と `x2` が張る平面にプロットすると以下のようになります． プロットの縦軸と横軸はそれぞれ `x1` と "
+"`x2` に対応します． また，記号 `X`，`Y`，および `_` はそれぞれ 1 回だけ探索された点，2 "
+"回探索された点，および探索されなかった点を表します． DUPRECATABLE_RANDOM および RANDOM は seed = 42 "
+"の場合の結果です．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:294
+msgid "*IN_ORDER*"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:304
+msgid "*UNIFORM*"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:314
+msgid "*DUPRICATABLE_RANDOM*"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:324
+msgid "*RANDOM*"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:334
+msgid ""
+"IN_ORDER，UNIFORM，および RANDOM は重複なしで探索を行います． IN_ORDER "
+"でサンプリングした場合，無視されるグリッド点が探索空間の端に集中します． 一方で，UNIFORM または "
+"RANDOMでサンプリングした場合，無視されるグリッド点が分散するため，満遍なくパラメータを探索できます． UNIFORM と RANDOM "
+"の違いは，解析的にサンプリングされる点が予測できるか否かです． UNIFORM では，`numpy.linspace` "
+"を用いて探索対象となるグリッド点の id の配列を生成していますが，RANDOM では "
+"`numpy.random.RandomState.choice` を用いてグリッド点を選択します．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:340
+msgid ""
+"DUPRECATABLE_RANDOM では，RANDOM と同様に `numpy.random.RandomState` "
+"を用いてグリッド点の選択を行いますが，重複が発生する可能性があります． これは，DUPRECATABLE_RANDOM "
+"でサンプリングを行う場合には，aiaccel の内部でグリッド点の \"組み合わせ\" を保持しないことが原因です． 例えば `x1` "
+"の選択として `[0, 1]` が，`x2` の選択肢として `[0, 1, 2]` が与えられた場合，RANDOM では "
+"`grid_points = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]` というような 6"
+" つの組み合わせを保持しますが，DUPRECATABLE_RANDOM では `x1` と `x2` の選択肢 (計 5 つ) "
+"をそのまま保持します． 従って DUPRECATABLE_RANDOM は，例えば 10 個のパラメータがそれぞれ 10 "
+"個の選択肢を持つような場合に，メモリの大きさの観点から RANDOM に対して大きな優位性を持ちます．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:345
+msgid ""
+"DUPRECATABLE_RANDOM と同様に，IN_ORDER および UNIFORM "
+"の場合もグリッド点を組み合わせとして保持しないため，メモリ上で大きな探索空間を扱うことが可能です．"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "grid_id"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "x1"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "x2"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "0"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "X"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "Y"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "1"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "2"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "_"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "3"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "4"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "5"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "6"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "7"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "8"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "9"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "10"
+msgstr ""
+
+#: ../../source/examples/local_budget_specified_grid_optimizer.md:40
+msgid "11"
+msgstr ""
+
+#~ msgid ""
+#~ "IN_ORDER，UNIFORM，および RANDOM は重複なしで探索を行います． IN_ORDER"
+#~ " でサンプリングした場合，探索空間の端に無視されるグリッド点が集中します． 一方で，UNIFORM または"
+#~ " RANDOMでサンプリングした場合，無視されるグリッド点が分散するため，満遍なくパラメータを探索できます． "
+#~ "UNIFORM と RANDOM の違いは，解析的にサンプリングされる点が予測できるか否かです． "
+#~ "UNIFORM では，`numpy.linspace` を用いて探索対象となるグリッド点の id "
+#~ "の配列を生成していますが，RANDOM では `numpy.random.RandomState.choice`"
+#~ " を用いてグリッド点を選択します．"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "DUPRECATABLE_RANDOM では，RANDOM と同様に "
+#~ "`numpy.random.RandomState` を用いてグリッド点の選択を行いますが，重複が発生します． "
+#~ "これは，DUPRECATABLE_RANDOM でサンプリングを行う場合には，aiaccel の内部でグリッド点の"
+#~ " \"組み合わせ\" を保持しないことが原因です． 例えば `x1` の選択として"
+#~ " `[0, 1]` が，`x2` の選択肢として `[0, 1, "
+#~ "2]` が与えられた場合，RANDOM では `grid_points = "
+#~ "[(0, 0), (0, 1), (0, 2), (1, "
+#~ "0), (1, 1), (1, 2)]` というような 6 "
+#~ "つの組み合わせを保持しますが，DUPRECATABLE_RANDOM では `x1` と "
+#~ "`x2` の選択肢 (計 5 つ) をそのまま保持します． 従って"
+#~ " DUPRECATABLE_RANDOM は，例えば 10 個のパラメータがそれぞれ "
+#~ "10 個の選択肢を持つような場合に，メモリの大きさの観点から RANDOM "
+#~ "に対して大きな優位性を持ちます．"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "IN_ORDER および UNIFORM についても，DUPRECATABLE_RANDOM "
+#~ "と同様にグリッド点を組み合わせとして保持しないため，メモリ上で大きな探索空間を扱うことが可能です．"
+#~ msgstr ""
+

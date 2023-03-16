@@ -1,0 +1,190 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-16 14:18+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/api_reference/aiaccel.master.evaluator.rst:2
+msgid "aiaccel.master.evaluator package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.evaluator.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.evaluator.rst:8
+msgid "aiaccel.master.evaluator.abstract\\_evaluator module"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:1 of
+msgid "An abstract class for MaximizeEvaluator and MinimizeEvaluator."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
+#: of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:3
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:9 of
+msgid "A dictionary containing command line options as well as process name."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator of
+msgid "type"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:12 of
+msgid "dict[str, str | int | bool]"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:16 of
+msgid "Path to the configuration file."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:18
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:30
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:36 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:22 of
+msgid "Config object."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:24 of
+msgid "Config"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:28 of
+msgid "Path to the workspace."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:34 of
+msgid "Path to \"lock', i.e. `ws`/lock."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:40 of
+msgid "A dict object of the best optimized result."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:42 of
+msgid "dict"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:46 of
+msgid "Storage object."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:48 of
+msgid "Storage"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:52 of
+msgid "Goal of optimization ('minimize' or 'maximize')."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:54 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:58 of
+msgid "TrialId object."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:60 of
+msgid "TrialId"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.evaluate:1 of
+msgid "Run an evaluation."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.evaluate
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.evaluate:3
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print:3
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save:3 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id:1
+#: of
+msgid "Returns string of trial id padded by zeros."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id:3
+#: of
+msgid "Trial id."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id:6
+#: of
+msgid "Trial id padded by zeros."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
+#: of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print:1 of
+msgid "Print current results."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save:1 of
+msgid "Save current results to a file."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.evaluator.rst:16
+msgid "aiaccel.master.evaluator.maximize\\_evaluator module"
+msgstr ""
+
+#: aiaccel.master.evaluator.maximize_evaluator.MaximizeEvaluator:1
+#: aiaccel.master.evaluator.minimize_evaluator.MinimizeEvaluator:1 of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator`"
+msgstr ""
+
+#: aiaccel.master.evaluator.maximize_evaluator.MaximizeEvaluator:1 of
+msgid "A evaluator class to maximize the results."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.evaluator.rst:24
+msgid "aiaccel.master.evaluator.minimize\\_evaluator module"
+msgstr ""
+
+#: aiaccel.master.evaluator.minimize_evaluator.MinimizeEvaluator:1 of
+msgid "A evaluator class to minimize the results."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.evaluator.rst:32
+msgid "Module contents"
+msgstr ""
+
