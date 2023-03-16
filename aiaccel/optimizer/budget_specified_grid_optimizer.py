@@ -17,7 +17,7 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
 
         option_accept_small_trial_number = options.get('accept_small_trial_number', False)
         config_accept_small_trial_number = self.config.grid_accept_small_trial_number.get()
-        accept_small_trial_number = option_accept_small_trial_number or config_accept_small_trial_number
+        accept_small_trial_number = bool(option_accept_small_trial_number or config_accept_small_trial_number)
 
         if accept_small_trial_number:
             self.logger.warning(
