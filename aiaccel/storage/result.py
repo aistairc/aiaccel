@@ -136,7 +136,7 @@ class Result(Abstract):
         return best_values[-1]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_objective_and_best_value(self, trial_id: int, goal: str) -> tuple[any, any]:
+    def get_any_trial_objective_and_best_value(self, trial_id: int, goal: str) -> tuple[Any, Any]:
         """Obtains the sorted result.
 
         Returns:
