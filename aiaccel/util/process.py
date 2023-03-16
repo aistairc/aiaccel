@@ -6,6 +6,7 @@ import re
 import subprocess
 import threading
 from subprocess import Popen
+from typing import Any
 
 import psutil
 
@@ -13,7 +14,7 @@ from aiaccel.util.time_tools import (get_time_now_object,
                                      get_time_string_from_object)
 
 
-def exec_runner(command: list) -> Popen:
+def exec_runner(command: list[Any]) -> Popen[bytes]:
     """Execute a subprocess with command.
 
     Args:
@@ -29,7 +30,7 @@ def exec_runner(command: list) -> Popen:
     )
 
 
-def subprocess_ps() -> list[dict]:
+def subprocess_ps() -> list[dict[str, Any]]:
     """Get a ps result as a list.
 
     Returns:
@@ -37,8 +38,8 @@ def subprocess_ps() -> list[dict]:
     """
     commands = ['ps', 'xu']
     res = subprocess.run(commands, stdout=subprocess.PIPE)
-    res = res.stdout.decode('utf-8')
-    stats = res.split('\n')
+    message = res.stdout.decode('utf-8')
+    stats = message.split('\n')
     stats_zero = re.split(' +', stats[0])
     stats_zero = [s for s in stats_zero if s != '']
     pid_order = stats_zero.index('PID')
@@ -60,7 +61,7 @@ def subprocess_ps() -> list[dict]:
     return ret
 
 
-def ps2joblist() -> list[dict]:
+def ps2joblist() -> list[dict[str, Any]]:
     """Get a ps result and convert to a job list format.
 
     Returns:

@@ -1,6 +1,7 @@
 from __future__ import annotations
-import numpy as np
+
 from pathlib import Path
+from typing import Any
 
 from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import \
     AbstractSchedulingAlgorithm
@@ -15,7 +16,7 @@ class RandomSamplingSchedulingAlgorithm(AbstractSchedulingAlgorithm):
         self,
         hp_ready: list[Path],
         num: int = 1,
-        rng: np.random.RandomState | None = None
+        rng: Any = None
     ) -> list[Path]:
         """Select multiple hyper parameters.
 

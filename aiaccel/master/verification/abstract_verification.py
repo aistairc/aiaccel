@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+from typing import Any
 
 from aiaccel import extension_verification
 from aiaccel.config import Config
@@ -34,15 +35,15 @@ class AbstractVerification(object):
         storage (Storage): Storage object.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         # === Load config file===
         self.options = options
         self.config = Config(self.options['config'])
         self.workspace = Workspace(self.config.workspace.get())
         self.is_verified: bool = None
         self.finished_loop = None
-        self.condition = None
-        self.verification_result = None
+        self.condition: Any = None
+        self.verification_result: Any = None
         self.load_verification_config()
         self.storage = Storage(self.workspace.path)
 
@@ -111,7 +112,7 @@ class AbstractVerification(object):
         logger.info('Current verification is followings:')
         logger.info(f'{self.verification_result}')
 
-    def save(self, name: int) -> None:
+    def save(self, name: str | int) -> None:
         """Save current verifications result to a file.
 
         Args:

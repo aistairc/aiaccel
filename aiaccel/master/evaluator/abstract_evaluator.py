@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import aiaccel
 from aiaccel.config import Config
@@ -30,7 +31,7 @@ class AbstractEvaluator(object):
 
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
         self.config = Config(str(self.config_path))

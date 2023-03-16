@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 from aiaccel.util.process import kill_process
 from aiaccel.util.time_tools import get_time_delta, get_time_now_object
@@ -10,8 +12,13 @@ if TYPE_CHECKING:
 
 
 class AbstractModel(object):
+    state: str
+    expire: Callable[[Any], Any]
+    schedule: Callable[[Any], Any]
+    next: Callable[[Any], Any]
 
     # Common
+
     def after_confirmed(self, obj: 'Job') -> None:
         """State transition of 'after_confirmed'.
 
@@ -393,7 +400,7 @@ class AbstractModel(object):
         )
         obj.threshold_retry = obj.expire_retry
 
-    def change_state(self, obj: 'Job'):
+    def change_state(self, obj: 'Job') -> None:
         obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state=obj.next_state)
 
     def write_results_to_database(self, obj: 'Job'):

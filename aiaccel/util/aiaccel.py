@@ -200,7 +200,7 @@ class Run:
             sys.stderr.write(f"{err}\n")
 
 
-def set_logging_file_for_trial_id(workspace, trial_id):
+def set_logging_file_for_trial_id(workspace: Path, trial_id: int) -> None:
     log_dir = workspace / "log"
     log_path = log_dir / f"job_{trial_id}.log"
     if not log_dir.exists():
