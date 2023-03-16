@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from typing import Any
 
 from aiaccel import (dict_alive, dict_error, dict_finished, dict_hp,
                      dict_jobstate, dict_lock, dict_log, dict_output, dict_pid,
@@ -179,7 +180,7 @@ class Workspace:
         return path.exists()
 
     @retry(_MAX_NUM=10, _DELAY=1.0)
-    def get_any_trial_result(self, trial_id: int) -> dict | None:
+    def get_any_trial_result(self, trial_id: int) -> dict[str, Any] | None:
         """Get any trial result.
 
         Returns:

@@ -9,7 +9,7 @@ from aiaccel.parameter import load_parameter
 from aiaccel.util.filesystem import create_yaml
 
 
-def main():
+def main() -> None:
     """Writes the result of a trial to a file.
     """
 

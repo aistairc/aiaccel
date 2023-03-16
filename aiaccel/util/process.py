@@ -113,17 +113,17 @@ class OutputHandler(threading.Thread):
         _sleep_time (int): A sleep time each loop.
     """
 
-    def __init__(self, proc: subprocess.Popen) -> None:
+    def __init__(self, proc: subprocess.Popen[bytes]) -> None:
         super(OutputHandler, self).__init__()
         self._proc = proc
         self._sleep_time = 1
         self._abort = False
 
         self._returncode = None
-        self._stdouts = []
-        self._stderrs = []
-        self._start_time = None
-        self._end_time = None
+        self._stdouts: list[str] = []
+        self._stderrs: list[str] = []
+        self._start_time: datetime.datetime | None = None
+        self._end_time: datetime.datetime | None = None
 
     def abort(self) -> None:
         self._abort = True
@@ -167,13 +167,17 @@ class OutputHandler(threading.Thread):
     def get_stderrs(self) -> list[str]:
         return copy.deepcopy(self._stderrs)
 
-    def get_start_time(self) -> str:
+    def get_start_time(self) -> str | None:
+        if self._start_time is None:
+            return ""
         return get_time_string_from_object(self._start_time)
 
-    def get_end_time(self) -> str:
+    def get_end_time(self) -> str | None:
+        if self._end_time is None:
+            return ""
         return get_time_string_from_object(self._end_time)
 
-    def get_returncode(self):
+    def get_returncode(self) -> int | None:
         return self._proc.poll()
 
 

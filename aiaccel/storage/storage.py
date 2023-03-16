@@ -18,9 +18,7 @@ class Storage:
     """
 
     def __init__(self, ws: Path | str) -> None:
-        if type(ws) is str:
-            ws = Path(ws).resolve()
-        db_path = ws / aiaccel.dict_storage / "storage.db"
+        db_path = Path(ws).resolve() / aiaccel.dict_storage / "storage.db"
         self.trial = Trial(db_path)
         self.hp = Hp(db_path)
         self.result = Result(db_path)

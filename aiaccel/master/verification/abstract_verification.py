@@ -40,7 +40,7 @@ class AbstractVerification(object):
         self.options = options
         self.config = Config(self.options['config'])
         self.workspace = Workspace(self.config.workspace.get())
-        self.is_verified: bool = None
+        self.is_verified: bool = False
         self.finished_loop = None
         self.condition: Any = None
         self.verification_result: Any = None

@@ -56,7 +56,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return True
 
-    def get_any_trial_xs(self, trial_id: int) -> dict | None:
+    def get_any_trial_xs(self, trial_id: int) -> dict[str, Any] | None:
         """Gets a parameter list of specific trial ID from Storage object.
 
         Args:
@@ -77,7 +77,7 @@ class PylocalScheduler(AbstractScheduler):
         return xs
 
     def report(
-        self, trial_id: int, y: any, err: str, start_time: str,
+        self, trial_id: int, y: Any, err: str, start_time: str,
         end_time: str
     ) -> None:
         """Saves results in the Storage object.
@@ -85,7 +85,7 @@ class PylocalScheduler(AbstractScheduler):
         Args:
             trial_id (int): Trial ID.
             xs (dict): A dictionary of parameters.
-            y (any): Objective value.
+            y (Any): Objective value.
             err (str): Error string.
             start_time (str): Execution start time.
             end_time (str): Execution end time.
@@ -113,16 +113,16 @@ class PylocalScheduler(AbstractScheduler):
         Returns:
             PosixPath: A Path object which points to the result file.
         """
-        return self.workspace.get_any_result_file_path(self.trial_id)
+        return self.workspace.get_any_result_file_path(self.trial_id.get())
 
     def create_result_file(
-            self,
-            trial_id: int,
-            xs: dict,
-            objective: any,
-            error: str,
-            start_time,
-            end_time
+        self,
+        trial_id: int,
+        xs: dict[str, Any],
+        objective: Any,
+        error: str,
+        start_time: str,
+        end_time: str
     ) -> None:
         args = {
             'file': self.workspace.get_any_result_file_path(trial_id),
@@ -143,7 +143,7 @@ class PylocalScheduler(AbstractScheduler):
         commands = ['aiaccel-set-result']
         for key in args.keys():
             commands.append('--' + key)
-            commands.append(args[key])
+            commands.append(str(args[key]))
 
         for key in xs.keys():
             commands.append('--' + key)
@@ -153,7 +153,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return None
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['run']
         del obj['pool']
@@ -184,7 +184,7 @@ def initializer(config_path: str | Path) -> None:
     workspace = Path(config.workspace.get()).resolve()
 
 
-def execute(args: list) -> tuple:
+def execute(args: Any) -> tuple[int, dict[str, Any], Any, str, str, str]:
     """Executes the specified function with the specified arguments.
 
     Args:

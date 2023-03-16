@@ -5,6 +5,7 @@ import sys
 from argparse import ArgumentParser
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
@@ -13,7 +14,7 @@ from aiaccel.util.time_tools import get_time_now
 
 
 class CommandLineArgs:
-    def __init__(self):
+    def __init__(self) -> None:
         self.parser = ArgumentParser()
         self.parser.add_argument('--trial_id', type=int, required=False)
         self.parser.add_argument('--config', type=str, required=False)
@@ -49,7 +50,7 @@ class CommandLineArgs:
                     self.parser.add_argument(f"--{name}", type=float)
             self.args = self.parser.parse_known_args()[0]
 
-    def get_xs_from_args(self) -> dict:
+    def get_xs_from_args(self) -> dict[str, Any]:
         xs = vars(self.args)
         delete_keys = ["trial_id", "config"]
         for key in delete_keys:
@@ -118,9 +119,7 @@ class Run:
         func: Callable[[dict[str, float | int | str]], float],
         xs: 'dict[str, float | int | str]',
         y_data_type: 'str | None'
-    ) -> tuple[dict[str, float | int | str] | None,
-               float | int | str | None,
-               str]:
+    ) -> Any:
         """Executes the target function.
 
         Args:
@@ -134,7 +133,7 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
-        if self.workspace is not None:
+        if self.workspace is not None and self.args.trial_id is not None:
             set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
 
         y = None
@@ -183,15 +182,16 @@ class Run:
         """
 
         xs = self.args.get_xs_from_args()
+        y: Any = None
         _, y, err, _, _ = self.execute(func, xs, y_data_type)
 
         self.report(y, err)
 
-    def report(self, y: any, err: str) -> None:
+    def report(self, y: Any, err: str) -> None:
         """Save the results to a text file.
 
         Args:
-            y (any): Objective value.
+            y (Any): Objective value.
             err (str): Error string.
         """
 
