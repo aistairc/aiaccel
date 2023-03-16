@@ -2,16 +2,16 @@
 import copy
 import json
 from re import T
+from unittest.mock import patch
 
-import aiaccel
 import numpy as np
 import pytest
+
+import aiaccel
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.parameter import load_parameter
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import load_yaml
-
-from unittest.mock import patch
 from tests.base_test import BaseTest
 
 
@@ -102,9 +102,7 @@ class TestNelderMead(BaseTest):
                     param_type='float'
                 )
         storage.trial.set_any_trial_state(trial_id=1, state='finished')
-        #
-        # c = load_yaml(work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp'))
-        #
+
         print(storage.get_finished())
         print(storage.result.get_all_result())
         c = storage.get_hp_dict(trial_id=0)
@@ -268,7 +266,6 @@ class TestNelderMead(BaseTest):
         self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
         assert self.nm._wait_shrink(results) is None
 
-        print(results)
         with patch.object(self.nm, '_state', 'WaitInitialize'):
             assert self.nm._wait_shrink(results) is None
 

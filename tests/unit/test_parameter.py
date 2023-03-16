@@ -1,22 +1,10 @@
 import numpy as np
 
-from aiaccel.parameter import get_type, load_parameter
+from aiaccel.parameter import load_parameter
 from tests.base_test import BaseTest
 
 
 class TestParameter(BaseTest):
-
-    def test_get_type(self):
-        int_p = {'type': 'uniform_int'}
-        assert get_type(int_p) == 'INT'
-        float_p = {'type': 'uniform_float'}
-        assert get_type(float_p) == 'FLOAT'
-        cat_p = {'type': 'categorical'}
-        assert get_type(cat_p) == 'CATEGORICAL'
-        ord_p = {'type': 'ordinal'}
-        assert get_type(ord_p) == 'ORDINAL'
-        other_p = {'type': 'invalid'}
-        assert get_type(other_p) == 'invalid'
 
     def test_load_parameter(self):
         hp = load_parameter(

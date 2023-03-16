@@ -5,6 +5,8 @@ from pathlib import Path
 import yaml
 
 import aiaccel
+from aiaccel import (resource_type_abci, resource_type_local,
+                     resource_type_python_local)
 from aiaccel.config import Config
 from aiaccel.master.create import create_master
 from aiaccel.master.local_master import LocalMaster
@@ -57,14 +59,14 @@ class IntegrationTest(BaseTest):
 
             with open(config_file, 'r') as f:
                 yml = yaml.load(f, Loader=yaml.SafeLoader)
-            yml['resource']['type'] = 'python_local'
+            yml['resource']['type'] = resource_type_python_local
 
             with open(new_config_file, 'w') as f:
                 f.write(yaml.dump(yml, default_flow_style=False))
 
             new_config_file = create_tmp_config(new_config_file)
             config = Config(new_config_file)
-            assert config.resource_type.get() == 'python_local'
+            assert config.resource_type.get() == resource_type_python_local
 
             # master
             master = create_master(new_config_file)
@@ -97,15 +99,3 @@ class IntegrationTest(BaseTest):
         assert running == 0
         final_result = work_dir.joinpath("best_result.yaml")
         assert final_result.exists()
-        '''
-        testr = load_yaml(
-            work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result))
-        datar = load_yaml(
-            data_dir.joinpath(
-                'work',
-                aiaccel.dict_result,
-                '{}.{}'.format(aiaccel.file_final_result, self.search_algorithm)
-            )
-        )
-        assert math.isclose(testr['result'], datar['result'], abs_tol=1e-10)
-        '''

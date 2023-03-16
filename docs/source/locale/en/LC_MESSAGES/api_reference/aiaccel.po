@@ -109,7 +109,6 @@ msgstr ""
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
 #: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.get_type
 #: aiaccel.parameter.load_parameter aiaccel.workspace.Workspace.check_consists
 #: aiaccel.workspace.Workspace.create
 #: aiaccel.wrapper_tools.create_runner_command
@@ -162,7 +161,6 @@ msgstr ""
 #: aiaccel.parameter.HyperParameter.sample
 #: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
 #: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.get_type
 #: aiaccel.parameter.load_parameter aiaccel.wrapper_tools.create_runner_command
 msgid "パラメータ"
 msgstr ""
@@ -190,7 +188,6 @@ msgstr ""
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
 #: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.get_type
 #: aiaccel.parameter.load_parameter aiaccel.workspace.Workspace.check_consists
 #: of
 msgid "戻り値の型"
@@ -486,10 +483,6 @@ msgstr ""
 msgid "A hyper parameter class."
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter:5 aiaccel.parameter.get_type:3 of
-msgid "A parameter dictionary in a configuration file."
-msgstr ""
-
 #: aiaccel.parameter.HyperParameter:7
 #: aiaccel.parameter.HyperParameterConfiguration:7
 #: aiaccel.parameter.HyperParameterConfiguration:13 of
@@ -502,10 +495,6 @@ msgstr ""
 
 #: aiaccel.parameter.HyperParameter:13 aiaccel.parameter.HyperParameter:20 of
 msgid "str"
-msgstr ""
-
-#: aiaccel.parameter.HyperParameter:17 aiaccel.parameter.get_type:6 of
-msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and 'ORDINAL'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:24 of
@@ -627,10 +616,6 @@ msgstr ""
 
 #: aiaccel.parameter.HyperParameterConfiguration.sample:8 of
 msgid "A hyper parameters set."
-msgstr ""
-
-#: aiaccel.parameter.get_type:1 of
-msgid "Get a type of a specified parameter."
 msgstr ""
 
 #: aiaccel.parameter.load_parameter:1 of

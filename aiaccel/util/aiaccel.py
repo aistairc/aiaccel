@@ -6,6 +6,8 @@ from argparse import ArgumentParser
 from collections.abc import Callable
 from pathlib import Path
 
+from aiaccel import (data_type_categorical, data_type_ordinal,
+                     data_type_uniform_float, data_type_uniform_int)
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
 from aiaccel.util.cast import cast_y
@@ -30,13 +32,13 @@ class CommandLineArgs:
             self.parameters_config = load_parameter(self.config.hyperparameters.get())
 
             for p in self.parameters_config.get_parameter_list():
-                if p.type.lower() == "float":
+                if p.type == data_type_uniform_float:
                     self.parser.add_argument(f"--{p.name}", type=float)
-                elif p.type.lower() == "int":
+                elif p.type == data_type_uniform_int:
                     self.parser.add_argument(f"--{p.name}", type=int)
-                elif p.type.lower() == "categorical":
+                elif p.type == data_type_categorical:
                     self.parser.add_argument(f"--{p.name}", type=str)
-                elif p.type.lower() == "ordinal":
+                elif p.type == data_type_ordinal:
                     self.parser.add_argument(f"--{p.name}", type=float)
                 else:
                     raise ValueError(f"Unknown parameter type: {p.type}")

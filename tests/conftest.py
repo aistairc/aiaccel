@@ -227,8 +227,6 @@ def setup_result(work_dir):
     def _setup_result(n=1):
         storage = Storage(work_dir)
         running = storage.get_running()
-        print('dbg')
-        print(running)
         for trial_id in running:
             storage.result.set_any_trial_objective(trial_id=trial_id, objective=0)
 

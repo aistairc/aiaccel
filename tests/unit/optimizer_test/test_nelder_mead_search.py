@@ -7,7 +7,7 @@ from aiaccel.config import ConfileWrapper
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.nelder_mead_optimizer import NelderMeadOptimizer
 from aiaccel.parameter import load_parameter
-
+from aiaccel import data_type_uniform_float
 from tests.base_test import BaseTest
 from unittest.mock import patch
 
@@ -29,16 +29,16 @@ class TestNelderMeadOptimizer(BaseTest):
 
     def test_generate_initial_parameter(self):
         expected = [
-            {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.74},
-            {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 2.98},
-            {'parameter_name': 'x3', 'type': 'FLOAT', 'value': 3.62},
-            {'parameter_name': 'x4', 'type': 'FLOAT', 'value': 0.9},
-            {'parameter_name': 'x5', 'type': 'FLOAT', 'value': 1.99},
-            {'parameter_name': 'x6', 'type': 'FLOAT', 'value': -2.78},
-            {'parameter_name': 'x7', 'type': 'FLOAT', 'value': 1.0},
-            {'parameter_name': 'x8', 'type': 'FLOAT', 'value': 4.97},
-            {'parameter_name': 'x9', 'type': 'FLOAT', 'value': 1.98},
-            {'parameter_name': 'x10', 'type': 'FLOAT', 'value': 4.03}
+            {'parameter_name': 'x1', 'type': data_type_uniform_float, 'value': 0.74},
+            {'parameter_name': 'x2', 'type': data_type_uniform_float, 'value': 2.98},
+            {'parameter_name': 'x3', 'type': data_type_uniform_float, 'value': 3.62},
+            {'parameter_name': 'x4', 'type': data_type_uniform_float, 'value': 0.9},
+            {'parameter_name': 'x5', 'type': data_type_uniform_float, 'value': 1.99},
+            {'parameter_name': 'x6', 'type': data_type_uniform_float, 'value': -2.78},
+            {'parameter_name': 'x7', 'type': data_type_uniform_float, 'value': 1.0},
+            {'parameter_name': 'x8', 'type': data_type_uniform_float, 'value': 4.97},
+            {'parameter_name': 'x9', 'type': data_type_uniform_float, 'value': 1.98},
+            {'parameter_name': 'x10', 'type': data_type_uniform_float, 'value': 4.03}
         ]
 
         _optimizer = NelderMeadOptimizer(self.options)

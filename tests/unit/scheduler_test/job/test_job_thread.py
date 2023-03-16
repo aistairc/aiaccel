@@ -119,14 +119,8 @@ class TestModel(BaseTest):
         assert self.model.before_failed(self.job) is None
 
     def test_conditions_confirmed(self, work_dir, database_remove):
-        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
         self.job.next_state = 'ready'
         assert self.model.conditions_confirmed(self.job)
-
-    # def test_before_file_move(self, work_dir):
-    #     self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
-    #     self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '002.hp')
-    #     assert self.model.before_file_move(self.job) is None
 
     def test_after_runner(self, database_remove):
         assert self.model.after_runner(self.job) is None
@@ -150,8 +144,6 @@ class TestModel(BaseTest):
         database_remove
     ):
         assert self.model.conditions_runner_confirmed(self.job)
-
-        self.abci_job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
         assert self.model.conditions_runner_confirmed(self.abci_job)
 
     def test_after_running(self, database_remove):
@@ -223,55 +215,6 @@ class TestModel(BaseTest):
     def test_after_finished(self, database_remove):
         assert self.model.after_finished(self.job) is None
 
-    """
-    def test_before_finished(
-        self,
-        setup_hp_running,
-        setup_result,
-        work_dir,
-        database_remove
-    ):
-        # setup_hp_running(0)
-        # setup_result(0)
-        # print(self.job.trial_id_str)
-        # print(self.storage.result.get_result_trial_id_list())
-        print(self.job.storage.result.get_all_result())
-        for i in range(10):
-            self.job.storage.result.set_any_trial_objective(trial_id=i, objective=i*1.0)
-            for j in range(10):
-                self.job.storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f'x{j+1}',
-                    param_value=0.0,
-                    param_type='float'
-                )
-        assert self.model.before_finished(self.job) is None
-
-        # self.job.storage.trial.all_delete()
-        # self.job.storage.hp.all_delete()
-
-        # setup_hp_running(1)
-        # setup_result(1)
-
-        for i in range(10):
-            self.job.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            for j in range(10):
-                self.job.storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f'x{j+1}',
-                    param_value=0.0,
-                    param_type='float'
-                )
-        print(self.job.trial_id)
-        print([d.objective for d in self.job.storage.result.get_all_result()])
-        print(self.job.storage.get_best_trial_dict('minimize'))
-
-        self.job.next_state = 'finished'
-        self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_running, '001.hp')
-        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp')
-        assert self.model.before_finished(self.job) is None
-    """
-
     def test_before_finished(
         self,
         setup_hp_running,
@@ -333,8 +276,6 @@ class TestModel(BaseTest):
         print(self.job.storage.get_best_trial_dict('minimize'))
 
         self.job.next_state = 'finished'
-        self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_running, '001.hp')
-        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp')
         assert self.model.before_finished(self.job) is None
 
     def test_after_expire(self, database_remove):

@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 import copy
 
+from aiaccel import (data_type_ordinal, data_type_uniform_float,
+                     data_type_uniform_int)
 from aiaccel.optimizer._nelder_mead import NelderMead
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
@@ -234,11 +237,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         for param in self.params.get_parameter_list():
             i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
-            if param.type.lower() == 'float':
+            if param.type == data_type_uniform_float:
                 value = float(pool_p['parameters'][i]['value'])
-            elif param.type.lower() == 'int':
+            elif param.type == data_type_uniform_int:
                 value = int(pool_p['parameters'][i]['value'])
-            elif param.type.lower() == 'ordinal':
+            elif param.type == data_type_ordinal:
                 index = int(pool_p['parameters'][i]['value'])
                 value = param.sequence[index]
             else:

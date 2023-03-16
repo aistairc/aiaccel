@@ -1,13 +1,14 @@
 import functools
 from pathlib import Path
 
+import pytest
+
 from aiaccel.config import Config
 from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
                                               generate_grid_points,
                                               get_grid_options)
 from aiaccel.parameter import HyperParameter, load_parameter
 from tests.base_test import BaseTest
-import pytest
 
 
 def test_get_grid_options():
@@ -90,7 +91,7 @@ def test_generate_grid_points(grid_load_test_config):
             self.type = type_name
 
     try:
-        generate_grid_points(FakeParameter('1', 'uniform_int'), config)
+        generate_grid_points(FakeParameter('1', 'INT'), config)
         assert False
     except TypeError:
         assert True

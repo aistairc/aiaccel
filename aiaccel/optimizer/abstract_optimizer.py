@@ -4,6 +4,8 @@ import copy
 
 from numpy import str_
 
+from aiaccel import (data_type_categorical, data_type_ordinal,
+                     data_type_uniform_float, data_type_uniform_int)
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
 from aiaccel.util.logger import str_to_logging_level
@@ -266,15 +268,15 @@ class AbstractOptimizer(AbstractModule):
 
             try:
                 if (
-                    param_type.lower() == 'categorical' or
-                    param_type.lower() == 'ordinal'
+                    param_type.lower() == data_type_categorical or
+                    param_type.lower() == data_type_ordinal
                 ):
                     casted_params.append(_param)
                     continue
 
-                if param_type.lower() == 'float':
+                if param_type.lower() == data_type_uniform_float:
                     _param['value'] = float(param_value)
-                if param_type.lower() == 'int':
+                if param_type.lower() == data_type_uniform_int:
                     _param['value'] = int(param_value)
                 casted_params.append(_param)
 

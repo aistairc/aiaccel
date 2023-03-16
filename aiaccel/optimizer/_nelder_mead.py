@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import logging
 
 import numpy as np
 
+from aiaccel import data_type_ordinal
 from aiaccel.parameter import HyperParameter
 from aiaccel.util.name import generate_random_name
 
@@ -149,17 +151,17 @@ class NelderMead(object):
 
             if num_of_initials < len(initial_parameters[dim]['value']):
                 val = initial_parameters[dim]['value'][num_of_initials]
-                if self.params[dim].type.lower() == 'ordinal':
+                if self.params[dim].type == data_type_ordinal:
                     val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
                 return val
             else:
                 val = self.params[dim].sample(rng=self._rng)['value']
-                if self.params[dim].type.lower() == 'ordinal':
+                if self.params[dim].type == data_type_ordinal:
                     val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
                 return val
         else:
             val = self.params[dim].sample(rng=self._rng)['value']
-            if self.params[dim].type.lower() == 'ordinal':
+            if self.params[dim].type == data_type_ordinal:
                 val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
             return val
 

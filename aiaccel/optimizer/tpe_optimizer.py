@@ -3,6 +3,8 @@ from __future__ import annotations
 import optuna
 
 import aiaccel.parameter
+from aiaccel import (data_type_categorical, data_type_ordinal,
+                     data_type_uniform_float, data_type_uniform_int)
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
@@ -209,20 +211,20 @@ def create_distributions(
     distributions = {}
 
     for p in parameters.get_parameter_list():
-        if p.type.lower() == 'float':
+        if p.type.lower() == data_type_uniform_float:
             distributions[p.name] = optuna.distributions.FloatDistribution(
                 p.lower, p.upper, log=p.log
             )
 
-        elif p.type.lower() == 'int':
+        elif p.type.lower() == data_type_uniform_int:
             distributions[p.name] = optuna.distributions.IntDistribution(
                 p.lower, p.upper, log=p.log
             )
 
-        elif p.type.lower() == 'categorical':
+        elif p.type.lower() == data_type_categorical:
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
 
-        elif p.type.lower() == 'ordinal':
+        elif p.type.lower() == data_type_ordinal:
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
 
         else:
