@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 import aiaccel
 from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
@@ -37,7 +40,7 @@ class AbstractMaster(AbstractModule):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         self.start_time = get_time_now_object()
-        self.loop_start_time = None
+        self.loop_start_time: datetime | None = None
         self.options = options
         self.options['process_name'] = 'master'
 
@@ -57,8 +60,8 @@ class AbstractMaster(AbstractModule):
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
 
-        self.runner_files = []
-        self.stats = []
+        self.runner_files: list[Path] | None = []
+        self.stats: list[Any] = []
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -84,6 +87,7 @@ class AbstractMaster(AbstractModule):
             ValueError: Causes when an invalid goal is set.
         """
 
+        evaluator: MaximizeEvaluator | MinimizeEvaluator
         if self.goal.lower() == aiaccel.goal_maximize:
             evaluator = MaximizeEvaluator(self.options)
         elif self.goal.lower() == aiaccel.goal_minimize:
@@ -156,7 +160,7 @@ class AbstractMaster(AbstractModule):
         """
         return None
 
-    def check_error(self):
+    def check_error(self) -> bool:
         """ Check to confirm if an error has occurred.
 
         Args:
