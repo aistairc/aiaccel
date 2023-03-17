@@ -45,12 +45,12 @@ class AbciMaster(AbstractMaster):
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
 
         try:
-            stats, errs = p.communicate(timeout=1)
+            stdout_data, _ = p.communicate(timeout=1)
         except subprocess.TimeoutExpired:
             p.kill()
-            stats, errs = p.communicate()
+            stdout_data, _ = p.communicate()
 
-        stats = stats.decode('utf-8')
+        stats = stdout_data.decode('utf-8')
 
         # Write qstat result
         lines = ''

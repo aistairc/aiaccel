@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import fasteners
 import yaml
 
 
-def create_yaml(path: Path, content: dict, dict_lock: Path | None = None) -> None:
+def create_yaml(path: Path, content: Any, dict_lock: Path | None = None) -> None:
     """Create a yaml file.
 
     Args:
@@ -140,7 +141,7 @@ def interprocess_lock_file(path: Path, dict_lock: Path) -> Path:
     return dict_lock / path.parent.name
 
 
-def load_yaml(path: Path, dict_lock: Path | None = None) -> dict:
+def load_yaml(path: Path, dict_lock: Path | None = None) -> dict[str, Any]:
     """Load a content of a yaml file.
 
     Args:

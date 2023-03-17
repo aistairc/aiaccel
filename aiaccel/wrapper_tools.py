@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 
 def create_runner_command(
     command: str,
-    param_content: dict,
+    param_content: dict[str, Any],
     trial_id: int,
     config_path: str,
     command_error_output: str

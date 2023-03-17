@@ -61,7 +61,7 @@ class LocalModel(AbstractModel):
         params = obj.content['parameters']
 
         if len(stdouts) == 0:
-            objective = float('nan')
+            objective = 'nan'
         else:
             objective = stdouts[-1]  # TODO: fix
         error = '\n'.join(stderrs)
@@ -85,7 +85,7 @@ class LocalModel(AbstractModel):
         commands = ['aiaccel-set-result']
         for key in args.keys():
             commands.append('--' + key)
-            commands.append(args[key])
+            commands.append(str(args[key]))
 
         for param in params:
             if 'parameter_name' in param.keys() and 'value' in param.keys():

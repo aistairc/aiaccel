@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.scheduler.job.model.local_model import LocalModel
@@ -34,7 +35,7 @@ class LocalScheduler(AbstractScheduler):
                 else:
                     self.logger.warning(f'**** Unknown process: {r}')
 
-    def parse_trial_id(self, command: str) -> str | None:
+    def parse_trial_id(self, command: str) -> Any:
         """Parse a command string and extract an unique name.
 
         Args:
@@ -65,7 +66,7 @@ class LocalScheduler(AbstractScheduler):
         """
         return LocalModel()
 
-    def get_any_trial_xs(self, trial_id: int) -> dict | None:
+    def get_any_trial_xs(self, trial_id: int) -> dict[str, Any] | None:
         """Gets a parameter list of specific trial ID from Storage object.
 
         Args:

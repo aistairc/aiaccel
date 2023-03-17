@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import numpy as np
+from typing import Any
 
 from aiaccel import (data_type_categorical, data_type_ordinal,
                      data_type_uniform_float, data_type_uniform_int)
@@ -30,15 +30,15 @@ class HyperParameter(object):
         q (float | int): A quantization factor.
     """
 
-    def __init__(self, parameter: dict[str, bool | int | float | list]) -> None:
+    def __init__(self, parameter: dict[str, Any]) -> None:
         self._raw_dict = parameter
         self.name = parameter['name']
         self.type = parameter['type'].lower()
-        self.log = False
-        self.lower = None
-        self.upper = None
-        self.choices = None
-        self.sequence = None
+        self.log = parameter.get('log', False)
+        # self.lower = None
+        # self.upper = None
+        # self.choices = None
+        # self.sequence = None
         self.initial = None
         self.q = None
         self.step = None
@@ -46,17 +46,22 @@ class HyperParameter(object):
         if 'log' in parameter:
             self.log = parameter['log']
 
-        if 'lower' in parameter:
-            self.lower = parameter['lower']
+        # if 'upper' in parameter:
+        #     self.upper = parameter['lower']
 
-        if 'upper' in parameter:
-            self.upper = parameter['upper']
+        # if 'upper' in parameter:
+        #     self.upper = parameter['upper']
 
-        if 'choices' in parameter:
-            self.choices = parameter['choices']
+        # if 'choices' in parameter:
+        #     self.choices = parameter['choices']
 
-        if 'sequence' in parameter:
-            self.sequence = parameter['sequence']
+        # if 'sequence' in parameter:
+        #     self.sequence = parameter['sequence']
+
+        self.lower = parameter.get('lower', None)
+        self.upper = parameter.get('upper', None)
+        self.choices = parameter.get('choices', None)
+        self.sequence = parameter.get('sequence', None)
 
         if 'initial' in parameter:
             self.initial = parameter['initial']
@@ -70,7 +75,7 @@ class HyperParameter(object):
         if 'base' in parameter:
             self.base = parameter['base']
 
-    def sample(self, initial: bool = False, rng: np.random.RandomState = None) -> dict:
+    def sample(self, initial: bool = False, rng: Any = None) -> dict[str, Any]:
         """Sample a parameter.
 
         Args:
@@ -111,7 +116,7 @@ class HyperParameterConfiguration(object):
         hps (dict): Hyper parameters.
     """
 
-    def __init__(self, json_string: dict) -> None:
+    def __init__(self, json_string: Any) -> None:
         self.json_string = json_string
         self.hps: dict[str, HyperParameter] = {}
 
@@ -143,7 +148,7 @@ class HyperParameterConfiguration(object):
         """
         return list(self.hps.values())
 
-    def get_parameter_dict(self) -> dict:
+    def get_parameter_dict(self) -> dict[str, Any]:
         """Get a dictionary of hyper parameters.
 
         Returns:
@@ -151,8 +156,8 @@ class HyperParameterConfiguration(object):
         """
         return self.hps
 
-    def sample(self, initial: bool = False, rng: np.random.RandomState = None
-               ) -> list[dict]:
+    def sample(self, initial: bool = False, rng: Any = None
+               ) -> list[dict[str, Any]]:
         """Sample a hyper parameters set.
 
         Args:
@@ -169,7 +174,7 @@ class HyperParameterConfiguration(object):
         return ret
 
 
-def load_parameter(json_string: dict) -> HyperParameterConfiguration:
+def load_parameter(json_string: dict[str, Any]) -> HyperParameterConfiguration:
     """Load HyperParameterConfiguration object from a configuration file.
 
     Args:

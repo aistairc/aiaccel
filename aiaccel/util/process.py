@@ -6,6 +6,7 @@ import re
 import subprocess
 import threading
 from subprocess import Popen
+from typing import Any
 
 import psutil
 
@@ -13,7 +14,7 @@ from aiaccel.util.time_tools import (get_time_now_object,
                                      get_time_string_from_object)
 
 
-def exec_runner(command: list) -> Popen:
+def exec_runner(command: list[Any]) -> Popen[bytes]:
     """Execute a subprocess with command.
 
     Args:
@@ -29,7 +30,7 @@ def exec_runner(command: list) -> Popen:
     )
 
 
-def subprocess_ps() -> list[dict]:
+def subprocess_ps() -> list[dict[str, Any]]:
     """Get a ps result as a list.
 
     Returns:
@@ -37,8 +38,8 @@ def subprocess_ps() -> list[dict]:
     """
     commands = ['ps', 'xu']
     res = subprocess.run(commands, stdout=subprocess.PIPE)
-    res = res.stdout.decode('utf-8')
-    stats = res.split('\n')
+    message = res.stdout.decode('utf-8')
+    stats = message.split('\n')
     stats_zero = re.split(' +', stats[0])
     stats_zero = [s for s in stats_zero if s != '']
     pid_order = stats_zero.index('PID')
@@ -60,7 +61,7 @@ def subprocess_ps() -> list[dict]:
     return ret
 
 
-def ps2joblist() -> list[dict]:
+def ps2joblist() -> list[dict[str, Any]]:
     """Get a ps result and convert to a job list format.
 
     Returns:
@@ -112,17 +113,17 @@ class OutputHandler(threading.Thread):
         _sleep_time (int): A sleep time each loop.
     """
 
-    def __init__(self, proc: subprocess.Popen) -> None:
+    def __init__(self, proc: subprocess.Popen[bytes]) -> None:
         super(OutputHandler, self).__init__()
         self._proc = proc
         self._sleep_time = 1
         self._abort = False
 
         self._returncode = None
-        self._stdouts = []
-        self._stderrs = []
-        self._start_time = None
-        self._end_time = None
+        self._stdouts: list[str] = []
+        self._stderrs: list[str] = []
+        self._start_time: datetime.datetime | None = None
+        self._end_time: datetime.datetime | None = None
 
     def abort(self) -> None:
         self._abort = True
@@ -166,13 +167,17 @@ class OutputHandler(threading.Thread):
     def get_stderrs(self) -> list[str]:
         return copy.deepcopy(self._stderrs)
 
-    def get_start_time(self) -> str:
+    def get_start_time(self) -> str | None:
+        if self._start_time is None:
+            return ""
         return get_time_string_from_object(self._start_time)
 
-    def get_end_time(self) -> str:
+    def get_end_time(self) -> str | None:
+        if self._end_time is None:
+            return ""
         return get_time_string_from_object(self._end_time)
 
-    def get_returncode(self):
+    def get_returncode(self) -> int | None:
         return self._proc.poll()
 
 

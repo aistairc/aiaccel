@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import importlib
+from importlib.util import module_from_spec, spec_from_file_location
 from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
 from subprocess import run
+from typing import Any
 
 from aiaccel.config import Config
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
@@ -11,13 +12,19 @@ from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
 from aiaccel.util.cast import cast_y
 from aiaccel.util.time_tools import get_time_now
 
+# These are for avoiding mypy-errors from initializer().
+# `global` does not work well.
+# https://github.com/python/mypy/issues/5732
+user_func: Any
+workspace: Path
+
 
 class PylocalScheduler(AbstractScheduler):
     """A scheduler class running on a local computer.
 
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         super().__init__(options)
         self.run = Run(self.config_path)
 
@@ -49,7 +56,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return True
 
-    def get_any_trial_xs(self, trial_id: int) -> dict | None:
+    def get_any_trial_xs(self, trial_id: int) -> dict[str, Any] | None:
         """Gets a parameter list of specific trial ID from Storage object.
 
         Args:
@@ -70,7 +77,7 @@ class PylocalScheduler(AbstractScheduler):
         return xs
 
     def report(
-        self, trial_id: int, y: any, err: str, start_time: str,
+        self, trial_id: int, y: Any, err: str, start_time: str,
         end_time: str
     ) -> None:
         """Saves results in the Storage object.
@@ -78,7 +85,7 @@ class PylocalScheduler(AbstractScheduler):
         Args:
             trial_id (int): Trial ID.
             xs (dict): A dictionary of parameters.
-            y (any): Objective value.
+            y (Any): Objective value.
             err (str): Error string.
             start_time (str): Execution start time.
             end_time (str): Execution end time.
@@ -98,13 +105,13 @@ class PylocalScheduler(AbstractScheduler):
         return None
 
     def create_result_file(
-            self,
-            trial_id: int,
-            xs: dict,
-            objective: any,
-            error: str,
-            start_time,
-            end_time
+        self,
+        trial_id: int,
+        xs: dict[str, Any],
+        objective: Any,
+        error: str,
+        start_time: str,
+        end_time: str
     ) -> None:
         args = {
             'workspace': str(self.workspace.path),
@@ -124,7 +131,7 @@ class PylocalScheduler(AbstractScheduler):
         commands = ['aiaccel-set-result']
         for key in args.keys():
             commands.append('--' + key)
-            commands.append(args[key])
+            commands.append(str(args[key]))
 
         for key in xs.keys():
             commands.append('--' + key)
@@ -134,7 +141,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return None
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['run']
         del obj['pool']
@@ -154,16 +161,18 @@ def initializer(config_path: str | Path) -> None:
     config = Config(config_path)
 
     # Load the specified module from the specified python program.
-    spec = importlib.util.spec_from_file_location("user_module", config.python_file.get())
-    module = importlib.util.module_from_spec(spec)
+    spec = spec_from_file_location("user_module", config.python_file.get())
+    if spec is None:
+        raise ValueError("Invalid python_path.")
+    module = module_from_spec(spec)
+    if spec.loader is None:
+        raise ValueError("spec.loader not defined.")
     spec.loader.exec_module(module)
-
     user_func = getattr(module, config.function.get())
-
     workspace = Path(config.workspace.get()).resolve()
 
 
-def execute(args: list) -> tuple:
+def execute(args: Any) -> tuple[int, dict[str, Any], Any, str, str, str]:
     """Executes the specified function with the specified arguments.
 
     Args:

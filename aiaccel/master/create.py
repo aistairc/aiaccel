@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from aiaccel import (resource_type_abci, resource_type_local,
                      resource_type_python_local)
 from aiaccel.config import Config
@@ -8,7 +10,7 @@ from aiaccel.master.local_master import LocalMaster
 from aiaccel.master.pylocal_master import PylocalMaster
 
 
-def create_master(config_path: str) -> type | None:
+def create_master(config_path: str) -> Any:
     """Returns master type.
 
     Args:

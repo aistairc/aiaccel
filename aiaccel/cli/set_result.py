@@ -8,13 +8,13 @@ from aiaccel.storage.storage import Storage
 
 
 def write_results_to_database(
-        workspace: str | Path,
-        trial_id: int,
-        objective: float | None,
-        start_time: str,
-        end_time: str,
-        error: str
-):
+    workspace: str | Path,
+    trial_id: int,
+    objective: float | None,
+    start_time: str,
+    end_time: str,
+    error: str
+) -> None:
 
     storage = Storage(workspace)
 
@@ -29,7 +29,7 @@ def write_results_to_database(
         storage.error.set_any_trial_error(trial_id, error)
 
 
-def main():
+def main() -> None:
     """Writes the result of a trial to a file.
     """
 

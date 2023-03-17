@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from aiaccel import (resource_type_abci, resource_type_local,
                      resource_type_python_local)
 from aiaccel.config import Config
@@ -8,7 +10,7 @@ from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
 
 
-def create_scheduler(config_path: str) -> type | None:
+def create_scheduler(config_path: str) -> Any:
     """Returns scheduler type.
 
     Args:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from typing import Any
 
 from aiaccel import (data_type_ordinal, data_type_uniform_float,
                      data_type_uniform_int)
@@ -25,9 +26,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.nelder_mead = None
-        self.parameter_pool = []
-        self.order = []
+        self.nelder_mead: Any = None
+        self.parameter_pool: list[dict[str, Any]] = []
+        self.order: list[Any] = []
 
     def generate_initial_parameter(
         self
@@ -40,7 +41,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         initial_parameter = super().generate_initial_parameter()
         if self.nelder_mead is not None:
-            return
+            return None
 
         self.params = self.special_settings_when_using_ordinal(self.params)
 
@@ -55,7 +56,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
     def check_result(self) -> None:
         pass
 
-    def get_ready_parameters(self) -> list:
+    def get_ready_parameters(self) -> list[Any]:
         """Get the list of ready parameters.
 
         Returns:
@@ -63,7 +64,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         return self.nelder_mead._executing
 
-    def get_nm_results(self) -> list[dict[str, str | int | list | bool]]:
+    def get_nm_results(self) -> list[dict[str, str | int | list[Any] | bool]]:
         """ Get the list of Nelder-Mead result.
 
         Returns:
@@ -87,7 +88,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         return nm_results
 
-    def _add_result(self, nm_results: list) -> None:
+    def _add_result(self, nm_results: list[Any]) -> None:
         """  Add a result parameter.
 
         Args:
@@ -112,8 +113,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def update_ready_parameter_name(
         self,
-        pool_p: str,  # old_param_name
-        name: str     # new_param_name
+        pool_p: dict[str, Any],  # old_param_name
+        name: Any     # new_param_name
     ) -> None:
         """ Update hyperparameter's names.
 
@@ -161,7 +162,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 e['vertex_id'] = new_param_name
                 break
 
-    def nelder_mead_main(self) -> list:
+    def nelder_mead_main(self) -> list[Any] | None:
         """ Nelder Mead's main module.
 
         Args:
@@ -178,7 +179,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             return None
         return searched_params
 
-    def _get_all_trial_id(self) -> list:
+    def _get_all_trial_id(self) -> list[Any]:
         """_get_all_trial_id.
 
         Get trial_ids from DB: 'result', 'finished', 'running', 'ready'
@@ -192,7 +193,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         return trial_id
 
-    def _get_current_names(self) -> list:
+    def _get_current_names(self) -> list[Any]:
         """Get parameter trial_id.
 
         Returns:
@@ -228,7 +229,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             ):
                 self.parameter_pool.append(copy.copy(p))
 
-        new_params = []
+        new_params: list[Any] = []
 
         if len(self.parameter_pool) == 0:
             return new_params

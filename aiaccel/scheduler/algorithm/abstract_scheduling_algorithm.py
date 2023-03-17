@@ -23,7 +23,7 @@ class AbstractSchedulingAlgorithm(object):
         hp_ready: list[Path],
         num: int = 1,
         rng: np.random.RandomState | None = None
-    ) -> None:
+    ) -> list[Path]:
         """Select multiple hyper parameters.
 
         Args:

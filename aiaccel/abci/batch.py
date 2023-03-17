@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 from aiaccel.util.filesystem import file_create
 
@@ -10,11 +11,11 @@ from aiaccel.util.filesystem import file_create
 class JobScrGenerator:
     """A class to generate a job script for ABCI.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.codetxt = ""
         self.indent_level = 0
 
-    def new_line(self) -> NotImplemented:
+    def new_line(self) -> None:
         """Add a new line to the code text.
 
         Args:
@@ -25,7 +26,7 @@ class JobScrGenerator:
         """
         self.codetxt += "\n"
 
-    def add_line(self, line: str):
+    def add_line(self, line: str) -> None:
         """Add a line to the code text.
 
         Args:
@@ -38,7 +39,7 @@ class JobScrGenerator:
             self.codetxt += "    "
         self.codetxt += line + "\n"
 
-    def add_lines(self, lines: list[str]):
+    def add_lines(self, lines: list[str]) -> None:
         """Add lines to the code text.
 
         Args:
@@ -97,7 +98,7 @@ class JobScrGenerator:
 
 def create_abci_batch_file(
     trial_id: int,
-    param_content: dict,
+    param_content: dict[str, Any],
     workspace: Path | str,
     error_file_path: Path | str,
     batch_file: Path,
@@ -204,7 +205,7 @@ def _generate_command_line(command: str, args: list[str]) -> str:
     return f'{command} {" ".join(args)}'
 
 
-def _generate_param_args(params: list[dict]) -> str:
+def _generate_param_args(params: list[dict[str, Any]]) -> str:
     param_args = ''
     for param in params:
         if 'parameter_name' in param.keys() and 'value' in param.keys():
