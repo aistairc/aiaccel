@@ -7,7 +7,6 @@ from typing import Union, List, Optional, Any
 
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
-from omegaconf import open_dict
 
 
 @dataclass
@@ -125,6 +124,14 @@ class Config:
     config_path: Optional[Union[None, Path, str]]
 
 
+
+def set_structs_false(conf):
+    OmegaConf.set_struct(conf, False)
+    if hasattr(conf, "__iter__"):
+        for item in conf:
+            set_structs_false(conf.__dict__["_content"][item])
+
+
 def load_config(config_path: str) -> DictConfig | None:
     """
     Load any configuration files, return the DictConfig object.
@@ -144,7 +151,8 @@ def load_config(config_path: str) -> DictConfig | None:
     customize = OmegaConf.load(path)
     customize.config_path = str(path)
 
-    with open_dict(base):
-        config = OmegaConf.merge(base, default, customize)
+    tmp_config = OmegaConf.merge(base, default)
+    set_structs_false(tmp_config)
+    config = OmegaConf.merge(tmp_config, customize)
 
     return config
