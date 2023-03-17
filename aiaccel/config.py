@@ -124,7 +124,6 @@ class Config:
     config_path: Optional[Union[None, Path, str]]
 
 
-
 def set_structs_false(conf):
     OmegaConf.set_struct(conf, False)
     if hasattr(conf, "__iter__"):
