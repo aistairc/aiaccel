@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from omegaconf.dictconfig import DictConfig
-
 import optuna
+from omegaconf.dictconfig import DictConfig
 
 import aiaccel.parameter
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
@@ -188,7 +187,7 @@ class TpeOptimizer(AbstractOptimizer):
             self.study = optuna.create_study(
                 sampler=TPESamplerWrapper(seed=self.randseed),
                 study_name=self.study_name,
-                direction=self.config.optimize.goal.lower()
+                direction=self.config.optimize.goal.value.lower()
             )
 
 
@@ -211,12 +210,12 @@ def create_distributions(
     distributions = {}
 
     for p in parameters.get_parameter_list():
-        if p.type.lower() == 'float':
+        if p.type.lower() == 'uniform_float':
             distributions[p.name] = optuna.distributions.FloatDistribution(
                 p.lower, p.upper, log=p.log
             )
 
-        elif p.type.lower() == 'int':
+        elif p.type.lower() == 'uniform_int':
             distributions[p.name] = optuna.distributions.IntDistribution(
                 p.lower, p.upper, log=p.log
             )

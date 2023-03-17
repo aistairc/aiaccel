@@ -38,11 +38,11 @@ class IntegrationTest(BaseTest):
             )
 
             # master
-            master = create_master(config.resource.type)
+            master = create_master(config.resource.type.value)
             assert master == LocalMaster
 
             # scheduler
-            scheduler = create_scheduler(config.resource.type)
+            scheduler = create_scheduler(config.resource.type.value)
             assert scheduler == LocalScheduler
 
             storage = Storage(ws=Path(config.generic.workspace))
@@ -71,14 +71,14 @@ class IntegrationTest(BaseTest):
                 f.write(yaml.dump(yml, default_flow_style=False))
 
             config = load_config(create_tmp_config(new_config_file_path))
-            assert config.resource.type == 'python_local'
+            assert config.resource.type.value == 'python_local'
 
             # master
-            master = create_master(config.resource.type)
+            master = create_master(config.resource.type.value)
             assert master == PylocalMaster
 
             # scheduler
-            scheduler = create_scheduler(config.resource.type)
+            scheduler = create_scheduler(config.resource.type.value)
             assert scheduler == PylocalScheduler
 
             storage = Storage(ws=Path(config.generic.workspace))

@@ -555,7 +555,7 @@ class Job:
         self.runner_timeout = self.config.job_setting.runner_timeout
         self.running_retry = self.config.job_setting.running_retry
         self.running_timeout = self.config.job_setting.running_timeout
-        self.resource_type = self.config.resource.type
+        self.resource_type = self.config.resource.type.value
 
         self.threshold_timeout = None
         self.threshold_retry = None

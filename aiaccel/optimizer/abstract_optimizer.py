@@ -1,14 +1,14 @@
 from __future__ import annotations
+
 import copy
 
+from numpy import str_
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.module import AbstractModule
-from aiaccel.parameter import load_parameter
+from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.util.logger import str_to_logging_level
 from aiaccel.util.trialid import TrialId
-
-from numpy import str_
 
 
 class AbstractOptimizer(AbstractModule):
@@ -48,7 +48,7 @@ class AbstractOptimizer(AbstractModule):
         self.hp_finished = 0
         self.num_of_generated_parameter = 0
         self.all_parameter_generated = False
-        self.params = load_parameter(self.config.optimize.parameters)
+        self.params = HyperParameterConfiguration(self.config.optimize.parameters)
         self.trial_id = TrialId(self.config.config_path)
 
     def register_new_parameters(
@@ -270,9 +270,9 @@ class AbstractOptimizer(AbstractModule):
                     casted_params.append(_param)
                     continue
 
-                if param_type.lower() == 'float':
+                if param_type.lower() == 'uniform_float':
                     _param['value'] = float(param_value)
-                if param_type.lower() == 'int':
+                if param_type.lower() == 'uniform_int':
                     _param['value'] = int(param_value)
                 casted_params.append(_param)
 

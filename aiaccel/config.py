@@ -1,12 +1,40 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from importlib.resources import read_text
 from pathlib import Path
-from typing import Union, List, Optional, Any
+from typing import Any, List, Optional, Union
 
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
+
+
+class ResourceType(Enum):
+    abci: str = 'abci'
+    local: str = 'local'
+    python_local: str = 'python_local'
+
+    @classmethod
+    def _missing_(cls, value):
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
+
+
+class OptimizerDirection(Enum):
+    minimize: str = 'minimize'
+    maximize: str = 'maximize'
+
+    @classmethod
+    def _missing_(cls, value):
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
 
 
 @dataclass
@@ -21,7 +49,7 @@ class GenericConfig:
 
 @dataclass
 class ResourceConifig:
-    type: str
+    type: ResourceType
     num_node: int
 
 
@@ -52,7 +80,7 @@ class ParameterConfig:
 @dataclass
 class OptimizeConifig:
     search_algorithm: str
-    goal: str
+    goal: OptimizerDirection
     trial_number: int
     rand_seed: int
     sobol_scramble: bool
@@ -60,7 +88,7 @@ class OptimizeConifig:
 
 
 @dataclass
-class JobConifig:
+class JobConfig:
     cancel_retry: int
     cancel_timeout: int
     expire_retry: int
@@ -116,7 +144,7 @@ class Config:
     resource: ResourceConifig
     ABCI: AbciConifig
     optimize: OptimizeConifig
-    job_setting: JobConifig
+    job_setting: JobConfig
     logger: Optional[LoggerConfig]
     verification: Optional[VerificationConfig]
     clean: Optional[bool]

@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 import aiaccel
-from aiaccel.config import load_config
+from aiaccel.config import ResourceType, load_config
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
                                        CustomMachine, Job)
@@ -48,7 +48,7 @@ class TestModel(BaseTest):
         self.workspace.create()
 
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = create_scheduler(config.resource.type)(config)
+        scheduler = create_scheduler(config.resource.type.value)(config)
 
         setup_hp_ready(1)
         trial_id = 0
@@ -71,9 +71,9 @@ class TestModel(BaseTest):
         database_remove
     ):
         config = self.load_config_for_test(self.configs['config.json'])
-        config.resource.type = 'ABCI'
+        config.resource.type = ResourceType('abci')
 
-        scheduler = create_scheduler(config.resource.type)(config)
+        scheduler = create_scheduler(config.resource.type.value)(config)
 
         trial_id = 1
         self.abci_job = Job(
@@ -370,7 +370,7 @@ class TestJob(BaseTest):
         self.workspace.create()
 
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = create_scheduler(config.resource.type)(config)
+        scheduler = create_scheduler(config.resource.type.value)(config)
 
         setup_hp_ready(1)
         trial_id = 1

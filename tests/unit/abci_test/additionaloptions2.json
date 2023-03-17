@@ -49,7 +49,7 @@
   "resource": {
     "type": "local",
     "num_node": 1,
-    "$type": "ABCI",
+    "$type": "abci",
     "$num_node": 4
   },
   "ABCI": {

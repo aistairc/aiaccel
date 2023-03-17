@@ -5,9 +5,7 @@ from pathlib import Path
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel import dict_lock
-from aiaccel import dict_result
-from aiaccel import file_final_result
+from aiaccel import dict_lock, dict_result, file_final_result
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.util.trialid import TrialId
@@ -44,7 +42,7 @@ class AbstractEvaluator(object):
         self.dict_lock = self.ws / dict_lock
         self.hp_result = None
         self.storage = Storage(self.ws)
-        self.goal = self.config.optimize.goal
+        self.goal = self.config.optimize.goal.value
         self.trial_id = TrialId(self.config.config_path)
 
     def get_zero_padding_any_trial_id(self, trial_id: int) -> str:

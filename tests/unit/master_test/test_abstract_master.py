@@ -1,23 +1,11 @@
 
 import asyncio
-import json
 import os
-import subprocess
-import sys
 import time
-from functools import wraps
-from pathlib import Path
-from unittest.mock import patch
 
 import aiaccel
-from aiaccel import workspace
-from aiaccel.config import load_config
 from aiaccel.master.abstract_master import AbstractMaster
-from aiaccel.master.create import create_master
-from aiaccel.util.filesystem import get_dict_files
 from aiaccel.util.time_tools import get_time_now_object
-from aiaccel.workspace import Workspace
-from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
 
@@ -97,20 +85,6 @@ class TestAbstractMaster(BaseTest):
                     param_type='flaot'
                 )
         assert master.post_process() is None
-
-        master.config.optimize.goal = aiaccel.goal_maximize
-        assert master.post_process() is None
-
-        master.config.optimize.goal = 'invalid_goal'
-
-        for i in range(10):
-            master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-
-        try:
-            master.post_process()
-            assert False
-        except ValueError:
-            assert True
 
     def test_print_dict_state(
         self,

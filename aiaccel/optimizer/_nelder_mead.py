@@ -1,9 +1,9 @@
 from __future__ import annotations
+
 import logging
 
-from omegaconf.listconfig import ListConfig
-
 import numpy as np
+from omegaconf.listconfig import ListConfig
 
 from aiaccel.parameter import HyperParameter
 from aiaccel.util.name import generate_random_name
