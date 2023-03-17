@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from typing import Any
+
 from aiaccel.config import Config
 from aiaccel.master import AbciMaster
 from aiaccel.master import LocalMaster
 from aiaccel.master import PylocalMaster
 
 
-def create_master(config_path: str) -> type | None:
+def create_master(config_path: str) -> Any:
     """Returns master type.
 
     Args:

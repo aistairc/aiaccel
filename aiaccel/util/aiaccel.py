@@ -35,7 +35,7 @@ class _Message:
         self.outputs: list[str] = []
         self.delimiter = "@"
 
-    def create_message(self, message: Any):
+    def create_message(self, message: Any) -> None:
         """ Concatenates a label and a message.
 
         Args:
@@ -65,11 +65,11 @@ class _Message:
                 if o.split(":")[1] != "":
                     print(o)
 
-    def parse(self, raw_data: str) -> list[str]:
+    def parse(self, string_message: str) -> list[str]:
         """
 
         Args:
-            raw_data (str): It is assumed the format
+            string_message (str): It is assumed the format
 
         Example:
          ::
@@ -79,9 +79,9 @@ class _Message:
                 message="hoge@hoge@hoge"
             )
         """
-        raw_data = raw_data.split("\n")
+        list_of_message = string_message.split("\n")
         target_data = []
-        for line in raw_data:
+        for line in list_of_message:
             label = line.split(":")[0]
             if label != self.label:
                 continue
@@ -91,15 +91,15 @@ class _Message:
             target_data.append("")
         return target_data
 
-    def clear(self):
+    def clear(self) -> None:
         self.outputs = []
 
 
 class Messages:
-    def __init__(self, *labels: tuple) -> None:
-        labels = list(labels)
+    def __init__(self, *labels: Any) -> None:
+        list_of_labels = list(labels)
         self.d: dict[str, _Message] = {}
-        for label in labels:
+        for label in list_of_labels:
             self.d[label] = _Message(label)
 
     def create_message(self, label: str, mess: str) -> None:
@@ -138,7 +138,7 @@ class Messages:
         """
         return self.d[label].parse(mess)
 
-    def get(self, label: str, index: int = -1) -> list[str]:
+    def get(self, label: str, index: int = -1) -> str:
         return self.d[label].outputs[index]
 
 
@@ -154,13 +154,13 @@ class WrapperInterface:
                     "objective_err: err" -> err
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.stdout = Messages(
             "objective_y",
             "objective_err"
         )
 
-    def get_data(self, output: subprocess.CompletedProcess[bytes]) -> tuple:
+    def get_data(self, output: subprocess.CompletedProcess[bytes]) -> tuple[Any, Any]:
         """For wrapper side, gets stdout and stderr of user program.
 
         Args:
@@ -191,7 +191,7 @@ class WrapperInterface:
 
     def out(
         self,
-        objective_y: float | int | str | None = None,
+        objective_y: Any | None = None,
         objective_err: str | None = None
     ) -> None:
         """For user program side, outputs the objective value and error message
@@ -284,7 +284,7 @@ class Run:
         self.com = WrapperInterface()
 
     def generate_commands(
-        self, command: str, xs: dict[str, float | int | str | None]
+        self, command: str, xs: dict[Any, Any]
     ) -> list[str]:
         """ Generate execution command of user program.
 
@@ -310,7 +310,7 @@ class Run:
 
         return commands
 
-    def get_any_trial_xs(self, trial_id: int) -> dict | None:
+    def get_any_trial_xs(self, trial_id: int) -> Any:
         """Gets a parameter list of specific trial ID from Storage object.
 
         Args:
@@ -322,7 +322,7 @@ class Run:
         """
         params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
         if params is None:
-            return
+            return None
 
         xs = {}
         for param in params:
@@ -333,12 +333,10 @@ class Run:
     @singledispatchmethod
     def execute(
         self,
-        func: Callable[[dict[str, float | int | str]], float],
+        func: Callable[[Any], Any],
         trial_id: int,
         y_data_type: str | None
-    ) -> tuple[dict[str, float | int | str] | None,
-               float | int | str | None,
-               str]:
+    ) -> Any:
         """Executes the target function.
 
         Args:
@@ -367,7 +365,7 @@ class Run:
         return xs, y, err
 
     @execute.register
-    def _(self, command: str, trial_id: int, y_data_type: str) -> tuple:
+    def _(self, command: str, trial_id: int, y_data_type: str) -> Any:
         """ Executes the user program.
 
         Args:
@@ -385,29 +383,26 @@ class Run:
 
         xs = self.get_any_trial_xs(trial_id)
         err = ""
-        y = None
 
         # Make running command of user program
         if command == "":
-            y = [float("nan")]
-            return xs, y, err
-
-        commands = self.generate_commands(command, xs)
-
-        output = subprocess.run(
-            commands,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        ys, err = self.com.get_data(output)
-        if y_data_type is None:
-            y = cast_y(ys[0], 'float')
+            # y = [float("nan")]
+            return xs, [float("nan")], err
         else:
-            y = cast_y(ys[0], y_data_type)
-        err = ("\n").join(err)
+            commands = self.generate_commands(command, xs)
 
-        return xs, y, err
+            output = subprocess.run(
+                commands,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+            ys, err = self.com.get_data(output)
+            if y_data_type is None:
+                y = cast_y(ys[0], 'float')
+            else:
+                y = cast_y(ys[0], y_data_type)
+            return xs, y, err
 
     @singledispatchmethod
     def execute_and_report(
@@ -444,7 +439,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: str = None) -> None:
+    def _(self, command: str, y_data_type: Any = None) -> None:
         """Executes the user program.
 
         Args:
@@ -466,7 +461,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     def report(
-        self, trial_id: int, xs: dict, y: any, err: str, start_time: str,
+        self, trial_id: int, xs: dict[str, Any], y: Any, err: str, start_time: str,
         end_time: str
     ) -> None:
         """Saves results in the Storage object.
@@ -474,7 +469,7 @@ class Run:
         Args:
             trial_id (int): Trial ID.
             xs (dict): A dictionary of parameters.
-            y (any): Objective value.
+            y (Any): Objective value.
             err (str): Error string.
             start_time (str): Execution start time.
             end_time (str): Execution end time.
@@ -486,7 +481,7 @@ class Run:
             self.storage.error.set_any_trial_error(trial_id, err)
 
 
-def set_logging_file_for_trial_id(workspace, trial_id):
+def set_logging_file_for_trial_id(workspace: Path, trial_id: int) -> None:
     log_dir = workspace / "log"
     log_path = log_dir / f"job_{trial_id}.log"
     if not log_dir.exists():

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import xml.etree.ElementTree as ElementTree
 from xml.etree.ElementTree import Element
 
@@ -21,7 +23,7 @@ stat = {
 '''
 
 
-def parse_qstat(config: Config, qstat: str) -> list[dict]:
+def parse_qstat(config: Config, qstat: str) -> list[dict[str, Any]]:
     """Parse ABCI 'qstat' command result.
 
     Args:
@@ -43,7 +45,7 @@ def parse_qstat(config: Config, qstat: str) -> list[dict]:
     return stat_list
 
 
-def parse_job_list(config: Config, job_list: Element) -> list[dict]:
+def parse_job_list(config: Config, job_list: Element) -> list[dict[str, Any]]:
     """Parse from XML element of 'qstat' to a job list.
 
     Args:

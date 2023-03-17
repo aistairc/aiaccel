@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import fasteners
 
@@ -30,7 +31,7 @@ class TrialId:
         lock (fasteners.InterProcessLock): An interprocess lock.
     """
 
-    def __init__(self, config_path: str) -> None:
+    def __init__(self, config_path: str | Path) -> None:
         self.config_path = Path(config_path).resolve()
         self.config = Config(str(self.config_path))
 
@@ -68,7 +69,7 @@ class TrialId:
             self.count_path.write_text('%d' % trial_id)
             self.lock.release()
 
-    def get(self) -> int | None:
+    def get(self) -> Any:
         """Returns trial id.
 
         Returns:
@@ -90,7 +91,7 @@ class TrialId:
             self.lock.release()
 
     @property
-    def integer(self) -> int | None:
+    def integer(self) -> Any:
         """Trial id.
         """
         return self.get()

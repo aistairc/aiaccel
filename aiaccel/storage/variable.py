@@ -23,7 +23,7 @@ class Variable(Abstract):
         label: str,
         value: Any,
         update_allow: bool
-    ):
+    ) -> None:
         with self.create_session() as session:
             try:
                 query = (
@@ -54,7 +54,7 @@ class Variable(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_variable(self, trial_id: int, process_name: str, label: str):
+    def get_any_trial_variable(self, trial_id: int, process_name: str, label: str) -> Any:
         with self.create_session() as session:
             data = (
                 session.query(VariableTable)
@@ -102,7 +102,7 @@ class Variable(Abstract):
 class Value(Variable):
     def __init__(self, file_name: Path, label: str) -> None:
         super().__init__(file_name)
-        self.process_name = None
+        self.process_name: Any = None
         self.label = label
         self.value = None
 
@@ -139,13 +139,13 @@ class Serializer:
         self.file_name: Path = file_name
         self.d: dict[str, Value] = {}
 
-    def register(self, process_name: str, labels: list) -> None:
+    def register(self, process_name: str, labels: list[str]) -> None:
         for i in range(len(labels)):
             if labels[i] not in self.d.keys():
                 self.d[labels[i]] = Value(self.file_name, labels[i])
                 self.d[labels[i]].set_process_name(process_name)
 
-    def delete_any_trial_variable(self, trial_id) -> None:
+    def delete_any_trial_variable(self, trial_id: int) -> None:
         for key in self.d.keys():
             self.d[key].delete(trial_id)
 

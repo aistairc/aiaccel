@@ -25,11 +25,11 @@ class BaseConfig(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def get_property(self, key, *keys):
+    def get_property(self, key: Any, *keys: Any) -> Any:
         pass
 
     @abstractmethod
-    def to_dict(self):
+    def to_dict(self) -> Any:
         pass
 
 
@@ -43,13 +43,13 @@ class JsonOrYamlObjectConfig(BaseConfig):
         file_type (str): 'json_object' or 'yaml_object'.
     """
 
-    def __init__(self, config: dict, file_type: str) -> None:
+    def __init__(self, config: dict[str, Any], file_type: str) -> None:
         if file_type in ['json_object', 'yaml_object']:
             self._config_dict = config
         else:
             raise TypeError(f'Unknown file type {file_type}')
 
-    def get_property(self, key: str, *keys: str) -> str | list | dict | None:
+    def get_property(self, key: str, *keys: str) -> str | list[Any] | dict[str, Any] | None:
         """Get a property for specified keys.
 
         Args:
@@ -75,7 +75,7 @@ class JsonOrYamlObjectConfig(BaseConfig):
         else:
             return sub_config_dict
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the configuration to a dictionary object.
 
@@ -113,7 +113,7 @@ class ConfileWrapper(object):
         elif config_type in ['json_object', 'yaml_object']:
             self.config = JsonOrYamlObjectConfig(config, config_type)
 
-    def get(self, key: str, *keys: str) -> str | list | dict | None:
+    def get(self, key: str, *keys: str) -> str | list[Any] | dict[str, Any] | None:
         """Get a property with specified keys.
 
         Args:
@@ -182,11 +182,11 @@ class ConfigEntry:
     def __init__(
         self,
         config: ConfileWrapper,
-        type: list,
+        type: list[Any],
         default: Any,
         warning: bool,
         group: str,
-        keys: list | tuple | str
+        keys: Any
     ) -> None:
         self.config = config
         self.group = group
@@ -208,7 +208,7 @@ class ConfigEntry:
         """
         return copy.deepcopy(self._value)
 
-    def set(self, value) -> None:
+    def set(self, value: Any) -> None:
         """
         Args
             value (any)
@@ -238,7 +238,7 @@ class ConfigEntry:
                 f"the default value will be applied.(default: {self.default})"
             )
 
-    def empty_if_error(self):
+    def empty_if_error(self) -> None:
         """ If the value is not set, it will force an error to occur.
         """
         if (
@@ -250,13 +250,10 @@ class ConfigEntry:
             logger.error(f"Configuration error. '{self.keys}' is not found.")
             sys.exit()
 
-    def load_config_values(self):
+    def load_config_values(self) -> None:
         """ Reads values from the configuration file.
         """
-        if (
-            type(self.keys) is list or
-            type(self.keys) is tuple
-        ):
+        if isinstance(self.keys, (list, tuple)):
             value = self.config.get(self.group, *self.keys)
         else:
             value = self.config.get(self.group, self.keys)
@@ -270,7 +267,7 @@ class ConfigEntry:
             self.read_values_from_config_file = True
 
     @ property
-    def Value(self):
+    def Value(self) -> Any | None:
         return self._value
 
 
@@ -316,9 +313,9 @@ _DEFAULT_ABCI_GROUP = ""
 _DEFAULT_JOB_EXECUTION_OPTIONS = ""
 _DEFAULT_GOAL = "minimize"
 _DEFAULT_MAX_TRIAL_NUMBER = 0
-_DEFAULT_HYPERPARAMETERS: list = []
+_DEFAULT_HYPERPARAMETERS: list[Any] = []
 _DEFAULT_IS_VERIFIED = False
-_DEFAULT_VERIFI_CONDITION: list = []
+_DEFAULT_VERIFI_CONDITION: list[Any] = []
 _DEFAULT_RANDOM_SCHESULING = True
 _DEFAULT_SOBOL_SCRAMBLE = True
 _DEFAULT_PYTHON_FILE = ""
@@ -351,7 +348,7 @@ class Config:
         if not self.config_path.exists():
             logger.error(f"config file: {config_path} doesn't exist.")
 
-        self.config = load_config(config_path)
+        self.config = load_config(str(config_path))
         self.define_items(self.config, warn)
         if format_check:
             self.workspace.empty_if_error()

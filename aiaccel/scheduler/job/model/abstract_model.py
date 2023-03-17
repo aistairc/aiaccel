@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
 from typing import TYPE_CHECKING
 
 from aiaccel.common import dict_runner
@@ -12,8 +15,13 @@ if TYPE_CHECKING:
 
 
 class AbstractModel(object):
+    state: str
+    expire: Callable[[Any], Any]
+    schedule: Callable[[Any], Any]
+    next: Callable[[Any], Any]
 
     # Common
+
     def after_confirmed(self, obj: 'Job') -> None:
         """State transition of 'after_confirmed'.
 
@@ -58,24 +66,7 @@ class AbstractModel(object):
         any_trial_state = obj.storage.trial.get_any_trial_state(trial_id=obj.trial_id)
         return (obj.next_state == any_trial_state)
 
-    def change_trial_state(self, obj: 'Job') -> None:
-        """State transition of 'change_trial_state'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        obj.storage.trial.set_any_trial_state(
-            trial_id=obj.trial_id,
-            state=obj.next_trial_state
-        )
-        return
-
-    def get_runner_file(self, obj: 'Job') -> None:
+    def get_runner_file(self, obj: 'Job') -> Path:
         return obj.ws / dict_runner / f'run_{obj.trial_id_str}.sh'
 
     # Runner
@@ -400,5 +391,5 @@ class AbstractModel(object):
         )
         obj.threshold_retry = obj.expire_retry
 
-    def change_state(self, obj: 'Job'):
+    def change_state(self, obj: 'Job') -> None:
         obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state=obj.next_state)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -16,7 +17,7 @@ class RandomSamplingSchedulingAlgorithm(AbstractSchedulingAlgorithm):
         self,
         hp_ready: list[Path],
         num: int = 1,
-        rng: np.random.RandomState | None = None
+        rng: Any = None
     ) -> list[Path]:
         """Select multiple hyper parameters.
 

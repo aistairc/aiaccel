@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import datetime
 import re
 import subprocess
 import threading
 from subprocess import Popen
+from typing import Any
 from typing import TYPE_CHECKING
 
 import psutil
@@ -12,12 +14,11 @@ if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.master import AbciMaster
     from aiaccel.master import AbstractMaster
     from aiaccel.master import LocalMaster
+    from aiaccel.scheduler import AbstractScheduler
     from aiaccel.storage import Storage
 
-import datetime
 
-
-def exec_runner(command: list) -> Popen:
+def exec_runner(command: list[Any]) -> Popen[bytes]:
     """Execute a subprocess with command.
 
     Args:
@@ -33,7 +34,7 @@ def exec_runner(command: list) -> Popen:
     )
 
 
-def subprocess_ps() -> list[dict]:
+def subprocess_ps() -> list[dict[str, Any]]:
     """Get a ps result as a list.
 
     Returns:
@@ -41,8 +42,8 @@ def subprocess_ps() -> list[dict]:
     """
     commands = ['ps', 'xu']
     res = subprocess.run(commands, stdout=subprocess.PIPE)
-    res = res.stdout.decode('utf-8')
-    stats = res.split('\n')
+    message = res.stdout.decode('utf-8')
+    stats = message.split('\n')
     stats_zero = re.split(' +', stats[0])
     stats_zero = [s for s in stats_zero if s != '']
     pid_order = stats_zero.index('PID')
@@ -64,7 +65,7 @@ def subprocess_ps() -> list[dict]:
     return ret
 
 
-def ps2joblist() -> list[dict]:
+def ps2joblist() -> list[dict[str, Any]]:
     """Get a ps result and convert to a job list format.
 
     Returns:
@@ -128,8 +129,8 @@ class OutputHandler(threading.Thread):
 
     def __init__(
         self,
-        parent: AbciMaster | AbstractMaster | LocalMaster,
-        proc: subprocess.Popen,
+        parent: AbstractScheduler,
+        proc: subprocess.Popen[bytes],
         module_name: str,
         trial_id: int,
         storage: Storage | None = None

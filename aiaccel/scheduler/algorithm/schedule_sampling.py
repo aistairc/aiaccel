@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -12,7 +13,7 @@ class RandomSampling(AbstractSchedulingAlgorithm):
         self,
         hp_ready: list[Path],
         num: int = 1,
-        rng: np.random.RandomState | None = None
+        rng: Any = None
     ) -> list[Path]:
         """Select multiple hyper parameters.
 
@@ -41,7 +42,7 @@ class SequentialSampling(AbstractSchedulingAlgorithm):
         self,
         hp_ready: list[Path],               # A list of path of ready hyper parameters.
         num: int = 1,             # A number to select hyper parameters.
-        rng: np.random.RandomState | None = None   # A random generator.
+        rng: Any = None   # A random generator.
     ) -> list[Path]:
         """Select multiple hyper parameters.
 

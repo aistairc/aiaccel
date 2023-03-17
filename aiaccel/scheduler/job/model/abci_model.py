@@ -43,7 +43,7 @@ class AbciModel(AbstractModel):
         runner_file = self.get_runner_file(obj)
         runner_command = create_qsub_command(
             obj.config,
-            str(runner_file)
+            runner_file
         )
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')

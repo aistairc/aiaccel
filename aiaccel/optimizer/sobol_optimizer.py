@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from scipy.stats import qmc
 
 from aiaccel.optimizer import AbstractOptimizer
@@ -24,8 +26,8 @@ class SobolOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.generate_index = None
-        self.sampler = None
+        self.generate_index: Any = None
+        self.sampler: Any = None
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.

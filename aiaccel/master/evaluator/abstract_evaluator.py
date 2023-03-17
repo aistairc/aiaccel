@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from aiaccel.common import dict_lock
 from aiaccel.common import dict_result
@@ -33,13 +34,13 @@ class AbstractEvaluator(object):
 
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
         self.config = Config(str(self.config_path))
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / dict_lock
-        self.hp_result = None
+        self.hp_result: dict[str, Any] | None = None
         self.storage = Storage(self.ws)
         self.goal = self.config.goal.get()
         self.trial_id = TrialId(str(self.config_path))
