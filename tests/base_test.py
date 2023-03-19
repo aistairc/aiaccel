@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 import shutil
 from aiaccel.config import Config
-from aiaccel.util.filesystem import create_yaml
+from aiaccel.util import create_yaml
 from aiaccel.workspace import Workspace
 import shutil
 

@@ -1,30 +1,27 @@
 from __future__ import annotations
 
 import logging
-
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import Any
+from typing import TYPE_CHECKING
 
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
-from aiaccel import dict_lock
-from aiaccel import dict_result
-from aiaccel import dict_error
-from aiaccel import resource_type_abci
-from aiaccel import resource_type_local
+from aiaccel.common import dict_lock
+from aiaccel.common import dict_result
+from aiaccel.common import dict_error
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.buffer import Buffer
-from aiaccel.util.time_tools import get_time_now_object
-from aiaccel.util.trialid import TrialId
-from aiaccel.scheduler.job.model.abci_model import AbciModel
-from aiaccel.scheduler.job.model.local_model import LocalModel
+from aiaccel.util import Buffer
+from aiaccel.util import get_time_now_object
+from aiaccel.util import TrialId
+from aiaccel.storage import Storage
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.scheduler.abci_scheduler import AbciScheduler
-    from aiaccel.scheduler.local_scheduler import LocalScheduler
+    from aiaccel.scheduler import AbstractModel
+    from aiaccel.scheduler import AbstractScheduler
 
 
 JOB_STATES = [
@@ -74,7 +71,7 @@ JOB_STATES = [
     {'name': 'Success'},
 ]
 
-JOB_TRANSITIONS = [
+JOB_TRANSITIONS: list[dict[str, str | list[str]]] = [
     {
         'trigger': 'next',
         'source': 'Init',
@@ -401,22 +398,6 @@ class CustomMachine(Machine):
     pass
 
 
-def create_model(resource_type: Literal['abci', 'local']) -> AbciModel | LocalModel:
-    """Creates model object of state machine.
-
-    Args:
-        resource_type (str): Resource type ('abci' or 'local')
-
-    Returns:
-        AbciModel | LocalModel: Model object.
-    """
-    if resource_type.lower() == resource_type_abci:
-        model = AbciModel()
-    elif resource_type.lower() == resource_type_local:
-        model = LocalModel()
-    return model
-
-
 class Job:
     """A job thread to manage running jobs on local computer or ABCI.
 
@@ -428,128 +409,133 @@ class Job:
         config (ConfileWrapper): A configuration object.
         scheduler (LocalScheduler | AbciScheduler): A reference for
             scheduler object.
+        model (LocalModel | AbciModel): A reference for
+            model object of state machine.
         hp_file (Path): A hyper parameter file for this job.
 
+    Raises:
+        ValueError: When model is None.
+
     Attributes:
-        - config (ConfileWrapper): A configuration object.
+        config (ConfileWrapper): A configuration object.
 
-        - ws (Path): A path of a workspace.
+        ws (Path): A path of a workspace.
 
-        - dict_lock (Path): A directory to store lock files.
+        dict_lock (Path): A directory to store lock files.
 
-        - runner_timeout (int):
+        runner_timeout (int):
             Timeout seconds to transit the state
             from RunnerChecking to RunnerFailed.
 
-        - running_timeout (int):
+        running_timeout (int):
             Timeout seconds to transit the state
             from HpRunningChecking to HpRunningFailed.
 
-        - job_timeout (int):
+        job_timeout (int):
             Timeout seconds to transit the state
             from JobChecking to JobFailed.
 
-        - batch_job_timeout (int):
+        batch_job_timeout (int):
             Timeout seconds to transit the state
             from WaitResult to HpExpireReady.
 
-        - finished_timeout (int):
+        finished_timeout (int):
             Timeout seconds to transit the state
             from HpFinishedChecking to HpFinishedFailed.
 
-        - kill_timeout (int):
+        kill_timeout (int):
             Timeout seconds to transit the state
             from KillChecking to KillFailed.
 
-        - cancel_timeout (int):
+        cancel_timeout (int):
             Timeout seconds to transit the state
             from HpCancelChecking to HpCancelFailed.
 
-        - expire_timeout (int):
+        expire_timeout (int):
             Timeout seconds to transit the state
             from HpExpireChecking to HpExpireFailed.
 
-        - runner_retry (int):
+        runner_retry (int):
             Max retry counts to transit the state
             from RunnerFailed to RunnerFailure.
 
-        - running_retry (int):
+        running_retry (int):
             Max retry counts to transit the state
             from HpRunningFailed to HpRunningFailure.
 
-        - job_retry (int):
+        job_retry (int):
             Max retry counts to transit the state
             from JobFailed to JobFailure.
 
-        - result_retry (int):
+        result_retry (int):
             Max retry counts to transit the state
             from RunnerFailed to RunnerFailure.
 
-        - finished_retry (int):
+        finished_retry (int):
             Max retry counts to transit the state
             from HpFinishedFailed to HpFinishedFailure.
 
-        - kill_retry (int):
+        kill_retry (int):
             Max retry counts to transit the state
             from KillFailed to KillFailure.
 
-        - cancel_retry (int):
+        cancel_retry (int):
             Max retry counts to transit the state
             from HpCancelFailed to HpCancelFailure.
 
-        - expire_retry (int):
+        expire_retry (int):
             Max retry counts to transit the state
             from HpExpireFailed to HpExpireFailure.
 
-        - threshold_timeout (int):
+        threshold_timeout (int):
             A timeout threshold for each state.
             A new value is stored each state transition if necessary.
 
-        - threshold_retry (int):
+        threshold_retry (int):
             A retry threshold for each state.
             A new value is stored each state transition if necessary.
 
-        - count_retry (int):
+        count_retry (int):
             A current retry count. This is compared with threshold_retry.
 
-        - job_loop_duration (int): A sleep time each job loop.
+        job_loop_duration (int): A sleep time each job loop.
 
-        - model (Model): A model object of state transitions.
+        model (Model): A model object of state transitions.
 
-        - machine (CustomMachine): A state machine object.
+        machine (CustomMachine): A state machine object.
 
-        - c (int): A loop counter.
+        c (int): A loop counter.
 
-        - scheduler (LocalScheduler | AbciScheduler):
+        scheduler (LocalScheduler | AbciScheduler):
             A reference for scheduler object.
 
-        - hp_file (Path): A hyper parameter file for this job.
+        hp_file (Path): A hyper parameter file for this job.
 
-        - trial_id (str): A unique name of this job.
+        trial_id (str): A unique name of this job.
 
-        - from_file (Path):
+        from_file (Path):
             A temporal file path to be used for each state transition.
-            For example, it's used for file moving.
+            For example, it is used for file moving.
 
-        - to_file (Path):
+        to_file (Path):
             A temporal file path to be used for each state transition.
             Usage is same with form_file.
 
-        - proc (subprocess.Popen): A running process.
+        proc (subprocess.Popen): A running process.
 
-        - th_oh (OutputHandler): An output handler for subprocess.
+        th_oh (OutputHandler): An output handler for subprocess.
     """
 
     def __init__(
         self,
         config: Config,
-        scheduler: AbciScheduler | LocalScheduler,
+        scheduler: AbstractScheduler,
+        model: AbstractModel,
         trial_id: int
     ) -> None:
         super(Job, self).__init__()
         # === Load config file===
         self.config = config
-        self.config_path = self.config.config_path
         # === Get config parameter values ===
         self.workspace = self.config.workspace.get()
         self.cancel_retry = self.config.cancel_retry.get()
@@ -571,14 +557,23 @@ class Job:
         self.running_timeout = self.config.running_timeout.get()
         self.resource_type = self.config.resource_type.get()
 
-        self.threshold_timeout = None
+        self.threshold_timeout: datetime | None = None
         self.threshold_retry = None
         self.count_retry = 0
 
         self.ws = Path(self.workspace).resolve()
         self.dict_lock = self.ws / dict_lock
 
-        self.model = create_model(self.resource_type)
+        self.scheduler = scheduler
+        self.model = model
+        if self.model is None:
+            raise ValueError(
+                "model is None. "
+                "Be sure to specify the model to use in the Job class. "
+                "For example, PylocalScheduler doesn't use model. "
+                "Therefore, Job class cannot be used."
+            )
+
         self.machine = CustomMachine(
             model=self.model,
             states=JOB_STATES,
@@ -588,16 +583,15 @@ class Job:
             ordered_transitions=False
         )
         self.loop_count = 0
-        self.scheduler = scheduler
 
-        self.config_path = str(self.config_path)
+        self.config_path = str(self.config.config_path)
         self.trial_id = trial_id
         self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
-        self.from_file = None
-        self.to_file = None
-        self.next_state = None
-        self.proc = None
-        self.th_oh = None
+        self.from_file: Any = None
+        self.to_file: Any = None
+        self.next_state: Any = None
+        self.proc: Any = None
+        self.th_oh: Any = None
         self.stop_flag = False
         self.storage = Storage(self.ws)
         self.content = self.storage.get_hp_dict(self.trial_id)
@@ -619,7 +613,7 @@ class Job:
         """
         return self.machine
 
-    def get_model(self) -> AbciModel | LocalModel:
+    def get_model(self) -> AbstractModel:
         """Get a state transition model object.
 
         Returns:
@@ -627,7 +621,7 @@ class Job:
         """
         return self.model
 
-    def get_state(self) -> Machine:
+    def get_state(self) -> Any:
         """Get a current state.
 
         Returns:

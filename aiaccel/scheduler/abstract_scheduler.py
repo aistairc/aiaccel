@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
+from aiaccel.common import dict_result
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm import schedule_sampling
-from aiaccel.scheduler.job.job import Job
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.filesystem import create_yaml
-from aiaccel import dict_result
+from aiaccel.scheduler import RandomSampling
+from aiaccel.scheduler import LocalModel
+from aiaccel.scheduler import Job
+from aiaccel.util import str_to_logging_level
+from aiaccel.util import create_yaml
 
 
 class AbstractScheduler(AbstractModule):
@@ -21,7 +23,7 @@ class AbstractScheduler(AbstractModule):
         options (dict[str, str | int | bool]): A dictionary containing
             command line options.
         config_path (Path): Path to the configuration file.
-        algorithm (RandomSamplingSchedulingAlgorithm): A scheduling algorithm
+        algorithm (RandomSampling): A scheduling algorithm
             to select hyper parameters from a parameter pool.
         available_resource (int): An available current resource number.
         jobs (list[dict]): A list to store job dictionaries.
@@ -30,7 +32,7 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         self.options = options
         self.options['process_name'] = 'scheduler'
         super().__init__(self.options)
@@ -47,15 +49,15 @@ class AbstractScheduler(AbstractModule):
 
         self.max_resource = self.config.num_node.get()
         self.available_resource = self.max_resource
-        self.stats = []
-        self.jobs = []
-        self.job_status = {}
-        self.algorithm = None
+        self.stats: list[Any] = []
+        self.jobs: list[Any] = []
+        self.job_status: dict[Any, Any] = {}
+        self.algorithm: Any = None
         self.num_node = self.config.num_node.get()
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
-            and running files are in running directory.
+        and running files are in running directory.
 
         Returns:
             None
@@ -78,7 +80,7 @@ class AbstractScheduler(AbstractModule):
         """
         self.get_each_state_count()
 
-    def start_job(self, trial_id: int) -> Job | None:
+    def start_job(self, trial_id: int) -> Any:
         """Start a new job.
 
         Args:
@@ -86,11 +88,11 @@ class AbstractScheduler(AbstractModule):
 
         Returns:
             Job | None: A reference for created job. It returns None if
-                specified hyper parameter file already exists.
+            specified hyper parameter file already exists.
         """
         trial_ids = [job.trial_id for job in self.jobs]
         if trial_id not in trial_ids:
-            job = Job(self.config, self, trial_id)
+            job = Job(self.config, self, self.create_model(), trial_id)
             self.jobs.append(job)
             self.logger.debug(f"Submit a job: {str(trial_id)}")
             job.main()
@@ -135,7 +137,7 @@ class AbstractScheduler(AbstractModule):
         self.create_numpy_random_generator()
         self.resume()
 
-        self.algorithm = schedule_sampling.RandomSampling(self.config)
+        self.algorithm = RandomSampling(self.config)
         self.change_state_finished_trials()
 
         runnings = self.storage.trial.get_running()
@@ -207,7 +209,7 @@ class AbstractScheduler(AbstractModule):
 
         return True
 
-    def parse_trial_id(self, command: str) -> str:
+    def parse_trial_id(self, command: str) -> str | None:
         """Parse a command string and extract an unique name.
 
         Args:
@@ -267,8 +269,7 @@ class AbstractScheduler(AbstractModule):
         return (num_trials >= self.config.trial_number.get())
 
     def resume(self) -> None:
-        """ When in resume mode, load the previous
-                optimization data in advance.
+        """ When in resume mode, load the previous optimization data in advance.
 
         Args:
             None
@@ -310,7 +311,25 @@ class AbstractScheduler(AbstractModule):
         result_file_path = self.ws / dict_result / file_name
         create_yaml(result_file_path, content)
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['jobs']
         return obj
+
+    def create_model(self) -> Any:
+        """Creates model object of state machine.
+
+        Override with a Scheduler that uses a Model.
+        For example, LocalScheduler, AbciScheduler, etc.
+        By the way, PylocalScheduler does not use Model.
+
+        Returns:
+            LocalModel: LocalModel object.
+
+            Should return None.
+            For that purpose, it is necessary to modify TestAbstractScheduler etc significantly.
+            So it returns LocalModel.
+
+            # TODO: Fix TestAbstractScheduler etc to return None.
+        """
+        return LocalModel()

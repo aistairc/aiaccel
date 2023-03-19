@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-from pathlib import PosixPath
+from pathlib import Path
+from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import TimestampTable
-from aiaccel.util.retry import retry
+from aiaccel.storage import Abstract
+from aiaccel.storage import TimestampTable
+from aiaccel.util import retry
 
 
 class TimeStamp(Abstract):
-    def __init__(self, file_name: PosixPath) -> None:
+    def __init__(self, file_name: Path) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -139,7 +140,7 @@ class TimeStamp(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def delete_any_trial_timestamp(self, trial_id) -> None:
+    def delete_any_trial_timestamp(self, trial_id: Any) -> None:
         with self.create_session() as session:
             try:
                 session.query(TimestampTable).filter(TimestampTable.trial_id == trial_id).delete()

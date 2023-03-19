@@ -4,15 +4,17 @@ from pathlib import Path
 
 import yaml
 
-import aiaccel
+from aiaccel.common import dict_result
+from aiaccel.common import file_final_result
 from aiaccel.config import Config, is_multi_objective
-from aiaccel.master.create import create_master
-from aiaccel.master.local_master import LocalMaster
-from aiaccel.master.pylocal_master import PylocalMaster
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
-from aiaccel.storage.storage import Storage
+from aiaccel.storage import Storage
+from aiaccel.master import create_master
+from aiaccel.master import LocalMaster
+from aiaccel.master import PylocalMaster
+from aiaccel.scheduler import create_scheduler
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler import PylocalScheduler
+
 from tests.base_test import BaseTest
 
 
@@ -105,17 +107,5 @@ class IntegrationTest(BaseTest):
         assert running == 0
 
         if not is_multi_objective:
-            final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
+            final_result = work_dir.joinpath(dict_result, file_final_result)
             assert final_result.exists()
-        '''
-        testr = load_yaml(
-            work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result))
-        datar = load_yaml(
-            data_dir.joinpath(
-                'work',
-                aiaccel.dict_result,
-                '{}.{}'.format(aiaccel.file_final_result, self.search_algorithm)
-            )
-        )
-        assert math.isclose(testr['result'], datar['result'], abs_tol=1e-10)
-        '''

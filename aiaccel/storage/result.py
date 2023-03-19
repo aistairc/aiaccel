@@ -1,16 +1,16 @@
 from __future__ import annotations
 from typing import Any
-from pathlib import PosixPath
+from pathlib import Path
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import ResultTable
-from aiaccel.util.retry import retry
+from aiaccel.storage import Abstract
+from aiaccel.storage import ResultTable
+from aiaccel.util import retry
 
 
 class Result(Abstract):
-    def __init__(self, file_name: PosixPath) -> None:
+    def __init__(self, file_name: Path) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -70,7 +70,7 @@ class Result(Abstract):
         return data.objective
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_all_result(self) -> list:
+    def get_all_result(self) -> list[Any]:
         """Get all results
 
         Returns:
@@ -85,7 +85,7 @@ class Result(Abstract):
         # return [d.objective for d in data]
         return data
 
-    def get_objectives(self) -> list:
+    def get_objectives(self) -> list[Any]:
         """Get all results in list.
 
         Returns:
@@ -95,7 +95,7 @@ class Result(Abstract):
 
         return [d.objective for d in data]
 
-    def get_bests(self, goal: str) -> list:
+    def get_bests(self, goal: str) -> list[Any]:
         """Obtains the sorted result.
 
         Returns:
@@ -123,7 +123,7 @@ class Result(Abstract):
         return best_values
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_result_trial_id_list(self) -> list | None:
+    def get_result_trial_id_list(self) -> list[Any] | None:
         """Obtains the sorted result.
 
         Returns:

@@ -1,5 +1,6 @@
 import pytest
-from aiaccel.util.retry import retry
+
+from aiaccel.util import retry
 
 
 @retry(_MAX_NUM=5, _DELAY=0.1)

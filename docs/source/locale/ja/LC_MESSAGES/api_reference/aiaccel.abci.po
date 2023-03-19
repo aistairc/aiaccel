@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:44+0000\n"
+"POT-Creation-Date: 2023-02-15 12:16+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,7 +80,7 @@ msgstr ""
 
 #: aiaccel.abci.qstat.parse_job_list:3 aiaccel.abci.qstat.parse_qstat:3
 #: aiaccel.abci.qsub.create_qsub_command:3 of
-msgid "A configuration object."
+msgid "A Config object."
 msgstr ""
 
 #: aiaccel.abci.qstat.parse_job_list:5 of
@@ -89,6 +89,11 @@ msgstr ""
 
 #: aiaccel.abci.qstat.parse_job_list:8 of
 msgid "A job list converted from a XML element of 'qstat' command."
+msgstr ""
+
+#: aiaccel.abci.qstat.parse_job_list aiaccel.abci.qstat.parse_qstat
+#: aiaccel.abci.qsub.create_qsub_command of
+msgid "戻り値の型"
 msgstr ""
 
 #: aiaccel.abci.qstat.parse_qstat:1 of
@@ -101,10 +106,6 @@ msgstr ""
 
 #: aiaccel.abci.qstat.parse_qstat:8 of
 msgid "A parsed job list from ABCI 'qstat' command."
-msgstr ""
-
-#: aiaccel.abci.qstat.parse_qstat aiaccel.abci.qsub.create_qsub_command of
-msgid "戻り値の型"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.abci.rst:24
@@ -126,4 +127,7 @@ msgstr ""
 #: ../../source/api_reference/aiaccel.abci.rst:32
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "A configuration object."
+#~ msgstr ""
 

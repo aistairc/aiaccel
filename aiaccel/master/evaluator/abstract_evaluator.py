@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
-import aiaccel
+from aiaccel.common import dict_lock
+from aiaccel.common import dict_result
+from aiaccel.common import file_final_result
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.trialid import TrialId
+from aiaccel.storage import Storage
+from aiaccel.util import create_yaml
+from aiaccel.util import TrialId
 
 
 class AbstractEvaluator(object):
@@ -31,13 +34,13 @@ class AbstractEvaluator(object):
 
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
         self.config = Config(str(self.config_path))
         self.ws = Path(self.config.workspace.get()).resolve()
-        self.dict_lock = self.ws / aiaccel.dict_lock
-        self.hp_result = None
+        self.dict_lock = self.ws / dict_lock
+        self.hp_result: dict[str, Any] | None = None
         self.storage = Storage(self.ws)
         self.goal = self.config.goal.get()
         self.trial_id = TrialId(str(self.config_path))
@@ -78,5 +81,5 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        path = self.ws / aiaccel.dict_result / aiaccel.file_final_result
+        path = self.ws / dict_result / file_final_result
         create_yaml(path, self.hp_result, self.dict_lock)

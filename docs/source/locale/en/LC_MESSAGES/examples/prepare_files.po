@@ -1,0 +1,63 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-06 17:28+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/examples/prepare_files.md:1
+msgid "作業ファイルの準備"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:3
+msgid "ワークスペースを作成し，移動します．"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:8
+msgid "リポジトリのクローンを取得し，ディレクトリ examles のコピーを作成します．"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:13
+msgid "examples 下には以下のフォルダが存在します．"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:14
+msgid "benchmark"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:15
+msgid "resnet50_cifar10"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:16
+msgid "schwefel"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:17
+msgid "sphere"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:18
+msgid "styblinski-tang"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:19
+msgid "wrapper_sample"
+msgstr ""
+
+#: ../../source/examples/prepare_files.md:21
+msgid "使用するフォルダに移動して設定を行い， aiaccel を実行します． 例えば sphere に移動するには，以下のようにします．"
+msgstr ""
+

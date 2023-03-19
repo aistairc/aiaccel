@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
-import aiaccel
 from aiaccel.config import is_multi_objective
-from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
-from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
-from aiaccel.master.verification.abstract_verification import \
-    AbstractVerification
+from aiaccel.common import goal_maximize
+from aiaccel.common import goal_minimize
 from aiaccel.module import AbstractModule
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.time_tools import (get_time_now_object,
-                                     get_time_string_from_object)
+from aiaccel.master import MaximizeEvaluator
+from aiaccel.master import MinimizeEvaluator
+from aiaccel.master import AbstractVerification
+from aiaccel.util import str_to_logging_level
+from aiaccel.util import get_time_now_object
+from aiaccel.util import get_time_string_from_object
 
 
 class AbstractMaster(AbstractModule):
@@ -38,7 +41,7 @@ class AbstractMaster(AbstractModule):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         self.start_time = get_time_now_object()
-        self.loop_start_time = None
+        self.loop_start_time: datetime | None = None
         self.options = options
         self.options['process_name'] = 'master'
 
@@ -58,8 +61,8 @@ class AbstractMaster(AbstractModule):
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
 
-        self.runner_files = []
-        self.stats = []
+        self.runner_files: list[Path] | None = []
+        self.stats: list[Any] = []
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -89,9 +92,9 @@ class AbstractMaster(AbstractModule):
 
         if is_multi_objective(self.config):
             self.logger.info('Multi-objective optimization does not run an evaluation process.')
-        elif self.goal.lower() == aiaccel.goal_maximize:
+        elif self.goal.lower() == goal_maximize:
             evaluator = MaximizeEvaluator(self.options)
-        elif self.goal.lower() == aiaccel.goal_minimize:
+        elif self.goal.lower() == goal_minimize:
             evaluator = MinimizeEvaluator(self.options)
         else:
             self.logger.error(f'Invalid goal: {self.goal}.')
@@ -162,7 +165,7 @@ class AbstractMaster(AbstractModule):
         """
         return None
 
-    def check_error(self):
+    def check_error(self) -> bool:
         """ Check to confirm if an error has occurred.
 
         Args:

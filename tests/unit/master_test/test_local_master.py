@@ -1,4 +1,4 @@
-from aiaccel.master.local_master import LocalMaster
+from aiaccel.master import LocalMaster
 
 from tests.base_test import BaseTest
 

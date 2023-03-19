@@ -4,14 +4,14 @@ import logging
 import subprocess
 from argparse import ArgumentParser
 from functools import singledispatchmethod
-from logging import StreamHandler, getLogger
 from typing import Any
 from collections.abc import Callable
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.time_tools import get_time_now
+from aiaccel.storage import Storage
+from aiaccel.util import get_time_now
+from aiaccel.util import cast_y
 
 
 class _Message:
@@ -35,7 +35,7 @@ class _Message:
         self.outputs: list[str] = []
         self.delimiter = "@"
 
-    def create_message(self, message: Any):
+    def create_message(self, message: Any) -> None:
         """ Concatenates a label and a message.
 
         Args:
@@ -65,11 +65,11 @@ class _Message:
                 if o.split(":")[1] != "":
                     print(o)
 
-    def parse(self, raw_data: str) -> list[str]:
+    def parse(self, string_message: str) -> list[str]:
         """
 
         Args:
-            raw_data (str): It is assumed the format
+            string_message (str): It is assumed the format
 
         Example:
          ::
@@ -79,9 +79,9 @@ class _Message:
                 message="hoge@hoge@hoge"
             )
         """
-        raw_data = raw_data.split("\n")
+        list_of_message = string_message.split("\n")
         target_data = []
-        for line in raw_data:
+        for line in list_of_message:
             label = line.split(":")[0]
             if label != self.label:
                 continue
@@ -91,15 +91,15 @@ class _Message:
             target_data.append("")
         return target_data
 
-    def clear(self):
+    def clear(self) -> None:
         self.outputs = []
 
 
 class Messages:
-    def __init__(self, *labels: tuple) -> None:
-        labels = list(labels)
+    def __init__(self, *labels: Any) -> None:
+        list_of_labels = list(labels)
         self.d: dict[str, _Message] = {}
-        for label in labels:
+        for label in list_of_labels:
             self.d[label] = _Message(label)
 
     def create_message(self, label: str, mess: str) -> None:
@@ -138,7 +138,7 @@ class Messages:
         """
         return self.d[label].parse(mess)
 
-    def get(self, label: str, index: int = -1) -> list[str]:
+    def get(self, label: str, index: int = -1) -> str:
         return self.d[label].outputs[index]
 
 
@@ -154,13 +154,13 @@ class WrapperInterface:
                     "objective_err: err" -> err
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.stdout = Messages(
             "objective_y",
             "objective_err"
         )
 
-    def get_data(self, output: subprocess.CompletedProcess[bytes]) -> tuple:
+    def get_data(self, output: subprocess.CompletedProcess[bytes]) -> tuple[Any, Any]:
         """For wrapper side, gets stdout and stderr of user program.
 
         Args:
@@ -168,9 +168,8 @@ class WrapperInterface:
                 have attributes args, returncode, stdout and stderr.
 
         Returns:
-            tuple(ys: str, err: str):
-                ys (list): The return value of user program.
-                err (list): The error message of user program.
+            tuple[list[str], list[str]]: The return value of user program and
+            the error message of user program.
         """
         ys = self.stdout.parse(
             "objective_y", output.stdout.decode("UTF-8")
@@ -192,7 +191,7 @@ class WrapperInterface:
 
     def out(
         self,
-        objective_y: float | int | str | None = None,
+        objective_y: Any | None = None,
         objective_err: str | None = None
     ) -> None:
         """For user program side, outputs the objective value and error message
@@ -227,10 +226,10 @@ class Run:
         args (dict): A dictionary object which contains command line arguments
             given by aiaccel.
         trial_id (int): Trial Id.
-        config_path (PosixPath): A Path object which points to the
+        config_path (Path): A Path object which points to the
             configuration file.
         config (Config): A Config object.
-        workspace (PosixPath): A Path object which points to the workspace.
+        workspace (Path): A Path object which points to the workspace.
         storage (Storage): A Storage object.
         logger (Logger): A Logger object.
         com (WrapperInterface): A WrapperInterface object.
@@ -261,7 +260,7 @@ class Run:
                 run.execute_and_report(func)
     """
 
-    def __init__(self, config_path: str | PosixPath | None = None) -> None:
+    def __init__(self, config_path: str | Path | None = None) -> None:
         parser = ArgumentParser()
         parser.add_argument('--config', type=str)
         parser.add_argument('--trial_id', type=str, required=False)
@@ -282,19 +281,10 @@ class Run:
         self.workspace = Path(self.config.workspace.get()).resolve()
         self.storage = Storage(self.workspace)
 
-        # logger
-        log_dir = self.workspace / "log"
-        log_path = log_dir / f"job_{self.trial_id}.log"
-        if not log_dir.exists():
-            log_dir.mkdir(parents=True)
-        logging.basicConfig(filename=log_path, level=logging.DEBUG)
-        self.logger = getLogger(__name__)
-        self.logger.addHandler(StreamHandler())
-
         self.com = WrapperInterface()
 
     def generate_commands(
-        self, command: str, xs: dict[str, float | int | str | None]
+        self, command: str, xs: dict[Any, Any]
     ) -> list[str]:
         """ Generate execution command of user program.
 
@@ -320,7 +310,7 @@ class Run:
 
         return commands
 
-    def get_any_trial_xs(self, trial_id: int) -> dict | None:
+    def get_any_trial_xs(self, trial_id: int) -> Any:
         """Gets a parameter list of specific trial ID from Storage object.
 
         Args:
@@ -328,11 +318,11 @@ class Run:
 
         Returns:
             dict | None: A dictionary of parameters. None if the parameter
-                specified by the given trial ID is not registered.
+            specified by the given trial ID is not registered.
         """
         params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
         if params is None:
-            return
+            return None
 
         xs = {}
         for param in params:
@@ -340,43 +330,13 @@ class Run:
 
         return xs
 
-    def cast_y(
-            self, y_value: Any, y_data_type: str | None) -> float | int | str:
-        """Casts y to the appropriate data type.
-
-        Args:
-            y_value (Any): y value to be casted.
-            y_data_type (str | None): Name of data type of objective value.
-
-        Returns:
-            float | int | str: Casted y value.
-
-        Raises:
-            TypeError: Occurs when given `y_data_type` is other than `float`,
-                 `int`, or `str`.
-        """
-        if y_data_type is None:
-            y = y_value
-        elif y_data_type.lower() == 'float':
-            y = float(y_value)
-        elif y_data_type.lower() == 'int':
-            y = int(float(y_value))
-        elif y_data_type.lower() == 'str':
-            y = str(y_value)
-        else:
-            TypeError(f'{y_data_type} cannot be specified')
-
-        return y
-
     @singledispatchmethod
     def execute(
         self,
-        func: Callable[[dict[str, float | int | str]], float],
+        func: Callable[[Any], Any],
         trial_id: int,
         y_data_type: str | None
-    ) -> tuple[dict[str, float | int | str] | None,
-               float | int | str | None,
-               str]:
+    ) -> Any:
         """Executes the target function.
 
         Args:
@@ -390,23 +350,22 @@ class Run:
                 A dictionary of parameters, a casted objective value, and error
                 string.
         """
+        set_logging_file_for_trial_id(self.workspace, trial_id)
         xs = self.get_any_trial_xs(trial_id)
-        y = None
-        err = ""
-
         try:
-            y = self.cast_y(func(xs), y_data_type)
+            y = cast_y(func(xs), y_data_type)
         except BaseException as e:
             err = str(e)
+            y = None
+        else:
+            err = ""
         finally:
             self.com.out(objective_y=y, objective_err=err)
 
         return xs, y, err
 
-    @ execute.register
-    def _(
-        self, command: str, trial_id: int, y_data_type: 'str | None'
-    ) -> 'tuple[dict[str, float | int | str] | None, float | int | str | None, str]':
+    @execute.register
+    def _(self, command: str, trial_id: int, y_data_type: str) -> Any:
         """ Executes the user program.
 
         Args:
@@ -420,31 +379,30 @@ class Run:
                 string.
         """
 
+        set_logging_file_for_trial_id(self.workspace, trial_id)
+
         xs = self.get_any_trial_xs(trial_id)
         err = ""
-        y = None
 
         # Make running command of user program
         if command == "":
-            y = [float("nan")]
-            return xs, y, err
-
-        commands = self.generate_commands(command, xs)
-
-        output = subprocess.run(
-            commands,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        ys, err = self.com.get_data(output)
-        if y_data_type is None:
-            y = self.cast_y(ys[0], 'float')
+            # y = [float("nan")]
+            return xs, [float("nan")], err
         else:
-            y = self.cast_y(ys[0], y_data_type)
-        err = ("\n").join(err)
+            commands = self.generate_commands(command, xs)
 
-        return xs, y, err
+            output = subprocess.run(
+                commands,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+            ys, err = self.com.get_data(output)
+            if y_data_type is None:
+                y = cast_y(ys[0], 'float')
+            else:
+                y = cast_y(ys[0], y_data_type)
+            return xs, y, err
 
     @singledispatchmethod
     def execute_and_report(
@@ -481,7 +439,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     @execute_and_report.register
-    def _(self, command: str, y_data_type: 'str | None' = None) -> None:
+    def _(self, command: str, y_data_type: Any = None) -> None:
         """Executes the user program.
 
         Args:
@@ -503,7 +461,7 @@ class Run:
         self.report(self.trial_id, xs, y, err, start_time, end_time)
 
     def report(
-        self, trial_id: int, xs: dict, y: any, err: str, start_time: str,
+        self, trial_id: int, xs: dict[str, Any], y: Any, err: str, start_time: str,
         end_time: str
     ) -> None:
         """Saves results in the Storage object.
@@ -511,7 +469,7 @@ class Run:
         Args:
             trial_id (int): Trial ID.
             xs (dict): A dictionary of parameters.
-            y (any): Objective value.
+            y (Any): Objective value.
             err (str): Error string.
             start_time (str): Execution start time.
             end_time (str): Execution end time.
@@ -521,3 +479,11 @@ class Run:
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
         if err != "":
             self.storage.error.set_any_trial_error(trial_id, err)
+
+
+def set_logging_file_for_trial_id(workspace: Path, trial_id: int) -> None:
+    log_dir = workspace / "log"
+    log_path = log_dir / f"job_{trial_id}.log"
+    if not log_dir.exists():
+        log_dir.mkdir(parents=True)
+    logging.basicConfig(filename=log_path, level=logging.DEBUG, force=True)

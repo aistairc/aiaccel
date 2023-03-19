@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-from pathlib import PosixPath
+from pathlib import Path
+from typing import Any
+
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import JobStateTable
-from aiaccel.util.retry import retry
+from aiaccel.storage import Abstract
+from aiaccel.storage import JobStateTable
+from aiaccel.util import retry
 
 
 class JobState(Abstract):
-    def __init__(self, file_name: PosixPath) -> None:
+    def __init__(self, file_name: Path) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -45,7 +47,7 @@ class JobState(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def set_any_trial_jobstates(self, states: list) -> None:
+    def set_any_trial_jobstates(self, states: list[Any]) -> None:
         """Set the specified jobstate to the specified trial.
 
         Args:
@@ -92,7 +94,7 @@ class JobState(Abstract):
         return data.state
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_all_trial_jobstate(self) -> list:
+    def get_all_trial_jobstate(self) -> list[Any]:
         with self.create_session() as session:
             data = (
                 session.query(JobStateTable)

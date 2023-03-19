@@ -1,4 +1,5 @@
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
+from aiaccel.scheduler import AbciScheduler
+from aiaccel.scheduler import AbciModel
 
 from tests.base_test import BaseTest
 
@@ -56,3 +57,14 @@ class TestAbciScheduler(BaseTest):
         s = {"name": "run_xxxxxx.sh"}
         trial_id = scheduler.parse_trial_id(s['name'])
         assert trial_id is None
+
+    def test_create_model(self):
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbciScheduler(options)
+        assert type(scheduler.create_model()) is AbciModel

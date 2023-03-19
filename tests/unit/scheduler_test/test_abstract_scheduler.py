@@ -4,10 +4,8 @@ import os
 import time
 from unittest.mock import patch
 
-import aiaccel
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.scheduler import AbstractScheduler
+from aiaccel.scheduler import LocalModel
 
 from tests.base_test import BaseTest
 
@@ -232,10 +230,10 @@ class TestAbstractScheduler(BaseTest):
             job.main()
 
         with patch.object(scheduler, 'check_finished', return_value=True):
-            assert scheduler.inner_loop_main_process() == False
+            assert scheduler.inner_loop_main_process() is False
 
         with patch.object(scheduler, 'all_done', return_value=True):
-            assert scheduler.inner_loop_main_process() == False
+            assert scheduler.inner_loop_main_process() is False
 
     def test_serialize(
         self,
@@ -332,3 +330,14 @@ class TestAbstractScheduler(BaseTest):
 
         scheduler.options['resume'] = None
         assert scheduler.resume() is None
+
+    def test_create_model(self):
+        options = {
+            'config': self.config_json,
+            'resume': None,
+            'clean': False,
+            'fs': False,
+            'process_name': 'scheduler'
+        }
+        scheduler = AbstractScheduler(options)
+        assert type(scheduler.create_model()) is LocalModel

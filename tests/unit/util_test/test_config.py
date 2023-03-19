@@ -1,7 +1,6 @@
 import dataclasses
 import json
 import sys
-from threading import local
 from unittest.mock import patch
 
 import pytest
