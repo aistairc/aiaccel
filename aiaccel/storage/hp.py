@@ -5,9 +5,9 @@ from pathlib import Path
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import HpTable
-from aiaccel.util.retry import retry
+from aiaccel.storage import Abstract
+from aiaccel.storage import HpTable
+from aiaccel.util import retry
 
 
 class Hp(Abstract):
@@ -48,7 +48,7 @@ class Hp(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def set_any_trial_params(self, trial_id: int, params: list) -> None:
+    def set_any_trial_params(self, trial_id: int, params: list[dict[str, Any]]) -> None:
         with self.create_session() as session:
             try:
                 hps = [
@@ -66,7 +66,7 @@ class Hp(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_params(self, trial_id: int) -> list[HpTable] | None:
+    def get_any_trial_params(self, trial_id: Any) -> list[HpTable] | None:
         """ Obtain the set parameter information for any given trial.
 
         Args:

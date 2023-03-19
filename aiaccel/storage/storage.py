@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
-import aiaccel
-from aiaccel.storage.error import Error
-from aiaccel.storage.hp import Hp
-from aiaccel.storage.jobstate import JobState
-from aiaccel.storage.result import Result
-from aiaccel.storage.timestamp import TimeStamp
-from aiaccel.storage.trial import Trial
-from aiaccel.storage.variable import Serializer
+from aiaccel.common import dict_storage
+from aiaccel.storage import Error
+from aiaccel.storage import Hp
+from aiaccel.storage import JobState
+from aiaccel.storage import Result
+from aiaccel.storage import TimeStamp
+from aiaccel.storage import Trial
+from aiaccel.storage import Serializer
 
 
 class Storage:
@@ -17,7 +18,7 @@ class Storage:
     """
 
     def __init__(self, ws: Path) -> None:
-        db_path = ws / aiaccel.dict_storage / "storage.db"
+        db_path = ws / dict_storage / "storage.db"
         self.trial = Trial(db_path)
         self.hp = Hp(db_path)
         self.result = Result(db_path)
@@ -42,7 +43,7 @@ class Storage:
 
         return max(trial_ids)
 
-    def get_ready(self) -> list:
+    def get_ready(self) -> list[Any]:
         """Get a trial number for the ready state.
 
         Returns:
@@ -50,7 +51,7 @@ class Storage:
         """
         return self.trial.get_ready()
 
-    def get_running(self) -> list:
+    def get_running(self) -> list[Any]:
         """Get a trial number for the running state.
 
         Returns:
@@ -58,7 +59,7 @@ class Storage:
         """
         return self.trial.get_running()
 
-    def get_finished(self) -> list:
+    def get_finished(self) -> list[Any]:
         """Get a trial number for the finished state.
 
         Returns:
@@ -123,7 +124,7 @@ class Storage:
         """
         return trial_id in self.trial.get_finished()
 
-    def get_hp_dict(self, trial_id: int) -> dict | None:
+    def get_hp_dict(self, trial_id: Any) -> Any:
         """Obtain information on a specified trial in dict.
 
         Args:
@@ -164,7 +165,7 @@ class Storage:
         end_time = self.timestamp.get_any_trial_end_time(trial_id=trial_id)
         error = self.error.get_any_trial_error(trial_id=trial_id)
 
-        content: dict[str, str | int | float | list] = {}
+        content: dict[str, str | int | float | list[Any]] = {}
         content['trial_id'] = trial_id
         content['parameters'] = hp
         content['result'] = result
@@ -209,11 +210,11 @@ class Storage:
                     best_trial_id = trial_id
 
             else:
-                return (None, None)
+                return None, None
 
-        return (best_trial_id, best_value)
+        return best_trial_id, best_value
 
-    def get_best_trial_dict(self, goal: str) -> dict | None:
+    def get_best_trial_dict(self, goal: str) -> Any:
         """Get best trial information in dict format.
 
         Args:
@@ -225,7 +226,7 @@ class Storage:
         best_trial_id, _ = self.get_best_trial(goal)
         return self.get_hp_dict(best_trial_id)
 
-    def get_result_and_error(self, trial_id: int) -> tuple:
+    def get_result_and_error(self, trial_id: int) -> tuple[Any, Any]:
         """Get results and errors for a given trial number.
 
         Args:

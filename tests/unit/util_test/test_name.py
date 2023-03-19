@@ -1,6 +1,6 @@
 import numpy as np
 
-from aiaccel.util.name import generate_random_name
+from aiaccel.util import generate_random_name
 
 
 def test_generate_random_name():

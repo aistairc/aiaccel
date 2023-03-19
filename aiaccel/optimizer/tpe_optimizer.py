@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from typing import Any
+
 import optuna
 
 import aiaccel.parameter
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):
@@ -39,12 +41,12 @@ class TpeOptimizer(AbstractOptimizer):
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:
         super().__init__(options)
-        self.parameter_pool = {}
-        self.parameter_list = []
+        self.parameter_pool: dict[str, Any] = {}
+        self.parameter_list: list[Any] = []
         self.study_name = "distributed-tpe"
-        self.study = None
-        self.distributions = None
-        self.trial_pool = {}
+        self.study: Any = None
+        self.distributions: Any = None
+        self.trial_pool: dict[str, Any] = {}
         self.randseed = self.config.randseed.get()
 
     def pre_process(self) -> None:
@@ -192,7 +194,7 @@ class TpeOptimizer(AbstractOptimizer):
 
 def create_distributions(
         parameters: aiaccel.parameter.HyperParameterConfiguration
-) -> dict:
+) -> dict[str, Any]:
     """Create an optuna.distributions dictionary for the parameters.
 
     Args:
@@ -206,7 +208,7 @@ def create_distributions(
     Returns:
         (dict): An optuna.distributions object.
     """
-    distributions = {}
+    distributions: dict[str, optuna.distributions.BaseDistribution] = {}
 
     for p in parameters.get_parameter_list():
         if p.type.lower() == 'float':

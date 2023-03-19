@@ -1,22 +1,14 @@
 
 import asyncio
-import json
 import os
-import subprocess
 import sys
 import time
-from functools import wraps
-from pathlib import Path
 from unittest.mock import patch
 
-import aiaccel
-from aiaccel import workspace
-from aiaccel.config import Config, ConfileWrapper
-from aiaccel.master.abstract_master import AbstractMaster
-from aiaccel.master.create import create_master
-from aiaccel.util.filesystem import get_dict_files
-from aiaccel.util.time_tools import get_time_now_object
-from aiaccel.workspace import Workspace
+from aiaccel.common import goal_maximize
+from aiaccel.config import Config
+from aiaccel.master import AbstractMaster
+from aiaccel.util import get_time_now_object
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
@@ -124,7 +116,7 @@ class TestAbstractMaster(BaseTest):
         assert master.post_process() is None
 
         master.config = Config(self.config_json)
-        master.config.goal.set(aiaccel.goal_maximize)
+        master.config.goal.set(goal_maximize)
         assert master.post_process() is None
 
         master.config = Config(self.config_json)

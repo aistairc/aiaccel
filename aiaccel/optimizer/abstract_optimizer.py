@@ -1,10 +1,11 @@
 from __future__ import annotations
 import copy
+from typing import Any
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.trialid import TrialId
+from aiaccel.util import str_to_logging_level
+from aiaccel.util import TrialId
 
 from numpy import str_
 
@@ -89,7 +90,7 @@ class AbstractOptimizer(AbstractModule):
 
     def generate_initial_parameter(
         self
-    ) -> list[dict[str, float | int | str]]:
+    ) -> Any:
         """Generate a list of initial parameters.
 
         Returns:
@@ -109,12 +110,12 @@ class AbstractOptimizer(AbstractModule):
 
         return new_params
 
-    def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
+    def generate_parameter(self) -> Any:
         """Generate a list of parameters.
 
         Raises:
             NotImplementedError: Causes when the inherited class does not
-            implement.
+                implement.
 
         Returns:
             list[dict[str, float | int | str]] | None: A created list of
@@ -234,7 +235,7 @@ class AbstractOptimizer(AbstractModule):
             self.trial_id.initial(num=self.options['resume'])
             self._deserialize(self.options['resume'])
 
-    def cast(self, params: list[dict[str, str | float | int]]) -> list | None:
+    def cast(self, params: list[dict[str, Any]]) -> list[Any] | None:
         """Casts types of parameter values to appropriate tepes.
 
         Args:
@@ -245,7 +246,7 @@ class AbstractOptimizer(AbstractModule):
 
         Returns:
             list | None: A list of parameters with casted values. None if given
-                `params` is None.
+            `params` is None.
         """
         if params is None or len(params) == 0:
             return params

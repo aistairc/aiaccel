@@ -1,0 +1,960 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:2
+msgid "aiaccel.scheduler package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:5
+msgid "Subpackages"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:14
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:17
+msgid "aiaccel.scheduler.abci\\_scheduler module"
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler:1
+#: aiaccel.scheduler.local_scheduler.LocalScheduler:1
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler:1 of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.scheduler.abstract_scheduler.AbstractScheduler`"
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler:1 of
+msgid "A scheduler class running on ABCI environment."
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.get_stats:1
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats:1 of
+msgid "Get a current status and update."
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.get_stats
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.parse_trial_id
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.change_state_finished_trials
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.parse_trial_id
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.post_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.pre_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.resume
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.update_resource
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp
+#: aiaccel.scheduler.create.create_scheduler
+#: aiaccel.scheduler.job.job.Job.get_machine
+#: aiaccel.scheduler.job.job.Job.get_model
+#: aiaccel.scheduler.job.job.Job.get_state
+#: aiaccel.scheduler.job.job.Job.get_state_name
+#: aiaccel.scheduler.job.job.Job.main aiaccel.scheduler.job.job.Job.schedule
+#: aiaccel.scheduler.job.job.create_model
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.inner_loop_main_process
+#: of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.get_stats:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.change_state_finished_trials:4
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file:6
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.post_process:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.pre_process:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.resume:5
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.update_resource:3
+#: aiaccel.scheduler.job.job.Job.main:3
+#: aiaccel.scheduler.job.job.Job.schedule:3
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted:8
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:8
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats:3 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.parse_trial_id:1
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.parse_trial_id:1
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id:1 of
+msgid "Parse a command string and extract an unique name."
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.parse_trial_id
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.parse_trial_id
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.resume
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp
+#: aiaccel.scheduler.create.create_scheduler aiaccel.scheduler.job.job.Job
+#: aiaccel.scheduler.job.job.create_model
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.parse_trial_id:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.parse_trial_id:3
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id:3 of
+msgid "A command string from ps command."
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.parse_trial_id:6
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.parse_trial_id:6
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id:6 of
+msgid "An unique name."
+msgstr ""
+
+#: aiaccel.scheduler.abci_scheduler.AbciScheduler.parse_trial_id
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.parse_trial_id
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp
+#: aiaccel.scheduler.create.create_scheduler
+#: aiaccel.scheduler.job.job.Job.get_machine
+#: aiaccel.scheduler.job.job.Job.get_model
+#: aiaccel.scheduler.job.job.Job.get_state
+#: aiaccel.scheduler.job.job.Job.get_state_name
+#: aiaccel.scheduler.job.job.create_model
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.inner_loop_main_process
+#: of
+msgid "戻り値の型"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:25
+msgid "aiaccel.scheduler.abstract\\_scheduler module"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.module.AbstractModule`"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:1 of
+msgid "An abstract class for AbciScheduler and LocalScheduler."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:3
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:9 of
+msgid "A dictionary containing command line options."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm
+#: aiaccel.scheduler.job.job.Job of
+msgid "type"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:12 of
+msgid "dict[str, str | int | bool]"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:16 of
+msgid "Path to the configuration file."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:18
+#: aiaccel.scheduler.job.job.Job:26 aiaccel.scheduler.job.job.Job:32
+#: aiaccel.scheduler.job.job.Job:200 aiaccel.scheduler.job.job.Job:213
+#: aiaccel.scheduler.job.job.Job:220 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:22 of
+msgid "A scheduling algorithm to select hyper parameters from a parameter pool."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:25 of
+msgid "RandomSampling"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:29 of
+msgid "An available current resource number."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:31
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:43
+#: aiaccel.scheduler.job.job.Job:39 aiaccel.scheduler.job.job.Job:46
+#: aiaccel.scheduler.job.job.Job:53 aiaccel.scheduler.job.job.Job:60
+#: aiaccel.scheduler.job.job.Job:67 aiaccel.scheduler.job.job.Job:74
+#: aiaccel.scheduler.job.job.Job:81 aiaccel.scheduler.job.job.Job:88
+#: aiaccel.scheduler.job.job.Job:95 aiaccel.scheduler.job.job.Job:102
+#: aiaccel.scheduler.job.job.Job:109 aiaccel.scheduler.job.job.Job:116
+#: aiaccel.scheduler.job.job.Job:123 aiaccel.scheduler.job.job.Job:130
+#: aiaccel.scheduler.job.job.Job:137 aiaccel.scheduler.job.job.Job:144
+#: aiaccel.scheduler.job.job.Job:151 aiaccel.scheduler.job.job.Job:158
+#: aiaccel.scheduler.job.job.Job:164 aiaccel.scheduler.job.job.Job:170
+#: aiaccel.scheduler.job.job.Job:188 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:35 of
+msgid "A list to store job dictionaries."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:37
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:50 of
+msgid "list[dict]"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:41 of
+msgid "A max resource number."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:47 of
+msgid ""
+"A list of current status which is updated using ps command or qstat "
+"command."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.change_state_finished_trials:1
+#: of
+msgid ""
+"Create finished hyper parameter files if result files can be found and "
+"running files are in running directory."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error:1 of
+msgid "Check to confirm if an error has occurred."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error:5 of
+msgid "True if no error, False if with error."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file:1
+#: of
+msgid "Save the results in yaml format."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file:3
+#: of
+msgid "Any trial od"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats:1 of
+msgid "Updates the number of files in hp(hyper parameter) directories."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process:1
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.inner_loop_main_process:1
+#: of
+msgid "A main loop process. This process is repeated every main loop."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process:3
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.inner_loop_main_process:3
+#: of
+msgid "The process succeeds or not. The main loop exits if failed."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.post_process:1 of
+msgid "Post-procedure after executed processes."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.pre_process:1 of
+msgid "Pre-procedure before executing processes."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.resume:1 of
+msgid "When in resume mode, load the previous optimization data in advance."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job:1 of
+msgid "Start a new job."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job:3 of
+msgid "A parameter file path"
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job:6 of
+msgid ""
+"A reference for created job. It returns None if specified hyper parameter"
+" file already exists."
+msgstr ""
+
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.update_resource:1 of
+msgid "Update an available current resource number."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:33
+msgid "aiaccel.scheduler.create module"
+msgstr ""
+
+#: aiaccel.scheduler.create.create_scheduler:1 of
+msgid "Returns scheduler type."
+msgstr ""
+
+#: aiaccel.scheduler.create.create_scheduler:3 of
+msgid "Path to configuration file."
+msgstr ""
+
+#: aiaccel.scheduler.create.create_scheduler:6 of
+msgid ""
+"`LocalScheduler` , `PylocalScheduler` , or `AbciScheduler` if resource "
+"type is 'local', 'python_local', or 'abci', respectively. Other cases, "
+"None."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:41
+msgid "aiaccel.scheduler.local\\_scheduler module"
+msgstr ""
+
+#: aiaccel.scheduler.local_scheduler.LocalScheduler:1
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler:1 of
+msgid "A scheduler class running on a local computer."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:49
+msgid "aiaccel.scheduler.pylocal\\_scheduler module"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.rst:57
+msgid "Module contents"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel:1 of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.scheduler.job.model.abstract_model.AbstractModel`"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted:1
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:1 of
+msgid "State transition of 'before_job_submitted'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted:3
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create:3
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:3
+#: of
+msgid "Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted:5
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create:5
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:5
+#: of
+msgid "A job object."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create:1
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:1 of
+msgid "State transition of 'before_runner_create'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed:1
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:1
+#: of
+msgid "State transition of 'conditions_runner_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:8
+#: of
+msgid "A target file exists or not. But always true if local execution."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:1
+#: aiaccel.scheduler.job.job.Job:1
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel:1 of
+msgid "State transition of 'after_cancel'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result:1
+#: of
+msgid "State transition of 'after_check_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed:1
+#: of
+msgid "State transition of 'after_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire:1 of
+msgid "State transition of 'after_expire'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished:1 of
+msgid "State transition of 'after_finished'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job:1 of
+msgid "State transition of 'after_job'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill:1 of
+msgid "State transition of 'after_kill'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result:1 of
+msgid "State transition of 'after_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner:1 of
+msgid "State transition of 'after_runner'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running:1 of
+msgid "State transition of 'after_running'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result:1
+#: of
+msgid "State transition of 'after_wait_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:1 of
+msgid "State transition of 'before_failed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:1
+#: of
+msgid "State transition of 'before_finished'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:1
+#: of
+msgid "State transition of 'before_kill_submitted'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:5
+#: of
+msgid "Ab object."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:1
+#: of
+msgid "State transition of 'change_trial_state'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:1
+#: of
+msgid "State transition of 'conditions_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:8
+#: of
+msgid "A target file exists or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:1
+#: of
+msgid "State transition of 'conditions_job_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:8
+#: of
+msgid "A target job is finished or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:1
+#: of
+msgid "State transition of 'conditions_kill_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:8
+#: of
+msgid "A target is killed or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:1
+#: of
+msgid "State transition of 'conditions_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:8
+#: of
+msgid "A target is in result files or not."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:1
+#: of
+msgid "An abstract class for scheduling algorithms used for Scheduler."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:3
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:8
+#: aiaccel.scheduler.job.job.Job:8 aiaccel.scheduler.job.job.Job:18 of
+msgid "A configuration object."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:10
+#: aiaccel.scheduler.job.job.Job:20 of
+msgid "ConfileWrapper"
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:1
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:1
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:1
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:1
+#: of
+msgid "Select multiple hyper parameters."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:3
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:3
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:3
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:3
+#: of
+msgid "A list of path of ready hyper parameters."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:5
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:5
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:5
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:5
+#: of
+msgid "A number to select hyper parameters Defaults to 1."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:8
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:8
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:8
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:8
+#: of
+msgid "A reference to a random generator. Defaults to None."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp
+#: of
+msgid "例外"
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:12
+#: of
+msgid "Causes when the inherited class does not     implement."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.CustomMachine:1 of
+msgid "ベースクラス: :py:class:`~transitions.core.Machine`"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:1 of
+msgid "A job thread to manage running jobs on local computer or ABCI."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:3 of
+msgid "課題"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:5 of
+msgid ""
+"Confirm the state transition especially timeout expire and retry expire. "
+"Retry expire works well?"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:10 aiaccel.scheduler.job.job.Job:192 of
+msgid "A reference for scheduler object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:13 aiaccel.scheduler.job.job.Job:198 of
+msgid "A hyper parameter file for this job."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:24 of
+msgid "A path of a workspace."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:30 of
+msgid "A directory to store lock files."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:36 of
+msgid "Timeout seconds to transit the state from RunnerChecking to RunnerFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:43 of
+msgid ""
+"Timeout seconds to transit the state from HpRunningChecking to "
+"HpRunningFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:50 of
+msgid "Timeout seconds to transit the state from JobChecking to JobFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:57 of
+msgid "Timeout seconds to transit the state from WaitResult to HpExpireReady."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:64 of
+msgid ""
+"Timeout seconds to transit the state from HpFinishedChecking to "
+"HpFinishedFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:71 of
+msgid "Timeout seconds to transit the state from KillChecking to KillFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:78 of
+msgid ""
+"Timeout seconds to transit the state from HpCancelChecking to "
+"HpCancelFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:85 of
+msgid ""
+"Timeout seconds to transit the state from HpExpireChecking to "
+"HpExpireFailed."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:92 aiaccel.scheduler.job.job.Job:113 of
+msgid "Max retry counts to transit the state from RunnerFailed to RunnerFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:99 of
+msgid ""
+"Max retry counts to transit the state from HpRunningFailed to "
+"HpRunningFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:106 of
+msgid "Max retry counts to transit the state from JobFailed to JobFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:120 of
+msgid ""
+"Max retry counts to transit the state from HpFinishedFailed to "
+"HpFinishedFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:127 of
+msgid "Max retry counts to transit the state from KillFailed to KillFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:134 of
+msgid ""
+"Max retry counts to transit the state from HpCancelFailed to "
+"HpCancelFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:141 of
+msgid ""
+"Max retry counts to transit the state from HpExpireFailed to "
+"HpExpireFailure."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:148 of
+msgid ""
+"A timeout threshold for each state. A new value is stored each state "
+"transition if necessary."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:155 of
+msgid ""
+"A retry threshold for each state. A new value is stored each state "
+"transition if necessary."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:162 of
+msgid "A current retry count. This is compared with threshold_retry."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:168 of
+msgid "A sleep time each job loop."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:174 of
+msgid "A model object of state transitions."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:176 of
+msgid "Model"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:180
+#: aiaccel.scheduler.job.job.Job.get_machine:3 of
+msgid "A state machine object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:182 of
+msgid "CustomMachine"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:186 of
+msgid "A loop counter."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:194 of
+msgid "LocalScheduler | AbciScheduler"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:204 of
+msgid "A unique name of this job."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:206 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:210 of
+msgid ""
+"A temporal file path to be used for each state transition. For example, "
+"it is used for file moving."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:217 of
+msgid ""
+"A temporal file path to be used for each state transition. Usage is same "
+"with form_file."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:224 of
+msgid "A running process."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:226 of
+msgid "subprocess.Popen"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:230 of
+msgid "An output handler for subprocess."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job:232 of
+msgid "OutputHandler"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_machine:1 of
+msgid "Get a state machine object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_model:1 of
+msgid "Get a state transition model object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_model:3 of
+msgid "A state transition model object."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_state:1 of
+msgid "Get a current state."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_state:3 of
+msgid "A current state."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_state_name:1 of
+msgid "Get a current state name."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_state_name:3 of
+msgid "A current state name."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.main:1 of
+msgid "Thread.run method."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.schedule:1 of
+msgid "Schedule to run this execution."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm:1
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling:1
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling:1 of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm`"
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:12
+#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:12
+#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:12
+#: of
+msgid "Selected hyper parameters."
+msgstr ""
+
+#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm:1
+#: of
+msgid "An algorithm to select hyper parameters."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.create_model:1 of
+msgid "Creates model object of state machine."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.create_model:3 of
+msgid "Resource type ('abci' or 'local')."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.create_model:6 of
+msgid "Model object."
+msgstr ""
+

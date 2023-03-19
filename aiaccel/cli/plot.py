@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.easy_visualizer import EasyVisualizer
+from aiaccel.storage import Storage
+from aiaccel.util import EasyVisualizer
 
 
 class Plotter:

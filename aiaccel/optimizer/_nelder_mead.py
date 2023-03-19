@@ -1,10 +1,12 @@
 from __future__ import annotations
+
 import logging
+from typing import Any
 
 import numpy as np
 
 from aiaccel.parameter import HyperParameter
-from aiaccel.util.name import generate_random_name
+from aiaccel.util import generate_random_name
 
 STATES = [
     'WaitInitialize',
@@ -35,7 +37,6 @@ class NelderMead(object):
             A initial parameters. Defaults to None.
         rng (np.random.RandomState | None, optional): A reference to a random
             generator. Defaults to None.
-
 
     Attributes:
         bdrys (np.ndarray): A list of boundaries.
@@ -74,10 +75,10 @@ class NelderMead(object):
     def __init__(
         self,
         params: list[HyperParameter],
-        iteration: float | None = float('inf'),
-        coef: dict | None = None,
+        iteration: float = float('inf'),
+        coef: dict[str, Any] | None = None,
         maximize: bool | None = False,
-        initial_parameters: list[dict[str, str | float | list[float]]] | None = None,
+        initial_parameters: Any = None,
         rng: np.random.RandomState | None = None
     ) -> None:
         if coef is None:
@@ -92,14 +93,14 @@ class NelderMead(object):
 
         self.y = self._create_initial_values(initial_parameters)
 
-        self.f = []
+        self.f: Any = []  # np.ndarray is assigned in self._wait_initialize().
         self.yc = None
         self._storage = {
             "r": None, "ic": None, "oc": None, "e": None, "s": None}
         self._max_itr = iteration
         self._total_itr = 0         # included out of boundary
         self._evaluated_itr = 0     # not included out of boundary
-        self._history = {
+        self._history: dict[str, list[Any]] = {
             'total_y': [],              # y each loop
             'evaluated_y': [],          # y each loop not included out of boundary
             'op': [],                   # operations such as 'reflect' and so on.
@@ -108,24 +109,23 @@ class NelderMead(object):
             'fyr_order': []             # order of f(yr) in self.f
         }
         self._executing_index = 0
-        self._executing = []
-        self._fr = None
-        self._fe = None
-        self._fic = None
-        self._foc = None
+        self._executing: list[Any] = []
+        self._fr: Any = None  # treated as "float" until self._finalize() where "None" is assigned.
+        self._fe: Any = None
+        self._fic: Any = None
+        self._foc: Any = None
         self._maximize = maximize
         self._num_shrink = 0
         self._state = 'WaitInitialize'
         self._out_of_boundary = False
-        self._result = []
+        self._result: list[Any] = []
         for y in self.y:
             self._add_executing(y)
 
     def _create_initial_values(
         self,
-        initial_parameters: list[dict[str, int | np.integer | float |
-                                      np.floating | list[int | np.integer | float | np.floating | str]]]
-    ) -> np.ndarray:
+        initial_parameters: list[dict[str, Any]]
+    ) -> np.ndarray[Any, Any]:
         initial_values = [
             [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
             for num_of_initials in range(self.n_dim + 1)
@@ -135,11 +135,10 @@ class NelderMead(object):
 
     def _create_initial_value(
         self,
-        initial_parameters: list[
-            dict[str, int | np.integer | float | np.floating | list[int | np.integer | float | np.floating | str]]],
+        initial_parameters: Any,
         dim: int,
         num_of_initials: int
-    ) -> int | np.integer | float | np.floating | list[int | np.integer | float | np.floating | str]:
+    ) -> Any:
         if initial_parameters is not None:
             if isinstance(initial_parameters[dim]['value'], (int, float, np.integer, np.floating)):
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
@@ -164,7 +163,7 @@ class NelderMead(object):
             return val
 
     def _add_executing(
-        self, y: np.ndarray,
+        self, y: np.ndarray[Any, Any],
         index: int | None = None
     ) -> None:
         """Add a parameter set to an execution candidate.
@@ -228,7 +227,7 @@ class NelderMead(object):
             self._history['evaluated_y'].append(self.y)
         self._history['total_y'].append(self.y)
 
-    def _pop_result(self) -> dict | None:
+    def _pop_result(self) -> dict[str, Any] | None:
         """Pop a result.
 
         Returns:
@@ -284,7 +283,7 @@ class NelderMead(object):
 
         self._state = state
 
-    def _wait_initialize(self, results: list[dict]) -> None:
+    def _wait_initialize(self, results: list[dict[str, Any]]) -> None:
         """Wait first parameter results are finished.
 
         Args:
@@ -310,7 +309,7 @@ class NelderMead(object):
         self._centroid()
         self._reflect()
 
-    def _wait_reflect(self, results: list[dict]) -> None:
+    def _wait_reflect(self, results: list[dict[str, Any]]) -> None:
         """Wait Reflect calculations are finished.
 
         Args:
@@ -343,7 +342,7 @@ class NelderMead(object):
         else:  # pragma: no cover
             pass  # not reached
 
-    def _wait_expand(self, results: list[dict]) -> None:
+    def _wait_expand(self, results: list[dict[str, Any]]) -> None:
         """Wait 'Expand' executions finished.
 
         Args:
@@ -371,7 +370,7 @@ class NelderMead(object):
             self.f[-1] = self._fr
         self._finalize()
 
-    def _wait_outside_contract(self, results: list[dict]) -> None:
+    def _wait_outside_contract(self, results: list[dict[str, Any]]) -> None:
         """Wait the 'OutsideContract' execution finished.
 
         Args:
@@ -398,7 +397,7 @@ class NelderMead(object):
         else:
             self._shrink()
 
-    def _wait_inside_contract(self, results: list[dict]) -> None:
+    def _wait_inside_contract(self, results: list[dict[str, Any]]) -> None:
         """Wait the 'InsideContract' execution finished.
 
         Args:
@@ -426,7 +425,7 @@ class NelderMead(object):
         else:
             self._shrink()
 
-    def _wait_shrink(self, results: list[dict]) -> None:
+    def _wait_shrink(self, results: list[dict[str, Any]]) -> None:
         """Wait the 'Shrink' execution finished.
 
         Args:
@@ -564,7 +563,7 @@ class NelderMead(object):
 
         self._history['op'].append('s')
 
-    def _is_out_of_boundary(self, y: np.ndarray) -> bool:
+    def _is_out_of_boundary(self, y: np.ndarray[Any, Any]) -> bool:
         """Is points out of boundary or not.
 
         Args:
@@ -579,7 +578,7 @@ class NelderMead(object):
 
         return False
 
-    def add_result_parameters(self, result: dict) -> None:
+    def add_result_parameters(self, result: dict[str, Any]) -> None:
         """Add a new result.
 
         Args:
@@ -590,33 +589,33 @@ class NelderMead(object):
         """
         self._result.append(result)
 
-    def search(self) -> list[dict] | None:
+    def search(self) -> list[dict[str, Any]] | None:
         """Proceed a search step. One search method does not increment the
-            iteration. It increments when finalize method is called.
+        iteration. It increments when finalize method is called.
 
-        The details of state transitions are as follows:
+        The details of state transitions are as follows: ::
 
-        -->: state change
-        indent: conditional branch
+            -->: state change
+            indent: conditional branch
 
-        WaitInitialize: wait first three executing
-        --> Initialize: add reflect executing
-        --> WaitReflect: wait executing reflect one
-        --> ReflectBranch: conditional jump using reflect
-            --> back to Initialize
-            --> WaitExpand: wait executing expand one
-                --> ExpandBranch: calc using expand
-                    ---> back to Initialize
-                --> WaitOutsideContract: wait executing oc one
-                    ---> OutsideContractBranch: conditional jump using oc
-                        --> back to Initialize
-                        --> WaitShrink: wait executing shrink f(y)
-                            ---> back to Initialize
-                --> WaitInsideContract: wait executing ic one
-                    ---> InsideContractBranch: conditional jump using ic
-                        --> back to Initialize
-                        --> WaitShrink: wait executing shrink f(y)
-                            ---> back to Initialize
+            WaitInitialize: wait first three executing
+            --> Initialize: add reflect executing
+            --> WaitReflect: wait executing reflect one
+            --> ReflectBranch: conditional jump using reflect
+                --> back to Initialize
+                --> WaitExpand: wait executing expand one
+                    --> ExpandBranch: calc using expand
+                        ---> back to Initialize
+                    --> WaitOutsideContract: wait executing oc one
+                        ---> OutsideContractBranch: conditional jump using oc
+                            --> back to Initialize
+                            --> WaitShrink: wait executing shrink f(y)
+                                ---> back to Initialize
+                    --> WaitInsideContract: wait executing ic one
+                        ---> InsideContractBranch: conditional jump using ic
+                            --> back to Initialize
+                            --> WaitShrink: wait executing shrink f(y)
+                                ---> back to Initialize
 
         Returns:
             None

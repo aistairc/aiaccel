@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Any
 
 from numpy import maximum
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
+from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
 
 
@@ -64,7 +67,7 @@ class Viewer:
                 }
             )
 
-        max_column_width = []
+        max_column_width: list[Any] = []
         for info in infos:
             width = [len(info[key]) + len_margin for key in list(info.keys())]
             header_width = [len(key) + len_margin for key in list(info.keys())]
