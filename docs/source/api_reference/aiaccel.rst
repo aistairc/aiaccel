@@ -11,7 +11,9 @@ Subpackages
    aiaccel.cli
    aiaccel.master
    aiaccel.optimizer
+   aiaccel.scheduler
    aiaccel.storage
+   aiaccel.util
 
 Submodules
 ----------

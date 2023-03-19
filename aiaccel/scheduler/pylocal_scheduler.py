@@ -6,11 +6,11 @@ from importlib.util import module_from_spec
 from pathlib import Path
 from typing import Any
 
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
 from aiaccel.util.aiaccel import WrapperInterface
 from aiaccel.util.aiaccel import set_logging_file_for_trial_id
-from aiaccel.util.time_tools import get_time_now
+from aiaccel.util import get_time_now
 from aiaccel.util.cast import cast_y
 from aiaccel.config import Config
 
