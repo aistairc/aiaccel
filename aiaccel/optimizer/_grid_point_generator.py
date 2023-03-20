@@ -11,7 +11,54 @@ from aiaccel.parameter import HyperParameter
 
 
 GridValueType = Union[float, int, str]
-SamplingMethodType = Literal['IN_ORDER', 'THIN_OUT', 'RANDOM', 'DUPLICATABLE_RANDOM']
+SamplingMethodType = Literal['IN_ORDER', 'UUNIFORM', 'RANDOM', 'DUPLICATABLE_RANDOM']
+
+
+def _make_numeric_choices(hyperparameter: HyperParameter) -> list[float | int]:
+    choices: list[float | int] = []
+    if hyperparameter.log:
+        choices = np.geomspace(
+            start=hyperparameter.lower,
+            stop=hyperparameter.upper,
+            dtype=int if hyperparameter.type == 'INT' else float
+        ).tolist()
+    else:
+        choices = np.linspace(
+            hyperparameter.lower,
+            hyperparameter.upper,
+            dtype=int if hyperparameter.type == 'INT' else float
+        ).tolist()
+    return choices
+
+
+class Candidates:
+    def __init__(self, hyperparameters: list[HyperParameter]) -> None:
+        if hyperparameters:
+            hyperparameter = hyperparameters.pop()
+            self.name = hyperparameter.name
+            if hyperparameter.type in ('FLOAT', 'INT'):
+                if isinstance(hyperparameter.num_grid_points, int):
+                    self.choices = _make_numeric_choices(hyperparameter)
+                    self.num_choices = hyperparameter.num_grid_points
+                else:
+                    self.choices = None
+                    self.num_choices = 1
+            elif hyperparameter.type == 'CATEGORICAL':
+                self.choices = hyperparameter.choices
+                self.num_choices = len(self.choices)
+            elif hyperparameter.type == 'ORDINAL':
+                self.choices = hyperparameter.sequence
+                self.num_choices = len(self.num_choices)
+            self.child = Candidates(hyperparameters)
+        else:
+            self.name = None
+            self.child = None
+
+    def measure_least_space_size(self) -> int:
+        if self.name:
+            return len(self.choices) * self.child.measure_least_space_size()
+        else:
+            return 1
 
 
 def _count_fixed_grid_points(hyperparameters: list[HyperParameter]
@@ -122,7 +169,7 @@ class GridPointGenerator:
                 - IN_ORDER (default) - Samples in order. If trial number is
                 smaller than the number of generated grid points, the grid
                 points near the edge of search space may be ignored.
-                - THIN_OUT - Samples after thin out the grid points and thus
+                - UUNIFORM - Samples after thin out the grid points and thus
                 the ignored points does not gather cirtein region.
                 - RANDOM - Samples randomly.
                 - DUPLICATABLE_RANDOM - Samples randomly but choice duplication
@@ -163,14 +210,6 @@ class GridPointGenerator:
             nums_fixed_grid_points, where=np.array(nums_fixed_grid_points) != 0
         ))
 
-        if trial_number < least_grid_space_size:
-            if not accept_small_trial_number:
-                raise ValueError(
-                    f'Too small "trial_num": {trial_number} (required '
-                    f'{least_grid_space_size} or greater). '
-                    'To proceed, use "--accept-small-trial-number" option.'
-                )
-
         suggested_nums_grid_points = _suggest_nums_grid_points(
             grid_space_size=trial_number,
             least_grid_space_size=least_grid_space_size,
@@ -180,8 +219,18 @@ class GridPointGenerator:
         self._point_list = _generate_all_grid_points(
             hyperparameters, suggested_nums_grid_points
         )
+
         self._parameter_lengths = list(map(len, self._point_list))
         self._grid_space_size = int(np.prod(self._parameter_lengths))
+
+        if trial_number < self._grid_space_size:
+            if not accept_small_trial_number:
+                raise ValueError(
+                    f'Too small "trial_num": {trial_number} (required '
+                    f'{least_grid_space_size} or greater). '
+                    'To proceed, use "--accept-small-trial-number" option.'
+                )
+
         self._digits = np.cumprod(self._parameter_lengths[::-1])[-2::-1]
         self._trial_number = trial_number
         self._sampling_method = sampling_method
@@ -215,7 +264,7 @@ class GridPointGenerator:
         if self._sampling_method == 'IN_ORDER':
             next_grid_point = self._get_grid_point_in_order(
                 self._num_generated_points)
-        elif self._sampling_method == 'THIN_OUT':
+        elif self._sampling_method == 'UUNIFORM':
             next_grid_point = self._get_grid_point_thin_out(
                 self._num_generated_points)
         elif self._sampling_method == 'RANDOM':

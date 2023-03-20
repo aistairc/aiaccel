@@ -33,7 +33,7 @@ parameter_conditions = [
 sampling_condition_key = 'sampling_method, rng'
 sampling_methods = [
     ('IN_ORDER', None),
-    ('THIN_OUT', None),
+    ('UUNIFORM', None),
     ('RANDOM', RandomState(42)),
     ('DUPLICATABLE_RANDOM', RandomState(42))
 ]
@@ -197,7 +197,7 @@ class TestGridPointGenerator(BaseTest):
     @pytest.mark.parametrize(sampling_condition_key, sampling_methods)
     def test_get_next_grid_point(
         self,
-        sampling_method: Literal['IN_ORDER', 'THIN_OUT', 'RANDOM', 'DUPLICATABLE_RANDOM'],
+        sampling_method: Literal['IN_ORDER', 'UUNIFORM', 'RANDOM', 'DUPLICATABLE_RANDOM'],
         rng: RandomState
     ) -> None:
         grid_point_generator = GridPointGenerator(
