@@ -10,7 +10,7 @@ from mpi4py.futures import MPIPoolExecutor
 from mpi4py import MPI
 import fasteners
 
-import aiaccel
+from aiaccel.common import resource_type_abci
 import aiaccel.experimental.mpi as mpi
 from aiaccel.experimental.mpi.util.error import MpiError
 from aiaccel.experimental.mpi.util.mpi_log import MpiLog
@@ -194,7 +194,7 @@ class Mpi:
     @classmethod
     def run_bat(cls, config: MpiConfig, logger: Logger):
         mpi_env = config.mpi_enviroment.get()
-        if mpi_env.lower() != aiaccel.resource_type_abci:
+        if mpi_env.lower() != resource_type_abci:
             logger.error(f'{mpi_env}, the mpi_enviroment, is not supported.')
             return
         if config.mpi_bat_make_file.get():
@@ -215,13 +215,15 @@ class Mpi:
         rt_type = config.mpi_bat_rt_type.get()
         rt_num = config.mpi_bat_rt_num.get()
         h_rt = config.mpi_bat_h_rt.get()
-        qsub_file = config.mpi_bat_file.get()
         num_node = config.num_node.get()
         # mpi_npernode = config.mpi_npernode.get()
-        venv_dir = config.mpi_bat_venv_dir.get()
-        aiaccel_dir = config.mpi_bat_aiaccel_dir.get()
-        config_dir = config.mpi_bat_config_dir.get()
-        hostfile = config.mpi_hostfile.get()
+        root_path = pathlib.Path(config.mpi_bat_root_dir.get())
+        venv_dir = str(root_path / config.mpi_bat_venv_dir.get())
+        aiaccel_dir = str(root_path / config.mpi_bat_aiaccel_dir.get())
+        config_path = root_path / config.mpi_bat_config_dir.get()
+        config_dir = str(config_path)
+        qsub_file_path = config_path / config.mpi_bat_file.get()
+        hostfile = str(config_path / config.mpi_hostfile.get())
         qsub_str = f'''#!/bin/bash
 
 #$ -l rt_{rt_type}={rt_num}
@@ -238,15 +240,16 @@ export PYTHONPATH={aiaccel_dir}/:$PYTHONPATH
 
 cd {config_dir}
 
-python3 -m aiaccel.experimental.mpi.cli.start --config config.yaml --make_hostfile
+python -m aiaccel.experimental.mpi.cli.start --config config.yaml --make_hostfile
 
 mpiexec -n {num_node+1} -hostfile {hostfile} \
-python3 -m mpi4py.futures -m aiaccel.experimental.mpi.cli.start --config config.yaml --clean --from_mpi_bat
+python -m mpi4py.futures -m aiaccel.experimental.mpi.cli.start --config config.yaml --clean --from_mpi_bat
 
 deactivate
 '''
         # 'mpiexec -n {num_node+1} -npernode {mpi_npernode}'
-        pathlib.Path(qsub_file).write_text(qsub_str)
+        qsub_file_path = pathlib.Path(os.path.expanduser(str(qsub_file_path)))
+        qsub_file_path.write_text(qsub_str)
 
     @classmethod
     def make_hostfile(cls, config: MpiConfig, logger: Logger):
@@ -258,7 +261,8 @@ deactivate
 
     @classmethod
     def _make_hostfile(cls, config: MpiConfig, logger: Logger):
-        hostfile = config.mpi_hostfile.get()
+        root_path = pathlib.Path(config.mpi_bat_root_dir.get())
+        hostfile_path = root_path / config.mpi_bat_config_dir.get() / config.mpi_hostfile.get()
         rt_num = config.mpi_bat_rt_num.get()
         mpi_npernode = config.mpi_npernode.get()
         mpi_gpu_mode = config.mpi_gpu_mode.get()
@@ -272,7 +276,8 @@ deactivate
             else:
                 ostr += f'{mpi_npernode}'
             ostr += os.linesep
-        pathlib.Path(hostfile).write_text(ostr)
+        hostfile_path = pathlib.Path(os.path.expanduser(str(hostfile_path)))
+        hostfile_path.write_text(ostr)
 
 
 class MpiOutputHandler(threading.Thread):

@@ -16,17 +16,17 @@ resource:
   mpi_bat_rt_type: "C.small"
   mpi_bat_rt_num: 1
   mpi_bat_h_rt: "2:00:00"
-  mpi_bat_venv_dir: "~/work/mpienv"
-  mpi_bat_aiaccel_dir: "~/work/aiaccel"
-  mpi_bat_aiaccel_dir: "~/work/aiaccel"
-  mpi_bat_config_dir: "~/work/aiaccel/examples/experimental/mpi/sphere"
+  mpi_bat_root_dir: "~/mpi_work"
+  mpi_bat_venv_dir: "./mpienv"
+  mpi_bat_aiaccel_dir: "./aiaccel"
+  mpi_bat_config_dir: "./sphere_cpu_1node_1try"
   mpi_bat_file: "./qsub.sh"
   mpi_hostfile: "./hostfile"
   mpi_gpu_mode: False
   mpi_bat_make_file: True
 
 ABCI:
-  group: "[group-name]"
+  group: "[your_group_id]"
   job_script_preamble: "./job_script_preamble.sh"
   job_execution_options: ""
 

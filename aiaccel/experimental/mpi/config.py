@@ -1,15 +1,16 @@
-import aiaccel
+from aiaccel.common import resource_type_abci
 from aiaccel.config import ConfileWrapper, ConfigEntry, Config
 
 
-_DEFAULT_MPI_ENVIROMENT = aiaccel.resource_type_abci
+_DEFAULT_MPI_ENVIROMENT = resource_type_abci
 _DEFAULT_MPI_NPERNODE = 1
 _DEFAULT_MPI_BAT_RT_TYPE = 'C.small'
 _DEFAULT_MPI_BAT_RT_NUM = 1
 _DEFAULT_MPI_BAT_H_RT = '1:00:00'
-_DEFAULT_MPI_BAT_VENV_DIR = '~/mpienv'
-_DEFAULT_MPI_BAT_AIACCEL_DIR = '~/aiaccel'
-_DEFAULT_MPI_BAT_CONFIG_DIR = '~/aiaccel/examples/experimental/mpi/sphere'
+_DEFAULT_MPI_BAT_ROOT_DIR = '~/mpi_work'
+_DEFAULT_MPI_BAT_VENV_DIR = './mpienv'
+_DEFAULT_MPI_BAT_AIACCEL_DIR = './aiaccel'
+_DEFAULT_MPI_BAT_CONFIG_DIR = './sphere_cpu_1node_1try'
 _DEFAULT_MPI_BAT_FILE = './qsub.sh'
 _DEFAULT_MPI_HOSTFILE = './hostfile'
 _DEFAULT_MPI_GPU_MODE = True
@@ -65,6 +66,14 @@ class MpiConfig(Config):
             warning=warn,
             group="resource",
             keys=("mpi_bat_h_rt")
+        )
+        self.mpi_bat_root_dir = ConfigEntry(
+            config=config,
+            type=[str],
+            default=_DEFAULT_MPI_BAT_VENV_DIR,
+            warning=warn,
+            group="resource",
+            keys=("mpi_bat_root_dir")
         )
         self.mpi_bat_venv_dir = ConfigEntry(
             config=config,

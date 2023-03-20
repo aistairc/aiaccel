@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from aiaccel.wrapper_tools import create_runner_command
-from aiaccel.scheduler.job.model.local_model import LocalModel
+from aiaccel.scheduler.job.model import LocalModel
 
 from aiaccel.experimental.mpi.util.mpi import Mpi, MpiOutputHandler
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job.job import Job
+    from aiaccel.scheduler import Job
 
 
 class MpiModel(LocalModel):
