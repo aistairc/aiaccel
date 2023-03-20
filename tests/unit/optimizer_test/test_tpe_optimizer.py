@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 from aiaccel.config import Config
-from aiaccel.optimizer import TpeOptimizer, create_distributions
-from aiaccel.optimizer.tpe_optimizer import TPESamplerWrapper
+from aiaccel.optimizer import TpeOptimizer
+from aiaccel.optimizer.tpe_optimizer import TPESamplerWrapper, create_distributions
 from aiaccel.parameter import load_parameter
 from tests.base_test import BaseTest
 
