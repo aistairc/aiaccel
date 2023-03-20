@@ -5,7 +5,7 @@ import time
 from unittest.mock import patch
 
 import pytest
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 from tests.base_test import BaseTest
 
 

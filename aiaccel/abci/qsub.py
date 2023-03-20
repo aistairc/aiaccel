@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from aiaccel.common import dict_output
 from aiaccel.config import Config
-from aiaccel import dict_output
+
 
 ''' Example of stat
 stat = {

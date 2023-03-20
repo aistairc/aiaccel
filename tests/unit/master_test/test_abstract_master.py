@@ -5,10 +5,11 @@ import sys
 import time
 from unittest.mock import patch
 
-import aiaccel
+from aiaccel.common import goal_maximize
 from aiaccel.config import Config
-from aiaccel.master.abstract_master import AbstractMaster
-from aiaccel.util.time_tools import get_time_now_object
+from aiaccel.master import AbstractMaster
+from aiaccel.util import get_time_now_object
+
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
@@ -116,7 +117,7 @@ class TestAbstractMaster(BaseTest):
         assert master.post_process() is None
 
         master.config = Config(self.config_json)
-        master.config.goal.set(aiaccel.goal_maximize)
+        master.config.goal.set(goal_maximize)
         assert master.post_process() is None
 
         master.config = Config(self.config_json)

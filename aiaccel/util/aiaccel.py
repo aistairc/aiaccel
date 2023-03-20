@@ -9,9 +9,9 @@ from collections.abc import Callable
 from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.time_tools import get_time_now
-from aiaccel.util.cast import cast_y
+from aiaccel.storage import Storage
+from aiaccel.util import get_time_now
+from aiaccel.util import cast_y
 
 
 class _Message:
@@ -168,9 +168,8 @@ class WrapperInterface:
                 have attributes args, returncode, stdout and stderr.
 
         Returns:
-            tuple(ys: str, err: str):
-                ys (list): The return value of user program.
-                err (list): The error message of user program.
+            tuple[list[str], list[str]]: The return value of user program and
+            the error message of user program.
         """
         ys = self.stdout.parse(
             "objective_y", output.stdout.decode("UTF-8")
@@ -319,7 +318,7 @@ class Run:
 
         Returns:
             dict | None: A dictionary of parameters. None if the parameter
-                specified by the given trial ID is not registered.
+            specified by the given trial ID is not registered.
         """
         params = self.storage.hp.get_any_trial_params(trial_id=trial_id)
         if params is None:

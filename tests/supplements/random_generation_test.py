@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
+from aiaccel.storage import Storage
 
 from tests.base_test import BaseTest
 

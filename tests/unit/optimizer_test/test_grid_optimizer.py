@@ -8,9 +8,9 @@ from pathlib import Path
 import pytest
 
 from aiaccel.config import Config
-from aiaccel.optimizer.grid_optimizer import (GridOptimizer,
-                                              generate_grid_points,
-                                              get_grid_options)
+from aiaccel.optimizer import GridOptimizer
+from aiaccel.optimizer import generate_grid_points
+from aiaccel.optimizer import get_grid_options
 from aiaccel.parameter import HyperParameter, load_parameter
 from tests.base_test import BaseTest
 
@@ -129,6 +129,7 @@ class TestGridOptimizer(BaseTest):
             'fs': False,
             'process_name': 'optimizer'
         }
+
         self.optimizer = GridOptimizer(options)
         self.optimizer.pre_process()
         yield
@@ -180,3 +181,4 @@ class TestGridOptimizer(BaseTest):
             m.setattr(self.optimizer, 'generate_parameter', lambda: None)
             with pytest.raises(ValueError):
                 _ = self.optimizer.generate_initial_parameter()
+
