@@ -110,11 +110,11 @@ class TestAbstractVerification(BaseTest):
             )
             assert self.verifier.verify() is None
             assert dummy_verified_loops == [5]
-            
+
             with monkeypatch.context() as m:
-            m.setattr(
-                self.verifier, '_verified_loops', dummy_verified_loops := []
-            )
+                m.setattr(
+                    self.verifier, '_verified_loops', dummy_verified_loops := []
+                )
             m.setattr(
                 self.verifier.storage, 'get_finished',
                 lambda: [5, 6, 7, 8, 9]
