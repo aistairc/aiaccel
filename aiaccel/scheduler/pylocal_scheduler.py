@@ -7,10 +7,10 @@ from subprocess import run
 from typing import Any
 
 from aiaccel.config import Config
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler import AbstractScheduler
+from aiaccel.util import get_time_now
 from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
 from aiaccel.util.cast import cast_y
-from aiaccel.util.time_tools import get_time_now
 
 # These are for avoiding mypy-errors from initializer().
 # `global` does not work well.

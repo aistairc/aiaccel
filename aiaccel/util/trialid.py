@@ -5,8 +5,8 @@ from typing import Any
 
 import fasteners
 
-from aiaccel import (file_hp_count, file_hp_count_lock,
-                     file_hp_count_lock_timeout)
+from aiaccel.common import (file_hp_count, file_hp_count_lock,
+                            file_hp_count_lock_timeout)
 from aiaccel.config import Config
 from aiaccel.workspace import Workspace
 

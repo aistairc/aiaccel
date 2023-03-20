@@ -7,7 +7,7 @@ from typing import Any
 from numpy import maximum
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
+from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
 
 

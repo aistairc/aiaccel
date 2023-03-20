@@ -6,9 +6,9 @@ from typing import Literal
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import TrialTable
-from aiaccel.util.retry import retry
+from aiaccel.storage import Abstract
+from aiaccel.storage import TrialTable
+from aiaccel.util import retry
 
 
 class Trial(Abstract):

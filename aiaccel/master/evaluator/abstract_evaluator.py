@@ -4,11 +4,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import aiaccel
+from aiaccel.common import file_final_result
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.trialid import TrialId
+from aiaccel.storage import Storage
+from aiaccel.util import TrialId, create_yaml
 from aiaccel.workspace import Workspace
 
 
@@ -36,7 +35,7 @@ class AbstractEvaluator(object):
         self.config_path = Path(self.options['config']).resolve()
         self.config = Config(str(self.config_path))
         self.workspace = Workspace(self.config.workspace.get())
-        self.hp_result = None
+        self.hp_result: dict[str, Any] | None = None
         self.storage = Storage(self.workspace.path)
         self.goal = self.config.goal.get()
         self.trial_id = TrialId(str(self.config_path))
@@ -66,5 +65,5 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        path = self.workspace.result / aiaccel.file_final_result
+        path = self.workspace.result / file_final_result
         create_yaml(path, self.hp_result, self.workspace.lock)

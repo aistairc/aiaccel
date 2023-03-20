@@ -5,26 +5,16 @@ from typing import TYPE_CHECKING
 
 import fasteners
 
-from aiaccel.abci.batch import create_abci_batch_file
-from aiaccel.abci.qsub import create_qsub_command
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
-from aiaccel.util.filesystem import interprocess_lock_file
-from aiaccel.util.process import OutputHandler
-from aiaccel.util.retry import retry
+from aiaccel.abci import create_abci_batch_file, create_qsub_command
+from aiaccel.scheduler.job.model import AbstractModel
+from aiaccel.util import OutputHandler, interprocess_lock_file, retry
 
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job.job import Job
+    from aiaccel.scheduler.job import Job
 
 
 class AbciModel(AbstractModel):
     def before_runner_create(self, obj: 'Job') -> None:
-        # commands = create_runner_command(
-        #     obj.config.job_command.get(),
-        #     obj.content,
-        #     obj.trial_id,
-        #     str(obj.config_path),
-        #     str(obj.command_error_output)
-        # )
 
         create_abci_batch_file(
             trial_id=obj.trial_id,

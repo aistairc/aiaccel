@@ -7,8 +7,8 @@ from numpy import str_
 
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.trialid import TrialId
+from aiaccel.util import str_to_logging_level
+from aiaccel.util import TrialId
 
 
 class AbstractOptimizer(AbstractModule):
@@ -116,7 +116,7 @@ class AbstractOptimizer(AbstractModule):
 
         Raises:
             NotImplementedError: Causes when the inherited class does not
-            implement.
+                implement.
 
         Returns:
             list[dict[str, float | int | str]] | None: A created list of
@@ -247,7 +247,7 @@ class AbstractOptimizer(AbstractModule):
 
         Returns:
             list | None: A list of parameters with casted values. None if given
-                `params` is None.
+            `params` is None.
         """
         if params is None or len(params) == 0:
             return params

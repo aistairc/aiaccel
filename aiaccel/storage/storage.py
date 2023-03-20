@@ -3,22 +3,17 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import aiaccel
-from aiaccel.storage.error import Error
-from aiaccel.storage.hp import Hp
-from aiaccel.storage.jobstate import JobState
-from aiaccel.storage.result import Result
-from aiaccel.storage.timestamp import TimeStamp
-from aiaccel.storage.trial import Trial
-from aiaccel.storage.variable import Serializer
+from aiaccel.common import dict_storage
+from aiaccel.storage import (Error, Hp, JobState, Result, Serializer,
+                             TimeStamp, Trial)
 
 
 class Storage:
     """Database
     """
 
-    def __init__(self, ws: Path | str) -> None:
-        db_path = Path(ws).resolve() / aiaccel.dict_storage / "storage.db"
+    def __init__(self, ws: Path) -> None:
+        db_path = ws / dict_storage / "storage.db"
         self.trial = Trial(db_path)
         self.hp = Hp(db_path)
         self.result = Result(db_path)

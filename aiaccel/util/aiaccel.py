@@ -9,8 +9,7 @@ from typing import Any
 
 from aiaccel.config import Config
 from aiaccel.parameter import load_parameter
-from aiaccel.util.cast import cast_y
-from aiaccel.util.time_tools import get_time_now
+from aiaccel.util import cast_y, get_time_now
 
 
 class CommandLineArgs:

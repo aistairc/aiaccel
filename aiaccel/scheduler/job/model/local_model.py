@@ -3,23 +3,22 @@ from __future__ import annotations
 from subprocess import PIPE, Popen, run
 from typing import TYPE_CHECKING
 
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
-from aiaccel.util.process import OutputHandler
+from aiaccel.scheduler.job.model import AbstractModel
+from aiaccel.util import OutputHandler
 from aiaccel.wrapper_tools import create_runner_command
 
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job.job import Job
+    from aiaccel.scheduler import Job
 
 
 class LocalModel(AbstractModel):
-
-    def before_runner_create(self, obj: 'Job') -> None:
+    def before_runner_create(self, obj: Job) -> None:
         return None
 
-    def conditions_runner_confirmed(self, obj: 'Job') -> bool:
+    def conditions_runner_confirmed(self, obj: Job) -> bool:
         return True
 
-    def before_job_submitted(self, obj: 'Job') -> None:
+    def before_job_submitted(self, obj: Job) -> None:
         runner_command = create_runner_command(
             obj.config.job_command.get(),
             obj.content,

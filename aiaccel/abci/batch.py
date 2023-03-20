@@ -5,7 +5,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-from aiaccel.util.filesystem import file_create
+from aiaccel.util import file_create
 
 
 class JobScrGenerator:

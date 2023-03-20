@@ -1,5 +1,5 @@
-from aiaccel.abci.batch import create_abci_batch_file
-from aiaccel.util.filesystem import create_yaml
+from aiaccel.abci import create_abci_batch_file
+from aiaccel.util import create_yaml
 from aiaccel.wrapper_tools import create_runner_command
 from tests.base_test import BaseTest
 

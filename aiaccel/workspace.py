@@ -2,24 +2,19 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Any
 
-from aiaccel import (dict_alive, dict_error, dict_finished, dict_hp,
-                     dict_jobstate, dict_lock, dict_log, dict_output, dict_pid,
-                     dict_ready, dict_result, dict_runner, dict_running,
-                     dict_storage, dict_timestamp, dict_verification,
-                     extension_hp)
-from aiaccel.util import filesystem as fs
-from aiaccel.util.retry import retry
-from aiaccel.util.suffix import Suffix
+from aiaccel.common import (dict_alive, dict_error, dict_finished, dict_hp,
+                            dict_jobstate, dict_lock, dict_log, dict_output,
+                            dict_pid, dict_ready, dict_result, dict_runner,
+                            dict_running, dict_storage, dict_timestamp,
+                            dict_verification)
+from aiaccel.util import Suffix, make_directories, retry
 
 
 class Workspace:
     """Provides interface to workspace.
-
     Args:
         base_path (str): Path to the workspace.
-
     Attributes:
         path (Path): Path to the workspace.
         alive (Path): Path to "alive", i.e. `path`/alive.
@@ -41,13 +36,11 @@ class Workspace:
         consists (list[Path]): A list of pathes under the workspace.
         results (Path): Path to the results which is prepared in the execution
             directory, i.e. "./results".
-
     """
 
     def __init__(self, base_path: str):
         self.path = Path(base_path).resolve()
 
-        # dict_*
         self.alive = self.path / dict_alive
         self.error = self.path / dict_error
         self.hp = self.path / dict_hp
@@ -84,14 +77,11 @@ class Workspace:
             self.verification
         ]
         self.results = Path("./results")
-        self.retults_csv_file = self.path / "results.csv"
 
     def create(self) -> bool:
         """Create a work directory.
-
         Returns:
             None
-
         Raises:
             NotADirectoryError: It raises if a workspace argument (self.path)
                 is not a directory.
@@ -99,7 +89,7 @@ class Workspace:
         if self.exists():
             return False
 
-        fs.make_directories(
+        make_directories(
             ds=self.consists,
             dict_lock=(self.lock)
         )
@@ -107,7 +97,6 @@ class Workspace:
 
     def exists(self) -> bool:
         """Returns whether workspace exists or not.
-
         Returns:
             bool: True if the workspace exists.
         """
@@ -116,7 +105,6 @@ class Workspace:
     @retry(_MAX_NUM=300, _DELAY=1.0)
     def clean(self) -> None:
         """ Delete a workspace.
-
         It is assumed to be the first one to be executed.
         """
         if not self.path.exists():
@@ -127,7 +115,6 @@ class Workspace:
     @retry(_MAX_NUM=10, _DELAY=1.0)
     def check_consists(self) -> bool:
         """Check required directories exist or not.
-
         Returns:
             bool: All required directories exist or not.
         """
@@ -141,11 +128,9 @@ class Workspace:
     @retry(_MAX_NUM=10, _DELAY=1.0)
     def move_completed_data(self) -> Path | None:
         """ Move workspace to under of results directory when finished.
-
         Raises:
             FileExistsError: Occurs if destination directory already exists
                 when the method is called.
-
         Returns:
             Path | None: Path of destination.
         """
@@ -161,32 +146,3 @@ class Workspace:
 
         shutil.copytree(self.path, dst, ignore=ignptn)
         return dst
-
-    def get_any_result_file_path(self, trial_id: int) -> Path:
-        """Get result file path.
-
-        Returns:
-            PosixPath: Path to result file.
-        """
-        return self.result / f"{trial_id}.{extension_hp}"
-
-    def result_file_exists(self, trial_id: int) -> bool:
-        """Check result file exists or not.
-
-        Returns:
-            bool: True if result file exists.
-        """
-        path = self.get_any_result_file_path(trial_id)
-        return path.exists()
-
-    @retry(_MAX_NUM=10, _DELAY=1.0)
-    def get_any_trial_result(self, trial_id: int) -> dict[str, Any] | None:
-        """Get any trial result.
-
-        Returns:
-            dict: Trial result.
-        """
-        path = self.get_any_result_file_path(trial_id)
-        if path.exists() is False:
-            return None
-        return fs.load_yaml(path)

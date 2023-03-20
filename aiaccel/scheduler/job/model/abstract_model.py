@@ -4,11 +4,10 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from aiaccel.util.process import kill_process
-from aiaccel.util.time_tools import get_time_delta, get_time_now_object
+from aiaccel.util import get_time_delta, get_time_now_object, kill_process
 
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job.job import Job
+    from aiaccel.scheduler import Job
 
 
 class AbstractModel(object):
@@ -109,7 +108,7 @@ class AbstractModel(object):
 
         Returns:
             bool: A target file exists or not. But always true if local
-                execution.
+            execution.
         """
         raise NotImplementedError
 

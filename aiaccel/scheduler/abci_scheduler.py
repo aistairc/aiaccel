@@ -3,9 +3,9 @@ from __future__ import annotations
 import re
 import subprocess
 
-from aiaccel.abci.qstat import parse_qstat
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.scheduler.job.model.abci_model import AbciModel
+from aiaccel.abci import parse_qstat
+from aiaccel.scheduler import AbstractScheduler
+from aiaccel.scheduler import AbciModel
 
 
 class AbciScheduler(AbstractScheduler):
