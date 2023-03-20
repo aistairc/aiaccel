@@ -6,10 +6,11 @@ from aiaccel.optimizer.grid_optimizer import (
     generate_grid_points,
     get_grid_options,
 )
+from aiaccel.optimizer.motpe_optimizer import MOTpeOptimizer
 from aiaccel.optimizer.nelder_mead_optimizer import NelderMeadOptimizer
 from aiaccel.optimizer.random_optimizer import RandomOptimizer
 from aiaccel.optimizer.sobol_optimizer import SobolOptimizer
-from aiaccel.optimizer.tpe_optimizer import TpeOptimizer
+from aiaccel.optimizer.tpe_optimizer import TpeOptimizer, create_distributions
 
 __all__ = [
     "AbstractOptimizer",
@@ -19,7 +20,8 @@ __all__ = [
     "RandomOptimizer",
     "SobolOptimizer",
     "TpeOptimizer",
-    "MOTpeOptimizer" "create_distributions",
+    "MOTpeOptimizer",
+    "create_distributions",
     "create_optimizer",
     "generate_grid_points",
     "get_grid_options",
