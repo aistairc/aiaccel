@@ -10,7 +10,6 @@ from aiaccel.module import AbstractModule
 from aiaccel.master import MaximizeEvaluator
 from aiaccel.master import MinimizeEvaluator
 from aiaccel.master import AbstractVerification
-from aiaccel.util import str_to_logging_level
 from aiaccel.util import get_time_now_object
 from aiaccel.util import get_time_string_from_object
 

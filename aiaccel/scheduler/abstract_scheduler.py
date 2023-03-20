@@ -8,7 +8,6 @@ from aiaccel.module import AbstractModule
 from aiaccel.scheduler import RandomSampling
 from aiaccel.scheduler import LocalModel
 from aiaccel.scheduler import Job
-from aiaccel.util import str_to_logging_level
 from aiaccel.util import create_yaml
 
 
