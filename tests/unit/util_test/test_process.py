@@ -1,16 +1,17 @@
 import logging
 import os
 import subprocess
-from pathlib import Path
 from subprocess import PIPE, STDOUT
 from unittest.mock import patch
 
-import psutil
 import pytest
-from aiaccel.master.abstract_master import AbstractMaster
-from aiaccel.util.process import (OutputHandler, exec_runner,
-                                  is_process_running, kill_process, ps2joblist,
-                                  subprocess_ps)
+
+from aiaccel.util import OutputHandler
+from aiaccel.util import exec_runner
+from aiaccel.util import is_process_running
+from aiaccel.util import kill_process
+from aiaccel.util import ps2joblist
+from aiaccel.util import subprocess_ps
 
 
 def test_exec_runner():

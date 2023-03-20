@@ -7,11 +7,14 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-import aiaccel
-from aiaccel.master.local_master import LocalMaster
+from aiaccel.common import module_type_master
+from aiaccel.common import module_type_optimizer
+from aiaccel.common import module_type_scheduler
+from aiaccel.master import LocalMaster
 from aiaccel.module import AbstractModule
-from aiaccel.optimizer.random_optimizer import RandomOptimizer
-from aiaccel.scheduler.local_scheduler import LocalScheduler
+from aiaccel.optimizer import RandomOptimizer
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.util import str_to_logging_level
 
 from tests.base_test import BaseTest
 
@@ -92,7 +95,7 @@ class TestAbstractModule(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             master = LocalMaster(options)
             module_type = master.get_module_type()
-            assert module_type == aiaccel.module_type_master
+            assert module_type == module_type_master
 
             options = {
                 'config': str(self.config_json),
@@ -103,7 +106,7 @@ class TestAbstractModule(BaseTest):
             }
             optimizer = RandomOptimizer(options)
             module_type = optimizer.get_module_type()
-            assert module_type == aiaccel.module_type_optimizer
+            assert module_type == module_type_optimizer
 
             options = {
                 'config': str(self.config_json),
@@ -114,7 +117,7 @@ class TestAbstractModule(BaseTest):
             }
             scheduler = LocalScheduler(options)
             module_type = scheduler.get_module_type()
-            assert module_type == aiaccel.module_type_scheduler
+            assert module_type == module_type_scheduler
 
     def test_check_finished(self, setup_hp_finished):
         assert not self.module.check_finished()

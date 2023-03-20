@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import re
 import subprocess
 import threading
@@ -10,10 +11,8 @@ from typing import TYPE_CHECKING
 import psutil
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-    from aiaccel.storage.storage import Storage
-
-import datetime
+    from aiaccel.scheduler import AbstractScheduler
+    from aiaccel.storage import Storage
 
 
 def exec_runner(command: list[Any]) -> Popen[bytes]:

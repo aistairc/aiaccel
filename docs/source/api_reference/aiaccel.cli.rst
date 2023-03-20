@@ -4,6 +4,14 @@ aiaccel.cli package
 Submodules
 ----------
 
+aiaccel.cli.creation\_report module
+-----------------------------------
+
+.. automodule:: aiaccel.cli.creation_report
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.cli.plot module
 -----------------------
 
