@@ -5,7 +5,7 @@ from operator import mul
 from typing import Any
 
 from aiaccel.config import Config
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 
@@ -116,7 +116,7 @@ class GridOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         ready_params (list[dict]): A list of ready hyper parameters.

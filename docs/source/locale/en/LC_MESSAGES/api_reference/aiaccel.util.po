@@ -1,0 +1,1004 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/api_reference/aiaccel.util.rst:2
+msgid "aiaccel.util package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:8
+msgid "aiaccel.util.aiaccel module"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages:1 aiaccel.util.aiaccel.Run:1
+#: aiaccel.util.aiaccel.WrapperInterface:1 aiaccel.util.buffer.Buffer:1
+#: aiaccel.util.easy_visualizer.EasyVisualizer:1 aiaccel.util.suffix.Suffix:1
+#: aiaccel.util.trialid.TrialId:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.create_message:1 of
+msgid "Create a message with a any label."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.create_message
+#: aiaccel.util.aiaccel.Messages.out aiaccel.util.aiaccel.Messages.parse
+#: aiaccel.util.aiaccel.Run aiaccel.util.aiaccel.Run.execute
+#: aiaccel.util.aiaccel.Run.execute_and_report
+#: aiaccel.util.aiaccel.Run.generate_commands
+#: aiaccel.util.aiaccel.Run.get_any_trial_xs aiaccel.util.aiaccel.Run.report
+#: aiaccel.util.aiaccel.WrapperInterface.get_data
+#: aiaccel.util.aiaccel.WrapperInterface.out aiaccel.util.buffer.Buffer
+#: aiaccel.util.buffer.Buffer.Add aiaccel.util.buffer.Buffer.Clear
+#: aiaccel.util.buffer.Buffer.Del aiaccel.util.cast.cast_y
+#: aiaccel.util.easy_visualizer.EasyVisualizer.caption
+#: aiaccel.util.easy_visualizer.EasyVisualizer.line_plot
+#: aiaccel.util.easy_visualizer.EasyVisualizer.set_colors
+#: aiaccel.util.easy_visualizer.EasyVisualizer.set_height
+#: aiaccel.util.easy_visualizer.EasyVisualizer.sort
+#: aiaccel.util.filesystem.create_yaml aiaccel.util.filesystem.file_create
+#: aiaccel.util.filesystem.file_delete aiaccel.util.filesystem.file_read
+#: aiaccel.util.filesystem.get_dict_files
+#: aiaccel.util.filesystem.get_file_result
+#: aiaccel.util.filesystem.get_file_result_hp
+#: aiaccel.util.filesystem.interprocess_lock_file
+#: aiaccel.util.filesystem.load_yaml aiaccel.util.filesystem.make_directories
+#: aiaccel.util.filesystem.make_directory
+#: aiaccel.util.logger.str_to_logging_level
+#: aiaccel.util.name.generate_random_name aiaccel.util.process.OutputHandler
+#: aiaccel.util.process.exec_runner aiaccel.util.process.is_process_running
+#: aiaccel.util.process.kill_process aiaccel.util.retry.retry
+#: aiaccel.util.time_tools.get_datetime_from_string
+#: aiaccel.util.time_tools.get_time_delta
+#: aiaccel.util.time_tools.get_time_string_from_object
+#: aiaccel.util.trialid.TrialId aiaccel.util.trialid.TrialId.initial
+#: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.create_message:3 of
+msgid "Create a message with this label name."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.create_message:5 of
+msgid "Message."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.out:1 of
+msgid "Display any labels message."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.out:3 of
+msgid "Displays a message with this label name."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.parse:1 of
+msgid "Name of the label to be extracted."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.parse:3 of
+msgid "Raw messages."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.parse:6 of
+msgid "The target data is only in the form of {label}:{message}."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Messages.parse:9 aiaccel.util.aiaccel.Run:58
+#: aiaccel.util.aiaccel.Run.execute_and_report:10 aiaccel.util.buffer.Buffer:23
+#: aiaccel.util.easy_visualizer.EasyVisualizer:4 of
+msgid "サンプル"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:1 of
+msgid "An Interface between user program or python function and Storage object."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:3 of
+msgid "A path to configration file. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:9 of
+msgid ""
+"A dictionary object which contains command line arguments given by "
+"aiaccel."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run aiaccel.util.buffer.Buffer
+#: aiaccel.util.process.OutputHandler aiaccel.util.trialid.TrialId of
+msgid "type"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:12 aiaccel.util.buffer.Buffer:20 of
+msgid "dict"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:16 of
+msgid "Trial Id."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:18 aiaccel.util.buffer.Buffer:14
+#: aiaccel.util.process.OutputHandler:41 aiaccel.util.trialid.TrialId:28 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:22 of
+msgid "A Path object which points to the configuration file."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:25 aiaccel.util.aiaccel.Run:37
+#: aiaccel.util.trialid.TrialId:22 aiaccel.util.trialid.TrialId:40
+#: aiaccel.util.trialid.TrialId:47 aiaccel.util.trialid.TrialId:53 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:29 of
+msgid "A Config object."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:31 aiaccel.util.trialid.TrialId:16 of
+msgid "Config"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:35 of
+msgid "A Path object which points to the workspace."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:41 of
+msgid "A Storage object."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:43 of
+msgid "Storage"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:47 of
+msgid "A Logger object."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:49 of
+msgid "Logger"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:53 of
+msgid "A WrapperInterface object."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:55 of
+msgid "WrapperInterface"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:59 of
+msgid "*User program* ::"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:66 of
+msgid ""
+"Note that `execute user_program` is a command to execute a user program. "
+"See :doc:`../examples/wrapper_sample`."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:70 of
+msgid "*Python function* ::"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:1 of
+msgid "Executes the target function."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:3
+#: aiaccel.util.aiaccel.Run.execute_and_report:3 of
+msgid "User-defined python function."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:5
+#: aiaccel.util.aiaccel.Run.get_any_trial_xs:3
+#: aiaccel.util.aiaccel.Run.report:3 of
+msgid "Trial ID."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:7 aiaccel.util.cast.cast_y:5 of
+msgid "Name of data type of objective value."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute aiaccel.util.aiaccel.Run.generate_commands
+#: aiaccel.util.aiaccel.Run.get_any_trial_xs
+#: aiaccel.util.aiaccel.WrapperInterface.get_data aiaccel.util.cast.cast_y
+#: aiaccel.util.easy_visualizer.EasyVisualizer.sort
+#: aiaccel.util.filesystem.create_yaml aiaccel.util.filesystem.file_create
+#: aiaccel.util.filesystem.file_delete aiaccel.util.filesystem.file_read
+#: aiaccel.util.filesystem.get_dict_files
+#: aiaccel.util.filesystem.get_file_result
+#: aiaccel.util.filesystem.get_file_result_hp
+#: aiaccel.util.filesystem.interprocess_lock_file
+#: aiaccel.util.filesystem.load_yaml aiaccel.util.filesystem.make_directories
+#: aiaccel.util.filesystem.make_directory
+#: aiaccel.util.logger.str_to_logging_level
+#: aiaccel.util.name.generate_random_name
+#: aiaccel.util.process.OutputHandler.run aiaccel.util.process.exec_runner
+#: aiaccel.util.process.is_process_running aiaccel.util.process.kill_process
+#: aiaccel.util.process.ps2joblist aiaccel.util.process.subprocess_ps
+#: aiaccel.util.suffix.Suffix.date
+#: aiaccel.util.time_tools.get_datetime_from_string
+#: aiaccel.util.time_tools.get_time_delta aiaccel.util.time_tools.get_time_now
+#: aiaccel.util.time_tools.get_time_now_object
+#: aiaccel.util.time_tools.get_time_string_from_object
+#: aiaccel.util.trialid.TrialId.get
+#: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:10 of
+msgid "A dictionary of parameters, a casted objective value, and error string."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute aiaccel.util.aiaccel.Run.generate_commands
+#: aiaccel.util.aiaccel.Run.get_any_trial_xs
+#: aiaccel.util.aiaccel.WrapperInterface.get_data aiaccel.util.cast.cast_y
+#: aiaccel.util.filesystem.file_read aiaccel.util.filesystem.get_dict_files
+#: aiaccel.util.filesystem.get_file_result
+#: aiaccel.util.filesystem.get_file_result_hp
+#: aiaccel.util.filesystem.interprocess_lock_file
+#: aiaccel.util.filesystem.load_yaml aiaccel.util.logger.str_to_logging_level
+#: aiaccel.util.name.generate_random_name aiaccel.util.process.exec_runner
+#: aiaccel.util.process.is_process_running aiaccel.util.process.ps2joblist
+#: aiaccel.util.process.subprocess_ps
+#: aiaccel.util.time_tools.get_datetime_from_string
+#: aiaccel.util.time_tools.get_time_delta aiaccel.util.time_tools.get_time_now
+#: aiaccel.util.time_tools.get_time_now_object
+#: aiaccel.util.time_tools.get_time_string_from_object
+#: aiaccel.util.trialid.TrialId.get
+#: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute_and_report:1 of
+msgid "Executes the target function and report the results."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute_and_report:5 of
+msgid "Name of data type of objective value. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.generate_commands:1 of
+msgid "Generate execution command of user program."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.generate_commands:3 of
+msgid "An Execution command to calculate objective value."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.generate_commands:5 of
+msgid ""
+"A dictionary of parameters of which key is parameter name and value is "
+"parameter value."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.generate_commands:10 of
+msgid "A list of execution command and options."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.get_any_trial_xs:1 of
+msgid "Gets a parameter list of specific trial ID from Storage object."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.get_any_trial_xs:6 of
+msgid ""
+"A dictionary of parameters. None if the parameter specified by the given "
+"trial ID is not registered."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:1 of
+msgid "Saves results in the Storage object."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:5 of
+msgid "A dictionary of parameters."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:7 of
+msgid "Objective value."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:9 of
+msgid "Error string."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:11 of
+msgid "Execution start time."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:13 of
+msgid "Execution end time."
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface:1 of
+msgid "Interface between Wrapper and User function."
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface:6 of
+msgid "user function:"
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface:6 of
+msgid "output  \"objective_y: y\""
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface:7 of
+msgid "\"objective_err: err\""
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface:9 of
+msgid "wrapper:"
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface:9 of
+msgid "input   \"objective_y: y\" -> y"
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface:10 of
+msgid "\"objective_err: err\" -> err"
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface.get_data:1 of
+msgid "For wrapper side, gets stdout and stderr of user program."
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface.get_data:3 of
+msgid ""
+"A CompletedProcess instance which have attributes args, returncode, "
+"stdout and stderr."
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface.get_data:7 of
+msgid "The return value of user program and the error message of user program."
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface.out:1 of
+msgid ""
+"For user program side, outputs the objective value and error message "
+"generated in the user-defined function."
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface.out:4 of
+msgid "Objective value returned from the user-defined function. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.aiaccel.WrapperInterface.out:7 of
+msgid "Error message. Defaults to None."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:16
+msgid "aiaccel.util.buffer module"
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer:1 of
+msgid "Label names."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer:6 of
+msgid "A list of buffer data names."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer:8 of
+msgid "list"
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer:12 of
+msgid "A length of labels."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer:18 of
+msgid "A dictionary for accessing arbitrary buffer data"
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer.Add:1 of
+msgid "Add a data to any buffer."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer.Add:3 of
+msgid "A target buffer labele."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer.Add:5 of
+msgid "Additional."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer.Clear:1 of
+msgid "Delete all buffer data of the target."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer.Clear:3 aiaccel.util.buffer.Buffer.Del:3 of
+msgid "A target label."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer.Del:1 of
+msgid "Delete a any data in any buffer."
+msgstr ""
+
+#: aiaccel.util.buffer.Buffer.Del:5 of
+msgid "A Index to be deleted in the target buffer."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:24
+msgid "aiaccel.util.cast module"
+msgstr ""
+
+#: aiaccel.util.cast.cast_y:1 of
+msgid "Casts y to the appropriate data type."
+msgstr ""
+
+#: aiaccel.util.cast.cast_y:3 of
+msgid "y value to be casted."
+msgstr ""
+
+#: aiaccel.util.cast.cast_y:8 of
+msgid "Casted y value."
+msgstr ""
+
+#: aiaccel.util.cast.cast_y
+#: aiaccel.util.easy_visualizer.EasyVisualizer.set_colors
+#: aiaccel.util.logger.str_to_logging_level aiaccel.util.process.ps2joblist of
+msgid "例外"
+msgstr ""
+
+#: aiaccel.util.cast.cast_y:11 of
+msgid ""
+"Occurs when given `y_data_type` is other than `float`,     `int`, or "
+"`str`."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:32
+msgid "aiaccel.util.easy\\_visualizer module"
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer:1 of
+msgid "Visualizer"
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.caption:1 of
+msgid "Set the any caption."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.line_plot:1 of
+msgid "Plot the any data."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.line_plot:3 of
+msgid "Target data."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.line_plot:6 of
+msgid "data = ([plot_data_1[], plot_data_2[],...)"
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.set_colors:1 of
+msgid "Set the color of line graph."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.set_colors:3 of
+msgid "The number of list item is same as the number of line."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.set_colors:7 of
+msgid "An out-of-target color is specified."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.set_height:1 of
+msgid "Set the any height of vertical axis."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.set_height:3 of
+msgid "height of vertical axis."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.sort:1 of
+msgid "Sort the any data to maximize or minimize."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.sort:3 of
+msgid "A swquential data."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.sort:5 of
+msgid "'minimize' or 'maximize'."
+msgstr ""
+
+#: aiaccel.util.easy_visualizer.EasyVisualizer.sort:8 of
+msgid "Sorted list, or None."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:40
+msgid "aiaccel.util.filesystem module"
+msgstr ""
+
+#: aiaccel.util.filesystem.create_yaml:1 of
+msgid "Create a yaml file."
+msgstr ""
+
+#: aiaccel.util.filesystem.create_yaml:3 of
+msgid "The path of the created yaml file."
+msgstr ""
+
+#: aiaccel.util.filesystem.create_yaml:5 of
+msgid "The content of the created yaml file."
+msgstr ""
+
+#: aiaccel.util.filesystem.create_yaml:7 aiaccel.util.filesystem.file_create:7
+#: of
+msgid "The path to store lock files. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.filesystem.create_yaml:11
+#: aiaccel.util.filesystem.file_create:11 aiaccel.util.filesystem.file_delete:9
+#: aiaccel.util.filesystem.make_directories:9
+#: aiaccel.util.filesystem.make_directory:9
+#: aiaccel.util.process.OutputHandler.run:3 aiaccel.util.process.kill_process:6
+#: of
+msgid "None"
+msgstr ""
+
+#: aiaccel.util.filesystem.file_create:1 of
+msgid "Create a text file."
+msgstr ""
+
+#: aiaccel.util.filesystem.file_create:3 of
+msgid "The path of the created file."
+msgstr ""
+
+#: aiaccel.util.filesystem.file_create:5 of
+msgid "The content of the created file."
+msgstr ""
+
+#: aiaccel.util.filesystem.file_delete:1 of
+msgid "Delete a file."
+msgstr ""
+
+#: aiaccel.util.filesystem.file_delete:3 of
+msgid "A deleted file path."
+msgstr ""
+
+#: aiaccel.util.filesystem.file_delete:5 aiaccel.util.filesystem.file_read:5 of
+msgid "A path to store lock files. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.filesystem.file_read:1 of
+msgid "Read a file."
+msgstr ""
+
+#: aiaccel.util.filesystem.file_read:3 of
+msgid "A path of reading file."
+msgstr ""
+
+#: aiaccel.util.filesystem.file_read:9 of
+msgid "A content of read file."
+msgstr ""
+
+#: aiaccel.util.filesystem.get_dict_files:1 of
+msgid "Get files matching a pattern in a directory."
+msgstr ""
+
+#: aiaccel.util.filesystem.get_dict_files:3 of
+msgid "A directory to search files."
+msgstr ""
+
+#: aiaccel.util.filesystem.get_dict_files:5 of
+msgid "A regular expression."
+msgstr ""
+
+#: aiaccel.util.filesystem.get_dict_files:7
+#: aiaccel.util.filesystem.get_file_result:5
+#: aiaccel.util.filesystem.get_file_result_hp:5
+#: aiaccel.util.filesystem.load_yaml:5
+#: aiaccel.util.filesystem.make_directories:5 of
+msgid "A directory to store lock files. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.filesystem.get_dict_files:11 of
+msgid "Matched files."
+msgstr ""
+
+#: aiaccel.util.filesystem.get_file_result:1
+#: aiaccel.util.filesystem.get_file_result_hp:1 of
+msgid "Get files in result directory."
+msgstr ""
+
+#: aiaccel.util.filesystem.get_file_result:3
+#: aiaccel.util.filesystem.get_file_result_hp:3 of
+msgid "A path to result directory."
+msgstr ""
+
+#: aiaccel.util.filesystem.get_file_result:9
+#: aiaccel.util.filesystem.get_file_result_hp:9 of
+msgid "Files in result directory."
+msgstr ""
+
+#: aiaccel.util.filesystem.interprocess_lock_file:1 of
+msgid "Get a directory of storing lock files."
+msgstr ""
+
+#: aiaccel.util.filesystem.interprocess_lock_file:3 of
+msgid "This base name directory will be created in a dict_lock directory."
+msgstr ""
+
+#: aiaccel.util.filesystem.interprocess_lock_file:6 of
+msgid "A directory to store lock files."
+msgstr ""
+
+#: aiaccel.util.filesystem.interprocess_lock_file:9 of
+msgid "A directory which path and dict_lock is joined."
+msgstr ""
+
+#: aiaccel.util.filesystem.load_yaml:1 of
+msgid "Load a content of a yaml file."
+msgstr ""
+
+#: aiaccel.util.filesystem.load_yaml:3 of
+msgid "A path of a yaml file."
+msgstr ""
+
+#: aiaccel.util.filesystem.load_yaml:9 of
+msgid "A loaded content."
+msgstr ""
+
+#: aiaccel.util.filesystem.make_directories:1 of
+msgid "Make directories."
+msgstr ""
+
+#: aiaccel.util.filesystem.make_directories:3 of
+msgid "A list of making directories."
+msgstr ""
+
+#: aiaccel.util.filesystem.make_directory:1 of
+msgid "Make a directory."
+msgstr ""
+
+#: aiaccel.util.filesystem.make_directory:3 of
+msgid "A path of making directory."
+msgstr ""
+
+#: aiaccel.util.filesystem.make_directory:5 of
+msgid "A directory to store lock files. Defaluts to None."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:48
+msgid "aiaccel.util.logger module"
+msgstr ""
+
+#: aiaccel.util.logger.str_to_logging_level:1 of
+msgid "Convert from a input string to a logging level."
+msgstr ""
+
+#: aiaccel.util.logger.str_to_logging_level:3 of
+msgid "A string that specify a logging level."
+msgstr ""
+
+#: aiaccel.util.logger.str_to_logging_level:6 of
+msgid "It returns a logging level."
+msgstr ""
+
+#: aiaccel.util.logger.str_to_logging_level:9 of
+msgid "Causes when an invalid argument s is given."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:56
+msgid "aiaccel.util.name module"
+msgstr ""
+
+#: aiaccel.util.name.generate_random_name:1 of
+msgid "Generate random name using alphanumeric."
+msgstr ""
+
+#: aiaccel.util.name.generate_random_name:3 of
+msgid "A length of the name."
+msgstr ""
+
+#: aiaccel.util.name.generate_random_name:5 of
+msgid "A reference to a random generator."
+msgstr ""
+
+#: aiaccel.util.name.generate_random_name:8 of
+msgid "A generated name."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:64
+msgid "aiaccel.util.process module"
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:1 of
+msgid "ベースクラス: :py:class:`~threading.Thread`"
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:1 of
+msgid "A class to print subprocess outputs."
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:3 aiaccel.util.process.OutputHandler:19
+#: of
+msgid "A reference for the caller object."
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:6 aiaccel.util.process.OutputHandler:26
+#: of
+msgid "A reference for subprocess.Popen."
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:8 aiaccel.util.process.OutputHandler:32
+#: of
+msgid "A module name which the subprocess is attached. For example, 'Optimizer'."
+msgstr ""
+
+#: aiaccel.util.TrialId.integer:1 aiaccel.util.process.OutputHandler:11
+#: aiaccel.util.trialid.TrialId.integer:1
+#: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id:3 of
+msgid "Trial id."
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:13 of
+msgid "Storage object. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:22 of
+msgid "AbciMaster | AbstractMaster | LocalMaster"
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:28 of
+msgid "Popen"
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:35 aiaccel.util.suffix.Suffix.date:3
+#: aiaccel.util.trialid.TrialId:10 aiaccel.util.trialid.TrialId:34 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler:39 of
+msgid "A sleep time each loop."
+msgstr ""
+
+#: aiaccel.util.process.OutputHandler.run:1 of
+msgid "Main thread."
+msgstr ""
+
+#: aiaccel.util.process.exec_runner:1 of
+msgid "Execute a subprocess with command."
+msgstr ""
+
+#: aiaccel.util.process.exec_runner:3 of
+msgid "A command list"
+msgstr ""
+
+#: aiaccel.util.process.exec_runner:6 of
+msgid "An opened process object."
+msgstr ""
+
+#: aiaccel.util.process.is_process_running:1 of
+msgid "Check the process is running or not."
+msgstr ""
+
+#: aiaccel.util.process.is_process_running:3 of
+msgid "A pid."
+msgstr ""
+
+#: aiaccel.util.process.is_process_running:6 of
+msgid "The process is running or not."
+msgstr ""
+
+#: aiaccel.util.process.kill_process:1 of
+msgid "Kill a process with PID using subprocess."
+msgstr ""
+
+#: aiaccel.util.process.kill_process:3 of
+msgid "A PID."
+msgstr ""
+
+#: aiaccel.util.process.ps2joblist:1 of
+msgid "Get a ps result and convert to a job list format."
+msgstr ""
+
+#: aiaccel.util.process.ps2joblist:3 of
+msgid "A job list of ps result."
+msgstr ""
+
+#: aiaccel.util.process.ps2joblist:6 of
+msgid "Causes when required keys are not contained in a ps result."
+msgstr ""
+
+#: aiaccel.util.process.subprocess_ps:1 of
+msgid "Get a ps result as a list."
+msgstr ""
+
+#: aiaccel.util.process.subprocess_ps:3 of
+msgid "A ps result."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:72
+msgid "aiaccel.util.retry module"
+msgstr ""
+
+#: aiaccel.util.retry.retry:1 of
+msgid "Decorator to retry function."
+msgstr ""
+
+#: aiaccel.util.retry.retry:3 of
+msgid "Maximum number of retries. Defaults to 60."
+msgstr ""
+
+#: aiaccel.util.retry.retry:5 of
+msgid "Retry interval in seconds. Defaults to 1.0."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:80
+msgid "aiaccel.util.suffix module"
+msgstr ""
+
+#: aiaccel.util.suffix.Suffix:1 of
+msgid "Create suffix with datetime."
+msgstr ""
+
+#: aiaccel.util.suffix.Suffix.date:1 of
+msgid "Get the now datetime."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:88
+msgid "aiaccel.util.time\\_tools module"
+msgstr ""
+
+#: aiaccel.util.time_tools.get_datetime_from_string:1 of
+msgid "Get a datetime object from specified string."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_datetime_from_string:3 of
+#, python-format
+msgid "A time string with format '%m/%d/%Y %H:%M:%S'."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_datetime_from_string:6 of
+msgid "A datetime object from specified string."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_delta:1 of
+msgid "Get a delta time from specified seconds."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_delta:3 of
+msgid "Seconds."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_delta:6 of
+msgid "A timedelta object from specified seconds."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_now:1 of
+msgid "Get a now time string."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_now:3 of
+#, python-format
+msgid "A now time string with format '%m/%d/%Y %H:%M:%S'."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_now_object:1 of
+msgid "Get a now datetime object."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_now_object:3 of
+msgid "A now datetime object."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_string_from_object:1 of
+msgid "Get a time string from specified datetime object."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_string_from_object:3 of
+msgid "A datetime object."
+msgstr ""
+
+#: aiaccel.util.time_tools.get_time_string_from_object:6 of
+msgid "A time string from specified datetime object."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:96
+msgid "aiaccel.util.trialid module"
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:1 of
+msgid "Provides interface to current trial id."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:3 aiaccel.util.trialid.TrialId:8 of
+msgid "Path to the config file."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:14 of
+msgid "Config object."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:20 of
+msgid "Path to the workspace."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:26 of
+msgid "Name length of hp files."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:32 of
+msgid "String format of hp file name."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:38 of
+msgid "Path to \"hp\", i.e. `ws`/hp."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:44 of
+msgid "Path to \"count.txt\" containing current trial id, i.e. `ws`/hp/count.txt."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:51 of
+msgid "Path to \"count.lock\", i.e. `ws`/hp/count.lock."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:57 of
+msgid "An interprocess lock."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId:59 of
+msgid "fasteners.InterProcessLock"
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId.get:1 of
+msgid "Returns trial id."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId.get:3 of
+msgid "Trial id. None if count.txt does not exist."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId.increment:1 of
+msgid "Increments trial id."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId.initial:1 of
+msgid "Initialize trial id."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId.initial:3 of
+msgid "_description_. Defaults to 0."
+msgstr ""
+
+#: aiaccel.util.TrialId.string:1 aiaccel.util.trialid.TrialId.string:1 of
+msgid "Formatted trial id."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id:1 of
+msgid "Returns string of trial id padded by zeros."
+msgstr ""
+
+#: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id:6 of
+msgid "Trial id padded by zeros."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.util.rst:104
+msgid "Module contents"
+msgstr ""
+

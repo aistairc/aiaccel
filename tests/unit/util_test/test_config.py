@@ -1,6 +1,5 @@
 import dataclasses
 import json
-from threading import local
 
 import pytest
 from aiaccel.config import (BaseConfig, Config, ConfileWrapper,
@@ -252,4 +251,4 @@ def test_value(config_json):
 
 def test_config_not_exists():
     with pytest.raises(FileNotFoundError):
-        config = Config("?")
+        _ = Config("?")

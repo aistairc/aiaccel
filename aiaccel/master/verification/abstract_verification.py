@@ -5,10 +5,12 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import aiaccel
+from aiaccel.common import dict_lock
+from aiaccel.common import dict_verification
+from aiaccel.common import extension_verification
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import create_yaml
+from aiaccel.storage import Storage
+from aiaccel.util import create_yaml
 
 
 class AbstractVerification(object):
@@ -41,7 +43,7 @@ class AbstractVerification(object):
         self.options = options
         self.config = Config(self.options['config'])
         self.ws = Path(self.config.workspace.get()).resolve()
-        self.dict_lock = self.ws / aiaccel.dict_lock
+        self.dict_lock = self.ws / dict_lock
         self.is_verified: bool = False
         self.finished_loop = None
         self.condition: Any = None
@@ -152,7 +154,7 @@ class AbstractVerification(object):
         if not self.is_verified:
             return None
 
-        path = self.ws / aiaccel.dict_verification / f'{name}.{aiaccel.extension_verification}'
+        path = self.ws / dict_verification / f'{name}.{extension_verification}'
         create_yaml(path, self.verification_result, self.dict_lock)
         logger = logging.getLogger('root.master.verification')
-        logger.info(f'Save verifiation file: {name}.{aiaccel.extension_verification}')
+        logger.info(f'Save verifiation file: {name}.{extension_verification}')

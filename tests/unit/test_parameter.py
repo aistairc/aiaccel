@@ -1,9 +1,14 @@
 import numpy as np
 import pytest
 
-import aiaccel
-from aiaccel.parameter import get_best_parameter, get_type, load_parameter
-from aiaccel.util.filesystem import create_yaml
+from aiaccel.common import goal_maximize
+from aiaccel.common import goal_minimize
+from aiaccel.common import dict_lock
+from aiaccel.common import dict_result
+from aiaccel.cli import get_best_parameter
+from aiaccel.parameter import get_type
+from aiaccel.parameter import load_parameter
+from aiaccel.util import create_yaml
 from tests.base_test import BaseTest
 
 
@@ -16,11 +21,11 @@ class TestParameter(BaseTest):
     ):
         clean_work_dir()
 
-        files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
+        files = list(work_dir.joinpath(dict_result).glob('*.yml'))
         best, best_file = get_best_parameter(
             files,
-            aiaccel.goal_maximize,
-            work_dir.joinpath(aiaccel.dict_lock)
+            goal_maximize,
+            work_dir.joinpath(dict_lock)
         )
         assert best is None
         assert best_file is None
@@ -34,25 +39,25 @@ class TestParameter(BaseTest):
             d['result'] = results[i]
             create_yaml(path, d)
 
-        files = list(work_dir.joinpath(aiaccel.dict_result).glob('*.yml'))
+        files = list(work_dir.joinpath(dict_result).glob('*.yml'))
         files.sort()
         best, best_file = get_best_parameter(
             files,
-            aiaccel.goal_maximize,
-            work_dir.joinpath(aiaccel.dict_lock)
+            goal_maximize,
+            work_dir.joinpath(dict_lock)
         )
         assert best == 140.
         best, best_file = get_best_parameter(
             files,
-            aiaccel.goal_minimize,
-            work_dir.joinpath(aiaccel.dict_lock)
+            goal_minimize,
+            work_dir.joinpath(dict_lock)
         )
         assert best == 101.
         try:
             _, _ = get_best_parameter(
                 files,
                 'invalid_goal',
-                work_dir.joinpath(aiaccel.dict_lock)
+                work_dir.joinpath(dict_lock)
             )
             assert False
         except ValueError:
