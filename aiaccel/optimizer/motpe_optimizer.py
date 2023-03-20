@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import optuna
 
 from aiaccel.optimizer.tpe_optimizer import TpeOptimizer, TPESamplerWrapper
