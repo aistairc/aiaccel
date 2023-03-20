@@ -2,15 +2,16 @@ import asyncio
 import subprocess
 from pathlib import Path
 
-import aiaccel
+from aiaccel.common import dict_result
+from aiaccel.common import file_final_result
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.master.create import create_master
-from aiaccel.master.local_master import LocalMaster
-from aiaccel.master.pylocal_master import PylocalMaster
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
+from aiaccel.storage import Storage
+from aiaccel.master import create_master
+from aiaccel.master import LocalMaster
+from aiaccel.master import PylocalMaster
+from aiaccel.scheduler import create_scheduler
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler import PylocalScheduler
 
 from tests.base_test import BaseTest
 
@@ -96,16 +97,16 @@ class IntegrationTest(BaseTest):
         assert finished == self.config.trial_number.get()
         assert ready == 0
         assert running == 0
-        final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
+        final_result = work_dir.joinpath(dict_result, file_final_result)
         assert final_result.exists()
         '''
         testr = load_yaml(
-            work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result))
+            work_dir.joinpath(dict_result, file_final_result))
         datar = load_yaml(
             data_dir.joinpath(
                 'work',
-                aiaccel.dict_result,
-                '{}.{}'.format(aiaccel.file_final_result, self.search_algorithm)
+                dict_result,
+                '{}.{}'.format(file_final_result, self.search_algorithm)
             )
         )
         assert math.isclose(testr['result'], datar['result'], abs_tol=1e-10)

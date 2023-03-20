@@ -1,7 +1,7 @@
 import shutil
 
 import pytest
-from aiaccel.util.easy_visualizer import EasyVisualizer
+from aiaccel.util import EasyVisualizer
 
 
 def test_easy_visualizer_init():

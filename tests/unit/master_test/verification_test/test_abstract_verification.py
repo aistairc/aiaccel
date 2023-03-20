@@ -5,11 +5,10 @@ from pathlib import Path
 
 import pytest
 
-from aiaccel import dict_verification
-from aiaccel import extension_verification
-from aiaccel.master.verification.abstract_verification import AbstractVerification
-from aiaccel.util.filesystem import load_yaml
-
+from aiaccel.common import dict_verification
+from aiaccel.common import extension_verification
+from aiaccel.master import AbstractVerification
+from aiaccel.util import load_yaml
 from tests.base_test import BaseTest
 
 
@@ -104,14 +103,15 @@ class TestAbstractVerification(BaseTest):
                 self.verifier.storage, 'get_finished',
                 lambda: [5, 6, 7, 8, 9]
             )
+
             m.setattr(
                 self.verifier.storage.result, 'get_any_trial_objective',
                 lambda x: [None, None, None, None, None, 0, 0, 0, 0, 0][x]
             )
             assert self.verifier.verify() is None
             assert dummy_verified_loops == [5]
-
-        with monkeypatch.context() as m:
+            
+            with monkeypatch.context() as m:
             m.setattr(
                 self.verifier, '_verified_loops', dummy_verified_loops := []
             )
