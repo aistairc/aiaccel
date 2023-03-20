@@ -37,7 +37,6 @@ class Viewer:
         trial_ids = self.storage.trial.get_all_trial_id()
 
         for trial_id in trial_ids:
-
             start_time = self.storage.timestamp.get_any_trial_start_time(trial_id)
             end_time = self.storage.timestamp.get_any_trial_end_time(trial_id)
             status = self.storage.trial.get_any_trial_state(trial_id)

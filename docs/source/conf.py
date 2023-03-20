@@ -12,16 +12,17 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../'))
+
+sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 
-project = 'aiaccel'
-copyright = '2022, AIST'
-author = 'AIST'
+project = "aiaccel"
+copyright = "2022, AIST"
+author = "AIST"
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = "0.0.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,21 +31,21 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.todo',
-    'sphinx_rtd_theme',
-    'sphinx_fontawesome',
-    'myst_parser',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.todo",
+    "sphinx_rtd_theme",
+    "sphinx_fontawesome",
+    "myst_parser",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Add optional syntaxes for MyST-Parser which are disabled by default.
 myst_enable_extensions = [
@@ -71,7 +72,7 @@ myst_enable_extensions = [
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 html_show_sourcelink = False
 html_show_sphinx = False
 
@@ -81,8 +82,8 @@ html_show_sphinx = False
 # html_static_path = ['_static']
 
 gettext_compact = False
-locale_dirs = ['locale/']
-language = 'ja'
+locale_dirs = ["locale/"]
+language = "ja"
 
 # -- Extension configuration -------------------------------------------------
 todo_include_todos = True

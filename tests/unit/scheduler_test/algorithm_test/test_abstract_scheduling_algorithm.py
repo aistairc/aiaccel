@@ -1,6 +1,6 @@
 import numpy as np
-from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import \
-    AbstractSchedulingAlgorithm
+
+from aiaccel.scheduler.algorithm.abstract_scheduling_algorithm import AbstractSchedulingAlgorithm
 
 
 def test_abstract_scheduling_algorithm(load_test_config):
@@ -14,7 +14,7 @@ def test_abstract_scheduling_algorithm(load_test_config):
     except NotImplementedError:
         assert True
 
-    '''
+    """
     try:
         algorithm.select_one_hp(None, None)
         assert False
@@ -26,4 +26,4 @@ def test_abstract_scheduling_algorithm(load_test_config):
         assert False
     except NotImplementedError:
         assert True
-    '''
+    """

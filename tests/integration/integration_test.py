@@ -2,19 +2,18 @@ import asyncio
 import subprocess
 from pathlib import Path
 
+import yaml
+
 import aiaccel
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
 from aiaccel.master.create import create_master
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.master.pylocal_master import PylocalMaster
 from aiaccel.scheduler.create import create_scheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
-
+from aiaccel.storage.storage import Storage
 from tests.base_test import BaseTest
-
-import yaml
 
 
 async def start_master(master):
@@ -26,12 +25,11 @@ class IntegrationTest(BaseTest):
     search_algorithm = None
 
     def test_run(self, data_dir, create_tmp_config, tmpdir, work_dir):
-
         #
         # local test
         #
         with self.create_main():
-            config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+            config_file = data_dir.joinpath("config_{}.json".format(self.search_algorithm))
             config_file = create_tmp_config(config_file)
             config = Config(config_file)
 
@@ -44,7 +42,7 @@ class IntegrationTest(BaseTest):
             assert scheduler == LocalScheduler
 
             storage = Storage(ws=Path(config.workspace.get()))
-            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
+            subprocess.Popen(["aiaccel-start", "--config", str(config_file), "--clean"]).wait()
             self.evaluate(work_dir, storage)
 
             self.result_comparison.append(storage.result.get_objectives())
@@ -53,19 +51,19 @@ class IntegrationTest(BaseTest):
         # pylocal test
         #
         with self.create_main():
-            config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
-            new_config_file = tmpdir.joinpath('config_{}_pylocal.yaml'.format(self.search_algorithm))
+            config_file = data_dir.joinpath("config_{}.json".format(self.search_algorithm))
+            new_config_file = tmpdir.joinpath("config_{}_pylocal.yaml".format(self.search_algorithm))
 
-            with open(config_file, 'r') as f:
+            with open(config_file, "r") as f:
                 yml = yaml.load(f, Loader=yaml.SafeLoader)
-            yml['resource']['type'] = 'python_local'
+            yml["resource"]["type"] = "python_local"
 
-            with open(new_config_file, 'w') as f:
+            with open(new_config_file, "w") as f:
                 f.write(yaml.dump(yml, default_flow_style=False))
 
             new_config_file = create_tmp_config(new_config_file)
             config = Config(new_config_file)
-            assert config.resource_type.get() == 'python_local'
+            assert config.resource_type.get() == "python_local"
 
             # master
             master = create_master(new_config_file)
@@ -77,7 +75,7 @@ class IntegrationTest(BaseTest):
 
             storage = Storage(ws=Path(config.workspace.get()))
 
-            subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
+            subprocess.Popen(["aiaccel-start", "--config", str(new_config_file), "--clean"]).wait()
             self.evaluate(work_dir, storage)
 
             print(storage.result.get_objectives())
@@ -98,7 +96,7 @@ class IntegrationTest(BaseTest):
         assert running == 0
         final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
         assert final_result.exists()
-        '''
+        """
         testr = load_yaml(
             work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result))
         datar = load_yaml(
@@ -109,4 +107,4 @@ class IntegrationTest(BaseTest):
             )
         )
         assert math.isclose(testr['result'], datar['result'], abs_tol=1e-10)
-        '''
+        """

@@ -1,7 +1,6 @@
-
 from aiaccel.master.abci_master import AbciMaster
-from aiaccel.master.local_master import LocalMaster
 from aiaccel.master.create import create_master
+from aiaccel.master.local_master import LocalMaster
 
 
 def test_create():

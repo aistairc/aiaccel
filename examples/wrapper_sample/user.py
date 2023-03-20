@@ -8,8 +8,8 @@ def main(x1, x2):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--x1', type=float)
-    parser.add_argument('--x2', type=float)
+    parser.add_argument("--x1", type=float)
+    parser.add_argument("--x2", type=float)
     args = vars(parser.parse_known_args()[0])
 
     y = main(args["x1"], args["x2"])

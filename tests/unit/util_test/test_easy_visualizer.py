@@ -1,6 +1,7 @@
 import shutil
 
 import pytest
+
 from aiaccel.util.easy_visualizer import EasyVisualizer
 
 
@@ -44,19 +45,19 @@ def test_line_plot():
     no_data = []
     assert cplot.line_plot([no_data]) is None
 
-    invalid_data = '123'
+    invalid_data = "123"
     assert cplot.line_plot([invalid_data]) is None
 
     none_data = [1, None, 2, 3, 4]
     assert cplot.line_plot([none_data]) is None
 
-    nan_data = [1, float('nan'), 2, 3, 4]
+    nan_data = [1, float("nan"), 2, 3, 4]
     assert cplot.line_plot([nan_data]) is None
 
-    inf_data = [1, float('inf'), 2, 3, 4]
+    inf_data = [1, float("inf"), 2, 3, 4]
     assert cplot.line_plot([inf_data]) is None
 
-    inf_data = [1, float('-inf'), 2, 3, 4]
+    inf_data = [1, float("-inf"), 2, 3, 4]
     assert cplot.line_plot([inf_data]) is None
 
     terminal_size = shutil.get_terminal_size().columns

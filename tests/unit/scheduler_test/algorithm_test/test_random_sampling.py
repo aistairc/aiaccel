@@ -1,6 +1,6 @@
 import numpy as np
-from aiaccel.scheduler.algorithm.random_sampling import \
-    RandomSamplingSchedulingAlgorithm
+
+from aiaccel.scheduler.algorithm.random_sampling import RandomSamplingSchedulingAlgorithm
 
 
 def test_random_sampling(load_test_config):
@@ -10,11 +10,11 @@ def test_random_sampling(load_test_config):
     hp = [1]
     assert algorithm.select_hp(hp, rng=rng) == [1]
 
-    '''
+    """
     resource = {'numAvailable': 1}
     assert algorithm.select_one_hp(resource, hp) == 1
     assert algorithm.select_one_hp(resource, []) is None
 
     assert algorithm.select_n_hp(resource, hp, 1) == [1]
     assert algorithm.select_n_hp(resource, [], 1) is None
-    '''
+    """

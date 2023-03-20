@@ -1,4 +1,3 @@
-
 import asyncio
 import json
 import os
@@ -39,38 +38,21 @@ def callback_return():
 
 
 class TestAbstractMaster(BaseTest):
-
-    def test_pre_process(
-        self,
-        database_remove
-    ):
+    def test_pre_process(self, database_remove):
         database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(self.config_json)
-        ]
+        commandline_args = ["start.py", "--config", format(self.config_json)]
 
-        with patch.object(sys, 'argv', commandline_args):
+        with patch.object(sys, "argv", commandline_args):
             options = parse_arguments()
             master = AbstractMaster(options)
         loop = asyncio.get_event_loop()
-        gather = asyncio.gather(
-            loop_pre_process(master)
-        )
+        gather = asyncio.gather(loop_pre_process(master))
         loop.run_until_complete(gather)
 
-    def test_pre_process_2(
-        self,
-        database_remove
-    ):
+    def test_pre_process_2(self, database_remove):
         database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(self.config_json)
-        ]
-        with patch.object(sys, 'argv', commandline_args):
+        commandline_args = ["start.py", "--config", format(self.config_json)]
+        with patch.object(sys, "argv", commandline_args):
             options = parse_arguments()
             master = AbstractMaster(options)
 
@@ -80,46 +62,24 @@ class TestAbstractMaster(BaseTest):
         except AssertionError:
             assert True
 
-    def test_pre_process_3(
-        self,
-        setup_hp_finished,
-        database_remove
-    ):
+    def test_pre_process_3(self, setup_hp_finished, database_remove):
         database_remove()
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+        options = {"config": self.config_json, "resume": None, "clean": False, "fs": False, "process_name": "master"}
         master = AbstractMaster(options)
         setup_hp_finished(10)
         assert master.pre_process() is None
 
-    def test_post_process(
-        self,
-        database_remove
-    ):
+    def test_post_process(self, database_remove):
         database_remove()
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+        options = {"config": self.config_json, "resume": None, "clean": False, "fs": False, "process_name": "master"}
         master = AbstractMaster(options)
 
         for i in range(10):
-            master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
+            master.storage.trial.set_any_trial_state(trial_id=i, state="finished")
             master.storage.result.set_any_trial_objective(trial_id=i, objective=(i * 10.0))
             for j in range(2):
                 master.storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f"x{j}",
-                    param_value=0.0,
-                    param_type='flaot'
+                    trial_id=i, param_name=f"x{j}", param_value=0.0, param_type="flaot"
                 )
         assert master.post_process() is None
 
@@ -128,10 +88,10 @@ class TestAbstractMaster(BaseTest):
         assert master.post_process() is None
 
         master.config = Config(self.config_json)
-        master.goal = 'invalid_goal'
+        master.goal = "invalid_goal"
 
         for i in range(10):
-            master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
+            master.storage.trial.set_any_trial_state(trial_id=i, state="finished")
 
         try:
             master.post_process()
@@ -139,18 +99,10 @@ class TestAbstractMaster(BaseTest):
         except ValueError:
             assert True
 
-    def test_print_dict_state(
-        self,
-        setup_hp_finished,
-        database_remove
-    ):
+    def test_print_dict_state(self, setup_hp_finished, database_remove):
         database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(self.config_json)
-        ]
-        with patch.object(sys, 'argv', commandline_args):
+        commandline_args = ["start.py", "--config", format(self.config_json)]
+        with patch.object(sys, "argv", commandline_args):
             # from aiaccel import start
             # master = start.Master()
             options = parse_arguments()
@@ -166,24 +118,11 @@ class TestAbstractMaster(BaseTest):
         master.get_each_state_count()
         assert master.print_dict_state() is None
 
-    def test_inner_loop_main_process(
-        self,
-        database_remove
-    ):
+    def test_inner_loop_main_process(self, database_remove):
         database_remove()
-        commandline_args = [
-            "start.py",
-            "--config",
-            format(self.config_json)
-        ]
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        with patch.object(sys, 'argv', commandline_args):
+        commandline_args = ["start.py", "--config", format(self.config_json)]
+        options = {"config": self.config_json, "resume": None, "clean": False, "fs": False, "process_name": "master"}
+        with patch.object(sys, "argv", commandline_args):
             options = parse_arguments()
             master = AbstractMaster(options)
 
@@ -192,7 +131,7 @@ class TestAbstractMaster(BaseTest):
 
         master.trial_number = 10
         for i in range(10):
-            master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
+            master.storage.trial.set_any_trial_state(trial_id=i, state="finished")
         # setup_hp_finished(10)
         master.get_each_state_count()
         assert not master.inner_loop_main_process()

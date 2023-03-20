@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 
 class AbstractModel(object):
-
     # Common
     def after_confirmed(self, obj: "Job") -> None:
         """State transition of 'after_confirmed'.

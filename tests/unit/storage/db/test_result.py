@@ -1,8 +1,10 @@
-from aiaccel.storage.storage import Storage
-from base import db_path, t_base, ws, init
-from undecorated import undecorated
-from sqlalchemy.exc import SQLAlchemyError
 import pytest
+from base import db_path, init, t_base, ws
+from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
+
+from aiaccel.storage.storage import Storage
+
 
 # set_any_trial_objective
 @t_base()
@@ -12,17 +14,12 @@ def test_set_any_trial_objective():
     trial_id = 0
     objective = 0.01
 
-    assert storage.result.set_any_trial_objective(
-        trial_id=trial_id,
-        objective=objective
-    ) is None
+    assert storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective) is None
 
     # update
     objective = 0.02
-    assert storage.result.set_any_trial_objective(
-        trial_id=trial_id,
-        objective=objective
-    ) is None
+    assert storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective) is None
+
 
 # set_any_trial_objective exception
 @t_base()
@@ -35,12 +32,7 @@ def test_set_any_trial_objective_exception():
     init()
     with pytest.raises(SQLAlchemyError):
         set_any_trial_objective = undecorated(storage.result.set_any_trial_objective)
-        set_any_trial_objective(
-            storage.result,
-            trial_id=trial_id,
-            objective=objective
-        )
-
+        set_any_trial_objective(storage.result, trial_id=trial_id, objective=objective)
 
 
 # get_any_trial_objective
@@ -51,10 +43,7 @@ def test_get_any_trial_objective():
     trial_id = 0
     objective = 0.01
 
-    storage.result.set_any_trial_objective(
-        trial_id=trial_id,
-        objective=objective
-    )
+    storage.result.set_any_trial_objective(trial_id=trial_id, objective=objective)
 
     o = storage.result.get_any_trial_objective(trial_id)
     assert objective == o
@@ -69,11 +58,8 @@ def test_get_all_result():
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
-    
+        storage.result.set_any_trial_objective(trial_id=ids[i], objective=objectives[i])
+
     data = storage.result.get_all_result()
     assert [d.objective for d in data] == objectives
 
@@ -87,11 +73,8 @@ def test_get_objectives():
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
-    
+        storage.result.set_any_trial_objective(trial_id=ids[i], objective=objectives[i])
+
     data = storage.result.get_objectives()
     assert objectives == data
 
@@ -100,19 +83,16 @@ def test_get_objectives():
 @t_base()
 def test_get_bests():
     storage = Storage(ws.path)
-    assert storage.result.get_bests('invalid') == []
+    assert storage.result.get_bests("invalid") == []
 
     objectives = [1, -5, 3, 1.23]
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
-    
-    assert storage.result.get_bests('minimize') == [1, -5, -5, -5]
-    assert storage.result.get_bests('maximize') == [1, 1, 3, 3]
+        storage.result.set_any_trial_objective(trial_id=ids[i], objective=objectives[i])
+
+    assert storage.result.get_bests("minimize") == [1, -5, -5, -5]
+    assert storage.result.get_bests("maximize") == [1, 1, 3, 3]
 
 
 # get_result_trial_id_list
@@ -126,11 +106,8 @@ def test_get_result_trial_id_list():
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
-    
+        storage.result.set_any_trial_objective(trial_id=ids[i], objective=objectives[i])
+
     assert storage.result.get_result_trial_id_list() == list(ids)
 
 
@@ -143,11 +120,8 @@ def test_all_delete():
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
-    
+        storage.result.set_any_trial_objective(trial_id=ids[i], objective=objectives[i])
+
     assert storage.result.get_any_trial_objective(0) == 1
     assert storage.result.all_delete() is None
     assert storage.result.get_any_trial_objective(0) is None
@@ -162,10 +136,7 @@ def test_all_delete_exception():
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
+        storage.result.set_any_trial_objective(trial_id=ids[i], objective=objectives[i])
 
     init()
     with pytest.raises(SQLAlchemyError):
@@ -182,10 +153,7 @@ def test_delete_any_trial_objective():
     objectives = [0.01, 0.02, 0.03]
 
     for i in range(len(ids)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
+        storage.result.set_any_trial_objective(trial_id=ids[i], objective=objectives[i])
 
     assert storage.result.get_any_trial_objective(ids[0]) is not None
     assert storage.result.get_any_trial_objective(ids[1]) is not None
@@ -216,10 +184,7 @@ def test_delete_any_trial_objective_exception():
     objectives = [0.01, 0.02, 0.03]
 
     for i in range(len(ids)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
+        storage.result.set_any_trial_objective(trial_id=ids[i], objective=objectives[i])
 
     init()
     with pytest.raises(SQLAlchemyError):

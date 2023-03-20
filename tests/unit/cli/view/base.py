@@ -6,7 +6,7 @@ from aiaccel.workspace import Workspace
 
 # db_path = pathlib.Path("test.db")
 # ws = Workspace("test_work")
-config_path = pathlib.Path('tests/test_data/config.json')
+config_path = pathlib.Path("tests/test_data/config.json")
 config = Config(config_path)
 ws = Workspace(config.workspace.get())
 db_path = pathlib.Path("test.db")
@@ -32,5 +32,7 @@ def t_base():
             finally:
                 init()
             return
+
         return _wrapper
+
     return _test_base

@@ -1,17 +1,18 @@
 import pathlib
+import time
 from functools import wraps
 
 from aiaccel.workspace import Workspace
-import time
 
 ws = Workspace("test_work")
-db_path = (ws.path / 'storage/storage.db')
-config_path = pathlib.Path('tests/test_data/config.json')
+db_path = ws.path / "storage/storage.db"
+config_path = pathlib.Path("tests/test_data/config.json")
 
 
 def db_delete():
     if db_path.exists():
         db_path.unlink()
+
 
 def init():
     if ws.exists():
@@ -35,7 +36,9 @@ def t_base():
             finally:
                 init()
             return
+
         return _wrapper
+
     return _test_base
 
 
@@ -54,5 +57,7 @@ def dummy_retry(_MAX_NUM, _DELAY):
                         raise e
                     time.sleep(_DELAY)
                     continue
+
         return _wrapper
+
     return _retry

@@ -207,7 +207,6 @@ class AbstractScheduler(AbstractModule):
         pass
 
     def check_error(self) -> bool:
-
         # Check state machin
         jobstates = self.storage.jobstate.get_all_trial_jobstate()
         for trial_id in self.job_status.keys():

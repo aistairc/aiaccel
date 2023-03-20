@@ -1,12 +1,11 @@
 import pathlib
 from functools import wraps
+from pathlib import Path
 
 from aiaccel.cli.view import Viewer
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
-
-from pathlib import Path
 
 
 def test_view(clean_work_dir, work_dir, create_tmp_config):
@@ -16,7 +15,7 @@ def test_view(clean_work_dir, work_dir, create_tmp_config):
         workspace.clean()
     workspace.create()
 
-    config_path = pathlib.Path('tests/test_data/config.json')
+    config_path = pathlib.Path("tests/test_data/config.json")
     config_path = create_tmp_config(config_path)
     config = Config(config_path)
     storage = Storage(ws=Path(config.workspace.get()))
