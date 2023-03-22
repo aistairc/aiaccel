@@ -1,99 +1,10 @@
 from __future__ import annotations
 
 import re
-from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 from aiaccel.util import file_create
-
-
-class JobScrGenerator:
-    """A class to generate a job script for ABCI.
-    """
-    def __init__(self) -> None:
-        self.codetxt = ""
-        self.indent_level = 0
-
-    def new_line(self) -> None:
-        """Add a new line to the code text.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.codetxt += "\n"
-
-    def add_line(self, line: str) -> None:
-        """Add a line to the code text.
-
-        Args:
-            line (str): A line to add.
-
-        Returns:
-            None
-        """
-        for _ in range(self.indent_level):
-            self.codetxt += "    "
-        self.codetxt += line + "\n"
-
-    def add_lines(self, lines: list[str]) -> None:
-        """Add lines to the code text.
-
-        Args:
-            lines (list[str]): A list of lines to add.
-
-        Returns:
-            None
-        """
-        for line in lines:
-            self.add_line(line)
-
-    def indent(self) -> None:
-        """Increase the indent level.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.indent_level += 1
-
-    def unindent(self) -> None:
-        """Decrease the indent level.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.indent_level -= 1
-
-    def reset_indent_level(self) -> None:
-        """Reset the indent level.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.indent_level = 0
-
-    def get_code(self) -> str:
-        """Get the code text.
-
-        Args:
-            None
-
-        Returns:
-            str: The code text.
-        """
-        return deepcopy(self.codetxt)
 
 
 def create_abci_batch_file(
@@ -141,34 +52,7 @@ def create_abci_batch_file(
     commands.append('2>')
     commands.append('$error_file_path')
 
-    code = JobScrGenerator()
-
-    if job_script_preamble is not None:
-        with open(job_script_preamble, 'r') as f:
-            code.add_lines(f.read().splitlines())
-    else:
-        code.add_line('#!/bin/bash')
-
-    code.new_line()
-
-    for param in param_content['parameters']:
-        if 'parameter_name' in param.keys() and 'value' in param.keys():
-            code.add_line(f'{param["parameter_name"]}={param["value"]}')
-    code.add_line(f'trial_id={trial_id}')
-    code.add_line(f'config_file_path={str(config_file_path)}')
-    code.add_line(f'output_file_path={str(output_file_path)}')
-    code.add_line(f'error_file_path={str(error_file_path)}')
-    code.add_line('start_time=`date "+%Y-%m-%d %H:%M:%S"`')
-    code.add_line(f'result=`{" ".join(commands)}`')
-    code.add_line('exitcode=$?')
-    code.add_line('result_array=($result)')
-    code.add_line('y=${result_array[${#result_array[@]}-1]}')
-    code.add_line('error=`cat $error_file_path`')
-    code.add_line('end_time=`date "+%Y-%m-%d %H:%M:%S"`')
-
-    code.add_line('if [ -n "$error" ]; then')
-    code.indent()
-    code.add_line(_generate_command_line(
+    set_retult = _generate_command_line(
         command='aiaccel-set-result',
         args=[
             '--file $output_file_path',
@@ -181,11 +65,8 @@ def create_abci_batch_file(
             '--exitcode $exitcode',
             _generate_param_args(param_content['parameters'])
         ])
-    )
-    code.unindent()
-    code.add_line('else')
-    code.indent()
-    code.add_line(_generate_command_line(
+
+    set_retult_no_error = _generate_command_line(
         command='aiaccel-set-result',
         args=[
             '--file $output_file_path',
@@ -197,12 +78,50 @@ def create_abci_batch_file(
             '--exitcode $exitcode',
             _generate_param_args(param_content['parameters'])
         ])
-    )
-    code.unindent()
-    code.add_line('fi')
-    code.new_line()
 
-    file_create(batch_file, code.get_code(), dict_lock)
+    mains = [
+        f'trial_id={str(trial_id)}',
+        f'config_file_path={str(config_file_path)}',
+        f'output_file_path={str(output_file_path)}',
+        f'error_file_path={str(error_file_path)}',
+        'start_time=`date "+%Y-%m-%d %H:%M:%S"`',
+        f'result=`{" ".join(commands)}`',
+        'exitcode=$?',
+        'result_array=($result)',
+        'y=${result_array[${#result_array[@]}-1]}',
+        'error=`cat $error_file_path`',
+        'end_time=`date "+%Y-%m-%d %H:%M:%S"`',
+        'if [ -n "$error" ]; then',
+        '\t' + set_retult,
+        'else',
+        '\t' + set_retult_no_error,
+        'fi'
+    ]
+
+    script = ""
+
+    # preamble
+    if job_script_preamble is not None:
+        with open(job_script_preamble, 'r') as f:
+            lines = (f.read().splitlines())
+            if len(lines) > 0:
+                for line in lines:
+                    script += line + "\n"
+
+    script += "\n"
+
+    # parameters
+    for param in param_content['parameters']:
+        if 'parameter_name' in param.keys() and 'value' in param.keys():
+            script += f'{param["parameter_name"]}={param["value"]}' + "\n"
+
+    script += "\n"
+
+    # main
+    for s in mains:
+        script += s + "\n"
+
+    file_create(batch_file, script, dict_lock)
 
 
 def _generate_command_line(command: str, args: list[str]) -> str:
