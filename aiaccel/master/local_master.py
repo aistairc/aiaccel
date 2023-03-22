@@ -1,4 +1,4 @@
-from aiaccel.master.abstract_master import AbstractMaster
+from aiaccel.master import AbstractMaster
 
 
 class LocalMaster(AbstractMaster):

@@ -2,8 +2,8 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from aiaccel.optimizer._nelder_mead import NelderMead
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import NelderMead
+from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 
 

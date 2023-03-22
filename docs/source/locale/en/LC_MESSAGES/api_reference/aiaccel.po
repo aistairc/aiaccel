@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-16 14:18+0900\n"
+"POT-Creation-Date: 2023-02-15 12:16+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,11 +25,11 @@ msgstr ""
 msgid "Subpackages"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:17
+#: ../../source/api_reference/aiaccel.rst:19
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:20
+#: ../../source/api_reference/aiaccel.rst:22
 msgid "aiaccel.common module"
 msgstr ""
 
@@ -38,14 +38,10 @@ msgid "Common variables and methods."
 msgstr ""
 
 #: aiaccel.common:3 of
-msgid "Import this as follows:"
+msgid "Example: ::"
 msgstr ""
 
-#: aiaccel.common:4 of
-msgid "import aiaccel"
-msgstr ""
-
-#: ../../source/api_reference/aiaccel.rst:28
+#: ../../source/api_reference/aiaccel.rst:30
 msgid "aiaccel.config module"
 msgstr ""
 
@@ -84,9 +80,8 @@ msgstr ""
 #: aiaccel.parameter.HyperParameterConfiguration
 #: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
 #: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_type
-#: aiaccel.parameter.load_parameter aiaccel.workspace.Workspace
-#: aiaccel.wrapper_tools.create_runner_command
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
+#: aiaccel.workspace.Workspace aiaccel.wrapper_tools.create_runner_command
 #: aiaccel.wrapper_tools.save_result of
 msgid "パラメータ"
 msgstr ""
@@ -199,8 +194,8 @@ msgstr ""
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
 #: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_type
-#: aiaccel.parameter.load_parameter aiaccel.workspace.Workspace.check_consists
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
+#: aiaccel.workspace.Workspace.check_consists
 #: aiaccel.workspace.Workspace.create aiaccel.workspace.Workspace.exists
 #: aiaccel.workspace.Workspace.move_completed_data
 #: aiaccel.wrapper_tools.create_runner_command
@@ -274,8 +269,8 @@ msgstr ""
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
 #: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_type
-#: aiaccel.parameter.load_parameter aiaccel.workspace.Workspace.check_consists
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
+#: aiaccel.workspace.Workspace.check_consists
 #: aiaccel.workspace.Workspace.exists
 #: aiaccel.workspace.Workspace.move_completed_data
 #: aiaccel.wrapper_tools.create_runner_command of
@@ -332,7 +327,7 @@ msgstr ""
 msgid "A wrapper object of the configuration."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:36
+#: ../../source/api_reference/aiaccel.rst:38
 msgid "aiaccel.module module"
 msgstr ""
 
@@ -462,7 +457,7 @@ msgid "Check to confirm if an error has occurred."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.check_error:5 of
-msgid "no error | False: with error."
+msgid "True if no error, False if with error."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.check_finished:1 of
@@ -515,7 +510,7 @@ msgstr ""
 #: aiaccel.module.AbstractModule.post_process
 #: aiaccel.parameter.HyperParameter.sample
 #: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
-#: aiaccel.parameter.get_best_parameter aiaccel.workspace.Workspace.create
+#: aiaccel.workspace.Workspace.create
 #: aiaccel.workspace.Workspace.move_completed_data of
 msgid "例外"
 msgstr ""
@@ -584,7 +579,7 @@ msgstr ""
 msgid "Updates hyperparameter counters for ready, runnning, and finished states."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:44
+#: ../../source/api_reference/aiaccel.rst:46
 msgid "aiaccel.parameter module"
 msgstr ""
 
@@ -737,33 +732,6 @@ msgstr ""
 msgid "A hyper parameters set."
 msgstr ""
 
-#: aiaccel.parameter.get_best_parameter:1 of
-msgid "Get a best parameter in specified files."
-msgstr ""
-
-#: aiaccel.parameter.get_best_parameter:3 of
-msgid "A list of files to find a best."
-msgstr ""
-
-#: aiaccel.parameter.get_best_parameter:5 of
-msgid "Maximize or Minimize."
-msgstr ""
-
-#: aiaccel.parameter.get_best_parameter:7 aiaccel.wrapper_tools.save_result:5
-#: of
-msgid "A directory to store lock files."
-msgstr ""
-
-#: aiaccel.parameter.get_best_parameter:10 of
-msgid ""
-"A best result value and a file path. It returns None if a number of files"
-" is less than one."
-msgstr ""
-
-#: aiaccel.parameter.get_best_parameter:14 of
-msgid "Causes when an invalid goal is set."
-msgstr ""
-
 #: aiaccel.parameter.get_type:1 of
 msgid "Get a type of a specified parameter."
 msgstr ""
@@ -776,7 +744,7 @@ msgstr ""
 msgid "A hyper parameter configuration."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:52
+#: ../../source/api_reference/aiaccel.rst:54
 msgid "aiaccel.workspace module"
 msgstr ""
 
@@ -912,7 +880,17 @@ msgstr ""
 msgid "Path of destination."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:60
+#: aiaccel.workspace.Workspace.move_completed_data:3 of
+msgid ""
+"Occurs if destination directory already exists     when the method is "
+"called."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.move_completed_data:5 of
+msgid "Path of destination."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.rst:62
 msgid "aiaccel.wrapper\\_tools module"
 msgstr ""
 
@@ -944,6 +922,10 @@ msgstr ""
 msgid "A path of a workspace."
 msgstr ""
 
+#: aiaccel.wrapper_tools.save_result:5 of
+msgid "A directory to store lock files."
+msgstr ""
+
 #: aiaccel.wrapper_tools.save_result:7 of
 msgid "An unique name of a parameter set."
 msgstr ""
@@ -964,7 +946,7 @@ msgstr ""
 msgid "Error message from Wrapper (user program)"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:68
+#: ../../source/api_reference/aiaccel.rst:70
 msgid "Module contents"
 msgstr ""
 
@@ -1025,16 +1007,16 @@ msgstr ""
 #~ "trial_id: str"
 #~ msgstr ""
 
+#~ msgid "Import this as follows:"
+#~ msgstr ""
+
+#~ msgid "import aiaccel"
+#~ msgstr ""
+
 #~ msgid "A Class for defining the configuration of a configuration file."
 #~ msgstr ""
 
-#~ msgid "Check whether all optimization finished or not."
-#~ msgstr ""
-
-#~ msgid "All optimization finished or not."
-#~ msgstr ""
-
-#~ msgid "Updates the number of files in hp(hyper parameter) directories."
+#~ msgid "no error | False: with error."
 #~ msgstr ""
 
 #~ msgid "This module type(name)."
@@ -1050,6 +1032,24 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Union[float, int, str]"
+#~ msgstr ""
+
+#~ msgid "Get a best parameter in specified files."
+#~ msgstr ""
+
+#~ msgid "A list of files to find a best."
+#~ msgstr ""
+
+#~ msgid "Maximize or Minimize."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A best result value and a file "
+#~ "path. It returns None if a number"
+#~ " of files is less than one."
+#~ msgstr ""
+
+#~ msgid "Causes when an invalid goal is set."
 #~ msgstr ""
 
 #~ msgid "It raises if a workspace argument (self.path) is"

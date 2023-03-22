@@ -2,19 +2,20 @@ import asyncio
 import subprocess
 from pathlib import Path
 
-import aiaccel
-from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.master.create import create_master
-from aiaccel.master.local_master import LocalMaster
-from aiaccel.master.pylocal_master import PylocalMaster
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
+import yaml
+
+from aiaccel.common import dict_result
+from aiaccel.common import file_final_result
+from aiaccel.config import Config, is_multi_objective
+from aiaccel.storage import Storage
+from aiaccel.master import create_master
+from aiaccel.master import LocalMaster
+from aiaccel.master import PylocalMaster
+from aiaccel.scheduler import create_scheduler
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler import PylocalScheduler
 
 from tests.base_test import BaseTest
-
-import yaml
 
 
 async def start_master(master):
@@ -30,8 +31,16 @@ class IntegrationTest(BaseTest):
         #
         # local test
         #
-        with self.create_main():
-            config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+        config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
+        config = Config(config_file)
+        #is_multi_objective = isinstance(config.goal.get(), list)
+
+        if is_multi_objective(config):
+            user_main_file = self.test_data_dir.joinpath('original_main_mo.py')
+        else:
+            user_main_file = None
+            
+        with self.create_main(from_file_path=user_main_file):
             config_file = create_tmp_config(config_file)
             config = Config(config_file)
 
@@ -45,14 +54,14 @@ class IntegrationTest(BaseTest):
 
             storage = Storage(ws=Path(config.workspace.get()))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage)
+            self.evaluate(work_dir, storage, is_multi_objective(config))
 
             self.result_comparison.append(storage.result.get_objectives())
 
         #
         # pylocal test
         #
-        with self.create_main():
+        with self.create_main(user_main_file):
             config_file = data_dir.joinpath('config_{}.json'.format(self.search_algorithm))
             new_config_file = tmpdir.joinpath('config_{}_pylocal.yaml'.format(self.search_algorithm))
 
@@ -78,7 +87,7 @@ class IntegrationTest(BaseTest):
             storage = Storage(ws=Path(config.workspace.get()))
 
             subprocess.Popen(['aiaccel-start', '--config', str(new_config_file), '--clean']).wait()
-            self.evaluate(work_dir, storage)
+            self.evaluate(work_dir, storage, is_multi_objective(config))
 
             print(storage.result.get_objectives())
             self.result_comparison.append(storage.result.get_objectives())
@@ -89,24 +98,14 @@ class IntegrationTest(BaseTest):
         for i in range(len(data_0)):
             assert data_0[i] == data_1[i]
 
-    def evaluate(self, work_dir, storage):
+    def evaluate(self, work_dir, storage, is_multi_objective=False):
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
         assert finished == self.config.trial_number.get()
         assert ready == 0
         assert running == 0
-        final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
-        assert final_result.exists()
-        '''
-        testr = load_yaml(
-            work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result))
-        datar = load_yaml(
-            data_dir.joinpath(
-                'work',
-                aiaccel.dict_result,
-                '{}.{}'.format(aiaccel.file_final_result, self.search_algorithm)
-            )
-        )
-        assert math.isclose(testr['result'], datar['result'], abs_tol=1e-10)
-        '''
+
+        if not is_multi_objective:
+            final_result = work_dir.joinpath(dict_result, file_final_result)
+            assert final_result.exists()

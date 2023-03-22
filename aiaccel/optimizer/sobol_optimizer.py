@@ -4,7 +4,7 @@ from typing import Any
 
 from scipy.stats import qmc
 
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 
 
 class SobolOptimizer(AbstractOptimizer):
@@ -12,7 +12,7 @@ class SobolOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         generate_index (int): A number of generated hyper parameters.

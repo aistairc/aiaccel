@@ -1,11 +1,13 @@
-from aiaccel.storage.storage import Storage
-from base import t_base, ws, init
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from undecorated import undecorated
 
+from aiaccel.storage import Storage
+from tests.unit.storage_test.db.base import t_base, ws, init
 
 # set_any_trial_start_time
+
+
 @t_base()
 def test_set_any_trial_start_time():
     storage = Storage(ws.path)
@@ -24,6 +26,8 @@ def test_set_any_trial_start_time():
     ) is None
 
 # set_any_trial_start_time exception
+
+
 @t_base()
 def test_set_any_trial_start_time_exception():
     storage = Storage(ws.path)
@@ -89,6 +93,7 @@ def test_set_any_trial_end_time_exception():
             end_time=end_time
         )
 
+
 @t_base()
 def test_set_any_trial_end_time_assersion():
     storage = Storage(ws.path)
@@ -105,6 +110,8 @@ def test_set_any_trial_end_time_assersion():
         )
 
 # get_any_trial_start_time
+
+
 @t_base()
 def test_get_any_trial_start_time():
     storage = Storage(ws.path)
@@ -178,6 +185,8 @@ def test_get_any_trial_end_time():
     assert storage.timestamp.get_any_trial_end_time(trial_id) is None
 
 # all_delete
+
+
 @t_base()
 def test_all_delete():
     storage = Storage(ws.path)
@@ -226,8 +235,6 @@ def test_all_delete_exception():
     with pytest.raises(SQLAlchemyError):
         all_delete = undecorated(storage.timestamp.all_delete)
         all_delete(storage.timestamp)
-
-
 
 
 # delete_any_trial_timestamp

@@ -1,8 +1,10 @@
-from aiaccel.storage.storage import Storage
-from base import db_path, t_base, ws
+import pytest
 from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
-import pytest
+
+from aiaccel.storage import Storage
+from tests.unit.storage_test.db.base import t_base, ws
+
 
 # set_any_trial_param
 @t_base()
@@ -121,12 +123,14 @@ def test_get_all_trial_jobstate():
         {'trial_id': 3, 'jobstate': 'stata_3'},
         {'trial_id': 4, 'jobstate': 'stata_4'}
     ]
-    
+
     storage.jobstate.set_any_trial_jobstates(states)
 
     assert storage.jobstate.get_all_trial_jobstate() == states
 
 # is_failure
+
+
 @t_base()
 def test_is_failure():
     storage = Storage(ws.path)
@@ -158,6 +162,8 @@ def test_is_failure():
     assert storage.jobstate.is_failure(len(ids) + 1) is False
 
 # delete_any_trial_jobstate
+
+
 @t_base()
 def test_delete_any_trial_jobstate():
     storage = Storage(ws.path)

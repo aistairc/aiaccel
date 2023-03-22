@@ -13,6 +13,7 @@ def db_delete():
     if db_path.exists():
         db_path.unlink()
 
+
 def init():
     if ws.exists():
         ws.clean()

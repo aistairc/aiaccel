@@ -1,8 +1,10 @@
-from aiaccel.storage.storage import Storage
-from base import db_path, t_base, ws, init
+import pytest
 from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
-import pytest
+
+from aiaccel.storage import Storage
+from tests.unit.storage_test.db.base import t_base, ws, init
+
 
 # set_any_trial_objective
 @t_base()
@@ -25,6 +27,8 @@ def test_set_any_trial_objective():
     ) is None
 
 # set_any_trial_objective exception
+
+
 @t_base()
 def test_set_any_trial_objective_exception():
     storage = Storage(ws.path)
@@ -40,7 +44,6 @@ def test_set_any_trial_objective_exception():
             trial_id=trial_id,
             objective=objective
         )
-
 
 
 # get_any_trial_objective
@@ -73,7 +76,7 @@ def test_get_all_result():
             trial_id=ids[i],
             objective=objectives[i]
         )
-    
+
     data = storage.result.get_all_result()
     assert [d.objective for d in data] == objectives
 
@@ -91,7 +94,7 @@ def test_get_objectives():
             trial_id=ids[i],
             objective=objectives[i]
         )
-    
+
     data = storage.result.get_objectives()
     assert objectives == data
 
@@ -110,7 +113,7 @@ def test_get_bests():
             trial_id=ids[i],
             objective=objectives[i]
         )
-    
+
     assert storage.result.get_bests('minimize') == [1, -5, -5, -5]
     assert storage.result.get_bests('maximize') == [1, 1, 3, 3]
 
@@ -130,7 +133,7 @@ def test_get_result_trial_id_list():
             trial_id=ids[i],
             objective=objectives[i]
         )
-    
+
     assert storage.result.get_result_trial_id_list() == list(ids)
 
 
@@ -147,7 +150,7 @@ def test_all_delete():
             trial_id=ids[i],
             objective=objectives[i]
         )
-    
+
     assert storage.result.get_any_trial_objective(0) == 1
     assert storage.result.all_delete() is None
     assert storage.result.get_any_trial_objective(0) is None

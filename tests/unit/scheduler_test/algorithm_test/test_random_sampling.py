@@ -1,6 +1,5 @@
 import numpy as np
-from aiaccel.scheduler.algorithm.random_sampling import \
-    RandomSamplingSchedulingAlgorithm
+from aiaccel.scheduler import RandomSamplingSchedulingAlgorithm
 
 
 def test_random_sampling(load_test_config):

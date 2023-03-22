@@ -6,15 +6,15 @@ from logging import StreamHandler, getLogger
 from fasteners import InterProcessLock
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.trialid import TrialId
+from aiaccel.storage import Storage
+from aiaccel.util import TrialId
 
 logger = getLogger(__name__)
 logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
 
 
-class CreationReport:
+class CsvWriter:
     """Provides report creation method.
 
     Args:
@@ -39,7 +39,7 @@ class CreationReport:
             'result_txt': str(self.ws / 'lock' / 'result_txt')
         }
 
-    def get_zero_padding_trial_id(self, trial_id: int) -> str:
+    def _get_zero_padding_trial_id(self, trial_id: int) -> str:
         """Gets string of trial id padded by zeros.
 
         Args:
@@ -74,7 +74,7 @@ class CreationReport:
                 writer.writerow(header)
 
         # write result data
-        trial_id_str = [self.get_zero_padding_trial_id(trial_id) for trial_id in trial_ids]
+        trial_id_str = [self._get_zero_padding_trial_id(trial_id) for trial_id in trial_ids]
         results = [self.storage.get_hp_dict(n) for n in trial_id_str]
 
         for contents in results:

@@ -5,16 +5,20 @@ import sys
 import time
 from unittest.mock import patch
 
-import aiaccel
 import pytest
-from aiaccel.config import ConfileWrapper
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.scheduler.job.job import (JOB_STATES, JOB_TRANSITIONS,
-                                       CustomMachine, Job)
-from aiaccel.scheduler.job.model.abci_model import AbciModel
-from aiaccel.scheduler.job.model.local_model import LocalModel
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.util.time_tools import get_time_now_object
+
+from aiaccel.common import dict_hp_finished
+from aiaccel.common import dict_hp_ready
+from aiaccel.common import dict_hp_running
+from aiaccel.common import dict_runner
+from aiaccel.scheduler import create_scheduler
+from aiaccel.scheduler import CustomMachine
+from aiaccel.scheduler import Job
+from aiaccel.scheduler import AbciModel
+from aiaccel.scheduler import LocalModel
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.util import get_time_now_object
+
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
@@ -33,7 +37,7 @@ async def async_stop_job_after_sleep(job, sleep_time):
 
 class TestModel(BaseTest):
 
-    @pytest.fixture(autouse=True)
+    @ pytest.fixture(autouse=True)
     def setup_job(
         self,
         clean_work_dir,
@@ -84,7 +88,6 @@ class TestModel(BaseTest):
             json_object = json.load(f)
 
         json_object['resource']['type'] = 'ABCI'
-        json_object_config = ConfileWrapper(json_object, 'json_object')
 
         commandline_args = [
             "start.py",
@@ -116,13 +119,13 @@ class TestModel(BaseTest):
         assert self.model.before_failed(self.job) is None
 
     def test_conditions_confirmed(self, work_dir, database_remove):
-        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
+        self.job.to_file = work_dir.joinpath(dict_hp_ready, '001.hp')
         self.job.next_state = 'ready'
         assert self.model.conditions_confirmed(self.job)
 
     # def test_before_file_move(self, work_dir):
-    #     self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
-    #     self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '002.hp')
+    #     self.job.from_file = work_dir.joinpath(dict_hp_ready, '001.hp')
+    #     self.job.to_file = work_dir.joinpath(dict_hp_ready, '002.hp')
     #     assert self.model.before_file_move(self.job) is None
 
     def test_after_runner(self, database_remove):
@@ -137,7 +140,7 @@ class TestModel(BaseTest):
     ):
         assert self.model.before_runner_create(self.job) is None
 
-        self.abci_job.to_file = work_dir.joinpath(aiaccel.dict_runner, 'run_001.sh')
+        self.abci_job.to_file = work_dir.joinpath(dict_runner, 'run_001.sh')
         assert self.model.before_runner_create(self.abci_job) is None
 
     def test_conditions_runner_confirmed(
@@ -148,7 +151,7 @@ class TestModel(BaseTest):
     ):
         assert self.model.conditions_runner_confirmed(self.job)
 
-        self.abci_job.to_file = work_dir.joinpath(aiaccel.dict_hp_ready, '001.hp')
+        self.abci_job.to_file = work_dir.joinpath(dict_hp_ready, '001.hp')
         assert self.model.conditions_runner_confirmed(self.abci_job)
 
     def test_after_running(self, database_remove):
@@ -260,8 +263,8 @@ class TestModel(BaseTest):
         print(self.job.storage.get_best_trial_dict('minimize'))
 
         self.job.next_state = 'finished'
-        self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_running, '001.hp')
-        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp')
+        self.job.from_file = work_dir.joinpath(dict_hp_running, '001.hp')
+        self.job.to_file = work_dir.joinpath(dict_hp_finished, '001.hp')
         assert self.model.before_finished(self.job) is None
     """
 
@@ -326,8 +329,8 @@ class TestModel(BaseTest):
         print(self.job.storage.get_best_trial_dict('minimize'))
 
         self.job.next_state = 'finished'
-        self.job.from_file = work_dir.joinpath(aiaccel.dict_hp_running, '001.hp')
-        self.job.to_file = work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp')
+        self.job.from_file = work_dir.joinpath(dict_hp_running, '001.hp')
+        self.job.to_file = work_dir.joinpath(dict_hp_finished, '001.hp')
         assert self.model.before_finished(self.job) is None
 
     def test_after_expire(self, database_remove):
