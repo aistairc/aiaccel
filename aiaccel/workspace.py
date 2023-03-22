@@ -9,7 +9,7 @@ from aiaccel.common import (dict_alive, dict_error, dict_finished, dict_hp,
                             dict_pid, dict_ready, dict_result, dict_runner,
                             dict_running, dict_storage, dict_timestamp,
                             dict_verification, extension_hp)
-from aiaccel.util import Suffix, load_yaml, make_directories, retry
+from aiaccel.util import Suffix, load_yaml, make_directories
 
 
 class Workspace:
@@ -110,7 +110,6 @@ class Workspace:
         """
         return self.path.exists()
 
-    @retry(_MAX_NUM=300, _DELAY=1.0)
     def clean(self) -> None:
         """ Delete a workspace.
 
@@ -121,7 +120,6 @@ class Workspace:
         shutil.rmtree(self.path)
         return
 
-    @retry(_MAX_NUM=10, _DELAY=1.0)
     def check_consists(self) -> bool:
         """Check required directories exist or not.
 
@@ -135,7 +133,6 @@ class Workspace:
                 return False
         return True
 
-    @retry(_MAX_NUM=10, _DELAY=1.0)
     def move_completed_data(self) -> Path | None:
         """ Move workspace to under of results directory when finished.
 
@@ -152,7 +149,8 @@ class Workspace:
             self.results.mkdir()
 
         if dst.exists():
-            raise FileExistsError
+            print(f"Destination directory already exists: {dst}")
+            return None
 
         ignptn = shutil.ignore_patterns('*-journal')
 
@@ -176,7 +174,6 @@ class Workspace:
         path = self.get_any_result_file_path(trial_id)
         return path.exists()
 
-    @retry(_MAX_NUM=10, _DELAY=1.0)
     def get_any_trial_result(self, trial_id: int) -> dict[str, Any] | None:
         """Get any trial result.
 

@@ -135,6 +135,9 @@ def main() -> None:  # pragma: no cover
 
     logger.info("moving...")
     dst = workspace.move_completed_data()
+    if dst is None:
+        logger.error("Moving data is failed.")
+        return
 
     config_name = Path(args.config).name
     shutil.copy(Path(args.config), dst / config_name)
