@@ -8,7 +8,7 @@ from typing import Any
 from aiaccel.common import dict_lock
 from aiaccel.common import dict_verification
 from aiaccel.common import extension_verification
-from aiaccel.config import Config
+from aiaccel.config import Config, is_multi_objective
 from aiaccel.storage import Storage
 from aiaccel.util import create_yaml
 
@@ -107,6 +107,9 @@ class AbstractVerification(object):
         #     self.verification_result[index]['passed'] = True
 
         # self.save(loop)
+
+        if is_multi_objective(self.config):
+            return
 
         best_trial = self.storage.get_best_trial_dict(self.config.goal.get().lower())
 
