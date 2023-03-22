@@ -101,10 +101,10 @@ def generate_grid_points(
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
     elif p.type.lower() == 'categorical':
-        new_param['parameters'] = list(p.choices)
+        new_param['parameters'] = p.choices
 
     elif p.type.lower() == 'ordinal':
-        new_param['parameters'] = list(p.sequence)
+        new_param['parameters'] = p.sequence
 
     else:
         raise TypeError(f'Invalid parameter type: {p.type}')
