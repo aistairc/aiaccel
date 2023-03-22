@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-03-22 14:37+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -153,4 +153,57 @@ msgstr ""
 #: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:32
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "ベースクラス: :py:class:`object`"
+#~ msgstr ""
+
+#~ msgid "An abstract class for scheduling algorithms used for Scheduler."
+#~ msgstr ""
+
+#~ msgid "パラメータ"
+#~ msgstr ""
+
+#~ msgid "A configuration object."
+#~ msgstr ""
+
+#~ msgid "type"
+#~ msgstr ""
+
+#~ msgid "ConfileWrapper"
+#~ msgstr ""
+
+#~ msgid "Select multiple hyper parameters."
+#~ msgstr ""
+
+#~ msgid "A list of path of ready hyper parameters."
+#~ msgstr ""
+
+#~ msgid "A number to select hyper parameters Defaults to 1."
+#~ msgstr ""
+
+#~ msgid "A reference to a random generator. Defaults to None."
+#~ msgstr ""
+
+#~ msgid "例外"
+#~ msgstr ""
+
+#~ msgid "Causes when the inherited class does not     implement."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "ベースクラス: "
+#~ ":py:class:`~aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm`"
+#~ msgstr ""
+
+#~ msgid "An algorithm to select hyper parameters."
+#~ msgstr ""
+
+#~ msgid "戻り値"
+#~ msgstr ""
+
+#~ msgid "Selected hyper parameters."
+#~ msgstr ""
+
+#~ msgid "戻り値の型"
+#~ msgstr ""
 

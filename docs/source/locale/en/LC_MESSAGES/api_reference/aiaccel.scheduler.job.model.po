@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-03-22 14:37+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -63,7 +63,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:3
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:3
@@ -95,7 +94,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
@@ -126,7 +124,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:5
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:5
@@ -158,7 +155,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
@@ -189,7 +185,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:8
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:8
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:8
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:8 of
 msgid "None"
@@ -300,11 +295,6 @@ msgstr ""
 msgid "Ab object."
 msgstr ""
 
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:1
-#: of
-msgid "State transition of 'change_trial_state'."
-msgstr ""
-
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:1
 #: of
 msgid "State transition of 'conditions_confirmed'."
@@ -352,4 +342,114 @@ msgstr ""
 #: ../../source/api_reference/aiaccel.scheduler.job.model.rst:32
 msgid "Module contents"
 msgstr ""
+
+#~ msgid ""
+#~ "ベースクラス: "
+#~ ":py:class:`~aiaccel.scheduler.job.model.abstract_model.AbstractModel`"
+#~ msgstr ""
+
+#~ msgid "State transition of 'before_job_submitted'."
+#~ msgstr ""
+
+#~ msgid "Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'."
+#~ msgstr ""
+
+#~ msgid "パラメータ"
+#~ msgstr ""
+
+#~ msgid "A job object."
+#~ msgstr ""
+
+#~ msgid "戻り値"
+#~ msgstr ""
+
+#~ msgid "None"
+#~ msgstr ""
+
+#~ msgid "State transition of 'before_runner_create'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'conditions_runner_confirmed'."
+#~ msgstr ""
+
+#~ msgid "A target file exists or not. But always true if local execution."
+#~ msgstr ""
+
+#~ msgid "戻り値の型"
+#~ msgstr ""
+
+#~ msgid "ベースクラス: :py:class:`object`"
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_cancel'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_check_result'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_confirmed'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_expire'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_finished'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_job'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_kill'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_result'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_runner'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_running'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'after_wait_result'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'before_failed'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'before_finished'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'before_kill_submitted'."
+#~ msgstr ""
+
+#~ msgid "Ab object."
+#~ msgstr ""
+
+#~ msgid "State transition of 'change_trial_state'."
+#~ msgstr ""
+
+#~ msgid "State transition of 'conditions_confirmed'."
+#~ msgstr ""
+
+#~ msgid "A target file exists or not."
+#~ msgstr ""
+
+#~ msgid "State transition of 'conditions_job_confirmed'."
+#~ msgstr ""
+
+#~ msgid "A target job is finished or not."
+#~ msgstr ""
+
+#~ msgid "State transition of 'conditions_kill_confirmed'."
+#~ msgstr ""
+
+#~ msgid "A target is killed or not."
+#~ msgstr ""
+
+#~ msgid "State transition of 'conditions_result'."
+#~ msgstr ""
+
+#~ msgid "A target is in result files or not."
+#~ msgstr ""
 

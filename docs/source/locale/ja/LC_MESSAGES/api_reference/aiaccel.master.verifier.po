@@ -1,0 +1,205 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-22 14:37+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/api_reference/aiaccel.master.verifier.rst:2
+msgid "aiaccel.master.verifier package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verifier.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verifier.rst:8
+msgid "aiaccel.master.verifier.abstract\\_verifier module"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:1 of
+msgid "ベースクラス: :py:class:`~abc.ABC`"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:1 of
+msgid "An abstract class of verifier."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier.save
+#: aiaccel.master.verifier.create.create_verifier of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:3
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:9 of
+msgid "A dictionary containing command line options as well as process name."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier of
+msgid "type"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:12 of
+msgid "dict[str, str | int | bool]"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:16 of
+msgid "Config object"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:18 of
+msgid "Config"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:22 of
+msgid "Path to the workspace."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:24
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:30 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:28 of
+msgid "Path to \"lock\", i.e. `ws`/lock."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:34 of
+msgid "Whether verified or not."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:36 of
+msgid "bool"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:40 of
+msgid ""
+"A list of verification conditions. Each element dict has keys 'loop', "
+"'minimum', and 'maximum' with values as int, float, and float, "
+"respectively. The verification is `True` if the optimized result of which"
+" the trial id is the given 'loop' is greater than or equal to 'minimum' "
+"as well as is less than or equal to the 'maximum'."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:47 of
+msgid "list[dict[str, int | float]]"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:51 of
+msgid "Deepcopy object of condition."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:53 of
+msgid "list[dict]"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:57 of
+msgid "Storage object."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:59 of
+msgid "Storage"
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier.load_verification_config:1
+#: of
+msgid "Load configurations about verification."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier.print:1 of
+msgid "Print current verifications result."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier.save:1 of
+msgid "Save current verifications result to a file."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verifier.rst:16
+msgid "aiaccel.master.verifier.create module"
+msgstr ""
+
+#: aiaccel.master.verifier.create.create_verifier:1 of
+msgid "Creates a verifier."
+msgstr ""
+
+#: aiaccel.master.verifier.create.create_verifier:3 of
+msgid "Path to the configuration file."
+msgstr ""
+
+#: aiaccel.master.verifier.create.create_verifier of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.master.verifier.create.create_verifier:6 of
+msgid "_description_"
+msgstr ""
+
+#: aiaccel.master.verifier.create.create_verifier of
+msgid "戻り値の型"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verifier.rst:24
+msgid "aiaccel.master.verifier.multi\\_objective\\_verifier module"
+msgstr ""
+
+#: aiaccel.master.verifier.multi_objective_verifier.MultiObjectiveVerifier:1
+#: aiaccel.master.verifier.single_objective_verifier.SingleObjectiveVerifier:1
+#: of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.master.verifier.abstract_verifier.AbstractVerifier`"
+msgstr ""
+
+#: aiaccel.master.verifier.multi_objective_verifier.MultiObjectiveVerifier:1 of
+msgid "Verifier for multi-objevtive optimization."
+msgstr ""
+
+#: aiaccel.master.verifier.multi_objective_verifier.MultiObjectiveVerifier:3 of
+msgid "Verification is not available for multi-objective optimization."
+msgstr ""
+
+#: aiaccel.master.verifier.multi_objective_verifier.MultiObjectiveVerifier.verify:1
+#: of
+msgid "Not implemented."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verifier.rst:32
+msgid "aiaccel.master.verifier.single\\_objective\\_verifier module"
+msgstr ""
+
+#: aiaccel.master.verifier.single_objective_verifier.SingleObjectiveVerifier:1
+#: of
+msgid "Verifier for single-objective optimization."
+msgstr ""
+
+#: aiaccel.master.verifier.single_objective_verifier.SingleObjectiveVerifier.verify:1
+#: of
+msgid "Run a verification."
+msgstr ""
+
+#: aiaccel.master.verifier.single_objective_verifier.SingleObjectiveVerifier.verify:3
+#: of
+msgid ""
+"The trigger to run a verification, is described in configuration file "
+"'verification' > 'conditions'."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.verifier.rst:40
+msgid "Module contents"
+msgstr ""
+

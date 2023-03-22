@@ -7,7 +7,7 @@ from typing import Any
 
 from aiaccel.common import goal_maximize, goal_minimize
 from aiaccel.config import is_multi_objective
-from aiaccel.master import AbstractVerification, MaximizeEvaluator, MinimizeEvaluator
+from aiaccel.master import MaximizeEvaluator, MinimizeEvaluator, create_verifier
 from aiaccel.module import AbstractModule
 from aiaccel.util import (
     get_time_now_object,
@@ -30,7 +30,7 @@ class AbstractMaster(AbstractModule):
         optimizer_proc (subprocess.Popen): A reference for a subprocess of
             Optimizer.
         start_time (datetime.datetime): A stored starting time.
-        verification (AbstractVerification): A verification object.
+        verifier (SingleObjectiveVerifier | MultiObjectiveVerifier): A verifier object.
         logger (logging.Logger): Logger object.
         goal (str): Goal of optimization ('minimize' or 'maximize').
         trial_number (int): The number of trials.
@@ -56,7 +56,8 @@ class AbstractMaster(AbstractModule):
             "Master   ",
         )
 
-        self.verification = AbstractVerification(self.options)
+        Verifier = create_verifier(self.options['config'])
+        self.verifier = Verifier(self.options)
         self.goal = self.config.goal.get()
         self.trial_number = self.config.trial_number.get()
 
@@ -109,8 +110,8 @@ class AbstractMaster(AbstractModule):
             evaluator.save()
 
         # verification
-        self.verification.verify()
-        self.verification.save("final")
+        self.verifier.verify()
+        self.verifier.save("final")
         self.logger.info("Master finished.")
 
     def print_dict_state(self) -> None:
@@ -156,7 +157,7 @@ class AbstractMaster(AbstractModule):
         self.get_stats()
         self.print_dict_state()
         # verification
-        self.verification.verify()
+        self.verifier.verify()
 
         return True
 

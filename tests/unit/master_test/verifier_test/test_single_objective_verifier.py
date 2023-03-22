@@ -7,13 +7,13 @@ import pytest
 
 from aiaccel.common import dict_verification
 from aiaccel.common import extension_verification
-from aiaccel.master import AbstractVerification
+from aiaccel.master import SingleObjectiveVerifier
 from aiaccel.util import load_yaml
+
 from tests.base_test import BaseTest
 
 
-class TestAbstractVerification(BaseTest):
-
+class TestSingleObjectiveVerifier(BaseTest):
     @pytest.fixture(autouse=True)
     def setupt_verifier(self) -> Generator[None, None, None]:
         options = {
@@ -23,7 +23,7 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
-        self.verifier = AbstractVerification(options)
+        self.verifier = SingleObjectiveVerifier(options)
         yield
         self.verifier = None
 
@@ -35,7 +35,7 @@ class TestAbstractVerification(BaseTest):
             'fs': False,
             'process_name': 'master'
         }
-        verifier = AbstractVerification(options)
+        verifier = SingleObjectiveVerifier(options)
         assert verifier.is_verified
 
     def test_verify(self, monkeypatch: pytest.MonkeyPatch, work_dir: Path) -> None:
@@ -178,37 +178,3 @@ class TestAbstractVerification(BaseTest):
             )
             assert self.verifier._make_verification(-1, 0) == ''
             assert hasattr(dummy_verification_result, 'passed') is False
-
-    def test_print(self):
-        self.verifier.is_verified = False
-        assert self.verifier.print() is None
-        self.verifier.is_verified = True
-        assert self.verifier.print() is None
-
-    def test_save(self, work_dir: Path) -> None:
-        self.verifier.is_verified = False
-        assert self.verifier.save(1) is None
-        self.verifier.is_verified = True
-        # setup_hp_finished(1)
-
-        for i in range(1):
-            self.verifier.storage.result.set_any_trial_objective(
-                trial_id=i,
-                objective=i * 1.0
-
-            )
-            for j in range(2):
-                self.verifier.storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f"x{j}",
-                    param_value=0.0,
-                    param_type='float'
-                )
-
-        self.verifier.verify()
-        path = work_dir / dict_verification / f'1.{extension_verification}'
-        if path.exists():
-            path.unlink()
-
-        self.verifier.save(1)
-        assert path.exists()

@@ -22,7 +22,7 @@ setup(
         'aiaccel.abci',
         'aiaccel.master',
         'aiaccel.master.evaluator',
-        'aiaccel.master.verification',
+        'aiaccel.master.verifier',
         'aiaccel.optimizer',
         'aiaccel.scheduler',
         'aiaccel.scheduler.algorithm',

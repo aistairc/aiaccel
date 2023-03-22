@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-03-22 14:37+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,10 +49,9 @@ msgstr ""
 #: aiaccel.master.create.create_master
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
-#: aiaccel.master.verification.abstract_verification.AbstractVerification
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.save
-#: of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier.save
+#: aiaccel.master.verifier.create.create_verifier of
 msgid "パラメータ"
 msgstr ""
 
@@ -68,7 +67,7 @@ msgstr ""
 #: aiaccel.master.abci_master.AbciMaster
 #: aiaccel.master.abstract_master.AbstractMaster
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator
-#: aiaccel.master.verification.abstract_verification.AbstractVerification of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier of
 msgid "type"
 msgstr ""
 
@@ -81,7 +80,7 @@ msgid "A result string of 'qstat' command."
 msgstr ""
 
 #: aiaccel.master.abci_master.AbciMaster:17
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:59 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:53 of
 msgid "list[dict]"
 msgstr ""
 
@@ -103,12 +102,7 @@ msgstr ""
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.load_verification_config
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.print
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.save
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.verify
-#: of
+#: aiaccel.master.verifier.create.create_verifier of
 msgid "戻り値"
 msgstr ""
 
@@ -120,13 +114,7 @@ msgstr ""
 #: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:4
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.evaluate:3
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print:3
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save:3
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.load_verification_config:3
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification:8
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.print:3
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.save:6
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.verify:6
-#: of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save:3 of
 msgid "None"
 msgstr ""
 
@@ -151,14 +139,14 @@ msgstr ""
 #: aiaccel.master.abstract_master.AbstractMaster:9
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:3
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:9
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:3
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:9 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:3
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:9 of
 msgid "A dictionary containing command line options as well as process name."
 msgstr ""
 
 #: aiaccel.master.abstract_master.AbstractMaster:12
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:12
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:12 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:12 of
 msgid "dict[str, str | int | bool]"
 msgstr ""
 
@@ -184,11 +172,11 @@ msgid "A stored starting time."
 msgstr ""
 
 #: aiaccel.master.abstract_master.AbstractMaster:35 of
-msgid "A verification object."
+msgid "A verifier object."
 msgstr ""
 
 #: aiaccel.master.abstract_master.AbstractMaster:37 of
-msgid "AbstractVerification"
+msgid "SingleObjectiveVerifier | MultiObjectiveVerifier"
 msgstr ""
 
 #: aiaccel.master.abstract_master.AbstractMaster:41 of
@@ -213,8 +201,7 @@ msgstr ""
 msgid "The number of trials."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster:55
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:42 of
+#: aiaccel.master.abstract_master.AbstractMaster:55 of
 msgid "int"
 msgstr ""
 
@@ -235,7 +222,7 @@ msgstr ""
 #: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process
 #: aiaccel.master.create.create_master
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
-#: of
+#: aiaccel.master.verifier.create.create_verifier of
 msgid "戻り値の型"
 msgstr ""
 
@@ -313,8 +300,7 @@ msgstr ""
 msgid "Module contents"
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:1
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:1 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:1 of
 msgid "ベースクラス: :py:class:`object`"
 msgstr ""
 
@@ -322,15 +308,16 @@ msgstr ""
 msgid "An abstract class for MaximizeEvaluator and MinimizeEvaluator."
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:16 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:16
+#: aiaccel.master.verifier.create.create_verifier:3 of
 msgid "Path to the configuration file."
 msgstr ""
 
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:18
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:30
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:36
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:24
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:30 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:24
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:30 of
 msgid "Path"
 msgstr ""
 
@@ -339,12 +326,12 @@ msgid "Config object."
 msgstr ""
 
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:24
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:18 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:18 of
 msgid "Config"
 msgstr ""
 
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:28
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:22 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:22 of
 msgid "Path to the workspace."
 msgstr ""
 
@@ -361,12 +348,12 @@ msgid "dict"
 msgstr ""
 
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:46
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:63 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:57 of
 msgid "Storage object."
 msgstr ""
 
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:48
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:65 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:59 of
 msgid "Storage"
 msgstr ""
 
@@ -405,31 +392,31 @@ msgstr ""
 msgid "Save current results to a file."
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:1 of
-msgid "An abstract class of verification."
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:1 of
+msgid "ベースクラス: :py:class:`~abc.ABC`"
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:16 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:1 of
+msgid "An abstract class of verifier."
+msgstr ""
+
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:16 of
 msgid "Config object"
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:28 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:28 of
 msgid "Path to \"lock\", i.e. `ws`/lock."
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:34 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:34 of
 msgid "Whether verified or not."
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:36 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:36 of
 msgid "bool"
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:40 of
-msgid "The last loop number verified."
-msgstr ""
-
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:46 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:40 of
 msgid ""
 "A list of verification conditions. Each element dict has keys 'loop', "
 "'minimum', and 'maximum' with values as int, float, and float, "
@@ -438,54 +425,25 @@ msgid ""
 "as well as is less than or equal to the 'maximum'."
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:53 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:47 of
 msgid "list[dict[str, int | float]]"
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification:57 of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier:51 of
 msgid "Deepcopy object of condition."
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.load_verification_config:1
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier.load_verification_config:1
 #: of
 msgid "Load configurations about verification."
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification:1
-#: of
-msgid "Run a verification and save the result."
-msgstr ""
-
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification:3
-#: of
-msgid "An index of verifications."
-msgstr ""
-
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.make_verification:5
-#: of
-msgid "A loop count of Master."
-msgstr ""
-
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.print:1
-#: of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier.print:1 of
 msgid "Print current verifications result."
 msgstr ""
 
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.save:1
-#: of
+#: aiaccel.master.verifier.abstract_verifier.AbstractVerifier.save:1 of
 msgid "Save current verifications result to a file."
-msgstr ""
-
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.verify:1
-#: of
-msgid "Run a verification."
-msgstr ""
-
-#: aiaccel.master.verification.abstract_verification.AbstractVerification.verify:3
-#: of
-msgid ""
-"The trigger to run a verification, is described in configuration file "
-"'verification' > 'conditions'."
 msgstr ""
 
 #: aiaccel.master.evaluator.maximize_evaluator.MaximizeEvaluator:1
@@ -501,6 +459,52 @@ msgstr ""
 
 #: aiaccel.master.evaluator.minimize_evaluator.MinimizeEvaluator:1 of
 msgid "A evaluator class to minimize the results."
+msgstr ""
+
+#: aiaccel.master.verifier.multi_objective_verifier.MultiObjectiveVerifier:1
+#: aiaccel.master.verifier.single_objective_verifier.SingleObjectiveVerifier:1
+#: of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.master.verifier.abstract_verifier.AbstractVerifier`"
+msgstr ""
+
+#: aiaccel.master.verifier.multi_objective_verifier.MultiObjectiveVerifier:1 of
+msgid "Verifier for multi-objevtive optimization."
+msgstr ""
+
+#: aiaccel.master.verifier.multi_objective_verifier.MultiObjectiveVerifier:3 of
+msgid "Verification is not available for multi-objective optimization."
+msgstr ""
+
+#: aiaccel.master.verifier.multi_objective_verifier.MultiObjectiveVerifier.verify:1
+#: of
+msgid "Not implemented."
+msgstr ""
+
+#: aiaccel.master.verifier.single_objective_verifier.SingleObjectiveVerifier:1
+#: of
+msgid "Verifier for single-objective optimization."
+msgstr ""
+
+#: aiaccel.master.verifier.single_objective_verifier.SingleObjectiveVerifier.verify:1
+#: of
+msgid "Run a verification."
+msgstr ""
+
+#: aiaccel.master.verifier.single_objective_verifier.SingleObjectiveVerifier.verify:3
+#: of
+msgid ""
+"The trigger to run a verification, is described in configuration file "
+"'verification' > 'conditions'."
+msgstr ""
+
+#: aiaccel.master.verifier.create.create_verifier:1 of
+msgid "Creates a verifier."
+msgstr ""
+
+#: aiaccel.master.verifier.create.create_verifier:6 of
+msgid "_description_"
 msgstr ""
 
 #~ msgid "List[Path]"
@@ -519,5 +523,291 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Create a master class by selecting localmaster or abcimaster."
+#~ msgstr ""
+
+#~ msgid "ベースクラス: :py:class:`~aiaccel.master.abstract_master.AbstractMaster`"
+#~ msgstr ""
+
+#~ msgid "A master class running on ABCI environment."
+#~ msgstr ""
+
+#~ msgid "パラメータ"
+#~ msgstr ""
+
+#~ msgid "A dictionary containing command line options."
+#~ msgstr ""
+
+#~ msgid "A list of path of runner files."
+#~ msgstr ""
+
+#~ msgid "type"
+#~ msgstr ""
+
+#~ msgid "list[Path]"
+#~ msgstr ""
+
+#~ msgid "A result string of 'qstat' command."
+#~ msgstr ""
+
+#~ msgid "list[dict]"
+#~ msgstr ""
+
+#~ msgid "Get a current status and update."
+#~ msgstr ""
+
+#~ msgid "戻り値"
+#~ msgstr ""
+
+#~ msgid "None"
+#~ msgstr ""
+
+#~ msgid "Pre-procedure before executing processes."
+#~ msgstr ""
+
+#~ msgid "ベースクラス: :py:class:`~aiaccel.module.AbstractModule`"
+#~ msgstr ""
+
+#~ msgid "An abstract class for AbciMaster and LocalMaster."
+#~ msgstr ""
+
+#~ msgid "A dictionary containing command line options as well as process name."
+#~ msgstr ""
+
+#~ msgid "dict[str, str | int | bool]"
+#~ msgstr ""
+
+#~ msgid "A stored loop starting time."
+#~ msgstr ""
+
+#~ msgid "datetime.datetime"
+#~ msgstr ""
+
+#~ msgid "A reference for a subprocess of Optimizer."
+#~ msgstr ""
+
+#~ msgid "subprocess.Popen"
+#~ msgstr ""
+
+#~ msgid "A stored starting time."
+#~ msgstr ""
+
+#~ msgid "A verification object."
+#~ msgstr ""
+
+#~ msgid "AbstractVerification"
+#~ msgstr ""
+
+#~ msgid "Logger object."
+#~ msgstr ""
+
+#~ msgid "logging.Logger"
+#~ msgstr ""
+
+#~ msgid "Goal of optimization ('minimize' or 'maximize')."
+#~ msgstr ""
+
+#~ msgid "str"
+#~ msgstr ""
+
+#~ msgid "The number of trials."
+#~ msgstr ""
+
+#~ msgid "int"
+#~ msgstr ""
+
+#~ msgid "list"
+#~ msgstr ""
+
+#~ msgid "Check to confirm if an error has occurred."
+#~ msgstr ""
+
+#~ msgid "True if no error. False if with error."
+#~ msgstr ""
+
+#~ msgid "戻り値の型"
+#~ msgstr ""
+
+#~ msgid "A main loop process. This process is repeated every main loop."
+#~ msgstr ""
+
+#~ msgid "The process succeeds or not. The main loop exits if failed."
+#~ msgstr ""
+
+#~ msgid "例外"
+#~ msgstr ""
+
+#~ msgid "Causes when an invalid goal is set."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Causes when expire the count which "
+#~ "cannot confirm to     run Optimizer and"
+#~ " Scheduler."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Display the number of yaml files "
+#~ "in 'ready', 'running', and 'finished' "
+#~ "directries in hp directory."
+#~ msgstr ""
+
+#~ msgid "Returns master type."
+#~ msgstr ""
+
+#~ msgid "Path to configuration file."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "`LocalMaster`, `PylocalMaster`, or `AbciMaster`"
+#~ "     if resource type is 'local', "
+#~ "'python_local', or 'abci',     respectively. "
+#~ "Other cases, None."
+#~ msgstr ""
+
+#~ msgid "`LocalMaster`, `PylocalMaster`, or `AbciMaster`"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "if resource type is 'local', "
+#~ "'python_local', or 'abci', respectively. Other"
+#~ " cases, None."
+#~ msgstr ""
+
+#~ msgid "A master class running on a local computer."
+#~ msgstr ""
+
+#~ msgid "ベースクラス: :py:class:`object`"
+#~ msgstr ""
+
+#~ msgid "An abstract class for MaximizeEvaluator and MinimizeEvaluator."
+#~ msgstr ""
+
+#~ msgid "Path to the configuration file."
+#~ msgstr ""
+
+#~ msgid "Path"
+#~ msgstr ""
+
+#~ msgid "Config object."
+#~ msgstr ""
+
+#~ msgid "Config"
+#~ msgstr ""
+
+#~ msgid "Path to the workspace."
+#~ msgstr ""
+
+#~ msgid "Path to \"lock', i.e. `ws`/lock."
+#~ msgstr ""
+
+#~ msgid "A dict object of the best optimized result."
+#~ msgstr ""
+
+#~ msgid "dict"
+#~ msgstr ""
+
+#~ msgid "Storage object."
+#~ msgstr ""
+
+#~ msgid "Storage"
+#~ msgstr ""
+
+#~ msgid "TrialId object."
+#~ msgstr ""
+
+#~ msgid "TrialId"
+#~ msgstr ""
+
+#~ msgid "Run an evaluation."
+#~ msgstr ""
+
+#~ msgid "Returns string of trial id padded by zeros."
+#~ msgstr ""
+
+#~ msgid "Trial id."
+#~ msgstr ""
+
+#~ msgid "Trial id padded by zeros."
+#~ msgstr ""
+
+#~ msgid "Print current results."
+#~ msgstr ""
+
+#~ msgid "Save current results to a file."
+#~ msgstr ""
+
+#~ msgid "An abstract class of verification."
+#~ msgstr ""
+
+#~ msgid "Config object"
+#~ msgstr ""
+
+#~ msgid "Path to \"lock\", i.e. `ws`/lock."
+#~ msgstr ""
+
+#~ msgid "Whether verified or not."
+#~ msgstr ""
+
+#~ msgid "bool"
+#~ msgstr ""
+
+#~ msgid "The last loop number verified."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A list of verification conditions. Each"
+#~ " element dict has keys 'loop', "
+#~ "'minimum', and 'maximum' with values as"
+#~ " int, float, and float, respectively. "
+#~ "The verification is `True` if the "
+#~ "optimized result of which the trial "
+#~ "id is the given 'loop' is greater"
+#~ " than or equal to 'minimum' as "
+#~ "well as is less than or equal "
+#~ "to the 'maximum'."
+#~ msgstr ""
+
+#~ msgid "list[dict[str, int | float]]"
+#~ msgstr ""
+
+#~ msgid "Deepcopy object of condition."
+#~ msgstr ""
+
+#~ msgid "Load configurations about verification."
+#~ msgstr ""
+
+#~ msgid "Run a verification and save the result."
+#~ msgstr ""
+
+#~ msgid "An index of verifications."
+#~ msgstr ""
+
+#~ msgid "A loop count of Master."
+#~ msgstr ""
+
+#~ msgid "Print current verifications result."
+#~ msgstr ""
+
+#~ msgid "Save current verifications result to a file."
+#~ msgstr ""
+
+#~ msgid "Run a verification."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The trigger to run a verification, "
+#~ "is described in configuration file "
+#~ "'verification' > 'conditions'."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "ベースクラス: "
+#~ ":py:class:`~aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator`"
+#~ msgstr ""
+
+#~ msgid "A evaluator class to maximize the results."
+#~ msgstr ""
+
+#~ msgid "A evaluator class to minimize the results."
 #~ msgstr ""
 
