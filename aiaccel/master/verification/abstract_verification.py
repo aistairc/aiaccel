@@ -9,7 +9,7 @@ from typing import Any
 from aiaccel.common import dict_lock
 from aiaccel.common import dict_verification
 from aiaccel.common import extension_verification
-from aiaccel.config import Config
+from aiaccel.config import Config, is_multi_objective
 from aiaccel.storage import Storage
 from aiaccel.util import create_yaml
 
@@ -65,6 +65,9 @@ class AbstractVerification(object):
         'verification' > 'conditions'.
         """
         if not self.is_verified:
+            return
+            
+        if is_multi_objective(self.config):
             return
 
         # TODO: Flatten following for-loop if main process is flatten.
