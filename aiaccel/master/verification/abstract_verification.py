@@ -66,7 +66,7 @@ class AbstractVerification(object):
         """
         if not self.is_verified:
             return
-            
+
         if is_multi_objective(self.config):
             return
 
