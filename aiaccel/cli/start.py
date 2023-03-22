@@ -1,24 +1,74 @@
+from __future__ import annotations
+
 import os
-import pathlib
 import shutil
 import time
 from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
+from pathlib import Path
 
-import aiaccel
-from aiaccel import parameter as pt
+from aiaccel.cli import CsvWriter
+from aiaccel.common import dict_lock, goal_maximize, goal_minimize
 from aiaccel.config import Config
-from aiaccel.master.create import create_master
-from aiaccel.optimizer.create import create_optimizer
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.tensorboard.tensorboard import TensorBoard
-from aiaccel.util import filesystem as fs
-from aiaccel.util.report import CreationReport
+from aiaccel.master import create_master
+from aiaccel.optimizer import create_optimizer
+from aiaccel.scheduler import create_scheduler
+from aiaccel.tensorboard import TensorBoard
+from aiaccel.util import get_file_result_hp, load_yaml
 from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
 logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
 logger.addHandler(StreamHandler())
+
+
+def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
+                       ) -> tuple[float | None, Path | None]:
+    """Get a best parameter in specified files.
+
+    Args:
+        files (list[Path]): A list of files to find a best.
+        goal (str): Maximize or Minimize.
+        dict_lock (Path): A directory to store lock files.
+
+    Returns:
+        tuple[float | None, Path | None]: A best result value and a
+        file path. It returns None if a number of files is less than one.
+
+    Raises:
+        ValueError: Causes when an invalid goal is set.
+    """
+
+    if len(files) < 1:
+        return None, None
+
+    yml = load_yaml(files[0], dict_lock)
+
+    try:
+        best = float(yml['result'])
+    except TypeError:
+        logger = getLogger('root.master.parameter')
+        logger.error(f'Invalid result: {yml["result"]}.')
+        return None, None
+
+    best_file = files[0]
+
+    for f in files[1:]:
+        yml = load_yaml(f, dict_lock)
+        result = float(yml['result'])
+
+        if goal.lower() == goal_maximize:
+            if best < result:
+                best, best_file = result, f
+        elif goal.lower() == goal_minimize:
+            if best > result:
+                best, best_file = result, f
+        else:
+            logger = getLogger('root.master.parameter')
+            logger.error(f'Invalid goal: {goal}.')
+            raise ValueError(f'Invalid goal: {goal}.')
+
+    return best, best_file
 
 
 def main() -> None:  # pragma: no cover
@@ -37,7 +87,7 @@ def main() -> None:  # pragma: no cover
 
     workspace = Workspace(config.workspace.get())
     goal = config.goal.get()
-    dict_lock = workspace.path / aiaccel.dict_lock
+    path_to_lock_file = workspace.path / dict_lock
 
     if args.resume is None:
         if args.clean is True:
@@ -54,7 +104,7 @@ def main() -> None:  # pragma: no cover
         logger.error("Creating workspace is Failed.")
         return
 
-    logger.info(f"config: {str(pathlib.Path(args.config).resolve())}")
+    logger.info(f"config: {str(Path(args.config).resolve())}")
 
     Master = create_master(args.config)
     Optimizer = create_optimizer(args.config)
@@ -87,17 +137,17 @@ def main() -> None:  # pragma: no cover
     for module in modules:
         module.post_process()
 
-    report = CreationReport(args.config)
-    report.create()
+    csv_writer = CsvWriter(args.config)
+    csv_writer.create()
 
     logger.info("moving...")
     dst = workspace.move_completed_data()
 
-    config_name = pathlib.Path(args.config).name
-    shutil.copy(pathlib.Path(args.config), dst / config_name)
+    config_name = Path(args.config).name
+    shutil.copy(Path(args.config), dst / config_name)
 
-    files = fs.get_file_result_hp(dst)
-    best, best_file = pt.get_best_parameter(files, goal, dict_lock)
+    files = get_file_result_hp(dst)
+    best, best_file = get_best_parameter(files, goal, path_to_lock_file)
 
     logger.info(f"Best result    : {best_file}")
     logger.info(f"               : {best}")

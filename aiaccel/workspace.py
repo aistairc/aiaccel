@@ -3,10 +3,10 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-import aiaccel
-from aiaccel.util import filesystem as fs
-from aiaccel.util.retry import retry
-from aiaccel.util.suffix import Suffix
+from aiaccel.common import (dict_error, dict_hp, dict_lock, dict_log,
+                            dict_output, dict_result, dict_runner,
+                            dict_storage, dict_tensorboard, dict_verification)
+from aiaccel.util import Suffix, make_directories, retry
 
 
 class Workspace:
@@ -42,16 +42,16 @@ class Workspace:
     def __init__(self, base_path: str):
         self.path = Path(base_path).resolve()
 
-        self.error = self.path / aiaccel.dict_error
-        self.hp = self.path / aiaccel.dict_hp
-        self.lock = self.path / aiaccel.dict_lock
-        self.log = self.path / aiaccel.dict_log
-        self.output = self.path / aiaccel.dict_output
-        self.result = self.path / aiaccel.dict_result
-        self.runner = self.path / aiaccel.dict_runner
-        self.storage = self.path / aiaccel.dict_storage
-        self.tensorboard = self.path / aiaccel.dict_tensorboard
-        self.verification = self.path / aiaccel.dict_verification
+        self.error = self.path / dict_error
+        self.hp = self.path / dict_hp
+        self.lock = self.path / dict_lock
+        self.log = self.path / dict_log
+        self.output = self.path / dict_output
+        self.result = self.path / dict_result
+        self.runner = self.path / dict_runner
+        self.storage = self.path / dict_storage
+        self.tensorboard = self.path / dict_tensorboard
+        self.verification = self.path / dict_verification
 
         self.consists = [
             self.error,
@@ -80,7 +80,7 @@ class Workspace:
         if self.exists():
             return False
 
-        fs.make_directories(
+        make_directories(
             ds=self.consists,
             dict_lock=(self.lock)
         )

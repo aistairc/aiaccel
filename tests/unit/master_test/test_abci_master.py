@@ -5,7 +5,7 @@ import time
 from unittest.mock import patch
 
 import pytest
-from aiaccel.master.abci_master import AbciMaster
+from aiaccel.master import AbciMaster
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 

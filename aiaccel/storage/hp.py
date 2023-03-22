@@ -5,9 +5,9 @@ from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import HpTable
-from aiaccel.util.retry import retry
+from aiaccel.storage import Abstract
+from aiaccel.storage import HpTable
+from aiaccel.util import retry
 
 
 class Hp(Abstract):

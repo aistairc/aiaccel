@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from tensorboardX import SummaryWriter
 
+from aiaccel.common import goal_maximize, goal_minimize
 from aiaccel.module import AbstractModule
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.trialid import TrialId
@@ -62,8 +63,12 @@ class TensorBoard(AbstractModule):
             if objective_y is None or best_value is None:
                 return True
 
+            tag = 'minimum'
+            if self.goal == goal_maximize:
+                tag = 'maximum'
+
             self.writer.add_scalar(tag='objective', scalar_value=objective_y, global_step=trial_id)
-            self.writer.add_scalar(tag=self.goal, scalar_value=best_value, global_step=trial_id)
+            self.writer.add_scalar(tag=tag, scalar_value=best_value, global_step=trial_id)
 
             # hyperparameters
             params = self.storage.hp.get_any_trial_params_dict(trial_id)
