@@ -27,8 +27,8 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
 
         try:
             self._grid_point_generator = GridPointGenerator(
-                self.params.get_parameter_list(),
                 self.config.trial_number.get(),
+                self.params.get_parameter_list(),
                 sampling_method=self.config.grid_sampling_method.get().upper(),
                 rng=self._rng,
                 accept_small_trial_number=accept_small_trial_number

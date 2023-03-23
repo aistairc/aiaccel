@@ -27,7 +27,7 @@
         "log": true,
         "lower": 0.1,
         "upper": 1.0,
-        "num_grid_points": 100
+        "num_numeric_choices": 100
       },
       {
         "name": "x2",

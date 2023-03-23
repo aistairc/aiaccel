@@ -62,7 +62,7 @@ class HyperParameter(object):
         self.q = parameter.get('q', 1)
         self.step = parameter.get('step', None)
         self.base = parameter.get('base', None)
-        self.num_grid_points = parameter.get('num_grid_points', None)
+        self.num_numeric_choices = parameter.get('num_numeric_choices', None)
 
     def sample(self, initial: bool = False, rng: Any = None) -> dict[str, Any]:
         """Sample a parameter.

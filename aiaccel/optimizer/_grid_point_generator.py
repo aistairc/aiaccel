@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from itertools import product
 from typing import Union
 from typing import Literal
@@ -11,146 +12,171 @@ from aiaccel.parameter import HyperParameter
 
 
 GridValueType = Union[float, int, str]
-SamplingMethodType = Literal['IN_ORDER', 'UUNIFORM', 'RANDOM', 'DUPLICATABLE_RANDOM']
+SamplingMethodType = Literal['IN_ORDER', 'UNIFORM', 'RANDOM', 'DUPLICATABLE_RANDOM']
+numeric_types = (float, int, np.floating, np.integer)
 
 
-def _make_numeric_choices(hyperparameter: HyperParameter) -> list[float | int]:
-    choices: list[float | int] = []
-    if hyperparameter.log:
-        choices = np.geomspace(
-            start=hyperparameter.lower,
-            stop=hyperparameter.upper,
-            dtype=int if hyperparameter.type == 'INT' else float
-        ).tolist()
+def _make_numeric_choices(hyperparameter: HyperParameter, num_choices: int | None = None) -> list[GridValueType]:
+    choices: list[GridValueType] = []
+    start = hyperparameter.lower
+    stop = hyperparameter.upper
+    num = num_choices or int(hyperparameter.num_numeric_choices)
+    if hyperparameter.type == 'FLOAT':
+        dtype = float
+    elif hyperparameter.type == 'INT':
+        dtype = int
     else:
-        choices = np.linspace(
-            hyperparameter.lower,
-            hyperparameter.upper,
-            dtype=int if hyperparameter.type == 'INT' else float
-        ).tolist()
+        raise TypeError(
+            f'Invalid parameter type "{hyperparameter.type}". "FLOAT" or "INT" required.'
+        )
+    dtype = int if hyperparameter.type == 'INT' else float
+    if hyperparameter.log:
+        choices = np.geomspace(start, stop, num, dtype=dtype).tolist()
+    else:
+        choices = np.linspace(start, stop, num, dtype=dtype).tolist()
     return choices
 
 
-class Candidates:
-    def __init__(self, hyperparameters: list[HyperParameter]) -> None:
+class GridCondition:
+    """Condition of grid point.
+
+    Args:
+        hyperparameter (HyperParameter): HyperParameter object.
+
+    Attributes:
+        name (str): Parameter name.
+        choices (list[float | int | str]): Choices of value of the parameter.
+        num_choices (int): The number of choices of value.
+
+    Raises:
+        TypeError: Occurs when the specified parameter type is invalid.
+    """
+
+    def __init__(self, hyperparameter: HyperParameter) -> None:
+        self.name = hyperparameter.name
+        if hyperparameter.type in ('FLOAT', 'INT'):
+            if isinstance(hyperparameter.num_numeric_choices, numeric_types):
+                self.choices = _make_numeric_choices(hyperparameter)
+                self.num_choices = int(hyperparameter.num_numeric_choices)
+            else:
+                self.choices = []
+                self.num_choices = 0
+        elif hyperparameter.type == 'CATEGORICAL':
+            self.choices = hyperparameter.choices
+            self.num_choices = len(self.choices)
+        elif hyperparameter.type == 'ORDINAL':
+            self.choices = hyperparameter.sequence
+            self.num_choices = len(self.choices)
+        else:
+            raise TypeError(
+                f'Specified parameter type "{hyperparameter.type}" for "{self.name}" is invalid.'
+            )
+
+    def __iter__(self) -> Iterator[GridValueType]:
+        return iter(self.choices)
+
+    def __len__(self) -> int:
+        return self.num_choices
+
+
+class GridConditionCollection:
+    """_summary_
+
+    Args:
+        num_trials (int): _description_
+        hyperparameters (list[HyperParameter]): _description_
+
+    Raises:
+        ValueError: _description_
+    """
+
+    def __init__(self, num_trials: int, hyperparameters: list[HyperParameter]) -> None:
+        self.num_trials = num_trials
+        self._conditions: list[GridCondition] = []
+        self._least_space_size = 1
+        self._num_unspecified_parameters = 0
+        self._residual_space_size = float(self.num_trials)
+        self._num_larger_choices = 1
+        self._num_larger_choice_parameters = self._num_unspecified_parameters
+        self._num_smaller_choices = 0
+        self._num_smaller_choice_parameters = 0
+        not_used_num_choices = self._register_grid_conditions(hyperparameters)
+        if not_used_num_choices:
+            raise ValueError(
+                'Failed to assign choice for numeric parameter.'
+            )
+
+    def __iter__(self) -> Iterator[GridCondition]:
+        return iter(self._conditions)
+
+    def __len__(self) -> int:
+        return len(self._conditions)
+
+    def _register_grid_conditions(self, hyperparameters: list[HyperParameter]) -> list[int]:
         if hyperparameters:
             hyperparameter = hyperparameters.pop()
-            self.name = hyperparameter.name
-            if hyperparameter.type in ('FLOAT', 'INT'):
-                if isinstance(hyperparameter.num_grid_points, int):
-                    self.choices = _make_numeric_choices(hyperparameter)
-                    self.num_choices = hyperparameter.num_grid_points
-                else:
-                    self.choices = None
-                    self.num_choices = 1
-            elif hyperparameter.type == 'CATEGORICAL':
-                self.choices = hyperparameter.choices
-                self.num_choices = len(self.choices)
-            elif hyperparameter.type == 'ORDINAL':
-                self.choices = hyperparameter.sequence
-                self.num_choices = len(self.num_choices)
-            self.child = Candidates(hyperparameters)
+            grid_condition = GridCondition(hyperparameter)
+            self._update_least_space_size(grid_condition)
+            self._update_num_unspecified_parameters(grid_condition)
+            nums_choices = self._register_grid_conditions(hyperparameters)
+            if grid_condition.num_choices == 0:
+                num_choices = nums_choices.pop()
+                grid_condition.num_choices = num_choices
+                grid_condition.choices = _make_numeric_choices(hyperparameter, num_choices)
+            self._conditions.append(grid_condition)
+            return nums_choices
         else:
-            self.name = None
-            self.child = None
-
-    def measure_least_space_size(self) -> int:
-        if self.name:
-            return len(self.choices) * self.child.measure_least_space_size()
-        else:
-            return 1
-
-
-def _count_fixed_grid_points(hyperparameters: list[HyperParameter]
-                             ) -> list[int]:
-    nums_fixed_grid_points: list[int] = []
-    for hyperparameter in hyperparameters:
-        if hyperparameter.type in ('INT', 'FLOAT'):
-            if isinstance(hyperparameter.num_grid_points, int):
-                nums_fixed_grid_points.append(hyperparameter.num_grid_points)
+            self._update_residual_space_size()
+            if self._num_unspecified_parameters:
+                self._calc_num_choices()
+                self._split_num_unspecified_parameters()
+                return self._get_auto_defined_num_choices()
             else:
-                nums_fixed_grid_points.append(0)
-        elif hyperparameter.type == 'CATEGORICAL':
-            nums_fixed_grid_points.append(len(hyperparameter.choices))
-        elif hyperparameter.type == 'ORDINAL':
-            nums_fixed_grid_points.append(len(hyperparameter.sequence))
-    return nums_fixed_grid_points
+                return []
 
+    def _update_least_space_size(self, grid_condition: GridCondition) -> None:
+        self._least_space_size *= grid_condition.num_choices or 1
 
-def _suggest_nums_grid_points(
-    grid_space_size: int,
-    least_grid_space_size: int,
-    num_parameter: int,
-) -> list[int]:
-    if num_parameter:
-        upper_points = 1
-        while (
-            least_grid_space_size * upper_points ** num_parameter < grid_space_size
+    def _update_num_unspecified_parameters(self, grid_condition: GridCondition) -> None:
+        self._num_unspecified_parameters += int(grid_condition.num_choices == 0)
+        self._num_larger_choice_parameters = self._num_unspecified_parameters
+
+    def _update_residual_space_size(self) -> None:
+        self._residual_space_size /= self._least_space_size
+
+    def _calc_num_choices(self) -> None:
+        if (
+            self._num_larger_choices ** self._num_unspecified_parameters <
+            self._residual_space_size
         ):
-            upper_points += 1
-        lower_points = upper_points - 1
+            self._num_larger_choices += 1
+            self._num_smaller_choices += 1
+            self._calc_num_choices()
 
-        num_lower_points_parameter = 0
-        num_upper_points_parameter = num_parameter
-        while (
-            least_grid_space_size *
-            lower_points ** (num_lower_points_parameter + 1) *
-            upper_points ** (num_upper_points_parameter - 1) > grid_space_size
+    def _split_num_unspecified_parameters(self) -> None:
+        if (
+            self._num_larger_choices ** (self._num_larger_choice_parameters - 1) *
+            self._num_smaller_choices ** (self._num_smaller_choice_parameters + 1) >
+            self._residual_space_size
         ):
-            num_lower_points_parameter += 1
-            num_upper_points_parameter -= 1
+            self._num_larger_choice_parameters -= 1
+            self._num_smaller_choice_parameters += 1
+            self._split_num_unspecified_parameters()
 
-        calculated_grid_points = (
-            [lower_points] * num_lower_points_parameter +
-            [upper_points] * num_upper_points_parameter
+    def _get_auto_defined_num_choices(self) -> list[int]:
+        nums_choices = (
+            [self._num_larger_choices] * self._num_larger_choice_parameters +
+            [self._num_smaller_choices] * self._num_smaller_choice_parameters
         )
-        return calculated_grid_points
-    else:
-        return []
+        return nums_choices
 
+    @property
+    def choices(self) -> list[list[GridValueType]]:
+        return [grid_condition.choices for grid_condition in self._conditions]
 
-def _generate_all_grid_points(
-    hyperparameters: list[HyperParameter],
-    suggested_nums_grid_points: list[int]
-) -> list[list[GridValueType]]:
-    grid_points: list[list[GridValueType]] = []
-    for hyperparameter in hyperparameters:
-        if hyperparameter.type in ('INT', 'FLOAT'):
-            if isinstance(hyperparameter.num_grid_points, int):
-                num = hyperparameter.num_grid_points
-            else:
-                num = suggested_nums_grid_points.pop()
-            if hyperparameter.log:
-                if hyperparameter.type == 'INT':
-                    grid_points.append(
-                        np.geomspace(hyperparameter.lower,
-                                     hyperparameter.upper, num,
-                                     dtype=int).tolist()
-                    )
-                else:
-                    grid_points.append(
-                        np.geomspace(hyperparameter.lower,
-                                     hyperparameter.upper, num,
-                                     dtype=float).tolist()
-                    )
-            else:
-                if hyperparameter.type == 'INT':
-                    grid_points.append(
-                        np.linspace(hyperparameter.lower,
-                                    hyperparameter.upper, num,
-                                    dtype=int).tolist()
-                    )
-                else:
-                    grid_points.append(
-                        np.linspace(hyperparameter.lower,
-                                    hyperparameter.upper, num,
-                                    dtype=float).tolist()
-                    )
-        elif hyperparameter.type == 'CATEGORICAL':
-            grid_points.append(hyperparameter.choices)
-        elif hyperparameter.type == 'ORDINAL':
-            grid_points.append(hyperparameter.sequence)
-    return grid_points
+    @property
+    def least_space_size(self) -> int:
+        return self._least_space_size
 
 
 class GridPointGenerator:
@@ -169,7 +195,7 @@ class GridPointGenerator:
                 - IN_ORDER (default) - Samples in order. If trial number is
                 smaller than the number of generated grid points, the grid
                 points near the edge of search space may be ignored.
-                - UUNIFORM - Samples after thin out the grid points and thus
+                - UNIFORM - Samples after thin out the grid points and thus
                 the ignored points does not gather cirtein region.
                 - RANDOM - Samples randomly.
                 - DUPLICATABLE_RANDOM - Samples randomly but choice duplication
@@ -199,40 +225,24 @@ class GridPointGenerator:
 
     def __init__(
         self,
+        num_trials: int,
         hyperparameters: list[HyperParameter],
-        trial_number: int,
         sampling_method: SamplingMethodType = 'IN_ORDER',
         rng: RandomState | None = None,
         accept_small_trial_number: bool = False
     ) -> None:
-        nums_fixed_grid_points = _count_fixed_grid_points(hyperparameters)
-        least_grid_space_size = int(np.prod(
-            nums_fixed_grid_points, where=np.array(nums_fixed_grid_points) != 0
-        ))
-
-        suggested_nums_grid_points = _suggest_nums_grid_points(
-            grid_space_size=trial_number,
-            least_grid_space_size=least_grid_space_size,
-            num_parameter=nums_fixed_grid_points.count(0),
-        )
-
-        self._point_list = _generate_all_grid_points(
-            hyperparameters, suggested_nums_grid_points
-        )
-
-        self._parameter_lengths = list(map(len, self._point_list))
-        self._grid_space_size = int(np.prod(self._parameter_lengths))
-
-        if trial_number < self._grid_space_size:
+        self._num_trials = num_trials
+        self._grid_condition_collection = GridConditionCollection(self._num_trials, hyperparameters)
+        if self._num_trials < self._grid_condition_collection.least_space_size:
             if not accept_small_trial_number:
                 raise ValueError(
-                    f'Too small "trial_num": {trial_number} (required '
-                    f'{least_grid_space_size} or greater). '
+                    f'Too small "trial_num": {self._num_trials} (required '
+                    f'{self._grid_condition_collection.least_space_size} or greater). '
                     'To proceed, use "--accept-small-trial-number" option.'
                 )
-
+        self._parameter_lengths = list(map(len, self._grid_condition_collection))
+        self._grid_space_size = int(np.prod(self._parameter_lengths))
         self._digits = np.cumprod(self._parameter_lengths[::-1])[-2::-1]
-        self._trial_number = trial_number
         self._sampling_method = sampling_method
         self._num_generated_points = 0
 
@@ -242,10 +252,9 @@ class GridPointGenerator:
             self._rng = rng
 
         if self._sampling_method == 'RANDOM':
-            self._grid_point_stack = list(product(*self._point_list))
+            self._grid_point_stack = list(product(*self._grid_condition_collection))
         else:
             self._grid_point_stack = []
-        self._generated_grid_point_stack: list[tuple[GridValueType]] = []
 
     def all_grid_points_generated(self) -> bool:
         """Whether all grid points are generated.
@@ -264,15 +273,19 @@ class GridPointGenerator:
         if self._sampling_method == 'IN_ORDER':
             next_grid_point = self._get_grid_point_in_order(
                 self._num_generated_points)
-        elif self._sampling_method == 'UUNIFORM':
-            next_grid_point = self._get_grid_point_thin_out(
+        elif self._sampling_method == 'UNIFORM':
+            next_grid_point = self._get_grid_point_uniformly(
                 self._num_generated_points)
         elif self._sampling_method == 'RANDOM':
-            next_grid_point = self._get_grid_point_random(
+            next_grid_point = self._get_grid_point_randomly(
                 self._num_generated_points)
-        else:  # self._sampling_method == 'DUPLICATABLE_RANDOM':
-            next_grid_point = self._get_grid_point_duplicatable_random(
+        elif self._sampling_method == 'DUPLICATABLE_RANDOM':
+            next_grid_point = self._get_grid_point_duplicatable_randomly(
                 self._num_generated_points
+            )
+        else:
+            raise ValueError(
+                f'Invalid sampling method: {self._sampling_method}'
             )
         self._num_generated_points += 1
         return next_grid_point
@@ -285,22 +298,22 @@ class GridPointGenerator:
             remain = trial_id % i
         indices.append(remain)
         next_grid_point = []
-        for index, param in zip(indices, self._point_list):
-            next_grid_point.append(param[index])
+        for index, param in zip(indices, self._grid_condition_collection):
+            next_grid_point.append(param.choices[index])
         return next_grid_point
 
-    def _get_grid_point_thin_out(self, trial_id: int) -> list[GridValueType]:
+    def _get_grid_point_uniformly(self, trial_id: int) -> list[GridValueType]:
         converted_trial_id = int(np.linspace(
-            0, self._grid_space_size - 1, self._trial_number, dtype=int
+            0, self._grid_space_size - 1, self._num_trials, dtype=int
         )[trial_id])
         return self._get_grid_point_in_order(converted_trial_id)
 
-    def _get_grid_point_random(self, trial_id: int) -> list[GridValueType]:
+    def _get_grid_point_randomly(self, trial_id: int) -> list[GridValueType]:
         index = self._rng.randint(0, len(self._grid_point_stack))
         next_grid_point = self._grid_point_stack.pop(index)
         return list(next_grid_point)
 
-    def _get_grid_point_duplicatable_random(self, trial_id: int) -> list[GridValueType]:
+    def _get_grid_point_duplicatable_randomly(self, trial_id: int) -> list[GridValueType]:
         index = self._rng.randint(0, self._grid_space_size)
         return self._get_grid_point_in_order(index)
 
