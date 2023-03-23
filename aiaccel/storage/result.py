@@ -1,11 +1,11 @@
 from __future__ import annotations
-from typing import Any
+
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage import Abstract
-from aiaccel.storage import ResultTable
+from aiaccel.storage import Abstract, ResultTable
 from aiaccel.util import retry
 
 
@@ -70,11 +70,11 @@ class Result(Abstract):
         return data.objective
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_all_result(self) -> list[Any]:
+    def get_all_result(self) -> dict[int, list[Any]]:
         """Get all results
 
         Returns:
-            list
+            dict[int, list[Any]]: trial_id and result values
         """
         with self.create_session() as session:
             data = (
@@ -83,7 +83,8 @@ class Result(Abstract):
             )
 
         # return [d.objective for d in data]
-        return data
+        # return data
+        return {d.trial_id: d.objective for d in data}
 
     def get_objectives(self) -> list[Any]:
         """Get all results in list.

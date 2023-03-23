@@ -54,6 +54,8 @@ class AbstractOptimizer(AbstractModule):
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
 
+        self._multiobjective = False
+
     def register_new_parameters(
         self,
         params: list[dict[str, float | int | str]]

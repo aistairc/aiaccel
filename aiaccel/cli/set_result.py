@@ -9,6 +9,16 @@ from aiaccel.parameter import load_parameter
 from aiaccel.util.filesystem import create_yaml
 
 
+def str_or_float_or_int(value):
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            return value
+
+
 def main() -> None:
     """Writes the result of a trial to a file.
     """
@@ -19,7 +29,7 @@ def main() -> None:
     parser.add_argument('--config', type=str, required=True)
     parser.add_argument('--start_time', type=str, default='', required=True)
     parser.add_argument('--end_time', type=str, default='', required=True)
-    parser.add_argument('--objective', type=float, default=None)
+    parser.add_argument('--objective', nargs='+', type=str_or_float_or_int, default=None)
     parser.add_argument('--error', type=str, default='')
     parser.add_argument('--exitcode', type=int, default=None)
 

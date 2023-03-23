@@ -51,31 +51,34 @@ class LocalModel(AbstractModel):
         Returns:
             None
         """
-        trial_id = obj.trial_id
-        stdouts = obj.th_oh.get_stdouts()
-        stderrs = obj.th_oh.get_stderrs()
-        start_time = str(obj.th_oh.get_start_time())
-        end_time = str(obj.th_oh.get_end_time())
-        exitcode = str(obj.th_oh.get_returncode())
-        params = obj.content['parameters']
+        trial_id: str = str(obj.trial_id)
+        stdouts: list = obj.th_oh.get_stdouts()
+        stderrs: list = obj.th_oh.get_stderrs()
+        start_time: str = str(obj.th_oh.get_start_time())
+        end_time: str = str(obj.th_oh.get_end_time())
+        exitcode: str = str(obj.th_oh.get_returncode())
+        params: list = obj.content['parameters']
+        objective: str = 'nan'
+        objectives: list[str] = []
 
-        if len(stdouts) == 0:
-            objective = 'nan'
-        else:
+        if len(stdouts) > 0:
             objective = stdouts[-1]  # TODO: fix
+            objective = objective.strip("[]")
+            objective = objective.replace(" ", "")
+            objectives = objective.split(",")
+
         error = '\n'.join(stderrs)
         output_file_path = str(obj.get_result_file_path())
         config_file_path = str(obj.config_path)
 
         args = {
             'file': output_file_path,
-            'trial_id': str(trial_id),
+            'trial_id': trial_id,
             'config': config_file_path,
             'start_time': start_time,
             'end_time': end_time,
-            'objective': objective,
             'error': error,
-            'exitcode': str(exitcode)
+            'exitcode': exitcode
         }
 
         if len(error) == 0:
@@ -88,6 +91,10 @@ class LocalModel(AbstractModel):
         for key in args.keys():
             commands.append('--' + key)
             commands.append(str(args[key]))
+
+        commands.append('--objective')
+        for objective in objectives:
+            commands.append(str(objective))
 
         for param in params:
             if 'parameter_name' in param.keys() and 'value' in param.keys():

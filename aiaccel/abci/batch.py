@@ -60,7 +60,7 @@ def create_abci_batch_file(
             '--config $config_file_path',
             '--start_time $start_time',
             '--end_time $end_time',
-            '--objective $y',
+            '--objective $ys',
             '--error $error',
             '--exitcode $exitcode',
             _generate_param_args(param_content['parameters'])
@@ -74,7 +74,7 @@ def create_abci_batch_file(
             '--config $config_file_path',
             '--start_time $start_time',
             '--end_time $end_time',
-            '--objective $y',
+            '--objective $ys',
             '--exitcode $exitcode',
             _generate_param_args(param_content['parameters'])
         ])
@@ -89,6 +89,7 @@ def create_abci_batch_file(
         'exitcode=$?',
         'result_array=($result)',
         'y=${result_array[${#result_array[@]}-1]}',
+        'ys=$(echo $y | tr -d "[]")',
         'error=`cat $error_file_path`',
         'end_time=`date "+%Y-%m-%d %H:%M:%S"`',
         'if [ -n "$error" ]; then',

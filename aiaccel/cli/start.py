@@ -8,8 +8,8 @@ from logging import StreamHandler, getLogger
 from pathlib import Path
 
 from aiaccel.cli import CsvWriter
-from aiaccel.common import goal_maximize, goal_minimize
-from aiaccel.config import Config
+from aiaccel.common import dict_lock, goal_maximize, goal_minimize
+from aiaccel.config import Config, is_multi_objective
 from aiaccel.master import create_master
 from aiaccel.optimizer import create_optimizer
 from aiaccel.scheduler import create_scheduler
@@ -17,12 +17,13 @@ from aiaccel.util import get_file_result_hp, load_yaml
 from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
-logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 logger.addHandler(StreamHandler())
 
 
-def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
-                       ) -> tuple[float | None, Path | None]:
+def get_best_parameter(
+    files: list[Path], goal: str, dict_lock: Path
+) -> tuple[float | None, Path | None]:
     """Get a best parameter in specified files.
 
     Args:
@@ -44,9 +45,9 @@ def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
     yml = load_yaml(files[0], dict_lock)
 
     try:
-        best = float(yml['result'])
+        best = float(yml["result"])
     except TypeError:
-        logger = getLogger('root.master.parameter')
+        logger = getLogger("root.master.parameter")
         logger.error(f'Invalid result: {yml["result"]}.')
         return None, None
 
@@ -54,7 +55,7 @@ def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
 
     for f in files[1:]:
         yml = load_yaml(f, dict_lock)
-        result = float(yml['result'])
+        result = float(yml["result"])
 
         if goal.lower() == goal_maximize:
             if best < result:
@@ -63,20 +64,19 @@ def get_best_parameter(files: list[Path], goal: str, dict_lock: Path
             if best > result:
                 best, best_file = result, f
         else:
-            logger = getLogger('root.master.parameter')
-            logger.error(f'Invalid goal: {goal}.')
-            raise ValueError(f'Invalid goal: {goal}.')
+            logger = getLogger("root.master.parameter")
+            logger.error(f"Invalid goal: {goal}.")
+            raise ValueError(f"Invalid goal: {goal}.")
 
     return best, best_file
 
 
 def main() -> None:  # pragma: no cover
-    """Parses command line options and executes optimization.
-    """
+    """Parses command line options and executes optimization."""
     parser = ArgumentParser()
-    parser.add_argument('--config', '-c', type=str, default="config.yml")
-    parser.add_argument('--resume', type=int, default=None)
-    parser.add_argument('--clean', nargs='?', const=True, default=False)
+    parser.add_argument("--config", "-c", type=str, default="config.yml")
+    parser.add_argument("--resume", type=int, default=None)
+    parser.add_argument("--clean", nargs="?", const=True, default=False)
     args = parser.parse_args()
 
     config = Config(args.config, warn=True, format_check=True)
@@ -86,12 +86,13 @@ def main() -> None:  # pragma: no cover
 
     workspace = Workspace(config.workspace.get())
     goal = config.goal.get()
+    path_to_lock_file = workspace.path / dict_lock
 
     if args.resume is None:
         if args.clean is True:
             logger.info("Cleaning workspace")
             workspace.clean()
-            logger.info(f'Workspace directory {str(workspace.path)} is cleaned.')
+            logger.info(f"Workspace directory {str(workspace.path)} is cleaned.")
         else:
             if workspace.exists():
                 logger.info("workspace exists.")
@@ -143,10 +144,12 @@ def main() -> None:  # pragma: no cover
     shutil.copy(Path(args.config), dst / config_name)
 
     files = get_file_result_hp(dst)
-    best, best_file = get_best_parameter(files, goal, workspace.lock)
 
-    logger.info(f"Best result    : {best_file}")
-    logger.info(f"               : {best}")
+    if is_multi_objective(config) is False:
+        best, best_file = get_best_parameter(files, goal, path_to_lock_file)
+        logger.info(f"Best result    : {best_file}")
+        logger.info(f"               : {best}")
+
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
     logger.info("Done.")
     return
