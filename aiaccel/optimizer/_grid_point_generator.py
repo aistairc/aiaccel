@@ -17,24 +17,23 @@ numeric_types = (float, int, np.floating, np.integer)
 
 
 def _make_numeric_choices(hyperparameter: HyperParameter, num_choices: int | None = None) -> list[GridValueType]:
-    choices: list[GridValueType] = []
+    casted_choices: list[GridValueType] = []
     start = hyperparameter.lower
     stop = hyperparameter.upper
     num = num_choices or int(hyperparameter.num_numeric_choices)
+    if hyperparameter.log:
+        choices = np.geomspace(start, stop, num)
+    else:
+        choices = np.linspace(start, stop, num)
     if hyperparameter.type == 'FLOAT':
-        dtype = float
+        casted_choices = list(map(float, choices))
     elif hyperparameter.type == 'INT':
-        dtype = int
+        casted_choices = list(map(int, choices))
     else:
         raise TypeError(
             f'Invalid parameter type "{hyperparameter.type}". "FLOAT" or "INT" required.'
         )
-    dtype = int if hyperparameter.type == 'INT' else float
-    if hyperparameter.log:
-        choices = np.geomspace(start, stop, num, dtype=dtype).tolist()
-    else:
-        choices = np.linspace(start, stop, num, dtype=dtype).tolist()
-    return choices
+    return casted_choices
 
 
 class GridCondition:
