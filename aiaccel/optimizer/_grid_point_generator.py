@@ -28,7 +28,7 @@ def _make_numeric_choices(hyperparameter: HyperParameter, num_choices: int | Non
     if hyperparameter.type == 'FLOAT':
         casted_choices = list(map(float, choices))
     elif hyperparameter.type == 'INT':
-        casted_choices = list(map(int, choices))
+        casted_choices = list(set(map(int, choices)))
     else:
         raise TypeError(
             f'Invalid parameter type "{hyperparameter.type}". "FLOAT" or "INT" required.'

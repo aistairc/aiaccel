@@ -27,17 +27,17 @@ parameter_conditions1 = [
     ('FLOAT', 0.0, 1.0, None, False, 20, np.linspace(0.0, 1.0, 20).tolist()),
     ('FLOAT', 0.1, 1.0, 10, True, None, np.geomspace(0.1, 1.0, 10).tolist()),
     ('FLOAT', 0.1, 1.0, None, True, 20, np.geomspace(0.1, 1.0, 20).tolist()),
-    ('INT', 0, 10, 10, False, None, np.linspace(0, 10, 10, dtype=int).tolist()),
-    ('INT', 0, 10, None, False, 20, np.linspace(0, 10, 20, dtype=int).tolist()),
-    ('INT', 1, 10, 10, True, None, np.geomspace(1, 10, 10, dtype=int).tolist()),
-    ('INT', 1, 10, None, True, 20, np.geomspace(1, 10, 20, dtype=int).tolist()),
+    ('INT', 0, 10, 10, False, None, list(set(np.linspace(0, 10, 10, dtype=int)))),
+    ('INT', 0, 10, None, False, 20, list(set(np.linspace(0, 10, 20, dtype=int)))),
+    ('INT', 1, 10, 10, True, None, list(set(np.geomspace(1, 10, 10, dtype=int)))),
+    ('INT', 1, 10, None, True, 20, list(set(np.geomspace(1, 10, 20, dtype=int))))
 ]
 
 condition_key2 = 'parameter_type, lower, upper, num_numeric_choices, log, choices, sequence, expect'
 parameter_conditions2 = [
     ('FLOAT', 0.0, 1.0, 10, False, None, None, np.linspace(0.0, 1.0, 10).tolist()),
     ('FLOAT', 0.0, 1.0, None, False, None, None, []),
-    ('INT', 0, 10, 10, False, None, None, np.linspace(0, 10, 10, dtype=int).tolist()),
+    ('INT', 0, 10, 10, False, None, None, list(set(np.linspace(0, 10, 10, dtype=int)))),
     ('INT', 0, 10, None, False, None, None, []),
     ('CATEGORICAL', None, None, None, None, ['a', 'b'], None, ['a', 'b']),
     ('ORDINAL', None, None, None, None, None, [0, 1], [0, 1])
@@ -47,8 +47,8 @@ condition_key3 = 'num_trials, parameter_type, lower, upper, num_numeric_choices,
 parameter_conditions3 = [
     (10, 'FLOAT', 0.0, 1.0, 10, False, None, None, np.linspace(0.0, 1.0, 10).tolist()),
     (10, 'FLOAT', 0.0, 1.0, None, False, None, None, np.linspace(0.0, 1.0, 10).tolist()),
-    (10, 'INT', 0, 10, 10, False, None, None, np.linspace(0, 10, 10, dtype=int).tolist()),
-    (10, 'INT', 0, 10, None, False, None, None, np.linspace(0, 10, 10, dtype=int).tolist()),
+    (10, 'INT', 0, 10, 10, False, None, None, list(set(np.linspace(0, 10, 10, dtype=int)))),
+    (10, 'INT', 0, 10, None, False, None, None, list(set(np.linspace(0, 10, 10, dtype=int)))),
     (10, 'CATEGORICAL', None, None, None, None, ['a', 'b'], None, ['a', 'b']),
     (10, 'ORDINAL', None, None, None, None, None, [0, 1], [0, 1])
 ]
