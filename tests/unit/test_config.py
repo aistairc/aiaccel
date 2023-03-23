@@ -12,6 +12,7 @@ class TestConfig(BaseTest):
         assert type(config) is omegaconf.dictconfig.DictConfig
         assert type(config.generic.workspace) is str
         assert type(config.resource.num_node) is int
+        assert type(config.optimize.parameters) is omegaconf.listconfig.ListConfig
         assert type(config.optimize.parameters[0].lower) is float
 
         # typo config (typo trial_number)
