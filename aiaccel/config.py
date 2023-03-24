@@ -8,6 +8,7 @@ from typing import Any, List, Optional, Union
 
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
+from omegaconf.base import Container
 
 
 class ResourceType(Enum):
@@ -152,7 +153,7 @@ class Config:
     config_path: Optional[Union[None, Path, str]]
 
 
-def set_structs_false(conf):
+def set_structs_false(conf: Container) -> None:
     OmegaConf.set_struct(conf, False)
     if hasattr(conf, "__iter__"):
         for item in conf:
@@ -178,8 +179,8 @@ def load_config(config_path: str) -> DictConfig | None:
     customize = OmegaConf.load(path)
     customize.config_path = str(path)
 
-    tmp_config = OmegaConf.merge(base, default)
-    set_structs_false(tmp_config)
-    config = OmegaConf.merge(tmp_config, customize)
+    config = OmegaConf.merge(base, default)
+    set_structs_false(config)
+    config = OmegaConf.merge(config, customize)
 
     return config
