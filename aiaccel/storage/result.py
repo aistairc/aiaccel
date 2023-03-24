@@ -82,9 +82,8 @@ class Result(Abstract):
                 .with_for_update(read=True)
             )
 
-        # return [d.objective for d in data]
-        # return data
-        return {d.trial_id: d.objective for d in data}
+        # return {d.trial_id: d.objective for d in data}
+        return data
 
     def get_objectives(self) -> list[Any]:
         """Get all results in list.
