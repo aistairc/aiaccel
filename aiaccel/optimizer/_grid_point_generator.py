@@ -88,7 +88,7 @@ class FloatGridCondition(GridCondition):
             self._num_choices = 0
 
 
-def _cast_start_stop_to_integer(start: GridValueType, stop: GridValueType) -> tuple[int, int]:
+def _cast_start_stop_to_integer(start: NumericType, stop: NumericType) -> tuple[int, int]:
     start, stop = sorted([start, stop])
     if start < 0:
         start = int(start)
@@ -236,7 +236,7 @@ class GridConditionCollection:
         is_updatable = False
         for grid_condition in self._conditions:
             grid_space_size *= grid_condition.num_choices
-            is_updatable += grid_condition.is_updatable()
+            is_updatable |= grid_condition.is_updatable()
         if is_updatable and grid_space_size < self._num_trials:
             self._set_num_choices(grid_conditions_with_empty_choices)
 
