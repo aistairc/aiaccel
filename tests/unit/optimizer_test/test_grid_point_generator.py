@@ -10,153 +10,425 @@ import pytest
 from numpy.random import RandomState
 
 from aiaccel.config import Config
-from aiaccel.optimizer._grid_point_generator import _make_numeric_choices
 from aiaccel.optimizer._grid_point_generator import GridCondition
+from aiaccel.optimizer._grid_point_generator import FloatGridCondition
+from aiaccel.optimizer._grid_point_generator import IntGridCondition
+from aiaccel.optimizer._grid_point_generator import CategoricalGridCondition
+from aiaccel.optimizer._grid_point_generator import OrdinalGridCondition
 from aiaccel.optimizer._grid_point_generator import GridConditionCollection
 from aiaccel.optimizer._grid_point_generator import GridPointGenerator
+from aiaccel.optimizer._grid_point_generator import _cast_start_stop_to_integer
+from aiaccel.optimizer._grid_point_generator import _create_grid_condition
 from aiaccel.optimizer._grid_point_generator import GridValueType
+from aiaccel.optimizer._grid_point_generator import NumericType
 from aiaccel.parameter import HyperParameter
 from aiaccel.parameter import load_parameter
 
 from tests.base_test import BaseTest
 
 
-condition_key1 = 'parameter_type, lower, upper, num_numeric_choices, log, num_choices, expect'
-parameter_conditions1 = [
-    ('FLOAT', 0.0, 1.0, 10, False, None, np.linspace(0.0, 1.0, 10).tolist()),
-    ('FLOAT', 0.0, 1.0, None, False, 20, np.linspace(0.0, 1.0, 20).tolist()),
-    ('FLOAT', 0.1, 1.0, 10, True, None, np.geomspace(0.1, 1.0, 10).tolist()),
-    ('FLOAT', 0.1, 1.0, None, True, 20, np.geomspace(0.1, 1.0, 20).tolist()),
-    ('INT', 0, 10, 10, False, None, list(set(np.linspace(0, 10, 10, dtype=int)))),
-    ('INT', 0, 10, None, False, 20, list(set(np.linspace(0, 10, 20, dtype=int)))),
-    ('INT', 1, 10, 10, True, None, list(set(np.geomspace(1, 10, 10, dtype=int)))),
-    ('INT', 1, 10, None, True, 20, list(set(np.geomspace(1, 10, 20, dtype=int))))
+class TestGridCondition:
+    @pytest.fixture(autouse=True)
+    def setup(self, request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
+        self.choices = [0, 1, 2]
+        self.num_choices = len(self.choices)
+        self.hyperparameter = HyperParameter(
+            {
+                'name': 'test',
+                'type': "FLOAT",
+                'lower': None,
+                'upper': None,
+                'log': None,
+                'num_numeric_choices': None,
+                'choices': None,
+                'sequence': None
+            }
+        )
+        if "noautouse" in request.keywords:
+            yield
+        else:
+            with monkeypatch.context() as m:
+                m.setattr(GridCondition, "__abstractmethods__", set())
+                self.grid_condition = GridCondition(self.hyperparameter)
+                yield
+        self.choices = None
+        self.num_choices = None
+        self.hyperparameter = None
+        self.grid_condition = None
+
+    @pytest.mark.noautouse
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with pytest.raises(TypeError):
+            _ = GridCondition(self.hyperparameter)
+
+        with monkeypatch.context() as m:
+            m.setattr(GridCondition, "__abstractmethods__", set())
+            grid_condition = GridCondition(self.hyperparameter)
+            assert grid_condition.choices == []
+            assert grid_condition.num_choices == 0
+
+    def test_iter(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.grid_condition, "_choices", self.choices)
+            for i, choice in enumerate(self.grid_condition):
+                assert choice == self.choices[i]
+
+    def test_len(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.grid_condition, "_num_choices", self.num_choices)
+            assert len(self.grid_condition) == self.num_choices
+
+    def test_has_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            assert self.grid_condition.has_choices() is False
+            m.setattr(self.grid_condition, "_choices", self.choices)
+            assert self.grid_condition.has_choices() is True
+
+    def test_has_num_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            assert self.grid_condition.has_num_choices() is False
+            m.setattr(self.grid_condition, "_num_choices", self.num_choices)
+            assert self.grid_condition.has_num_choices() is True
+
+    def test_is_updatable(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            assert self.grid_condition.is_updatable() is True
+            m.setattr(self.grid_condition, "_num_choices", 1)
+            m.setattr(self.grid_condition, "_max_num_choices", 1)
+            assert self.grid_condition.is_updatable() is False
+
+    def test_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        grid_condition = GridCondition(self.hyperparameter)
+        with monkeypatch.context() as m:
+            m.setattr(grid_condition, "_choices", self.choices)
+            assert grid_condition.choices == self.choices
+        grid_condition.choices = self.choices
+        assert grid_condition._choices == self.choices
+
+    def test_num_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        grid_condition = GridCondition(self.hyperparameter)
+        with monkeypatch.context() as m:
+            m.setattr(grid_condition, "_num_choices", self.num_choices)
+            assert grid_condition.num_choices == self.num_choices
+        grid_condition.num_choices = self.num_choices
+        assert grid_condition._num_choices == self.num_choices
+
+
+argnames_float_grid_condition_set_choices = "has_num_choices, num_choices, log, num_numeric_choices, choices"
+argvalues_float_grid_condition_set_choices = [
+    (False, None, False, None, []),
+    (False, None, False, 10, list(map(float, np.linspace(1.0, 10.0, 10)))),
+    (False, None, True, None, []),
+    (False, None, True, 10, list(map(float, np.geomspace(1.0, 10.0, 10)))),
+    (True, 100, False, None, list(map(float, np.linspace(1.0, 10.0, 100)))),
+    (True, 100, True, None, list(map(float, np.geomspace(1.0, 10.0, 100))))
 ]
 
-condition_key2 = 'parameter_type, lower, upper, num_numeric_choices, log, choices, sequence, expect'
-parameter_conditions2 = [
-    ('FLOAT', 0.0, 1.0, 10, False, None, None, np.linspace(0.0, 1.0, 10).tolist()),
-    ('FLOAT', 0.0, 1.0, None, False, None, None, []),
-    ('INT', 0, 10, 10, False, None, None, list(set(np.linspace(0, 10, 10, dtype=int)))),
-    ('INT', 0, 10, None, False, None, None, []),
-    ('CATEGORICAL', None, None, None, None, ['a', 'b'], None, ['a', 'b']),
-    ('ORDINAL', None, None, None, None, None, [0, 1], [0, 1])
+
+class TestFloatGridCondition:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> Generator[None, None, None]:
+        self.hyperparameter = HyperParameter(
+            {
+                "name": "test",
+                "type": "FLOAT",
+                "lower": 1.0,
+                "upper": 10.0,
+                "log": None,
+                "num_numeric_choices": None,
+                "choices": None,
+                "sequence": None
+            }
+        )
+        yield
+        self.hyperparameter = None
+
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            args = []
+            m.setattr(GridCondition, "__init__", lambda _, hyperparameter: args.append(hyperparameter))
+            _ = FloatGridCondition(self.hyperparameter)
+            assert args == [self.hyperparameter]
+
+    @pytest.mark.parametrize(
+        argnames=argnames_float_grid_condition_set_choices,
+        argvalues=argvalues_float_grid_condition_set_choices
+    )
+    def test_set_choices(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        has_num_choices: bool,
+        num_choices: int | None,
+        log: bool,
+        num_numeric_choices: int | None,
+        choices: list[float]
+    ) -> None:
+        hyperparameter = HyperParameter(
+            {
+                "name": "test",
+                "type": "FLOAT",
+                "lower": 1.0,
+                "upper": 10.0,
+                "log": log,
+                "num_numeric_choices": num_numeric_choices,
+            }
+        )
+        grid_condition = FloatGridCondition(hyperparameter)
+        with monkeypatch.context() as m:
+            m.setattr(grid_condition, "has_num_choices", lambda: has_num_choices)
+            m.setattr(grid_condition, "_num_choices", num_choices)
+            grid_condition.set_choices(hyperparameter)
+            assert grid_condition.choices == choices
+
+    def test_num_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        hyperparameter = HyperParameter(
+            {
+                "name": "test",
+                "type": "FLOAT",
+                "lower": 1.0,
+                "upper": 10.0,
+                "log": False,
+                "num_numeric_choices": None,
+            }
+        )
+        grid_condition = FloatGridCondition(hyperparameter)
+        with monkeypatch.context() as m:
+            m.setattr(grid_condition, "_num_choices", 10)
+            assert grid_condition.num_choices == 10
+        grid_condition.num_choices = 10.1
+        assert grid_condition._num_choices == 10
+        grid_condition.num_choices = -1
+        assert grid_condition._num_choices == 0
+
+
+argnames_cast_start_stop_to_integer = "start, stop, expect"
+argvalues_cast_start_stop_to_integer = [
+    (-1, -3, (-3, -1)),
+    (-1, 1, (-1, 1)),
+    (1, 3, (1, 3)),
+    (1.5, 3.5, (2, 3)),
+    (-1.5, -3.5, (-3, -2)),
+    (-1.5, 1.5, (-1, 1)),
 ]
 
-condition_key3 = 'num_trials, parameter_type, lower, upper, num_numeric_choices, log, choices, sequence, expect'
-parameter_conditions3 = [
-    (10, 'FLOAT', 0.0, 1.0, 10, False, None, None, np.linspace(0.0, 1.0, 10).tolist()),
-    (10, 'FLOAT', 0.0, 1.0, None, False, None, None, np.linspace(0.0, 1.0, 10).tolist()),
+
+@pytest.mark.parametrize(
+    argnames=argnames_cast_start_stop_to_integer,
+    argvalues=argvalues_cast_start_stop_to_integer
+)
+def test_cast_start_stop_to_integer(start: NumericType, stop: NumericType, expect: tuple[int, int]):
+    assert _cast_start_stop_to_integer(start, stop) == expect
+
+
+argnames_int_grid_condition_set_choices = (
+    "has_num_choices, num_choices, lower, upper, log, num_numeric_choices, choices"
+)
+argvalues_int_grid_condition_set_choices = [
+    (False, None, 1, 10, False, None, []),
+    (False, None, 1, 10, False, 10, list(set(map(int, np.linspace(1, 10, 10))))),
+    (False, None, -1, -3, False, 10, [-3, -2, -1]),
+    (False, None, -1, 1, False, 10, [-1, 0, 1]),
+    (False, None, 1, 3, False, 10, [1, 2, 3]),
+    (False, None, 1.5, 3.5, False, 10, [2, 3]),
+    (False, None, -1.5, -3.5, False, 10, [-3, -2]),
+    (False, None, -1.5, 1.5, False, 10, [-1, 0, 1]),
+    (False, None, 1, 10, True, None, []),
+    (False, None, 1, 10, True, 10, list(set(map(int, np.geomspace(1, 10, 10))))),
+    (True, 100, 1, 10, False, None, list(set(map(int, np.linspace(1, 10, 100))))),
+    (True, 100, 1, 10, False, None, list(set(map(int, np.linspace(1, 10, 100))))),
+]
+
+
+class TestIntGridCondition:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> Generator[None, None, None]:
+        self.choices = [0, 1, 2]
+        self.num_choices = len(self.choices)
+        self.hyperparameter = HyperParameter(
+            {
+                "name": "test",
+                "type": "INT",
+                "lower": 1.0,
+                "upper": 10.0,
+                "log": None,
+                "num_numeric_choices": None,
+                "choices": None,
+                "sequence": None
+            }
+        )
+        yield
+        self.choices = None
+        self.num_choices = None
+        self.hyperparameter = None
+
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            args = []
+            m.setattr(GridCondition, "__init__", lambda _, hyperparameter: args.append(hyperparameter))
+            _ = IntGridCondition(self.hyperparameter)
+            assert args == [self.hyperparameter]
+
+    @pytest.mark.parametrize(
+        argnames=argnames_int_grid_condition_set_choices,
+        argvalues=argvalues_int_grid_condition_set_choices
+    )
+    def test_set_choices(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        has_num_choices: bool,
+        num_choices: int | None,
+        lower: NumericType,
+        upper: NumericType,
+        log: bool,
+        num_numeric_choices: int | None,
+        choices: list[float]
+    ) -> None:
+        hyperparameter = HyperParameter(
+            {
+                "name": "test",
+                "type": "INT",
+                "lower": lower,
+                "upper": upper,
+                "log": log,
+                "num_numeric_choices": num_numeric_choices,
+            }
+        )
+        grid_condition = IntGridCondition(hyperparameter)
+        with monkeypatch.context() as m:
+            m.setattr(grid_condition, "has_num_choices", lambda: has_num_choices)
+            m.setattr(grid_condition, "_num_choices", num_choices)
+            grid_condition.set_choices(hyperparameter)
+            assert grid_condition.choices == choices
+
+    def test_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        grid_condition = IntGridCondition(self.hyperparameter)
+        with monkeypatch.context() as m:
+            m.setattr(grid_condition, "_choices", self.choices)
+            assert grid_condition.choices == self.choices
+        grid_condition.choices = self.choices
+        assert grid_condition._choices == self.choices
+        assert grid_condition._num_choices == self.num_choices
+
+    def test_num_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        grid_condition = IntGridCondition(self.hyperparameter)
+        with monkeypatch.context() as m:
+            m.setattr(grid_condition, "_num_choices", self.num_choices)
+            assert grid_condition.num_choices == self.num_choices
+        grid_condition.num_choices = 5.1
+        assert grid_condition._num_choices == 5
+        grid_condition.num_choices = 100
+        assert grid_condition._num_choices == grid_condition._max_num_choices
+        grid_condition.num_choices = -1
+        assert grid_condition._num_choices == 0
+
+
+class TestCategoricalGridCondition:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> Generator[None, None, None]:
+        self.choices = [0, 1, 2]
+        self.num_choices = len(self.choices)
+        self.hyperparameter = HyperParameter(
+            {
+                "name": "test",
+                "type": "CATEGORICAL",
+                "choices": self.choices,
+            }
+        )
+        yield
+        self.choices = None
+        self.num_choices = None
+        self.hyperparameter = None
+
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            args = []
+            m.setattr(GridCondition, "__init__", lambda _, hyperparameter: args.append(hyperparameter))
+            _ = CategoricalGridCondition(self.hyperparameter)
+            assert args == [self.hyperparameter]
+
+    def test_set_choices(self) -> None:
+        grid_condition = CategoricalGridCondition(self.hyperparameter)
+        assert grid_condition.choices == self.choices
+        assert grid_condition.num_choices == self.num_choices
+
+
+class TestOrdinalGridCondition:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> Generator[None, None, None]:
+        self.choices = [0, 1, 2]
+        self.num_choices = len(self.choices)
+        self.hyperparameter = HyperParameter(
+            {
+                "name": "test",
+                "type": "ORDINAL",
+                "sequence": self.choices,
+            }
+        )
+        yield
+        self.choices = None
+        self.num_choices = None
+        self.hyperparameter = None
+
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            args = []
+            m.setattr(GridCondition, "__init__", lambda _, hyperparameter: args.append(hyperparameter))
+            _ = OrdinalGridCondition(self.hyperparameter)
+            assert args == [self.hyperparameter]
+
+    def test_set_choices(self) -> None:
+        grid_condition = OrdinalGridCondition(self.hyperparameter)
+        assert grid_condition.choices == self.choices
+        assert grid_condition.num_choices == self.num_choices
+
+
+def test_create_grid_condition(monkeypatch: pytest.MonkeyPatch) -> None:
+    hyperparameter = HyperParameter(
+        {
+            "name": "test",
+            "type": "FLOAT"
+        }
+    )
+    with monkeypatch.context() as m:
+        m.setattr(GridCondition, "__init__", lambda *_: None)
+        hyperparameter.type = "FLOAT"
+        grid_condition = _create_grid_condition(hyperparameter)
+        assert isinstance(grid_condition, FloatGridCondition)
+        hyperparameter.type = "INT"
+        grid_condition = _create_grid_condition(hyperparameter)
+        assert isinstance(grid_condition, IntGridCondition)
+        hyperparameter.type = "CATEGORICAL"
+        grid_condition = _create_grid_condition(hyperparameter)
+        assert isinstance(grid_condition, CategoricalGridCondition)
+        hyperparameter.type = "ORDINAL"
+        grid_condition = _create_grid_condition(hyperparameter)
+        assert isinstance(grid_condition, OrdinalGridCondition)
+        with pytest.raises(TypeError):
+            hyperparameter.type = "INVALID"
+            _ = _create_grid_condition(hyperparameter)
+
+
+argnames_grid_condition_collection_register = (
+    'num_trials, parameter_type, lower, upper, num_numeric_choices, log, choices, sequence, expect'
+)
+argvalues_grid_condition_collection_register = [
+    (10, 'FLOAT', 0.0, 1.0, 10, False, None, None, list(map(float, np.linspace(0.0, 1.0, 10)))),
+    (10, 'FLOAT', 0.0, 1.0, None, False, None, None, list(map(float, np.linspace(0.0, 1.0, 10)))),
     (10, 'INT', 0, 10, 10, False, None, None, list(set(np.linspace(0, 10, 10, dtype=int)))),
     (10, 'INT', 0, 10, None, False, None, None, list(set(np.linspace(0, 10, 10, dtype=int)))),
     (10, 'CATEGORICAL', None, None, None, None, ['a', 'b'], None, ['a', 'b']),
     (10, 'ORDINAL', None, None, None, None, None, [0, 1], [0, 1])
 ]
 
-sampling_condition_key = 'sampling_method, rng'
-sampling_methods = [
-    ('IN_ORDER', None),
-    ('UNIFORM', None),
-    ('RANDOM', RandomState(42)),
-    ('DUPLICATABLE_RANDOM', RandomState(42)),
-    ('INVALID', None)
-]
 
-
-@ pytest.mark.parametrize(condition_key1, parameter_conditions1)
-def test_make_numeric_choices(
-    parameter_type: Literal['FLOAT', 'INT'],
-    lower: float | int,
-    upper: float | int,
-    num_numeric_choices: int,
-    log: bool,
-    num_choices: int | None,
-    expect: list[GridValueType]
-) -> None:
-    hyperparameter = HyperParameter(
-        {
-            'name': 'test',
-            'type': parameter_type,
-            'lower': lower,
-            'upper': upper,
-            'log': log,
-            'num_numeric_choices': num_numeric_choices
-        }
-    )
-    choices = _make_numeric_choices(hyperparameter, num_choices)
-    assert choices == expect
-
-    hyperparameter.type = 'INVALID'
-    with pytest.raises(TypeError):
-        _ = _make_numeric_choices(hyperparameter, num_choices)
-
-
-class TestGridCondition(BaseTest):
-    @pytest.mark.parametrize(condition_key2, parameter_conditions2)
-    def test_init(
-        self,
-        parameter_type: Literal['FLOAT', 'INT', 'CATEGORICAL', 'ORDINAL'],
-        lower: float | int | None,
-        upper: float | int | None,
-        num_numeric_choices: int | None,
-        log: bool | None,
-        choices: list[GridValueType] | None,
-        sequence: list[GridValueType] | None,
-        expect: list[GridValueType]
-    ) -> None:
-        hyperparameter = HyperParameter(
-            {
-                'name': 'test',
-                'type': parameter_type,
-                'lower': lower,
-                'upper': upper,
-                'log': log,
-                'num_numeric_choices': num_numeric_choices,
-                'choices': choices,
-                'sequence': sequence
-            }
-        )
-        grid_condition = GridCondition(hyperparameter)
-        assert grid_condition.choices == expect
-
-        hyperparameter.type = 'INVALID'
-        with pytest.raises(TypeError):
-            _ = GridCondition(hyperparameter)
-
-    def test_iter(self) -> None:
-        choices = ["a", "b", "c"]
-        hyperparameter = HyperParameter(
-            {
-                "name": "test",
-                "type": "CATEGORICAL",
-                "choices": choices
-            }
-        )
-        grid_condition = GridCondition(hyperparameter)
-        for i, item in enumerate(grid_condition):
-            assert item == choices[i]
-
-    def test_len(self) -> None:
-        choices = ["1", "2", "3"]
-        hyperparameter = HyperParameter(
-            {
-                "name": "test",
-                "type": "CATEGORICAL",
-                "choices": choices
-            }
-        )
-        grid_condition = GridCondition(hyperparameter)
-        assert len(grid_condition) == len(choices)
-
-
-class TestGridConditionCollection(BaseTest):
-    @pytest.fixture(autouse=True)
-    def setup_hyperparameters(self):
+class TestGridConditionCollection:
+    @ pytest.fixture(autouse=True)
+    def setup_hyperparameters(self, request: pytest.FixtureRequest) -> Generator[None, None, None]:
         self.hyperparameters = [
             HyperParameter(
                 {
                     'name': 'test',
-                    'type': 'FLOAT',
+                    'type': 'INT',
                     'lower': 0.0,
                     'upper': 1.0,
                     'log': False,
@@ -164,26 +436,38 @@ class TestGridConditionCollection(BaseTest):
                 }
             )
         ]
+        if "noautouse" in request.keywords:
+            yield
+        else:
+            self.grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
+            yield
+        self.hyperparameters = None
+        self.grid_condition_collection = None
 
-    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    @pytest.mark.noautouse
+    def test_init(self) -> None:
         grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
-        assert grid_condition_collection.num_trials == 100
+        assert grid_condition_collection._num_trials == 100
         assert len(grid_condition_collection._conditions) == 1
 
-        with monkeypatch.context() as m:
-            m.setattr(GridConditionCollection, '_register_grid_conditions', lambda *_: [1])
-            with pytest.raises(ValueError):
-                _ = GridConditionCollection(100, self.hyperparameters)
-
     def test_iter(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
         conditions = [1, 2, 3]
         with monkeypatch.context() as m:
-            m.setattr(grid_condition_collection, '_conditions', conditions)
-            for i, condition in enumerate(grid_condition_collection):
+            m.setattr(self.grid_condition_collection, "_conditions", conditions)
+            for i, condition in enumerate(self.grid_condition_collection):
                 assert condition == conditions[i]
 
-    @pytest.mark.parametrize(condition_key3, parameter_conditions3)
+    def test_len(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        assert len(self.grid_condition_collection) == 1
+        conditions = [1, 2, 3]
+        with monkeypatch.context() as m:
+            m.setattr(self.grid_condition_collection, "_conditions", conditions)
+            assert len(self.grid_condition_collection) == len(conditions)
+
+    @pytest.mark.parametrize(
+        argnames_grid_condition_collection_register,
+        argvalues_grid_condition_collection_register
+    )
     def test_register_grid_conditions(
         self,
         num_trials: int,
@@ -213,72 +497,65 @@ class TestGridConditionCollection(BaseTest):
         grid_condition_collection = GridConditionCollection(num_trials, hyperparameters)
         assert grid_condition_collection.choices[0] == expect
 
-    def test_update_least_space_size(self) -> None:
-        grid_condition = GridCondition(self.hyperparameters[0])
-        grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
+    def test_get_grid_conditions_with_empty_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        conditions = [
+            FloatGridCondition(
+                HyperParameter(
+                    {
+                        "name": "x1",
+                        "type": "FLOAT",
+                        "lower": 0.0,
+                        "upper": 1.0,
+                        "log": False
+                    }
+                )
+            ),
+            CategoricalGridCondition(
+                HyperParameter(
+                    {
+                        "name": "x0",
+                        "type": "CATEGORICAL",
+                        "choices": [0, 1, 2]
+                    }
+                )
+            )
+        ]
+        with monkeypatch.context() as m:
+            m.setattr(self.grid_condition_collection, "_conditions", conditions)
+            empty_grid_conditions = self.grid_condition_collection._get_grid_conditions_with_empty_choices()
+            assert empty_grid_conditions == [conditions[0]]
 
-        grid_condition_collection._least_space_size = 1
-        grid_condition.num_choices = 2
-        grid_condition_collection._update_least_space_size(grid_condition)
-        assert grid_condition_collection._least_space_size == 2
+    def test_set_num_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        conditions = [
+            FloatGridCondition(
+                HyperParameter(
+                    {
+                        "name": "x1",
+                        "type": "FLOAT",
+                        "lower": 0.0,
+                        "upper": 1.0,
+                        "log": False
+                    }
+                )
+            )
+        ]
+        with monkeypatch.context() as m:
+            m.setattr(self.grid_condition_collection, "_conditions", conditions)
+            self.grid_condition_collection._set_num_choices(conditions)
+            assert conditions[0].num_choices == 100
 
-        grid_condition_collection._least_space_size = 1
-        grid_condition.num_choices = 0
-        grid_condition_collection._update_least_space_size(grid_condition)
-        assert grid_condition_collection._least_space_size == 1
+    def test_choices(self) -> None:
+        pass
 
-    def test_update_unspecified_parameters(self) -> None:
-        grid_condition = GridCondition(self.hyperparameters[0])
-        grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
 
-        grid_condition_collection._num_unspecified_parameters = 0
-        grid_condition.num_choices = 1
-        grid_condition_collection._num_larger_choice_parameters = 0
-        grid_condition_collection._update_num_unspecified_parameters(grid_condition)
-        assert grid_condition_collection._num_unspecified_parameters == 0
-        assert grid_condition_collection._num_larger_choice_parameters == 0
-
-        grid_condition.num_choices = 0
-        grid_condition_collection._update_num_unspecified_parameters(grid_condition)
-        assert grid_condition_collection._num_unspecified_parameters == 1
-        assert grid_condition_collection._num_larger_choice_parameters == 1
-
-    def test_update_residual_space_size(self) -> None:
-        grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
-        grid_condition_collection._residual_space_size = 100
-        grid_condition_collection._least_space_size = 10
-        grid_condition_collection._update_residual_space_size()
-        assert grid_condition_collection._residual_space_size == 10
-
-    def test_calc_num_choices(self) -> None:
-        grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
-        grid_condition_collection._num_larger_choices = 1
-        grid_condition_collection._num_smaller_choices = 0
-        grid_condition_collection._num_unspecified_parameters = 2
-        grid_condition_collection._residual_space_size = 10.0
-        grid_condition_collection._calc_num_choices()
-        assert grid_condition_collection._num_larger_choices == 4
-        assert grid_condition_collection._num_smaller_choices == 3
-
-    def test_split_num_unspecified_parameters(self) -> None:
-        grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
-        grid_condition_collection._num_larger_choices = 3
-        grid_condition_collection._num_smaller_choices = 2
-        grid_condition_collection._num_larger_choice_parameters = 5
-        grid_condition_collection._num_smaller_choice_parameters = 0
-        grid_condition_collection._residual_space_size = 100.0
-        grid_condition_collection._split_num_unspecified_parameters()
-        assert grid_condition_collection._num_larger_choice_parameters == 3
-        assert grid_condition_collection._num_smaller_choice_parameters == 2
-
-    def test_get_auto_defined_num_choices(self) -> None:
-        grid_condition_collection = GridConditionCollection(100, self.hyperparameters)
-        grid_condition_collection._num_larger_choices = 3
-        grid_condition_collection._num_smaller_choices = 2
-        grid_condition_collection._num_larger_choice_parameters = 3
-        grid_condition_collection._num_smaller_choice_parameters = 2
-        nums_choices = grid_condition_collection._get_auto_defined_num_choices()
-        assert nums_choices == [3, 3, 3, 2, 2]
+argnames_grid_point_generator = 'sampling_method, rng'
+argvalues_grid_point_generator = [
+    ('IN_ORDER', None),
+    ('UNIFORM', None),
+    ('RANDOM', RandomState(42)),
+    ('DUPLICATABLE_RANDOM', RandomState(42)),
+    ('INVALID', None)
+]
 
 
 class TestGridPointGenerator(BaseTest):
@@ -348,7 +625,7 @@ class TestGridPointGenerator(BaseTest):
             )
             assert self.grid_point_generator.all_grid_points_generated()
 
-    @ pytest.mark.parametrize(sampling_condition_key, sampling_methods)
+    @ pytest.mark.parametrize(argnames_grid_point_generator, argvalues_grid_point_generator)
     def test_get_next_grid_point(
         self,
         sampling_method: Literal['IN_ORDER', 'UNIFORM', 'RANDOM', 'DUPLICATABLE_RANDOM', 'INVALID'],
