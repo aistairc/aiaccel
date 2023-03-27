@@ -1,8 +1,8 @@
+import warnings
+
 import numpy as np
 import pytest
-from aiaccel.config import Config
 from aiaccel.optimizer.motpe_optimizer import MOTpeOptimizer
-from aiaccel.parameter import load_parameter
 
 from tests.base_test import BaseTest
 from unittest.mock import patch
@@ -22,7 +22,7 @@ class TestMOTpeOptimizer(BaseTest):
             'process_name': 'optimizer',
         }
         self.optimizer = MOTpeOptimizer(self.options)
-        #self.optimizer.config.goal.set(['minimize'])
+        # self.optimizer.config.goal.set(['minimize'])
         yield
         self.optimizer = None
 
@@ -36,7 +36,12 @@ class TestMOTpeOptimizer(BaseTest):
     def test_check_result(self, setup_hp_finished, setup_result, work_dir):
         self.optimizer.pre_process()
         self.optimizer.inner_loop_main_process()
-        with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=1):
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', UserWarning)
+            with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=1):
+                with pytest.raises(UserWarning):
+                    self.optimizer.check_result()
+        with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=[0, 1]):
             assert self.optimizer.check_result() is None
 
     def test_is_startup_trials(self):
@@ -50,7 +55,7 @@ class TestMOTpeOptimizer(BaseTest):
         # if ((not self.is_startup_trials()) and (len(self.parameter_pool) >= 1))
         with patch.object(self.optimizer, 'check_result', return_value=None):
             with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
-                with patch.object(self.optimizer, 'parameter_pool', [{},{},{}]):
+                with patch.object(self.optimizer, 'parameter_pool', [{}, {}, {}]):
                     assert self.optimizer.generate_parameter() is None
 
         # if len(self.parameter_pool) >= self.config.num_node.get()
