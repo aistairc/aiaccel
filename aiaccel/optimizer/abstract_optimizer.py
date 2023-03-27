@@ -123,7 +123,7 @@ class AbstractOptimizer(AbstractModule):
             list[dict[str, float | int | str]]: A created list of initial
             parameters.
         """
-        sample = self.params.sample(initial=True, rng=self._rng)
+        sample = self.params.sample(self._rng, initial=True)
         new_params = []
 
         for s in sample:
