@@ -19,7 +19,7 @@ mpi機能の実行環境は、通常のaiaccelとは完全に分離されてい�
 mkdir ~/mpi_work
 ```
 ほぼ全てのフォルダがこちらに作成されますが、
-`~/.keras`のみ、ホームフォルダに作成されます。
+`~/.keras`は、ホームフォルダに作成されます。
 次に、mpi環境用のvenv、`~/mpi_work/mpienv`を作成します。
 これにより、cpuのみによるテスト実行が可能になります。
 さらに、gpuによるテスト実行のためのvenv、`~/mpi_work/tfenv`を作成します。
@@ -122,13 +122,13 @@ vi config.yamlなどで、
 ```
 の`your_group_id`を、適切なグループidに変更して下さい。
 
-config.yamlのmpi関連のパラメータは、
+config.yamlのmpi関連のパラメータを以下に抜粋します。
 ```
+generic:
+  workspace: "./work"
+
 resource:
   type: "mpi"
-  #type: "local"
-  #type: "ABCI"
-  #type: "python_local"
   num_node: 1
   mpi_npernode: 1
   mpi_enviroment: "ABCI"
@@ -143,11 +143,16 @@ resource:
   mpi_hostfile: "./hostfile"
   mpi_gpu_mode: False
   mpi_bat_make_file: True
+
+ABCI:
+  group: "[your_group_id]"
+
+optimize:
+  trial_number: 1
 ```
-です。
 詳細は後述しますが、
 1tryだけでmpiの動作テストを行うため、
-qsubのリクエスト待ち後の実行開始後、すぐに終了します。
+qsubのリクエスト待ち後の実行開始後、1分程で終了します。
 
 ```
 PYTHONPATH=~/mpi_work/aiaccel python -m aiaccel.experimental.mpi.cli.start --config config.yaml --clean
@@ -165,6 +170,8 @@ work/
 
 ### hostfile
 
+通常、hostfileをユーザが閲覧、編集することはありません。
+トラブル時に内容を確認できるように指定しています。
 config.yamlの`mpi_hostfile: ./hostfile`で指定されたファイル名です。
 mpi実行時に作成されます。
 なお、mpi_hostfileは、`mpi_bat_config_dir`からの相対指定です。
@@ -208,11 +215,9 @@ deactivate
 ```
 qsub.shを直接変更したい場合は、config.yamlで`mpi_bat_make_file: False`とします。
 
-# WIP。以下、作成中。
-
 ### qsub.sh.o39165552
 
-qsub.shの出力ファイル。abciがカレントフォルダに出力するもの。
+qsub.shの出力ファイルです。abciがカレントフォルダに出力します。
 ```
 --------------------------------------------------------------------------
 A process has executed an operation involving a call to the
@@ -251,9 +256,11 @@ Done.
 [g0036.abci.local:91995] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
 ```
 
+# WIP
+
 ### work
 
-aiaccelの出力フォルダ。
+aiaccelの出力フォルダです。
 `work/experimental/mpi/
 ```
 ls work/experimental/mpi/rank_log/
