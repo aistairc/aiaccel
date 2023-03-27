@@ -12,29 +12,31 @@ from aiaccel.master import AbstractVerifier
 from tests.base_test import BaseTest
 
 
-class DerivedClassOfAbstractVerifier(AbstractVerifier):
-    def __init__(self, options):
-        super().__init__(options)
-
-    def verify(self):
-        pass
-
-
-class TestAbstractVerification(BaseTest):
+class TestAbstractVerifier(BaseTest):
     @pytest.fixture(autouse=True)
-    def setupt_verifier(self) -> Generator[None, None, None]:
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        self.verifier = DerivedClassOfAbstractVerifier(options)
-        yield
+    def setupt_verifier(
+        self,
+        request: pytest.FixtureRequest,
+        monkeypatch: pytest.MonkeyPatch
+    ) -> Generator[None, None, None]:
+        if "noautousefixture" in request.keywords:
+            yield
+        else:
+            options = {
+                'config': self.config_json,
+                'resume': None,
+                'clean': False,
+                'fs': False,
+                'process_name': 'master'
+            }
+            with monkeypatch.context() as m:
+                m.setattr(AbstractVerifier, "__abstractmethods__", set())
+                self.verifier = AbstractVerifier(options)
+                yield
         self.verifier = None
 
-    def test_init(self) -> None:
+    @pytest.mark.noautousefixture
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
         options = {
             'config': self.config_json,
             'resume': None,
@@ -45,8 +47,10 @@ class TestAbstractVerification(BaseTest):
         with pytest.raises(TypeError):
             _ = AbstractVerifier(options)
 
-        verifier = DerivedClassOfAbstractVerifier(options)
-        assert verifier.is_verified
+        with monkeypatch.context() as m:
+            m.setattr(AbstractVerifier, "__abstractmethods__", set())
+            verifier = AbstractVerifier(options)
+            assert verifier.is_verified
 
     def test_print(self):
         self.verifier.is_verified = False

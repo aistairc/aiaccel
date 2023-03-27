@@ -293,3 +293,7 @@ def clean_work_dir(work_dir, data_dir):
                 shutil.copyfile(data_dir.joinpath(wf), work_dir.joinpath(wf))
 
     return _clean_work_dir
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    config.addinivalue_line("markers", "noautousefixture: Marks test without autouse-fixture of test class.")
