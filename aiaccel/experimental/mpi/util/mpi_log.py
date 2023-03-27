@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from pathlib import Path
 from os import linesep
 
 from aiaccel.experimental.mpi.util.error import MpiError
@@ -5,13 +8,13 @@ from aiaccel.experimental.mpi.util.time import get_now_str
 
 
 class MpiLog:
-    def __init__(self, rank, processor, rank_log_path):
+    def __init__(self, rank: int, processor: str, rank_log_path: Path) -> None:
         self._rank = rank
         self._processor = processor
         self._path = rank_log_path / f'{self._rank}.csv'
-        self._tag = None
+        self._tag: int | None = None
 
-    def write(self, message, tag=None, stdout=False):
+    def write(self, message: str, tag: int | None = None, stdout: bool = False) -> None:
         stime = get_now_str()
         if tag is not None:
             self._tag = tag

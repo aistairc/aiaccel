@@ -3,7 +3,7 @@
 import datetime
 
 
-def get_now_str():
+def get_now_str() -> str:
     """現在時刻の文字列を取得。.
 
     Returns:
@@ -12,7 +12,7 @@ def get_now_str():
     return datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')[:-3]
 
 
-def get_timestamp(now_str):
+def get_timestamp(now_str: str) -> float:
     """get_now_str()の文字列から時刻の文字列を取得。.
 
     Returns:

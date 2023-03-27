@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 from aiaccel.wrapper_tools import create_runner_command
+from aiaccel.scheduler import Job
 from aiaccel.scheduler.job.model import LocalModel
-
+from aiaccel.experimental.mpi.config import MpiConfig
 from aiaccel.experimental.mpi.util.mpi import Mpi, MpiOutputHandler
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from aiaccel.scheduler import Job
 
 
 class MpiModel(LocalModel):
 
-    def before_job_submitted(self, obj: 'Job') -> None:
+    def before_job_submitted(self, obj: Job) -> None:
         runner_command = create_runner_command(
             obj.config.job_command.get(),
             obj.content,
@@ -24,7 +20,7 @@ class MpiModel(LocalModel):
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
 
-        gpu_mode = obj.config.mpi_gpu_mode.get()
+        gpu_mode = MpiConfig(obj.config.config_path).mpi_gpu_mode.get()
         (processor, tag) = Mpi.submit(
             runner_command,
             gpu_mode
@@ -35,6 +31,8 @@ class MpiModel(LocalModel):
             gpu_mode,
             processor,
             tag,
-            'Job'
+            'Job',
+            obj.trial_id,
+            storage=obj.storage
         )
         obj.th_oh.start()

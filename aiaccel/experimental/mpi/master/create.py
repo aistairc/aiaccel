@@ -4,7 +4,7 @@ from aiaccel.master.abci_master import AbciMaster
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.master.pylocal_master import PylocalMaster
 
-from aiaccel.experimental.mpi import resource_type_mpi
+from aiaccel.experimental.mpi.common import resource_type_mpi
 from aiaccel.experimental.mpi.config import MpiConfig
 from aiaccel.experimental.mpi.master.mpi_master import MpiMaster
 

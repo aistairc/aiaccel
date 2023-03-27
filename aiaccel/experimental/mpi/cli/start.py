@@ -16,7 +16,7 @@ from aiaccel.util import get_file_result_hp
 from aiaccel.cli import CsvWriter
 from aiaccel.workspace import Workspace
 
-from aiaccel.experimental.mpi import resource_type_mpi
+from aiaccel.experimental.mpi.common import resource_type_mpi
 from aiaccel.experimental.mpi.config import MpiConfig
 from aiaccel.experimental.mpi.master.create import create_master
 from aiaccel.experimental.mpi.scheduler.create import create_scheduler

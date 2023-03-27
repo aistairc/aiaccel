@@ -1,6 +1,6 @@
 # mpi機能の概要
 
-abciでmpiによりaiaccelを並列実行させます。
+abciでmpiによりaiaccelのjobを並列実行させます。
 mpi機能の実行環境は、通常のaiaccelとは完全に分離されています。
 そのため、aiaccelインストール後に、mpi環境を整えて、mpi用aiaccelを実行します。
 

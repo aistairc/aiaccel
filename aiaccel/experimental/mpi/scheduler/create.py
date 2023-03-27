@@ -4,7 +4,7 @@ from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
 
-from aiaccel.experimental.mpi import resource_type_mpi
+from aiaccel.experimental.mpi.common import resource_type_mpi
 from aiaccel.experimental.mpi.config import MpiConfig
 from aiaccel.experimental.mpi.scheduler.mpi_scheduler import MpiScheduler
 

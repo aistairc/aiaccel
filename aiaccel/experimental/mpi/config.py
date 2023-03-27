@@ -21,7 +21,7 @@ class MpiConfig(Config):
     """ A Class for defining the configuration of a configuration file.
     """
 
-    def define_items(self, config: ConfileWrapper, warn: bool):
+    def define_items(self, config: ConfileWrapper, warn: bool) -> None:
         """ Define the configuration of the configuration file
         """
         super().define_items(config, warn)

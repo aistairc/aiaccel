@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.experimental.mpi.config import MpiConfig
 from aiaccel.experimental.mpi.scheduler.job.model.mpi_model import MpiModel
@@ -7,7 +11,7 @@ class MpiScheduler(LocalScheduler):
     """A scheduler class running on a mpi systems.
 
     """
-    def __init__(self, options: dict) -> None:
+    def __init__(self, options: dict[str, Any]) -> None:
         super().__init__(options)
         self.config = MpiConfig(self.config_path)
 
