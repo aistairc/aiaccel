@@ -36,6 +36,14 @@ aiaccel.optimizer.grid\_optimizer module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.optimizer.motpe\_optimizer module
+-----------------------------------------
+
+.. automodule:: aiaccel.optimizer.motpe_optimizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.optimizer.nelder\_mead\_optimizer module
 ------------------------------------------------
 

@@ -10,6 +10,11 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
     Args:
         options (dict[str, str | int | bool]): A dictionary containing command line options.
 
+
+    Raises:
+        ValueError: Causes when the number of trials is smaller than the least
+            space size determined by the parameters of which the number of
+            choices is specified.
     """
 
     def __init__(self, options: dict[str, str | int | bool]) -> None:

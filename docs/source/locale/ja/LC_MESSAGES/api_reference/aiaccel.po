@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-06 17:28+0900\n"
+"POT-Creation-Date: 2023-03-27 16:48+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,7 +62,75 @@ msgid "Fork by confile: https://github.com/777nancy/confile"
 msgstr ""
 
 #: aiaccel.config.Config:1 of
-msgid "A Class for defining the configuration of a configuration file."
+msgid "Defines the configuration of a configuration file."
+msgstr ""
+
+#: aiaccel.config.Config aiaccel.config.Config.define_items
+#: aiaccel.config.ConfigEntry aiaccel.config.ConfileWrapper
+#: aiaccel.config.ConfileWrapper.get aiaccel.config.JsonOrYamlObjectConfig
+#: aiaccel.config.JsonOrYamlObjectConfig.get_property
+#: aiaccel.config.is_multi_objective aiaccel.module.AbstractModule.check_error
+#: aiaccel.module.AbstractModule.create_numpy_random_generator
+#: aiaccel.module.AbstractModule.get_numpy_random_state
+#: aiaccel.module.AbstractModule.resume
+#: aiaccel.module.AbstractModule.set_logger
+#: aiaccel.module.AbstractModule.set_numpy_random_seed
+#: aiaccel.module.AbstractModule.set_numpy_random_state
+#: aiaccel.parameter.HyperParameter aiaccel.parameter.HyperParameter.sample
+#: aiaccel.parameter.HyperParameterConfiguration
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
+#: aiaccel.parameter.HyperParameterConfiguration.sample
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
+#: aiaccel.workspace.Workspace aiaccel.wrapper_tools.create_runner_command
+#: aiaccel.wrapper_tools.save_result of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.config.Config:3 aiaccel.config.ConfigEntry:3 of
+msgid "A path of configuration file."
+msgstr ""
+
+#: aiaccel.config.Config:5 aiaccel.config.Config.define_items:5 of
+msgid "A flag of print a warning or not. Defaults to False."
+msgstr ""
+
+#: aiaccel.config.Config:8 of
+msgid "A flag of do tha check format or not. Defaults to None."
+msgstr ""
+
+#: aiaccel.config.Config:14 aiaccel.module.AbstractModule:28 of
+msgid "Path to the configuration file."
+msgstr ""
+
+#: aiaccel.config.Config aiaccel.module.AbstractModule
+#: aiaccel.parameter.HyperParameter
+#: aiaccel.parameter.HyperParameterConfiguration aiaccel.workspace.Workspace of
+msgid "type"
+msgstr ""
+
+#: aiaccel.config.Config:16 aiaccel.module.AbstractModule:30
+#: aiaccel.module.AbstractModule:42 aiaccel.module.AbstractModule:48
+#: aiaccel.module.AbstractModule:54 aiaccel.module.AbstractModule:60
+#: aiaccel.module.AbstractModule:66 aiaccel.module.AbstractModule:72
+#: aiaccel.module.AbstractModule:78 aiaccel.workspace.Workspace:10
+#: aiaccel.workspace.Workspace:16 aiaccel.workspace.Workspace:22
+#: aiaccel.workspace.Workspace:28 aiaccel.workspace.Workspace:34
+#: aiaccel.workspace.Workspace:40 aiaccel.workspace.Workspace:46
+#: aiaccel.workspace.Workspace:52 aiaccel.workspace.Workspace:58
+#: aiaccel.workspace.Workspace:64 aiaccel.workspace.Workspace:70
+#: aiaccel.workspace.Workspace:76 aiaccel.workspace.Workspace:82
+#: aiaccel.workspace.Workspace:88 aiaccel.workspace.Workspace:94
+#: aiaccel.workspace.Workspace:100 aiaccel.workspace.Workspace:106
+#: aiaccel.workspace.Workspace:119 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.config.Config:22 of
+msgid "ConfileWrapper"
+msgstr ""
+
+#: aiaccel.config.Config:28 of
+msgid "ConfigEntry"
 msgstr ""
 
 #: aiaccel.config.Config.define_items:1 of
@@ -107,7 +175,8 @@ msgstr ""
 
 #: aiaccel.config.ConfigEntry.get aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
+#: aiaccel.config.JsonOrYamlObjectConfig.to_dict
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
 #: aiaccel.module.AbstractModule.create_numpy_random_generator
@@ -126,9 +195,10 @@ msgstr ""
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
 #: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_type
-#: aiaccel.parameter.load_parameter aiaccel.workspace.Workspace.check_consists
-#: aiaccel.workspace.Workspace.create
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
+#: aiaccel.workspace.Workspace.check_consists
+#: aiaccel.workspace.Workspace.create aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.move_completed_data
 #: aiaccel.wrapper_tools.create_runner_command
 #: aiaccel.wrapper_tools.save_result of
 msgid "戻り値"
@@ -191,7 +261,8 @@ msgstr ""
 
 #: aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
+#: aiaccel.config.JsonOrYamlObjectConfig.to_dict
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
 #: aiaccel.module.AbstractModule.get_module_type
@@ -200,9 +271,11 @@ msgstr ""
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
 #: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
 #: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.get_best_parameter aiaccel.parameter.get_type
-#: aiaccel.parameter.load_parameter aiaccel.workspace.Workspace.check_consists
-#: of
+#: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
+#: aiaccel.workspace.Workspace.check_consists
+#: aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.move_completed_data
+#: aiaccel.wrapper_tools.create_runner_command of
 msgid "戻り値の型"
 msgstr ""
 
@@ -244,6 +317,18 @@ msgstr ""
 
 #: aiaccel.config.JsonOrYamlObjectConfig.to_dict:3 of
 msgid "The dictionary object of the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:1 of
+msgid "Is the multi-objective option set in the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:3 of
+msgid "A configuration object."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:6 of
+msgid "Is the multi--objective option set in the configuration or not."
 msgstr ""
 
 #: aiaccel.config.load_config:1 of
@@ -439,7 +524,8 @@ msgstr ""
 #: aiaccel.module.AbstractModule.post_process
 #: aiaccel.parameter.HyperParameter.sample
 #: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
-#: aiaccel.parameter.get_best_parameter aiaccel.workspace.Workspace.create of
+#: aiaccel.workspace.Workspace.create
+#: aiaccel.workspace.Workspace.move_completed_data of
 msgid "例外"
 msgstr ""
 
@@ -696,8 +782,70 @@ msgstr ""
 msgid "Path to \"hp\", i.e. `path`/hp."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:52
-msgid "aiaccel.workspace module"
+#: aiaccel.workspace.Workspace:32 of
+msgid "Path to \"ready\", i.e. `path`/hp/ready."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:38 of
+msgid "Path to \"running\", i.e. `path`/hp/running."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:44 of
+msgid "Path to \"finished\", i.e. `path`/hp/finished."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:50 of
+msgid "Path to \"jobstate\", i.e. `path`/jobstate."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:56 of
+msgid "Path to \"lock\", i.e. `path`/lock."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:62 of
+msgid "Path to \"log\", i.e. `path`/log."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:68 of
+msgid "Path to \"abci_output\", i.e. `path`/abci_output."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:74 of
+msgid "Path to \"pid\", i.e. `path`/pid."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:80 of
+msgid "Path to \"result\", i.e. `path`/result."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:86 of
+msgid "Path to \"runner\", i.e. `path`/runner."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:92 of
+msgid "Path to \"storage\", i.e. `path`/storage."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:98 of
+msgid "Path to \"timestamp\", i.e. `path`/timestamp."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:104 of
+msgid "Path to \"verification\", i.e. `path`/verification."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:110 of
+msgid "A list of pathes under the workspace."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:112 of
+msgid "list[Path]"
+msgstr ""
+
+#: aiaccel.workspace.Workspace:116 of
+msgid ""
+"Path to the results which is prepared in the execution directory, i.e. "
+"\"./results\"."
 msgstr ""
 
 #: aiaccel.workspace.Workspace.check_consists:1 of
@@ -734,16 +882,6 @@ msgstr ""
 
 #: aiaccel.workspace.Workspace.move_completed_data:1 of
 msgid "Move workspace to under of results directory when finished."
-msgstr ""
-
-#: aiaccel.workspace.Workspace.move_completed_data:3 of
-msgid ""
-"Occurs if destination directory already exists     when the method is "
-"called."
-msgstr ""
-
-#: aiaccel.workspace.Workspace.move_completed_data:5 of
-msgid "Path of destination."
 msgstr ""
 
 #: aiaccel.workspace.Workspace.move_completed_data:3 of
@@ -871,5 +1009,8 @@ msgstr ""
 #~ " dict :param trial_id: A unique name"
 #~ " of a hyper parameter. :type "
 #~ "trial_id: str"
+#~ msgstr ""
+
+#~ msgid "A Class for defining the configuration of a configuration file."
 #~ msgstr ""
 

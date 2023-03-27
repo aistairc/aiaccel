@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-03-27 16:48+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,7 +69,7 @@ msgstr ""
 #: aiaccel.config.ConfigEntry aiaccel.config.ConfileWrapper
 #: aiaccel.config.ConfileWrapper.get aiaccel.config.JsonOrYamlObjectConfig
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.module.AbstractModule.check_error
+#: aiaccel.config.is_multi_objective aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.create_numpy_random_generator
 #: aiaccel.module.AbstractModule.get_numpy_random_state
 #: aiaccel.module.AbstractModule.resume
@@ -175,7 +175,8 @@ msgstr ""
 
 #: aiaccel.config.ConfigEntry.get aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
+#: aiaccel.config.JsonOrYamlObjectConfig.to_dict
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
 #: aiaccel.module.AbstractModule.create_numpy_random_generator
@@ -260,7 +261,8 @@ msgstr ""
 
 #: aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
+#: aiaccel.config.JsonOrYamlObjectConfig.to_dict
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
 #: aiaccel.module.AbstractModule.get_module_type
@@ -315,6 +317,18 @@ msgstr ""
 
 #: aiaccel.config.JsonOrYamlObjectConfig.to_dict:3 of
 msgid "The dictionary object of the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:1 of
+msgid "Is the multi-objective option set in the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:3 of
+msgid "A configuration object."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:6 of
+msgid "Is the multi--objective option set in the configuration or not."
 msgstr ""
 
 #: aiaccel.config.load_config:1 of
@@ -868,16 +882,6 @@ msgstr ""
 
 #: aiaccel.workspace.Workspace.move_completed_data:1 of
 msgid "Move workspace to under of results directory when finished."
-msgstr ""
-
-#: aiaccel.workspace.Workspace.move_completed_data:3 of
-msgid ""
-"Occurs if destination directory already exists     when the method is "
-"called."
-msgstr ""
-
-#: aiaccel.workspace.Workspace.move_completed_data:5 of
-msgid "Path of destination."
 msgstr ""
 
 #: aiaccel.workspace.Workspace.move_completed_data:3 of
