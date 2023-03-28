@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.optimizer import BudgetSpecifiedGridOptimizer
 from tests.base_test import BaseTest
 
@@ -34,45 +35,23 @@ class TestBudgetSpecifiedGridOptimizer(BaseTest):
 
     def test_init(
         self,
-        data_dir: Path,
-        create_tmp_config: Callable[[Path], Path],
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(AbstractOptimizer, "__init__", lambda *_: None)
 
-        options = {
-            'config': self.config_path,
-            'resume': None,
-            'clean': False,
-            'process_name': 'optimizer',
-            'accept_small_trial_number': True
-        }
-        assert isinstance(
-            BudgetSpecifiedGridOptimizer(options),
-            BudgetSpecifiedGridOptimizer
-        )
+            m.setattr(self.optimizer.config.trial_number, "get", lambda: 0)
+            m.setattr(self.optimizer.config.grid_accept_small_trial_number, "get", lambda: False)
+            with pytest.raises(ValueError):
+                self.optimizer.__init__(self.options)
+            m.setattr(self.optimizer.config.grid_accept_small_trial_number, "get", lambda: True)
+            assert self.optimizer.__init__(self.options) is None
 
-        config_path = create_tmp_config(
-            data_dir / 'config_budget-specified-grid_too_small_trials.json'
-        )
-        options = {
-            'config': config_path,
-            'resume': None,
-            'clean': False,
-            'process_name': 'optimizer'
-        }
-        with pytest.raises(ValueError):
-            _ = BudgetSpecifiedGridOptimizer(options)
-
-        options = {
-            'config': config_path,
-            'resume': None,
-            'clean': False,
-            'process_name': 'optimizer',
-            'accept_small_trial_number': True
-        }
-        assert isinstance(
-            BudgetSpecifiedGridOptimizer(options),
-            BudgetSpecifiedGridOptimizer
-        )
+            m.setattr(self.optimizer.config.trial_number, "get", lambda: 9999)
+            m.setattr(self.optimizer.config.grid_accept_small_trial_number, "get", lambda: False)
+            assert self.options.__init__(self.options) is None
+            m.setattr(self.optimizer.config.grid_accept_small_trial_number, "get", lambda: True)
+            assert self.options.__init__(self.options) is None
 
     def test_generate_parameter(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self.optimizer.pre_process()

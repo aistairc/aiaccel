@@ -14,6 +14,14 @@ from aiaccel.storage.storage import Storage
 from tests.base_test import BaseTest
 
 
+argnames_test_run = "config_filename, expected_returncode"
+argvalues_test_run = [
+    ("config_budget-specified-grid.yaml", 0),
+    ("config_budget-specified-grid_small_trial_number.yaml", 1),
+    ("config_budget-specified-grid_accept_small_trial_number.yaml", 0),
+]
+
+
 class AdditionalBudgetSpecifiedGridTest(BaseTest):
     search_algorithm = None
 
@@ -26,50 +34,33 @@ class AdditionalBudgetSpecifiedGridTest(BaseTest):
         yield
         self.test_data_dir = None
 
-    def main(
-        self,
-        config_file: Path,
-        option_command: list[str] = []
-    ) -> tuple[Config, Storage, Popen]:
+    def main(self, config_file: Path) -> tuple[Config, Storage, Popen]:
         config = Config(config_file)
         python_file = self.test_data_dir.joinpath('user.py')
 
         with self.create_main(python_file):
             storage = Storage(ws=Path(config.workspace.get()))
             popen = Popen(
-                ['aiaccel-start', '--config', str(config_file), '--clean'] + option_command
+                ['aiaccel-start', '--config', str(config_file), '--clean']
             )
             popen.wait(timeout=self.config.batch_job_timeout.get())
 
         return config, storage, popen
 
+    @pytest.mark.parametrize(argnames_test_run, argvalues_test_run)
     def test_run(
         self,
         work_dir: Path,
-        create_tmp_config: Callable[[Path], Path]
+        create_tmp_config: Callable[[Path], Path],
+        config_filename: str,
+        expected_returncode: int
     ) -> None:
-        config_file = self.test_data_dir.joinpath(
-            'config_budget-specified-grid.yaml'
-        )
+        config_file = self.test_data_dir.joinpath(config_filename)
         config_file = create_tmp_config(config_file)
-        config, storage, _ = self.main(config_file)
-        self.evaluate(work_dir, config, storage)
-
-    def test_num_grid_specified(
-        self,
-        work_dir: Path,
-        create_tmp_config: Callable[[Path], Path]
-    ) -> None:
-        config_file = self.test_data_dir.joinpath(
-            'config_budget-specified-grid_num_grid_specified.yaml'
-        )
-        config_file = create_tmp_config(config_file)
-        _, _, popen = self.main(config_file)
-        assert popen.returncode == 1
-
-        config, storage, popen = self.main(config_file, ['--accept-small-trial-number'])
-        assert popen.returncode == 0
-        self.evaluate(work_dir, config, storage)
+        config, storage, popen = self.main(config_file)
+        assert popen.returncode == expected_returncode
+        if expected_returncode == 0:
+            self.evaluate(work_dir, config, storage)
 
     def evaluate(
         self,

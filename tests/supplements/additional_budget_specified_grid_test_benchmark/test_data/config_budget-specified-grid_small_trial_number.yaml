@@ -19,6 +19,8 @@ optimize:
   goal: minimize
   trial_number: 10
   rand_seed: 42
+  grid_accept_small_trial_number: false
+  grid_sampling_method: IN_ORDER
   parameters:
     -
       name: x1
