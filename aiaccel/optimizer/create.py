@@ -1,13 +1,17 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Type
 
 from importlib import import_module
 
 from aiaccel.config import Config
+from aiaccel.optimizer import AbstractOptimizer
+
+# TODO: Replace typing.Type with builtins.type when aiaccel supports python>=3.9.
+OptimizerType = Type[AbstractOptimizer]
 
 
-def create_optimizer(config_path: str) -> Any:
+def create_optimizer(config_path: str) -> OptimizerType:
     """Returns master type.
 
     Args:
@@ -20,7 +24,7 @@ def create_optimizer(config_path: str) -> Any:
     return import_and_getattr(config.search_algorithm.get())
 
 
-def import_and_getattr(name: str) -> Any:
+def import_and_getattr(name: str) -> OptimizerType:
     """Imports the specified Optimizer class.
 
     Args:
