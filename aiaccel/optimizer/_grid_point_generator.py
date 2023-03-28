@@ -394,7 +394,7 @@ class GridPointGenerator:
                 raise ValueError(
                     f'Too small "trial_num": {self._num_trials} (required '
                     f'{self._grid_condition_collection.least_space_size} or greater). '
-                    'To proceed, use "--accept-small-trial-number" option.'
+                    'To proceed, set "optimize.grid_accept_small_trial_number" `True` in config.'
                 )
         self._parameter_lengths = list(map(len, self._grid_condition_collection))
         self._grid_space_size = int(np.prod(self._parameter_lengths))
