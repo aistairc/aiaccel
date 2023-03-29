@@ -5,10 +5,10 @@ from typing import Any
 
 from numpy import str_
 
+from aiaccel.config import is_multi_objective
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
-from aiaccel.util import str_to_logging_level
-from aiaccel.util import TrialId
+from aiaccel.util import TrialId, str_to_logging_level
 
 
 class AbstractOptimizer(AbstractModule):
@@ -53,8 +53,6 @@ class AbstractOptimizer(AbstractModule):
         self.all_parameter_generated = False
         self.params = load_parameter(self.config.hyperparameters.get())
         self.trial_id = TrialId(str(self.config_path))
-
-        self._multiobjective = False
 
     def register_new_parameters(
         self,
@@ -303,3 +301,24 @@ class AbstractOptimizer(AbstractModule):
             self.logger.error(error_message)
 
         return False
+
+    def get_any_trial_objective(self, trial_id: int) -> Any:
+        """Get any trial result.
+
+            if the objective is multi-objective, return the list of objective.
+
+        Args:
+            trial_id (int): Trial ID.
+
+        Returns:
+            Any: Any trial result.
+        """
+
+        objective = self.storage.result.get_any_trial_objective(trial_id)
+        if objective is None:
+            return None
+
+        if is_multi_objective(self.config):
+            return objective
+        else:
+            return objective[0]

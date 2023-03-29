@@ -1,12 +1,8 @@
 import numpy as np
 
-from aiaccel.common import goal_maximize
-from aiaccel.common import goal_minimize
-from aiaccel.common import dict_lock
-from aiaccel.common import dict_result
 from aiaccel.cli import get_best_parameter
-from aiaccel.parameter import get_type
-from aiaccel.parameter import load_parameter
+from aiaccel.common import dict_lock, dict_result, goal_maximize, goal_minimize
+from aiaccel.parameter import get_type, load_parameter
 from aiaccel.util import create_yaml
 from tests.base_test import BaseTest
 
@@ -20,10 +16,12 @@ class TestParameter(BaseTest):
     ):
         clean_work_dir()
 
+        objective_y_index = 0
         files = list(work_dir.joinpath(dict_result).glob('*.yml'))
         best, best_file = get_best_parameter(
             files,
             goal_maximize,
+            objective_y_index,
             work_dir.joinpath(dict_lock)
         )
         assert best is None
@@ -35,7 +33,7 @@ class TestParameter(BaseTest):
             d = self.test_result_data[i]
             name = f"{d['trial_id']}.yml"
             path = work_dir / 'result' / name
-            d['result'] = results[i]
+            d['result'] = [results[i]]
             create_yaml(path, d)
 
         files = list(work_dir.joinpath(dict_result).glob('*.yml'))
@@ -43,12 +41,14 @@ class TestParameter(BaseTest):
         best, best_file = get_best_parameter(
             files,
             goal_maximize,
+            objective_y_index,
             work_dir.joinpath(dict_lock)
         )
         assert best == 140.
         best, best_file = get_best_parameter(
             files,
             goal_minimize,
+            objective_y_index,
             work_dir.joinpath(dict_lock)
         )
         assert best == 101.
@@ -56,6 +56,7 @@ class TestParameter(BaseTest):
             _, _ = get_best_parameter(
                 files,
                 'invalid_goal',
+                objective_y_index,
                 work_dir.joinpath(dict_lock)
             )
             assert False

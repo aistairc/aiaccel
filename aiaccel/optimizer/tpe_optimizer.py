@@ -81,10 +81,10 @@ class TpeOptimizer(AbstractOptimizer):
         """
 
         for trial_id in list(self.parameter_pool.keys()):
-            objective = self.storage.result.get_any_trial_objective(trial_id)
+            objective = self.get_any_trial_objective(int(trial_id))
 
             if objective is not None:
-                self.study.tell(trial_id, objective, skip_if_finished=True)
+                self.study.tell(int(trial_id), objective, skip_if_finished=True)
                 del self.parameter_pool[trial_id]
 
     def is_startup_trials(self) -> bool:
@@ -219,7 +219,7 @@ class TpeOptimizer(AbstractOptimizer):
         session.commit()
 
         for trial_id in list(self.parameter_pool.keys()):
-            objective = self.storage.result.get_any_trial_objective(trial_id)
+            objective = self.get_any_trial_objective(int(trial_id))
             if objective is not None:
                 del self.parameter_pool[trial_id]
                 self.logger.info(

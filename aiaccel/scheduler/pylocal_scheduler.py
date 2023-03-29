@@ -48,11 +48,11 @@ class PylocalScheduler(AbstractScheduler):
             args.append([trial_id, self.get_any_trial_xs(trial_id)])
             self._serialize(trial_id)
 
-        for trial_id, xs, y, err, start_time, end_time in self.pool.imap_unordered(execute, args):
-            self.report(trial_id, y, err, start_time, end_time)
+        for trial_id, xs, ys, err, start_time, end_time in self.pool.imap_unordered(execute, args):
+            self.report(trial_id, ys, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
 
-            self.create_result_file(trial_id, xs, y, err, start_time, end_time)
+            self.create_result_file(trial_id, xs, ys, err, start_time, end_time)
 
         return True
 
@@ -77,7 +77,7 @@ class PylocalScheduler(AbstractScheduler):
         return xs
 
     def report(
-        self, trial_id: int, y: Any, err: str, start_time: str,
+        self, trial_id: int, ys: list[Any], err: str, start_time: str,
         end_time: str
     ) -> None:
         """Saves results in the Storage object.
@@ -91,7 +91,7 @@ class PylocalScheduler(AbstractScheduler):
             end_time (str): Execution end time.
         """
 
-        self.storage.result.set_any_trial_objective(trial_id, y)
+        self.storage.result.set_any_trial_objective(trial_id, ys)
         self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
         if err != "":
@@ -119,7 +119,7 @@ class PylocalScheduler(AbstractScheduler):
         self,
         trial_id: int,
         xs: dict[str, Any],
-        objective: Any,
+        ys: list[Any],
         error: str,
         start_time: str,
         end_time: str
@@ -130,20 +130,20 @@ class PylocalScheduler(AbstractScheduler):
             'config': self.config_path,
             'start_time': start_time,
             'end_time': end_time,
-            'objective': str(objective),
             'error': error
         }
 
         if len(error) == 0:
             del args['error']
 
-        if objective == 'None':
-            del args['objective']
-
         commands = ['aiaccel-set-result']
         for key in args.keys():
             commands.append('--' + key)
             commands.append(str(args[key]))
+
+        commands.append('--objective')
+        for y in ys:
+            commands.append(str(y))
 
         for key in xs.keys():
             commands.append('--' + key)
@@ -184,7 +184,7 @@ def initializer(config_path: str | Path) -> None:
     workspace = Path(config.workspace.get()).resolve()
 
 
-def execute(args: Any) -> tuple[int, dict[str, Any], Any, str, str, str]:
+def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:
     """Executes the specified function with the specified arguments.
 
     Args:
@@ -198,10 +198,15 @@ def execute(args: Any) -> tuple[int, dict[str, Any], Any, str, str, str]:
     set_logging_file_for_trial_id(workspace, trial_id)
 
     try:
-        y = cast_y(user_func(xs), y_data_type=None)
+        # y = cast_y(user_func(xs), y_data_type=None)
+        y = user_func(xs)
+        if isinstance(y, list):
+            y = [cast_y(yi, y_data_type=None) for yi in y]
+        else:
+            y = [cast_y(y, y_data_type=None)]
     except BaseException as e:
         err = str(e)
-        y = None
+        y = [None]
     else:
         err = ""
 

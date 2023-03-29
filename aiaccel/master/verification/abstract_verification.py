@@ -46,6 +46,10 @@ class AbstractVerification(object):
         self.verification_result: Any = None
         self.load_verification_config()
         self.storage = Storage(self.workspace.path)
+        if isinstance(self.config.goal.get(), str):
+            self.goal = [self.config.goal.get()]
+        else:
+            self.goal = self.config.goal.get()
 
     def verify(self) -> None:
         """Run a verification.
@@ -81,11 +85,15 @@ class AbstractVerification(object):
         if is_multi_objective(self.config):
             return
 
-        best_trial = self.storage.get_best_trial_dict(self.config.goal.get().lower())
+        best_trial = self.storage.get_best_trial_dict(self.goal)
+        if best_trial is None:
+            self.verification_result[index]['passed'] = False
+            self.save(loop)
+            return
 
         if (
-            best_trial['result'] < self.condition[index]['minimum'] or
-            best_trial['result'] > self.condition[index]['maximum']
+            best_trial[0]['result'][0] < self.condition[index]['minimum'] or
+            best_trial[0]['result'][0] > self.condition[index]['maximum']
         ):
             self.verification_result[index]['passed'] = False
         else:

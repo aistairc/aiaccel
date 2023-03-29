@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from subprocess import PIPE, Popen, run
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from aiaccel.scheduler.job.model import AbstractModel
 from aiaccel.util import OutputHandler
@@ -52,12 +52,12 @@ class LocalModel(AbstractModel):
             None
         """
         trial_id: str = str(obj.trial_id)
-        stdouts: list = obj.th_oh.get_stdouts()
-        stderrs: list = obj.th_oh.get_stderrs()
+        stdouts: list[str] = obj.th_oh.get_stdouts()
+        stderrs: list[str] = obj.th_oh.get_stderrs()
         start_time: str = str(obj.th_oh.get_start_time())
         end_time: str = str(obj.th_oh.get_end_time())
         exitcode: str = str(obj.th_oh.get_returncode())
-        params: list = obj.content['parameters']
+        params: list[dict[str, Any]] = obj.content['parameters']
         objective: str = 'nan'
         objectives: list[str] = []
 
@@ -84,9 +84,6 @@ class LocalModel(AbstractModel):
         if len(error) == 0:
             del args['error']
 
-        if objective == 'None':
-            del args['objective']
-
         commands = ['aiaccel-set-result']
         for key in args.keys():
             commands.append('--' + key)
@@ -100,7 +97,7 @@ class LocalModel(AbstractModel):
             if 'parameter_name' in param.keys() and 'value' in param.keys():
                 commands.append('--' + param['parameter_name'])
                 commands.append(str(param['value']))
-
+        print(commands)
         run(commands)
 
         return None

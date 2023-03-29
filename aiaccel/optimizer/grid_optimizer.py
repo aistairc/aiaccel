@@ -1,10 +1,11 @@
 from __future__ import annotations
+
 import math
 from functools import reduce
 from operator import mul
 from typing import Any
 
-from aiaccel.config import Config
+from aiaccel.config import Config, is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
@@ -127,6 +128,12 @@ class GridOptimizer(AbstractOptimizer):
         super().__init__(options)
         self.ready_params: Any = None
         self.generate_index: Any = None
+
+        if is_multi_objective(self.config):
+            raise NotImplementedError(
+                'Grid search optimizer does not support multi-objective '
+                'optimization.'
+            )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.

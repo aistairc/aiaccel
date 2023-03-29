@@ -322,9 +322,6 @@ class TestModel(BaseTest):
                     param_type='float'
                 )
             """
-        print(self.job.trial_id)
-        print([d.objective for d in self.job.storage.result.get_all_result()])
-        print(self.job.storage.get_best_trial_dict('minimize'))
 
         self.job.next_state = 'finished'
         self.job.from_file = work_dir.joinpath(dict_hp_running, '001.hp')

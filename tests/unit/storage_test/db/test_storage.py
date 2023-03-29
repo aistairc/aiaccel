@@ -481,7 +481,7 @@ def test_get_best_trial_dict():
     param_value = 0.1
     param_type = "float"
     error = "aaaa"
-    goal = "minimize"
+    goal = ["minimize"]
 
     storage.result.set_any_trial_objective(
         trial_id=trial_id,
@@ -526,7 +526,7 @@ def test_get_best_trial_dict():
         "error": error
     }
 
-    d = storage.get_best_trial_dict(goal)
+    d = storage.get_best_trial_dict(goal)[0]
 
     for key in d.keys():
         assert exp[key] == d[key]
@@ -537,7 +537,7 @@ def test_get_best_trial_dict():
 def test_get_best_trial():
     storage = Storage(ws.path)
     trial_ids = [0, 1, 2, 3, 4]
-    objectives = [0.00, 0.01, -1, 1, 0.03]
+    objectives = [[0.00], [0.01], [-1], [1], [0.03]]
 
     for i in range(len(trial_ids)):
         storage.result.set_any_trial_objective(
@@ -545,13 +545,13 @@ def test_get_best_trial():
             objective=objectives[i]
         )
 
-    goal = "minimize"
-    assert storage.get_best_trial(goal) == (2, -1)
+    goal = ["minimize"]
+    assert storage.get_best_trial(goal) == ([2], [-1])
 
-    goal = "maximize"
-    assert storage.get_best_trial(goal) == (3, 1)
+    goal = ["maximize"]
+    assert storage.get_best_trial(goal) == ([3], [1])
 
-    goal = "aaaaaaaaaa"
+    goal = ["aaaaaaaaaa"]
     assert storage.get_best_trial(goal) == (None, None)
 
 

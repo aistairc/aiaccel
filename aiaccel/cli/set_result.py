@@ -9,7 +9,7 @@ from aiaccel.parameter import load_parameter
 from aiaccel.util.filesystem import create_yaml
 
 
-def str_or_float_or_int(value):
+def str_or_float_or_int(value: str | float | int) -> str | float | int:
     try:
         return int(value)
     except ValueError:

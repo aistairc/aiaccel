@@ -35,9 +35,12 @@ class AbstractEvaluator(object):
         self.config_path = Path(self.options['config']).resolve()
         self.config = Config(str(self.config_path))
         self.workspace = Workspace(self.config.workspace.get())
-        self.hp_result: dict[str, Any] | None = None
+        self.hp_result: list[dict[str, Any]] | None = None
         self.storage = Storage(self.workspace.path)
-        self.goal = self.config.goal.get()
+        if isinstance(self.config.goal.get(), str):
+            self.goal = [self.config.goal.get()]
+        else:
+            self.goal = self.config.goal.get()
         self.trial_id = TrialId(str(self.config_path))
 
     def evaluate(self) -> None:
@@ -46,8 +49,14 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        best_trial_id, _ = self.storage.get_best_trial(self.goal)
-        self.hp_result = self.storage.get_hp_dict(best_trial_id)
+        best_trial_ids, _ = self.storage.get_best_trial(self.goal)
+        if best_trial_ids is None:
+            return
+
+        hp_results: list[dict[str, Any]] = []
+        for best_trial_id in best_trial_ids:
+            hp_results.append(self.storage.get_hp_dict(best_trial_id))
+        self.hp_result = hp_results
 
     def print(self) -> None:
         """Print current results.

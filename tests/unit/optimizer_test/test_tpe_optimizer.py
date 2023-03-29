@@ -44,7 +44,7 @@ class TestTpeOptimizer(BaseTest):
         self.optimizer.pre_process()
         self.optimizer.inner_loop_main_process()
         with patch.object(
-            self.optimizer.storage.result, "get_any_trial_objective", return_value=1
+            self.optimizer.storage.result, "get_any_trial_objective", return_value=[1]
         ):
             assert self.optimizer.check_result() is None
 
