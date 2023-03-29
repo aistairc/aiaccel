@@ -19,7 +19,7 @@ optimize:
   goal: minimize
   trial_number: 10
   rand_seed: 42
-  grid_accept_small_trial_number: false
+  grid_accept_small_trial_number: true
   grid_sampling_method: IN_ORDER
   parameters:
     -
@@ -28,33 +28,36 @@ optimize:
       log: true
       lower: 0.1
       upper: 1.0
-      num_numeric_choices: 3
+      num_numeric_choices: 1
     -
       name: x2
       type: uniform_float
       log: false
       lower: -5.0
       upper: 5.0
+      num_numeric_choices: 1
     -
       name: x3
       type: uniform_int
       log: true
       lower: 1
       upper: 10_000_000_000
+      num_numeric_choices: 1
     -
       name: x4
       type: uniform_int
       log: false
       lower: -5
       upper: 5
+      num_numeric_choices: 1
     -
       name: x5
       type: categorical
-      choices: ['a', 'b', 'c']
+      choices: ['a']
     -
       name: x6
       type: ordinal
-      sequence: [-5, 0, 5]
+      sequence: [-5]
 
 
 job_setting:

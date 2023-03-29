@@ -19,6 +19,8 @@ argvalues_test_run = [
     ("config_budget-specified-grid.yaml", 0),
     ("config_budget-specified-grid_small_trial_number.yaml", 1),
     ("config_budget-specified-grid_accept_small_trial_number.yaml", 0),
+    ("config_budget-specified-grid_excessive_trial_number.yaml", 0),
+    ("config_budget-specified-grid_invalid_parameter_range.yaml", 1),
 ]
 
 
@@ -57,24 +59,20 @@ class AdditionalBudgetSpecifiedGridTest(BaseTest):
     ) -> None:
         config_file = self.test_data_dir.joinpath(config_filename)
         config_file = create_tmp_config(config_file)
-        config, storage, popen = self.main(config_file)
+        _, storage, popen = self.main(config_file)
         assert popen.returncode == expected_returncode
         if expected_returncode == 0:
-            self.evaluate(work_dir, config, storage)
+            self.evaluate(work_dir, storage)
 
     def evaluate(
         self,
         work_dir: Path,
-        config: Config,
         storage: Storage
     ) -> None:
-        num_trials = config.trial_number.get()
         num_running = storage.get_num_running()
         num_ready = storage.get_num_ready()
-        num_finished = storage.get_num_finished()
         assert num_running == 0
         assert num_ready == 0
-        assert num_finished == num_trials
 
         final_result = work_dir.joinpath(dict_result, file_final_result)
         assert final_result.exists()

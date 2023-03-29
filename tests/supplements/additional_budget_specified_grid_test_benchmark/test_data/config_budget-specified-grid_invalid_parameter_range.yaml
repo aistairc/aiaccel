@@ -19,14 +19,14 @@ optimize:
   goal: minimize
   trial_number: 10
   rand_seed: 42
-  grid_accept_small_trial_number: false
+  grid_accept_small_trial_number: true
   grid_sampling_method: IN_ORDER
   parameters:
     -
       name: x1
       type: uniform_float
       log: true
-      lower: 0.1
+      lower: -1.0
       upper: 1.0
       num_numeric_choices: 3
     -

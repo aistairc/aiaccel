@@ -28,7 +28,7 @@ optimize:
       log: true
       lower: 0.1
       upper: 1.0
-      num_grid_points: 3
+      num_numeric_choices: 3
     -
       name: x2
       type: uniform_float

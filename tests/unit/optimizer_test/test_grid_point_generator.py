@@ -10,16 +10,19 @@ import pytest
 from numpy.random import RandomState
 
 from aiaccel.config import Config
-from aiaccel.optimizer._grid_point_generator import GridCondition
-from aiaccel.optimizer._grid_point_generator import FloatGridCondition
-from aiaccel.optimizer._grid_point_generator import IntGridCondition
 from aiaccel.optimizer._grid_point_generator import CategoricalGridCondition
-from aiaccel.optimizer._grid_point_generator import OrdinalGridCondition
+from aiaccel.optimizer._grid_point_generator import FloatGridCondition
+from aiaccel.optimizer._grid_point_generator import GridCondition
 from aiaccel.optimizer._grid_point_generator import GridConditionCollection
 from aiaccel.optimizer._grid_point_generator import GridPointGenerator
+from aiaccel.optimizer._grid_point_generator import IntGridCondition
+from aiaccel.optimizer._grid_point_generator import NumericGridCondition
+from aiaccel.optimizer._grid_point_generator import OrdinalGridCondition
 from aiaccel.optimizer._grid_point_generator import _cast_start_to_integer
 from aiaccel.optimizer._grid_point_generator import _cast_stop_to_integer
 from aiaccel.optimizer._grid_point_generator import _create_grid_condition
+from aiaccel.optimizer._grid_point_generator import _is_there_zero_between_lower_and_upper
+from aiaccel.optimizer._grid_point_generator import _validate_parameter_range
 from aiaccel.optimizer._grid_point_generator import GridValueType
 from aiaccel.optimizer._grid_point_generator import NumericType
 from aiaccel.parameter import HyperParameter
@@ -68,6 +71,12 @@ class TestGridCondition:
             assert grid_condition.choices == []
             assert grid_condition.num_choices == 0
 
+    def test_contains(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.grid_condition, "_choices", self.choices)
+            for choice in self.grid_condition:
+                assert choice in self.choices
+
     def test_iter(self, monkeypatch: pytest.MonkeyPatch) -> None:
         with monkeypatch.context() as m:
             m.setattr(self.grid_condition, "_choices", self.choices)
@@ -113,6 +122,88 @@ class TestGridCondition:
             assert grid_condition.num_choices == self.num_choices
         grid_condition.num_choices = self.num_choices
         assert grid_condition._num_choices == self.num_choices
+
+
+argnames_is_there_zero_between_lower_and_upper = "lower, upper, expect"
+argvalues_is_there_zero_between_lower_and_upper = [
+    (-2, -1, False),
+    (-1, 0, True),
+    (-1, 1, True),
+    (0, 1, True),
+    (1, 2, False)
+]
+
+
+@pytest.mark.parametrize(
+    argnames_is_there_zero_between_lower_and_upper,
+    argvalues_is_there_zero_between_lower_and_upper,
+)
+def is_there_zero_between_lower_and_upper(lower, upper, expect) -> None:
+    hyperparameter = HyperParameter(
+        {
+            "name": "test",
+            "type": "FLOAT",
+            "lower": lower,
+            "upper": upper,
+            "log": None,
+            "num_numeric_choices": None,
+            "choices": None,
+            "sequence": None
+        }
+    )
+    assert _is_there_zero_between_lower_and_upper(hyperparameter) == expect
+
+
+def test_validate_parameter_range(monkeypatch: pytest.MonkeyPatch) -> None:
+    hyperparameter = HyperParameter(
+        {
+            "name": "test",
+            "type": "FLOAT",
+            "lower": 1.0,
+            "upper": 10.0,
+            "log": None,
+            "num_numeric_choices": None,
+            "choices": None,
+            "sequence": None
+        }
+    )
+    with monkeypatch.context() as m:
+        m.setattr(hyperparameter, "log", True)
+
+        m.setattr("aiaccel.optimizer._grid_point_generator._is_there_zero_between_lower_and_upper", lambda _: True)
+        with pytest.raises(ValueError):
+            _validate_parameter_range(hyperparameter)
+
+        m.setattr("aiaccel.optimizer._grid_point_generator._is_there_zero_between_lower_and_upper", lambda _: False)
+        assert _validate_parameter_range(hyperparameter) is None
+
+        m.setattr(hyperparameter, "log", False)
+        assert _validate_parameter_range(hyperparameter) is None
+
+
+class TestNumericGridCondition:
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        hyperparameter = HyperParameter(
+            {
+                "name": "test",
+                "type": "FLOAT",
+                "lower": 1.0,
+                "upper": 10.0,
+                "log": None,
+                "num_numeric_choices": None,
+                "choices": None,
+                "sequence": None
+            }
+        )
+
+        with pytest.raises(TypeError):
+            _ = NumericGridCondition(hyperparameter)
+
+        with monkeypatch.context() as m:
+            m.setattr(NumericGridCondition, "__abstractmethods__", set())
+            grid_condition = NumericGridCondition(hyperparameter)
+            assert grid_condition._choices == []
+            assert grid_condition._num_choices == 0
 
 
 argnames_float_grid_condition_create_choices = "has_num_choices, num_choices, log, num_numeric_choices, choices"

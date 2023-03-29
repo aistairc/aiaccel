@@ -21,7 +21,7 @@ NumericType = Union[float, int, np.floating, np.integer]
 
 
 class GridCondition(ABC):
-    """An abstract class for grid condition of a parameter.
+    """An abstract class for grid condition container of a parameter.
 
     Args:
         hyperparameter (HyperParameter): A hyperparameter object.
@@ -35,6 +35,9 @@ class GridCondition(ABC):
 
     @abstractmethod
     def create_choices(self, hyperparameter: HyperParameter) -> None: ...
+
+    def __contains__(self, value: object) -> bool:
+        return value in self._choices
 
     def __iter__(self) -> Iterator[GridValueType]:
         return iter(self._choices)
@@ -83,7 +86,31 @@ class GridCondition(ABC):
         self._num_choices = num_choices
 
 
-class FloatGridCondition(GridCondition):
+def _is_there_zero_between_lower_and_upper(hyperparameter: HyperParameter) -> bool:
+    return hyperparameter.lower * hyperparameter.upper <= 0
+
+
+def _validate_parameter_range(hyperparameter: HyperParameter) -> None:
+    if hyperparameter.log:
+        if _is_there_zero_between_lower_and_upper(hyperparameter):
+            raise ValueError(
+                "Zero cannot be included in the parameter range if log = true."
+            )
+
+
+class NumericGridCondition(GridCondition):
+    """An abstract class for a grid condition container of a numeric parameter.
+
+    Args:
+        hyperparameter (HyperParameter): A hyperparameter object.
+    """
+
+    def __init__(self, hyperparameter: HyperParameter) -> None:
+        _validate_parameter_range(hyperparameter)
+        super().__init__(hyperparameter)
+
+
+class FloatGridCondition(NumericGridCondition):
     """A grid condition container for a float parameter.
 
     Args:
@@ -141,7 +168,7 @@ def _cast_stop_to_integer(stop: NumericType) -> int:
     return stop
 
 
-class IntGridCondition(GridCondition):
+class IntGridCondition(NumericGridCondition):
     """A grid condition container for an int parameter.
 
     Args:
@@ -297,7 +324,7 @@ class GridConditionCollection:
 
     def _register_grid_conditions(self, hyperparameters: list[HyperParameter]) -> None:
         if hyperparameters:
-            hyperparameter = hyperparameters.pop()
+            hyperparameter = hyperparameters.pop(0)
             grid_condition = _create_grid_condition(hyperparameter)
             self._conditions.append(grid_condition)
             self._register_grid_conditions(hyperparameters)
