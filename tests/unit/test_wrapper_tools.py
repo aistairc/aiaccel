@@ -1,5 +1,3 @@
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.time_tools import get_time_now
 from aiaccel.wrapper_tools import create_runner_command
 from tests.base_test import BaseTest
 

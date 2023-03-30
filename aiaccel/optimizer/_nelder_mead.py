@@ -5,9 +5,9 @@ from typing import Any
 
 import numpy as np
 
-from aiaccel import data_type_ordinal
+from aiaccel.common import data_type_ordinal
 from aiaccel.parameter import HyperParameter
-from aiaccel.util.name import generate_random_name
+from aiaccel.util import generate_random_name
 
 STATES = [
     'WaitInitialize',
@@ -38,7 +38,6 @@ class NelderMead(object):
             A initial parameters. Defaults to None.
         rng (np.random.RandomState | None, optional): A reference to a random
             generator. Defaults to None.
-
 
     Attributes:
         bdrys (np.ndarray): A list of boundaries.
@@ -91,6 +90,11 @@ class NelderMead(object):
         self.bdrys = np.array([[p.lower, p.upper] for p in self.params])
         self.coef = coef
         self.n_dim = len(self.bdrys)
+
+        if rng is None:
+            raise ValueError(
+                'rng (RandomState) is required to randomly generate initial parameters.'
+            )
         self._rng = rng
 
         self.y = self._create_initial_values(initial_parameters)
@@ -183,7 +187,7 @@ class NelderMead(object):
             out_of_boundary = True
             self.logger.debug(f'_add_executing out of boundary y: {y}')
 
-        vertex_id = generate_random_name(rng=self._rng)
+        vertex_id = generate_random_name(self._rng)
         params = []
 
         for yi, p in zip(y, self.params):
@@ -593,31 +597,31 @@ class NelderMead(object):
 
     def search(self) -> list[dict[str, Any]] | None:
         """Proceed a search step. One search method does not increment the
-            iteration. It increments when finalize method is called.
+        iteration. It increments when finalize method is called.
 
-        The details of state transitions are as follows:
+        The details of state transitions are as follows: ::
 
-        -->: state change
-        indent: conditional branch
+            -->: state change
+            indent: conditional branch
 
-        WaitInitialize: wait first three executing
-        --> Initialize: add reflect executing
-        --> WaitReflect: wait executing reflect one
-        --> ReflectBranch: conditional jump using reflect
-            --> back to Initialize
-            --> WaitExpand: wait executing expand one
-                --> ExpandBranch: calc using expand
-                    ---> back to Initialize
-                --> WaitOutsideContract: wait executing oc one
-                    ---> OutsideContractBranch: conditional jump using oc
-                        --> back to Initialize
-                        --> WaitShrink: wait executing shrink f(y)
-                            ---> back to Initialize
-                --> WaitInsideContract: wait executing ic one
-                    ---> InsideContractBranch: conditional jump using ic
-                        --> back to Initialize
-                        --> WaitShrink: wait executing shrink f(y)
-                            ---> back to Initialize
+            WaitInitialize: wait first three executing
+            --> Initialize: add reflect executing
+            --> WaitReflect: wait executing reflect one
+            --> ReflectBranch: conditional jump using reflect
+                --> back to Initialize
+                --> WaitExpand: wait executing expand one
+                    --> ExpandBranch: calc using expand
+                        ---> back to Initialize
+                    --> WaitOutsideContract: wait executing oc one
+                        ---> OutsideContractBranch: conditional jump using oc
+                            --> back to Initialize
+                            --> WaitShrink: wait executing shrink f(y)
+                                ---> back to Initialize
+                    --> WaitInsideContract: wait executing ic one
+                        ---> InsideContractBranch: conditional jump using ic
+                            --> back to Initialize
+                            --> WaitShrink: wait executing shrink f(y)
+                                ---> back to Initialize
 
         Returns:
             None

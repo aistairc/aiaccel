@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.easy_visualizer import EasyVisualizer
+from aiaccel.storage import Storage
+from aiaccel.util import EasyVisualizer
 
 
 class Plotter:
@@ -23,7 +23,9 @@ class Plotter:
         self.workspace = Path(config.workspace.get()).resolve()
 
         self.storage = Storage(self.workspace)
-        self.goal = config.goal.get().lower()
+        self.goals = config.goal.get()
+        if type(self.goals) is str:
+            self.goals = [self.goals]
         self.cplt = EasyVisualizer()
 
     def plot(self) -> None:
@@ -34,7 +36,26 @@ class Plotter:
             None
         """
         objectives = self.storage.result.get_objectives()
-        bests = self.storage.result.get_bests(self.goal)
+        if len(objectives) == 0:
+            print("Result data is empty")
+            return
+
+        objectives = list(map(lambda x: list(x), zip(*objectives)))
+
+        bests = self.storage.result.get_bests(self.goals)
+
+        plot_datas = []
+        for i in range(len(self.goals)):
+            plot_datas.append(objectives[i])
+            plot_datas.append(bests[i])
+
+        caption_set = [caption_set for caption_set in [
+            [f"objective_y[{i}]", f"best value[{i}]"] for i in range(len(self.goals))]]
+
+        captions = []
+        for captions_ in caption_set:
+            for caption in captions_:
+                captions.append(caption)
 
         if len(objectives) == 0:
             print("Result data is empty")
@@ -44,24 +65,9 @@ class Plotter:
             print("Invalid data")
             return
 
-        self.cplt.set_colors(
-            [
-                "red",
-                "green"
-            ]
-        )
-        self.cplt.caption(
-            [
-                "objective",
-                "best value"
-            ]
-        )
-        self.cplt.line_plot(
-            [
-                objectives,
-                bests
-            ]
-        )
+        self.cplt.caption(captions)
+        self.cplt.line_plot(plot_datas)
+
         return
 
 

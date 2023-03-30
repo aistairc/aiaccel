@@ -4,7 +4,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from aiaccel.util.aiaccel import CommandLineArgs, Run
+from aiaccel.util.aiaccel import CommandLineArgs
 from tests.base_test import BaseTest
 
 
@@ -15,12 +15,15 @@ def main(p):
 
     return float(y)
 
+
 def invalid_func(p):
     return [1, 2, 3]
 
 #
 # Run test
 #
+
+
 class TestRun(BaseTest):
 
     def get_test_args(self):
@@ -63,6 +66,7 @@ class TestRun(BaseTest):
                 "upper": 5
             }
         ]
+
 
 class TestCommandLineArgs(BaseTest):
 

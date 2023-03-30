@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import copy
 import os
 import sys
@@ -613,7 +614,7 @@ class Config:
         # === hyperparameter defalt config ===
         self.goal = ConfigEntry(
             config=config,
-            type=[str],
+            type=[str, list],
             default=_DEFAULT_GOAL,
             warning=warn,
             group="optimize",
@@ -752,3 +753,16 @@ class Config:
             group="verification",
             keys=("condition")
         )
+
+
+def is_multi_objective(config: Config) -> bool:
+    """Is the multi-objective option set in the configuration.
+
+    Args:
+        config (Config): A configuration object.
+
+    Returns:
+        bool: Is the multi--objective option set in the configuration or not.
+    """
+    _goal = config.goal.get()
+    return (isinstance(_goal, list) and len(_goal) > 1)

@@ -9,8 +9,7 @@ import subprocess
 from pathlib import Path
 
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-
+from aiaccel.storage import Storage
 from tests.integration.integration_test import IntegrationTest
 
 
@@ -52,4 +51,4 @@ class AdditionalResumptionTest(IntegrationTest):
 
     def get_final_result(self, storage):
         data = storage.result.get_all_result()
-        return [d.objective for d in data]
+        return [data[trial_id] for trial_id in data.keys()]

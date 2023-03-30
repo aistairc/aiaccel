@@ -1,16 +1,14 @@
 import asyncio
 import os
-import shutil
-import sys
 import time
 from unittest.mock import patch
 
 import numpy as np
 import pytest
 
-from aiaccel import (data_type_categorical, data_type_ordinal,
-                     data_type_uniform_float, data_type_uniform_int)
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
+from aiaccel.optimizer import AbstractOptimizer
 from tests.base_test import BaseTest
 
 
@@ -63,17 +61,21 @@ class TestAbstractOptimizer(BaseTest):
         assert self.optimizer.post_process() is None
 
     def test_inner_loop_main_process(self):
-        
+
         def dummy_register_new_parameters(new_params):
             return
+
         def dummy_increment():
             return
+
         def dummy_serialize(trial_id):
             return
-        
-        initial = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1}, {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.1}]
-        param = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.2}, {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.2}]
-        
+
+        initial = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1},
+                   {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.1}]
+        param = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.2},
+                 {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.2}]
+
         with patch.object(self.optimizer, 'generate_initial_parameter', return_value=initial):
             with patch.object(self.optimizer, 'generate_parameter', return_value=param):
                 with patch.object(self.optimizer, '_serialize', return_value=None):
@@ -115,34 +117,26 @@ class TestAbstractOptimizer(BaseTest):
         assert self.optimizer._deserialize(1) is None
 
     def test_cast(self):
-        org_params = [
-            {'parameter_name': 'x1', 'type': data_type_uniform_int, 'value': 0.1},
-            {'parameter_name': 'x2', 'type': data_type_uniform_int, 'value': 1.5}
-        ]
+        org_params = [{'parameter_name': 'x1', 'type': data_type_uniform_int, 'value': 0.1},
+                      {'parameter_name': 'x2', 'type': data_type_uniform_int, 'value': 1.5}]
         new_params = self.optimizer.cast(org_params)
         assert new_params[0]["value"] == 0
         assert new_params[1]["value"] == 1
 
-        org_params = [
-            {'parameter_name': 'x1', 'type': data_type_uniform_float, 'value': 0.1},
-            {'parameter_name': 'x2', 'type': data_type_uniform_float, 'value': 1.5}
-        ]
+        org_params = [{'parameter_name': 'x1', 'type': data_type_uniform_float, 'value': 0.1},
+                      {'parameter_name': 'x2', 'type': data_type_uniform_float, 'value': 1.5}]
         new_params = self.optimizer.cast(org_params)
         assert new_params[0]["value"] == 0.1
         assert new_params[1]["value"] == 1.5
 
-        org_params = [
-            {'parameter_name': 'x1', 'type': data_type_categorical, 'value': 'a'},
-            {'parameter_name': 'x2', 'type': data_type_categorical, 'value': 'b'}
-        ]
+        org_params = [{'parameter_name': 'x1', 'type': data_type_categorical, 'value': 'a'},
+                      {'parameter_name': 'x2', 'type': data_type_categorical, 'value': 'b'}]
         new_params = self.optimizer.cast(org_params)
         assert new_params[0]["value"] == 'a'
         assert new_params[1]["value"] == 'b'
 
-        org_params = [
-            {'parameter_name': 'x1', 'type': data_type_ordinal, 'value': [1, 2, 3]},
-            {'parameter_name': 'x2', 'type': data_type_ordinal, 'value': [4, 5, 6]}
-        ]
+        org_params = [{'parameter_name': 'x1', 'type': data_type_ordinal, 'value': [1, 2, 3]},
+                      {'parameter_name': 'x2', 'type': data_type_ordinal, 'value': [4, 5, 6]}]
         new_params = self.optimizer.cast(org_params)
         assert new_params[0]["value"] == [1, 2, 3]
         assert new_params[1]["value"] == [4, 5, 6]
@@ -153,7 +147,7 @@ class TestAbstractOptimizer(BaseTest):
 
         org_params = None
         new_params = self.optimizer.cast(org_params)
-        assert new_params == None
+        assert new_params is None
 
     def test_check_error(self):
         self.optimizer.storage.error.all_delete()

@@ -3,11 +3,10 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from aiaccel import (dict_error, dict_hp, dict_lock, dict_log, dict_output,
-                     dict_runner, dict_storage, dict_verification)
-from aiaccel.util import filesystem as fs
-from aiaccel.util.retry import retry
-from aiaccel.util.suffix import Suffix
+from aiaccel.common import (dict_error, dict_hp, dict_lock, dict_log,
+                            dict_output, dict_runner, dict_storage,
+                            dict_verification)
+from aiaccel.util import Suffix, make_directories
 
 
 class Workspace:
@@ -79,7 +78,7 @@ class Workspace:
         if self.exists():
             return False
 
-        fs.make_directories(
+        make_directories(
             ds=self.consists,
             dict_lock=(self.lock)
         )
@@ -93,7 +92,6 @@ class Workspace:
         """
         return self.path.exists()
 
-    @retry(_MAX_NUM=300, _DELAY=1.0)
     def clean(self) -> None:
         """ Delete a workspace.
 
@@ -104,7 +102,6 @@ class Workspace:
         shutil.rmtree(self.path)
         return
 
-    @retry(_MAX_NUM=10, _DELAY=1.0)
     def check_consists(self) -> bool:
         """Check required directories exist or not.
 
@@ -118,7 +115,6 @@ class Workspace:
                 return False
         return True
 
-    @retry(_MAX_NUM=10, _DELAY=1.0)
     def move_completed_data(self) -> Path | None:
         """ Move workspace to under of results directory when finished.
 
@@ -135,7 +131,8 @@ class Workspace:
             self.results.mkdir()
 
         if dst.exists():
-            raise FileExistsError
+            print(f"Destination directory already exists: {dst}")
+            return None
 
         ignptn = shutil.ignore_patterns('*-journal')
 

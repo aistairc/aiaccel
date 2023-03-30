@@ -1,11 +1,9 @@
 import shutil
 from pathlib import Path
 
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import (create_yaml, file_create, file_delete,
-                                     file_read, get_dict_files, load_yaml,
-                                     make_directories, make_directory)
-from aiaccel.workspace import Workspace
+from aiaccel.util import (create_yaml, file_create, file_delete, file_read,
+                          get_dict_files, load_yaml, make_directories,
+                          make_directory)
 
 
 def test_create_yaml(clean_work_dir, work_dir):

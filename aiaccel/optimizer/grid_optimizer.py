@@ -5,10 +5,10 @@ from functools import reduce
 from operator import mul
 from typing import Any
 
-from aiaccel import (data_type_categorical, data_type_ordinal,
-                     data_type_uniform_float, data_type_uniform_int)
-from aiaccel.config import Config
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
+from aiaccel.config import Config, is_multi_objective
+from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 
@@ -120,7 +120,7 @@ class GridOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         ready_params (list[dict]): A list of ready hyper parameters.
@@ -131,6 +131,12 @@ class GridOptimizer(AbstractOptimizer):
         super().__init__(options)
         self.ready_params: Any = None
         self.generate_index: Any = None
+
+        if is_multi_objective(self.config):
+            raise NotImplementedError(
+                'Grid search optimizer does not support multi-objective '
+                'optimization.'
+            )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.

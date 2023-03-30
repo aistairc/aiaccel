@@ -6,10 +6,12 @@ from typing import Any
 
 import numpy as np
 
-import aiaccel
+from aiaccel.common import (class_master, class_optimizer, class_scheduler,
+                            module_type_master, module_type_optimizer,
+                            module_type_scheduler)
 from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-from aiaccel.util.trialid import TrialId
+from aiaccel.storage import Storage
+from aiaccel.util import TrialId
 from aiaccel.workspace import Workspace
 
 
@@ -57,6 +59,11 @@ class AbstractModule(object):
         self.config = Config(self.config_path)
         self.workspace = Workspace(self.config.workspace.get())
 
+        if isinstance(self.config.goal.get(), str):
+            self.goal = [self.config.goal.get()]
+        else:
+            self.goal = self.config.goal.get()
+
         self.logger: Any = None
         self.fh: Any = None
         self.ch: Any = None
@@ -93,12 +100,12 @@ class AbstractModule(object):
             str: Name of this module type.
         """
 
-        if aiaccel.class_master in self.__class__.__name__:
-            return aiaccel.module_type_master
-        elif aiaccel.class_optimizer in self.__class__.__name__:
-            return aiaccel.module_type_optimizer
-        elif aiaccel.class_scheduler in self.__class__.__name__:
-            return aiaccel.module_type_scheduler
+        if class_master in self.__class__.__name__:
+            return module_type_master
+        elif class_optimizer in self.__class__.__name__:
+            return module_type_optimizer
+        elif class_scheduler in self.__class__.__name__:
+            return module_type_scheduler
         else:
             return None
 
@@ -278,7 +285,7 @@ class AbstractModule(object):
             None
 
         Returns:
-            True: no error | False: with error.
+            bool: True if no error, False if with error.
         """
         return True
 

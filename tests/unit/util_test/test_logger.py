@@ -1,6 +1,6 @@
 import logging
 
-from aiaccel.util.logger import str_to_logging_level
+from aiaccel.util import str_to_logging_level
 
 
 def test_str_to_logging_level():

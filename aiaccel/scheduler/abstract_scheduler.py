@@ -4,10 +4,8 @@ from pathlib import Path
 from typing import Any
 
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm.schedule_sampling import RandomSampling
-from aiaccel.scheduler.job.job import Job
-from aiaccel.scheduler.job.model.local_model import LocalModel
-from aiaccel.util.logger import str_to_logging_level
+from aiaccel.scheduler import Job, LocalModel, RandomSampling
+from aiaccel.util import str_to_logging_level
 
 
 class AbstractScheduler(AbstractModule):
@@ -21,7 +19,7 @@ class AbstractScheduler(AbstractModule):
         options (dict[str, str | int | bool]): A dictionary containing
             command line options.
         config_path (Path): Path to the configuration file.
-        algorithm (RandomSamplingSchedulingAlgorithm): A scheduling algorithm
+        algorithm (RandomSampling): A scheduling algorithm
             to select hyper parameters from a parameter pool.
         available_resource (int): An available current resource number.
         jobs (list[dict]): A list to store job dictionaries.
@@ -55,7 +53,7 @@ class AbstractScheduler(AbstractModule):
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
-            and running files are in running directory.
+        and running files are in running directory.
 
         Returns:
             None
@@ -86,7 +84,7 @@ class AbstractScheduler(AbstractModule):
 
         Returns:
             Job | None: A reference for created job. It returns None if
-                specified hyper parameter file already exists.
+            specified hyper parameter file already exists.
         """
         trial_ids = [job.trial_id for job in self.jobs]
         if trial_id not in trial_ids:
@@ -267,8 +265,7 @@ class AbstractScheduler(AbstractModule):
         return (num_trials >= self.config.trial_number.get())
 
     def resume(self) -> None:
-        """ When in resume mode, load the previous
-                optimization data in advance.
+        """ When in resume mode, load the previous optimization data in advance.
 
         Args:
             None
@@ -281,34 +278,6 @@ class AbstractScheduler(AbstractModule):
             self.options['resume'] > 0
         ):
             self._deserialize(self.options['resume'])
-
-    # def create_result_file(self, trial_id: int) -> None:
-    #     """ Save the results in yaml format.
-
-    #     Args:
-    #         trial_id (int): Any trial od
-
-    #     Returns:
-    #         None
-    #     """
-
-    #     file_hp_count_fmt = f'%0{self.config.name_length.get()}d'
-    #     file_name = file_hp_count_fmt % trial_id + '.hp'
-
-    #     content = self.storage.get_hp_dict(trial_id)
-    #     result = self.storage.result.get_any_trial_objective(trial_id=trial_id)
-    #     error = self.storage.error.get_any_trial_error(trial_id=trial_id)
-
-    #     content['result'] = result
-
-    #     if error is not None:
-    #         content['error'] = error
-
-    #     for i in range(len(content['parameters'])):
-    #         content['parameters'][i]['value'] = content['parameters'][i]['value']
-
-    #     result_file_path = self.workspace.result / file_name
-    #     create_yaml(result_file_path, content)
 
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()

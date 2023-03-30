@@ -1,7 +1,9 @@
 """Common variables and methods.
 
-    * Import this as follows:
-    * import aiaccel
+Example: ::
+
+    from aiaccel.common import alive_master
+
 """
 
 class_master = 'Master'
@@ -22,6 +24,7 @@ extension_verification = 'verification'
 file_hp_count = 'count.txt'
 file_hp_count_lock = 'count.lock'
 file_hp_count_lock_timeout = 10
+file_final_result = 'final_result.result'
 
 goal_maximize = 'maximize'
 goal_minimize = 'minimize'

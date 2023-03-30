@@ -29,6 +29,16 @@ def write_results_to_database(
         storage.error.set_any_trial_error(trial_id, error)
 
 
+def str_or_float_or_int(value: str | float | int) -> str | float | int:
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            return value
+
+
 def main() -> None:
     """Writes the result of a trial to a file.
     """
@@ -38,7 +48,7 @@ def main() -> None:
     parser.add_argument('--trial_id', type=int, required=True)
     parser.add_argument('--start_time', type=str, default='', required=True)
     parser.add_argument('--end_time', type=str, default='', required=True)
-    parser.add_argument('--objective', type=float, default=None)
+    parser.add_argument('--objective', nargs='+', type=str_or_float_or_int, default=None)
     parser.add_argument('--error', type=str, default='')
     parser.add_argument('--exitcode', type=int, default=None)
 
@@ -70,7 +80,7 @@ def main() -> None:
     contents = {
         'trial_id': args.trial_id,
         'result': args.objective,
-        'paramerters': xs,
+        'parameters': xs,
         'start_time': args.start_time,
         'end_time': args.end_time,
         'exitcode': args.exitcode,

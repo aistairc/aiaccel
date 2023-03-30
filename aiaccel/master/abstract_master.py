@@ -5,15 +5,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import aiaccel
-from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
-from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
-from aiaccel.master.verification.abstract_verification import \
-    AbstractVerification
+from aiaccel.common import file_final_result
+from aiaccel.master import AbstractVerification
 from aiaccel.module import AbstractModule
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.time_tools import (get_time_now_object,
-                                     get_time_string_from_object)
+from aiaccel.util import (create_yaml, get_time_now_object,
+                          get_time_string_from_object, str_to_logging_level)
 
 
 class AbstractMaster(AbstractModule):
@@ -42,10 +38,10 @@ class AbstractMaster(AbstractModule):
         self.start_time = get_time_now_object()
         self.loop_start_time: datetime | None = None
         self.options = options
-        self.options['process_name'] = 'master'
+        self.options["process_name"] = "master"
 
         super().__init__(self.options)
-        self.logger = logging.getLogger('root.master')
+        self.logger = logging.getLogger("root.master")
         self.logger.setLevel(logging.DEBUG)
 
         self.set_logger(
@@ -53,11 +49,16 @@ class AbstractMaster(AbstractModule):
             self.workspace.log / self.config.master_logfile.get(),
             str_to_logging_level(self.config.master_file_log_level.get()),
             str_to_logging_level(self.config.master_stream_log_level.get()),
-            'Master   '
+            "Master   ",
         )
 
         self.verification = AbstractVerification(self.options)
-        self.goal = self.config.goal.get()
+
+        if isinstance(self.config.goal.get(), str):
+            self.goal = [self.config.goal.get()]
+        else:
+            self.goal = self.config.goal.get()
+
         self.trial_number = self.config.trial_number.get()
 
         self.runner_files: list[Path] | None = []
@@ -89,23 +90,12 @@ class AbstractMaster(AbstractModule):
         if not self.check_finished():
             return
 
-        evaluator: MaximizeEvaluator | MinimizeEvaluator
-        if self.goal.lower() == aiaccel.goal_maximize:
-            evaluator = MaximizeEvaluator(self.options)
-        elif self.goal.lower() == aiaccel.goal_minimize:
-            evaluator = MinimizeEvaluator(self.options)
-        else:
-            self.logger.error(f'Invalid goal: {self.goal}.')
-            raise ValueError(f'Invalid goal: {self.goal}.')
-
-        evaluator.evaluate()
-        evaluator.print()
-        evaluator.save()
+        self.evaluate()
 
         # verification
         self.verification.verify()
-        self.verification.save('final')
-        self.logger.info('Master finished.')
+        self.verification.save("final")
+        self.logger.info("Master finished.")
 
     def print_dict_state(self) -> None:
         """Display the number of yaml files in 'ready', 'running', and
@@ -117,23 +107,23 @@ class AbstractMaster(AbstractModule):
         now = get_time_now_object()
 
         if self.loop_start_time is None:
-            end_estimated_time = 'Unknown'
+            end_estimated_time = "Unknown"
         else:
             looping_time = now - self.loop_start_time
 
             if self.hp_finished != 0:
-                one_loop_time = (looping_time / self.hp_finished)
+                one_loop_time = looping_time / self.hp_finished
                 hp_finished = self.hp_finished
-                finishing_time = (now + (self.trial_number - hp_finished) * one_loop_time)
+                finishing_time = now + (self.trial_number - hp_finished) * one_loop_time
                 end_estimated_time = get_time_string_from_object(finishing_time)
             else:
-                end_estimated_time = 'Unknown'
+                end_estimated_time = "Unknown"
 
         self.logger.info(
-            f'{self.hp_finished}/{self.trial_number} finished, '
-            f'ready: {self.hp_ready} ,'
-            f'running: {self.hp_running}, '
-            f'end estimated time: {end_estimated_time}'
+            f"{self.hp_finished}/{self.trial_number} finished, "
+            f"ready: {self.hp_ready} ,"
+            f"running: {self.hp_running}, "
+            f"end estimated time: {end_estimated_time}"
         )
 
     def inner_loop_main_process(self) -> bool:
@@ -163,7 +153,7 @@ class AbstractMaster(AbstractModule):
         return None
 
     def check_error(self) -> bool:
-        """ Check to confirm if an error has occurred.
+        """Check to confirm if an error has occurred.
 
         Args:
             None
@@ -172,3 +162,25 @@ class AbstractMaster(AbstractModule):
             bool: True if no error. False if with error.
         """
         return True
+
+    def evaluate(self) -> None:
+        """Evaluate the result of optimization.
+
+        Returns:
+            None
+        """
+
+        best_trial_ids, _ = self.storage.get_best_trial(self.goal)
+        if best_trial_ids is None:
+            raise ValueError("No best trial found.")
+
+        hp_results = []
+
+        for best_trial_id in best_trial_ids:
+            hp_results.append(self.storage.get_hp_dict(best_trial_id))
+
+        self.logger.info('Best hyperparameter is followings:')
+        self.logger.info(hp_results)
+
+        path = self.workspace.path / file_final_result
+        create_yaml(path, hp_results, self.workspace.lock)

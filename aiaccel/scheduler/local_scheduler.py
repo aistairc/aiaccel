@@ -3,9 +3,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.scheduler.job.model.local_model import LocalModel
-from aiaccel.util.process import ps2joblist
+from aiaccel.scheduler import AbstractScheduler, LocalModel
+from aiaccel.util import ps2joblist
 
 
 class LocalScheduler(AbstractScheduler):

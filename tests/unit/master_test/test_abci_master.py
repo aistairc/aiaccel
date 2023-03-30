@@ -5,7 +5,8 @@ import time
 from unittest.mock import patch
 
 import pytest
-from aiaccel.master.abci_master import AbciMaster
+
+from aiaccel.master import AbciMaster
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
@@ -43,10 +44,7 @@ class TestAbciMaster(BaseTest):
         ]
 
         with patch.object(sys, 'argv', commandline_args):
-            # from aiaccel import start
-            # self.master = start.Master()
             options = parse_arguments()
-            # self.master = create_master(options['config'])(options)
             self.master = AbciMaster(options)
 
         yield

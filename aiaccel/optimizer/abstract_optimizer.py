@@ -5,12 +5,12 @@ from typing import Any
 
 from numpy import str_
 
-from aiaccel import (data_type_categorical, data_type_ordinal,
-                     data_type_uniform_float, data_type_uniform_int)
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
+from aiaccel.config import is_multi_objective
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.trialid import TrialId
+from aiaccel.util import TrialId, str_to_logging_level
 
 
 class AbstractOptimizer(AbstractModule):
@@ -100,7 +100,7 @@ class AbstractOptimizer(AbstractModule):
             list[dict[str, float | int | str]]: A created list of initial
             parameters.
         """
-        sample = self.params.sample(initial=True, rng=self._rng)
+        sample = self.params.sample(self._rng, initial=True)
         new_params = []
 
         for s in sample:
@@ -118,7 +118,7 @@ class AbstractOptimizer(AbstractModule):
 
         Raises:
             NotImplementedError: Causes when the inherited class does not
-            implement.
+                implement.
 
         Returns:
             list[dict[str, float | int | str]] | None: A created list of
@@ -249,7 +249,7 @@ class AbstractOptimizer(AbstractModule):
 
         Returns:
             list | None: A list of parameters with casted values. None if given
-                `params` is None.
+            `params` is None.
         """
         if params is None or len(params) == 0:
             return params
@@ -303,3 +303,24 @@ class AbstractOptimizer(AbstractModule):
             self.logger.error(error_message)
 
         return False
+
+    def get_any_trial_objective(self, trial_id: int) -> Any:
+        """Get any trial result.
+
+            if the objective is multi-objective, return the list of objective.
+
+        Args:
+            trial_id (int): Trial ID.
+
+        Returns:
+            Any: Any trial result.
+        """
+
+        objective = self.storage.result.get_any_trial_objective(trial_id)
+        if objective is None:
+            return None
+
+        if is_multi_objective(self.config):
+            return objective
+        else:
+            return objective[0]

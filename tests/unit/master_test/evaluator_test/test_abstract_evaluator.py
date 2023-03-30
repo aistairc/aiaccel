@@ -1,5 +1,4 @@
-import aiaccel
-from aiaccel.master.evaluator.abstract_evaluator import AbstractEvaluator
+from aiaccel.master import AbstractEvaluator
 from tests.base_test import BaseTest
 
 
@@ -59,5 +58,4 @@ class TestAbstractEvaluator(BaseTest):
         evaluator = AbstractEvaluator(options)
         setup_hp_finished(1)
         evaluator.evaluate()
-        evaluator.save()
-        assert work_dir.joinpath("best_result.yaml").exists()
+        assert evaluator.save() is None
