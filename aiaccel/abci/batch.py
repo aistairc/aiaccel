@@ -10,7 +10,7 @@ from aiaccel.util import file_create
 def create_abci_batch_file(
     trial_id: int,
     param_content: dict[str, Any],
-    output_file_path: Path | str,
+    workspace_path: Path | str,
     error_file_path: Path | str,
     config_file_path: Path | str,
     batch_file: Path,
@@ -25,7 +25,7 @@ def create_abci_batch_file(
     Args:
         trial_id (int): A trial id.
         param_content (dict): A dictionary of parameters.
-        output_file_path (Path | str): A path of a output file.
+        workspace (Path | str): A path of a workspace.
         error_file_path (Path | str): A path of a error file.
         config_file_path (Path | str): A path of a config file.
         batch_file (Path): A path of a creating file.
@@ -52,7 +52,7 @@ def create_abci_batch_file(
     set_retult = _generate_command_line(
         command='aiaccel-set-result',
         args=[
-            '--file $output_file_path',
+            '--workspace_path $workspace_path',
             '--trial_id $trial_id',
             '--config $config_file_path',
             '--start_time $start_time',
@@ -78,8 +78,8 @@ def create_abci_batch_file(
 
     mains = [
         f'trial_id={str(trial_id)}',
+        f'workspace_path={str(workspace_path)}',
         f'config_file_path={str(config_file_path)}',
-        f'output_file_path={str(output_file_path)}',
         f'error_file_path={str(error_file_path)}',
         'start_time=`date "+%Y-%m-%d %H:%M:%S"`',
         f'result=`{" ".join(commands)}`',

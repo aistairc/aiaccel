@@ -152,6 +152,10 @@ def main() -> None:  # pragma: no cover
     config_name = Path(args.config).name
     shutil.copy(Path(args.config), dst / config_name)
 
+    if best_results is None:
+        logger.info("No result.")
+        return
+
     for i in range(len(best_results)):
         parametets = str([f'{param["parameter_name"]}: {param["value"]}' for param in best_results[i]["parameters"]])
         parametets = parametets.replace("[", "")
