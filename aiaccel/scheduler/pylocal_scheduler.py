@@ -6,6 +6,7 @@ from importlib.util import module_from_spec
 from pathlib import Path
 from typing import Any
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run
 from aiaccel.util.aiaccel import WrapperInterface
@@ -27,7 +28,7 @@ class PylocalScheduler(AbstractScheduler):
 
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         super().__init__(options)
         self.run = Run(self.config_path)
         self.com = WrapperInterface()

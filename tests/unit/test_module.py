@@ -7,11 +7,10 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import module_type_master
 from aiaccel.common import module_type_optimizer
 from aiaccel.common import module_type_scheduler
-
-
 from aiaccel.master import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import RandomOptimizer
@@ -37,34 +36,16 @@ def dummy_break():
     sys.exit()
 
 
-# def test_make_work_directory_exit(config_json, work_dir):
-#     options = {
-#         'config': config_json,
-#         'process_name': 'test'
-#     }
-#     module = AbstractModule(options)
-#     module.logger = logging.getLogger(__name__)
-#     shutil.rmtree(work_dir)
-#     file_create(work_dir.parent.joinpath('work'), "")
-
-#     try:
-#         module.make_work_directory()
-#         assert False
-#     except NotADirectoryError:
-#         assert True
-
-
 class TestAbstractModule(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_module(self):
-        options = {
-            'config': str(self.config_json),
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'test'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="test"
+        )
 
         self.module = AbstractModule(options)
         self.module.logger = logging.getLogger(__name__)
@@ -81,13 +62,12 @@ class TestAbstractModule(BaseTest):
         module_type = self.module.get_module_type()
         assert module_type is None
 
-        options = {
-            'config': str(self.config_json),
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         commandline_args = [
             "start.py",
             "--config",
@@ -99,24 +79,22 @@ class TestAbstractModule(BaseTest):
             module_type = master.get_module_type()
             assert module_type == module_type_master
 
-            options = {
-                'config': str(self.config_json),
-                'resume': None,
-                'clean': False,
-                'fs': False,
-                'process_name': 'optimizer'
-            }
+            options = CommandLineOptions(
+                config=str(self.config_json),
+                resume=None,
+                clean=False,
+                process_name="optimizer"
+            )
             optimizer = RandomOptimizer(options)
             module_type = optimizer.get_module_type()
             assert module_type == module_type_optimizer
 
-            options = {
-                'config': str(self.config_json),
-                'resume': None,
-                'clean': False,
-                'fs': False,
-                'process_name': 'scheduler'
-            }
+            options = CommandLineOptions(
+                config=str(self.config_json),
+                resume=None,
+                clean=False,
+                process_name="scheduler"
+            )
             scheduler = LocalScheduler(options)
             module_type = scheduler.get_module_type()
             assert module_type == module_type_scheduler
@@ -191,17 +169,17 @@ class TestAbstractModule(BaseTest):
         assert self.module.check_error() is True
 
     def test_resume(self):
-        options = {
-            'config': str(self.config_json),
-            'resume': None,
-            'clean': False,
-            'process_name': 'test'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="test"
+        )
 
         self.module = AbstractModule(options)
         self.module._rng = np.random.RandomState(0)
         assert self.module.resume() is None
 
-        self.module.options['resume'] = 1
+        self.module.options.resume = 1
         self.module._serialize(1)
         assert self.module.resume() is None

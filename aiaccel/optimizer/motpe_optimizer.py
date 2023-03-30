@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import optuna
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.optimizer.tpe_optimizer import TpeOptimizer, TPESamplerWrapper
 
 
@@ -9,10 +10,11 @@ class MOTpeOptimizer(TpeOptimizer):
     """An optimizer class based on multi-objective optuna.samplers.TPESampler.
 
     Args:
-        options (dict): A dictionary containing command line options.
+        options (CommandLineOptions): A dataclass object containing
+            command line options.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         """Initial method of MOTpeOptimizer.
 
         Args:
@@ -33,7 +35,7 @@ class MOTpeOptimizer(TpeOptimizer):
         sampler._random_sampler._rng = self._rng
         storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
-        load_if_exists = self.options["resume"] is not None
+        load_if_exists = self.options.resume is not None
 
         self.study = optuna.create_study(
             sampler=sampler,

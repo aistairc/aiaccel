@@ -5,6 +5,7 @@ import sys
 import time
 from unittest.mock import patch
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import goal_maximize
 from aiaccel.config import Config
 from aiaccel.master import AbstractMaster
@@ -44,7 +45,12 @@ class TestAbstractMaster(BaseTest):
         ]
 
         with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
             master = AbstractMaster(options)
         loop = asyncio.get_event_loop()
         gather = asyncio.gather(
@@ -63,7 +69,12 @@ class TestAbstractMaster(BaseTest):
             format(self.config_json)
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
             master = AbstractMaster(options)
 
         try:
@@ -78,13 +89,12 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         master = AbstractMaster(options)
         setup_hp_finished(10)
         assert master.pre_process() is None
@@ -94,13 +104,12 @@ class TestAbstractMaster(BaseTest):
         database_remove
     ):
         database_remove()
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         master = AbstractMaster(options)
 
         for i in range(10):
@@ -145,7 +154,12 @@ class TestAbstractMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # master = start.Master()
-            options = parse_arguments()
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
             master = AbstractMaster(options)
 
         # master = AbstractMaster(config_json)
@@ -168,15 +182,19 @@ class TestAbstractMaster(BaseTest):
             "--config",
             format(self.config_json)
         ]
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
             master = AbstractMaster(options)
 
         master.pre_process()

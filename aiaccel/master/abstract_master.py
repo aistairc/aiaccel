@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import goal_maximize, goal_minimize
 from aiaccel.config import is_multi_objective
 from aiaccel.master import AbstractVerification, MaximizeEvaluator, MinimizeEvaluator
@@ -20,11 +21,11 @@ class AbstractMaster(AbstractModule):
     """An abstract class for AbciMaster and LocalMaster.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
+        options (CommandLineOptions): A dataclass object containing
+            command line options as well as process name.
 
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
+        options (CommandLineOptions): A dataclass object containing
             command line options as well as process name.
         loop_start_time (datetime.datetime): A stored loop starting time.
         optimizer_proc (subprocess.Popen): A reference for a subprocess of
@@ -38,11 +39,11 @@ class AbstractMaster(AbstractModule):
         stats (list):
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         self.start_time = get_time_now_object()
         self.loop_start_time: datetime | None = None
         self.options = options
-        self.options["process_name"] = "master"
+        self.options.process_name = "master"
 
         super().__init__(self.options)
         self.logger = logging.getLogger("root.master")

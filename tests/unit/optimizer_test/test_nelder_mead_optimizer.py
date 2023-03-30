@@ -2,6 +2,7 @@ import json
 import numpy as np
 import pytest
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import goal_maximize
 from aiaccel.config import ConfileWrapper
 from aiaccel.optimizer import NelderMead
@@ -16,13 +17,12 @@ class TestNelderMeadOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
-        self.options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
+        self.options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="optimizer"
+        )
         self.optimizer = NelderMeadOptimizer(self.options)
         yield
         self.optimizer = None

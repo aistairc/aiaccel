@@ -4,6 +4,7 @@ from functools import reduce
 from operator import mul
 from typing import Any
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.config import Config
 from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
@@ -115,7 +116,7 @@ class GridOptimizer(AbstractOptimizer):
     """An optimizer class with grid search algorithm.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
+        options (CommandLineOptions): A dataclass object containing
             command line options.
 
     Attributes:
@@ -123,7 +124,7 @@ class GridOptimizer(AbstractOptimizer):
         generate_index (int): A number of generated hyper parameters.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         super().__init__(options)
         self.ready_params: Any = None
         self.generate_index: Any = None

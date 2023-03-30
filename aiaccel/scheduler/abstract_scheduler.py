@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import dict_result
 from aiaccel.module import AbstractModule
 from aiaccel.scheduler import RandomSampling
@@ -16,11 +17,11 @@ class AbstractScheduler(AbstractModule):
     """An abstract class for AbciScheduler and LocalScheduler.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
+        options (CommandLineOptions): A dataclass object containing
             command line options.
 
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
+        options (CommandLineOptions): A dataclass object containing
             command line options.
         config_path (Path): Path to the configuration file.
         algorithm (RandomSampling): A scheduling algorithm
@@ -32,12 +33,12 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         self.options = options
-        self.options['process_name'] = 'scheduler'
+        self.options.process_name = "scheduler"
         super().__init__(self.options)
 
-        self.config_path = Path(self.options['config']).resolve()
+        self.config_path = Path(self.options.config).resolve()
 
         self.set_logger(
             'root.scheduler',
@@ -277,11 +278,8 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
-        ):
-            self._deserialize(self.options['resume'])
+        if isinstance(self.options.resume, int) and self.options.resume > 0:
+            self._deserialize(self.options.resume)
 
     def create_result_file(self, trial_id: int) -> None:
         """ Save the results in yaml format.

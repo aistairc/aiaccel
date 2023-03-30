@@ -1,8 +1,10 @@
+import copy
 from unittest.mock import patch
 
 import numpy as np
 import pytest
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.config import Config
 from aiaccel.optimizer import TpeOptimizer
 from aiaccel.optimizer.tpe_optimizer import TPESamplerWrapper, create_distributions
@@ -21,13 +23,12 @@ class TestTpeOptimizer(BaseTest):
     def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
         self.config_tpe_path = create_tmp_config(self.data_dir / "config_tpe.json")
-        self.options = {
-            "config": self.config_tpe_path,
-            "resume": None,
-            "clean": False,
-            "fs": False,
-            "process_name": "optimizer",
-        }
+        self.options = CommandLineOptions(
+            config=str(self.config_tpe_path),
+            resume=None,
+            clean=False,
+            process_name="optimizer"
+        )
         self.optimizer = TpeOptimizer(self.options)
         yield
         self.optimizer = None
@@ -67,7 +68,7 @@ class TestTpeOptimizer(BaseTest):
                 assert self.optimizer.generate_parameter() is None
 
     def test_generate_initial_parameter(self, create_tmp_config):
-        options = self.options.copy()
+        options = copy.copy(self.options)
         self.config_tpe_path = create_tmp_config(self.data_dir / "config_tpe_2.json")
         optimizer = TpeOptimizer(self.options)
         (optimizer.ws / "storage" / "storage.db").unlink()

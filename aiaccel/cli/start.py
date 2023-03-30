@@ -9,6 +9,7 @@ from pathlib import Path
 
 from aiaccel.cli import CsvWriter
 from aiaccel.common import dict_lock, goal_maximize, goal_minimize
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.config import Config, is_multi_objective
 from aiaccel.master import create_master
 from aiaccel.optimizer import create_optimizer
@@ -77,19 +78,19 @@ def main() -> None:  # pragma: no cover
     parser.add_argument("--config", "-c", type=str, default="config.yml")
     parser.add_argument("--resume", type=int, default=None)
     parser.add_argument("--clean", nargs="?", const=True, default=False)
-    args = parser.parse_args()
+    command_line_options = parser.parse_args(namespace=CommandLineOptions)
 
-    config = Config(args.config, warn=True, format_check=True)
+    config = Config(command_line_options.config, warn=True, format_check=True)
     if config is None:
-        logger.error(f"Invalid workspace: {args.workspace} or config: {args.config}")
+        logger.error(f"Invalid workspace: {command_line_options.workspace} or config: {command_line_options.config}")
         return
 
     workspace = Workspace(config.workspace.get())
     goal = config.goal.get()
     path_to_lock_file = workspace.path / dict_lock
 
-    if args.resume is None:
-        if args.clean is True:
+    if command_line_options.resume is None:
+        if command_line_options.clean is True:
             logger.info("Cleaning workspace")
             workspace.clean()
             logger.info(f"Workspace directory {str(workspace.path)} is cleaned.")
@@ -103,12 +104,16 @@ def main() -> None:  # pragma: no cover
         logger.error("Creating workspace is Failed.")
         return
 
-    logger.info(f"config: {str(Path(args.config).resolve())}")
+    logger.info(f"config: {str(Path(command_line_options.config).resolve())}")
 
-    Master = create_master(args.config)
-    Optimizer = create_optimizer(args.config)
-    Scheduler = create_scheduler(args.config)
-    modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
+    Master = create_master(command_line_options.config)
+    Optimizer = create_optimizer(command_line_options.config)
+    Scheduler = create_scheduler(command_line_options.config)
+    modules = [
+        Master(command_line_options),
+        Optimizer(command_line_options),
+        Scheduler(command_line_options)
+    ]
 
     sleep_time = config.sleep_time.get()
     time_s = time.time()
@@ -131,14 +136,14 @@ def main() -> None:  # pragma: no cover
     for module in modules:
         module.post_process()
 
-    csv_writer = CsvWriter(args.config)
+    csv_writer = CsvWriter(command_line_options.config)
     csv_writer.create()
 
     logger.info("moving...")
     dst = workspace.move_completed_data()
 
-    config_name = Path(args.config).name
-    shutil.copy(Path(args.config), dst / config_name)
+    config_name = Path(command_line_options.config).name
+    shutil.copy(Path(command_line_options.config), dst / config_name)
 
     files = get_file_result_hp(dst)
 

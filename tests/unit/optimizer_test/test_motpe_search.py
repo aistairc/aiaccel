@@ -1,8 +1,10 @@
 import warnings
+import copy
 
 import numpy as np
 import pytest
-from aiaccel.optimizer.motpe_optimizer import MOTpeOptimizer
+from aiaccel.command_line_options import CommandLineOptions
+from aiaccel.optimizer import MOTpeOptimizer
 
 from tests.base_test import BaseTest
 from unittest.mock import patch
@@ -14,13 +16,12 @@ class TestMOTpeOptimizer(BaseTest):
     def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
         self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe.json')
-        self.options = {
-            'config': self.config_motpe_path,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer',
-        }
+        self.options = CommandLineOptions(
+            config=str(self.config_motpe_path),
+            resume=None,
+            clean=False,
+            process_name="optimizer"
+        )
         self.optimizer = MOTpeOptimizer(self.options)
         # self.optimizer.config.goal.set(['minimize'])
         yield
@@ -64,7 +65,7 @@ class TestMOTpeOptimizer(BaseTest):
                 assert self.optimizer.generate_parameter() is None
 
     def test_generate_initial_parameter(self, create_tmp_config):
-        options = self.options.copy()
+        options = copy.copy(self.options)
         self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe_no_initial_params.json')
         optimizer = MOTpeOptimizer(self.options)
         (optimizer.ws / 'storage' / 'storage.db').unlink()

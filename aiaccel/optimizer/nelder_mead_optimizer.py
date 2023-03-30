@@ -2,6 +2,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.optimizer import NelderMead
 from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
@@ -11,8 +12,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+        options (CommandLineOptions): A dataclass object containing
+            command line options.
 
     Attributes:
         nelder_mead (NelderMead): A class object implementing Nelder-Mead
@@ -21,7 +22,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         order (list): A list of parameters being processed.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         super().__init__(options)
         self.nelder_mead: Any = None
         self.parameter_pool: list[dict[str, Any]] = []

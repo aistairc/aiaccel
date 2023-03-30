@@ -8,6 +8,7 @@ import sqlalchemy.orm as sqlalchemy_orm
 from optuna.storages._rdb import models
 
 import aiaccel.parameter
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.optimizer import AbstractOptimizer
 
 
@@ -25,8 +26,8 @@ class TpeOptimizer(AbstractOptimizer):
     """An optimizer class based on optuna.samplers.TPESampler.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary
-            containing command line options.
+        options (CommandLineOptions): A dataclass object containing
+            command line options.
 
     Attributes:
         parameter_pool (dict[int, list[dict[str, float | int | str]]]):
@@ -42,7 +43,7 @@ class TpeOptimizer(AbstractOptimizer):
         randseed (int): Random seed.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         super().__init__(options)
         self.parameter_pool: dict[str, Any] = {}
         self.parameter_list: list[Any] = []
@@ -63,7 +64,7 @@ class TpeOptimizer(AbstractOptimizer):
         if self.distributions is None:
             self.distributions = create_distributions(self.params)
 
-        if self.options["resume"] is not None and self.options["resume"] > 0:
+        if self.options.resume is not None and self.options.resume > 0:
             self.resume_trial()
 
         self.create_study()
@@ -187,7 +188,7 @@ class TpeOptimizer(AbstractOptimizer):
         sampler._random_sampler._rng = self._rng
         storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
-        load_if_exists = self.options["resume"] is not None
+        load_if_exists = self.options.resume is not None
         self.study = optuna.create_study(
             sampler=sampler,
             storage=storage,
@@ -204,7 +205,7 @@ class TpeOptimizer(AbstractOptimizer):
         session = Session()
 
         for optuna_trial in optuna_trials:
-            if optuna_trial.number >= self.options["resume"]:
+            if optuna_trial.number >= self.options.resume:
                 self.resumed_list.append(optuna_trial)
                 resumed_trial = (
                     session.query(models.TrialModel)

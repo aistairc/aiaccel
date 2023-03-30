@@ -4,6 +4,7 @@ from typing import Any
 
 from scipy.stats import qmc
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.optimizer import AbstractOptimizer
 
 
@@ -11,7 +12,7 @@ class SobolOptimizer(AbstractOptimizer):
     """An optimizer class with sobol algorithm.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
+        options (CommandLineOptions): A dataclass object containing
             command line options.
 
     Attributes:
@@ -24,7 +25,7 @@ class SobolOptimizer(AbstractOptimizer):
         Confirm whether the current code resumes for any timings of quits.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         super().__init__(options)
         self.generate_index: Any = None
         self.sampler: Any = None
@@ -40,7 +41,7 @@ class SobolOptimizer(AbstractOptimizer):
         finished = self.storage.trial.get_finished()
         self.generate_index = len(finished)
 
-        if self.options['resume'] is None or self.options['resume'] <= 0:
+        if self.options.resume is None or self.options.resume <= 0:
             self.sampler = qmc.Sobol(
                 d=len(self.params.get_parameter_list()),
                 scramble=self.config.sobol_scramble.get(),

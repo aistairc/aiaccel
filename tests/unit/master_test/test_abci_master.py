@@ -5,6 +5,7 @@ import time
 from unittest.mock import patch
 
 import pytest
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.master import AbciMaster
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
@@ -45,7 +46,12 @@ class TestAbciMaster(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # self.master = start.Master()
-            options = parse_arguments()
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
             # self.master = create_master(options['config'])(options)
             self.master = AbciMaster(options)
 
@@ -64,7 +70,12 @@ class TestAbciMaster(BaseTest):
             str(self.config_path)
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
             master = AbciMaster(options)
         master.pre_process()
         assert type(master.runner_files) is list
@@ -83,7 +94,12 @@ class TestAbciMaster(BaseTest):
             str(self.config_path)
         ]
         with patch.object(sys, 'argv', commandline_args):
-            options = parse_arguments()
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
             master = AbciMaster(options)
 
         xml_path = data_dir.joinpath('qstat.xml')

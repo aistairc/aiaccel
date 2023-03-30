@@ -2,6 +2,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
 from aiaccel.util import str_to_logging_level
@@ -14,12 +15,12 @@ class AbstractOptimizer(AbstractModule):
     """An abstract class for Optimizer classes.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
+        options (CommandLineOptions): A dataclass object containing
             command line options.
 
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
+        options (CommandLineOptions): A dataclass object containing
+            command line options as well as process name.
         hp_ready (int): A ready number of hyper parameters.
         hp_running (int): A running number of hyper prameters.
         hp_finished (int): A finished number of hyper parameters.
@@ -32,9 +33,9 @@ class AbstractOptimizer(AbstractModule):
         trial_id (TrialId): TrialId object.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         self.options = options
-        self.options['process_name'] = 'optimizer'
+        self.options.process_name = 'optimizer'
         super().__init__(self.options)
 
         self.set_logger(
@@ -226,14 +227,11 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
-        ):
-            self.storage.rollback_to_ready(self.options['resume'])
-            self.storage.delete_trial_data_after_this(self.options['resume'])
-            self.trial_id.initial(num=self.options['resume'])
-            self._deserialize(self.options['resume'])
+        if isinstance(self.options.resume, int) and self.options.resume > 0:
+            self.storage.rollback_to_ready(self.options.resume)
+            self.storage.delete_trial_data_after_this(self.options.resume)
+            self.trial_id.initial(num=self.options.resume)
+            self._deserialize(self.options.resume)
 
     def cast(self, params: list[dict[str, Any]]) -> list[Any] | None:
         """Casts types of parameter values to appropriate tepes.

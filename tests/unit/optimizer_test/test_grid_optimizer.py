@@ -1,6 +1,10 @@
+from __future__ import annotations
+from collections.abc import Callable
+from collections.abc import Generator
 import functools
 from pathlib import Path
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.config import Config
 from aiaccel.optimizer import GridOptimizer
 from aiaccel.optimizer import generate_grid_points
@@ -111,87 +115,49 @@ def test_generate_grid_points(grid_load_test_config):
 
 
 class TestGridOptimizer(BaseTest):
-
-    def test_pre_process(self, create_tmp_config):
-        self.workspace.clean()
-        self.workspace.create()
-
+    @pytest.fixture(autouse=True)
+    def setup_optimizer(self, create_tmp_config: Callable[[Path], Path]) -> Generator[None, None, None]:
         self.grid_config_json = create_tmp_config(self.grid_config_json)
-
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
-        optimizer.pre_process()
-
-    def test_get_parameter_index(self, create_tmp_config):
-        self.workspace.clean()
-        self.workspace.create()
-
-        self.grid_config_json = create_tmp_config(self.grid_config_json)
-
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
-        optimizer.pre_process()
-        assert optimizer.get_parameter_index() == [0 for _ in range(0, 10)]
-
-        max_index = functools.reduce(
-            lambda x, y: x*y,
-            [len(p['parameters']) for p in optimizer.ready_params]
+        self.options = CommandLineOptions(
+            config=str(self.grid_config_json),
+            resume=None,
+            clean=False,
+            process_name="optimizer"
         )
-        optimizer.generate_index = max_index + 1
-        assert optimizer.get_parameter_index() is None
+        self.optimizer = GridOptimizer(self.options)
+        self.optimizer.pre_process()
+        yield
+        self.options = None
+        self.optimizer = None
 
-    def test_generate_parameter(self, create_tmp_config):
-        self.workspace.clean()
-        self.workspace.create()
+    def test_pre_process(self) -> None:
+        pass
 
-        self.grid_config_json = create_tmp_config(self.grid_config_json)
+    def test_get_parameter_index(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        assert self.optimizer.get_parameter_index() == [0] * 10
 
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
-        optimizer.pre_process()
         max_index = functools.reduce(
             lambda x, y: x*y,
-            [len(p['parameters']) for p in optimizer.ready_params]
+            [len(p['parameters']) for p in self.optimizer.ready_params]
+        )
+        with monkeypatch.context() as m:
+            m.setattr(self.optimizer, "generate_index", max_index + 1)
+            assert self.optimizer.get_parameter_index() is None
+
+    def test_generate_parameter(self,  monkeypatch: pytest.MonkeyPatch) -> None:
+        max_index = functools.reduce(
+            lambda x, y: x*y,
+            [len(p['parameters']) for p in self.optimizer.ready_params]
         )
 
         # All generated
-        optimizer.generate_index = max_index + 1
-        assert len(optimizer.generate_parameter()) == 0
+        with monkeypatch.context() as m:
+            m.setattr(self.optimizer, "generate_index", max_index + 1)
+            assert len(self.optimizer.generate_parameter()) == 0
 
-        optimizer.generate_index = 0
-        assert len(optimizer.generate_parameter()) == self.config.trial_number.get()
+        with monkeypatch.context() as m:
+            m.setattr(self.optimizer, "generate_index",  0)
+            assert len(self.optimizer.generate_parameter()) == self.config.trial_number.get()
 
-    def test_generate_initial_parameter(self, create_tmp_config):
-        self.workspace.clean()
-        self.workspace.create()
-
-        self.grid_config_json = create_tmp_config(self.grid_config_json)
-
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        optimizer = GridOptimizer(options)
-        optimizer.pre_process()
-        optimizer.generate_initial_parameter()
+    def test_generate_initial_parameter(self) -> None:
+        self.optimizer.generate_initial_parameter()

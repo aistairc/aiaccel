@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import dict_lock
 from aiaccel.common import dict_result
 from aiaccel.common import file_final_result
@@ -17,12 +18,10 @@ class AbstractEvaluator(object):
     """An abstract class for MaximizeEvaluator and MinimizeEvaluator.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
+        options (CommandLineOptions): A dataclass object containing
             command line options as well as process name.
 
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options as well as process name.
         config_path (Path): Path to the configuration file.
         config (Config): Config object.
         ws (Path): Path to the workspace.
@@ -34,9 +33,8 @@ class AbstractEvaluator(object):
 
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
-        self.options = options
-        self.config_path = Path(self.options['config']).resolve()
+    def __init__(self, options: CommandLineOptions) -> None:
+        self.config_path = Path(options.config).resolve()
         self.config = Config(str(self.config_path))
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / dict_lock

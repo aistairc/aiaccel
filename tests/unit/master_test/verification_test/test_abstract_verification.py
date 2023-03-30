@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import dict_verification
 from aiaccel.common import extension_verification
 from aiaccel.master import AbstractVerification
@@ -10,26 +11,22 @@ from tests.base_test import BaseTest
 class TestAbstractVerification(BaseTest):
 
     def test_init(self):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         verification = AbstractVerification(options)
         assert verification.is_verified
 
     def test_verify(self, setup_hp_finished, work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         verification = AbstractVerification(options)
         verification.is_verified = False
         assert verification.verify() is None
@@ -65,14 +62,12 @@ class TestAbstractVerification(BaseTest):
         setup_hp_finished,
         work_dir
     ):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         verification = AbstractVerification(options)
         setup_hp_finished(10)
 
@@ -112,13 +107,12 @@ class TestAbstractVerification(BaseTest):
                 assert verification.make_verification(0, 0) is None
 
     def test_print(self):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         verification = AbstractVerification(options)
         verification.is_verified = False
         assert verification.print() is None
@@ -126,13 +120,12 @@ class TestAbstractVerification(BaseTest):
         assert verification.print() is None
 
     def test_save(self, work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="master"
+        )
         verification = AbstractVerification(options)
         verification.is_verified = False
         assert verification.save(1) is None

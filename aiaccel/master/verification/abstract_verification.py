@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import dict_lock
 from aiaccel.common import dict_verification
 from aiaccel.common import extension_verification
@@ -17,7 +18,7 @@ class AbstractVerification(object):
     """An abstract class of verification.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
+        options (CommandLineOptions): A dataclass object containing
             command line options as well as process name.
 
     Attributes:
@@ -38,10 +39,10 @@ class AbstractVerification(object):
         storage (Storage): Storage object.
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         # === Load config file===
         self.options = options
-        self.config = Config(self.options['config'])
+        self.config = Config(self.options.config)
         self.ws = Path(self.config.workspace.get()).resolve()
         self.dict_lock = self.ws / dict_lock
         self.is_verified: bool = False

@@ -1,5 +1,6 @@
 from aiaccel import common
 from aiaccel import config
+from aiaccel import command_line_options
 from aiaccel import module
 from aiaccel import parameter
 from aiaccel import workspace
@@ -16,6 +17,7 @@ from aiaccel import util
 __all__ = [
     'common',
     'config',
+    'command_line_options',
     'module',
     'parameter',
     'workspace',

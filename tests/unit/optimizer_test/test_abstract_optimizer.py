@@ -5,6 +5,8 @@ import time
 from unittest.mock import patch
 
 import pytest
+
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.optimizer import AbstractOptimizer
 from tests.base_test import BaseTest
 
@@ -24,13 +26,12 @@ class TestAbstractOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': 0,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=0,
+            clean=False,
+            process_name="optimizer"
+        )
         self.optimizer = AbstractOptimizer(options)
         yield
         self.optimizer = None

@@ -6,6 +6,7 @@ from typing import Any
 
 import numpy as np
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import alive_master
 from aiaccel.common import alive_optimizer
 from aiaccel.common import alive_scheduler
@@ -48,12 +49,12 @@ class AbstractModule(object):
     5. call post_process()
 
      Args:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
+        options (CommandLineOptions): A dataclass object containing
+            command line options as well as process name.
 
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
+        options (CommandLineOptions): A dataclass object containing
+            command line options as well as process name.
         config_path (Path): Path to the configuration file.
         config (Config): A config object.
         ws (Path): A path to a current workspace.
@@ -70,10 +71,10 @@ class AbstractModule(object):
         loop_count (int): A loop count that is incremented in loop method.
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
+    def __init__(self, options: CommandLineOptions) -> None:
         # === Load config file===
         self.options = options
-        self.config_path = Path(self.options['config']).resolve()
+        self.config_path = Path(self.options.config).resolve()
         self.config = Config(self.config_path)
         self.ws = Path(self.config.workspace.get()).resolve()
 
@@ -106,12 +107,12 @@ class AbstractModule(object):
         self.hp_finished = 0
         self.seed = self.config.randseed.get()
         self.storage = Storage(self.ws)
-        self.trial_id = TrialId(self.options['config'])
+        self.trial_id = TrialId(self.options.config)
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng: Any = None
 
         self.storage.variable.register(
-            process_name=self.options['process_name'],
+            process_name=self.options.process_name,
             labels=['native_random_state', 'numpy_random_state', 'state']
         )
 
@@ -331,11 +332,8 @@ class AbstractModule(object):
         Returns:
             None
         """
-        if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
-        ):
-            self._deserialize(self.options['resume'])
+        if isinstance(self.options.resume, int) and self.options.resume > 0:
+            self._deserialize(self.options.resume)
 
     def __getstate__(self) -> dict[str, Any]:
         obj = self.__dict__.copy()

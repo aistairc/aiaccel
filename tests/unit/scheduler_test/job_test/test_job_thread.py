@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
+from aiaccel.command_line_options import CommandLineOptions
 from aiaccel.common import dict_hp_finished
 from aiaccel.common import dict_hp_ready
 from aiaccel.common import dict_hp_running
@@ -59,8 +60,13 @@ class TestModel(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
+            scheduler = create_scheduler(options.config)(options)
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
         setup_hp_ready(1)
@@ -98,8 +104,13 @@ class TestModel(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
+            scheduler = create_scheduler(options.config)(options)
         # scheduler = LocalScheduler(config_json)
         trial_id = 1
         self.abci_job = Job(
@@ -404,8 +415,13 @@ class TestJob(BaseTest):
         with patch.object(sys, 'argv', commandline_args):
             # from aiaccel import start
             # scheduler = start.Scheduler()
-            options = parse_arguments()
-            scheduler = create_scheduler(options['config'])(options)
+            dict_options = parse_arguments()
+            options = CommandLineOptions(
+                config=dict_options["config"],
+                resume=dict_options["resume"],
+                clean=dict_options["clean"],
+            )
+            scheduler = create_scheduler(options.config)(options)
         # scheduler = LocalScheduler(config_json)
         # config = load_test_config()
         setup_hp_ready(1)
@@ -428,14 +444,12 @@ class TestJob(BaseTest):
         work_dir,
         database_remove
     ):
-
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'scheduler'
-        }
+        options = CommandLineOptions(
+            config=str(self.config_json),
+            resume=None,
+            clean=False,
+            process_name="scheduler"
+        )
         scheduler = LocalScheduler(options)
         # config = load_test_config()
         setup_hp_ready(1)
