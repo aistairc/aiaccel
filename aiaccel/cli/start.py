@@ -11,6 +11,7 @@ from aiaccel.cli import CsvWriter
 from aiaccel.common import dict_lock, goal_maximize, goal_minimize
 from aiaccel.config import Config, is_multi_objective
 from aiaccel.master import create_master
+from aiaccel.module import AbstractModule
 from aiaccel.optimizer import create_optimizer
 from aiaccel.scheduler import create_scheduler
 from aiaccel.util import get_file_result_hp, load_yaml
@@ -108,7 +109,7 @@ def main() -> None:  # pragma: no cover
     Master = create_master(args.config)
     Optimizer = create_optimizer(args.config)
     Scheduler = create_scheduler(args.config)
-    modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
+    modules: list[AbstractModule] = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
 
     sleep_time = config.sleep_time.get()
     time_s = time.time()
