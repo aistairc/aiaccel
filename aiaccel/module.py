@@ -108,7 +108,7 @@ class AbstractModule(object):
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.options['config'])
         # TODO: Separate the generator if don't want to affect randomness each other.
-        self._rng: Any = None
+        self._rng = np.random.RandomState(self.seed)
 
         self.storage.variable.register(
             process_name=self.options['process_name'],
@@ -262,51 +262,32 @@ class AbstractModule(object):
         # random state
         self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
 
-    def set_numpy_random_seed(self) -> None:
-        """ set any random seed.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.logger.debug(f'set numpy random seed: {self.seed}')
-        if self._rng is None:
-            self.create_numpy_random_generator()
-        np.random.set_state(self.get_numpy_random_state())
-
-    def create_numpy_random_generator(self) -> None:
-        """ create random generator using any random seed.
-
-        Args:
-            None
-
-        Returns:
-            None
+    def write_random_seed_to_debug_log(self) -> None:
+        """Writes the random seed to the logger as debug information.
         """
         self.logger.debug(f'create numpy random generator by seed: {self.seed}')
-        self._rng = np.random.RandomState(self.seed)
 
-    def get_numpy_random_state(self) -> Any:
-        """ get random state.
-
-        Args:
-            None
+    def get_numpy_random_state(
+        self
+    ) -> dict[str, Any] | tuple[str, np.ndarray[Any, np.dtype[np.uint32]], int, int, float]:
+        """Gets random state.
 
         Returns:
-            numpy.random.get_state (tuple)
+            dict[str, Any] | tuple[str, ndarray[Any, dtype[uint32]], int, int, float]: A tuple representing the
+                internal state of the generator if legacy is True. If legacy is False, or the BitGenerator is not
+                MT19937, then state is returned as a dictionary.
         """
         return self._rng.get_state()
 
-    def set_numpy_random_state(self, state: Any) -> None:
-        """ get random state.
+    def set_numpy_random_state(
+        self,
+        state: Any
+    ) -> None:
+        """Gets random state.
 
         Args:
-            state (tuple): random state
-
-        Returns:
-            None
+            state (dict[str, Any] | tuple[str, ndarray[Any, np.dtype[uint32]], int, int, float]): A tuple or dictionary
+                representing the internal state of the generator.
         """
         self._rng.set_state(state)
 
