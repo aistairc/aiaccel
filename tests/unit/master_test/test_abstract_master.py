@@ -120,7 +120,7 @@ class TestAbstractMaster(BaseTest):
         assert master.post_process() is None
 
         master.config = Config(self.config_json)
-        master.goal = 'invalid_goal'
+        master.goals = ['invalid_goal']
 
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')

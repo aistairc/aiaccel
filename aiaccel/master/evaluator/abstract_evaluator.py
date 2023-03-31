@@ -25,7 +25,7 @@ class AbstractEvaluator(object):
         config (Config): Config object.
         hp_result (dict): A dict object of the best optimized result.
         storage (Storage): Storage object.
-        goal (str): Goal of optimization ('minimize' or 'maximize').
+        goals (list[str]): Goal of optimization ('minimize' or 'maximize').
         trial_id (TrialId): TrialId object.
 
     """
@@ -38,9 +38,9 @@ class AbstractEvaluator(object):
         self.hp_result: list[dict[str, Any]] | None = None
         self.storage = Storage(self.workspace.path)
         if isinstance(self.config.goal.get(), str):
-            self.goal = [self.config.goal.get()]
+            self.goals = [self.config.goal.get()]
         else:
-            self.goal = self.config.goal.get()
+            self.goals = self.config.goal.get()
         self.trial_id = TrialId(str(self.config_path))
 
     def evaluate(self) -> None:
@@ -49,7 +49,7 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        best_trial_ids, _ = self.storage.get_best_trial(self.goal)
+        best_trial_ids, _ = self.storage.get_best_trial(self.goals)
         if best_trial_ids is None:
             return
 

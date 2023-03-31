@@ -28,7 +28,7 @@ class AbstractMaster(AbstractModule):
         start_time (datetime.datetime): A stored starting time.
         verification (AbstractVerification): A verification object.
         logger (logging.Logger): Logger object.
-        goal (str): Goal of optimization ('minimize' or 'maximize').
+        goals (list[str]): Goal of optimization ('minimize' or 'maximize').
         trial_number (int): The number of trials.
         runner_files (list):
         stats (list):
@@ -55,9 +55,9 @@ class AbstractMaster(AbstractModule):
         self.verification = AbstractVerification(self.options)
 
         if isinstance(self.config.goal.get(), str):
-            self.goal = [self.config.goal.get()]
+            self.goals = [self.config.goal.get()]
         else:
-            self.goal = self.config.goal.get()
+            self.goals = self.config.goal.get()
 
         self.trial_number = self.config.trial_number.get()
 
@@ -170,7 +170,7 @@ class AbstractMaster(AbstractModule):
             None
         """
 
-        best_trial_ids, _ = self.storage.get_best_trial(self.goal)
+        best_trial_ids, _ = self.storage.get_best_trial(self.goals)
         if best_trial_ids is None:
             raise ValueError("No best trial found.")
 

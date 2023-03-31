@@ -193,7 +193,7 @@ class TpeOptimizer(AbstractOptimizer):
             storage=storage,
             study_name=self.study_name,
             load_if_exists=load_if_exists,
-            direction=self.config.goal.get().lower(),
+            direction=self.goals[0].lower(),
         )
 
     def resume_trial(self) -> None:

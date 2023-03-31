@@ -481,7 +481,7 @@ def test_get_best_trial_dict():
     param_value = 0.1
     param_type = "float"
     error = "aaaa"
-    goal = ["minimize"]
+    goals = ["minimize"]
 
     storage.result.set_any_trial_objective(
         trial_id=trial_id,
@@ -526,7 +526,7 @@ def test_get_best_trial_dict():
         "error": error
     }
 
-    d = storage.get_best_trial_dict(goal)[0]
+    d = storage.get_best_trial_dict(goals)[0]
 
     for key in d.keys():
         assert exp[key] == d[key]
@@ -545,14 +545,14 @@ def test_get_best_trial():
             objective=objectives[i]
         )
 
-    goal = ["minimize"]
-    assert storage.get_best_trial(goal) == ([2], [-1])
+    goals = ["minimize"]
+    assert storage.get_best_trial(goals) == ([2], [-1])
 
-    goal = ["maximize"]
-    assert storage.get_best_trial(goal) == ([3], [1])
+    goals = ["maximize"]
+    assert storage.get_best_trial(goals) == ([3], [1])
 
-    goal = ["aaaaaaaaaa"]
-    assert storage.get_best_trial(goal) == (None, None)
+    goals = ["aaaaaaaaaa"]
+    assert storage.get_best_trial(goals) == (None, None)
 
 
 # delete_trial_data_after_this

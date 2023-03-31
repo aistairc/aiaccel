@@ -60,9 +60,9 @@ class AbstractModule(object):
         self.workspace = Workspace(self.config.workspace.get())
 
         if isinstance(self.config.goal.get(), str):
-            self.goal = [self.config.goal.get()]
+            self.goals = [self.config.goal.get()]
         else:
-            self.goal = self.config.goal.get()
+            self.goals = self.config.goal.get()
 
         self.logger: Any = None
         self.fh: Any = None
