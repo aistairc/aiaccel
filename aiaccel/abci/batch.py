@@ -79,7 +79,7 @@ def create_abci_batch_file(
             _generate_param_args(param_content['parameters'])
         ])
 
-    mains = [
+    main_parts = [
         f'trial_id={str(trial_id)}',
         f'config_file_path={str(config_file_path)}',
         f'output_file_path={str(output_file_path)}',
@@ -87,9 +87,7 @@ def create_abci_batch_file(
         'start_time=`date "+%Y-%m-%d %H:%M:%S"`',
         f'result=`{" ".join(commands)}`',
         'exitcode=$?',
-        'result_array=($result)',
-        'y=${result_array[${#result_array[@]}-1]}',
-        'ys=$(echo $y | tr -d "[]")',
+        'ys=$(echo $result | tr -d "[],")',
         'error=`cat $error_file_path`',
         'end_time=`date "+%Y-%m-%d %H:%M:%S"`',
         'if [ -n "$error" ]; then',
@@ -119,7 +117,7 @@ def create_abci_batch_file(
     script += "\n"
 
     # main
-    for s in mains:
+    for s in main_parts:
         script += s + "\n"
 
     file_create(batch_file, script, dict_lock)
