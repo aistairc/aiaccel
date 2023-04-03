@@ -372,38 +372,38 @@ class GridPointGenerator:
         hyperparameters (list[HyperParameter]): A list of HyperParameter
             object.
         trial_number (int): The number of trials.
-        sampling_method (SamplingMethod, optional): Method to sample grid
-            points. In the case the trial number matches the number of
-            generated grid points, this option basically affect only seach
-            order. On the other hand, the trial number does not match the
-            number of grid points results in ignoring of some grid points which
-            are determined by this option. Available options are as follows;
-                - IN_ORDER (default) - Samples in order. If trial number is
-                smaller than the number of generated grid points, the grid
-                points near the edge of search space may be ignored.
-                - UNIFORM - Samples after thin out the grid points and thus
-                the ignored points does not gather cirtein region.
+        sampling_method (SamplingMethod, optional): How to sample the grid
+            points. This option affects only the search order if the number of
+            trials and the number of generated grid points match.
+            On the other hand, if the number of trials does not match the
+            number of grid points, some grid points determined by this option
+            will be ignored. Available options are:
+                - IN_ORDER (default) - samples in order. If the number of
+                trials is less than the number of grid points generated, grid
+                points near the edges of the search space may be ignored.
+                - UNIFORM - samples grid points with uniformly decimation so
+                that ignored points do not cluster in a particular area.
                 - RANDOM - Samples randomly.
-                - DUPLICATABLE_RANDOM - Samples randomly but choice duplication
-                may occur. This option should be used only for the numerous
-                grid points such that memory error occurs when using RANDOM.
-                Although RANDOM stacks combination of grid points, this option
-                stacks grid points only for each parameter. This saves memory
-                in exchange for possible duplication.
+                - DUPLICATABLE_RANDOM - samples randomly, but duplicate
+                selections can occur. This option should only be used for large
+                numbers of grid points where using RANDOM would result in
+                memory errors. RANDOM stacks combinations of grid points, but
+                this option stacks only the choices for each parameter. This
+                saves memory at the cost of possible duplicates.
 
             Defaults to SamplingMethod.IN_ORDER.
         rng (RandomState | None, optional): RandomState. If None, the
-            constructor makes a random generator by `RandomState(None)`.
+            constructor creates a random generator by `RandomState(None)`.
             Defaults to None.
-        accept_small_trial_number (bool, optional): Whether to accept smaller
-            trial number than the least grid space size. If True, use the given
-            trial number while ignoring some grid points. Defaults to False.
+        accept_small_trial_number (bool, optional): Whether to accept trials
+            smaller than the minimum grid space size. If True, use the
+            specified number of trials and ignore some grid points. Defaults to
+            False.
 
     Raises:
-        ValueError: Causes when trial_num is smaller than the number of grid
-            point in the least grid space composed of parameters with fixed
-            grid points.
-
+        ValueError: Causes when trial_num is less than the number of grid
+            points in the minimum grid space consisting of parameters with
+            fixed choices.
     """
 
     def __init__(

@@ -72,7 +72,7 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
         """Generates initial parameters.
 
         Raises:
-            ValueError: _description_
+            ValueError: Causes when initial parameter could not be generated.
 
         Returns:
             list[dict[str, float | int | str]]: A list of new parameters.
