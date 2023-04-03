@@ -42,6 +42,7 @@ data_type_uniform_float = 'uniform_float'
 data_type_categorical = 'categorical'
 data_type_ordinal = 'ordinal'
 
+search_algorithm_budget_specified_grid = 'aiaccel.optimizer.BudgetSpecifiedGridOptimizer'
 search_algorithm_grid = 'aiaccel.optimizer.GridOptimizer'
 search_algorithm_nelder_mead = 'aiaccel.optimizer.NelderMeadOptimizer'
 search_algorithm_random = 'aiaccel.optimizer.RandomOptimizer'

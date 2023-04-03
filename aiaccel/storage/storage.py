@@ -175,27 +175,27 @@ class Storage:
 
         return content
 
-    def get_best_trial(self, goal: list[str]) -> tuple[list[int] | None, list[float] | None]:
+    def get_best_trial(self, goals: list[str]) -> tuple[list[int] | None, list[float] | None]:
         """Get best trial number and best value.
 
         Args:
-            goal(str): minimize | maximize
+            goals(list[str]): minimize | maximize
 
         Returns:
             best(tuple): (trial_id, value)
         """
 
         best_values = []
-        for i in range(len(goal)):
-            if goal[i].lower() == 'maximize':
+        for i in range(len(goals)):
+            if goals[i].lower() == 'maximize':
                 best_values.append(float('-inf'))
-            elif goal[i].lower() == 'minimize':
+            elif goals[i].lower() == 'minimize':
                 best_values.append(float('inf'))
             else:
                 return None, None
 
         best_trial_id = 0
-        best_trial_ids = [0] * len(goal)
+        best_trial_ids = [0] * len(goals)
 
         results_d = self.result.get_all_result()
         for trial_id in results_d.keys():
@@ -206,19 +206,19 @@ class Storage:
             else:
                 values = value
 
-            if len(values) != len(goal):
+            if len(values) != len(goals):
                 return None, None
 
             for i, val in enumerate(values):
                 best_value = best_values[i]
                 best_trial_id = best_trial_ids[i]
 
-                if goal[i].lower() == 'maximize':
+                if goals[i].lower() == 'maximize':
                     if best_value < val:
                         best_value = val
                         best_trial_id = trial_id
 
-                elif goal[i].lower() == 'minimize':
+                elif goals[i].lower() == 'minimize':
                     if best_value > val:
                         best_value = val
                         best_trial_id = trial_id
@@ -228,16 +228,16 @@ class Storage:
 
         return best_trial_ids, best_values
 
-    def get_best_trial_dict(self, goal: list[str]) -> list[Any] | None:
+    def get_best_trial_dict(self, goals: list[str]) -> list[Any] | None:
         """Get best trial information in dict format.
 
         Args:
-            goal(str): minimize | maximize
+            goals(list[str]): minimize | maximize
 
         Returns:
             -(dict): Any trials information
         """
-        best_trial_ids, _ = self.get_best_trial(goal)
+        best_trial_ids, _ = self.get_best_trial(goals)
         if best_trial_ids is None:
             return None
 

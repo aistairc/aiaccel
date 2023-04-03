@@ -22,7 +22,6 @@ class TestMOTpeOptimizer(BaseTest):
             'process_name': 'optimizer',
         }
         self.optimizer = MOTpeOptimizer(self.options)
-        # self.optimizer.config.goal.set(['minimize'])
         yield
         self.optimizer = None
 

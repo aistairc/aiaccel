@@ -230,7 +230,6 @@ class AbstractModel(object):
         """
         objective = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
         return (objective is not None)
-        # return obj.workspace.result_file_exists(trial_id=obj.trial_id)
 
     # Finished
     def after_finished(self, obj: 'Job') -> None:

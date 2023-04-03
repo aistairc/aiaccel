@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-03-27 16:48+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,7 +69,7 @@ msgstr ""
 #: aiaccel.config.ConfigEntry aiaccel.config.ConfileWrapper
 #: aiaccel.config.ConfileWrapper.get aiaccel.config.JsonOrYamlObjectConfig
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.module.AbstractModule.check_error
+#: aiaccel.config.is_multi_objective aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.create_numpy_random_generator
 #: aiaccel.module.AbstractModule.get_numpy_random_state
 #: aiaccel.module.AbstractModule.resume
@@ -175,11 +175,11 @@ msgstr ""
 
 #: aiaccel.config.ConfigEntry.get aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
+#: aiaccel.config.JsonOrYamlObjectConfig.to_dict
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
 #: aiaccel.module.AbstractModule.create_numpy_random_generator
-#: aiaccel.module.AbstractModule.get_each_state_count
 #: aiaccel.module.AbstractModule.get_module_type
 #: aiaccel.module.AbstractModule.get_numpy_random_state
 #: aiaccel.module.AbstractModule.inner_loop_main_process
@@ -258,7 +258,8 @@ msgstr ""
 
 #: aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
+#: aiaccel.config.JsonOrYamlObjectConfig.to_dict
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
 #: aiaccel.module.AbstractModule.get_module_type
@@ -313,6 +314,18 @@ msgstr ""
 
 #: aiaccel.config.JsonOrYamlObjectConfig.to_dict:3 of
 msgid "The dictionary object of the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:1 of
+msgid "Is the multi-objective option set in the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:3 of
+msgid "A configuration object."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:6 of
+msgid "Is the multi--objective option set in the configuration or not."
 msgstr ""
 
 #: aiaccel.config.load_config:1 of
@@ -459,11 +472,11 @@ msgid "True if no error, False if with error."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.check_finished:1 of
-msgid "Check whether all optimization finished or not."
+msgid "Checks whether all optimization finished."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.check_finished:3 of
-msgid "All optimization finished or not."
+msgid "True if all optimizations are finished."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.create_numpy_random_generator:1 of
@@ -471,7 +484,6 @@ msgid "create random generator using any random seed."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.create_numpy_random_generator:5
-#: aiaccel.module.AbstractModule.get_each_state_count:3
 #: aiaccel.module.AbstractModule.inner_loop_main_process:3
 #: aiaccel.module.AbstractModule.post_process:3
 #: aiaccel.module.AbstractModule.pre_process:3
@@ -482,10 +494,6 @@ msgstr ""
 #: aiaccel.module.AbstractModule.set_numpy_random_state:6
 #: aiaccel.workspace.Workspace.create:3
 msgid "None"
-msgstr ""
-
-#: aiaccel.module.AbstractModule.get_each_state_count:1 of
-msgid "Updates the number of files in hp(hyper parameter) directories."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.get_module_type:1 of
@@ -576,6 +584,10 @@ msgstr ""
 
 #: aiaccel.module.AbstractModule.set_numpy_random_state:3 of
 msgid "random state"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.update_each_state_count:1 of
+msgid "Updates hyperparameter counters for ready, runnning, and finished states."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.rst:46

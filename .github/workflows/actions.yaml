@@ -12,10 +12,10 @@ jobs:
         python-version: ['3.8']
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Up ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -62,3 +62,4 @@ jobs:
           pytest -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_nelder_mead_resumption.py
           pytest -v tests/supplements/random_generation_test_benchmark/test_benchmark_random_generation.py
           pytest -v tests/supplements/additional_grid_test/test_benchmark_grid.py
+          pytest -v tests/supplements/additional_budget_specified_grid_test_benchmark/test_benchmark_budget_specified_grid.py

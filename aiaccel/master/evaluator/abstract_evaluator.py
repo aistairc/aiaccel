@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from aiaccel.common import file_final_result
 from aiaccel.config import Config
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId, create_yaml
@@ -24,7 +25,7 @@ class AbstractEvaluator(object):
         config (Config): Config object.
         hp_result (dict): A dict object of the best optimized result.
         storage (Storage): Storage object.
-        goal (str): Goal of optimization ('minimize' or 'maximize').
+        goals (list[str]): Goal of optimization ('minimize' or 'maximize').
         trial_id (TrialId): TrialId object.
 
     """
@@ -37,9 +38,9 @@ class AbstractEvaluator(object):
         self.hp_result: list[dict[str, Any]] | None = None
         self.storage = Storage(self.workspace.path)
         if isinstance(self.config.goal.get(), str):
-            self.goal = [self.config.goal.get()]
+            self.goals = [self.config.goal.get()]
         else:
-            self.goal = self.config.goal.get()
+            self.goals = self.config.goal.get()
         self.trial_id = TrialId(str(self.config_path))
 
     def evaluate(self) -> None:
@@ -48,7 +49,7 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        best_trial_ids, _ = self.storage.get_best_trial(self.goal)
+        best_trial_ids, _ = self.storage.get_best_trial(self.goals)
         if best_trial_ids is None:
             return
 
@@ -64,8 +65,11 @@ class AbstractEvaluator(object):
             None
         """
         logger = logging.getLogger('root.master.evaluator')
-        logger.info('Best hyperparameter is followings:')
-        logger.info(self.hp_result)
+        if self.hp_result:
+            logger.info('Best hyperparameter is followings:')
+            logger.info(self.hp_result)
+        else:
+            logger.info('Evaluation not available (no results in storage.db).')
 
     def save(self) -> None:
         """Save current results to a file.
@@ -73,5 +77,5 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        path = self.workspace.path / "best_result.yaml"
+        path = self.workspace.path / file_final_result
         create_yaml(path, self.hp_result, self.workspace.lock)

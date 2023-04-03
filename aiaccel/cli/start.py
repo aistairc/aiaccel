@@ -8,13 +8,12 @@ from logging import StreamHandler, getLogger
 from pathlib import Path
 
 from aiaccel.cli import CsvWriter
-from aiaccel.common import goal_maximize, goal_minimize
 from aiaccel.config import Config
 from aiaccel.master import create_master
+from aiaccel.module import AbstractModule
 from aiaccel.optimizer import create_optimizer
 from aiaccel.scheduler import create_scheduler
 from aiaccel.storage.storage import Storage
-from aiaccel.util import load_yaml
 from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
@@ -22,65 +21,12 @@ logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 logger.addHandler(StreamHandler())
 
 
-def get_best_parameter(
-    files: list[Path],
-    goal: str,
-    objective_y_index: int,
-    dict_lock: Path
-) -> tuple[float | None, Path | None]:
-    """Get a best parameter in specified files.
-
-    Args:
-        files (list[Path]): A list of files to find a best.
-        goal (str): Maximize or Minimize.
-        dict_lock (Path): A directory to store lock files.
-
-    Returns:
-        tuple[float | None, Path | None]: A best result value and a
-        file path. It returns None if a number of files is less than one.
-
-    Raises:
-        ValueError: Causes when an invalid goal is set.
-    """
-
-    if len(files) < 1:
-        return None, None
-
-    yml = load_yaml(files[0], dict_lock)
-
-    try:
-        best = float(yml["result"][objective_y_index])
-    except TypeError:
-        logger = getLogger("root.master.parameter")
-        logger.error(f'Invalid result: {yml["result"][objective_y_index]}.')
-        return None, None
-
-    best_file = files[0]
-
-    for f in files[1:]:
-        yml = load_yaml(f, dict_lock)
-        result = float(yml["result"][objective_y_index])
-
-        if goal.lower() == goal_maximize:
-            if best < result:
-                best, best_file = result, f
-        elif goal.lower() == goal_minimize:
-            if best > result:
-                best, best_file = result, f
-        else:
-            logger = getLogger("root.master.parameter")
-            logger.error(f"Invalid goal: {goal}.")
-            raise ValueError(f"Invalid goal: {goal}.")
-
-    return best, best_file
-
-
 def main() -> None:  # pragma: no cover
     """Parses command line options and executes optimization."""
     parser = ArgumentParser()
-    parser.add_argument("--config", "-c", type=str, default="config.yml")
-    parser.add_argument("--resume", type=int, default=None)
-    parser.add_argument("--clean", nargs="?", const=True, default=False)
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument('--resume', type=int, default=None)
+    parser.add_argument('--clean', nargs='?', const=True, default=False)
     args = parser.parse_args()
 
     config = Config(args.config, warn=True, format_check=True)
@@ -112,7 +58,7 @@ def main() -> None:  # pragma: no cover
     Master = create_master(args.config)
     Optimizer = create_optimizer(args.config)
     Scheduler = create_scheduler(args.config)
-    modules = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
+    modules: list[AbstractModule] = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
 
     sleep_time = config.sleep_time.get()
     time_s = time.time()

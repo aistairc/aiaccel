@@ -37,45 +37,15 @@ class HyperParameter(object):
         self.name = parameter['name']
         self.type = parameter['type'].lower()
         self.log = parameter.get('log', False)
-        # self.lower = None
-        # self.upper = None
-        # self.choices = None
-        # self.sequence = None
-        self.initial = None
-        self.q = None
-        self.step = None
-
-        if 'log' in parameter:
-            self.log = parameter['log']
-
-        # if 'upper' in parameter:
-        #     self.upper = parameter['lower']
-
-        # if 'upper' in parameter:
-        #     self.upper = parameter['upper']
-
-        # if 'choices' in parameter:
-        #     self.choices = parameter['choices']
-
-        # if 'sequence' in parameter:
-        #     self.sequence = parameter['sequence']
-
         self.lower = parameter.get('lower', None)
         self.upper = parameter.get('upper', None)
         self.choices = parameter.get('choices', None)
         self.sequence = parameter.get('sequence', None)
-
-        if 'initial' in parameter:
-            self.initial = parameter['initial']
-
-        if 'q' in parameter:
-            self.q = parameter['q']
-
-        if 'step' in parameter:
-            self.step = parameter['step']
-
-        if 'base' in parameter:
-            self.base = parameter['base']
+        self.initial = parameter.get('initial', None)
+        self.q = parameter.get('q', 1)
+        self.step = parameter.get('step', None)
+        self.base = parameter.get('base', None)
+        self.num_numeric_choices = parameter.get('num_numeric_choices', None)
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         """Sample a parameter.

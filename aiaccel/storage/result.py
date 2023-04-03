@@ -95,33 +95,6 @@ class Result(Abstract):
 
         return [data[trial_id] for trial_id in data.keys()]
 
-    # def get_bests(self, goal: str) -> list[Any]:
-    #     """Obtains the sorted result.
-
-    #     Returns:
-    #         list: result values
-    #     """
-    #     goal = goal.lower()
-    #     objectives = self.get_objectives()
-    #     best_values = []
-
-    #     if goal == "maximize":
-    #         best_value = float("-inf")
-    #         for objective in objectives:
-    #             if best_value < objective:
-    #                 best_value = objective
-    #             best_values.append(best_value)
-    #     elif goal == "minimize":
-    #         best_value = float("inf")
-    #         for objective in objectives:
-    #             if best_value > objective:
-    #                 best_value = objective
-    #             best_values.append(best_value)
-    #     else:
-    #         return []
-
-    #     return best_values
-
     def get_bests(self, goals: list[str]) -> list[Any]:
         """Obtains the sorted result.
 
