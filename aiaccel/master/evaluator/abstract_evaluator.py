@@ -65,8 +65,11 @@ class AbstractEvaluator(object):
             None
         """
         logger = logging.getLogger('root.master.evaluator')
-        logger.info('Best hyperparameter is followings:')
-        logger.info(self.hp_result)
+        if self.hp_result:
+            logger.info('Best hyperparameter is followings:')
+            logger.info(self.hp_result)
+        else:
+            logger.info('Evaluation not available (no results in storage.db).')
 
     def save(self) -> None:
         """Save current results to a file.
