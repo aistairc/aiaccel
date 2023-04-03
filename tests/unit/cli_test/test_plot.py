@@ -29,7 +29,7 @@ def test_plot(clean_work_dir, work_dir, create_tmp_config):
 
     # 正常
     trial_id = 0
-    objective = 0.01
+    objective = [0.01]
 
     storage.result.set_any_trial_objective(
         trial_id=trial_id,
@@ -44,13 +44,13 @@ def test_plot(clean_work_dir, work_dir, create_tmp_config):
         assert plotter.plot() is None
 
     # len(objectives) != len(bests)
-    with patch.object(plotter.storage.result, 'get_objectives', return_value=[1, 2, 3]):
+    with patch.object(plotter.storage.result, 'get_objectives', return_value=[[1], [2], [3]]):
         with patch.object(plotter.storage.result, 'get_bests', return_value=[1, 2, 3, 4]):
             assert plotter.plot() is None
 
     # self.cplt.set_colors
     # self.cplt.caption
     # self.cplt.line_plot
-    with patch.object(plotter.storage.result, 'get_objectives', return_value=[1, 2, 3]):
+    with patch.object(plotter.storage.result, 'get_objectives', return_value=[[1], [2], [3]]):
         with patch.object(plotter.storage.result, 'get_bests', return_value=[1, 2, 3]):
             assert plotter.plot() is None

@@ -7,17 +7,13 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from aiaccel.common import module_type_master
-from aiaccel.common import module_type_optimizer
-from aiaccel.common import module_type_scheduler
-
-
+from aiaccel.common import (module_type_master, module_type_optimizer,
+                            module_type_scheduler)
 from aiaccel.master import LocalMaster
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import RandomOptimizer
 from aiaccel.scheduler import LocalScheduler
 from aiaccel.util import str_to_logging_level
-
 from tests.base_test import BaseTest
 
 
@@ -139,7 +135,7 @@ class TestAbstractModule(BaseTest):
         assert self.module.set_logger(
             'root.optimizer',
             work_dir.joinpath(
-                self.module.dict_log,
+                self.module.workspace.log,
                 # self.config.get('logger', 'optimizer_logfile')
                 # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
                 self.module.config.optimizer_logfile.get()

@@ -105,7 +105,7 @@ class TestAbstractMaster(BaseTest):
 
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            master.storage.result.set_any_trial_objective(trial_id=i, objective=(i * 10.0))
+            master.storage.result.set_any_trial_objective(trial_id=i, objective=([i * 10.0]))
             for j in range(2):
                 master.storage.hp.set_any_trial_param(
                     trial_id=i,
@@ -120,7 +120,7 @@ class TestAbstractMaster(BaseTest):
         assert master.post_process() is None
 
         master.config = Config(self.config_json)
-        master.goal = 'invalid_goal'
+        master.goals = ['invalid_goal']
 
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')

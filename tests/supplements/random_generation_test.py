@@ -5,7 +5,6 @@ from pathlib import Path
 
 from aiaccel.config import Config
 from aiaccel.storage import Storage
-
 from tests.base_test import BaseTest
 
 
@@ -55,4 +54,4 @@ class RandomGenerationTest(BaseTest):
 
     def get_final_result(self, storage):
         data = storage.result.get_all_result()
-        return [d.objective for d in data]
+        return [data[trial_id] for trial_id in data.keys()]

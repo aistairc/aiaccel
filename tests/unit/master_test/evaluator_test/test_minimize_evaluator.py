@@ -1,5 +1,4 @@
 from aiaccel.master import MinimizeEvaluator
-
 from tests.base_test import BaseTest
 
 
@@ -14,4 +13,4 @@ class TestMinimizeEvaluator(BaseTest):
         }
         evaluator = MinimizeEvaluator(options)
         evaluator.evaluate()
-        assert evaluator.hp_result is None
+        assert evaluator.hp_result[0] is None
