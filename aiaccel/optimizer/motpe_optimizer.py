@@ -31,7 +31,7 @@ class MOTpeOptimizer(TpeOptimizer):
         sampler = TPESamplerWrapper()
         sampler._rng = self._rng
         sampler._random_sampler._rng = self._rng
-        storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
+        storage_path = str(f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
         load_if_exists = self.options["resume"] is not None
 

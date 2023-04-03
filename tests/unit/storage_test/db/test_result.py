@@ -78,7 +78,7 @@ def test_get_all_result():
         )
 
     data = storage.result.get_all_result()
-    assert [d.objective for d in data] == objectives
+    assert [data[trial_id] for trial_id in data.keys()] == objectives
 
 
 # get_objectives
@@ -105,7 +105,7 @@ def test_get_bests():
     storage = Storage(ws.path)
     assert storage.result.get_bests('invalid') == []
 
-    objectives = [1, -5, 3, 1.23]
+    objectives = [[1], [-5], [3], [1.23]]
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
@@ -114,26 +114,13 @@ def test_get_bests():
             objective=objectives[i]
         )
 
-    assert storage.result.get_bests('minimize') == [1, -5, -5, -5]
-    assert storage.result.get_bests('maximize') == [1, 1, 3, 3]
+    bests = storage.result.get_bests(['minimize'])
+    for i in range(len(bests)):
+        assert bests[i][0] == objectives[i][0]
 
-
-# get_best_objective
-@t_base()
-def test_get_best_objective():
-    storage = Storage(ws.path)
-
-    objectives = [1, -5, 3, 1.23]
-    ids = range(len(objectives))
-
-    for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
-
-    assert storage.result.get_best_objective('minimize') == -5
-    assert storage.result.get_best_objective('maximize') == 3
+    bests = storage.result.get_bests(['maximize'])
+    for i in range(len(bests)):
+        assert bests[i][0] == objectives[i][0]
 
 
 # get_any_trial_objective_and_best_value
@@ -141,7 +128,7 @@ def test_get_best_objective():
 def test_get_any_trial_objective_and_best_value():
     storage = Storage(ws.path)
 
-    objectives = [1, -5, 3, 1.23]
+    objectives = [[1], [-5], [3], [1.23], [0.01]]
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
@@ -150,8 +137,28 @@ def test_get_any_trial_objective_and_best_value():
             objective=objectives[i]
         )
 
-    assert storage.result.get_any_trial_objective_and_best_value(2, 'minimize') == (3, -5)
-    assert storage.result.get_any_trial_objective_and_best_value(3, 'maximize') == (1.23, 3)
+    assert storage.result.get_any_trial_objective_and_best_value(2, 'minimize', 0) == (3, -5)
+    assert storage.result.get_any_trial_objective_and_best_value(3, 'maximize', 0) == (1.23, 3)
+
+
+# get_any_trial_objective_and_best_value (multi-objective)
+@t_base()
+def test_get_any_trial_objective_and_best_value_mult_objective():
+    storage = Storage(ws.path)
+
+    objectives = [[1, 0], [-5, 6], [3, 8], [1.23, 5.9], [0.01, -1.2]]
+    ids = range(len(objectives))
+
+    for i in range(len(objectives)):
+        storage.result.set_any_trial_objective(
+            trial_id=ids[i],
+            objective=objectives[i]
+        )
+
+    assert storage.result.get_any_trial_objective_and_best_value(2, 'minimize', 0) == (3, -5)   # 1st objective, 2nd best value
+    assert storage.result.get_any_trial_objective_and_best_value(3, 'maximize', 1) == (5.9, 8)  # 1st objective, 2nd best value
+
+
 
 
 # get_result_trial_id_list

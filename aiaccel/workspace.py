@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from typing import Any
 
 from aiaccel.common import (dict_error, dict_hp, dict_lock, dict_log,
                             dict_output, dict_result, dict_runner,
-                            dict_storage, dict_tensorboard, dict_verification)
-from aiaccel.util import Suffix, make_directories, retry
+                            dict_storage, dict_tensorboard, dict_verification,
+                            extension_hp)
+from aiaccel.util import Suffix, load_yaml, make_directories
 
 
 class Workspace:
@@ -66,6 +68,7 @@ class Workspace:
             self.verification
         ]
         self.results = Path("./results")
+        self.retults_csv_file = self.path / "results.csv"
 
     def create(self) -> bool:
         """Create a work directory.
@@ -94,7 +97,6 @@ class Workspace:
         """
         return self.path.exists()
 
-    @retry(_MAX_NUM=300, _DELAY=1.0)
     def clean(self) -> None:
         """ Delete a workspace.
 
@@ -105,7 +107,6 @@ class Workspace:
         shutil.rmtree(self.path)
         return
 
-    @retry(_MAX_NUM=10, _DELAY=1.0)
     def check_consists(self) -> bool:
         """Check required directories exist or not.
 
@@ -119,7 +120,6 @@ class Workspace:
                 return False
         return True
 
-    @retry(_MAX_NUM=10, _DELAY=1.0)
     def move_completed_data(self) -> Path | None:
         """ Move workspace to under of results directory when finished.
 
@@ -136,9 +136,38 @@ class Workspace:
             self.results.mkdir()
 
         if dst.exists():
-            raise FileExistsError
+            print(f"Destination directory already exists: {dst}")
+            return None
 
         ignptn = shutil.ignore_patterns('*-journal')
 
         shutil.copytree(self.path, dst, ignore=ignptn)
         return dst
+
+    def get_any_result_file_path(self, trial_id: int) -> Path:
+        """Get result file path.
+
+        Returns:
+            PosixPath: Path to result file.
+        """
+        return self.result / f"{trial_id}.{extension_hp}"
+
+    def result_file_exists(self, trial_id: int) -> bool:
+        """Check result file exists or not.
+
+        Returns:
+            bool: True if result file exists.
+        """
+        path = self.get_any_result_file_path(trial_id)
+        return path.exists()
+
+    def get_any_trial_result(self, trial_id: int) -> dict[str, Any] | None:
+        """Get any trial result.
+
+        Returns:
+            dict: Trial result.
+        """
+        path = self.get_any_result_file_path(trial_id)
+        if path.exists() is False:
+            return None
+        return load_yaml(path)

@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING, Any
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
-from aiaccel.common import dict_error, dict_lock, dict_result
 from aiaccel.config import Config
 from aiaccel.storage import Storage
 from aiaccel.util import Buffer, TrialId, get_time_now_object
+from aiaccel.workspace import Workspace
 
 if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler import AbstractModel, AbstractScheduler
@@ -184,6 +184,7 @@ JOB_TRANSITIONS: list[dict[str, str | list[str]]] = [
         'source': 'WaitResult',
         'dest': 'Result',
         'conditions': 'conditions_result',
+        'before': 'before_result',
         'after': 'after_result'
     },
     {
@@ -530,7 +531,6 @@ class Job:
         # === Load config file===
         self.config = config
         # === Get config parameter values ===
-        self.workspace = self.config.workspace.get()
         self.cancel_retry = self.config.cancel_retry.get()
         self.cancel_timeout = self.config.cancel_timeout.get()
         self.expire_retry = self.config.expire_retry.get()
@@ -554,8 +554,7 @@ class Job:
         self.threshold_retry = None
         self.count_retry = 0
 
-        self.ws = Path(self.workspace).resolve()
-        self.dict_lock = self.ws / dict_lock
+        self.workspace = Workspace(self.config.workspace.get())
 
         self.scheduler = scheduler
         self.model = model
@@ -586,9 +585,9 @@ class Job:
         self.proc: Any = None
         self.th_oh: Any = None
         self.stop_flag = False
-        self.storage = Storage(self.ws)
+        self.storage = Storage(self.workspace.path)
         self.content = self.storage.get_hp_dict(self.trial_id)
-        self.result_file_path = self.ws / dict_result / (self.trial_id_str + '.hp')
+        self.result_file_path = self.workspace.result / (self.trial_id_str + '.hp')
         self.expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt["trigger"] == "expire"]
 
         self.buff = Buffer(['state.name'])
@@ -596,7 +595,7 @@ class Job:
 
         self.logger = logging.getLogger('root.scheduler.job')
 
-        self.command_error_output = self.ws / dict_error / f'{self.trial_id}.txt'
+        self.command_error_output = self.workspace.error / f'{self.trial_id}.txt'
 
     def get_machine(self) -> CustomMachine:
         """Get a state machine object.
@@ -669,6 +668,17 @@ class Job:
 
         return True
 
+    def get_result_file_path(self) -> Path:
+        """Get a path to the result file.
+
+        Args:
+            trial_id (int): Trial Id.
+
+        Returns:
+            PosixPath: A Path object which points to the result file.
+        """
+        return self.workspace.get_any_result_file_path(trial_id=self.trial_id)
+
     def main(self) -> None:
         """Thread.run method.
 
@@ -685,15 +695,21 @@ class Job:
         ):
             self.storage.jobstate.set_any_trial_jobstate(trial_id=self.trial_id, state=state.name)
 
-        if state.name == 'Success' or 'Failure' in state.name:
+        if state.name.lower() == 'success':
             return
 
-        now = get_time_now_object()
+        if 'failure' in state.name.lower():
+            if self.storage.error.get_any_trial_error(trial_id=self.trial_id) is None:
+                self.storage.error.set_any_trial_error(
+                    trial_id=self.trial_id,
+                    error_message=state.name
+                )
+            return
 
         if self.is_timeout():
             self.logger.debug(
                 f'Timeout expire state: {state.name}, '
-                f'now: {now}, '
+                f'now: {get_time_now_object()}, '
                 f'timeout: {self.threshold_timeout}'
             )
             self.model.expire(self)
@@ -706,7 +722,7 @@ class Job:
             )
             self.model.expire(self)
 
-        elif state.name != 'Scheduling':
+        elif state.name.lower() != 'scheduling':
             self.model.next(self)
 
         self.logger.debug(

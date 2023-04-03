@@ -5,9 +5,10 @@ from typing import Any
 
 import fasteners
 
-from aiaccel.common import (dict_hp, file_hp_count, file_hp_count_lock,
+from aiaccel.common import (file_hp_count, file_hp_count_lock,
                             file_hp_count_lock_timeout)
 from aiaccel.config import Config
+from aiaccel.workspace import Workspace
 
 
 class TrialId:
@@ -21,7 +22,6 @@ class TrialId:
         ws (Path): Path to the workspace.
         name_length (int): Name length of hp files.
         file_hp_count_fmt (str): String format of hp file name.
-        dict_hp (Path): Path to "hp", i.e. `ws`/hp.
         count_path (Path): Path to "count.txt" containing current trial id,
             i.e. `ws`/hp/count.txt.
         lock_path (Path): Path to "count.lock", i.e. `ws`/hp/count.lock.
@@ -30,13 +30,12 @@ class TrialId:
 
     def __init__(self, config: Config) -> None:
         self.config = config
-        self.ws = Path(self.config.workspace.get()).resolve()
+        self.workspace = Workspace(Path(self.config.workspace.get()).resolve())
         self.name_length = self.config.name_length.get()
         self.file_hp_count_fmt = f'%0{self.name_length}d'
-        self.dict_hp = self.ws / dict_hp
 
-        self.count_path = self.dict_hp / file_hp_count
-        self.lock_path = self.dict_hp / file_hp_count_lock
+        self.count_path = self.workspace.hp / file_hp_count
+        self.lock_path = self.workspace.hp / file_hp_count_lock
         self.lock = fasteners.InterProcessLock(str(self.lock_path))
 
         if self.get() is None:

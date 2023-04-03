@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer
 
 
@@ -6,6 +8,15 @@ class RandomOptimizer(AbstractOptimizer):
     """An optimizer class with a random algorithm.
 
     """
+
+    def __init__(self, options: dict[str, str | int | bool]) -> None:
+        super().__init__(options)
+
+        if is_multi_objective(self.config):
+            raise NotImplementedError(
+                'Random optimizer does not support multi-objective '
+                'optimization.'
+            )
 
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
