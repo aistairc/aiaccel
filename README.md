@@ -72,7 +72,6 @@ An example for optimizing a simple function (i.e., sphere function) on a local c
     > ls ./work
     abci_output         alive               hp                  lock
     log                 result              runner              state
-    verification
 
     > cat ./work/result/final_result.result
     ~~~

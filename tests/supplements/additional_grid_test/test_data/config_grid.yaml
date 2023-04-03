@@ -78,7 +78,4 @@ logger:
     master: "DEBUG"
     optimizer: "CRITICAL"
     scheduler: "CRITICAL"
-
-verification:
-  is_verified: false
-  condition: []
+    

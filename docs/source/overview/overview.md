@@ -54,7 +54,6 @@ pip install git+https://github.com/aistairc/aiaccel.git
     > ls ./work
     abci_output         alive               hp                  lock
     log                 result              runner              state
-    verification
 
     > cat ./work/result/final_result.result
     ~~~

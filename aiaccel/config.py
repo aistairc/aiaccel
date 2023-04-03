@@ -317,8 +317,6 @@ _DEFAULT_JOB_EXECUTION_OPTIONS = ""
 _DEFAULT_GOAL = "minimize"
 _DEFAULT_MAX_TRIAL_NUMBER = 0
 _DEFAULT_HYPERPARAMETERS: list[Any] = []
-_DEFAULT_IS_VERIFIED = False
-_DEFAULT_VERIFI_CONDITION: list[Any] = []
 _DEFAULT_RANDOM_SCHESULING = True
 _DEFAULT_SOBOL_SCRAMBLE = True
 _DEFAULT_PYTHON_FILE = ""
@@ -752,24 +750,6 @@ class Config:
             warning=False,
             group="optimize",
             keys=("sobol_scramble")
-        )
-
-        # === verification ===
-        self.is_verified = ConfigEntry(
-            config=config,
-            type=[bool],
-            default=_DEFAULT_IS_VERIFIED,
-            warning=False,
-            group="verification",
-            keys=("is_verified")
-        )
-        self.condition = ConfigEntry(
-            config=config,
-            type=[list],
-            default=_DEFAULT_VERIFI_CONDITION,
-            warning=False,
-            group="verification",
-            keys=("condition")
         )
 
 

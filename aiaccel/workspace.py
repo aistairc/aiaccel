@@ -8,7 +8,7 @@ from aiaccel.common import (dict_alive, dict_error, dict_finished, dict_hp,
                             dict_jobstate, dict_lock, dict_log, dict_output,
                             dict_pid, dict_ready, dict_result, dict_runner,
                             dict_running, dict_storage, dict_timestamp,
-                            dict_verification, extension_hp)
+                            extension_hp)
 from aiaccel.util import Suffix, load_yaml, make_directories
 
 
@@ -35,7 +35,6 @@ class Workspace:
         runner (Path): Path to "runner", i.e. `path`/runner.
         storage (Path): Path to "storage", i.e. `path`/storage.
         timestamp (Path): Path to "timestamp", i.e. `path`/timestamp.
-        verification (Path): Path to "verification", i.e. `path`/verification.
         consists (list[Path]): A list of pathes under the workspace.
         results (Path): Path to the results which is prepared in the execution
             directory, i.e. "./results".
@@ -60,7 +59,6 @@ class Workspace:
         self.runner = self.path / dict_runner
         self.storage = self.path / dict_storage
         self.timestamp = self.path / dict_timestamp
-        self.verification = self.path / dict_verification
 
         self.consists = [
             self.alive,
@@ -77,8 +75,7 @@ class Workspace:
             self.result,
             self.runner,
             self.storage,
-            self.timestamp,
-            self.verification
+            self.timestamp
         ]
         self.results = Path("./results")
         self.retults_csv_file = self.path / "results.csv"

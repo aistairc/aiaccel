@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-27 16:48+0900\n"
+"POT-Creation-Date: 2023-04-03 15:32+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -868,51 +870,4 @@ msgid ""
 "A logging level for a stream output of scheduler module. Defaults to "
 "\"DEBUG\"."
 msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:412
-msgid "**verification:**"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:414
-msgid "is_verified (bool, optional):"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:415
-msgid "最適化結果の verification を行うかを設定します． デフォルトでは flase が設定されています．"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:418
-msgid "Defaults to false."
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:420
-msgid "condition (list, optional):"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:421
-msgid "Verification の条件の配列を設定します． 配列の各要素には，以下の項目が設定されている必要があります．"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:423
-msgid "**loop** - Verification 対象となるジョブの ID です．"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:424
-msgid "**minimum** - 試行回数 loop 回までに計算された最も良い目的関数の値として許容される値の下限です．"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:425
-msgid "**maximum** - 試行回数 loop 回までに計算された最も良い目的関数の値として許容される値の下限です．"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:427
-msgid "デフォルトでは，[] (空の配列) が設定されています．"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:429
-msgid "Defaults to [] (an empty list)."
-msgstr ""
-
-#~ msgid "コンフィグレーションの設定ガイド(WIP)"
-#~ msgstr ""
 

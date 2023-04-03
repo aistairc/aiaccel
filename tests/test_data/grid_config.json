@@ -161,15 +161,5 @@
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     }
-  },
-  "verification": {
-    "is_verified": false,
-    "condition": [
-      {
-        "loop": 1,
-        "minimum": 0.0,
-        "maximum": 70.0
-      }
-    ]
   }
 }

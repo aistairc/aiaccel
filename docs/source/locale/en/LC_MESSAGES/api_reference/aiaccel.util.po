@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -31,28 +31,21 @@ msgstr ""
 msgid "aiaccel.util.aiaccel module"
 msgstr ""
 
-#: aiaccel.util.aiaccel.Messages:1 aiaccel.util.aiaccel.Run:1
-#: aiaccel.util.aiaccel.WrapperInterface:1 aiaccel.util.buffer.Buffer:1
-#: aiaccel.util.easy_visualizer.EasyVisualizer:1 aiaccel.util.suffix.Suffix:1
-#: aiaccel.util.trialid.TrialId:1 of
+#: aiaccel.util.aiaccel.CommandLineArgs:1 aiaccel.util.aiaccel.Run:1
+#: aiaccel.util.buffer.Buffer:1 aiaccel.util.easy_visualizer.EasyVisualizer:1
+#: aiaccel.util.suffix.Suffix:1 aiaccel.util.trialid.TrialId:1 of
 msgid "ベースクラス: :py:class:`object`"
 msgstr ""
 
-#: aiaccel.util.aiaccel.Messages.create_message:1 of
-msgid "Create a message with a any label."
+#: aiaccel.util.aiaccel.Run:1 of
+msgid "An Interface between user program or python function object."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Messages.create_message
-#: aiaccel.util.aiaccel.Messages.out aiaccel.util.aiaccel.Messages.parse
 #: aiaccel.util.aiaccel.Run aiaccel.util.aiaccel.Run.execute
-#: aiaccel.util.aiaccel.Run.execute_and_report
-#: aiaccel.util.aiaccel.Run.generate_commands
-#: aiaccel.util.aiaccel.Run.get_any_trial_xs aiaccel.util.aiaccel.Run.report
-#: aiaccel.util.aiaccel.WrapperInterface.get_data
-#: aiaccel.util.aiaccel.WrapperInterface.out aiaccel.util.buffer.Buffer
-#: aiaccel.util.buffer.Buffer.Add aiaccel.util.buffer.Buffer.Clear
-#: aiaccel.util.buffer.Buffer.Del aiaccel.util.cast.cast_y
-#: aiaccel.util.easy_visualizer.EasyVisualizer.caption
+#: aiaccel.util.aiaccel.Run.execute_and_report aiaccel.util.aiaccel.Run.report
+#: aiaccel.util.buffer.Buffer aiaccel.util.buffer.Buffer.Add
+#: aiaccel.util.buffer.Buffer.Clear aiaccel.util.buffer.Buffer.Del
+#: aiaccel.util.cast.cast_y aiaccel.util.easy_visualizer.EasyVisualizer.caption
 #: aiaccel.util.easy_visualizer.EasyVisualizer.line_plot
 #: aiaccel.util.easy_visualizer.EasyVisualizer.set_colors
 #: aiaccel.util.easy_visualizer.EasyVisualizer.set_height
@@ -75,44 +68,6 @@ msgstr ""
 #: aiaccel.util.trialid.TrialId aiaccel.util.trialid.TrialId.initial
 #: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id of
 msgid "パラメータ"
-msgstr ""
-
-#: aiaccel.util.aiaccel.Messages.create_message:3 of
-msgid "Create a message with this label name."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Messages.create_message:5 of
-msgid "Message."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Messages.out:1 of
-msgid "Display any labels message."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Messages.out:3 of
-msgid "Displays a message with this label name."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Messages.parse:1 of
-msgid "Name of the label to be extracted."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Messages.parse:3 of
-msgid "Raw messages."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Messages.parse:6 of
-msgid "The target data is only in the form of {label}:{message}."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Messages.parse:9 aiaccel.util.aiaccel.Run:58
-#: aiaccel.util.aiaccel.Run.execute_and_report:10 aiaccel.util.buffer.Buffer:23
-#: aiaccel.util.easy_visualizer.EasyVisualizer:4 of
-msgid "サンプル"
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run:1 of
-msgid "An Interface between user program or python function and Storage object."
 msgstr ""
 
 #: aiaccel.util.aiaccel.Run:3 of
@@ -139,7 +94,7 @@ msgid "Trial Id."
 msgstr ""
 
 #: aiaccel.util.aiaccel.Run:18 aiaccel.util.buffer.Buffer:14
-#: aiaccel.util.process.OutputHandler:41 aiaccel.util.trialid.TrialId:28 of
+#: aiaccel.util.process.OutputHandler:18 aiaccel.util.trialid.TrialId:28 of
 msgid "int"
 msgstr ""
 
@@ -166,40 +121,30 @@ msgid "A Path object which points to the workspace."
 msgstr ""
 
 #: aiaccel.util.aiaccel.Run:41 of
-msgid "A Storage object."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run:43 of
-msgid "Storage"
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run:47 of
 msgid "A Logger object."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run:49 of
+#: aiaccel.util.aiaccel.Run:43 of
 msgid "Logger"
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run:53 of
-msgid "A WrapperInterface object."
+#: aiaccel.util.aiaccel.Run:46 aiaccel.util.aiaccel.Run.execute_and_report:10
+#: aiaccel.util.buffer.Buffer:23 aiaccel.util.easy_visualizer.EasyVisualizer:4
+#: of
+msgid "サンプル"
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run:55 of
-msgid "WrapperInterface"
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run:59 of
+#: aiaccel.util.aiaccel.Run:47 of
 msgid "*User program* ::"
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run:66 of
+#: aiaccel.util.aiaccel.Run:54 of
 msgid ""
 "Note that `execute user_program` is a command to execute a user program. "
 "See :doc:`../examples/wrapper_sample`."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run:70 of
+#: aiaccel.util.aiaccel.Run:58 of
 msgid "*Python function* ::"
 msgstr ""
 
@@ -212,9 +157,7 @@ msgstr ""
 msgid "User-defined python function."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run.execute:5
-#: aiaccel.util.aiaccel.Run.get_any_trial_xs:3
-#: aiaccel.util.aiaccel.Run.report:3 of
+#: aiaccel.util.aiaccel.Run.execute:5 of
 msgid "Trial ID."
 msgstr ""
 
@@ -222,9 +165,7 @@ msgstr ""
 msgid "Name of data type of objective value."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run.execute aiaccel.util.aiaccel.Run.generate_commands
-#: aiaccel.util.aiaccel.Run.get_any_trial_xs
-#: aiaccel.util.aiaccel.WrapperInterface.get_data aiaccel.util.cast.cast_y
+#: aiaccel.util.aiaccel.Run.execute aiaccel.util.cast.cast_y
 #: aiaccel.util.easy_visualizer.EasyVisualizer.sort
 #: aiaccel.util.filesystem.create_yaml aiaccel.util.filesystem.file_create
 #: aiaccel.util.filesystem.file_delete aiaccel.util.filesystem.file_read
@@ -253,9 +194,7 @@ msgstr ""
 msgid "A dictionary of parameters, a casted objective value, and error string."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run.execute aiaccel.util.aiaccel.Run.generate_commands
-#: aiaccel.util.aiaccel.Run.get_any_trial_xs
-#: aiaccel.util.aiaccel.WrapperInterface.get_data aiaccel.util.cast.cast_y
+#: aiaccel.util.aiaccel.Run.execute aiaccel.util.cast.cast_y
 #: aiaccel.util.filesystem.file_read aiaccel.util.filesystem.get_dict_files
 #: aiaccel.util.filesystem.get_file_result
 #: aiaccel.util.filesystem.get_file_result_hp
@@ -281,112 +220,16 @@ msgstr ""
 msgid "Name of data type of objective value. Defaults to None."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run.generate_commands:1 of
-msgid "Generate execution command of user program."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run.generate_commands:3 of
-msgid "An Execution command to calculate objective value."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run.generate_commands:5 of
-msgid ""
-"A dictionary of parameters of which key is parameter name and value is "
-"parameter value."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run.generate_commands:10 of
-msgid "A list of execution command and options."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run.get_any_trial_xs:1 of
-msgid "Gets a parameter list of specific trial ID from Storage object."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run.get_any_trial_xs:6 of
-msgid ""
-"A dictionary of parameters. None if the parameter specified by the given "
-"trial ID is not registered."
-msgstr ""
-
 #: aiaccel.util.aiaccel.Run.report:1 of
-msgid "Saves results in the Storage object."
+msgid "Save the results to a text file."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run.report:5 of
-msgid "A dictionary of parameters."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run.report:7 of
+#: aiaccel.util.aiaccel.Run.report:3 of
 msgid "Objective value."
 msgstr ""
 
-#: aiaccel.util.aiaccel.Run.report:9 of
+#: aiaccel.util.aiaccel.Run.report:5 of
 msgid "Error string."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run.report:11 of
-msgid "Execution start time."
-msgstr ""
-
-#: aiaccel.util.aiaccel.Run.report:13 of
-msgid "Execution end time."
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface:1 of
-msgid "Interface between Wrapper and User function."
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface:6 of
-msgid "user function:"
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface:6 of
-msgid "output  \"objective_y: y\""
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface:7 of
-msgid "\"objective_err: err\""
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface:9 of
-msgid "wrapper:"
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface:9 of
-msgid "input   \"objective_y: y\" -> y"
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface:10 of
-msgid "\"objective_err: err\" -> err"
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface.get_data:1 of
-msgid "For wrapper side, gets stdout and stderr of user program."
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface.get_data:3 of
-msgid ""
-"A CompletedProcess instance which have attributes args, returncode, "
-"stdout and stderr."
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface.get_data:7 of
-msgid "The return value of user program and the error message of user program."
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface.out:1 of
-msgid ""
-"For user program side, outputs the objective value and error message "
-"generated in the user-defined function."
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface.out:4 of
-msgid "Objective value returned from the user-defined function. Defaults to None."
-msgstr ""
-
-#: aiaccel.util.aiaccel.WrapperInterface.out:7 of
-msgid "Error message. Defaults to None."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.util.rst:16
@@ -459,7 +302,8 @@ msgstr ""
 
 #: aiaccel.util.cast.cast_y
 #: aiaccel.util.easy_visualizer.EasyVisualizer.set_colors
-#: aiaccel.util.logger.str_to_logging_level aiaccel.util.process.ps2joblist of
+#: aiaccel.util.logger.str_to_logging_level
+#: aiaccel.util.name.generate_random_name aiaccel.util.process.ps2joblist of
 msgid "例外"
 msgstr ""
 
@@ -711,14 +555,18 @@ msgid "Generate random name using alphanumeric."
 msgstr ""
 
 #: aiaccel.util.name.generate_random_name:3 of
-msgid "A length of the name."
-msgstr ""
-
-#: aiaccel.util.name.generate_random_name:5 of
 msgid "A reference to a random generator."
 msgstr ""
 
-#: aiaccel.util.name.generate_random_name:8 of
+#: aiaccel.util.name.generate_random_name:5 of
+msgid "A length of the name. This value should be greater than 0. Defaults to 10."
+msgstr ""
+
+#: aiaccel.util.name.generate_random_name:9 of
+msgid "Occurs if the specified length is less than 1."
+msgstr ""
+
+#: aiaccel.util.name.generate_random_name:11 of
 msgid "A generated name."
 msgstr ""
 
@@ -734,45 +582,15 @@ msgstr ""
 msgid "A class to print subprocess outputs."
 msgstr ""
 
-#: aiaccel.util.process.OutputHandler:3 aiaccel.util.process.OutputHandler:19
-#: of
-msgid "A reference for the caller object."
+#: aiaccel.util.process.OutputHandler:3 aiaccel.util.process.OutputHandler:9 of
+msgid "A reference for subprocess.Popen. For example, 'Optimizer'."
 msgstr ""
 
-#: aiaccel.util.process.OutputHandler:6 aiaccel.util.process.OutputHandler:26
-#: of
-msgid "A reference for subprocess.Popen."
-msgstr ""
-
-#: aiaccel.util.process.OutputHandler:8 aiaccel.util.process.OutputHandler:32
-#: of
-msgid "A module name which the subprocess is attached. For example, 'Optimizer'."
-msgstr ""
-
-#: aiaccel.util.TrialId.integer:1 aiaccel.util.process.OutputHandler:11
-#: aiaccel.util.trialid.TrialId.integer:1
-#: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id:3 of
-msgid "Trial id."
-msgstr ""
-
-#: aiaccel.util.process.OutputHandler:13 of
-msgid "Storage object. Defaults to None."
-msgstr ""
-
-#: aiaccel.util.process.OutputHandler:22 of
-msgid "AbciMaster | AbstractMaster | LocalMaster"
-msgstr ""
-
-#: aiaccel.util.process.OutputHandler:28 of
+#: aiaccel.util.process.OutputHandler:12 of
 msgid "Popen"
 msgstr ""
 
-#: aiaccel.util.process.OutputHandler:35 aiaccel.util.suffix.Suffix.date:3
-#: aiaccel.util.trialid.TrialId:10 aiaccel.util.trialid.TrialId:34 of
-msgid "str"
-msgstr ""
-
-#: aiaccel.util.process.OutputHandler:39 of
+#: aiaccel.util.process.OutputHandler:16 of
 msgid "A sleep time each loop."
 msgstr ""
 
@@ -858,6 +676,11 @@ msgstr ""
 
 #: aiaccel.util.suffix.Suffix.date:1 of
 msgid "Get the now datetime."
+msgstr ""
+
+#: aiaccel.util.suffix.Suffix.date:3 aiaccel.util.trialid.TrialId:10
+#: aiaccel.util.trialid.TrialId:34 of
+msgid "str"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.util.rst:88
@@ -984,6 +807,11 @@ msgstr ""
 
 #: aiaccel.util.trialid.TrialId.initial:3 of
 msgid "_description_. Defaults to 0."
+msgstr ""
+
+#: aiaccel.util.TrialId.integer:1 aiaccel.util.trialid.TrialId.integer:1
+#: aiaccel.util.trialid.TrialId.zero_padding_any_trial_id:3 of
+msgid "Trial id."
 msgstr ""
 
 #: aiaccel.util.TrialId.string:1 aiaccel.util.trialid.TrialId.string:1 of
