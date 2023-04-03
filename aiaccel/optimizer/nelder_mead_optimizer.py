@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 import copy
 from typing import Any
 
-from aiaccel.optimizer import NelderMead
-from aiaccel.optimizer import AbstractOptimizer
+from aiaccel.config import is_multi_objective
+from aiaccel.optimizer import AbstractOptimizer, NelderMead
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 
 
@@ -26,6 +27,12 @@ class NelderMeadOptimizer(AbstractOptimizer):
         self.nelder_mead: Any = None
         self.parameter_pool: list[dict[str, Any]] = []
         self.order: list[Any] = []
+
+        if is_multi_objective(self.config):
+            raise NotImplementedError(
+                'Nelder-Mead optimizer does not support multi-objective '
+                'optimization.'
+            )
 
     def generate_initial_parameter(
         self
@@ -76,7 +83,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             except KeyError:
                 continue
 
-            result = self.storage.result.get_any_trial_objective(index)
+            result = self.get_any_trial_objective(index)
 
             if result is not None:
                 nm_result = copy.copy(p)

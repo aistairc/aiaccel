@@ -3,22 +3,17 @@ import datetime
 import json
 import sys
 import time
+from subprocess import Popen
 from unittest.mock import patch
 
 import pytest
 
-from aiaccel.common import dict_hp_finished
-from aiaccel.common import dict_hp_ready
-from aiaccel.common import dict_hp_running
-from aiaccel.common import dict_runner
-from aiaccel.scheduler import create_scheduler
-from aiaccel.scheduler import CustomMachine
-from aiaccel.scheduler import Job
-from aiaccel.scheduler import AbciModel
-from aiaccel.scheduler import LocalModel
-from aiaccel.scheduler import LocalScheduler
+from aiaccel.common import (dict_hp_finished, dict_hp_ready, dict_hp_running,
+                            dict_runner)
+from aiaccel.scheduler import (AbciModel, CustomMachine, Job, LocalModel,
+                               LocalScheduler, create_scheduler)
 from aiaccel.util import get_time_now_object
-
+from aiaccel.util.process import OutputHandler
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
@@ -202,9 +197,11 @@ class TestModel(BaseTest):
 
         # self.job.scheduler.stats.append({'name': '001'})
         # self.job.scheduler.stats.append({'name': 0})
-        self.job.scheduler.stats.append(
-            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0', }
-        )
+        # self.job.scheduler.stats.append(
+        #     {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0', }
+        # )
+        self.job.trial_id = 99
+        self.job.scheduler.storage.trial.set_any_trial_state(self.job.trial_id, 'running')
         assert self.model.conditions_job_confirmed(self.job)
 
     def test_after_result(self, database_remove):
@@ -214,6 +211,7 @@ class TestModel(BaseTest):
         assert self.model.after_wait_result(self.job) is None
 
     def test_conditions_result(self, database_remove):
+        self.job.th_oh = OutputHandler(Popen(['ls']))
         assert not self.model.conditions_result(self.job)
 
     def test_after_finished(self, database_remove):
@@ -324,9 +322,6 @@ class TestModel(BaseTest):
                     param_type='float'
                 )
             """
-        print(self.job.trial_id)
-        print([d.objective for d in self.job.storage.result.get_all_result()])
-        print(self.job.storage.get_best_trial_dict('minimize'))
 
         self.job.next_state = 'finished'
         self.job.from_file = work_dir.joinpath(dict_hp_running, '001.hp')

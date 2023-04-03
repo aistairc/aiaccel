@@ -9,7 +9,7 @@ from pathlib import Path
 
 from aiaccel.cli import CsvWriter
 from aiaccel.common import dict_lock, goal_maximize, goal_minimize
-from aiaccel.config import Config, is_multi_objective
+from aiaccel.config import Config
 from aiaccel.master import create_master
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import create_optimizer
@@ -23,7 +23,10 @@ logger.addHandler(StreamHandler())
 
 
 def get_best_parameter(
-    files: list[Path], goal: str, dict_lock: Path
+    files: list[Path],
+    goal: str,
+    objective_y_index: int,
+    dict_lock: Path
 ) -> tuple[float | None, Path | None]:
     """Get a best parameter in specified files.
 
@@ -46,17 +49,17 @@ def get_best_parameter(
     yml = load_yaml(files[0], dict_lock)
 
     try:
-        best = float(yml["result"])
+        best = float(yml["result"][objective_y_index])
     except TypeError:
         logger = getLogger("root.master.parameter")
-        logger.error(f'Invalid result: {yml["result"]}.')
+        logger.error(f'Invalid result: {yml["result"][objective_y_index]}.')
         return None, None
 
     best_file = files[0]
 
     for f in files[1:]:
         yml = load_yaml(f, dict_lock)
-        result = float(yml["result"])
+        result = float(yml["result"][objective_y_index])
 
         if goal.lower() == goal_maximize:
             if best < result:
@@ -86,7 +89,10 @@ def main() -> None:  # pragma: no cover
         return
 
     workspace = Workspace(config.workspace.get())
-    goal = config.goal.get()
+    if isinstance(config.goal.get(), str):
+        goal = [config.goal.get()]
+    else:
+        goal = config.goal.get()
     path_to_lock_file = workspace.path / dict_lock
 
     if args.resume is None:
@@ -137,16 +143,19 @@ def main() -> None:  # pragma: no cover
 
     logger.info("moving...")
     dst = workspace.move_completed_data()
+    if dst is None:
+        logger.error("Moving data is failed.")
+        return
 
     config_name = Path(args.config).name
     shutil.copy(Path(args.config), dst / config_name)
 
     files = get_file_result_hp(dst)
 
-    if is_multi_objective(config) is False:
-        best, best_file = get_best_parameter(files, goal, path_to_lock_file)
-        logger.info(f"Best result    : {best_file}")
-        logger.info(f"               : {best}")
+    for i in range(len(goal)):
+        best, best_file = get_best_parameter(files, goal[i], i, path_to_lock_file)
+        logger.info(f"Best result [{i}] : {best_file}")
+        logger.info(f"\tvalue : {best}")
 
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
     logger.info("Done.")

@@ -81,10 +81,10 @@ class TpeOptimizer(AbstractOptimizer):
         """
 
         for trial_id in list(self.parameter_pool.keys()):
-            objective = self.storage.result.get_any_trial_objective(trial_id)
+            objective = self.get_any_trial_objective(int(trial_id))
 
             if objective is not None:
-                self.study.tell(trial_id, objective, skip_if_finished=True)
+                self.study.tell(int(trial_id), objective, skip_if_finished=True)
                 del self.parameter_pool[trial_id]
 
     def is_startup_trials(self) -> bool:
@@ -185,7 +185,7 @@ class TpeOptimizer(AbstractOptimizer):
         sampler = TPESamplerWrapper()
         sampler._rng = self._rng
         sampler._random_sampler._rng = self._rng
-        storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
+        storage_path = str(f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
         load_if_exists = self.options["resume"] is not None
         self.study = optuna.create_study(
@@ -193,12 +193,12 @@ class TpeOptimizer(AbstractOptimizer):
             storage=storage,
             study_name=self.study_name,
             load_if_exists=load_if_exists,
-            direction=self.config.goal.get().lower(),
+            direction=self.goals[0].lower(),
         )
 
     def resume_trial(self) -> None:
         optuna_trials = self.study.get_trials()
-        storage_path = f"sqlite:///{self.ws}/optuna-{self.study_name}.db"
+        storage_path = f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db"
         engine = sqlalchemy.create_engine(storage_path, echo=False)
         Session = sqlalchemy_orm.sessionmaker(bind=engine)
         session = Session()
@@ -219,7 +219,7 @@ class TpeOptimizer(AbstractOptimizer):
         session.commit()
 
         for trial_id in list(self.parameter_pool.keys()):
-            objective = self.storage.result.get_any_trial_objective(trial_id)
+            objective = self.get_any_trial_objective(int(trial_id))
             if objective is not None:
                 del self.parameter_pool[trial_id]
                 self.logger.info(

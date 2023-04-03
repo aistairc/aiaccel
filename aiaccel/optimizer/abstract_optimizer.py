@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 import copy
 from typing import Any
 
+from numpy import str_
+
+from aiaccel.config import is_multi_objective
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import load_parameter
-from aiaccel.util import str_to_logging_level
-from aiaccel.util import TrialId
-
-from numpy import str_
+from aiaccel.util import TrialId, str_to_logging_level
 
 
 class AbstractOptimizer(AbstractModule):
@@ -39,7 +40,7 @@ class AbstractOptimizer(AbstractModule):
 
         self.set_logger(
             'root.optimizer',
-            self.dict_log / self.config.optimizer_logfile.get(),
+            self.workspace.log / self.config.optimizer_logfile.get(),
             str_to_logging_level(self.config.optimizer_file_log_level.get()),
             str_to_logging_level(self.config.optimizer_stream_log_level.get()),
             'Optimizer'
@@ -300,3 +301,24 @@ class AbstractOptimizer(AbstractModule):
             self.logger.error(error_message)
 
         return False
+
+    def get_any_trial_objective(self, trial_id: int) -> Any:
+        """Get any trial result.
+
+            if the objective is multi-objective, return the list of objective.
+
+        Args:
+            trial_id (int): Trial ID.
+
+        Returns:
+            Any: Any trial result.
+        """
+
+        objective = self.storage.result.get_any_trial_objective(trial_id)
+        if objective is None:
+            return None
+
+        if is_multi_objective(self.config):
+            return objective
+        else:
+            return objective[0]
