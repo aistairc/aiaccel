@@ -1,3 +1,5 @@
+import pytest
+
 from aiaccel.scheduler import AbciScheduler
 from aiaccel.scheduler import LocalScheduler
 from aiaccel.scheduler import PylocalScheduler
@@ -14,5 +16,6 @@ def test_create():
     config_python_local = "tests/test_data/config_python_local.json"
     assert create_scheduler(config_python_local) == PylocalScheduler
 
-    config_invalid = "tests/test_data/config_invalid_resource.json"
-    assert create_scheduler(config_invalid) is None
+    with pytest.raises(ValueError):
+        config_invalid = "tests/test_data/config_invalid_resource.json"
+        _ = create_scheduler(config_invalid)
