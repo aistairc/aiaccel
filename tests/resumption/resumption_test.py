@@ -3,7 +3,6 @@ from pathlib import Path
 
 from aiaccel.config import Config
 from aiaccel.storage import Storage
-
 from tests.integration.integration_test import IntegrationTest
 
 
@@ -33,13 +32,14 @@ class ResumptionTest(IntegrationTest):
             config_file = data_dir / f'config_{self.search_algorithm}_resumption.json'
             config_file = create_tmp_config(config_file)
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
+            subprocess.Popen(['aiaccel-view', '--config', str(config_file)]).wait()
 
         # resume
         with self.create_main(user_main_file):
             config_file = data_dir.joinpath(f'config_{self.search_algorithm}.json')
             config_file = create_tmp_config(config_file)
             storage = Storage(ws=Path(config.workspace.get()))
-            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--resume', '4']).wait()
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--resume', '3']).wait()
             final_result_resumption = self.get_final_result(storage)
             print('resumption steps finished', final_result_resumption)
 
@@ -47,4 +47,4 @@ class ResumptionTest(IntegrationTest):
 
     def get_final_result(self, storage):
         data = storage.result.get_all_result()
-        return [d.objective for d in data][-1]
+        return [data[trial_id] for trial_id in data.keys()][-1]

@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import subprocess
 
-from aiaccel.common import dict_runner
 from aiaccel.abci import parse_qstat
 from aiaccel.master import AbstractMaster
-from aiaccel.util import get_dict_files
-from aiaccel.util import retry
+from aiaccel.util import get_dict_files, retry
 
 
 class AbciMaster(AbstractMaster):
@@ -33,10 +31,7 @@ class AbciMaster(AbstractMaster):
             None
         """
 
-        self.runner_files = get_dict_files(
-            self.ws / dict_runner,
-            "run_*.sh"
-        )
+        self.runner_files = get_dict_files(self.workspace.runner, "run_*.sh")
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_stats(self) -> None:
