@@ -9,6 +9,7 @@ from aiaccel.common import goal_maximize
 from aiaccel.config import Config
 from aiaccel.master import AbstractMaster
 from aiaccel.util import get_time_now_object
+
 from tests.arguments import parse_arguments
 from tests.base_test import BaseTest
 
@@ -155,7 +156,7 @@ class TestAbstractMaster(BaseTest):
         assert master.print_dict_state() is None
 
         setup_hp_finished(1)
-        master.get_each_state_count()
+        master.update_each_state_count()
         assert master.print_dict_state() is None
 
     def test_inner_loop_main_process(
@@ -186,5 +187,5 @@ class TestAbstractMaster(BaseTest):
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
         # setup_hp_finished(10)
-        master.get_each_state_count()
+        master.update_each_state_count()
         assert not master.inner_loop_main_process()

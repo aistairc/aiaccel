@@ -4,10 +4,10 @@ aiaccel.cli package
 Submodules
 ----------
 
-aiaccel.cli.creation\_report module
------------------------------------
+aiaccel.cli.csv\_writer module
+------------------------------
 
-.. automodule:: aiaccel.cli.creation_report
+.. automodule:: aiaccel.cli.csv_writer
    :members:
    :undoc-members:
    :show-inheritance:
