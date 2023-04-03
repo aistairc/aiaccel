@@ -75,7 +75,7 @@ class AbstractEvaluator(object):
             logger.info('Best hyperparameter is followings:')
             logger.info(self.hp_result)
         else:
-            logger.info('Evaluation not available (no results in stirage.db).')
+            logger.info('Evaluation not available (no results in storage.db).')
 
     def save(self) -> None:
         """Save current results to a file.
