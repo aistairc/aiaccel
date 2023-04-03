@@ -67,8 +67,8 @@ class TestAbstractModule(BaseTest):
         yield
         self.module = None
 
-    def test_get_each_state_count(self):
-        assert self.module.get_each_state_count() is None
+    def test_update_each_state_count(self):
+        assert self.module.update_each_state_count() is None
         assert self.module.hp_ready == 0
         assert self.module.hp_running == 0
         assert self.module.hp_finished == 0
