@@ -764,4 +764,5 @@ def is_multi_objective(config: Config) -> bool:
     Returns:
         bool: Is the multi--objective option set in the configuration or not.
     """
-    return isinstance(config.goal.get(), list)
+    _goal = config.goal.get()
+    return (isinstance(_goal, list) and len(_goal) > 1)

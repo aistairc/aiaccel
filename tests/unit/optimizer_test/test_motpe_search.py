@@ -1,11 +1,11 @@
 import warnings
+from unittest.mock import patch
 
 import numpy as np
 import pytest
-from aiaccel.optimizer.motpe_optimizer import MOTpeOptimizer
 
+from aiaccel.optimizer.motpe_optimizer import MOTpeOptimizer
 from tests.base_test import BaseTest
-from unittest.mock import patch
 
 
 class TestMOTpeOptimizer(BaseTest):
@@ -22,7 +22,6 @@ class TestMOTpeOptimizer(BaseTest):
             'process_name': 'optimizer',
         }
         self.optimizer = MOTpeOptimizer(self.options)
-        # self.optimizer.config.goal.set(['minimize'])
         yield
         self.optimizer = None
 
@@ -67,7 +66,7 @@ class TestMOTpeOptimizer(BaseTest):
         options = self.options.copy()
         self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe_no_initial_params.json')
         optimizer = MOTpeOptimizer(self.options)
-        (optimizer.ws / 'storage' / 'storage.db').unlink()
+        (optimizer.workspace.path / 'storage' / 'storage.db').unlink()
 
         optimizer.__init__(options)
         optimizer.pre_process()
