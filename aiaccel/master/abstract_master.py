@@ -86,8 +86,6 @@ class AbstractMaster(AbstractModule):
         Raises:
             ValueError: Causes when an invalid goal is set.
         """
-        # if not self.check_finished():
-        #     return
 
         if is_multi_objective(self.config):
             self.logger.info(

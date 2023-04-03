@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-
 from aiaccel.common import dict_lock
 from aiaccel.common import dict_result
 from aiaccel.common import file_final_result
@@ -63,8 +62,6 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        # best_trial_id, _ = self.storage.get_best_trial(self.goal)
-        # self.hp_result = self.storage.get_hp_dict(best_trial_id)
         self.hp_result = self.storage.get_best_trial_dict(self.goal)
 
     def print(self) -> None:
