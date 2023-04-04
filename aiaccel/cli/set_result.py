@@ -58,7 +58,7 @@ def main() -> None:
     for unknown_arg in unknown_args_list:
         if unknown_arg.startswith("--"):
             name = unknown_arg.replace("--", "")
-            parser.add_argument(f"--{name}", type=float)
+            parser.add_argument(f"--{name}", type=str_or_float_or_int)
     args = parser.parse_known_args()[0]
 
     xs = vars(copy.deepcopy(args))

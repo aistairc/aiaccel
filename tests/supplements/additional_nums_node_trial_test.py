@@ -12,7 +12,6 @@ import yaml
 import aiaccel
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
-
 from tests.base_test import BaseTest
 
 
@@ -72,5 +71,5 @@ class AdditionalNumsNodeTrialTest(BaseTest):
         assert finished <= self.config.trial_number.get()
         assert ready == 0
         assert running == 0
-        final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
+        final_result = work_dir.joinpath(aiaccel.file_final_result)
         assert final_result.exists()

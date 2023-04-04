@@ -1,4 +1,5 @@
 from aiaccel.abci import create_abci_batch_file
+from aiaccel.common import data_type_uniform_float
 from tests.base_test import BaseTest
 
 
@@ -42,12 +43,12 @@ class TestCreateAbciBatchFile(BaseTest):
             'parameters': [
                 {
                     'parameter_name': 'x1',
-                    'type': 'FLOAT',
+                    'type': data_type_uniform_float,
                     'value': -4.716525234779937
                 },
                 {
                     'parameter_name': 'x2',
-                    'type': 'FLOAT',
+                    'type': data_type_uniform_float,
                     'value': 123456
                 }
             ],

@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
 from subprocess import Popen
 
 import pytest
 
-from aiaccel.common import dict_result
 from aiaccel.common import file_final_result
 from aiaccel.config import Config
 from aiaccel.storage.storage import Storage
 from tests.base_test import BaseTest
-
 
 argnames_test_run = "config_filename, expected_returncode"
 argvalues_test_run = [
@@ -74,5 +71,5 @@ class AdditionalBudgetSpecifiedGridTest(BaseTest):
         assert num_running == 0
         assert num_ready == 0
 
-        final_result = work_dir.joinpath(dict_result, file_final_result)
+        final_result = work_dir.joinpath(file_final_result)
         assert final_result.exists()

@@ -55,8 +55,8 @@ class TestAbstractOptimizer(BaseTest):
 
     def test_register_new_parameters(self):
         params = [
-            {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1},
-            {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.1}
+            {'parameter_name': 'x1', 'type': data_type_uniform_float, 'value': 0.1},
+            {'parameter_name': 'x2', 'type': data_type_uniform_float, 'value': 0.1}
         ]
 
         assert self.optimizer.register_new_parameters(params) is None
@@ -66,14 +66,14 @@ class TestAbstractOptimizer(BaseTest):
             assert self.optimizer.generate_initial_parameter() == []
 
         p = [
-            {'name': "x1", 'type': 'FLOAT', 'value': 1.0},
-            {'name': "x2", 'type': 'FLOAT', 'value': 2.0},
+            {'name': "x1", 'type': data_type_uniform_float, 'value': 1.0},
+            {'name': "x2", 'type': data_type_uniform_float, 'value': 2.0},
         ]
 
         with patch.object(self.optimizer.params, 'sample', return_value=p):
             assert self.optimizer.generate_initial_parameter() == [
-                {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 1.0},
-                {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 2.0}
+                {'parameter_name': 'x1', 'type': data_type_uniform_float, 'value': 1.0},
+                {'parameter_name': 'x2', 'type': data_type_uniform_float, 'value': 2.0}
             ]
 
     def test_generate_parameter(self) -> None:
@@ -105,10 +105,10 @@ class TestAbstractOptimizer(BaseTest):
         assert self.optimizer.post_process() is None
 
     def test_inner_loop_main_process(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        initial = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1},
-                   {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.1}]
-        param = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.2},
-                 {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.2}]
+        initial = [{'parameter_name': 'x1', 'type': data_type_uniform_float, 'value': 0.1},
+                   {'parameter_name': 'x2', 'type': data_type_uniform_float, 'value': 0.1}]
+        param = [{'parameter_name': 'x1', 'type': data_type_uniform_float, 'value': 0.2},
+                 {'parameter_name': 'x2', 'type': data_type_uniform_float, 'value': 0.2}]
 
         with monkeypatch.context() as m:
             m.setattr(self.optimizer, 'generate_initial_parameter', lambda: initial)

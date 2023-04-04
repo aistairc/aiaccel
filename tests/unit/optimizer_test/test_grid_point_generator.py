@@ -565,7 +565,8 @@ class TestGridConditionCollection:
     def test_register_grid_conditions(
         self,
         num_trials: int,
-        parameter_type: Literal['FLOAT', 'INT', 'CATEGORICAL', 'ORDINAL'],
+        # parameter_type: Literal['FLOAT', 'INT', 'CATEGORICAL', 'ORDINAL'],
+        parameter_type: Literal['data_type_uniform_float', 'data_type_uniform_int', 'data_type_categorical', 'data_type_categorical'],
         lower: float | int | None,
         upper: float | int | None,
         num_numeric_choices: int | None,

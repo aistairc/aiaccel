@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
-from aiaccel.common import dict_verification, extension_verification
+from aiaccel.common import (data_type_uniform_float, dict_verification,
+                            extension_verification)
 from aiaccel.master import AbstractVerification
 from aiaccel.util import load_yaml
 from tests.base_test import BaseTest
@@ -44,7 +45,7 @@ class TestAbstractVerification(BaseTest):
             verification.storage.hp.set_any_trial_params(
                 trial_id=i,
                 params=[
-                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': data_type_uniform_float}
                     for j in range(2)
                 ]
             )
@@ -86,7 +87,7 @@ class TestAbstractVerification(BaseTest):
                     trial_id=i,
                     param_name=f'x{j+1}',
                     param_value=0.0,
-                    param_type='float'
+                    param_type=data_type_uniform_float
                 )
 
         verification.verify()
@@ -146,7 +147,7 @@ class TestAbstractVerification(BaseTest):
                     trial_id=i,
                     param_name=f"x{j}",
                     param_value=0.0,
-                    param_type='float'
+                    param_type=data_type_uniform_float
                 )
 
         verification.verify()
