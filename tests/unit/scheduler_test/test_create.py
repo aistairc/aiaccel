@@ -1,7 +1,7 @@
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
-from aiaccel.scheduler.create import create_scheduler
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
+from aiaccel.scheduler import AbciScheduler
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.scheduler import PylocalScheduler
+from aiaccel.scheduler import create_scheduler
 
 
 def test_create():

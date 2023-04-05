@@ -5,7 +5,9 @@ from pathlib import Path
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel import dict_lock, dict_result, file_final_result
+from aiaccel.common import dict_lock
+from aiaccel.common import dict_result
+from aiaccel.common import file_final_result
 from aiaccel.storage.storage import Storage
 from aiaccel.util.filesystem import create_yaml
 from aiaccel.util.trialid import TrialId

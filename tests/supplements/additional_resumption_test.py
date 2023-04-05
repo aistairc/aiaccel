@@ -10,7 +10,7 @@ from pathlib import Path
 
 from aiaccel.config import load_config
 
-from aiaccel.storage.storage import Storage
+from aiaccel.storage import Storage
 
 from tests.integration.integration_test import IntegrationTest
 

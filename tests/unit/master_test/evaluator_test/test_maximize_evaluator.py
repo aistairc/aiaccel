@@ -1,4 +1,4 @@
-from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
+from aiaccel.master import MaximizeEvaluator
 
 from tests.base_test import BaseTest
 

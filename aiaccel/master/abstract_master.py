@@ -1,18 +1,21 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel import goal_maximize, goal_minimize
-from aiaccel.master.evaluator.maximize_evaluator import MaximizeEvaluator
-from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
-from aiaccel.master.verification.abstract_verification import \
-    AbstractVerification
+from aiaccel.common import goal_maximize, goal_minimize
+from aiaccel.config import is_multi_objective
+from aiaccel.master import AbstractVerification, MaximizeEvaluator, MinimizeEvaluator
 from aiaccel.module import AbstractModule
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.time_tools import (get_time_now_object,
-                                     get_time_string_from_object)
+from aiaccel.util import (
+    get_time_now_object,
+    get_time_string_from_object,
+    str_to_logging_level,
+)
 
 
 class AbstractMaster(AbstractModule):
@@ -40,7 +43,7 @@ class AbstractMaster(AbstractModule):
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config, 'master')
         self.start_time = get_time_now_object()
-        self.loop_start_time = None
+        self.loop_start_time: datetime | None = None
         self.logger = logging.getLogger('root.master')
         self.logger.setLevel(logging.DEBUG)
         self.set_logger(
@@ -52,11 +55,11 @@ class AbstractMaster(AbstractModule):
         )
 
         self.verification = AbstractVerification(self.config)
-        self.goal = self.config.optimize.goal.value
+        self.goal = self.config.optimize.goal
         self.trial_number = self.config.optimize.trial_number
 
-        self.runner_files = []
-        self.stats = []
+        self.runner_files: list[Path] | None = []
+        self.stats: list[Any] = []
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -84,22 +87,27 @@ class AbstractMaster(AbstractModule):
         if not self.check_finished():
             return
 
-        if self.config.optimize.goal.value.lower() == goal_maximize:
+        if is_multi_objective(self.config):
+            self.logger.info(
+                "Multi-objective optimization does not run an evaluation process."
+            )
+        elif self.config.optimize.goal.value.lower() == goal_maximize:
             evaluator = MaximizeEvaluator(self.config)
         elif self.config.optimize.goal.value.lower() == goal_minimize:
             evaluator = MinimizeEvaluator(self.config)
         else:
-            self.logger.error(f'Invalid goal: {self.goal}.')
-            raise ValueError(f'Invalid goal: {self.goal}.')
+            self.logger.error(f"Invalid goal: {self.goal}.")
+            raise ValueError(f"Invalid goal: {self.goal}.")
 
-        evaluator.evaluate()
-        evaluator.print()
-        evaluator.save()
+        if is_multi_objective(self.config) is False:
+            evaluator.evaluate()
+            evaluator.print()
+            evaluator.save()
 
         # verification
         self.verification.verify()
-        self.verification.save('final')
-        self.logger.info('Master finished.')
+        self.verification.save("final")
+        self.logger.info("Master finished.")
 
     def print_dict_state(self) -> None:
         """Display the number of yaml files in 'ready', 'running', and
@@ -111,23 +119,23 @@ class AbstractMaster(AbstractModule):
         now = get_time_now_object()
 
         if self.loop_start_time is None:
-            end_estimated_time = 'Unknown'
+            end_estimated_time = "Unknown"
         else:
             looping_time = now - self.loop_start_time
 
             if self.hp_finished != 0:
-                one_loop_time = (looping_time / self.hp_finished)
+                one_loop_time = looping_time / self.hp_finished
                 hp_finished = self.hp_finished
-                finishing_time = (now + (self.trial_number - hp_finished) * one_loop_time)
+                finishing_time = now + (self.trial_number - hp_finished) * one_loop_time
                 end_estimated_time = get_time_string_from_object(finishing_time)
             else:
-                end_estimated_time = 'Unknown'
+                end_estimated_time = "Unknown"
 
         self.logger.info(
-            f'{self.hp_finished}/{self.trial_number} finished, '
-            f'ready: {self.hp_ready} ,'
-            f'running: {self.hp_running}, '
-            f'end estimated time: {end_estimated_time}'
+            f"{self.hp_finished}/{self.trial_number} finished, "
+            f"ready: {self.hp_ready} ,"
+            f"running: {self.hp_running}, "
+            f"end estimated time: {end_estimated_time}"
         )
 
     def inner_loop_main_process(self) -> bool:
@@ -156,8 +164,8 @@ class AbstractMaster(AbstractModule):
         """
         return None
 
-    def check_error(self):
-        """ Check to confirm if an error has occurred.
+    def check_error(self) -> bool:
+        """Check to confirm if an error has occurred.
 
         Args:
             None

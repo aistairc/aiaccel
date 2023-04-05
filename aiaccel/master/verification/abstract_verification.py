@@ -3,13 +3,17 @@ from __future__ import annotations
 import copy
 import logging
 from pathlib import Path
+from typing import Any
 
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel import dict_lock, dict_verification, extension_verification
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import create_yaml
+from aiaccel.common import dict_lock
+from aiaccel.common import dict_verification
+from aiaccel.common import extension_verification
+from aiaccel.config import is_multi_objective
+from aiaccel.storage import Storage
+from aiaccel.util import create_yaml
 
 
 class AbstractVerification(object):
@@ -44,8 +48,8 @@ class AbstractVerification(object):
         self.dict_lock = self.ws / dict_lock
         self.is_verified = None
         self.finished_loop = None
-        self.condition = None
-        self.verification_result = None
+        self.condition: Any = None
+        self.verification_result: Any = None
         self.load_verification_config()
         self.storage = Storage(self.ws)
 
@@ -104,7 +108,10 @@ class AbstractVerification(object):
 
         # self.save(loop)
 
-        best_trial = self.storage.get_best_trial_dict(self.config.optimize.goal.value.lower())
+        if is_multi_objective(self.config):
+            return
+
+        best_trial = self.storage.get_best_trial_dict(self.config.optimize.goal.lower())
         if best_trial is None:
             return
 
@@ -138,7 +145,7 @@ class AbstractVerification(object):
         logger.info('Current verification is followings:')
         logger.info(f'{self.verification_result}')
 
-    def save(self, name: int) -> None:
+    def save(self, name: str | int) -> None:
         """Save current verifications result to a file.
         Args:
             name (int):

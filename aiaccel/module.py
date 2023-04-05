@@ -2,14 +2,35 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
 from omegaconf.dictconfig import DictConfig
 
-import aiaccel
 from aiaccel.storage.storage import Storage
 from aiaccel.util.trialid import TrialId
+from aiaccel.common import alive_master
+from aiaccel.common import alive_optimizer
+from aiaccel.common import alive_scheduler
+from aiaccel.common import class_master
+from aiaccel.common import class_optimizer
+from aiaccel.common import class_scheduler
+from aiaccel.common import dict_alive
+from aiaccel.common import dict_hp
+from aiaccel.common import dict_hp_ready
+from aiaccel.common import dict_hp_running
+from aiaccel.common import dict_hp_finished
+from aiaccel.common import dict_lock
+from aiaccel.common import dict_log
+from aiaccel.common import dict_output
+from aiaccel.common import dict_result
+from aiaccel.common import dict_runner
+from aiaccel.common import dict_storage
+from aiaccel.common import dict_verification
+from aiaccel.common import module_type_master
+from aiaccel.common import module_type_optimizer
+from aiaccel.common import module_type_scheduler
 
 
 class AbstractModule(object):
@@ -55,28 +76,28 @@ class AbstractModule(object):
         self.ws = Path(self.config.generic.workspace).resolve()
 
         # working directory
-        self.dict_alive = self.ws / aiaccel.dict_alive
-        self.dict_hp = self.ws / aiaccel.dict_hp
-        self.dict_lock = self.ws / aiaccel.dict_lock
-        self.dict_log = self.ws / aiaccel.dict_log
-        self.dict_output = self.ws / aiaccel.dict_output
-        self.dict_result = self.ws / aiaccel.dict_result
-        self.dict_runner = self.ws / aiaccel.dict_runner
-        self.dict_verification = self.ws / aiaccel.dict_verification
-        self.dict_hp_ready = self.ws / aiaccel.dict_hp_ready
-        self.dict_hp_running = self.ws / aiaccel.dict_hp_running
-        self.dict_hp_finished = self.ws / aiaccel.dict_hp_finished
-        self.dict_storage = self.ws / aiaccel.dict_storage
+        self.dict_alive = self.ws / dict_alive
+        self.dict_hp = self.ws / dict_hp
+        self.dict_lock = self.ws / dict_lock
+        self.dict_log = self.ws / dict_log
+        self.dict_output = self.ws / dict_output
+        self.dict_result = self.ws / dict_result
+        self.dict_runner = self.ws / dict_runner
+        self.dict_verification = self.ws / dict_verification
+        self.dict_hp_ready = self.ws / dict_hp_ready
+        self.dict_hp_running = self.ws / dict_hp_running
+        self.dict_hp_finished = self.ws / dict_hp_finished
+        self.dict_storage = self.ws / dict_storage
 
         # alive file
-        self.alive_master = self.dict_alive / aiaccel.alive_master
-        self.alive_optimizer = self.dict_alive / aiaccel.alive_optimizer
-        self.alive_scheduler = self.dict_alive / aiaccel.alive_scheduler
+        self.alive_master = self.dict_alive / alive_master
+        self.alive_optimizer = self.dict_alive / alive_optimizer
+        self.alive_scheduler = self.dict_alive / alive_scheduler
 
-        self.logger = None
-        self.fh = None
-        self.ch = None
-        self.ch_formatter = None
+        self.logger: Any = None
+        self.fh: Any = None
+        self.ch: Any = None
+        self.ch_formatter: Any = None
         self.loop_count = 0
         self.hp_ready = 0
         self.hp_running = 0
@@ -85,7 +106,7 @@ class AbstractModule(object):
         self.storage = Storage(self.ws)
         self.trial_id = TrialId(self.config.config_path)
         # TODO: Separate the generator if don't want to affect randomness each other.
-        self._rng: np.random.RandomState | None = None
+        self._rng: Any = None
         self.module_name = module_name
 
         self.storage.variable.register(
@@ -110,12 +131,12 @@ class AbstractModule(object):
             str: Name of this module type.
         """
 
-        if aiaccel.class_master in self.__class__.__name__:
-            return aiaccel.module_type_master
-        elif aiaccel.class_optimizer in self.__class__.__name__:
-            return aiaccel.module_type_optimizer
-        elif aiaccel.class_scheduler in self.__class__.__name__:
-            return aiaccel.module_type_scheduler
+        if class_master in self.__class__.__name__:
+            return module_type_master
+        elif class_optimizer in self.__class__.__name__:
+            return module_type_optimizer
+        elif class_scheduler in self.__class__.__name__:
+            return module_type_scheduler
         else:
             return None
 
@@ -169,17 +190,17 @@ class AbstractModule(object):
         self.logger = logging.getLogger(logger_name)
         self.logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler(logfile, mode='w')
-        fh_formatter = (
+        fh_formatter = logging.Formatter(
             '%(asctime)s %(levelname)-8s %(filename)-12s line '
             '%(lineno)-4s %(message)s'
         )
-        fh_formatter = logging.Formatter(fh_formatter)
         fh.setFormatter(fh_formatter)
         fh.setLevel(file_level)
 
         ch = logging.StreamHandler()
-        ch_formatter = (f'{module_type} %(levelname)-8s %(message)s')
-        ch_formatter = logging.Formatter(ch_formatter)
+        ch_formatter = logging.Formatter(
+            f'{module_type} %(levelname)-8s %(message)s'
+        )
         ch.setFormatter(ch_formatter)
         ch.setLevel(stream_level)
 
@@ -266,7 +287,7 @@ class AbstractModule(object):
         self.logger.debug(f'create numpy random generator by seed: {self.seed}')
         self._rng = np.random.RandomState(self.seed)
 
-    def get_numpy_random_state(self) -> tuple:
+    def get_numpy_random_state(self) -> Any:
         """ get random state.
 
         Args:
@@ -277,7 +298,7 @@ class AbstractModule(object):
         """
         return self._rng.get_state()
 
-    def set_numpy_random_state(self, state: tuple) -> None:
+    def set_numpy_random_state(self, state: Any) -> None:
         """ get random state.
 
         Args:
@@ -295,7 +316,7 @@ class AbstractModule(object):
             None
 
         Returns:
-            True: no error | False: with error.
+            bool: True if no error, False if with error.
         """
         return True
 
@@ -315,7 +336,7 @@ class AbstractModule(object):
         ):
             self._deserialize(self.config.resume)
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = self.__dict__.copy()
         del obj['storage']
         del obj['config']

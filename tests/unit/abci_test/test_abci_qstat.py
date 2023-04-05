@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ElementTree
 
-from aiaccel.abci.qstat import parse_job_list, parse_qstat
+from aiaccel.abci import parse_job_list, parse_qstat
 
 
 def test_parse_qstat(data_dir, load_test_config):
@@ -12,6 +12,7 @@ def test_parse_qstat(data_dir, load_test_config):
 
     stat_list = parse_qstat(xml_string)
     assert type(stat_list) is list
+
 
 def test_parse_job_list(data_dir, load_test_config):
     config = load_test_config()

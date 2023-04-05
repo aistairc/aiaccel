@@ -12,9 +12,9 @@ def create_scheduler(resource_type: str) -> type | None:
         config_path (str): Path to configuration file.
 
     Returns:
-        type | None: `LocalScheduler`, `PylocalScheduler`, or `AbciScheduler`
-            if resource type is 'local', 'python_local', or 'abci',
-            respectively. Other cases, None.
+        type | None: `LocalScheduler` , `PylocalScheduler` , or `AbciScheduler`
+        if resource type is 'local', 'python_local', or 'abci', respectively.
+        Other cases, None.
     """
 
     if resource_type.lower() == "local":

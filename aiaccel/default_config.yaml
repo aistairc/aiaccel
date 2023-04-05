@@ -18,7 +18,8 @@ ABCI:
 
 optimize:
     search_algorithm: aiaccel.optimizer.NelderMeadOptimizer
-    goal: minimize
+    # goal: minimize
+    goal: [minimize]
     trial_number: 30
     rand_seed: 42
     sobol_scramble: True

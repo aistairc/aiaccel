@@ -1,17 +1,27 @@
 from __future__ import annotations
 
-import importlib
 from multiprocessing.pool import Pool, ThreadPool
+from importlib.util import spec_from_file_location
+from importlib.util import module_from_spec
 from pathlib import Path
+from typing import Any
+from aiaccel.config import load_config
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.config import load_config
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.util.aiaccel import (Run, WrapperInterface,
-                                  set_logging_file_for_trial_id)
-from aiaccel.util.cast import cast_y
+from aiaccel.util.aiaccel import Run
+from aiaccel.util.aiaccel import WrapperInterface
+from aiaccel.util.aiaccel import set_logging_file_for_trial_id
 from aiaccel.util.time_tools import get_time_now
+from aiaccel.util.cast import cast_y
+
+
+# These are for avoiding mypy-errors from initializer().
+# `global` does not work well.
+# https://github.com/python/mypy/issues/5732
+user_func: Any
+workspace: Path
 
 
 class PylocalScheduler(AbstractScheduler):
@@ -53,7 +63,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return True
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj['run']
         del obj['pool']
@@ -68,14 +78,18 @@ class PylocalScheduler(AbstractScheduler):
         return None
 
 
-def initializer(config_path: str | Path):
+def initializer(config_path: str | Path) -> None:
     global user_func, workspace
 
     config = load_config(config_path)
 
     # Load the specified module from the specified python program.
-    spec = importlib.util.spec_from_file_location("user_module", config.generic.python_file)
-    module = importlib.util.module_from_spec(spec)
+    spec = spec_from_file_location("user_module", config.generic.python_file)
+    if spec is None:
+        raise ValueError("Invalid python_path.")
+    module = module_from_spec(spec)
+    if spec.loader is None:
+        raise ValueError("spec.loader not defined.")
     spec.loader.exec_module(module)
 
     user_func = getattr(module, config.generic.function)
@@ -83,7 +97,7 @@ def initializer(config_path: str | Path):
     workspace = Path(config.generic.workspace).resolve()
 
 
-def execute(args):
+def execute(args: Any) -> Any:
     trial_id, xs = args
 
     start_time = get_time_now()

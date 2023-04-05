@@ -8,6 +8,7 @@ from typing import Any, List, Optional, Union
 
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
 from omegaconf.base import Container
 
 
@@ -81,7 +82,7 @@ class ParameterConfig:
 @dataclass
 class OptimizeConifig:
     search_algorithm: str
-    goal: OptimizerDirection
+    goal: List[OptimizerDirection]
     trial_number: int
     rand_seed: int
     sobol_scramble: bool
@@ -157,7 +158,8 @@ def set_structs_false(conf: Container) -> None:
     OmegaConf.set_struct(conf, False)
     if hasattr(conf, "__iter__"):
         for item in conf:
-            set_structs_false(conf.__dict__["_content"][item])
+            if isinstance(conf.__dict__["_content"], dict):
+                set_structs_false(conf.__dict__["_content"][item])
 
 
 def load_config(config_path: str) -> DictConfig | None:
@@ -178,9 +180,23 @@ def load_config(config_path: str) -> DictConfig | None:
     default = OmegaConf.create(read_text('aiaccel', 'default_config.yaml'))
     customize = OmegaConf.load(path)
     customize.config_path = str(path)
+    if not isinstance(customize.optimize.goal, ListConfig):
+        customize.optimize.goal = ListConfig([customize.optimize.goal])
 
     config = OmegaConf.merge(base, default)
     set_structs_false(config)
     config = OmegaConf.merge(config, customize)
 
     return config
+
+
+def is_multi_objective(config: DictConfig) -> bool:
+    """Is the multi-objective option set in the configuration.
+
+    Args:
+        config (Config): A configuration object.
+
+    Returns:
+        bool: Is the multi--objective option set in the configuration or not.
+    """
+    return isinstance(config.optimize.goal, ListConfig) and len(config.optimize.goal) > 1

@@ -1,15 +1,18 @@
 from __future__ import annotations
 
-from sqlalchemy.exc import SQLAlchemyError
+from pathlib import Path
+from typing import Any
 from typing import Literal
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import TrialTable
-from aiaccel.util.retry import retry
+from sqlalchemy.exc import SQLAlchemyError
+
+from aiaccel.storage import Abstract
+from aiaccel.storage import TrialTable
+from aiaccel.util import retry
 
 
 class Trial(Abstract):
-    def __init__(self, file_name) -> None:
+    def __init__(self, file_name: Path) -> None:
         super().__init__(file_name)
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -151,7 +154,7 @@ class Trial(Abstract):
         return [trial.trial_id for trial in trials]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_finished(self) -> list:
+    def get_finished(self) -> list[Any]:
         """Get the trial id whose status is finished.
 
         Returns:

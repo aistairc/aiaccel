@@ -1,24 +1,23 @@
 from __future__ import annotations
 
-from aiaccel.util.process import OutputHandler, exec_runner
-from aiaccel.wrapper_tools import create_runner_command
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
-
 from typing import TYPE_CHECKING
 
+from aiaccel.util import OutputHandler
+from aiaccel.util import exec_runner
+from aiaccel.wrapper_tools import create_runner_command
+from aiaccel.scheduler.job.model import AbstractModel
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job.job import Job
+    from aiaccel.scheduler import Job
 
 
 class LocalModel(AbstractModel):
-
-    def before_runner_create(self, obj: 'Job') -> None:
+    def before_runner_create(self, obj: Job) -> None:
         return None
 
-    def conditions_runner_confirmed(self, obj: 'Job') -> bool:
+    def conditions_runner_confirmed(self, obj: Job) -> bool:
         return True
 
-    def before_job_submitted(self, obj: 'Job') -> None:
+    def before_job_submitted(self, obj: Job) -> None:
         runner_command = create_runner_command(
             obj.config.generic.job_command,
             obj.content,

@@ -1,5 +1,3 @@
-import aiaccel
-
 from tests.resumption.resumption_test import ResumptionTest
 
 

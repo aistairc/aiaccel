@@ -3,9 +3,9 @@ import asyncio
 import os
 import time
 
-import aiaccel
-from aiaccel.master.abstract_master import AbstractMaster
-from aiaccel.util.time_tools import get_time_now_object
+from aiaccel.common import goal_maximize
+from aiaccel.master import AbstractMaster
+from aiaccel.util import get_time_now_object
 from tests.base_test import BaseTest
 
 
@@ -73,7 +73,7 @@ class TestAbstractMaster(BaseTest):
         database_remove()
 
         master = AbstractMaster(self.load_config_for_test(self.configs["config.json"]))
-        
+
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
             master.storage.result.set_any_trial_objective(trial_id=i, objective=(i * 10.0))
@@ -84,6 +84,10 @@ class TestAbstractMaster(BaseTest):
                     param_value=0.0,
                     param_type='flaot'
                 )
+        assert master.post_process() is None
+
+        master.config = self.load_config_for_test(self.configs["config.json"])
+        master.config.optimize.goal = goal_maximize
         assert master.post_process() is None
 
     def test_print_dict_state(

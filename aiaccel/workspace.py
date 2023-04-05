@@ -1,11 +1,27 @@
 from __future__ import annotations
-from pathlib import Path
-import shutil
 
-import aiaccel
-from aiaccel.util import filesystem as fs
-from aiaccel.util.retry import retry
-from aiaccel.util.suffix import Suffix
+import shutil
+from pathlib import Path
+
+from aiaccel.common import dict_alive
+from aiaccel.common import dict_error
+from aiaccel.common import dict_hp
+from aiaccel.common import dict_ready
+from aiaccel.common import dict_running
+from aiaccel.common import dict_finished
+from aiaccel.common import dict_jobstate
+from aiaccel.common import dict_lock
+from aiaccel.common import dict_log
+from aiaccel.common import dict_output
+from aiaccel.common import dict_pid
+from aiaccel.common import dict_result
+from aiaccel.common import dict_runner
+from aiaccel.common import dict_storage
+from aiaccel.common import dict_timestamp
+from aiaccel.common import dict_verification
+from aiaccel.util import Suffix
+from aiaccel.util import retry
+from aiaccel.util import make_directories
 
 
 class Workspace:
@@ -41,22 +57,22 @@ class Workspace:
     def __init__(self, base_path: str):
         self.path = Path(base_path).resolve()
 
-        self.alive = self.path / aiaccel.dict_alive
-        self.error = self.path / aiaccel.dict_error
-        self.hp = self.path / aiaccel.dict_hp
-        self.hp_ready = self.path / aiaccel.dict_hp / aiaccel.dict_ready
-        self.hp_running = self.path / aiaccel.dict_hp / aiaccel.dict_running
-        self.hp_finished = self.path / aiaccel.dict_hp / aiaccel.dict_finished
-        self.jobstate = self.path / aiaccel.dict_jobstate
-        self.lock = self.path / aiaccel.dict_lock
-        self.log = self.path / aiaccel.dict_log
-        self.output = self.path / aiaccel.dict_output
-        self.pid = self.path / aiaccel.dict_pid
-        self.result = self.path / aiaccel.dict_result
-        self.runner = self.path / aiaccel.dict_runner
-        self.storage = self.path / aiaccel.dict_storage
-        self.timestamp = self.path / aiaccel.dict_timestamp
-        self.verification = self.path / aiaccel.dict_verification
+        self.alive = self.path / dict_alive
+        self.error = self.path / dict_error
+        self.hp = self.path / dict_hp
+        self.hp_ready = self.path / dict_hp / dict_ready
+        self.hp_running = self.path / dict_hp / dict_running
+        self.hp_finished = self.path / dict_hp / dict_finished
+        self.jobstate = self.path / dict_jobstate
+        self.lock = self.path / dict_lock
+        self.log = self.path / dict_log
+        self.output = self.path / dict_output
+        self.pid = self.path / dict_pid
+        self.result = self.path / dict_result
+        self.runner = self.path / dict_runner
+        self.storage = self.path / dict_storage
+        self.timestamp = self.path / dict_timestamp
+        self.verification = self.path / dict_verification
 
         self.consists = [
             self.alive,
@@ -91,7 +107,7 @@ class Workspace:
         if self.exists():
             return False
 
-        fs.make_directories(
+        make_directories(
             ds=self.consists,
             dict_lock=(self.lock)
         )

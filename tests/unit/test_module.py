@@ -1,28 +1,20 @@
 import asyncio
 import logging
-import numpy as np
-import shutil
-import sys
 import time
-from contextlib import ExitStack
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
 
-import aiaccel
+import numpy as np
 import pytest
-from aiaccel.master.local_master import LocalMaster
-from aiaccel.module import AbstractModule
-from aiaccel.optimizer.random_optimizer import RandomOptimizer
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import file_create
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.config import load_config
+from aiaccel.common import (module_type_master, module_type_optimizer,
+                            module_type_scheduler)
 
+from aiaccel.master import LocalMaster
+from aiaccel.module import AbstractModule
+
+from aiaccel.optimizer import RandomOptimizer
+from aiaccel.scheduler import LocalScheduler
+from aiaccel.util import str_to_logging_level
 
 from tests.base_test import BaseTest
-
-import pytest
 
 
 async def async_function(func):
@@ -39,6 +31,7 @@ async def delay_make_directory(sleep_time, d):
 def dummy_break():
     import sys
     sys.exit()
+
 
 class TestAbstractModule(BaseTest):
 
@@ -61,15 +54,15 @@ class TestAbstractModule(BaseTest):
 
         master = LocalMaster(self.load_config_for_test(self.configs["config.json"]))
         module_type = master.get_module_type()
-        assert module_type == aiaccel.module_type_master
+        assert module_type == module_type_master
 
         optimizer = RandomOptimizer(self.load_config_for_test(self.configs["config.json"]))
         module_type = optimizer.get_module_type()
-        assert module_type == aiaccel.module_type_optimizer
+        assert module_type == module_type_optimizer
 
         scheduler = LocalScheduler(self.load_config_for_test(self.configs["config.json"]))
         module_type = scheduler.get_module_type()
-        assert module_type == aiaccel.module_type_scheduler
+        assert module_type == module_type_scheduler
 
     def test_check_finished(self, setup_hp_finished):
         assert not self.module.check_finished()

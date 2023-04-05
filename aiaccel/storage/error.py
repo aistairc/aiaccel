@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
+
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import ErrorTable
-from aiaccel.util.retry import retry
+from aiaccel.storage import Abstract
+from aiaccel.storage import ErrorTable
+from aiaccel.util import retry
 
 
 class Error(Abstract):
@@ -66,7 +68,7 @@ class Error(Abstract):
         return data.error
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_error_trial_id(self) -> list:
+    def get_error_trial_id(self) -> list[Any]:
         """Obtain a list of trial ids in which an error occurred.
 
         Returns:

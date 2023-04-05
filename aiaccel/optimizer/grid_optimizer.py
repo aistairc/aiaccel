@@ -3,17 +3,18 @@ from __future__ import annotations
 import math
 from functools import reduce
 from operator import mul
+from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 
 def get_grid_options(
     parameter_name: str,
     config: DictConfig
-) -> tuple[int | None, bool, int | None]:
+) -> tuple[Any, bool, Any]:
     """Get options about grid search.
 
     Args:
@@ -61,7 +62,7 @@ def get_grid_options(
 
 def generate_grid_points(
     p: HyperParameter, config: DictConfig
-) -> dict[str, float | int | str | list[float, int, str]]:
+) -> dict[str, Any]:
     """Make a list of all parameters for this grid.
 
     Args:
@@ -80,7 +81,7 @@ def generate_grid_points(
         'type': p.type
     }
 
-    if p.type.lower() in ['uniform_int', 'uniform_float']:
+    if p.type.lower() in ['int', 'float']:
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
@@ -97,7 +98,7 @@ def generate_grid_points(
         else:
             n = int((upper - lower) / step) + 1
             new_param['parameters'] = [lower + i * step for i in range(0, n)]
-        if p.type.lower() == 'uniform_int':
+        if p.type.lower() == 'int':
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
     elif p.type.lower() == 'categorical':
@@ -117,7 +118,7 @@ class GridOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         ready_params (list[dict]): A list of ready hyper parameters.
@@ -126,8 +127,8 @@ class GridOptimizer(AbstractOptimizer):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
-        self.ready_params = None
-        self.generate_index = None
+        self.ready_params: Any = None
+        self.generate_index: Any = None
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -187,7 +188,7 @@ class GridOptimizer(AbstractOptimizer):
             list[dict[str, float | int | str]]: A list of new parameters.
         """
         parameter_index = self.get_parameter_index()
-        new_params = []
+        new_params: list[Any] = []
 
         if parameter_index is None:
             self.logger.info('Generated all of parameters.')

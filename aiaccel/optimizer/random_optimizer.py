@@ -1,5 +1,5 @@
 from __future__ import annotations
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 
 
 class RandomOptimizer(AbstractOptimizer):

@@ -1,8 +1,6 @@
-from aiaccel.scheduler.local_scheduler import LocalScheduler
-from aiaccel.scheduler.job.job import Job
-from aiaccel.config import load_config
+from aiaccel.scheduler import Job
+from aiaccel.scheduler import LocalScheduler
 
-from aiaccel.scheduler.job.model.local_model import LocalModel
 from tests.base_test import BaseTest
 
 

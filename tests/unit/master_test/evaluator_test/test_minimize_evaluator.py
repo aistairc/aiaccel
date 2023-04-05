@@ -1,4 +1,4 @@
-from aiaccel.master.evaluator.minimize_evaluator import MinimizeEvaluator
+from aiaccel.master import MinimizeEvaluator
 
 from tests.base_test import BaseTest
 

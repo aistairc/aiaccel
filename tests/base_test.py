@@ -5,7 +5,7 @@ import pytest
 
 from aiaccel.config import load_config
 
-from aiaccel.util.filesystem import create_yaml
+from aiaccel.util import create_yaml
 from aiaccel.workspace import Workspace
 import shutil
 
@@ -208,6 +208,7 @@ class BaseTest(object):
             "config_sobol_no_initial.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_no_initial.json')),
             "config_tpe.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe.json')),
             "config_tpe_2.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe_2.json')),
+            "config_motpe.json": create_tmp_config(self.test_data_dir.joinpath('config_motpe.json')),
             "config_abci_json": create_tmp_config(self.test_data_dir.joinpath('config_abci.json')),
             "config_nelder_mead.json": create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead.json')),
             "config_nelder_mead_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead_resumption.json')),

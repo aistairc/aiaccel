@@ -5,7 +5,7 @@ from pathlib import Path
 from omegaconf.dictconfig import DictConfig
 from omegaconf.listconfig import ListConfig
 
-from aiaccel import dict_output
+from aiaccel.common import dict_output
 
 ''' Example of stat
 stat = {

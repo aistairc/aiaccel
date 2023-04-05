@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from importlib import import_module
 
 
@@ -7,7 +9,7 @@ def create_optimizer(search_algorithm: str) -> type | None:
     return import_and_getattr(search_algorithm)
 
 
-def import_and_getattr(name: str) -> type | None:
+def import_and_getattr(name: str) -> Any:
     """Imports the specified Optimizer class.
 
     Args:

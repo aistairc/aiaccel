@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from typing import Any
 
 from numpy import str_
 from omegaconf.dictconfig import DictConfig
@@ -88,7 +89,7 @@ class AbstractOptimizer(AbstractModule):
 
     def generate_initial_parameter(
         self
-    ) -> list[dict[str, float | int | str]]:
+    ) -> Any:
         """Generate a list of initial parameters.
 
         Returns:
@@ -108,12 +109,12 @@ class AbstractOptimizer(AbstractModule):
 
         return new_params
 
-    def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
+    def generate_parameter(self) -> Any:
         """Generate a list of parameters.
 
         Raises:
             NotImplementedError: Causes when the inherited class does not
-            implement.
+                implement.
 
         Returns:
             list[dict[str, float | int | str]] | None: A created list of
@@ -233,7 +234,7 @@ class AbstractOptimizer(AbstractModule):
             self.trial_id.initial(num=self.config.resume)
             self._deserialize(self.config.resume)
 
-    def cast(self, params: list[dict[str, str | float | int]]) -> list | None:
+    def cast(self, params: list[dict[str, Any]]) -> list[Any] | None:
         """Casts types of parameter values to appropriate tepes.
 
         Args:
@@ -244,7 +245,7 @@ class AbstractOptimizer(AbstractModule):
 
         Returns:
             list | None: A list of parameters with casted values. None if given
-                `params` is None.
+            `params` is None.
         """
         if params is None or len(params) == 0:
             return params
@@ -270,9 +271,9 @@ class AbstractOptimizer(AbstractModule):
                     casted_params.append(_param)
                     continue
 
-                if param_type.lower() == 'uniform_float':
+                if param_type.lower() == 'float':
                     _param['value'] = float(param_value)
-                if param_type.lower() == 'uniform_int':
+                if param_type.lower() == 'int':
                     _param['value'] = int(param_value)
                 casted_params.append(_param)
 

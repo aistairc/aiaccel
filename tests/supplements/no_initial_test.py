@@ -3,10 +3,11 @@
 import subprocess
 from pathlib import Path
 
-import aiaccel
 from aiaccel.config import load_config
 
-from aiaccel.storage.storage import Storage
+from aiaccel.common import dict_result
+from aiaccel.common import file_final_result
+from aiaccel.storage import Storage
 
 from tests.base_test import BaseTest
 
@@ -34,5 +35,5 @@ class NoInitialTest(BaseTest):
         assert finished == self.config.optimize.trial_number
         assert ready == 0
         assert running == 0
-        final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)
+        final_result = work_dir.joinpath(dict_result, file_final_result)
         assert final_result.exists()

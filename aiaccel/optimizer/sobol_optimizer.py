@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from omegaconf.dictconfig import DictConfig
+from typing import Any
 
 from scipy.stats import qmc
 
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 
 
 class SobolOptimizer(AbstractOptimizer):
@@ -12,7 +13,7 @@ class SobolOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         generate_index (int): A number of generated hyper parameters.
@@ -26,8 +27,8 @@ class SobolOptimizer(AbstractOptimizer):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
-        self.generate_index = None
-        self.sampler = None
+        self.generate_index: Any = None
+        self.sampler: Any = None
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.

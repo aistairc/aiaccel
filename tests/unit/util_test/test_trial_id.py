@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from aiaccel.config import load_config
-from aiaccel.util.trialid import TrialId
+from aiaccel.util import TrialId
 
 
 def test_trial_id_init(create_tmp_config):

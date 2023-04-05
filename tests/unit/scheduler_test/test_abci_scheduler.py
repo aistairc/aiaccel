@@ -1,4 +1,5 @@
-from aiaccel.scheduler.abci_scheduler import AbciScheduler
+from aiaccel.scheduler import AbciScheduler
+
 from tests.base_test import BaseTest
 
 
