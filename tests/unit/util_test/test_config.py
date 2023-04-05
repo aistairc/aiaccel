@@ -1,4 +1,5 @@
 from aiaccel.config import (is_multi_objective, load_config)
+import pytest
 
 
 def test_load_config(config_json, config_yaml):
@@ -9,7 +10,8 @@ def test_load_config(config_json, config_yaml):
 
 
 def test_config_not_exists():
-    assert load_config("?") is None
+    with pytest.raises(ValueError):
+        load_config("?")
 
 
 def test_is_multi_objective(config_json):
