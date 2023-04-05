@@ -3,13 +3,9 @@ from __future__ import annotations
 from omegaconf.dictconfig import DictConfig
 from typing import Any
 
-from aiaccel.common import dict_result
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler import RandomSampling
-from aiaccel.scheduler import LocalModel
-from aiaccel.scheduler import Job
+from aiaccel.scheduler import Job, LocalModel, RandomSampling
 from aiaccel.util import str_to_logging_level
-from aiaccel.util import create_yaml
 
 
 class AbstractScheduler(AbstractModule):
@@ -35,7 +31,7 @@ class AbstractScheduler(AbstractModule):
         super().__init__(config, 'scheduler')
         self.set_logger(
             'root.scheduler',
-            self.dict_log / self.config.logger.file.scheduler,
+            self.workspace.log / self.config.logger.file.scheduler,
             str_to_logging_level(self.config.logger.log_level.scheduler),
             str_to_logging_level(self.config.logger.stream_level.scheduler),
             'Scheduler'
@@ -72,7 +68,7 @@ class AbstractScheduler(AbstractModule):
         Returns:
             None
         """
-        self.get_each_state_count()
+        self.update_each_state_count()
 
     def start_job(self, trial_id: int) -> Any:
         """Start a new job.
@@ -276,34 +272,6 @@ class AbstractScheduler(AbstractModule):
             self.config.resume > 0
         ):
             self._deserialize(self.config.resume)
-
-    def create_result_file(self, trial_id: int) -> None:
-        """ Save the results in yaml format.
-
-        Args:
-            trial_id (int): Any trial od
-
-        Returns:
-            None
-        """
-
-        file_hp_count_fmt = f'%0{self.config.job_setting.name_length}d'
-        file_name = file_hp_count_fmt % trial_id + '.hp'
-
-        content = self.storage.get_hp_dict(trial_id)
-        result = self.storage.result.get_any_trial_objective(trial_id=trial_id)
-        error = self.storage.error.get_any_trial_error(trial_id=trial_id)
-
-        content['result'] = result
-
-        if error is not None:
-            content['error'] = error
-
-        for i in range(len(content['parameters'])):
-            content['parameters'][i]['value'] = content['parameters'][i]['value']
-
-        result_file_path = self.ws / dict_result / file_name
-        create_yaml(result_file_path, content)
 
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()

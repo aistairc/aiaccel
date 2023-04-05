@@ -1,9 +1,9 @@
 import pytest
-from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import t_base, ws, init
+from tests.unit.storage_test.db.base import init, t_base, ws
 
 
 # set_any_trial_objective
@@ -78,7 +78,7 @@ def test_get_all_result():
         )
 
     data = storage.result.get_all_result()
-    assert [d.objective for d in data] == objectives
+    assert [data[trial_id] for trial_id in data.keys()] == objectives
 
 
 # get_objectives
@@ -105,7 +105,7 @@ def test_get_bests():
     storage = Storage(ws.path)
     assert storage.result.get_bests('invalid') == []
 
-    objectives = [1, -5, 3, 1.23]
+    objectives = [[1], [-5], [3], [1.23]]
     ids = range(len(objectives))
 
     for i in range(len(objectives)):
@@ -114,8 +114,13 @@ def test_get_bests():
             objective=objectives[i]
         )
 
-    assert storage.result.get_bests('minimize') == [1, -5, -5, -5]
-    assert storage.result.get_bests('maximize') == [1, 1, 3, 3]
+    bests = storage.result.get_bests(['minimize'])
+    for i in range(len(bests)):
+        assert bests[i][0] == objectives[i][0]
+
+    bests = storage.result.get_bests(['maximize'])
+    for i in range(len(bests)):
+        assert bests[i][0] == objectives[i][0]
 
 
 # get_result_trial_id_list

@@ -12,8 +12,8 @@ from pathlib import Path
 
 from aiaccel.cli import CsvWriter
 from aiaccel.common import dict_lock, goal_maximize, goal_minimize
-from aiaccel.config import is_multi_objective
 from aiaccel.master import create_master
+from aiaccel.module import AbstractModule
 from aiaccel.optimizer import create_optimizer
 from aiaccel.scheduler import create_scheduler
 from aiaccel.util import get_file_result_hp, load_yaml
@@ -25,7 +25,10 @@ logger.addHandler(StreamHandler())
 
 
 def get_best_parameter(
-    files: list[Path], goal: str, dict_lock: Path
+    files: list[Path],
+    goal: str,
+    objective_y_index: int,
+    dict_lock: Path
 ) -> tuple[float | None, Path | None]:
     """Get a best parameter in specified files.
 
@@ -48,17 +51,17 @@ def get_best_parameter(
     yml = load_yaml(files[0], dict_lock)
 
     try:
-        best = float(yml["result"])
+        best = float(yml["result"][objective_y_index])
     except TypeError:
         logger = getLogger("root.master.parameter")
-        logger.error(f'Invalid result: {yml["result"]}.')
+        logger.error(f'Invalid result: {yml["result"][objective_y_index]}.')
         return None, None
 
     best_file = files[0]
 
     for f in files[1:]:
         yml = load_yaml(f, dict_lock)
-        result = float(yml["result"])
+        result = float(yml["result"][objective_y_index])
 
         if goal.lower() == goal_maximize:
             if best < result:
@@ -77,9 +80,9 @@ def get_best_parameter(
 def main() -> None:  # pragma: no cover
     """Parses command line options and executes optimization."""
     parser = ArgumentParser()
-    parser.add_argument("--config", "-c", type=str, default="config.yml")
-    parser.add_argument("--resume", type=int, default=None)
-    parser.add_argument("--clean", nargs="?", const=True, default=False)
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument('--resume', type=int, default=None)
+    parser.add_argument('--clean', nargs='?', const=True, default=False)
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -91,7 +94,7 @@ def main() -> None:  # pragma: no cover
     config.clean = args.clean
 
     workspace = Workspace(config.generic.workspace)
-    goal = config.optimize.goal
+    goals = [item.value for item in config.optimize.goal]
     path_to_lock_file = workspace.path / dict_lock
 
     if config.resume is None:
@@ -114,7 +117,7 @@ def main() -> None:  # pragma: no cover
     Master = create_master(config.resource.type.value)
     Optimizer = create_optimizer(config.optimize.search_algorithm)
     Scheduler = create_scheduler(config.resource.type.value)
-    modules = [Master(config), Optimizer(config), Scheduler(config)]
+    modules: list[AbstractModule] = [Master(config), Optimizer(config), Scheduler(config)]
 
     time_s = time.time()
 
@@ -141,16 +144,19 @@ def main() -> None:  # pragma: no cover
 
     logger.info("moving...")
     dst = workspace.move_completed_data()
+    if dst is None:
+        logger.error("Moving data is failed.")
+        return
 
     config_name = Path(args.config).name
     shutil.copy(Path(args.config), dst / config_name)
 
     files = get_file_result_hp(dst)
 
-    if is_multi_objective(config) is False:
-        best, best_file = get_best_parameter(files, goal, path_to_lock_file)
-        logger.info(f"Best result    : {best_file}")
-        logger.info(f"               : {best}")
+    for i in range(len(goals)):
+        best, best_file = get_best_parameter(files, goals[i], i, path_to_lock_file)
+        logger.info(f"Best result [{i}] : {best_file}")
+        logger.info(f"\tvalue : {best}")
 
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
     logger.info("Done.")

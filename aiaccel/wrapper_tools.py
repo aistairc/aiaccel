@@ -27,21 +27,18 @@ def create_runner_command(
     """
     commands = re.split(' +', command)
     params = param_content['parameters']
-    commands.append('2>')
-    commands.append(command_error_output)
+    for param in params:
+        # Fix a bug related a negative exponential parameters
+        # Need to modify wrapper.py as follows:
+        if 'parameter_name' in param.keys() and 'value' in param.keys():
+            commands.append(f'--{param["parameter_name"]}')
+            commands.append(f'{param["value"]}')
     commands.append('--trial_id')
     commands.append(str(trial_id))
     commands.append('--config')
     commands.append(config_path)
-
-    for param in params:
-        # Fix a bug related a negative exponential parameters
-        # Need to modify wrapper.py as follows:
-        if (
-            'parameter_name' in param.keys() and
-            'value' in param.keys()
-        ):
-            commands.append(f'--{param["parameter_name"]}={param["value"]}')
+    commands.append('2>')
+    commands.append(command_error_output)
     return commands
 
 

@@ -35,7 +35,7 @@ class TestTpeOptimizer(BaseTest):
         self.optimizer.pre_process()
         self.optimizer.inner_loop_main_process()
         with patch.object(
-            self.optimizer.storage.result, "get_any_trial_objective", return_value=1
+            self.optimizer.storage.result, "get_any_trial_objective", return_value=[1]
         ):
             assert self.optimizer.check_result() is None
 
@@ -61,7 +61,7 @@ class TestTpeOptimizer(BaseTest):
 
     def test_generate_initial_parameter(self):
         optimizer = TpeOptimizer(self.load_config_for_test(self.configs['config_tpe_2.json']))
-        (optimizer.ws / 'storage' / 'storage.db').unlink()
+        (optimizer.workspace.storage / 'storage.db').unlink()
 
         optimizer.__init__(self.load_config_for_test(self.configs['config_tpe_2.json']))
         optimizer.pre_process()

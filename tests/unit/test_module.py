@@ -13,7 +13,6 @@ from aiaccel.module import AbstractModule
 from aiaccel.optimizer import RandomOptimizer
 from aiaccel.scheduler import LocalScheduler
 from aiaccel.util import str_to_logging_level
-
 from tests.base_test import BaseTest
 
 
@@ -42,8 +41,8 @@ class TestAbstractModule(BaseTest):
         yield
         self.module = None
 
-    def test_get_each_state_count(self):
-        assert self.module.get_each_state_count() is None
+    def test_update_each_state_count(self):
+        assert self.module.update_each_state_count() is None
         assert self.module.hp_ready == 0
         assert self.module.hp_running == 0
         assert self.module.hp_finished == 0
@@ -82,7 +81,7 @@ class TestAbstractModule(BaseTest):
         assert self.module.set_logger(
             'root.optimizer',
             work_dir.joinpath(
-                self.module.dict_log,
+                self.module.workspace.log,
                 # self.config.get('logger', 'optimizer_logfile')
                 # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
                 self.module.config.logger.file.optimizer
@@ -143,7 +142,7 @@ class TestAbstractModule(BaseTest):
         self.module = AbstractModule(config, 'abstract')
         self.module.set_logger(
             'root.abstract',
-            self.module.dict_log / self.module.config.logger.file.master,
+            self.module.workspace.log / self.module.config.logger.file.master,
             str_to_logging_level(self.module.config.logger.log_level.master),
             str_to_logging_level(self.module.config.logger.stream_level.master),
             'Abstract   '

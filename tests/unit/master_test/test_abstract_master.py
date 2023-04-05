@@ -6,6 +6,7 @@ import time
 from aiaccel.common import goal_maximize
 from aiaccel.master import AbstractMaster
 from aiaccel.util import get_time_now_object
+
 from tests.base_test import BaseTest
 
 
@@ -76,7 +77,7 @@ class TestAbstractMaster(BaseTest):
 
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
-            master.storage.result.set_any_trial_objective(trial_id=i, objective=(i * 10.0))
+            master.storage.result.set_any_trial_objective(trial_id=i, objective=([i * 10.0]))
             for j in range(2):
                 master.storage.hp.set_any_trial_param(
                     trial_id=i,
@@ -87,7 +88,7 @@ class TestAbstractMaster(BaseTest):
         assert master.post_process() is None
 
         master.config = self.load_config_for_test(self.configs["config.json"])
-        master.config.optimize.goal = goal_maximize
+        master.config.optimize.goal = [goal_maximize]
         assert master.post_process() is None
 
     def test_print_dict_state(
@@ -105,7 +106,7 @@ class TestAbstractMaster(BaseTest):
         assert master.print_dict_state() is None
 
         setup_hp_finished(1)
-        master.get_each_state_count()
+        master.update_each_state_count()
         assert master.print_dict_state() is None
 
     def test_inner_loop_main_process(
@@ -123,5 +124,5 @@ class TestAbstractMaster(BaseTest):
         for i in range(10):
             master.storage.trial.set_any_trial_state(trial_id=i, state='finished')
         # setup_hp_finished(10)
-        master.get_each_state_count()
+        master.update_each_state_count()
         assert not master.inner_loop_main_process()

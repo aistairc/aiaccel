@@ -2,18 +2,16 @@ from __future__ import annotations
 
 import copy
 import logging
-from pathlib import Path
 from typing import Any
 
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import dict_lock
-from aiaccel.common import dict_verification
 from aiaccel.common import extension_verification
 from aiaccel.config import is_multi_objective
 from aiaccel.storage import Storage
 from aiaccel.util import create_yaml
+from aiaccel.workspace import Workspace
 
 
 class AbstractVerification(object):
@@ -27,8 +25,7 @@ class AbstractVerification(object):
         options (dict[str, str | int | bool]): A dictionary containing
             command line options as well as process name.
         config (Config): Config object
-        ws (Path): Path to the workspace.
-        dict_lock (Path): Path to "lock", i.e. `ws`/lock.
+        workspace (Workspace): Path to the workspace.
         is_verified (bool): Whether verified or not.
         finished_loop (int): The last loop number verified.
         condition (list[dict[str, int | float]]): A list of verification
@@ -44,14 +41,14 @@ class AbstractVerification(object):
     def __init__(self, config: DictConfig) -> None:
         # === Load config file===
         self.config = config
-        self.ws = Path(self.config.generic.workspace).resolve()
-        self.dict_lock = self.ws / dict_lock
-        self.is_verified = None
+        self.workspace = Workspace(self.config.generic.workspace)
+        self.is_verified: bool = False
         self.finished_loop = None
         self.condition: Any = None
         self.verification_result: Any = None
         self.load_verification_config()
-        self.storage = Storage(self.ws)
+        self.storage = Storage(self.workspace.path)
+        self.goals = [item.value for item in self.config.optimize.goal]
 
     def verify(self) -> None:
         """Run a verification.
@@ -64,10 +61,6 @@ class AbstractVerification(object):
         """
         if not self.is_verified:
             return
-
-        # with fasteners.InterProcessLock(interprocess_lock_file(
-        #         (self.ws / aiaccel.dict_hp), self.dict_lock)):
-        #     hp_finished_files = get_file_hp_finished(self.ws)
 
         for i, c in enumerate(self.condition):
             if self.storage.get_num_finished() >= c['loop']:
@@ -86,38 +79,18 @@ class AbstractVerification(object):
         Returns:
             None
         """
-        # with fasteners.InterProcessLock(
-        #     interprocess_lock_file((self.ws / aiaccel.dict_hp), self.dict_lock)
-        # ):
-        #     hp_finished_files = get_file_hp_finished(self.ws)
-
-        # best, best_file = get_best_parameter(
-        #     hp_finished_files,
-        #     self.config.optimize.goal,
-        #     self.dict_lock
-        # )
-        # self.verification_result[index]['best'] = best
-
-        # if (
-        #     best < self.condition[index]['minimum'] or
-        #     best > self.condition[index]['maximum']
-        # ):
-        #     self.verification_result[index]['passed'] = False
-        # else:
-        #     self.verification_result[index]['passed'] = True
-
-        # self.save(loop)
-
         if is_multi_objective(self.config):
             return
 
-        best_trial = self.storage.get_best_trial_dict(self.config.optimize.goal.lower())
+        best_trial = self.storage.get_best_trial_dict(self.goals)
         if best_trial is None:
+            self.verification_result[index]['passed'] = False
+            self.save(loop)
             return
 
         if (
-            best_trial['result'] < self.condition[index]['minimum'] or
-            best_trial['result'] > self.condition[index]['maximum']
+            best_trial[0]['result'][0] < self.condition[index]['minimum'] or
+            best_trial[0]['result'][0] > self.condition[index]['maximum']
         ):
             self.verification_result[index]['passed'] = False
         else:
@@ -155,7 +128,7 @@ class AbstractVerification(object):
         if not self.is_verified:
             return None
 
-        path = self.ws / dict_verification / f'{name}.{extension_verification}'
-        create_yaml(path, self.verification_result, self.dict_lock)
+        path = self.workspace.verification / f'{name}.{extension_verification}'
+        create_yaml(path, self.verification_result, self.workspace.lock)
         logger = logging.getLogger('root.master.verification')
         logger.info(f'Save verifiation file: {name}.{extension_verification}')

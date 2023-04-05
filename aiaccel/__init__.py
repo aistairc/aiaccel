@@ -1,17 +1,6 @@
-from aiaccel import common
-from aiaccel import config
-from aiaccel import module
-from aiaccel import parameter
-from aiaccel import workspace
-from aiaccel import wrapper_tools
-from aiaccel import abci
-from aiaccel import cli
-from aiaccel import master
-from aiaccel import optimizer
-from aiaccel import scheduler
-from aiaccel import storage
-from aiaccel import util
-
+from aiaccel import (abci, cli, common, config, master, module, optimizer,
+                     parameter, scheduler, storage, util, workspace,
+                     wrapper_tools)
 
 __all__ = [
     'common',
@@ -26,5 +15,5 @@ __all__ = [
     'optimizer',
     'scheduler',
     'storage',
-    'util',
+    'util'
 ]

@@ -90,6 +90,11 @@ class NelderMead(object):
         self.bdrys = np.array([[p.lower, p.upper] for p in self.params])
         self.coef = coef
         self.n_dim = len(self.bdrys)
+
+        if rng is None:
+            raise ValueError(
+                'rng (RandomState) is required to randomly generate initial parameters.'
+            )
         self._rng = rng
 
         self.y = self._create_initial_values(initial_parameters)
@@ -182,7 +187,7 @@ class NelderMead(object):
             out_of_boundary = True
             self.logger.debug(f'_add_executing out of boundary y: {y}')
 
-        vertex_id = generate_random_name(rng=self._rng)
+        vertex_id = generate_random_name(self._rng)
         params = []
 
         for yi, p in zip(y, self.params):

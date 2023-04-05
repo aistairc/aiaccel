@@ -1,6 +1,7 @@
-import tempfile
+import json
 import os
 import shutil
+import tempfile
 from pathlib import Path
 
 import fasteners
@@ -8,10 +9,7 @@ import pytest
 from aiaccel.config import load_config
 from aiaccel.workspace import Workspace
 from aiaccel.storage import Storage
-from aiaccel.util import create_yaml
-from aiaccel.util import load_yaml
-from aiaccel.util import interprocess_lock_file
-import json
+from aiaccel.util import create_yaml, interprocess_lock_file, load_yaml
 
 WORK_SUB_DIRECTORIES = [
     'abci_output', 'alive', 'hp', 'hp/finished', 'hp/ready', 'hp/running',
@@ -240,10 +238,8 @@ def setup_result(work_dir):
     def _setup_result(n=1):
         storage = Storage(work_dir)
         running = storage.get_running()
-        print('dbg')
-        print(running)
         for trial_id in running:
-            storage.result.set_any_trial_objective(trial_id=trial_id, objective=0)
+            storage.result.set_any_trial_objective(trial_id=trial_id, objective=[0])
 
     return _setup_result
 

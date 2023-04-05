@@ -203,6 +203,7 @@ class BaseTest(object):
             "config.json": create_tmp_config(self.test_data_dir.joinpath('config.json')),
             "config_random.json": create_tmp_config(self.test_data_dir.joinpath('config_random.json')),
             "config_grid.json": create_tmp_config(self.test_data_dir.joinpath('config_grid.json')),
+            "config_budget-specified-grid.json": create_tmp_config(self.test_data_dir.joinpath('config_budget-specified-grid.json')),
             "config_sobol.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol.json')),
             "config_sobol_int.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_int.json')),
             "config_sobol_no_initial.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_no_initial.json')),

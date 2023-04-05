@@ -355,7 +355,7 @@ def test_nelder_mead_parameters(load_test_config):
     nelder_mead = NelderMead(
         params.get_parameter_list(), initial_parameters=initial_parameters,
         iteration=100,
-        maximize=(config.optimize.goal.value.lower() == 'maximize'),
+        maximize=(config.optimize.goal[0].value.lower() == 'maximize'),
         rng=rng
     )
 

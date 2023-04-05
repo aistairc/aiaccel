@@ -44,6 +44,7 @@ setup(
             'aiaccel-report=aiaccel.cli.report:main',
             'aiaccel-start=aiaccel.cli.start:main',
             'aiaccel-view=aiaccel.cli.view:main',
+            'aiaccel-set-result=aiaccel.cli.set_result:main',
         ],
     },
 )

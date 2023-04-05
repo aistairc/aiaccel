@@ -7,6 +7,7 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
+from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
@@ -127,8 +128,16 @@ class GridOptimizer(AbstractOptimizer):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
-        self.ready_params: Any = None
-        self.generate_index: Any = None
+        self.ready_params = []
+        for param in self.params.get_parameter_list():
+            self.ready_params.append(generate_grid_points(param, self.config))
+        self.generate_index = 0
+
+        if is_multi_objective(self.config):
+            raise NotImplementedError(
+                'Grid search optimizer does not support multi-objective '
+                'optimization.'
+            )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -137,11 +146,6 @@ class GridOptimizer(AbstractOptimizer):
             None
         """
         super().pre_process()
-
-        self.ready_params = []
-
-        for param in self.params.get_parameter_list():
-            self.ready_params.append(generate_grid_points(param, self.config))
 
         self.generate_index = (
             self.storage.get_num_ready() +
@@ -181,43 +185,55 @@ class GridOptimizer(AbstractOptimizer):
 
         return parameter_index
 
-    def generate_parameter(self) -> list[dict[str, float | int | str]]:
+    def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
         Returns:
-            list[dict[str, float | int | str]]: A list of new parameters.
+            list[dict[str, float | int | str]] | None: A list of new
+                parameters. None if all of parameters are generated.
         """
         parameter_index = self.get_parameter_index()
-        new_params: list[Any] = []
 
         if parameter_index is None:
             self.logger.info('Generated all of parameters.')
-            if self.storage.get_num_finished() >= self.generate_index:
-                self.all_parameter_generated = True
-            return new_params
+            self.all_parameters_generated = True
+            return None
 
-        for i in range(0, len(self.ready_params)):
-            new_param = {
-                'parameter_name': self.ready_params[i]['parameter_name'],
-                'type': self.ready_params[i]['type'],
-                'value': self.ready_params[i]['parameters']
-                [parameter_index[i]]
-            }
-            new_params.append(new_param)
-
+        new_params: list[Any] = []
+        for param, index in zip(self.ready_params, parameter_index):
+            new_params.append(
+                {
+                    'parameter_name': param['parameter_name'],
+                    'type': param['type'],
+                    'value': param['parameters'][index]
+                }
+            )
         return new_params
 
     def generate_initial_parameter(
         self
     ) -> list[dict[str, float | int | str]]:
-        """Generate initial parameters.
+        """Generates initial parameters.
+
+        Grid search algorithm always ignores the initial values in
+        configulation file even if given.
+
+        Raises:
+            ValueError: Causes when the parameter is not generated.
 
         Returns:
             list[dict[str, float | int | str]]: A list of new parameters.
         """
-        if super().generate_initial_parameter() is not None:
-            self.logger.warning(
-                "Initial values cannot be specified for grid search."
-                "The set initial value has been invalidated."
-            )
-        return self.generate_parameter()
+        for hyperparameter in self.params.get_parameter_list():
+            if hyperparameter.initial is not None:
+                self.logger.warning(
+                    "Initial values cannot be specified for grid search. "
+                    "The set initial value has been invalidated."
+                )
+                break
+        generated_parameter = self.generate_parameter()
+        if generated_parameter is None:
+            self.logger.error('Initial parameter not generaged.')
+            raise ValueError('Initial parameter not generated.')
+        else:
+            return generated_parameter

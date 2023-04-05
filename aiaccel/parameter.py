@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from numpy.random import RandomState
+
 
 def get_type(parameter: dict[str, Any]) -> str:
     """Get a type of a specified parameter.
@@ -54,52 +56,23 @@ class HyperParameter(object):
         self.name = parameter['name']
         self.type = get_type(parameter)
         self.log = parameter.get('log', False)
-        # self.lower = None
-        # self.upper = None
-        # self.choices = None
-        # self.sequence = None
-        self.initial = None
-        self.q = None
-        self.step = None
-
-        if 'log' in parameter:
-            self.log = parameter['log']
-
-        # if 'upper' in parameter:
-        #     self.upper = parameter['lower']
-
-        # if 'upper' in parameter:
-        #     self.upper = parameter['upper']
-
-        # if 'choices' in parameter:
-        #     self.choices = parameter['choices']
-
-        # if 'sequence' in parameter:
-        #     self.sequence = parameter['sequence']
-
         self.lower = parameter.get('lower', None)
         self.upper = parameter.get('upper', None)
         self.choices = parameter.get('choices', None)
         self.sequence = parameter.get('sequence', None)
+        self.initial = parameter.get('initial', None)
+        self.q = parameter.get('q', 1)
+        self.step = parameter.get('step', None)
+        self.base = parameter.get('base', None)
+        self.num_numeric_choices = parameter.get('num_numeric_choices', None)
 
-        if 'initial' in parameter:
-            self.initial = parameter['initial']
-
-        if 'q' in parameter:
-            self.q = parameter['q']
-
-        if 'step' in parameter:
-            self.step = parameter['step']
-
-        if 'base' in parameter:
-            self.base = parameter['base']
-
-    def sample(self, initial: bool = False, rng: Any = None) -> dict[str, Any]:
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         """Sample a parameter.
 
         Args:
-            initial (bool): This is set, when a initial value is required.
-            rng (np.random.RandomState): A reference to a random generator.
+            rng (RandomState): A random generator.
+            initial (bool, optional): Whether to require a initial value. If
+                True, returns the initial value. Defaults to False.
 
         Returns:
             dict: A parameter dictionary.
@@ -175,22 +148,21 @@ class HyperParameterConfiguration(object):
         """
         return self.hps
 
-    def sample(self, initial: bool = False, rng: Any = None
-               ) -> list[dict[str, Any]]:
+    def sample(self, rng: RandomState, initial: bool = False) -> list[dict[str, Any]]:
         """Sample a hyper parameters set.
 
         Args:
-            initial (bool, optional): This is set, when a initial value is
-                required.
-            rng (np.random.RandomState): A reference to a random generator.
+            rng (RandomState): A random generator.
+            initial (bool, optional): Whether to require a initial value. If
+                True, returns the initial value. Defaults to False.
 
         Returns:
             list[dict]: A hyper parameters set.
         """
-        ret = []
-        for name, value in self.hps.items():
-            ret.append(value.sample(initial, rng=rng))
-        return ret
+        sampled_values = []
+        for hyperparameter in self.hps.values():
+            sampled_values.append(hyperparameter.sample(rng, initial))
+        return sampled_values
 
 
 def load_parameter(json_string: dict[str, Any]) -> HyperParameterConfiguration:

@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 import functools
+from collections.abc import Callable
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
@@ -114,51 +118,62 @@ def test_generate_grid_points(grid_load_test_config):
 
 
 class TestGridOptimizer(BaseTest):
+    @pytest.fixture(autouse=True)
+    def setup_optimizer(
+        self,
+        create_tmp_config: Callable[[Path], Path]
+    ) -> Generator[None, None, None]:
+        self.grid_config_json = self.load_config_for_test(self.configs['config_grid.json'])
+        self.optimizer = GridOptimizer(self.grid_config_json)
 
-    def test_pre_process(self, create_tmp_config):
-        self.workspace.clean()
-        self.workspace.create()
+        self.optimizer.pre_process()
+        yield
+        self.optimzer = None
 
-        optimizer = GridOptimizer(self.load_config_for_test(self.configs['config_grid.json']))
-        optimizer.pre_process()
+    def test_pre_process(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.optimizer.storage, 'get_num_finished', lambda: 1)
+            m.setattr(self.optimizer.storage, 'get_num_running', lambda: 1)
+            m.setattr(self.optimizer.storage, 'get_num_ready', lambda: 1)
+            self.optimizer.pre_process()
+            num_params = len(self.optimizer.params.get_parameter_list())
+            assert len(self.optimizer.ready_params) == num_params
+            assert self.optimizer.generate_index == 1 + 1 + 1
 
-    def test_get_parameter_index(self, create_tmp_config):
-        self.workspace.clean()
-        self.workspace.create()
+    def test_get_parameter_index(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            max_index = functools.reduce(
+                lambda x, y: x * y,
+                [len(p['parameters']) for p in self.optimizer.ready_params]
+            )
+            m.setattr(self.optimizer, 'generate_index', max_index + 1)
+            assert self.optimizer.get_parameter_index() is None
 
-        optimizer = GridOptimizer(self.load_config_for_test(self.configs['config_grid.json']))
-        optimizer.pre_process()
-        assert optimizer.get_parameter_index() == [0 for _ in range(0, 10)]
+        assert self.optimizer.get_parameter_index() == [0 for _ in range(10)]
+        assert self.optimizer.generate_index == 1
 
-        max_index = functools.reduce(
-            lambda x, y: x*y,
-            [len(p['parameters']) for p in optimizer.ready_params]
-        )
-        optimizer.generate_index = max_index + 1
-        assert optimizer.get_parameter_index() is None
+    def test_generate_parameter(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            m.setattr(self.optimizer, 'get_parameter_index', lambda: None)
+            assert self.optimizer.generate_parameter() is None
 
-    def test_generate_parameter(self, create_tmp_config):
-        self.workspace.clean()
-        self.workspace.create()
+        num_params = len(self.optimizer.params.get_parameter_list())
+        assert len(self.optimizer.generate_parameter()) == num_params
 
-        optimizer = GridOptimizer(self.load_config_for_test(self.configs['config_grid.json']))
-        optimizer.pre_process()
-        max_index = functools.reduce(
-            lambda x, y: x*y,
-            [len(p['parameters']) for p in optimizer.ready_params]
-        )
+    def test_generate_initial_parameter(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        with monkeypatch.context() as m:
+            dummy = []
+            for hyperparameter in self.optimizer.params.get_parameter_list():
+                hyperparameter.initial = 0.0
+                dummy.append(hyperparameter)
+            m.setattr(self.optimizer.params, 'get_parameter_list', lambda: dummy)
+            log = []
+            m.setattr(self.optimizer.logger, 'warning', lambda s: log.append(s))
+            assert len(self.optimizer.generate_initial_parameter()) > 0
+            assert len(log) == 1
 
-        # All generated
-        optimizer.generate_index = max_index + 1
-        assert len(optimizer.generate_parameter()) == 0
+        with monkeypatch.context() as m:
+            m.setattr(self.optimizer, 'generate_parameter', lambda: None)
+            with pytest.raises(ValueError):
+                _ = self.optimizer.generate_initial_parameter()
 
-        optimizer.generate_index = 0
-        assert len(optimizer.generate_parameter()) == self.load_config_for_test(self.configs['config_grid.json']).optimize.trial_number
-
-    def test_generate_initial_parameter(self, create_tmp_config):
-        self.workspace.clean()
-        self.workspace.create()
-
-        optimizer = GridOptimizer(self.load_config_for_test(self.configs['config_grid.json']))
-        optimizer.pre_process()
-        optimizer.generate_initial_parameter()

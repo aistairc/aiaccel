@@ -3,6 +3,8 @@ from __future__ import annotations
 import xml.etree.ElementTree as ElementTree
 from xml.etree.ElementTree import Element
 
+from typing import Any
+
 
 ''' Example of stat
 stat = {
@@ -20,7 +22,7 @@ stat = {
 '''
 
 
-def parse_qstat(qstat: str) -> list[dict]:
+def parse_qstat(qstat: str) -> list[dict[str, Any]]:
     """Parse ABCI 'qstat' command result.
 
     Args:
@@ -42,7 +44,7 @@ def parse_qstat(qstat: str) -> list[dict]:
     return stat_list
 
 
-def parse_job_list(job_list: Element) -> list[dict]:
+def parse_job_list(job_list: Element) -> list[dict[str, Any]]:
     """Parse from XML element of 'qstat' to a job list.
 
     Args:

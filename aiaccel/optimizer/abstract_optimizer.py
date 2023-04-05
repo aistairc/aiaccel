@@ -6,10 +6,11 @@ from typing import Any
 from numpy import str_
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.module import AbstractModule
 from aiaccel.parameter import HyperParameterConfiguration
-from aiaccel.util.logger import str_to_logging_level
-from aiaccel.util.trialid import TrialId
+
+from aiaccel.config import is_multi_objective
+from aiaccel.module import AbstractModule
+from aiaccel.util import TrialId, str_to_logging_level
 
 
 class AbstractOptimizer(AbstractModule):
@@ -22,13 +23,12 @@ class AbstractOptimizer(AbstractModule):
     Attributes:
         options (dict[str, str | int | bool]): A dictionary containing
             command line options.
-        hp_ready (int): A ready number of hyper parameters.
-        hp_running (int): A running number of hyper prameters.
-        hp_finished (int): A finished number of hyper parameters.
-        num_of_generated_parameter (int): A number of generated hyper
-            paramters.
-        all_parameter_generated (bool): A boolean indicating if all parameters
-            are generated or not.
+        hp_ready (int): A ready number of hyperparameters.
+        hp_running (int): A running number of hyperprameters.
+        hp_finished (int): A finished number of hyperparameters.
+        num_of_generated_parameter (int): A number of generated hyperparamters.
+        all_parameters_generated (bool): Whether all parameters are generated.
+            True if all parameters are generated.
         params (HyperParameterConfiguration): Loaded hyper parameter
             configuration object.
         trial_id (TrialId): TrialId object.
@@ -38,19 +38,46 @@ class AbstractOptimizer(AbstractModule):
         super().__init__(config, 'optimizer')
         self.set_logger(
             'root.optimizer',
-            self.dict_log / self.config.logger.file.optimizer,
+            self.workspace.log / self.config.logger.file.optimizer,
             str_to_logging_level(self.config.logger.log_level.optimizer),
             str_to_logging_level(self.config.logger.stream_level.optimizer),
             'Optimizer'
         )
 
+        self.trial_number = self.config.optimize.trial_number
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
         self.num_of_generated_parameter = 0
-        self.all_parameter_generated = False
         self.params = HyperParameterConfiguration(self.config.optimize.parameters)
         self.trial_id = TrialId(self.config.config_path)
+        self.all_parameters_generated = False
+
+    def all_parameters_processed(self) -> bool:
+        """Checks whether any unprocessed parameters are left.
+
+        This method is beneficial for the case that the maximum number of
+        parameter generation is limited by algorithm (e.g. grid search).
+        To make this method effective, the algorithm with the parameter
+        generation limit should turn `all_parameters_generated` True when all
+        of available parameters are generated.
+
+        Returns:
+            bool: True if all parameters are generated and are processed.
+        """
+        return self.hp_ready == 0 and self.hp_running == 0 and self.all_parameters_generated
+
+    def all_parameters_registered(self) -> bool:
+        """Checks whether all parameters that can be generated with the given
+        number of trials are registered.
+
+        This method does not check whether the registered parameters have been
+        processed.
+
+        Returns:
+            bool: True if all parameters are registerd.
+        """
+        return self.trial_number - self.hp_finished - self.hp_ready - self.hp_running == 0
 
     def register_new_parameters(
         self,
@@ -96,7 +123,7 @@ class AbstractOptimizer(AbstractModule):
             list[dict[str, float | int | str]]: A created list of initial
             parameters.
         """
-        sample = self.params.sample(initial=True, rng=self._rng)
+        sample = self.params.sample(self._rng, initial=True)
         new_params = []
 
         for s in sample:
@@ -128,21 +155,11 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             int: Pool size.
         """
-        hp_ready = self.storage.get_num_ready()
-        hp_running = self.storage.get_num_running()
-        hp_finished = self.storage.get_num_finished()
-
         max_pool_size = self.config.resource.num_node
-        max_trial_number = self.config.optimize.trial_number
-
-        n1 = max_pool_size - hp_running - hp_ready
-        n2 = max_trial_number - hp_finished - hp_running - hp_ready
-        pool_size = min(n1, n2)
-
-        if (pool_size <= 0 or hp_ready >= max_pool_size):
-            return 0
-
-        return pool_size
+        hp_running = self.storage.get_num_running()
+        hp_ready = self.storage.get_num_ready()
+        available_pool_size = max_pool_size - hp_running - hp_ready
+        return available_pool_size
 
     def generate_new_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate a list of parameters.
@@ -182,14 +199,19 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
+        self.update_each_state_count()
 
         if self.check_finished():
             return False
 
-        self.get_each_state_count()
+        if self.all_parameters_processed():
+            return False
+
+        if self.all_parameters_registered():
+            return True
 
         pool_size = self.get_pool_size()
-        if pool_size <= 0:
+        if pool_size == 0:
             return True
 
         self.logger.info(
@@ -200,17 +222,11 @@ class AbstractOptimizer(AbstractModule):
             f'pool_size: {pool_size}'
         )
 
-        for _ in range(pool_size):
-            new_params = self.generate_new_parameter()
-            if new_params is not None and len(new_params) > 0:
-                self.register_new_parameters(new_params)
-
-                self.trial_id.increment()
-                self._serialize(self.trial_id.integer)
-
-        if self.all_parameter_generated is True:
-            self.logger.info("All parameter was generated.")
-            return False
+        if new_params := self.generate_new_parameter():
+            self.register_new_parameters(new_params)
+            self.trial_id.increment()
+            self._serialize(self.trial_id.integer)
+            return True
 
         self.print_dict_state()
 
@@ -233,6 +249,7 @@ class AbstractOptimizer(AbstractModule):
             self.storage.delete_trial_data_after_this(self.config.resume)
             self.trial_id.initial(num=self.config.resume)
             self._deserialize(self.config.resume)
+            self.trial_number = self.config.optimize.trial_number
 
     def cast(self, params: list[dict[str, Any]]) -> list[Any] | None:
         """Casts types of parameter values to appropriate tepes.
@@ -299,3 +316,24 @@ class AbstractOptimizer(AbstractModule):
             self.logger.error(error_message)
 
         return False
+
+    def get_any_trial_objective(self, trial_id: int) -> Any:
+        """Get any trial result.
+
+            if the objective is multi-objective, return the list of objective.
+
+        Args:
+            trial_id (int): Trial ID.
+
+        Returns:
+            Any: Any trial result.
+        """
+
+        objective = self.storage.result.get_any_trial_objective(trial_id)
+        if objective is None:
+            return None
+
+        if is_multi_objective(self.config):
+            return objective
+        else:
+            return objective[0]

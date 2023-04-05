@@ -1,14 +1,15 @@
 import csv
 import os
-from pathlib import Path
 from logging import StreamHandler, getLogger
 
 from fasteners import InterProcessLock
 
 from omegaconf.dictconfig import DictConfig
-
-from aiaccel.storage.storage import Storage
-from aiaccel.util.trialid import TrialId
+from omegaconf.listconfig import ListConfig
+from typing import Union
+from aiaccel.storage import Storage
+from aiaccel.util import TrialId
+from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
 logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
@@ -23,22 +24,20 @@ class CsvWriter:
 
     Attributes:
         config (Config): Config object.
-        ws (Path): Directory path to the workspace.
+        workspace (Workspace): Workspace object.
         fp (Path): File path to the csv file named 'results.csv'.
         trialid (TrialId): TrialId object.
         storage (Storage): Storage object related to the workspace.
         lock_file (dict[str, str]): Dict object containing string path to lock.
     """
 
-    def __init__(self, config: DictConfig):
+    def __init__(self, config: Union[ListConfig, DictConfig]):
         self.config = config
-        self.ws = Path(self.config.generic.workspace).resolve()
-        self.fp = self.ws / 'results.csv'
+        self.workspace = Workspace(self.config.generic.workspace)
+        self.fp = self.workspace.retults_csv_file
         self.trialid = TrialId(self.config.config_path)
-        self.storage = Storage(self.ws)
-        self.lock_file = {
-            'result_txt': str(self.ws / 'lock' / 'result_txt')
-        }
+        self.storage = Storage(self.workspace.path)
+        self.lock_file = {'result_txt': str(self.workspace.lock / 'result_txt')}
 
     def _get_zero_padding_trial_id(self, trial_id: int) -> str:
         """Gets string of trial id padded by zeros.

@@ -46,7 +46,7 @@ class TestNelderMeadOptimizer(BaseTest):
 
     def test_pre_process(self):
         assert self.optimizer.pre_process() is None
-        self.optimizer.config.optimize.goal = goal_maximize
+        self.optimizer.config.optimize.goal = [goal_maximize]
         self.optimizer.post_process()
         assert self.optimizer.pre_process() is None
 

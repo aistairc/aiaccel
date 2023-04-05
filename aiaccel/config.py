@@ -18,7 +18,7 @@ class ResourceType(Enum):
     python_local: str = 'python_local'
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: Any) -> Any | None:
         value = value.lower()
         for member in cls:
             if member.value == value:
@@ -31,7 +31,7 @@ class OptimizerDirection(Enum):
     maximize: str = 'maximize'
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: Any) -> Any | None:
         value = value.lower()
         for member in cls:
             if member.value == value:
@@ -86,6 +86,8 @@ class OptimizeConifig:
     trial_number: int
     rand_seed: int
     sobol_scramble: bool
+    grid_accept_small_trial_number: bool
+    grid_sampling_method: str
     parameters: List[ParameterConfig]
 
 
@@ -162,7 +164,7 @@ def set_structs_false(conf: Container) -> None:
                 set_structs_false(conf.__dict__["_content"][item])
 
 
-def load_config(config_path: str) -> DictConfig | None:
+def load_config(config_path: Path | str) -> Union[ListConfig, DictConfig]:
     """
     Load any configuration files, return the DictConfig object.
     Args:
@@ -174,7 +176,7 @@ def load_config(config_path: str) -> DictConfig | None:
     path = Path(config_path).resolve()
 
     if not path.exists():
-        return None
+        raise ValueError("Config is not found.")
 
     base = OmegaConf.structured(Config)
     default = OmegaConf.create(read_text('aiaccel', 'default_config.yaml'))
@@ -183,7 +185,7 @@ def load_config(config_path: str) -> DictConfig | None:
     if not isinstance(customize.optimize.goal, ListConfig):
         customize.optimize.goal = ListConfig([customize.optimize.goal])
 
-    config = OmegaConf.merge(base, default)
+    config: Union[ListConfig, DictConfig] = OmegaConf.merge(base, default)
     set_structs_false(config)
     config = OmegaConf.merge(config, customize)
 

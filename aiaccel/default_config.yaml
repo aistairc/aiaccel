@@ -23,6 +23,8 @@ optimize:
     trial_number: 30
     rand_seed: 42
     sobol_scramble: True
+    grid_accept_small_trial_number: False
+    grid_sampling_method: 'IN_ORDER'
     parameters: []
 
 job_setting:
