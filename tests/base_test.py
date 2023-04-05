@@ -217,6 +217,7 @@ class BaseTest(object):
             "config_sobol_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_resumption.json')),
             "config_tpe_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe_resumption.json')),
             "config_grid_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_grid_resumption.json')),
+            "config_motpe_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_motpe_resumption.json')),
         }
 
         self.tmpdir_path = tmpdir
