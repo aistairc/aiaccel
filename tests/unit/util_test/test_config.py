@@ -11,7 +11,7 @@ def test_load_config(config_json, config_yaml):
 
 def test_config_not_exists():
     with pytest.raises(ValueError):
-        load_config("?")
+        load_config('invalid')
 
 
 def test_is_multi_objective(config_json):
