@@ -1,0 +1,45 @@
+name: Type check
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.8']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mypy
+
+      - name: Type check
+        run: |
+          mypy aiaccel \
+            --install-types \
+            --non-interactive \
+            --ignore-missing-imports \
+            --warn-unused-configs \
+            --disallow-any-generics \
+            --disallow-untyped-calls \
+            --disallow-untyped-defs \
+            --disallow-incomplete-defs \
+            --check-untyped-defs \
+            --disallow-untyped-decorators \
+            --warn-redundant-casts \
+            --warn-unused-ignores \
+            --no-implicit-reexport \
+            --strict-equality \
+            --strict-concatenate

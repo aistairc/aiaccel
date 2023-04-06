@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+from typing import Any
+
 import optuna
+from omegaconf.dictconfig import DictConfig
+import sqlalchemy
+import sqlalchemy.orm as sqlalchemy_orm
+from optuna.storages._rdb import models
 
 import aiaccel.parameter
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.optimizer import AbstractOptimizer
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):
@@ -37,28 +43,34 @@ class TpeOptimizer(AbstractOptimizer):
         randseed (int): Random seed.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
-        self.parameter_pool = {}
-        self.parameter_list = []
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
+        self.parameter_pool: dict[str, Any] = {}
+        self.parameter_list: list[Any] = []
         self.study_name = "distributed-tpe"
-        self.study = None
-        self.distributions = None
-        self.trial_pool = {}
-        self.randseed = self.config.randseed.get()
+        self.study: Any = None
+        self.distributions: Any = None
+        self.trial_pool: dict[str, Any] = {}
+        self.randseed = self.config.optimize.rand_seed
+        self.resumed_list: list[Any] = []
 
     def pre_process(self) -> None:
-        """Pre-Procedure before executing optimize processes.
-        """
+        """Pre-Procedure before executing optimize processes."""
+
         super().pre_process()
 
         self.parameter_list = self.params.get_parameter_list()
+
+        if self.distributions is None:
+            self.distributions = create_distributions(self.params)
+
+        if self.config.resume is not None and self.config.resume > 0:
+            self.resume_trial()
+
         self.create_study()
-        self.distributions = create_distributions(self.params)
 
     def post_process(self) -> None:
-        """Post-procedure after executed processes.
-        """
+        """Post-procedure after executed processes."""
         self.check_result()
         super().post_process()
 
@@ -69,19 +81,12 @@ class TpeOptimizer(AbstractOptimizer):
             None
         """
 
-        del_keys = []
-        for trial_id, param in self.parameter_pool.items():
-            objective = self.storage.result.get_any_trial_objective(trial_id)
+        for trial_id in list(self.parameter_pool.keys()):
+            objective = self.get_any_trial_objective(int(trial_id))
+
             if objective is not None:
-                trial = self.trial_pool[trial_id]
-                self.study.tell(trial, objective)
-                del_keys.append(trial_id)
-
-        for key in del_keys:
-            self.parameter_pool.pop(key)
-            self.logger.info(f'trial_id {key} is deleted from parameter_pool')
-
-        self.logger.debug(f'current pool {[k for k, v in self.parameter_pool.items()]}')
+                self.study.tell(int(trial_id), objective, skip_if_finished=True)
+                del self.parameter_pool[trial_id]
 
     def is_startup_trials(self) -> bool:
         """Is a current trial startup trial or not.
@@ -93,8 +98,7 @@ class TpeOptimizer(AbstractOptimizer):
         return self.num_of_generated_parameter < n_startup_trials
 
     def generate_parameter(
-        self,
-        number: int | None = 1
+        self, number: int | None = 1
     ) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
@@ -106,42 +110,41 @@ class TpeOptimizer(AbstractOptimizer):
             list[dict[str, float | int | str]] | None: A list of created
             parameters.
         """
+
         self.check_result()
         self.logger.debug(
-            f'number: {number}, pool: {len(self.parameter_pool)} losses'
+            f"generate_parameter requests {number} params, pool length: {len(self.parameter_pool)}"
         )
 
         # TPE has to be sequential.
-        if (
-            (not self.is_startup_trials()) and
-            (len(self.parameter_pool) >= 1)
-        ):
+        if (not self.is_startup_trials()) and (len(self.parameter_pool) >= 1):
             return None
 
-        if len(self.parameter_pool) >= self.config.num_node.get():
+        if len(self.parameter_pool) >= self.config.resource.num_node:
             return None
 
-        new_params = []
+        new_params: list[dict[str, Any]] = []
         trial = self.study.ask(self.distributions)
+        new_params = []
 
         for param in self.params.get_parameter_list():
             new_param = {
-                'parameter_name': param.name,
-                'type': param.type,
-                'value': trial.params[param.name]
+                "parameter_name": param.name,
+                "type": param.type,
+                "value": trial.params[param.name],
             }
             new_params.append(new_param)
 
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        self.logger.info(
+            f"new parameter {trial_id} is added to parameter_pool {new_params}"
+        )
 
         return new_params
 
-    def generate_initial_parameter(
-        self
-    ) -> list[dict[str, float | int | str]] | None:
+    def generate_initial_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
 
         Returns:
@@ -159,21 +162,22 @@ class TpeOptimizer(AbstractOptimizer):
 
         self.study.enqueue_trial(enqueue_trial)
         trial = self.study.ask(self.distributions)
-
         new_params = []
 
         for name, value in trial.params.items():
             new_param = {
-                'parameter_name': name,
-                'type': self.params.hps[name].type,
-                'value': value
+                "parameter_name": name,
+                "type": self.params.hps[name].type,
+                "value": value,
             }
             new_params.append(new_param)
 
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(f'newly added name: {trial_id} to parameter_pool')
+        self.logger.info(
+            f"new initial parameter {trial_id} is added to parameter_pool {new_params}"
+        )
         return new_params
 
     def create_study(self) -> None:
@@ -182,17 +186,55 @@ class TpeOptimizer(AbstractOptimizer):
         Returns:
             None
         """
-        if self.study is None:
-            self.study = optuna.create_study(
-                sampler=TPESamplerWrapper(seed=self.randseed),
-                study_name=self.study_name,
-                direction=self.config.goal.get().lower()
-            )
+
+        sampler = TPESamplerWrapper()
+        sampler._rng = self._rng
+        sampler._random_sampler._rng = self._rng
+        storage_path = str(f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db")
+        storage = optuna.storages.RDBStorage(url=storage_path)
+        load_if_exists = self.config.resume is not None
+        self.study = optuna.create_study(
+            sampler=sampler,
+            storage=storage,
+            study_name=self.study_name,
+            load_if_exists=load_if_exists,
+            direction=self.goals[0].lower(),
+        )
+
+    def resume_trial(self) -> None:
+        optuna_trials = self.study.get_trials()
+        storage_path = f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db"
+        engine = sqlalchemy.create_engine(storage_path, echo=False)
+        Session = sqlalchemy_orm.sessionmaker(bind=engine)
+        session = Session()
+
+        for optuna_trial in optuna_trials:
+            if optuna_trial.number >= self.config.resume:
+                self.resumed_list.append(optuna_trial)
+                resumed_trial = (
+                    session.query(models.TrialModel)
+                    .filter_by(number=optuna_trial.number)
+                    .first()
+                )
+                session.delete(resumed_trial)
+                self.logger.info(
+                    f"resume_trial deletes the trial number {resumed_trial.number} from optuna db."
+                )
+
+        session.commit()
+
+        for trial_id in list(self.parameter_pool.keys()):
+            objective = self.get_any_trial_objective(int(trial_id))
+            if objective is not None:
+                del self.parameter_pool[trial_id]
+                self.logger.info(
+                    f"resume_trial trial_id {trial_id} is deleted from parameter_pool"
+                )
 
 
 def create_distributions(
-        parameters: aiaccel.parameter.HyperParameterConfiguration
-) -> dict:
+    parameters: aiaccel.parameter.HyperParameterConfiguration,
+) -> dict[str, Any]:
     """Create an optuna.distributions dictionary for the parameters.
 
     Args:
@@ -206,7 +248,7 @@ def create_distributions(
     Returns:
         (dict): An optuna.distributions object.
     """
-    distributions = {}
+    distributions: dict[str, Any] = {}
 
     for p in parameters.get_parameter_list():
         if p.type.lower() == 'float':
@@ -219,13 +261,17 @@ def create_distributions(
                 p.lower, p.upper, log=p.log
             )
 
-        elif p.type.lower() == 'categorical':
-            distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
+        elif p.type.lower() == "categorical":
+            distributions[p.name] = optuna.distributions.CategoricalDistribution(
+                p.choices
+            )
 
-        elif p.type.lower() == 'ordinal':
-            distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
+        elif p.type.lower() == "ordinal":
+            distributions[p.name] = optuna.distributions.CategoricalDistribution(
+                p.sequence
+            )
 
         else:
-            raise TypeError('Unsupported parameter type')
+            raise TypeError("Unsupported parameter type")
 
     return distributions

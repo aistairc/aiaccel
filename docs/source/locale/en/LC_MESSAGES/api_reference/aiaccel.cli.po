@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:40+0000\n"
+"POT-Creation-Date: 2023-03-22 14:37+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,11 +26,114 @@ msgid "Submodules"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.cli.rst:8
+msgid "aiaccel.cli.csv\\_writer module"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:1 aiaccel.cli.plot.Plotter:1
+#: aiaccel.cli.view.Viewer:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:1 of
+msgid "Provides report creation method."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter aiaccel.cli.plot.Plotter
+#: aiaccel.cli.start.get_best_parameter aiaccel.cli.view.Viewer of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:3 aiaccel.cli.view.Viewer:8 of
+msgid "Path to the config file."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:8 aiaccel.cli.plot.Plotter:3
+#: aiaccel.cli.view.Viewer:3 of
+msgid "Config object."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter aiaccel.cli.plot.Plotter
+#: aiaccel.cli.view.Viewer of
+msgid "type"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:10 of
+msgid "Config"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:14 of
+msgid "Directory path to the workspace."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:16 aiaccel.cli.csv_writer.CsvWriter:22
+#: aiaccel.cli.plot.Plotter:10 aiaccel.cli.view.Viewer:10
+#: aiaccel.cli.view.Viewer:16 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:20 of
+msgid "File path to the csv file named 'results.csv'."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:26 of
+msgid "TrialId object."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:28 of
+msgid "TrialId"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:32 of
+msgid "Storage object related to the workspace."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:34 aiaccel.cli.plot.Plotter:16
+#: aiaccel.cli.view.Viewer:22 of
+msgid "Storage"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:38 of
+msgid "Dict object containing string path to lock."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:40 of
+msgid "dict[str, str]"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter.create:1 of
+msgid "Creates repoprt."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.cli.rst:16
 msgid "aiaccel.cli.plot module"
 msgstr ""
 
-#: aiaccel.cli.plot.Plotter:1 aiaccel.cli.view.Viewer:1 of
-msgid "ベースクラス: :py:class:`object`"
+#: aiaccel.cli.plot.Plotter:1 of
+msgid "Provides method to prints a graph on a terminal."
+msgstr ""
+
+#: aiaccel.cli.plot.Plotter:8 aiaccel.cli.view.Viewer:14 of
+msgid "Path to the workspace."
+msgstr ""
+
+#: aiaccel.cli.plot.Plotter:14 aiaccel.cli.view.Viewer:20 of
+msgid "Storage object."
+msgstr ""
+
+#: aiaccel.cli.plot.Plotter:20 of
+msgid "Goal of optimization ('minimize' or 'maximize')."
+msgstr ""
+
+#: aiaccel.cli.plot.Plotter:22 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.cli.plot.Plotter:26 of
+msgid "EasyVisualizer object."
+msgstr ""
+
+#: aiaccel.cli.plot.Plotter:28 of
+msgid "EasyVisualizer"
 msgstr ""
 
 #: aiaccel.cli.plot.Plotter.plot:1 of
@@ -39,31 +142,100 @@ msgid ""
 "terminal."
 msgstr ""
 
-#: aiaccel.cli.plot.Plotter.plot aiaccel.cli.view.Viewer.view of
+#: aiaccel.cli.plot.Plotter.plot aiaccel.cli.start.get_best_parameter
+#: aiaccel.cli.view.Viewer.view of
 msgid "戻り値"
 msgstr ""
 
-#: aiaccel.cli.plot.Plotter.plot:3 aiaccel.cli.view.Viewer.view:3 of
+#: aiaccel.cli.plot.Plotter.plot:4 aiaccel.cli.view.Viewer.view:3 of
 msgid "None"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.cli.rst:16
-msgid "aiaccel.cli.report module"
+#: aiaccel.cli.plot.main:1 of
+msgid "Parses command line options and plots a graph on the terminal."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.cli.rst:24
-msgid "aiaccel.cli.start module"
+msgid "aiaccel.cli.report module"
+msgstr ""
+
+#: aiaccel.cli.report.main:1 of
+msgid "Parses command line options and reports the result."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.cli.rst:32
+msgid "aiaccel.cli.start module"
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter:1 of
+msgid "Get a best parameter in specified files."
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter:3 of
+msgid "A list of files to find a best."
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter:5 of
+msgid "Maximize or Minimize."
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter:7 of
+msgid "A directory to store lock files."
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter:10 of
+msgid ""
+"A best result value and a file path. It returns None if a number of files"
+" is less than one."
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter of
+msgid "例外"
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter:14 of
+msgid "Causes when an invalid goal is set."
+msgstr ""
+
+#: aiaccel.cli.start.main:1 of
+msgid "Parses command line options and executes optimization."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.cli.rst:40
 msgid "aiaccel.cli.view module"
+msgstr ""
+
+#: aiaccel.cli.view.Viewer:1 of
+msgid "Provides a method to print database information."
 msgstr ""
 
 #: aiaccel.cli.view.Viewer.view:1 of
 msgid "Print database information"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.cli.rst:40
+#: aiaccel.cli.view.main:1 of
+msgid ""
+"Parses command line options and prints database information on "
+"theterminal."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.cli.rst:48
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "aiaccel.cli.creation\\_report module"
+#~ msgstr ""
+
+#~ msgid "Gets string of trial id padded by zeros."
+#~ msgstr ""
+
+#~ msgid "Target trial id."
+#~ msgstr ""
+
+#~ msgid "Trial id padded by zeros."
+#~ msgstr ""
 

@@ -1,5 +1,5 @@
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.time_tools import get_time_now
+from aiaccel.util import create_yaml
+from aiaccel.util import get_time_now
 from aiaccel.wrapper_tools import create_runner_command, save_result
 
 from tests.base_test import BaseTest
@@ -26,21 +26,24 @@ class TestCeaterRunnerComand(BaseTest):
         error_output = str(work_dir / 'error' / f"{d['trial_id']}.txt")
 
         commands = create_runner_command(
-            config.job_command.get(),
+            config.generic.job_command,
             get_one_parameter(),
             'name',
             'config.json',
             error_output
         )
+        print(commands)
         assert commands[0] == 'python'
         assert commands[1] == 'original_main.py'
-        assert commands[2] == '2>'
-        assert commands[3] == error_output
-        assert commands[4] == '--trial_id'
-        assert commands[5] == 'name'
-        assert commands[6] == '--config'
-        assert commands[7] == 'config.json'
-        assert commands[8] == '--x1=0.9932890709584586'
+        assert commands[2] == '--x1'
+        assert commands[3] == '0.9932890709584586'
+        # skip --x2 ~ x10        
+        assert commands[22] == '--trial_id'
+        assert commands[23] == 'name'
+        assert commands[24] == '--config'
+        assert commands[25] == 'config.json'
+        assert commands[26] == '2>'
+        assert commands[27] == error_output
 
         start_time = get_time_now()
         end_time = get_time_now()

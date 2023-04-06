@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
-from aiaccel import dict_result
-from aiaccel.util.filesystem import create_yaml
+from aiaccel.common import dict_result
+from aiaccel.util import create_yaml
 
 
 def create_runner_command(
     command: str,
-    param_content: dict,
+    param_content: dict[str, Any],
     trial_id: int,
     config_path: str,
     command_error_output: str
@@ -26,21 +27,18 @@ def create_runner_command(
     """
     commands = re.split(' +', command)
     params = param_content['parameters']
-    commands.append('2>')
-    commands.append(command_error_output)
+    for param in params:
+        # Fix a bug related a negative exponential parameters
+        # Need to modify wrapper.py as follows:
+        if 'parameter_name' in param.keys() and 'value' in param.keys():
+            commands.append(f'--{param["parameter_name"]}')
+            commands.append(f'{param["value"]}')
     commands.append('--trial_id')
     commands.append(str(trial_id))
     commands.append('--config')
     commands.append(config_path)
-
-    for param in params:
-        # Fix a bug related a negative exponential parameters
-        # Need to modify wrapper.py as follows:
-        if (
-            'parameter_name' in param.keys() and
-            'value' in param.keys()
-        ):
-            commands.append(f'--{param["parameter_name"]}={param["value"]}')
+    commands.append('2>')
+    commands.append(command_error_output)
     return commands
 
 

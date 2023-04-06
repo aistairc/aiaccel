@@ -1,4 +1,4 @@
-from aiaccel.master.local_master import LocalMaster
+from aiaccel.master import LocalMaster
 
 from tests.base_test import BaseTest
 
@@ -6,12 +6,5 @@ from tests.base_test import BaseTest
 class TestLocalMaster(BaseTest):
 
     def test_init(self, clean_work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        master = LocalMaster(options)
+        master = LocalMaster(self.load_config_for_test(self.configs["config.json"]))
         assert master.loop_start_time is None

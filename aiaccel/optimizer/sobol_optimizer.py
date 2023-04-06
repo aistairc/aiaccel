@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from omegaconf.dictconfig import DictConfig
+from typing import Any
+
 from scipy.stats import qmc
 
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.config import is_multi_objective
+from aiaccel.optimizer import AbstractOptimizer
 
 
 class SobolOptimizer(AbstractOptimizer):
@@ -10,7 +14,7 @@ class SobolOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         generate_index (int): A number of generated hyper parameters.
@@ -22,10 +26,16 @@ class SobolOptimizer(AbstractOptimizer):
         Confirm whether the current code resumes for any timings of quits.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
-        self.generate_index = None
-        self.sampler = None
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
+        self.generate_index: Any = None
+        self.sampler: Any = None
+
+        if is_multi_objective(self.config):
+            raise NotImplementedError(
+                'Sobol optimizer does not support multi-objective '
+                'optimization.'
+            )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -38,10 +48,10 @@ class SobolOptimizer(AbstractOptimizer):
         finished = self.storage.trial.get_finished()
         self.generate_index = len(finished)
 
-        if self.options['resume'] is None or self.options['resume'] <= 0:
+        if self.config.resume is None or self.config.resume <= 0:
             self.sampler = qmc.Sobol(
                 d=len(self.params.get_parameter_list()),
-                scramble=self.config.sobol_scramble.get(),
+                scramble=self.config.optimize.sobol_scramble,
                 seed=self._rng
             )
 

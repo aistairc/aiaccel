@@ -1,4 +1,4 @@
-from aiaccel.util.suffix import Suffix
+from aiaccel.util import Suffix
 
 
 def test_suffix():

@@ -1,7 +1,11 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from aiaccel.config import Config
+from typing import Union
+from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
+
+from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.easy_visualizer import EasyVisualizer
 
@@ -19,11 +23,12 @@ class Plotter:
         cplt (EasyVisualizer): EasyVisualizer object.
     """
 
-    def __init__(self, config: Config) -> None:
-        self.workspace = Path(config.workspace.get()).resolve()
+    def __init__(self, config: Union[ListConfig, DictConfig]):
+        self.workspace = Path(config.generic.workspace).resolve()
 
         self.storage = Storage(self.workspace)
-        self.goal = config.goal.get().lower()
+        self.goals = [item.value for item in config.optimize.goal]
+
         self.cplt = EasyVisualizer()
 
     def plot(self) -> None:
@@ -34,7 +39,26 @@ class Plotter:
             None
         """
         objectives = self.storage.result.get_objectives()
-        bests = self.storage.result.get_bests(self.goal)
+        if len(objectives) == 0:
+            print("Result data is empty")
+            return
+
+        objectives = list(map(lambda x: list(x), zip(*objectives)))
+
+        bests = self.storage.result.get_bests(self.goals)
+
+        plot_datas = []
+        for i in range(len(self.goals)):
+            plot_datas.append(objectives[i])
+            plot_datas.append(bests[i])
+
+        caption_set = [caption_set for caption_set in [
+            [f"objective_y[{i}]", f"best value[{i}]"] for i in range(len(self.goals))]]
+
+        captions = []
+        for captions_ in caption_set:
+            for caption in captions_:
+                captions.append(caption)
 
         if len(objectives) == 0:
             print("Result data is empty")
@@ -44,24 +68,9 @@ class Plotter:
             print("Invalid data")
             return
 
-        self.cplt.set_colors(
-            [
-                "red",
-                "green"
-            ]
-        )
-        self.cplt.caption(
-            [
-                "objective",
-                "best value"
-            ]
-        )
-        self.cplt.line_plot(
-            [
-                objectives,
-                bests
-            ]
-        )
+        self.cplt.caption(captions)
+        self.cplt.line_plot(plot_datas)
+
         return
 
 
@@ -72,11 +81,10 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
-    config = Config(args.config)
-    workspace = config.workspace.get()
+    config: Union[ListConfig, DictConfig] = load_config(args.config)
 
-    if Path(workspace).exists() is False:
-        print(f"{workspace} is not found.")
+    if Path(config.generic.workspace).exists() is False:
+        print(f"{config.generic.workspace} is not found.")
         return
 
     plotter = Plotter(config)

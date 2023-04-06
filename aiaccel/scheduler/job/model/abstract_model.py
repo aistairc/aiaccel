@@ -1,19 +1,23 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
-from aiaccel import dict_runner
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.util.process import kill_process
-from aiaccel.util.time_tools import get_time_delta, get_time_now_object
+from aiaccel.util import get_time_delta, get_time_now_object, kill_process
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job.job import Job
+    from aiaccel.scheduler import Job
 
 
 class AbstractModel(object):
+    state: str
+    expire: Callable[[Any], Any]
+    schedule: Callable[[Any], Any]
+    next: Callable[[Any], Any]
 
     # Common
+
     def after_confirmed(self, obj: 'Job') -> None:
         """State transition of 'after_confirmed'.
 
@@ -58,25 +62,8 @@ class AbstractModel(object):
         any_trial_state = obj.storage.trial.get_any_trial_state(trial_id=obj.trial_id)
         return (obj.next_state == any_trial_state)
 
-    def change_trial_state(self, obj: 'Job') -> None:
-        """State transition of 'change_trial_state'.
-
-        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
-
-        Args:
-            obj (Job): A job object.
-
-        Returns:
-            None
-        """
-        obj.storage.trial.set_any_trial_state(
-            trial_id=obj.trial_id,
-            state=obj.next_trial_state
-        )
-        return
-
-    def get_runner_file(self, obj: 'Job') -> None:
-        return obj.ws / dict_runner / f'run_{obj.trial_id_str}.sh'
+    def get_runner_file(self, obj: 'Job') -> Path:
+        return obj.workspace.runner / f'run_{obj.trial_id_str}.sh'
 
     # Runner
     def after_runner(self, obj: 'Job') -> None:
@@ -121,7 +108,7 @@ class AbstractModel(object):
 
         Returns:
             bool: A target file exists or not. But always true if local
-                execution.
+            execution.
         """
         raise NotImplementedError
 
@@ -185,16 +172,8 @@ class AbstractModel(object):
         Returns:
             bool: A target job is finished or not.
         """
-        for state in obj.scheduler.stats:
-            state_trial_id = obj.scheduler.parse_trial_id(state['name'])
-            if state_trial_id is not None and obj.trial_id == int(state_trial_id):
-                return True
-        else:
-            # confirm whether the result file exists or not (this means the job finished quickly
-            trial_ids = obj.storage.result.get_result_trial_id_list()
-            if trial_ids is None:
-                return False
-            return obj.trial_id in trial_ids
+        state = obj.storage.trial.get_any_trial_state(obj.trial_id)
+        return (state is not None and state in ['running', 'finished'])
 
     # Result
     def after_result(self, obj: 'Job') -> None:
@@ -209,6 +188,19 @@ class AbstractModel(object):
             None
         """
         self.after_confirmed(obj)
+
+    def before_result(self, obj: 'Job') -> None:
+        """State transition of 'before_finished'.
+
+        Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'.
+
+        Args:
+            obj (Job): A job object.
+
+        Returns:
+            None
+        """
+        self.write_results_to_database(obj)
 
     def after_wait_result(self, obj: 'Job') -> None:
         """State transition of 'after_wait_result'.
@@ -236,8 +228,9 @@ class AbstractModel(object):
         Returns:
             bool: A target is in result files or not.
         """
-        objective = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
-        return (objective is not None)
+        # objective = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
+        # return (objective is not None)
+        return obj.workspace.result_file_exists(trial_id=obj.trial_id)
 
     # Finished
     def after_finished(self, obj: 'Job') -> None:
@@ -252,8 +245,7 @@ class AbstractModel(object):
             None
         """
         self.after_confirmed(obj)
-        # obj.from_file = obj.ws / aiaccel.dict_hp_running / obj.hp_file.name
-        # obj.to_file = obj.ws / aiaccel.dict_hp_finished / obj.hp_file.name
+
         obj.next_state = 'finished'
         obj.threshold_timeout = (
             get_time_now_object() + get_time_delta(obj.finished_timeout)
@@ -273,16 +265,6 @@ class AbstractModel(object):
         """
 
         self.change_state(obj)
-
-        result = obj.storage.result.get_any_trial_objective(trial_id=obj.trial_id)
-        error = obj.storage.error.get_any_trial_error(trial_id=obj.trial_id)
-        content = obj.storage.get_hp_dict(trial_id=obj.trial_id)
-        content['result'] = result
-
-        if error is not None:
-            content['error'] = error
-
-        create_yaml(obj.result_file_path, content)
 
     # Expire
     def after_expire(self, obj: 'Job') -> None:
@@ -400,5 +382,17 @@ class AbstractModel(object):
         )
         obj.threshold_retry = obj.expire_retry
 
-    def change_state(self, obj: 'Job'):
+    def change_state(self, obj: 'Job') -> None:
         obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state=obj.next_state)
+
+    def write_results_to_database(self, obj: 'Job') -> None:
+        trial_id = obj.trial_id
+        result = obj.workspace.get_any_trial_result(trial_id=trial_id)
+        if result is None:
+            raise Exception("Could not get result")
+
+        obj.storage.result.set_any_trial_objective(trial_id, result['result'])
+        obj.storage.timestamp.set_any_trial_start_time(trial_id, result['start_time'])
+        obj.storage.timestamp.set_any_trial_end_time(trial_id, result['end_time'])
+        if 'error' in result.keys() and result['error'] != "":
+            obj.storage.error.set_any_trial_error(trial_id, result['error'])

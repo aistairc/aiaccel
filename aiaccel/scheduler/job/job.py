@@ -1,30 +1,22 @@
 from __future__ import annotations
 
 import logging
-
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+from omegaconf.dictconfig import DictConfig
 
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
-from aiaccel import dict_lock
-from aiaccel import dict_result
-from aiaccel import dict_error
-from aiaccel.util.buffer import Buffer
-from aiaccel.util.time_tools import get_time_now_object
-from aiaccel.util.trialid import TrialId
-from aiaccel.scheduler.job.model.abci_model import AbciModel
-from aiaccel.scheduler.job.model.local_model import LocalModel
+from aiaccel.storage import Storage
+from aiaccel.util import Buffer, TrialId, get_time_now_object
+from aiaccel.workspace import Workspace
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.scheduler.abci_scheduler import AbciScheduler
-    from aiaccel.scheduler.local_scheduler import LocalScheduler
-
-from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
-
+    from aiaccel.scheduler import AbstractModel, AbstractScheduler
 
 JOB_STATES = [
     {'name': 'Init'},
@@ -73,7 +65,7 @@ JOB_STATES = [
     {'name': 'Success'},
 ]
 
-JOB_TRANSITIONS = [
+JOB_TRANSITIONS: list[dict[str, str | list[str]]] = [
     {
         'trigger': 'next',
         'source': 'Init',
@@ -193,6 +185,7 @@ JOB_TRANSITIONS = [
         'source': 'WaitResult',
         'dest': 'Result',
         'conditions': 'conditions_result',
+        'before': 'before_result',
         'after': 'after_result'
     },
     {
@@ -419,153 +412,147 @@ class Job:
         ValueError: When model is None.
 
     Attributes:
-        - config (ConfileWrapper): A configuration object.
+        - config (DictConfig): A configuration object.
 
-        - ws (Path): A path of a workspace.
+        ws (Path): A path of a workspace.
 
-        - dict_lock (Path): A directory to store lock files.
+        dict_lock (Path): A directory to store lock files.
 
-        - runner_timeout (int):
+        runner_timeout (int):
             Timeout seconds to transit the state
             from RunnerChecking to RunnerFailed.
 
-        - running_timeout (int):
+        running_timeout (int):
             Timeout seconds to transit the state
             from HpRunningChecking to HpRunningFailed.
 
-        - job_timeout (int):
+        job_timeout (int):
             Timeout seconds to transit the state
             from JobChecking to JobFailed.
 
-        - batch_job_timeout (int):
+        batch_job_timeout (int):
             Timeout seconds to transit the state
             from WaitResult to HpExpireReady.
 
-        - finished_timeout (int):
+        finished_timeout (int):
             Timeout seconds to transit the state
             from HpFinishedChecking to HpFinishedFailed.
 
-        - kill_timeout (int):
+        kill_timeout (int):
             Timeout seconds to transit the state
             from KillChecking to KillFailed.
 
-        - cancel_timeout (int):
+        cancel_timeout (int):
             Timeout seconds to transit the state
             from HpCancelChecking to HpCancelFailed.
 
-        - expire_timeout (int):
+        expire_timeout (int):
             Timeout seconds to transit the state
             from HpExpireChecking to HpExpireFailed.
 
-        - runner_retry (int):
+        runner_retry (int):
             Max retry counts to transit the state
             from RunnerFailed to RunnerFailure.
 
-        - running_retry (int):
+        running_retry (int):
             Max retry counts to transit the state
             from HpRunningFailed to HpRunningFailure.
 
-        - job_retry (int):
+        job_retry (int):
             Max retry counts to transit the state
             from JobFailed to JobFailure.
 
-        - result_retry (int):
+        result_retry (int):
             Max retry counts to transit the state
             from RunnerFailed to RunnerFailure.
 
-        - finished_retry (int):
+        finished_retry (int):
             Max retry counts to transit the state
             from HpFinishedFailed to HpFinishedFailure.
 
-        - kill_retry (int):
+        kill_retry (int):
             Max retry counts to transit the state
             from KillFailed to KillFailure.
 
-        - cancel_retry (int):
+        cancel_retry (int):
             Max retry counts to transit the state
             from HpCancelFailed to HpCancelFailure.
 
-        - expire_retry (int):
+        expire_retry (int):
             Max retry counts to transit the state
             from HpExpireFailed to HpExpireFailure.
 
-        - threshold_timeout (int):
+        threshold_timeout (int):
             A timeout threshold for each state.
             A new value is stored each state transition if necessary.
 
-        - threshold_retry (int):
+        threshold_retry (int):
             A retry threshold for each state.
             A new value is stored each state transition if necessary.
 
-        - count_retry (int):
+        count_retry (int):
             A current retry count. This is compared with threshold_retry.
-
-        - job_loop_duration (int): A sleep time each job loop.
 
         - model (Model): A model object of state transitions.
 
-        - machine (CustomMachine): A state machine object.
+        machine (CustomMachine): A state machine object.
 
-        - c (int): A loop counter.
+        c (int): A loop counter.
 
-        - scheduler (LocalScheduler | AbciScheduler):
+        scheduler (LocalScheduler | AbciScheduler):
             A reference for scheduler object.
 
-        - hp_file (Path): A hyper parameter file for this job.
+        hp_file (Path): A hyper parameter file for this job.
 
-        - trial_id (str): A unique name of this job.
+        trial_id (str): A unique name of this job.
 
-        - from_file (Path):
+        from_file (Path):
             A temporal file path to be used for each state transition.
-            For example, it's used for file moving.
+            For example, it is used for file moving.
 
-        - to_file (Path):
+        to_file (Path):
             A temporal file path to be used for each state transition.
             Usage is same with form_file.
 
-        - proc (subprocess.Popen): A running process.
+        proc (subprocess.Popen): A running process.
 
-        - th_oh (OutputHandler): An output handler for subprocess.
+        th_oh (OutputHandler): An output handler for subprocess.
     """
 
     def __init__(
         self,
-        config: Config,
-        scheduler: AbciScheduler | LocalScheduler,
-        model: AbciModel | LocalModel,
+        config: DictConfig,
+        scheduler: AbstractScheduler,
+        model: AbstractModel,
         trial_id: int
     ) -> None:
         super(Job, self).__init__()
         # === Load config file===
         self.config = config
-        self.config_path = self.config.config_path
         # === Get config parameter values ===
-        self.workspace = self.config.workspace.get()
-        self.cancel_retry = self.config.cancel_retry.get()
-        self.cancel_timeout = self.config.cancel_timeout.get()
-        self.expire_retry = self.config.expire_retry.get()
-        self.expire_timeout = self.config.expire_timeout.get()
-        self.finished_retry = self.config.finished_retry.get()
-        self.finished_timeout = self.config.finished_timeout.get()
-        self.job_loop_duration = self.config.job_loop_duration.get()
-        self.job_retry = self.config.job_retry.get()
-        self.job_timeout = self.config.job_timeout.get()
-        self.kill_retry = self.config.kill_retry.get()
-        self.kill_timeout = self.config.kill_timeout.get()
-        self.result_retry = self.config.result_retry.get()
-        self.batch_job_timeout = self.config.batch_job_timeout.get()
-        self.runner_retry = self.config.runner_retry.get()
-        self.runner_timeout = self.config.runner_timeout.get()
-        self.running_retry = self.config.running_retry.get()
-        self.running_timeout = self.config.running_timeout.get()
-        self.resource_type = self.config.resource_type.get()
+        self.cancel_retry = self.config.job_setting.cancel_retry
+        self.cancel_timeout = self.config.job_setting.cancel_timeout
+        self.expire_retry = self.config.job_setting.expire_retry
+        self.expire_timeout = self.config.job_setting.expire_timeout
+        self.finished_retry = self.config.job_setting.finished_retry
+        self.finished_timeout = self.config.job_setting.finished_timeout
+        self.job_retry = self.config.job_setting.job_retry
+        self.job_timeout = self.config.job_setting.job_timeout
+        self.kill_retry = self.config.job_setting.kill_retry
+        self.kill_timeout = self.config.job_setting.kill_timeout
+        self.result_retry = self.config.job_setting.result_retry
+        self.batch_job_timeout = self.config.generic.batch_job_timeout
+        self.runner_retry = self.config.job_setting.runner_retry
+        self.runner_timeout = self.config.job_setting.runner_timeout
+        self.running_retry = self.config.job_setting.running_retry
+        self.running_timeout = self.config.job_setting.running_timeout
+        self.resource_type = self.config.resource.type.value
 
-        self.threshold_timeout = None
+        self.threshold_timeout: datetime | None = None
         self.threshold_retry = None
         self.count_retry = 0
 
-        self.ws = Path(self.workspace).resolve()
-        self.dict_lock = self.ws / dict_lock
+        self.workspace = Workspace(self.config.generic.workspace)
 
         self.scheduler = scheduler
         self.model = model
@@ -586,19 +573,18 @@ class Job:
             ordered_transitions=False
         )
         self.loop_count = 0
-
-        self.config_path = str(self.config_path)
+        self.scheduler = scheduler
         self.trial_id = trial_id
-        self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
-        self.from_file = None
-        self.to_file = None
-        self.next_state = None
-        self.proc = None
-        self.th_oh = None
+        self.trial_id_str = TrialId(self.config.config_path).zero_padding_any_trial_id(self.trial_id)
+        self.from_file: Any = None
+        self.to_file: Any = None
+        self.next_state: Any = None
+        self.proc: Any = None
+        self.th_oh: Any = None
         self.stop_flag = False
-        self.storage = Storage(self.ws)
+        self.storage = Storage(self.workspace.path)
         self.content = self.storage.get_hp_dict(self.trial_id)
-        self.result_file_path = self.ws / dict_result / (self.trial_id_str + '.hp')
+        self.result_file_path = self.workspace.result / (self.trial_id_str + '.hp')
         self.expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt["trigger"] == "expire"]
 
         self.buff = Buffer(['state.name'])
@@ -606,7 +592,7 @@ class Job:
 
         self.logger = logging.getLogger('root.scheduler.job')
 
-        self.command_error_output = self.ws / dict_error / f'{self.trial_id}.txt'
+        self.command_error_output = self.workspace.error / f'{self.trial_id}.txt'
 
     def get_machine(self) -> CustomMachine:
         """Get a state machine object.
@@ -616,7 +602,7 @@ class Job:
         """
         return self.machine
 
-    def get_model(self) -> AbciModel | LocalModel:
+    def get_model(self) -> AbstractModel:
         """Get a state transition model object.
 
         Returns:
@@ -624,7 +610,7 @@ class Job:
         """
         return self.model
 
-    def get_state(self) -> Machine:
+    def get_state(self) -> Any:
         """Get a current state.
 
         Returns:
@@ -679,6 +665,17 @@ class Job:
 
         return True
 
+    def get_result_file_path(self) -> Path:
+        """Get a path to the result file.
+
+        Args:
+            trial_id (int): Trial Id.
+
+        Returns:
+            PosixPath: A Path object which points to the result file.
+        """
+        return self.workspace.get_any_result_file_path(trial_id=self.trial_id)
+
     def main(self) -> None:
         """Thread.run method.
 
@@ -695,15 +692,21 @@ class Job:
         ):
             self.storage.jobstate.set_any_trial_jobstate(trial_id=self.trial_id, state=state.name)
 
-        if state.name == 'Success' or 'Failure' in state.name:
+        if state.name.lower() == 'success':
             return
 
-        now = get_time_now_object()
+        if 'failure' in state.name.lower():
+            if self.storage.error.get_any_trial_error(trial_id=self.trial_id) is None:
+                self.storage.error.set_any_trial_error(
+                    trial_id=self.trial_id,
+                    error_message=state.name
+                )
+            return
 
         if self.is_timeout():
             self.logger.debug(
                 f'Timeout expire state: {state.name}, '
-                f'now: {now}, '
+                f'now: {get_time_now_object()}, '
                 f'timeout: {self.threshold_timeout}'
             )
             self.model.expire(self)
@@ -716,7 +719,7 @@ class Job:
             )
             self.model.expire(self)
 
-        elif state.name != 'Scheduling':
+        elif state.name.lower() != 'scheduling':
             self.model.next(self)
 
         self.logger.debug(

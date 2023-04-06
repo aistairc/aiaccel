@@ -1,156 +1,198 @@
 from __future__ import annotations
-import copy
-import os
-import sys
-from abc import ABCMeta, abstractmethod
-from logging import StreamHandler, getLogger
+
+from dataclasses import dataclass
+from enum import Enum
+from importlib.resources import read_text
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Optional, Union
 
-import confile
-
-from aiaccel.common import search_algorithm_nelder_mead
-
-NoneType = type(None)
-
-logger = getLogger(__name__)
-logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
-logger.addHandler(StreamHandler())
+from omegaconf import OmegaConf
+from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
+from omegaconf.base import Container
 
 
-class BaseConfig(metaclass=ABCMeta):
-    """An interface for all config classes.
+class ResourceType(Enum):
+    abci: str = 'abci'
+    local: str = 'local'
+    python_local: str = 'python_local'
 
-    Fork by confile: https://github.com/777nancy/confile
+    @classmethod
+    def _missing_(cls, value: Any) -> Any | None:
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
+
+
+class OptimizerDirection(Enum):
+    minimize: str = 'minimize'
+    maximize: str = 'maximize'
+
+    @classmethod
+    def _missing_(cls, value: Any) -> Any | None:
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
+
+
+@dataclass
+class GenericConfig:
+    workspace: str
+    job_command: str
+    python_file: str
+    function: str
+    batch_job_timeout: int
+    sleep_time: Union[float, int]
+
+
+@dataclass
+class ResourceConifig:
+    type: ResourceType
+    num_node: int
+
+
+@dataclass
+class AbciConifig:
+    group: str
+    job_script_preamble: str
+    job_execution_options: Optional[str]
+    runner_search_pattern: Optional[str]
+
+
+@dataclass
+class ParameterConfig:
+    name: str
+    type: str
+    lower: Union[float, int]
+    upper: Union[float, int]
+    # initial: Optional[Union[None, float, int, str, List[Union[float, int]]]]  # Unions of containers are not supported
+    initial: Optional[Any]
+    choices: Optional[List[Union[None, float, int, str]]]
+    sequence: Optional[List[Union[None, float, int, str]]]
+    q: Optional[Union[float, int]]
+    log: Optional[bool]
+    base: Optional[int]
+    step: Optional[Union[int, float]]
+    num_numeric_choices: Optional[int]
+
+
+@dataclass
+class OptimizeConifig:
+    search_algorithm: str
+    goal: List[OptimizerDirection]
+    trial_number: int
+    rand_seed: int
+    sobol_scramble: bool
+    grid_accept_small_trial_number: bool
+    grid_sampling_method: str
+    parameters: List[ParameterConfig]
+
+
+@dataclass
+class JobConfig:
+    cancel_retry: int
+    cancel_timeout: int
+    expire_retry: int
+    expire_timeout: int
+    finished_retry: int
+    finished_timeout: int
+    job_retry: int
+    job_timeout: int
+    kill_retry: int
+    kill_timeout: int
+    result_retry: int
+    runner_retry: int
+    runner_timeout: int
+    running_retry: int
+    running_timeout: int
+    init_fail_count: int
+    name_length: int
+    random_scheduling: bool
+
+
+@dataclass
+class LoggingItemConifig:
+    master: str
+    optimizer: str
+    scheduler: str
+
+
+@dataclass
+class LoggerConfig:
+    file: LoggingItemConifig
+    log_level: LoggingItemConifig
+    stream_level: LoggingItemConifig
+
+
+@dataclass
+class ConditionConfig:
+    loop: int
+    minimum: Union[float, int]
+    maximum: Union[float, int]
+    passed: Optional[bool]
+    best: Optional[Union[float, int]]
+
+
+@dataclass
+class VerificationConfig:
+    is_verified: bool
+    condition: List[ConditionConfig]
+
+
+@dataclass
+class Config:
+    generic: GenericConfig
+    resource: ResourceConifig
+    ABCI: AbciConifig
+    optimize: OptimizeConifig
+    job_setting: JobConfig
+    logger: Optional[LoggerConfig]
+    verification: Optional[VerificationConfig]
+    clean: Optional[bool]
+    resume: Optional[Union[None, int]]
+    config_path: Optional[Union[None, Path, str]]
+
+
+def set_structs_false(conf: Container) -> None:
+    OmegaConf.set_struct(conf, False)
+    if hasattr(conf, "__iter__"):
+        for item in conf:
+            if isinstance(conf.__dict__["_content"], dict):
+                set_structs_false(conf.__dict__["_content"][item])
+
+
+def load_config(config_path: Path | str) -> Union[ListConfig, DictConfig]:
     """
-
-    @abstractmethod
-    def get_property(self, key, *keys):
-        pass
-
-    @abstractmethod
-    def to_dict(self):
-        pass
-
-
-class JsonOrYamlObjectConfig(BaseConfig):
-    """A wrapper for confile to support json, yaml object.
-
-    Fork by confile: https://github.com/777nancy/confile
-
-    Args:
-        config (dict): A json or yaml object
-        file_type (str): 'json_object' or 'yaml_object'.
-    """
-
-    def __init__(self, config: dict, file_type: str) -> None:
-        if file_type in ['json_object', 'yaml_object']:
-            self._config_dict = config
-        else:
-            raise TypeError(f'Unknown file type {file_type}')
-
-    def get_property(self, key: str, *keys: str) -> str | list | dict | None:
-        """Get a property for specified keys.
-
-        Args:
-            key (str): A key to get a property.
-            *keys (str): Keys to get a property.
-
-        Returns:
-            str | list | dict | None: A property for the keys.
-        """
-        if isinstance(self._config_dict, list):
-            return None
-
-        sub_config_dict = self._config_dict.get(key)
-
-        if keys and sub_config_dict is not None:
-            for k in keys:
-                if type(sub_config_dict) is not dict or\
-                        sub_config_dict is None:
-                    return None
-                value = sub_config_dict.get(k)
-                sub_config_dict = value
-            return sub_config_dict
-        else:
-            return sub_config_dict
-
-    def to_dict(self) -> dict:
-        """
-        Convert the configuration to a dictionary object.
-
-        Returns:
-            dict: The dictionary object of the configuration.
-        """
-        return self._config_dict
-
-
-class ConfileWrapper(object):
-    """
-    A wrapper class for confile library.
-
-    Thins wrapper class supports to load a configuration file in JSON object,
-    JSON file and YAML format. It provides a simple method 'get' to get a
-    property for the specified keys.
-
-    Args:
-        config (Any): A file path to configuration file.
-        config_type (str): A file path to default configuration file.
-    """
-
-    def __init__(self, config: Any, config_type: str) -> None:
-        config_types = [
-            'json_file',
-            'yaml_file',
-            'json_object',
-            'yaml_object'
-        ]
-        if config_type not in config_types:
-            raise TypeError(f'Unknown config type: {config_type}')
-
-        if config_type in ['json_file', 'yaml_file']:
-            self.config = confile.read_config(str(config))
-        elif config_type in ['json_object', 'yaml_object']:
-            self.config = JsonOrYamlObjectConfig(config, config_type)
-
-    def get(self, key: str, *keys: str) -> str | list | dict | None:
-        """Get a property with specified keys.
-
-        Args:
-            key (str): A key for the property
-            *keys (list): Nested eys for the property
-
-        Returns:
-            str | list | dict | None: A property for the specified keys.
-        """
-        p = self.config.get_property(key, *keys)
-        return p
-
-
-def load_config(config_path: str) -> ConfileWrapper:
-    """
-    Load any configuration files, return the ConfileWrapper object.
+    Load any configuration files, return the DictConfig object.
     Args:
         config_path (str): A path to a configuration file.
 
     Returns:
-        ConfileWrapper: A wrapper object of the configuration.
+        config: DictConfig object
     """
     path = Path(config_path).resolve()
 
     if not path.exists():
-        raise FileNotFoundError(f'config file cannot be found: {config_path}')
+        raise ValueError("Config is not found.")
 
-    file_type = path.suffix[1:].lower()
+    base = OmegaConf.structured(Config)
+    default = OmegaConf.create(read_text('aiaccel', 'default_config.yaml'))
+    customize = OmegaConf.load(path)
+    customize.config_path = str(path)
+    if not isinstance(customize.optimize.goal, ListConfig):
+        customize.optimize.goal = ListConfig([customize.optimize.goal])
 
-    if file_type == 'json':
-        return ConfileWrapper(config_path, 'json_file')
-    elif file_type in ['yml', 'yaml']:
-        return ConfileWrapper(config_path, 'yaml_file')
-    else:
-        raise TypeError(f'Unknown file type {file_type}')
+    config: Union[ListConfig, DictConfig] = OmegaConf.merge(base, default)
+    set_structs_false(config)
+    config = OmegaConf.merge(config, customize)
 
+    return config
 
+<<<<<<< HEAD
 class ConfigEntry:
     """ A class for defining values in a configuration file \
         or for holding read values.
@@ -324,24 +366,16 @@ _DEFAULT_SOBOL_SCRAMBLE = True
 _DEFAULT_PYTHON_FILE = ""
 _DEFAULT_FUNCTION = ""
 _DEFAULT_IS_IGNORE_WARNING = True
+=======
+>>>>>>> 72450882f5821b5eec9e90cf5401df1d623b8443
 
-
-class Config:
-    """Defines the configuration of a configuration file.
+def is_multi_objective(config: DictConfig) -> bool:
+    """Is the multi-objective option set in the configuration.
 
     Args:
-        config_path (str | Path): A path of configuration file.
-        warn (bool, optional): A flag of print a warning or not. Defaults to
-            False.
-        format_check (bool, optional): A flag of do tha check format or not.
-            Defaults to None.
+        config (Config): A configuration object.
 
-    Attributes:
-        config_path (Path): Path to the configuration file.
-        config (ConfileWrapper):
-        workspace (ConfigEntry):
-    """
-
+<<<<<<< HEAD
     def __init__(
         self,
         config_path: str | Path,
@@ -764,3 +798,9 @@ class Config:
             group="verification",
             keys=("condition")
         )
+=======
+    Returns:
+        bool: Is the multi--objective option set in the configuration or not.
+    """
+    return isinstance(config.optimize.goal, ListConfig) and len(config.optimize.goal) > 1
+>>>>>>> 72450882f5821b5eec9e90cf5401df1d623b8443

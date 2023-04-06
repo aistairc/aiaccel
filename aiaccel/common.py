@@ -1,7 +1,9 @@
 """Common variables and methods.
 
-    * Import this as follows:
-    * import aiaccel
+Example: ::
+
+    from aiaccel.common import alive_master
+
 """
 
 alive_master = 'master.yml'
@@ -65,6 +67,7 @@ module_type_scheduler = 'scheduler'
 resource_type_local = 'local'
 resource_type_abci = 'abci'
 
+search_algorithm_budget_specified_grid = 'aiaccel.optimizer.BudgetSpecifiedGridOptimizer'
 search_algorithm_grid = 'aiaccel.optimizer.GridOptimizer'
 search_algorithm_nelder_mead = 'aiaccel.optimizer.NelderMeadOptimizer'
 search_algorithm_random = 'aiaccel.optimizer.RandomOptimizer'

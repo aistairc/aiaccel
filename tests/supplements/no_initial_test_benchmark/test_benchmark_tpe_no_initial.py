@@ -1,5 +1,3 @@
-
-
 from tests.supplements.no_initial_test import NoInitialTest
 
 

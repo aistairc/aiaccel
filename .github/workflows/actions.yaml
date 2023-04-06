@@ -12,10 +12,10 @@ jobs:
         python-version: ['3.8']
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Up ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -43,6 +43,7 @@ jobs:
           pytest -v tests/integration/sphere/test_sphere_sobol_int.py
           pytest -v tests/integration/sphere/test_sphere_tpe.py
           pytest -v tests/integration/sphere/test_sphere_nelder_mead.py
+          pytest -v tests/integration/sphere/test_sphere_motpe.py
 
       - name: Resume Test
         run: |
@@ -51,6 +52,7 @@ jobs:
           pytest -v tests/resumption/sphere/test_sphere_sobol_resumption.py
           pytest -v tests/resumption/sphere/test_sphere_tpe_resumption.py
           pytest -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
+          pytest -v tests/resumption/sphere/test_sphere_motpe_resumption.py
 
       - name: Supplemental Test
         run: |
@@ -59,3 +61,5 @@ jobs:
           pytest -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_tpe_resumption.py
           pytest -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_nelder_mead_resumption.py
           pytest -v tests/supplements/random_generation_test_benchmark/test_benchmark_random_generation.py
+          pytest -v tests/supplements/additional_grid_test/test_benchmark_grid.py
+          pytest -v tests/supplements/additional_budget_specified_grid_test_benchmark/test_benchmark_budget_specified_grid.py

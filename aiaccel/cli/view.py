@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Any, Union
 
 from numpy import maximum
 
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
+
+from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
 
@@ -20,9 +26,8 @@ class Viewer:
         storage (Storage): Storage object.
     """
 
-    def __init__(self, config: Config) -> None:
-        self.config_path = config.config_path
-        self.workspace = Path(config.workspace.get()).resolve()
+    def __init__(self, config: Union[ListConfig, DictConfig]) -> None:
+        self.workspace = Path(config.generic.workspace).resolve()
         self.storage = Storage(self.workspace)
 
     def view(self) -> None:
@@ -64,7 +69,7 @@ class Viewer:
                 }
             )
 
-        max_column_width = []
+        max_column_width: list[Any] = []
         for info in infos:
             width = [len(info[key]) + len_margin for key in list(info.keys())]
             header_width = [len(key) + len_margin for key in list(info.keys())]
@@ -109,8 +114,8 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
-    config = Config(args.config)
-    workspace = config.workspace.get()
+    config: Union[ListConfig, DictConfig] = load_config(args.config)
+    workspace = config.generic.workspace
 
     ws = Workspace(workspace)
     if ws.exists() is False:

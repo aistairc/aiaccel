@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import Any
+
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage.abstract import Abstract
-from aiaccel.storage.model import ResultTable
-from aiaccel.util.retry import retry
+from aiaccel.storage import Abstract, ResultTable
+from aiaccel.util import retry
 
 
 class Result(Abstract):
@@ -47,7 +47,7 @@ class Result(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_objective(self, trial_id: int) -> int | float | None:
+    def get_any_trial_objective(self, trial_id: int) -> list[int | float | str] | None:
         """Obtain the results of an arbitrary trial.
 
         Args:
@@ -70,11 +70,11 @@ class Result(Abstract):
         return data.objective
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_all_result(self) -> list:
+    def get_all_result(self) -> dict[int, list[Any]]:
         """Get all results
 
         Returns:
-            list
+            dict[int, list[Any]]: trial_id and result values
         """
         with self.create_session() as session:
             data = (
@@ -82,10 +82,10 @@ class Result(Abstract):
                 .with_for_update(read=True)
             )
 
-        # return [d.objective for d in data]
-        return data
+        return {d.trial_id: d.objective for d in data}
+        # return data
 
-    def get_objectives(self) -> list:
+    def get_objectives(self) -> list[Any]:
         """Get all results in list.
 
         Returns:
@@ -93,37 +93,42 @@ class Result(Abstract):
         """
         data = self.get_all_result()
 
-        return [d.objective for d in data]
+        return [data[trial_id] for trial_id in data.keys()]
 
-    def get_bests(self, goal: str) -> list:
+    def get_bests(self, goals: list[str]) -> list[Any]:
         """Obtains the sorted result.
 
         Returns:
             list: result values
         """
-        goal = goal.lower()
+        bests = []
+
         objectives = self.get_objectives()
-        best_values = []
 
-        if goal == "maximize":
-            best_value = float("-inf")
-            for objective in objectives:
-                if best_value < objective:
-                    best_value = objective
-                best_values.append(best_value)
-        elif goal == "minimize":
-            best_value = float("inf")
-            for objective in objectives:
-                if best_value > objective:
-                    best_value = objective
-                best_values.append(best_value)
-        else:
-            return []
+        for i in range(len(goals)):
+            best_values = []
 
-        return best_values
+            if goals[i].lower() == "maximize":
+                best_value = float("-inf")
+                for objective in objectives:
+                    if best_value < objective[i]:
+                        best_value = objective[i]
+                    best_values.append(best_value)
+            elif goals[i].lower() == "minimize":
+                best_value = float("inf")
+                for objective in objectives:
+                    if best_value > objective[i]:
+                        best_value = objective[i]
+                    best_values.append(best_value)
+            else:
+                continue
+
+            bests.append(best_values)
+
+        return bests
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_result_trial_id_list(self) -> list | None:
+    def get_result_trial_id_list(self) -> list[Any] | None:
         """Obtains the sorted result.
 
         Returns:

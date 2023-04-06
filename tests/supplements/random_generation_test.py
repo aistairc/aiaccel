@@ -3,9 +3,9 @@
 import subprocess
 from pathlib import Path
 
-from aiaccel.config import Config
-from aiaccel.storage.storage import Storage
+from aiaccel.config import load_config
 
+from aiaccel.storage import Storage
 from tests.base_test import BaseTest
 
 
@@ -19,10 +19,10 @@ class RandomGenerationTest(BaseTest):
         # random execution
         config_file = test_data_dir.joinpath('config_random.yaml')
         config_file = create_tmp_config(config_file)
-        config = Config(config_file)
+        config = load_config(config_file)
 
         with self.create_main(python_file):
-            storage = Storage(ws=Path(config.workspace.get()))
+            storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
         final_result_random = self.get_final_result(storage)
         print('random', final_result_random)
@@ -30,10 +30,10 @@ class RandomGenerationTest(BaseTest):
         # tpe execution
         config_file = test_data_dir.joinpath('config_tpe.yaml')
         config_file = create_tmp_config(config_file)
-        config = Config(config_file)
+        config = load_config(config_file)
 
         with self.create_main(python_file):
-            storage = Storage(ws=Path(config.workspace.get()))
+            storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
         final_result_tpe = self.get_final_result(storage)
         print('tpe', final_result_tpe)
@@ -43,10 +43,10 @@ class RandomGenerationTest(BaseTest):
         # nelder-mead execution
         config_file = test_data_dir.joinpath('config_nelder-mead.yaml')
         config_file = create_tmp_config(config_file)
-        config = Config(config_file)
+        config = load_config(config_file)
 
         with self.create_main(python_file):
-            storage = Storage(ws=Path(config.workspace.get()))
+            storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
         final_result_neldermead = self.get_final_result(storage)
         print('nelder-mead', final_result_neldermead)
@@ -55,4 +55,4 @@ class RandomGenerationTest(BaseTest):
 
     def get_final_result(self, storage):
         data = storage.result.get_all_result()
-        return [d.objective for d in data]
+        return [data[trial_id] for trial_id in data.keys()]

@@ -30,7 +30,7 @@ msgid "aiaccel.storage.abstract module"
 msgstr ""
 
 #: aiaccel.storage.abstract.Abstract:1 aiaccel.storage.storage.Storage:1
-#: aiaccel.storage.variable.Serializer:1 of
+#: aiaccel.storage.variable.Serializer:1 of sqlalchemy.orm.decl_api.Base:1
 msgid "ベースクラス: :py:class:`object`"
 msgstr ""
 
@@ -55,12 +55,10 @@ msgstr ""
 
 #: aiaccel.storage.error.Error.all_delete
 #: aiaccel.storage.error.Error.delete_any_trial_error
-#: aiaccel.storage.error.Error.get_any_trial_error
 #: aiaccel.storage.error.Error.get_error_trial_id
 #: aiaccel.storage.error.Error.set_any_trial_error
 #: aiaccel.storage.hp.Hp.all_delete
 #: aiaccel.storage.hp.Hp.delete_any_trial_params
-#: aiaccel.storage.hp.Hp.get_any_trial_params
 #: aiaccel.storage.hp.Hp.set_any_trial_param
 #: aiaccel.storage.jobstate.JobState.delete_any_trial_jobstate
 #: aiaccel.storage.jobstate.JobState.get_any_trial_jobstate
@@ -68,9 +66,7 @@ msgstr ""
 #: aiaccel.storage.jobstate.JobState.set_any_trial_jobstate
 #: aiaccel.storage.jobstate.JobState.set_any_trial_jobstates
 #: aiaccel.storage.result.Result.all_delete
-#: aiaccel.storage.result.Result.delete_any_trial_objective
 #: aiaccel.storage.result.Result.get_all_result
-#: aiaccel.storage.result.Result.get_any_trial_objective
 #: aiaccel.storage.result.Result.get_bests
 #: aiaccel.storage.result.Result.get_objectives
 #: aiaccel.storage.result.Result.get_result_trial_id_list
@@ -115,7 +111,6 @@ msgstr ""
 #: aiaccel.storage.jobstate.JobState.set_any_trial_jobstate:8
 #: aiaccel.storage.jobstate.JobState.set_any_trial_jobstates:8
 #: aiaccel.storage.result.Result.all_delete:3
-#: aiaccel.storage.result.Result.delete_any_trial_objective:1
 #: aiaccel.storage.result.Result.set_any_trial_objective:8
 #: aiaccel.storage.timestamp.TimeStamp.all_delete:3
 #: aiaccel.storage.timestamp.TimeStamp.set_any_trial_end_time:8
@@ -138,6 +133,7 @@ msgstr ""
 #: aiaccel.storage.jobstate.JobState.is_failure
 #: aiaccel.storage.jobstate.JobState.set_any_trial_jobstate
 #: aiaccel.storage.jobstate.JobState.set_any_trial_jobstates
+#: aiaccel.storage.result.Result.delete_any_trial_objective
 #: aiaccel.storage.result.Result.get_any_trial_objective
 #: aiaccel.storage.result.Result.set_any_trial_objective
 #: aiaccel.storage.storage.Storage.get_best_trial
@@ -180,20 +176,11 @@ msgstr ""
 msgid "Any trial id"
 msgstr ""
 
-#: aiaccel.storage.error.Error.get_any_trial_error:6 of
-msgid "str | None"
-msgstr ""
-
-#: aiaccel.storage.error.Error.get_error_trial_id:1 of
-msgid "Obtain a list of trial ids in which an error occurred."
-msgstr ""
-
-#: aiaccel.storage.error.Error.get_error_trial_id:3 of
-msgid "trial id list"
-msgstr ""
-
+#: aiaccel.storage.error.Error.get_any_trial_error
 #: aiaccel.storage.error.Error.get_error_trial_id
+#: aiaccel.storage.hp.Hp.get_any_trial_params
 #: aiaccel.storage.jobstate.JobState.get_any_trial_jobstate
+#: aiaccel.storage.result.Result.get_any_trial_objective
 #: aiaccel.storage.result.Result.get_bests
 #: aiaccel.storage.result.Result.get_objectives
 #: aiaccel.storage.result.Result.get_result_trial_id_list
@@ -209,8 +196,18 @@ msgstr ""
 #: aiaccel.storage.storage.Storage.get_running
 #: aiaccel.storage.timestamp.TimeStamp.get_any_trial_end_time
 #: aiaccel.storage.timestamp.TimeStamp.get_any_trial_start_time
+#: aiaccel.storage.trial.Trial.get_all_trial_id
+#: aiaccel.storage.trial.Trial.get_any_state_list
 #: aiaccel.storage.trial.Trial.get_any_trial_state of
 msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.storage.error.Error.get_error_trial_id:1 of
+msgid "Obtain a list of trial ids in which an error occurred."
+msgstr ""
+
+#: aiaccel.storage.error.Error.get_error_trial_id:3 of
+msgid "trial id list"
 msgstr ""
 
 #: aiaccel.storage.error.Error.set_any_trial_error:1 of
@@ -231,10 +228,6 @@ msgstr ""
 
 #: aiaccel.storage.hp.Hp.get_any_trial_params:3 of
 msgid "Any trial id."
-msgstr ""
-
-#: aiaccel.storage.hp.Hp.get_any_trial_params:6 of
-msgid "list[HpTable]"
 msgstr ""
 
 #: aiaccel.storage.hp.Hp.set_any_trial_param:1 of
@@ -305,13 +298,25 @@ msgstr ""
 msgid "aiaccel.storage.result module"
 msgstr ""
 
+#: aiaccel.storage.result.Result.delete_any_trial_objective:1 of
+msgid "_summary_"
+msgstr ""
+
+#: aiaccel.storage.result.Result.delete_any_trial_objective:3
+#: aiaccel.storage.result.Result.delete_any_trial_objective:6 of
+msgid "_description_"
+msgstr ""
+
+#: aiaccel.storage.result.Result.delete_any_trial_objective of
+msgid "例外"
+msgstr ""
+
 #: aiaccel.storage.result.Result.get_all_result:1 of
 msgid "Get all results"
 msgstr ""
 
-#: aiaccel.storage.result.Result.get_all_result:3
-#: aiaccel.storage.result.Result.get_any_trial_objective:6 of
-msgid "Any"
+#: aiaccel.storage.result.Result.get_all_result:3 of
+msgid "list"
 msgstr ""
 
 #: aiaccel.storage.result.Result.get_any_trial_objective:1 of
@@ -337,10 +342,7 @@ msgstr ""
 msgid "Set any trial result value."
 msgstr ""
 
-#: aiaccel.storage.result.Result.set_any_trial_objective:5
-#: aiaccel.storage.trial.Trial.get_any_state_list:3
-#: aiaccel.storage.trial.Trial.get_any_trial_state:6
-#: aiaccel.storage.trial.Trial.set_any_trial_state:5 of
+#: aiaccel.storage.result.Result.set_any_trial_objective:5 of
 msgid "ready, running, finished"
 msgstr ""
 
@@ -493,16 +495,22 @@ msgstr ""
 msgid "aiaccel.storage.trial module"
 msgstr ""
 
-#: aiaccel.storage.trial.Trial.get_all_trial_id:1
-#: aiaccel.storage.trial.Trial.get_any_state_list:6
-#: aiaccel.storage.trial.Trial.get_finished:3
-#: aiaccel.storage.trial.Trial.get_ready:3
-#: aiaccel.storage.trial.Trial.get_running:3 of
-msgid "trial ids(list[int])"
+#: aiaccel.storage.trial.Trial.get_all_trial_id:1 of
+msgid "A list of trial ids."
 msgstr ""
 
 #: aiaccel.storage.trial.Trial.get_any_state_list:1 of
 msgid "Get any trials numbers."
+msgstr ""
+
+#: aiaccel.storage.trial.Trial.get_any_state_list:3
+#: aiaccel.storage.trial.Trial.get_any_trial_state:6
+#: aiaccel.storage.trial.Trial.set_any_trial_state:5 of
+msgid "Trial state."
+msgstr ""
+
+#: aiaccel.storage.trial.Trial.get_any_state_list:6 of
+msgid "A list of trial ids. None if no trials match the specified state."
 msgstr ""
 
 #: aiaccel.storage.trial.Trial.get_any_trial_state:1 of
@@ -511,6 +519,12 @@ msgstr ""
 
 #: aiaccel.storage.trial.Trial.get_finished:1 of
 msgid "Get the trial id whose status is finished."
+msgstr ""
+
+#: aiaccel.storage.trial.Trial.get_finished:3
+#: aiaccel.storage.trial.Trial.get_ready:3
+#: aiaccel.storage.trial.Trial.get_running:3 of
+msgid "trial ids(list[int])"
 msgstr ""
 
 #: aiaccel.storage.trial.Trial.get_ready:1 of
@@ -537,6 +551,25 @@ msgstr ""
 msgid "Module contents"
 msgstr ""
 
+#: of sqlalchemy.orm.decl_api.Base:1
+msgid "The base class of the class hierarchy."
+msgstr ""
+
+#: of sqlalchemy.orm.decl_api.Base:3
+msgid ""
+"When called, it accepts no arguments and returns a new featureless "
+"instance that has no instance attributes and cannot be given any."
+msgstr ""
+
 #~ msgid "TODO: Refuctoring"
+#~ msgstr ""
+
+#~ msgid "str | None"
+#~ msgstr ""
+
+#~ msgid "list[HpTable]"
+#~ msgstr ""
+
+#~ msgid "Any"
 #~ msgstr ""
 

@@ -1,17 +1,12 @@
-#from ConfigSpace.read_and_write import json as configspace_json
 import copy
-import json
-from re import T
+from unittest.mock import patch
 
-import aiaccel
 import numpy as np
 import pytest
-from aiaccel.optimizer._nelder_mead import NelderMead
-from aiaccel.parameter import load_parameter
-from aiaccel.storage.storage import Storage
-from aiaccel.util.filesystem import load_yaml
 
-from unittest.mock import patch
+from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.optimizer import NelderMead
+from aiaccel.storage import Storage
 from tests.base_test import BaseTest
 
 
@@ -20,14 +15,13 @@ class TestNelderMead(BaseTest):
     @pytest.fixture(autouse=True)
     def setup_nelder_mead(self, load_test_config):
         self.config = load_test_config()
-        # params = load_parameter(config.get('optimize', 'parameters'))
-        params = load_parameter(self.config.hyperparameters.get())
+        params = HyperParameterConfiguration(self.config.optimize.parameters)
         rng = np.random.RandomState(0)
-        nm_coef = NelderMead(
-            params.get_parameter_list(),
-            coef={"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5},
-            rng=rng
-        )
+        # nm_coef = NelderMead(
+        #     params.get_parameter_list(),
+        #     coef={"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5},
+        #     rng=rng
+        # )
         self.nm = NelderMead(params.get_parameter_list(), rng=rng)
         yield
         self.nm = None
@@ -36,34 +30,34 @@ class TestNelderMead(BaseTest):
         assert type(self.nm) is NelderMead
 
     def test__create_initial_values(self):
-        params = load_parameter(self.config.hyperparameters.get())
+        params = HyperParameterConfiguration(self.config.optimize.parameters)
         hps = params.get_parameter_list()
         initial_parameters = [
-            {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x3', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x4', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x5', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x6', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x7', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x8', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x9', 'type': 'FLOAT', 'value': 1},
-            {'parameter_name': 'x10', 'type': 'FLOAT', 'value': 1},
+            {'parameter_name': 'x1', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x3', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x4', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x5', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x6', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x7', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x8', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x9', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x10', 'type': 'uniform_float', 'value': 1},
         ]
         rng = np.random.RandomState(0)
         NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
 
         initial_parameters = [
-            {'parameter_name': 'x1', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x2', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x3', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x4', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x5', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x6', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x7', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x8', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x9', 'type': 'CATEGORICAL', 'value': '1'},
-            {'parameter_name': 'x10', 'type': 'CATEGORICAL', 'value': '1'},
+            {'parameter_name': 'x1', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x2', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x3', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x4', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x5', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x6', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x7', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x8', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x9', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x10', 'type': 'categorical', 'value': '1'},
         ]
         with pytest.raises(TypeError):
             NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
@@ -103,7 +97,7 @@ class TestNelderMead(BaseTest):
                 )
         storage.trial.set_any_trial_state(trial_id=1, state='finished')
         #
-        # c = load_yaml(work_dir.joinpath(aiaccel.dict_hp_finished, '001.hp'))
+        # c = load_yaml(work_dir.joinpath(dict_hp_finished, '001.hp'))
         #
         print(storage.get_finished())
         print(storage.result.get_all_result())
@@ -352,16 +346,16 @@ class TestNelderMead(BaseTest):
 def test_nelder_mead_parameters(load_test_config):
     debug = False
     config = load_test_config()
-    params = load_parameter(
+    params = HyperParameterConfiguration(
         # config.get('optimize', 'parameters')
-        config.hyperparameters.get()
+        config.optimize.parameters
     )
     initial_parameters = None
     rng = np.random.RandomState(0)
     nelder_mead = NelderMead(
         params.get_parameter_list(), initial_parameters=initial_parameters,
         iteration=100,
-        maximize=(config.goal.get().lower() == 'maximize'),
+        maximize=(config.optimize.goal[0].value.lower() == 'maximize'),
         rng=rng
     )
 
