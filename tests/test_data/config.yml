@@ -1,33 +1,27 @@
 generic:
-  project_name: "sphere"
-  debug: True
-  name_length: 32
-  init_fail_count: 50
-  randseed: 1
+  workspace: "./hoge"
 logger:
-  master_logfile: 'master.log'
-  master_loglevel: 'DEBUG'
-  optimizer_logfile: 'optimizer.log'
-  optimizer_loglevel: 'DEBUG'
-  scheduler_logfile: 'scheduler.log'
-  scheduler_loglevel: 'DEBUG'
-wrapper:
-master:
-  sleep_time_master: 1
-optimizer:
-  #search_algorithm: "Random"
-  #search_algorithm: "Grid"
+  file:
+    master: "master.log"
+    optimizer: "optimizer.log"
+    scheduler: "scheduler.log"
+  log_level:
+    master: "DEBUG"
+    optimizer: "DEBUG"
+    scheduler: "DEBUG"
+  stream_level:
+    master: "DEBUG"
+    optimizer: "DEBUG"
+    scheduler: "DEBUG"
+optimize:
+  goal: "minimize"
+  trial_number: 10
   search_algorithm: 'aiaccel.optimizer.NelderMeadOptimizer'
-  #search_algorithm: "Sobol"
-  #search_algorithm: "Tpe"
-  sleep_time_optimizer: 3
-scheduler:
-  sleep_time_scheduler: 1
-  initial_timeout: 10
+job_setting:
+  name_length: 32
   runner_timeout: 10
   running_timeout: 10
   job_timeout: 60
-  result_timeout: 600
   finished_timeout: 10
   kill_timeout: 30
   cancel_timeout: 10
@@ -45,13 +39,8 @@ resource:
   type: "local"
   num_node: 3
   # ABCI settings
-  #type: "ABCI"
+  #type: "abci"
   # num_node is the number how many ready files are allocated at a moment.
   #num_node: 4
 ABCI:
   group: "[group]"
-hyperparameter:
-  goal: "minimize"
-  trial_number: 10
-  # parallelism is the number how many jobs are run at a moment.
-  parallelism: 2

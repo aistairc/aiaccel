@@ -71,15 +71,7 @@ def test_get_dict_files(clean_work_dir, work_dir):
 
 
 def test_get_file_result(clean_work_dir, setup_result, work_dir):
-    clean_work_dir()
-    workspace = Workspace(str(work_dir))
-    if workspace.path.exists():
-        workspace.clean()
-    workspace.create()
-
-    storage = Storage(work_dir)
-    setup_result(1)
-    content = storage.get_hp_dict('0')
+    content = {}
     create_yaml((work_dir / 'result' / '001.result'), content)
     assert get_file_result(work_dir) == [
         work_dir.joinpath('result/001.result')

@@ -618,8 +618,8 @@ msgstr ""
 msgid "str"
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter:20 aiaccel.parameter.get_type:6 of
-msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and 'ORDINAL'."
+#: aiaccel.parameter.HyperParameter:17 aiaccel.parameter.get_type:6 of
+msgid "A parameter type any of 'uniform_int', 'uniform_float', 'categorical' and 'ordinal'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:27 of
@@ -646,15 +646,15 @@ msgstr ""
 #: aiaccel.parameter.HyperParameter:45 of
 msgid ""
 "This is set as a list of a parameter, when a parameter type is "
-"'CATEGORICAL'."
+"'categorical'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:48 aiaccel.parameter.HyperParameter:55 of
 msgid "list[float, int, str]"
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter:52 of
-msgid "This is set as a list of a parameter, when a parameter type is 'ORDINAL'."
+#: aiaccel.parameter.HyperParameter:49 of
+msgid "This is set as a list of a parameter, when a parameter type is 'ordinal'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:59 of
@@ -774,74 +774,8 @@ msgstr ""
 msgid "Path to \"alive\", i.e. `path`/alive."
 msgstr ""
 
-#: aiaccel.workspace.Workspace:20 of
-msgid "Path to \"error\", i.e. 'path`/error."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:26 of
-msgid "Path to \"hp\", i.e. `path`/hp."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:32 of
-msgid "Path to \"ready\", i.e. `path`/hp/ready."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:38 of
-msgid "Path to \"running\", i.e. `path`/hp/running."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:44 of
-msgid "Path to \"finished\", i.e. `path`/hp/finished."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:50 of
-msgid "Path to \"jobstate\", i.e. `path`/jobstate."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:56 of
-msgid "Path to \"lock\", i.e. `path`/lock."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:62 of
-msgid "Path to \"log\", i.e. `path`/log."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:68 of
-msgid "Path to \"abci_output\", i.e. `path`/abci_output."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:74 of
-msgid "Path to \"pid\", i.e. `path`/pid."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:80 of
-msgid "Path to \"result\", i.e. `path`/result."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:86 of
-msgid "Path to \"runner\", i.e. `path`/runner."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:92 of
-msgid "Path to \"storage\", i.e. `path`/storage."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:98 of
-msgid "Path to \"timestamp\", i.e. `path`/timestamp."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:104 of
-msgid "A list of pathes under the workspace."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:106 of
-msgid "list[Path]"
-msgstr ""
-
-#: aiaccel.workspace.Workspace:110 of
-msgid ""
-"Path to the results which is prepared in the execution directory, i.e. "
-"\"./results\"."
+#: ../../source/api_reference/aiaccel.rst:52
+msgid "aiaccel.workspace module"
 msgstr ""
 
 #: aiaccel.workspace.Workspace.check_consists:1 of
@@ -973,4 +907,64 @@ msgstr ""
 #: ../../source/api_reference/aiaccel.rst:70
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "This is an interface for all config classes."
+#~ msgstr ""
+
+#~ msgid "workspace = ConfigEntry("
+#~ msgstr ""
+
+#~ msgid ""
+#~ "config=config, type=[str], default=_DEFAULT_WORKSPACE, "
+#~ "warning=warn, group=\"generic\", keys=(\"workspace\")"
+#~ msgstr ""
+
+#~ msgid ") workspace.get()"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "4-1. in while loop, inner_loop_main_process()"
+#~ " is called. 4-2. in while loop, "
+#~ "loop_count is incremented."
+#~ msgstr ""
+
+#~ msgid "set any random seed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A best result value and a     file"
+#~ " path. It returns None if a "
+#~ "number of files is less than one."
+#~ msgstr ""
+
+#~ msgid "A best result value and a"
+#~ msgstr ""
+
+#~ msgid "file path. It returns None if a number of files is less than one."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A parameter type any of 'uniform_int', "
+#~ "'uniform_float', 'categorical' and     'ordinal'."
+#~ msgstr ""
+
+#~ msgid "A parameter type any of 'uniform_int', 'uniform_float', 'categorical' and"
+#~ msgstr ""
+
+#~ msgid "'ordinal'."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Create a list of command strings "
+#~ "to run a hyper parameter. :param "
+#~ "command: A string command. :type "
+#~ "command: str :param param_content: A "
+#~ "hyper parameter content. :type param_content:"
+#~ " dict :param trial_id: A unique name"
+#~ " of a hyper parameter. :type "
+#~ "trial_id: str"
+#~ msgstr ""
+
+#~ msgid "A Class for defining the configuration of a configuration file."
+#~ msgstr ""
 

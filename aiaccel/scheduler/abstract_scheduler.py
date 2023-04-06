@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
+from omegaconf.dictconfig import DictConfig
 from typing import Any
 
 from aiaccel.module import AbstractModule
@@ -18,8 +18,7 @@ class AbstractScheduler(AbstractModule):
     Attributes:
         options (dict[str, str | int | bool]): A dictionary containing
             command line options.
-        config_path (Path): Path to the configuration file.
-        algorithm (RandomSampling): A scheduling algorithm
+        algorithm (RandomSamplingSchedulingAlgorithm): A scheduling algorithm
             to select hyper parameters from a parameter pool.
         available_resource (int): An available current resource number.
         jobs (list[dict]): A list to store job dictionaries.
@@ -28,28 +27,23 @@ class AbstractScheduler(AbstractModule):
             command or qstat command.
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
-        self.options = options
-        self.options['process_name'] = 'scheduler'
-        super().__init__(self.options)
-
-        self.config_path = Path(self.options['config']).resolve()
-
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config, 'scheduler')
         self.set_logger(
             'root.scheduler',
-            self.workspace.log / self.config.scheduler_logfile.get(),
-            str_to_logging_level(self.config.scheduler_file_log_level.get()),
-            str_to_logging_level(self.config.scheduler_stream_log_level.get()),
+            self.workspace.log / self.config.logger.file.scheduler,
+            str_to_logging_level(self.config.logger.log_level.scheduler),
+            str_to_logging_level(self.config.logger.stream_level.scheduler),
             'Scheduler'
         )
 
-        self.max_resource = self.config.num_node.get()
+        self.max_resource = self.config.resource.num_node
         self.available_resource = self.max_resource
         self.stats: list[Any] = []
         self.jobs: list[Any] = []
         self.job_status: dict[Any, Any] = {}
         self.algorithm: Any = None
-        self.num_node = self.config.num_node.get()
+        self.num_node = self.config.resource.num_node
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
@@ -262,7 +256,7 @@ class AbstractScheduler(AbstractModule):
         for s in done_states:
             num_trials += jobstates.count(s)
 
-        return (num_trials >= self.config.trial_number.get())
+        return (num_trials >= self.config.optimize.trial_number)
 
     def resume(self) -> None:
         """ When in resume mode, load the previous optimization data in advance.
@@ -274,10 +268,10 @@ class AbstractScheduler(AbstractModule):
             None
         """
         if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
+            self.config.resume is not None and
+            self.config.resume > 0
         ):
-            self._deserialize(self.options['resume'])
+            self._deserialize(self.config.resume)
 
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()

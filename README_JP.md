@@ -90,7 +90,7 @@
 3. config.yamlのresourceをABCIに変更します。
     ```yaml
     resource:
-        type: "ABCI"
+        type: "abci"
         num_node: 4
     ```
 

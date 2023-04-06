@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
+from omegaconf.dictconfig import DictConfig
 from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer, NelderMead
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
@@ -22,8 +23,8 @@ class NelderMeadOptimizer(AbstractOptimizer):
         order (list): A list of parameters being processed.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
         self.nelder_mead: Any = None
         self.parameter_pool: list[dict[str, Any]] = []
         self.order: list[Any] = []

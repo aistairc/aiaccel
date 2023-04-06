@@ -26,7 +26,7 @@ class TestCeaterRunnerComand(BaseTest):
         error_output = str(work_dir / 'error' / f"{d['trial_id']}.txt")
 
         commands = create_runner_command(
-            config.job_command.get(),
+            config.generic.job_command,
             get_one_parameter(),
             'name',
             'config.json',

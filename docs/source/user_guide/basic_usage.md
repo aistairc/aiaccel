@@ -117,11 +117,11 @@ generic:
 
 ```yaml
 resource:
-    type: "ABCI"
+    type: "abci"
     num_node: 4
 ```
 
-- **type** - 実行環境を指定します。 `ABCI` 、または `local` を指定します。
+- **type** - 実行環境を指定します。 `abci` 、または `local` を指定します。
 - **num_node** - 使用するノード数を指定します。ローカルの場合はCPUコア数を指定してください。
 
 ### ABCI

@@ -3,23 +3,20 @@
     "workspace": "/tmp/work",
     "job_command": "python original_main.py",
     "python_file": "original_main.py",
-    "function": "main",
-    "batch_job_timeout": 600
+    "function": "main"
   },
   "resource": {
-    "type": "python_local",
+    "type": "local",
     "num_node": 4
   },
   "ABCI": {
-    "group": "[group]",
-    "job_script_preamble": "./job_script_preamble.sh",
-    "job_execution_options": ""
+    "job_script_preamble": "wrapper_abci.sh",
+    "group": "gaa"
   },
   "optimize": {
     "search_algorithm": "aiaccel.optimizer.NelderMeadOptimizer",
     "goal": "minimize",
-    "trial_number": 5,
-    "rand_seed": 42,
+    "trial_number": 10,
     "parameters": [
       {
         "name": "x1",
@@ -208,80 +205,41 @@
           1.92
         ]
       }
-    ],
-    "parametersfor_TestNelderMead": [
-      {
-        "name": "x1",
-        "type": "uniform_float",
-        "lower": -1.0,
-        "upper": 1.0,
-        "initial": [
-          0.81,
-          0.72,
-          -0.41
-        ]
-      },
-      {
-        "name": "x2",
-        "type": "uniform_float",
-        "lower": -1.0,
-        "upper": 1.0,
-        "initial": [
-          0.61,
-          0.62,
-          -0.56
-        ]
-      }
-    ],
-    "parameters_for_TestNelderMeadSearch": [
-      {
-        "name": "x1",
-        "type": "uniform_int",
-        "lower": -10,
-        "upper": 10,
-        "initial": [
-          4,
-          2,
-          -3
-        ]
-      },
-      {
-        "name": "x2",
-        "type": "uniform_int",
-        "lower": -10,
-        "upper": 10,
-        "initial": [
-          -1,
-          9,
-          -3
-        ]
-      }
-    ],
-    "parameters_for_TestTPESampler": [
-      {
-        "name": "x1",
-        "type": "uniform_int",
-        "lower": -10,
-        "upper": 10,
-        "initial": 5
-      },
-      {
-        "name": "x2",
-        "type": "uniform_float",
-        "lower": -1.0,
-        "upper": 1.0,
-        "initial": 0.5
-      },
-      {
-        "name": "x3",
-        "type": "categorical",
-        "choices": [
-          "red",
-          "green",
-          "blue"
-        ],
-        "initial": "red"
-      }
     ]
+  },
+  "job_setting": {
+    "name_length": 6,
+    "cancel_retry": 3,
+    "cancel_timeout": 60,
+    "expire_retry": 3,
+    "expire_timeout": 60,
+    "finished_retry": 3,
+    "finished_timeout": 60,
+    "job_retry": 2,
+    "job_timeout": 60,
+    "kill_retry": 3,
+    "kill_timeout": 60,
+    "result_retry": 1,
+    "runner_retry": 3,
+    "runner_timeout": 60,
+    "running_retry": 3,
+    "running_timeout": 60
+  },
+  "logger": {
+    "file": {
+      "master": "master.log",
+      "scheduler": "scheduler.log",
+      "optimizer": "optimizer.log"
+    },
+    "log_level": {
+      "master": "DEBUG",
+      "scheduler": "DEBUG",
+      "optimizer": "DEBUG"
+    },
+    "stream_level": {
+      "master": "DEBUG",
+      "scheduler": "DEBUG",
+      "optimizer": "DEBUG"
+    }
   }
 }

@@ -20,10 +20,10 @@ class LocalModel(AbstractModel):
 
     def before_job_submitted(self, obj: Job) -> None:
         runner_command = create_runner_command(
-            obj.config.job_command.get(),
+            obj.config.generic.job_command,
             obj.content,
             obj.trial_id,
-            str(obj.config_path),
+            str(obj.config.config_path),
             str(obj.command_error_output)
         )
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
@@ -69,7 +69,7 @@ class LocalModel(AbstractModel):
 
         error = '\n'.join(stderrs)
         output_file_path = str(obj.get_result_file_path())
-        config_file_path = str(obj.config_path)
+        config_file_path = str(obj.config.config_path)
 
         args = {
             'file': output_file_path,

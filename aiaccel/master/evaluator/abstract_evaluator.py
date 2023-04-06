@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import Any
 
+from omegaconf.dictconfig import DictConfig
+
 from aiaccel.common import file_final_result
-from aiaccel.config import Config
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId, create_yaml
 from aiaccel.workspace import Workspace
@@ -29,19 +29,18 @@ class AbstractEvaluator(object):
         trial_id (TrialId): TrialId object.
 
     """
+    def __init__(self, config: DictConfig) -> None:
+        """Initial method for AbstractEvaluator.
 
-    def __init__(self, options: dict[str, Any]) -> None:
-        self.options = options
-        self.config_path = Path(self.options['config']).resolve()
-        self.config = Config(str(self.config_path))
-        self.workspace = Workspace(self.config.workspace.get())
+        Args:
+            config (ConfileWrapper): A configuration object.
+        """
+        self.config = config
+        self.workspace = Workspace(self.config.generic.workspace)
         self.hp_result: list[dict[str, Any]] | None = None
         self.storage = Storage(self.workspace.path)
-        if isinstance(self.config.goal.get(), str):
-            self.goals = [self.config.goal.get()]
-        else:
-            self.goals = self.config.goal.get()
-        self.trial_id = TrialId(str(self.config_path))
+        self.goals = [item.value for item in self.config.optimize.goal]
+        self.trial_id = TrialId(self.config.config_path)
 
     def evaluate(self) -> None:
         """Run an evaluation.

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import optuna
+from omegaconf.dictconfig import DictConfig
 import sqlalchemy
 import sqlalchemy.orm as sqlalchemy_orm
 from optuna.storages._rdb import models
@@ -42,15 +43,15 @@ class TpeOptimizer(AbstractOptimizer):
         randseed (int): Random seed.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
         self.parameter_pool: dict[str, Any] = {}
         self.parameter_list: list[Any] = []
         self.study_name = "distributed-tpe"
         self.study: Any = None
         self.distributions: Any = None
         self.trial_pool: dict[str, Any] = {}
-        self.randseed = self.config.randseed.get()
+        self.randseed = self.config.optimize.rand_seed
         self.resumed_list: list[Any] = []
 
     def pre_process(self) -> None:
@@ -63,7 +64,7 @@ class TpeOptimizer(AbstractOptimizer):
         if self.distributions is None:
             self.distributions = create_distributions(self.params)
 
-        if self.options["resume"] is not None and self.options["resume"] > 0:
+        if self.config.resume is not None and self.config.resume > 0:
             self.resume_trial()
 
         self.create_study()
@@ -119,6 +120,10 @@ class TpeOptimizer(AbstractOptimizer):
         if (not self.is_startup_trials()) and (len(self.parameter_pool) >= 1):
             return None
 
+        if len(self.parameter_pool) >= self.config.resource.num_node:
+            return None
+
+        new_params: list[dict[str, Any]] = []
         trial = self.study.ask(self.distributions)
         new_params = []
 
@@ -187,7 +192,7 @@ class TpeOptimizer(AbstractOptimizer):
         sampler._random_sampler._rng = self._rng
         storage_path = str(f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
-        load_if_exists = self.options["resume"] is not None
+        load_if_exists = self.config.resume is not None
         self.study = optuna.create_study(
             sampler=sampler,
             storage=storage,
@@ -204,7 +209,7 @@ class TpeOptimizer(AbstractOptimizer):
         session = Session()
 
         for optuna_trial in optuna_trials:
-            if optuna_trial.number >= self.options["resume"]:
+            if optuna_trial.number >= self.config.resume:
                 self.resumed_list.append(optuna_trial)
                 resumed_trial = (
                     session.query(models.TrialModel)
@@ -246,12 +251,12 @@ def create_distributions(
     distributions: dict[str, Any] = {}
 
     for p in parameters.get_parameter_list():
-        if p.type.lower() == "float":
+        if p.type.lower() == 'float':
             distributions[p.name] = optuna.distributions.FloatDistribution(
                 p.lower, p.upper, log=p.log
             )
 
-        elif p.type.lower() == "int":
+        elif p.type.lower() == 'int':
             distributions[p.name] = optuna.distributions.IntDistribution(
                 p.lower, p.upper, log=p.log
             )

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from aiaccel.optimizer._grid_point_generator import GridPointGenerator
+from omegaconf.dictconfig import DictConfig
 
 
 class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
@@ -17,10 +18,10 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
             choices is specified.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
 
-        accept_small_trial_number = self.config.grid_accept_small_trial_number.get()
+        accept_small_trial_number = self.config.optimize.grid_accept_small_trial_number
 
         if accept_small_trial_number:
             self.logger.warning(
@@ -30,9 +31,9 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
 
         try:
             self._grid_point_generator = GridPointGenerator(
-                self.config.trial_number.get(),
+                self.config.optimize.trial_number,
                 self.params.get_parameter_list(),
-                sampling_method=self.config.grid_sampling_method.get().upper(),
+                sampling_method=self.config.optimize.grid_sampling_method.upper(),
                 rng=self._rng,
                 accept_small_trial_number=accept_small_trial_number
             )

@@ -13,15 +13,7 @@ class TestMOTpeOptimizer(BaseTest):
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
-        self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe.json')
-        self.options = {
-            'config': self.config_motpe_path,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer',
-        }
-        self.optimizer = MOTpeOptimizer(self.options)
+        self.optimizer = MOTpeOptimizer(self.load_config_for_test(self.configs['config_motpe.json']))
         yield
         self.optimizer = None
 
@@ -58,17 +50,17 @@ class TestMOTpeOptimizer(BaseTest):
                     assert self.optimizer.generate_parameter() is None
 
         # if len(self.parameter_pool) >= self.config.num_node.get()
-        with patch.object(self.optimizer.config.num_node, 'get', return_value=0):
-            with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
-                assert self.optimizer.generate_parameter() is None
+        self.optimizer.config.resource.num_node = 0
+        with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
+            assert self.optimizer.generate_parameter() is None
 
     def test_generate_initial_parameter(self, create_tmp_config):
-        options = self.options.copy()
+        config = self.optimizer.config.copy()
         self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe_no_initial_params.json')
-        optimizer = MOTpeOptimizer(self.options)
+        optimizer = MOTpeOptimizer(self.optimizer.config)
         (optimizer.workspace.path / 'storage' / 'storage.db').unlink()
 
-        optimizer.__init__(options)
+        optimizer.__init__(config)
         optimizer.pre_process()
         assert len(optimizer.generate_initial_parameter()) > 0
         assert len(optimizer.generate_initial_parameter()) > 0

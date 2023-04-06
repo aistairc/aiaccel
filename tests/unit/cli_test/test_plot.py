@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest.mock import patch
 
+from aiaccel.config import load_config
 from aiaccel.cli import Plotter
-from aiaccel.config import Config
 from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
 
@@ -17,11 +17,10 @@ def test_plot(clean_work_dir, work_dir, create_tmp_config):
 
     config_path = Path('tests/test_data/config.json')
     config_path = create_tmp_config(config_path)
-    config = Config(config_path)
-    storage = Storage(ws=Path(config.workspace.get()))
+    config = load_config(config_path)
+    storage = Storage(ws=Path(config.generic.workspace))
 
-    goal = "minimize"
-    config.goal.set(goal)
+    config.optimize.goal = ["minimize"]
 
     # データ無しの場合
     plotter = Plotter(config)

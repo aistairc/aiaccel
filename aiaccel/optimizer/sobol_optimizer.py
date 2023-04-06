@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from omegaconf.dictconfig import DictConfig
 from typing import Any
 
 from scipy.stats import qmc
@@ -25,8 +26,8 @@ class SobolOptimizer(AbstractOptimizer):
         Confirm whether the current code resumes for any timings of quits.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
         self.generate_index: Any = None
         self.sampler: Any = None
 
@@ -47,10 +48,10 @@ class SobolOptimizer(AbstractOptimizer):
         finished = self.storage.trial.get_finished()
         self.generate_index = len(finished)
 
-        if self.options['resume'] is None or self.options['resume'] <= 0:
+        if self.config.resume is None or self.config.resume <= 0:
             self.sampler = qmc.Sobol(
                 d=len(self.params.get_parameter_list()),
-                scramble=self.config.sobol_scramble.get(),
+                scramble=self.config.optimize.sobol_scramble,
                 seed=self._rng
             )
 

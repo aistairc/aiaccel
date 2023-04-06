@@ -31,6 +31,7 @@ setup(
         'aiaccel.cli',
         'aiaccel.storage'
     ],
+    data_files=[('aiaccel', ['aiaccel/default_config.yaml'])],
     install_requires=requirements,
     zip_safe=False,
     extensions=extensions,
