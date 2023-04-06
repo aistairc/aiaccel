@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from numpy import maximum
 from omegaconf.dictconfig import DictConfig
-from omegaconf.listconfig import ListConfig
 
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
