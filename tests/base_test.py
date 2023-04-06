@@ -2,8 +2,9 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
-import shutil
-from aiaccel.config import Config
+
+from aiaccel.config import load_config
+
 from aiaccel.util import create_yaml
 from aiaccel.workspace import Workspace
 import shutil
@@ -195,23 +196,38 @@ class BaseTest(object):
 
     @pytest.fixture(autouse=True)
     def _setup(self, tmpdir, work_dir, create_tmp_config, cd_work):
-        test_data_dir = Path(__file__).resolve().parent.joinpath('test_data')
-        self.test_data_dir = test_data_dir
-        self.config_random_path = test_data_dir.joinpath('config_random.json')
-        self.config_sobol_path = test_data_dir.joinpath('config_sobol.json')
-        self.config_random = Config(self.config_random_path)
-        self.config_sobol = Config(self.config_sobol_path)
-        self.config_json = test_data_dir.joinpath('config.json')
-        self.grid_config_json = test_data_dir.joinpath('grid_config.json')
-        self.config_yaml = test_data_dir.joinpath('config.yml')
+        self.test_data_dir = Path(__file__).resolve().parent.joinpath('test_data')
+        self.config_json_path = create_tmp_config(self.test_data_dir.joinpath('config.json'))
+
+        self.configs = {
+            "config.json": create_tmp_config(self.test_data_dir.joinpath('config.json')),
+            "config_random.json": create_tmp_config(self.test_data_dir.joinpath('config_random.json')),
+            "config_grid.json": create_tmp_config(self.test_data_dir.joinpath('config_grid.json')),
+            "config_budget-specified-grid.json": create_tmp_config(self.test_data_dir.joinpath('config_budget-specified-grid.json')),
+            "config_sobol.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol.json')),
+            "config_sobol_int.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_int.json')),
+            "config_sobol_no_initial.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_no_initial.json')),
+            "config_tpe.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe.json')),
+            "config_tpe_2.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe_2.json')),
+            "config_motpe.json": create_tmp_config(self.test_data_dir.joinpath('config_motpe.json')),
+            "config_abci_json": create_tmp_config(self.test_data_dir.joinpath('config_abci.json')),
+            "config_nelder_mead.json": create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead.json')),
+            "config_nelder_mead_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead_resumption.json')),
+            "config_random_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_random_resumption.json')),
+            "config_sobol_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_sobol_resumption.json')),
+            "config_tpe_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe_resumption.json')),
+            "config_grid_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_grid_resumption.json')),
+            "config_motpe_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_motpe_resumption.json')),
+        }
 
         self.tmpdir_path = tmpdir
 
-        self.dict_lock = work_dir.joinpath('lock')
+        # for label in self.configs.keys():
+        #     self.configs[label].resume = None
+        #     self.configs[label].clean = None
+        #     self.configs[label].generic.workspace = self.tmpdir_path / 'work'
 
-        self.config_grid = Config(self.grid_config_json)
-
-        self.workspace = Workspace(str(work_dir))
+        self.workspace = Workspace(str(self.tmpdir_path / 'work'))
         if self.workspace.path.exists():
             self.workspace.clean()
         self.workspace.create()
@@ -228,8 +244,13 @@ class BaseTest(object):
 
         self.result_comparison = []
 
-        self.config_json = create_tmp_config(self.config_json)
-        self.config = Config(self.config_json)
+    def load_config_for_test(self, path):
+        config = load_config(path)
+        config.resume = None
+        config.clean = None
+        config.generic.workspace = self.tmpdir_path / 'work'
+
+        return config
 
     @contextmanager
     def create_main(self, from_file_path=None):
@@ -238,6 +259,3 @@ class BaseTest(object):
         to_file_path = self.tmpdir_path.joinpath('original_main.py')
         shutil.copy(from_file_path, to_file_path)
         yield
-
-    def get_workspace_path(self):
-        return self.work_dir

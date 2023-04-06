@@ -98,7 +98,7 @@ This tutorial describes how to run examples/sphere on ABCI.
 3. Please confirm the configuration file before running master.
     ```yaml
     resource:
-        type: "ABCI"
+        type: "abci"
         num_node: 4
     ```
 

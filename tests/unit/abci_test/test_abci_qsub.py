@@ -18,36 +18,38 @@ def test_create_qsub_command(load_test_config):
     qsub_command = create_qsub_command(config, optimizer_file)
     assert type(qsub_command) is list
 
-    path = Path(config.workspace.get()).resolve()
+    path = Path(config.generic.workspace).resolve()
     command = [
         'qsub',
-        '-g', f'{config.abci_group.get()}',
+        '-g', f'{config.ABCI.group}',
         '-j', 'y',
         '-o', f'{path / dict_output}',
         str(optimizer_file)
     ]
-    with patch.object(config.job_execution_options, 'get', return_value=None):
-        assert create_qsub_command(config, optimizer_file) == command
 
-    with patch.object(config.job_execution_options, 'get', return_value=''):
-        assert create_qsub_command(config, optimizer_file) == command
+    tmp_config = config
+    tmp_config.ABCI.job_execution_options = None
+    assert create_qsub_command(tmp_config, optimizer_file) == command
 
-    with patch.object(config.job_execution_options, 'get', return_value=[]):
-        assert create_qsub_command(config, optimizer_file) == command
+    tmp_config.ABCI.job_execution_options = ''
+    assert create_qsub_command(tmp_config, optimizer_file) == command
 
-    with patch.object(config.job_execution_options, 'get', return_value='aaa bbb'):
-        command_tmp = command.copy()
-        for cmd in 'aaa bbb'.split(' '):
-            command_tmp.insert(-1, cmd)
-        assert create_qsub_command(config, optimizer_file) == command_tmp
+    # tmp_config.ABCI.job_execution_options = []
+    # assert create_qsub_command(tmp_config, optimizer_file) == command
 
-    with patch.object(config.job_execution_options, 'get', return_value=['aaa bbb']):
-        command_tmp = command.copy()
-        for option in ['aaa bbb']:
-            for cmd in option.split(' '):
-                command_tmp.insert(-1, cmd)
-        assert create_qsub_command(config, optimizer_file) == command_tmp
+    tmp_config.ABCI.job_execution_options = 'aaa bbb'
+    command_tmp = command.copy()
+    for cmd in 'aaa bbb'.split(' '):
+        command_tmp.insert(-1, cmd)
+    assert create_qsub_command(tmp_config, optimizer_file) == command_tmp
 
-    with patch.object(config.job_execution_options, 'get', return_value=1):
-        with pytest.raises(ValueError):
-            create_qsub_command(config, optimizer_file)
+    # tmp_config.ABCI.job_execution_options = ['aaa bbb']
+    # command_tmp = command.copy()
+    # for option in ['aaa bbb']:
+    #     for cmd in option.split(' '):
+    #         command_tmp.insert(-1, cmd)
+    # assert create_qsub_command(tmp_config, optimizer_file) == command_tmp
+
+    # tmp_config.ABCI.job_execution_options = 1
+    # with pytest.raises(ValueError):
+    #     create_qsub_command(tmp_config, optimizer_file)

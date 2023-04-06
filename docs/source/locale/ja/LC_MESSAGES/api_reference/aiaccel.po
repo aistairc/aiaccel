@@ -620,8 +620,8 @@ msgstr ""
 msgid "str"
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter:20 aiaccel.parameter.get_type:6 of
-msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and 'ORDINAL'."
+#: aiaccel.parameter.HyperParameter:17 aiaccel.parameter.get_type:6 of
+msgid "A parameter type any of 'uniform_int', 'uniform_float', 'categorical' and 'ordinal'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:27 of
@@ -648,15 +648,15 @@ msgstr ""
 #: aiaccel.parameter.HyperParameter:45 of
 msgid ""
 "This is set as a list of a parameter, when a parameter type is "
-"'CATEGORICAL'."
+"'categorical'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:48 aiaccel.parameter.HyperParameter:55 of
 msgid "list[float, int, str]"
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter:52 of
-msgid "This is set as a list of a parameter, when a parameter type is 'ORDINAL'."
+#: aiaccel.parameter.HyperParameter:49 of
+msgid "This is set as a list of a parameter, when a parameter type is 'ordinal'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:59 of
@@ -774,78 +774,8 @@ msgstr ""
 msgid "Path to \"alive\", i.e. `path`/alive."
 msgstr ""
 
-#: aiaccel.workspace.Workspace:20 of
-msgid "Path to \"error\", i.e. 'path`/error."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:26 of
-msgid "Path to \"hp\", i.e. `path`/hp."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:32 of
-msgid "Path to \"ready\", i.e. `path`/hp/ready."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:38 of
-msgid "Path to \"running\", i.e. `path`/hp/running."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:44 of
-msgid "Path to \"finished\", i.e. `path`/hp/finished."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:50 of
-msgid "Path to \"jobstate\", i.e. `path`/jobstate."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:56 of
-msgid "Path to \"lock\", i.e. `path`/lock."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:62 of
-msgid "Path to \"log\", i.e. `path`/log."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:68 of
-msgid "Path to \"abci_output\", i.e. `path`/abci_output."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:74 of
-msgid "Path to \"pid\", i.e. `path`/pid."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:80 of
-msgid "Path to \"result\", i.e. `path`/result."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:86 of
-msgid "Path to \"runner\", i.e. `path`/runner."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:92 of
-msgid "Path to \"storage\", i.e. `path`/storage."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:98 of
-msgid "Path to \"timestamp\", i.e. `path`/timestamp."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:104 of
-msgid "Path to \"verification\", i.e. `path`/verification."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:110 of
-msgid "A list of pathes under the workspace."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:112 of
-msgid "list[Path]"
-msgstr ""
-
-#: aiaccel.workspace.Workspace:116 of
-msgid ""
-"Path to the results which is prepared in the execution directory, i.e. "
-"\"./results\"."
+#: ../../source/api_reference/aiaccel.rst:52
+msgid "aiaccel.workspace module"
 msgstr ""
 
 #: aiaccel.workspace.Workspace.check_consists:1 of
@@ -990,14 +920,14 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid ""
-#~ "A parameter type any of 'INT', "
-#~ "'FLOAT', 'CATEGORICAL' and     'ORDINAL'."
+#~ "A parameter type any of 'uniform_int', "
+#~ "'uniform_float', 'categorical' and     'ordinal'."
 #~ msgstr ""
 
-#~ msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and"
+#~ msgid "A parameter type any of 'uniform_int', 'uniform_float', 'categorical' and"
 #~ msgstr ""
 
-#~ msgid "'ORDINAL'."
+#~ msgid "'ordinal'."
 #~ msgstr ""
 
 #~ msgid ""

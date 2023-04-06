@@ -29,6 +29,8 @@ from aiaccel.parameter import HyperParameter
 from aiaccel.parameter import load_parameter
 
 from tests.base_test import BaseTest
+from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.config import load_config
 
 
 class TestGridCondition:
@@ -670,14 +672,10 @@ class TestGridPointGenerator(BaseTest):
         create_tmp_config: Callable[[Path], Path]
     ) -> Generator[None, None, None]:
         self.data_dir = data_dir
-        self.config_path = create_tmp_config(
-            self.data_dir / 'config_budget-specified-grid.json'
-        )
 
-        config = Config(self.config_path)
-        params = config.hyperparameters.get()
-        self.hyperparameters = load_parameter(params).get_parameter_list()
-        self.trial_number = config.trial_number.get()
+        config = self.load_config_for_test(self.configs['config_budget-specified-grid.json'])
+        self.hyperparameters = load_parameter(config.optimize.parameters).get_parameter_list()
+        self.trial_number = config.optimize.trial_number
         self.grid_point_generator = GridPointGenerator(
             self.trial_number, self.hyperparameters.copy()
         )

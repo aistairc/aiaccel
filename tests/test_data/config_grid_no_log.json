@@ -2,6 +2,8 @@
   "generic": {
     "workspace": "/tmp/work",
     "job_command": "python original_main.py",
+    "python_file": "original_main.py",
+    "function": "main",
     "batch_job_timeout": 600
   },
   "resource": {
@@ -22,7 +24,6 @@
       {
         "name": "x1",
         "type": "uniform_float",
-        "$log": true,
         "step": 0.1,
         "base": 10,
         "lower": 0.1,

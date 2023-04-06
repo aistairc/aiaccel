@@ -6,10 +6,11 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from omegaconf.dictconfig import DictConfig
+
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
-from aiaccel.config import Config
 from aiaccel.storage import Storage
 from aiaccel.util import Buffer, TrialId, get_time_now_object
 from aiaccel.workspace import Workspace
@@ -411,7 +412,7 @@ class Job:
         ValueError: When model is None.
 
     Attributes:
-        config (ConfileWrapper): A configuration object.
+        - config (DictConfig): A configuration object.
 
         ws (Path): A path of a workspace.
 
@@ -492,9 +493,7 @@ class Job:
         count_retry (int):
             A current retry count. This is compared with threshold_retry.
 
-        job_loop_duration (int): A sleep time each job loop.
-
-        model (Model): A model object of state transitions.
+        - model (Model): A model object of state transitions.
 
         machine (CustomMachine): A state machine object.
 
@@ -522,7 +521,7 @@ class Job:
 
     def __init__(
         self,
-        config: Config,
+        config: DictConfig,
         scheduler: AbstractScheduler,
         model: AbstractModel,
         trial_id: int
@@ -531,30 +530,29 @@ class Job:
         # === Load config file===
         self.config = config
         # === Get config parameter values ===
-        self.cancel_retry = self.config.cancel_retry.get()
-        self.cancel_timeout = self.config.cancel_timeout.get()
-        self.expire_retry = self.config.expire_retry.get()
-        self.expire_timeout = self.config.expire_timeout.get()
-        self.finished_retry = self.config.finished_retry.get()
-        self.finished_timeout = self.config.finished_timeout.get()
-        self.job_loop_duration = self.config.job_loop_duration.get()
-        self.job_retry = self.config.job_retry.get()
-        self.job_timeout = self.config.job_timeout.get()
-        self.kill_retry = self.config.kill_retry.get()
-        self.kill_timeout = self.config.kill_timeout.get()
-        self.result_retry = self.config.result_retry.get()
-        self.batch_job_timeout = self.config.batch_job_timeout.get()
-        self.runner_retry = self.config.runner_retry.get()
-        self.runner_timeout = self.config.runner_timeout.get()
-        self.running_retry = self.config.running_retry.get()
-        self.running_timeout = self.config.running_timeout.get()
-        self.resource_type = self.config.resource_type.get()
+        self.cancel_retry = self.config.job_setting.cancel_retry
+        self.cancel_timeout = self.config.job_setting.cancel_timeout
+        self.expire_retry = self.config.job_setting.expire_retry
+        self.expire_timeout = self.config.job_setting.expire_timeout
+        self.finished_retry = self.config.job_setting.finished_retry
+        self.finished_timeout = self.config.job_setting.finished_timeout
+        self.job_retry = self.config.job_setting.job_retry
+        self.job_timeout = self.config.job_setting.job_timeout
+        self.kill_retry = self.config.job_setting.kill_retry
+        self.kill_timeout = self.config.job_setting.kill_timeout
+        self.result_retry = self.config.job_setting.result_retry
+        self.batch_job_timeout = self.config.generic.batch_job_timeout
+        self.runner_retry = self.config.job_setting.runner_retry
+        self.runner_timeout = self.config.job_setting.runner_timeout
+        self.running_retry = self.config.job_setting.running_retry
+        self.running_timeout = self.config.job_setting.running_timeout
+        self.resource_type = self.config.resource.type.value
 
         self.threshold_timeout: datetime | None = None
         self.threshold_retry = None
         self.count_retry = 0
 
-        self.workspace = Workspace(self.config.workspace.get())
+        self.workspace = Workspace(self.config.generic.workspace)
 
         self.scheduler = scheduler
         self.model = model
@@ -575,10 +573,9 @@ class Job:
             ordered_transitions=False
         )
         self.loop_count = 0
-
-        self.config_path = str(self.config.config_path)
+        self.scheduler = scheduler
         self.trial_id = trial_id
-        self.trial_id_str = TrialId(self.config_path).zero_padding_any_trial_id(self.trial_id)
+        self.trial_id_str = TrialId(self.config.config_path).zero_padding_any_trial_id(self.trial_id)
         self.from_file: Any = None
         self.to_file: Any = None
         self.next_state: Any = None

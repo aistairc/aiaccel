@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 import numpy as np
+from omegaconf.listconfig import ListConfig
 
 from aiaccel.parameter import HyperParameter
 from aiaccel.util import generate_random_name
@@ -148,7 +149,7 @@ class NelderMead(object):
             if isinstance(initial_parameters[dim]['value'], (int, float, np.integer, np.floating)):
                 initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
 
-            if type(initial_parameters[dim]['value']) is not list:
+            if type(initial_parameters[dim]['value']) not in [list, ListConfig]:
                 raise TypeError('Default parameter should be set as list.')
 
             if num_of_initials < len(initial_parameters[dim]['value']):

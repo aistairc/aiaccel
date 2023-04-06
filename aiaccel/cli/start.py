@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import os
+import pathlib
 import shutil
 import time
 from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
+
+from aiaccel.config import load_config
 from pathlib import Path
 
 from aiaccel.cli import CsvWriter
 from aiaccel.common import dict_lock, goal_maximize, goal_minimize
-from aiaccel.config import Config
 from aiaccel.master import create_master
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import create_optimizer
@@ -83,20 +85,20 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--clean', nargs='?', const=True, default=False)
     args = parser.parse_args()
 
-    config = Config(args.config, warn=True, format_check=True)
+    config = load_config(args.config)
     if config is None:
         logger.error(f"Invalid workspace: {args.workspace} or config: {args.config}")
         return
 
-    workspace = Workspace(config.workspace.get())
-    if isinstance(config.goal.get(), str):
-        goal = [config.goal.get()]
-    else:
-        goal = config.goal.get()
+    config.resume = args.resume
+    config.clean = args.clean
+
+    workspace = Workspace(config.generic.workspace)
+    goals = [item.value for item in config.optimize.goal]
     path_to_lock_file = workspace.path / dict_lock
 
-    if args.resume is None:
-        if args.clean is True:
+    if config.resume is None:
+        if config.clean is True:
             logger.info("Cleaning workspace")
             workspace.clean()
             logger.info(f"Workspace directory {str(workspace.path)} is cleaned.")
@@ -110,14 +112,13 @@ def main() -> None:  # pragma: no cover
         logger.error("Creating workspace is Failed.")
         return
 
-    logger.info(f"config: {str(Path(args.config).resolve())}")
+    logger.info(f"config: {str(pathlib.Path(config.config_path).resolve())}")
 
-    Master = create_master(args.config)
-    Optimizer = create_optimizer(args.config)
-    Scheduler = create_scheduler(args.config)
-    modules: list[AbstractModule] = [Master(vars(args)), Optimizer(vars(args)), Scheduler(vars(args))]
+    Master = create_master(config.resource.type.value)
+    Optimizer = create_optimizer(config.optimize.search_algorithm)
+    Scheduler = create_scheduler(config.resource.type.value)
+    modules: list[AbstractModule] = [Master(config), Optimizer(config), Scheduler(config)]
 
-    sleep_time = config.sleep_time.get()
     time_s = time.time()
 
     for module in modules:
@@ -131,14 +132,14 @@ def main() -> None:  # pragma: no cover
                 break
             module.loop_count += 1
         else:
-            time.sleep(sleep_time)
+            time.sleep(config.generic.sleep_time)
             continue
         break
 
     for module in modules:
         module.post_process()
 
-    csv_writer = CsvWriter(args.config)
+    csv_writer = CsvWriter(config)
     csv_writer.create()
 
     logger.info("moving...")
@@ -152,8 +153,8 @@ def main() -> None:  # pragma: no cover
 
     files = get_file_result_hp(dst)
 
-    for i in range(len(goal)):
-        best, best_file = get_best_parameter(files, goal[i], i, path_to_lock_file)
+    for i in range(len(goals)):
+        best, best_file = get_best_parameter(files, goals[i], i, path_to_lock_file)
         logger.info(f"Best result [{i}] : {best_file}")
         logger.info(f"\tvalue : {best}")
 

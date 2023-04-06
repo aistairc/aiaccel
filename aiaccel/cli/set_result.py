@@ -4,9 +4,9 @@ import copy
 from argparse import ArgumentParser
 from pathlib import Path
 
-from aiaccel.config import Config
-from aiaccel.parameter import load_parameter
 from aiaccel.util.filesystem import create_yaml
+from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.config import load_config
 
 
 def str_or_float_or_int(value: str | float | int) -> str | float | int:
@@ -40,8 +40,9 @@ def main() -> None:
 
     if args.config is not None:
         config_path = Path(args.config).resolve()
-        config = Config(config_path)
-        parameters_config = load_parameter(config.hyperparameters.get())
+        config = load_config(config_path)
+
+        parameters_config = HyperParameterConfiguration(config.optimize.parameters)
 
         for p in parameters_config.get_parameter_list():
             if p.type.lower() == "float":

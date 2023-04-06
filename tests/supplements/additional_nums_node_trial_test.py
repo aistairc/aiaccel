@@ -58,18 +58,18 @@ class AdditionalNumsNodeTrialTest(BaseTest):
         self.config = Config(self.config_file)
 
         with self.create_main(self.python_file):
-            storage = Storage(ws=Path(self.config.workspace.get()))
+            storage = Storage(ws=Path(self.config.generic.workspace))
             popen = Popen(
                 ['aiaccel-start', '--config', str(self.config_file), '--clean']
             )
-            popen.wait(timeout=self.config.batch_job_timeout.get())
+            popen.wait(timeout=self.config.generic.batch_job_timeout)
         self.evaluate(work_dir, storage)
 
     def evaluate(self, work_dir: Path, storage: Storage) -> None:
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
-        assert finished <= self.config.trial_number.get()
+        assert finished <= self.config.optimize.trial_number
         assert ready == 0
         assert running == 0
         final_result = work_dir.joinpath(aiaccel.dict_result, aiaccel.file_final_result)

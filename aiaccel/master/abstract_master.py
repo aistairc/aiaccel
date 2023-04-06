@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from omegaconf.dictconfig import DictConfig
 from aiaccel.common import file_final_result
 from aiaccel.master import AbstractVerification
 from aiaccel.module import AbstractModule
@@ -34,32 +35,24 @@ class AbstractMaster(AbstractModule):
         stats (list):
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config, 'master')
         self.start_time = get_time_now_object()
         self.loop_start_time: datetime | None = None
-        self.options = options
-        self.options["process_name"] = "master"
-
-        super().__init__(self.options)
-        self.logger = logging.getLogger("root.master")
+        self.logger = logging.getLogger('root.master')
         self.logger.setLevel(logging.DEBUG)
-
         self.set_logger(
             'root.master',
-            self.workspace.log / self.config.master_logfile.get(),
-            str_to_logging_level(self.config.master_file_log_level.get()),
-            str_to_logging_level(self.config.master_stream_log_level.get()),
-            "Master   ",
+            self.workspace.log / self.config.logger.file.master,
+            # self.dict_log / self.config.logger.file.master,
+            str_to_logging_level(self.config.logger.log_level.master),
+            str_to_logging_level(self.config.logger.stream_level.master),
+            'Master   '
         )
 
-        self.verification = AbstractVerification(self.options)
-
-        if isinstance(self.config.goal.get(), str):
-            self.goals = [self.config.goal.get()]
-        else:
-            self.goals = self.config.goal.get()
-
-        self.trial_number = self.config.trial_number.get()
+        self.verification = AbstractVerification(self.config)
+        self.goals = [item.value for item in self.config.optimize.goal]
+        self.trial_number = self.config.optimize.trial_number
 
         self.runner_files: list[Path] | None = []
         self.stats: list[Any] = []

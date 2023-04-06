@@ -20,16 +20,7 @@ class TestBudgetSpecifiedGridOptimizer(BaseTest):
     ) -> Generator[None, None, None]:
 
         self.data_dir = data_dir
-        self.config_path = create_tmp_config(
-            self.data_dir / 'config_budget-specified-grid.json'
-        )
-        self.options = {
-            'config': self.config_path,
-            'resume': None,
-            'clean': False,
-            'process_name': 'optimizer'
-        }
-        self.optimizer = BudgetSpecifiedGridOptimizer(self.options)
+        self.optimizer = BudgetSpecifiedGridOptimizer(self.load_config_for_test(self.configs['config_tpe.json']))
         yield
         self.optimizer = None
 
@@ -40,18 +31,18 @@ class TestBudgetSpecifiedGridOptimizer(BaseTest):
         with monkeypatch.context() as m:
             m.setattr(AbstractOptimizer, "__init__", lambda *_: None)
 
-            m.setattr(self.optimizer.config.trial_number, "get", lambda: 0)
-            m.setattr(self.optimizer.config.grid_accept_small_trial_number, "get", lambda: False)
+            self.optimizer.config.optimize.trial_number = 0
+            self.optimizer.config.optimize.grid_accept_small_trial_number = False
             with pytest.raises(ValueError):
-                self.optimizer.__init__(self.options)
-            m.setattr(self.optimizer.config.grid_accept_small_trial_number, "get", lambda: True)
-            assert self.optimizer.__init__(self.options) is None
+                self.optimizer.__init__(self.optimizer.config)
+            self.optimizer.config.optimize.grid_accept_small_trial_number = True
+            assert self.optimizer.__init__(self.optimizer.config) is None
 
-            m.setattr(self.optimizer.config.trial_number, "get", lambda: 9999)
-            m.setattr(self.optimizer.config.grid_accept_small_trial_number, "get", lambda: False)
-            assert self.options.__init__(self.options) is None
-            m.setattr(self.optimizer.config.grid_accept_small_trial_number, "get", lambda: True)
-            assert self.options.__init__(self.options) is None
+            self.optimizer.config.optimize.trial_number = 9999
+            self.optimizer.config.optimize.grid_accept_small_trial_number = False
+            assert self.optimizer.__init__(self.optimizer.config) is None
+            self.optimizer.config.optimize.grid_accept_small_trial_number = True
+            assert self.optimizer.__init__(self.optimizer.config) is None
 
     def test_generate_parameter(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self.optimizer.pre_process()

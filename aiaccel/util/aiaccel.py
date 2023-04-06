@@ -7,9 +7,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from aiaccel.config import Config
-from aiaccel.parameter import load_parameter
 from aiaccel.util import cast_y, get_time_now
+from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.config import load_config
 
 
 class CommandLineArgs:
@@ -26,8 +26,8 @@ class CommandLineArgs:
             self.trial_id = self.args.trial_id
         if self.args.config is not None:
             self.config_path = Path(self.args.config).resolve()
-            self.config = Config(self.config_path)
-            self.parameters_config = load_parameter(self.config.hyperparameters.get())
+            self.config = load_config(self.config_path)
+            self.parameters_config = HyperParameterConfiguration(self.config.optimize.parameters)
 
             for p in self.parameters_config.get_parameter_list():
                 if p.type.lower() == "float":
@@ -111,7 +111,7 @@ class Run:
         self.config_path = self.args.config_path or config_path
         self.config = self.args.config
         if self.config is not None:
-            self.workspace = Path(self.config.workspace.get()).resolve()
+            self.workspace = Path(self.config.generic.workspace).resolve()
 
     def execute(
         self,
