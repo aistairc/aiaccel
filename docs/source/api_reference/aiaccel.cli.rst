@@ -28,6 +28,14 @@ aiaccel.cli.report module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.cli.set\_result module
+------------------------------
+
+.. automodule:: aiaccel.cli.set_result
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.cli.start module
 ------------------------
 

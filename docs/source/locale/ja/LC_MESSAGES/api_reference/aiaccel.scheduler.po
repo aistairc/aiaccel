@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-22 14:37+0900\n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -49,8 +49,7 @@ msgstr ""
 
 #: aiaccel.scheduler.abci_scheduler.AbciScheduler.create_model:1
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_model:1
-#: aiaccel.scheduler.local_scheduler.LocalScheduler.create_model:1
-#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.create_model:1 of
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.create_model:1 of
 msgid "Creates model object of state machine."
 msgstr ""
 
@@ -60,7 +59,6 @@ msgstr ""
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.change_state_finished_trials
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_model
-#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.inner_loop_main_process
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.parse_trial_id
@@ -75,6 +73,7 @@ msgstr ""
 #: aiaccel.scheduler.create.create_scheduler
 #: aiaccel.scheduler.job.job.Job.get_machine
 #: aiaccel.scheduler.job.job.Job.get_model
+#: aiaccel.scheduler.job.job.Job.get_result_file_path
 #: aiaccel.scheduler.job.job.Job.get_state
 #: aiaccel.scheduler.job.job.Job.get_state_name
 #: aiaccel.scheduler.job.job.Job.main aiaccel.scheduler.job.job.Job.schedule
@@ -96,6 +95,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
@@ -104,13 +104,18 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file
 #: aiaccel.scheduler.local_scheduler.LocalScheduler.create_model
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_any_trial_xs
 #: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats
 #: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id
-#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.create_model
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_any_trial_xs
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_result_file_path
 #: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.inner_loop_main_process
-#: of
+#: aiaccel.scheduler.pylocal_scheduler.execute
+#: aiaccel.scheduler.pylocal_scheduler.initializer of
 msgid "戻り値"
 msgstr ""
 
@@ -132,6 +137,7 @@ msgstr ""
 #: aiaccel.scheduler.create.create_scheduler
 #: aiaccel.scheduler.job.job.Job.get_machine
 #: aiaccel.scheduler.job.job.Job.get_model
+#: aiaccel.scheduler.job.job.Job.get_result_file_path
 #: aiaccel.scheduler.job.job.Job.get_state
 #: aiaccel.scheduler.job.job.Job.get_state_name
 #: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed
@@ -140,12 +146,15 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
 #: aiaccel.scheduler.local_scheduler.LocalScheduler.create_model
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_any_trial_xs
 #: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id
-#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.create_model
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_any_trial_xs
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_result_file_path
 #: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.inner_loop_main_process
-#: of
+#: aiaccel.scheduler.pylocal_scheduler.execute of
 msgid "戻り値の型"
 msgstr ""
 
@@ -156,7 +165,6 @@ msgstr ""
 
 #: aiaccel.scheduler.abci_scheduler.AbciScheduler.get_stats:3
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.change_state_finished_trials:4
-#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file:6
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats:3
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.post_process:3
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.pre_process:3
@@ -181,10 +189,13 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:8
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:8
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:8
-#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats:3 of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:6
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_stats:3
+#: aiaccel.scheduler.pylocal_scheduler.initializer:6 of
 msgid "None"
 msgstr ""
 
@@ -197,7 +208,6 @@ msgstr ""
 #: aiaccel.scheduler.abci_scheduler.AbciScheduler.parse_trial_id
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.check_error
-#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.parse_trial_id
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.resume
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.start_job
@@ -207,6 +217,7 @@ msgstr ""
 #: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp
 #: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp
 #: aiaccel.scheduler.create.create_scheduler aiaccel.scheduler.job.job.Job
+#: aiaccel.scheduler.job.job.Job.get_result_file_path
 #: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create
 #: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed
@@ -225,6 +236,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
@@ -233,8 +245,16 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
-#: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_any_trial_xs
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.parse_trial_id
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_any_trial_xs
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_result_file_path
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.report
+#: aiaccel.scheduler.pylocal_scheduler.execute
+#: aiaccel.scheduler.pylocal_scheduler.initializer of
 msgid "パラメータ"
 msgstr ""
 
@@ -277,7 +297,8 @@ msgstr ""
 msgid "dict[str, str | int | bool]"
 msgstr ""
 
-#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:16 of
+#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler:16
+#: aiaccel.scheduler.pylocal_scheduler.initializer:3 of
 msgid "Path to the configuration file."
 msgstr ""
 
@@ -377,16 +398,6 @@ msgstr ""
 msgid "# TODO: Fix TestAbstractScheduler etc to return None."
 msgstr ""
 
-#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file:1
-#: of
-msgid "Save the results in yaml format."
-msgstr ""
-
-#: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.create_result_file:3
-#: of
-msgid "Any trial od"
-msgstr ""
-
 #: aiaccel.scheduler.abstract_scheduler.AbstractScheduler.get_stats:1 of
 msgid "Updates the number of files in hp(hyper parameter) directories."
 msgstr ""
@@ -445,11 +456,19 @@ msgstr ""
 msgid "Path to configuration file."
 msgstr ""
 
+#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp
+#: aiaccel.scheduler.create.create_scheduler aiaccel.scheduler.job.job.Job of
+msgid "例外"
+msgstr ""
+
 #: aiaccel.scheduler.create.create_scheduler:6 of
+msgid "Causes when specified resource type is invalid."
+msgstr ""
+
+#: aiaccel.scheduler.create.create_scheduler:8 of
 msgid ""
 "`LocalScheduler` , `PylocalScheduler` , or `AbciScheduler` if resource "
-"type is 'local', 'python_local', or 'abci', respectively. Other cases, "
-"None."
+"type is 'local', 'python_local', or 'abci', respectively."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.scheduler.rst:41
@@ -461,12 +480,100 @@ msgstr ""
 msgid "A scheduler class running on a local computer."
 msgstr ""
 
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_any_trial_xs:1
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_any_trial_xs:1 of
+msgid "Gets a parameter list of specific trial ID from Storage object."
+msgstr ""
+
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_any_trial_xs:3
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_any_trial_xs:3
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.report:3 of
+msgid "Trial ID."
+msgstr ""
+
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_any_trial_xs:6
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_any_trial_xs:6 of
+msgid ""
+"A dictionary of parameters. None if the parameter     specified by the "
+"given trial ID is not registered."
+msgstr ""
+
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_any_trial_xs:8
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_any_trial_xs:8 of
+msgid "A dictionary of parameters. None if the parameter"
+msgstr ""
+
+#: aiaccel.scheduler.local_scheduler.LocalScheduler.get_any_trial_xs:9
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_any_trial_xs:9 of
+msgid "specified by the given trial ID is not registered."
+msgstr ""
+
 #: ../../source/api_reference/aiaccel.scheduler.rst:49
 msgid "aiaccel.scheduler.pylocal\\_scheduler module"
 msgstr ""
 
-#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.create_model:3 of
-msgid "Because it does not use the state transition model."
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.create_model:1 of
+msgid ""
+"Creates model object of state machine. :returns: Because it does not use "
+"the state transition model. :rtype: None"
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_result_file_path:1
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_result_file_path:1
+#: of
+msgid "Get a path to the result file."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_result_file_path:3
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_result_file_path:3
+#: of
+msgid "Trial Id."
+msgstr ""
+
+#: aiaccel.scheduler.job.job.Job.get_result_file_path:6
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.get_result_file_path:6
+#: of
+msgid "A Path object which points to the result file."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.report:1 of
+msgid "Saves results in the Storage object."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.report:5 of
+msgid "A dictionary of parameters."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.report:7 of
+msgid "Objective value."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.report:9 of
+msgid "Error string."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.report:11 of
+msgid "Execution start time."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.PylocalScheduler.report:13 of
+msgid "Execution end time."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.execute:1 of
+msgid "Executes the specified function with the specified arguments."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.execute:3 of
+msgid "Arguments."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.execute:6 of
+msgid "Trial ID, arguments, objective value, error string, start time, end time."
+msgstr ""
+
+#: aiaccel.scheduler.pylocal_scheduler.initializer:1 of
+msgid "Initializer for multiprocessing.Pool."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.scheduler.rst:57
@@ -504,6 +611,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:3
@@ -512,6 +620,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:3
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:3
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:3
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:3
 #: of
 msgid "Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'."
@@ -534,6 +643,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:5
@@ -542,6 +652,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:5
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:5
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:5
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:5
 #: of
 msgid "A job object."
@@ -625,7 +736,7 @@ msgid "State transition of 'before_failed'."
 msgstr ""
 
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:1
-#: of
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:1 of
 msgid "State transition of 'before_finished'."
 msgstr ""
 
@@ -670,12 +781,12 @@ msgid "A target is killed or not."
 msgstr ""
 
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:1
-#: of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:1 of
 msgid "State transition of 'conditions_result'."
 msgstr ""
 
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:8
-#: of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:8 of
 msgid "A target is in result files or not."
 msgstr ""
 
@@ -725,11 +836,6 @@ msgstr ""
 #: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:8
 #: of
 msgid "A reference to a random generator. Defaults to None."
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp
-#: aiaccel.scheduler.job.job.Job of
-msgid "例外"
 msgstr ""
 
 #: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:12
@@ -972,6 +1078,14 @@ msgstr ""
 msgid "Schedule to run this execution."
 msgstr ""
 
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:1 of
+msgid "Create result file."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:3 of
+msgid "Job object."
+msgstr ""
+
 #: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm:1
 #: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling:1
 #: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling:1 of
@@ -991,10 +1105,4 @@ msgstr ""
 #: of
 msgid "An algorithm to select hyper parameters."
 msgstr ""
-
-#~ msgid "State transition of 'change_trial_state'."
-#~ msgstr ""
-
-#~ msgid "Resource type ('abci' or 'local')."
-#~ msgstr ""
 

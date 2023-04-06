@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-22 14:37+0900\n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -62,17 +64,20 @@ msgid "Config"
 msgstr ""
 
 #: aiaccel.cli.csv_writer.CsvWriter:14 of
-msgid "Directory path to the workspace."
+msgid "Workspace object."
 msgstr ""
 
-#: aiaccel.cli.csv_writer.CsvWriter:16 aiaccel.cli.csv_writer.CsvWriter:22
-#: aiaccel.cli.plot.Plotter:10 aiaccel.cli.view.Viewer:10
-#: aiaccel.cli.view.Viewer:16 of
-msgid "Path"
+#: aiaccel.cli.csv_writer.CsvWriter:16 of
+msgid "Workspace"
 msgstr ""
 
 #: aiaccel.cli.csv_writer.CsvWriter:20 of
 msgid "File path to the csv file named 'results.csv'."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:22 aiaccel.cli.plot.Plotter:10
+#: aiaccel.cli.view.Viewer:10 aiaccel.cli.view.Viewer:16 of
+msgid "Path"
 msgstr ""
 
 #: aiaccel.cli.csv_writer.CsvWriter:26 of
@@ -164,6 +169,14 @@ msgid "Parses command line options and reports the result."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.cli.rst:32
+msgid "aiaccel.cli.set\\_result module"
+msgstr ""
+
+#: aiaccel.cli.set_result.main:1 of
+msgid "Writes the result of a trial to a file."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.cli.rst:40
 msgid "aiaccel.cli.start module"
 msgstr ""
 
@@ -205,7 +218,7 @@ msgstr ""
 msgid "Parses command line options and executes optimization."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.cli.rst:40
+#: ../../source/api_reference/aiaccel.cli.rst:48
 msgid "aiaccel.cli.view module"
 msgstr ""
 
@@ -223,10 +236,7 @@ msgid ""
 "theterminal."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.cli.rst:48
+#: ../../source/api_reference/aiaccel.cli.rst:56
 msgid "Module contents"
 msgstr ""
-
-#~ msgid "aiaccel.cli.creation\\_report module"
-#~ msgstr ""
 
