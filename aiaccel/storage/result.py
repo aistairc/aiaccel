@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.sql import func
 
 from aiaccel.storage import Abstract, ResultTable
 from aiaccel.util import retry
@@ -102,99 +102,18 @@ class Result(Abstract):
         Returns:
             list: result values
         """
-        bests = []
-
-        objectives = self.get_objectives()
+        objectives = np.array(self.get_objectives())
+        bests = np.zeros((len(goals), len(objectives[0])))
 
         for i in range(len(goals)):
-            best_values = []
-
             if goals[i].lower() == "maximize":
-                best_value = float("-inf")
-                for objective in objectives:
-                    if best_value < objective[i]:
-                        best_value = objective[i]
-                    best_values.append(best_value)
+                bests[i, :] = np.max(objectives[:, i], axis=0)
             elif goals[i].lower() == "minimize":
-                best_value = float("inf")
-                for objective in objectives:
-                    if best_value > objective[i]:
-                        best_value = objective[i]
-                    best_values.append(best_value)
+                bests[i, :] = np.min(objectives[:, i], axis=0)
             else:
-                continue
+                raise ValueError("Invalid goal value.")
 
-            bests.append(best_values)
-
-        return bests
-
-    # # @retry(_MAX_NUM=60, _DELAY=1.0)
-    # def get_any_trial_objective_and_best_value(self, trial_id: int, goal: str) -> tuple:
-    #     """Obtains the sorted result.
-
-    #     Returns:
-    #         tuple: objective, best_value
-    #     """
-    #     with self.create_session() as session:
-    #         data = (
-    #             session.query(ResultTable.trial_id, ResultTable.objective)
-    #             .with_for_update(read=True)
-    #             .filter(ResultTable.trial_id <= trial_id)
-    #             .order_by(ResultTable.trial_id)
-    #             .all()
-    #         )
-
-    #     if not data:
-    #         return None, None
-
-    #     best_value = data[0][1] if goal.lower() == "maximize" else float("inf")
-    #     objective_and_best_value = {}
-
-    #     for trial_id_, objective in data:
-    #         if goal.lower() == "maximize":
-    #             best_value = max(best_value, objective)
-    #         else:
-    #             best_value = min(best_value, objective)
-    #         objective_and_best_value[trial_id_] = (objective, best_value)
-
-    #     if trial_id not in objective_and_best_value:
-    #         return None, None
-
-    #     return objective_and_best_value[trial_id]
-
-    # @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_objective_and_best_value(self, trial_id: int, goal: str, objective_y_index: int) -> tuple:
-        """Obtains the sorted result.
-
-        Returns:
-            tuple: objective, best_value
-        """
-        with self.create_session() as session:
-            data = (
-                session.query(ResultTable.trial_id, ResultTable.objective)
-                .with_for_update(read=True)
-                .filter(ResultTable.trial_id <= trial_id)
-                .order_by(ResultTable.trial_id)
-                .all()
-            )
-
-        if not data:
-            return None, None
-        
-        best_value = float("-inf") if goal.lower() == "maximize" else float("inf")
-        objective_and_best_value = {}
-
-        for trial_id_, objective in data:
-            if goal.lower() == "maximize":
-                best_value = max(objective[objective_y_index], best_value)
-            else:
-                best_value = min(objective[objective_y_index], best_value)
-            objective_and_best_value[trial_id_] = (objective[objective_y_index], best_value)
-
-        if trial_id not in objective_and_best_value:
-            return None, None
-
-        return objective_and_best_value[trial_id]
+        return [row[0] for row in bests.tolist()]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_result_trial_id_list(self) -> list[Any] | None:
@@ -214,6 +133,24 @@ class Result(Abstract):
             return None
 
         return [d.trial_id for d in data]
+
+    def get_any_trial_objective_and_best_value(self, trial_id: int, goals: list[str]) -> tuple[list[Any], list[Any]]:
+        """Obtain the results of an arbitrary trial.
+
+        Args:
+            trial_id (int): Any trial id
+            column_idx (int): Any column index of objectives and best_values
+
+        Returns:
+            int | float | None:
+        """
+        objectives: list[Any] = self.get_any_trial_objective(trial_id)
+        if objectives is None:
+            return None, None
+
+        best_values = self.get_bests(goals)
+
+        return objectives, best_values
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def all_delete(self) -> None:

@@ -41,7 +41,7 @@ class Workspace:
 
     """
 
-    def __init__(self, base_path: str):
+    def __init__(self, base_path: Path | str):
         self.path = Path(base_path).resolve()
 
         self.error = self.path / dict_error

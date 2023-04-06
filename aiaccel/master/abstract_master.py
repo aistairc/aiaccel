@@ -87,8 +87,6 @@ class AbstractMaster(AbstractModule):
         Raises:
             ValueError: Causes when an invalid goal is set.
         """
-        if not self.check_finished():
-            return
 
         self.evaluate()
 
@@ -132,7 +130,7 @@ class AbstractMaster(AbstractModule):
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
         """
-        self.get_each_state_count()
+        self.update_each_state_count()
 
         if self.hp_finished >= self.trial_number:
             return False

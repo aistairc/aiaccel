@@ -32,12 +32,10 @@ class CsvWriter:
     def __init__(self, config_path: str) -> None:
         self.config = Config(config_path)
         self.workspace = Workspace(self.config.workspace.get())
-        self.fp = self.workspace.path / 'results.csv'
+        self.fp = self.workspace.retults_csv_file
         self.trialid = TrialId(self.config)
         self.storage = Storage(self.workspace.path)
-        self.lock_file = {
-            'result_txt': str(self.workspace.path / 'lock' / 'result_txt')
-        }
+        self.lock_file = {'result_txt': str(self.workspace.lock / 'result_txt')}
 
     def _get_zero_padding_trial_id(self, trial_id: int) -> str:
         """Gets string of trial id padded by zeros.

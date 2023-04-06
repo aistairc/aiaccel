@@ -34,9 +34,9 @@ class AbstractEvaluator(object):
         self.options = options
         self.config_path = Path(self.options['config']).resolve()
         self.config = Config(str(self.config_path))
-        self.workspace = Workspace(Path(self.config.workspace.get()).resolve())
+        self.workspace = Workspace(self.config.workspace.get())
         self.dict_lock = self.workspace.lock
-        self.hp_result: dict[str, Any] | None = None
+        self.hp_result: list[dict[str, Any]] | None = None
         self.storage = Storage(self.workspace.path)
         if isinstance(self.config.goal.get(), str):
             self.goals = [self.config.goal.get()]
@@ -66,8 +66,11 @@ class AbstractEvaluator(object):
             None
         """
         logger = logging.getLogger('root.master.evaluator')
-        logger.info('Best hyperparameter is followings:')
-        logger.info(self.hp_result)
+        if self.hp_result:
+            logger.info('Best hyperparameter is followings:')
+            logger.info(self.hp_result)
+        else:
+            logger.info('Evaluation not available (no results in storage.db).')
 
     def save(self) -> None:
         """Save current results to a file.

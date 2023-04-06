@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-03-22 14:37+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -63,7 +63,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:3
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:3
@@ -95,7 +94,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
@@ -126,7 +124,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:5
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:5
@@ -158,7 +155,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
@@ -189,7 +185,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:8
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:8
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:8
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:8 of
 msgid "None"
@@ -300,11 +295,6 @@ msgstr ""
 msgid "Ab object."
 msgstr ""
 
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:1
-#: of
-msgid "State transition of 'change_trial_state'."
-msgstr ""
-
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:1
 #: of
 msgid "State transition of 'conditions_confirmed'."
@@ -352,4 +342,7 @@ msgstr ""
 #: ../../source/api_reference/aiaccel.scheduler.job.model.rst:32
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "State transition of 'change_trial_state'."
+#~ msgstr ""
 

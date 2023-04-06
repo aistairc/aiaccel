@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from undecorated import undecorated
@@ -99,12 +100,9 @@ def test_get_objectives():
     assert objectives == data
 
 
-# get_bests
 @t_base()
 def test_get_bests():
     storage = Storage(ws.path)
-    assert storage.result.get_bests('invalid') == []
-
     objectives = [[1], [-5], [3], [1.23]]
     ids = range(len(objectives))
 
@@ -114,52 +112,16 @@ def test_get_bests():
             objective=objectives[i]
         )
 
+    with pytest.raises(ValueError):
+        storage.result.get_bests(['invalid'])
+
     bests = storage.result.get_bests(['minimize'])
     for i in range(len(bests)):
-        assert bests[i][0] == objectives[i][0]
+        assert bests[i] == np.min(objectives)
 
     bests = storage.result.get_bests(['maximize'])
     for i in range(len(bests)):
-        assert bests[i][0] == objectives[i][0]
-
-
-# get_any_trial_objective_and_best_value
-@t_base()
-def test_get_any_trial_objective_and_best_value():
-    storage = Storage(ws.path)
-
-    objectives = [[1], [-5], [3], [1.23], [0.01]]
-    ids = range(len(objectives))
-
-    for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
-
-    assert storage.result.get_any_trial_objective_and_best_value(2, 'minimize', 0) == (3, -5)
-    assert storage.result.get_any_trial_objective_and_best_value(3, 'maximize', 0) == (1.23, 3)
-
-
-# get_any_trial_objective_and_best_value (multi-objective)
-@t_base()
-def test_get_any_trial_objective_and_best_value_mult_objective():
-    storage = Storage(ws.path)
-
-    objectives = [[1, 0], [-5, 6], [3, 8], [1.23, 5.9], [0.01, -1.2]]
-    ids = range(len(objectives))
-
-    for i in range(len(objectives)):
-        storage.result.set_any_trial_objective(
-            trial_id=ids[i],
-            objective=objectives[i]
-        )
-
-    assert storage.result.get_any_trial_objective_and_best_value(2, 'minimize', 0) == (3, -5)   # 1st objective, 2nd best value
-    assert storage.result.get_any_trial_objective_and_best_value(3, 'maximize', 1) == (5.9, 8)  # 1st objective, 2nd best value
-
-
-
+        assert bests[i] == np.max(objectives)
 
 # get_result_trial_id_list
 @t_base()
