@@ -147,6 +147,5 @@ class TestAbstractModule(BaseTest):
             str_to_logging_level(self.module.config.logger.stream_level.master),
             'Abstract   '
         )
-        self.module.create_numpy_random_generator()
         self.module._serialize(1)
         assert self.module.resume() is None
