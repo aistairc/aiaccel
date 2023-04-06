@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from tensorboardX import SummaryWriter
 
 from aiaccel.common import goal_maximize
