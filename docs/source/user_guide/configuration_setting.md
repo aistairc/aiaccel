@@ -399,25 +399,3 @@ Defaults to "DEBUG".
 
 A logging level for a stream output of scheduler module.
 Defaults to "DEBUG".
-
-
-<br>
-
-## **verification:**
-
-### is_verified (bool, optional):
-最適化結果の verification を行うかを設定します．
-デフォルトでは flase が設定されています．
-
-Defaults to false.
-
-### condition (list, optional):
-Verification の条件の配列を設定します．
-配列の各要素には，以下の項目が設定されている必要があります．
-- **loop** - Verification 対象となるジョブの ID です．
-- **minimum** - 試行回数 loop 回までに計算された最も良い目的関数の値として許容される値の下限です．
-- **maximum** - 試行回数 loop 回までに計算された最も良い目的関数の値として許容される値の下限です．
-
-デフォルトでは，[] (空の配列) が設定されています．
-
-Defaults to [] (an empty list).

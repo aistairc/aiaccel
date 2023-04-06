@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-06 17:28+0900\n"
+"POT-Creation-Date: 2023-03-28 10:51+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -459,30 +461,4 @@ msgstr ""
 #: ../../source/user_guide/basic_usage.md:549
 msgid "ローカル環境で実施する場合、 `job_script_preamble.sh` は不要です。 記述した内容は動作に反映されません。"
 msgstr ""
-
-#~ msgid "sequential"
-#~ msgstr ""
-
-#~ msgid "catogoricalを使用できるのは、最適化アルゴリズムが `Random` と `TPE` の場合のみです。"
-#~ msgstr ""
-
-#~ msgid "ordinalを使用できるのは、最適化アルゴリズムが `RandomSearch` と `TPE` の場合のみです。"
-#~ msgstr ""
-
-#~ msgid "ユーザープログラムの作成 最適化対象の処理を作成します。ここでは、作成済みモデルをaiaccelで最適化するための変更方法を記述します。"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Wrapperの作成 "
-#~ "必要に応じてwrapperプログラムを作成します。aiaccelはユーザープログラムのwrapperを作成するためのAPIを提供します。"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "job_script_preamble.shの作成 `job_script_preamble.sh` "
-#~ "は、ABCIにジョブを投入するためのバッチファイルのベースファイルです。 "
-#~ "このファイルには事前設定を記述します。ここに記述した設定が全てのジョブに適用されます。"
-#~ msgstr ""
-
-#~ msgid "最適化実行 プロジェクトフォルダに移動し、次のコマンドを実行します。"
-#~ msgstr ""
 

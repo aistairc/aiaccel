@@ -13,7 +13,7 @@ from aiaccel.util import create_yaml, interprocess_lock_file, load_yaml
 
 WORK_SUB_DIRECTORIES = [
     'abci_output', 'alive', 'hp', 'hp/finished', 'hp/ready', 'hp/running',
-    'lock', 'log', 'resource', 'result', 'runner', 'state', 'verification'
+    'lock', 'log', 'resource', 'result', 'runner', 'state'
 ]
 WORK_FILES = [
     'config.json',
