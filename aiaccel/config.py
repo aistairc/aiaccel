@@ -77,6 +77,7 @@ class ParameterConfig:
     log: Optional[bool]
     base: Optional[int]
     step: Optional[Union[int, float]]
+    num_numeric_choices: Optional[int]
 
 
 @dataclass
