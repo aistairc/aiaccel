@@ -5,9 +5,9 @@ from typing import Any
 
 import fasteners
 
+from aiaccel.config import load_config
 from aiaccel.common import (file_hp_count, file_hp_count_lock,
                             file_hp_count_lock_timeout)
-from aiaccel.config import Config
 from aiaccel.workspace import Workspace
 
 
@@ -32,10 +32,10 @@ class TrialId:
 
     def __init__(self, config_path: str | Path) -> None:
         self.config_path = Path(config_path).resolve()
-        self.config = Config(str(self.config_path))
+        self.config = load_config(str(self.config_path))
 
-        self.workspace = Workspace(self.config.workspace.get())
-        self.name_length = self.config.name_length.get()
+        self.workspace = Workspace(self.config.generic.workspace)
+        self.name_length = self.config.job_setting.name_length
         self.file_hp_count_fmt = f'%0{self.name_length}d'
 
         self.count_path = self.workspace.hp / file_hp_count

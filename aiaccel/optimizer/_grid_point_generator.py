@@ -482,7 +482,7 @@ class GridPointGenerator:
         indices.append(remain)
         next_grid_point = []
         for index, param in zip(indices, self._grid_condition_collection):
-            next_grid_point.append(param.choices[index])
+            next_grid_point.append(param.choices[index.item()])
         return next_grid_point
 
     def _get_grid_point_uniformly(self, trial_id: int) -> list[GridValueType]:

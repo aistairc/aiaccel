@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from omegaconf.dictconfig import DictConfig
 import numpy as np
-
-from aiaccel.config import Config
 
 
 class AbstractSchedulingAlgorithm(object):
@@ -17,7 +16,7 @@ class AbstractSchedulingAlgorithm(object):
         config (ConfileWrapper): A configuration object.
     """
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: DictConfig) -> None:
         self.config = config
 
     def select_hp(

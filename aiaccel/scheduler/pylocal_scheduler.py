@@ -5,8 +5,10 @@ from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
 from subprocess import run
 from typing import Any
+from aiaccel.config import load_config
 
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+
 from aiaccel.scheduler import AbstractScheduler
 from aiaccel.util import get_time_now
 from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
@@ -24,12 +26,12 @@ class PylocalScheduler(AbstractScheduler):
 
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
-        super().__init__(options)
-        self.run = Run(self.config_path)
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
+        self.run = Run(self.config.config_path)
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
-        self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config_path,))
+        self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config.config_path,))
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -127,7 +129,7 @@ class PylocalScheduler(AbstractScheduler):
         args = {
             'file': self.workspace.get_any_result_file_path(trial_id),
             'trial_id': str(trial_id),
-            'config': self.config_path,
+            'config': self.config.config_path,
             'start_time': start_time,
             'end_time': end_time,
             'error': error
@@ -170,18 +172,20 @@ def initializer(config_path: str | Path) -> None:
     """
     global user_func, workspace
 
-    config = Config(config_path)
+    config = load_config(config_path)
 
     # Load the specified module from the specified python program.
-    spec = spec_from_file_location("user_module", config.python_file.get())
+    spec = spec_from_file_location("user_module", config.generic.python_file)
     if spec is None:
         raise ValueError("Invalid python_path.")
     module = module_from_spec(spec)
     if spec.loader is None:
         raise ValueError("spec.loader not defined.")
     spec.loader.exec_module(module)
-    user_func = getattr(module, config.function.get())
-    workspace = Path(config.workspace.get()).resolve()
+
+    user_func = getattr(module, config.generic.function)
+
+    workspace = Path(config.generic.workspace).resolve()
 
 
 def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:

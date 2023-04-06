@@ -37,15 +37,15 @@ class HyperParameter(object):
     Attributes:
         _raw_dict (dict): A parameter dictionary in a configuration file.
         name (str): A parameter name.
-        type (str): A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
-            'ORDINAL'.
+        type (str): A parameter type any of 'uniform_int', 'uniform_float',
+            'categorical' and 'ordinal'.
         log (bool): A parameter is logarithm or not.
         lower (float | int): A lower value of a parameter.
         upper (float | int): A upper value of a parameter.
         choices (list[float, int, str]): This is set as a list of a parameter,
-            when a parameter type is 'CATEGORICAL'.
+            when a parameter type is 'categorical'.
         sequence (list[float, int, str]): This is set as a list of a parameter,
-            when a parameter type is 'ORDINAL'.
+            when a parameter type is 'ordinal'.
         initial (float | int | str): A initial value. If this is set, this
             value is evaluated at first run.
         q (float | int): A quantization factor.

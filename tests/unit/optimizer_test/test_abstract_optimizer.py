@@ -1,10 +1,11 @@
 import asyncio
-import numpy as np
 import os
 import time
 from unittest.mock import patch
 
+import numpy as np
 import pytest
+
 from aiaccel.optimizer import AbstractOptimizer
 from tests.base_test import BaseTest
 
@@ -24,14 +25,7 @@ class TestAbstractOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': 0,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        self.optimizer = AbstractOptimizer(options)
+        self.optimizer = AbstractOptimizer(self.load_config_for_test(self.configs["config.json"]))
         yield
         self.optimizer = None
 
@@ -79,7 +73,7 @@ class TestAbstractOptimizer(BaseTest):
 
     def test_get_pool_size(self, monkeypatch: pytest.MonkeyPatch) -> None:
         with monkeypatch.context() as m:
-            m.setattr(self.optimizer.config.num_node, 'get', lambda: 10)
+            self.optimizer.config.resource.num_node = 10
             m.setattr(self.optimizer.storage, 'get_num_running', lambda: 1)
             m.setattr(self.optimizer.storage, 'get_num_ready', lambda: 1)
             assert self.optimizer.get_pool_size() == 10 - 1 - 1

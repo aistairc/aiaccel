@@ -1,7 +1,9 @@
 {
   "generic": {
     "workspace": "/tmp/work",
-    "job_command": "python original_main.py"
+    "job_command": "python original_main.py",
+    "python_file": "original_main.py",
+    "function": "main"
   },
   "resource": {
     "type": "local",

@@ -21,7 +21,7 @@ class LocalScheduler(AbstractScheduler):
         super().get_stats()
 
         res = ps2joblist()
-        command = self.config.job_command.get()
+        command = self.config.generic.job_command
         self.stats = []
         trial_id_list = [job.trial_id for job in self.jobs]
 

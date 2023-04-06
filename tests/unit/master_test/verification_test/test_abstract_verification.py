@@ -9,27 +9,11 @@ from tests.base_test import BaseTest
 class TestAbstractVerification(BaseTest):
 
     def test_init(self):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-
-        verification = AbstractVerification(options)
+        verification = AbstractVerification(self.load_config_for_test(self.configs["config.json"]))
         assert verification.is_verified
 
-    def test_verify(self, setup_hp_finished, work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-
-        verification = AbstractVerification(options)
+    def test_verify(self, clean_work_dir, setup_hp_finished, work_dir):
+        verification = AbstractVerification(self.load_config_for_test(self.configs["config.json"]))
         verification.is_verified = False
         assert verification.verify() is None
         verification.is_verified = True
@@ -64,15 +48,7 @@ class TestAbstractVerification(BaseTest):
         setup_hp_finished,
         work_dir
     ):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-
-        verification = AbstractVerification(options)
+        verification = AbstractVerification(self.load_config_for_test(self.configs["config.json"]))
         setup_hp_finished(10)
 
         for i in range(10):
@@ -108,28 +84,14 @@ class TestAbstractVerification(BaseTest):
                 assert verification.make_verification(0, 0) is None
 
     def test_print(self):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        verification = AbstractVerification(options)
+        verification = AbstractVerification(self.load_config_for_test(self.configs["config.json"]))
         verification.is_verified = False
         assert verification.print() is None
         verification.is_verified = True
         assert verification.print() is None
 
-    def test_save(self, work_dir):
-        options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'master'
-        }
-        verification = AbstractVerification(options)
+    def test_save(self, clean_work_dir, setup_hp_finished, work_dir):
+        verification = AbstractVerification(self.load_config_for_test(self.configs["config.json"]))
         verification.is_verified = False
         assert verification.save(1) is None
         verification.is_verified = True
