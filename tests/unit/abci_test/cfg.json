@@ -2,8 +2,6 @@
   "generic": {
     "init_fail_count": 100,
     "name_length": 6,
-    "project_name": "sphere",
-    "randseed": 1,
     "workspace": "./work",
     "user_program_name": "user.py",
     "objective_function_name": "main"
@@ -37,13 +35,11 @@
     "expire_timeout": 10,
     "finished_retry": 3,
     "finished_timeout": 10,
-    "job_loop_duration": 0.5,
     "job_retry": 2,
     "job_timeout": 10,
     "kill_retry": 3,
     "kill_timeout": 30,
     "result_retry": 1,
-    "result_timeout": 600,
     "runner_retry": 3,
     "runner_timeout": 10,
     "running_retry": 3,
@@ -53,51 +49,34 @@
   "resource": {
     "type": "local",
     "num_node": 1,
-    "$type": "ABCI",
+    "$type": "abci",
     "$num_node": 4
   },
   "ABCI": {
     "job_script_preamble": "wrapper_abci.sh",
     "group": "gaa"
   },
-  "hyperparameter": {
+  "optimize": {
     "goal": "minimize",
-    "hyperparameter_file": "hyperparameter.json",
     "trial_number": 20,
-    "$parallelism": 2,
-    "grid_search_option": [
+    "parameters": [
       {
         "name": "x1",
-        "step": 0.1,
-        "log": true,
-        "base": 10
+        "type": "uniform_float",
+        "log": false,
+        "lower": 0.0,
+        "upper": 5.0,
+        "initial": 0.0
       },
       {
         "name": "x2",
-        "step": 1.0,
-        "log": false
+        "type": "uniform_float",
+        "log": false,
+        "lower": 0.0,
+        "upper": 5.0,
+        "initial": 0.0
       }
-    ],
-    "ConfigSpace_hyperparameter": {
-      "hyperparameters": [
-        {
-          "name": "x1",
-          "type": "uniform_float",
-          "log": false,
-          "lower": 0.0,
-          "upper": 5.0,
-          "initial": 0.0
-        },
-        {
-          "name": "x2",
-          "type": "uniform_float",
-          "log": false,
-          "lower": 0.0,
-          "upper": 5.0,
-          "initial": 0.0
-        }
-      ]
-    }
+    ]
   },
   "verification": {
     "is_verified": true,

@@ -6,19 +6,21 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+from omegaconf.errors import MissingMandatoryValue
 
-from aiaccel.config import Config
+from aiaccel.config import load_config
+from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 from aiaccel.optimizer import GridOptimizer
 from aiaccel.optimizer import generate_grid_points
 from aiaccel.optimizer import get_grid_options
-from aiaccel.parameter import HyperParameter, load_parameter
 from tests.base_test import BaseTest
 
 
 def test_get_grid_options():
     test_data_dir = Path(__file__).resolve().parent.parent.parent.joinpath('test_data')
-    grid_config_json = test_data_dir.joinpath('grid_config.json')
-    config_grid = Config(grid_config_json)
+    grid_config_json = test_data_dir.joinpath('config_grid.json')
+    config_grid = load_config(grid_config_json)
+    config_grid.resume = None
 
     base, log, step = get_grid_options('x1', config_grid)
     assert base == 10
@@ -32,32 +34,32 @@ def test_get_grid_options():
 
     # no step
     grid_config_json = test_data_dir / 'config_grid_no_step.json'
-    config_grid = Config(grid_config_json)
-    with pytest.raises(KeyError):
+    config_grid = load_config(grid_config_json)
+    config_grid.resume = None
+
+    with pytest.raises(MissingMandatoryValue):
         base, log, step = get_grid_options('x1', config_grid)
 
     # no log
     grid_config_json = test_data_dir / 'config_grid_no_log.json'
-    config_grid = Config(grid_config_json)
-    with pytest.raises(KeyError):
+    config_grid = load_config(grid_config_json)
+    config_grid.resume = None
+
+    with pytest.raises(MissingMandatoryValue):
         base, log, step = get_grid_options('x1', config_grid)
 
     # no base
     grid_config_json = test_data_dir / 'config_grid_no_base.json'
-    config_grid = Config(grid_config_json)
-    with pytest.raises(KeyError):
-        base, log, step = get_grid_options('x1', config_grid)
+    config_grid = load_config(grid_config_json)
+    config_grid.resume = None
 
-    # base true/false
-    grid_config_json = test_data_dir / 'config_grid_base.json'
-    config_grid = Config(grid_config_json)
-    with pytest.raises(KeyError):
+    with pytest.raises(MissingMandatoryValue):
         base, log, step = get_grid_options('x1', config_grid)
 
 
 def test_generate_grid_points(grid_load_test_config):
     config = grid_load_test_config()
-    params = load_parameter(config.hyperparameters.get())
+    params = HyperParameterConfiguration(config.optimize.parameters)
     for p in params.get_parameter_list():
         generate_grid_points(p, config)
 
@@ -121,16 +123,9 @@ class TestGridOptimizer(BaseTest):
         self,
         create_tmp_config: Callable[[Path], Path]
     ) -> Generator[None, None, None]:
-        self.grid_config_json = create_tmp_config(self.grid_config_json)
-        options = {
-            'config': self.grid_config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
+        self.grid_config_json = self.load_config_for_test(self.configs['config_grid.json'])
+        self.optimizer = GridOptimizer(self.grid_config_json)
 
-        self.optimizer = GridOptimizer(options)
         self.optimizer.pre_process()
         yield
         self.optimzer = None

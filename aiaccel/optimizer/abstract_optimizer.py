@@ -4,10 +4,11 @@ import copy
 from typing import Any
 
 from numpy import str_
+from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import is_multi_objective
 from aiaccel.module import AbstractModule
-from aiaccel.parameter import load_parameter
+from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.util import TrialId, str_to_logging_level
 
 
@@ -32,25 +33,22 @@ class AbstractOptimizer(AbstractModule):
         trial_id (TrialId): TrialId object.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        self.options = options
-        self.options['process_name'] = 'optimizer'
-        super().__init__(self.options)
-
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config, 'optimizer')
         self.set_logger(
             'root.optimizer',
-            self.workspace.log / self.config.optimizer_logfile.get(),
-            str_to_logging_level(self.config.optimizer_file_log_level.get()),
-            str_to_logging_level(self.config.optimizer_stream_log_level.get()),
+            self.workspace.log / self.config.logger.file.optimizer,
+            str_to_logging_level(self.config.logger.log_level.optimizer),
+            str_to_logging_level(self.config.logger.stream_level.optimizer),
             'Optimizer'
         )
 
-        self.trial_number = self.config.trial_number.get()
+        self.trial_number = self.config.optimize.trial_number
         self.hp_ready = 0
         self.hp_running = 0
         self.hp_finished = 0
         self.num_of_generated_parameter = 0
-        self.params = load_parameter(self.config.hyperparameters.get())
+        self.params = HyperParameterConfiguration(self.config.optimize.parameters)
         self.trial_id = TrialId(self.config)
         self.all_parameters_generated = False
 
@@ -156,7 +154,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             int: Pool size.
         """
-        max_pool_size = self.config.num_node.get()
+        max_pool_size = self.config.resource.num_node
         hp_running = self.storage.get_num_running()
         hp_ready = self.storage.get_num_ready()
         available_pool_size = max_pool_size - hp_running - hp_ready
@@ -182,7 +180,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.create_numpy_random_generator()
+        self.write_random_seed_to_debug_log()
         self.resume()
 
     def post_process(self) -> None:
@@ -219,7 +217,7 @@ class AbstractOptimizer(AbstractModule):
             f'hp_ready: {self.hp_ready}, '
             f'hp_running: {self.hp_running}, '
             f'hp_finished: {self.hp_finished}, '
-            f'total: {self.config.trial_number.get()}, '
+            f'total: {self.config.optimize.trial_number}, '
             f'pool_size: {pool_size}'
         )
 
@@ -243,14 +241,14 @@ class AbstractOptimizer(AbstractModule):
             None
         """
         if (
-            self.options['resume'] is not None and
-            self.options['resume'] > 0
+            self.config.resume is not None and
+            self.config.resume > 0
         ):
-            self.storage.rollback_to_ready(self.options['resume'])
-            self.storage.delete_trial_data_after_this(self.options['resume'])
-            self.trial_id.initial(num=self.options['resume'])
-            self._deserialize(self.options['resume'])
-            self.trial_number = self.config.trial_number.get()
+            self.storage.rollback_to_ready(self.config.resume)
+            self.storage.delete_trial_data_after_this(self.config.resume)
+            self.trial_id.initial(num=self.config.resume)
+            self._deserialize(self.config.resume)
+            self.trial_number = self.config.optimize.trial_number
 
     def cast(self, params: list[dict[str, Any]]) -> list[Any] | None:
         """Casts types of parameter values to appropriate tepes.

@@ -14,6 +14,7 @@ mako
 monotonic
 myst-parser
 natsort
+omegaconf
 optuna>=3.0.0
 pluggy
 pycodestyle

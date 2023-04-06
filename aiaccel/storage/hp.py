@@ -105,6 +105,25 @@ class Hp(Abstract):
         return {p.param_name: p.param_value for p in params}
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
+    def get_num_params(self) -> int:
+        """ Get number of generated parameters.
+
+        Args:
+            None
+
+        Returns:
+            int: Number of generated parameters.
+        """
+        with self.create_session() as session:
+            hp = (
+                session.query(HpTable)
+                .with_for_update(read=True)
+                .all()
+            )
+
+        return len(hp)
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def all_delete(self) -> None:
         """Clear table
 

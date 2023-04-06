@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from omegaconf.dictconfig import DictConfig
 from tensorboardX import SummaryWriter
 
 from aiaccel.common import goal_maximize
@@ -19,9 +20,8 @@ class TensorBoard(AbstractModule):
         writer (SummaryWriter): A SummaryWriter object.
         buff (Buffer): A Buffer object.
     """
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        self.options = options
-        super().__init__(self.options)
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config, 'tensorboard')
 
         self.writer = SummaryWriter(str(self.workspace.tensorboard))
 

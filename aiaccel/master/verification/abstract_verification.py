@@ -4,8 +4,11 @@ import copy
 import logging
 from typing import Any
 
+from omegaconf import OmegaConf
+from omegaconf.dictconfig import DictConfig
+
 from aiaccel.common import extension_verification
-from aiaccel.config import Config, is_multi_objective
+from aiaccel.config import is_multi_objective
 from aiaccel.storage import Storage
 from aiaccel.util import create_yaml
 from aiaccel.workspace import Workspace
@@ -35,21 +38,17 @@ class AbstractVerification(object):
         storage (Storage): Storage object.
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
+    def __init__(self, config: DictConfig) -> None:
         # === Load config file===
-        self.options = options
-        self.config = Config(self.options['config'])
-        self.workspace = Workspace(self.config.workspace.get())
+        self.config = config
+        self.workspace = Workspace(self.config.generic.workspace)
         self.is_verified: bool = False
         self.finished_loop = None
         self.condition: Any = None
         self.verification_result: Any = None
         self.load_verification_config()
         self.storage = Storage(self.workspace.path)
-        if isinstance(self.config.goal.get(), str):
-            self.goals = [self.config.goal.get()]
-        else:
-            self.goals = self.config.goal.get()
+        self.goals = [item.value for item in self.config.optimize.goal]
 
     def verify(self) -> None:
         """Run a verification.
@@ -74,11 +73,9 @@ class AbstractVerification(object):
 
     def make_verification(self, index: int, loop: int) -> None:
         """Run a verification and save the result.
-
         Args:
             index (int): An index of verifications.
             loop (int): A loop count of Master.
-
         Returns:
             None
         """
@@ -102,17 +99,15 @@ class AbstractVerification(object):
 
     def load_verification_config(self) -> None:
         """Load configurations about verification.
-
         Returns:
             None
         """
-        self.is_verified = self.config.is_verified.get()
-        self.condition = self.config.condition.get()
-        self.verification_result = copy.copy(self.condition)
+        self.is_verified = self.config.verification.is_verified
+        self.condition = self.config.verification.condition
+        self.verification_result = OmegaConf.to_container(copy.copy(self.condition))
 
     def print(self) -> None:
         """Print current verifications result.
-
         Returns:
             None
         """
@@ -125,10 +120,8 @@ class AbstractVerification(object):
 
     def save(self, name: str | int) -> None:
         """Save current verifications result to a file.
-
         Args:
             name (int):
-
         Returns:
             None
         """

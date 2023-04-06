@@ -37,7 +37,6 @@ job_setting:
   expire_timeout: 60
   finished_retry: 3
   finished_timeout: 60
-  job_loop_duration: 0.5
   job_retry: 2
   job_timeout: 60
   kill_retry: 3

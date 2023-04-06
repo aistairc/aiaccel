@@ -21,10 +21,10 @@ class AbciModel(AbstractModel):
             param_content=obj.content,
             output_file_path=obj.get_result_file_path(),
             error_file_path=obj.command_error_output,
-            config_file_path=obj.config_path,
+            config_file_path=obj.config.config_path,
             batch_file=obj.to_file,
-            job_script_preamble=obj.config.job_script_preamble.get(),
-            command=obj.config.job_command.get(),
+            job_script_preamble=obj.config.ABCI.job_script_preamble,
+            command=obj.config.generic.job_command,
             dict_lock=obj.workspace.lock
         )
 

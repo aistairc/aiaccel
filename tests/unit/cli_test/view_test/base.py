@@ -1,14 +1,15 @@
 import pathlib
 from functools import wraps
 
-from aiaccel.config import Config
+from aiaccel.config import load_config
+
 from aiaccel.workspace import Workspace
 
 # db_path = pathlib.Path("test.db")
 # ws = Workspace("test_work")
 config_path = pathlib.Path('tests/test_data/config.json')
-config = Config(config_path)
-ws = Workspace(config.workspace.get())
+config = load_config(config_path)
+ws = Workspace(config.generic.workspace)
 db_path = pathlib.Path("test.db")
 
 

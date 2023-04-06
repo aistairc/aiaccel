@@ -9,6 +9,8 @@ def main(p):
         p['x6'], p['x7'], p['x8'], p['x9'], p['x10']
     ])
 
+    print(p)
+
     # Sphere
     y = np.sum(x ** 2)
     return y

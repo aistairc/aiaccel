@@ -3,8 +3,8 @@ import os
 from logging import StreamHandler, getLogger
 
 from fasteners import InterProcessLock
+from omegaconf.dictconfig import DictConfig
 
-from aiaccel.config import Config
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId
 from aiaccel.workspace import Workspace
@@ -18,7 +18,7 @@ class CsvWriter:
     """Provides report creation method.
 
     Args:
-        config_path (str): Path to the config file.
+        config (DictConfig): Config object.
 
     Attributes:
         config (Config): Config object.
@@ -29,9 +29,9 @@ class CsvWriter:
         lock_file (dict[str, str]): Dict object containing string path to lock.
     """
 
-    def __init__(self, config_path: str) -> None:
-        self.config = Config(config_path)
-        self.workspace = Workspace(self.config.workspace.get())
+    def __init__(self, config: DictConfig):
+        self.config = config
+        self.workspace = Workspace(self.config.generic.workspace)
         self.fp = self.workspace.retults_csv_file
         self.trialid = TrialId(self.config)
         self.storage = Storage(self.workspace.path)

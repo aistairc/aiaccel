@@ -1,29 +1,21 @@
-import json
+from unittest.mock import patch
+
 import numpy as np
 import pytest
 
 from aiaccel.common import goal_maximize
-from aiaccel.config import ConfileWrapper
+from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.optimizer import NelderMead
 from aiaccel.optimizer import NelderMeadOptimizer
-from aiaccel.parameter import load_parameter
 
 from tests.base_test import BaseTest
-from unittest.mock import patch
 
 
 class TestNelderMeadOptimizer(BaseTest):
 
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, clean_work_dir):
-        self.options = {
-            'config': self.config_json,
-            'resume': None,
-            'clean': False,
-            'fs': False,
-            'process_name': 'optimizer'
-        }
-        self.optimizer = NelderMeadOptimizer(self.options)
+        self.optimizer = NelderMeadOptimizer(self.load_config_for_test(self.configs["config.json"]))
         yield
         self.optimizer = None
 
@@ -41,7 +33,7 @@ class TestNelderMeadOptimizer(BaseTest):
             {'parameter_name': 'x10', 'type': 'FLOAT', 'value': 4.03}
         ]
 
-        _optimizer = NelderMeadOptimizer(self.options)
+        _optimizer = NelderMeadOptimizer(self.load_config_for_test(self.configs["config.json"]))
         _optimizer._rng = np.random.RandomState(0)
         _nelder_mead = _optimizer.generate_initial_parameter()
         self.optimizer._rng = np.random.RandomState(0)
@@ -54,13 +46,7 @@ class TestNelderMeadOptimizer(BaseTest):
 
     def test_pre_process(self):
         assert self.optimizer.pre_process() is None
-
-        with open(self.config_json, 'r') as f:
-            json_obj = json.load(f)
-        json_obj['optimize']['goal'] = goal_maximize
-        config = ConfileWrapper(json_obj, 'json_object')
-        json_obj['optimize']['goal'] = goal_maximize
-        self.optimizer.config = config
+        self.optimizer.config.optimize.goal = [goal_maximize]
         self.optimizer.post_process()
         assert self.optimizer.pre_process() is None
 
@@ -80,10 +66,8 @@ class TestNelderMeadOptimizer(BaseTest):
     ):
         self.optimizer.pre_process()
         # config = load_test_config()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get('optimize',
-                       'parameters_for_TestNelderMead'))
+        config = self.load_config_for_test(self.configs["config_nelder_mead.json"])
+        self.optimizer.params = HyperParameterConfiguration(config.optimize.parameters)
         rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list(),
@@ -111,10 +95,8 @@ class TestNelderMeadOptimizer(BaseTest):
         setup_result
     ):
         self.optimizer.pre_process()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get('optimize',
-                       'parameters_for_TestNelderMeadSearch'))
+        config = self.load_config_for_test(self.configs["config.json"])
+        self.optimizer.params = HyperParameterConfiguration(config.optimize.parameters)
         rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list(),
@@ -131,13 +113,8 @@ class TestNelderMeadOptimizer(BaseTest):
         load_test_config_org
     ):
         self.optimizer.pre_process()
-        config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get(
-                'optimize',
-                'parameters_for_TestNelderMead'
-            )
-        )
+        config = self.load_config_for_test(self.configs["config.json"])
+        self.optimizer.params = HyperParameterConfiguration(config.optimize.parameters)
         rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list(),
@@ -157,19 +134,15 @@ class TestNelderMeadOptimizer(BaseTest):
     ):
         self.optimizer.pre_process()
         config = load_test_config_org()
-        self.optimizer.params = load_parameter(
-            config.get(
-                'optimize',
-                'parameters_for_TestNelderMead'
-            )
-        )
+        config = self.load_config_for_test(self.configs["config.json"])
+        self.optimizer.params = HyperParameterConfiguration(config.optimize.parameters)
+
         rng = np.random.RandomState(0)
         self.optimizer.nelder_mead = NelderMead(
             self.optimizer.params.get_parameter_list(),
             rng=rng
         )
-        # assert len(self.nm.get_ready_parameters()) == 11
-        assert len(self.optimizer.get_ready_parameters()) == 3
+        assert len(self.optimizer.get_ready_parameters()) == 11
 
     def test_get_nm_results(self):
         rng = np.random.RandomState(0)

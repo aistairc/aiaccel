@@ -5,14 +5,16 @@ from functools import reduce
 from operator import mul
 from typing import Any
 
-from aiaccel.config import Config, is_multi_objective
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 
 def get_grid_options(
     parameter_name: str,
-    config: Config
+    config: DictConfig
 ) -> tuple[Any, bool, Any]:
     """Get options about grid search.
 
@@ -32,7 +34,7 @@ def get_grid_options(
     log: bool = False
     step: float | None = None
 
-    grid_options = config.hyperparameters.get()
+    grid_options = config.optimize.parameters
 
     for g in grid_options:
         if g['name'] == parameter_name:
@@ -60,13 +62,13 @@ def get_grid_options(
 
 
 def generate_grid_points(
-    p: HyperParameter, config: Config
+    p: HyperParameter, config: DictConfig
 ) -> dict[str, Any]:
     """Make a list of all parameters for this grid.
 
     Args:
         p (HyperParameter): A hyper parameter object.
-        config (Config): A config object.
+        config (DictConfig): A configuration object.
 
     Returns:
         dict[str, str | list[float, int, str]]: A dictionary including all grid
@@ -101,10 +103,10 @@ def generate_grid_points(
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
     elif p.type.lower() == 'categorical':
-        new_param['parameters'] = list(p.choices)
+        new_param['parameters'] = p.choices
 
     elif p.type.lower() == 'ordinal':
-        new_param['parameters'] = list(p.sequence)
+        new_param['parameters'] = p.sequence
 
     else:
         raise TypeError(f'Invalid parameter type: {p.type}')
@@ -124,8 +126,8 @@ class GridOptimizer(AbstractOptimizer):
         generate_index (int): A number of generated hyper parameters.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
         self.ready_params = []
         for param in self.params.get_parameter_list():
             self.ready_params.append(generate_grid_points(param, self.config))

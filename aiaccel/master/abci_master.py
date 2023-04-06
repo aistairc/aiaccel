@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import subprocess
 
+from omegaconf.dictconfig import DictConfig
 from aiaccel.abci import parse_qstat
 from aiaccel.master import AbstractMaster
 from aiaccel.util import get_dict_files, retry
@@ -19,8 +20,13 @@ class AbciMaster(AbstractMaster):
         stats (list[dict]): A result string of 'qstat' command.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
+    def __init__(self, config: DictConfig) -> None:
+        """Initial method of AbciMaster.
+
+        Args:
+            config (DictConfig): A configuration object.
+        """
+        super().__init__(config)
         self.runner_files = []
         self.stats = []
 
@@ -60,4 +66,4 @@ class AbciMaster(AbstractMaster):
         if len(stats) < 1:
             return
 
-        self.stats = parse_qstat(self.config, stats)
+        self.stats = parse_qstat(stats)

@@ -1,9 +1,11 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from aiaccel.config import Config
-from aiaccel.storage import Storage
-from aiaccel.util import EasyVisualizer
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel.config import load_config
+from aiaccel.storage.storage import Storage
+from aiaccel.util.easy_visualizer import EasyVisualizer
 
 
 class Plotter:
@@ -19,13 +21,12 @@ class Plotter:
         cplt (EasyVisualizer): EasyVisualizer object.
     """
 
-    def __init__(self, config: Config) -> None:
-        self.workspace = Path(config.workspace.get()).resolve()
+    def __init__(self, config: DictConfig):
+        self.workspace = Path(config.generic.workspace).resolve()
 
         self.storage = Storage(self.workspace)
-        self.goals = config.goal.get()
-        if type(self.goals) is str:
-            self.goals = [self.goals]
+        self.goals = [item.value for item in config.optimize.goal]
+
         self.cplt = EasyVisualizer()
 
     def plot(self) -> None:
@@ -78,11 +79,10 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
-    config = Config(args.config)
-    workspace = config.workspace.get()
+    config: DictConfig = load_config(args.config)
 
-    if Path(workspace).exists() is False:
-        print(f"{workspace} is not found.")
+    if Path(config.generic.workspace).exists() is False:
+        print(f"{config.generic.workspace} is not found.")
         return
 
     plotter = Plotter(config)

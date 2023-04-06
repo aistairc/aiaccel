@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
 from subprocess import Popen
 
 import pytest
+from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import dict_result
-from aiaccel.common import file_final_result
-from aiaccel.config import Config
+from aiaccel.common import dict_result, file_final_result
+from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from tests.base_test import BaseTest
-
 
 argnames_test_run = "config_filename, expected_returncode"
 argvalues_test_run = [
@@ -36,16 +34,16 @@ class AdditionalBudgetSpecifiedGridTest(BaseTest):
         yield
         self.test_data_dir = None
 
-    def main(self, config_file: Path) -> tuple[Config, Storage, Popen]:
-        config = Config(config_file)
+    def main(self, config_file: Path) -> tuple[DictConfig, Storage, Popen]:
+        config = load_config(config_file)
         python_file = self.test_data_dir.joinpath('user.py')
 
         with self.create_main(python_file):
-            storage = Storage(ws=Path(config.workspace.get()))
+            storage = Storage(ws=Path(config.generic.workspace))
             popen = Popen(
                 ['aiaccel-start', '--config', str(config_file), '--clean']
             )
-            popen.wait(timeout=self.config.batch_job_timeout.get())
+            popen.wait(timeout=config.generic.batch_job_timeout)
 
         return config, storage, popen
 
