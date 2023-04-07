@@ -6,10 +6,9 @@ from typing import Any
 from numpy import str_
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.parameter import HyperParameterConfiguration
-
 from aiaccel.config import is_multi_objective
 from aiaccel.module import AbstractModule
+from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.util import TrialId, str_to_logging_level
 
 
@@ -50,7 +49,7 @@ class AbstractOptimizer(AbstractModule):
         self.hp_finished = 0
         self.num_of_generated_parameter = 0
         self.params = HyperParameterConfiguration(self.config.optimize.parameters)
-        self.trial_id = TrialId(self.config.config_path)
+        self.trial_id = TrialId(self.config)
         self.all_parameters_generated = False
 
     def all_parameters_processed(self) -> bool:

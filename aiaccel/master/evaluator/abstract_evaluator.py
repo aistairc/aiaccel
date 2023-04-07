@@ -40,7 +40,7 @@ class AbstractEvaluator(object):
         self.hp_result: list[dict[str, Any]] | None = None
         self.storage = Storage(self.workspace.path)
         self.goals = [item.value for item in self.config.optimize.goal]
-        self.trial_id = TrialId(self.config.config_path)
+        self.trial_id = TrialId(self.config)
 
     def evaluate(self) -> None:
         """Run an evaluation.

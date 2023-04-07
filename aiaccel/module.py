@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-
 from omegaconf.dictconfig import DictConfig
+
 from aiaccel.common import (class_master, class_optimizer, class_scheduler,
                             module_type_master, module_type_optimizer,
                             module_type_scheduler)
@@ -65,7 +65,7 @@ class AbstractModule(object):
         self.hp_finished = 0
         self.seed = self.config.optimize.rand_seed
         self.storage = Storage(self.workspace.path)
-        self.trial_id = TrialId(self.config.config_path)
+        self.trial_id = TrialId(self.config)
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng = np.random.RandomState(self.seed)
         self.module_name = module_name
