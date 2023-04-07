@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import Any, List, Optional, Union
 
 from omegaconf import OmegaConf
+from omegaconf.base import Container
 from omegaconf.dictconfig import DictConfig
 from omegaconf.listconfig import ListConfig
-from omegaconf.base import Container
 
 
 class ResourceType(Enum):
@@ -158,12 +158,11 @@ def set_structs_false(conf: Container) -> None:
                 set_structs_false(conf.__dict__["_content"][item])
 
 
-def load_config(config_path: Path | str) -> Union[ListConfig, DictConfig]:
+def load_config(config_path: Path | str) -> DictConfig:
     """
     Load any configuration files, return the DictConfig object.
     Args:
         config_path (str): A path to a configuration file.
-
     Returns:
         config: DictConfig object
     """
@@ -182,7 +181,8 @@ def load_config(config_path: Path | str) -> Union[ListConfig, DictConfig]:
     config: Union[ListConfig, DictConfig] = OmegaConf.merge(base, default)
     set_structs_false(config)
     config = OmegaConf.merge(config, customize)
-
+    if not isinstance(config, DictConfig):
+        raise RuntimeError("The configuration is not a DictConfig object.")
     return config
 
 

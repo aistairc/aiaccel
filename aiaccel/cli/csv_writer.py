@@ -1,11 +1,9 @@
 import csv
 import os
 from logging import StreamHandler, getLogger
-from typing import Union
 
 from fasteners import InterProcessLock
 from omegaconf.dictconfig import DictConfig
-from omegaconf.listconfig import ListConfig
 
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId
@@ -31,7 +29,7 @@ class CsvWriter:
         lock_file (dict[str, str]): Dict object containing string path to lock.
     """
 
-    def __init__(self, config: Union[ListConfig, DictConfig]):
+    def __init__(self, config: DictConfig):
         self.config = config
         self.workspace = Workspace(self.config.generic.workspace)
         self.fp = self.workspace.retults_csv_file

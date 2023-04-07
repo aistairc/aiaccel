@@ -1,9 +1,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from typing import Union
 from omegaconf.dictconfig import DictConfig
-from omegaconf.listconfig import ListConfig
 
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
@@ -23,7 +21,7 @@ class Plotter:
         cplt (EasyVisualizer): EasyVisualizer object.
     """
 
-    def __init__(self, config: Union[ListConfig, DictConfig]):
+    def __init__(self, config: DictConfig):
         self.workspace = Path(config.generic.workspace).resolve()
 
         self.storage = Storage(self.workspace)
@@ -81,7 +79,7 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
-    config: Union[ListConfig, DictConfig] = load_config(args.config)
+    config: DictConfig = load_config(args.config)
 
     if Path(config.generic.workspace).exists() is False:
         print(f"{config.generic.workspace} is not found.")

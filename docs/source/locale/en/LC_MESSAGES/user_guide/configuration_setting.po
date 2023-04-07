@@ -603,15 +603,11 @@ msgid ""
 "HpFinishedFailed. Defaults to 60."
 msgstr ""
 
-<<<<<<< HEAD
-#: ../../source/user_guide/configuration_setting.md:242
-=======
 #: ../../source/user_guide/configuration_setting.md:277
 msgid "job_loop_duration (float, optional):"
 msgstr ""
 
 #: ../../source/user_guide/configuration_setting.md:278
->>>>>>> 6ba7a3c4eb9e7b6925528e0eca5db05c917b9c77
 msgid "スケジューラジョブスレッドのループ 1 周あたりのスリープ時間を秒単位で指定します． デフォルトでは 0.5 (秒) に設定されています．"
 msgstr ""
 
