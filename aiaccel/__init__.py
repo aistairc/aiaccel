@@ -15,5 +15,6 @@ __all__ = [
     'optimizer',
     'scheduler',
     'storage',
+    'tensorboard',
     'util'
 ]
