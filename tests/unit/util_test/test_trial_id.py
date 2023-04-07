@@ -10,7 +10,7 @@ def test_trial_id_init(create_tmp_config):
     config = load_config(config_path)
     trial_id = TrialId(config)
 
-    assert trial_id.__init__(config_path) is None
+    assert trial_id.__init__(config) is None
 
 
 def test_zero_padding_any_trial_id(create_tmp_config):
