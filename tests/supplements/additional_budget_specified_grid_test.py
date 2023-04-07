@@ -12,10 +12,8 @@ from aiaccel.common import file_final_result
 from aiaccel.storage.storage import Storage
 from tests.base_test import BaseTest
 from aiaccel.config import load_config
-from typing import Union
 
 from omegaconf.dictconfig import DictConfig
-from omegaconf.listconfig import ListConfig
 
 argnames_test_run = "config_filename, expected_returncode"
 argvalues_test_run = [
@@ -39,7 +37,7 @@ class AdditionalBudgetSpecifiedGridTest(BaseTest):
         yield
         self.test_data_dir = None
 
-    def main(self, config_file: Path) -> tuple[Union[ListConfig, DictConfig], Storage, Popen]:
+    def main(self, config_file: Path) -> tuple[DictConfig, Storage, Popen]:
         config = load_config(config_file)
         python_file = self.test_data_dir.joinpath('user.py')
 

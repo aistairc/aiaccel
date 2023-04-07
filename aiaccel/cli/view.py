@@ -2,12 +2,10 @@ from __future__ import annotations
 
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from numpy import maximum
-
 from omegaconf.dictconfig import DictConfig
-from omegaconf.listconfig import ListConfig
 
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
@@ -26,7 +24,7 @@ class Viewer:
         storage (Storage): Storage object.
     """
 
-    def __init__(self, config: Union[ListConfig, DictConfig]) -> None:
+    def __init__(self, config: DictConfig) -> None:
         self.workspace = Path(config.generic.workspace).resolve()
         self.storage = Storage(self.workspace)
 
@@ -114,7 +112,7 @@ def main() -> None:  # pragma: no cover
     parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
-    config: Union[ListConfig, DictConfig] = load_config(args.config)
+    config: DictConfig = load_config(args.config)
     workspace = config.generic.workspace
 
     ws = Workspace(workspace)
