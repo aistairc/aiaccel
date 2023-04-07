@@ -138,12 +138,6 @@ class ConditionConfig:
 
 
 @dataclass
-class VerificationConfig:
-    is_verified: bool
-    condition: List[ConditionConfig]
-
-
-@dataclass
 class Config:
     generic: GenericConfig
     resource: ResourceConifig
@@ -151,7 +145,6 @@ class Config:
     optimize: OptimizeConifig
     job_setting: JobConfig
     logger: Optional[LoggerConfig]
-    verification: Optional[VerificationConfig]
     clean: Optional[bool]
     resume: Optional[Union[None, int]]
     config_path: Optional[Union[None, Path, str]]
