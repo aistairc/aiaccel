@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from undecorated import undecorated
@@ -126,12 +127,9 @@ def test_get_objectives():
     assert objectives == data
 
 
-# get_bests
 @t_base()
 def test_get_bests():
     storage = Storage(ws.path)
-    assert storage.result.get_bests('invalid') == []
-
     objectives = [[1], [-5], [3], [1.23]]
     ids = range(len(objectives))
 
@@ -141,13 +139,16 @@ def test_get_bests():
             objective=objectives[i]
         )
 
+    with pytest.raises(ValueError):
+        storage.result.get_bests(['invalid'])
+
     bests = storage.result.get_bests(['minimize'])
     for i in range(len(bests)):
-        assert bests[i][0] == objectives[i][0]
+        assert bests[i] == np.min(objectives)
 
     bests = storage.result.get_bests(['maximize'])
     for i in range(len(bests)):
-        assert bests[i][0] == objectives[i][0]
+        assert bests[i] == np.max(objectives)
 
 
 # get_result_trial_id_list
