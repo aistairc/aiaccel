@@ -7,7 +7,6 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 from aiaccel.common import file_final_result
-from aiaccel.master import AbstractVerification
 from aiaccel.module import AbstractModule
 from aiaccel.util import (create_yaml, get_time_now_object,
                           get_time_string_from_object, str_to_logging_level)
@@ -27,7 +26,6 @@ class AbstractMaster(AbstractModule):
         optimizer_proc (subprocess.Popen): A reference for a subprocess of
             Optimizer.
         start_time (datetime.datetime): A stored starting time.
-        verification (AbstractVerification): A verification object.
         logger (logging.Logger): Logger object.
         goals (list[str]): Goal of optimization ('minimize' or 'maximize').
         trial_number (int): The number of trials.
@@ -50,7 +48,6 @@ class AbstractMaster(AbstractModule):
             'Master   '
         )
 
-        self.verification = AbstractVerification(self.config)
         self.goals = [item.value for item in self.config.optimize.goal]
         self.trial_number = self.config.optimize.trial_number
 
@@ -82,10 +79,6 @@ class AbstractMaster(AbstractModule):
         """
 
         self.evaluate()
-
-        # verification
-        self.verification.verify()
-        self.verification.save("final")
         self.logger.info("Master finished.")
 
     def print_dict_state(self) -> None:
@@ -130,8 +123,6 @@ class AbstractMaster(AbstractModule):
 
         self.get_stats()
         self.print_dict_state()
-        # verification
-        self.verification.verify()
 
         return True
 

@@ -1,6 +1,7 @@
+import omegaconf
+
 from aiaccel.config import load_config
 from tests.base_test import BaseTest
-import omegaconf
 
 
 class TestConfig(BaseTest):
@@ -43,4 +44,3 @@ class TestConfig(BaseTest):
         assert type(config.logger.log_level.user_option_log_level) is str
         assert type(config.logger.stream_level.user_option_stream_level) is str
         assert type(config.logger.user_option_logger) is str
-        assert type(config.verification.user_option_verification) is str

@@ -6,8 +6,7 @@ from typing import Any
 
 from aiaccel.common import (dict_error, dict_hp, dict_lock, dict_log,
                             dict_output, dict_result, dict_runner,
-                            dict_storage, dict_tensorboard, dict_verification,
-                            extension_hp)
+                            dict_storage, dict_tensorboard, extension_hp)
 from aiaccel.util import Suffix, load_yaml, make_directories
 
 
@@ -34,7 +33,6 @@ class Workspace:
         runner (Path): Path to "runner", i.e. `path`/runner.
         storage (Path): Path to "storage", i.e. `path`/storage.
         timestamp (Path): Path to "timestamp", i.e. `path`/timestamp.
-        verification (Path): Path to "verification", i.e. `path`/verification.
         consists (list[Path]): A list of pathes under the workspace.
         results (Path): Path to the results which is prepared in the execution
             directory, i.e. "./results".
@@ -53,7 +51,6 @@ class Workspace:
         self.runner = self.path / dict_runner
         self.storage = self.path / dict_storage
         self.tensorboard = self.path / dict_tensorboard
-        self.verification = self.path / dict_verification
 
         self.consists = [
             self.error,
@@ -65,7 +62,6 @@ class Workspace:
             self.runner,
             self.storage,
             self.tensorboard,
-            self.verification
         ]
         self.results = Path("./results")
         self.retults_csv_file = self.path / "results.csv"

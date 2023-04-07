@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-27 16:48+0900\n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -111,8 +113,7 @@ msgstr ""
 #: aiaccel.config.Config:16 aiaccel.module.AbstractModule:30
 #: aiaccel.module.AbstractModule:42 aiaccel.module.AbstractModule:48
 #: aiaccel.module.AbstractModule:54 aiaccel.module.AbstractModule:60
-#: aiaccel.module.AbstractModule:66 aiaccel.module.AbstractModule:72
-#: aiaccel.module.AbstractModule:78 aiaccel.workspace.Workspace:10
+#: aiaccel.module.AbstractModule:66 aiaccel.workspace.Workspace:10
 #: aiaccel.workspace.Workspace:16 aiaccel.workspace.Workspace:22
 #: aiaccel.workspace.Workspace:28 aiaccel.workspace.Workspace:34
 #: aiaccel.workspace.Workspace:40 aiaccel.workspace.Workspace:46
@@ -120,8 +121,7 @@ msgstr ""
 #: aiaccel.workspace.Workspace:64 aiaccel.workspace.Workspace:70
 #: aiaccel.workspace.Workspace:76 aiaccel.workspace.Workspace:82
 #: aiaccel.workspace.Workspace:88 aiaccel.workspace.Workspace:94
-#: aiaccel.workspace.Workspace:100 aiaccel.workspace.Workspace:106
-#: aiaccel.workspace.Workspace:119 of
+#: aiaccel.workspace.Workspace:100 aiaccel.workspace.Workspace:113 of
 msgid "Path"
 msgstr ""
 
@@ -198,7 +198,10 @@ msgstr ""
 #: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
 #: aiaccel.workspace.Workspace.check_consists
 #: aiaccel.workspace.Workspace.create aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.get_any_result_file_path
+#: aiaccel.workspace.Workspace.get_any_trial_result
 #: aiaccel.workspace.Workspace.move_completed_data
+#: aiaccel.workspace.Workspace.result_file_exists
 #: aiaccel.wrapper_tools.create_runner_command
 #: aiaccel.wrapper_tools.save_result of
 msgid "戻り値"
@@ -274,7 +277,10 @@ msgstr ""
 #: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
 #: aiaccel.workspace.Workspace.check_consists
 #: aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.get_any_result_file_path
+#: aiaccel.workspace.Workspace.get_any_trial_result
 #: aiaccel.workspace.Workspace.move_completed_data
+#: aiaccel.workspace.Workspace.result_file_exists
 #: aiaccel.wrapper_tools.create_runner_command of
 msgid "戻り値の型"
 msgstr ""
@@ -422,47 +428,39 @@ msgid "A path to lock directory."
 msgstr ""
 
 #: aiaccel.module.AbstractModule:58 of
-msgid "A path to log directory."
-msgstr ""
-
-#: aiaccel.module.AbstractModule:64 of
 msgid "A path to output directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:70 of
+#: aiaccel.module.AbstractModule:64 of
 msgid "A path to runner directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:76 of
-msgid "A path to verification directory."
-msgstr ""
-
-#: aiaccel.module.AbstractModule:82 of
+#: aiaccel.module.AbstractModule:70 of
 msgid "A number of files in hp/finished directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:84 aiaccel.module.AbstractModule:90
-#: aiaccel.module.AbstractModule:96 aiaccel.module.AbstractModule:108 of
+#: aiaccel.module.AbstractModule:72 aiaccel.module.AbstractModule:78
+#: aiaccel.module.AbstractModule:84 aiaccel.module.AbstractModule:96 of
 msgid "int"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:88 of
+#: aiaccel.module.AbstractModule:76 of
 msgid "A number of files in hp/ready directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:94 of
+#: aiaccel.module.AbstractModule:82 of
 msgid "A number of files in hp/running directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:100 of
+#: aiaccel.module.AbstractModule:88 of
 msgid "A logger object."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:102 of
+#: aiaccel.module.AbstractModule:90 of
 msgid "logging.Logger"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:106 of
+#: aiaccel.module.AbstractModule:94 of
 msgid "A loop count that is incremented in loop method."
 msgstr ""
 
@@ -677,19 +675,21 @@ msgstr ""
 
 #: aiaccel.parameter.HyperParameter.sample:3
 #: aiaccel.parameter.HyperParameterConfiguration.sample:3 of
-msgid "This is set, when a initial value is required."
+msgid "A random generator."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter.sample:5
-#: aiaccel.parameter.HyperParameterConfiguration.sample:6 of
-msgid "A reference to a random generator."
+#: aiaccel.parameter.HyperParameterConfiguration.sample:5 of
+msgid ""
+"Whether to require a initial value. If True, returns the initial value. "
+"Defaults to False."
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter.sample:8 of
+#: aiaccel.parameter.HyperParameter.sample:9 of
 msgid "A parameter dictionary."
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter.sample:11 of
+#: aiaccel.parameter.HyperParameter.sample:12 of
 msgid "Causes when an invalid type is set."
 msgstr ""
 
@@ -810,6 +810,22 @@ msgstr ""
 msgid "True if the workspace exists."
 msgstr ""
 
+#: aiaccel.workspace.Workspace.get_any_result_file_path:1 of
+msgid "Get result file path."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_any_result_file_path:3 of
+msgid "Path to result file."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_any_trial_result:1 of
+msgid "Get any trial result."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_any_trial_result:3 of
+msgid "Trial result."
+msgstr ""
+
 #: aiaccel.workspace.Workspace.move_completed_data:1 of
 msgid "Move workspace to under of results directory when finished."
 msgstr ""
@@ -822,6 +838,14 @@ msgstr ""
 
 #: aiaccel.workspace.Workspace.move_completed_data:5 of
 msgid "Path of destination."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.result_file_exists:1 of
+msgid "Check result file exists or not."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.result_file_exists:3 of
+msgid "True if result file exists."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.rst:62
