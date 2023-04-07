@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from omegaconf.dictconfig import DictConfig
-
 from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
@@ -575,7 +574,7 @@ class Job:
         self.loop_count = 0
         self.scheduler = scheduler
         self.trial_id = trial_id
-        self.trial_id_str = TrialId(self.config.config_path).zero_padding_any_trial_id(self.trial_id)
+        self.trial_id_str = TrialId(self.config).zero_padding_any_trial_id(self.trial_id)
         self.from_file: Any = None
         self.to_file: Any = None
         self.next_state: Any = None

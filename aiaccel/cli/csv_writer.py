@@ -1,12 +1,12 @@
 import csv
 import os
 from logging import StreamHandler, getLogger
+from typing import Union
 
 from fasteners import InterProcessLock
-
 from omegaconf.dictconfig import DictConfig
 from omegaconf.listconfig import ListConfig
-from typing import Union
+
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId
 from aiaccel.workspace import Workspace
@@ -35,7 +35,7 @@ class CsvWriter:
         self.config = config
         self.workspace = Workspace(self.config.generic.workspace)
         self.fp = self.workspace.retults_csv_file
-        self.trialid = TrialId(self.config.config_path)
+        self.trialid = TrialId(self.config)
         self.storage = Storage(self.workspace.path)
         self.lock_file = {'result_txt': str(self.workspace.lock / 'result_txt')}
 
