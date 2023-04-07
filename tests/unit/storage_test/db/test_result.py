@@ -1,3 +1,6 @@
+from unittest.mock import MagicMock, patch
+
+import numpy as np
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from undecorated import undecorated
@@ -44,6 +47,31 @@ def test_set_any_trial_objective_exception():
             trial_id=trial_id,
             objective=objective
         )
+
+@t_base()
+def test_get_any_trial_objective_and_best_value():
+
+    storage = Storage(ws.path)
+
+    # Test when objectives is None
+    trial_id = 1
+    goals = ['minimize']
+    mock_get_any_trial_objective = MagicMock(return_value=None)
+    with patch.object(storage.result, 'get_any_trial_objective', mock_get_any_trial_objective):
+        objectives, best_values = storage.result.get_any_trial_objective_and_best_value(trial_id, goals)
+        assert objectives is None
+        assert best_values is None
+
+    # Test when objectives is not None
+    trial_id = 2
+    goals = ['minimize', 'maximize']
+    mock_get_any_trial_objective = MagicMock(return_value=[0.9, 0.8])
+    mock_get_bests = MagicMock(return_value=[0.95, 0.85])
+    with patch.object(storage.result, 'get_any_trial_objective', mock_get_any_trial_objective):
+        with patch.object(storage.result, 'get_bests', mock_get_bests):
+            objectives, best_values =storage.result.get_any_trial_objective_and_best_value(trial_id, goals)
+            assert objectives == [0.9, 0.8]
+            assert best_values == [0.95, 0.85]
 
 
 # get_any_trial_objective
@@ -99,12 +127,9 @@ def test_get_objectives():
     assert objectives == data
 
 
-# get_bests
 @t_base()
 def test_get_bests():
     storage = Storage(ws.path)
-    assert storage.result.get_bests('invalid') == []
-
     objectives = [[1], [-5], [3], [1.23]]
     ids = range(len(objectives))
 
@@ -114,13 +139,16 @@ def test_get_bests():
             objective=objectives[i]
         )
 
+    with pytest.raises(ValueError):
+        storage.result.get_bests(['invalid'])
+
     bests = storage.result.get_bests(['minimize'])
     for i in range(len(bests)):
-        assert bests[i][0] == objectives[i][0]
+        assert bests[i] == np.min(objectives)
 
     bests = storage.result.get_bests(['maximize'])
     for i in range(len(bests)):
-        assert bests[i][0] == objectives[i][0]
+        assert bests[i] == np.max(objectives)
 
 
 # get_result_trial_id_list
