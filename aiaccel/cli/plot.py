@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Union
 
 from omegaconf.dictconfig import DictConfig
 

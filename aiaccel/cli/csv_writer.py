@@ -1,7 +1,6 @@
 import csv
 import os
 from logging import StreamHandler, getLogger
-from typing import Union
 
 from fasteners import InterProcessLock
 from omegaconf.dictconfig import DictConfig

@@ -163,7 +163,6 @@ def load_config(config_path: Path | str) -> DictConfig:
     Load any configuration files, return the DictConfig object.
     Args:
         config_path (str): A path to a configuration file.
-
     Returns:
         config: DictConfig object
     """
@@ -179,14 +178,11 @@ def load_config(config_path: Path | str) -> DictConfig:
     if not isinstance(customize.optimize.goal, ListConfig):
         customize.optimize.goal = ListConfig([customize.optimize.goal])
 
-    config = OmegaConf.merge(base, default)
-
-    if not isinstance(config, DictConfig):
-        raise RuntimeError("The configuration is not a DictConfig object.")
-
+    config: Union[ListConfig, DictConfig] = OmegaConf.merge(base, default)
     set_structs_false(config)
     config = OmegaConf.merge(config, customize)
-
+    if not isinstance(config, DictConfig):
+        raise RuntimeError("The configuration is not a DictConfig object.")
     return config
 
 
