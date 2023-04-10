@@ -1,1 +1,1 @@
-include requirements.txt
+include aiaccel/default_config.yaml
