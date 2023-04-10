@@ -7,8 +7,8 @@ from typing import Any
 from aiaccel.common import (dict_alive, dict_error, dict_finished, dict_hp,
                             dict_jobstate, dict_lock, dict_log, dict_output,
                             dict_pid, dict_ready, dict_result, dict_runner,
-                            dict_running, dict_storage, dict_timestamp,
-                            extension_hp)
+                            dict_running, dict_storage, dict_tensorboard,
+                            dict_timestamp, extension_hp)
 from aiaccel.util import Suffix, load_yaml, make_directories
 
 
@@ -58,6 +58,7 @@ class Workspace:
         self.result = self.path / dict_result
         self.runner = self.path / dict_runner
         self.storage = self.path / dict_storage
+        self.tensorboard = self.path / dict_tensorboard
         self.timestamp = self.path / dict_timestamp
 
         self.consists = [
@@ -75,6 +76,7 @@ class Workspace:
             self.result,
             self.runner,
             self.storage,
+            self.tensorboard,
             self.timestamp
         ]
         self.results = Path("./results")

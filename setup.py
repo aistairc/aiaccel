@@ -1,6 +1,7 @@
-from pathlib import Path
-from setuptools import setup
 import codecs
+from pathlib import Path
+
+from setuptools import setup
 
 here = Path(__file__).resolve().parent
 
@@ -27,6 +28,7 @@ setup(
         'aiaccel.scheduler.algorithm',
         'aiaccel.scheduler.job',
         'aiaccel.scheduler.job.model',
+        'aiaccel.tensorboard',
         'aiaccel.util',
         'aiaccel.cli',
         'aiaccel.storage'

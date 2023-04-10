@@ -6,16 +6,16 @@ import shutil
 import time
 from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
-
-from aiaccel.config import load_config
 from pathlib import Path
 
 from aiaccel.cli import CsvWriter
 from aiaccel.common import dict_lock, goal_maximize, goal_minimize
+from aiaccel.config import load_config
 from aiaccel.master import create_master
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import create_optimizer
 from aiaccel.scheduler import create_scheduler
+from aiaccel.tensorboard import TensorBoard
 from aiaccel.util import get_file_result_hp, load_yaml
 from aiaccel.workspace import Workspace
 
@@ -117,7 +117,7 @@ def main() -> None:  # pragma: no cover
     Master = create_master(config.resource.type.value)
     Optimizer = create_optimizer(config.optimize.search_algorithm)
     Scheduler = create_scheduler(config.resource.type.value)
-    modules: list[AbstractModule] = [Master(config), Optimizer(config), Scheduler(config)]
+    modules: list[AbstractModule] = [Master(config), Optimizer(config), Scheduler(config), TensorBoard(config)]
 
     time_s = time.time()
 
