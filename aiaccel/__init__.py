@@ -1,6 +1,6 @@
 from aiaccel import (abci, cli, common, config, master, module, optimizer,
-                     parameter, scheduler, storage, util, workspace,
-                     wrapper_tools)
+                     parameter, scheduler, storage, tensorboard, util,
+                     workspace, wrapper_tools)
 
 __all__ = [
     'common',
@@ -15,5 +15,6 @@ __all__ = [
     'optimizer',
     'scheduler',
     'storage',
+    'tensorboard',
     'util'
 ]
