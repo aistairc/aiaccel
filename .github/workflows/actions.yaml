@@ -24,7 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -q build
           python -m build
-          python -m pip install dist/aiaccel-0.0.1.whl
+          python -m pip install aiaccel-0.0.1
 
       - name: Unit Test
         run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit
