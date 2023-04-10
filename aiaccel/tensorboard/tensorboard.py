@@ -60,8 +60,12 @@ class TensorBoard(AbstractModule):
                 objective_y = objective_ys[i]
                 best_value = best_values[i]
 
-                tag_objective = f"objective_{i}_"
-                tag_min_or_max = f"minimize_{i}_" if goal == goal_maximize else f"maximize_{i}_"
+                if len(self.goals) == 1:
+                    tag_objective = "objective"
+                    tag_min_or_max = "minimum" if goal == goal_maximize else "maximum"
+                else:
+                    tag_objective = f"objective_{i}_"
+                    tag_min_or_max = f"minimum_{i}_" if goal == goal_maximize else f"maximum_{i}_"
 
                 self.writer.add_scalar(tag=tag_objective, scalar_value=objective_y, global_step=trial_id)
                 self.writer.add_scalar(tag=tag_min_or_max, scalar_value=best_value, global_step=trial_id)
