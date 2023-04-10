@@ -28,7 +28,7 @@ jobs:
         run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit
 
       - name: Pycodestyle Test
-        run: pycodestyle --ignore="E501" aiaccel examples
+        run: pycodestyle --ignore="E203,E501,W503" aiaccel examples
 
       - name: Flake8 Test
         run: flake8 --max-line-length 120 --ignore=E203,503 aiaccel examples
