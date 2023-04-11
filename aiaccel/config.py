@@ -73,7 +73,6 @@ class ParameterConfig:
     initial: Optional[Any]
     choices: Optional[List[Union[None, float, int, str]]]
     sequence: Optional[List[Union[None, float, int, str]]]
-    q: Optional[Union[float, int]]
     log: Optional[bool]
     base: Optional[int]
     step: Optional[Union[int, float]]
