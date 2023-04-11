@@ -41,7 +41,6 @@ class AbstractMaster(AbstractModule):
         self.set_logger(
             'root.master',
             self.workspace.log / self.config.logger.file.master,
-            # self.dict_log / self.config.logger.file.master,
             str_to_logging_level(self.config.logger.log_level.master),
             str_to_logging_level(self.config.logger.stream_level.master),
             'Master   '
