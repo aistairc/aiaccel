@@ -1,5 +1,5 @@
 PyYAML>=5.4
-SQLAlchemy==1.4.46
+SQLAlchemy
 asciichartpy
 confile
 coverage
@@ -33,6 +33,8 @@ sphinx
 sphinx_fontawesome
 sphinx_rtd_theme
 sphinxcontrib.jquery>=3.0.0
+tensorboard
+tensorboardx
 toml
 transitions
 twisted
