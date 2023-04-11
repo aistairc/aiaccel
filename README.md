@@ -1,3 +1,5 @@
+<div align="center"><img src="https://raw.githubusercontent.com/aistairc/aiaccel/master/docs/image/logo_aiaccel.png" width="400"/></div>
+
 # aiaccel: an HPO library for ABCI
 [![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
 [![Supported Python version](https://img.shields.io/badge/Python-3.8-blue)](https://github.com/aistairc/aiaccel)
@@ -20,7 +22,7 @@ The software can be installed using `pip`.
 # Getting started
 
 ## Running on a local computer
-An example for optimizeing a simple function (i.e., sphere function) on a local computer.
+An example for optimizing a simple function (i.e., sphere function) on a local computer.
 
 
 0. (Optional) Install [Virtualenv](https://virtualenv.pypa.io/en/latest/) and create a virtual environment. 
@@ -46,7 +48,7 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
 
     > cd sphere
     > ls
-    config.yaml         job_script_preamble.sh         user.py
+    config.yaml         user.py
     ~~~
 
 3. Run the parameter optimization
@@ -70,7 +72,6 @@ An example for optimizeing a simple function (i.e., sphere function) on a local 
     > ls ./work
     abci_output         alive               hp                  lock
     log                 result              runner              state
-    verification
 
     > cat ./work/result/final_result.result
     ~~~
@@ -85,8 +86,7 @@ This tutorial describes how to run examples/sphere on ABCI.
 
 1. First, setup python environment following [the ABCI Users Guide](https://docs.abci.ai/en/python/):
     ~~~bash
-    > module load gcc/11.2.0
-    > module load python/3.8/3.8.13
+    > module load python/3.11/3.11.2
     > python3 -m venv optenv
     > source optenv/bin/activate
     ~~~
@@ -96,7 +96,7 @@ This tutorial describes how to run examples/sphere on ABCI.
 3. Please confirm the configuration file before running master.
     ```yaml
     resource:
-        type: "ABCI"
+        type: "abci"
         num_node: 4
     ```
 
@@ -108,7 +108,7 @@ This tutorial describes how to run examples/sphere on ABCI.
 5. If you want to check the running jobs, please refer the [ABCI User Guide](https://docs.abci.ai/en/job-execution/#show-the-status-of-batch-jobs).
 
 
-## Other
+## Others
 - Check the progress
     ~~~bash
     > aiaccel-view --config config.yaml
@@ -125,7 +125,6 @@ This tutorial describes how to run examples/sphere on ABCI.
     ~~~
 
 
-# Acknowledgment
-* Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Deve
-lopment Organization (NEDO).
+# Acknowledgement
+* Part of this software was developed in a project commissioned by the New Energy and Industrial Technology Development Organization (NEDO).
 * aiaccel is built with the help of Optuna.

@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:40+0000\n"
+"POT-Creation-Date: 2023-03-28 10:51+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -133,8 +135,8 @@ msgstr ""
 #: ../../source/user_guide/basic_usage.md:116
 #: ../../source/user_guide/basic_usage.md:129
 #: ../../source/user_guide/basic_usage.md:143
-#: ../../source/user_guide/basic_usage.md:442
-#: ../../source/user_guide/basic_usage.md:474
+#: ../../source/user_guide/basic_usage.md:443
+#: ../../source/user_guide/basic_usage.md:476
 msgid "**サンプル**"
 msgstr ""
 
@@ -223,141 +225,141 @@ msgid "ordinal"
 msgstr ""
 
 #: ../../source/user_guide/basic_usage.md:177
-msgid "sequential"
-msgstr ""
-
-#: ../../source/user_guide/basic_usage.md:178
 msgid "**lower** - ハイパーパラメータ最小値を設定します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:179
+#: ../../source/user_guide/basic_usage.md:178
 msgid "**upper** - ハイパーパラメータ最大値を設定します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:180
+#: ../../source/user_guide/basic_usage.md:179
 msgid "**initial** - ハイパーパラメータの初期値を設定します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:181
+#: ../../source/user_guide/basic_usage.md:180
 msgid "**step**  - ハイパーパラメータの分解能を設定します(最適化アルゴリズムがgridの場合は必ず指定してください。)。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:182
+#: ../../source/user_guide/basic_usage.md:181
 msgid "**log** - 対数設定用の項目です(最適化アルゴリズムがgridの場合は必ず指定してください。)。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:183
+#: ../../source/user_guide/basic_usage.md:182
 msgid "**base** - 対数設定用の項目です(最適化アルゴリズムがgridの場合は必ず指定してください。)。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:184
+#: ../../source/user_guide/basic_usage.md:183
 msgid "**comment** - 自由記述欄。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:188
+#: ../../source/user_guide/basic_usage.md:187
 msgid "aiaccelは、次の最適化アルゴリズムをサポートしています。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:189
+#: ../../source/user_guide/basic_usage.md:188
 msgid "**random** - ハイパーパラメータの値をランダムに生成します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:190
+#: ../../source/user_guide/basic_usage.md:189
 msgid "**grid** - ハイパーパラメータの値を一定間隔でサンプリングします。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:191
+#: ../../source/user_guide/basic_usage.md:190
 msgid "**sobol** - Sobol列を用いてハイパーパラメータの値を生成します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:192
+#: ../../source/user_guide/basic_usage.md:191
 msgid "**nelder-mead** - ヒューリスティクスな最適化アルゴリズムです."
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:193
+#: ../../source/user_guide/basic_usage.md:192
 msgid "**tpe** - ベイズ最適化による最適化アルゴリズムです。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:196
+#: ../../source/user_guide/basic_usage.md:195
 msgid "parametersの記述例"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:198
+#: ../../source/user_guide/basic_usage.md:197
 msgid "Type: uniform_intの記述例"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:217
+#: ../../source/user_guide/basic_usage.md:216
 msgid "initialを指定しない場合は、項目を削除します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:227
+#: ../../source/user_guide/basic_usage.md:226
 msgid "Type: uniform_floatの記述例"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:245
+#: ../../source/user_guide/basic_usage.md:244
 msgid "Type: categoricalの記述例"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:260
+#: ../../source/user_guide/basic_usage.md:259
 msgid "categorial使用時は `choices` 項目を使用します. `choices` は配列で指定する必要があります。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:261
-msgid "catogoricalを使用できるのは、最適化アルゴリズムが `Random` と `TPE` の場合のみです。"
+#: ../../source/user_guide/basic_usage.md:260
+msgid "catogoricalを使用できるのは、最適化アルゴリズムが `Random`, `Grid', および `TPE` の場合のみです。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:264
+#: ../../source/user_guide/basic_usage.md:263
 msgid "Type: ordinalの記述例"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:283
+#: ../../source/user_guide/basic_usage.md:282
 msgid "ordinal使用時は `sequence` 項目を使用します. `sequence` は配列で指定する必要があります。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:284
+#: ../../source/user_guide/basic_usage.md:283
 msgid "ordinal使用時は `initial` の設定はできません。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:285
-msgid "ordinalを使用できるのは、最適化アルゴリズムが `RandomSearch` と `TPE` の場合のみです。"
+#: ../../source/user_guide/basic_usage.md:284
+msgid "ordinalを使用できるのは、最適化アルゴリズムが `Random` と `Grid` の場合のみです。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:288
+#: ../../source/user_guide/basic_usage.md:287
 msgid "grid使用時の注意事項"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:289
+#: ../../source/user_guide/basic_usage.md:288
 msgid ""
 "最適化アルゴリズムで `grid` を使用する場合、 `parameters` の設定に `log` 、 `step` 、 `base` "
 "を指定してください。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:314
+#: ../../source/user_guide/basic_usage.md:313
 msgid "Nelder-Mead使用時の注意事項"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:315
+#: ../../source/user_guide/basic_usage.md:314
 msgid "Nelder-Meadを使用する場合、 `initial` を配列で指定する必要があります。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:333
+#: ../../source/user_guide/basic_usage.md:332
 msgid "また、 `initial` を使用しない場合は、空のリストを指定します."
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:353
+#: ../../source/user_guide/basic_usage.md:352
 msgid "あるいは、 `initial` 項目そのものを削除します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:371
+#: ../../source/user_guide/basic_usage.md:370
 msgid "コンフィグファイル サンプル"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:373
+#: ../../source/user_guide/basic_usage.md:372
 msgid "config.yaml"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:410
-msgid "ユーザープログラムの作成 最適化対象の処理を作成します。ここでは、作成済みモデルをaiaccelで最適化するための変更方法を記述します。"
+#: ../../source/user_guide/basic_usage.md:409
+msgid "ユーザープログラムの作成"
+msgstr ""
+
+#: ../../source/user_guide/basic_usage.md:411
+msgid "最適化対象の処理を作成します。ここでは、作成済みモデルをaiaccelで最適化するための変更方法を記述します。"
 msgstr ""
 
 #: ../../source/user_guide/basic_usage.md:413
@@ -369,85 +371,94 @@ msgid "これを、aiaccelで最適化させるには次のように変更しま
 msgstr ""
 
 #: ../../source/user_guide/basic_usage.md:439
-msgid ""
-"Wrapperの作成 "
-"必要に応じてwrapperプログラムを作成します。aiaccelはユーザープログラムのwrapperを作成するためのAPIを提供します。"
+msgid "Wrapperの作成"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:444
+#: ../../source/user_guide/basic_usage.md:441
+msgid "必要に応じてwrapperプログラムを作成します。aiaccelはユーザープログラムのwrapperを作成するためのAPIを提供します。"
+msgstr ""
+
+#: ../../source/user_guide/basic_usage.md:445
 msgid "wrapper.py(任意の名前に変更可能)"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:461
+#: ../../source/user_guide/basic_usage.md:462
 msgid "aiaccelでwrapperプログラムを最適化させる場合はコンフィグファイルの`job_command`を変更します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:470
+#: ../../source/user_guide/basic_usage.md:471
+msgid "job_script_preamble.shの作成"
+msgstr ""
+
+#: ../../source/user_guide/basic_usage.md:473
 msgid ""
-"job_script_preamble.shの作成 `job_script_preamble.sh` "
-"は、ABCIにジョブを投入するためのバッチファイルのベースファイルです。 "
+"`job_script_preamble.sh` は、ABCIにジョブを投入するためのバッチファイルのベースファイルです。 "
 "このファイルには事前設定を記述します。ここに記述した設定が全てのジョブに適用されます。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:495
-msgid "最適化実行 プロジェクトフォルダに移動し、次のコマンドを実行します。"
+#: ../../source/user_guide/basic_usage.md:497
+msgid "最適化実行"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:505
+#: ../../source/user_guide/basic_usage.md:499
+msgid "プロジェクトフォルダに移動し、次のコマンドを実行します。"
+msgstr ""
+
+#: ../../source/user_guide/basic_usage.md:508
 msgid "実行するとターミナルに進捗状況を出力します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:507
+#: ../../source/user_guide/basic_usage.md:510
 msgid "オプション付きの実行"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:509
+#: ../../source/user_guide/basic_usage.md:512
 msgid "`start` コマンドの後に、追加オプションを指定できます。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:515
+#: ../../source/user_guide/basic_usage.md:518
 msgid "--clean : workspaceが既に存在する場合、最適化実行前にworkspaceを削除します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:516
+#: ../../source/user_guide/basic_usage.md:519
 msgid ""
 "--resume : "
 "workspaceが既に存在する場合、保存データが存在するトライアルを指定することで、指定のトライアルから再開することができます。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:518
+#: ../../source/user_guide/basic_usage.md:521
 msgid "例"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:523
+#: ../../source/user_guide/basic_usage.md:526
 msgid "ローカル環境での実行方法"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:524
+#: ../../source/user_guide/basic_usage.md:527
 msgid "ローカル環境でaiaccelを使用する場合は、次のように設定を変更します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:526
+#: ../../source/user_guide/basic_usage.md:529
 msgid "resourceの設定"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:527
+#: ../../source/user_guide/basic_usage.md:530
 msgid "コンフィグファイルの `resource` の `type` に `local` を指定します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:535
+#: ../../source/user_guide/basic_usage.md:538
 msgid "ABCIの設定"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:536
+#: ../../source/user_guide/basic_usage.md:539
 msgid "ローカル環境で実施する場合, `ABCI` の設定は動作に反映されません。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:545
+#: ../../source/user_guide/basic_usage.md:548
 msgid "job_script_preamble.sh"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:546
+#: ../../source/user_guide/basic_usage.md:549
 msgid "ローカル環境で実施する場合、 `job_script_preamble.sh` は不要です。 記述した内容は動作に反映されません。"
 msgstr ""
 

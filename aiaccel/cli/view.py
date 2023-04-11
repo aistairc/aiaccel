@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Any
 
 from numpy import maximum
+from omegaconf.dictconfig import DictConfig
 
-from aiaccel.config import Config
+from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.workspace import Workspace
 
@@ -20,9 +24,8 @@ class Viewer:
         storage (Storage): Storage object.
     """
 
-    def __init__(self, config: Config) -> None:
-        self.config_path = config.config_path
-        self.workspace = Path(config.workspace.get()).resolve()
+    def __init__(self, config: DictConfig) -> None:
+        self.workspace = Path(config.generic.workspace).resolve()
         self.storage = Storage(self.workspace)
 
     def view(self) -> None:
@@ -31,12 +34,13 @@ class Viewer:
         Returns:
             None
         """
-        symbols = ["─", "╰", "╭", "╮", "╯", "│"]
+        symbols = ['─', '╰', '╭', '╮', '╯', '│']
         infos = []
         len_margin = 2
         trial_ids = self.storage.trial.get_all_trial_id()
 
         for trial_id in trial_ids:
+
             start_time = self.storage.timestamp.get_any_trial_start_time(trial_id)
             end_time = self.storage.timestamp.get_any_trial_end_time(trial_id)
             status = self.storage.trial.get_any_trial_state(trial_id)
@@ -63,14 +67,17 @@ class Viewer:
                 }
             )
 
-        max_column_width = []
+        max_column_width: list[Any] = []
         for info in infos:
             width = [len(info[key]) + len_margin for key in list(info.keys())]
             header_width = [len(key) + len_margin for key in list(info.keys())]
             if len(max_column_width) == 0:
                 max_column_width = maximum(width, header_width).tolist()
             else:
-                max_column_width = maximum(max_column_width, maximum(width, header_width).tolist()).tolist()
+                max_column_width = maximum(
+                    max_column_width,
+                    maximum(width, header_width).tolist()
+                ).tolist()
 
         max_width = sum(max_column_width)
         print("\n")
@@ -102,11 +109,11 @@ def main() -> None:  # pragma: no cover
     theterminal.
     """
     parser = ArgumentParser()
-    parser.add_argument("--config", "-c", type=str, default="config.yml")
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
-    config = Config(args.config)
-    workspace = config.workspace.get()
+    config: DictConfig = load_config(args.config)
+    workspace = config.generic.workspace
 
     ws = Workspace(workspace)
     if ws.exists() is False:

@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:44+0000\n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,10 +24,14 @@ msgid "aiaccel.master package"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.master.rst:5
+msgid "Subpackages"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.rst:13
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.master.rst:8
+#: ../../source/api_reference/aiaccel.master.rst:16
 msgid "aiaccel.master.abci\\_master module"
 msgstr ""
 
@@ -39,25 +45,39 @@ msgstr ""
 msgid "A master class running on ABCI environment."
 msgstr ""
 
-#: aiaccel.master.abci_master.AbciMaster:5 of
+#: aiaccel.master.abci_master.AbciMaster
+#: aiaccel.master.abstract_master.AbstractMaster
+#: aiaccel.master.abstract_master.AbstractMaster.check_error
+#: aiaccel.master.create.create_master
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster:3
+#: aiaccel.master.abstract_master.AbstractMaster:3 of
+msgid "A dictionary containing command line options."
+msgstr ""
+
+#: aiaccel.master.abci_master.AbciMaster:9 of
 msgid "A list of path of runner files."
 msgstr ""
 
 #: aiaccel.master.abci_master.AbciMaster
-#: aiaccel.master.abstract_master.AbstractMaster of
+#: aiaccel.master.abstract_master.AbstractMaster
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator of
 msgid "type"
 msgstr ""
 
-#: aiaccel.master.abci_master.AbciMaster:7 of
-msgid "List[Path]"
+#: aiaccel.master.abci_master.AbciMaster:11 of
+msgid "list[Path]"
 msgstr ""
 
-#: aiaccel.master.abci_master.AbciMaster:11 of
+#: aiaccel.master.abci_master.AbciMaster:15 of
 msgid "A result string of 'qstat' command."
 msgstr ""
 
-#: aiaccel.master.abci_master.AbciMaster:13 of
-msgid "Anystr"
+#: aiaccel.master.abci_master.AbciMaster:17 of
+msgid "list[dict]"
 msgstr ""
 
 #: aiaccel.master.abci_master.AbciMaster.get_stats:1
@@ -68,20 +88,29 @@ msgstr ""
 #: aiaccel.master.abci_master.AbciMaster.get_stats
 #: aiaccel.master.abci_master.AbciMaster.pre_process
 #: aiaccel.master.abstract_master.AbstractMaster.check_error
+#: aiaccel.master.abstract_master.AbstractMaster.evaluate
 #: aiaccel.master.abstract_master.AbstractMaster.get_stats
 #: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process
 #: aiaccel.master.abstract_master.AbstractMaster.post_process
 #: aiaccel.master.abstract_master.AbstractMaster.pre_process
-#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state of
+#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state
+#: aiaccel.master.create.create_master
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.evaluate
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save of
 msgid "戻り値"
 msgstr ""
 
 #: aiaccel.master.abci_master.AbciMaster.get_stats:3
 #: aiaccel.master.abci_master.AbciMaster.pre_process:3
+#: aiaccel.master.abstract_master.AbstractMaster.evaluate:3
 #: aiaccel.master.abstract_master.AbstractMaster.get_stats:3
 #: aiaccel.master.abstract_master.AbstractMaster.post_process:3
 #: aiaccel.master.abstract_master.AbstractMaster.pre_process:3
-#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:4 of
+#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:4
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.evaluate:3
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print:3
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save:3 of
 msgid "None"
 msgstr ""
 
@@ -91,7 +120,7 @@ msgstr ""
 msgid "Pre-procedure before executing processes."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.master.rst:16
+#: ../../source/api_reference/aiaccel.master.rst:24
 msgid "aiaccel.master.abstract\\_master module"
 msgstr ""
 
@@ -103,50 +132,85 @@ msgstr ""
 msgid "An abstract class for AbciMaster and LocalMaster."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster:5 of
+#: aiaccel.master.abstract_master.AbstractMaster:9
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:3
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:9 of
+msgid "A dictionary containing command line options as well as process name."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:12
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:12 of
+msgid "dict[str, str | int | bool]"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:16 of
 msgid "A stored loop starting time."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster:7
-#: aiaccel.master.abstract_master.AbstractMaster:20 of
+#: aiaccel.master.abstract_master.AbstractMaster:18
+#: aiaccel.master.abstract_master.AbstractMaster:31 of
 msgid "datetime.datetime"
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster:11 of
+#: aiaccel.master.abstract_master.AbstractMaster:22 of
 msgid "A reference for a subprocess of Optimizer."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster:14 of
+#: aiaccel.master.abstract_master.AbstractMaster:25 of
 msgid "subprocess.Popen"
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster:18 of
+#: aiaccel.master.abstract_master.AbstractMaster:29 of
 msgid "A stored starting time."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster:24 of
-msgid "A verification object."
+#: aiaccel.master.abstract_master.AbstractMaster:35 of
+msgid "Logger object."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster:26 of
-msgid "AbstractVerification"
+#: aiaccel.master.abstract_master.AbstractMaster:37 of
+msgid "logging.Logger"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:41
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:40 of
+msgid "Goal of optimization ('minimize' or 'maximize')."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:43
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:42 of
+msgid "list[str]"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:47 of
+msgid "The number of trials."
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:49 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster:55
+#: aiaccel.master.abstract_master.AbstractMaster:61 of
+msgid "list"
 msgstr ""
 
 #: aiaccel.master.abstract_master.AbstractMaster.check_error:1 of
 msgid "Check to confirm if an error has occurred."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster.check_error of
-msgid "パラメータ"
-msgstr ""
-
 #: aiaccel.master.abstract_master.AbstractMaster.check_error:5 of
-msgid "no error | False: with error."
+msgid "True if no error. False if with error."
 msgstr ""
 
 #: aiaccel.master.abstract_master.AbstractMaster.check_error
-#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process of
+#: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process
+#: aiaccel.master.create.create_master of
 msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.master.abstract_master.AbstractMaster.evaluate:1 of
+msgid "Evaluate the result of optimization."
 msgstr ""
 
 #: aiaccel.master.abstract_master.AbstractMaster.inner_loop_main_process:1 of
@@ -158,7 +222,8 @@ msgid "The process succeeds or not. The main loop exits if failed."
 msgstr ""
 
 #: aiaccel.master.abstract_master.AbstractMaster.post_process
-#: aiaccel.master.abstract_master.AbstractMaster.pre_process of
+#: aiaccel.master.abstract_master.AbstractMaster.pre_process
+#: aiaccel.master.create.create_master of
 msgid "例外"
 msgstr ""
 
@@ -172,23 +237,43 @@ msgid ""
 "and Scheduler."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:2 of
-msgid "Display the number of yaml files in 'ready' 'running'"
+#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:1 of
+msgid ""
+"Display the number of yaml files in 'ready', 'running', and 'finished' "
+"directries in hp directory."
 msgstr ""
 
-#: aiaccel.master.abstract_master.AbstractMaster.print_dict_state:2 of
-msgid "and 'finished' directries in hp directory."
-msgstr ""
-
-#: ../../source/api_reference/aiaccel.master.rst:24
+#: ../../source/api_reference/aiaccel.master.rst:32
 msgid "aiaccel.master.create module"
 msgstr ""
 
 #: aiaccel.master.create.create_master:1 of
-msgid "Create a master class by selecting localmaster or abcimaster."
+msgid "Returns master type."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.master.rst:32
+#: aiaccel.master.create.create_master:3 of
+msgid "Path to configuration file."
+msgstr ""
+
+#: aiaccel.master.create.create_master:6 of
+msgid "Causes when specified resource type is invalid."
+msgstr ""
+
+#: aiaccel.master.create.create_master:8 of
+msgid ""
+"`LocalMaster`, `PylocalMaster`, or `AbciMaster`     if resource type is "
+"'local', 'python_local', or 'abci',     respectively."
+msgstr ""
+
+#: aiaccel.master.create.create_master:11 of
+msgid "`LocalMaster`, `PylocalMaster`, or `AbciMaster`"
+msgstr ""
+
+#: aiaccel.master.create.create_master:11 of
+msgid "if resource type is 'local', 'python_local', or 'abci', respectively."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.master.rst:40
 msgid "aiaccel.master.local\\_master module"
 msgstr ""
 
@@ -197,11 +282,86 @@ msgstr ""
 msgid "A master class running on a local computer."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.master.rst:40
+#: ../../source/api_reference/aiaccel.master.rst:48
 msgid "aiaccel.master.pylocal\\_master module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.master.rst:48
+#: ../../source/api_reference/aiaccel.master.rst:56
 msgid "Module contents"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:1 of
+msgid "An abstract class for MaximizeEvaluator and MinimizeEvaluator."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:16 of
+msgid "Path to the configuration file."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:18 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:22 of
+msgid "Config object."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:24 of
+msgid "Config"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:28 of
+msgid "A dict object of the best optimized result."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:30 of
+msgid "dict"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:34 of
+msgid "Storage object."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:36 of
+msgid "Storage"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:46 of
+msgid "TrialId object."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:48 of
+msgid "TrialId"
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.evaluate:1 of
+msgid "Run an evaluation."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print:1 of
+msgid "Print current results."
+msgstr ""
+
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save:1 of
+msgid "Save current results to a file."
+msgstr ""
+
+#: aiaccel.master.evaluator.maximize_evaluator.MaximizeEvaluator:1
+#: aiaccel.master.evaluator.minimize_evaluator.MinimizeEvaluator:1 of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator`"
+msgstr ""
+
+#: aiaccel.master.evaluator.maximize_evaluator.MaximizeEvaluator:1 of
+msgid "A evaluator class to maximize the results."
+msgstr ""
+
+#: aiaccel.master.evaluator.minimize_evaluator.MinimizeEvaluator:1 of
+msgid "A evaluator class to minimize the results."
 msgstr ""
 

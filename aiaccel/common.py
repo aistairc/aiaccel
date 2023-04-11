@@ -1,7 +1,9 @@
 """Common variables and methods.
 
-    * Import this as follows:
-    * import aiaccel
+Example: ::
+
+    from aiaccel.common import alive_master
+
 """
 
 alive_master = "master.yml"
@@ -31,14 +33,13 @@ dict_jobstate = "jobstate"
 dict_result = "result"
 dict_runner = "runner"
 dict_timestamp = "timestamp"
-dict_verification = "verification"
 dict_storage = "storage"
+dict_tensorboard = "tensorboard"
 
 extension_hp = "hp"
 extension_pickle = "pickle"
 extension_resource = "res"
 extension_result = "result"
-extension_verification = "verification"
 
 file_configspace = "configspace"
 file_final_result = "final_result.result"
@@ -65,6 +66,7 @@ module_type_scheduler = "scheduler"
 resource_type_local = "local"
 resource_type_abci = "abci"
 
+search_algorithm_budget_specified_grid = "aiaccel.optimizer.BudgetSpecifiedGridOptimizer"
 search_algorithm_grid = "aiaccel.optimizer.GridOptimizer"
 search_algorithm_nelder_mead = "aiaccel.optimizer.NelderMeadOptimizer"
 search_algorithm_random = "aiaccel.optimizer.RandomOptimizer"

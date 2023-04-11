@@ -1,0 +1,364 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:2
+msgid "aiaccel.scheduler.job.model package"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:8
+msgid "aiaccel.scheduler.job.model.abci\\_model module"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel:1 of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.scheduler.job.model.abstract_model.AbstractModel`"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted:1
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:1 of
+msgid "State transition of 'before_job_submitted'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted:3
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create:3
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:3
+#: of
+msgid "Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted:5
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create:5
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:5
+#: of
+msgid "A job object."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_job_submitted:8
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:6 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.before_runner_create:1
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:1 of
+msgid "State transition of 'before_runner_create'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed:1
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:1
+#: of
+msgid "State transition of 'conditions_runner_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:8
+#: of
+msgid "A target file exists or not. But always true if local execution."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abci_model.AbciModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
+#: of
+msgid "戻り値の型"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:16
+msgid "aiaccel.scheduler.job.model.abstract\\_model module"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel:1 of
+msgid "ベースクラス: :py:class:`object`"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_cancel:1 of
+msgid "State transition of 'after_cancel'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_check_result:1
+#: of
+msgid "State transition of 'after_check_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_confirmed:1
+#: of
+msgid "State transition of 'after_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_expire:1 of
+msgid "State transition of 'after_expire'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_finished:1 of
+msgid "State transition of 'after_finished'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_job:1 of
+msgid "State transition of 'after_job'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_kill:1 of
+msgid "State transition of 'after_kill'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_result:1 of
+msgid "State transition of 'after_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_runner:1 of
+msgid "State transition of 'after_runner'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_running:1 of
+msgid "State transition of 'after_running'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.after_wait_result:1
+#: of
+msgid "State transition of 'after_wait_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:1 of
+msgid "State transition of 'before_failed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:1
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:1 of
+msgid "State transition of 'before_finished'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:1
+#: of
+msgid "State transition of 'before_kill_submitted'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:5
+#: of
+msgid "Ab object."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:1
+#: of
+msgid "State transition of 'conditions_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:8
+#: of
+msgid "A target file exists or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:1
+#: of
+msgid "State transition of 'conditions_job_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:8
+#: of
+msgid "A target job is finished or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:1
+#: of
+msgid "State transition of 'conditions_kill_confirmed'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:8
+#: of
+msgid "A target is killed or not."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:1
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:1 of
+msgid "State transition of 'conditions_result'."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:8 of
+msgid "A target is in result files or not."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:24
+msgid "aiaccel.scheduler.job.model.local\\_model module"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:1 of
+msgid "Create result file."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:3 of
+msgid "Job object."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:32
+msgid "Module contents"
+msgstr ""
+

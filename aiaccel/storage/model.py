@@ -1,4 +1,5 @@
-from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
+from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, PickleType, String, Text
 

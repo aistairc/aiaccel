@@ -19,7 +19,8 @@ def get_time_now_object() -> datetime.datetime:
     Returns:
         datetime.datetime: A now datetime object.
     """
-    return datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+    return datetime.datetime.now(datetime.timezone(datetime.timedelta(
+        hours=9)))
 
 
 def get_time_now() -> str:
@@ -29,7 +30,7 @@ def get_time_now() -> str:
         str: A now time string with format '%m/%d/%Y %H:%M:%S'.
     """
     d = get_time_now_object()
-    return d.strftime("%m/%d/%Y %H:%M:%S")
+    return d.strftime('%m/%d/%Y %H:%M:%S')
 
 
 def get_time_string_from_object(d: datetime.datetime) -> str:
@@ -41,7 +42,7 @@ def get_time_string_from_object(d: datetime.datetime) -> str:
     Returns:
         str: A time string from specified datetime object.
     """
-    return d.strftime("%m/%d/%Y %H:%M:%S")
+    return d.strftime('%m/%d/%Y %H:%M:%S')
 
 
 def get_datetime_from_string(string: str) -> datetime.datetime:
@@ -53,4 +54,4 @@ def get_datetime_from_string(string: str) -> datetime.datetime:
     Returns:
         datetime.datetime: A datetime object from specified string.
     """
-    return datetime.datetime.strptime(string, "%m/%d/%Y %H:%M:%S")
+    return datetime.datetime.strptime(string, '%m/%d/%Y %H:%M:%S')

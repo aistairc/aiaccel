@@ -3,8 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
 
 
 class AbstractSchedulingAlgorithm(object):
@@ -17,18 +16,18 @@ class AbstractSchedulingAlgorithm(object):
         config (ConfileWrapper): A configuration object.
     """
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: DictConfig) -> None:
         self.config = config
 
-    def select_hp(self, hp_ready: list[Path], num: int = 1, rng: np.random.RandomState | None = None) -> None:
+    def select_hp(self, hp_ready: list[Path], num: int = 1, rng: np.random.RandomState | None = None) -> list[Path]:
         """Select multiple hyper parameters.
 
         Args:
             hp_ready (list[Path]): A list of path of ready hyper parameters.
             num (int, optional): A number to select hyper parameters Defaults
-            to 1.
+                to 1.
             rng (np.random.RandomState | None, optional): A reference to a
-            random generator. Defaults to None.
+                random generator. Defaults to None.
 
         Raises:
             NotImplementedError: Causes when the inherited class does not

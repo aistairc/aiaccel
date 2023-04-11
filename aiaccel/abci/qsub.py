@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from aiaccel import dict_output
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
+
+from aiaccel.common import dict_output
 
 """ Example of stat
 stat = {
@@ -21,7 +23,7 @@ stat = {
 """
 
 
-def create_qsub_command(config: Config, runner_file: Path) -> list[str]:
+def create_qsub_command(config: DictConfig, runner_file: Path) -> list[str]:
     """Create ABCI 'qsub' command.
 
     Args:
@@ -31,10 +33,10 @@ def create_qsub_command(config: Config, runner_file: Path) -> list[str]:
     Returns:
         list: A list to run 'qsub' command.
     """
-    path = Path(config.workspace.get()).resolve()
-    job_execution_options = config.job_execution_options.get()
+    path = Path(config.generic.workspace).resolve()
+    job_execution_options = config.ABCI.job_execution_options
 
-    command = ["qsub", "-g", f"{config.abci_group.get()}", "-j", "y", "-o", f"{path / dict_output}", str(runner_file)]
+    command = ["qsub", "-g", f"{config.ABCI.group}", "-j", "y", "-o", f"{path / dict_output}", str(runner_file)]
 
     #
     # additional option
@@ -53,7 +55,7 @@ def create_qsub_command(config: Config, runner_file: Path) -> list[str]:
     if type(job_execution_options) == str:
         for cmd in job_execution_options.split(" "):
             command_tmp.insert(-1, cmd)
-    elif type(job_execution_options) == list:
+    elif type(job_execution_options) == list or type(job_execution_options) == ListConfig:
         for option in job_execution_options:
             for cmd in option.split(" "):
                 command_tmp.insert(-1, cmd)

@@ -1,39 +1,473 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-07 23:40+0000\n"
+"POT-Creation-Date: 2023-03-28 10:51+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.11.0\n"
 
 #: ../../source/contribution_guide/contribution_guide.md:1
-msgid "コントリビューションガイド(WIP)"
+msgid "Issues"
 msgstr ""
 
 #: ../../source/contribution_guide/contribution_guide.md:3
-msgid "イシュー(WIP)"
+msgid ""
+"問題を発見した場合や追加機能の要望がある場合，すでに同様の issue が投稿されていないかの確認をお願いします． "
+"同様のテーマが話し合われていない場合，新しい issue を作成してください．"
 msgstr ""
 
-#: ../../source/contribution_guide/contribution_guide.md:5
-msgid "プルリクエスト(WIP)"
+#: ../../source/contribution_guide/contribution_guide.md:6
+msgid "バグの報告 (Bug report)"
 msgstr ""
 
-#: ../../source/contribution_guide/contribution_guide.md:7
-msgid "テスト(WIP)"
+#: ../../source/contribution_guide/contribution_guide.md:8
+msgid "バグの報告では，以下の内容についての明確かつ簡潔な説明を含めてください．"
 msgstr ""
 
-#: ../../source/contribution_guide/contribution_guide.md:9
-msgid "コーディング規約(WIP)"
+#: ../../source/contribution_guide/contribution_guide.md:10
+msgid "バグの内容"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:11
+msgid "バグを再現する手順"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:12
+msgid "あなたが起こると期待したこと"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:13
+msgid "実行環境"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:16
+msgid "機能リクエスト (Feature request)"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:18
+msgid "機能リクエストを行う際には，以下の内容についての明確かつ簡潔な説明を含めることを推奨します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:20
+msgid "バグが関連する場合，バグの内容"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:21
+msgid "実現したい機能の説明"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:22
+msgid "検討した実装の説明"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:26
+msgid "Pull request"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:28
+msgid ""
+"aiaccel のコードを修正しリポジトリに反映して欲しい場合，pull request を実行してください． Pull request "
+"を行う際には，以下に注意してください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:31
+msgid "手順"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:33
+msgid "初めて開発に参加する場合"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:34
+msgid "まず，GitHub 上で aiaccel をフォークします．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:35
+msgid "フォークした後，aiaccel のリポジトリを clone します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:40
+msgid "開発"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:41
+msgid "ローカルのリポジトリを最新の状態に更新します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:46
+msgid "ブランチを作成します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:50
+msgid "`git add` および `git commit` を使用し，進行に合わせてローカルでコミットします．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:51
+msgid "コミットメッセージでは，変更の動機，バグの性質，または拡張機能の詳細を説明します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:52
+msgid "メッセージは，コードを見なくても内容を理解できるように記述する必要があります．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:53
+msgid "投稿"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:55
+msgid "*Pull request を行う前に，以下を確認してください*："
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:56
+msgid "事前に issue などで他の開発者と議論したか？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:57
+msgid "MIT ライセンスで配布できるか？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:58
+msgid "適切な[ユニットテスト](#テスト)は存在するか？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:59
+msgid "[ユニットテスト](#テスト)をローカル環境で実行できたか？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:60
+msgid "パブリックな関数は docstring を持っているか？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:61
+msgid "[ドキュメンテーション](#ドキュメンテーション-wip)は正しくレンダリングされるか？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:62
+msgid "[コーディングスタイル](#コーディング規約)は適切か？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:63
+msgid "コミットメッセージは適切か？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:64
+msgid "大規模な追加の場合，例 (docs/source/examples) やモジュールレベルの説明はあるか？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:65
+msgid "コンパイル済みのコードを追加する場合，setup.py を変更したか？"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:68
+msgid "*上記を確認した後*:"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:69
+msgid "GitHub 上のフォークに変更をプッシュします．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:73
+msgid "GitHub のユーザーネームとパスワードを入力します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:74
+msgid "GitHub に移動します．以下に注意しながらタイトルとメッセージを記述します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:75
+msgid "**タイトル**"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:76
+msgid "変更を反映した簡単な説明を行うこと．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:77
+msgid "コードはバックフォートでラップすること．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:78
+msgid "ピリオドで終了しないこと．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:79
+msgid "**説明**"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:80
+msgid "動機を書くこと．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:81
+msgid "変更点を書くこと．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:82
+msgid "関連する issue を閉じることができる場合，`Close #N` で issue を閉じること．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:83
+msgid "作業が進行中 (work-in-progress) であるなら，残りのタスクを書くこと．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:84
+msgid "Pull request を送信します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:87
+msgid "レビュープロセス"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:88
+msgid "他の開発者は，pull request の実装，ドキュメント，コーディングスタイルを改善するためのコメントを投稿します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:89
+msgid ""
+"Pull request "
+"したコードの更新を行う際は，ローカルリポジトリで変更をコミットし，ローカル環境でのテストが成功した場合にのみフォークへプッシュします．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:90
+msgid "aiaccel の開発チームのメンバー 1 人以上が pull request を検証し，承認された場合に main ブランチへマージされます．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:94
+msgid "ドキュメンテーション (WIP)"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:96
+msgid "docstrings"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:97
+msgid "実装した関数の基本的な説明，パラメータや返却値の型と意味，使用例を docstrings として記述します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:98
+msgid ""
+"[Google Python Style "
+"Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-"
+"docstrings) に準拠する形で記述してください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:99
+msgid "[コーディング規約](#コーディング規約) も参考にしてください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:102
+msgid "ドキュメント"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:104
+msgid "ドキュメントのソースファイルは docs の下のディレクトリに作成します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:105
+msgid "ドキュメントのファイル形式はマークダウン形式を推奨しています．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:106
+msgid "大規模な機能の追加があった場合，ドキュメントを作成してください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:109
+msgid "レンダリングの確認"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:111
+msgid "ドキュメントの追加や変更・修正があった場合には，ローカル環境でレンダリングが正常に行われるかを確認してください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:113
+msgid "API リファレンスの生成を行うには，aiaccel に移動し，以下のコマンドを実行します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:118
+msgid "ドキュメンテーションのレンダリングを確認するには，aiaccel/docs に移動し，HTML ファイルのビルドを行います．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:123
+msgid "ビルドされた HTML 形式のファイルは docs/build/html の下に生成されます．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:125
+msgid "多言語ドキュメントの生成を行うには，aiaccel/docs で以下のコマンドを実行します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:132
+msgid "テスト"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:134
+msgid "テストの追加"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:135
+msgid "aiaccel では pytest を用いてテストを行います．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:136
+msgid "ユニットテストは tests の下のディレクトリに作成します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:137
+msgid ""
+"aiaccel/tests/unit 以下のディレクトリ構造は，config.py などの一部のモジュールを除いて，aiaccel/aiaccel"
+" 以下の構造に対応します． 例えば，aiaccel/aiaccel/optimizer/abstract_optimizer.py のテストは "
+"aiaccel/tests/unit/optimzier_test/test_abstract_optimizer.py です．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:138
+msgid "新たな機能の追加，またはバグの修正を行った場合，テストコードを作成してください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:141
+msgid "テストの実行 (WIP)"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:142
+msgid "ローカル環境ですべてのテストコードを実行するには，aiaccel に移動し，以下のコマンドを実行します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:147
+msgid "特定のテストコードのみを実行したい場合には，ファイル名を引数として指定します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:151
+msgid "さらに，コーディングスタイルのチェックを行うため，以下のコマンドを実行します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:158
+msgid "追加コードに対するカバレッジ"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:160
+msgid "コードカバレッジの厳密な基準は設定されていませんが，テストを設計する際にはこの値を十分に考慮します． 特に，以下のような場合は注意が必要です．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:162
+msgid "全体的なスコアが大幅に低下する場合．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:163
+msgid "あるクラスやモジュールのカバレッジが異常に低い場合．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:164
+msgid "テストが if 文の特定の分岐をカバーしていない場合．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:166
+msgid "カバレッジの測定"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:167
+msgid "C0 カバレッジを測定するには，オプション `--cov` を使用して pytest を実行します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:171
+msgid "特定のテストコードのみのカバレッジを測定するには，aiaccel の部分を適切なパスに置き換えます．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:173
+msgid "C1 カバレッジを測定するには，オプション `--cov` に加えて `--cov-branch` を使用して pytest を実行します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:178
+msgid "コーディング規約"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:180
+msgid "基本的なルール"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:182
+msgid "aiaccel のソースコードは Python で作成します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:183
+msgid "コーディングスタイルは PEP8 に従います．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:184
+msgid "aiaccel では pycodestyle と flake8 を用いてコーディングスタイルの検証を行います．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:186
+msgid "下記の Docstrings についても確認してください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:187
+msgid "aiaccel では型ヒントの検証は行いませんが，できる限り型ヒントを記述してください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:188
+msgid ""
+"aiaccel ではバージョン 3.8 の Python をサポートするため，ビルトインな \"`list`\" などを型ヒントに使用する際は"
+"，future-import を行ってください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:189
+msgid ""
+"ランダムな値の生成には "
+"[`numpy.random.RandomState`](https://numpy.org/doc/1.16/reference/generated/numpy.random.RandomState.html)"
+" を使用して下さい．これは aiaccel が利用しているライブラリ "
+"[optuna](https://github.com/optuna/optuna) との互換性を保つためです．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:192
+msgid "Docstrings"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:194
+msgid ""
+"基本的には [Google Python Style "
+"Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-"
+"docstrings) に準拠する形で docstrings を記述します． ただし，以下の例外についても注意してください．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:197
+msgid "各モジュールの docstrings は必須ではありません．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:198
+msgid "`Args:` セクションでは，パラメータ名の後ろにパラメータの型を括弧で括って記述します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:199
+msgid "必要に応じて `Example:` セクションを追加します．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:200
+msgid "`__init__` メソッドはクラスの docstring に含めます．`__init__` メソッドには記述しません．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:201
+msgid "Python オブジェクトへのリンクは *sphinx-style* なリンクを使用します."
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:202
+msgid ""
+"エディタとして vscode "
+"を利用する場合，[autoDocstring](https://marketplace.visualstudio.com/items?itemName=njpwerner.autodocstring)"
+" が docstring 生成の役に立ちます．"
+msgstr ""
+
+#: ../../source/contribution_guide/contribution_guide.md:204
+msgid "Example"
 msgstr ""
 

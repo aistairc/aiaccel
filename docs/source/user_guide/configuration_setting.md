@@ -67,10 +67,11 @@ aiaccel が ABCI の計算ノード上にジョブを投入する際に付加さ
 ### search_algorithm (str, optional):
 最適化アルゴリズムを設定します．
 aiaccel では以下のアルゴリズムをサポートしています．
-- "aiaccel.optimizer.NelderMeadOptimizer" - Nelder-Mead 法でパラメータの探索を行います．
-- "aiaccel.optimizer.RandomOptimizer" - パラメータをランダムに生成します，
-- "aiaccel.optimizer.SobolOptimizer" - Sobol' 列を用いてパラメータを生成します．
+- "aiaccel.optimizer.NelderMeadOptimizer" (default) - Nelder-Mead 法でパラメータの探索を行います．
+- "aiaccel.optimizer.BudgetSpecifiedOptimizer" - コンフィグで設定した試行回数 (`trial_number`) に応じて，探索空間を分割し，その中からパラメータを選択します．
 - "aiaccel.optimizer.GridOptimizer" - 分割した探索空間からパラメータを選びます．
+- "aiaccel.optimizer.RandomOptimizer" - パラメータをランダムに生成します．
+- "aiaccel.optimizer.SobolOptimizer" - Sobol' 列を用いた準モンテカルロ的なサンプリングを行い，パラメータを生成します．
 - "aiaccel.optimizer.TpeOptimizer" - ベイズ最適化を用いてパラメータの探索を行います．
 
 デフォルトでは "aiaccel.optimizer.NelderMeadOptimizer" に設定されています．
@@ -91,20 +92,21 @@ aiaccel では以下のアルゴリズムをサポートしています．
 
 ### sobol_scramble (bool, optional):
 ソボルオプティマイザを使用する際に，[スクランブル](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.Sobol.html#scipy-stats-qmc-sobol)を使用するかを指定します．
-デフォルトでは true に設定されています．
+デフォルトでは `true` に設定されています．
+
+### grid_accept_small_trial_number (bool, optional):
+`true` に設定すると，バジェット指定型グリッドオプティマイザを使用する際，生成されるグリッド点の数より指定した試行回数が少ない場合にも，強制的に最適化を実行します．`false` に設定した場合，十分な試行回数が設定されていなければ，aiaccel は最適化を行わずに，警告を発して終了します．デフォルトでは `false` に設定されています．
 
 ### parameters (list):
 パラメータの探索条件をまとめたリストを設定します．
 最適化アルゴルズムとパラメータのデータ型に応じて，各要素には以下の項目が含まれます．
 
 - *name* - パラメータの名前を設定します．
-
 - *type* - パラメータのデータ型を設定します．aiaccel は次のデータ型をサポートします．
   - "uniform_float" - 浮動小数点数型
   - "uniform_int" - 整数型
   - "categorical" - カテゴリカル型
   - "ordinal" - オーディナル型
-
 - *lower* - パラメータの最小値を設定します．
 - *upper* - パラメータの最大値を設定します．
 - *initial* - パラメータの初期値を設定します．
@@ -114,7 +116,7 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *choices* - データ型が categorical の場合に，選択肢のリストを設定します．
 - *sequence* - データ型が ordinal の場合に，選択肢のリストを設定します．
 - *comment* - コメントを設定します．
-
+- *num_grid_points* - バジェット指定型グリッドオプティマイザのみで使用します．パラメータを何通り考慮するかを指定します．例えば，`lower = 0.0`，`upper = 1.0` のときに `num_grid_points = 5` であれば，対象のパラメータは `0.0, 0.25, 0.50, 0.75, 1.00` の中から選択されます．
 <br>
 
 
@@ -137,37 +139,27 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
 - *initial* - 要素数が **パラメータ数 + 1** の配列を設定します．initial の項目が存在しない場合，aiaccel はランダムに初期値の配列を設定します．また，設定された配列の要素数が **パラメータ数 + 1** より少ない場合，aiaccel は足りない初期値をランダムに生成し補います．
 
-**ランダムオプティマイザ ("aiaccel.optimizer.RandomOptimizer")**
+**バジェット指定型グリッドオプティマイザ (aiaccel.optimizer.BudgetSpecifiedOptimizer)**
 
-設定可能なデータ型は "uniform_float", "uniform_int", "categorical", および "ordinal" です．
+設定可能なデータ型は "uniform_float"，"uniform_int"，"categorical"，および "ordinal" です．
 
 ***"uniform_float" または "uniform_int" の場合***
 - *name*
 - *type ("uniform_float", "uniform_int")*
 - *lower*
 - *upper*
-- *initial*
+- *log* - (optional) 対数スケールでグリッド点を指定したい場合には `true` を設定します．この値が `true` のときは，`lower` と `upper` の値の符号が一致し，かつ何れも 0 ではない必要があります．指定されなかった場合，デフォルトでは `false` として扱われます．
+- *num_grid_points* - (optional) パラメータを何通り考慮するかを指定します．例えば，`lower = 0.0`，`upper = 1.0` のときに `num_grid_points = 5` であれば，対象のパラメータは `0.0, 0.25, 0.50, 0.75, 1.00` の中から選択されます．設定されていない場合，他のパラメータの設定と試行回数から，自動で値が設定されます．
 
 ***"categorical" の場合***
 - *name*
 - *type ("categorical")*
 - *choices* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
-- *initial*
 
 ***"ordinal" の場合***
 - *name*
 - *type ("ordinal")*
 - *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
-- *initial*
-
-**ソボルオプティマイザ ("aiaccel.optimizer.SobolOptimizer")**
-
-設定可能なデータ型は "uniform_float" と "uniform_int" です．
-データ型に依らず，初期値は設定できません．
-- *name*
-- *type ("uniform_float", "uniform_int")*
-- *lower*
-- *upper*
 
 **グリッドオプティマイザ ("aiaccel.optimizer.GridOptimizer")**
 
@@ -197,6 +189,38 @@ aiaccel では以下のアルゴリズムをサポートしています．
 - *name*
 - *type ("ordinal")*
 - *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
+
+**ランダムオプティマイザ ("aiaccel.optimizer.RandomOptimizer")**
+
+設定可能なデータ型は "uniform_float"，"uniform_int"，"categorical"，および "ordinal" です．
+
+***"uniform_float" または "uniform_int" の場合***
+- *name*
+- *type ("uniform_float", "uniform_int")*
+- *lower*
+- *upper*
+- *initial*
+
+***"categorical" の場合***
+- *name*
+- *type ("categorical")*
+- *choices* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
+- *initial*
+
+***"ordinal" の場合***
+- *name*
+- *type ("ordinal")*
+- *sequence* - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．
+- *initial*
+
+**ソボルオプティマイザ ("aiaccel.optimizer.SobolOptimizer")**
+
+設定可能なデータ型は "uniform_float" と "uniform_int" です．
+データ型に依らず，初期値は設定できません．
+- *name*
+- *type ("uniform_float", "uniform_int")*
+- *lower*
+- *upper*
 
 **TPE オプティマイザ ("aiaccel.optimizer.TpeOptimizer")**
 
@@ -250,12 +274,6 @@ Defaults to 3.
 Timeout seconds to transit the state from HpFinishedChecking to HpFinishedFailed.
 Defaults to 60.
 
-### job_loop_duration (float, optional):
-スケジューラジョブスレッドのループ 1 周あたりのスリープ時間を秒単位で指定します．
-デフォルトでは 0.5 (秒) に設定されています．
-
-A sleep time each job loop.
-Defaults to 0.5.
 
 ### job_retry (int, optional):
 Max retry counts to transit the state from HpCancelFailed to HpCancelFailure.
@@ -381,25 +399,3 @@ Defaults to "DEBUG".
 
 A logging level for a stream output of scheduler module.
 Defaults to "DEBUG".
-
-
-<br>
-
-## **verification:**
-
-### is_verified (bool, optional):
-最適化結果の verification を行うかを設定します．
-デフォルトでは flase が設定されています．
-
-Defaults to false.
-
-### condition (list, optional):
-Verification の条件の配列を設定します．
-配列の各要素には，以下の項目が設定されている必要があります．
-- **loop** - Verification 対象となるジョブの ID です．
-- **minimum** - 試行回数 loop 回までに計算された最も良い目的関数の値として許容される値の下限です．
-- **maximum** - 試行回数 loop 回までに計算された最も良い目的関数の値として許容される値の下限です．
-
-デフォルトでは，[] (空の配列) が設定されています．
-
-Defaults to [] (an empty list).

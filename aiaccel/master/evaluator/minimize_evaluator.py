@@ -1,7 +1,8 @@
-from aiaccel.master.evaluator.abstract_evaluator import AbstractEvaluator
+from aiaccel.master.evaluator import AbstractEvaluator
 
 
 class MinimizeEvaluator(AbstractEvaluator):
-    """A evaluator class to minimize the results."""
+    """A evaluator class to minimize the results.
 
+    """
     pass

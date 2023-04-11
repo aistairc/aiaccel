@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import copy
+from typing import Any
 
-from aiaccel.optimizer._nelder_mead import NelderMead
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel.config import is_multi_objective
+from aiaccel.optimizer import AbstractOptimizer, NelderMead
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 
 
@@ -21,11 +24,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
         order (list): A list of parameters being processed.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
-        self.nelder_mead = None
-        self.parameter_pool = []
-        self.order = []
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
+        self.nelder_mead: Any = None
+        self.parameter_pool: list[dict[str, Any]] = []
+        self.order: list[Any] = []
+
+        if is_multi_objective(self.config):
+            raise NotImplementedError("Nelder-Mead optimizer does not support multi-objective " "optimization.")
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
@@ -36,7 +42,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         initial_parameter = super().generate_initial_parameter()
         if self.nelder_mead is not None:
-            return
+            return None
 
         self.params = self.special_settings_when_using_ordinal(self.params)
 
@@ -49,7 +55,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
     def check_result(self) -> None:
         pass
 
-    def get_ready_parameters(self) -> list:
+    def get_ready_parameters(self) -> list[Any]:
         """Get the list of ready parameters.
 
         Returns:
@@ -57,7 +63,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         return self.nelder_mead._executing
 
-    def get_nm_results(self) -> list[dict[str, str | int | list | bool]]:
+    def get_nm_results(self) -> list[dict[str, str | int | list[Any] | bool]]:
         """Get the list of Nelder-Mead result.
 
         Returns:
@@ -72,7 +78,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             except KeyError:
                 continue
 
-            result = self.storage.result.get_any_trial_objective(index)
+            result = self.get_any_trial_objective(index)
 
             if result is not None:
                 nm_result = copy.copy(p)
@@ -81,7 +87,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         return nm_results
 
-    def _add_result(self, nm_results: list) -> None:
+    def _add_result(self, nm_results: list[Any]) -> None:
         """Add a result parameter.
 
         Args:
@@ -101,7 +107,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 self.order.pop(0)
                 break
 
-    def update_ready_parameter_name(self, pool_p: str, name: str) -> None:  # old_param_name  # new_param_name
+    def update_ready_parameter_name(
+        self, pool_p: dict[str, Any], name: Any  # old_param_name  # new_param_name
+    ) -> None:
         """Update hyperparameter's names.
 
         Args:
@@ -148,7 +156,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                 e["vertex_id"] = new_param_name
                 break
 
-    def nelder_mead_main(self) -> list:
+    def nelder_mead_main(self) -> list[Any] | None:
         """Nelder Mead's main module.
 
         Args:
@@ -165,7 +173,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             return None
         return searched_params
 
-    def _get_all_trial_id(self) -> list:
+    def _get_all_trial_id(self) -> list[Any]:
         """_get_all_trial_id.
 
         Get trial_ids from DB: 'result', 'finished', 'running', 'ready'
@@ -179,7 +187,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         return trial_id
 
-    def _get_current_names(self) -> list:
+    def _get_current_names(self) -> list[Any]:
         """Get parameter trial_id.
 
         Returns:
@@ -210,7 +218,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             if p["vertex_id"] not in self._get_all_trial_id() and p["vertex_id"] not in self._get_current_names():
                 self.parameter_pool.append(copy.copy(p))
 
-        new_params = []
+        new_params: list[Any] = []
 
         if len(self.parameter_pool) == 0:
             return new_params

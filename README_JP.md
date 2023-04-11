@@ -1,3 +1,5 @@
+<div align="center"><img src="https://raw.githubusercontent.com/aistairc/aiaccel/master/docs/image/logo_aiaccel.png" width="400"/></div>
+
 # aiaccel: an HPO library for ABCI
 [![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
 [![Supported Python version](https://img.shields.io/badge/Python-3.8-blue)](https://github.com/aistairc/aiaccel)
@@ -41,7 +43,7 @@
 
     > cd sphere
     > ls
-    config.yaml         job_script_preamble.sh         user.py
+    config.yaml         user.py
     ~~~
 
 3. パラメータ最適化を実行します。
@@ -65,7 +67,6 @@
     > ls ./work
     abci_output         alive               hp                  lock
     log                 result              runner              state
-    verification
 
     > cat ./work/result/final_result.result
     ~~~
@@ -78,8 +79,7 @@
 ## ABCI上で実行する
 1. まず、[ABCIユーザーズガイド](https://docs.abci.ai/ja/python)に従って、pythonの環境を構築してください。
     ~~~bash
-    > module load gcc/11.2.0
-    > module load python/3.8/3.8.13
+    > module load python/3.11/3.11.2
     > python3 -m venv optenv
     > source optenv/bin/activate
     ~~~
@@ -89,7 +89,7 @@
 3. config.yamlのresourceをABCIに変更します。
     ```yaml
     resource:
-        type: "ABCI"
+        type: "abci"
         num_node: 4
     ```
 

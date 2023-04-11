@@ -1,33 +1,40 @@
 from __future__ import annotations
 
-from aiaccel.config import Config
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
+from typing import Type
+from typing import Union
 
 
-def create_scheduler(config_path: str) -> type | None:
+# TODO: Replace typing.Type with builtins.type when aiaccel supports python>=3.9.
+SchedulerType = Type[Union[AbciScheduler, LocalScheduler, PylocalScheduler]]
+
+
+def create_scheduler(resource_type: str) -> type:
     """Returns scheduler type.
 
     Args:
         config_path (str): Path to configuration file.
 
-    Returns:
-        type | None: `LocalScheduler`, `PylocalScheduler`, or `AbciScheduler`
-            if resource type is 'local', 'python_local', or 'abci',
-            respectively. Other cases, None.
-    """
-    config = Config(config_path)
-    resource = config.resource_type.get()
+    Raises:
+        ValueError: Causes when specified resource type is invalid.
 
-    if resource.lower() == "local":
+    Returns:
+        type | None: `LocalScheduler` , `PylocalScheduler` , or `AbciScheduler`
+        if resource type is 'local', 'python_local', or 'abci', respectively.
+    """
+
+    if resource_type.lower() == "local":
         return LocalScheduler
 
-    elif resource.lower() == "python_local":
+    elif resource_type.lower() == "python_local":
         return PylocalScheduler
 
-    elif resource.lower() == "abci":
+    elif resource_type.lower() == "abci":
         return AbciScheduler
-
     else:
-        return None
+        raise ValueError(
+            f"Invalid resource type \"{resource_type}\". "
+            "The resource type should be one of \"local\", \"python_local\", and \"abci\"."
+        )

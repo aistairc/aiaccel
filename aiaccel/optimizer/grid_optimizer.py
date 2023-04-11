@@ -3,13 +3,16 @@ from __future__ import annotations
 import math
 from functools import reduce
 from operator import mul
+from typing import Any
 
-from aiaccel.config import Config
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel.config import is_multi_objective
+from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 
-def get_grid_options(parameter_name: str, config: Config) -> tuple[int | None, bool, int | None]:
+def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool, Any]:
     """Get options about grid search.
 
     Args:
@@ -28,7 +31,7 @@ def get_grid_options(parameter_name: str, config: Config) -> tuple[int | None, b
     log: bool = False
     step: float | None = None
 
-    grid_options = config.hyperparameters.get()
+    grid_options = config.optimize.parameters
 
     for g in grid_options:
         if g["name"] == parameter_name:
@@ -49,12 +52,12 @@ def get_grid_options(parameter_name: str, config: Config) -> tuple[int | None, b
     raise KeyError(f"Invalid parameter name: {parameter_name}")
 
 
-def generate_grid_points(p: HyperParameter, config: Config) -> dict[str, float | int | str | list[float, int, str]]:
+def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict[str, Any]:
     """Make a list of all parameters for this grid.
 
     Args:
         p (HyperParameter): A hyper parameter object.
-        config (Config): A config object.
+        config (DictConfig): A configuration object.
 
     Returns:
         dict[str, str | list[float, int, str]]: A dictionary including all grid
@@ -86,10 +89,10 @@ def generate_grid_points(p: HyperParameter, config: Config) -> dict[str, float |
             new_param["parameters"] = [int(i) for i in new_param["parameters"]]
 
     elif p.type.lower() == "categorical":
-        new_param["parameters"] = list(p.choices)
+        new_param["parameters"] = p.choices
 
     elif p.type.lower() == "ordinal":
-        new_param["parameters"] = list(p.sequence)
+        new_param["parameters"] = p.sequence
 
     else:
         raise TypeError(f"Invalid parameter type: {p.type}")
@@ -102,17 +105,22 @@ class GridOptimizer(AbstractOptimizer):
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+            command line options.
 
     Attributes:
         ready_params (list[dict]): A list of ready hyper parameters.
         generate_index (int): A number of generated hyper parameters.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
-        super().__init__(options)
-        self.ready_params = None
-        self.generate_index = None
+    def __init__(self, config: DictConfig) -> None:
+        super().__init__(config)
+        self.ready_params = []
+        for param in self.params.get_parameter_list():
+            self.ready_params.append(generate_grid_points(param, self.config))
+        self.generate_index = 0
+
+        if is_multi_objective(self.config):
+            raise NotImplementedError("Grid search optimizer does not support multi-objective " "optimization.")
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -121,11 +129,6 @@ class GridOptimizer(AbstractOptimizer):
             None
         """
         super().pre_process()
-
-        self.ready_params = []
-
-        for param in self.params.get_parameter_list():
-            self.ready_params.append(generate_grid_points(param, self.config))
 
         self.generate_index = (
             self.storage.get_num_ready() + self.storage.get_num_running() + self.storage.get_num_finished()
@@ -147,7 +150,7 @@ class GridOptimizer(AbstractOptimizer):
             return None
 
         parameter_index = []
-        div = [reduce(lambda x, y: x * y, parameter_lengths[0 : -1 - i]) for i in range(0, len(parameter_lengths) - 1)]
+        div = [reduce(lambda x, y: x * y, parameter_lengths[i + 1 :]) for i in range(0, len(parameter_lengths) - 1)]
 
         for i in range(0, len(parameter_lengths) - 1):
             d = int(remain / div[i])
@@ -159,38 +162,48 @@ class GridOptimizer(AbstractOptimizer):
 
         return parameter_index
 
-    def generate_parameter(self) -> list[dict[str, float | int | str]]:
+    def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
         Returns:
-            list[dict[str, float | int | str]]: A list of new parameters.
+            list[dict[str, float | int | str]] | None: A list of new
+                parameters. None if all of parameters are generated.
         """
         parameter_index = self.get_parameter_index()
-        new_params = []
 
         if parameter_index is None:
             self.logger.info("Generated all of parameters.")
-            self.all_parameter_generated = True
-            return new_params
+            self.all_parameters_generated = True
+            return None
 
-        for i in range(0, len(self.ready_params)):
-            new_param = {
-                "parameter_name": self.ready_params[i]["parameter_name"],
-                "type": self.ready_params[i]["type"],
-                "value": self.ready_params[i]["parameters"][parameter_index[i]],
-            }
-            new_params.append(new_param)
-
+        new_params: list[Any] = []
+        for param, index in zip(self.ready_params, parameter_index):
+            new_params.append(
+                {"parameter_name": param["parameter_name"], "type": param["type"], "value": param["parameters"][index]}
+            )
         return new_params
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
-        """Generate initial parameters.
+        """Generates initial parameters.
+
+        Grid search algorithm always ignores the initial values in
+        configulation file even if given.
+
+        Raises:
+            ValueError: Causes when the parameter is not generated.
 
         Returns:
             list[dict[str, float | int | str]]: A list of new parameters.
         """
-        if super().generate_initial_parameter() is not None:
-            self.logger.warning(
-                "Initial values cannot be specified for grid search." "The set initial value has been invalidated."
-            )
-        return self.generate_parameter()
+        for hyperparameter in self.params.get_parameter_list():
+            if hyperparameter.initial is not None:
+                self.logger.warning(
+                    "Initial values cannot be specified for grid search. " "The set initial value has been invalidated."
+                )
+                break
+        generated_parameter = self.generate_parameter()
+        if generated_parameter is None:
+            self.logger.error("Initial parameter not generaged.")
+            raise ValueError("Initial parameter not generated.")
+        else:
+            return generated_parameter

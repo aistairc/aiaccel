@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+from typing import Any
 
 import numpy as np
 from asciichartpy import (
@@ -36,7 +37,7 @@ class EasyVisualizer:
         cplt.line_plot([values: list])
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.line_colors = {
             "black": black,
             "blue": blue,
@@ -73,11 +74,11 @@ class EasyVisualizer:
             "darkgray",
             "black",
         ]
-        self.plot_config = {
+        self.plot_config: dict[str, Any] = {
             "height": 15,
             "colors": [self.line_colors[self.color_priority[0]], self.line_colors[self.color_priority[1]]],
         }
-        self.plot_datas = [[]]
+        self.plot_datas: list[list[Any]] = [[]]
 
     def set_height(self, height: int) -> None:
         """Set the any height of vertical axis.
@@ -95,7 +96,7 @@ class EasyVisualizer:
     #     """
     #     self.plot_config["width"] = width
 
-    def set_colors(self, colors: list) -> None:
+    def set_colors(self, colors: list[Any]) -> None:
         """Set the color of line graph.
 
         Args:
@@ -115,7 +116,7 @@ class EasyVisualizer:
             else:
                 raise Exception
 
-    def caption(self, *labels: tuple) -> None:
+    def caption(self, *labels: Any) -> None:
         """Set the any caption.
 
         Args:
@@ -126,7 +127,7 @@ class EasyVisualizer:
             color = self.line_colors[self.color_priority[i]]
             print(f"{color}{list(labels)[i]}{reset}")
 
-    def line_plot(self, *data: tuple) -> None:
+    def line_plot(self, *data: Any) -> None:
         """Plot the any data.
 
         Args:
@@ -171,7 +172,7 @@ class EasyVisualizer:
                 self.plot_datas.append(data[i])
         print(plot(series=self.plot_datas, cfg=self.plot_config))
 
-    def sort(self, data: list, goal: str) -> list | None:
+    def sort(self, data: list[Any], goal: str) -> list[Any] | None:
         """Sort the any data to maximize or minimize.
 
         Args:
@@ -182,7 +183,7 @@ class EasyVisualizer:
             Sorted list, or None.
         """
         if not type(data) == list:
-            return
+            return None
 
         best_values = []
 
