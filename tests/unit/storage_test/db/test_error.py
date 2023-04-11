@@ -3,7 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import t_base, ws, init
+from tests.unit.storage_test.db.base import init, t_base, ws
 
 # set_any_trial_error
 
@@ -14,16 +14,10 @@ def test_set_any_trial_error():
 
     trial_id = 0
     message = "hoge"
-    assert storage.error.set_any_trial_error(
-        trial_id=trial_id,
-        error_message=message
-    ) is None
+    assert storage.error.set_any_trial_error(trial_id=trial_id, error_message=message) is None
 
     # update
-    assert storage.error.set_any_trial_error(
-        trial_id=trial_id,
-        error_message=message
-    ) is None
+    assert storage.error.set_any_trial_error(trial_id=trial_id, error_message=message) is None
 
 
 # set_any_trial_error exception
@@ -47,10 +41,7 @@ def test_get_any_trial_error():
 
     trial_id = 0
     message = "hoge"
-    storage.error.set_any_trial_error(
-        trial_id=trial_id,
-        error_message=message
-    )
+    storage.error.set_any_trial_error(trial_id=trial_id, error_message=message)
 
     get_mess = storage.error.get_any_trial_error(trial_id)
     assert message == get_mess
@@ -65,17 +56,10 @@ def test_get_error_trial_id():
     assert storage.error.get_error_trial_id() == []
 
     ids = [0, 1, 2]
-    mess = [
-        "hoge_0",
-        "hoge_1",
-        "hoge_2"
-    ]
+    mess = ["hoge_0", "hoge_1", "hoge_2"]
 
     for i in range(len(ids)):
-        storage.error.set_any_trial_error(
-            trial_id=ids[i],
-            error_message=mess[i]
-        )
+        storage.error.set_any_trial_error(trial_id=ids[i], error_message=mess[i])
 
     assert storage.error.get_error_trial_id() == ids
 
@@ -86,17 +70,10 @@ def test_all_delete():
     storage = Storage(ws.path)
 
     ids = [0, 1, 2]
-    mess = [
-        "hoge_0",
-        "hoge_1",
-        "hoge_2"
-    ]
+    mess = ["hoge_0", "hoge_1", "hoge_2"]
 
     for i in range(len(ids)):
-        storage.error.set_any_trial_error(
-            trial_id=ids[i],
-            error_message=mess[i]
-        )
+        storage.error.set_any_trial_error(trial_id=ids[i], error_message=mess[i])
 
     assert storage.error.all_delete() is None
     for id in ids:
@@ -109,19 +86,12 @@ def test_all_delete_exception():
     storage = Storage(ws.path)
 
     ids = [0, 1, 2]
-    mess = [
-        "hoge_0",
-        "hoge_1",
-        "hoge_2"
-    ]
+    mess = ["hoge_0", "hoge_1", "hoge_2"]
 
     for i in range(len(ids)):
-        storage.error.set_any_trial_error(
-            trial_id=ids[i],
-            error_message=mess[i]
-        )
+        storage.error.set_any_trial_error(trial_id=ids[i], error_message=mess[i])
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / "storage/storage.db").unlink()
     with pytest.raises(SQLAlchemyError):
         all_delete = undecorated(storage.error.all_delete)
         all_delete(storage.error)
@@ -136,10 +106,7 @@ def test_delete_any_trial_error():
     messages = ["hoge0", "hoge1", "hoge2"]
 
     for i in range(len(ids)):
-        storage.error.set_any_trial_error(
-            trial_id=ids[i],
-            error_message=messages[i]
-        )
+        storage.error.set_any_trial_error(trial_id=ids[i], error_message=messages[i])
 
     assert storage.error.get_any_trial_error(trial_id=0) is not None
     assert storage.error.get_any_trial_error(trial_id=1) is not None
@@ -170,12 +137,9 @@ def test_delete_any_trial_error_exception():
     messages = ["hoge0", "hoge1", "hoge2"]
 
     for i in range(len(ids)):
-        storage.error.set_any_trial_error(
-            trial_id=ids[i],
-            error_message=messages[i]
-        )
+        storage.error.set_any_trial_error(trial_id=ids[i], error_message=messages[i])
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / "storage/storage.db").unlink()
     with pytest.raises(SQLAlchemyError):
         delete_any_trial_error = undecorated(storage.error.delete_any_trial_error)
         delete_any_trial_error(storage.error, trial_id=0)

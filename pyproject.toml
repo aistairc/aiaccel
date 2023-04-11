@@ -24,6 +24,7 @@ dependencies = [
     "filelock>=3.10.0,<4.0.0",
     "joblib>=1.2.0,<2.0.0",
     "monotonic>=1.6,<2.0.0",
+    "omegaconf",
     "pluggy>=1.0.0,<2.0.0",
     "pyyaml>=6.0,<7.0.0",
     "undecorated>=0.3.0,<1.0.0",

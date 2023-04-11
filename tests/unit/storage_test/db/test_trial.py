@@ -1,9 +1,9 @@
 import pytest
-from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import t_base, ws, init
+from tests.unit.storage_test.db.base import init, t_base, ws
 
 
 # set_any_trial_state
@@ -14,17 +14,11 @@ def test_set_any_trial_state():
     states = ["ready", "running", "finished"]
 
     for i in range(len(states)):
-        assert storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        ) is None
+        assert storage.trial.set_any_trial_state(trial_id=i, state=states[i]) is None
 
     # update
     for i in range(len(states)):
-        assert storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        ) is None
+        assert storage.trial.set_any_trial_state(trial_id=i, state=states[i]) is None
 
 
 # set_any_trial_state exception
@@ -35,11 +29,8 @@ def test_set_any_trial_state_exception():
     init()
     with pytest.raises(SQLAlchemyError):
         set_any_trial_state = undecorated(storage.trial.set_any_trial_state)
-        set_any_trial_state(
-            storage.trial,
-            trial_id=0,
-            state="ready"
-        )
+        set_any_trial_state(storage.trial, trial_id=0, state="ready")
+
 
 # test_get_any_trial_state
 
@@ -48,23 +39,10 @@ def test_set_any_trial_state_exception():
 def test_get_any_trial_state():
     storage = Storage(ws.path)
 
-    states = [
-        "ready",
-        "ready",
-        "running",
-        "running",
-        "running",
-        "finished",
-        "finished",
-        "finished",
-        "finished"
-    ]
+    states = ["ready", "ready", "running", "running", "running", "finished", "finished", "finished", "finished"]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     for i in range(len(states)):
         assert storage.trial.get_any_trial_state(i) == states[i]
@@ -77,23 +55,10 @@ def test_get_any_state_list():
 
     assert storage.trial.get_any_state_list("ready") is None
 
-    states = [
-        "ready",
-        "ready",
-        "running",
-        "running",
-        "running",
-        "finished",
-        "finished",
-        "finished",
-        "finished"
-    ]
+    states = ["ready", "ready", "running", "running", "running", "finished", "finished", "finished", "finished"]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     assert storage.trial.get_any_state_list("ready") == [0, 1]
     assert storage.trial.get_any_state_list("running") == [2, 3, 4]
@@ -105,23 +70,10 @@ def test_get_any_state_list():
 def test_all_delete():
     storage = Storage(ws.path)
 
-    states = [
-        "ready",
-        "ready",
-        "running",
-        "running",
-        "running",
-        "finished",
-        "finished",
-        "finished",
-        "finished"
-    ]
+    states = ["ready", "ready", "running", "running", "running", "finished", "finished", "finished", "finished"]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     for i in range(len(states)):
         assert storage.trial.get_any_trial_state(i) == states[i]
@@ -137,23 +89,10 @@ def test_all_delete():
 def test_all_delete_exception():
     storage = Storage(ws.path)
 
-    states = [
-        "ready",
-        "ready",
-        "running",
-        "running",
-        "running",
-        "finished",
-        "finished",
-        "finished",
-        "finished"
-    ]
+    states = ["ready", "ready", "running", "running", "running", "finished", "finished", "finished", "finished"]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     for i in range(len(states)):
         assert storage.trial.get_any_trial_state(i) == states[i]
@@ -169,23 +108,10 @@ def test_all_delete_exception():
 def test_get_ready():
     storage = Storage(ws.path)
 
-    states = [
-        "ready",
-        "ready",
-        "running",
-        "running",
-        "running",
-        "finished",
-        "finished",
-        "finished",
-        "finished"
-    ]
+    states = ["ready", "ready", "running", "running", "running", "finished", "finished", "finished", "finished"]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     assert storage.trial.get_ready() == [0, 1]
 
@@ -195,23 +121,10 @@ def test_get_ready():
 def test_get_running():
     storage = Storage(ws.path)
 
-    states = [
-        "ready",
-        "ready",
-        "running",
-        "running",
-        "running",
-        "finished",
-        "finished",
-        "finished",
-        "finished"
-    ]
+    states = ["ready", "ready", "running", "running", "running", "finished", "finished", "finished", "finished"]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     assert storage.trial.get_running() == [2, 3, 4]
 
@@ -221,23 +134,10 @@ def test_get_running():
 def test_get_finished():
     storage = Storage(ws.path)
 
-    states = [
-        "ready",
-        "ready",
-        "running",
-        "running",
-        "running",
-        "finished",
-        "finished",
-        "finished",
-        "finished"
-    ]
+    states = ["ready", "ready", "running", "running", "running", "finished", "finished", "finished", "finished"]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     assert storage.trial.get_finished() == [5, 6, 7, 8]
 
@@ -249,23 +149,10 @@ def test_get_all_trial_id():
 
     assert storage.trial.get_all_trial_id() is None
 
-    states = [
-        "ready",
-        "ready",
-        "running",
-        "running",
-        "running",
-        "finished",
-        "finished",
-        "finished",
-        "finished"
-    ]
+    states = ["ready", "ready", "running", "running", "running", "finished", "finished", "finished", "finished"]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     assert storage.trial.get_all_trial_id() == [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
@@ -282,10 +169,7 @@ def test_delete_any_trial_state():
     ]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     for i in range(len(states)):
         assert storage.trial.get_any_trial_state(i) == states[i]
@@ -322,10 +206,7 @@ def test_delete_any_trial_state_exception():
     ]
 
     for i in range(len(states)):
-        storage.trial.set_any_trial_state(
-            trial_id=i,
-            state=states[i]
-        )
+        storage.trial.set_any_trial_state(trial_id=i, state=states[i])
 
     for i in range(len(states)):
         assert storage.trial.get_any_trial_state(i) == states[i]

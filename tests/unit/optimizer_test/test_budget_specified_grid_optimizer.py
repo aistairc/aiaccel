@@ -1,26 +1,19 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
 
 import pytest
 
-from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.optimizer import BudgetSpecifiedGridOptimizer
+from aiaccel.optimizer import AbstractOptimizer, BudgetSpecifiedGridOptimizer
 from tests.base_test import BaseTest
 
 
 class TestBudgetSpecifiedGridOptimizer(BaseTest):
     @pytest.fixture(autouse=True)
-    def setup_optimizer(
-        self,
-        data_dir: Path,
-        create_tmp_config: Callable[[Path], Path]
-    ) -> Generator[None, None, None]:
-
+    def setup_optimizer(self, data_dir: Path, create_tmp_config: Callable[[Path], Path]) -> Generator[None, None, None]:
         self.data_dir = data_dir
-        self.optimizer = BudgetSpecifiedGridOptimizer(self.load_config_for_test(self.configs['config_tpe.json']))
+        self.optimizer = BudgetSpecifiedGridOptimizer(self.load_config_for_test(self.configs["config_tpe.json"]))
         yield
         self.optimizer = None
 
@@ -48,7 +41,7 @@ class TestBudgetSpecifiedGridOptimizer(BaseTest):
         self.optimizer.pre_process()
 
         with monkeypatch.context() as m:
-            m.setattr(self.optimizer, 'all_parameters_generated', lambda: True)
+            m.setattr(self.optimizer, "all_parameters_generated", lambda: True)
             assert self.optimizer.generate_parameter() is None
 
         with monkeypatch.context() as m:
@@ -66,7 +59,7 @@ class TestBudgetSpecifiedGridOptimizer(BaseTest):
             for hyperparameter in self.optimizer.params.get_parameter_list():
                 hyperparameter.initial = None
                 hyperparameters.append(hyperparameter)
-            m.setattr(self.optimizer.params, 'get_parameter_list', lambda: hyperparameters)
+            m.setattr(self.optimizer.params, "get_parameter_list", lambda: hyperparameters)
             assert len(self.optimizer.generate_initial_parameter()) > 0
 
         with monkeypatch.context() as m:
@@ -74,10 +67,10 @@ class TestBudgetSpecifiedGridOptimizer(BaseTest):
             for hyperparameter in self.optimizer.params.get_parameter_list():
                 hyperparameter.initial = hyperparameter.lower
                 hyperparameters.append(hyperparameter)
-            m.setattr(self.optimizer.params, 'get_parameter_list', lambda: hyperparameters)
+            m.setattr(self.optimizer.params, "get_parameter_list", lambda: hyperparameters)
             assert len(self.optimizer.generate_initial_parameter()) > 0
 
         with monkeypatch.context() as m:
-            m.setattr(self.optimizer, 'generate_parameter', lambda: None)
+            m.setattr(self.optimizer, "generate_parameter", lambda: None)
             with pytest.raises(ValueError):
                 _ = self.optimizer.generate_initial_parameter()

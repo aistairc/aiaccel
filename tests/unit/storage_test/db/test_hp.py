@@ -1,6 +1,6 @@
 import pytest
-from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
 
 from aiaccel.storage import Storage
 from tests.unit.storage_test.db.base import t_base, ws
@@ -17,12 +17,12 @@ def test_set_any_trial_param():
     param_value = 0.01
     param_type = "float"
 
-    assert storage.hp.set_any_trial_param(
-        trial_id=trial_id,
-        param_name=param_name,
-        param_value=param_value,
-        param_type=param_type
-    ) is None
+    assert (
+        storage.hp.set_any_trial_param(
+            trial_id=trial_id, param_name=param_name, param_value=param_value, param_type=param_type
+        )
+        is None
+    )
 
 
 # set_any_trial_param exception
@@ -35,15 +35,11 @@ def test_set_any_trial_param():
     param_value = 0.01
     param_type = "float"
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / "storage/storage.db").unlink()
     with pytest.raises(SQLAlchemyError):
         set_any_trial_param = undecorated(storage.hp.set_any_trial_param)
         set_any_trial_param(
-            storage.hp,
-            trial_id=trial_id,
-            param_name=param_name,
-            param_value=param_value,
-            param_type=param_type
+            storage.hp, trial_id=trial_id, param_name=param_name, param_value=param_value, param_type=param_type
         )
 
 
@@ -54,36 +50,13 @@ def test_set_any_trial_params():
 
     trial_id = 0
     params = [
-        {
-            "parameter_name": "x1",
-            "value": 0.01,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x2",
-            "value": 0.02,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x3",
-            "value": 0.03,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x4",
-            "value": 0.04,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x5",
-            "value": 0.05,
-            "type": "float"
-        }
+        {"parameter_name": "x1", "value": 0.01, "type": "float"},
+        {"parameter_name": "x2", "value": 0.02, "type": "float"},
+        {"parameter_name": "x3", "value": 0.03, "type": "float"},
+        {"parameter_name": "x4", "value": 0.04, "type": "float"},
+        {"parameter_name": "x5", "value": 0.05, "type": "float"},
     ]
-    assert storage.hp.set_any_trial_params(
-        trial_id=trial_id,
-        params=params
-    ) is None
+    assert storage.hp.set_any_trial_params(trial_id=trial_id, params=params) is None
 
 
 # set_any_trial_param exception
@@ -93,41 +66,17 @@ def test_set_any_trial_params_exception():
 
     trial_id = 0
     params = [
-        {
-            "parameter_name": "x1",
-            "value": 0.01,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x2",
-            "value": 0.02,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x3",
-            "value": 0.03,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x4",
-            "value": 0.04,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x5",
-            "value": 0.05,
-            "type": "float"
-        }
+        {"parameter_name": "x1", "value": 0.01, "type": "float"},
+        {"parameter_name": "x2", "value": 0.02, "type": "float"},
+        {"parameter_name": "x3", "value": 0.03, "type": "float"},
+        {"parameter_name": "x4", "value": 0.04, "type": "float"},
+        {"parameter_name": "x5", "value": 0.05, "type": "float"},
     ]
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / "storage/storage.db").unlink()
     with pytest.raises(SQLAlchemyError):
         set_any_trial_params = undecorated(storage.hp.set_any_trial_params)
-        set_any_trial_params(
-            storage.hp,
-            trial_id=trial_id,
-            params=params
-        )
+        set_any_trial_params(storage.hp, trial_id=trial_id, params=params)
 
 
 # get_any_trial_params
@@ -141,10 +90,7 @@ def test_get_any_trial_params():
     param_type = "float"
 
     storage.hp.set_any_trial_param(
-        trial_id=trial_id,
-        param_name=param_name,
-        param_value=param_value,
-        param_type=param_type
+        trial_id=trial_id, param_name=param_name, param_value=param_value, param_type=param_type
     )
 
     d = storage.hp.get_any_trial_params(trial_id)
@@ -174,10 +120,7 @@ def test_all_delete():
     param_type = "float"
 
     storage.hp.set_any_trial_param(
-        trial_id=trial_id,
-        param_name=param_name,
-        param_value=param_value,
-        param_type=param_type
+        trial_id=trial_id, param_name=param_name, param_value=param_value, param_type=param_type
     )
 
     assert storage.hp.all_delete() is None
@@ -195,16 +138,14 @@ def test_all_delete_exception():
     param_type = "float"
 
     storage.hp.set_any_trial_param(
-        trial_id=trial_id,
-        param_name=param_name,
-        param_value=param_value,
-        param_type=param_type
+        trial_id=trial_id, param_name=param_name, param_value=param_value, param_type=param_type
     )
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / "storage/storage.db").unlink()
     with pytest.raises(SQLAlchemyError):
         all_delete = undecorated(storage.hp.all_delete)
         all_delete(storage.hp)
+
 
 # delete_any_trial_params
 
@@ -215,57 +156,24 @@ def test_delete_any_trial_params():
 
     trial_id = 0
     params = [
-        {
-            "parameter_name": "x1",
-            "value": 0.01,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x2",
-            "value": 0.02,
-            "type": "float"
-        }
+        {"parameter_name": "x1", "value": 0.01, "type": "float"},
+        {"parameter_name": "x2", "value": 0.02, "type": "float"},
     ]
-    storage.hp.set_any_trial_params(
-        trial_id=trial_id,
-        params=params
-    )
+    storage.hp.set_any_trial_params(trial_id=trial_id, params=params)
 
     trial_id = 1
     params = [
-        {
-            "parameter_name": "x1",
-            "value": 0.01,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x2",
-            "value": 0.02,
-            "type": "float"
-        }
+        {"parameter_name": "x1", "value": 0.01, "type": "float"},
+        {"parameter_name": "x2", "value": 0.02, "type": "float"},
     ]
-    storage.hp.set_any_trial_params(
-        trial_id=trial_id,
-        params=params
-    )
+    storage.hp.set_any_trial_params(trial_id=trial_id, params=params)
 
     trial_id = 2
     params = [
-        {
-            "parameter_name": "x1",
-            "value": 0.01,
-            "type": "float"
-        },
-        {
-            "parameter_name": "x2",
-            "value": 0.02,
-            "type": "float"
-        }
+        {"parameter_name": "x1", "value": 0.01, "type": "float"},
+        {"parameter_name": "x2", "value": 0.02, "type": "float"},
     ]
-    storage.hp.set_any_trial_params(
-        trial_id=trial_id,
-        params=params
-    )
+    storage.hp.set_any_trial_params(trial_id=trial_id, params=params)
 
     assert storage.hp.get_any_trial_params(trial_id=0) is not None
     assert storage.hp.get_any_trial_params(trial_id=1) is not None
@@ -292,7 +200,7 @@ def test_delete_any_trial_params():
 def test_delete_any_trial_params_exception():
     storage = Storage(ws.path)
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / "storage/storage.db").unlink()
     with pytest.raises(SQLAlchemyError):
         delete_any_trial_params = undecorated(storage.hp.delete_any_trial_params)
         delete_any_trial_params(storage.hp, trial_id=0)

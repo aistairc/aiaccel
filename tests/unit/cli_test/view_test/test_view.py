@@ -1,9 +1,7 @@
-
-from aiaccel.config import load_config
-
 from pathlib import Path
 
 from aiaccel.cli.view import Viewer
+from aiaccel.config import load_config
 from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
 
@@ -15,7 +13,7 @@ def test_view(clean_work_dir, work_dir, create_tmp_config):
         workspace.clean()
     workspace.create()
 
-    config_path = Path('tests/test_data/config.json')
+    config_path = Path("tests/test_data/config.json")
     config_path = create_tmp_config(config_path)
     config = load_config(config_path)
     storage = Storage(ws=Path(config.generic.workspace))

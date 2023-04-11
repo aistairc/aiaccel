@@ -4,12 +4,10 @@ import time
 
 import numpy as np
 import pytest
-from aiaccel.common import (module_type_master, module_type_optimizer,
-                            module_type_scheduler)
 
+from aiaccel.common import module_type_master, module_type_optimizer, module_type_scheduler
 from aiaccel.master import LocalMaster
 from aiaccel.module import AbstractModule
-
 from aiaccel.optimizer import RandomOptimizer
 from aiaccel.scheduler import LocalScheduler
 from aiaccel.util import str_to_logging_level
@@ -29,14 +27,14 @@ async def delay_make_directory(sleep_time, d):
 
 def dummy_break():
     import sys
+
     sys.exit()
 
 
 class TestAbstractModule(BaseTest):
-
     @pytest.fixture(autouse=True)
     def setup_module(self, clean_work_dir):
-        self.module = AbstractModule(self.load_config_for_test(self.configs["config.json"]), 'abstract')
+        self.module = AbstractModule(self.load_config_for_test(self.configs["config.json"]), "abstract")
         self.module.logger = logging.getLogger(__name__)
         yield
         self.module = None
@@ -78,26 +76,29 @@ class TestAbstractModule(BaseTest):
         assert self.module.print_dict_state() is None
 
     def test_set_logger(self, work_dir):
-        assert self.module.set_logger(
-            'root.optimizer',
-            work_dir.joinpath(
-                self.module.workspace.log,
-                # self.config.get('logger', 'optimizer_logfile')
-                # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
-                self.module.config.logger.file.optimizer
-            ),
-            str_to_logging_level(
-                # self.module.config.get('logger', 'optimizer_file_log_level')
-                # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
-                self.module.config.logger.log_level.optimizer
-            ),
-            str_to_logging_level(
-                # self.module.config.get('logger', 'optimizer_stream_log_level')
-                # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
-                self.module.config.logger.stream_level.optimizer
-            ),
-            'Optimizer'
-        ) is None
+        assert (
+            self.module.set_logger(
+                "root.optimizer",
+                work_dir.joinpath(
+                    self.module.workspace.log,
+                    # self.config.get('logger', 'optimizer_logfile')
+                    # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
+                    self.module.config.logger.file.optimizer,
+                ),
+                str_to_logging_level(
+                    # self.module.config.get('logger', 'optimizer_file_log_level')
+                    # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(2021-08-12:荒本)
+                    self.module.config.logger.log_level.optimizer
+                ),
+                str_to_logging_level(
+                    # self.module.config.get('logger', 'optimizer_stream_log_level')
+                    # コンフィグファイルの読取り形式変更改修に伴いテストコードも変更(荒本)
+                    self.module.config.logger.stream_level.optimizer
+                ),
+                "Optimizer",
+            )
+            is None
+        )
 
     def test_pre_process(self):
         try:
@@ -133,19 +134,19 @@ class TestAbstractModule(BaseTest):
         assert self.module.check_error() is True
 
     def test_resume(self):
-        self.module = AbstractModule(self.load_config_for_test(self.configs["config.json"]), 'abstract')
+        self.module = AbstractModule(self.load_config_for_test(self.configs["config.json"]), "abstract")
         self.module._rng = np.random.RandomState(0)
         assert self.module.resume() is None
 
         config = self.load_config_for_test(self.configs["config.json"])
         config.resume = 1
-        self.module = AbstractModule(config, 'abstract')
+        self.module = AbstractModule(config, "abstract")
         self.module.set_logger(
-            'root.abstract',
+            "root.abstract",
             self.module.workspace.log / self.module.config.logger.file.master,
             str_to_logging_level(self.module.config.logger.log_level.master),
             str_to_logging_level(self.module.config.logger.stream_level.master),
-            'Abstract   '
+            "Abstract   ",
         )
         self.module._serialize(1)
         assert self.module.resume() is None

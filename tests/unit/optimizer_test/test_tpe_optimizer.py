@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 
 from aiaccel.config import load_config
-from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.optimizer import TpeOptimizer
 from aiaccel.optimizer.tpe_optimizer import TPESamplerWrapper, create_distributions
+from aiaccel.parameter import HyperParameterConfiguration
 from tests.base_test import BaseTest
 
 
@@ -20,7 +20,7 @@ class TestTpeOptimizer(BaseTest):
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
-        self.optimizer = TpeOptimizer(self.load_config_for_test(self.configs['config_tpe.json']))
+        self.optimizer = TpeOptimizer(self.load_config_for_test(self.configs["config_tpe.json"]))
         yield
         self.optimizer = None
 
@@ -34,9 +34,7 @@ class TestTpeOptimizer(BaseTest):
     def test_check_result(self):
         self.optimizer.pre_process()
         self.optimizer.inner_loop_main_process()
-        with patch.object(
-            self.optimizer.storage.result, "get_any_trial_objective", return_value=[1]
-        ):
+        with patch.object(self.optimizer.storage.result, "get_any_trial_objective", return_value=[1]):
             assert self.optimizer.check_result() is None
 
     def test_is_startup_trials(self):
@@ -60,10 +58,10 @@ class TestTpeOptimizer(BaseTest):
         self.optimizer.config.resource.num_node = _tmp_num_node
 
     def test_generate_initial_parameter(self):
-        optimizer = TpeOptimizer(self.load_config_for_test(self.configs['config_tpe_2.json']))
-        (optimizer.workspace.storage / 'storage.db').unlink()
+        optimizer = TpeOptimizer(self.load_config_for_test(self.configs["config_tpe_2.json"]))
+        (optimizer.workspace.storage / "storage.db").unlink()
 
-        optimizer.__init__(self.load_config_for_test(self.configs['config_tpe_2.json']))
+        optimizer.__init__(self.load_config_for_test(self.configs["config_tpe_2.json"]))
         optimizer.pre_process()
         assert len(optimizer.generate_initial_parameter()) > 0
         assert len(optimizer.generate_initial_parameter()) > 0
@@ -87,17 +85,17 @@ class TestTpeOptimizer(BaseTest):
 
 
 def test_create_distributions(data_dir):
-    config = load_config(data_dir / 'config_tpe_2.json')
+    config = load_config(data_dir / "config_tpe_2.json")
     params = HyperParameterConfiguration(config.optimize.parameters)
     dist = create_distributions(params)
     assert type(dist) is dict
 
-    config = load_config(data_dir / 'config_tpe_categorical.json')
+    config = load_config(data_dir / "config_tpe_categorical.json")
     params = HyperParameterConfiguration(config.optimize.parameters)
     dist = create_distributions(params)
     assert type(dist) is dict
 
-    config = load_config(data_dir / 'config_tpe_invalid_type.json')
+    config = load_config(data_dir / "config_tpe_invalid_type.json")
     params = HyperParameterConfiguration(config.optimize.parameters)
     with pytest.raises(TypeError):
         create_distributions(params)
