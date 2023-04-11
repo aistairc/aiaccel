@@ -1,0 +1,82 @@
+{
+  "generic": {
+    "init_fail_count": 100,
+    "name_length": 6,
+    "workspace": "./work",
+    "user_program_name": "user.py",
+    "objective_function_name": "main"
+  },
+  "logger": {
+    "master_logfile": "master.log",
+    "master_file_log_level": "DEBUG",
+    "master_stream_log_level": "DEBUG",
+    "optimizer_logfile": "optimizer.log",
+    "optimizer_file_log_level": "DEBUG",
+    "optimizer_stream_log_level": "DEBUG",
+    "scheduler_logfile": "scheduler.log",
+    "scheduler_file_log_level": "DEBUG",
+    "scheduler_stream_log_level": "DEBUG"
+  },
+  "wrapper": {
+    "job_command": "python wrapper.py"
+  },
+  "master": {
+    "sleep_time_master": 1
+  },
+  "optimizer": {
+    "search_algorithm": "aiaccel.optimizer.TpeOptimizer",
+    "parameter_pool_size": 4,
+    "sleep_time_optimizer": 1
+  },
+  "scheduler": {
+    "cancel_retry": 3,
+    "cancel_timeout": 10,
+    "expire_retry": 3,
+    "expire_timeout": 10,
+    "finished_retry": 3,
+    "finished_timeout": 10,
+    "job_retry": 2,
+    "job_timeout": 10,
+    "kill_retry": 3,
+    "kill_timeout": 30,
+    "result_retry": 1,
+    "runner_retry": 3,
+    "runner_timeout": 10,
+    "running_retry": 3,
+    "running_timeout": 10,
+    "sleep_time_scheduler": 1
+  },
+  "resource": {
+    "type": "local",
+    "num_node": 1,
+    "$type": "abci",
+    "$num_node": 4
+  },
+  "ABCI": {
+    "job_script_preamble": "wrapper_abci.sh",
+    "group": "gaa",
+    "job_execution_options": ""
+  },
+  "optimize": {
+    "goal": "minimize",
+    "trial_number": 20,
+    "parameters": [
+      {
+        "name": "x1",
+        "type": "uniform_float",
+        "log": false,
+        "lower": 0.0,
+        "upper": 5.0,
+        "initial": 0.0
+      },
+      {
+        "name": "x2",
+        "type": "uniform_float",
+        "log": false,
+        "lower": 0.0,
+        "upper": 5.0,
+        "initial": 0.0
+      }
+    ]
+  }
+}

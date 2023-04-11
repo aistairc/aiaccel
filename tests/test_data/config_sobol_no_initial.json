@@ -1,0 +1,39 @@
+{
+  "generic": {
+    "workspace": "/tmp/work",
+    "job_command": "python original_main.py",
+    "python_file": "original_main.py",
+    "function": "main"
+  },
+  "resource": {
+    "type": "local",
+    "num_node": 4
+  },
+  "ABCI": {
+    "group": "[group]",
+    "job_script_preamble": "./job_script_preamble.sh",
+    "job_execution_options": ""
+  },
+  "optimize": {
+    "search_algorithm": "aiaccel.optimizer.SobolOptimizer",
+    "goal": "minimize",
+    "trial_number": 10,
+    "rand_seed": 42,
+    "parameters": [
+      {
+        "name": "x1",
+        "type": "uniform_float",
+        "log": false,
+        "lower": 0.1,
+        "upper": 1.0
+      },
+      {
+        "name": "x2",
+        "type": "uniform_float",
+        "log": false,
+        "lower": -5.0,
+        "upper": 5.0
+      }
+    ]
+  }
+}

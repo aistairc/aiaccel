@@ -1,0 +1,34 @@
+{
+  "generic": {
+    "workspace": "/tmp/work",
+    "job_command": "python original_main.py",
+    "python_file": "original_main.py",
+    "function": "main",
+    "batch_job_timeout": 600
+  },
+  "resource": {
+    "type": "local",
+    "num_node": 4
+  },
+  "ABCI": {
+    "group": "[group]",
+    "job_script_preamble": "./job_script_preamble.sh",
+    "job_execution_options": ""
+  },
+  "optimize": {
+    "search_algorithm": "aiaccel.optimizer.GridOptimizer",
+    "goal": "minimize",
+    "trial_number": 10,
+    "rand_seed": 42,
+    "parameters": [
+      {
+        "name": "x1",
+        "type": "uniform_float",
+        "log": true,
+        "base": 10,
+        "lower": 0.1,
+        "upper": 1.0
+      }
+    ]
+  }
+}

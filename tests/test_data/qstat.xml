@@ -1,0 +1,43 @@
+<?xml version='1.0'?>
+<job_info  xmlns:xsd="http://www.univa.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="file:///bb/system/uge/latest/util/resources/schemas/8.6.6/qstat/qstat.xsd file:///bb/system/uge/latest/util/resources/schemas/8.6.6/qstat/message.xsd file:///bb/system/uge/latest/util/resources/schemas/8.6.6/qstat/detailed_job_info.xsd">
+    <queue_info>
+        <job_list state="running">
+            <JB_job_number>4300139</JB_job_number>
+            <JAT_prio>0.25586</JAT_prio>
+            <JB_name>run_oL8g5ubbbPIa84yRnBUbHoWC8FJowoRo.sh</JB_name>
+            <JB_owner>aca10423ls</JB_owner>
+            <state>r</state>
+            <JAT_start_time>2020-10-21T12:52:25.479</JAT_start_time>
+            <queue_name>gpu@g0004</queue_name>
+            <jclass_name></jclass_name>
+            <slots>10</slots>
+            <invalid>0</invalid>
+        </job_list>
+    </queue_info>
+    <job_info>
+        <job_list state="pending">
+            <JB_job_number>4300140</JB_job_number>
+            <JAT_prio>0.00000</JAT_prio>
+            <JB_name>run_iK2ZWeqhFWCEPyYngFb51yBMWXaSCrUZ.sh</JB_name>
+            <JB_owner>aca10423ls</JB_owner>
+            <state>qw</state>
+            <JB_submission_time>2020-10-21T12:52:20.192</JB_submission_time>
+            <queue_name></queue_name>
+            <jclass_name></jclass_name>
+            <slots>10</slots>
+            <invalid>0</invalid>
+        </job_list>
+        <job_list state="pending">
+            <JB_job_number>4300141</JB_job_number>
+            <JAT_prio>0.00000</JAT_prio>
+            <JB_name>run_WD8s7bA16J7PglOU3shVv5UTG79BG16Q.sh</JB_name>
+            <JB_owner>aca10423ls</JB_owner>
+            <state>qw</state>
+            <JB_submission_time>2020-10-21T12:52:22.037</JB_submission_time>
+            <queue_name></queue_name>
+            <jclass_name></jclass_name>
+            <slots>10</slots>
+            <invalid>0</invalid>
+        </job_list>
+    </job_info>
+</job_info>
