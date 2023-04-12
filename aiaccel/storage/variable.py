@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -5,7 +6,8 @@ from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage import Abstract, VariableTable
+from aiaccel.storage import Abstract
+from aiaccel.storage import VariableTable
 from aiaccel.util import retry
 
 
@@ -15,7 +17,12 @@ class Variable(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_variable(
-        self, trial_id: int, process_name: str, label: str, value: Any, update_allow: bool
+        self,
+        trial_id: int,
+        process_name: str,
+        label: str,
+        value: Any,
+        update_allow: bool
     ) -> None:
         with self.create_session() as session:
             try:
@@ -26,9 +33,18 @@ class Variable(Abstract):
                     .filter(VariableTable.label == label)
                 )
                 if session.query(query.exists()).scalar() and update_allow is True:
-                    self.delete_any_trial_variable(trial_id=trial_id, process_name=process_name, label=label)
+                    self.delete_any_trial_variable(
+                        trial_id=trial_id,
+                        process_name=process_name,
+                        label=label
+                    )
 
-                new_row = VariableTable(trial_id=trial_id, process_name=process_name, label=label, value=value)
+                new_row = VariableTable(
+                    trial_id=trial_id,
+                    process_name=process_name,
+                    label=label,
+                    value=value
+                )
 
                 session.add(new_row)
                 session.commit()
@@ -72,13 +88,11 @@ class Variable(Abstract):
     def delete_any_trial_variable(self, trial_id: int, process_name: str, label: str) -> None:
         with self.create_session() as session:
             try:
-                (
-                    session.query(VariableTable)
+                (session.query(VariableTable)
                     .filter(VariableTable.trial_id == trial_id)
                     .filter(VariableTable.process_name == process_name)
                     .filter(VariableTable.label == label)
-                    .delete()
-                )
+                    .delete())
                 session.commit()
             except SQLAlchemyError as e:
                 session.rollback()
@@ -97,15 +111,27 @@ class Value(Variable):
 
     def set(self, trial_id: int, value: Any, update_allow: bool = True) -> None:
         self.set_any_trial_variable(
-            trial_id=trial_id, process_name=self.process_name, label=self.label, value=value, update_allow=update_allow
+            trial_id=trial_id,
+            process_name=self.process_name,
+            label=self.label,
+            value=value,
+            update_allow=update_allow
         )
 
     def get(self, trial_id: int) -> Any | None:
-        self.value = self.get_any_trial_variable(trial_id=trial_id, process_name=self.process_name, label=self.label)
+        self.value = self.get_any_trial_variable(
+            trial_id=trial_id,
+            process_name=self.process_name,
+            label=self.label
+        )
         return self.value
 
     def delete(self, trial_id: int) -> None:
-        self.delete_any_trial_variable(trial_id=trial_id, process_name=self.process_name, label=self.label)
+        self.delete_any_trial_variable(
+            trial_id=trial_id,
+            process_name=self.process_name,
+            label=self.label
+        )
 
 
 class Serializer:

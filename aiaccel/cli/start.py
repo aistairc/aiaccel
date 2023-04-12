@@ -25,7 +25,10 @@ logger.addHandler(StreamHandler())
 
 
 def get_best_parameter(
-    files: list[Path], goal: str, objective_y_index: int, dict_lock: Path
+    files: list[Path],
+    goal: str,
+    objective_y_index: int,
+    dict_lock: Path
 ) -> tuple[float | None, Path | None]:
     """Get a best parameter in specified files.
 
@@ -77,9 +80,9 @@ def get_best_parameter(
 def main() -> None:  # pragma: no cover
     """Parses command line options and executes optimization."""
     parser = ArgumentParser()
-    parser.add_argument("--config", "-c", type=str, default="config.yml")
-    parser.add_argument("--resume", type=int, default=None)
-    parser.add_argument("--clean", nargs="?", const=True, default=False)
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument('--resume', type=int, default=None)
+    parser.add_argument('--clean', nargs='?', const=True, default=False)
     args = parser.parse_args()
 
     config = load_config(args.config)

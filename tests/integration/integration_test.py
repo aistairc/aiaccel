@@ -7,8 +7,10 @@ import yaml
 from aiaccel.common import dict_result, file_final_result
 from aiaccel.config import is_multi_objective, load_config
 from aiaccel.master import LocalMaster, PylocalMaster, create_master
-from aiaccel.scheduler import LocalScheduler, PylocalScheduler, create_scheduler
+from aiaccel.scheduler import (LocalScheduler, PylocalScheduler,
+                               create_scheduler)
 from aiaccel.storage import Storage
+from aiaccel.workspace import Workspace
 from tests.base_test import BaseTest
 
 
@@ -21,15 +23,18 @@ class IntegrationTest(BaseTest):
     search_algorithm = None
 
     def test_run(self, data_dir, create_tmp_config, tmpdir, work_dir):
+
         #
         # local test
         #
         # is_multi_objective = isinstance(config.goal.get(), list)
 
-        config = self.load_config_for_test(self.configs["config_{}.json".format(self.search_algorithm)])
+        config = self.load_config_for_test(
+            self.configs['config_{}.json'.format(self.search_algorithm)]
+        )
 
         if is_multi_objective(config):
-            user_main_file = self.test_data_dir.joinpath("original_main_mo.py")
+            user_main_file = self.test_data_dir.joinpath('original_main_mo.py')
         else:
             user_main_file = None
 
@@ -42,9 +47,10 @@ class IntegrationTest(BaseTest):
             scheduler = create_scheduler(config.resource.type.value)
             assert scheduler == LocalScheduler
 
-            storage = Storage(ws=Path(config.generic.workspace))
-            print(f"\n{config.config_path}\n")
-            subprocess.Popen(["aiaccel-start", "--config", str(config.config_path), "--clean"]).wait()
+            workspace = Workspace(config.generic.workspace)
+            storage = Storage(workspace.storage_file_path)
+            print(f'\n{config.config_path}\n')
+            subprocess.Popen(['aiaccel-start', '--config', str(config.config_path), '--clean']).wait()
             self.evaluate(config, is_multi_objective(config))
 
             self.result_comparison.append(storage.result.get_objectives())
@@ -53,19 +59,21 @@ class IntegrationTest(BaseTest):
         # pylocal test
         #
         with self.create_main(user_main_file):
-            config = self.load_config_for_test(self.configs["config_{}.json".format(self.search_algorithm)])
+            config = self.load_config_for_test(
+                self.configs['config_{}.json'.format(self.search_algorithm)]
+            )
             base_dir = Path(config.config_path).parent
-            new_config_file_path = base_dir / f"config_{self.search_algorithm}_pylocal.yaml"
+            new_config_file_path = base_dir / f'config_{self.search_algorithm}_pylocal.yaml'
 
-            with open(config.config_path, "r") as f:
+            with open(config.config_path, 'r') as f:
                 yml = yaml.load(f, Loader=yaml.SafeLoader)
-            yml["resource"]["type"] = "python_local"
+            yml['resource']['type'] = 'python_local'
 
-            with open(new_config_file_path, "w") as f:
+            with open(new_config_file_path, 'w') as f:
                 f.write(yaml.dump(yml, default_flow_style=False))
 
             config = load_config(create_tmp_config(new_config_file_path))
-            assert config.resource.type.value == "python_local"
+            assert config.resource.type.value == 'python_local'
 
             # master
             master = create_master(config.resource.type.value)
@@ -75,9 +83,10 @@ class IntegrationTest(BaseTest):
             scheduler = create_scheduler(config.resource.type.value)
             assert scheduler == PylocalScheduler
 
-            storage = Storage(ws=Path(config.generic.workspace))
+            workspace = Workspace(config.generic.workspace)
+            storage = Storage(workspace.storage_file_path)
 
-            subprocess.Popen(["aiaccel-start", "--config", str(new_config_file_path), "--clean"]).wait()
+            subprocess.Popen(['aiaccel-start', '--config', str(new_config_file_path), '--clean']).wait()
             self.evaluate(config, is_multi_objective(config))
 
             print(storage.result.get_objectives())
@@ -90,7 +99,8 @@ class IntegrationTest(BaseTest):
             assert data_0[i] == data_1[i]
 
     def evaluate(self, config, is_multi_objective=False):
-        storage = Storage(ws=Path(config.generic.workspace))
+        workspace = Workspace(config.generic.workspace)
+        storage = Storage(workspace.storage_file_path)
         work_dir = Path(config.generic.workspace)
         running = storage.get_num_running()
         ready = storage.get_num_ready()

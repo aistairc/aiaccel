@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import numpy as np
 from omegaconf.dictconfig import DictConfig
+import numpy as np
 
 
 class AbstractSchedulingAlgorithm(object):
@@ -19,7 +19,12 @@ class AbstractSchedulingAlgorithm(object):
     def __init__(self, config: DictConfig) -> None:
         self.config = config
 
-    def select_hp(self, hp_ready: list[Path], num: int = 1, rng: np.random.RandomState | None = None) -> list[Path]:
+    def select_hp(
+        self,
+        hp_ready: list[Path],
+        num: int = 1,
+        rng: np.random.RandomState | None = None
+    ) -> list[Path]:
         """Select multiple hyper parameters.
 
         Args:

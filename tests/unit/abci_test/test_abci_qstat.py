@@ -5,9 +5,9 @@ from aiaccel.abci import parse_job_list, parse_qstat
 
 def test_parse_qstat(data_dir, load_test_config):
     config = load_test_config()
-    xml_path = data_dir.joinpath("qstat.xml")
+    xml_path = data_dir.joinpath('qstat.xml')
 
-    with open(xml_path, "r") as f:
+    with open(xml_path, 'r') as f:
         xml_string = f.read()
 
     stat_list = parse_qstat(xml_string)
@@ -16,14 +16,14 @@ def test_parse_qstat(data_dir, load_test_config):
 
 def test_parse_job_list(data_dir, load_test_config):
     config = load_test_config()
-    xml_path = data_dir.joinpath("qstat.xml")
+    xml_path = data_dir.joinpath('qstat.xml')
 
-    with open(xml_path, "r") as f:
+    with open(xml_path, 'r') as f:
         xml_string = f.read()
 
     root = ElementTree.fromstring(xml_string)
 
-    for i in root.findall("./job_info/job_list"):
+    for i in root.findall('./job_info/job_list'):
         parse_job_list(i)
 
-    assert parse_job_list("") == []
+    assert parse_job_list('') == []

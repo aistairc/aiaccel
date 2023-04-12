@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Type, Union
-
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
+from typing import Type
+from typing import Union
+
 
 # TODO: Replace typing.Type with builtins.type when aiaccel supports python>=3.9.
 SchedulerType = Type[Union[AbciScheduler, LocalScheduler, PylocalScheduler]]
@@ -34,6 +35,6 @@ def create_scheduler(resource_type: str) -> type:
         return AbciScheduler
     else:
         raise ValueError(
-            f'Invalid resource type "{resource_type}". '
-            'The resource type should be one of "local", "python_local", and "abci".'
+            f"Invalid resource type \"{resource_type}\". "
+            "The resource type should be one of \"local\", \"python_local\", and \"abci\"."
         )

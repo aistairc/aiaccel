@@ -12,7 +12,7 @@ def test_abstract_scheduling_algorithm(load_test_config):
     with pytest.raises(NotImplementedError):
         algorithm.select_hp(None, None, rng=rng)
 
-    """
+    '''
     try:
         algorithm.select_one_hp(None, None)
         assert False
@@ -24,4 +24,4 @@ def test_abstract_scheduling_algorithm(load_test_config):
         assert False
     except NotImplementedError:
         assert True
-    """
+    '''

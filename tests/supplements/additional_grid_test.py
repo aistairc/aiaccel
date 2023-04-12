@@ -6,6 +6,7 @@ from pathlib import Path
 from aiaccel.common import dict_result, file_final_result
 from aiaccel.config import load_config
 from aiaccel.storage import Storage
+from aiaccel.workspace import Workspace
 from tests.base_test import BaseTest
 
 
@@ -13,24 +14,25 @@ class AdditionalGridTest(BaseTest):
     search_algorithm = None
 
     def test_run(self, work_dir, create_tmp_config):
-        test_data_dir = Path(__file__).resolve().parent.joinpath("additional_grid_test", "test_data")
-        config_file = test_data_dir.joinpath("config_{}.yaml".format(self.search_algorithm))
+        test_data_dir = Path(__file__).resolve().parent.joinpath('additional_grid_test', 'test_data')
+        config_file = test_data_dir.joinpath('config_{}.yaml'.format(self.search_algorithm))
         config_file = create_tmp_config(config_file)
-        self.config = load_config(config_file)
-        python_file = test_data_dir.joinpath("user.py")
+        config = load_config(config_file)
+        python_file = test_data_dir.joinpath('user.py')
+
+        workspace = Workspace(config.generic.workspace)
+        storage = Storage(workspace.storage_file_path)
 
         with self.create_main(python_file):
-            storage = Storage(ws=Path(self.config.generic.workspace))
-            subprocess.Popen(["aiaccel-start", "--config", str(config_file), "--clean"]).wait(
-                timeout=self.config.generic.batch_job_timeout
-            )
-        self.evaluate(work_dir, storage)
+            subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']
+                             ).wait(timeout=config.generic.batch_job_timeout)
+        self.evaluate(work_dir, storage, config)
 
-    def evaluate(self, work_dir, storage):
+    def evaluate(self, work_dir, storage, config):
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
-        assert finished == self.config.optimize.trial_number
+        assert finished == config.optimize.trial_number
         assert ready == 0
         assert running == 0
         final_result = work_dir.joinpath(dict_result, file_final_result)

@@ -2,12 +2,13 @@ import os
 import subprocess
 from subprocess import PIPE
 
-from aiaccel.util import OutputHandler, exec_runner, is_process_running, kill_process, ps2joblist, subprocess_ps
+from aiaccel.util import (OutputHandler, exec_runner, is_process_running,
+                          kill_process, ps2joblist, subprocess_ps)
 
 
 def test_exec_runner():
-    assert type(exec_runner(["ps"])) is subprocess.Popen
-    assert type(exec_runner(["ps"])) is subprocess.Popen
+    assert type(exec_runner(['ps'])) is subprocess.Popen
+    assert type(exec_runner(['ps'])) is subprocess.Popen
 
 
 def test_subprocess_ps():
@@ -88,7 +89,8 @@ def test_ps2joblist():
 
 
 def test_kill_process():
-    proc = subprocess.Popen(["sleep", "5"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    proc = subprocess.Popen(['sleep', '5'], stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL)
     assert kill_process(proc.pid) is None
 
 
@@ -98,7 +100,7 @@ def test_is_process_running():
 
 
 def test_OutputHandler():
-    _ouputhandler = OutputHandler(subprocess.Popen("ls", stdout=PIPE))
+    _ouputhandler = OutputHandler(subprocess.Popen('ls', stdout=PIPE))
 
     _ouputhandler._abort = False
 
@@ -108,5 +110,5 @@ def test_OutputHandler():
     _ouputhandler._abort = False
     assert _ouputhandler.run() is None
 
-    _ouputhandler = OutputHandler(subprocess.Popen("ls", stdout=None))
+    _ouputhandler = OutputHandler(subprocess.Popen('ls', stdout=None))
     assert _ouputhandler.run() is None

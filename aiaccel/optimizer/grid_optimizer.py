@@ -12,7 +12,10 @@ from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
 
 
-def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool, Any]:
+def get_grid_options(
+    parameter_name: str,
+    config: DictConfig
+) -> tuple[Any, bool, Any]:
     """Get options about grid search.
 
     Args:
@@ -34,25 +37,33 @@ def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool
     grid_options = config.optimize.parameters
 
     for g in grid_options:
-        if g["name"] == parameter_name:
-            if "step" not in g.keys():
-                raise KeyError(f"No grid option `step` for parameter: {parameter_name}")
-            if "log" not in g.keys():
-                raise KeyError(f"No grid option `log` for parameter: {parameter_name}")
-            if "base" not in g.keys():
-                raise KeyError(f"No grid option `base` for parameter: {parameter_name}")
+        if g['name'] == parameter_name:
+            if 'step' not in g.keys():
+                raise KeyError(
+                    f'No grid option `step` for parameter: {parameter_name}'
+                )
+            if 'log' not in g.keys():
+                raise KeyError(
+                    f'No grid option `log` for parameter: {parameter_name}'
+                )
+            if 'base' not in g.keys():
+                raise KeyError(
+                    f'No grid option `base` for parameter: {parameter_name}'
+                )
 
-            step = float(g["step"])
-            log = bool(g["log"])
+            step = float(g['step'])
+            log = bool(g['log'])
             if log:
-                base = int(g["base"])
+                base = int(g['base'])
 
             return base, log, step
 
-    raise KeyError(f"Invalid parameter name: {parameter_name}")
+    raise KeyError(f'Invalid parameter name: {parameter_name}')
 
 
-def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict[str, Any]:
+def generate_grid_points(
+    p: HyperParameter, config: DictConfig
+) -> dict[str, Any]:
     """Make a list of all parameters for this grid.
 
     Args:
@@ -66,36 +77,39 @@ def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict[str, Any
     Raises:
         TypeError: Causes when an invalid parameter type is set.
     """
-    new_param = {"parameter_name": p.name, "type": p.type}
+    new_param = {
+        'parameter_name': p.name,
+        'type': p.type
+    }
 
-    if p.type.lower() in ["int", "float"]:
+    if p.type.lower() in ['int', 'float']:
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
 
         if log:
-            lower_x = base**lower
-            upper_x = base**upper
-            step_x = base**step
+            lower_x = base ** lower
+            upper_x = base ** upper
+            step_x = base ** step
             x = lower_x
-            new_param["parameters"] = []
+            new_param['parameters'] = []
             while x < upper_x or math.isclose(x, upper_x, abs_tol=1e-10):
-                new_param["parameters"].append(x)
+                new_param['parameters'].append(x)
                 x *= step_x
         else:
             n = int((upper - lower) / step) + 1
-            new_param["parameters"] = [lower + i * step for i in range(0, n)]
-        if p.type.lower() == "int":
-            new_param["parameters"] = [int(i) for i in new_param["parameters"]]
+            new_param['parameters'] = [lower + i * step for i in range(0, n)]
+        if p.type.lower() == 'int':
+            new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
-    elif p.type.lower() == "categorical":
-        new_param["parameters"] = p.choices
+    elif p.type.lower() == 'categorical':
+        new_param['parameters'] = p.choices
 
-    elif p.type.lower() == "ordinal":
-        new_param["parameters"] = p.sequence
+    elif p.type.lower() == 'ordinal':
+        new_param['parameters'] = p.sequence
 
     else:
-        raise TypeError(f"Invalid parameter type: {p.type}")
+        raise TypeError(f'Invalid parameter type: {p.type}')
 
     return new_param
 
@@ -120,7 +134,10 @@ class GridOptimizer(AbstractOptimizer):
         self.generate_index = 0
 
         if is_multi_objective(self.config):
-            raise NotImplementedError("Grid search optimizer does not support multi-objective " "optimization.")
+            raise NotImplementedError(
+                'Grid search optimizer does not support multi-objective '
+                'optimization.'
+            )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -131,7 +148,9 @@ class GridOptimizer(AbstractOptimizer):
         super().pre_process()
 
         self.generate_index = (
-            self.storage.get_num_ready() + self.storage.get_num_running() + self.storage.get_num_finished()
+            self.storage.get_num_ready() +
+            self.storage.get_num_running() +
+            self.storage.get_num_finished()
         )
 
     def get_parameter_index(self) -> list[int] | None:
@@ -141,16 +160,20 @@ class GridOptimizer(AbstractOptimizer):
             list[int] | None: It returns None if all parameters are
             already generated.
         """
-        parameter_lengths = [len(i["parameters"]) for i in self.ready_params]
+        parameter_lengths = [len(i['parameters']) for i in self.ready_params]
         remain = self.generate_index
         max_index = reduce(mul, parameter_lengths)
 
         if self.generate_index >= max_index:
-            self.logger.warning("All parameters were generated.")
+            self.logger.warning('All parameters were generated.')
             return None
 
         parameter_index = []
-        div = [reduce(lambda x, y: x * y, parameter_lengths[i + 1 :]) for i in range(0, len(parameter_lengths) - 1)]
+        div = [
+            reduce(
+                lambda x, y: x * y, parameter_lengths[i + 1:]
+            ) for i in range(0, len(parameter_lengths) - 1)
+        ]
 
         for i in range(0, len(parameter_lengths) - 1):
             d = int(remain / div[i])
@@ -172,18 +195,24 @@ class GridOptimizer(AbstractOptimizer):
         parameter_index = self.get_parameter_index()
 
         if parameter_index is None:
-            self.logger.info("Generated all of parameters.")
+            self.logger.info('Generated all of parameters.')
             self.all_parameters_generated = True
             return None
 
         new_params: list[Any] = []
         for param, index in zip(self.ready_params, parameter_index):
             new_params.append(
-                {"parameter_name": param["parameter_name"], "type": param["type"], "value": param["parameters"][index]}
+                {
+                    'parameter_name': param['parameter_name'],
+                    'type': param['type'],
+                    'value': param['parameters'][index]
+                }
             )
         return new_params
 
-    def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
+    def generate_initial_parameter(
+        self
+    ) -> list[dict[str, float | int | str]]:
         """Generates initial parameters.
 
         Grid search algorithm always ignores the initial values in
@@ -198,12 +227,13 @@ class GridOptimizer(AbstractOptimizer):
         for hyperparameter in self.params.get_parameter_list():
             if hyperparameter.initial is not None:
                 self.logger.warning(
-                    "Initial values cannot be specified for grid search. " "The set initial value has been invalidated."
+                    "Initial values cannot be specified for grid search. "
+                    "The set initial value has been invalidated."
                 )
                 break
         generated_parameter = self.generate_parameter()
         if generated_parameter is None:
-            self.logger.error("Initial parameter not generaged.")
-            raise ValueError("Initial parameter not generated.")
+            self.logger.error('Initial parameter not generaged.')
+            raise ValueError('Initial parameter not generated.')
         else:
             return generated_parameter

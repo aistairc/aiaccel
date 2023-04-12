@@ -5,7 +5,8 @@ from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage import Abstract, TimestampTable
+from aiaccel.storage import Abstract
+from aiaccel.storage import TimestampTable
 from aiaccel.util import retry
 
 
@@ -33,7 +34,11 @@ class TimeStamp(Abstract):
                     .one_or_none()
                 )
                 if data is None:
-                    new_row = TimestampTable(trial_id=trial_id, start_time=start_time, end_time="")
+                    new_row = TimestampTable(
+                        trial_id=trial_id,
+                        start_time=start_time,
+                        end_time=""
+                    )
                     session.add(new_row)
                 else:
                     data.start_time = start_time
@@ -89,7 +94,7 @@ class TimeStamp(Abstract):
 
         if data is None:
             return None
-        if data.start_time == "":
+        if data.start_time == '':
             return None
 
         return data.start_time
@@ -114,7 +119,7 @@ class TimeStamp(Abstract):
 
         if data is None:
             return None
-        if data.end_time == "":
+        if data.end_time == '':
             return None
 
         return data.end_time

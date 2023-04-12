@@ -17,7 +17,5 @@ def t_base():
             func(*wrgs, **kwargs)
             init()
             return
-
         return _wrapper
-
     return _test_base

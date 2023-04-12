@@ -3,7 +3,6 @@ from __future__ import annotations
 import subprocess
 
 from omegaconf.dictconfig import DictConfig
-
 from aiaccel.abci import parse_qstat
 from aiaccel.master import AbstractMaster
 from aiaccel.util import get_dict_files, retry
@@ -47,7 +46,7 @@ class AbciMaster(AbstractMaster):
         Returns:
             None
         """
-        commands = "qstat -xml"
+        commands = 'qstat -xml'
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
 
         try:
@@ -56,10 +55,10 @@ class AbciMaster(AbstractMaster):
             p.kill()
             stdout_data, _ = p.communicate()
 
-        stats = stdout_data.decode("utf-8")
+        stats = stdout_data.decode('utf-8')
 
         # Write qstat result
-        lines = ""
+        lines = ''
 
         for line in stats:
             lines += line

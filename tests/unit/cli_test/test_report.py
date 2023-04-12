@@ -1,13 +1,15 @@
 import pathlib
+
 from unittest.mock import patch
 
-from aiaccel.cli import CsvWriter
 from aiaccel.cli.report import main
 from aiaccel.config import load_config
+from aiaccel.cli import CsvWriter
 from aiaccel.workspace import Workspace
 
+
 ws = Workspace("test_work")
-config_path = pathlib.Path("tests/test_data/config.json")
+config_path = pathlib.Path('tests/test_data/config.json')
 
 
 def test_report(clean_work_dir, work_dir, create_tmp_config):
@@ -17,25 +19,33 @@ def test_report(clean_work_dir, work_dir, create_tmp_config):
         workspace.clean()
     workspace.create()
 
-    config_path = pathlib.Path("tests/test_data/config.json")
+    config_path = pathlib.Path('tests/test_data/config.json')
     config_path = create_tmp_config(config_path)
     config = load_config(config_path)
 
     csv_writer = CsvWriter(config)
 
-    assert csv_writer._get_zero_padding_trial_id(1) == "000001"
+    assert csv_writer._get_zero_padding_trial_id(1) == '000001'
     assert csv_writer.create() is None
 
     hp = {
-        "trial_id": "000000",
-        "parameters": [
-            {"parameter_name": "test_1", "type": "uniform_float", "value": 2.155147371813655},
-            {"parameter_name": "test_2", "type": "uniform_float", "value": 4.071839861571789},
+        'trial_id': '000000',
+        'parameters': [
+            {
+                'parameter_name': 'test_1',
+                'type': 'uniform_float',
+                'value': 2.155147371813655
+            },
+            {
+                'parameter_name': 'test_2',
+                'type': 'uniform_float',
+                'value': 4.071839861571789
+            }
         ],
-        "result": -0.2433042724186567,
+        'result': -0.2433042724186567
     }
-    with patch.object(csv_writer.storage.trial, "get_finished", return_value=[0]):
-        with patch.object(csv_writer.storage, "get_hp_dict", return_value=hp):
+    with patch.object(csv_writer.storage.trial, 'get_finished', return_value=[0]):
+        with patch.object(csv_writer.storage, 'get_hp_dict', return_value=hp):
             assert csv_writer.create() is None
 
 

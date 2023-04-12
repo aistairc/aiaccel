@@ -1,18 +1,21 @@
 from __future__ import annotations
 
 import sys
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from collections.abc import Iterator
 from itertools import product
-from typing import Literal, Union
+from typing import Union
+from typing import Literal
 
 import numpy as np
 from numpy.random import RandomState
 
 from aiaccel.parameter import HyperParameter
 
+
 GridValueType = Union[float, int, str]
-SamplingMethodType = Literal["IN_ORDER", "UNIFORM", "RANDOM", "DUPLICATABLE_RANDOM"]
+SamplingMethodType = Literal['IN_ORDER', 'UNIFORM', 'RANDOM', 'DUPLICATABLE_RANDOM']
 numeric_types = (float, int, np.floating, np.integer)
 NumericType = Union[float, int, np.floating, np.integer]
 
@@ -31,8 +34,7 @@ class GridCondition(ABC):
         self.create_choices(hyperparameter)
 
     @abstractmethod
-    def create_choices(self, hyperparameter: HyperParameter) -> None:
-        ...
+    def create_choices(self, hyperparameter: HyperParameter) -> None: ...
 
     def __contains__(self, value: object) -> bool:
         return value in self._choices
@@ -91,7 +93,9 @@ def _is_there_zero_between_lower_and_upper(hyperparameter: HyperParameter) -> bo
 def _validate_parameter_range(hyperparameter: HyperParameter) -> None:
     if hyperparameter.log:
         if _is_there_zero_between_lower_and_upper(hyperparameter):
-            raise ValueError("Zero cannot be included in the parameter range if log = true.")
+            raise ValueError(
+                "Zero cannot be included in the parameter range if log = true."
+            )
 
 
 class NumericGridCondition(GridCondition):
@@ -192,8 +196,8 @@ class IntGridCondition(NumericGridCondition):
         if int(hyperparameter.lower) == int(hyperparameter.upper):
             raise ValueError(
                 f'Invalid range of int parameter "{hyperparameter.name}": '
-                f"{hyperparameter.lower} and {hyperparameter.upper} are rounded "
-                f"to the same integer {int(hyperparameter.lower)}."
+                f'{hyperparameter.lower} and {hyperparameter.upper} are rounded '
+                f'to the same integer {int(hyperparameter.lower)}.'
             )
         start, stop = sorted([hyperparameter.lower, hyperparameter.upper])
         start = _cast_start_to_integer(start)
@@ -274,16 +278,18 @@ class OrdinalGridCondition(GridCondition):
 
 
 def _create_grid_condition(hyperparameter: HyperParameter) -> GridCondition:
-    if hyperparameter.type == "FLOAT":
+    if hyperparameter.type == 'FLOAT':
         return FloatGridCondition(hyperparameter)
-    elif hyperparameter.type == "INT":
+    elif hyperparameter.type == 'INT':
         return IntGridCondition(hyperparameter)
-    elif hyperparameter.type == "CATEGORICAL":
+    elif hyperparameter.type == 'CATEGORICAL':
         return CategoricalGridCondition(hyperparameter)
-    elif hyperparameter.type == "ORDINAL":
+    elif hyperparameter.type == 'ORDINAL':
         return OrdinalGridCondition(hyperparameter)
     else:
-        raise TypeError(f'Specified parameter type "{hyperparameter.type}" of "{hyperparameter.name}" is invalid.')
+        raise TypeError(
+            f'Specified parameter type "{hyperparameter.type}" of "{hyperparameter.name}" is invalid.'
+        )
 
 
 class GridConditionCollection:
@@ -350,11 +356,11 @@ class GridConditionCollection:
         if is_incrementable and grid_space_size < self._num_trials:
             self._set_num_choices(grid_conditions_with_empty_choices)
 
-    @property
+    @ property
     def choices(self) -> list[list[GridValueType]]:
         return [grid_condition.choices for grid_condition in self._conditions]
 
-    @property
+    @ property
     def least_space_size(self) -> int:
         return self._least_space_size
 
@@ -404,9 +410,9 @@ class GridPointGenerator:
         self,
         num_trials: int,
         hyperparameters: list[HyperParameter],
-        sampling_method: SamplingMethodType = "IN_ORDER",
+        sampling_method: SamplingMethodType = 'IN_ORDER',
         rng: RandomState | None = None,
-        accept_small_trial_number: bool = False,
+        accept_small_trial_number: bool = False
     ) -> None:
         self._num_trials = num_trials
         self._grid_condition_collection = GridConditionCollection(self._num_trials, hyperparameters)
@@ -414,7 +420,7 @@ class GridPointGenerator:
             if not accept_small_trial_number:
                 raise ValueError(
                     f'Too small "trial_num": {self._num_trials} (required '
-                    f"{self._grid_condition_collection.least_space_size} or greater). "
+                    f'{self._grid_condition_collection.least_space_size} or greater). '
                     'To proceed, set "optimize.grid_accept_small_trial_number" `True` in config.'
                 )
         self._parameter_lengths = list(map(len, self._grid_condition_collection))
@@ -428,7 +434,7 @@ class GridPointGenerator:
         else:
             self._rng = rng
 
-        if self._sampling_method == "RANDOM":
+        if self._sampling_method == 'RANDOM':
             self._grid_point_stack = list(product(*self._grid_condition_collection))
         else:
             self._grid_point_stack = []
@@ -447,16 +453,23 @@ class GridPointGenerator:
         Returns:
             list[GridValueType]: A list of parameters.
         """
-        if self._sampling_method == "IN_ORDER":
-            next_grid_point = self._get_grid_point_in_order(self._num_generated_points)
-        elif self._sampling_method == "UNIFORM":
-            next_grid_point = self._get_grid_point_uniformly(self._num_generated_points)
-        elif self._sampling_method == "RANDOM":
-            next_grid_point = self._get_grid_point_randomly(self._num_generated_points)
-        elif self._sampling_method == "DUPLICATABLE_RANDOM":
-            next_grid_point = self._get_grid_point_duplicatable_randomly(self._num_generated_points)
+        if self._sampling_method == 'IN_ORDER':
+            next_grid_point = self._get_grid_point_in_order(
+                self._num_generated_points)
+        elif self._sampling_method == 'UNIFORM':
+            next_grid_point = self._get_grid_point_uniformly(
+                self._num_generated_points)
+        elif self._sampling_method == 'RANDOM':
+            next_grid_point = self._get_grid_point_randomly(
+                self._num_generated_points)
+        elif self._sampling_method == 'DUPLICATABLE_RANDOM':
+            next_grid_point = self._get_grid_point_duplicatable_randomly(
+                self._num_generated_points
+            )
         else:
-            raise ValueError(f"Invalid sampling method: {self._sampling_method}")
+            raise ValueError(
+                f'Invalid sampling method: {self._sampling_method}'
+            )
         self._num_generated_points += 1
         return next_grid_point
 
@@ -473,7 +486,9 @@ class GridPointGenerator:
         return next_grid_point
 
     def _get_grid_point_uniformly(self, trial_id: int) -> list[GridValueType]:
-        converted_trial_id = int(np.linspace(0, self._grid_space_size - 1, self._num_trials, dtype=int)[trial_id])
+        converted_trial_id = int(np.linspace(
+            0, self._grid_space_size - 1, self._num_trials, dtype=int
+        )[trial_id])
         return self._get_grid_point_in_order(converted_trial_id)
 
     def _get_grid_point_randomly(self, trial_id: int) -> list[GridValueType]:
@@ -485,6 +500,6 @@ class GridPointGenerator:
         index = self._rng.randint(0, self._grid_space_size)
         return self._get_grid_point_in_order(index)
 
-    @property
+    @ property
     def num_generated_points(self) -> int:
         return self._num_generated_points

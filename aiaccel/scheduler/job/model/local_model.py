@@ -24,7 +24,7 @@ class LocalModel(AbstractModel):
             obj.content,
             obj.trial_id,
             str(obj.config.config_path),
-            str(obj.command_error_output),
+            str(obj.command_error_output)
         )
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
         obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE)
@@ -32,7 +32,7 @@ class LocalModel(AbstractModel):
         obj.th_oh = OutputHandler(obj.proc)
         obj.th_oh.start()
 
-    def conditions_result(self, obj: "Job") -> bool:
+    def conditions_result(self, obj: 'Job') -> bool:
         if super().conditions_result(obj):
             return True
 
@@ -42,7 +42,7 @@ class LocalModel(AbstractModel):
             self.create_result_file(obj)
             return False
 
-    def create_result_file(self, obj: "Job") -> None:
+    def create_result_file(self, obj: 'Job') -> None:
         """Create result file.
 
         Args:
@@ -57,8 +57,8 @@ class LocalModel(AbstractModel):
         start_time: str = str(obj.th_oh.get_start_time())
         end_time: str = str(obj.th_oh.get_end_time())
         exitcode: str = str(obj.th_oh.get_returncode())
-        params: list[dict[str, Any]] = obj.content["parameters"]
-        objective: str = "nan"
+        params: list[dict[str, Any]] = obj.content['parameters']
+        objective: str = 'nan'
         objectives: list[str] = []
 
         if len(stdouts) > 0:
@@ -67,36 +67,36 @@ class LocalModel(AbstractModel):
             objective = objective.replace(" ", "")
             objectives = objective.split(",")
 
-        error = "\n".join(stderrs)
+        error = '\n'.join(stderrs)
         output_file_path = str(obj.get_result_file_path())
         config_file_path = str(obj.config.config_path)
 
         args = {
-            "file": output_file_path,
-            "trial_id": trial_id,
-            "config": config_file_path,
-            "start_time": start_time,
-            "end_time": end_time,
-            "error": error,
-            "exitcode": exitcode,
+            'file': output_file_path,
+            'trial_id': trial_id,
+            'config': config_file_path,
+            'start_time': start_time,
+            'end_time': end_time,
+            'error': error,
+            'exitcode': exitcode
         }
 
         if len(error) == 0:
-            del args["error"]
+            del args['error']
 
-        commands = ["aiaccel-set-result"]
+        commands = ['aiaccel-set-result']
         for key in args.keys():
-            commands.append("--" + key)
+            commands.append('--' + key)
             commands.append(str(args[key]))
 
-        commands.append("--objective")
+        commands.append('--objective')
         for objective in objectives:
             commands.append(str(objective))
 
         for param in params:
-            if "parameter_name" in param.keys() and "value" in param.keys():
-                commands.append("--" + param["parameter_name"])
-                commands.append(str(param["value"]))
+            if 'parameter_name' in param.keys() and 'value' in param.keys():
+                commands.append('--' + param['parameter_name'])
+                commands.append(str(param['value']))
         print(commands)
         run(commands)
 

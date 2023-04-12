@@ -14,7 +14,8 @@ if TYPE_CHECKING:
 
 
 class AbciModel(AbstractModel):
-    def before_runner_create(self, obj: "Job") -> None:
+    def before_runner_create(self, obj: 'Job') -> None:
+
         create_abci_batch_file(
             trial_id=obj.trial_id,
             param_content=obj.content,
@@ -24,18 +25,21 @@ class AbciModel(AbstractModel):
             batch_file=obj.to_file,
             job_script_preamble=obj.config.ABCI.job_script_preamble,
             command=obj.config.generic.job_command,
-            dict_lock=obj.workspace.lock,
+            dict_lock=obj.workspace.lock
         )
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def conditions_runner_confirmed(self, obj: "Job") -> bool:
+    def conditions_runner_confirmed(self, obj: 'Job') -> bool:
         lockpath = interprocess_lock_file(obj.to_file, obj.workspace.lock)
         with fasteners.InterProcessLock(lockpath):
             return obj.to_file.exists()
 
-    def before_job_submitted(self, obj: "Job") -> None:
+    def before_job_submitted(self, obj: 'Job') -> None:
         runner_file = self.get_runner_file(obj)
-        runner_command = create_qsub_command(obj.config, runner_file)
+        runner_command = create_qsub_command(
+            obj.config,
+            runner_file
+        )
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
         obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE)

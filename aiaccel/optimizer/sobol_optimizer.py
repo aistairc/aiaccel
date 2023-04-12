@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from omegaconf.dictconfig import DictConfig
 from typing import Any
 
-from omegaconf.dictconfig import DictConfig
 from scipy.stats import qmc
 
 from aiaccel.config import is_multi_objective
@@ -32,7 +32,10 @@ class SobolOptimizer(AbstractOptimizer):
         self.sampler: Any = None
 
         if is_multi_objective(self.config):
-            raise NotImplementedError("Sobol optimizer does not support multi-objective " "optimization.")
+            raise NotImplementedError(
+                'Sobol optimizer does not support multi-objective '
+                'optimization.'
+            )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -47,7 +50,9 @@ class SobolOptimizer(AbstractOptimizer):
 
         if self.config.resume is None or self.config.resume <= 0:
             self.sampler = qmc.Sobol(
-                d=len(self.params.get_parameter_list()), scramble=self.config.optimize.sobol_scramble, seed=self._rng
+                d=len(self.params.get_parameter_list()),
+                scramble=self.config.optimize.sobol_scramble,
+                seed=self._rng
             )
 
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
@@ -71,12 +76,18 @@ class SobolOptimizer(AbstractOptimizer):
             min_value = l_params[i].lower
             max_value = l_params[i].upper
             value = (max_value - min_value) * vec[i] + min_value
-            new_param = {"parameter_name": l_params[i].name, "type": l_params[i].type, "value": value}
+            new_param = {
+                'parameter_name': l_params[i].name,
+                'type': l_params[i].type,
+                'value': value
+            }
             new_params.append(new_param)
 
         return new_params
 
-    def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
+    def generate_initial_parameter(
+        self
+    ) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
 
         Returns:
@@ -84,6 +95,7 @@ class SobolOptimizer(AbstractOptimizer):
         """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(
-                "Initial values cannot be specified for sobol." "The set initial value has been invalidated."
+                "Initial values cannot be specified for sobol."
+                "The set initial value has been invalidated."
             )
         return self.generate_parameter()

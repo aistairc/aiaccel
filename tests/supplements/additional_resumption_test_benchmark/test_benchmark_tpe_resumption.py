@@ -4,6 +4,7 @@ from tests.supplements.additional_resumption_test import AdditionalResumptionTes
 
 
 class TestBenchmarkTpeResumption(AdditionalResumptionTest):
+
     @classmethod
     def setup_class(cls):
         cls.search_algorithm = "tpe"

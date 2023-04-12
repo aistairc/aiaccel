@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
-from pathlib import Path
 from typing import Any
 
 from numpy import maximum
@@ -20,13 +19,13 @@ class Viewer:
 
     Attributes:
         config_path (Path): Path to the config file.
-        workspace (Path): Path to the workspace.
+        workspace (Workspace): Workspace object.
         storage (Storage): Storage object.
     """
 
     def __init__(self, config: DictConfig) -> None:
-        self.workspace = Path(config.generic.workspace).resolve()
-        self.storage = Storage(self.workspace)
+        self.workspace = Workspace(config.generic.workspace)
+        self.storage = Storage(self.workspace.storage_file_path)
 
     def view(self) -> None:
         """Print database information
@@ -34,12 +33,13 @@ class Viewer:
         Returns:
             None
         """
-        symbols = ["─", "╰", "╭", "╮", "╯", "│"]
+        symbols = ['─', '╰', '╭', '╮', '╯', '│']
         infos = []
         len_margin = 2
         trial_ids = self.storage.trial.get_all_trial_id()
 
         for trial_id in trial_ids:
+
             start_time = self.storage.timestamp.get_any_trial_start_time(trial_id)
             end_time = self.storage.timestamp.get_any_trial_end_time(trial_id)
             status = self.storage.trial.get_any_trial_state(trial_id)
@@ -73,7 +73,10 @@ class Viewer:
             if len(max_column_width) == 0:
                 max_column_width = maximum(width, header_width).tolist()
             else:
-                max_column_width = maximum(max_column_width, maximum(width, header_width).tolist()).tolist()
+                max_column_width = maximum(
+                    max_column_width,
+                    maximum(width, header_width).tolist()
+                ).tolist()
 
         max_width = sum(max_column_width)
         print("\n")
@@ -105,7 +108,7 @@ def main() -> None:  # pragma: no cover
     theterminal.
     """
     parser = ArgumentParser()
-    parser.add_argument("--config", "-c", type=str, default="config.yml")
+    parser.add_argument('--config', '-c', type=str, default="config.yml")
     args = parser.parse_args()
 
     config: DictConfig = load_config(args.config)

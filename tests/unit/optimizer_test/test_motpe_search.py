@@ -9,10 +9,11 @@ from tests.base_test import BaseTest
 
 
 class TestMOTpeOptimizer(BaseTest):
+
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
-        self.optimizer = MOTpeOptimizer(self.load_config_for_test(self.configs["config_motpe.json"]))
+        self.optimizer = MOTpeOptimizer(self.load_config_for_test(self.configs['config_motpe.json']))
         yield
         self.optimizer = None
 
@@ -27,11 +28,11 @@ class TestMOTpeOptimizer(BaseTest):
         self.optimizer.pre_process()
         self.optimizer.inner_loop_main_process()
         with warnings.catch_warnings():
-            warnings.simplefilter("error", UserWarning)
-            with patch.object(self.optimizer.storage.result, "get_any_trial_objective", return_value=1):
+            warnings.simplefilter('error', UserWarning)
+            with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=1):
                 with pytest.raises(UserWarning):
                     self.optimizer.check_result()
-        with patch.object(self.optimizer.storage.result, "get_any_trial_objective", return_value=[0, 1]):
+        with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=[0, 1]):
             assert self.optimizer.check_result() is None
 
     def test_is_startup_trials(self):
@@ -43,21 +44,21 @@ class TestMOTpeOptimizer(BaseTest):
         assert len(self.optimizer.generate_parameter()) > 0
 
         # if ((not self.is_startup_trials()) and (len(self.parameter_pool) >= 1))
-        with patch.object(self.optimizer, "check_result", return_value=None):
-            with patch.object(self.optimizer, "is_startup_trials", return_value=False):
-                with patch.object(self.optimizer, "parameter_pool", [{}, {}, {}]):
+        with patch.object(self.optimizer, 'check_result', return_value=None):
+            with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
+                with patch.object(self.optimizer, 'parameter_pool', [{}, {}, {}]):
                     assert self.optimizer.generate_parameter() is None
 
         # if len(self.parameter_pool) >= self.config.num_node.get()
         self.optimizer.config.resource.num_node = 0
-        with patch.object(self.optimizer, "is_startup_trials", return_value=False):
+        with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
             assert self.optimizer.generate_parameter() is None
 
     def test_generate_initial_parameter(self, create_tmp_config):
         config = self.optimizer.config.copy()
-        self.config_motpe_path = create_tmp_config(self.data_dir / "config_motpe_no_initial_params.json")
+        self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe_no_initial_params.json')
         optimizer = MOTpeOptimizer(self.optimizer.config)
-        (optimizer.workspace.path / "storage" / "storage.db").unlink()
+        (optimizer.workspace.path / 'storage' / 'storage.db').unlink()
 
         optimizer.__init__(config)
         optimizer.pre_process()

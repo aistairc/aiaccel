@@ -18,171 +18,372 @@ if TYPE_CHECKING:  # pragma: no cover
     from aiaccel.scheduler import AbstractModel, AbstractScheduler
 
 JOB_STATES = [
-    {"name": "Init"},
-    {"name": "RunnerReady"},
-    {"name": "RunnerChecking"},
-    {"name": "RunnerConfirmed"},
-    {"name": "RunnerFailed"},
-    {"name": "RunnerFailure"},
-    {"name": "Scheduling"},
-    {"name": "HpRunningReady"},
-    {"name": "HpRunningChecking"},
-    {"name": "HpRunningConfirmed"},
-    {"name": "HpRunningFailed"},
-    {"name": "HpRunningFailure"},
-    {"name": "JobReady"},
-    {"name": "JobChecking"},
-    {"name": "JobFailed"},
-    {"name": "JobConfirmed"},
-    {"name": "JobFailure"},
-    {"name": "WaitResult"},
-    {"name": "Result"},
-    {"name": "HpFinishedReady"},
-    {"name": "HpFinishedChecking"},
-    {"name": "HpFinishedFailed"},
-    {"name": "HpFinishedConfirmed"},
-    {"name": "HpFinishedFailure"},
-    {"name": "HpExpireReady"},
-    {"name": "HpExpireChecking"},
-    {"name": "HpExpireConfirmed"},
-    {"name": "HpExpireFailed"},
-    {"name": "HpExpireFailure"},
-    {"name": "HpExpiredFailure"},
-    {"name": "Canceling"},
-    {"name": "KillReady"},
-    {"name": "KillChecking"},
-    {"name": "KillConfirmed"},
-    {"name": "KillFailed"},
-    {"name": "KillFailure"},
-    {"name": "CheckResult"},
-    {"name": "HpCancelReady"},
-    {"name": "HpCancelChecking"},
-    {"name": "HpCancelConfirmed"},
-    {"name": "HpCancelFailed"},
-    {"name": "HpCancelFailure"},
-    {"name": "Canceled"},
-    {"name": "Success"},
+    {'name': 'Init'},
+    {'name': 'RunnerReady'},
+    {'name': 'RunnerChecking'},
+    {'name': 'RunnerConfirmed'},
+    {'name': 'RunnerFailed'},
+    {'name': 'RunnerFailure'},
+    {'name': 'Scheduling'},
+    {'name': 'HpRunningReady'},
+    {'name': 'HpRunningChecking'},
+    {'name': 'HpRunningConfirmed'},
+    {'name': 'HpRunningFailed'},
+    {'name': 'HpRunningFailure'},
+    {'name': 'JobReady'},
+    {'name': 'JobChecking'},
+    {'name': 'JobFailed'},
+    {'name': 'JobConfirmed'},
+    {'name': 'JobFailure'},
+    {'name': 'WaitResult'},
+    {'name': 'Result'},
+    {'name': 'HpFinishedReady'},
+    {'name': 'HpFinishedChecking'},
+    {'name': 'HpFinishedFailed'},
+    {'name': 'HpFinishedConfirmed'},
+    {'name': 'HpFinishedFailure'},
+    {'name': 'HpExpireReady'},
+    {'name': 'HpExpireChecking'},
+    {'name': 'HpExpireConfirmed'},
+    {'name': 'HpExpireFailed'},
+    {'name': 'HpExpireFailure'},
+    {'name': 'HpExpiredFailure'},
+    {'name': 'Canceling'},
+    {'name': 'KillReady'},
+    {'name': 'KillChecking'},
+    {'name': 'KillConfirmed'},
+    {'name': 'KillFailed'},
+    {'name': 'KillFailure'},
+    {'name': 'CheckResult'},
+    {'name': 'HpCancelReady'},
+    {'name': 'HpCancelChecking'},
+    {'name': 'HpCancelConfirmed'},
+    {'name': 'HpCancelFailed'},
+    {'name': 'HpCancelFailure'},
+    {'name': 'Canceled'},
+    {'name': 'Success'},
 ]
 
 JOB_TRANSITIONS: list[dict[str, str | list[str]]] = [
-    {"trigger": "next", "source": "Init", "dest": "RunnerReady", "after": "after_runner"},
-    {"trigger": "next", "source": "RunnerReady", "dest": "RunnerChecking", "before": "before_runner_create"},
     {
-        "trigger": "next",
-        "source": "RunnerChecking",
-        "dest": "RunnerConfirmed",
-        "conditions": "conditions_runner_confirmed",
-    },
-    {"trigger": "expire", "source": "RunnerChecking", "dest": "RunnerFailed", "before": "before_failed"},
-    {"trigger": "next", "source": "RunnerFailed", "dest": "RunnerReady"},
-    {"trigger": "expire", "source": "RunnerFailed", "dest": "RunnerFailure"},
-    {"trigger": "next", "source": "RunnerConfirmed", "dest": "Scheduling", "after": "after_confirmed"},
-    {"trigger": "schedule", "source": "Scheduling", "dest": "HpRunningReady", "after": "after_running"},
-    {"trigger": "next", "source": "HpRunningReady", "dest": "HpRunningChecking", "before": "change_state"},
-    {
-        "trigger": "next",
-        "source": "HpRunningChecking",
-        "dest": "HpRunningConfirmed",
-        "conditions": "conditions_confirmed",
-    },
-    {"trigger": "expire", "source": "HpRunningChecking", "dest": "HpRunningFailed", "before": "before_failed"},
-    {"trigger": "next", "source": "HpRunningFailed", "dest": "HpRunningReady"},
-    {"trigger": "expire", "source": "HpRunningFailed", "dest": "HpRunningFailure"},
-    {"trigger": "next", "source": "HpRunningConfirmed", "dest": "JobReady", "after": "after_job"},
-    {"trigger": "next", "source": "JobReady", "dest": "JobChecking", "before": "before_job_submitted"},
-    {"trigger": "next", "source": "JobChecking", "dest": "JobConfirmed", "conditions": "conditions_job_confirmed"},
-    {"trigger": "expire", "source": "JobChecking", "dest": "JobFailed", "before": "before_failed"},
-    {"trigger": "next", "source": "JobFailed", "dest": "JobReady"},
-    {"trigger": "expire", "source": "JobFailed", "dest": "JobFailure"},
-    {"trigger": "next", "source": "JobConfirmed", "dest": "WaitResult", "after": "after_wait_result"},
-    {
-        "trigger": "next",
-        "source": "WaitResult",
-        "dest": "Result",
-        "conditions": "conditions_result",
-        "before": "before_result",
-        "after": "after_result",
-    },
-    {"trigger": "expire", "source": "WaitResult", "dest": "HpExpireReady", "after": "after_expire"},
-    {"trigger": "next", "source": "Result", "dest": "HpFinishedReady", "after": "after_finished"},
-    {"trigger": "next", "source": "HpFinishedReady", "dest": "HpFinishedChecking", "before": "before_finished"},
-    {
-        "trigger": "next",
-        "source": "HpFinishedChecking",
-        "dest": "HpFinishedConfirmed",
-        "conditions": "conditions_confirmed",
-    },
-    {"trigger": "expire", "source": "HpFinishedChecking", "dest": "HpFinishedFailed", "before": "before_failed"},
-    {"trigger": "next", "source": "HpFinishedFailed", "dest": "HpFinishedReady"},
-    {"trigger": "expire", "source": "HpFinishedFailed", "dest": "HpFinishedFailure"},
-    {"trigger": "next", "source": "HpFinishedConfirmed", "dest": "Success", "after": "after_confirmed"},
-    {"trigger": "next", "source": "HpExpireReady", "dest": "HpExpireChecking", "before": "change_state"},
-    {
-        "trigger": "next",
-        "source": "HpExpireChecking",
-        "dest": "HpExpireConfirmed",
-        "conditions": "conditions_confirmed",
-    },
-    {"trigger": "expire", "source": "HpExpireChecking", "dest": "HpExpireFailed", "before": "before_failed"},
-    {"trigger": "next", "source": "HpExpireFailed", "dest": "HpExpireReady"},
-    {"trigger": "expire", "source": "HpExpireFailed", "dest": "HpExpireFailure"},
-    {"trigger": "next", "source": "HpExpireConfirmed", "dest": "Scheduling", "after": "after_confirmed"},
-    {"trigger": "next", "source": "Canceling", "dest": "KillReady", "after": "after_kill"},
-    {"trigger": "next", "source": "KillReady", "dest": "KillChecking", "before": "before_kill_submitted"},
-    {"trigger": "next", "source": "KillChecking", "dest": "KillConfirmed", "conditions": "conditions_kill_confirmed"},
-    {"trigger": "expire", "source": "KillChecking", "dest": "KillFailed", "before": "before_failed"},
-    {"trigger": "next", "source": "KillFailed", "dest": "KillReady"},
-    {"trigger": "expire", "source": "KillFailed", "dest": "KillFailure"},
-    {"trigger": "next", "source": "KillConfirmed", "dest": "CheckResult", "after": "after_check_result"},
-    {"trigger": "next", "source": "CheckResult", "dest": "Result", "conditions": "conditions_result"},
-    {"trigger": "expire", "source": "CheckResult", "dest": "HpCancelReady", "after": "after_cancel"},
-    {
-        "trigger": "next",
-        "source": "HpCancelReady",
-        "dest": "HpCancelChecking",
-        "prepare": "prepare_expire",
-        "before": "change_state",
+        'trigger': 'next',
+        'source': 'Init',
+        'dest': 'RunnerReady',
+        'after': 'after_runner'
     },
     {
-        "trigger": "next",
-        "source": "HpCancelChecking",
-        "dest": "HpCancelConfirmed",
-        "conditions": "conditions_confirmed",
+        'trigger': 'next',
+        'source': 'RunnerReady',
+        'dest': 'RunnerChecking',
+        'before': 'before_runner_create'
     },
-    {"trigger": "expire", "source": "HpCancelChecking", "dest": "HpCancelFailed", "before": "before_failed"},
-    {"trigger": "next", "source": "HpCancelFailed", "dest": "HpCancelReady"},
-    {"trigger": "expire", "source": "HpCancelFailed", "dest": "HpCancelFailure"},
-    {"trigger": "next", "source": "HpCancelConfirmed", "dest": "Canceled", "after": "after_confirmed"},
     {
-        "trigger": "cancel",
-        "source": [
-            "Init",
-            "RunnerReady",
-            "RunnerChecking",
-            "RunnerConfirmed",
-            "RunnerFailed",
-            "HpRunningReady",
-            "HpRunningChecking",
-            "HpRunningConfirmed",
-            "HpRunningFailed",
-            "JobReady",
-            "JobChecking",
-            "JobConfirmed",
-            "JobFailed",
-            "HpFinishedReady",
-            "HpFinishedChecking",
-            "HpFinishedConfirmed",
-            "HpFinishedFailed",
-            "HpExpireReady",
-            "HpExpireChecking",
-            "HpExpireConfirmed",
-            "HpExpireFailed",
-            "Scheduling",
-            "WaitResult",
-            "Result",
+        'trigger': 'next',
+        'source': 'RunnerChecking',
+        'dest': 'RunnerConfirmed',
+        'conditions': 'conditions_runner_confirmed'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'RunnerChecking',
+        'dest': 'RunnerFailed',
+        'before': 'before_failed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'RunnerFailed',
+        'dest': 'RunnerReady'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'RunnerFailed',
+        'dest': 'RunnerFailure'
+    },
+    {
+        'trigger': 'next',
+        'source': 'RunnerConfirmed',
+        'dest': 'Scheduling',
+        'after': 'after_confirmed'
+    },
+    {
+        'trigger': 'schedule',
+        'source': 'Scheduling',
+        'dest': 'HpRunningReady',
+        'after': 'after_running'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpRunningReady',
+        'dest': 'HpRunningChecking',
+        'before': 'change_state'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpRunningChecking',
+        'dest': 'HpRunningConfirmed',
+        'conditions': 'conditions_confirmed'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'HpRunningChecking',
+        'dest': 'HpRunningFailed',
+        'before': 'before_failed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpRunningFailed',
+        'dest': 'HpRunningReady'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'HpRunningFailed',
+        'dest': 'HpRunningFailure'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpRunningConfirmed',
+        'dest': 'JobReady',
+        'after': 'after_job'
+    },
+    {
+        'trigger': 'next',
+        'source': 'JobReady',
+        'dest': 'JobChecking',
+        'before': 'before_job_submitted'
+    },
+    {
+        'trigger': 'next',
+        'source': 'JobChecking',
+        'dest': 'JobConfirmed',
+        'conditions': 'conditions_job_confirmed'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'JobChecking',
+        'dest': 'JobFailed',
+        'before': 'before_failed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'JobFailed',
+        'dest': 'JobReady'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'JobFailed',
+        'dest': 'JobFailure'
+    },
+    {
+        'trigger': 'next',
+        'source': 'JobConfirmed',
+        'dest': 'WaitResult',
+        'after': 'after_wait_result'
+    },
+    {
+        'trigger': 'next',
+        'source': 'WaitResult',
+        'dest': 'Result',
+        'conditions': 'conditions_result',
+        'before': 'before_result',
+        'after': 'after_result'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'WaitResult',
+        'dest': 'HpExpireReady',
+        'after': 'after_expire'
+    },
+    {
+        'trigger': 'next',
+        'source': 'Result',
+        'dest': 'HpFinishedReady',
+        'after': 'after_finished'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpFinishedReady',
+        'dest': 'HpFinishedChecking',
+        'before': 'before_finished'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpFinishedChecking',
+        'dest': 'HpFinishedConfirmed',
+        'conditions': 'conditions_confirmed'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'HpFinishedChecking',
+        'dest': 'HpFinishedFailed',
+        'before': 'before_failed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpFinishedFailed',
+        'dest': 'HpFinishedReady'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'HpFinishedFailed',
+        'dest': 'HpFinishedFailure'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpFinishedConfirmed',
+        'dest': 'Success',
+        'after': 'after_confirmed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpExpireReady',
+        'dest': 'HpExpireChecking',
+        'before': 'change_state'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpExpireChecking',
+        'dest': 'HpExpireConfirmed',
+        'conditions': 'conditions_confirmed'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'HpExpireChecking',
+        'dest': 'HpExpireFailed',
+        'before': 'before_failed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpExpireFailed',
+        'dest': 'HpExpireReady'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'HpExpireFailed',
+        'dest': 'HpExpireFailure'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpExpireConfirmed',
+        'dest': 'Scheduling',
+        'after': 'after_confirmed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'Canceling',
+        'dest': 'KillReady',
+        'after': 'after_kill'
+    },
+    {
+        'trigger': 'next',
+        'source': 'KillReady',
+        'dest': 'KillChecking',
+        'before': 'before_kill_submitted'
+    },
+    {
+        'trigger': 'next',
+        'source': 'KillChecking',
+        'dest': 'KillConfirmed',
+        'conditions': 'conditions_kill_confirmed'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'KillChecking',
+        'dest': 'KillFailed',
+        'before': 'before_failed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'KillFailed',
+        'dest': 'KillReady'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'KillFailed',
+        'dest': 'KillFailure'
+    },
+    {
+        'trigger': 'next',
+        'source': 'KillConfirmed',
+        'dest': 'CheckResult',
+        'after': 'after_check_result'
+    },
+    {
+        'trigger': 'next',
+        'source': 'CheckResult',
+        'dest': 'Result',
+        'conditions': 'conditions_result'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'CheckResult',
+        'dest': 'HpCancelReady',
+        'after': 'after_cancel'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpCancelReady',
+        'dest': 'HpCancelChecking',
+        'prepare': 'prepare_expire',
+        'before': 'change_state'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpCancelChecking',
+        'dest': 'HpCancelConfirmed',
+        'conditions': 'conditions_confirmed'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'HpCancelChecking',
+        'dest': 'HpCancelFailed',
+        'before': 'before_failed'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpCancelFailed',
+        'dest': 'HpCancelReady'
+    },
+    {
+        'trigger': 'expire',
+        'source': 'HpCancelFailed',
+        'dest': 'HpCancelFailure'
+    },
+    {
+        'trigger': 'next',
+        'source': 'HpCancelConfirmed',
+        'dest': 'Canceled',
+        'after': 'after_confirmed'
+    },
+    {
+        'trigger': 'cancel',
+        'source': [
+            'Init',
+            'RunnerReady',
+            'RunnerChecking',
+            'RunnerConfirmed',
+            'RunnerFailed',
+            'HpRunningReady',
+            'HpRunningChecking',
+            'HpRunningConfirmed',
+            'HpRunningFailed',
+            'JobReady',
+            'JobChecking',
+            'JobConfirmed',
+            'JobFailed',
+            'HpFinishedReady',
+            'HpFinishedChecking',
+            'HpFinishedConfirmed',
+            'HpFinishedFailed',
+            'HpExpireReady',
+            'HpExpireChecking',
+            'HpExpireConfirmed',
+            'HpExpireFailed',
+            'Scheduling',
+            'WaitResult',
+            'Result'
         ],
-        "dest": "Canceling",
-    },
+        'dest': 'Canceling'
+    }
 ]
 
 
@@ -317,7 +518,13 @@ class Job:
         th_oh (OutputHandler): An output handler for subprocess.
     """
 
-    def __init__(self, config: DictConfig, scheduler: AbstractScheduler, model: AbstractModel, trial_id: int) -> None:
+    def __init__(
+        self,
+        config: DictConfig,
+        scheduler: AbstractScheduler,
+        model: AbstractModel,
+        trial_id: int
+    ) -> None:
         super(Job, self).__init__()
         # === Load config file===
         self.config = config
@@ -360,9 +567,9 @@ class Job:
             model=self.model,
             states=JOB_STATES,
             transitions=JOB_TRANSITIONS,
-            initial=JOB_STATES[0]["name"],
+            initial=JOB_STATES[0]['name'],
             auto_transitions=False,
-            ordered_transitions=False,
+            ordered_transitions=False
         )
         self.loop_count = 0
         self.scheduler = scheduler
@@ -374,17 +581,17 @@ class Job:
         self.proc: Any = None
         self.th_oh: Any = None
         self.stop_flag = False
-        self.storage = Storage(self.workspace.path)
+        self.storage = Storage(self.workspace.storage_file_path)
         self.content = self.storage.get_hp_dict(self.trial_id)
-        self.result_file_path = self.workspace.result / (self.trial_id_str + ".hp")
+        self.result_file_path = self.workspace.result / (self.trial_id_str + '.hp')
         self.expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt["trigger"] == "expire"]
 
-        self.buff = Buffer(["state.name"])
-        self.buff.d["state.name"].set_max_len(2)
+        self.buff = Buffer(['state.name'])
+        self.buff.d['state.name'].set_max_len(2)
 
-        self.logger = logging.getLogger("root.scheduler.job")
+        self.logger = logging.getLogger('root.scheduler.job')
 
-        self.command_error_output = self.workspace.error / f"{self.trial_id}.txt"
+        self.command_error_output = self.workspace.error / f'{self.trial_id}.txt'
 
     def get_machine(self) -> CustomMachine:
         """Get a state machine object.
@@ -432,13 +639,19 @@ class Job:
         now = get_time_now_object()
         if self.threshold_timeout is None:
             return False
-        return now >= self.threshold_timeout and state.name in self.expirable_states
+        return (
+            now >= self.threshold_timeout and
+            state.name in self.expirable_states
+        )
 
     def is_exceeded_retry_times_max(self) -> bool:
         state = self.machine.get_state(self.model.state)
         if self.threshold_retry is None:
             return False
-        return self.count_retry >= self.threshold_retry and state.name in self.expirable_states
+        return (
+            self.count_retry >= self.threshold_retry and
+            state.name in self.expirable_states
+        )
 
     def check_job_command_error(self) -> bool:
         if self.command_error_output.exists() is False:
@@ -472,38 +685,47 @@ class Job:
         state = self.machine.get_state(self.model.state)
 
         self.buff.Add("state.name", state.name)
-        if self.buff.d["state.name"].Len == 1 or self.buff.d["state.name"].has_difference():
+        if (
+            self.buff.d["state.name"].Len == 1 or
+            self.buff.d["state.name"].has_difference()
+        ):
             self.storage.jobstate.set_any_trial_jobstate(trial_id=self.trial_id, state=state.name)
 
-        if state.name.lower() == "success":
+        if state.name.lower() == 'success':
             return
 
-        if "failure" in state.name.lower():
+        if 'failure' in state.name.lower():
             if self.storage.error.get_any_trial_error(trial_id=self.trial_id) is None:
-                self.storage.error.set_any_trial_error(trial_id=self.trial_id, error_message=state.name)
+                self.storage.error.set_any_trial_error(
+                    trial_id=self.trial_id,
+                    error_message=state.name
+                )
             return
 
         if self.is_timeout():
             self.logger.debug(
-                f"Timeout expire state: {state.name}, "
-                f"now: {get_time_now_object()}, "
-                f"timeout: {self.threshold_timeout}"
+                f'Timeout expire state: {state.name}, '
+                f'now: {get_time_now_object()}, '
+                f'timeout: {self.threshold_timeout}'
             )
             self.model.expire(self)
 
         elif self.is_exceeded_retry_times_max():
             self.logger.debug(
-                f"Retry expire state: {state.name}, "
-                f"count: {self.count_retry}, "
-                f"threshold: {self.threshold_retry}"
+                f'Retry expire state: {state.name}, '
+                f'count: {self.count_retry}, '
+                f'threshold: {self.threshold_retry}'
             )
             self.model.expire(self)
 
-        elif state.name.lower() != "scheduling":
+        elif state.name.lower() != 'scheduling':
             self.model.next(self)
 
         self.logger.debug(
-            f"Running job, " f"trial id: {self.trial_id}, " f"state: {state.name} ," f"count retry: {self.count_retry}"
+            f'Running job, '
+            f'trial id: {self.trial_id}, '
+            f'state: {state.name} ,'
+            f'count retry: {self.count_retry}'
         )
 
         self.check_job_command_error()

@@ -27,9 +27,8 @@ class AbstractEvaluator(object):
         storage (Storage): Storage object.
         goals (list[str]): Goal of optimization ('minimize' or 'maximize').
         trial_id (TrialId): TrialId object.
-
+        workspace (Workspace): Workspace object.
     """
-
     def __init__(self, config: DictConfig) -> None:
         """Initial method for AbstractEvaluator.
 
@@ -39,7 +38,7 @@ class AbstractEvaluator(object):
         self.config = config
         self.workspace = Workspace(self.config.generic.workspace)
         self.hp_result: list[dict[str, Any]] | None = None
-        self.storage = Storage(self.workspace.path)
+        self.storage = Storage(self.workspace.storage_file_path)
         self.goals = [item.value for item in self.config.optimize.goal]
         self.trial_id = TrialId(self.config)
 
@@ -64,12 +63,12 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        logger = logging.getLogger("root.master.evaluator")
+        logger = logging.getLogger('root.master.evaluator')
         if self.hp_result:
-            logger.info("Best hyperparameter is followings:")
+            logger.info('Best hyperparameter is followings:')
             logger.info(self.hp_result)
         else:
-            logger.info("Evaluation not available (no results in storage.db).")
+            logger.info('Evaluation not available (no results in storage.db).')
 
     def save(self) -> None:
         """Save current results to a file.

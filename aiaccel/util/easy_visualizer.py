@@ -4,26 +4,10 @@ import shutil
 from typing import Any
 
 import numpy as np
-from asciichartpy import (
-    black,
-    blue,
-    cyan,
-    darkgray,
-    green,
-    lightblue,
-    lightcyan,
-    lightgray,
-    lightgreen,
-    lightmagenta,
-    lightred,
-    lightyellow,
-    magenta,
-    plot,
-    red,
-    reset,
-    white,
-    yellow,
-)
+from asciichartpy import (black, blue, cyan, darkgray, green, lightblue,
+                          lightcyan, lightgray, lightgreen, lightmagenta,
+                          lightred, lightyellow, magenta, plot, red, reset,
+                          white, yellow)
 
 
 class EasyVisualizer:
@@ -54,7 +38,7 @@ class EasyVisualizer:
             "lightgreen": lightgreen,
             "lightmagenta": lightmagenta,
             "lightred": lightred,
-            "lightyellow": lightyellow,
+            "lightyellow": lightyellow
         }
         self.color_priority = [
             "red",
@@ -76,12 +60,15 @@ class EasyVisualizer:
         ]
         self.plot_config: dict[str, Any] = {
             "height": 15,
-            "colors": [self.line_colors[self.color_priority[0]], self.line_colors[self.color_priority[1]]],
+            "colors": [
+                self.line_colors[self.color_priority[0]],
+                self.line_colors[self.color_priority[1]]
+            ]
         }
         self.plot_datas: list[list[Any]] = [[]]
 
     def set_height(self, height: int) -> None:
-        """Set the any height of vertical axis.
+        """ Set the any height of vertical axis.
 
         Args:
             height (int): height of vertical axis.
@@ -97,7 +84,7 @@ class EasyVisualizer:
     #     self.plot_config["width"] = width
 
     def set_colors(self, colors: list[Any]) -> None:
-        """Set the color of line graph.
+        """ Set the color of line graph.
 
         Args:
             colors (list): The number of list item is same as the number of
@@ -125,10 +112,10 @@ class EasyVisualizer:
         labels = list(labels)[0]
         for i in range(len(labels)):
             color = self.line_colors[self.color_priority[i]]
-            print(f"{color}{list(labels)[i]}{reset}")
+            print(f'{color}{list(labels)[i]}{reset}')
 
     def line_plot(self, *data: Any) -> None:
-        """Plot the any data.
+        """ Plot the any data.
 
         Args:
             data (tuple): Target data.
@@ -167,13 +154,15 @@ class EasyVisualizer:
                 return
 
             if len(data[i]) >= plot_width_max:
-                self.plot_datas.append(data[i][(len(data[i]) - plot_width_max) :])
+                self.plot_datas.append(
+                    data[i][(len(data[i]) - plot_width_max):]
+                )
             else:
                 self.plot_datas.append(data[i])
         print(plot(series=self.plot_datas, cfg=self.plot_config))
 
     def sort(self, data: list[Any], goal: str) -> list[Any] | None:
-        """Sort the any data to maximize or minimize.
+        """ Sort the any data to maximize or minimize.
 
         Args:
             data (list): A swquential data.

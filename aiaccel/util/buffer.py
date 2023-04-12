@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import copy
 from typing import Any
 
@@ -18,18 +17,21 @@ class _buffer:
         return self.arr[index]
 
     def set_max_len(self, value: int) -> None:
-        """Set any max size of this label length."""
+        """ Set any max size of this label length.
+        """
         self._max_size = int(value)
 
     def Add(self, value: Any) -> None:
-        """Append any data."""
+        """ Append any data.
+        """
         if self.Len == self._max_size:
             self.arr = [self.arr[-1]]
         self.arr.append(value)
 
     @property
     def Pre(self) -> Any:
-        """Refers to the previous value."""
+        """ Refers to the previous value.
+        """
         if self.Len >= 2:
             return self.arr[-2]
         else:
@@ -37,30 +39,35 @@ class _buffer:
 
     @property
     def Now(self) -> Any:
-        """Refers to the current value."""
+        """ Refers to the current value.
+        """
         return self.arr[-1]
 
     def Clear(self) -> None:
-        """Initialize list."""
+        """ Initialize list.
+        """
         self.arr = []
 
     def Replace(self, arr: list[Any]) -> None:
-        """Replace to any list data."""
+        """ Replace to any list data.
+        """
         self.Clear()
         self.arr = copy.deepcopy(arr)
 
     @property
     def Len(self) -> int:
-        """Get list length."""
+        """ Get list length.
+        """
         return len(self.arr)
 
     @property
     def Data(self) -> list[Any]:
-        """Get the list data itself."""
+        """ Get the list data itself.
+        """
         return self.arr
 
     def Value(self, index: int) -> None:
-        """Get any data in list.
+        """ Get any data in list.
 
         Args:
             index (int): A index of list.
@@ -68,7 +75,7 @@ class _buffer:
         return self.arr[index]
 
     def Del(self, index: int) -> None:
-        """Delete any data in list.
+        """ Delete any data in list.
 
         Args:
             index (int): A index of list.
@@ -77,14 +84,15 @@ class _buffer:
 
     @property
     def Is_Empty(self) -> bool:
-        """Itself is empty or not"""
+        """ Itself is empty or not
+        """
         if self.arr == []:
             return True
         else:
             return False
 
     def Duplicate(self, value: Any) -> int:
-        """Get index if exists duplicate data in list else -1.
+        """ Get index if exists duplicate data in list else -1.
 
         Args:
             value (Any): Check to see if the same value already exists.
@@ -98,11 +106,12 @@ class _buffer:
         return -1
 
     def delta(self) -> Any:
-        """Get numerical difference."""
+        """ Get numerical difference.
+        """
         return self.Now - self.Pre
 
     def point_diff(self, idx_pre: int, idx_now: int) -> Any:
-        """Get the difference between any two points.
+        """ Get the difference between any two points.
 
         Args:
             idx_pre (int): Any index value.
@@ -122,15 +131,15 @@ class _buffer:
         """
         if len(self.arr) >= 2:
             if digit is None:
-                return self.Pre != self.Now
+                return (self.Pre != self.Now)
             else:
-                return round(self.Pre, digit) != round(self.Now, digit)
+                return (round(self.Pre, digit) != round(self.Now, digit))
         else:
             return False
 
 
 class Buffer:
-    """Buffer
+    """ Buffer
 
     Args:
         labels (tuple) : Label names.
@@ -164,7 +173,7 @@ class Buffer:
             self.d[self.labels[i]] = _buffer(self.labels[i])
 
     def Add(self, label: str, value: Any) -> None:
-        """Add a data to any buffer.
+        """ Add a data to any buffer.
 
         Args:
             label (str): A target buffer labele.
@@ -173,7 +182,7 @@ class Buffer:
         self.d[label].Add(value)
 
     def Del(self, label: str, index: int) -> None:
-        """Delete a any data in any buffer.
+        """ Delete a any data in any buffer.
 
         Args:
             label (str): A target label.
@@ -182,7 +191,7 @@ class Buffer:
         self.d[label].Del(index)
 
     def Clear(self, label: str) -> None:
-        """Delete all buffer data of the target.
+        """ Delete all buffer data of the target.
 
         Args:
             label (str): A target label.
