@@ -110,7 +110,7 @@ packages = [
     'aiaccel.storage'
 ]
 
-[tool.setuptools.packages-data]
+[tool.setuptools.package-data]
 aiaccel = ["default_config.yaml"]
 
 [tool.black]
