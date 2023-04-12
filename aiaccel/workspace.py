@@ -82,6 +82,7 @@ class Workspace:
         self.results = Path("./results")
         self.retults_csv_file = self.path / "results.csv"
         self.final_result_file = self.path / dict_result / "final_result.result"
+        self.storage_file_path = self.storage / "storage.db"
 
     def create(self) -> bool:
         """Create a work directory.
