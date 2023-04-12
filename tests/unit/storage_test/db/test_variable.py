@@ -4,12 +4,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import t_base, ws, init
+from tests.unit.storage_test.db.base import get_storage, init, t_base, ws
 
 
 @t_base()
 def test_serialize():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
 
     # if labels[i] not in self.d.keys()
@@ -41,7 +41,7 @@ def test_serialize():
 
 @t_base()
 def test_set_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
 
     init()
@@ -59,7 +59,7 @@ def test_set_exception():
 
 @t_base()
 def test_get():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
 
     storage.variable.d['hoge'].set(trial_id=1, value=1.1)
@@ -69,14 +69,14 @@ def test_get():
 
 @t_base()
 def test_all_delete():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
     assert storage.variable.d['hoge'].all_delete() is None
 
 
 @t_base()
 def test_all_delete_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
 
     init()
@@ -87,7 +87,7 @@ def test_all_delete_exception():
 
 @t_base()
 def test_delete_any_trial_variable():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
 
     storage.variable.d['hoge'].set(trial_id=1, value=1.1)
@@ -127,7 +127,7 @@ def test_delete_any_trial_variable():
 
 @t_base()
 def test_delete_any_trial_variable_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
 
     storage.variable.d['hoge'].set(trial_id=1, value=1.1)
@@ -145,7 +145,7 @@ def test_delete_any_trial_variable_exception():
 
 @t_base()
 def test_delete():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
 
     storage.variable.d['hoge'].set(trial_id=1, value=1.1)
@@ -170,7 +170,7 @@ def test_delete():
 
 @t_base()
 def test_delete_any_trial_variable():
-    storage = Storage(ws.path)
+    storage = get_storage()
     storage.variable.register(process_name='optimizer', labels=['hoge', 'foo', 'bar'])
 
     storage.variable.d['hoge'].set(trial_id=1, value=1.1)

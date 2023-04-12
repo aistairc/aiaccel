@@ -64,7 +64,7 @@ class AbstractModule(object):
         self.hp_running = 0
         self.hp_finished = 0
         self.seed = self.config.optimize.rand_seed
-        self.storage = Storage(self.workspace.path)
+        self.storage = Storage(self.workspace.storage_file_path)
         self.trial_id = TrialId(self.config)
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng = np.random.RandomState(self.seed)

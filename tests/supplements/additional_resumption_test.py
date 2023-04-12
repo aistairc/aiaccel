@@ -9,8 +9,8 @@ import subprocess
 from pathlib import Path
 
 from aiaccel.config import load_config
-
 from aiaccel.storage import Storage
+from aiaccel.workspace import Workspace
 from tests.integration.integration_test import IntegrationTest
 
 
@@ -24,16 +24,17 @@ class AdditionalResumptionTest(IntegrationTest):
         config = load_config(config_file)
         python_file = test_data_dir.joinpath('user.py')
 
+        workspace = Workspace(config.generic.workspace)
+        storage = Storage(workspace.storage_file_path)
+
         # normal execution
         with self.create_main(python_file):
-            storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
             final_result_at_one_time = self.get_final_result(storage)
         print('at one time', final_result_at_one_time)
 
         # resume from initial point
         with self.create_main(python_file):
-            storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--resume', '2']).wait()
             final_result_resumption_in_initial = self.get_final_result(storage)
         print('resumption steps in initial point finished', final_result_resumption_in_initial)
@@ -42,7 +43,6 @@ class AdditionalResumptionTest(IntegrationTest):
 
         # resume after initial point
         with self.create_main(python_file):
-            storage = Storage(ws=Path(config.generic.workspace))
             subprocess.Popen(['aiaccel-start', '--config', str(config_file),
                               '--resume', '11']).wait()
             final_result_resumption = self.get_final_result(storage)

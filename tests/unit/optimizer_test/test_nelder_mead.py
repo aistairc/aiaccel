@@ -4,9 +4,10 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.optimizer import NelderMead
+from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.storage import Storage
+from aiaccel.workspace import Workspace
 from tests.base_test import BaseTest
 
 
@@ -84,7 +85,9 @@ class TestNelderMead(BaseTest):
         for p, i in zip(params, range(1, len(self.nm.bdrys)+2)):
             p['vertex_id'] = '{:03}'.format(i)
 
-        storage = Storage(work_dir)
+        workspace = Workspace(work_dir)
+        storage = Storage(workspace.storage_file_path)
+
         setup_hp_finished(1)
         for i in range(1):
             storage.result.set_any_trial_objective(trial_id=i, objective=0.0)

@@ -8,12 +8,12 @@ from subprocess import Popen
 
 import pytest
 import yaml
+from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import dict_result
-from aiaccel.common import file_final_result
+from aiaccel.common import dict_result, file_final_result
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
-
+from aiaccel.workspace import Workspace
 from tests.base_test import BaseTest
 
 
@@ -46,31 +46,33 @@ class AdditionalNumsNodeTrialTest(BaseTest):
         work_dir: Path,
         create_tmp_config: Callable[[Path, Path]]
     ) -> None:
-        self.config_file = self.test_data_dir.joinpath(
+        config_file = self.test_data_dir.joinpath(
             'config_{}.yaml'.format(self.search_algorithm)
         )
-        with open(self.config_file, 'r') as f:
+        with open(config_file, 'r') as f:
             cfg = yaml.load(f, Loader=yaml.SafeLoader)
         cfg['resource']['num_node'] = num_node
         cfg['optimize']['trial_number'] = num_trial
-        with open(self.config_file, 'w') as f:
+        with open(config_file, 'w') as f:
             yaml.dump(cfg, f, default_flow_style=False)
-        self.config_file = create_tmp_config(self.config_file)
-        self.config = load_config(self.config_file)
+        config_file = create_tmp_config(self.config_file)
+        config = load_config(self.config_file)
+
+        workspace = Workspace(config.generic.workspace)
+        storage = Storage(workspace.storage_file_path)
 
         with self.create_main(self.python_file):
-            storage = Storage(ws=Path(self.config.generic.workspace))
             popen = Popen(
                 ['aiaccel-start', '--config', str(self.config_file), '--clean']
             )
-            popen.wait(timeout=self.config.generic.batch_job_timeout)
-        self.evaluate(work_dir, storage)
+            popen.wait(timeout=config.generic.batch_job_timeout)
+        self.evaluate(work_dir, config, storage)
 
-    def evaluate(self, work_dir: Path, storage: Storage) -> None:
+    def evaluate(self, work_dir: Path, config: DictConfig, storage: Storage) -> None:
         running = storage.get_num_running()
         ready = storage.get_num_ready()
         finished = storage.get_num_finished()
-        assert finished <= self.config.optimize.trial_number
+        assert finished <= config.optimize.trial_number
         assert ready == 0
         assert running == 0
         final_result = work_dir.joinpath(dict_result, file_final_result)

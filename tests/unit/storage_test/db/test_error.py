@@ -3,14 +3,14 @@ from sqlalchemy.exc import SQLAlchemyError
 from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import t_base, ws, init
+from tests.unit.storage_test.db.base import get_storage, init, t_base, ws
 
 # set_any_trial_error
 
 
 @t_base()
 def test_set_any_trial_error():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     message = "hoge"
@@ -29,7 +29,7 @@ def test_set_any_trial_error():
 # set_any_trial_error exception
 @t_base()
 def test_set_any_trial_error_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     message = "hoge"
@@ -43,7 +43,7 @@ def test_set_any_trial_error_exception():
 # get_any_trial_error
 @t_base()
 def test_get_any_trial_error():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     message = "hoge"
@@ -59,9 +59,9 @@ def test_get_any_trial_error():
 # get_error_trial_id
 @t_base()
 def test_get_error_trial_id():
-    storage = Storage(ws.path)
-    assert storage.error.get_error_trial_id() == []
+    storage = get_storage()
 
+    assert storage.error.get_error_trial_id() == []
     assert storage.error.get_error_trial_id() == []
 
     ids = [0, 1, 2]
@@ -83,7 +83,7 @@ def test_get_error_trial_id():
 # all_delete
 @t_base()
 def test_all_delete():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     ids = [0, 1, 2]
     mess = [
@@ -106,7 +106,7 @@ def test_all_delete():
 # all_delete
 @t_base()
 def test_all_delete_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     ids = [0, 1, 2]
     mess = [
@@ -130,7 +130,7 @@ def test_all_delete_exception():
 # delete_any_trial_error
 @t_base()
 def test_delete_any_trial_error():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     ids = [0, 1, 2]
     messages = ["hoge0", "hoge1", "hoge2"]
@@ -164,7 +164,7 @@ def test_delete_any_trial_error():
 # delete_any_trial_error exception
 @t_base()
 def test_delete_any_trial_error_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     ids = [0, 1, 2]
     messages = ["hoge0", "hoge1", "hoge2"]
