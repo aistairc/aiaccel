@@ -1,4 +1,6 @@
 from __future__ import annotations
+from aiaccel.common import extension_hp
+from aiaccel.common import dict_result
 import yaml
 from typing import Any
 
@@ -103,7 +105,7 @@ def main() -> None:  # pragma: no cover
         best_id = final_result["trial_id"]
         best_value = final_result["result"][i]
         if best_id is not None and best_value is not None:
-            logger.info(f"Best result ID [{i}] : {best_id}")
+            logger.info(f"Best result [{i}] : {dst}/{dict_result}/{best_id}.{extension_hp}")
             logger.info(f"\tvalue : {best_value}")
 
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
