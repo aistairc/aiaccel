@@ -3,14 +3,19 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.8']
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
@@ -18,7 +23,7 @@ jobs:
           pip install black flake8 isort pycodestyle
 
       - name: Pycodestyle Test
-        run: pycodestyle --ignore="E501" aiaccel examples
+        run: pycodestyle --max-line-length=120 aiaccel examples
 
       - name: Lint
         run: |
