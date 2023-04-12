@@ -1,0 +1,58 @@
+generic:
+  workspace: "./work"
+  job_command: "python user.py"
+  # python_file: "./user.py"
+  # function: "main"
+  batch_job_timeout: 600
+
+resource:
+  # type: "abci"
+  type: "local"
+  # type: "python_local"
+  num_node: 4
+
+ABCI:
+  group: "[group]"
+  job_script_preamble: "./job_script_preamble.sh"
+  job_execution_options: ""
+
+optimize:
+  # search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
+  search_algorithm: "aiaccel.optimizer.RandomOptimizer"
+  # search_algorithm: "aiaccel.optimizer.SobolOptimizer"
+  # search_algorithm: "aiaccel.optimizer.GridOptimizer"
+  # search_algorithm: "aiaccel.optimizer.TpeOptimizer"
+  goal: "minimize"
+  trial_number: 100
+  rand_seed: 42
+  parameters:
+    -
+      name: "x1"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+      initial: -5.0
+    -
+      name: "x2"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+      initial: -5.0
+    -
+      name: "x3"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+      initial: -5.0
+    -
+      name: "x4"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+      initial: -5.0
+    -
+      name: "x5"
+      type: "uniform_float"
+      lower: -5.0
+      upper: 5.0
+      # initial: -5.0

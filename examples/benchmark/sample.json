@@ -1,0 +1,336 @@
+{
+  "generic": {
+    "silent_wrapper": false,
+    "workspace": "/tmp/work"
+  },
+  "logger": {
+    "master_logfile": "master.log",
+    "master_file_log_level": "DEBUG",
+    "master_stream_log_level": "INFO",
+    "optimizer_logfile": "optimizer.log",
+    "optimizer_file_log_level": "DEBUG",
+    "optimizer_stream_log_level": "WARNING",
+    "scheduler_logfile": "scheduler.log",
+    "scheduler_file_log_level": "DEBUG",
+    "scheduler_stream_log_level": "WARNING"
+  },
+  "wrapper": {
+    "$aistopt_wrapper": "wrapper_aistopt.sh",
+    "wrapper_command": "python wrapper.py"
+  },
+  "master": {
+    "sleep_time_master": 1
+  },
+  "optimizer": {
+    "search_algorithm": "NelderMeadSearch",
+    "parameter_pool_size": 5,
+  },
+  "scheduler": {
+    "cancel_retry": 3,
+    "cancel_timeout": 10,
+    "expire_retry": 3,
+    "expire_timeout": 10,
+    "finished_retry": 3,
+    "finished_timeout": 10,
+    "job_retry": 2,
+    "job_timeout": 60,
+    "kill_retry": 3,
+    "kill_timeout": 30,
+    "result_retry": 1,
+    "runner_retry": 3,
+    "runner_timeout": 10,
+    "running_retry": 3,
+    "running_timeout": 10,
+    "$scheduler_runner": "run_scheduler.sh"
+  },
+  "resource": {
+    "resource_name": "abci1",
+    "type": "abci",
+    "num_node": 4
+  },
+  "ABCI": {
+    "abci_wrapper": "wrapper_abci.sh",
+    "group": "gaa50073",
+    "runner_search_pattern": "run_*.sh"
+  },
+  "hyperparameter": {
+    "goal": "MINIMIZE",
+    "hyperparameter_file": "hyperparameter.json",
+    "trial_number": 10,
+    "grid_search_option": [
+      {
+        "name": "x1",
+        "step": 0.1,
+        "log": true,
+        "base": 10
+      },
+      {
+        "name": "x2",
+        "step": 1.0,
+        "log": false
+      },
+      {
+        "name": "x3",
+        "step": 1.0,
+        "log": false
+      },
+      {
+        "name": "x4",
+        "step": 1.0,
+        "log": false
+      },
+      {
+        "name": "x5",
+        "step": 1.0,
+        "log": false
+      },
+      {
+        "name": "x6",
+        "step": 1.0,
+        "log": false
+      },
+      {
+        "name": "x7",
+        "step": 1.0,
+        "log": false
+      },
+      {
+        "name": "x8",
+        "step": 1.0,
+        "log": false
+      },
+      {
+        "name": "x9",
+        "step": 1.0,
+        "log": false
+      },
+      {
+        "name": "x10",
+        "step": 1.0,
+        "log": false
+      }
+    ],
+    "nelder_mead_default_parameters": [
+      [
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0
+      ],
+      [
+        1.1,
+        1.2,
+        1.3,
+        1.4,
+        1.5,
+        1.6,
+        1.7,
+        1.8,
+        1.9,
+        1.1
+      ],
+      [
+        2.1,
+        2.2,
+        2.3,
+        2.4,
+        2.5,
+        2.6,
+        2.7,
+        2.8,
+        2.9,
+        1.2
+      ],
+      [
+        3.1,
+        3.2,
+        3.3,
+        3.4,
+        3.5,
+        3.6,
+        3.7,
+        3.8,
+        3.9,
+        1.3
+      ],
+      [
+        4.1,
+        4.2,
+        4.3,
+        4.4,
+        4.5,
+        4.6,
+        4.7,
+        4.8,
+        4.9,
+        1.4
+      ],
+      [
+        -0.1,
+        -0.2,
+        -0.3,
+        -0.4,
+        -0.5,
+        -0.6,
+        -0.7,
+        -0.8,
+        -0.9,
+        -1.0
+      ],
+      [
+        -1.1,
+        -1.2,
+        -1.3,
+        -1.4,
+        -1.5,
+        -1.6,
+        -1.7,
+        -1.8,
+        -1.9,
+        -1.1
+      ],
+      [
+        -2.1,
+        -2.2,
+        -2.3,
+        -2.4,
+        -2.5,
+        -2.6,
+        -2.7,
+        -2.8,
+        -2.9,
+        -1.2
+      ],
+      [
+        -3.1,
+        -3.2,
+        -3.3,
+        -3.4,
+        -3.5,
+        -3.6,
+        -3.7,
+        -3.8,
+        -3.9,
+        -1.3
+      ],
+      [
+        -4.1,
+        -4.2,
+        -4.3,
+        -4.4,
+        -4.5,
+        -4.6,
+        -4.7,
+        -4.8,
+        -4.9,
+        -1.4
+      ],
+      [
+        1.1,
+        -1.2,
+        2.3,
+        -3.4,
+        4.5,
+        -4.6,
+        3.7,
+        -3.8,
+        2.9,
+        -2.0
+      ]
+    ],
+    "ConfigSpace_hyperparameter": {
+      "hyperparameters": [
+        {
+          "name": "x1",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x2",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x3",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x4",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x5",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x6",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x7",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x8",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x9",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        },
+        {
+          "name": "x10",
+          "type": "uniform_float",
+          "log": false,
+          "lower": -5.0,
+          "upper": 5.0,
+          "default": 4.0
+        }
+      ],
+      "conditions": [],
+      "forbiddens": [],
+      "python_module_version": "0.4.10",
+      "json_format_version": 0.1
+    }
+  }
+}
