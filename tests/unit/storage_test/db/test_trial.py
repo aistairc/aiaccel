@@ -1,15 +1,15 @@
 import pytest
-from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import t_base, ws, init
+from tests.unit.storage_test.db.base import get_storage, init, t_base, ws
 
 
 # set_any_trial_state
 @t_base()
 def test_set_any_trial_state():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = ["ready", "running", "finished"]
 
@@ -30,7 +30,7 @@ def test_set_any_trial_state():
 # set_any_trial_state exception
 @t_base()
 def test_set_any_trial_state_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     init()
     with pytest.raises(SQLAlchemyError):
@@ -46,7 +46,7 @@ def test_set_any_trial_state_exception():
 
 @t_base()
 def test_get_any_trial_state():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         "ready",
@@ -73,7 +73,7 @@ def test_get_any_trial_state():
 # get_any_state_list
 @t_base()
 def test_get_any_state_list():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     assert storage.trial.get_any_state_list("ready") is None
 
@@ -103,7 +103,7 @@ def test_get_any_state_list():
 # all_delete
 @t_base()
 def test_all_delete():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         "ready",
@@ -135,7 +135,7 @@ def test_all_delete():
 # all_delete exception
 @t_base()
 def test_all_delete_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         "ready",
@@ -167,7 +167,7 @@ def test_all_delete_exception():
 # get_ready
 @t_base()
 def test_get_ready():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         "ready",
@@ -193,7 +193,7 @@ def test_get_ready():
 # get_running
 @t_base()
 def test_get_running():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         "ready",
@@ -219,7 +219,7 @@ def test_get_running():
 # get_finished
 @t_base()
 def test_get_finished():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         "ready",
@@ -245,7 +245,7 @@ def test_get_finished():
 # get_all_trial_id
 @t_base()
 def test_get_all_trial_id():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     assert storage.trial.get_all_trial_id() is None
 
@@ -273,7 +273,7 @@ def test_get_all_trial_id():
 # delete_any_trial_state
 @t_base()
 def test_delete_any_trial_state():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         "ready",
@@ -313,7 +313,7 @@ def test_delete_any_trial_state():
 # delete_any_trial_state exception
 @t_base()
 def test_delete_any_trial_state_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         "ready",

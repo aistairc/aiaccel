@@ -1,15 +1,15 @@
 import pytest
-from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import t_base, ws
+from tests.unit.storage_test.db.base import get_storage, t_base, ws
 
 
 # set_any_trial_param
 @t_base()
 def test_set_any_trial_jobstate():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     state = "test_state"
@@ -29,7 +29,7 @@ def test_set_any_trial_jobstate():
 # set_any_trial_param exception
 @t_base()
 def test_set_any_trial_jobstate_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     state = "test_state"
@@ -47,7 +47,7 @@ def test_set_any_trial_jobstate_exception():
 # get_any_trial_jobstate
 @t_base()
 def test_get_any_trial_jobstate():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     state = "test_state"
@@ -72,7 +72,7 @@ def test_get_any_trial_jobstate():
 # set_any_trial_jobstates
 @t_base()
 def test_set_any_trial_jobstates():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         {'trial_id': 0, 'jobstate': 'stata_0'},
@@ -93,7 +93,7 @@ def test_set_any_trial_jobstates():
 # set_any_trial_jobstates exception
 @t_base()
 def test_set_any_trial_jobstates_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     states = [
         {'trial_id': 0, 'jobstate': 'stata_0'},
@@ -112,7 +112,7 @@ def test_set_any_trial_jobstates_exception():
 # get_all_trial_jobstate
 @t_base()
 def test_get_all_trial_jobstate():
-    storage = Storage(ws.path)
+    storage = get_storage()
     print(storage.jobstate.get_all_trial_jobstate())
     assert storage.jobstate.get_all_trial_jobstate() == [{'trial_id': None, 'jobstate': None}]
 
@@ -133,7 +133,7 @@ def test_get_all_trial_jobstate():
 
 @t_base()
 def test_is_failure():
-    storage = Storage(ws.path)
+    storage = get_storage()
     test_states = [
         'RunnerFailure',
         'HpRunningFailure',
@@ -166,7 +166,7 @@ def test_is_failure():
 
 @t_base()
 def test_delete_any_trial_jobstate():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     state = "test_state_0"
@@ -212,7 +212,7 @@ def test_delete_any_trial_jobstate():
 # delete_any_trial_jobstate exception
 @t_base()
 def test_delete_any_trial_jobstate_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     state = "test_state_0"

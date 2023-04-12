@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
-from pathlib import Path
 from typing import Any
 
 from numpy import maximum
@@ -20,13 +19,13 @@ class Viewer:
 
     Attributes:
         config_path (Path): Path to the config file.
-        workspace (Path): Path to the workspace.
+        workspace (Workspace): Workspace object.
         storage (Storage): Storage object.
     """
 
     def __init__(self, config: DictConfig) -> None:
-        self.workspace = Path(config.generic.workspace).resolve()
-        self.storage = Storage(self.workspace)
+        self.workspace = Workspace(config.generic.workspace)
+        self.storage = Storage(self.workspace.storage_file_path)
 
     def view(self) -> None:
         """Print database information

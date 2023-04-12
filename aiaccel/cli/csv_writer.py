@@ -34,7 +34,7 @@ class CsvWriter:
         self.workspace = Workspace(self.config.generic.workspace)
         self.fp = self.workspace.retults_csv_file
         self.trialid = TrialId(self.config)
-        self.storage = Storage(self.workspace.path)
+        self.storage = Storage(self.workspace.storage_file_path)
         self.lock_file = {'result_txt': str(self.workspace.lock / 'result_txt')}
 
     def _get_zero_padding_trial_id(self, trial_id: int) -> str:

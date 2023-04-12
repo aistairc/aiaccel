@@ -581,7 +581,7 @@ class Job:
         self.proc: Any = None
         self.th_oh: Any = None
         self.stop_flag = False
-        self.storage = Storage(self.workspace.path)
+        self.storage = Storage(self.workspace.storage_file_path)
         self.content = self.storage.get_hp_dict(self.trial_id)
         self.result_file_path = self.workspace.result / (self.trial_id_str + '.hp')
         self.expirable_states = [jt["source"] for jt in JOB_TRANSITIONS if jt["trigger"] == "expire"]

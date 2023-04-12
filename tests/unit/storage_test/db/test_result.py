@@ -6,13 +6,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import init, t_base, ws
+from tests.unit.storage_test.db.base import init, t_base, ws, get_storage
 
 
 # set_any_trial_objective
 @t_base()
 def test_set_any_trial_objective():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     objective = 0.01
@@ -34,7 +34,7 @@ def test_set_any_trial_objective():
 
 @t_base()
 def test_set_any_trial_objective_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     objective = 0.01
@@ -51,7 +51,7 @@ def test_set_any_trial_objective_exception():
 @t_base()
 def test_get_any_trial_objective_and_best_value():
 
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     # Test when objectives is None
     trial_id = 1
@@ -77,7 +77,7 @@ def test_get_any_trial_objective_and_best_value():
 # get_any_trial_objective
 @t_base()
 def test_get_any_trial_objective():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     objective = 0.01
@@ -94,7 +94,7 @@ def test_get_any_trial_objective():
 # get_all_result
 @t_base()
 def test_get_all_result():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     objectives = [1, 2, 3, 1.23]
     ids = range(len(objectives))
@@ -112,7 +112,7 @@ def test_get_all_result():
 # get_objectives
 @t_base()
 def test_get_objectives():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     objectives = [1, 2, 3, 1.23]
     ids = range(len(objectives))
@@ -129,7 +129,7 @@ def test_get_objectives():
 
 @t_base()
 def test_get_bests():
-    storage = Storage(ws.path)
+    storage = get_storage()
     objectives = [[1], [-5], [3], [1.23]]
     ids = range(len(objectives))
 
@@ -154,7 +154,7 @@ def test_get_bests():
 # get_result_trial_id_list
 @t_base()
 def test_get_result_trial_id_list():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     assert storage.result.get_result_trial_id_list() is None
 
@@ -173,7 +173,7 @@ def test_get_result_trial_id_list():
 # all_delete
 @t_base()
 def test_all_delete():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     objectives = [1, 2, 3, 1.23]
     ids = range(len(objectives))
@@ -192,7 +192,7 @@ def test_all_delete():
 # all_delete exception
 @t_base()
 def test_all_delete_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     objectives = [1, 2, 3, 1.23]
     ids = range(len(objectives))
@@ -212,7 +212,7 @@ def test_all_delete_exception():
 # delete_any_trial_objective
 @t_base()
 def test_delete_any_trial_objective():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     ids = [0, 1, 2]
     objectives = [0.01, 0.02, 0.03]
@@ -246,7 +246,7 @@ def test_delete_any_trial_objective():
 # delete_any_trial_objective exception
 @t_base()
 def test_delete_any_trial_objective_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     ids = [0, 1, 2]
     objectives = [0.01, 0.02, 0.03]
