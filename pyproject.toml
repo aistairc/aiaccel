@@ -110,6 +110,9 @@ packages = [
     'aiaccel.storage'
 ]
 
+[tool.setuptools.packages-data]
+aiaccel = ["default_config.yaml"]
+
 [tool.black]
 target-version = ['py38']
 line-length = 120
