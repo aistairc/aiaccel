@@ -55,15 +55,15 @@ class AdditionalNumsNodeTrialTest(BaseTest):
         cfg['optimize']['trial_number'] = num_trial
         with open(config_file, 'w') as f:
             yaml.dump(cfg, f, default_flow_style=False)
-        config_file = create_tmp_config(self.config_file)
-        config = load_config(self.config_file)
+        config_file = create_tmp_config(config_file)
+        config = load_config(config_file)
 
         workspace = Workspace(config.generic.workspace)
         storage = Storage(workspace.storage_file_path)
 
         with self.create_main(self.python_file):
             popen = Popen(
-                ['aiaccel-start', '--config', str(self.config_file), '--clean']
+                ['aiaccel-start', '--config', str(config_file), '--clean']
             )
             popen.wait(timeout=config.generic.batch_job_timeout)
         self.evaluate(work_dir, config, storage)
