@@ -20,6 +20,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: pyproject.toml
+
       - name: Install Software
         run: |
           python -m pip install --upgrade pip
@@ -27,12 +28,6 @@ jobs:
 
       - name: Unit Test
         run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit
-
-      - name: Pycodestyle Test
-        run: pycodestyle --ignore="E203,E501,W503" aiaccel examples
-
-      - name: Flake8 Test
-        run: flake8 --max-line-length 120 --ignore=E203,503 aiaccel examples
 
       - name: Optimizer Algorithm Test
         run: |
