@@ -1,8 +1,9 @@
 import pathlib
+import time
 from functools import wraps
 
+from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
-import time
 
 ws = Workspace("test_work")
 db_path = (ws.path / 'storage/storage.db')
@@ -24,6 +25,9 @@ def init():
 def create():
     ws.create()
 
+def get_storage():
+    storage = Storage(ws.storage_file_path)
+    return storage
 
 def t_base():
     def _test_base(func):

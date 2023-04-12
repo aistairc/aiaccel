@@ -1,16 +1,16 @@
 import pytest
-from undecorated import undecorated
 from sqlalchemy.exc import SQLAlchemyError
+from undecorated import undecorated
 
 from aiaccel.storage import Storage
-from tests.unit.storage_test.db.base import t_base, ws
+from tests.unit.storage_test.db.base import get_storage, t_base, ws
 
 # set_any_trial_param
 
 
 @t_base()
 def test_set_any_trial_param():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     param_name = "x1"
@@ -28,7 +28,7 @@ def test_set_any_trial_param():
 # set_any_trial_param exception
 @t_base()
 def test_set_any_trial_param():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     param_name = "x1"
@@ -50,7 +50,7 @@ def test_set_any_trial_param():
 # set_any_trial_param
 @t_base()
 def test_set_any_trial_params():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     params = [
@@ -89,7 +89,7 @@ def test_set_any_trial_params():
 # set_any_trial_param exception
 @t_base()
 def test_set_any_trial_params_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     params = [
@@ -133,7 +133,7 @@ def test_set_any_trial_params_exception():
 # get_any_trial_params
 @t_base()
 def test_get_any_trial_params():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     param_name = "x1"
@@ -166,7 +166,7 @@ def test_get_any_trial_params():
 # all_delete
 @t_base()
 def test_all_delete():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     param_name = "x1"
@@ -187,7 +187,7 @@ def test_all_delete():
 # all_delete exception
 @t_base()
 def test_all_delete_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     param_name = "x1"
@@ -211,7 +211,7 @@ def test_all_delete_exception():
 
 @t_base()
 def test_delete_any_trial_params():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     trial_id = 0
     params = [
@@ -290,7 +290,7 @@ def test_delete_any_trial_params():
 # delete_any_trial_params exception
 @t_base()
 def test_delete_any_trial_params_exception():
-    storage = Storage(ws.path)
+    storage = get_storage()
 
     (ws.path / 'storage/storage.db').unlink()
     with pytest.raises(SQLAlchemyError):

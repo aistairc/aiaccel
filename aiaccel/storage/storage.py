@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from aiaccel.common import dict_storage
 from aiaccel.storage import (Error, Hp, JobState, Result, Serializer,
                              TimeStamp, Trial)
 
@@ -12,15 +11,15 @@ class Storage:
     """Database
     """
 
-    def __init__(self, ws: Path) -> None:
-        db_path = ws / dict_storage / "storage.db"
-        self.trial = Trial(db_path)
-        self.hp = Hp(db_path)
-        self.result = Result(db_path)
-        self.jobstate = JobState(db_path)
-        self.error = Error(db_path)
-        self.timestamp = TimeStamp(db_path)
-        self.variable = Serializer(db_path)
+    def __init__(self, _db_path: Path | str) -> None:
+        self.db_path = Path(_db_path)
+        self.trial = Trial(self.db_path)
+        self.hp = Hp(self.db_path)
+        self.result = Result(self.db_path)
+        self.jobstate = JobState(self.db_path)
+        self.error = Error(self.db_path)
+        self.timestamp = TimeStamp(self.db_path)
+        self.variable = Serializer(self.db_path)
 
     def current_max_trial_number(self) -> int | None:
         """Get the current maximum number of trials.

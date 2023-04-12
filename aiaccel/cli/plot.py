@@ -6,6 +6,7 @@ from omegaconf.dictconfig import DictConfig
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.easy_visualizer import EasyVisualizer
+from aiaccel.workspace import Workspace
 
 
 class Plotter:
@@ -15,16 +16,15 @@ class Plotter:
         config (Config): Config object.
 
     Attributes:
-        workspace (Path): Path to the workspace.
+        workspace (Workspace): Workspace object.
         storage (Storage): Storage object.
         goar (str): Goal of optimization ('minimize' or 'maximize').
         cplt (EasyVisualizer): EasyVisualizer object.
     """
 
     def __init__(self, config: DictConfig):
-        self.workspace = Path(config.generic.workspace).resolve()
-
-        self.storage = Storage(self.workspace)
+        self.workspace = Workspace(config.generic.workspace)
+        self.storage = Storage(self.workspace.storage_file_path)
         self.goals = [item.value for item in config.optimize.goal]
 
         self.cplt = EasyVisualizer()
