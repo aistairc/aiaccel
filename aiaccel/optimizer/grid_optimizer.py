@@ -7,6 +7,8 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
 from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer
 from aiaccel.parameter import HyperParameter
@@ -82,7 +84,7 @@ def generate_grid_points(
         'type': p.type
     }
 
-    if p.type.lower() in ['int', 'float']:
+    if p.type.lower() in [data_type_uniform_int, data_type_uniform_float]:
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
@@ -99,13 +101,13 @@ def generate_grid_points(
         else:
             n = int((upper - lower) / step) + 1
             new_param['parameters'] = [lower + i * step for i in range(0, n)]
-        if p.type.lower() == 'int':
+        if p.type.lower() == data_type_uniform_int:
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
-    elif p.type.lower() == 'categorical':
+    elif p.type.lower() == data_type_categorical:
         new_param['parameters'] = p.choices
 
-    elif p.type.lower() == 'ordinal':
+    elif p.type.lower() == data_type_ordinal:
         new_param['parameters'] = p.sequence
 
     else:

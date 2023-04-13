@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 import functools
-from collections.abc import Callable
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
 
 import pytest
 from omegaconf.errors import MissingMandatoryValue
 
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
 from aiaccel.config import load_config
+from aiaccel.optimizer import (GridOptimizer, generate_grid_points,
+                               get_grid_options)
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
-from aiaccel.optimizer import GridOptimizer
-from aiaccel.optimizer import generate_grid_points
-from aiaccel.optimizer import get_grid_options
 from tests.base_test import BaseTest
 
 
@@ -66,7 +66,7 @@ def test_generate_grid_points(grid_load_test_config):
     int_p = HyperParameter(
         {
             'name': 'x4',
-            'type': 'uniform_int',
+            'type': data_type_uniform_int,
             'lower': 1,
             'upper': 10,
             'log': False,
@@ -80,7 +80,7 @@ def test_generate_grid_points(grid_load_test_config):
     cat_p = HyperParameter(
         {
             'name': 'x3',
-            'type': 'categorical',
+            'type': data_type_categorical,
             'choices': ['red', 'green', 'blue'],
             'log': False,
             'step': 1,
@@ -97,15 +97,15 @@ def test_generate_grid_points(grid_load_test_config):
             self.type = type_name
 
     try:
-        generate_grid_points(FakeParameter('1', 'uniform_int'), config)
+        generate_grid_points(FakeParameter('1', data_type_uniform_int), config)
         assert False
-    except TypeError:
+    except KeyError:
         assert True
 
     cat_p = HyperParameter(
         {
             'name': 'x3',
-            'type': 'ordinal',
+            'type': data_type_ordinal,
             'choices': ['red', 'green', 'blue'],
             'log': False,
             'step': 1,

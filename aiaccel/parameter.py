@@ -4,27 +4,8 @@ from typing import Any
 
 from numpy.random import RandomState
 
-
-def get_type(parameter: dict[str, Any]) -> str:
-    """Get a type of a specified parameter.
-
-    Args:
-        parameter (dict): A parameter dictionary in a configuration file.
-
-    Returns:
-        str: A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
-        'ORDINAL'.
-    """
-    if parameter['type'].lower() == 'uniform_int':
-        return 'INT'
-    elif parameter['type'].lower() == 'uniform_float':
-        return 'FLOAT'
-    elif parameter['type'].lower() == 'categorical':
-        return 'CATEGORICAL'
-    elif parameter['type'].lower() == 'ordinal':
-        return 'ORDINAL'
-    else:
-        return parameter['type']
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
 
 
 class HyperParameter(object):
@@ -54,7 +35,7 @@ class HyperParameter(object):
     def __init__(self, parameter: dict[str, Any]) -> None:
         self._raw_dict = parameter
         self.name = parameter['name']
-        self.type = get_type(parameter)
+        self.type = parameter['type'].lower()
         self.log = parameter.get('log', False)
         self.lower = parameter.get('lower', None)
         self.upper = parameter.get('upper', None)
@@ -82,13 +63,13 @@ class HyperParameter(object):
         """
         if initial and self.initial is not None:
             value = self.initial
-        elif self.type.lower() == 'int':
+        elif self.type.lower() == data_type_uniform_int:
             value = rng.randint(self.lower, self.upper)
-        elif self.type.lower() == 'float':
+        elif self.type.lower() == data_type_uniform_float:
             value = rng.uniform(self.lower, self.upper)
-        elif self.type.lower() == 'categorical':
+        elif self.type.lower() == data_type_categorical:
             value = rng.choice(self.choices)
-        elif self.type.lower() == 'ordinal':
+        elif self.type.lower() == data_type_ordinal:
             value = rng.choice(self.sequence)
         else:
             raise TypeError(

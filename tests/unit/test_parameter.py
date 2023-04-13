@@ -1,9 +1,12 @@
 import numpy as np
 import pytest
 
-from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.cli import get_best_parameter
-from aiaccel.common import dict_lock, dict_result, goal_maximize, goal_minimize
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int,
+                            dict_lock, dict_result, goal_maximize,
+                            goal_minimize)
+from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.util import create_yaml
 from tests.base_test import BaseTest
 
@@ -75,38 +78,27 @@ class TestParameter(BaseTest):
         assert ps.name == 'x3'
 
     def test_sample(self):
-        # json_string = {
-        #     'parameters': [
-        #         {'name': 'a', 'type': 'uniform_int', 'lower': 0, 'upper': 10},
-        #         {'name': 'b', 'type': 'uniform_float', 'lower': 0.,
-        #          'upper': 10.},
-        #         {'name': 'c', 'type': 'categorical',
-        #          'choices': ['red', 'green', 'blue']},
-        #         {'name': 'd', 'type': 'ordinal',
-        #          'sequence': ['10', '20', '30']}
-        #     ]
-        # }
         json_string = [
             {
                 'name': 'a',
-                'type': 'uniform_int',
+                'type': data_type_uniform_int,
                 'lower': 0,
                 'upper': 10
             },
             {
                 'name': 'b',
-                'type': 'uniform_float',
+                'type': data_type_uniform_float,
                 'lower': 0.,
                 'upper': 10.
             },
             {
                 'name': 'c',
-                'type': 'categorical',
+                'type': data_type_categorical,
                 'choices': ['red', 'green', 'blue']
             },
             {
                 'name': 'd',
-                'type': 'ordinal',
+                'type': data_type_ordinal,
                 'sequence': ['10', '20', '30']
             }
         ]

@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 import sys
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from itertools import product
-from typing import Union
-from typing import Literal
+from typing import Literal, Union
 
 import numpy as np
 from numpy.random import RandomState
 
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
 from aiaccel.parameter import HyperParameter
-
 
 GridValueType = Union[float, int, str]
 SamplingMethodType = Literal['IN_ORDER', 'UNIFORM', 'RANDOM', 'DUPLICATABLE_RANDOM']
@@ -278,13 +277,13 @@ class OrdinalGridCondition(GridCondition):
 
 
 def _create_grid_condition(hyperparameter: HyperParameter) -> GridCondition:
-    if hyperparameter.type == 'FLOAT':
+    if hyperparameter.type == data_type_uniform_float:
         return FloatGridCondition(hyperparameter)
-    elif hyperparameter.type == 'INT':
+    elif hyperparameter.type == data_type_uniform_int:
         return IntGridCondition(hyperparameter)
-    elif hyperparameter.type == 'CATEGORICAL':
+    elif hyperparameter.type == data_type_categorical:
         return CategoricalGridCondition(hyperparameter)
-    elif hyperparameter.type == 'ORDINAL':
+    elif hyperparameter.type == data_type_ordinal:
         return OrdinalGridCondition(hyperparameter)
     else:
         raise TypeError(

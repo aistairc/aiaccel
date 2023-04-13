@@ -1,20 +1,20 @@
 import asyncio
 import datetime
 import time
-
-from aiaccel.config import ResourceType
-
 from subprocess import Popen
 
 import pytest
 
-from aiaccel.common import (dict_hp_finished, dict_hp_ready, dict_hp_running,
-                            dict_runner)
+from aiaccel.common import (data_type_uniform_float, dict_hp_finished,
+                            dict_hp_ready, dict_hp_running, dict_lock,
+                            dict_result, dict_runner, goal_maximize,
+                            goal_minimize)
+from aiaccel.config import ResourceType
 from aiaccel.scheduler import (AbciModel, CustomMachine, Job, LocalModel,
                                LocalScheduler, create_scheduler)
 from aiaccel.util import get_time_now_object
-from tests.base_test import BaseTest
 from aiaccel.util.process import OutputHandler
+from tests.base_test import BaseTest
 
 
 async def async_start_job(job):
@@ -258,19 +258,10 @@ class TestModel(BaseTest):
             self.job.storage.hp.set_any_trial_params(
                 trial_id=i,
                 params=[
-                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': data_type_uniform_float}
                     for j in range(10)
                 ]
             )
-            """
-            for j in range(10):
-                self.job.storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f'x{j+1}',
-                    param_value=0.0,
-                    param_type='float'
-                )
-            """
         assert self.model.before_finished(self.job) is None
 
         # self.job.storage.trial.all_delete()
@@ -284,19 +275,10 @@ class TestModel(BaseTest):
             self.job.storage.hp.set_any_trial_params(
                 trial_id=i,
                 params=[
-                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'float'}
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': data_type_uniform_float}
                     for j in range(10)
                 ]
             )
-            """
-            for j in range(10):
-                self.job.storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f'x{j+1}',
-                    param_value=0.0,
-                    param_type='float'
-                )
-            """
 
         self.job.next_state = 'finished'
         self.job.from_file = work_dir.joinpath(dict_hp_running, '001.hp')
