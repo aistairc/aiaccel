@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 from omegaconf.dictconfig import DictConfig
-from aiaccel.common import file_final_result
 from aiaccel.module import AbstractModule
 from aiaccel.util import (create_yaml, get_time_now_object,
                           get_time_string_from_object, str_to_logging_level)
@@ -42,7 +41,6 @@ class AbstractMaster(AbstractModule):
         self.set_logger(
             'root.master',
             self.workspace.log / self.config.logger.file.master,
-            # self.dict_log / self.config.logger.file.master,
             str_to_logging_level(self.config.logger.log_level.master),
             str_to_logging_level(self.config.logger.stream_level.master),
             'Master   '
@@ -154,7 +152,8 @@ class AbstractMaster(AbstractModule):
 
         best_trial_ids, _ = self.storage.get_best_trial(self.goals)
         if best_trial_ids is None:
-            raise ValueError("No best trial found.")
+            self.logger.error(f"Failed to output {self.workspace.final_result_file}.")
+            return
 
         hp_results = []
 
@@ -164,5 +163,4 @@ class AbstractMaster(AbstractModule):
         self.logger.info('Best hyperparameter is followings:')
         self.logger.info(hp_results)
 
-        path = self.workspace.result / file_final_result
-        create_yaml(path, hp_results, self.workspace.lock)
+        create_yaml(self.workspace.final_result_file, hp_results, self.workspace.lock)
