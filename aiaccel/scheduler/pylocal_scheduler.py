@@ -3,7 +3,7 @@ from __future__ import annotations
 from importlib.util import module_from_spec, spec_from_file_location
 from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
-from subprocess import run
+from subprocess import Popen
 from typing import Any
 from aiaccel.config import load_config
 
@@ -151,7 +151,7 @@ class PylocalScheduler(AbstractScheduler):
             commands.append('--' + key)
             commands.append(str(xs[key]))
 
-        run(commands)
+        Popen(commands)
 
         return None
 
