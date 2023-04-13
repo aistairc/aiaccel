@@ -29,7 +29,6 @@ class HyperParameter(object):
             when a parameter type is 'ordinal'.
         initial (float | int | str): A initial value. If this is set, this
             value is evaluated at first run.
-        q (float | int): A quantization factor.
     """
 
     def __init__(self, parameter: dict[str, Any]) -> None:
@@ -42,7 +41,6 @@ class HyperParameter(object):
         self.choices = parameter.get('choices', None)
         self.sequence = parameter.get('sequence', None)
         self.initial = parameter.get('initial', None)
-        self.q = parameter.get('q', 1)
         self.step = parameter.get('step', None)
         self.base = parameter.get('base', None)
         self.num_numeric_choices = parameter.get('num_numeric_choices', None)
