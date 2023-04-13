@@ -5,7 +5,7 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import data_type, data_type_ordinal
+from aiaccel.common import data_type
 from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer, NelderMead
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
@@ -288,7 +288,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
                     assert False
                 new_params.hps[param.name] = HyperParameter({
                     'name': param.name,
-                    'type': data_type_ordinal,
+                    'type': 'ordinal',
                     'lower': 0,
                     'upper': len(param.sequence) - 1,
                     'sequence': param.sequence

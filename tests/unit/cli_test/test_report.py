@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from aiaccel.cli import CsvWriter
 from aiaccel.cli.report import main
-from aiaccel.common import data_type_uniform_float
+from aiaccel.common import 'uniform_float'
 from aiaccel.config import load_config
 from aiaccel.workspace import Workspace
 
@@ -32,12 +32,12 @@ def test_report(clean_work_dir, work_dir, create_tmp_config):
         'parameters': [
             {
                 'parameter_name': 'test_1',
-                'type': data_type_uniform_float,
+                'type': 'uniform_float',
                 'value': 2.155147371813655
             },
             {
                 'parameter_name': 'test_2',
-                'type': data_type_uniform_float,
+                'type': 'uniform_float',
                 'value': 4.071839861571789
             }
         ],

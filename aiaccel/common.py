@@ -6,6 +6,8 @@ Example: ::
 
 """
 
+from aiaccel.util.datatype import DataType
+
 alive_master = 'master.yml'
 alive_optimizer = 'optimizer.yml'
 alive_scheduler = 'scheduler.yml'
@@ -66,31 +68,11 @@ module_type_scheduler = 'scheduler'
 resource_type_local = 'local'
 resource_type_abci = 'abci'
 
-data_type_uniform_int = 'uniform_int'
-data_type_uniform_float = 'uniform_float'
-data_type_categorical = 'categorical'
-data_type_ordinal = 'ordinal'
-
 search_algorithm_budget_specified_grid = 'aiaccel.optimizer.BudgetSpecifiedGridOptimizer'
 search_algorithm_grid = 'aiaccel.optimizer.GridOptimizer'
 search_algorithm_nelder_mead = 'aiaccel.optimizer.NelderMeadOptimizer'
 search_algorithm_random = 'aiaccel.optimizer.RandomOptimizer'
 search_algorithm_sobol = 'aiaccel.optimizer.SobolOptimizer'
 search_algorithm_tpe = 'aiaccel.optimizer.TpeOptimizer'
-
-
-class DataType:
-    def is_uniform_int(self, data_type: str) -> bool:
-        return data_type.lower() == data_type_uniform_int
-
-    def is_uniform_float(self, data_type: str) -> bool:
-        return data_type.lower() == data_type_uniform_float
-
-    def is_categorical(self, data_type: str) -> bool:
-        return data_type.lower() == data_type_categorical
-
-    def is_ordinal(self, data_type: str) -> bool:
-        return data_type.lower() == data_type_ordinal
-
 
 data_type = DataType()

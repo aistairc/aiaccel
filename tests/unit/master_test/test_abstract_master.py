@@ -3,7 +3,7 @@ import asyncio
 import os
 import time
 
-from aiaccel.common import data_type_uniform_float, goal_maximize
+from aiaccel.common import 'uniform_float', goal_maximize
 from aiaccel.master import AbstractMaster
 from aiaccel.util import get_time_now_object
 from tests.base_test import BaseTest
@@ -82,7 +82,7 @@ class TestAbstractMaster(BaseTest):
                     trial_id=i,
                     param_name=f"x{j}",
                     param_value=0.0,
-                    param_type=data_type_uniform_float
+                    param_type='uniform_float'
                 )
         assert master.post_process() is None
 

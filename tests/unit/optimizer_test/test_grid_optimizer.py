@@ -7,8 +7,6 @@ from pathlib import Path
 import pytest
 from omegaconf.errors import MissingMandatoryValue
 
-from aiaccel.common import (data_type_categorical, data_type_ordinal,
-                            data_type_uniform_float, data_type_uniform_int)
 from aiaccel.config import load_config
 from aiaccel.optimizer import (GridOptimizer, generate_grid_points,
                                get_grid_options)
@@ -66,7 +64,7 @@ def test_generate_grid_points(grid_load_test_config):
     int_p = HyperParameter(
         {
             'name': 'x4',
-            'type': data_type_uniform_int,
+            'type': 'uniform_int',
             'lower': 1,
             'upper': 10,
             'log': False,
@@ -80,7 +78,7 @@ def test_generate_grid_points(grid_load_test_config):
     cat_p = HyperParameter(
         {
             'name': 'x3',
-            'type': data_type_categorical,
+            'type': 'categorical',
             'choices': ['red', 'green', 'blue'],
             'log': False,
             'step': 1,
@@ -97,7 +95,7 @@ def test_generate_grid_points(grid_load_test_config):
             self.type = type_name
 
     try:
-        generate_grid_points(FakeParameter('1', data_type_uniform_int), config)
+        generate_grid_points(FakeParameter('1', 'uniform_int'), config)
         assert False
     except KeyError:
         assert True
@@ -105,7 +103,7 @@ def test_generate_grid_points(grid_load_test_config):
     cat_p = HyperParameter(
         {
             'name': 'x3',
-            'type': data_type_ordinal,
+            'type': 'ordinal',
             'choices': ['red', 'green', 'blue'],
             'log': False,
             'step': 1,

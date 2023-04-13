@@ -4,7 +4,6 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from aiaccel.common import data_type_categorical, data_type_uniform_float
 from aiaccel.optimizer import NelderMead
 from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.storage import Storage
@@ -35,31 +34,31 @@ class TestNelderMead(BaseTest):
         params = HyperParameterConfiguration(self.config.optimize.parameters)
         hps = params.get_parameter_list()
         initial_parameters = [
-            {'parameter_name': 'x1', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x2', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x3', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x4', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x5', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x6', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x7', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x8', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x9', 'type': data_type_uniform_float, 'value': 1},
-            {'parameter_name': 'x10', 'type': data_type_uniform_float, 'value': 1},
+            {'parameter_name': 'x1', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x3', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x4', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x5', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x6', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x7', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x8', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x9', 'type': 'uniform_float', 'value': 1},
+            {'parameter_name': 'x10', 'type': 'uniform_float', 'value': 1},
         ]
         rng = np.random.RandomState(0)
         NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
 
         initial_parameters = [
-            {'parameter_name': 'x1', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x2', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x3', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x4', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x5', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x6', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x7', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x8', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x9', 'type': data_type_categorical, 'value': '1'},
-            {'parameter_name': 'x10', 'type': data_type_categorical, 'value': '1'},
+            {'parameter_name': 'x1', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x2', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x3', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x4', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x5', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x6', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x7', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x8', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x9', 'type': 'categorical', 'value': '1'},
+            {'parameter_name': 'x10', 'type': 'categorical', 'value': '1'},
         ]
         with pytest.raises(TypeError):
             NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
@@ -97,7 +96,7 @@ class TestNelderMead(BaseTest):
                     trial_id=i,
                     param_name=f'x{j+1}',
                     param_value=0.0,
-                    param_type=data_type_uniform_float
+                    param_type='uniform_float'
                 )
         storage.trial.set_any_trial_state(trial_id=1, state='finished')
         #

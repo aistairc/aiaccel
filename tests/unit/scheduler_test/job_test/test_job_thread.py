@@ -5,7 +5,7 @@ from subprocess import Popen
 
 import pytest
 
-from aiaccel.common import (data_type_uniform_float, dict_hp_finished,
+from aiaccel.common import ('uniform_float', dict_hp_finished,
                             dict_hp_ready, dict_hp_running, dict_lock,
                             dict_result, dict_runner, goal_maximize,
                             goal_minimize)
@@ -209,7 +209,7 @@ class TestModel(BaseTest):
             self.job.storage.hp.set_any_trial_params(
                 trial_id=i,
                 params=[
-                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': data_type_uniform_float}
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'uniform_float'}
                     for j in range(10)
                 ]
             )
@@ -226,7 +226,7 @@ class TestModel(BaseTest):
             self.job.storage.hp.set_any_trial_params(
                 trial_id=i,
                 params=[
-                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': data_type_uniform_float}
+                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'uniform_float'}
                     for j in range(10)
                 ]
             )

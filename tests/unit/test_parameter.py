@@ -1,8 +1,6 @@
 import numpy as np
 import pytest
 
-from aiaccel.common import (data_type_categorical, data_type_ordinal,
-                            data_type_uniform_float, data_type_uniform_int)
 from aiaccel.parameter import HyperParameterConfiguration
 from tests.base_test import BaseTest
 
@@ -23,24 +21,24 @@ class TestParameter(BaseTest):
         json_string = [
             {
                 'name': 'a',
-                'type': data_type_uniform_int,
+                'type': 'uniform_int',
                 'lower': 0,
                 'upper': 10
             },
             {
                 'name': 'b',
-                'type': data_type_uniform_float,
+                'type': 'uniform_float',
                 'lower': 0.,
                 'upper': 10.
             },
             {
                 'name': 'c',
-                'type': data_type_categorical,
+                'type': 'categorical',
                 'choices': ['red', 'green', 'blue']
             },
             {
                 'name': 'd',
-                'type': data_type_ordinal,
+                'type': 'ordinal',
                 'sequence': ['10', '20', '30']
             }
         ]
