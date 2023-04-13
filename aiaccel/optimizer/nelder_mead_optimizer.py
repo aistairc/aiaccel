@@ -5,8 +5,7 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import (data_type_ordinal, data_type_uniform_float,
-                            data_type_uniform_int)
+from aiaccel.common import data_type, data_type_ordinal
 from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer, NelderMead
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
@@ -246,11 +245,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         for param in self.params.get_parameter_list():
             i = [p['parameter_name'] for p in pool_p['parameters']].index(param.name)
-            if param.type.lower() == data_type_uniform_float:
+            if data_type.is_uniform_float(param.type):
                 value = float(pool_p['parameters'][i]['value'])
-            elif param.type.lower() == data_type_uniform_int:
+            elif data_type.is_uniform_int(param.type):
                 value = int(pool_p['parameters'][i]['value'])
-            elif param.type.lower() == data_type_ordinal:
+            elif data_type.is_ordinal(param.type):
                 index = int(pool_p['parameters'][i]['value'])
                 value = param.sequence[index]
             else:
@@ -284,7 +283,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         new_params = copy.deepcopy(params)
         for param in params.get_parameter_list():
-            if param.type.lower() == data_type_ordinal:
+            if data_type.is_ordinal(param.type):
                 if param.name not in new_params.hps.keys():
                     assert False
                 new_params.hps[param.name] = HyperParameter({

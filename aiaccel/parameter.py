@@ -4,8 +4,7 @@ from typing import Any
 
 from numpy.random import RandomState
 
-from aiaccel.common import (data_type_categorical, data_type_ordinal,
-                            data_type_uniform_float, data_type_uniform_int)
+from aiaccel.common import data_type
 
 
 class HyperParameter(object):
@@ -61,13 +60,13 @@ class HyperParameter(object):
         """
         if initial and self.initial is not None:
             value = self.initial
-        elif self.type.lower() == data_type_uniform_int:
+        elif data_type.is_uniform_int(self.type):
             value = rng.randint(self.lower, self.upper)
-        elif self.type.lower() == data_type_uniform_float:
+        elif data_type.is_uniform_float(self.type):
             value = rng.uniform(self.lower, self.upper)
-        elif self.type.lower() == data_type_categorical:
+        elif data_type.is_categorical(self.type):
             value = rng.choice(self.choices)
-        elif self.type.lower() == data_type_ordinal:
+        elif data_type.is_ordinal(self.type):
             value = rng.choice(self.sequence)
         else:
             raise TypeError(

@@ -9,8 +9,7 @@ from typing import Literal, Union
 import numpy as np
 from numpy.random import RandomState
 
-from aiaccel.common import (data_type_categorical, data_type_ordinal,
-                            data_type_uniform_float, data_type_uniform_int)
+from aiaccel.common import data_type
 from aiaccel.parameter import HyperParameter
 
 GridValueType = Union[float, int, str]
@@ -277,13 +276,13 @@ class OrdinalGridCondition(GridCondition):
 
 
 def _create_grid_condition(hyperparameter: HyperParameter) -> GridCondition:
-    if hyperparameter.type == data_type_uniform_float:
+    if data_type.is_uniform_float(hyperparameter.type):
         return FloatGridCondition(hyperparameter)
-    elif hyperparameter.type == data_type_uniform_int:
+    elif data_type.is_uniform_int(hyperparameter.type):
         return IntGridCondition(hyperparameter)
-    elif hyperparameter.type == data_type_categorical:
+    elif data_type.is_categorical(hyperparameter.type):
         return CategoricalGridCondition(hyperparameter)
-    elif hyperparameter.type == data_type_ordinal:
+    elif data_type.is_ordinal(hyperparameter.type):
         return OrdinalGridCondition(hyperparameter)
     else:
         raise TypeError(

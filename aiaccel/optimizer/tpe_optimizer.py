@@ -9,8 +9,7 @@ from omegaconf.dictconfig import DictConfig
 from optuna.storages._rdb import models
 
 import aiaccel.parameter
-from aiaccel.common import (data_type_categorical, data_type_ordinal,
-                            data_type_uniform_float, data_type_uniform_int)
+from aiaccel.common import data_type
 from aiaccel.optimizer import AbstractOptimizer
 
 
@@ -253,22 +252,21 @@ def create_distributions(
     distributions: dict[str, Any] = {}
 
     for p in parameters.get_parameter_list():
-        if p.type.lower() == data_type_uniform_float:
+        if data_type.is_uniform_float(p.type):
             distributions[p.name] = optuna.distributions.FloatDistribution(
                 p.lower, p.upper, log=p.log
             )
 
-        elif p.type.lower() == data_type_uniform_int:
+        elif data_type.is_uniform_int(p.type):
             distributions[p.name] = optuna.distributions.IntDistribution(
                 p.lower, p.upper, log=p.log
             )
 
-        elif p.type.lower() == data_type_categorical:
+        elif data_type.is_categorical(p.type):
             distributions[p.name] = optuna.distributions.CategoricalDistribution(
                 p.choices
             )
-
-        elif p.type.lower() == data_type_ordinal:
+        elif data_type.is_ordinal(p.type):
             distributions[p.name] = optuna.distributions.CategoricalDistribution(
                 p.sequence
             )
