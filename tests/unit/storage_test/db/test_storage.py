@@ -1,3 +1,4 @@
+import numpy as np
 from unittest.mock import patch
 
 from aiaccel.storage import Storage
@@ -537,7 +538,7 @@ def test_get_best_trial_dict():
 def test_get_best_trial():
     storage = get_storage()
     trial_ids = [0, 1, 2, 3, 4]
-    objectives = [[0.00], [0.01], [-1], [1], [0.03]]
+    objectives = [[0.00], [0.01], [-1], [1], [np.float64(.3)]]
 
     for i in range(len(trial_ids)):
         storage.result.set_any_trial_objective(
@@ -552,6 +553,14 @@ def test_get_best_trial():
     assert storage.get_best_trial(goals) == ([3], [1])
 
     goals = ["aaaaaaaaaa"]
+    assert storage.get_best_trial(goals) == (None, None)
+
+    storage.result.set_any_trial_objective(
+        trial_id=2,
+        objective=[None]
+    )
+
+    goals = ["minimize"]
     assert storage.get_best_trial(goals) == (None, None)
 
 

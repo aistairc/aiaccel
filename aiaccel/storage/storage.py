@@ -206,6 +206,11 @@ class Storage:
                 return None, None
 
             for i, val in enumerate(values):
+                try:
+                    float(val)
+                except (ValueError, TypeError):
+                    return None, None
+
                 best_value = best_values[i]
                 best_trial_id = best_trial_ids[i]
 

@@ -98,6 +98,7 @@ class LocalModel(AbstractModel):
                 commands.append('--' + param['parameter_name'])
                 commands.append(str(param['value']))
         print(commands)
-        run(commands)
+        # run(commands)
+        Popen(commands)
 
         return None
