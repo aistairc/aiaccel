@@ -3,7 +3,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from aiaccel.common import 'uniform_float', goal_maximize
+from aiaccel.common import goal_maximize
 from aiaccel.optimizer import NelderMead, NelderMeadOptimizer
 from aiaccel.parameter import HyperParameterConfiguration
 from tests.base_test import BaseTest

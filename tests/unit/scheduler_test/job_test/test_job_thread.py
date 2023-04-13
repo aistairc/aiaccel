@@ -5,9 +5,8 @@ from subprocess import Popen
 
 import pytest
 
-from aiaccel.common import ('uniform_float', dict_hp_finished,
-                            dict_hp_ready, dict_hp_running, dict_lock,
-                            dict_result, dict_runner, goal_maximize,
+from aiaccel.common import (dict_hp_finished, dict_hp_ready, dict_hp_running,
+                            dict_lock, dict_result, dict_runner, goal_maximize,
                             goal_minimize)
 from aiaccel.config import ResourceType
 from aiaccel.scheduler import (AbciModel, CustomMachine, Job, LocalModel,

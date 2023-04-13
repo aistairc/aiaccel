@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 from aiaccel.cli import CsvWriter
 from aiaccel.cli.report import main
-from aiaccel.common import 'uniform_float'
 from aiaccel.config import load_config
 from aiaccel.workspace import Workspace
 
