@@ -35,9 +35,19 @@ class ConvertedHyperparameter:
         convert_sequence (bool, optional): Whether to treat the sequence of
             ordinal parameter as a float value corresponding to the index of
             sequence. Defaults to True.
+
+        Raises:
+            TypeError: Causes when the parameter type is invalid.
         """
         self.name = hyperparameter.name
-        self.type = hyperparameter.type
+        # TODO: use data_type.
+        self.type = (
+            "uniform_float" if hyperparameter.type == "FLOAT" else
+            "uniform_int" if hyperparameter.type == "INT" else
+            "categorical" if hyperparameter.type == "CATEGORICAL" else
+            "ordinal" if hyperparameter.type == "ORDINAL" else
+            hyperparameter.type
+        )
         self.convert_log = hyperparameter.log and convert_log
         self.convert_choices = convert_choices
         self.convert_sequence = convert_sequence
@@ -55,6 +65,8 @@ class ConvertedHyperparameter:
             if self.convert_sequence:
                 self.lower = 0
                 self.upper = len(self.sequence)
+        else:
+            raise TypeError(f"Type of {self.name}: {self.type} is invalid.")
 
     def convert_to_internal_value(self, external_value: Any) -> Any:
         """Converts a value in the external representation to the internal
