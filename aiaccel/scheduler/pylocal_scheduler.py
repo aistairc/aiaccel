@@ -14,6 +14,8 @@ from aiaccel.util import get_time_now
 from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
 from aiaccel.util.cast import cast_y
 
+import glob
+
 # These are for avoiding mypy-errors from initializer().
 # `global` does not work well.
 # https://github.com/python/mypy/issues/5732
@@ -57,6 +59,13 @@ class PylocalScheduler(AbstractScheduler):
             self.create_result_file(trial_id, xs, ys, err, start_time, end_time)
 
         return True
+
+    def post_process(self) -> None:
+        result_files = glob.glob(str(self.workspace.result / "*.hp"))
+        while len(result_files) < len(self.storage.trial.get_finished()):
+            result_files = glob.glob(str(self.workspace.result / "*.hp"))
+
+        super().post_process()
 
     def get_any_trial_xs(self, trial_id: int) -> dict[str, Any] | None:
         """Gets a parameter list of specific trial ID from Storage object.

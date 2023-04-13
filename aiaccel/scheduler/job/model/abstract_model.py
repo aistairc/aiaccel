@@ -1,4 +1,5 @@
 from __future__ import annotations
+from aiaccel.util import retry
 
 from collections.abc import Callable
 from pathlib import Path
@@ -387,12 +388,18 @@ class AbstractModel(object):
 
     def write_results_to_database(self, obj: 'Job') -> None:
         trial_id = obj.trial_id
-        result = obj.workspace.get_any_trial_result(trial_id=trial_id)
-        if result is None:
-            raise Exception("Could not get result")
+        result = self.get_result(obj, trial_id)
 
         obj.storage.result.set_any_trial_objective(trial_id, result['result'])
         obj.storage.timestamp.set_any_trial_start_time(trial_id, result['start_time'])
         obj.storage.timestamp.set_any_trial_end_time(trial_id, result['end_time'])
         if 'error' in result.keys() and result['error'] != "":
             obj.storage.error.set_any_trial_error(trial_id, result['error'])
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def get_result(self, obj: 'Job', trial_id: int):
+        result = obj.workspace.get_any_trial_result(trial_id=trial_id)
+        if result is None:
+            raise Exception("Could not get result")
+
+        return result
