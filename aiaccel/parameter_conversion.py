@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any
 
 import numpy as np
 
@@ -9,7 +9,7 @@ from aiaccel.parameter import HyperParameter
 
 class ConvertedHyperparameter:
     name: str
-    type: Literal["uniform_int", "uniform_float", "categorical", "ordinal"]
+    type: str
     lower: float
     upper: float
     choices: list[Any]
