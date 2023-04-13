@@ -7,9 +7,11 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from aiaccel.util import cast_y, get_time_now
-from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
 from aiaccel.config import load_config
+from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.util import cast_y, get_time_now
 
 
 class CommandLineArgs:
@@ -30,13 +32,13 @@ class CommandLineArgs:
             self.parameters_config = HyperParameterConfiguration(self.config.optimize.parameters)
 
             for p in self.parameters_config.get_parameter_list():
-                if p.type.lower() == "float":
+                if p.type.lower() == data_type_uniform_float:
                     self.parser.add_argument(f"--{p.name}", type=float)
-                elif p.type.lower() == "int":
+                elif p.type.lower() == data_type_uniform_int:
                     self.parser.add_argument(f"--{p.name}", type=int)
-                elif p.type.lower() == "categorical":
+                elif p.type.lower() == data_type_categorical:
                     self.parser.add_argument(f"--{p.name}", type=str)
-                elif p.type.lower() == "ordinal":
+                elif p.type.lower() == data_type_ordinal:
                     self.parser.add_argument(f"--{p.name}", type=float)
                 else:
                     raise ValueError(f"Unknown parameter type: {p.type}")

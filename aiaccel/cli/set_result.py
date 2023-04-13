@@ -4,9 +4,11 @@ import copy
 from argparse import ArgumentParser
 from pathlib import Path
 
-from aiaccel.util.filesystem import create_yaml
-from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.common import (data_type_categorical, data_type_ordinal,
+                            data_type_uniform_float, data_type_uniform_int)
 from aiaccel.config import load_config
+from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.util.filesystem import create_yaml
 
 
 def str_or_float_or_int(value: str | float | int) -> str | float | int:
@@ -45,13 +47,13 @@ def main() -> None:
         parameters_config = HyperParameterConfiguration(config.optimize.parameters)
 
         for p in parameters_config.get_parameter_list():
-            if p.type.lower() == "float":
+            if p.type.lower() == data_type_uniform_float:
                 parser.add_argument(f"--{p.name}", type=float)
-            elif p.type.lower() == "int":
+            elif p.type.lower() == data_type_uniform_int:
                 parser.add_argument(f"--{p.name}", type=int)
-            elif p.type.lower() == "categorical":
+            elif p.type.lower() == data_type_categorical:
                 parser.add_argument(f"--{p.name}", type=str)
-            elif p.type.lower() == "ordinal":
+            elif p.type.lower() == data_type_ordinal:
                 parser.add_argument(f"--{p.name}", type=float)
             else:
                 raise ValueError(f"Unknown parameter type: {p.type}")
@@ -61,7 +63,7 @@ def main() -> None:
         for unknown_arg in unknown_args_list:
             if unknown_arg.startswith("--"):
                 name = unknown_arg.replace("--", "")
-                parser.add_argument(f"--{name}", type=float)
+                parser.add_argument(f"--{name}", type=str_or_float_or_int)
         args = parser.parse_known_args()[0]
 
     xs = vars(copy.deepcopy(args))
