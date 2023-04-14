@@ -6,6 +6,7 @@ from typing import Any
 from scipy.stats import qmc
 
 from aiaccel.optimizer import AbstractOptimizer
+from aiaccel.parameter_conversion import ConvertedHyperparameterConfiguration
 
 
 class SobolOptimizer(AbstractOptimizer):
@@ -54,27 +55,24 @@ class SobolOptimizer(AbstractOptimizer):
         Returns:
             list[dict[str, float | int | str]]: A list of new parameters.
         """
-        l_params = self.params.get_parameter_list()
-        n_params = len(l_params)
+        self.converted_parameters = ConvertedHyperparameterConfiguration(
+            self.params.get_parameter_list()
+        )
 
-        new_params = []
+        self.generate_index += 1
+
         vec = self.sampler.random()[0]
 
-        if self.generate_index is None:
-            self.generate_index = 1
-        else:
-            self.generate_index += 1
-
-        for i in range(0, n_params):
-            min_value = l_params[i].lower
-            max_value = l_params[i].upper
-            value = (max_value - min_value) * vec[i] + min_value
-            new_param = {
-                'parameter_name': l_params[i].name,
-                'type': l_params[i].type,
-                'value': value
-            }
-            new_params.append(new_param)
+        new_params = []
+        for vec_i, param in zip(vec, self.converted_parameters.get_list()):
+            internal_value = (param.upper - param.lower) * vec_i + param.lower
+            new_params.append(
+                {
+                    "name": param.name,
+                    "type": param.type,
+                    "value": param.convert_to_external_value(internal_value)
+                }
+            )
 
         return new_params
 
