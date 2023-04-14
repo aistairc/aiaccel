@@ -28,8 +28,11 @@ class SobolOptimizer(AbstractOptimizer):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
-        self.generate_index: Any = None
+        self.generate_index = 0
         self.sampler: Any = None
+        self.converted_parameters = ConvertedHyperparameterConfiguration(
+            self.params.get_parameter_list()
+        )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -55,10 +58,6 @@ class SobolOptimizer(AbstractOptimizer):
         Returns:
             list[dict[str, float | int | str]]: A list of new parameters.
         """
-        self.converted_parameters = ConvertedHyperparameterConfiguration(
-            self.params.get_parameter_list()
-        )
-
         self.generate_index += 1
 
         vec = self.sampler.random()[0]
@@ -68,7 +67,7 @@ class SobolOptimizer(AbstractOptimizer):
             internal_value = (param.upper - param.lower) * vec_i + param.lower
             new_params.append(
                 {
-                    "name": param.name,
+                    "parameter_name": param.name,
                     "type": param.type,
                     "value": param.convert_to_external_value(internal_value)
                 }
