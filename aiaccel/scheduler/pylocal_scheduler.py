@@ -31,6 +31,7 @@ class PylocalScheduler(AbstractScheduler):
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
         self.run = Run(self.config.config_path)
+        self.processes = []
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
         self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config.config_path,))
@@ -61,9 +62,8 @@ class PylocalScheduler(AbstractScheduler):
         return True
 
     def post_process(self) -> None:
-        result_files = glob.glob(str(self.workspace.result / "*.hp"))
-        while len(result_files) < len(self.storage.trial.get_finished()):
-            result_files = glob.glob(str(self.workspace.result / "*.hp"))
+        for process in self.processes:
+            process.wait()
 
         super().post_process()
 
@@ -160,7 +160,7 @@ class PylocalScheduler(AbstractScheduler):
             commands.append('--' + key)
             commands.append(str(xs[key]))
 
-        Popen(commands)
+        self.processes.append(Popen(commands))
 
         return None
 
@@ -168,6 +168,7 @@ class PylocalScheduler(AbstractScheduler):
         obj = super().__getstate__()
         del obj['run']
         del obj['pool']
+        del obj['processes']
         return obj
 
 
