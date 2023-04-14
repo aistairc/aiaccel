@@ -397,7 +397,7 @@ class AbstractModel(object):
             obj.storage.error.set_any_trial_error(trial_id, result['error'])
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_result(self, obj: 'Job', trial_id: int):
+    def get_result(self, obj: 'Job', trial_id: int) -> dict[str, Any]:
         result = obj.workspace.get_any_trial_result(trial_id=trial_id)
         if result is None:
             raise Exception("Could not get result")
