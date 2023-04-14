@@ -56,10 +56,7 @@ class SobolOptimizer(AbstractOptimizer):
         new_params = []
         vec = self.sampler.random()[0]
 
-        if self.generate_index is None:
-            self.generate_index = 1
-        else:
-            self.generate_index += 1
+        self.generate_index += 1
 
         for i in range(0, n_params):
             min_value = l_params[i].lower
