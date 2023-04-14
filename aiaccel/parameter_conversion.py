@@ -84,9 +84,12 @@ class ConvertedHyperparameter:
             Any: A value in the internal representation.
         """
         if self.type in ("uniform_int", "uniform_float"):
-            if external_value <= 0:
-                raise ValueError("Log scaled value can not be negative.")
-            return np.log(external_value) if self.convert_log else external_value
+            if self.convert_log:
+                if external_value <= 0:
+                    raise ValueError("Log scaled value can not be negative.")
+                return np.log(external_value)
+            else:
+                return external_value
         elif self.type == "categorical":
             if external_value not in self.choices:
                 raise ValueError(f"Specified value: {external_value} is not in choices.")

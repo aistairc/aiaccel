@@ -14,7 +14,7 @@ class RandomOptimizer(AbstractOptimizer):
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
         self.converted_parameters = ConvertedHyperparameterConfiguration(
-            self.params
+            self.params.get_parameter_list()
         )
 
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
@@ -24,7 +24,7 @@ class RandomOptimizer(AbstractOptimizer):
             list[dict[str, float | int | str]]: A list of created parameters.
         """
         new_params = []
-        for param in self.converted_parameters.converted_parameters.values():
+        for param in self.converted_parameters.get_list():
             if param.type == "uniform_float":
                 internal_value = self._rng.uniform(param.lower, param.upper)
             elif param.type == "uniform_int":
