@@ -4,7 +4,9 @@ ABCI:
   job_script_preamble: ./job_script_preamble.sh
 generic:
   batch_job_timeout: 600
+  function: main
   job_command: python original_main.py
+  python_file: original_main.py
   sleep_time: 0
   workspace: /tmp/work
 job_setting:
@@ -61,4 +63,4 @@ optimize:
   trial_number: 3
 resource:
   num_node: 2
-  type: local
+  type: python_local
