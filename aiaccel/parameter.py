@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Union
 
 from numpy.random import RandomState
 
 from aiaccel.common import data_type
 
 
-class HyperParameter(object):
+class AbstractParameter:
     """
-    A hyper parameter class.
+    A parameter class.
 
     Args:
         parameter (dict): A parameter dictionary in a configuration file.
@@ -58,21 +58,59 @@ class HyperParameter(object):
         Raises:
             TypeError: Causes when an invalid type is set.
         """
+        raise NotImplementedError
+
+
+class IntParameter(AbstractParameter):
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         if initial and self.initial is not None:
             value = self.initial
-        elif data_type.is_uniform_int(self.type):
-            value = rng.randint(self.lower, self.upper)
-        elif data_type.is_uniform_float(self.type):
-            value = rng.uniform(self.lower, self.upper)
-        elif data_type.is_categorical(self.type):
-            value = rng.choice(self.choices)
-        elif data_type.is_ordinal(self.type):
-            value = rng.choice(self.sequence)
         else:
-            raise TypeError(
-                f'Invalid hyper parameter type: {self.type}')
-
+            value = rng.randint(self.lower, self.upper)
         return {'name': self.name, 'type': self.type, 'value': value}
+
+
+class FloatParameter(AbstractParameter):
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
+        if initial and self.initial is not None:
+            value = self.initial
+        else:
+            value = rng.uniform(self.lower, self.upper)
+        return {'name': self.name, 'type': self.type, 'value': value}
+
+
+class CategoricalParameter(AbstractParameter):
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
+        if initial and self.initial is not None:
+            value = self.initial
+        else:
+            value = rng.choice(self.choices)
+        return {'name': self.name, 'type': self.type, 'value': value}
+
+
+class OrdinalParameter(AbstractParameter):
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
+        if initial and self.initial is not None:
+            value = self.initial
+        else:
+            value = rng.choice(self.sequence)
+        return {'name': self.name, 'type': self.type, 'value': value}
+
+
+def HyperParameter(data_type: str) -> IntParameter | FloatParameter | CategoricalParameter | OrdinalParameter:
+    """ Data type for hyperparameter optimization.
+    """
+
+    if data_type.lower() == 'uniform_int':
+        return IntParameter
+    elif data_type.lower() == 'uniform_float':
+        return FloatParameter
+    elif data_type.lower() == 'categorical':
+        return CategoricalParameter
+    elif data_type.lower() == 'ordinal':
+        return OrdinalParameter
+    else:
+        raise TypeError('Invalid data type: {}'.format(data_type))
 
 
 class HyperParameterConfiguration(object):
@@ -91,7 +129,8 @@ class HyperParameterConfiguration(object):
         self.hps: dict[str, HyperParameter] = {}
 
         for hps in self.json_string:
-            self.hps[hps['name']] = HyperParameter(hps)
+            parameter = HyperParameter(hps['type'])
+            self.hps[hps['name']] = parameter(hps)
 
     def get_hyperparameter(self, name: str) -> HyperParameter:
         """Get a hyper parameter with a name.
