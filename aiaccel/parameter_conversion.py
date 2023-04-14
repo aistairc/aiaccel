@@ -169,3 +169,29 @@ class ConvertedHyperparameterConfiguration:
             return self.converted_parameters[name]
         else:
             raise KeyError(f"Invalid parameter name: {name}")
+
+    def get_names(self) -> list[str]:
+        """Gets a list of parameter names.
+
+        Returns:
+            list[str]: A list of parameter names.
+        """
+        return list(self.converted_parameters.keys())
+
+    def get_list(self) -> list[ConvertedHyperparameter]:
+        """Gets a list of parameters.
+
+        Returns:
+            list[ConvertedHyperparameter]: A list of ConvertedHyperparameter
+                objects.
+        """
+        return list(self.converted_parameters.values())
+
+    def get_dict(self) -> dict[str, ConvertedHyperparameter]:
+        """Gets a dict object of ConvertedHyperparmaeters.
+
+        Returns:
+            dict[str, ConvertedHyperparameter]: A dict object of
+                ConvertedHyperparameter objects.
+        """
+        return self.converted_parameters
