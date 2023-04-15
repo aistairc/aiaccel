@@ -5,8 +5,7 @@ from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage import Abstract
-from aiaccel.storage import ErrorTable
+from aiaccel.storage import Abstract, ErrorTable
 from aiaccel.util import retry
 
 
@@ -75,11 +74,7 @@ class Error(Abstract):
             trial_ids(list): trial id list
         """
         with self.create_session() as session:
-            data = (
-                session.query(ErrorTable)
-                .with_for_update(read=True)
-                .all()
-            )
+            data = session.query(ErrorTable).with_for_update(read=True).all()
 
         if data is None or len(data) == 0:
             return []

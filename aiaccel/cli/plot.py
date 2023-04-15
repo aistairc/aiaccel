@@ -50,8 +50,9 @@ class Plotter:
             plot_datas.append(objectives[i])
             plot_datas.append(bests[i])
 
-        caption_set = [caption_set for caption_set in [
-            [f"objective_y[{i}]", f"best value[{i}]"] for i in range(len(self.goals))]]
+        caption_set = [
+            caption_set for caption_set in [[f"objective_y[{i}]", f"best value[{i}]"] for i in range(len(self.goals))]
+        ]
 
         captions = []
         for captions_ in caption_set:
@@ -73,10 +74,9 @@ class Plotter:
 
 
 def main() -> None:  # pragma: no cover
-    """Parses command line options and plots a graph on the terminal.
-    """
+    """Parses command line options and plots a graph on the terminal."""
     parser = ArgumentParser()
-    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument("--config", "-c", type=str, default="config.yml")
     args = parser.parse_args()
 
     config: DictConfig = load_config(args.config)

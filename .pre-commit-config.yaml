@@ -4,24 +4,38 @@ repos:
     hooks:
       - id: black
         args: ["--line-length", "120"]
+        exclude:  ^(?:examples|tests)/.*
   - repo: https://github.com/PyCQA/isort
     rev: 5.12.0
     hooks:
       - id: isort
         args: ["--profile", "black", "--line-length", "120"]
+        exclude:  ^(?:examples|tests)/.*
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
     hooks:
       - id: flake8
-        args: ["--ignore", "E203,S101,S314,S404,S405,S506,S602,S603,W503"]
-        additional_dependencies:
-          - flake8-isort
-          - flake8-bugbear
-          - flake8-builtins
-          - flake8-pytest-style
-          - flake8-unused-arguments
-          - pep8-naming
+        args: ["--max-line-length", "120", "--ignore", "E203", "aiaccel"]
+        exclude:  ^(?:examples|tests)/.*
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.1.1
     hooks:
       - id: mypy
+        args: [
+          "--install-types",
+          "--non-interactive",
+          "--ignore-missing-imports",
+          "--warn-unused-configs",
+          "--disallow-any-generics",
+          "--disallow-untyped-calls",
+          "--disallow-untyped-defs",
+          "--disallow-incomplete-defs",
+          "--check-untyped-defs",
+          "--disallow-untyped-decorators",
+          "--warn-redundant-casts",
+          "--warn-unused-ignores",
+          "--no-implicit-reexport",
+          "--strict-equality",
+          "--strict-concatenate",
+        ]
+        exclude:  ^(?:examples|tests)/.*

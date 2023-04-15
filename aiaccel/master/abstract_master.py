@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Any
 
 from omegaconf.dictconfig import DictConfig
+
 from aiaccel.module import AbstractModule
-from aiaccel.util import (create_yaml, get_time_now_object,
-                          get_time_string_from_object, str_to_logging_level)
+from aiaccel.util import create_yaml, get_time_now_object, get_time_string_from_object, str_to_logging_level
 
 
 class AbstractMaster(AbstractModule):
@@ -33,17 +33,17 @@ class AbstractMaster(AbstractModule):
     """
 
     def __init__(self, config: DictConfig) -> None:
-        super().__init__(config, 'master')
+        super().__init__(config, "master")
         self.start_time = get_time_now_object()
         self.loop_start_time: datetime | None = None
-        self.logger = logging.getLogger('root.master')
+        self.logger = logging.getLogger("root.master")
         self.logger.setLevel(logging.DEBUG)
         self.set_logger(
-            'root.master',
+            "root.master",
             self.workspace.log / self.config.logger.file.master,
             str_to_logging_level(self.config.logger.log_level.master),
             str_to_logging_level(self.config.logger.stream_level.master),
-            'Master   '
+            "Master   ",
         )
 
         self.goals = [item.value for item in self.config.optimize.goal]
@@ -160,7 +160,7 @@ class AbstractMaster(AbstractModule):
         for best_trial_id in best_trial_ids:
             hp_results.append(self.storage.get_hp_dict(best_trial_id))
 
-        self.logger.info('Best hyperparameter is followings:')
+        self.logger.info("Best hyperparameter is followings:")
         self.logger.info(hp_results)
 
         create_yaml(self.workspace.final_result_file, hp_results, self.workspace.lock)

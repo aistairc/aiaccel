@@ -3,13 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from aiaccel.storage import (Error, Hp, JobState, Result, Serializer,
-                             TimeStamp, Trial)
+from aiaccel.storage import Error, Hp, JobState, Result, Serializer, TimeStamp, Trial
 
 
 class Storage:
-    """Database
-    """
+    """Database"""
 
     def __init__(self, _db_path: Path | str) -> None:
         self.db_path = Path(_db_path)
@@ -147,27 +145,21 @@ class Storage:
             else:  # pragma: no cover
                 pass  # not reached
 
-            hp.append(
-                {
-                    'parameter_name': param_name,
-                    'type': dtype,
-                    'value': value
-                }
-            )
+            hp.append({"parameter_name": param_name, "type": dtype, "value": value})
         result = self.result.get_any_trial_objective(trial_id=trial_id)
         start_time = self.timestamp.get_any_trial_start_time(trial_id=trial_id)
         end_time = self.timestamp.get_any_trial_end_time(trial_id=trial_id)
         error = self.error.get_any_trial_error(trial_id=trial_id)
 
         content: dict[str, str | int | float | list[Any]] = {}
-        content['trial_id'] = trial_id
-        content['parameters'] = hp
-        content['result'] = result
-        content['start_time'] = start_time
-        content['end_time'] = end_time
+        content["trial_id"] = trial_id
+        content["parameters"] = hp
+        content["result"] = result
+        content["start_time"] = start_time
+        content["end_time"] = end_time
 
         if error is not None and len(error) > 0:
-            content['error'] = error
+            content["error"] = error
 
         return content
 
@@ -183,10 +175,10 @@ class Storage:
 
         best_values = []
         for i in range(len(goals)):
-            if goals[i].lower() == 'maximize':
-                best_values.append(float('-inf'))
-            elif goals[i].lower() == 'minimize':
-                best_values.append(float('inf'))
+            if goals[i].lower() == "maximize":
+                best_values.append(float("-inf"))
+            elif goals[i].lower() == "minimize":
+                best_values.append(float("inf"))
             else:
                 return None, None
 
@@ -214,12 +206,12 @@ class Storage:
                 best_value = best_values[i]
                 best_trial_id = best_trial_ids[i]
 
-                if goals[i].lower() == 'maximize':
+                if goals[i].lower() == "maximize":
                     if best_value < val:
                         best_value = val
                         best_trial_id = trial_id
 
-                elif goals[i].lower() == 'minimize':
+                elif goals[i].lower() == "minimize":
                     if best_value > val:
                         best_value = val
                         best_trial_id = trial_id
