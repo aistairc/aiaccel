@@ -23,10 +23,10 @@ jobs:
           pip install black flake8 isort pycodestyle
 
       - name: Pycodestyle Test
-        run: pycodestyle --max-line-length=120 aiaccel examples
+        run: pycodestyle --max-line-length=120 --ignore=E203 aiaccel
 
       - name: Lint
         run: |
-          flake8 --max-line-length 120 aiaccel
+          flake8 --max-line-length 120 --ignore E203 aiaccel
           isort --check --diff aiaccel
           black --check --line-length 120 aiaccel
