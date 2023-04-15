@@ -120,7 +120,3 @@ docs/build/html
 # Docker
 .devcontainer
 Dockerfile
-
-# Poetry
-poetry.lock
-poetry.toml
