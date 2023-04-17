@@ -29,7 +29,7 @@ class TestSobolOptimizer(BaseTest):
 
         assert len(optimizer.generate_parameter()) > 0
 
-        with patch.object(optimizer, 'generate_index', 0):
+        with patch.object(optimizer, 'num_generated_params', 0):
             assert len(optimizer.generate_parameter()) > 0
 
     def test_generate_initial_parameter(self):
