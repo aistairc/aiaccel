@@ -5,7 +5,6 @@ from typing import Any
 
 from scipy.stats import qmc
 
-from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer
 
 
@@ -30,12 +29,6 @@ class SobolOptimizer(AbstractOptimizer):
         super().__init__(config)
         self.generate_index: Any = None
         self.sampler: Any = None
-
-        if is_multi_objective(self.config):
-            raise NotImplementedError(
-                'Sobol optimizer does not support multi-objective '
-                'optimization.'
-            )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
