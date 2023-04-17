@@ -28,5 +28,5 @@ jobs:
       - name: Lint
         run: |
           flake8 --max-line-length 120 --ignore E203 aiaccel
-          isort --check --diff aiaccel
+          isort --check --diff --profile black aiaccel
           black --check --line-length 120 aiaccel
