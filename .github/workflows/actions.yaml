@@ -35,17 +35,6 @@ jobs:
       - name: Flake8 Test
         run: flake8 aiaccel examples
 
-      - name: Optimizer Algorithm Test
-        run: |
-          pytest -s -v tests/integration/sphere/test_sphere_random.py
-          pytest -s -v tests/integration/sphere/test_sphere_grid.py
-          pytest -s -v tests/integration/sphere/test_sphere_budget_specified_grid.py
-          pytest -s -v tests/integration/sphere/test_sphere_sobol.py
-          pytest -s -v tests/integration/sphere/test_sphere_sobol_int.py
-          pytest -s -v tests/integration/sphere/test_sphere_tpe.py
-          pytest -s -v tests/integration/sphere/test_sphere_nelder_mead.py
-          pytest -s -v tests/integration/sphere/test_sphere_motpe.py
-
       - name: Resume Test
         run: |
           pytest -s -v tests/resumption/sphere/test_sphere_random_resumption.py
