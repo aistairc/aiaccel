@@ -19,8 +19,9 @@ class ConvertedHyperparameter:
     convert_sequence: bool
 
     def __init__(self, hyperparameter: HyperParameter,
-                 convert_log: bool = True, convert_choices: bool = True,
-                 convert_sequence: bool = True) -> None:
+                 convert_log: bool = True, convert_int: bool = True,
+                 convert_choices: bool = True, convert_sequence: bool = True
+                 ) -> None:
         """Conditions of hyperparameter of which the scale of numerical values,
         choices, or sequence are converted appropriately.
 
@@ -29,6 +30,10 @@ class ConvertedHyperparameter:
         convert_log (bool, optional): Whether to convert the numerical values
             between log and linear scale when log of the hyperparameter object
             is True. Defaults to True.
+        convert_int (bool, optional): Whether to convert the int value to
+            float. For example, if convert_int = False and log-scale conversion
+            is enabled, the value `v` will be converted as `int(numpy.log(v))`.
+            Defaults to True.
         convert_choices (bool, optional): Whether to treat the choices of
             categorical parameter as float value corresponding to the index of
             choices. Defaults to True.
@@ -49,12 +54,13 @@ class ConvertedHyperparameter:
             hyperparameter.type
         )
         self.convert_log = hyperparameter.log and convert_log
+        self.convert_int = convert_int
         self.convert_choices = convert_choices
         self.convert_sequence = convert_sequence
 
         if self.type in ("uniform_int", "uniform_float"):
-            self.lower = self.convert_to_internal_value(hyperparameter.lower)
-            self.upper = self.convert_to_internal_value(hyperparameter.upper)
+            self.lower = self.convert(hyperparameter.lower)
+            self.upper = self.convert(hyperparameter.upper)
         elif self.type == "categorical":
             self.choices = hyperparameter.choices
             if self.convert_choices:
@@ -68,7 +74,7 @@ class ConvertedHyperparameter:
         else:
             raise TypeError(f"Type of {self.name}: {self.type} is invalid.")
 
-    def convert_to_internal_value(self, external_value: Any) -> Any:
+    def convert(self, external_value: Any) -> Any:
         """Converts a value in the external representation to the internal
         representation.
 
@@ -83,13 +89,20 @@ class ConvertedHyperparameter:
         Returns:
             Any: A value in the internal representation.
         """
-        if self.type in ("uniform_int", "uniform_float"):
+        if self.type == "uniform_int":
+            if self.convert_log:
+                if external_value <= 0:
+                    raise ValueError("Log scaled value can not be negative.")
+                return float(np.log(external_value)) if self.convert_int else int(np.log(external_value))
+            else:
+                return float(external_value) if self.convert_int else int(external_value)
+        if self.type == "uniform_float":
             if self.convert_log:
                 if external_value <= 0:
                     raise ValueError("Log scaled value can not be negative.")
                 return np.log(external_value)
             else:
-                return external_value
+                return float(external_value)
         elif self.type == "categorical":
             if external_value not in self.choices:
                 raise ValueError(f"Specified value: {external_value} is not in choices.")
@@ -101,7 +114,7 @@ class ConvertedHyperparameter:
         else:
             raise TypeError(f"Type of {self.name}: {self.type} is invalid.")
 
-    def convert_to_external_value(self, internal_value: Any) -> Any:
+    def convert_to_original_repr(self, internal_value: Any) -> Any:
         """Converts a value in the internal representation to the external
         representation.
 
@@ -136,27 +149,27 @@ class ConvertedHyperparameterConfiguration:
         convert_log (bool, optional): Whether to convert the numerical values
             between log and linear scale when log of the hyperparameter object
             is True. Defaults to True.
+        convert_int (bool, optional): Whether to convert the int value to
+            float. For example, if convert_int = False and log-scale conversion
+            is enabled, the value `v` will be converted as `int(numpy.log(v))`.
+            Defaults to True.
         convert_choices (bool, optional): Whether to treat the choices of
             categorical parameter as float value corresponding to the index of
             choices. Defaults to True.
         convert_sequence (bool, optional): Whether to treat the sequence of
             ordinal parameter as a float value corresponding to the index of
             sequence. Defaults to True.
-
-    Attributes:
-        converted_parameters (dict[str, ConvertedHyperparameter]): A dict
-            object of ConvertedHyperparameter.
     """
 
     def __init__(self, hyperparameters: list[HyperParameter],
                  convert_log: bool = True, convert_choices: bool = True,
                  convert_sequence: bool = True) -> None:
-        self.converted_parameters: dict[str, ConvertedHyperparameter] = {}
+        self._converted_params: dict[str, ConvertedHyperparameter] = {}
         for param in hyperparameters:
-            self.converted_parameters[param.name] = ConvertedHyperparameter(
+            self._converted_params[param.name] = ConvertedHyperparameter(
                 param, convert_log, convert_choices, convert_sequence)
 
-    def get(self, name: str) -> ConvertedHyperparameter:
+    def get_hyperparameter(self, name: str) -> ConvertedHyperparameter:
         """Gets a ConvertedHyperparameter object by specifying parameter name.
 
         Args:
@@ -168,33 +181,25 @@ class ConvertedHyperparameterConfiguration:
         Returns:
             ConvertedHyperparameter: Specified parameter name.
         """
-        if name in self.converted_parameters:
-            return self.converted_parameters[name]
+        if name in self._converted_params:
+            return self._converted_params[name]
         else:
             raise KeyError(f"Invalid parameter name: {name}")
 
-    def get_names(self) -> list[str]:
-        """Gets a list of parameter names.
-
-        Returns:
-            list[str]: A list of parameter names.
-        """
-        return list(self.converted_parameters.keys())
-
-    def get_list(self) -> list[ConvertedHyperparameter]:
+    def get_parameter_list(self) -> list[ConvertedHyperparameter]:
         """Gets a list of parameters.
 
         Returns:
             list[ConvertedHyperparameter]: A list of ConvertedHyperparameter
                 objects.
         """
-        return list(self.converted_parameters.values())
+        return list(self._converted_params.values())
 
-    def get_dict(self) -> dict[str, ConvertedHyperparameter]:
+    def get_parameter_dict(self) -> dict[str, ConvertedHyperparameter]:
         """Gets a dict object of ConvertedHyperparmaeters.
 
         Returns:
             dict[str, ConvertedHyperparameter]: A dict object of
                 ConvertedHyperparameter objects.
         """
-        return self.converted_parameters
+        return self._converted_params

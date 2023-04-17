@@ -63,13 +63,13 @@ class SobolOptimizer(AbstractOptimizer):
         vec = self.sampler.random()[0]
 
         new_params = []
-        for vec_i, param in zip(vec, self.converted_parameters.get_list()):
+        for vec_i, param in zip(vec, self.converted_parameters.get_parameter_list()):
             internal_value = (param.upper - param.lower) * vec_i + param.lower
             new_params.append(
                 {
                     "parameter_name": param.name,
                     "type": param.type,
-                    "value": param.convert_to_external_value(internal_value)
+                    "value": param.convert_to_original_repr(internal_value)
                 }
             )
 
