@@ -6,7 +6,7 @@ from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool
 
-from aiaccel.storage import Base
+from aiaccel.storage.model import Base
 from aiaccel.util import retry
 
 

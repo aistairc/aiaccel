@@ -4,7 +4,8 @@ import re
 import subprocess
 
 from aiaccel.abci import parse_qstat
-from aiaccel.scheduler import AbciModel, AbstractScheduler
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler.job.model.abci_model import AbciModel
 
 
 class AbciScheduler(AbstractScheduler):

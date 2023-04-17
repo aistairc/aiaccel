@@ -5,7 +5,7 @@ import subprocess
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.abci import parse_qstat
-from aiaccel.master import AbstractMaster
+from aiaccel.master.abstract_master import AbstractMaster
 from aiaccel.util import get_dict_files, retry
 
 

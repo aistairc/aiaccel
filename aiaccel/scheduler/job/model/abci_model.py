@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import fasteners
 
 from aiaccel.abci import create_abci_batch_file, create_qsub_command
-from aiaccel.scheduler.job.model import AbstractModel
+from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.util import OutputHandler, interprocess_lock_file, retry
 
 if TYPE_CHECKING:

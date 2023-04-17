@@ -9,7 +9,7 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import load_config
-from aiaccel.scheduler import AbstractScheduler
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util import get_time_now
 from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
 from aiaccel.util.cast import cast_y

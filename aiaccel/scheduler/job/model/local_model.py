@@ -3,7 +3,7 @@ from __future__ import annotations
 from subprocess import PIPE, Popen, run
 from typing import TYPE_CHECKING, Any
 
-from aiaccel.scheduler.job.model import AbstractModel
+from aiaccel.scheduler.job.model.abstract_model import AbstractModel
 from aiaccel.util import OutputHandler
 from aiaccel.wrapper_tools import create_runner_command
 

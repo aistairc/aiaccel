@@ -5,7 +5,9 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler import Job, LocalModel, RandomSampling
+from aiaccel.scheduler.algorithm import RandomSampling
+from aiaccel.scheduler.job.job import Job
+from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.util import str_to_logging_level
 
 

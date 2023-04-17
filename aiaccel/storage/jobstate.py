@@ -5,7 +5,8 @@ from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage import Abstract, JobStateTable
+from aiaccel.storage.abstract import Abstract
+from aiaccel.storage.model import JobStateTable
 from aiaccel.util import retry
 
 
