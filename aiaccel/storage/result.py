@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 from sqlalchemy.exc import SQLAlchemyError
 
 from aiaccel.storage import Abstract, ResultTable
@@ -33,11 +34,7 @@ class Result(Abstract):
                     .one_or_none()
                 )
                 if data is None:
-                    new_row = ResultTable(
-                        trial_id=trial_id,
-                        data_type=str(type(objective)),
-                        objective=objective
-                    )
+                    new_row = ResultTable(trial_id=trial_id, data_type=str(type(objective)), objective=objective)
                     session.add(new_row)
                 else:
                     data.objective = objective
@@ -77,10 +74,7 @@ class Result(Abstract):
             dict[int, list[Any]]: trial_id and result values
         """
         with self.create_session() as session:
-            data = (
-                session.query(ResultTable)
-                .with_for_update(read=True)
-            )
+            data = session.query(ResultTable).with_for_update(read=True)
 
         return {d.trial_id: d.objective for d in data}
         # return data
@@ -97,35 +91,21 @@ class Result(Abstract):
 
     def get_bests(self, goals: list[str]) -> list[Any]:
         """Obtains the sorted result.
-
         Returns:
             list: result values
         """
-        bests = []
-
-        objectives = self.get_objectives()
+        objectives = np.array(self.get_objectives())
+        bests = np.zeros((len(goals), len(objectives[0])))
 
         for i in range(len(goals)):
-            best_values = []
-
             if goals[i].lower() == "maximize":
-                best_value = float("-inf")
-                for objective in objectives:
-                    if best_value < objective[i]:
-                        best_value = objective[i]
-                    best_values.append(best_value)
+                bests[i, :] = np.max(objectives[:, i], axis=0)
             elif goals[i].lower() == "minimize":
-                best_value = float("inf")
-                for objective in objectives:
-                    if best_value > objective[i]:
-                        best_value = objective[i]
-                    best_values.append(best_value)
+                bests[i, :] = np.min(objectives[:, i], axis=0)
             else:
-                continue
+                raise ValueError("Invalid goal value.")
 
-            bests.append(best_values)
-
-        return bests
+        return [row[0] for row in bests.tolist()]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_result_trial_id_list(self) -> list[Any] | None:
@@ -135,16 +115,29 @@ class Result(Abstract):
             list | None: result values
         """
         with self.create_session() as session:
-            data = (
-                session.query(ResultTable)
-                .with_for_update(read=True)
-                .all()
-            )
+            data = session.query(ResultTable).with_for_update(read=True).all()
 
         if data is None or len(data) == 0:
             return None
 
         return [d.trial_id for d in data]
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def get_any_trial_objective_and_best_value(self, trial_id: int, goals: list[str]) -> tuple[list[Any], list[Any]]:
+        """Obtain the results of an arbitrary trial.
+        Args:
+            trial_id (int): Any trial id
+            column_idx (int): Any column index of objectives and best_values
+        Returns:
+            int | float | None:
+        """
+        objectives: list[Any] = self.get_any_trial_objective(trial_id)
+        if objectives is None:
+            return None, None
+
+        best_values = self.get_bests(goals)
+
+        return objectives, best_values
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def all_delete(self) -> None:

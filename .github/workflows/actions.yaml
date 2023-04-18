@@ -19,47 +19,44 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
+          cache-dependency-path: pyproject.toml
 
       - name: Install Software
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          python setup.py install
+          python -m pip install .[dev,github-actions,test]
 
       - name: Unit Test
         run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit
 
-      - name: Pycodestyle Test
-        run: pycodestyle aiaccel examples
-
-      - name: Flake8 Test
-        run: flake8 aiaccel examples
-
       - name: Optimizer Algorithm Test
         run: |
-          pytest -v tests/integration/sphere/test_sphere_random.py
-          pytest -v tests/integration/sphere/test_sphere_grid.py
-          pytest -v tests/integration/sphere/test_sphere_sobol.py
-          pytest -v tests/integration/sphere/test_sphere_sobol_int.py
-          pytest -v tests/integration/sphere/test_sphere_tpe.py
-          pytest -v tests/integration/sphere/test_sphere_nelder_mead.py
-          pytest -v tests/integration/sphere/test_sphere_motpe.py
+          pytest -s -v tests/integration/sphere/test_sphere_random.py
+          pytest -s -v tests/integration/sphere/test_sphere_grid.py
+          pytest -s -v tests/integration/sphere/test_sphere_budget_specified_grid.py
+          pytest -s -v tests/integration/sphere/test_sphere_sobol.py
+          pytest -s -v tests/integration/sphere/test_sphere_sobol_int.py
+          pytest -s -v tests/integration/sphere/test_sphere_tpe.py
+          pytest -s -v tests/integration/sphere/test_sphere_nelder_mead.py
+          pytest -s -v tests/integration/sphere/test_sphere_motpe.py
 
       - name: Resume Test
         run: |
-          pytest -v tests/resumption/sphere/test_sphere_random_resumption.py
-          pytest -v tests/resumption/sphere/test_sphere_grid_resumption.py
-          pytest -v tests/resumption/sphere/test_sphere_sobol_resumption.py
-          pytest -v tests/resumption/sphere/test_sphere_tpe_resumption.py
-          pytest -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
-          pytest -v tests/resumption/sphere/test_sphere_motpe_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_random_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_grid_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_budget_specified_grid_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_sobol_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_tpe_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_motpe_resumption.py
 
       - name: Supplemental Test
         run: |
-          pytest -v tests/supplements/no_initial_test_benchmark/test_benchmark_tpe_no_initial.py
-          pytest -v tests/supplements/no_initial_test_benchmark/test_benchmark_nelder_mead_no_initial.py
-          pytest -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_tpe_resumption.py
-          pytest -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_nelder_mead_resumption.py
-          pytest -v tests/supplements/random_generation_test_benchmark/test_benchmark_random_generation.py
-          pytest -v tests/supplements/additional_grid_test/test_benchmark_grid.py
-          pytest -v tests/supplements/additional_budget_specified_grid_test_benchmark/test_benchmark_budget_specified_grid.py
+          pytest -s -v tests/supplements/no_initial_test_benchmark/test_benchmark_tpe_no_initial.py
+          pytest -s -v tests/supplements/no_initial_test_benchmark/test_benchmark_nelder_mead_no_initial.py
+          pytest -s -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_tpe_resumption.py
+          pytest -s -v tests/supplements/additional_resumption_test_benchmark/test_benchmark_nelder_mead_resumption.py
+          pytest -s -v tests/supplements/random_generation_test_benchmark/test_benchmark_random_generation.py
+          pytest -s -v tests/supplements/additional_grid_test/test_benchmark_grid.py
+          pytest -s -v tests/supplements/additional_budget_specified_grid_test_benchmark/test_benchmark_budget_specified_grid.py
+          pytest -s -v tests/supplements/additional_nums_node_trial_test/test_sphere_grid_additional_nums_node_trial_test.py

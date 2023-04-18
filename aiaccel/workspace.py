@@ -4,11 +4,25 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from aiaccel.common import (dict_alive, dict_error, dict_finished, dict_hp,
-                            dict_jobstate, dict_lock, dict_log, dict_output,
-                            dict_pid, dict_ready, dict_result, dict_runner,
-                            dict_running, dict_storage, dict_timestamp,
-                            dict_verification, extension_hp)
+from aiaccel.common import (
+    dict_alive,
+    dict_error,
+    dict_finished,
+    dict_hp,
+    dict_jobstate,
+    dict_lock,
+    dict_log,
+    dict_output,
+    dict_pid,
+    dict_ready,
+    dict_result,
+    dict_runner,
+    dict_running,
+    dict_storage,
+    dict_tensorboard,
+    dict_timestamp,
+    extension_hp,
+)
 from aiaccel.util import Suffix, load_yaml, make_directories
 
 
@@ -35,7 +49,6 @@ class Workspace:
         runner (Path): Path to "runner", i.e. `path`/runner.
         storage (Path): Path to "storage", i.e. `path`/storage.
         timestamp (Path): Path to "timestamp", i.e. `path`/timestamp.
-        verification (Path): Path to "verification", i.e. `path`/verification.
         consists (list[Path]): A list of pathes under the workspace.
         results (Path): Path to the results which is prepared in the execution
             directory, i.e. "./results".
@@ -59,8 +72,8 @@ class Workspace:
         self.result = self.path / dict_result
         self.runner = self.path / dict_runner
         self.storage = self.path / dict_storage
+        self.tensorboard = self.path / dict_tensorboard
         self.timestamp = self.path / dict_timestamp
-        self.verification = self.path / dict_verification
 
         self.consists = [
             self.alive,
@@ -77,11 +90,13 @@ class Workspace:
             self.result,
             self.runner,
             self.storage,
+            self.tensorboard,
             self.timestamp,
-            self.verification
         ]
         self.results = Path("./results")
         self.retults_csv_file = self.path / "results.csv"
+        self.final_result_file = self.path / dict_result / "final_result.result"
+        self.storage_file_path = self.storage / "storage.db"
 
     def create(self) -> bool:
         """Create a work directory.
@@ -96,10 +111,7 @@ class Workspace:
         if self.exists():
             return False
 
-        make_directories(
-            ds=self.consists,
-            dict_lock=(self.lock)
-        )
+        make_directories(ds=self.consists, dict_lock=(self.lock))
         return True
 
     def exists(self) -> bool:
@@ -111,7 +123,7 @@ class Workspace:
         return self.path.exists()
 
     def clean(self) -> None:
-        """ Delete a workspace.
+        """Delete a workspace.
 
         It is assumed to be the first one to be executed.
         """
@@ -134,7 +146,7 @@ class Workspace:
         return True
 
     def move_completed_data(self) -> Path | None:
-        """ Move workspace to under of results directory when finished.
+        """Move workspace to under of results directory when finished.
 
         Raises:
             FileExistsError: Occurs if destination directory already exists
@@ -152,7 +164,7 @@ class Workspace:
             print(f"Destination directory already exists: {dst}")
             return None
 
-        ignptn = shutil.ignore_patterns('*-journal')
+        ignptn = shutil.ignore_patterns("*-journal")
 
         shutil.copytree(self.path, dst, ignore=ignptn)
         return dst

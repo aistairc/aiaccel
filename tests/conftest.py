@@ -6,14 +6,15 @@ from pathlib import Path
 
 import fasteners
 import pytest
+
 from aiaccel.config import load_config
-from aiaccel.workspace import Workspace
 from aiaccel.storage import Storage
 from aiaccel.util import create_yaml, interprocess_lock_file, load_yaml
+from aiaccel.workspace import Workspace
 
 WORK_SUB_DIRECTORIES = [
     'abci_output', 'alive', 'hp', 'hp/finished', 'hp/ready', 'hp/running',
-    'lock', 'log', 'resource', 'result', 'runner', 'state', 'verification'
+    'lock', 'log', 'resource', 'result', 'runner', 'state'
 ]
 WORK_FILES = [
     'config.json',
@@ -180,8 +181,8 @@ def create_tmp_config(data_dir, tmpdir, work_dir):
             with open(tmp_conf_path, 'w') as f:
                 json.dump(json_obj, f)
 
-        ws = Workspace(str(work_dir))
-        ws.create()
+        workspace = Workspace(str(work_dir))
+        workspace.create()
 
         return tmp_conf_path
 
@@ -202,8 +203,8 @@ def setup_hp_files(work_dir):
         #         data_dir.joinpath('work/hp/finished/{:03}.hp'.format(i)),
         #         work_dir.joinpath('hp/{}/{:03}.hp'.format(hp_type, i))
         #     )
-
-        storage = Storage(work_dir)
+        workspace = Workspace(str(work_dir))
+        storage = Storage(workspace.storage_file_path)
         for i in range(n):
             storage.trial.set_any_trial_state(trial_id=i, state=hp_type)
     return _setup_hp_files
@@ -236,7 +237,8 @@ def setup_hp_finished(setup_hp_files):
 @pytest.fixture(scope="session")
 def setup_result(work_dir):
     def _setup_result(n=1):
-        storage = Storage(work_dir)
+        workspace = Workspace(str(work_dir))
+        storage = Storage(workspace.storage_file_path)
         running = storage.get_running()
         for trial_id in running:
             storage.result.set_any_trial_objective(trial_id=trial_id, objective=[0])
@@ -247,9 +249,9 @@ def setup_result(work_dir):
 @pytest.fixture(scope="session")
 def database_remove(work_dir):
     def _database_remove():
-        p = work_dir / 'storage' / 'storage.db'
-        if p.exists():
-            p.unlink()
+        workspace = Workspace(str(work_dir))
+        if workspace.storage_file_path.exists():
+            workspace.storage_file_path.unlink()
     return _database_remove
 
 

@@ -1,17 +1,19 @@
-# Translations template for PROJECT.
-# Copyright (C) 2023 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-03-16 14:18+0900\n"
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -37,9 +39,7 @@ msgstr ""
 msgid "An abstract class for MaximizeEvaluator and MinimizeEvaluator."
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
-#: of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator of
 msgid "パラメータ"
 msgstr ""
 
@@ -60,9 +60,7 @@ msgstr ""
 msgid "Path to the configuration file."
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:18
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:30
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:36 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:18 of
 msgid "Path"
 msgstr ""
 
@@ -75,42 +73,34 @@ msgid "Config"
 msgstr ""
 
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:28 of
-msgid "Path to the workspace."
-msgstr ""
-
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:34 of
-msgid "Path to \"lock', i.e. `ws`/lock."
-msgstr ""
-
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:40 of
 msgid "A dict object of the best optimized result."
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:42 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:30 of
 msgid "dict"
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:46 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:34 of
 msgid "Storage object."
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:48 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:36 of
 msgid "Storage"
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:52 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:40 of
 msgid "Goal of optimization ('minimize' or 'maximize')."
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:54 of
-msgid "str"
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:42 of
+msgid "list[str]"
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:58 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:46 of
 msgid "TrialId object."
 msgstr ""
 
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:60 of
+#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator:48 of
 msgid "TrialId"
 msgstr ""
 
@@ -119,7 +109,6 @@ msgid "Run an evaluation."
 msgstr ""
 
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.evaluate
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save of
 msgid "戻り値"
@@ -129,26 +118,6 @@ msgstr ""
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print:3
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.save:3 of
 msgid "None"
-msgstr ""
-
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id:1
-#: of
-msgid "Returns string of trial id padded by zeros."
-msgstr ""
-
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id:3
-#: of
-msgid "Trial id."
-msgstr ""
-
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id:6
-#: of
-msgid "Trial id padded by zeros."
-msgstr ""
-
-#: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.get_zero_padding_any_trial_id
-#: of
-msgid "戻り値の型"
 msgstr ""
 
 #: aiaccel.master.evaluator.abstract_evaluator.AbstractEvaluator.print:1 of

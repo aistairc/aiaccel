@@ -10,8 +10,7 @@ from typing import Any
 
 import psutil
 
-from aiaccel.util.time_tools import (get_time_now_object,
-                                     get_time_string_from_object)
+from aiaccel.util.time_tools import get_time_now_object, get_time_string_from_object
 
 
 def exec_runner(command: list[Any]) -> Popen[bytes]:
@@ -23,11 +22,7 @@ def exec_runner(command: list[Any]) -> Popen[bytes]:
     Returns:
         Popen: An opened process object.
     """
-    return subprocess.Popen(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+    return subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def subprocess_ps() -> list[dict[str, Any]]:
@@ -36,27 +31,24 @@ def subprocess_ps() -> list[dict[str, Any]]:
     Returns:
         list[dict]: A ps result.
     """
-    commands = ['ps', 'xu']
+    commands = ["ps", "xu"]
     res = subprocess.run(commands, stdout=subprocess.PIPE)
-    message = res.stdout.decode('utf-8')
-    stats = message.split('\n')
-    stats_zero = re.split(' +', stats[0])
-    stats_zero = [s for s in stats_zero if s != '']
-    pid_order = stats_zero.index('PID')
-    command_order = stats_zero.index('COMMAND')
+    message = res.stdout.decode("utf-8")
+    stats = message.split("\n")
+    stats_zero = re.split(" +", stats[0])
+    stats_zero = [s for s in stats_zero if s != ""]
+    pid_order = stats_zero.index("PID")
+    command_order = stats_zero.index("COMMAND")
     ret = []
 
     for s in range(1, len(stats)):
-        pstat = re.split(' +', stats[s])
-        pstat = [s for s in pstat if s != '']
+        pstat = re.split(" +", stats[s])
+        pstat = [s for s in pstat if s != ""]
 
         if len(pstat) < command_order - 1:
             continue
 
-        ret.append({
-            'PID': pstat[pid_order],
-            'COMMAND': pstat[command_order],
-            'full': stats[s]})
+        ret.append({"PID": pstat[pid_order], "COMMAND": pstat[command_order], "full": stats[s]})
 
     return ret
 
@@ -73,15 +65,22 @@ def ps2joblist() -> list[dict[str, Any]]:
 
     job_list = []
 
-    for p_info in psutil.process_iter(['pid', 'username', 'status', 'create_time', 'cmdline']):
+    for p_info in psutil.process_iter(["pid", "username", "status", "create_time", "cmdline"]):
         # p_info = proc.as_dict(
         #    attrs=['pid', 'username', 'status', 'create_time', 'cmdline'])
         d = {
-            'job-ID': p_info.info['pid'], 'prior': None, 'user': p_info.info['username'],
-            'state': p_info.info['status'], 'queue': None, 'jclass': None,
-            'slots': None, 'ja-task-ID': None, 'name': " ".join(p_info.info['cmdline'] or []),
-            'submit/start at': datetime.datetime.fromtimestamp(
-                p_info.info['create_time']).strftime("%Y-%m-%d %H:%M:%S")
+            "job-ID": p_info.info["pid"],
+            "prior": None,
+            "user": p_info.info["username"],
+            "state": p_info.info["status"],
+            "queue": None,
+            "jclass": None,
+            "slots": None,
+            "ja-task-ID": None,
+            "name": " ".join(p_info.info["cmdline"] or []),
+            "submit/start at": datetime.datetime.fromtimestamp(p_info.info["create_time"]).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
         }
         job_list.append(d)
 
@@ -97,7 +96,7 @@ def kill_process(pid: int) -> None:
     Returns:
         None
     """
-    args = ['/bin/kill', f'{pid}']
+    args = ["/bin/kill", f"{pid}"]
     subprocess.Popen(args, stdout=subprocess.PIPE)
 
 
@@ -190,15 +189,7 @@ def is_process_running(pid: int) -> bool:
     Returns:
         bool: The process is running or not.
     """
-    status = [
-        "running",
-        "sleeping",
-        "disk-sleep",
-        "stopped",
-        "tracing-stop",
-        "waking",
-        "idle"
-    ]
+    status = ["running", "sleeping", "disk-sleep", "stopped", "tracing-stop", "waking", "idle"]
 
     try:
         p = psutil.Process(pid)

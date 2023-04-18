@@ -1,13 +1,12 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from typing import Union
 from omegaconf.dictconfig import DictConfig
-from omegaconf.listconfig import ListConfig
 
 from aiaccel.config import load_config
 from aiaccel.storage.storage import Storage
 from aiaccel.util.easy_visualizer import EasyVisualizer
+from aiaccel.workspace import Workspace
 
 
 class Plotter:
@@ -17,16 +16,15 @@ class Plotter:
         config (Config): Config object.
 
     Attributes:
-        workspace (Path): Path to the workspace.
+        workspace (Workspace): Workspace object.
         storage (Storage): Storage object.
         goar (str): Goal of optimization ('minimize' or 'maximize').
         cplt (EasyVisualizer): EasyVisualizer object.
     """
 
-    def __init__(self, config: Union[ListConfig, DictConfig]):
-        self.workspace = Path(config.generic.workspace).resolve()
-
-        self.storage = Storage(self.workspace)
+    def __init__(self, config: DictConfig):
+        self.workspace = Workspace(config.generic.workspace)
+        self.storage = Storage(self.workspace.storage_file_path)
         self.goals = [item.value for item in config.optimize.goal]
 
         self.cplt = EasyVisualizer()
@@ -52,8 +50,9 @@ class Plotter:
             plot_datas.append(objectives[i])
             plot_datas.append(bests[i])
 
-        caption_set = [caption_set for caption_set in [
-            [f"objective_y[{i}]", f"best value[{i}]"] for i in range(len(self.goals))]]
+        caption_set = [
+            caption_set for caption_set in [[f"objective_y[{i}]", f"best value[{i}]"] for i in range(len(self.goals))]
+        ]
 
         captions = []
         for captions_ in caption_set:
@@ -75,13 +74,12 @@ class Plotter:
 
 
 def main() -> None:  # pragma: no cover
-    """Parses command line options and plots a graph on the terminal.
-    """
+    """Parses command line options and plots a graph on the terminal."""
     parser = ArgumentParser()
-    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument("--config", "-c", type=str, default="config.yml")
     args = parser.parse_args()
 
-    config: Union[ListConfig, DictConfig] = load_config(args.config)
+    config: DictConfig = load_config(args.config)
 
     if Path(config.generic.workspace).exists() is False:
         print(f"{config.generic.workspace} is not found.")

@@ -43,4 +43,3 @@ class TestConfig(BaseTest):
         assert type(config.logger.log_level.user_option_log_level) is str
         assert type(config.logger.stream_level.user_option_stream_level) is str
         assert type(config.logger.user_option_logger) is str
-        assert type(config.verification.user_option_verification) is str

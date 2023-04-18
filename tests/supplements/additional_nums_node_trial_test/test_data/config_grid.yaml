@@ -62,6 +62,3 @@ optimize:
 resource:
   num_node: 2
   type: local
-verification:
-  condition: []
-  is_verified: false

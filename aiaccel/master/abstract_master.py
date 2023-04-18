@@ -6,11 +6,9 @@ from pathlib import Path
 from typing import Any
 
 from omegaconf.dictconfig import DictConfig
-from aiaccel.common import file_final_result
-from aiaccel.master import AbstractVerification
+
 from aiaccel.module import AbstractModule
-from aiaccel.util import (create_yaml, get_time_now_object,
-                          get_time_string_from_object, str_to_logging_level)
+from aiaccel.util import create_yaml, get_time_now_object, get_time_string_from_object, str_to_logging_level
 
 
 class AbstractMaster(AbstractModule):
@@ -27,7 +25,6 @@ class AbstractMaster(AbstractModule):
         optimizer_proc (subprocess.Popen): A reference for a subprocess of
             Optimizer.
         start_time (datetime.datetime): A stored starting time.
-        verification (AbstractVerification): A verification object.
         logger (logging.Logger): Logger object.
         goals (list[str]): Goal of optimization ('minimize' or 'maximize').
         trial_number (int): The number of trials.
@@ -36,21 +33,19 @@ class AbstractMaster(AbstractModule):
     """
 
     def __init__(self, config: DictConfig) -> None:
-        super().__init__(config, 'master')
+        super().__init__(config, "master")
         self.start_time = get_time_now_object()
         self.loop_start_time: datetime | None = None
-        self.logger = logging.getLogger('root.master')
+        self.logger = logging.getLogger("root.master")
         self.logger.setLevel(logging.DEBUG)
         self.set_logger(
-            'root.master',
+            "root.master",
             self.workspace.log / self.config.logger.file.master,
-            # self.dict_log / self.config.logger.file.master,
             str_to_logging_level(self.config.logger.log_level.master),
             str_to_logging_level(self.config.logger.stream_level.master),
-            'Master   '
+            "Master   ",
         )
 
-        self.verification = AbstractVerification(self.config)
         self.goals = [item.value for item in self.config.optimize.goal]
         self.trial_number = self.config.optimize.trial_number
 
@@ -82,10 +77,6 @@ class AbstractMaster(AbstractModule):
         """
 
         self.evaluate()
-
-        # verification
-        self.verification.verify()
-        self.verification.save("final")
         self.logger.info("Master finished.")
 
     def print_dict_state(self) -> None:
@@ -130,8 +121,6 @@ class AbstractMaster(AbstractModule):
 
         self.get_stats()
         self.print_dict_state()
-        # verification
-        self.verification.verify()
 
         return True
 
@@ -163,15 +152,15 @@ class AbstractMaster(AbstractModule):
 
         best_trial_ids, _ = self.storage.get_best_trial(self.goals)
         if best_trial_ids is None:
-            raise ValueError("No best trial found.")
+            self.logger.error(f"Failed to output {self.workspace.final_result_file}.")
+            return
 
         hp_results = []
 
         for best_trial_id in best_trial_ids:
             hp_results.append(self.storage.get_hp_dict(best_trial_id))
 
-        self.logger.info('Best hyperparameter is followings:')
+        self.logger.info("Best hyperparameter is followings:")
         self.logger.info(hp_results)
 
-        path = self.workspace.result / file_final_result
-        create_yaml(path, hp_results, self.workspace.lock)
+        create_yaml(self.workspace.final_result_file, hp_results, self.workspace.lock)

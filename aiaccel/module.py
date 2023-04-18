@@ -5,11 +5,16 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-
 from omegaconf.dictconfig import DictConfig
-from aiaccel.common import (class_master, class_optimizer, class_scheduler,
-                            module_type_master, module_type_optimizer,
-                            module_type_scheduler)
+
+from aiaccel.common import (
+    class_master,
+    class_optimizer,
+    class_scheduler,
+    module_type_master,
+    module_type_optimizer,
+    module_type_scheduler,
+)
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId
 from aiaccel.workspace import Workspace
@@ -44,7 +49,6 @@ class AbstractModule(object):
         dict_lock (Path): A path to lock directory.
         dict_output (Path): A path to output directory.
         dict_runner (Path): A path to runner directory.
-        dict_verification (Path): A path to verification directory.
         hp_finished (int): A number of files in hp/finished directory.
         hp_ready (int): A number of files in hp/ready directory.
         hp_running (int): A number of files in hp/running directory.
@@ -65,15 +69,14 @@ class AbstractModule(object):
         self.hp_running = 0
         self.hp_finished = 0
         self.seed = self.config.optimize.rand_seed
-        self.storage = Storage(self.workspace.path)
-        self.trial_id = TrialId(self.config.config_path)
+        self.storage = Storage(self.workspace.storage_file_path)
+        self.trial_id = TrialId(self.config)
         # TODO: Separate the generator if don't want to affect randomness each other.
         self._rng = np.random.RandomState(self.seed)
         self.module_name = module_name
 
         self.storage.variable.register(
-            process_name=self.module_name,
-            labels=['native_random_state', 'numpy_random_state', 'state']
+            process_name=self.module_name, labels=["native_random_state", "numpy_random_state", "state"]
         )
 
     def update_each_state_count(self) -> None:
@@ -120,20 +123,13 @@ class AbstractModule(object):
             None
         """
         self.logger.info(
-            f'{self.hp_finished}/{self.config.optimize.trial_number}, '
-            f'finished, '
-            f'ready: {self.hp_ready}, '
-            f'running: {self.hp_running}'
+            f"{self.hp_finished}/{self.config.optimize.trial_number}, "
+            f"finished, "
+            f"ready: {self.hp_ready}, "
+            f"running: {self.hp_running}"
         )
 
-    def set_logger(
-        self,
-        logger_name: str,
-        logfile: Path,
-        file_level: int,
-        stream_level: int,
-        module_type: str
-    ) -> None:
+    def set_logger(self, logger_name: str, logfile: Path, file_level: int, stream_level: int, module_type: str) -> None:
         """Set a default logger options.
 
         Args:
@@ -149,18 +145,13 @@ class AbstractModule(object):
         """
         self.logger = logging.getLogger(logger_name)
         self.logger.setLevel(logging.DEBUG)
-        fh = logging.FileHandler(logfile, mode='w')
-        fh_formatter = logging.Formatter(
-            '%(asctime)s %(levelname)-8s %(filename)-12s line '
-            '%(lineno)-4s %(message)s'
-        )
+        fh = logging.FileHandler(logfile, mode="w")
+        fh_formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(filename)-12s line " "%(lineno)-4s %(message)s")
         fh.setFormatter(fh_formatter)
         fh.setLevel(file_level)
 
         ch = logging.StreamHandler()
-        ch_formatter = logging.Formatter(
-            f'{module_type} %(levelname)-8s %(message)s'
-        )
+        ch_formatter = logging.Formatter(f"{module_type} %(levelname)-8s %(message)s")
         ch.setFormatter(ch_formatter)
         ch.setLevel(stream_level)
 
@@ -205,29 +196,28 @@ class AbstractModule(object):
         Returns:
             None
         """
-        self.storage.variable.d['state'].set(trial_id, self)
+        self.storage.variable.d["state"].set(trial_id, self)
 
         # random state
-        self.storage.variable.d['numpy_random_state'].set(trial_id, self.get_numpy_random_state())
+        self.storage.variable.d["numpy_random_state"].set(trial_id, self.get_numpy_random_state())
 
     def _deserialize(self, trial_id: int) -> None:
-        """ Deserialize this module.
+        """Deserialize this module.
 
         Returns:
             None
         """
-        self.__dict__.update(self.storage.variable.d['state'].get(trial_id).__dict__.copy())
+        self.__dict__.update(self.storage.variable.d["state"].get(trial_id).__dict__.copy())
 
         # random state
-        self.set_numpy_random_state(self.storage.variable.d['numpy_random_state'].get(trial_id))
+        self.set_numpy_random_state(self.storage.variable.d["numpy_random_state"].get(trial_id))
 
     def write_random_seed_to_debug_log(self) -> None:
-        """Writes the random seed to the logger as debug information.
-        """
-        self.logger.debug(f'create numpy random generator by seed: {self.seed}')
+        """Writes the random seed to the logger as debug information."""
+        self.logger.debug(f"create numpy random generator by seed: {self.seed}")
 
     def get_numpy_random_state(
-        self
+        self,
     ) -> dict[str, Any] | tuple[str, np.ndarray[Any, np.dtype[np.uint32]], int, int, float]:
         """Gets random state.
 
@@ -238,10 +228,7 @@ class AbstractModule(object):
         """
         return self._rng.get_state()
 
-    def set_numpy_random_state(
-        self,
-        state: Any
-    ) -> None:
+    def set_numpy_random_state(self, state: Any) -> None:
         """Gets random state.
 
         Args:
@@ -251,7 +238,7 @@ class AbstractModule(object):
         self._rng.set_state(state)
 
     def check_error(self) -> bool:
-        """ Check to confirm if an error has occurred.
+        """Check to confirm if an error has occurred.
 
         Args:
             None
@@ -262,7 +249,7 @@ class AbstractModule(object):
         return True
 
     def resume(self) -> None:
-        """ When in resume mode, load the previous
+        """When in resume mode, load the previous
                 optimization data in advance.
 
         Args:
@@ -271,14 +258,11 @@ class AbstractModule(object):
         Returns:
             None
         """
-        if (
-            self.config.resume is not None and
-            self.config.resume > 0
-        ):
+        if self.config.resume is not None and self.config.resume > 0:
             self._deserialize(self.config.resume)
 
     def __getstate__(self) -> dict[str, Any]:
         obj = self.__dict__.copy()
-        del obj['storage']
-        del obj['config']
+        del obj["storage"]
+        del obj["config"]
         return obj

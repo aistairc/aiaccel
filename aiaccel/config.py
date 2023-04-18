@@ -7,15 +7,15 @@ from pathlib import Path
 from typing import Any, List, Optional, Union
 
 from omegaconf import OmegaConf
+from omegaconf.base import Container
 from omegaconf.dictconfig import DictConfig
 from omegaconf.listconfig import ListConfig
-from omegaconf.base import Container
 
 
 class ResourceType(Enum):
-    abci: str = 'abci'
-    local: str = 'local'
-    python_local: str = 'python_local'
+    abci: str = "abci"
+    local: str = "local"
+    python_local: str = "python_local"
 
     @classmethod
     def _missing_(cls, value: Any) -> Any | None:
@@ -27,8 +27,8 @@ class ResourceType(Enum):
 
 
 class OptimizerDirection(Enum):
-    minimize: str = 'minimize'
-    maximize: str = 'maximize'
+    minimize: str = "minimize"
+    maximize: str = "maximize"
 
     @classmethod
     def _missing_(cls, value: Any) -> Any | None:
@@ -73,7 +73,6 @@ class ParameterConfig:
     initial: Optional[Any]
     choices: Optional[List[Union[None, float, int, str]]]
     sequence: Optional[List[Union[None, float, int, str]]]
-    q: Optional[Union[float, int]]
     log: Optional[bool]
     base: Optional[int]
     step: Optional[Union[int, float]]
@@ -138,12 +137,6 @@ class ConditionConfig:
 
 
 @dataclass
-class VerificationConfig:
-    is_verified: bool
-    condition: List[ConditionConfig]
-
-
-@dataclass
 class Config:
     generic: GenericConfig
     resource: ResourceConifig
@@ -151,7 +144,6 @@ class Config:
     optimize: OptimizeConifig
     job_setting: JobConfig
     logger: Optional[LoggerConfig]
-    verification: Optional[VerificationConfig]
     clean: Optional[bool]
     resume: Optional[Union[None, int]]
     config_path: Optional[Union[None, Path, str]]
@@ -165,12 +157,11 @@ def set_structs_false(conf: Container) -> None:
                 set_structs_false(conf.__dict__["_content"][item])
 
 
-def load_config(config_path: Path | str) -> Union[ListConfig, DictConfig]:
+def load_config(config_path: Path | str) -> DictConfig:
     """
     Load any configuration files, return the DictConfig object.
     Args:
         config_path (str): A path to a configuration file.
-
     Returns:
         config: DictConfig object
     """
@@ -180,7 +171,7 @@ def load_config(config_path: Path | str) -> Union[ListConfig, DictConfig]:
         raise ValueError("Config is not found.")
 
     base = OmegaConf.structured(Config)
-    default = OmegaConf.create(read_text('aiaccel', 'default_config.yaml'))
+    default = OmegaConf.create(read_text("aiaccel", "default_config.yaml"))
     customize = OmegaConf.load(path)
     customize.config_path = str(path)
     if not isinstance(customize.optimize.goal, ListConfig):
@@ -189,7 +180,8 @@ def load_config(config_path: Path | str) -> Union[ListConfig, DictConfig]:
     config: Union[ListConfig, DictConfig] = OmegaConf.merge(base, default)
     set_structs_false(config)
     config = OmegaConf.merge(config, customize)
-
+    if not isinstance(config, DictConfig):
+        raise RuntimeError("The configuration is not a DictConfig object.")
     return config
 
 

@@ -6,9 +6,7 @@ from typing import Any
 import fasteners
 import yaml
 
-from aiaccel.common import dict_result
-from aiaccel.common import extension_result
-from aiaccel.common import extension_hp
+from aiaccel.common import dict_result, extension_hp, extension_result
 
 
 def create_yaml(path: Path, content: Any, dict_lock: Path | None = None) -> None:
@@ -23,17 +21,15 @@ def create_yaml(path: Path, content: Any, dict_lock: Path | None = None) -> None
         None
     """
     if dict_lock is None:
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(yaml.dump(content, default_flow_style=False))
     else:
-        with fasteners.InterProcessLock(
-                interprocess_lock_file(path, dict_lock)):
-            with open(path, 'w') as f:
+        with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
+            with open(path, "w") as f:
                 f.write(yaml.dump(content, default_flow_style=False))
 
 
-def file_create(path: Path, content: str, dict_lock: Path | None = None
-                ) -> None:
+def file_create(path: Path, content: str, dict_lock: Path | None = None) -> None:
     """Create a text file.
     Args:
         path (Path): The path of the created file.
@@ -45,12 +41,11 @@ def file_create(path: Path, content: str, dict_lock: Path | None = None
         None
     """
     if dict_lock is None:
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(content)
     else:
-        with fasteners.InterProcessLock(
-                interprocess_lock_file(path, dict_lock)):
-            with open(path, 'w') as f:
+        with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
+            with open(path, "w") as f:
                 f.write(content)
 
 
@@ -68,8 +63,7 @@ def file_delete(path: Path, dict_lock: Path | None = None) -> None:
         if dict_lock is None:
             path.unlink()
         else:
-            with fasteners.InterProcessLock(
-                    interprocess_lock_file(path, dict_lock)):
+            with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
                 path.unlink()
 
 
@@ -86,19 +80,17 @@ def file_read(path: Path, dict_lock: Path | None = None) -> str | None:
     lines = None
     if path.exists():
         if dict_lock is None:
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 lines = f.read()
         else:
-            with fasteners.InterProcessLock(
-                    interprocess_lock_file(path, dict_lock)):
-                with open(path, 'r') as f:
+            with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
+                with open(path, "r") as f:
                     lines = f.read()
 
     return lines
 
 
-def get_dict_files(directory: Path, pattern: str,
-                   dict_lock: Path | None = None) -> list[Path] | None:
+def get_dict_files(directory: Path, pattern: str, dict_lock: Path | None = None) -> list[Path] | None:
     """Get files matching a pattern in a directory.
     Args:
         directory (Path): A directory to search files.
@@ -116,8 +108,7 @@ def get_dict_files(directory: Path, pattern: str,
                 files.sort()
             return files
         else:
-            with fasteners.InterProcessLock(
-                    interprocess_lock_file(directory, dict_lock)):
+            with fasteners.InterProcessLock(interprocess_lock_file(directory, dict_lock)):
                 files = list(directory.glob(pattern))
                 if len(files) > 0:
                     files.sort()
@@ -126,8 +117,7 @@ def get_dict_files(directory: Path, pattern: str,
         return None
 
 
-def get_file_result(path: Path, dict_lock: Path | None = None
-                    ) -> list[Path] | None:
+def get_file_result(path: Path, dict_lock: Path | None = None) -> list[Path] | None:
     """Get files in result directory.
     Args:
         path (Path): A path to result directory.
@@ -138,15 +128,10 @@ def get_file_result(path: Path, dict_lock: Path | None = None
         list: Files in result directory.
     """
 
-    return get_dict_files(
-        path / dict_result,
-        f'*.{extension_result}',
-        dict_lock=dict_lock
-    )
+    return get_dict_files(path / dict_result, f"*.{extension_result}", dict_lock=dict_lock)
 
 
-def get_file_result_hp(path: Path, dict_lock: Path | None = None
-                       ) -> Any:
+def get_file_result_hp(path: Path, dict_lock: Path | None = None) -> Any:
     """Get files in result directory.
     Args:
         path (Path): A path to result directory.
@@ -157,11 +142,7 @@ def get_file_result_hp(path: Path, dict_lock: Path | None = None
         list: Files in result directory.
     """
 
-    return get_dict_files(
-        path / dict_result,
-        f'*.{extension_hp}',
-        dict_lock=dict_lock
-    )
+    return get_dict_files(path / dict_result, f"*.{extension_hp}", dict_lock=dict_lock)
 
 
 def interprocess_lock_file(path: Path, dict_lock: Path) -> Path:
@@ -187,11 +168,11 @@ def load_yaml(path: Path, dict_lock: Path | None = None) -> dict[str, Any]:
         dict: A loaded content.
     """
     if dict_lock is None:
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             yml = yaml.load(f, Loader=yaml.UnsafeLoader)
     else:
         with fasteners.InterProcessLock(interprocess_lock_file(path, dict_lock)):
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 yml = yaml.load(f, Loader=yaml.UnsafeLoader)
     return yml
 

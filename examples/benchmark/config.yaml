@@ -73,7 +73,3 @@ logger:
     master: "DEBUG"
     optimizer: "DEBUG"
     scheduler: "DEBUG"
-
-verification:
-  is_verified: false
-  condition: []
