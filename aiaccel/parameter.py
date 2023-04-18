@@ -15,16 +15,16 @@ def get_type(parameter: dict[str, Any]) -> str:
         str: A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
         'ORDINAL'.
     """
-    if parameter['type'].lower() == 'uniform_int':
-        return 'INT'
-    elif parameter['type'].lower() == 'uniform_float':
-        return 'FLOAT'
-    elif parameter['type'].lower() == 'categorical':
-        return 'CATEGORICAL'
-    elif parameter['type'].lower() == 'ordinal':
-        return 'ORDINAL'
+    if parameter["type"].lower() == "uniform_int":
+        return "INT"
+    elif parameter["type"].lower() == "uniform_float":
+        return "FLOAT"
+    elif parameter["type"].lower() == "categorical":
+        return "CATEGORICAL"
+    elif parameter["type"].lower() == "ordinal":
+        return "ORDINAL"
     else:
-        return parameter['type']
+        return parameter["type"]
 
 
 class HyperParameter(object):
@@ -52,17 +52,17 @@ class HyperParameter(object):
 
     def __init__(self, parameter: dict[str, Any]) -> None:
         self._raw_dict = parameter
-        self.name = parameter['name']
+        self.name = parameter["name"]
         self.type = get_type(parameter)
-        self.log = parameter.get('log', False)
-        self.lower = parameter.get('lower', None)
-        self.upper = parameter.get('upper', None)
-        self.choices = parameter.get('choices', None)
-        self.sequence = parameter.get('sequence', None)
-        self.initial = parameter.get('initial', None)
-        self.step = parameter.get('step', None)
-        self.base = parameter.get('base', None)
-        self.num_numeric_choices = parameter.get('num_numeric_choices', None)
+        self.log = parameter.get("log", False)
+        self.lower = parameter.get("lower", None)
+        self.upper = parameter.get("upper", None)
+        self.choices = parameter.get("choices", None)
+        self.sequence = parameter.get("sequence", None)
+        self.initial = parameter.get("initial", None)
+        self.step = parameter.get("step", None)
+        self.base = parameter.get("base", None)
+        self.num_numeric_choices = parameter.get("num_numeric_choices", None)
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         """Sample a parameter.
@@ -80,19 +80,18 @@ class HyperParameter(object):
         """
         if initial and self.initial is not None:
             value = self.initial
-        elif self.type.lower() == 'int':
+        elif self.type.lower() == "int":
             value = rng.randint(self.lower, self.upper)
-        elif self.type.lower() == 'float':
+        elif self.type.lower() == "float":
             value = rng.uniform(self.lower, self.upper)
-        elif self.type.lower() == 'categorical':
+        elif self.type.lower() == "categorical":
             value = rng.choice(self.choices)
-        elif self.type.lower() == 'ordinal':
+        elif self.type.lower() == "ordinal":
             value = rng.choice(self.sequence)
         else:
-            raise TypeError(
-                f'Invalid hyper parameter type: {self.type}')
+            raise TypeError(f"Invalid hyper parameter type: {self.type}")
 
-        return {'name': self.name, 'type': self.type, 'value': value}
+        return {"name": self.name, "type": self.type, "value": value}
 
 
 class HyperParameterConfiguration(object):
@@ -111,7 +110,7 @@ class HyperParameterConfiguration(object):
         self.hps: dict[str, HyperParameter] = {}
 
         for hps in self.json_string:
-            self.hps[hps['name']] = HyperParameter(hps)
+            self.hps[hps["name"]] = HyperParameter(hps)
 
     def get_hyperparameter(self, name: str) -> HyperParameter:
         """Get a hyper parameter with a name.
@@ -128,7 +127,7 @@ class HyperParameterConfiguration(object):
         if name in self.hps:
             return self.hps[name]
         else:
-            raise KeyError(f'The parameter name {name} does not exist.')
+            raise KeyError(f"The parameter name {name} does not exist.")
 
     def get_parameter_list(self) -> list[HyperParameter]:
         """Get a list of hyper parameter objects.

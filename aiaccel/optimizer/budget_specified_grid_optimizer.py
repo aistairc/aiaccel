@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from aiaccel.optimizer._grid_point_generator import GridPointGenerator
 from omegaconf.dictconfig import DictConfig
+
+from aiaccel.optimizer._grid_point_generator import GridPointGenerator
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 
 
 class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
@@ -25,8 +26,7 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
 
         if accept_small_trial_number:
             self.logger.warning(
-                'The option "accept_small_trial_number" is valid. '
-                'Some of grid points may be not seached.'
+                'The option "accept_small_trial_number" is valid. ' "Some of grid points may be not seached."
             )
 
         try:
@@ -35,7 +35,7 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
                 self.params.get_parameter_list(),
                 sampling_method=self.config.optimize.grid_sampling_method.upper(),
                 rng=self._rng,
-                accept_small_trial_number=accept_small_trial_number
+                accept_small_trial_number=accept_small_trial_number,
             )
         except ValueError as exception:
             self.logger.error(exception)
@@ -51,22 +51,13 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
             return None
 
         if self._grid_point_generator.all_grid_points_generated():
-            self.logger.info('Generated all of parameters.')
+            self.logger.info("Generated all of parameters.")
             self.all_parameters_generated = True
             return None
 
         new_params: list[dict[str, float | int | str]] = []
-        for param, value in zip(
-                self.params.get_parameter_list(),
-                self._grid_point_generator.get_next_grid_point()
-        ):
-            new_params.append(
-                {
-                    'parameter_name': param.name,
-                    'type': param.type,
-                    'value': value
-                }
-            )
+        for param, value in zip(self.params.get_parameter_list(), self._grid_point_generator.get_next_grid_point()):
+            new_params.append({"parameter_name": param.name, "type": param.type, "value": value})
         return new_params
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
@@ -82,10 +73,9 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
         for hyperparameter in self.params.get_parameter_list():
             if hyperparameter.initial is not None:
                 self.logger.warning(
-                    "Initial values cannot be specified for grid search. "
-                    "The set initial value has been invalidated."
+                    "Initial values cannot be specified for grid search. " "The set initial value has been invalidated."
                 )
         if initial_parameter := self.generate_parameter():
             return initial_parameter
         else:
-            raise ValueError('Initial parameter could not be generated.')
+            raise ValueError("Initial parameter could not be generated.")

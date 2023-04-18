@@ -1,0 +1,148 @@
+[build-system]
+requires = ["setuptools>=50.3.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aiaccel"
+version = "0.0.1"
+description = "A hyperparameter optimization library for AI Bridging Cloud Infrastructure (ABCI). This software solves hyperparameter optimizations related to AI technologies including deep learning and multi-agent simulation. The software currently supports five optimization algorithms: random search, grid search, sobol sequence, nelder-mead method, and TPE."
+readme = "README.md"
+requires-python = ">=3.8.1,<3.12"
+license = {text = "MIT"}
+authors = [
+    {name = "aistairc", email = "aistairc@example.com"}
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "asciichartpy>=1.5.25,<2.0.0",
+    "confile>=1.4,<2.0.0",
+    "coverage>=7.2.2,<8.0.0",
+    "cython>=0.29.33,<1.0.0",
+    "fasteners>=0.18,<1.0.0",
+    "filelock>=3.10.0,<4.0.0",
+    "importlib-resources>=5.12.0,<6.0.0",
+    "importlib-metadata>=6.1.0,<7.0.0",
+    "joblib>=1.2.0,<2.0.0",
+    "mako",
+    "monotonic>=1.6,<2.0.0",
+    "natsort>=8.3.1,<9.0.0",
+    "omegaconf",
+    "optuna>=3.1.0,<4.0.0",
+    "pluggy>=1.0.0,<2.0.0",
+    "pyyaml>=6.0,<7.0.0",
+    "scipy>=1.10.1,<2.0.0",
+    "six>=1.16.0,<2.0.0",
+    "sqlalchemy>=2.0.7,<3.0.0",
+    "tensorboard",
+    "tensorboardx",
+    "toml>=0.10.2,<1.0.0",
+    "transitions>=0.9.0,<1.0.0",
+    "twisted>=22.10.0,<23.0.0",
+    "undecorated>=0.3.0,<1.0.0",
+    "watchdog>=2.3.1,<3.0.0",
+]
+
+[project.scripts]
+aiaccel-plot= "aiaccel.cli.plot:main"
+aiaccel-report = "aiaccel.cli.report:main"
+aiaccel-start = "aiaccel.cli.start:main"
+aiaccel-view = "aiaccel.cli.view:main"
+aiaccel-set-result = "aiaccel.cli.set_result:main"
+
+[project.urls]
+homepage = "https://github.com/aistairc/aiaccel"
+documentation = "https://aiaccel.readthedocs.io"
+repository = "https://github.com/aistairc/aiaccel"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-arraydiff",
+    "pytest-astropy",
+    "pytest-cov",
+    "pytest-subprocess",
+    "pytest-tornasync",
+    "pytest-trio",
+    "pytest-twisted",
+]
+github-actions = [
+    "pytest-github-actions-annotate-failures",
+]
+dev = [
+    "black",
+    "flake8",
+    "flake8-bugbear",
+    "flake8-builtins",
+    "flake8-isort",
+    "flake8-pyproject",
+    "flake8-pytest-style",
+    "flake8-unused-arguments",
+    "isort",
+    "mypy",
+    "myst-parser",
+    "pep8-naming",
+    "pre-commit",
+    "pycodestyle",
+    "sphinx",
+    "sphinxcontrib-jquery",
+    "sphinx-intl",
+    "sphinx-fontawesome",
+    "sphinx-rtd-theme",
+]
+
+[tool.setuptools]
+include-package-data = true
+packages = [
+    'aiaccel',
+    'aiaccel.abci',
+    'aiaccel.master',
+    'aiaccel.master.evaluator',
+    'aiaccel.optimizer',
+    'aiaccel.scheduler',
+    'aiaccel.scheduler.algorithm',
+    'aiaccel.scheduler.job',
+    'aiaccel.scheduler.job.model',
+    'aiaccel.tensorboard',
+    'aiaccel.util',
+    'aiaccel.cli',
+    'aiaccel.storage'
+]
+
+[tool.setuptools.package-data]
+aiaccel = ["default_config.yaml"]
+
+[tool.black]
+target-version = ['py38']
+line-length = 120
+
+[tool.isort]
+profile = "black"
+py_version = 38
+line_length = 120
+
+[tool.flake8]
+max-line-length = 120
+# E203: whitespace before ':'
+# E501: Line too long (82 > 79 characters)
+# W503: Line break occurred before a binary operator
+ignore = "E203,E501,W503"
+
+[tool.mypy]
+python_version="3.8"
+install_types = true
+non_interactive = true
+ignore_missing_imports = true
+warn_unused_configs = true
+disallow_any_generics = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_reexport = true
+strict_equality = true
+strict_concatenate = true

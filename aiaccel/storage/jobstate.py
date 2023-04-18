@@ -5,8 +5,8 @@ from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage import Abstract
-from aiaccel.storage import JobStateTable
+from aiaccel.storage.abstract import Abstract
+from aiaccel.storage.model import JobStateTable
 from aiaccel.util import retry
 
 
@@ -34,10 +34,7 @@ class JobState(Abstract):
                     .one_or_none()
                 )
                 if data is None:
-                    new_row = JobStateTable(
-                        trial_id=trial_id,
-                        state=state
-                    )
+                    new_row = JobStateTable(trial_id=trial_id, state=state)
                     session.add(new_row)
                 else:
                     data.state = state
@@ -59,12 +56,7 @@ class JobState(Abstract):
         """
         with self.create_session() as session:
             try:
-                data = [
-                    JobStateTable(
-                        trial_id=state['trial_id'],
-                        state=state['jobstate']
-                    ) for state in states
-                ]
+                data = [JobStateTable(trial_id=state["trial_id"], state=state["jobstate"]) for state in states]
                 session.bulk_save_objects(data)
                 session.commit()
             except SQLAlchemyError as e:
@@ -96,19 +88,12 @@ class JobState(Abstract):
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_all_trial_jobstate(self) -> list[Any]:
         with self.create_session() as session:
-            data = (
-                session.query(JobStateTable)
-                .with_for_update(read=True)
-                .all()
-            )
+            data = session.query(JobStateTable).with_for_update(read=True).all()
 
         if len(data) == 0:
-            return [{'trial_id': None, 'jobstate': None}]
+            return [{"trial_id": None, "jobstate": None}]
 
-        jobstates = [
-            {'trial_id': d.trial_id, 'jobstate': d.state}
-            for d in data
-        ]
+        jobstates = [{"trial_id": d.trial_id, "jobstate": d.state} for d in data]
         return jobstates
 
     @retry(_MAX_NUM=60, _DELAY=1.0)

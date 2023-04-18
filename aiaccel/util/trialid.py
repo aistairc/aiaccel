@@ -5,8 +5,7 @@ from typing import Any
 import fasteners
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import (file_hp_count, file_hp_count_lock,
-                            file_hp_count_lock_timeout)
+from aiaccel.common import file_hp_count, file_hp_count_lock, file_hp_count_lock_timeout
 from aiaccel.workspace import Workspace
 
 
@@ -29,7 +28,7 @@ class TrialId:
         self.config = config
         self.workspace = Workspace(self.config.generic.workspace)
         self.name_length = self.config.job_setting.name_length
-        self.file_hp_count_fmt = f'%0{self.name_length}d'
+        self.file_hp_count_fmt = f"%0{self.name_length}d"
 
         self.count_path = self.workspace.hp / file_hp_count
         self.lock_path = self.workspace.hp / file_hp_count_lock
@@ -48,14 +47,13 @@ class TrialId:
         return self.file_hp_count_fmt % trial_id
 
     def increment(self) -> None:
-        """Increments trial id.
-        """
+        """Increments trial id."""
         if self.lock.acquire(timeout=file_hp_count_lock_timeout):
             trial_id = 0
             if self.count_path.exists():
                 trial_id = int(self.count_path.read_text())
                 trial_id += 1
-            self.count_path.write_text('%d' % trial_id)
+            self.count_path.write_text("%d" % trial_id)
             self.lock.release()
 
     def get(self) -> Any:
@@ -74,17 +72,15 @@ class TrialId:
         """
         if self.lock.acquire(timeout=file_hp_count_lock_timeout):
             trial_id = num
-            self.count_path.write_text('%d' % trial_id)
+            self.count_path.write_text("%d" % trial_id)
             self.lock.release()
 
     @property
     def integer(self) -> Any:
-        """Trial id.
-        """
+        """Trial id."""
         return self.get()
 
     @property
     def string(self) -> str:
-        """Formatted trial id.
-        """
+        """Formatted trial id."""
         return self.file_hp_count_fmt % self.get()
