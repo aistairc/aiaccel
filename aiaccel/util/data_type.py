@@ -4,24 +4,23 @@ from typing import Any
 
 from numpy.random import RandomState
 from omegaconf.base import UnionNode
-from omegaconf.nodes import (BooleanNode, BytesNode, FloatNode, IntegerNode,
-                             PathNode, StringNode)
+from omegaconf.nodes import BooleanNode, BytesNode, FloatNode, IntegerNode, PathNode, StringNode
 
 
 def is_uniform_float(data_type: str) -> bool:
-    return data_type.lower() == 'uniform_float'
+    return data_type.lower() == "uniform_float"
 
 
 def is_uniform_int(data_type: str) -> bool:
-    return data_type.lower() == 'uniform_int'
+    return data_type.lower() == "uniform_int"
 
 
 def is_categorical(data_type: str) -> bool:
-    return data_type.lower() == 'categorical'
+    return data_type.lower() == "categorical"
 
 
 def is_ordinal(data_type: str) -> bool:
-    return data_type.lower() == 'ordinal'
+    return data_type.lower() == "ordinal"
 
 
 class AbstractParameter:
@@ -49,21 +48,21 @@ class AbstractParameter:
 
     def __init__(self, parameter: dict[str, Any]) -> None:
         self._raw_dict = parameter
-        self.name = parameter['name']
-        self.type = parameter['type'].lower()
-        self.log = parameter.get('log', False)
-        self.lower = parameter.get('lower', None)
-        self.upper = parameter.get('upper', None)
-        self.choices = parameter.get('choices', None)
+        self.name = parameter["name"]
+        self.type = parameter["type"].lower()
+        self.log = parameter.get("log", False)
+        self.lower = parameter.get("lower", None)
+        self.upper = parameter.get("upper", None)
+        self.choices = parameter.get("choices", None)
         if self.choices is not None:
             self.choices = [self.unwrap(v) for v in self.choices]
-        self.sequence = parameter.get('sequence', None)
+        self.sequence = parameter.get("sequence", None)
         if self.sequence is not None:
             self.sequence = [self.unwrap(v) for v in self.sequence]
-        self.initial = parameter.get('initial', None)
-        self.step = parameter.get('step', None)
-        self.base = parameter.get('base', None)
-        self.num_numeric_choices = parameter.get('num_numeric_choices', None)
+        self.initial = parameter.get("initial", None)
+        self.step = parameter.get("step", None)
+        self.base = parameter.get("base", None)
+        self.num_numeric_choices = parameter.get("num_numeric_choices", None)
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         """Sample a parameter.
@@ -87,7 +86,7 @@ class AbstractParameter:
             if isinstance(value, (IntegerNode, PathNode, StringNode, BooleanNode, BytesNode, FloatNode)):
                 return value._value()
             else:
-                assert False, f'Invalid type: {type(value)}'
+                assert False, f"Invalid type: {type(value)}"
         elif isinstance(value, (IntegerNode, PathNode, StringNode, BooleanNode, BytesNode, FloatNode)):
             return value._value()
         else:
@@ -100,7 +99,7 @@ class IntParameter(AbstractParameter):
             value = self.initial
         else:
             value = rng.randint(self.lower, self.upper)
-        return {'name': self.name, 'type': self.type, 'value': self.unwrap(value)}
+        return {"name": self.name, "type": self.type, "value": self.unwrap(value)}
 
 
 class FloatParameter(AbstractParameter):
@@ -109,7 +108,7 @@ class FloatParameter(AbstractParameter):
             value = self.initial
         else:
             value = rng.uniform(self.lower, self.upper)
-        return {'name': self.name, 'type': self.type, 'value': self.unwrap(value)}
+        return {"name": self.name, "type": self.type, "value": self.unwrap(value)}
 
 
 class CategoricalParameter(AbstractParameter):
@@ -118,7 +117,7 @@ class CategoricalParameter(AbstractParameter):
             value = self.initial
         else:
             value = rng.choice(self.choices)
-        return {'name': self.name, 'type': self.type, 'value': self.unwrap(value)}
+        return {"name": self.name, "type": self.type, "value": self.unwrap(value)}
 
 
 class OrdinalParameter(AbstractParameter):
@@ -127,12 +126,12 @@ class OrdinalParameter(AbstractParameter):
             value = self.initial
         else:
             value = rng.choice(self.sequence)
-        return {'name': self.name, 'type': self.type, 'value': self.unwrap(value)}
+        return {"name": self.name, "type": self.type, "value": self.unwrap(value)}
 
 
 class Parameter(AbstractParameter):
     def __new__(cls, parameter: dict[str, Any]) -> Any:
-        data_type = parameter['type'].lower()
+        data_type = parameter["type"].lower()
         if is_uniform_int(data_type):
             return IntParameter(parameter)
         elif is_uniform_float(data_type):

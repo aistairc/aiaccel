@@ -22,7 +22,7 @@ class HyperParameterConfiguration(object):
         self.param: dict[str, Parameter] = {}
 
         for param in parameters:
-            self.param[param['name']] = Parameter(param)
+            self.param[param["name"]] = Parameter(param)
 
     def get_hyperparameter(self, name: str) -> Parameter:
         """Get a hyper parameter with a name.

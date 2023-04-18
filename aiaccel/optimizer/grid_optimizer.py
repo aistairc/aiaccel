@@ -8,8 +8,7 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.util.data_type import (Parameter, is_categorical, is_ordinal,
-                                    is_uniform_float, is_uniform_int)
+from aiaccel.util.data_type import Parameter, is_categorical, is_ordinal, is_uniform_float, is_uniform_int
 
 
 def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool, Any]:
@@ -84,15 +83,15 @@ def generate_grid_points(p: Parameter, config: DictConfig) -> dict[str, Any]:
                 x *= step_x
         else:
             n = int((upper - lower) / step) + 1
-            new_param['parameters'] = [lower + i * step for i in range(0, n)]
+            new_param["parameters"] = [lower + i * step for i in range(0, n)]
         if is_uniform_int(p.type):
-            new_param['parameters'] = [int(i) for i in new_param['parameters']]
+            new_param["parameters"] = [int(i) for i in new_param["parameters"]]
 
     elif is_categorical(p.type):
-        new_param['parameters'] = p.choices
+        new_param["parameters"] = p.choices
 
     elif is_ordinal(p.type):
-        new_param['parameters'] = p.sequence
+        new_param["parameters"] = p.sequence
 
     else:
         raise TypeError(f"Invalid parameter type: {p.type}")
@@ -147,7 +146,7 @@ class GridOptimizer(AbstractOptimizer):
             return None
 
         parameter_index = []
-        div = [reduce(lambda x, y: x * y, parameter_lengths[i + 1:]) for i in range(0, len(parameter_lengths) - 1)]
+        div = [reduce(lambda x, y: x * y, parameter_lengths[i + 1 :]) for i in range(0, len(parameter_lengths) - 1)]
 
         for i in range(0, len(parameter_lengths) - 1):
             d = int(remain / div[i])

@@ -7,9 +7,14 @@ from typing import Any
 import numpy as np
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import (class_master, class_optimizer, class_scheduler,
-                            module_type_master, module_type_optimizer,
-                            module_type_scheduler)
+from aiaccel.common import (
+    class_master,
+    class_optimizer,
+    class_scheduler,
+    module_type_master,
+    module_type_optimizer,
+    module_type_scheduler,
+)
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId
 from aiaccel.workspace import Workspace

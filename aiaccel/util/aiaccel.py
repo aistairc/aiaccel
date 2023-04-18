@@ -10,8 +10,7 @@ from typing import Any
 from aiaccel.config import load_config
 from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.util import cast_y, get_time_now
-from aiaccel.util.data_type import (is_categorical, is_ordinal,
-                                    is_uniform_float, is_uniform_int)
+from aiaccel.util.data_type import is_categorical, is_ordinal, is_uniform_float, is_uniform_int
 
 
 class CommandLineArgs:

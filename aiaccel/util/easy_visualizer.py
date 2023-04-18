@@ -4,10 +4,26 @@ import shutil
 from typing import Any
 
 import numpy as np
-from asciichartpy import (black, blue, cyan, darkgray, green, lightblue,
-                          lightcyan, lightgray, lightgreen, lightmagenta,
-                          lightred, lightyellow, magenta, plot, red, reset,
-                          white, yellow)
+from asciichartpy import (
+    black,
+    blue,
+    cyan,
+    darkgray,
+    green,
+    lightblue,
+    lightcyan,
+    lightgray,
+    lightgreen,
+    lightmagenta,
+    lightred,
+    lightyellow,
+    magenta,
+    plot,
+    red,
+    reset,
+    white,
+    yellow,
+)
 
 
 class EasyVisualizer:
@@ -151,7 +167,7 @@ class EasyVisualizer:
                 return
 
             if len(data[i]) >= plot_width_max:
-                self.plot_datas.append(data[i][(len(data[i]) - plot_width_max):])
+                self.plot_datas.append(data[i][(len(data[i]) - plot_width_max) :])
             else:
                 self.plot_datas.append(data[i])
         print(plot(series=self.plot_datas, cfg=self.plot_config))

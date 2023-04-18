@@ -9,8 +9,7 @@ from typing import Literal, Union
 import numpy as np
 from numpy.random import RandomState
 
-from aiaccel.util.data_type import (Parameter, is_categorical, is_ordinal,
-                                    is_uniform_float, is_uniform_int)
+from aiaccel.util.data_type import Parameter, is_categorical, is_ordinal, is_uniform_float, is_uniform_int
 
 GridValueType = Union[float, int, str]
 SamplingMethodType = Literal["IN_ORDER", "UNIFORM", "RANDOM", "DUPLICATABLE_RANDOM"]
@@ -405,7 +404,7 @@ class GridPointGenerator:
         self,
         num_trials: int,
         hyperparameters: list[Parameter],
-        sampling_method: SamplingMethodType = 'IN_ORDER',
+        sampling_method: SamplingMethodType = "IN_ORDER",
         rng: RandomState | None = None,
         accept_small_trial_number: bool = False,
     ) -> None:
