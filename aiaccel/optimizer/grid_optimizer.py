@@ -147,7 +147,7 @@ class GridOptimizer(AbstractOptimizer):
             return None
 
         parameter_index = []
-        div = [reduce(lambda x, y: x * y, parameter_lengths[i + 1 :]) for i in range(0, len(parameter_lengths) - 1)]
+        div = [reduce(lambda x, y: x * y, parameter_lengths[i + 1:]) for i in range(0, len(parameter_lengths) - 1)]
 
         for i in range(0, len(parameter_lengths) - 1):
             d = int(remain / div[i])
