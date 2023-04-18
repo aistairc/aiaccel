@@ -1,8 +1,4 @@
 from __future__ import annotations
-from aiaccel.common import extension_hp
-from aiaccel.common import dict_result
-import yaml
-from typing import Any
 
 import os
 import pathlib
@@ -11,8 +7,12 @@ import time
 from argparse import ArgumentParser
 from logging import StreamHandler, getLogger
 from pathlib import Path
+from typing import Any
+
+import yaml
 
 from aiaccel.cli import CsvWriter
+from aiaccel.common import dict_result, extension_hp
 from aiaccel.config import load_config
 from aiaccel.master import create_master
 from aiaccel.module import AbstractModule
@@ -29,9 +29,9 @@ logger.addHandler(StreamHandler())
 def main() -> None:  # pragma: no cover
     """Parses command line options and executes optimization."""
     parser = ArgumentParser()
-    parser.add_argument('--config', '-c', type=str, default="config.yml")
-    parser.add_argument('--resume', type=int, default=None)
-    parser.add_argument('--clean', nargs='?', const=True, default=False)
+    parser.add_argument("--config", "-c", type=str, default="config.yml")
+    parser.add_argument("--resume", type=int, default=None)
+    parser.add_argument("--clean", nargs="?", const=True, default=False)
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -98,7 +98,7 @@ def main() -> None:  # pragma: no cover
     config_name = Path(args.config).name
     shutil.copy(Path(args.config), dst / config_name)
 
-    with open(workspace.final_result_file, 'r') as f:
+    with open(workspace.final_result_file, "r") as f:
         final_results: list[dict[str, Any]] = yaml.load(f, Loader=yaml.UnsafeLoader)
 
     for i, final_result in enumerate(final_results):

@@ -99,9 +99,7 @@ class TpeOptimizer(AbstractOptimizer):
         n_startup_trials = self.study.sampler.get_startup_trials()
         return self.num_of_generated_parameter < n_startup_trials
 
-    def generate_parameter(
-        self, number: int | None = 1
-    ) -> list[dict[str, float | int | str]] | None:
+    def generate_parameter(self, number: int | None = 1) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
         Args:
@@ -114,9 +112,7 @@ class TpeOptimizer(AbstractOptimizer):
         """
 
         self.check_result()
-        self.logger.debug(
-            f"generate_parameter requests {number} params, pool length: {len(self.parameter_pool)}"
-        )
+        self.logger.debug(f"generate_parameter requests {number} params, pool length: {len(self.parameter_pool)}")
 
         # TPE has to be sequential.
         if (not self.is_startup_trials()) and (len(self.parameter_pool) >= 1):
@@ -140,9 +136,7 @@ class TpeOptimizer(AbstractOptimizer):
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(
-            f"new parameter {trial_id} is added to parameter_pool {new_params}"
-        )
+        self.logger.info(f"new parameter {trial_id} is added to parameter_pool {new_params}")
 
         return new_params
 
@@ -177,9 +171,7 @@ class TpeOptimizer(AbstractOptimizer):
         trial_id = self.trial_id.get()
         self.parameter_pool[trial_id] = new_params
         self.trial_pool[trial_id] = trial
-        self.logger.info(
-            f"new initial parameter {trial_id} is added to parameter_pool {new_params}"
-        )
+        self.logger.info(f"new initial parameter {trial_id} is added to parameter_pool {new_params}")
         return new_params
 
     def create_study(self) -> None:
@@ -213,15 +205,9 @@ class TpeOptimizer(AbstractOptimizer):
         for optuna_trial in optuna_trials:
             if optuna_trial.number >= self.config.resume:
                 self.resumed_list.append(optuna_trial)
-                resumed_trial = (
-                    session.query(models.TrialModel)
-                    .filter_by(number=optuna_trial.number)
-                    .first()
-                )
+                resumed_trial = session.query(models.TrialModel).filter_by(number=optuna_trial.number).first()
                 session.delete(resumed_trial)
-                self.logger.info(
-                    f"resume_trial deletes the trial number {resumed_trial.number} from optuna db."
-                )
+                self.logger.info(f"resume_trial deletes the trial number {resumed_trial.number} from optuna db.")
 
         session.commit()
 
@@ -229,9 +215,7 @@ class TpeOptimizer(AbstractOptimizer):
             objective = self.get_any_trial_objective(int(trial_id))
             if objective is not None:
                 del self.parameter_pool[trial_id]
-                self.logger.info(
-                    f"resume_trial trial_id {trial_id} is deleted from parameter_pool"
-                )
+                self.logger.info(f"resume_trial trial_id {trial_id} is deleted from parameter_pool")
 
 
 def create_distributions(
@@ -254,23 +238,15 @@ def create_distributions(
 
     for p in parameters.get_parameter_list():
         if is_uniform_float(p.type):
-            distributions[p.name] = optuna.distributions.FloatDistribution(
-                p.lower, p.upper, log=p.log
-            )
+            distributions[p.name] = optuna.distributions.FloatDistribution(p.lower, p.upper, log=p.log)
 
         elif is_uniform_int(p.type):
-            distributions[p.name] = optuna.distributions.IntDistribution(
-                p.lower, p.upper, log=p.log
-            )
+            distributions[p.name] = optuna.distributions.IntDistribution(p.lower, p.upper, log=p.log)
 
         elif is_categorical(p.type):
-            distributions[p.name] = optuna.distributions.CategoricalDistribution(
-                p.choices
-            )
+            distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
         elif is_ordinal(p.type):
-            distributions[p.name] = optuna.distributions.CategoricalDistribution(
-                p.sequence
-            )
+            distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
 
         else:
             raise TypeError("Unsupported parameter type")

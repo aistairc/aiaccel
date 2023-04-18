@@ -39,7 +39,7 @@ class HyperParameterConfiguration(object):
         if name in self.param:
             return self.param[name]
         else:
-            raise KeyError(f'The parameter name {name} does not exist.')
+            raise KeyError(f"The parameter name {name} does not exist.")
 
     def get_parameter_list(self) -> list[Parameter]:
         """Get a list of hyper parameter objects.

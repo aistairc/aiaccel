@@ -36,13 +36,13 @@ class AbstractOptimizer(AbstractModule):
     """
 
     def __init__(self, config: DictConfig) -> None:
-        super().__init__(config, 'optimizer')
+        super().__init__(config, "optimizer")
         self.set_logger(
-            'root.optimizer',
+            "root.optimizer",
             self.workspace.log / self.config.logger.file.optimizer,
             str_to_logging_level(self.config.logger.log_level.optimizer),
             str_to_logging_level(self.config.logger.stream_level.optimizer),
-            'Optimizer'
+            "Optimizer",
         )
 
         self.trial_number = self.config.optimize.trial_number
@@ -80,10 +80,7 @@ class AbstractOptimizer(AbstractModule):
         """
         return self.trial_number - self.hp_finished - self.hp_ready - self.hp_running == 0
 
-    def register_new_parameters(
-        self,
-        params: list[dict[str, float | int | str]]
-    ) -> None:
+    def register_new_parameters(self, params: list[dict[str, float | int | str]]) -> None:
         """Create hyper parameter files.
 
         Args:
@@ -103,21 +100,13 @@ class AbstractOptimizer(AbstractModule):
                 }
 
         """
-        self.storage.hp.set_any_trial_params(
-            trial_id=self.trial_id.get(),
-            params=params
-        )
+        self.storage.hp.set_any_trial_params(trial_id=self.trial_id.get(), params=params)
 
-        self.storage.trial.set_any_trial_state(
-            trial_id=self.trial_id.get(),
-            state='ready'
-        )
+        self.storage.trial.set_any_trial_state(trial_id=self.trial_id.get(), state="ready")
 
         self.num_of_generated_parameter += 1
 
-    def generate_initial_parameter(
-        self
-    ) -> Any:
+    def generate_initial_parameter(self) -> Any:
         """Generate a list of initial parameters.
 
         Returns:
@@ -128,11 +117,7 @@ class AbstractOptimizer(AbstractModule):
         new_params = []
 
         for s in sample:
-            new_param = {
-                'parameter_name': s['name'],
-                'type': s['type'],
-                'value': s['value']
-            }
+            new_param = {"parameter_name": s["name"], "type": s["type"], "value": s["value"]}
             new_params.append(new_param)
 
         return new_params
@@ -191,8 +176,8 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        self.logger.info('Optimizer delete alive file.')
-        self.logger.info('Optimizer finished.')
+        self.logger.info("Optimizer delete alive file.")
+        self.logger.info("Optimizer finished.")
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -216,11 +201,11 @@ class AbstractOptimizer(AbstractModule):
             return True
 
         self.logger.info(
-            f'hp_ready: {self.hp_ready}, '
-            f'hp_running: {self.hp_running}, '
-            f'hp_finished: {self.hp_finished}, '
-            f'total: {self.config.optimize.trial_number}, '
-            f'pool_size: {pool_size}'
+            f"hp_ready: {self.hp_ready}, "
+            f"hp_running: {self.hp_running}, "
+            f"hp_finished: {self.hp_finished}, "
+            f"total: {self.config.optimize.trial_number}, "
+            f"pool_size: {pool_size}"
         )
 
         if new_params := self.generate_new_parameter():
@@ -234,7 +219,7 @@ class AbstractOptimizer(AbstractModule):
         return True
 
     def resume(self) -> None:
-        """ When in resume mode, load the previous optimization data in advance.
+        """When in resume mode, load the previous optimization data in advance.
 
         Args:
             None
@@ -242,10 +227,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             None
         """
-        if (
-            self.config.resume is not None and
-            self.config.resume > 0
-        ):
+        if self.config.resume is not None and self.config.resume > 0:
             self.storage.rollback_to_ready(self.config.resume)
             self.storage.delete_trial_data_after_this(self.config.resume)
             self.trial_id.initial(num=self.config.resume)
@@ -272,20 +254,17 @@ class AbstractOptimizer(AbstractModule):
 
         for param in params:
             _param = copy.deepcopy(param)
-            param_type = _param['type']
-            param_value = _param['value']
+            param_type = _param["type"]
+            param_value = _param["value"]
 
             # None: str to NoneType
-            if type(_param['value']) in [str, str_]:
-                if _param['value'].lower() == 'none':
-                    _param['value'] = None
-                    _param['type'] = str(type(None))
+            if type(_param["value"]) in [str, str_]:
+                if _param["value"].lower() == "none":
+                    _param["value"] = None
+                    _param["type"] = str(type(None))
 
             try:
-                if (
-                    is_categorical(param_type) or
-                    is_ordinal(param_type)
-                ):
+                if (is_categorical(param_type) or is_ordinal(param_type)):
                     casted_params.append(_param)
                     continue
                 if is_uniform_float(param_type):
@@ -310,9 +289,7 @@ class AbstractOptimizer(AbstractModule):
             return True
 
         for trial_id in error_trial_ids:
-            error_message = self.storage.error.get_any_trial_error(
-                trial_id=trial_id
-            )
+            error_message = self.storage.error.get_any_trial_error(trial_id=trial_id)
             self.logger.error(error_message)
 
         return False

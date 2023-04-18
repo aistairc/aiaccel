@@ -17,8 +17,8 @@ from aiaccel.util.data_type import (is_categorical, is_ordinal,
 class CommandLineArgs:
     def __init__(self) -> None:
         self.parser = ArgumentParser()
-        self.parser.add_argument('--trial_id', type=int, required=False)
-        self.parser.add_argument('--config', type=str, required=False)
+        self.parser.add_argument("--trial_id", type=int, required=False)
+        self.parser.add_argument("--config", type=str, required=False)
         self.args = self.parser.parse_known_args()[0]
         self.trial_id = None
         self.config_path = None
@@ -118,8 +118,8 @@ class Run:
     def execute(
         self,
         func: Callable[[dict[str, float | int | str]], float],
-        xs: 'dict[str, float | int | str]',
-        y_data_type: 'str | None'
+        xs: "dict[str, float | int | str]",
+        y_data_type: "str | None",
     ) -> Any:
         """Executes the target function.
 
@@ -155,9 +155,7 @@ class Run:
         return xs, y, err, start_time, end_time
 
     def execute_and_report(
-        self,
-        func: Callable[[dict[str, float | int | str]], float],
-        y_data_type: str | None = None
+        self, func: Callable[[dict[str, float | int | str]], float], y_data_type: str | None = None
     ) -> None:
         """Executes the target function and report the results.
 

@@ -24,9 +24,9 @@ from aiaccel.util.trialid import TrialId
 
 
 __all__ = [
-    'Buffer',
-    'EasyVisualizer',
-    'OutputHandler',
+    "Buffer",
+    "EasyVisualizer",
+    "OutputHandler",
     # 'Run',
     'Suffix',
     'TrialId',

@@ -29,6 +29,7 @@ class AbstractEvaluator(object):
         trial_id (TrialId): TrialId object.
         workspace (Workspace): Workspace object.
     """
+
     def __init__(self, config: DictConfig) -> None:
         """Initial method for AbstractEvaluator.
 
@@ -63,12 +64,12 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        logger = logging.getLogger('root.master.evaluator')
+        logger = logging.getLogger("root.master.evaluator")
         if self.hp_result:
-            logger.info('Best hyperparameter is followings:')
+            logger.info("Best hyperparameter is followings:")
             logger.info(self.hp_result)
         else:
-            logger.info('Evaluation not available (no results in storage.db).')
+            logger.info("Evaluation not available (no results in storage.db).")
 
     def save(self) -> None:
         """Save current results to a file.

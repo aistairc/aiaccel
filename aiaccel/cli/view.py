@@ -33,13 +33,12 @@ class Viewer:
         Returns:
             None
         """
-        symbols = ['─', '╰', '╭', '╮', '╯', '│']
+        symbols = ["─", "╰", "╭", "╮", "╯", "│"]
         infos = []
         len_margin = 2
         trial_ids = self.storage.trial.get_all_trial_id()
 
         for trial_id in trial_ids:
-
             start_time = self.storage.timestamp.get_any_trial_start_time(trial_id)
             end_time = self.storage.timestamp.get_any_trial_end_time(trial_id)
             status = self.storage.trial.get_any_trial_state(trial_id)
@@ -73,10 +72,7 @@ class Viewer:
             if len(max_column_width) == 0:
                 max_column_width = maximum(width, header_width).tolist()
             else:
-                max_column_width = maximum(
-                    max_column_width,
-                    maximum(width, header_width).tolist()
-                ).tolist()
+                max_column_width = maximum(max_column_width, maximum(width, header_width).tolist()).tolist()
 
         max_width = sum(max_column_width)
         print("\n")
@@ -108,7 +104,7 @@ def main() -> None:  # pragma: no cover
     theterminal.
     """
     parser = ArgumentParser()
-    parser.add_argument('--config', '-c', type=str, default="config.yml")
+    parser.add_argument("--config", "-c", type=str, default="config.yml")
     args = parser.parse_args()
 
     config: DictConfig = load_config(args.config)
