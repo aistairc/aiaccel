@@ -1,17 +1,18 @@
 from __future__ import annotations
-from aiaccel.util.cast import cast_y
-from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
-from aiaccel.util import get_time_now
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from omegaconf.dictconfig import DictConfig
-from aiaccel.config import load_config
-from typing import Any, List
-from subprocess import Popen
 
 from importlib.util import module_from_spec, spec_from_file_location
 from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
+from subprocess import Popen
+from typing import Any, List
 
+from omegaconf.dictconfig import DictConfig
+
+from aiaccel.config import load_config
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.util import get_time_now
+from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
+from aiaccel.util.cast import cast_y
 
 # These are for avoiding mypy-errors from initializer().
 # `global` does not work well.
@@ -29,8 +30,7 @@ class PylocalScheduler(AbstractScheduler):
         self.processes: List[Any] = []
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
-        self.pool = Pool_(self.num_node, initializer=initializer,
-                          initargs=(self.config.config_path,))
+        self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config.config_path,))
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -45,18 +45,15 @@ class PylocalScheduler(AbstractScheduler):
 
         args = []
         for trial_id in trial_ids:
-            self.storage.trial.set_any_trial_state(
-                trial_id=trial_id, state="running")
+            self.storage.trial.set_any_trial_state(trial_id=trial_id, state="running")
             args.append([trial_id, self.get_any_trial_xs(trial_id)])
             self._serialize(trial_id)
 
         for trial_id, xs, ys, err, start_time, end_time in self.pool.imap_unordered(execute, args):
             self.report(trial_id, ys, err, start_time, end_time)
-            self.storage.trial.set_any_trial_state(
-                trial_id=trial_id, state="finished")
+            self.storage.trial.set_any_trial_state(trial_id=trial_id, state="finished")
 
-            self.create_result_file(
-                trial_id, xs, ys, err, start_time, end_time)
+            self.create_result_file(trial_id, xs, ys, err, start_time, end_time)
 
         return True
 

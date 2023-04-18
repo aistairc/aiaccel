@@ -1,11 +1,10 @@
 from __future__ import annotations
-from aiaccel.util import retry
 
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from aiaccel.util import get_time_delta, get_time_now_object, kill_process
+from aiaccel.util import get_time_delta, get_time_now_object, kill_process, retry
 
 if TYPE_CHECKING:
     from aiaccel.scheduler import Job
@@ -60,8 +59,7 @@ class AbstractModel(object):
         Returns:
             bool: A target file exists or not.
         """
-        any_trial_state = obj.storage.trial.get_any_trial_state(
-            trial_id=obj.trial_id)
+        any_trial_state = obj.storage.trial.get_any_trial_state(trial_id=obj.trial_id)
         return obj.next_state == any_trial_state
 
     def get_runner_file(self, obj: "Job") -> Path:
@@ -209,8 +207,7 @@ class AbstractModel(object):
             None
         """
         self.after_confirmed(obj)
-        obj.threshold_timeout = get_time_now_object(
-        ) + get_time_delta(obj.batch_job_timeout)
+        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.batch_job_timeout)
         obj.threshold_retry = obj.result_retry
 
     def conditions_result(self, obj: "Job") -> bool:
@@ -341,8 +338,7 @@ class AbstractModel(object):
             None
         """
         self.after_confirmed(obj)
-        obj.threshold_timeout = get_time_now_object(
-        ) + get_time_delta(obj.batch_job_timeout)
+        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.batch_job_timeout)
         obj.threshold_retry = obj.result_retry
 
     # Cancel
@@ -359,8 +355,7 @@ class AbstractModel(object):
         """
 
         if obj.storage.is_ready(obj.trial_id) or obj.storage.is_running(obj.trial_id):
-            obj.storage.trial.set_any_trial_state(
-                trial_id=obj.trial_id, state="ready")
+            obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state="ready")
         else:
             obj.logger.warning(f"Could not find any trial_id: {obj.trial_id}")
 
@@ -368,23 +363,20 @@ class AbstractModel(object):
         obj.threshold_retry = obj.expire_retry
 
     def change_state(self, obj: "Job") -> None:
-        obj.storage.trial.set_any_trial_state(
-            trial_id=obj.trial_id, state=obj.next_state)
+        obj.storage.trial.set_any_trial_state(trial_id=obj.trial_id, state=obj.next_state)
 
     def write_results_to_database(self, obj: "Job") -> None:
         trial_id = obj.trial_id
         result = self.get_result(obj, trial_id)
 
         obj.storage.result.set_any_trial_objective(trial_id, result["result"])
-        obj.storage.timestamp.set_any_trial_start_time(
-            trial_id, result["start_time"])
-        obj.storage.timestamp.set_any_trial_end_time(
-            trial_id, result["end_time"])
+        obj.storage.timestamp.set_any_trial_start_time(trial_id, result["start_time"])
+        obj.storage.timestamp.set_any_trial_end_time(trial_id, result["end_time"])
         if "error" in result.keys() and result["error"] != "":
             obj.storage.error.set_any_trial_error(trial_id, result["error"])
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_result(self, obj: 'Job', trial_id: int) -> dict[str, Any]:
+    def get_result(self, obj: "Job", trial_id: int) -> dict[str, Any]:
         result = obj.workspace.get_any_trial_result(trial_id=trial_id)
         if result is None:
             raise Exception("Could not get result")
