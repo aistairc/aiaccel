@@ -21,7 +21,6 @@ class Storage:
         self.error = Error(db_path)
         self.timestamp = TimeStamp(db_path)
         self.variable = Serializer(db_path)
-        self.returncode = ReturnCode(db_path)
 
     def current_max_trial_number(self) -> int | None:
         """Get the current maximum number of trials.
