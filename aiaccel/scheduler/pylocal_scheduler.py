@@ -4,8 +4,6 @@ from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
 from aiaccel.util import get_time_now
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from omegaconf.dictconfig import DictConfig
-from typing import Any
-from subprocess import run
 from aiaccel.config import load_config
 from typing import Any, List
 from subprocess import Popen
@@ -13,9 +11,6 @@ from subprocess import Popen
 from importlib.util import module_from_spec, spec_from_file_location
 from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
-<< << << < HEAD
-== == == =
->>>>>> > b79eb1795aa026503c484e41df17d967564e152e
 
 
 # These are for avoiding mypy-errors from initializer().
