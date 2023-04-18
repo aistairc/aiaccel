@@ -125,8 +125,6 @@ class OutputHandler(threading.Thread):
         self._start_time: datetime.datetime | None = None
         self._end_time: datetime.datetime | None = None
 
-        self.is_ignore_warning = is_ignore_warning
-
     def abort(self) -> None:
         self._abort = True
 

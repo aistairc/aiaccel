@@ -394,5 +394,6 @@ class AbstractModel(object):
         obj.storage.result.set_any_trial_objective(trial_id, result['result'])
         obj.storage.timestamp.set_any_trial_start_time(trial_id, result['start_time'])
         obj.storage.timestamp.set_any_trial_end_time(trial_id, result['end_time'])
+        obj.storage.error.set_any_trial_exitcode(trial_id, result['exitcode'])
         if 'error' in result.keys() and result['error'] != "":
             obj.storage.error.set_any_trial_error(trial_id, result['error'])

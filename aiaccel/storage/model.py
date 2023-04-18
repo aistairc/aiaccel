@@ -17,6 +17,7 @@ class ErrorTable(Base):
     __tablename__ = 'errors'
     trial_id = Column(Integer, primary_key=True, nullable=False)
     error = Column(Text, nullable=True)
+    exitcode = Column(Integer, nullable=True)
 
 
 class TimestampTable(Base):
@@ -56,8 +57,3 @@ class VariableTable(Base):
     label = Column(String(length=128), nullable=False)
     value = Column(PickleType, nullable=False)
 
-
-class ReturnCodeTable(Base):
-    __tablename__ = 'returncode'
-    trial_id = Column(Integer, primary_key=True, nullable=False)
-    returncode = Column(Integer, nullable=True)
