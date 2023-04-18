@@ -1,4 +1,4 @@
-name: CI
+name: Resume Test
 on: [push, pull_request]
 
 jobs:
@@ -26,5 +26,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install .[dev,github-actions,test]
 
-      - name: Unit Test
-        run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit
+      - name: Resume Test
+        run: |
+          pytest -s -v tests/resumption/sphere/test_sphere_random_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_grid_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_budget_specified_grid_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_sobol_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_tpe_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_motpe_resumption.py

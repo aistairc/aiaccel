@@ -8,7 +8,7 @@
   },
   "resource": {
     "type": "invalid",
-    "num_node": 4
+    "num_node": 10
   },
   "ABCI": {
     "job_script_preamble": "wrapper_abci.sh",

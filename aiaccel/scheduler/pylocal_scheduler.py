@@ -3,8 +3,8 @@ from __future__ import annotations
 from importlib.util import module_from_spec, spec_from_file_location
 from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
-from subprocess import run
-from typing import Any
+from subprocess import Popen
+from typing import Any, List
 
 from omegaconf.dictconfig import DictConfig
 
@@ -27,6 +27,7 @@ class PylocalScheduler(AbstractScheduler):
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
         self.run = Run(self.config.config_path)
+        self.processes: List[Any] = []
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
         self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config.config_path,))
@@ -55,6 +56,12 @@ class PylocalScheduler(AbstractScheduler):
             self.create_result_file(trial_id, xs, ys, err, start_time, end_time)
 
         return True
+
+    def post_process(self) -> None:
+        for process in self.processes:
+            process.wait()
+
+        super().post_process()
 
     def get_any_trial_xs(self, trial_id: int) -> dict[str, Any] | None:
         """Gets a parameter list of specific trial ID from Storage object.
@@ -140,7 +147,7 @@ class PylocalScheduler(AbstractScheduler):
             commands.append("--" + key)
             commands.append(str(xs[key]))
 
-        run(commands)
+        self.processes.append(Popen(commands))
 
         return None
 
@@ -148,6 +155,7 @@ class PylocalScheduler(AbstractScheduler):
         obj = super().__getstate__()
         del obj["run"]
         del obj["pool"]
+        del obj["processes"]
         return obj
 
 
