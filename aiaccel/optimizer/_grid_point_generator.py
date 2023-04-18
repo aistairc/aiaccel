@@ -32,7 +32,8 @@ class GridCondition(ABC):
         self.create_choices(hyperparameter)
 
     @abstractmethod
-    def create_choices(self, hyperparameter: Parameter) -> None: ...
+    def create_choices(self, hyperparameter: Parameter) -> None:
+        ...
 
     def __contains__(self, value: object) -> bool:
         return value in self._choices
