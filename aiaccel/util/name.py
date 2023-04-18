@@ -22,13 +22,10 @@ def generate_random_name(rng: RandomState, length: int = 10) -> str:
     """
 
     if length < 1:
-        logger = logging.getLogger('root.optimizer.name')
-        logger.error('Name length should be greater than 0.')
-        raise ValueError('Name length should be greater than 0.')
+        logger = logging.getLogger("root.optimizer.name")
+        logger.error("Name length should be greater than 0.")
+        raise ValueError("Name length should be greater than 0.")
 
-    rands = [
-        rng.choice(list(string.ascii_letters + string.digits))[0]
-        for _ in range(length)
-    ]
+    rands = [rng.choice(list(string.ascii_letters + string.digits))[0] for _ in range(length)]
 
-    return ''.join(rands)
+    return "".join(rands)

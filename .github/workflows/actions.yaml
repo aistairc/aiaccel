@@ -19,18 +19,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
+          cache-dependency-path: pyproject.toml
 
       - name: Install Software
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          python setup.py install
+          python -m pip install .[dev,github-actions,test]
 
       - name: Unit Test
         run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit
-
-      - name: Pycodestyle Test
-        run: pycodestyle aiaccel examples
-
-      - name: Flake8 Test
-        run: flake8 aiaccel examples
