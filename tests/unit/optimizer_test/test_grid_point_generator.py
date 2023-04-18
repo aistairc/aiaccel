@@ -15,8 +15,8 @@ from aiaccel.optimizer._grid_point_generator import (
     IntGridCondition, NumericGridCondition, NumericType, OrdinalGridCondition,
     _cast_start_to_integer, _cast_stop_to_integer, _create_grid_condition,
     _is_there_zero_between_lower_and_upper, _validate_parameter_range)
-from aiaccel.parameter import (HyperParameter, HyperParameterConfiguration,
-                               load_parameter)
+from aiaccel.parameter import load_parameter
+from aiaccel.util.data_type import Parameter
 from tests.base_test import BaseTest
 
 
@@ -25,10 +25,10 @@ class TestGridCondition:
     def setup(self, request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
         self.choices = [0, 1, 2]
         self.num_choices = len(self.choices)
-        self.hyperparameter = HyperParameter(
+        self.hyperparameter = Parameter(
             {
                 'name': 'test',
-                'type': "FLOAT",
+                'type': "uniform_float",
                 'lower': None,
                 'upper': None,
                 'log': None,
@@ -128,7 +128,7 @@ argvalues_is_there_zero_between_lower_and_upper = [
     argvalues_is_there_zero_between_lower_and_upper,
 )
 def is_there_zero_between_lower_and_upper(lower, upper, expect) -> None:
-    hyperparameter = HyperParameter(
+    hyperparameter = Parameter(
         {
             "name": "test",
             "type": 'uniform_float',
@@ -144,7 +144,7 @@ def is_there_zero_between_lower_and_upper(lower, upper, expect) -> None:
 
 
 def test_validate_parameter_range(monkeypatch: pytest.MonkeyPatch) -> None:
-    hyperparameter = HyperParameter(
+    hyperparameter = Parameter(
         {
             "name": "test",
             "type": 'uniform_float',
@@ -172,7 +172,7 @@ def test_validate_parameter_range(monkeypatch: pytest.MonkeyPatch) -> None:
 
 class TestNumericGridCondition:
     def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        hyperparameter = HyperParameter(
+        hyperparameter = Parameter(
             {
                 "name": "test",
                 "type": 'uniform_float',
@@ -209,7 +209,7 @@ argvalues_float_grid_condition_create_choices = [
 class TestFloatGridCondition:
     @pytest.fixture(autouse=True)
     def setup(self) -> Generator[None, None, None]:
-        self.hyperparameter = HyperParameter(
+        self.hyperparameter = Parameter(
             {
                 "name": "test",
                 "type": 'uniform_float',
@@ -244,7 +244,7 @@ class TestFloatGridCondition:
         num_numeric_choices: int | None,
         choices: list[float]
     ) -> None:
-        hyperparameter = HyperParameter(
+        hyperparameter = Parameter(
             {
                 "name": "test",
                 "type": 'uniform_float',
@@ -262,7 +262,7 @@ class TestFloatGridCondition:
             assert grid_condition.choices == choices
 
     def test_num_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        hyperparameter = HyperParameter(
+        hyperparameter = Parameter(
             {
                 "name": "test",
                 "type": 'uniform_float',
@@ -323,7 +323,7 @@ class TestIntGridCondition:
     def setup(self) -> Generator[None, None, None]:
         self.choices = [0, 1, 2]
         self.num_choices = len(self.choices)
-        self.hyperparameter = HyperParameter(
+        self.hyperparameter = Parameter(
             {
                 "name": "test",
                 "type": 'uniform_int',
@@ -364,7 +364,7 @@ class TestIntGridCondition:
         num_numeric_choices: int | None,
         choices: list[float]
     ) -> None:
-        hyperparameter = HyperParameter(
+        hyperparameter = Parameter(
             {
                 "name": "test",
                 "type": 'uniform_int',
@@ -412,7 +412,7 @@ class TestCategoricalGridCondition:
     def setup(self) -> Generator[None, None, None]:
         self.choices = [0, 1, 2]
         self.num_choices = len(self.choices)
-        self.hyperparameter = HyperParameter(
+        self.hyperparameter = Parameter(
             {
                 "name": "test",
                 "type": 'categorical',
@@ -442,7 +442,7 @@ class TestOrdinalGridCondition:
     def setup(self) -> Generator[None, None, None]:
         self.choices = [0, 1, 2]
         self.num_choices = len(self.choices)
-        self.hyperparameter = HyperParameter(
+        self.hyperparameter = Parameter(
             {
                 "name": "test",
                 "type": 'ordinal',
@@ -468,7 +468,7 @@ class TestOrdinalGridCondition:
 
 
 def test_create_grid_condition(monkeypatch: pytest.MonkeyPatch) -> None:
-    hyperparameter = HyperParameter(
+    hyperparameter = Parameter(
         {
             "name": "test",
             "type": 'uniform_float'
@@ -510,7 +510,7 @@ class TestGridConditionCollection:
     @ pytest.fixture(autouse=True)
     def setup_hyperparameters(self, request: pytest.FixtureRequest) -> Generator[None, None, None]:
         self.hyperparameters = [
-            HyperParameter(
+            Parameter(
                 {
                     'name': 'test',
                     'type': 'uniform_int',
@@ -574,7 +574,7 @@ class TestGridConditionCollection:
         expect: list[GridValueType]
     ) -> None:
         hyperparameters = [
-            HyperParameter(
+            Parameter(
                 {
                     'name': 'test',
                     'type': parameter_type,
@@ -593,10 +593,10 @@ class TestGridConditionCollection:
     def test_get_grid_conditions_with_empty_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
         conditions = [
             FloatGridCondition(
-                HyperParameter(
+                Parameter(
                     {
                         "name": "x1",
-                        "type": "FLOAT",
+                        "type": "uniform_float",
                         "lower": 0.0,
                         "upper": 1.0,
                         "log": False
@@ -604,10 +604,10 @@ class TestGridConditionCollection:
                 )
             ),
             CategoricalGridCondition(
-                HyperParameter(
+                Parameter(
                     {
                         "name": "x0",
-                        "type": "CATEGORICAL",
+                        "type": "categorical",
                         "choices": [0, 1, 2]
                     }
                 )
@@ -621,10 +621,10 @@ class TestGridConditionCollection:
     def test_set_num_choices(self, monkeypatch: pytest.MonkeyPatch) -> None:
         conditions = [
             FloatGridCondition(
-                HyperParameter(
+                Parameter(
                     {
                         "name": "x1",
-                        "type": "FLOAT",
+                        "type": "uniform_float",
                         "lower": 0.0,
                         "upper": 1.0,
                         "log": False

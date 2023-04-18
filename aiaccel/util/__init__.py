@@ -1,6 +1,7 @@
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.cast import cast_y
-from aiaccel.util.datatype import DataType
+from aiaccel.util.data_type import (CategoricalParameter, FloatParameter,
+                                    IntParameter, OrdinalParameter, Parameter)
 from aiaccel.util.easy_visualizer import EasyVisualizer
 from aiaccel.util.filesystem import (create_yaml, file_create, file_delete,
                                      file_read, get_dict_files,
@@ -24,7 +25,6 @@ from aiaccel.util.trialid import TrialId
 
 __all__ = [
     'Buffer',
-    'DataType',
     'EasyVisualizer',
     'OutputHandler',
     # 'Run',
@@ -55,4 +55,9 @@ __all__ = [
     'retry',
     'str_to_logging_level',
     'subprocess_ps',
+    'CategoricalParameter',
+    'FloatParameter',
+    'IntParameter',
+    'OrdinalParameter',
+    'Parameter',
 ]

@@ -4,9 +4,10 @@ import copy
 from argparse import ArgumentParser
 from pathlib import Path
 
-from aiaccel.common import data_type
 from aiaccel.config import load_config
 from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.util.data_type import (is_categorical, is_ordinal,
+                                    is_uniform_float, is_uniform_int)
 from aiaccel.util.filesystem import create_yaml
 
 
@@ -46,13 +47,13 @@ def main() -> None:
         parameters_config = HyperParameterConfiguration(config.optimize.parameters)
 
         for p in parameters_config.get_parameter_list():
-            if data_type.is_uniform_float(p.type):
+            if is_uniform_float(p.type):
                 parser.add_argument(f"--{p.name}", type=float)
-            elif data_type.is_uniform_int(p.type):
+            elif is_uniform_int(p.type):
                 parser.add_argument(f"--{p.name}", type=int)
-            elif data_type.is_categorical(p.type):
+            elif is_categorical(p.type):
                 parser.add_argument(f"--{p.name}", type=str)
-            elif data_type.is_ordinal(p.type):
+            elif is_ordinal(p.type):
                 parser.add_argument(f"--{p.name}", type=float)
             else:
                 raise ValueError(f"Unknown parameter type: {p.type}")

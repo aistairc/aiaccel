@@ -9,8 +9,8 @@ from typing import Literal, Union
 import numpy as np
 from numpy.random import RandomState
 
-from aiaccel.common import data_type
-from aiaccel.parameter import HyperParameter
+from aiaccel.util.data_type import (Parameter, is_categorical, is_ordinal,
+                                    is_uniform_float, is_uniform_int)
 
 GridValueType = Union[float, int, str]
 SamplingMethodType = Literal['IN_ORDER', 'UNIFORM', 'RANDOM', 'DUPLICATABLE_RANDOM']
@@ -22,17 +22,17 @@ class GridCondition(ABC):
     """An abstract class for grid condition container of a parameter.
 
     Args:
-        hyperparameter (HyperParameter): A hyperparameter object.
+        hyperparameter (Parameter): A hyperparameter object.
     """
 
-    def __init__(self, hyperparameter: HyperParameter) -> None:
+    def __init__(self, hyperparameter: Parameter) -> None:
         self._choices: list[GridValueType] = []
         self._num_choices: int = 0
         self._max_num_choices: int = sys.maxsize
         self.create_choices(hyperparameter)
 
     @abstractmethod
-    def create_choices(self, hyperparameter: HyperParameter) -> None: ...
+    def create_choices(self, hyperparameter: Parameter) -> None: ...
 
     def __contains__(self, value: object) -> bool:
         return value in self._choices
@@ -84,11 +84,11 @@ class GridCondition(ABC):
         self._num_choices = num_choices
 
 
-def _is_there_zero_between_lower_and_upper(hyperparameter: HyperParameter) -> bool:
+def _is_there_zero_between_lower_and_upper(hyperparameter: Parameter) -> bool:
     return hyperparameter.lower * hyperparameter.upper <= 0
 
 
-def _validate_parameter_range(hyperparameter: HyperParameter) -> None:
+def _validate_parameter_range(hyperparameter: Parameter) -> None:
     if hyperparameter.log:
         if _is_there_zero_between_lower_and_upper(hyperparameter):
             raise ValueError(
@@ -100,10 +100,10 @@ class NumericGridCondition(GridCondition):
     """An abstract class for a grid condition container of a numeric parameter.
 
     Args:
-        hyperparameter (HyperParameter): A hyperparameter object.
+        hyperparameter (Parameter): A hyperparameter object.
     """
 
-    def __init__(self, hyperparameter: HyperParameter) -> None:
+    def __init__(self, hyperparameter: Parameter) -> None:
         _validate_parameter_range(hyperparameter)
         super().__init__(hyperparameter)
 
@@ -112,13 +112,13 @@ class FloatGridCondition(NumericGridCondition):
     """A grid condition container for a float parameter.
 
     Args:
-        hyperparameter (HyperParameter): A hyperparameter object.
+        hyperparameter (Parameter): A hyperparameter object.
     """
 
-    def __init__(self, hyperparameter: HyperParameter) -> None:
+    def __init__(self, hyperparameter: Parameter) -> None:
         super().__init__(hyperparameter)
 
-    def create_choices(self, hyperparameter: HyperParameter) -> None:
+    def create_choices(self, hyperparameter: Parameter) -> None:
         """Creates choices from specified hyperparameter.
 
         The number of choices is specified by a property `num_choices` if it is
@@ -127,7 +127,7 @@ class FloatGridCondition(NumericGridCondition):
         number of choices.
 
         Args:
-            hyperparameter (HyperParameter): A hyperparameter object.
+            hyperparameter (Parameter): A hyperparameter object.
         """
         start = hyperparameter.lower
         stop = hyperparameter.upper
@@ -170,13 +170,13 @@ class IntGridCondition(NumericGridCondition):
     """A grid condition container for an int parameter.
 
     Args:
-        hyperparameter (HyperParameter): A hyperparameter object.
+        hyperparameter (Parameter): A hyperparameter object.
     """
 
-    def __init__(self, hyperparameter: HyperParameter) -> None:
+    def __init__(self, hyperparameter: Parameter) -> None:
         super().__init__(hyperparameter)
 
-    def create_choices(self, hyperparameter: HyperParameter) -> None:
+    def create_choices(self, hyperparameter: Parameter) -> None:
         """Creates choices from specified hyperparameter.
 
         The number of choices is specified by a property `num_choices` if it is
@@ -185,7 +185,7 @@ class IntGridCondition(NumericGridCondition):
         number of choices.
 
         Args:
-            hyperparameter (HyperParameter): A hyperparameter object.
+            hyperparameter (Parameter): A hyperparameter object.
 
         Raises:
             ValueError: Causes when lower and upper values of hyperparameter
@@ -233,19 +233,19 @@ class CategoricalGridCondition(GridCondition):
     """A grid condition container for a categorical parameter.
 
     Args:
-        hyperparameter (HyperParameter): A hyperparameter object.
+        hyperparameter (Parameter): A hyperparameter object.
     """
 
-    def __init__(self, hyperparameter: HyperParameter) -> None:
+    def __init__(self, hyperparameter: Parameter) -> None:
         super().__init__(hyperparameter)
 
-    def create_choices(self, hyperparameter: HyperParameter) -> None:
+    def create_choices(self, hyperparameter: Parameter) -> None:
         """Creates choices from specified hyperparameter.
 
         The choices are equivalent to `hyperparameter.sequence`.
 
         Args:
-            hyperparameter (HyperParameter): A hyperparameter object.
+            hyperparameter (Parameter): A hyperparameter object.
         """
         self.choices = hyperparameter.choices
         self.num_choices = len(self.choices)
@@ -256,33 +256,33 @@ class OrdinalGridCondition(GridCondition):
     """A grid condition container for an ordinal parameter.
 
     Args:
-        hyperparameter (HyperParameter): A hyperparameter object.
+        hyperparameter (Parameter): A hyperparameter object.
     """
 
-    def __init__(self, hyperparameter: HyperParameter) -> None:
+    def __init__(self, hyperparameter: Parameter) -> None:
         super().__init__(hyperparameter)
 
-    def create_choices(self, hyperparameter: HyperParameter) -> None:
+    def create_choices(self, hyperparameter: Parameter) -> None:
         """Creates choices from specified hyperparameter.
 
         The choices are equivalent to `hyperparameter.choices`.
 
         Args:
-            hyperparameter (HyperParameter): A hyperparameter object.
+            hyperparameter (Parameter): A hyperparameter object.
         """
         self.choices = hyperparameter.sequence
         self.num_choices = len(self.choices)
         self._max_num_choices = self.num_choices
 
 
-def _create_grid_condition(hyperparameter: HyperParameter) -> GridCondition:
-    if data_type.is_uniform_float(hyperparameter.type):
+def _create_grid_condition(hyperparameter: Parameter) -> GridCondition:
+    if is_uniform_float(hyperparameter.type):
         return FloatGridCondition(hyperparameter)
-    elif data_type.is_uniform_int(hyperparameter.type):
+    elif is_uniform_int(hyperparameter.type):
         return IntGridCondition(hyperparameter)
-    elif data_type.is_categorical(hyperparameter.type):
+    elif is_categorical(hyperparameter.type):
         return CategoricalGridCondition(hyperparameter)
-    elif data_type.is_ordinal(hyperparameter.type):
+    elif is_ordinal(hyperparameter.type):
         return OrdinalGridCondition(hyperparameter)
     else:
         raise TypeError(
@@ -295,11 +295,11 @@ class GridConditionCollection:
 
     Args:
         num_trials (int): The number of trials.
-        hyperparameters (list[HyperParameter]): A list of Hyperparameter
+        hyperparameters (list[Parameter]): A list of Hyperparameter
             objects.
     """
 
-    def __init__(self, num_trials: int, hyperparameters: list[HyperParameter]) -> None:
+    def __init__(self, num_trials: int, hyperparameters: list[Parameter]) -> None:
         self._num_trials = num_trials
         self._conditions: list[GridCondition] = []
         self._least_space_size = 1
@@ -320,7 +320,7 @@ class GridConditionCollection:
     def __len__(self) -> int:
         return len(self._conditions)
 
-    def _register_grid_conditions(self, hyperparameters: list[HyperParameter]) -> None:
+    def _register_grid_conditions(self, hyperparameters: list[Parameter]) -> None:
         if hyperparameters:
             hyperparameter = hyperparameters.pop(0)
             grid_condition = _create_grid_condition(hyperparameter)
@@ -367,7 +367,7 @@ class GridPointGenerator:
     """Generator of grid points.
 
     Args:
-        hyperparameters (list[HyperParameter]): A list of HyperParameter
+        hyperparameters (list[Parameter]): A list of Parameter
             object.
         trial_number (int): The number of trials.
         sampling_method (SamplingMethod, optional): How to sample the grid
@@ -407,7 +407,7 @@ class GridPointGenerator:
     def __init__(
         self,
         num_trials: int,
-        hyperparameters: list[HyperParameter],
+        hyperparameters: list[Parameter],
         sampling_method: SamplingMethodType = 'IN_ORDER',
         rng: RandomState | None = None,
         accept_small_trial_number: bool = False

@@ -6,11 +6,12 @@ from typing import Any
 from numpy import str_
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import data_type
 from aiaccel.config import is_multi_objective
 from aiaccel.module import AbstractModule
 from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.util import TrialId, str_to_logging_level
+from aiaccel.util.data_type import (is_categorical, is_ordinal,
+                                    is_uniform_float, is_uniform_int)
 
 
 class AbstractOptimizer(AbstractModule):
@@ -282,14 +283,14 @@ class AbstractOptimizer(AbstractModule):
 
             try:
                 if (
-                    data_type.is_categorical(param_type) or
-                    data_type.is_ordinal(param_type)
+                    is_categorical(param_type) or
+                    is_ordinal(param_type)
                 ):
                     casted_params.append(_param)
                     continue
-                if data_type.is_uniform_float(param_type):
+                if is_uniform_float(param_type):
                     _param['value'] = float(param_value)
-                if data_type.is_uniform_int(param_type):
+                if is_uniform_int(param_type):
                     _param['value'] = int(param_value)
                 casted_params.append(_param)
 

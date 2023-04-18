@@ -6,8 +6,8 @@ from typing import Any
 import numpy as np
 from omegaconf.listconfig import ListConfig
 
-from aiaccel.parameter import HyperParameter
 from aiaccel.util import generate_random_name
+from aiaccel.util.data_type import OrdinalParameter, Parameter
 
 STATES = [
     'WaitInitialize',
@@ -28,7 +28,7 @@ class NelderMead(object):
     """A class implementing Nelder-Mead method.
 
     Args:
-        params (list[HyperParameter]): A list of hyper parameter objects.
+        params (list[Parameter]): A list of hyper parameter objects.
         iteration (float | None, optional): A max iteration counts.
             Defaults to float('inf').
         coef (dict | None, optional): A coefficient values. Defaults to None.
@@ -44,7 +44,7 @@ class NelderMead(object):
         coef (dict[str, float]): A dictionary of coefficients.
         f (np.ndarray): A list of evaluated parameter results.
         logger (logging.Logger): A logger object.
-        params (list[HyperParameter]): A list of hyper parameters.
+        params (list[Parameter]): A list of hyper parameters.
         storage (dict[str, float | None]): A dictionary to store temporal
             calculation results.
         y (np.ndarray): A list of current evaluated parameters.
@@ -75,7 +75,7 @@ class NelderMead(object):
 
     def __init__(
         self,
-        params: list[HyperParameter],
+        params: list[Parameter],
         iteration: float = float('inf'),
         coef: dict[str, Any] | None = None,
         maximize: bool | None = False,
@@ -133,7 +133,10 @@ class NelderMead(object):
         initial_parameters: list[dict[str, Any]]
     ) -> np.ndarray[Any, Any]:
         initial_values = [
-            [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
+            [
+                self._create_initial_value(initial_parameters, dim, num_of_initials)
+                for dim in range(len(self.params))
+            ]
             for num_of_initials in range(self.n_dim + 1)
         ]
 
@@ -145,28 +148,28 @@ class NelderMead(object):
         dim: int,
         num_of_initials: int
     ) -> Any:
-        if initial_parameters is not None:
-            if isinstance(initial_parameters[dim]['value'], (int, float, np.integer, np.floating)):
-                initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
+        if initial_parameters is None:
+            if isinstance(self.params[dim], OrdinalParameter):
+                return self._rng.randint(len(self.params[dim].sequence))
+            return self.params[dim].sample(rng=self._rng)['value']
 
-            if type(initial_parameters[dim]['value']) not in [list, ListConfig]:
-                raise TypeError('Default parameter should be set as list.')
+        values = initial_parameters[dim]['value']
+        if isinstance(values, (int, float, np.integer, np.floating)):
+            values = [values]
 
-            if num_of_initials < len(initial_parameters[dim]['value']):
-                val = initial_parameters[dim]['value'][num_of_initials]
-                if self.params[dim].type.lower() == 'ordinal':
-                    val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
-                return val
-            else:
-                val = self.params[dim].sample(rng=self._rng)['value']
-                if self.params[dim].type.lower() == 'ordinal':
-                    val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
-                return val
+        if not isinstance(values, (list, ListConfig)):
+            raise TypeError('Default parameter should be set as list.')
+
+        if num_of_initials < len(values):
+            value = values[num_of_initials]
+            if isinstance(self.params[dim], OrdinalParameter):
+                return np.abs(np.array(self.params[dim].sequence) - value).argmin()
+            return value
         else:
-            val = self.params[dim].sample(rng=self._rng)['value']
-            if self.params[dim].type.lower() == 'ordinal':
-                val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
-            return val
+            value = self.params[dim].sample(rng=self._rng)['value']
+            if isinstance(self.params[dim], OrdinalParameter):
+                return np.abs(np.array(self.params[dim].sequence) - value).argmin()
+            return value
 
     def _add_executing(
         self, y: np.ndarray[Any, Any],

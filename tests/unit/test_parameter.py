@@ -55,10 +55,8 @@ class TestParameter(BaseTest):
         assert len(p) == 4
 
         json_string.append({'name': 'e', 'type': 'invalid'})
-        hp = HyperParameterConfiguration(json_string)
-
         try:
-            hp.sample(rng=rng)
+            hp = HyperParameterConfiguration(json_string)
             assert False
-        except TypeError:
+        except ValueError:
             assert True

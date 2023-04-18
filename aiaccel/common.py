@@ -6,8 +6,6 @@ Example: ::
 
 """
 
-from aiaccel.util.datatype import DataType
-
 alive_master = 'master.yml'
 alive_optimizer = 'optimizer.yml'
 alive_scheduler = 'scheduler.yml'
@@ -74,5 +72,3 @@ search_algorithm_nelder_mead = 'aiaccel.optimizer.NelderMeadOptimizer'
 search_algorithm_random = 'aiaccel.optimizer.RandomOptimizer'
 search_algorithm_sobol = 'aiaccel.optimizer.SobolOptimizer'
 search_algorithm_tpe = 'aiaccel.optimizer.TpeOptimizer'
-
-data_type = DataType()

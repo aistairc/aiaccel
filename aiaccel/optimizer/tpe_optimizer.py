@@ -9,8 +9,9 @@ from omegaconf.dictconfig import DictConfig
 from optuna.storages._rdb import models
 
 import aiaccel.parameter
-from aiaccel.common import data_type
 from aiaccel.optimizer import AbstractOptimizer
+from aiaccel.util.data_type import (is_categorical, is_ordinal,
+                                    is_uniform_float, is_uniform_int)
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):
@@ -153,7 +154,7 @@ class TpeOptimizer(AbstractOptimizer):
             parameters. None if `self.nelder_mead` is already defined.
         """
         enqueue_trial = {}
-        for hp in self.params.hps.values():
+        for hp in self.params.param.values():
             if hp.initial is not None:
                 enqueue_trial[hp.name] = hp.initial
 
@@ -168,7 +169,7 @@ class TpeOptimizer(AbstractOptimizer):
         for name, value in trial.params.items():
             new_param = {
                 "parameter_name": name,
-                "type": self.params.hps[name].type,
+                "type": self.params.param[name].type,
                 "value": value,
             }
             new_params.append(new_param)
@@ -252,21 +253,21 @@ def create_distributions(
     distributions: dict[str, Any] = {}
 
     for p in parameters.get_parameter_list():
-        if data_type.is_uniform_float(p.type):
+        if is_uniform_float(p.type):
             distributions[p.name] = optuna.distributions.FloatDistribution(
                 p.lower, p.upper, log=p.log
             )
 
-        elif data_type.is_uniform_int(p.type):
+        elif is_uniform_int(p.type):
             distributions[p.name] = optuna.distributions.IntDistribution(
                 p.lower, p.upper, log=p.log
             )
 
-        elif data_type.is_categorical(p.type):
+        elif is_categorical(p.type):
             distributions[p.name] = optuna.distributions.CategoricalDistribution(
                 p.choices
             )
-        elif data_type.is_ordinal(p.type):
+        elif is_ordinal(p.type):
             distributions[p.name] = optuna.distributions.CategoricalDistribution(
                 p.sequence
             )

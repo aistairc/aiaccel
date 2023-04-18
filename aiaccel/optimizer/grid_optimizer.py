@@ -7,10 +7,10 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import data_type
 from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.parameter import HyperParameter
+from aiaccel.util.data_type import (Parameter, is_categorical, is_ordinal,
+                                    is_uniform_float, is_uniform_int)
 
 
 def get_grid_options(
@@ -63,12 +63,12 @@ def get_grid_options(
 
 
 def generate_grid_points(
-    p: HyperParameter, config: DictConfig
+    p: Parameter, config: DictConfig
 ) -> dict[str, Any]:
     """Make a list of all parameters for this grid.
 
     Args:
-        p (HyperParameter): A hyper parameter object.
+        p (Parameter): A hyper parameter object.
         config (DictConfig): A configuration object.
 
     Returns:
@@ -83,7 +83,7 @@ def generate_grid_points(
         'type': p.type
     }
 
-    if data_type.is_uniform_float(p.type) or data_type.is_uniform_int(p.type):
+    if is_uniform_float(p.type) or is_uniform_int(p.type):
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
@@ -100,13 +100,13 @@ def generate_grid_points(
         else:
             n = int((upper - lower) / step) + 1
             new_param['parameters'] = [lower + i * step for i in range(0, n)]
-        if data_type.is_uniform_int(p.type):
+        if is_uniform_int(p.type):
             new_param['parameters'] = [int(i) for i in new_param['parameters']]
 
-    elif data_type.is_categorical(p.type):
+    elif is_categorical(p.type):
         new_param['parameters'] = p.choices
 
-    elif data_type.is_ordinal(p.type):
+    elif is_ordinal(p.type):
         new_param['parameters'] = p.sequence
 
     else:
