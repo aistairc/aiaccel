@@ -7,6 +7,26 @@ from omegaconf.base import UnionNode
 from omegaconf.nodes import BooleanNode, BytesNode, FloatNode, IntegerNode, PathNode, StringNode
 
 
+def str_or_float_or_int(value: str | float | int) -> str | float | int:
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            return value
+
+
+def float_or_int(value: float | int) -> float | int:
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError as e:
+            raise e
+
+
 def is_uniform_float(data_type: str) -> bool:
     return data_type.lower() == "uniform_float"
 

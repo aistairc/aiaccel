@@ -6,18 +6,15 @@ from pathlib import Path
 
 from aiaccel.config import load_config
 from aiaccel.parameter import HyperParameterConfiguration
-from aiaccel.util.data_type import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter
+from aiaccel.util.data_type import (
+    CategoricalParameter,
+    FloatParameter,
+    IntParameter,
+    OrdinalParameter,
+    float_or_int,
+    str_or_float_or_int,
+)
 from aiaccel.util.filesystem import create_yaml
-
-
-def str_or_float_or_int(value: str | float | int) -> str | float | int:
-    try:
-        return int(value)
-    except ValueError:
-        try:
-            return float(value)
-        except ValueError:
-            return value
 
 
 def main() -> None:
@@ -50,9 +47,9 @@ def main() -> None:
             elif isinstance(p, IntParameter):
                 parser.add_argument(f"--{p.name}", type=int)
             elif isinstance(p, CategoricalParameter):
-                parser.add_argument(f"--{p.name}", type=str)
+                parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
             elif isinstance(p, OrdinalParameter):
-                parser.add_argument(f"--{p.name}", type=float)
+                parser.add_argument(f"--{p.name}", type=float_or_int)
             else:
                 raise ValueError(f"Unknown parameter type: {p.type}")
         args = parser.parse_known_args()[0]

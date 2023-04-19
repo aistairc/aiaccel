@@ -10,7 +10,14 @@ from typing import Any
 from aiaccel.config import load_config
 from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.util import cast_y, get_time_now
-from aiaccel.util.data_type import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter
+from aiaccel.util.data_type import (
+    CategoricalParameter,
+    FloatParameter,
+    IntParameter,
+    OrdinalParameter,
+    float_or_int,
+    str_or_float_or_int,
+)
 
 
 class CommandLineArgs:
@@ -36,9 +43,9 @@ class CommandLineArgs:
                 elif isinstance(p, IntParameter):
                     self.parser.add_argument(f"--{p.name}", type=int)
                 elif isinstance(p, CategoricalParameter):
-                    self.parser.add_argument(f"--{p.name}", type=str)
+                    self.parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
                 elif isinstance(p, OrdinalParameter):
-                    self.parser.add_argument(f"--{p.name}", type=float)
+                    self.parser.add_argument(f"--{p.name}", type=float_or_int)
                 else:
                     raise ValueError(f"Unknown parameter type: {p.type}")
             self.args = self.parser.parse_known_args()[0]
@@ -47,7 +54,7 @@ class CommandLineArgs:
             for unknown_arg in unknown_args_list:
                 if unknown_arg.startswith("--"):
                     name = unknown_arg.replace("--", "")
-                    self.parser.add_argument(f"--{name}", type=float)
+                    self.parser.add_argument(f"--{name}", type=str_or_float_or_int)
             self.args = self.parser.parse_known_args()[0]
 
     def get_xs_from_args(self) -> dict[str, Any]:
