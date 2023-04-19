@@ -28,6 +28,7 @@ dependencies = [
     "mako",
     "monotonic>=1.6,<2.0.0",
     "natsort>=8.3.1,<9.0.0",
+    "numpy",
     "omegaconf",
     "optuna>=3.1.0,<4.0.0",
     "pluggy>=1.0.0,<2.0.0",

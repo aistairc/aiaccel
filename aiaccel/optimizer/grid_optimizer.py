@@ -35,14 +35,11 @@ def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool
     for g in grid_options:
         if g["name"] == parameter_name:
             if "step" not in g.keys():
-                raise KeyError(
-                    f"No grid option `step` for parameter: {parameter_name}")
+                raise KeyError(f"No grid option `step` for parameter: {parameter_name}")
             if "log" not in g.keys():
-                raise KeyError(
-                    f"No grid option `log` for parameter: {parameter_name}")
+                raise KeyError(f"No grid option `log` for parameter: {parameter_name}")
             if "base" not in g.keys():
-                raise KeyError(
-                    f"No grid option `base` for parameter: {parameter_name}")
+                raise KeyError(f"No grid option `base` for parameter: {parameter_name}")
 
             step = float(g["step"])
             log = bool(g["log"])
@@ -140,17 +137,16 @@ class GridOptimizer(AbstractOptimizer):
             list[int] | None: It returns None if all parameters are
             already generated.
         """
-        parameter_lengths = [len(i['parameters']) for i in self.ready_params]
+        parameter_lengths = [len(i["parameters"]) for i in self.ready_params]
         remain = self.num_generated_params
         max_index = reduce(mul, parameter_lengths)
 
         if self.num_generated_params >= max_index:
-            self.logger.warning('All parameters were generated.')
+            self.logger.warning("All parameters were generated.")
             return None
 
         parameter_index = []
-        div = [reduce(lambda x, y: x * y, parameter_lengths[i + 1:])
-               for i in range(0, len(parameter_lengths) - 1)]
+        div = [reduce(lambda x, y: x * y, parameter_lengths[i + 1 :]) for i in range(0, len(parameter_lengths) - 1)]
 
         for i in range(0, len(parameter_lengths) - 1):
             d = int(remain / div[i])
@@ -179,8 +175,7 @@ class GridOptimizer(AbstractOptimizer):
         new_params: list[Any] = []
         for param, index in zip(self.ready_params, parameter_index):
             new_params.append(
-                {"parameter_name": param["parameter_name"],
-                    "type": param["type"], "value": param["parameters"][index]}
+                {"parameter_name": param["parameter_name"], "type": param["type"], "value": param["parameters"][index]}
             )
         return new_params
 

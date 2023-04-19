@@ -27,9 +27,7 @@ class SobolOptimizer(AbstractOptimizer):
         super().__init__(config)
         self.num_generated_params = 0
         self.sampler = qmc.Sobol(
-            d=len(self.params.get_parameter_list()),
-            scramble=self.config.optimize.sobol_scramble,
-            seed=self._rng
+            d=len(self.params.get_parameter_list()), scramble=self.config.optimize.sobol_scramble, seed=self._rng
         )
 
     def pre_process(self) -> None:
@@ -61,8 +59,7 @@ class SobolOptimizer(AbstractOptimizer):
             min_value = l_params[i].lower
             max_value = l_params[i].upper
             value = (max_value - min_value) * vec[i] + min_value
-            new_param = {
-                "parameter_name": l_params[i].name, "type": l_params[i].type, "value": value}
+            new_param = {"parameter_name": l_params[i].name, "type": l_params[i].type, "value": value}
             new_params.append(new_param)
 
         return new_params
@@ -77,8 +74,7 @@ class SobolOptimizer(AbstractOptimizer):
         for hyperparameter in self.params.get_parameter_list():
             if hyperparameter.initial is not None:
                 self.logger.warning(
-                    "Initial values cannot be specified for grid search. "
-                    "The set initial value has been invalidated."
+                    "Initial values cannot be specified for grid search. " "The set initial value has been invalidated."
                 )
                 break
 
