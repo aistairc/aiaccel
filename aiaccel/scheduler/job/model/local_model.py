@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from subprocess import PIPE, Popen, run
+from subprocess import PIPE, Popen
 from typing import TYPE_CHECKING, Any
 
 from aiaccel.scheduler.job.model.abstract_model import AbstractModel
@@ -31,15 +31,17 @@ class LocalModel(AbstractModel):
 
         obj.th_oh = OutputHandler(obj.proc)
         obj.th_oh.start()
+        self.is_firsttime_called: bool = False
 
     def conditions_result(self, obj: "Job") -> bool:
         if super().conditions_result(obj):
             return True
 
-        if obj.th_oh.get_returncode() is None:
+        if obj.th_oh.get_returncode() is None or self.is_firsttime_called:
             return False
         else:
             self.create_result_file(obj)
+            self.is_firsttime_called = True
             return False
 
     def create_result_file(self, obj: "Job") -> None:
@@ -98,6 +100,6 @@ class LocalModel(AbstractModel):
                 commands.append("--" + param["parameter_name"])
                 commands.append(str(param["value"]))
         print(commands)
-        run(commands)
+        Popen(commands)
 
         return None
