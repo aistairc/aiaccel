@@ -35,11 +35,11 @@ class Error(Abstract):
                 )
 
                 if data is None:
-                    new_row = ErrorTable(trial_id=trial_id, error=error_message)
+                    new_row = ErrorTable(trial_id=trial_id, error=error_message, exitcode=None)
                     session.add(new_row)
-                    session.commit()
                 else:
                     data.error = error_message
+                session.commit()
 
             except SQLAlchemyError as e:
                 session.rollback()
@@ -88,11 +88,11 @@ class Error(Abstract):
                 )
 
                 if data is None:
-                    new_row = ErrorTable(trial_id=trial_id, exitcode=exitcode)
+                    new_row = ErrorTable(trial_id=trial_id, error=None, exitcode=exitcode)
                     session.add(new_row)
-                    session.commit()
                 else:
                     data.exitcode = exitcode
+                session.commit()
 
             except SQLAlchemyError as e:
                 session.rollback()
@@ -143,12 +143,7 @@ class Error(Abstract):
             trial_ids(list): trial id list
         """
         with self.create_session() as session:
-            data = (
-                session.query(ErrorTable)
-                .filter(ErrorTable.exitcode != 0)
-                .with_for_update(read=True)
-                .all()
-            )
+            data = session.query(ErrorTable).filter(ErrorTable.exitcode != 0).with_for_update(read=True).all()
 
         if data is None or len(data) == 0:
             return []
