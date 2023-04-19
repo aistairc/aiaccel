@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Union
 
 from numpy.random import RandomState
 from omegaconf.base import UnionNode
 from omegaconf.nodes import BooleanNode, BytesNode, FloatNode, IntegerNode, PathNode, StringNode
 
 
-def str_or_float_or_int(value: str | float | int) -> str | float | int:
+def str_or_float_or_int(value: str | float | int) -> Union[str, float, int]:
     try:
         return int(value)
     except ValueError:
@@ -17,7 +17,7 @@ def str_or_float_or_int(value: str | float | int) -> str | float | int:
             return value
 
 
-def float_or_int(value: float | int) -> float | int:
+def float_or_int(value: float | int) -> Union[float, int]:
     try:
         return int(value)
     except ValueError:

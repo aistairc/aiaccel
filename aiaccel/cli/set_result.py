@@ -11,7 +11,6 @@ from aiaccel.util.data_type import (
     FloatParameter,
     IntParameter,
     OrdinalParameter,
-    float_or_int,
     str_or_float_or_int,
 )
 from aiaccel.util.filesystem import create_yaml
@@ -49,7 +48,7 @@ def main() -> None:
             elif isinstance(p, CategoricalParameter):
                 parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
             elif isinstance(p, OrdinalParameter):
-                parser.add_argument(f"--{p.name}", type=float_or_int)
+                parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
             else:
                 raise ValueError(f"Unknown parameter type: {p.type}")
         args = parser.parse_known_args()[0]

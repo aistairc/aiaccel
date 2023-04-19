@@ -15,7 +15,6 @@ from aiaccel.util.data_type import (
     FloatParameter,
     IntParameter,
     OrdinalParameter,
-    float_or_int,
     str_or_float_or_int,
 )
 
@@ -45,7 +44,7 @@ class CommandLineArgs:
                 elif isinstance(p, CategoricalParameter):
                     self.parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
                 elif isinstance(p, OrdinalParameter):
-                    self.parser.add_argument(f"--{p.name}", type=float_or_int)
+                    self.parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
                 else:
                     raise ValueError(f"Unknown parameter type: {p.type}")
             self.args = self.parser.parse_known_args()[0]
