@@ -195,7 +195,7 @@ class Run:
         sys.stdout.write(f"{y}\n")
         if err != "":
             sys.stderr.write(f"{err}\n")
-            raise BaseException(err)
+            exit(1)
 
 
 def set_logging_file_for_trial_id(workspace: Path, trial_id: int) -> None:
