@@ -8,7 +8,7 @@
   },
   "resource": {
     "type": "local",
-    "num_node": 4
+    "num_node": 10
   },
   "ABCI": {
     "group": "[group]",
