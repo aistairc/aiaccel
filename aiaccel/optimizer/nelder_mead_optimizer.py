@@ -8,7 +8,7 @@ from omegaconf.dictconfig import DictConfig
 from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer, NelderMead
 from aiaccel.parameter import HyperParameterConfiguration
-from aiaccel.util.data_type import Parameter, is_ordinal, is_uniform_float, is_uniform_int
+from aiaccel.util.data_type import FloatParameter, IntParameter, OrdinalParameter, Parameter
 
 
 class NelderMeadOptimizer(AbstractOptimizer):
@@ -228,11 +228,11 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         for param in self.params.get_parameter_list():
             i = [p["parameter_name"] for p in pool_p["parameters"]].index(param.name)
-            if is_uniform_float(param.type):
+            if isinstance(param, FloatParameter):
                 value = float(pool_p["parameters"][i]["value"])
-            elif is_uniform_int(param.type):
+            elif isinstance(param, IntParameter):
                 value = int(pool_p["parameters"][i]["value"])
-            elif is_ordinal(param.type):
+            elif isinstance(param, OrdinalParameter):
                 index = int(pool_p["parameters"][i]["value"])
                 value = param.sequence[index]
             else:
@@ -255,7 +255,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         """
         new_params = copy.deepcopy(params)
         for param in params.get_parameter_list():
-            if is_ordinal(param.type):
+            if isinstance(param, OrdinalParameter):
                 if param.name not in new_params.param.keys():
                     assert False
                 new_params.param[param.name] = Parameter(

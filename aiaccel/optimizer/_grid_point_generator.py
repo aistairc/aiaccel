@@ -9,7 +9,7 @@ from typing import Literal, Union
 import numpy as np
 from numpy.random import RandomState
 
-from aiaccel.util.data_type import Parameter, is_categorical, is_ordinal, is_uniform_float, is_uniform_int
+from aiaccel.util.data_type import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter, Parameter
 
 GridValueType = Union[float, int, str]
 SamplingMethodType = Literal["IN_ORDER", "UNIFORM", "RANDOM", "DUPLICATABLE_RANDOM"]
@@ -274,13 +274,13 @@ class OrdinalGridCondition(GridCondition):
 
 
 def _create_grid_condition(hyperparameter: Parameter) -> GridCondition:
-    if is_uniform_float(hyperparameter.type):
+    if isinstance(hyperparameter, FloatParameter):
         return FloatGridCondition(hyperparameter)
-    elif is_uniform_int(hyperparameter.type):
+    elif isinstance(hyperparameter, IntParameter):
         return IntGridCondition(hyperparameter)
-    elif is_categorical(hyperparameter.type):
+    elif isinstance(hyperparameter, CategoricalParameter):
         return CategoricalGridCondition(hyperparameter)
-    elif is_ordinal(hyperparameter.type):
+    elif isinstance(hyperparameter, OrdinalParameter):
         return OrdinalGridCondition(hyperparameter)
     else:
         raise TypeError(f'Specified parameter type "{hyperparameter.type}" of "{hyperparameter.name}" is invalid.')

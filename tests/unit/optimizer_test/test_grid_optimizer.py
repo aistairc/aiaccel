@@ -98,7 +98,7 @@ def test_generate_grid_points(grid_load_test_config):
     try:
         generate_grid_points(FakeParameter('1', 'uniform_int'), config)
         assert False
-    except KeyError:
+    except TypeError:
         assert True
 
     cat_p = Parameter(

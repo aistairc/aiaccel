@@ -141,4 +141,4 @@ class Parameter(AbstractParameter):
         elif is_ordinal(data_type):
             return OrdinalParameter(parameter)
         else:
-            raise ValueError(f"Invalid data_type: {data_type}")
+            raise TypeError(f"Invalid data_type: {data_type}")

@@ -10,7 +10,7 @@ from typing import Any
 from aiaccel.config import load_config
 from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.util import cast_y, get_time_now
-from aiaccel.util.data_type import is_categorical, is_ordinal, is_uniform_float, is_uniform_int
+from aiaccel.util.data_type import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter
 
 
 class CommandLineArgs:
@@ -31,13 +31,13 @@ class CommandLineArgs:
             self.parameters_config = HyperParameterConfiguration(self.config.optimize.parameters)
 
             for p in self.parameters_config.get_parameter_list():
-                if is_uniform_float(p.type):
+                if isinstance(p, FloatParameter):
                     self.parser.add_argument(f"--{p.name}", type=float)
-                elif is_uniform_int(p.type):
+                elif isinstance(p, IntParameter):
                     self.parser.add_argument(f"--{p.name}", type=int)
-                elif is_categorical(p.type):
+                elif isinstance(p, CategoricalParameter):
                     self.parser.add_argument(f"--{p.name}", type=str)
-                elif is_ordinal(p.type):
+                elif isinstance(p, OrdinalParameter):
                     self.parser.add_argument(f"--{p.name}", type=float)
                 else:
                     raise ValueError(f"Unknown parameter type: {p.type}")

@@ -5,8 +5,7 @@ import pytest
 
 from aiaccel.config import load_config
 from aiaccel.optimizer import TpeOptimizer
-from aiaccel.optimizer.tpe_optimizer import (TPESamplerWrapper,
-                                             create_distributions)
+from aiaccel.optimizer.tpe_optimizer import TPESamplerWrapper, create_distributions
 from aiaccel.parameter import HyperParameterConfiguration
 from tests.base_test import BaseTest
 
@@ -100,6 +99,6 @@ def test_create_distributions(data_dir):
 
     config = load_config(data_dir / 'config_tpe_invalid_type.json')
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         params = HyperParameterConfiguration(config.optimize.parameters)
         create_distributions(params)

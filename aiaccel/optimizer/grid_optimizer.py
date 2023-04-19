@@ -8,7 +8,7 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.util.data_type import Parameter, is_categorical, is_ordinal, is_uniform_float, is_uniform_int
+from aiaccel.util.data_type import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter, Parameter
 
 
 def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool, Any]:
@@ -67,7 +67,7 @@ def generate_grid_points(p: Parameter, config: DictConfig) -> dict[str, Any]:
     """
     new_param = {"parameter_name": p.name, "type": p.type}
 
-    if is_uniform_float(p.type) or is_uniform_int(p.type):
+    if isinstance(p, FloatParameter) or isinstance(p, IntParameter):
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
@@ -84,13 +84,13 @@ def generate_grid_points(p: Parameter, config: DictConfig) -> dict[str, Any]:
         else:
             n = int((upper - lower) / step) + 1
             new_param["parameters"] = [lower + i * step for i in range(0, n)]
-        if is_uniform_int(p.type):
+        if isinstance(p, IntParameter):
             new_param["parameters"] = [int(i) for i in new_param["parameters"]]
 
-    elif is_categorical(p.type):
+    elif isinstance(p, CategoricalParameter):
         new_param["parameters"] = p.choices
 
-    elif is_ordinal(p.type):
+    elif isinstance(p, OrdinalParameter):
         new_param["parameters"] = p.sequence
 
     else:

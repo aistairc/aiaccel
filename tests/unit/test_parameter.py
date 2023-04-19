@@ -58,5 +58,5 @@ class TestParameter(BaseTest):
         try:
             hp = HyperParameterConfiguration(json_string)
             assert False
-        except ValueError:
+        except TypeError:
             assert True

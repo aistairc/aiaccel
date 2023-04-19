@@ -10,11 +10,22 @@ from numpy.random import RandomState
 
 from aiaccel.config import Config, load_config
 from aiaccel.optimizer._grid_point_generator import (
-    CategoricalGridCondition, FloatGridCondition, GridCondition,
-    GridConditionCollection, GridPointGenerator, GridValueType,
-    IntGridCondition, NumericGridCondition, NumericType, OrdinalGridCondition,
-    _cast_start_to_integer, _cast_stop_to_integer, _create_grid_condition,
-    _is_there_zero_between_lower_and_upper, _validate_parameter_range)
+    CategoricalGridCondition,
+    FloatGridCondition,
+    GridCondition,
+    GridConditionCollection,
+    GridPointGenerator,
+    GridValueType,
+    IntGridCondition,
+    NumericGridCondition,
+    NumericType,
+    OrdinalGridCondition,
+    _cast_start_to_integer,
+    _cast_stop_to_integer,
+    _create_grid_condition,
+    _is_there_zero_between_lower_and_upper,
+    _validate_parameter_range,
+)
 from aiaccel.parameter import load_parameter
 from aiaccel.util.data_type import Parameter
 from tests.base_test import BaseTest
@@ -468,28 +479,29 @@ class TestOrdinalGridCondition:
 
 
 def test_create_grid_condition(monkeypatch: pytest.MonkeyPatch) -> None:
-    hyperparameter = Parameter(
-        {
-            "name": "test",
-            "type": 'uniform_float'
-        }
-    )
+    parameter_info = {"name": "test", "type": 'uniform_float'}
+    hyperparameter = Parameter(parameter_info)
     with monkeypatch.context() as m:
         m.setattr(GridCondition, "__init__", lambda *_: None)
         hyperparameter.type = 'uniform_float'
         grid_condition = _create_grid_condition(hyperparameter)
         assert isinstance(grid_condition, FloatGridCondition)
-        hyperparameter.type = 'uniform_int'
+        parameter_info["type"] = "uniform_int"
+        hyperparameter = Parameter(parameter_info)
         grid_condition = _create_grid_condition(hyperparameter)
+        print(grid_condition)
         assert isinstance(grid_condition, IntGridCondition)
-        hyperparameter.type = 'categorical'
+        parameter_info["type"] = "categorical"
+        hyperparameter = Parameter(parameter_info)
         grid_condition = _create_grid_condition(hyperparameter)
         assert isinstance(grid_condition, CategoricalGridCondition)
-        hyperparameter.type = 'ordinal'
+        parameter_info["type"] = "ordinal"
+        hyperparameter = Parameter(parameter_info)
         grid_condition = _create_grid_condition(hyperparameter)
         assert isinstance(grid_condition, OrdinalGridCondition)
         with pytest.raises(TypeError):
-            hyperparameter.type = "INVALID"
+            parameter_info["type"] = "INVALID"
+            hyperparameter = Parameter(parameter_info)
             _ = _create_grid_condition(hyperparameter)
 
 
