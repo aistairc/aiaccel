@@ -290,7 +290,7 @@ class AbstractOptimizer(AbstractModule):
             if len(failed_trial_ids) == 0:
                 return True
         else:
-            if len(error_trial_ids) == 0:
+            if len(failed_trial_ids) == 0 and len(error_trial_ids) == 0:
                 return True
 
         for trial_id in error_trial_ids:
