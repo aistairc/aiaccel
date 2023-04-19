@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from omegaconf.dictconfig import DictConfig
-
 from scipy.stats import qmc
 
 from aiaccel.optimizer import AbstractOptimizer
@@ -63,17 +62,12 @@ class SobolOptimizer(AbstractOptimizer):
             max_value = l_params[i].upper
             value = (max_value - min_value) * vec[i] + min_value
             new_param = {
-                'parameter_name': l_params[i].name,
-                'type': l_params[i].type,
-                'value': value
-            }
+                "parameter_name": l_params[i].name, "type": l_params[i].type, "value": value}
             new_params.append(new_param)
 
         return new_params
 
-    def generate_initial_parameter(
-        self
-    ) -> list[dict[str, float | int | str]]:
+    def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
 
         Returns:

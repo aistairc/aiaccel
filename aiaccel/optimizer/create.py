@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Type
-
 from importlib import import_module
-
+from typing import Type
 
 from aiaccel.optimizer import AbstractOptimizer
 

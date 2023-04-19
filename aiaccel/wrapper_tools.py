@@ -9,11 +9,7 @@ from aiaccel.util import create_yaml
 
 
 def create_runner_command(
-    command: str,
-    param_content: dict[str, Any],
-    trial_id: int,
-    config_path: str,
-    command_error_output: str
+    command: str, param_content: dict[str, Any], trial_id: int, config_path: str, command_error_output: str
 ) -> list[str]:
     """Create a list of command strings to run a hyper parameter.
 
@@ -25,31 +21,25 @@ def create_runner_command(
     Returns:
         list[str]: A list of command strings.
     """
-    commands = re.split(' +', command)
-    params = param_content['parameters']
+    commands = re.split(" +", command)
+    params = param_content["parameters"]
     for param in params:
         # Fix a bug related a negative exponential parameters
         # Need to modify wrapper.py as follows:
-        if 'parameter_name' in param.keys() and 'value' in param.keys():
+        if "parameter_name" in param.keys() and "value" in param.keys():
             commands.append(f'--{param["parameter_name"]}')
             commands.append(f'{param["value"]}')
-    commands.append('--trial_id')
+    commands.append("--trial_id")
     commands.append(str(trial_id))
-    commands.append('--config')
+    commands.append("--config")
     commands.append(config_path)
-    commands.append('2>')
+    commands.append("2>")
     commands.append(command_error_output)
     return commands
 
 
 def save_result(
-    ws: Path,
-    dict_lock: Path,
-    trial_id_str: str,
-    result: float,
-    start_time: str,
-    end_time: str,
-    err_message: str = ""
+    ws: Path, dict_lock: Path, trial_id_str: str, result: float, start_time: str, end_time: str, err_message: str = ""
 ) -> None:
     """Save a result file.
 
@@ -65,19 +55,11 @@ def save_result(
     Returns:
         None
     """
-    result_file = ws / dict_result / f'{trial_id_str}.result'
+    result_file = ws / dict_result / f"{trial_id_str}.result"
 
-    contents = {
-        'result': result,
-        'start_time': start_time,
-        'end_time': end_time
-    }
+    contents = {"result": result, "start_time": start_time, "end_time": end_time}
 
     if len(err_message) > 0:
         contents["error"] = err_message
 
-    create_yaml(
-        result_file,
-        contents,
-        dict_lock
-    )
+    create_yaml(result_file, contents, dict_lock)

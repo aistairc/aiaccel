@@ -13,9 +13,9 @@ from omegaconf.listconfig import ListConfig
 
 
 class ResourceType(Enum):
-    abci: str = 'abci'
-    local: str = 'local'
-    python_local: str = 'python_local'
+    abci: str = "abci"
+    local: str = "local"
+    python_local: str = "python_local"
 
     @classmethod
     def _missing_(cls, value: Any) -> Any | None:
@@ -27,8 +27,8 @@ class ResourceType(Enum):
 
 
 class OptimizerDirection(Enum):
-    minimize: str = 'minimize'
-    maximize: str = 'maximize'
+    minimize: str = "minimize"
+    maximize: str = "maximize"
 
     @classmethod
     def _missing_(cls, value: Any) -> Any | None:
@@ -171,7 +171,7 @@ def load_config(config_path: Path | str) -> DictConfig:
         raise ValueError("Config is not found.")
 
     base = OmegaConf.structured(Config)
-    default = OmegaConf.create(read_text('aiaccel', 'default_config.yaml'))
+    default = OmegaConf.create(read_text("aiaccel", "default_config.yaml"))
     customize = OmegaConf.load(path)
     customize.config_path = str(path)
     if not isinstance(customize.optimize.goal, ListConfig):
