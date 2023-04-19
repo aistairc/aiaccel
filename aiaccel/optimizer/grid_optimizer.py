@@ -130,8 +130,7 @@ class GridOptimizer(AbstractOptimizer):
         super().pre_process()
 
         self.num_generated_params = (
-            self.storage.get_num_ready() + self.storage.get_num_running() +
-            self.storage.get_num_finished()
+            self.storage.get_num_ready() + self.storage.get_num_running() + self.storage.get_num_finished()
         )
 
     def get_parameter_index(self) -> list[int] | None:
