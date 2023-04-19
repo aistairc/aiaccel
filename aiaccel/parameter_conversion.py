@@ -1,10 +1,13 @@
 from __future__ import annotations
+from typing import overload
+from abc import abstractmethod
+from abc import ABC
 
 from typing import Any
 
 import numpy as np
 
-from aiaccel.parameter import HyperParameter
+from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 
 
 class ConvertedHyperparameter:
@@ -15,12 +18,15 @@ class ConvertedHyperparameter:
     choices: list[Any]
     sequence: list[Any]
     convert_log: bool
+    convert_int: bool
     convert_choices: bool
     convert_sequence: bool
+    choice_index: int
 
     def __init__(self, hyperparameter: HyperParameter,
                  convert_log: bool = True, convert_int: bool = True,
-                 convert_choices: bool = True, convert_sequence: bool = True
+                 convert_choices: bool = True, convert_sequence: bool = True,
+                 choice_index: int = 0
                  ) -> None:
         """Conditions of hyperparameter of which the scale of numerical values,
         choices, or sequence are converted appropriately.
@@ -62,15 +68,15 @@ class ConvertedHyperparameter:
             self.lower = self.convert(hyperparameter.lower)
             self.upper = self.convert(hyperparameter.upper)
         elif self.type == "categorical":
+            self.original_name = hyperparameter.name
+            self.name = f"{hyperparameter.name}_{choice_index}"
             self.choices = hyperparameter.choices
-            if self.convert_choices:
-                self.lower = 0
-                self.upper = len(self.choices)
+            self.choice_index = choice_index
         elif self.type == "ordinal":
+            self.original_name = hyperparameter.name
+            self.name = f"{hyperparameter.name}_{choice_index}"
             self.sequence = hyperparameter.sequence
-            if self.convert_sequence:
-                self.lower = 0
-                self.upper = len(self.sequence)
+            self.choice_index = choice_index
         else:
             raise TypeError(f"Type of {self.name}: {self.type} is invalid.")
 
@@ -134,14 +140,118 @@ class ConvertedHyperparameter:
         elif self.type == "uniform_float":
             return float(np.exp(internal_value) if self.convert_log else internal_value)
         elif self.type == "categorical":
-            return self.choices[int(internal_value)] if self.convert_choices else internal_value
+            return self.choices[np.argmax(internal_value)] if self.convert_choices else internal_value
         elif self.type == "ordinal":
-            return self.sequence[int(internal_value)] if self.convert_sequence else internal_value
+            return self.sequence[np.argmax(internal_value)] if self.convert_sequence else internal_value
         else:
             raise TypeError(f"Type of {self.name}: {self.type} is invalid.")
 
 
-class ConvertedHyperparameterConfiguration:
+class ConvertedParameter(ABC):
+    @overload
+    def __init__(self, param: HyperParameter, convert_log: bool = True) -> None: ...
+
+    @overload
+    def __init__(self, param: HyperParameter, convert_log: bool = True, convert_int: bool = True) -> None: ...
+
+    @overload
+    def __init__(self, param: HyperParameter, convert_choices: bool = True, choice_index: int = -1) -> None: ...
+
+    @overload
+    def __init__(self, param: HyperParameter, convert_sequence: bool = True, choice_index: int = -1) -> None: ...
+
+    def __init__(self, param: HyperParameter, convert_log: bool = True,
+                 convert_int: bool = True, convert_choices: bool = True,
+                 convert_sequence: bool = True, choice_index: int = -1
+                 ) -> None:
+        self.name = param.name
+        self.type = param.type
+        self.convert_log = convert_log
+        self.convert_int = convert_int
+        self.convert_choices = convert_choices
+        self.convert_sequence = convert_sequence
+        self.choice_index = choice_index
+
+    @overload
+    @abstractmethod
+    def convert(self, external_value: float) -> float: ...
+
+    @overload
+    @abstractmethod
+    def convert(self, external_value: Any) -> Any: ...
+
+    @overload
+    @abstractmethod
+    def convert_to_original_repr(self, internal_value: float) -> float: ...
+
+    @overload
+    @abstractmethod
+    def convert_to_original_repr(self, internal_value: float) -> int: ...
+
+    @overload
+    @abstractmethod
+    def convert_to_original_repr(self, internal_value: list[float]) -> Any: ...
+
+
+class NumericalConvertedParameter(ConvertedParameter):
+    def __init__(self, param: HyperParameter, convert_log: bool = True,
+                 convert_int: bool = True) -> None:
+        super().__init__(param, convert_log, convert_int)
+
+    def convert(self, external_value: float) -> float:
+        if self.convert_log:
+            if external_value <= 0:
+                raise ValueError("Log scaled value can not be negative.")
+            return float(np.log(external_value))
+        else:
+            return float(external_value)
+
+    def convert_to_original_repr(self, internal_value: float) -> float:
+        if self.convert_log:
+            return float(np.exp(internal_value))
+        else:
+            return float(internal_value)
+
+
+class FloatConvertedParameter(NumericalConvertedParameter):
+    def __init__(self, param: HyperParameter, convert_log: bool = True) -> None:
+        super().__init__(param, convert_log)
+
+
+class IntConvertedParameter(NumericalConvertedParameter):
+    def __init__(self, param: HyperParameter, convert_log: bool = True,
+                 convert_int: bool = True) -> None:
+        super().__init__(param, convert_log, convert_int)
+
+    def convert(self, external_value: float) -> float:
+        return int(super().convert(external_value)) if self.convert_int else super().convert(external_value)
+
+    def convert_to_original_repr(self, internal_value: float) -> int:
+        return int(super().convert_to_original_repr(internal_value))
+
+
+class CategoricalConvertedParameter(ConvertedParameter):
+    def __init__(self, param: HyperParameter, convert_choices: bool = True, choice_index: int = -1) -> None:
+        super().__init__(param, convert_choices, choice_index)
+        if convert_choices:
+            self.name = f"{param.name}_{choice_index}"
+        else:
+            self.name = param.name
+        self.original_name = param.name
+        self.type = param.type
+        self.convert_choices = convert_choices
+        self.choices = param.choices
+
+    def convert(self, internal_param: Any) -> Any:
+        ...
+
+
+class OrdinalConvertedParameter(CategoricalConvertedParameter):
+    def __init__(self, param: HyperParameter, convert_sequence: bool = True, choice_index: int = -1) -> None:
+        super().__init__(param, convert_sequence, choice_index)
+
+
+class ConvertedHyperparameterConfiguration(HyperParameterConfiguration):
     """Collection of ConvertedHyperparameter objects.
 
     Args:
@@ -162,12 +272,33 @@ class ConvertedHyperparameterConfiguration:
     """
 
     def __init__(self, hyperparameters: list[HyperParameter],
-                 convert_log: bool = True, convert_choices: bool = True,
-                 convert_sequence: bool = True) -> None:
+                 convert_log: bool = True, convert_int: bool = True,
+                 convert_choices: bool = True, convert_sequence: bool = True
+                 ) -> None:
         self._converted_params: dict[str, ConvertedHyperparameter] = {}
         for param in hyperparameters:
-            self._converted_params[param.name] = ConvertedHyperparameter(
-                param, convert_log, convert_choices, convert_sequence)
+            if param.type in ("unifoem_float", "uniform_int"):
+                self._converted_params[param.name] = ConvertedHyperparameter(
+                    param,
+                    convert_log=convert_log,
+                    convert_int=convert_int
+                )
+            elif param.type == "categorical":
+                for i in range(len(param.choices)):
+                    self._converted_params[param.name] = ConvertedHyperparameter(
+                        param,
+                        convert_choices=convert_choices,
+                        choice_index=i
+                    )
+            elif param.type == "ordinal":
+                for i in range(len(param.sequence)):
+                    self._converted_params[param.name] = ConvertedHyperparameter(
+                        param,
+                        convert_sequence=convert_sequence,
+                        choice_index=i
+                    )
+            else:
+                raise TypeError(f"Invalid type: {param.type}")
 
     def get_hyperparameter(self, name: str) -> ConvertedHyperparameter:
         """Gets a ConvertedHyperparameter object by specifying parameter name.
@@ -203,3 +334,52 @@ class ConvertedHyperparameterConfiguration:
                 ConvertedHyperparameter objects.
         """
         return self._converted_params
+
+    def to_original_repr(self, internal_params: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Converts parameters in the original representation.
+
+        Args:
+            internal_params (list[dict[str, Any]]): A list of dict objects
+                containing each parameter information in the internal
+                representation.
+
+        Returns:
+            list[dict[str, Any]]: A list of dict objects containing each
+                parameter information in the original representation.
+        """
+
+        params_in_original_repr: list[dict[str, Any]] = []
+        choice_weights: dict[str, dict[str, Any]] = {}
+        for param in internal_params:
+            converted_param = self.get_hyperparameter(param["parameter_name"])
+            if converted_param.type in ("uniform_float", "uniform_int"):
+                params_in_original_repr.append(converted_param.convert_to_original_repr(param["value"]))
+            elif converted_param.type == "categorical":
+                if converted_param.convert_choices:
+                    if converted_param.original_name in choice_weights:
+                        choice_weights[converted_param.original_name][converted_param.name] = param["value"]
+                    else:
+                        choice_weights[converted_param.original_name] = {converted_param.name: param["value"]}
+                    if len(choice_weights[converted_param.original_name]) == len(converted_param.choices):
+                        encoded_choices = []
+                        for i in range(len(converted_param.choices)):
+                            encoded_choices.append(float(choice_weights[f"{converted_param.original_name}_{i}"]))
+                        params_in_original_repr.append(converted_param.convert_to_original_repr(encoded_choices))
+                else:
+                    params_in_original_repr.append(converted_param.convert_to_original_repr(param["value"]))
+            else:
+                assert converted_param.type == "ordinal"
+                if converted_param.convert_sequence:
+                    if converted_param.original_name in choice_weights:
+                        choice_weights[converted_param.original_name][converted_param.name] = param["value"]
+                    else:
+                        choice_weights[converted_param.original_name] = {converted_param.name: param["value"]}
+                    if len(choice_weights[converted_param.original_name]) == len(converted_param.sequence):
+                        encoded_sequence = []
+                        for i in range(len(converted_param.sequence)):
+                            encoded_sequence.append(float(choice_weights[f"{converted_param.original_name}_{i}"]))
+                        params_in_original_repr.append(converted_param.convert_to_original_repr(encoded_sequence))
+                else:
+                    params_in_original_repr.append(converted_param.convert_to_original_repr(param["value"]))
+
+        return params_in_original_repr
