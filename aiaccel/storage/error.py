@@ -35,7 +35,7 @@ class Error(Abstract):
                 )
 
                 if data is None:
-                    new_row = ErrorTable(trial_id=trial_id, error=error_message, exitcode=None)
+                    new_row = ErrorTable(trial_id=trial_id, error=error_message)
                     session.add(new_row)
                 else:
                     data.error = error_message
@@ -88,7 +88,7 @@ class Error(Abstract):
                 )
 
                 if data is None:
-                    new_row = ErrorTable(trial_id=trial_id, error=None, exitcode=exitcode)
+                    new_row = ErrorTable(trial_id=trial_id, exitcode=exitcode)
                     session.add(new_row)
                 else:
                     data.exitcode = exitcode
