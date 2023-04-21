@@ -126,9 +126,7 @@ line_length = 120
 [tool.flake8]
 max-line-length = 120
 # E203: whitespace before ':'
-# E501: Line too long (82 > 79 characters)
-# W503: Line break occurred before a binary operator
-ignore = "E203,E501,W503"
+extend-ignore = "E203,"
 
 [tool.mypy]
 python_version="3.8"
