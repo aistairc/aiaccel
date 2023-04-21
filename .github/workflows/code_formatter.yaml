@@ -22,11 +22,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install black flake8 isort pycodestyle
 
-      - name: Pycodestyle Test
-        run: pycodestyle --max-line-length=120 --ignore=E203 aiaccel
-
       - name: Lint
         run: |
-          flake8 --max-line-length 120 --ignore E203 aiaccel
+          flake8 --max-line-length 120 --extend-ignore E203 aiaccel
           isort --check --diff --profile black aiaccel
           black --check --line-length 120 aiaccel
