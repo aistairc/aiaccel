@@ -7,17 +7,12 @@ from aiaccel.parameter_conversion import ConvertedHyperparameterConfiguration
 
 
 class RandomOptimizer(AbstractOptimizer):
-    """An optimizer class with a random algorithm.
-
-    """
+    """An optimizer class with a random algorithm."""
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
         self.converted_params = ConvertedHyperparameterConfiguration(
-            self.params.get_parameter_list(),
-            convert_int=False,
-            convert_choices=False,
-            convert_sequence=False
+            self.params.get_parameter_list(), convert_int=False, convert_choices=False, convert_sequence=False
         )
 
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
@@ -43,7 +38,7 @@ class RandomOptimizer(AbstractOptimizer):
                 {
                     "parameter_name": param.name,
                     "type": param.type,
-                    "value": param.convert_to_original_repr(internal_value)
+                    "value": param.convert_to_original_repr(internal_value),
                 }
             )
 

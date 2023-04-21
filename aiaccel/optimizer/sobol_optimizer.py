@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from omegaconf.dictconfig import DictConfig
 from typing import Any
 
+from omegaconf.dictconfig import DictConfig
 from scipy.stats import qmc
 
 from aiaccel.optimizer import AbstractOptimizer
@@ -30,9 +30,7 @@ class SobolOptimizer(AbstractOptimizer):
         super().__init__(config)
         self.generate_index = 0
         self.sampler: Any = None
-        self.converted_parameters = ConvertedHyperparameterConfiguration(
-            self.params.get_parameter_list()
-        )
+        self.converted_parameters = ConvertedHyperparameterConfiguration(self.params.get_parameter_list())
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -47,9 +45,7 @@ class SobolOptimizer(AbstractOptimizer):
 
         if self.config.resume is None or self.config.resume <= 0:
             self.sampler = qmc.Sobol(
-                d=len(self.params.get_parameter_list()),
-                scramble=self.config.optimize.sobol_scramble,
-                seed=self._rng
+                d=len(self.params.get_parameter_list()), scramble=self.config.optimize.sobol_scramble, seed=self._rng
             )
 
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
@@ -69,15 +65,13 @@ class SobolOptimizer(AbstractOptimizer):
                 {
                     "parameter_name": param.name,
                     "type": param.type,
-                    "value": param.convert_to_original_repr(internal_value)
+                    "value": param.convert_to_original_repr(internal_value),
                 }
             )
 
         return new_params
 
-    def generate_initial_parameter(
-        self
-    ) -> list[dict[str, float | int | str]]:
+    def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
 
         Returns:
@@ -85,7 +79,6 @@ class SobolOptimizer(AbstractOptimizer):
         """
         if super().generate_initial_parameter() is not None:
             self.logger.warning(
-                "Initial values cannot be specified for sobol."
-                "The set initial value has been invalidated."
+                "Initial values cannot be specified for sobol." "The set initial value has been invalidated."
             )
         return self.generate_parameter()

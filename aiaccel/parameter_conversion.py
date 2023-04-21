@@ -1,9 +1,7 @@
 from __future__ import annotations
-from typing import overload
-from abc import abstractmethod
-from abc import ABC
 
-from typing import Any
+from abc import ABC, abstractmethod
+from typing import Any, overload
 
 import numpy as np
 
@@ -23,11 +21,15 @@ class ConvertedHyperparameter:
     convert_sequence: bool
     choice_index: int
 
-    def __init__(self, hyperparameter: HyperParameter,
-                 convert_log: bool = True, convert_int: bool = True,
-                 convert_choices: bool = True, convert_sequence: bool = True,
-                 choice_index: int = 0
-                 ) -> None:
+    def __init__(
+        self,
+        hyperparameter: HyperParameter,
+        convert_log: bool = True,
+        convert_int: bool = True,
+        convert_choices: bool = True,
+        convert_sequence: bool = True,
+        choice_index: int = 0,
+    ) -> None:
         """Conditions of hyperparameter of which the scale of numerical values,
         choices, or sequence are converted appropriately.
 
@@ -53,11 +55,15 @@ class ConvertedHyperparameter:
         self.name = hyperparameter.name
         # TODO: use data_type.
         self.type = (
-            "uniform_float" if hyperparameter.type == "FLOAT" else
-            "uniform_int" if hyperparameter.type == "INT" else
-            "categorical" if hyperparameter.type == "CATEGORICAL" else
-            "ordinal" if hyperparameter.type == "ORDINAL" else
-            hyperparameter.type
+            "uniform_float"
+            if hyperparameter.type == "FLOAT"
+            else "uniform_int"
+            if hyperparameter.type == "INT"
+            else "categorical"
+            if hyperparameter.type == "CATEGORICAL"
+            else "ordinal"
+            if hyperparameter.type == "ORDINAL"
+            else hyperparameter.type
         )
         self.convert_log = hyperparameter.log and convert_log
         self.convert_int = convert_int
@@ -149,21 +155,30 @@ class ConvertedHyperparameter:
 
 class ConvertedParameter(ABC):
     @overload
-    def __init__(self, param: HyperParameter, convert_log: bool = True) -> None: ...
+    def __init__(self, param: HyperParameter, convert_log: bool = True) -> None:
+        ...
 
     @overload
-    def __init__(self, param: HyperParameter, convert_log: bool = True, convert_int: bool = True) -> None: ...
+    def __init__(self, param: HyperParameter, convert_log: bool = True, convert_int: bool = True) -> None:
+        ...
 
     @overload
-    def __init__(self, param: HyperParameter, convert_choices: bool = True, choice_index: int = -1) -> None: ...
+    def __init__(self, param: HyperParameter, convert_choices: bool = True, choice_index: int = -1) -> None:
+        ...
 
     @overload
-    def __init__(self, param: HyperParameter, convert_sequence: bool = True, choice_index: int = -1) -> None: ...
+    def __init__(self, param: HyperParameter, convert_sequence: bool = True, choice_index: int = -1) -> None:
+        ...
 
-    def __init__(self, param: HyperParameter, convert_log: bool = True,
-                 convert_int: bool = True, convert_choices: bool = True,
-                 convert_sequence: bool = True, choice_index: int = -1
-                 ) -> None:
+    def __init__(
+        self,
+        param: HyperParameter,
+        convert_log: bool = True,
+        convert_int: bool = True,
+        convert_choices: bool = True,
+        convert_sequence: bool = True,
+        choice_index: int = -1,
+    ) -> None:
         self.name = param.name
         self.type = param.type
         self.convert_log = convert_log
@@ -174,28 +189,32 @@ class ConvertedParameter(ABC):
 
     @overload
     @abstractmethod
-    def convert(self, external_value: float) -> float: ...
+    def convert(self, external_value: float) -> float:
+        ...
 
     @overload
     @abstractmethod
-    def convert(self, external_value: Any) -> Any: ...
+    def convert(self, external_value: Any) -> Any:
+        ...
 
     @overload
     @abstractmethod
-    def convert_to_original_repr(self, internal_value: float) -> float: ...
+    def convert_to_original_repr(self, internal_value: float) -> float:
+        ...
 
     @overload
     @abstractmethod
-    def convert_to_original_repr(self, internal_value: float) -> int: ...
+    def convert_to_original_repr(self, internal_value: float) -> int:
+        ...
 
     @overload
     @abstractmethod
-    def convert_to_original_repr(self, internal_value: list[float]) -> Any: ...
+    def convert_to_original_repr(self, internal_value: list[float]) -> Any:
+        ...
 
 
 class NumericalConvertedParameter(ConvertedParameter):
-    def __init__(self, param: HyperParameter, convert_log: bool = True,
-                 convert_int: bool = True) -> None:
+    def __init__(self, param: HyperParameter, convert_log: bool = True, convert_int: bool = True) -> None:
         super().__init__(param, convert_log, convert_int)
 
     def convert(self, external_value: float) -> float:
@@ -219,8 +238,7 @@ class FloatConvertedParameter(NumericalConvertedParameter):
 
 
 class IntConvertedParameter(NumericalConvertedParameter):
-    def __init__(self, param: HyperParameter, convert_log: bool = True,
-                 convert_int: bool = True) -> None:
+    def __init__(self, param: HyperParameter, convert_log: bool = True, convert_int: bool = True) -> None:
         super().__init__(param, convert_log, convert_int)
 
     def convert(self, external_value: float) -> float:
@@ -271,31 +289,29 @@ class ConvertedHyperparameterConfiguration(HyperParameterConfiguration):
             sequence. Defaults to True.
     """
 
-    def __init__(self, hyperparameters: list[HyperParameter],
-                 convert_log: bool = True, convert_int: bool = True,
-                 convert_choices: bool = True, convert_sequence: bool = True
-                 ) -> None:
+    def __init__(
+        self,
+        hyperparameters: list[HyperParameter],
+        convert_log: bool = True,
+        convert_int: bool = True,
+        convert_choices: bool = True,
+        convert_sequence: bool = True,
+    ) -> None:
         self._converted_params: dict[str, ConvertedHyperparameter] = {}
         for param in hyperparameters:
             if param.type in ("unifoem_float", "uniform_int"):
                 self._converted_params[param.name] = ConvertedHyperparameter(
-                    param,
-                    convert_log=convert_log,
-                    convert_int=convert_int
+                    param, convert_log=convert_log, convert_int=convert_int
                 )
             elif param.type == "categorical":
                 for i in range(len(param.choices)):
                     self._converted_params[param.name] = ConvertedHyperparameter(
-                        param,
-                        convert_choices=convert_choices,
-                        choice_index=i
+                        param, convert_choices=convert_choices, choice_index=i
                     )
             elif param.type == "ordinal":
                 for i in range(len(param.sequence)):
                     self._converted_params[param.name] = ConvertedHyperparameter(
-                        param,
-                        convert_sequence=convert_sequence,
-                        choice_index=i
+                        param, convert_sequence=convert_sequence, choice_index=i
                     )
             else:
                 raise TypeError(f"Invalid type: {param.type}")

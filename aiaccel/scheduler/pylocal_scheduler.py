@@ -3,13 +3,13 @@ from __future__ import annotations
 from importlib.util import module_from_spec, spec_from_file_location
 from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
-from subprocess import run
-from typing import Any
-from aiaccel.config import load_config
+from subprocess import Popen
+from typing import Any, List
 
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.scheduler import AbstractScheduler
+from aiaccel.config import load_config
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util import get_time_now
 from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
 from aiaccel.util.cast import cast_y
@@ -22,13 +22,12 @@ workspace: Path
 
 
 class PylocalScheduler(AbstractScheduler):
-    """A scheduler class running on a local computer.
-
-    """
+    """A scheduler class running on a local computer."""
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
         self.run = Run(self.config.config_path)
+        self.processes: List[Any] = []
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
         self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config.config_path,))
@@ -46,17 +45,23 @@ class PylocalScheduler(AbstractScheduler):
 
         args = []
         for trial_id in trial_ids:
-            self.storage.trial.set_any_trial_state(trial_id=trial_id, state='running')
+            self.storage.trial.set_any_trial_state(trial_id=trial_id, state="running")
             args.append([trial_id, self.get_any_trial_xs(trial_id)])
             self._serialize(trial_id)
 
         for trial_id, xs, ys, err, start_time, end_time in self.pool.imap_unordered(execute, args):
             self.report(trial_id, ys, err, start_time, end_time)
-            self.storage.trial.set_any_trial_state(trial_id=trial_id, state='finished')
+            self.storage.trial.set_any_trial_state(trial_id=trial_id, state="finished")
 
             self.create_result_file(trial_id, xs, ys, err, start_time, end_time)
 
         return True
+
+    def post_process(self) -> None:
+        for process in self.processes:
+            process.wait()
+
+        super().post_process()
 
     def get_any_trial_xs(self, trial_id: int) -> dict[str, Any] | None:
         """Gets a parameter list of specific trial ID from Storage object.
@@ -78,10 +83,7 @@ class PylocalScheduler(AbstractScheduler):
 
         return xs
 
-    def report(
-        self, trial_id: int, ys: list[Any], err: str, start_time: str,
-        end_time: str
-    ) -> None:
+    def report(self, trial_id: int, ys: list[Any], err: str, start_time: str, end_time: str) -> None:
         """Saves results in the Storage object.
 
         Args:
@@ -118,47 +120,42 @@ class PylocalScheduler(AbstractScheduler):
         return self.workspace.get_any_result_file_path(self.trial_id.get())
 
     def create_result_file(
-        self,
-        trial_id: int,
-        xs: dict[str, Any],
-        ys: list[Any],
-        error: str,
-        start_time: str,
-        end_time: str
+        self, trial_id: int, xs: dict[str, Any], ys: list[Any], error: str, start_time: str, end_time: str
     ) -> None:
         args = {
-            'file': self.workspace.get_any_result_file_path(trial_id),
-            'trial_id': str(trial_id),
-            'config': self.config.config_path,
-            'start_time': start_time,
-            'end_time': end_time,
-            'error': error
+            "file": self.workspace.get_any_result_file_path(trial_id),
+            "trial_id": str(trial_id),
+            "config": self.config.config_path,
+            "start_time": start_time,
+            "end_time": end_time,
+            "error": error,
         }
 
         if len(error) == 0:
-            del args['error']
+            del args["error"]
 
-        commands = ['aiaccel-set-result']
+        commands = ["aiaccel-set-result"]
         for key in args.keys():
-            commands.append('--' + key)
+            commands.append("--" + key)
             commands.append(str(args[key]))
 
-        commands.append('--objective')
+        commands.append("--objective")
         for y in ys:
             commands.append(str(y))
 
         for key in xs.keys():
-            commands.append('--' + key)
+            commands.append("--" + key)
             commands.append(str(xs[key]))
 
-        run(commands)
+        self.processes.append(Popen(commands))
 
         return None
 
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
-        del obj['run']
-        del obj['pool']
+        del obj["run"]
+        del obj["pool"]
+        del obj["processes"]
         return obj
 
 
