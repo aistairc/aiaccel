@@ -7,11 +7,16 @@ from aiaccel.optimizer import AbstractOptimizer
 
 
 class RandomOptimizer(AbstractOptimizer):
-    """An optimizer class with a random algorithm."""
+    """An optimizer class with a random algorithm.
+
+    Args:
+        config (DictConfig): A DictConfig object which has contents of
+            configuration file and command line options.
+    """
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
-        self.params = ConvertedParameterConfiguration(
+        self.params: ConvertedParameterConfiguration = ConvertedParameterConfiguration(
             self.params, convert_int=False, convert_choices=False, convert_sequence=False
         )
 

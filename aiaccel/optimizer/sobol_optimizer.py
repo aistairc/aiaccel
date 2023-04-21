@@ -13,8 +13,8 @@ class SobolOptimizer(AbstractOptimizer):
     """An optimizer class with sobol algorithm.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
+        config (DictConfig): A DictConfig object which has contents of
+            configuration file and command line options.
 
     Attributes:
         generate_index (int): A number of generated hyper parameters.
@@ -30,7 +30,7 @@ class SobolOptimizer(AbstractOptimizer):
         super().__init__(config)
         self.generate_index = 0
         self.sampler: Any = None
-        self.params = ConvertedParameterConfiguration(self.params)
+        self.params: ConvertedParameterConfiguration = ConvertedParameterConfiguration(self.params)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
