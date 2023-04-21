@@ -52,19 +52,6 @@ class ConvertedOrdinalParameter(ConvertedCategoricalParameter):
     ...
 
 
-def _make_converted_categorical_parameter_name(original_name: str, choice_index: int) -> str:
-    """_summary_
-
-    Args:
-        original_name (str): _description_
-        choice_index (str): _description_
-
-    Returns:
-        str: _description_
-    """
-    return f"{original_name}_{choice_index}"
-
-
 class WeightOfChoice(ConvertedCategoricalParameter):
     def __init__(self, param: HyperParameter, choice_index: int) -> None:
         super().__init__(param)
@@ -79,7 +66,8 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
     """Collection of ConvertedHyperparameter objects.
 
     Args:
-        hyperparameters (list[HyperParameter]): A list of HyperPrameter objects.
+        params (list[HyperParameter] | HyperParameterConfiguration): A list of
+            HyperPrameter objects or HyperParameterconfiguration object.
         convert_log (bool, optional): Whether to convert the numerical values
             between log and linear scale when log of the hyperparameter object
             is True. Defaults to True.
@@ -116,20 +104,38 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         convert_choices: bool = True,
         convert_sequence: bool = True,
     ) -> dict[str, ConvertedParameter]:
-        """_summary_
+        """Converts all of HyperParameter in the given list to the internal
+        representation.
 
-        Args:
-            params (list[HyperParameter]): _description_
-            convert_log (bool, optional): _description_. Defaults to True.
-            convert_int (bool, optional): _description_. Defaults to True.
-            convert_choices (bool, optional): _description_. Defaults to True.
-            convert_sequence (bool, optional): _description_. Defaults to True.
+        If `categorical` (`ordinal`) parameters are included, and
+        `convert_choice` (`convert_sequence`) is `True`, the number of
+        parameters in a returned list may different from the original one.
+        This is because, each choice in `choices` (`sequence`) is treated as a
+        float parameter bounded by lower and upper value of 0.0 and 1.0,
+        respectively.
+
+        params (list[HyperParameter]): A list of HyperPrameter objects.
+        convert_log (bool, optional): Whether to convert the numerical values
+            between log and linear scale when log of the hyperparameter object
+            is True. Defaults to True.
+        convert_int (bool, optional): Whether to convert the int value to
+            float. For example, if convert_int = False and log-scale conversion
+            is enabled, the value `v` will be converted as `int(numpy.log(v))`.
+            Defaults to True.
+        convert_choices (bool, optional): Whether to treat the choices of
+            categorical parameter as float value corresponding to the index of
+            choices. Defaults to True.
+        convert_sequence (bool, optional): Whether to treat the sequence of
+            ordinal parameter as a float value corresponding to the index of
+            sequence. Defaults to True.
 
         Raises:
-            TypeError: _description_
+            TypeError: Causes when the type of parameter is invalid.
 
         Returns:
-            dict[str, ConvertedParameter]: _description_
+            dict[str, ConvertedParameter]: A dict object of ConvertedParameter.
+                Keys of the dict specifies name of parameters internaly
+                effective.
         """
         converted_params: dict[str, ConvertedParameter] = {}
         for param in params:
@@ -232,6 +238,19 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         return self._converted_params
 
 
+def _make_converted_categorical_parameter_name(original_name: str, choice_index: int) -> str:
+    """Makes name of internal parameter for weight of one of the choices.
+
+    Args:
+        original_name (str): The name of categorical or ordinal parameter.
+        choice_index (str): The index of choice.
+
+    Returns:
+        str: Name of internal parameter for weight of one of the choices.
+    """
+    return f"{original_name}_{choice_index}"
+
+
 def _convert_numerical_value(param: ConvertedNumericalParameter, external_value: float) -> float:
     if param.convert_log:
         if external_value <= 0:
@@ -276,21 +295,15 @@ def _restore_int(param: ConvertedIntParameter, internal_value: float | int) -> i
         return int(internal_value)
 
 
-def _is_weight_collected(
-    weight_of_choice: WeightOfChoice,
-    weights: dict[str, dict[str, Any]],
-) -> bool:
-    return len(weight_of_choice.choices) == len(weights[weight_of_choice.original_name])
+def _is_weight_collected(param: WeightOfChoice, weights: dict[str, dict[str, Any]]) -> bool:
+    return len(param.choices) == len(weights[param.original_name])
 
 
-def _make_weight_distribution(
-    weight_of_choice: WeightOfChoice,
-    weights: dict[str, dict[str, Any]],
-) -> list[float]:
-    original_name = weight_of_choice.original_name
+def _make_weight_distribution(param: WeightOfChoice, weights: dict[str, dict[str, Any]]) -> list[float]:
+    original_name = param.original_name
     weight_dict = weights[original_name]
     weight_list = []
-    for i in range(len(weight_of_choice.choices)):
+    for i in range(len(param.choices)):
         weight_list.append(float(weight_dict[f"{original_name}_{i}"]))
     return weight_list
 
@@ -312,4 +325,4 @@ def _restore_categorical_value(param: ConvertedCategoricalParameter, value: Any)
 
 
 def _make_structured_value(param: ConvertedParameter, value: Any) -> dict[str, Any]:
-    return {"name": param.name, "type": param.type, "value": value}
+    return {"parameter_name": param.name, "type": param.type, "value": value}
