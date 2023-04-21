@@ -5,10 +5,8 @@ from collections.abc import Generator
 import numpy as np
 import pytest
 
+from aiaccel.converted_parameter import ConvertedParameter, ConvertedParameterConfiguration
 from aiaccel.parameter import HyperParameter
-from aiaccel.parameter_conversion import ConvertedHyperparameter
-from aiaccel.parameter_conversion import ConvertedHyperparameterConfiguration
-
 
 float_parameter_dict = {
     "name": "x0",
@@ -46,10 +44,10 @@ class BaseTestParameterConversion:
         self.int_param = HyperParameter(int_parameter_dict)
         self.categorical_param = HyperParameter(categorical_parameter_dict)
         self.ordinal_param = HyperParameter(ordinal_parameter_dict)
-        self.converted_float = ConvertedHyperparameter(self.float_param)
-        self.converted_int = ConvertedHyperparameter(self.int_param)
-        self.converted_categorical = ConvertedHyperparameter(self.categorical_param)
-        self.converted_ordinal = ConvertedHyperparameter(self.ordinal_param)
+        self.converted_float = ConvertedParameter(self.float_param)
+        self.converted_int = ConvertedParameter(self.int_param)
+        self.converted_categorical = ConvertedParameter(self.categorical_param)
+        self.converted_ordinal = ConvertedParameter(self.ordinal_param)
 
         self.list_of_hyperparameters = [
             self.float_param,
@@ -74,7 +72,7 @@ class BaseTestParameterConversion:
 
 class TestConvertedHyperparameter(BaseTestParameterConversion):
     def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        converted = ConvertedHyperparameter(self.float_param)
+        converted = ConvertedParameter(self.float_param)
         assert converted.type == "uniform_float"
         assert converted.convert_log is self.float_param.log
         assert converted.lower == self.float_param.lower
@@ -83,17 +81,17 @@ class TestConvertedHyperparameter(BaseTestParameterConversion):
         with monkeypatch.context() as m:
             m.setattr(self.float_param, "log", True)
 
-            converted = ConvertedHyperparameter(self.float_param)
+            converted = ConvertedParameter(self.float_param)
             assert converted.convert_log is True
             assert converted.lower == np.log(self.float_param.lower)
             assert converted.upper == np.log(self.float_param.upper)
 
-            converted = ConvertedHyperparameter(self.float_param, convert_log=False)
+            converted = ConvertedParameter(self.float_param, convert_log=False)
             assert converted.convert_log is False
             assert converted.lower == self.float_param.lower
             assert converted.upper == self.float_param.upper
 
-        converted = ConvertedHyperparameter(self.int_param)
+        converted = ConvertedParameter(self.int_param)
         assert converted.type == "uniform_int"
         assert converted.convert_log is self.int_param.log
         assert converted.lower == self.int_param.lower
@@ -102,37 +100,37 @@ class TestConvertedHyperparameter(BaseTestParameterConversion):
         with monkeypatch.context() as m:
             m.setattr(self.int_param, "log", True)
 
-            converted = ConvertedHyperparameter(self.int_param)
+            converted = ConvertedParameter(self.int_param)
             assert converted.convert_log is True
             assert converted.lower == np.log(self.int_param.lower)
             assert converted.upper == np.log(self.int_param.upper)
 
-            converted = ConvertedHyperparameter(self.int_param, convert_log=False)
+            converted = ConvertedParameter(self.int_param, convert_log=False)
             assert converted.convert_log is False
             assert converted.lower == self.int_param.lower
             assert converted.upper == self.int_param.upper
 
-        converted = ConvertedHyperparameter(self.categorical_param)
+        converted = ConvertedParameter(self.categorical_param)
         assert converted.type == "categorical"
         assert converted.convert_choices is True
         assert converted.choices == self.categorical_param.choices
         assert converted.lower == 0
         assert converted.upper == len(self.categorical_param.choices)
 
-        converted = ConvertedHyperparameter(self.categorical_param, convert_choices=False)
+        converted = ConvertedParameter(self.categorical_param, convert_choices=False)
         assert converted.convert_choices is False
         assert converted.choices == self.categorical_param.choices
         assert hasattr(converted, "lower") is False
         assert hasattr(converted, "upper") is False
 
-        converted = ConvertedHyperparameter(self.ordinal_param)
+        converted = ConvertedParameter(self.ordinal_param)
         assert converted.type == "ordinal"
         assert converted.convert_sequence is True
         assert converted.sequence == self.ordinal_param.sequence
         assert converted.lower == 0
         assert converted.upper == len(self.ordinal_param.sequence)
 
-        converted = ConvertedHyperparameter(self.ordinal_param, convert_sequence=False)
+        converted = ConvertedParameter(self.ordinal_param, convert_sequence=False)
         assert converted.convert_sequence is False
         assert converted.sequence == self.ordinal_param.sequence
         assert hasattr(converted, "lower") is False
@@ -141,7 +139,7 @@ class TestConvertedHyperparameter(BaseTestParameterConversion):
         with monkeypatch.context() as m:
             m.setattr(self.float_param, "type", "invalid_type")
             with pytest.raises(TypeError):
-                _ = ConvertedHyperparameter(self.float_param)
+                _ = ConvertedParameter(self.float_param)
 
     def test_convert_to_internal_value(self, monkeypatch: pytest.MonkeyPatch) -> None:
         assert self.converted_float.convert_to_internal_value(1) == 1
@@ -222,7 +220,7 @@ class TestConvertedHyperparameter(BaseTestParameterConversion):
 
 class TestConvertedHyperparameterConfiguraion(BaseTestParameterConversion):
     def test_init(self) -> None:
-        converted_parameters = ConvertedHyperparameterConfiguration(
+        converted_parameters = ConvertedParameterConfiguration(
             self.list_of_hyperparameters, convert_log=True, convert_choices=True, convert_sequence=True
         )
         assert len(self.list_of_hyperparameters) == len(converted_parameters.converted_parameters)
@@ -237,7 +235,7 @@ class TestConvertedHyperparameterConfiguraion(BaseTestParameterConversion):
                 assert converted_param.type == "ordinal"
                 assert converted_param.convert_sequence is True
 
-        converted_parameters = ConvertedHyperparameterConfiguration(
+        converted_parameters = ConvertedParameterConfiguration(
             self.list_of_hyperparameters, convert_log=False, convert_choices=False, convert_sequence=False
         )
         assert len(self.list_of_hyperparameters) == len(converted_parameters.converted_parameters)
@@ -253,7 +251,7 @@ class TestConvertedHyperparameterConfiguraion(BaseTestParameterConversion):
                 assert converted_param.convert_sequence is False
 
     def test_get(self):
-        converted_parameters = ConvertedHyperparameterConfiguration(
+        converted_parameters = ConvertedParameterConfiguration(
             self.list_of_hyperparameters
         )
         assert converted_parameters.get("x0").name == "x0"

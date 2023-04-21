@@ -5,8 +5,8 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 from scipy.stats import qmc
 
+from aiaccel.converted_parameter import ConvertedParameterConfiguration
 from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.parameter_conversion import ConvertedHyperparameterConfiguration
 
 
 class SobolOptimizer(AbstractOptimizer):
@@ -30,7 +30,7 @@ class SobolOptimizer(AbstractOptimizer):
         super().__init__(config)
         self.generate_index = 0
         self.sampler: Any = None
-        self.converted_parameters = ConvertedHyperparameterConfiguration(self.params.get_parameter_list())
+        self.params = ConvertedParameterConfiguration(self.params)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -59,17 +59,11 @@ class SobolOptimizer(AbstractOptimizer):
         vec = self.sampler.random()[0]
 
         new_params = []
-        for vec_i, param in zip(vec, self.converted_parameters.get_parameter_list()):
-            internal_value = (param.upper - param.lower) * vec_i + param.lower
-            new_params.append(
-                {
-                    "parameter_name": param.name,
-                    "type": param.type,
-                    "value": param.convert_to_original_repr(internal_value),
-                }
-            )
+        for vec_i, param in zip(vec, self.params.get_parameter_list()):
+            value = (param.upper - param.lower) * vec_i + param.lower
+            new_params.append({"parameter_name": param.name, "type": param.type, "value": value})
 
-        return new_params
+        return self.params.to_original_repr(new_params)
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
