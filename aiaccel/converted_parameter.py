@@ -139,20 +139,20 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         """
         converted_params: dict[str, ConvertedParameter] = {}
         for param in params:
-            if param.type == "unifoem_float":
+            if param.type == "FLOAT":
                 converted_params[param.name] = ConvertedFloatParameter(param, convert_log=convert_log)
-            elif param.type == "uniform_int":
+            elif param.type == "INT":
                 converted_params[param.name] = ConvertedIntParameter(
                     param, convert_log=convert_log, convert_int=convert_int
                 )
-            elif param.type == "categorical":
+            elif param.type == "CATEGORICAL":
                 if convert_choices:
                     for i in range(len(param.choices)):
                         converted_param = WeightOfChoice(param, choice_index=i)
                         converted_params[converted_param.name] = converted_param
                 else:
                     converted_params[param.name] = ConvertedCategoricalParameter(param, convert_choices=convert_choices)
-            elif param.type == "ordinal":
+            elif param.type == "ORDINAL":
                 if convert_sequence:
                     for i in range(len(param.sequence)):
                         converted_ordinal_param = WeightOfChoice(param, choice_index=i)
