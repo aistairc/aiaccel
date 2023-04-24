@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from omegaconf.dictconfig import DictConfig
 from scipy.stats import qmc
 
@@ -16,7 +14,7 @@ class SobolOptimizer(AbstractOptimizer):
             command line options.
 
     Attributes:
-        generate_index (int): A number of generated hyper parameters.
+        num_generated_params (int): A number of generated hyper parameters.
         sampler (Sobol): Engine for generating (scrambled) Sobol' sequences.
 
     Todo:
@@ -27,8 +25,10 @@ class SobolOptimizer(AbstractOptimizer):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
-        self.generate_index: Any = None
-        self.sampler: Any = None
+        self.num_generated_params = 0
+        self.sampler = qmc.Sobol(
+            d=len(self.params.get_parameter_list()), scramble=self.config.optimize.sobol_scramble, seed=self._rng
+        )
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -39,12 +39,7 @@ class SobolOptimizer(AbstractOptimizer):
         super().pre_process()
 
         finished = self.storage.trial.get_finished()
-        self.generate_index = len(finished)
-
-        if self.config.resume is None or self.config.resume <= 0:
-            self.sampler = qmc.Sobol(
-                d=len(self.params.get_parameter_list()), scramble=self.config.optimize.sobol_scramble, seed=self._rng
-            )
+        self.num_generated_params = len(finished)
 
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
@@ -58,10 +53,7 @@ class SobolOptimizer(AbstractOptimizer):
         new_params = []
         vec = self.sampler.random()[0]
 
-        if self.generate_index is None:
-            self.generate_index = 1
-        else:
-            self.generate_index += 1
+        self.num_generated_params += 1
 
         for i in range(0, n_params):
             min_value = l_params[i].lower
@@ -78,8 +70,12 @@ class SobolOptimizer(AbstractOptimizer):
         Returns:
             list[dict[str, float | int | str]]: A list of new parameters.
         """
-        if super().generate_initial_parameter() is not None:
-            self.logger.warning(
-                "Initial values cannot be specified for sobol." "The set initial value has been invalidated."
-            )
+
+        for hyperparameter in self.params.get_parameter_list():
+            if hyperparameter.initial is not None:
+                self.logger.warning(
+                    "Initial values cannot be specified for grid search. " "The set initial value has been invalidated."
+                )
+                break
+
         return self.generate_parameter()
