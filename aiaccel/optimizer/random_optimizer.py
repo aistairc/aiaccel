@@ -27,18 +27,7 @@ class RandomOptimizer(AbstractOptimizer):
             list[dict[str, float | int | str]]: A list of created parameters.
         """
         new_params = []
-        for param in self.params.get_parameter_list():
-            if param.type == "uniform_float":
-                value = self._rng.uniform(param.lower, param.upper)
-            elif param.type == "uniform_int":
-                value = self._rng.randint(param.lower, param.upper)
-            elif param.type == "categorical":
-                value = self._rng.choice(param.choices)
-            elif param.type == "ordinal":
-                value = self._rng.choice(param.sequence)
-            else:
-                assert False, f"Invalid type: {param.type}"
-
-            new_params.append({"parameter_name": param.name, "type": param.type, "value": value})
+        for param in self.params.sample(self._rng):
+            new_params.append({"parameter_name": param["name"], "type": param["type"], "value": param["value"]})
 
         return self.params.to_original_repr(new_params)
