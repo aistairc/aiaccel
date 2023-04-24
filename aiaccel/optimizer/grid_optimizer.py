@@ -107,8 +107,8 @@ class GridOptimizer(AbstractOptimizer):
             command line options.
 
     Attributes:
-        ready_params (list[dict]): A list of ready hyper parameters.
-        generate_index (int): A number of generated hyper parameters.
+        ready_params (list[dict]): A list of ready hyperparameters.
+        num_generated_params (int): The number of generated hyperparameters.
     """
 
     def __init__(self, config: DictConfig) -> None:
@@ -116,7 +116,7 @@ class GridOptimizer(AbstractOptimizer):
         self.ready_params = []
         for param in self.params.get_parameter_list():
             self.ready_params.append(generate_grid_points(param, self.config))
-        self.generate_index = 0
+        self.num_generated_params = 0
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
@@ -126,7 +126,7 @@ class GridOptimizer(AbstractOptimizer):
         """
         super().pre_process()
 
-        self.generate_index = (
+        self.num_generated_params = (
             self.storage.get_num_ready() + self.storage.get_num_running() + self.storage.get_num_finished()
         )
 
@@ -138,10 +138,10 @@ class GridOptimizer(AbstractOptimizer):
             already generated.
         """
         parameter_lengths = [len(i["parameters"]) for i in self.ready_params]
-        remain = self.generate_index
+        remain = self.num_generated_params
         max_index = reduce(mul, parameter_lengths)
 
-        if self.generate_index >= max_index:
+        if self.num_generated_params >= max_index:
             self.logger.warning("All parameters were generated.")
             return None
 
@@ -154,7 +154,7 @@ class GridOptimizer(AbstractOptimizer):
             remain -= d * div[i]
 
         parameter_index.append(remain)
-        self.generate_index += 1
+        self.num_generated_params += 1
 
         return parameter_index
 
