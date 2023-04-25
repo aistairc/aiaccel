@@ -19,17 +19,12 @@ class ConvertedParameter(HyperParameter):
         self.original_initial = param.initial
 
 
-class ConvertedNumericalParameter(ConvertedParameter):
+class ConvertedFloatParameter(ConvertedParameter):
     def __init__(self, param: HyperParameter, convert_log: bool = True):
         super().__init__(param)
         self.convert_log = convert_log and param.log
         self.original_lower = param.lower
         self.original_upper = param.upper
-
-
-class ConvertedFloatParameter(ConvertedNumericalParameter):
-    def __init__(self, param: HyperParameter, convert_log: bool = True):
-        super().__init__(param, convert_log)
         self.lower = _convert_float(self, param.lower)
         self.upper = _convert_float(self, param.upper)
         self.initial = _convert_float(self, param.initial) if param.initial is not None else None
@@ -42,7 +37,7 @@ class ConvertedFloatParameter(ConvertedNumericalParameter):
         return {"name": self.name, "type": self.type, "value": value}
 
 
-class ConvertedIntParameter(ConvertedNumericalParameter):
+class ConvertedIntParameter(ConvertedFloatParameter):
     def __init__(self, param: HyperParameter, convert_log: bool = True, convert_int: bool = True) -> None:
         super().__init__(param, convert_log=convert_log)
         self.convert_int = convert_int
@@ -76,7 +71,21 @@ class ConvertedCategoricalParameter(ConvertedParameter):
 
 
 class ConvertedOrdinalParameter(ConvertedCategoricalParameter):
-    pass
+    @property
+    def sequence(self) -> list[Any]:
+        return self.choices
+
+    @sequence.setter
+    def sequence(self, sequence: list[Any]) -> None:
+        self.choices = sequence
+
+    @property
+    def convert_sequence(self) -> bool:
+        return self.convert_choices
+
+    @convert_sequence.setter
+    def convert_sequence(self, convert_sequence: bool) -> None:
+        self.convert_choices = convert_sequence
 
 
 class WeightOfChoice(ConvertedCategoricalParameter):
@@ -84,13 +93,18 @@ class WeightOfChoice(ConvertedCategoricalParameter):
         super().__init__(param)
         self.choice_index = choice_index
         self.original_name = self.name
-        self.name = _make_converted_categorical_parameter_name(self.original_name, choice_index)
+        self.name = _make_weight_name(self.original_name, choice_index)
         self.lower = 0.0
         self.upper = 1.0
+        self.initial = (
+            float(list(self.choices).index(self.original_initial) == self.choice_index)
+            if self.original_initial is not None
+            else None
+        )
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, str | float]:
         if initial and self.initial is not None:
-            value = float(list(self.choices).index(self.initial) == self.choice_index)
+            value = self.initial
         else:
             value = rng.uniform(self.lower, self.upper)
         return {"name": self.name, "type": self.type, "value": value}
@@ -165,7 +179,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
             TypeError: Causes when the type of parameter is invalid.
 
         Returns:
-            dict[str, ConvertedParameter]: A dict object of ConvertedParameter.
+            dict[str, HyperParameter]: A dict object of ConvertedParameter.
                 Keys of the dict specifies name of parameters internaly
                 effective.
         """
@@ -217,8 +231,11 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         weights: dict[str, dict[str, Any]] = {}
         for param in params_in_internal_repr:
             converted_param = self.get_hyperparameter(param["parameter_name"])
-            if isinstance(converted_param, ConvertedNumericalParameter):
-                value = _restore_numerical_value(converted_param, param["value"])
+            if isinstance(converted_param, ConvertedFloatParameter):
+                value = _restore_float(converted_param, param["value"])
+                params_in_original_repr.append(_make_structured_value(converted_param, value))
+            elif isinstance(converted_param, ConvertedIntParameter):
+                value = _restore_int(converted_param, param["value"])
                 params_in_original_repr.append(_make_structured_value(converted_param, value))
             elif isinstance(converted_param, ConvertedCategoricalParameter):
                 if isinstance(converted_param, WeightOfChoice):
@@ -234,7 +251,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
                     value = _restore_categorical_value(converted_param, param["value"])
                     params_in_original_repr.append(_make_structured_value(converted_param, value))
             else:
-                raise TypeError(f"invalid type: {type(converted_param).__name__}")
+                assert False, f"invalid type: {type(converted_param).__name__}"
 
         return params_in_original_repr
 
@@ -278,7 +295,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         return self._converted_params
 
 
-def _make_converted_categorical_parameter_name(original_name: str, choice_index: int) -> str:
+def _make_weight_name(original_name: str, choice_index: int) -> str:
     """Makes name of internal parameter for weight of one of the choices.
 
     Args:
@@ -291,7 +308,7 @@ def _make_converted_categorical_parameter_name(original_name: str, choice_index:
     return f"{original_name}_{choice_index}"
 
 
-def _convert_numerical_value(param: ConvertedNumericalParameter, external_value: float) -> float:
+def _convert_float(param: ConvertedFloatParameter, external_value: float) -> float:
     if param.convert_log:
         if external_value <= 0:
             raise ValueError("Log scaled value can not be negative.")
@@ -300,25 +317,12 @@ def _convert_numerical_value(param: ConvertedNumericalParameter, external_value:
         return external_value
 
 
-def _convert_float(param: ConvertedFloatParameter, external_value: float) -> float:
-    return _convert_numerical_value(param, external_value)
-
-
 def _convert_int(param: ConvertedIntParameter, external_value: int) -> float:
-    converted_value = _convert_numerical_value(param, external_value)
+    converted_value = _convert_float(param, external_value)
     if param.convert_int:
         return float(converted_value)
     else:
         return int(converted_value)
-
-
-def _restore_numerical_value(param: ConvertedNumericalParameter, internal_value: float) -> float:
-    if isinstance(param, ConvertedFloatParameter):
-        return _restore_float(param, internal_value)
-    elif isinstance(param, ConvertedIntParameter):
-        return _restore_int(param, internal_value)
-    else:
-        raise TypeError(f"Invalid type: {type(param).__name__}")
 
 
 def _restore_float(param: ConvertedFloatParameter, internal_value: float) -> float:
@@ -335,11 +339,11 @@ def _restore_int(param: ConvertedIntParameter, internal_value: float | int) -> i
         return int(internal_value)
 
 
-def _is_weight_collected(param: WeightOfChoice, weights: dict[str, dict[str, Any]]) -> bool:
+def _is_weight_collected(param: WeightOfChoice, weights: dict[str, dict[str, str | float]]) -> bool:
     return len(param.choices) == len(weights[param.original_name])
 
 
-def _make_weight_distribution(param: WeightOfChoice, weights: dict[str, dict[str, Any]]) -> list[float]:
+def _make_weight_distribution(param: WeightOfChoice, weights: dict[str, dict[str, str | float]]) -> list[float]:
     original_name = param.original_name
     weight_dict = weights[original_name]
     weight_list = []
