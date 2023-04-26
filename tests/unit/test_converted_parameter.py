@@ -18,12 +18,10 @@ from aiaccel.converted_parameter import (
     _convert_float,
     _convert_int,
     _decode_weight_distribution,
-    _encode_categorical_value,
     _is_weight_collected,
     _make_structured_value,
     _make_weight_distribution,
     _make_weight_name,
-    _restore_categorical_value,
     _restore_float,
     _restore_int,
 )
@@ -145,7 +143,6 @@ class TestConvertedIntParameter(BaseTestConvertedParameter):
         with monkeypatch.context() as m:
             m.setattr(self.int_param, "log", True)
             param = ConvertedIntParameter(self.int_param, convert_int=False)
-            param = ConvertedIntParameter(self.int_param)
             assert param.lower == int(np.log(self.int_param.lower))
             assert param.upper == int(np.log(self.int_param.upper))
             assert param.initial == int(np.log(self.int_param.initial))
@@ -394,12 +391,12 @@ def test_convert_float(monkeypatch: pytest.MonkeyPatch) -> None:
         with pytest.raises(ValueError):
             _convert_float(param, -1)
 
-        value = test_convert_float(param, 1)
+        value = _convert_float(param, 1)
         assert value == 1.0
 
     with monkeypatch.context() as m:
         m.setattr(param, "convert_log", False)
-        value = test_convert_float(param, 1)
+        value = _convert_float(param, 1)
         assert value == 1.0
 
 
@@ -415,7 +412,7 @@ def test_convert_int(monkeypatch: pytest.MonkeyPatch) -> None:
     with monkeypatch.context() as m:
         m.setattr(param, "convert_int", False)
         value = _convert_int(param, 1)
-        assert isinstance(param, int)
+        assert isinstance(value, int)
         assert value == 1
 
 
@@ -464,21 +461,10 @@ def test_is_weight_collected() -> None:
 def test_make_weight_distribution() -> None:
     param = WeightOfChoice(HyperParameter(categorical_parameter_dict), 0)
     weights = {
-        param.original_name: {f"{param.name}_{i}": i * 0.1 for i in range(len(param.choices))}
+        param.original_name: {f"{param.original_name}_{i}": i * 0.1 for i in range(len(param.choices))}
     }
     weight_distribution = _make_weight_distribution(param, weights)
     assert weight_distribution == [i * 0.1 for i in range(len(param.choices))]
-
-
-def test_encode_categorical_value() -> None:
-    param = WeightOfChoice(HyperParameter(categorical_parameter_dict), 0)
-    external_value = param.choices[0]
-    weight_distribution = _encode_categorical_value(param, external_value)
-    assert weight_distribution == np.array([1] + [0] * (len(param.choices) - 1))
-
-    with pytest.raises(ValueError):
-        external_value = "This value is not in the choices"
-        weight_distribution = _encode_categorical_value(param, external_value)
 
 
 def test_decode_weight_distribution() -> None:
@@ -486,13 +472,6 @@ def test_decode_weight_distribution() -> None:
     weight_distribution = [1] + [0] * (len(param.choices) - 1)
     choosed_value = _decode_weight_distribution(param, weight_distribution)
     assert choosed_value == param.choices[0]
-
-
-def test_restore_categorical_value() -> None:
-    param = ConvertedCategoricalParameter(HyperParameter(categorical_parameter_dict), convert_choices=False)
-    internal_value = param.choices[0]
-    external_value = _restore_categorical_value(param, internal_value)
-    assert external_value == internal_value
 
 
 def test_make_structured_value() -> None:

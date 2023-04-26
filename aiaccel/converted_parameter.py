@@ -1,22 +1,23 @@
 from __future__ import annotations
 
-# from collections.abc import Mapping,
 from logging import getLogger
 from typing import Any
 
 import numpy as np
-import numpy.typing as npt
 from numpy.random import RandomState
 
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 
+# TODO: Confirm to change base classes to corresponding Parameter classes.
+# For example, FloatParameter should be base class of ConvertedFloatParameter?
 
-# class ConvertedParameter(AbstractParameter):
+
 class ConvertedParameter(HyperParameter):
     def __init__(self, param: HyperParameter) -> None:
         self.name = param.name
         self.type = param.type
         self.original_initial = param.initial
+        self.initial = param.initial
 
 
 class ConvertedFloatParameter(ConvertedParameter):
@@ -70,25 +71,21 @@ class ConvertedCategoricalParameter(ConvertedParameter):
         return {"name": self.name, "type": self.type, "value": value}
 
 
-class ConvertedOrdinalParameter(ConvertedCategoricalParameter):
-    @property
-    def sequence(self) -> list[Any]:
-        return self.choices
+class ConvertedOrdinalParameter(ConvertedParameter):
+    def __init__(self, param: HyperParameter, convert_sequence: bool = True) -> None:
+        super().__init__(param)
+        self.sequence = param.sequence
+        self.convert_sequence = convert_sequence
 
-    @sequence.setter
-    def sequence(self, sequence: list[Any]) -> None:
-        self.choices = sequence
-
-    @property
-    def convert_sequence(self) -> bool:
-        return self.convert_choices
-
-    @convert_sequence.setter
-    def convert_sequence(self, convert_sequence: bool) -> None:
-        self.convert_choices = convert_sequence
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
+        if initial and self.initial is not None:
+            value = self.initial
+        else:
+            value = rng.choice(self.sequence)
+        return {"name": self.name, "type": self.type, "value": value}
 
 
-class WeightOfChoice(ConvertedCategoricalParameter):
+class WeightOfChoice(ConvertedParameter):
     def __init__(self, param: HyperParameter, choice_index: int) -> None:
         super().__init__(param)
         self.choice_index = choice_index
@@ -101,6 +98,7 @@ class WeightOfChoice(ConvertedCategoricalParameter):
             if self.original_initial is not None
             else None
         )
+        self.choices = param.choices if param.type.lower() == "categorical" else param.sequence
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, str | float]:
         if initial and self.initial is not None:
@@ -208,7 +206,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
                     logger = getLogger("root.optimizer")
                     logger.warn(f"The sequence of {param.name} is converted to {len(param.sequence)} float parameters.")
                 else:
-                    converted_params[param.name] = ConvertedOrdinalParameter(param, convert_choices=convert_sequence)
+                    converted_params[param.name] = ConvertedOrdinalParameter(param, convert_sequence=convert_sequence)
             else:
                 raise TypeError(f"Invalid type: {param.type}")
 
@@ -238,17 +236,19 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
                 value = _restore_int(converted_param, param["value"])
                 params_in_original_repr.append(_make_structured_value(converted_param, value))
             elif isinstance(converted_param, ConvertedCategoricalParameter):
-                if isinstance(converted_param, WeightOfChoice):
-                    if converted_param.original_name in weights:
-                        weights[converted_param.original_name][converted_param.name] = param["value"]
-                    else:
-                        weights[converted_param.original_name] = {converted_param.name: param["value"]}
-                    if _is_weight_collected(converted_param, weights):
-                        weight_distribution = _make_weight_distribution(converted_param, weights)
-                        value = _decode_weight_distribution(converted_param, weight_distribution)
-                        params_in_original_repr.append(_make_structured_value(converted_param, value))
+                value = param["value"]
+                params_in_original_repr.append(_make_structured_value(converted_param, value))
+            elif isinstance(converted_param, ConvertedOrdinalParameter):
+                value = param["value"]
+                params_in_original_repr.append(_make_structured_value(converted_param, value))
+            elif isinstance(converted_param, WeightOfChoice):
+                if converted_param.original_name in weights:
+                    weights[converted_param.original_name][converted_param.name] = param["value"]
                 else:
-                    value = _restore_categorical_value(converted_param, param["value"])
+                    weights[converted_param.original_name] = {converted_param.name: param["value"]}
+                if _is_weight_collected(converted_param, weights):
+                    weight_distribution = _make_weight_distribution(converted_param, weights)
+                    value = _decode_weight_distribution(converted_param, weight_distribution)
                     params_in_original_repr.append(_make_structured_value(converted_param, value))
             else:
                 assert False, f"invalid type: {type(converted_param).__name__}"
@@ -352,20 +352,8 @@ def _make_weight_distribution(param: WeightOfChoice, weights: dict[str, dict[str
     return weight_list
 
 
-def _encode_categorical_value(param: ConvertedCategoricalParameter, external_value: Any) -> npt.ArrayLike:
-    if external_value in param.choices:
-        weights = np.zeros_like(param.choices)
-        weights[list(param.choices).index(external_value)] = 1.0
-        return weights
-    raise ValueError(f"The value ({external_value}) not in choices ({param.choices})")
-
-
-def _decode_weight_distribution(param: ConvertedCategoricalParameter, weight_distribution: list[float]) -> Any:
+def _decode_weight_distribution(param: WeightOfChoice, weight_distribution: list[float]) -> Any:
     return param.choices[np.argmax(weight_distribution)]
-
-
-def _restore_categorical_value(param: ConvertedCategoricalParameter, value: Any) -> Any:
-    return value
 
 
 def _make_structured_value(param: ConvertedParameter, value: Any) -> dict[str, Any]:
