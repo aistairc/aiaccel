@@ -8,9 +8,6 @@ from numpy.random import RandomState
 
 from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
 
-# TODO: Confirm to change base classes to corresponding Parameter classes.
-# For example, FloatParameter should be base class of ConvertedFloatParameter?
-
 
 class ConvertedParameter(HyperParameter):
     def __init__(self, param: HyperParameter) -> None:
@@ -20,27 +17,32 @@ class ConvertedParameter(HyperParameter):
         self.initial = param.initial
 
 
-class ConvertedFloatParameter(ConvertedParameter):
-    def __init__(self, param: HyperParameter, convert_log: bool = True):
+class ConvertedNumericalParameter(ConvertedParameter):
+    def __init__(self, param: HyperParameter, convert_log: bool):
         super().__init__(param)
         self.convert_log = convert_log and param.log
         self.original_lower = param.lower
         self.original_upper = param.upper
+
+
+class ConvertedFloatParameter(ConvertedNumericalParameter):
+    def __init__(self, param: HyperParameter, convert_log: bool = True):
+        super().__init__(param, convert_log)
         self.lower = _convert_float(self, param.lower)
         self.upper = _convert_float(self, param.upper)
         self.initial = _convert_float(self, param.initial) if param.initial is not None else None
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, str | float]:
-        if initial:
+        if initial and self.initial is not None:
             value = self.initial
         else:
             value = rng.uniform(self.lower, self.upper)
         return {"name": self.name, "type": self.type, "value": value}
 
 
-class ConvertedIntParameter(ConvertedFloatParameter):
+class ConvertedIntParameter(ConvertedNumericalParameter):
     def __init__(self, param: HyperParameter, convert_log: bool = True, convert_int: bool = True) -> None:
-        super().__init__(param, convert_log=convert_log)
+        super().__init__(param, convert_log)
         self.convert_int = convert_int
         self.lower = _convert_int(self, param.lower)
         self.upper = _convert_int(self, param.upper)
@@ -91,6 +93,7 @@ class WeightOfChoice(ConvertedParameter):
         self.choice_index = choice_index
         self.original_name = self.name
         self.name = _make_weight_name(self.original_name, choice_index)
+        self.choices = param.choices if param.type.lower() == "categorical" else param.sequence
         self.lower = 0.0
         self.upper = 1.0
         self.initial = (
@@ -98,7 +101,6 @@ class WeightOfChoice(ConvertedParameter):
             if self.original_initial is not None
             else None
         )
-        self.choices = param.choices if param.type.lower() == "categorical" else param.sequence
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, str | float]:
         if initial and self.initial is not None:
@@ -183,28 +185,32 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         """
         converted_params: dict[str, HyperParameter] = {}
         for param in params.get_parameter_list():
-            if param.type == "FLOAT":
+            if param.type.lower() == "float":
                 converted_params[param.name] = ConvertedFloatParameter(param, convert_log=convert_log)
-            elif param.type == "INT":
+            elif param.type.lower() == "int":
                 converted_params[param.name] = ConvertedIntParameter(
                     param, convert_log=convert_log, convert_int=convert_int
                 )
-            elif param.type == "CATEGORICAL":
+            elif param.type.lower() == "categorical":
                 if convert_choices:
                     for i in range(len(param.choices)):
                         converted_param = WeightOfChoice(param, choice_index=i)
                         converted_params[converted_param.name] = converted_param
                     logger = getLogger("root.optimizer")
-                    logger.warn(f"The choices of {param.name} is converted to {len(param.choices)} float parameters.")
+                    logger.warning(
+                        f"The choices of {param.name} is converted to {len(param.choices)} float parameters."
+                    )
                 else:
                     converted_params[param.name] = ConvertedCategoricalParameter(param, convert_choices=convert_choices)
-            elif param.type == "ORDINAL":
+            elif param.type.lower() == "ordinal":
                 if convert_sequence:
                     for i in range(len(param.sequence)):
                         converted_param = WeightOfChoice(param, choice_index=i)
                         converted_params[converted_param.name] = converted_param
                     logger = getLogger("root.optimizer")
-                    logger.warn(f"The sequence of {param.name} is converted to {len(param.sequence)} float parameters.")
+                    logger.warning(
+                        f"The sequence of {param.name} is converted to {len(param.sequence)} float parameters."
+                    )
                 else:
                     converted_params[param.name] = ConvertedOrdinalParameter(param, convert_sequence=convert_sequence)
             else:
@@ -251,7 +257,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
                     value = _decode_weight_distribution(converted_param, weight_distribution)
                     params_in_original_repr.append(_make_structured_value(converted_param, value))
             else:
-                assert False, f"invalid type: {type(converted_param).__name__}"
+                raise TypeError(f"Invalid type: {type(converted_param).__name__}")
 
         return params_in_original_repr
 
@@ -308,7 +314,7 @@ def _make_weight_name(original_name: str, choice_index: int) -> str:
     return f"{original_name}_{choice_index}"
 
 
-def _convert_float(param: ConvertedFloatParameter, external_value: float) -> float:
+def _convert_numerics(param: ConvertedFloatParameter | ConvertedIntParameter, external_value: float) -> float:
     if param.convert_log:
         if external_value <= 0:
             raise ValueError("Log scaled value can not be negative.")
@@ -317,8 +323,12 @@ def _convert_float(param: ConvertedFloatParameter, external_value: float) -> flo
         return external_value
 
 
+def _convert_float(param: ConvertedFloatParameter, external_value: float) -> float:
+    return _convert_numerics(param, external_value)
+
+
 def _convert_int(param: ConvertedIntParameter, external_value: int) -> float:
-    converted_value = _convert_float(param, external_value)
+    converted_value = _convert_numerics(param, external_value)
     if param.convert_int:
         return float(converted_value)
     else:

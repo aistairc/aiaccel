@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from collections.abc import Generator
 
 import numpy as np
@@ -11,12 +10,14 @@ from aiaccel.converted_parameter import (
     ConvertedCategoricalParameter,
     ConvertedFloatParameter,
     ConvertedIntParameter,
+    ConvertedNumericalParameter,
     ConvertedOrdinalParameter,
     ConvertedParameter,
     ConvertedParameterConfiguration,
     WeightOfChoice,
     _convert_float,
     _convert_int,
+    _convert_numerics,
     _decode_weight_distribution,
     _is_weight_collected,
     _make_structured_value,
@@ -86,12 +87,27 @@ class TestConvertedParameter(BaseTestConvertedParameter):
         assert param.original_initial == self.float_param.initial
 
 
-class TestConvertedFloatParameter(BaseTestConvertedParameter):
+class TestConvertedNumericalParameter(BaseTestConvertedParameter):
     def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        param = ConvertedFloatParameter(self.float_param)
+        param = ConvertedNumericalParameter(self.float_param, convert_log=True)
         assert param.convert_log is False
         assert param.original_lower == self.float_param.lower
         assert param.original_upper == self.float_param.upper
+
+        with monkeypatch.context() as m:
+            m.setattr(self.float_param, "log", True)
+            param = ConvertedNumericalParameter(self.float_param, convert_log=True)
+            assert param.convert_log is True
+
+        with monkeypatch.context() as m:
+            m.setattr(self.float_param, "initial", None)
+            param = ConvertedNumericalParameter(self.float_param, convert_log=True)
+            assert param.original_initial is None
+
+
+class TestConvertedFloatParameter(BaseTestConvertedParameter):
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        param = ConvertedFloatParameter(self.float_param)
         assert param.lower == self.float_param.lower
         assert param.upper == self.float_param.upper
         assert param.initial == self.float_param.initial
@@ -109,7 +125,7 @@ class TestConvertedFloatParameter(BaseTestConvertedParameter):
             assert param.upper == np.log(self.float_param.upper)
             assert param.initial == np.log(self.float_param.initial)
 
-    def test_sample(self) -> None:
+    def test_sample(self, monkeypatch: pytest.MonkeyPatch) -> None:
         param = ConvertedFloatParameter(self.float_param)
         sampled_value = param.sample(self._rng)
         assert sampled_value["name"] == self.float_param.name
@@ -118,6 +134,12 @@ class TestConvertedFloatParameter(BaseTestConvertedParameter):
 
         initial_value = param.sample(self._rng, initial=True)
         assert initial_value["value"] == self.float_param.initial
+
+        with monkeypatch.context() as m:
+            m.setattr(self.float_param, "initial", None)
+            param = ConvertedFloatParameter(self.float_param)
+            sampled_value = param.sample(self._rng, initial=True)
+            assert sampled_value["value"] is not None
 
 
 class TestConvertedIntParameter(BaseTestConvertedParameter):
@@ -147,7 +169,7 @@ class TestConvertedIntParameter(BaseTestConvertedParameter):
             assert param.upper == int(np.log(self.int_param.upper))
             assert param.initial == int(np.log(self.int_param.initial))
 
-    def test_sample(self) -> None:
+    def test_sample(self, monkeypatch: pytest.MonkeyPatch) -> None:
         param = ConvertedIntParameter(self.int_param)
         sampled_value = param.sample(self._rng)
         assert sampled_value["name"] == self.int_param.name
@@ -160,6 +182,12 @@ class TestConvertedIntParameter(BaseTestConvertedParameter):
         param = ConvertedIntParameter(self.int_param, convert_int=False)
         sampled_value = param.sample(self._rng)
         assert isinstance(sampled_value["value"], int)
+
+        with monkeypatch.context() as m:
+            m.setattr(self.int_param, "initial", None)
+            param = ConvertedFloatParameter(self.int_param)
+            sampled_value = param.sample(self._rng, initial=True)
+            assert sampled_value["value"] is not None
 
 
 class TestConvertedCategoricalParameter(BaseTestConvertedParameter):
@@ -179,28 +207,21 @@ class TestConvertedCategoricalParameter(BaseTestConvertedParameter):
         assert initial_value["value"] == self.categorical_param.initial
 
 
-class TestconvertedOrdinalParameter(BaseTestConvertedParameter):
+class TestConvertedOrdinalParameter(BaseTestConvertedParameter):
     def test_init(self) -> None:
-        pass
+        param = ConvertedOrdinalParameter(self.ordinal_param)
+        assert param.sequence == self.ordinal_param.sequence
+        assert param.convert_sequence is True
 
     def test_smaple(self) -> None:
-        pass
-
-    def test_sequence(self) -> None:
         param = ConvertedOrdinalParameter(self.ordinal_param)
-        assert param.choices == self.ordinal_param.sequence
-        assert param.sequence == self.ordinal_param.sequence
-        param.sequence = [100, 200, 300]
-        assert param.choices == [100, 200, 300]
-        assert param.sequence == [100, 200, 300]
+        sampled_value = param.sample(self._rng)
+        assert sampled_value["name"] == self.ordinal_param.name
+        assert sampled_value["type"] == self.ordinal_param.type
+        assert sampled_value["value"] in self.ordinal_param.sequence
 
-    def test_convert_sequence(self) -> None:
-        param = ConvertedOrdinalParameter(self.ordinal_param)
-        assert param.convert_choices is True
-        assert param.convert_sequence is True
-        param.convert_sequence = False
-        assert param.convert_choices is False
-        assert param.convert_sequence is False
+        initial_value = param.sample(self._rng, initial=True)
+        assert initial_value["value"] == self.ordinal_param.initial
 
 
 class TestWeightOfChoice(BaseTestConvertedParameter):
@@ -251,41 +272,39 @@ class TestConvertedHyperparameterConfiguraion:
         )
         assert len(params._converted_params) == len(self.list_config)
 
-    def test_convert(self) -> None:
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            params = ConvertedParameterConfiguration(
-                self.params, convert_log=True, convert_int=True, convert_choices=False, convert_sequence=False
-            )
-            assert len(w) == 0
+    def test_convert(self, caplog: pytest.LogCaptureFixture) -> None:
+        params = ConvertedParameterConfiguration(
+            self.params, convert_log=True, convert_int=True, convert_choices=False, convert_sequence=False
+        )
+        assert len(caplog.records) == 0
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            params = ConvertedParameterConfiguration(
-                self.params, convert_log=True, convert_int=True, convert_choices=True, convert_sequence=True
-            )
-            assert len(w) == 2
-            assert "converted" in str(w[-1].message)
+        caplog.clear()
+
+        params = ConvertedParameterConfiguration(
+            self.params, convert_log=True, convert_int=True, convert_choices=True, convert_sequence=True
+        )
+        assert len(caplog.records) == 2
+        assert "converted" in caplog.records[-1].message
 
         assert (
             len(params._converted_params)
             == 1 + 1 + len(categorical_parameter_dict["choices"]) + len(ordinal_parameter_dict["sequence"])
         )
 
-        for param in params._converted_params:
+        for param in params._converted_params.values():
             if isinstance(param, ConvertedFloatParameter):
                 assert param.convert_log is False
             elif isinstance(param, ConvertedIntParameter):
                 assert param.convert_log is False
                 assert param.convert_int is True
             elif isinstance(param, WeightOfChoice):
-                assert param.convert_choices is True
+                assert isinstance(param.initial, float)
             elif isinstance(param, ConvertedOrdinalParameter):
                 assert False
             elif isinstance(param, ConvertedCategoricalParameter):
                 assert False
             else:
-                assert False
+                assert False, f"{type(param)}"
 
     def test_to_original_repr(self) -> None:
         params_in_internal_repr = [
@@ -301,32 +320,32 @@ class TestConvertedHyperparameterConfiguraion:
             },
             {
                 "parameter_name": f"{categorical_parameter_dict['name']}_0",
-                "type": int_parameter_dict["type"],
+                "type": categorical_parameter_dict["type"],
                 "value": 0.0,
             },
             {
                 "parameter_name": f"{categorical_parameter_dict['name']}_1",
-                "type": int_parameter_dict["type"],
+                "type": categorical_parameter_dict["type"],
                 "value": 0.0,
             },
             {
                 "parameter_name": f"{categorical_parameter_dict['name']}_2",
-                "type": int_parameter_dict["type"],
+                "type": categorical_parameter_dict["type"],
                 "value": 1.0,
             },
             {
                 "parameter_name": f"{ordinal_parameter_dict['name']}_0",
-                "type": int_parameter_dict["type"],
+                "type": ordinal_parameter_dict["type"],
                 "value": 0.0,
             },
             {
                 "parameter_name": f"{ordinal_parameter_dict['name']}_1",
-                "type": int_parameter_dict["type"],
+                "type": ordinal_parameter_dict["type"],
                 "value": 1.0,
             },
             {
                 "parameter_name": f"{ordinal_parameter_dict['name']}_2",
-                "type": int_parameter_dict["type"],
+                "type": ordinal_parameter_dict["type"],
                 "value": 0.0,
             },
         ]
@@ -342,6 +361,35 @@ class TestConvertedHyperparameterConfiguraion:
                 assert param["value"] == categorical_parameter_dict["choices"][2]
             if param["type"].lower() == "ordinal":
                 assert param["value"] == ordinal_parameter_dict["sequence"][1]
+
+        params = HyperParameterConfiguration(self.list_config)
+        converted_params = ConvertedParameterConfiguration(params, convert_choices=False, convert_sequence=False)
+
+        params_in_internal_repr = [
+            {
+                "parameter_name": float_parameter_dict["name"],
+                "type": float_parameter_dict["type"],
+                "value": float_parameter_dict["lower"],
+            },
+            {
+                "parameter_name": int_parameter_dict["name"],
+                "type": int_parameter_dict["type"],
+                "value": int_parameter_dict["lower"],
+            },
+            {
+                "parameter_name": f"{categorical_parameter_dict['name']}",
+                "type": categorical_parameter_dict["type"],
+                "value": categorical_parameter_dict["choices"][2],
+            },
+            {
+                "parameter_name": f"{ordinal_parameter_dict['name']}",
+                "type": ordinal_parameter_dict["type"],
+                "value": ordinal_parameter_dict["sequence"][1],
+            },
+        ]
+
+        params_in_original_repr = converted_params.to_original_repr(params_in_internal_repr)
+        assert len(params_in_original_repr) == len(self.list_config)  # == 4
 
     def test_sample(self) -> None:
         sampled_values = self.converted_params.sample(self._rng)
@@ -382,7 +430,7 @@ def test_make_weight_name() -> None:
     assert name == "x_0"
 
 
-def test_convert_float(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_convert_numerics(monkeypatch: pytest.MonkeyPatch) -> None:
     param = ConvertedFloatParameter(HyperParameter(float_parameter_dict))
 
     with monkeypatch.context() as m:
@@ -392,12 +440,21 @@ def test_convert_float(monkeypatch: pytest.MonkeyPatch) -> None:
             _convert_float(param, -1)
 
         value = _convert_float(param, 1)
-        assert value == 1.0
+        assert value == 0.0
 
     with monkeypatch.context() as m:
         m.setattr(param, "convert_log", False)
         value = _convert_float(param, 1)
         assert value == 1.0
+
+
+def test_convert_float() -> None:
+    param = ConvertedFloatParameter(HyperParameter(float_parameter_dict))
+
+    value_by_convert_float = _convert_float(param, 1.0)
+    value_by_convert_numerics = _convert_numerics(param, 1.0)
+
+    assert value_by_convert_float == value_by_convert_numerics
 
 
 def test_convert_int(monkeypatch: pytest.MonkeyPatch) -> None:
