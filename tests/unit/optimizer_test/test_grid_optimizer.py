@@ -136,7 +136,7 @@ class TestGridOptimizer(BaseTest):
             self.optimizer.pre_process()
             num_params = len(self.optimizer.params.get_parameter_list())
             assert len(self.optimizer.ready_params) == num_params
-            assert self.optimizer.generate_index == 1 + 1 + 1
+            assert self.optimizer.num_generated_params == 1 + 1 + 1
 
     def test_get_parameter_index(self, monkeypatch: pytest.MonkeyPatch) -> None:
         with monkeypatch.context() as m:
@@ -144,11 +144,11 @@ class TestGridOptimizer(BaseTest):
                 lambda x, y: x * y,
                 [len(p['parameters']) for p in self.optimizer.ready_params]
             )
-            m.setattr(self.optimizer, 'generate_index', max_index + 1)
+            m.setattr(self.optimizer, 'num_generated_params', max_index + 1)
             assert self.optimizer.get_parameter_index() is None
 
         assert self.optimizer.get_parameter_index() == [0 for _ in range(10)]
-        assert self.optimizer.generate_index == 1
+        assert self.optimizer.num_generated_params == 1
 
     def test_generate_parameter(self, monkeypatch: pytest.MonkeyPatch) -> None:
         with monkeypatch.context() as m:
@@ -174,4 +174,3 @@ class TestGridOptimizer(BaseTest):
             m.setattr(self.optimizer, 'generate_parameter', lambda: None)
             with pytest.raises(ValueError):
                 _ = self.optimizer.generate_initial_parameter()
-

@@ -28,9 +28,11 @@ dependencies = [
     "mako",
     "monotonic>=1.6,<2.0.0",
     "natsort>=8.3.1,<9.0.0",
+    "numpy",
     "omegaconf",
     "optuna>=3.1.0,<4.0.0",
     "pluggy>=1.0.0,<2.0.0",
+    "psutil",
     "pyyaml>=6.0,<7.0.0",
     "scipy>=1.10.1,<2.0.0",
     "six>=1.16.0,<2.0.0",
@@ -125,9 +127,7 @@ line_length = 120
 [tool.flake8]
 max-line-length = 120
 # E203: whitespace before ':'
-# E501: Line too long (82 > 79 characters)
-# W503: Line break occurred before a binary operator
-ignore = "E203,E501,W503"
+extend-ignore = "E203,"
 
 [tool.mypy]
 python_version="3.8"
