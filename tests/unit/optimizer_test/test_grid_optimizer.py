@@ -9,8 +9,7 @@ from omegaconf.errors import MissingMandatoryValue
 
 from aiaccel.config import load_config
 from aiaccel.optimizer import GridOptimizer, generate_grid_points, get_grid_options
-from aiaccel.parameter import HyperParameterConfiguration
-from aiaccel.util.data_type import Parameter
+from aiaccel.parameter import HyperParameterConfiguration, Parameter
 from tests.base_test import BaseTest
 
 

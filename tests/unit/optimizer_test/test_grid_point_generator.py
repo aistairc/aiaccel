@@ -26,8 +26,7 @@ from aiaccel.optimizer._grid_point_generator import (
     _is_there_zero_between_lower_and_upper,
     _validate_parameter_range,
 )
-from aiaccel.parameter import load_parameter
-from aiaccel.util.data_type import Parameter
+from aiaccel.parameter import Parameter, load_parameter
 from tests.base_test import BaseTest
 
 
