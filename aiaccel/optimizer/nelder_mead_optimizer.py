@@ -7,8 +7,7 @@ from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import is_multi_objective
 from aiaccel.optimizer import AbstractOptimizer, NelderMead
-from aiaccel.parameter import HyperParameterConfiguration
-from aiaccel.util.data_type import FloatParameter, IntParameter, OrdinalParameter, Parameter
+from aiaccel.parameter import FloatParameter, HyperParameterConfiguration, IntParameter, OrdinalParameter, Parameter
 
 
 class NelderMeadOptimizer(AbstractOptimizer):

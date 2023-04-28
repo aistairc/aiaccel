@@ -10,7 +10,7 @@ from optuna.storages._rdb import models
 
 import aiaccel.parameter
 from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.util.data_type import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter
+from aiaccel.parameter import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):

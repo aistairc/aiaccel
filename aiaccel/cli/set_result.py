@@ -5,14 +5,14 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from aiaccel.config import load_config
-from aiaccel.parameter import HyperParameterConfiguration
-from aiaccel.util.data_type import (
+from aiaccel.parameter import (
     CategoricalParameter,
     FloatParameter,
+    HyperParameterConfiguration,
     IntParameter,
     OrdinalParameter,
-    str_or_float_or_int,
 )
+from aiaccel.util.data_type import str_or_float_or_int
 from aiaccel.util.filesystem import create_yaml
 
 

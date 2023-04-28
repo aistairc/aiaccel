@@ -6,8 +6,8 @@ from typing import Any
 import numpy as np
 from omegaconf.listconfig import ListConfig
 
+from aiaccel.parameter import OrdinalParameter, Parameter
 from aiaccel.util import generate_random_name
-from aiaccel.util.data_type import OrdinalParameter, Parameter
 
 STATES = [
     "WaitInitialize",

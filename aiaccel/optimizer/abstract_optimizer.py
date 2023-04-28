@@ -8,9 +8,8 @@ from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import is_multi_objective
 from aiaccel.module import AbstractModule
-from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.parameter import HyperParameterConfiguration, is_categorical, is_ordinal, is_uniform_float, is_uniform_int
 from aiaccel.util import TrialId, str_to_logging_level
-from aiaccel.util.data_type import is_categorical, is_ordinal, is_uniform_float, is_uniform_int
 
 
 class AbstractOptimizer(AbstractModule):

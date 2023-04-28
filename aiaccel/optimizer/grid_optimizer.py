@@ -8,7 +8,7 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.util.data_type import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter, Parameter
+from aiaccel.parameter import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter, Parameter
 
 
 def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool, Any]:

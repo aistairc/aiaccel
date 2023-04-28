@@ -9,7 +9,7 @@ from typing import Literal, Union
 import numpy as np
 from numpy.random import RandomState
 
-from aiaccel.util.data_type import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter, Parameter
+from aiaccel.parameter import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter, Parameter
 
 GridValueType = Union[float, int, str]
 SamplingMethodType = Literal["IN_ORDER", "UNIFORM", "RANDOM", "DUPLICATABLE_RANDOM"]
@@ -245,9 +245,10 @@ class CategoricalGridCondition(GridCondition):
         Args:
             hyperparameter (Parameter): A hyperparameter object.
         """
-        self.choices = hyperparameter.choices
-        self.num_choices = len(self.choices)
-        self._max_num_choices = self.num_choices
+        if isinstance(hyperparameter, CategoricalParameter):
+            self.choices = hyperparameter.choices
+            self.num_choices = len(self.choices)
+            self._max_num_choices = self.num_choices
 
 
 class OrdinalGridCondition(GridCondition):
@@ -268,9 +269,10 @@ class OrdinalGridCondition(GridCondition):
         Args:
             hyperparameter (Parameter): A hyperparameter object.
         """
-        self.choices = hyperparameter.sequence
-        self.num_choices = len(self.choices)
-        self._max_num_choices = self.num_choices
+        if isinstance(hyperparameter, OrdinalParameter):
+            self.choices = hyperparameter.sequence
+            self.num_choices = len(self.choices)
+            self._max_num_choices = self.num_choices
 
 
 def _create_grid_condition(hyperparameter: Parameter) -> GridCondition:
