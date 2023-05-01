@@ -23,6 +23,7 @@ class MpiModel(LocalModel):
         gpu_mode = MpiConfig(obj.config.config_path).mpi_gpu_mode.get()
         (processor, tag) = Mpi.submit(
             runner_command,
+            obj.trial_id,
             gpu_mode
         )
         obj.proc = None

@@ -11,18 +11,18 @@ resource:
   #type: "ABCI"
   #type: "python_local"
   num_node: 1
-  mpi_npernode: 5
+  mpi_npernode: 4
   mpi_enviroment: "ABCI"
-  mpi_bat_rt_type: "C.small"
+  mpi_bat_rt_type: "F"
   mpi_bat_rt_num: 1
   mpi_bat_h_rt: "2:00:00"
   mpi_bat_root_dir: "~/mpi_work"
   mpi_bat_venv_dir: "./mpienv"
   mpi_bat_aiaccel_dir: "./aiaccel"
-  mpi_bat_config_dir: "./sphere_cpu_1node_1try"
+  mpi_bat_config_dir: "./mnist_gpu_1node_1try"
   mpi_bat_file: "./qsub.sh"
   mpi_hostfile: "./hostfile"
-  mpi_gpu_mode: False
+  mpi_gpu_mode: True
   mpi_bat_make_file: True
 
 ABCI:
@@ -43,25 +43,5 @@ optimize:
     -
       name: "x1"
       type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-    -
-      name: "x2"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-    -
-      name: "x3"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-    -
-      name: "x4"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
-    -
-      name: "x5"
-      type: "uniform_float"
-      lower: -5.0
-      upper: 5.0
+      lower: 0.1
+      upper: 1.9

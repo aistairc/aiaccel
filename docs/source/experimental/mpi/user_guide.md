@@ -7,7 +7,6 @@ mpi機能の実行環境は、通常のaiaccelとは完全に分離されてい�
 なお、後述の使い方などの説明では、
 ```
 ~/mpi_work
-~/.keras
 ```
 のフォルダを作成し、その構造を前提とします
 (config.yamlの設定などで構造を変更することは可能です)。
@@ -29,7 +28,7 @@ mkdir ~/mpi_work
 
 通常のaiaccelのインスールとほぼ同じですが、
 ```
-module load openmpi/4.1.3
+module load hpcx-mt/2.12
 pip install mpi4py
 ```
 などの部分が追加されています。
@@ -49,9 +48,8 @@ pip install git+https://github.com/aistairc/aiaccel.git@feature/experimental/mpi
 ssh abci
 qrsh -g your_group_id -l rt_C.small=1 -l h_rt=2:00:00
 source /etc/profile.d/modules.sh
-module load gcc/11.2.0
-module load python/3.8/3.8.13
-module load openmpi/4.1.3
+module load python/3.11/3.11.2
+module load hpcx-mt/2.12
 cd ~/mpi_work
 python3 -m venv mpienv
 source mpienv/bin/activate
@@ -62,16 +60,15 @@ deactivate
 exit
 ```
 
-## `~/mpi_work/tfenv`を作成した後にkerasのmnist_convnetの動作確認
+## `~/mpi_work/ptenv`を作成した後にmnist.pyの動作確認
 
-まず、gpuでのテストのためのvenv、`~/mpi_work/tfenv`を作成します。
+まず、gpuでのテストのためのvenv、`~/mpi_work/ptenv`を作成します。
 その後に、gpuでのテストに使用する評価関数の動作確認をします。
 ```
 ssh abci
 qrsh -g your_group_id -l rt_G.small=1 -l h_rt=2:00:00
 source /etc/profile.d/modules.sh
-module load gcc/11.2.0
-module load python/3.8/3.8.13
+module load python/3.11/3.11.2
 module load cuda/11.0/11.0.3
 module load cudnn/8.0/8.0.5
 cd ~/mpi_work

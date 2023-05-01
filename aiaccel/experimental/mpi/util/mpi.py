@@ -36,6 +36,7 @@ class Mpi:
     gpu_max = 0
     gpu_list: dict[str, list[list[int]]] = {}
     tag = 0
+    trial_id_list: list[[int, int]] = [] # [[trial_id, tag]]
 
     @classmethod
     def prepare(cls, workspace_path: Path) -> None:
@@ -64,7 +65,7 @@ class Mpi:
         MPIPoolExecutor()
 
     @classmethod
-    def submit(cls, command: list[str], silent: bool = True) -> tuple[str, int]:
+    def submit(cls, command: list[str], trial_id: int, gpu_mode: bool, silent: bool = True) -> tuple[str, int]:
         if cls.log is None:
             raise MpiError('cls.lock is None')
         if cls.lock is None:
@@ -72,7 +73,7 @@ class Mpi:
         if not cls.lock.acquire(timeout=file_mpi_lock_timeout):
             raise MpiError('Failed to lock due to timeout.', cls.error_file_path)
         try:
-            ret = cls._submit(command, silent)
+            ret = cls._submit(command, trial_id, gpu_mode, silent)
         except Exception as e:
             cls.log.write(f'submit(): catch Exception as {e}', stdout=True)
             cls.lock.release()
@@ -82,7 +83,7 @@ class Mpi:
         return retf
 
     @classmethod
-    def _submit(cls, command: list[str], gpu_mode: bool) -> tuple[str, int]:
+    def _submit(cls, command: list[str], trial_id: int, gpu_mode: bool, silent: bool) -> tuple[str, int]:
         if cls.log is None:
             raise MpiError('cls.log is None')
         cls.tag += 1
@@ -91,14 +92,15 @@ class Mpi:
             cls.executor.submit(cls._func, command, gpu_mode, tag, str(cls.rank_log_path))
         comm = COMM_WORLD
         list_ = comm.recv(tag=tag)
-        cls.log.write(f'submit start: recv: tag={tag} list={list_}', cls.tag, stdout=True)
+        cls.log.write(f'submit start: recv: tag={tag} trial_id={trial_id} list={list_}', cls.tag)
         rank = list_[0]
         processor = list_[1]
+        cls.trial_id_list.append([trial_id, tag])
         if gpu_mode:
             gpu_num = cls._get_gpu_num(processor, tag)
             comm.send(gpu_num, rank)
-            cls.log.write(f'send: rank={rank} tag={tag} gpu_num={gpu_num}', stdout=True)
-            cls.log.write(f'info: gpu_list={cls.gpu_list}', stdout=True)
+            cls.log.write(f'send: rank={rank} tag={tag} gpu_num={gpu_num}')
+            cls.log.write(f'info: gpu_list={cls.gpu_list}')
         return (processor, tag)
 
     @classmethod
@@ -120,11 +122,11 @@ class Mpi:
             cls.rank_log_path = Path(rank_log_path_str)
             cls.log = MpiLog(rank, processor, cls.rank_log_path)
 
-        cls.log.write(f'_func_sub(): tag={tag} command={command}', tag, stdout=True)
+        cls.log.write(f'_func_sub(): tag={tag} command={command}', tag)
         comm.send([rank, processor], 0, tag=tag)
         if gpu_mode:
             gpu_num = comm.recv(source=0)
-            cls.log.write(f'start: recv: gpu_num={gpu_num}', stdout=True)
+            cls.log.write(f'start: recv: gpu_num={gpu_num}')
             cls._set_gpu(str(gpu_num))
         proc = Popen(
             command,
@@ -145,7 +147,7 @@ class Mpi:
                 cls.log.write(f'_func_sub(): debug: line={line}')  # for debug
 
             if not line and proc.poll() is not None:
-                cls.log.write(f'_func_sub(): end: tag={tag} process finished.', stdout=True)
+                cls.log.write(f'_func_sub(): end: tag={tag} process finished.')
                 o, e = proc.communicate()
                 s = ''
                 if o:
@@ -173,6 +175,48 @@ class Mpi:
             raise e
         return n
 
+    @classmethod
+    def rm_trial_id(cls, tag: int) -> None:
+        if cls.log is None:
+            raise MpiError('cls.log is None')
+        if cls.lock is None:
+            raise MpiError('cls.lock is None')
+        if not cls.lock.acquire(timeout=file_mpi_lock_timeout):
+            raise MpiError('Failed to lock due to timeout.', cls.error_file_path)
+        try:
+            flag = False
+            for a in cls.trial_id_list:
+                if a[1] == tag:
+                    cls.trial_id_list.remove(a)
+                    flag = True
+                    break
+            if not flag:
+                raise MpiError(f'There is no element tag({tag}) in cls.trial_id_list({cls.trial_id_list}).')
+        except Exception as e:
+            cls.log.write(f'rm_trial_id(): catch Exception as {e}', stdout=True)
+            cls.lock.release()
+            raise e
+        cls.lock.release()
+
+    @classmethod
+    def get_trial_id_list(cls) -> list[int]:
+        if cls.log is None:
+            raise MpiError('cls.log is None')
+        if cls.lock is None:
+            raise MpiError('cls.lock is None')
+        if not cls.lock.acquire(timeout=file_mpi_lock_timeout):
+            raise MpiError('Failed to lock due to timeout.', cls.error_file_path)
+        ret = []
+        try:
+            for a in cls.trial_id_list:
+                ret.append(a[0])
+        except Exception as e:
+            cls.log.write(f'get_trial_id_list(): catch Exception as {e}', stdout=True)
+            cls.lock.release()
+            raise e
+        cls.lock.release()
+        return ret
+        
     @classmethod
     def rm_gpu_num(cls, processor: str, tag: int) -> None:
         if cls.log is None:
@@ -256,9 +300,8 @@ class Mpi:
 #$ -cwd
 
 source /etc/profile.d/modules.sh
-module load gcc/11.2.0
-module load python/3.8/3.8.13
-module load openmpi/4.1.3
+module load python/3.11
+module load hpcx-mt/2.12
 source {venv_dir}/bin/activate
 export PYTHONPATH={aiaccel_dir}/:$PYTHONPATH
 
@@ -339,5 +382,6 @@ class MpiOutputHandler(Thread):
 
             if self._abort:
                 break
+        Mpi.rm_trial_id(self._tag)
         if self._gpu_mode:
             Mpi.rm_gpu_num(self._processor, self._tag)
