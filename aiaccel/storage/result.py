@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import Any
-from pathlib import Path
 
+from pathlib import Path
+from typing import Any
+
+import numpy as np
 from sqlalchemy.exc import SQLAlchemyError
 
-from aiaccel.storage import Abstract
-from aiaccel.storage import ResultTable
+from aiaccel.storage import Abstract, ResultTable
 from aiaccel.util import retry
 
 
@@ -33,11 +34,7 @@ class Result(Abstract):
                     .one_or_none()
                 )
                 if data is None:
-                    new_row = ResultTable(
-                        trial_id=trial_id,
-                        data_type=str(type(objective)),
-                        objective=objective
-                    )
+                    new_row = ResultTable(trial_id=trial_id, data_type=str(type(objective)), objective=objective)
                     session.add(new_row)
                 else:
                     data.objective = objective
@@ -47,7 +44,7 @@ class Result(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_any_trial_objective(self, trial_id: int) -> int | float | None:
+    def get_any_trial_objective(self, trial_id: int) -> list[int | float | str] | None:
         """Obtain the results of an arbitrary trial.
 
         Args:
@@ -70,20 +67,17 @@ class Result(Abstract):
         return data.objective
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def get_all_result(self) -> list[Any]:
+    def get_all_result(self) -> dict[int, list[Any]]:
         """Get all results
 
         Returns:
-            list
+            dict[int, list[Any]]: trial_id and result values
         """
         with self.create_session() as session:
-            data = (
-                session.query(ResultTable)
-                .with_for_update(read=True)
-            )
+            data = session.query(ResultTable).with_for_update(read=True)
 
-        # return [d.objective for d in data]
-        return data
+        return {d.trial_id: d.objective for d in data}
+        # return data
 
     def get_objectives(self) -> list[Any]:
         """Get all results in list.
@@ -93,34 +87,25 @@ class Result(Abstract):
         """
         data = self.get_all_result()
 
-        return [d.objective for d in data]
+        return [data[trial_id] for trial_id in data.keys()]
 
-    def get_bests(self, goal: str) -> list[Any]:
+    def get_bests(self, goals: list[str]) -> list[Any]:
         """Obtains the sorted result.
-
         Returns:
             list: result values
         """
-        goal = goal.lower()
-        objectives = self.get_objectives()
-        best_values = []
+        objectives = np.array(self.get_objectives())
+        bests = np.zeros((len(goals), len(objectives[0])))
 
-        if goal == "maximize":
-            best_value = float("-inf")
-            for objective in objectives:
-                if best_value < objective:
-                    best_value = objective
-                best_values.append(best_value)
-        elif goal == "minimize":
-            best_value = float("inf")
-            for objective in objectives:
-                if best_value > objective:
-                    best_value = objective
-                best_values.append(best_value)
-        else:
-            return []
+        for i in range(len(goals)):
+            if goals[i].lower() == "maximize":
+                bests[i, :] = np.max(objectives[:, i], axis=0)
+            elif goals[i].lower() == "minimize":
+                bests[i, :] = np.min(objectives[:, i], axis=0)
+            else:
+                raise ValueError("Invalid goal value.")
 
-        return best_values
+        return [row[0] for row in bests.tolist()]
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_result_trial_id_list(self) -> list[Any] | None:
@@ -130,16 +115,29 @@ class Result(Abstract):
             list | None: result values
         """
         with self.create_session() as session:
-            data = (
-                session.query(ResultTable)
-                .with_for_update(read=True)
-                .all()
-            )
+            data = session.query(ResultTable).with_for_update(read=True).all()
 
         if data is None or len(data) == 0:
             return None
 
         return [d.trial_id for d in data]
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def get_any_trial_objective_and_best_value(self, trial_id: int, goals: list[str]) -> tuple[list[Any], list[Any]]:
+        """Obtain the results of an arbitrary trial.
+        Args:
+            trial_id (int): Any trial id
+            column_idx (int): Any column index of objectives and best_values
+        Returns:
+            int | float | None:
+        """
+        objectives: list[Any] = self.get_any_trial_objective(trial_id)
+        if objectives is None:
+            return None, None
+
+        best_values = self.get_bests(goals)
+
+        return objectives, best_values
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def all_delete(self) -> None:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import optuna
+from omegaconf.dictconfig import DictConfig
 
 from aiaccel.optimizer.tpe_optimizer import TpeOptimizer, TPESamplerWrapper
 
@@ -12,13 +13,13 @@ class MOTpeOptimizer(TpeOptimizer):
         options (dict): A dictionary containing command line options.
     """
 
-    def __init__(self, options: dict[str, str | int | bool]) -> None:
+    def __init__(self, config: DictConfig) -> None:
         """Initial method of MOTpeOptimizer.
 
         Args:
             options (dict): A file name of a configuration.
         """
-        super().__init__(options)
+        super().__init__(config)
         self.study_name = "multi-objective-tpe"
 
     def create_study(self) -> None:
@@ -31,14 +32,14 @@ class MOTpeOptimizer(TpeOptimizer):
         sampler = TPESamplerWrapper()
         sampler._rng = self._rng
         sampler._random_sampler._rng = self._rng
-        storage_path = str(f"sqlite:///{self.ws}/optuna-{self.study_name}.db")
+        storage_path = str(f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
-        load_if_exists = self.options["resume"] is not None
+        load_if_exists = self.config.resume is not None
 
         self.study = optuna.create_study(
             sampler=sampler,
             storage=storage,
             study_name=self.study_name,
             load_if_exists=load_if_exists,
-            directions=self.config.goal.get(),
+            directions=[item.value for item in self.config.optimize.goal],
         )

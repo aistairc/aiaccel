@@ -1,16 +1,16 @@
 import csv
 import os
-from pathlib import Path
 from logging import StreamHandler, getLogger
 
 from fasteners import InterProcessLock
+from omegaconf.dictconfig import DictConfig
 
-from aiaccel.config import Config
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId
+from aiaccel.workspace import Workspace
 
 logger = getLogger(__name__)
-logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 logger.addHandler(StreamHandler())
 
 
@@ -18,26 +18,24 @@ class CsvWriter:
     """Provides report creation method.
 
     Args:
-        config_path (str): Path to the config file.
+        config (DictConfig): Config object.
 
     Attributes:
         config (Config): Config object.
-        ws (Path): Directory path to the workspace.
+        workspace (Workspace): Workspace object.
         fp (Path): File path to the csv file named 'results.csv'.
         trialid (TrialId): TrialId object.
         storage (Storage): Storage object related to the workspace.
         lock_file (dict[str, str]): Dict object containing string path to lock.
     """
 
-    def __init__(self, config_path: str) -> None:
-        self.config = Config(config_path)
-        self.ws = Path(self.config.workspace.get()).resolve()
-        self.fp = self.ws / 'results.csv'
-        self.trialid = TrialId(str(config_path))
-        self.storage = Storage(self.ws)
-        self.lock_file = {
-            'result_txt': str(self.ws / 'lock' / 'result_txt')
-        }
+    def __init__(self, config: DictConfig):
+        self.config = config
+        self.workspace = Workspace(self.config.generic.workspace)
+        self.fp = self.workspace.retults_csv_file
+        self.trialid = TrialId(self.config)
+        self.storage = Storage(self.workspace.storage_file_path)
+        self.lock_file = {"result_txt": str(self.workspace.lock / "result_txt")}
 
     def _get_zero_padding_trial_id(self, trial_id: int) -> str:
         """Gets string of trial id padded by zeros.
@@ -51,8 +49,7 @@ class CsvWriter:
         return self.trialid.zero_padding_any_trial_id(trial_id)
 
     def create(self) -> None:
-        """Creates repoprt.
-        """
+        """Creates repoprt."""
         data = []
         header = []
 
@@ -63,14 +60,14 @@ class CsvWriter:
 
         # write header
         example = self.storage.get_hp_dict(trial_ids[0])
-        header.append('trial_id')
-        for param in example['parameters']:
-            header.append(param['parameter_name'])
-        header.append('objective')
+        header.append("trial_id")
+        for param in example["parameters"]:
+            header.append(param["parameter_name"])
+        header.append("objective")
 
-        with InterProcessLock(self.lock_file['result_txt']):
-            with open(self.fp, 'w') as f:
-                writer = csv.writer(f, lineterminator='\n')
+        with InterProcessLock(self.lock_file["result_txt"]):
+            with open(self.fp, "w") as f:
+                writer = csv.writer(f, lineterminator="\n")
                 writer.writerow(header)
 
         # write result data
@@ -79,13 +76,13 @@ class CsvWriter:
 
         for contents in results:
             row = []
-            row.append(str(contents['trial_id']))
-            for param in contents['parameters']:
-                row.append(param['value'])
-            row.append(contents['result'])
+            row.append(str(contents["trial_id"]))
+            for param in contents["parameters"]:
+                row.append(param["value"])
+            row.append(contents["result"])
             data.append(row)
 
-        with InterProcessLock(self.lock_file['result_txt']):
-            with open(self.fp, 'a') as f:
-                writer = csv.writer(f, lineterminator='\n')
+        with InterProcessLock(self.lock_file["result_txt"]):
+            with open(self.fp, "a") as f:
+                writer = csv.writer(f, lineterminator="\n")
                 writer.writerows(data)

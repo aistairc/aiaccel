@@ -1,35 +1,40 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Type, Union
 
-from aiaccel.config import Config
-from aiaccel.master import AbciMaster
-from aiaccel.master import LocalMaster
-from aiaccel.master import PylocalMaster
+from aiaccel.master.abci_master import AbciMaster
+from aiaccel.master.local_master import LocalMaster
+from aiaccel.master.pylocal_master import PylocalMaster
+
+# TODO: Replace typing.Type with builtins.type when aiaccel supports python>=3.9.
+MasterType = Type[Union[AbciMaster, LocalMaster, PylocalMaster]]
 
 
-def create_master(config_path: str) -> Any:
+def create_master(resource_type: str) -> type:
     """Returns master type.
 
     Args:
         config_path (str): Path to configuration file.
 
-    Returns:
-        type | None: `LocalMaster`, `PylocalMaster`, or `AbciMaster`
-            if resource type is 'local', 'python_local', or 'abci',
-            respectively. Other cases, None.
-    """
-    config = Config(config_path)
-    resource = config.resource_type.get()
+    Raises:
+        ValueError: Causes when specified resource type is invalid.
 
-    if resource.lower() == "local":
+    Returns:
+        MasterType: `LocalMaster`, `PylocalMaster`, or `AbciMaster`
+            if resource type is 'local', 'python_local', or 'abci',
+            respectively.
+    """
+
+    if resource_type.lower() == "local":
         return LocalMaster
 
-    elif resource.lower() == "python_local":
+    elif resource_type.lower() == "python_local":
         return PylocalMaster
 
-    elif resource.lower() == "abci":
+    elif resource_type.lower() == "abci":
         return AbciMaster
-
     else:
-        return None
+        raise ValueError(
+            f'Invalid resource type "{resource_type}". '
+            'The resource type should be one of "local", "python_local", and "abci".'
+        )

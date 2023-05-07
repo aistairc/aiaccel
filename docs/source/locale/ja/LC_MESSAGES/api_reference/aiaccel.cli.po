@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -26,107 +28,85 @@ msgid "Submodules"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.cli.rst:8
-msgid "aiaccel.cli.creation\\_report module"
+msgid "aiaccel.cli.csv\\_writer module"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:1 aiaccel.cli.plot.Plotter:1
+#: aiaccel.cli.csv_writer.CsvWriter:1 aiaccel.cli.plot.Plotter:1
 #: aiaccel.cli.view.Viewer:1 of
 msgid "ベースクラス: :py:class:`object`"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:1 of
+#: aiaccel.cli.csv_writer.CsvWriter:1 of
 msgid "Provides report creation method."
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport
-#: aiaccel.cli.creation_report.CreationReport.get_zero_padding_trial_id
-#: aiaccel.cli.plot.Plotter aiaccel.cli.start.get_best_parameter
-#: aiaccel.cli.view.Viewer of
+#: aiaccel.cli.csv_writer.CsvWriter aiaccel.cli.plot.Plotter
+#: aiaccel.cli.start.get_best_parameter aiaccel.cli.view.Viewer of
 msgid "パラメータ"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:3 aiaccel.cli.view.Viewer:8 of
+#: aiaccel.cli.csv_writer.CsvWriter:3 aiaccel.cli.view.Viewer:8 of
 msgid "Path to the config file."
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:8 aiaccel.cli.plot.Plotter:3
+#: aiaccel.cli.csv_writer.CsvWriter:8 aiaccel.cli.plot.Plotter:3
 #: aiaccel.cli.view.Viewer:3 of
 msgid "Config object."
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport aiaccel.cli.plot.Plotter
+#: aiaccel.cli.csv_writer.CsvWriter aiaccel.cli.plot.Plotter
 #: aiaccel.cli.view.Viewer of
 msgid "type"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:10 of
+#: aiaccel.cli.csv_writer.CsvWriter:10 of
 msgid "Config"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:14 of
-msgid "Directory path to the workspace."
+#: aiaccel.cli.csv_writer.CsvWriter:14 of
+msgid "Workspace object."
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:16
-#: aiaccel.cli.creation_report.CreationReport:22 aiaccel.cli.plot.Plotter:10
+#: aiaccel.cli.csv_writer.CsvWriter:16 of
+msgid "Workspace"
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:20 of
+msgid "File path to the csv file named 'results.csv'."
+msgstr ""
+
+#: aiaccel.cli.csv_writer.CsvWriter:22 aiaccel.cli.plot.Plotter:10
 #: aiaccel.cli.view.Viewer:10 aiaccel.cli.view.Viewer:16 of
 msgid "Path"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:20 of
-msgid "File path to the csv file named 'results.csv'."
-msgstr ""
-
-#: aiaccel.cli.creation_report.CreationReport:26 of
+#: aiaccel.cli.csv_writer.CsvWriter:26 of
 msgid "TrialId object."
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:28 of
+#: aiaccel.cli.csv_writer.CsvWriter:28 of
 msgid "TrialId"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:32 of
+#: aiaccel.cli.csv_writer.CsvWriter:32 of
 msgid "Storage object related to the workspace."
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:34 aiaccel.cli.plot.Plotter:16
+#: aiaccel.cli.csv_writer.CsvWriter:34 aiaccel.cli.plot.Plotter:16
 #: aiaccel.cli.view.Viewer:22 of
 msgid "Storage"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:38 of
+#: aiaccel.cli.csv_writer.CsvWriter:38 of
 msgid "Dict object containing string path to lock."
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport:40 of
+#: aiaccel.cli.csv_writer.CsvWriter:40 of
 msgid "dict[str, str]"
 msgstr ""
 
-#: aiaccel.cli.creation_report.CreationReport.create:1 of
+#: aiaccel.cli.csv_writer.CsvWriter.create:1 of
 msgid "Creates repoprt."
-msgstr ""
-
-#: aiaccel.cli.creation_report.CreationReport.get_zero_padding_trial_id:1 of
-msgid "Gets string of trial id padded by zeros."
-msgstr ""
-
-#: aiaccel.cli.creation_report.CreationReport.get_zero_padding_trial_id:3 of
-msgid "Target trial id."
-msgstr ""
-
-#: aiaccel.cli.creation_report.CreationReport.get_zero_padding_trial_id
-#: aiaccel.cli.plot.Plotter.plot aiaccel.cli.start.get_best_parameter
-#: aiaccel.cli.view.Viewer.view of
-msgid "戻り値"
-msgstr ""
-
-#: aiaccel.cli.creation_report.CreationReport.get_zero_padding_trial_id:6 of
-msgid "Trial id padded by zeros."
-msgstr ""
-
-#: aiaccel.cli.creation_report.CreationReport.get_zero_padding_trial_id
-#: aiaccel.cli.start.get_best_parameter of
-msgid "戻り値の型"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.cli.rst:16
@@ -167,6 +147,11 @@ msgid ""
 "terminal."
 msgstr ""
 
+#: aiaccel.cli.plot.Plotter.plot aiaccel.cli.start.get_best_parameter
+#: aiaccel.cli.view.Viewer.view of
+msgid "戻り値"
+msgstr ""
+
 #: aiaccel.cli.plot.Plotter.plot:4 aiaccel.cli.view.Viewer.view:3 of
 msgid "None"
 msgstr ""
@@ -184,6 +169,14 @@ msgid "Parses command line options and reports the result."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.cli.rst:32
+msgid "aiaccel.cli.set\\_result module"
+msgstr ""
+
+#: aiaccel.cli.set_result.main:1 of
+msgid "Writes the result of a trial to a file."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.cli.rst:40
 msgid "aiaccel.cli.start module"
 msgstr ""
 
@@ -210,6 +203,10 @@ msgid ""
 msgstr ""
 
 #: aiaccel.cli.start.get_best_parameter of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.cli.start.get_best_parameter of
 msgid "例外"
 msgstr ""
 
@@ -221,7 +218,7 @@ msgstr ""
 msgid "Parses command line options and executes optimization."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.cli.rst:40
+#: ../../source/api_reference/aiaccel.cli.rst:48
 msgid "aiaccel.cli.view module"
 msgstr ""
 
@@ -239,7 +236,7 @@ msgid ""
 "theterminal."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.cli.rst:48
+#: ../../source/api_reference/aiaccel.cli.rst:56
 msgid "Module contents"
 msgstr ""
 

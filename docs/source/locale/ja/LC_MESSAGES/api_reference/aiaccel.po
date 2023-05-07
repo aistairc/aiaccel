@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -69,7 +71,7 @@ msgstr ""
 #: aiaccel.config.ConfigEntry aiaccel.config.ConfileWrapper
 #: aiaccel.config.ConfileWrapper.get aiaccel.config.JsonOrYamlObjectConfig
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.module.AbstractModule.check_error
+#: aiaccel.config.is_multi_objective aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.create_numpy_random_generator
 #: aiaccel.module.AbstractModule.get_numpy_random_state
 #: aiaccel.module.AbstractModule.resume
@@ -111,8 +113,7 @@ msgstr ""
 #: aiaccel.config.Config:16 aiaccel.module.AbstractModule:30
 #: aiaccel.module.AbstractModule:42 aiaccel.module.AbstractModule:48
 #: aiaccel.module.AbstractModule:54 aiaccel.module.AbstractModule:60
-#: aiaccel.module.AbstractModule:66 aiaccel.module.AbstractModule:72
-#: aiaccel.module.AbstractModule:78 aiaccel.workspace.Workspace:10
+#: aiaccel.module.AbstractModule:66 aiaccel.workspace.Workspace:10
 #: aiaccel.workspace.Workspace:16 aiaccel.workspace.Workspace:22
 #: aiaccel.workspace.Workspace:28 aiaccel.workspace.Workspace:34
 #: aiaccel.workspace.Workspace:40 aiaccel.workspace.Workspace:46
@@ -120,8 +121,7 @@ msgstr ""
 #: aiaccel.workspace.Workspace:64 aiaccel.workspace.Workspace:70
 #: aiaccel.workspace.Workspace:76 aiaccel.workspace.Workspace:82
 #: aiaccel.workspace.Workspace:88 aiaccel.workspace.Workspace:94
-#: aiaccel.workspace.Workspace:100 aiaccel.workspace.Workspace:106
-#: aiaccel.workspace.Workspace:119 of
+#: aiaccel.workspace.Workspace:100 aiaccel.workspace.Workspace:113 of
 msgid "Path"
 msgstr ""
 
@@ -175,11 +175,11 @@ msgstr ""
 
 #: aiaccel.config.ConfigEntry.get aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
+#: aiaccel.config.JsonOrYamlObjectConfig.to_dict
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
 #: aiaccel.module.AbstractModule.create_numpy_random_generator
-#: aiaccel.module.AbstractModule.get_each_state_count
 #: aiaccel.module.AbstractModule.get_module_type
 #: aiaccel.module.AbstractModule.get_numpy_random_state
 #: aiaccel.module.AbstractModule.inner_loop_main_process
@@ -198,7 +198,10 @@ msgstr ""
 #: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
 #: aiaccel.workspace.Workspace.check_consists
 #: aiaccel.workspace.Workspace.create aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.get_any_result_file_path
+#: aiaccel.workspace.Workspace.get_any_trial_result
 #: aiaccel.workspace.Workspace.move_completed_data
+#: aiaccel.workspace.Workspace.result_file_exists
 #: aiaccel.wrapper_tools.create_runner_command
 #: aiaccel.wrapper_tools.save_result of
 msgid "戻り値"
@@ -261,7 +264,8 @@ msgstr ""
 
 #: aiaccel.config.ConfileWrapper.get
 #: aiaccel.config.JsonOrYamlObjectConfig.get_property
-#: aiaccel.config.JsonOrYamlObjectConfig.to_dict aiaccel.config.load_config
+#: aiaccel.config.JsonOrYamlObjectConfig.to_dict
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
 #: aiaccel.module.AbstractModule.check_error
 #: aiaccel.module.AbstractModule.check_finished
 #: aiaccel.module.AbstractModule.get_module_type
@@ -273,7 +277,10 @@ msgstr ""
 #: aiaccel.parameter.get_type aiaccel.parameter.load_parameter
 #: aiaccel.workspace.Workspace.check_consists
 #: aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.get_any_result_file_path
+#: aiaccel.workspace.Workspace.get_any_trial_result
 #: aiaccel.workspace.Workspace.move_completed_data
+#: aiaccel.workspace.Workspace.result_file_exists
 #: aiaccel.wrapper_tools.create_runner_command of
 msgid "戻り値の型"
 msgstr ""
@@ -316,6 +323,18 @@ msgstr ""
 
 #: aiaccel.config.JsonOrYamlObjectConfig.to_dict:3 of
 msgid "The dictionary object of the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:1 of
+msgid "Is the multi-objective option set in the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:3 of
+msgid "A configuration object."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:6 of
+msgid "Is the multi--objective option set in the configuration or not."
 msgstr ""
 
 #: aiaccel.config.load_config:1 of
@@ -409,47 +428,39 @@ msgid "A path to lock directory."
 msgstr ""
 
 #: aiaccel.module.AbstractModule:58 of
-msgid "A path to log directory."
-msgstr ""
-
-#: aiaccel.module.AbstractModule:64 of
 msgid "A path to output directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:70 of
+#: aiaccel.module.AbstractModule:64 of
 msgid "A path to runner directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:76 of
-msgid "A path to verification directory."
-msgstr ""
-
-#: aiaccel.module.AbstractModule:82 of
+#: aiaccel.module.AbstractModule:70 of
 msgid "A number of files in hp/finished directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:84 aiaccel.module.AbstractModule:90
-#: aiaccel.module.AbstractModule:96 aiaccel.module.AbstractModule:108 of
+#: aiaccel.module.AbstractModule:72 aiaccel.module.AbstractModule:78
+#: aiaccel.module.AbstractModule:84 aiaccel.module.AbstractModule:96 of
 msgid "int"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:88 of
+#: aiaccel.module.AbstractModule:76 of
 msgid "A number of files in hp/ready directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:94 of
+#: aiaccel.module.AbstractModule:82 of
 msgid "A number of files in hp/running directory."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:100 of
+#: aiaccel.module.AbstractModule:88 of
 msgid "A logger object."
 msgstr ""
 
-#: aiaccel.module.AbstractModule:102 of
+#: aiaccel.module.AbstractModule:90 of
 msgid "logging.Logger"
 msgstr ""
 
-#: aiaccel.module.AbstractModule:106 of
+#: aiaccel.module.AbstractModule:94 of
 msgid "A loop count that is incremented in loop method."
 msgstr ""
 
@@ -462,11 +473,11 @@ msgid "True if no error, False if with error."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.check_finished:1 of
-msgid "Check whether all optimization finished or not."
+msgid "Checks whether all optimization finished."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.check_finished:3 of
-msgid "All optimization finished or not."
+msgid "True if all optimizations are finished."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.create_numpy_random_generator:1 of
@@ -474,7 +485,6 @@ msgid "create random generator using any random seed."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.create_numpy_random_generator:5
-#: aiaccel.module.AbstractModule.get_each_state_count:3
 #: aiaccel.module.AbstractModule.inner_loop_main_process:3
 #: aiaccel.module.AbstractModule.post_process:3
 #: aiaccel.module.AbstractModule.pre_process:3
@@ -485,10 +495,6 @@ msgstr ""
 #: aiaccel.module.AbstractModule.set_numpy_random_state:6
 #: aiaccel.workspace.Workspace.create:3 aiaccel.wrapper_tools.save_result:18 of
 msgid "None"
-msgstr ""
-
-#: aiaccel.module.AbstractModule.get_each_state_count:1 of
-msgid "Updates the number of files in hp(hyper parameter) directories."
 msgstr ""
 
 #: aiaccel.module.AbstractModule.get_module_type:1 of
@@ -581,6 +587,10 @@ msgstr ""
 msgid "random state"
 msgstr ""
 
+#: aiaccel.module.AbstractModule.update_each_state_count:1 of
+msgid "Updates hyperparameter counters for ready, runnning, and finished states."
+msgstr ""
+
 #: ../../source/api_reference/aiaccel.rst:46
 msgid "aiaccel.parameter module"
 msgstr ""
@@ -608,8 +618,8 @@ msgstr ""
 msgid "str"
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter:20 aiaccel.parameter.get_type:6 of
-msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and 'ORDINAL'."
+#: aiaccel.parameter.HyperParameter:17 aiaccel.parameter.get_type:6 of
+msgid "A parameter type any of 'uniform_int', 'uniform_float', 'categorical' and 'ordinal'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:27 of
@@ -636,15 +646,15 @@ msgstr ""
 #: aiaccel.parameter.HyperParameter:45 of
 msgid ""
 "This is set as a list of a parameter, when a parameter type is "
-"'CATEGORICAL'."
+"'categorical'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:48 aiaccel.parameter.HyperParameter:55 of
 msgid "list[float, int, str]"
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter:52 of
-msgid "This is set as a list of a parameter, when a parameter type is 'ORDINAL'."
+#: aiaccel.parameter.HyperParameter:49 of
+msgid "This is set as a list of a parameter, when a parameter type is 'ordinal'."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter:59 of
@@ -665,19 +675,21 @@ msgstr ""
 
 #: aiaccel.parameter.HyperParameter.sample:3
 #: aiaccel.parameter.HyperParameterConfiguration.sample:3 of
-msgid "This is set, when a initial value is required."
+msgid "A random generator."
 msgstr ""
 
 #: aiaccel.parameter.HyperParameter.sample:5
-#: aiaccel.parameter.HyperParameterConfiguration.sample:6 of
-msgid "A reference to a random generator."
+#: aiaccel.parameter.HyperParameterConfiguration.sample:5 of
+msgid ""
+"Whether to require a initial value. If True, returns the initial value. "
+"Defaults to False."
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter.sample:8 of
+#: aiaccel.parameter.HyperParameter.sample:9 of
 msgid "A parameter dictionary."
 msgstr ""
 
-#: aiaccel.parameter.HyperParameter.sample:11 of
+#: aiaccel.parameter.HyperParameter.sample:12 of
 msgid "Causes when an invalid type is set."
 msgstr ""
 
@@ -762,78 +774,8 @@ msgstr ""
 msgid "Path to \"alive\", i.e. `path`/alive."
 msgstr ""
 
-#: aiaccel.workspace.Workspace:20 of
-msgid "Path to \"error\", i.e. 'path`/error."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:26 of
-msgid "Path to \"hp\", i.e. `path`/hp."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:32 of
-msgid "Path to \"ready\", i.e. `path`/hp/ready."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:38 of
-msgid "Path to \"running\", i.e. `path`/hp/running."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:44 of
-msgid "Path to \"finished\", i.e. `path`/hp/finished."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:50 of
-msgid "Path to \"jobstate\", i.e. `path`/jobstate."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:56 of
-msgid "Path to \"lock\", i.e. `path`/lock."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:62 of
-msgid "Path to \"log\", i.e. `path`/log."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:68 of
-msgid "Path to \"abci_output\", i.e. `path`/abci_output."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:74 of
-msgid "Path to \"pid\", i.e. `path`/pid."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:80 of
-msgid "Path to \"result\", i.e. `path`/result."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:86 of
-msgid "Path to \"runner\", i.e. `path`/runner."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:92 of
-msgid "Path to \"storage\", i.e. `path`/storage."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:98 of
-msgid "Path to \"timestamp\", i.e. `path`/timestamp."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:104 of
-msgid "Path to \"verification\", i.e. `path`/verification."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:110 of
-msgid "A list of pathes under the workspace."
-msgstr ""
-
-#: aiaccel.workspace.Workspace:112 of
-msgid "list[Path]"
-msgstr ""
-
-#: aiaccel.workspace.Workspace:116 of
-msgid ""
-"Path to the results which is prepared in the execution directory, i.e. "
-"\"./results\"."
+#: ../../source/api_reference/aiaccel.rst:52
+msgid "aiaccel.workspace module"
 msgstr ""
 
 #: aiaccel.workspace.Workspace.check_consists:1 of
@@ -868,6 +810,22 @@ msgstr ""
 msgid "True if the workspace exists."
 msgstr ""
 
+#: aiaccel.workspace.Workspace.get_any_result_file_path:1 of
+msgid "Get result file path."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_any_result_file_path:3 of
+msgid "Path to result file."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_any_trial_result:1 of
+msgid "Get any trial result."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_any_trial_result:3 of
+msgid "Trial result."
+msgstr ""
+
 #: aiaccel.workspace.Workspace.move_completed_data:1 of
 msgid "Move workspace to under of results directory when finished."
 msgstr ""
@@ -880,6 +838,14 @@ msgstr ""
 
 #: aiaccel.workspace.Workspace.move_completed_data:5 of
 msgid "Path of destination."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.result_file_exists:1 of
+msgid "Check result file exists or not."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.result_file_exists:3 of
+msgid "True if result file exists."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.rst:62
@@ -978,14 +944,14 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid ""
-#~ "A parameter type any of 'INT', "
-#~ "'FLOAT', 'CATEGORICAL' and     'ORDINAL'."
+#~ "A parameter type any of 'uniform_int', "
+#~ "'uniform_float', 'categorical' and     'ordinal'."
 #~ msgstr ""
 
-#~ msgid "A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and"
+#~ msgid "A parameter type any of 'uniform_int', 'uniform_float', 'categorical' and"
 #~ msgstr ""
 
-#~ msgid "'ORDINAL'."
+#~ msgid "'ordinal'."
 #~ msgstr ""
 
 #~ msgid ""
@@ -999,51 +965,6 @@ msgstr ""
 #~ "trial_id: str"
 #~ msgstr ""
 
-#~ msgid "Import this as follows:"
-#~ msgstr ""
-
-#~ msgid "import aiaccel"
-#~ msgstr ""
-
 #~ msgid "A Class for defining the configuration of a configuration file."
-#~ msgstr ""
-
-#~ msgid "no error | False: with error."
-#~ msgstr ""
-
-#~ msgid "This module type(name)."
-#~ msgstr ""
-
-#~ msgid "set any random seed. :param None:"
-#~ msgstr ""
-
-#~ msgid "Union[float, int]"
-#~ msgstr ""
-
-#~ msgid "List[float, int, str]"
-#~ msgstr ""
-
-#~ msgid "Union[float, int, str]"
-#~ msgstr ""
-
-#~ msgid "Get a best parameter in specified files."
-#~ msgstr ""
-
-#~ msgid "A list of files to find a best."
-#~ msgstr ""
-
-#~ msgid "Maximize or Minimize."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A best result value and a file "
-#~ "path. It returns None if a number"
-#~ " of files is less than one."
-#~ msgstr ""
-
-#~ msgid "Causes when an invalid goal is set."
-#~ msgstr ""
-
-#~ msgid "It raises if a workspace argument (self.path) is"
 #~ msgstr ""
 

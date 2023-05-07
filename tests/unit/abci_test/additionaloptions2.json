@@ -2,8 +2,6 @@
   "generic": {
     "init_fail_count": 100,
     "name_length": 6,
-    "project_name": "sphere",
-    "randseed": 1,
     "workspace": "./work",
     "user_program_name": "user.py",
     "objective_function_name": "main"
@@ -37,13 +35,11 @@
     "expire_timeout": 10,
     "finished_retry": 3,
     "finished_timeout": 10,
-    "job_loop_duration": 0.5,
     "job_retry": 2,
     "job_timeout": 10,
     "kill_retry": 3,
     "kill_timeout": 30,
     "result_retry": 1,
-    "result_timeout": 600,
     "runner_retry": 3,
     "runner_timeout": 10,
     "running_retry": 3,
@@ -53,13 +49,16 @@
   "resource": {
     "type": "local",
     "num_node": 1,
-    "$type": "ABCI",
+    "$type": "abci",
     "$num_node": 4
   },
   "ABCI": {
     "job_script_preamble": "wrapper_abci.sh",
     "group": "gaa",
-    "job_execution_options": ["-hoge 12", "-foo 42"]
+    "job_execution_options": [
+      "-hoge 12",
+      "-foo 42"
+    ]
   },
   "hyperparameter": {
     "goal": "minimize",
@@ -67,8 +66,17 @@
     "trial_number": 20,
     "$parallelism": 2,
     "grid_search_option": [
-      { "name": "x1", "step": 0.1, "log": true, "base": 10 },
-      { "name": "x2", "step": 1.0, "log": false }
+      {
+        "name": "x1",
+        "step": 0.1,
+        "log": true,
+        "base": 10
+      },
+      {
+        "name": "x2",
+        "step": 1.0,
+        "log": false
+      }
     ],
     "ConfigSpace_hyperparameter": {
       "hyperparameters": [
@@ -78,7 +86,7 @@
           "log": false,
           "lower": 0.0,
           "upper": 5.0,
-          "initial": 0.0 
+          "initial": 0.0
         },
         {
           "name": "x2",
@@ -90,70 +98,5 @@
         }
       ]
     }
-  },
-  "verification": {
-    "is_verified": true,
-    "condition": [
-      {
-        "loop": 1,
-        "minimum": 0.0,
-        "maximum": 70.0
-      },
-      {
-        "loop": 5,
-        "minimum": 0.0,
-        "maximum": 60.0
-      },
-      {
-        "loop": 10,
-        "minimum": 0.0,
-        "maximum": 50.0
-      },
-      {
-        "loop": 20,
-        "minimum": 0.0,
-        "maximum": 10.0
-      },
-      {
-        "loop": 30,
-        "minimum": 0.0,
-        "maximum": 9.0
-      },
-      {
-        "loop": 40,
-        "minimum": 0.0,
-        "maximum": 8.0
-      },
-      {
-        "loop": 50,
-        "minimum": 0.0,
-        "maximum": 6.0
-      },
-      {
-        "loop": 60,
-        "minimum": 0.0,
-        "maximum": 5.0
-      },
-      {
-        "loop": 70,
-        "minimum": 0.0,
-        "maximum": 3.0
-      },
-      {
-        "loop": 80,
-        "minimum": 0.0,
-        "maximum": 1.0
-      },
-      {
-        "loop": 90,
-        "minimum": 0.0,
-        "maximum": 0.5
-      },
-      {
-        "loop": 100,
-        "minimum": 0.0,
-        "maximum": 0.1
-      }
-    ]
   }
 }

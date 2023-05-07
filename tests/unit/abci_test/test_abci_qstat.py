@@ -10,7 +10,7 @@ def test_parse_qstat(data_dir, load_test_config):
     with open(xml_path, 'r') as f:
         xml_string = f.read()
 
-    stat_list = parse_qstat(config, xml_string)
+    stat_list = parse_qstat(xml_string)
     assert type(stat_list) is list
 
 
@@ -24,6 +24,6 @@ def test_parse_job_list(data_dir, load_test_config):
     root = ElementTree.fromstring(xml_string)
 
     for i in root.findall('./job_info/job_list'):
-        parse_job_list(config, i)
+        parse_job_list(i)
 
-    assert parse_job_list(config, '') == []
+    assert parse_job_list('') == []

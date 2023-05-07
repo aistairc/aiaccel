@@ -3,8 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 
-def cast_y(
-        y_value: Any, y_data_type: str | None) -> float | int | str:
+def cast_y(y_value: Any, y_data_type: str | None) -> float | int | str:
     """Casts y to the appropriate data type.
 
     Args:
@@ -20,13 +19,13 @@ def cast_y(
     """
     if y_data_type is None:
         y = y_value
-    elif y_data_type.lower() == 'float':
+    elif y_data_type.lower() == "float":
         y = float(y_value)
-    elif y_data_type.lower() == 'int':
+    elif y_data_type.lower() == "int":
         y = int(float(y_value))
-    elif y_data_type.lower() == 'str':
+    elif y_data_type.lower() == "str":
         y = str(y_value)
     else:
-        TypeError(f'{y_data_type} cannot be specified')
+        TypeError(f"{y_data_type} cannot be specified")
 
     return y

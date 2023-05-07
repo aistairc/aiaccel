@@ -3,8 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-
-from aiaccel.config import Config
+from omegaconf.dictconfig import DictConfig
 
 
 class AbstractSchedulingAlgorithm(object):
@@ -17,15 +16,10 @@ class AbstractSchedulingAlgorithm(object):
         config (ConfileWrapper): A configuration object.
     """
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: DictConfig) -> None:
         self.config = config
 
-    def select_hp(
-        self,
-        hp_ready: list[Path],
-        num: int = 1,
-        rng: np.random.RandomState | None = None
-    ) -> list[Path]:
+    def select_hp(self, hp_ready: list[Path], num: int = 1, rng: np.random.RandomState | None = None) -> list[Path]:
         """Select multiple hyper parameters.
 
         Args:

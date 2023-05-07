@@ -1,17 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2022, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-03-28 10:51+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -468,55 +470,4 @@ msgstr ""
 #: ../../source/contribution_guide/contribution_guide.md:204
 msgid "Example"
 msgstr ""
-
-#~ msgid "コントリビューションガイド(WIP)"
-#~ msgstr ""
-
-#~ msgid "イシュー(WIP)"
-#~ msgstr ""
-
-#~ msgid "プルリクエスト(WIP)"
-#~ msgstr ""
-
-#~ msgid "テスト(WIP)"
-#~ msgstr ""
-
-#~ msgid "コーディング規約(WIP)"
-#~ msgstr ""
-
-#~ msgid "ローカル環境ですべてのテストコードを実行するには，aiaccel または aiaccel/tests に移動し，以下のコマンドを実行します．"
-#~ msgstr ""
-
-#~ msgid "または，特定のテストコードのみを実行するには，ファイル名を引数として指定します．"
-#~ msgstr ""
-
-#~ msgid "[aiaccel-specific なスタイル](#aiaccel-specific-なスタイル)についても確認してください．"
-#~ msgstr ""
-
-#~ msgid "あなたが起こる期待したこと"
-#~ msgstr ""
-
-#~ msgid "フォークした後，aiaccel のリポジトリをcloneします．"
-#~ msgstr ""
-
-#~ msgid "関連する issue がある場合，`Close #N` で issue を閉じること．"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "ドキュメントの追加や変更・修正があった場合には，ローカル環境でレンダリングが正常に行われるかを確認してください． "
-#~ "レンダリングの確認には aiaccel/docs に移動し，HTML ファイルのビルドを行います．"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "sphinx-apidoc -f -o docs/source/api_reference"
-#~ " aiaccel 多言語ドキュメントの生成 cd docs make "
-#~ "gettext sphinx-intl update -p build-"
-#~ "gettext -l en -l ja"
-#~ msgstr ""
-
-#~ msgid "新たな機能の追加, またはバグの修正を行った場合，テストコードを作成してください．"
-#~ msgstr ""
-
-#~ msgid "aiaccel では flake8 を用いてコーディングスタイルの検証を行います．"
-#~ msgstr ""
 

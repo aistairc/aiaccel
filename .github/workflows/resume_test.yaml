@@ -1,0 +1,37 @@
+name: Resume Test
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        #os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
+        #python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.8']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set Up ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+
+      - name: Install Software
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[dev,github-actions,test]
+
+      - name: Resume Test
+        run: |
+          pytest -s -v tests/resumption/sphere/test_sphere_random_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_grid_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_budget_specified_grid_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_sobol_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_tpe_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_nelder_mead_resumption.py
+          pytest -s -v tests/resumption/sphere/test_sphere_motpe_resumption.py

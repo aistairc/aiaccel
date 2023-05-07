@@ -7,12 +7,7 @@ from aiaccel.scheduler.algorithm import AbstractSchedulingAlgorithm
 
 
 class RandomSampling(AbstractSchedulingAlgorithm):
-    def select_hp(
-        self,
-        hp_ready: list[Path],
-        num: int = 1,
-        rng: Any = None
-    ) -> list[Path]:
+    def select_hp(self, hp_ready: list[Path], num: int = 1, rng: Any = None) -> list[Path]:
         """Select multiple hyper parameters.
 
         Args:
@@ -38,9 +33,9 @@ class RandomSampling(AbstractSchedulingAlgorithm):
 class SequentialSampling(AbstractSchedulingAlgorithm):
     def select_hp(
         self,
-        hp_ready: list[Path],               # A list of path of ready hyper parameters.
-        num: int = 1,             # A number to select hyper parameters.
-        rng: Any = None   # A random generator.
+        hp_ready: list[Path],  # A list of path of ready hyper parameters.
+        num: int = 1,  # A number to select hyper parameters.
+        rng: Any = None,  # A random generator.
     ) -> list[Path]:
         """Select multiple hyper parameters.
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-15 12:16+0900\n"
+"POT-Creation-Date: 2023-04-03 15:25+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -62,8 +62,8 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:3
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:3
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:3
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:3
@@ -71,6 +71,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:3
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:3
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:3
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:3
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:3
 #: of
 msgid "Check the details of 'JOB_STATES' and 'JOB_TRANSITIONS'."
@@ -94,8 +95,8 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
@@ -103,8 +104,9 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
-#: of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file of
 msgid "パラメータ"
 msgstr ""
 
@@ -125,8 +127,8 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_failed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:5
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:5
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed:5
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed:5
@@ -134,6 +136,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed:5
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:5
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:5
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:5
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed:5
 #: of
 msgid "A job object."
@@ -157,8 +160,8 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_job_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
@@ -166,8 +169,9 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
-#: of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file of
 msgid "戻り値"
 msgstr ""
 
@@ -188,10 +192,11 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_job_submitted:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:8
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:8
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_runner_create:8
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:8
 #: aiaccel.scheduler.job.model.local_model.LocalModel.before_job_submitted:8
-#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:8 of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.before_runner_create:8
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:6 of
 msgid "None"
 msgstr ""
 
@@ -221,6 +226,7 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_kill_confirmed
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_runner_confirmed
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result
 #: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_runner_confirmed
 #: of
 msgid "戻り値の型"
@@ -286,7 +292,7 @@ msgid "State transition of 'before_failed'."
 msgstr ""
 
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_finished:1
-#: of
+#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_result:1 of
 msgid "State transition of 'before_finished'."
 msgstr ""
 
@@ -298,11 +304,6 @@ msgstr ""
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.before_kill_submitted:5
 #: of
 msgid "Ab object."
-msgstr ""
-
-#: aiaccel.scheduler.job.model.abstract_model.AbstractModel.change_trial_state:1
-#: of
-msgid "State transition of 'change_trial_state'."
 msgstr ""
 
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_confirmed:1
@@ -336,17 +337,25 @@ msgid "A target is killed or not."
 msgstr ""
 
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:1
-#: of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:1 of
 msgid "State transition of 'conditions_result'."
 msgstr ""
 
 #: aiaccel.scheduler.job.model.abstract_model.AbstractModel.conditions_result:8
-#: of
+#: aiaccel.scheduler.job.model.local_model.LocalModel.conditions_result:8 of
 msgid "A target is in result files or not."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.scheduler.job.model.rst:24
 msgid "aiaccel.scheduler.job.model.local\\_model module"
+msgstr ""
+
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:1 of
+msgid "Create result file."
+msgstr ""
+
+#: aiaccel.scheduler.job.model.local_model.LocalModel.create_result_file:3 of
+msgid "Job object."
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.scheduler.job.model.rst:32

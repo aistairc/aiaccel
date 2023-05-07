@@ -4,22 +4,23 @@ import logging
 from typing import Any
 
 import numpy as np
+from omegaconf.listconfig import ListConfig
 
 from aiaccel.parameter import HyperParameter
 from aiaccel.util import generate_random_name
 
 STATES = [
-    'WaitInitialize',
-    'Initialize',
-    'WaitReflect',
-    'ReflectBranch',
-    'WaitExpand',
-    'ExpandBranch',
-    'WaitOutsideContract',
-    'OutsideContractBranch',
-    'WaitInsideContract',
-    'InsideContractBranch',
-    'WaitShrink'
+    "WaitInitialize",
+    "Initialize",
+    "WaitReflect",
+    "ReflectBranch",
+    "WaitExpand",
+    "ExpandBranch",
+    "WaitOutsideContract",
+    "OutsideContractBranch",
+    "WaitInsideContract",
+    "InsideContractBranch",
+    "WaitShrink",
 ]
 
 
@@ -75,43 +76,40 @@ class NelderMead(object):
     def __init__(
         self,
         params: list[HyperParameter],
-        iteration: float = float('inf'),
+        iteration: float = float("inf"),
         coef: dict[str, Any] | None = None,
         maximize: bool | None = False,
         initial_parameters: Any = None,
-        rng: np.random.RandomState | None = None
+        rng: np.random.RandomState | None = None,
     ) -> None:
         if coef is None:
-            coef = {"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
+            coef = {"r": 1.0, "ic": -0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
 
-        self.logger = logging.getLogger('root.optimizer.nelder_mead')
+        self.logger = logging.getLogger("root.optimizer.nelder_mead")
         self.params = params
         self.bdrys = np.array([[p.lower, p.upper] for p in self.params])
         self.coef = coef
         self.n_dim = len(self.bdrys)
 
         if rng is None:
-            raise ValueError(
-                'rng (RandomState) is required to randomly generate initial parameters.'
-            )
+            raise ValueError("rng (RandomState) is required to randomly generate initial parameters.")
         self._rng = rng
 
         self.y = self._create_initial_values(initial_parameters)
 
         self.f: Any = []  # np.ndarray is assigned in self._wait_initialize().
         self.yc = None
-        self._storage = {
-            "r": None, "ic": None, "oc": None, "e": None, "s": None}
+        self._storage = {"r": None, "ic": None, "oc": None, "e": None, "s": None}
         self._max_itr = iteration
-        self._total_itr = 0         # included out of boundary
-        self._evaluated_itr = 0     # not included out of boundary
+        self._total_itr = 0  # included out of boundary
+        self._evaluated_itr = 0  # not included out of boundary
         self._history: dict[str, list[Any]] = {
-            'total_y': [],              # y each loop
-            'evaluated_y': [],          # y each loop not included out of boundary
-            'op': [],                   # operations such as 'reflect' and so on.
-            'total_sample': [],         # sampled point each loop
-            'evaluated_sample': [],     # sampled point each loop not included out of boundary
-            'fyr_order': []             # order of f(yr) in self.f
+            "total_y": [],  # y each loop
+            "evaluated_y": [],  # y each loop not included out of boundary
+            "op": [],  # operations such as 'reflect' and so on.
+            "total_sample": [],  # sampled point each loop
+            "evaluated_sample": [],  # sampled point each loop not included out of boundary
+            "fyr_order": [],  # order of f(yr) in self.f
         }
         self._executing_index = 0
         self._executing: list[Any] = []
@@ -121,16 +119,13 @@ class NelderMead(object):
         self._foc: Any = None
         self._maximize = maximize
         self._num_shrink = 0
-        self._state = 'WaitInitialize'
+        self._state = "WaitInitialize"
         self._out_of_boundary = False
         self._result: list[Any] = []
         for y in self.y:
             self._add_executing(y)
 
-    def _create_initial_values(
-        self,
-        initial_parameters: list[dict[str, Any]]
-    ) -> np.ndarray[Any, Any]:
+    def _create_initial_values(self, initial_parameters: list[dict[str, Any]]) -> np.ndarray[Any, Any]:
         initial_values = [
             [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
             for num_of_initials in range(self.n_dim + 1)
@@ -138,39 +133,31 @@ class NelderMead(object):
 
         return np.array(initial_values)
 
-    def _create_initial_value(
-        self,
-        initial_parameters: Any,
-        dim: int,
-        num_of_initials: int
-    ) -> Any:
+    def _create_initial_value(self, initial_parameters: Any, dim: int, num_of_initials: int) -> Any:
         if initial_parameters is not None:
-            if isinstance(initial_parameters[dim]['value'], (int, float, np.integer, np.floating)):
-                initial_parameters[dim]['value'] = [initial_parameters[dim]['value']]
+            if isinstance(initial_parameters[dim]["value"], (int, float, np.integer, np.floating)):
+                initial_parameters[dim]["value"] = [initial_parameters[dim]["value"]]
 
-            if type(initial_parameters[dim]['value']) is not list:
-                raise TypeError('Default parameter should be set as list.')
+            if type(initial_parameters[dim]["value"]) not in [list, ListConfig]:
+                raise TypeError("Default parameter should be set as list.")
 
-            if num_of_initials < len(initial_parameters[dim]['value']):
-                val = initial_parameters[dim]['value'][num_of_initials]
-                if self.params[dim].type.lower() == 'ordinal':
+            if num_of_initials < len(initial_parameters[dim]["value"]):
+                val = initial_parameters[dim]["value"][num_of_initials]
+                if self.params[dim].type.lower() == "ordinal":
                     val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
                 return val
             else:
-                val = self.params[dim].sample(rng=self._rng)['value']
-                if self.params[dim].type.lower() == 'ordinal':
+                val = self.params[dim].sample(rng=self._rng)["value"]
+                if self.params[dim].type.lower() == "ordinal":
                     val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
                 return val
         else:
-            val = self.params[dim].sample(rng=self._rng)['value']
-            if self.params[dim].type.lower() == 'ordinal':
+            val = self.params[dim].sample(rng=self._rng)["value"]
+            if self.params[dim].type.lower() == "ordinal":
                 val = np.abs(np.array(self.params[dim].sequence) - val).argmin()
             return val
 
-    def _add_executing(
-        self, y: np.ndarray[Any, Any],
-        index: int | None = None
-    ) -> None:
+    def _add_executing(self, y: np.ndarray[Any, Any], index: int | None = None) -> None:
         """Add a parameter set to an execution candidate.
 
         Args:
@@ -184,38 +171,38 @@ class NelderMead(object):
 
         if self._is_out_of_boundary(y):
             out_of_boundary = True
-            self.logger.debug(f'_add_executing out of boundary y: {y}')
+            self.logger.debug(f"_add_executing out of boundary y: {y}")
 
         vertex_id = generate_random_name(self._rng)
         params = []
 
         for yi, p in zip(y, self.params):
-            params.append({'parameter_name': p.name, 'value': yi})
+            params.append({"parameter_name": p.name, "value": yi})
 
         self._executing.append(
             {
-                'vertex_id': vertex_id,
-                'parameters': params,
-                'state': self._state,
-                'itr': self._evaluated_itr,
-                'index': index,
-                'out_of_boundary': out_of_boundary
+                "vertex_id": vertex_id,
+                "parameters": params,
+                "state": self._state,
+                "itr": self._evaluated_itr,
+                "index": index,
+                "out_of_boundary": out_of_boundary,
             }
         )
 
         if out_of_boundary:
-            result = float('inf')
+            result = float("inf")
             if self._maximize:
-                result = float('inf') * -1
+                result = float("inf") * -1
             self.add_result_parameters(
                 {
-                    'vertex_id': vertex_id,
-                    'parameters': params,
-                    'state': self._state,
-                    'itr': self._evaluated_itr,
-                    'index': index,
-                    'out_of_boundary': out_of_boundary,
-                    'result': result
+                    "vertex_id": vertex_id,
+                    "parameters": params,
+                    "state": self._state,
+                    "itr": self._evaluated_itr,
+                    "index": index,
+                    "out_of_boundary": out_of_boundary,
+                    "result": result,
                 }
             )
 
@@ -229,8 +216,8 @@ class NelderMead(object):
             None
         """
         if not self._out_of_boundary:
-            self._history['evaluated_y'].append(self.y)
-        self._history['total_y'].append(self.y)
+            self._history["evaluated_y"].append(self.y)
+        self._history["total_y"].append(self.y)
 
     def _pop_result(self) -> dict[str, Any] | None:
         """Pop a result.
@@ -252,20 +239,20 @@ class NelderMead(object):
             return None
 
         try:
-            i = [e['vertex_id'] for e in self._executing].index(r['vertex_id'])
+            i = [e["vertex_id"] for e in self._executing].index(r["vertex_id"])
         except ValueError:
-            self.logger.error(f'Could not find match for r: {r}')
-            raise ValueError(f'Could not find match for r: {r}')
+            self.logger.error(f"Could not find match for r: {r}")
+            raise ValueError(f"Could not find match for r: {r}")
 
-        if r['out_of_boundary']:
-            if self._state == 'WaitShrink':
-                self.logger.error(f'out of boundary in WaitShrink. r: {r}')
-                raise ValueError(f'out of boundary in WaitShrink. r: {r}')
-            r['result'] = float('inf')
+        if r["out_of_boundary"]:
+            if self._state == "WaitShrink":
+                self.logger.error(f"out of boundary in WaitShrink. r: {r}")
+                raise ValueError(f"out of boundary in WaitShrink. r: {r}")
+            r["result"] = float("inf")
             self._out_of_boundary = True
 
         if self._maximize:
-            r['result'] *= -1
+            r["result"] *= -1
 
         self._executing.pop(i)
         return r
@@ -283,8 +270,8 @@ class NelderMead(object):
             ValueError: Causes when unsupported state is given.
         """
         if state not in STATES:
-            self.logger.error(f'Unsupported state: {state}')
-            raise ValueError(f'Unsupported state: {state}')
+            self.logger.error(f"Unsupported state: {state}")
+            raise ValueError(f"Unsupported state: {state}")
 
         self._state = state
 
@@ -298,12 +285,12 @@ class NelderMead(object):
             None
         """
         for r in results:
-            if self._state == r['state']:
-                self.f = np.append(self.f, r['result'])
+            if self._state == r["state"]:
+                self.f = np.append(self.f, r["result"])
 
         if len(self.y) == len(self.f):
             self.f = np.array(self.f)
-            self._change_state('Initialize')
+            self._change_state("Initialize")
 
     def _initialize(self) -> None:
         """Initialize state method.
@@ -324,9 +311,9 @@ class NelderMead(object):
             None
         """
         for r in results:
-            if r['state'] == self._state:
-                self._fr = r['result']
-                self._change_state('ReflectBranch')
+            if r["state"] == self._state:
+                self._fr = r["result"]
+                self._change_state("ReflectBranch")
 
     def _reflect_branch(self) -> None:
         """Branch to change a state after Reflect.
@@ -357,9 +344,9 @@ class NelderMead(object):
             None
         """
         for r in results:
-            if r['state'] == self._state:
-                self._fe = r['result']
-                self._change_state('ExpandBranch')
+            if r["state"] == self._state:
+                self._fe = r["result"]
+                self._change_state("ExpandBranch")
 
     def _expand_branch(self) -> None:
         """Branch to change state after 'Expand'.
@@ -385,9 +372,9 @@ class NelderMead(object):
             None
         """
         for r in results:
-            if r['state'] == self._state:
-                self._foc = r['result']
-                self._change_state('OutsideContractBranch')
+            if r["state"] == self._state:
+                self._foc = r["result"]
+                self._change_state("OutsideContractBranch")
 
     def _outside_contract_branch(self) -> None:
         """Branch to change state after 'OutsideContract'.
@@ -412,9 +399,9 @@ class NelderMead(object):
             None
         """
         for r in results:
-            if r['state'] == self._state:
-                self._fic = r['result']
-                self._change_state('InsideContractBranch')
+            if r["state"] == self._state:
+                self._fic = r["result"]
+                self._change_state("InsideContractBranch")
 
     def _inside_contract_branch(self) -> None:
         """Branch to change state after 'InsideContract'.
@@ -441,8 +428,8 @@ class NelderMead(object):
         """
 
         for r in results:
-            if r['state'] == self._state:
-                self.f[r['index']] = r['result']
+            if r["state"] == self._state:
+                self.f[r["index"]] = r["result"]
                 self._num_shrink += 1
 
         if len(self.y) - 1 == self._num_shrink:
@@ -456,19 +443,17 @@ class NelderMead(object):
         """
         if not self._out_of_boundary:
             self._evaluated_itr += 1
-            self._history['evaluated_sample'].append(self.y[-1])
+            self._history["evaluated_sample"].append(self.y[-1])
         else:
             self.logger.debug(f'history: {self._history["op"]}')
-            self.logger.debug(f'y: {self.y}')
-            self.logger.debug(f'f: {self.f}')
+            self.logger.debug(f"y: {self.y}")
+            self.logger.debug(f"f: {self.f}")
 
         self._total_itr += 1
         self._add_y_history()
-        self._history['fyr_order'].append(
-            np.argsort(np.argsort(self.f))[-1] + 1
-        )
+        self._history["fyr_order"].append(np.argsort(np.argsort(self.f))[-1] + 1)
         # If do shrink, should save it?
-        self._history['total_sample'].append(self.y[-1])
+        self._history["total_sample"].append(self.y[-1])
 
         self._fr = None
         self._fe = None
@@ -476,7 +461,7 @@ class NelderMead(object):
         self._foc = None
         self._num_shrink = 0
         self._out_of_boundary = False
-        self._change_state('Initialize')
+        self._change_state("Initialize")
 
     def _order_by(self) -> None:
         """Order the values.
@@ -494,16 +479,10 @@ class NelderMead(object):
         Returns:
             None
         """
-        self._storage = {
-            "r": None,
-            "ic": None,
-            "oc": None,
-            "e": None,
-            "s": None
-        }
+        self._storage = {"r": None, "ic": None, "oc": None, "e": None, "s": None}
         self._order_by()
         self.yc = self.y[:-1].mean(axis=0)
-        self._history['op'].append('i')
+        self._history["op"].append("i")
 
     def _reflect(self) -> None:
         """Compute reflected point.
@@ -513,8 +492,8 @@ class NelderMead(object):
         """
         yr = self.yc + self.coef["r"] * (self.yc - self.y[-1])
         self._storage["r"] = yr
-        self._history['op'].append('r')
-        self._change_state('WaitReflect')
+        self._history["op"].append("r")
+        self._change_state("WaitReflect")
         self._add_executing(yr)
 
     def _expand(self) -> None:
@@ -525,8 +504,8 @@ class NelderMead(object):
         """
         ye = self.yc + self.coef["e"] * (self.yc - self.y[-1])
         self._storage["e"] = ye
-        self._history['op'].append('e')
-        self._change_state('WaitExpand')
+        self._history["op"].append("e")
+        self._change_state("WaitExpand")
         self._add_executing(ye)
 
     def _inside_contract(self) -> None:
@@ -538,8 +517,8 @@ class NelderMead(object):
         """
         yic = self.yc + self.coef["ic"] * (self.yc - self.y[-1])
         self._storage["ic"] = yic
-        self._history['op'].append('ic')
-        self._change_state('WaitInsideContract')
+        self._history["op"].append("ic")
+        self._change_state("WaitInsideContract")
         self._add_executing(yic)
 
     def _outside_contract(self) -> None:
@@ -551,8 +530,8 @@ class NelderMead(object):
         """
         yoc = self.yc + self.coef["oc"] * (self.yc - self.y[-1])
         self._storage["oc"] = yoc
-        self._history['op'].append('io')
-        self._change_state('WaitOutsideContract')
+        self._history["op"].append("io")
+        self._change_state("WaitOutsideContract")
         self._add_executing(yoc)
 
     def _shrink(self) -> None:
@@ -563,10 +542,10 @@ class NelderMead(object):
         """
         for i in range(1, len(self.y)):
             self.y[i] = self.y[0] + self.coef["s"] * (self.y[i] - self.y[0])
-            self._change_state('WaitShrink')
+            self._change_state("WaitShrink")
             self._add_executing(self.y[i], i)
 
-        self._history['op'].append('s')
+        self._history["op"].append("s")
 
     def _is_out_of_boundary(self, y: np.ndarray[Any, Any]) -> bool:
         """Is points out of boundary or not.
@@ -636,30 +615,30 @@ class NelderMead(object):
                 break
             results.append(r)
 
-        if self._state == 'WaitInitialize':
+        if self._state == "WaitInitialize":
             self._wait_initialize(results)
-        elif self._state == 'Initialize':
+        elif self._state == "Initialize":
             self._initialize()
-        elif self._state == 'WaitReflect':
+        elif self._state == "WaitReflect":
             self._wait_reflect(results)
-        elif self._state == 'ReflectBranch':
+        elif self._state == "ReflectBranch":
             self._reflect_branch()
-        elif self._state == 'WaitExpand':
+        elif self._state == "WaitExpand":
             self._wait_expand(results)
-        elif self._state == 'ExpandBranch':
+        elif self._state == "ExpandBranch":
             self._expand_branch()
-        elif self._state == 'WaitOutsideContract':
+        elif self._state == "WaitOutsideContract":
             self._wait_outside_contract(results)
-        elif self._state == 'OutsideContractBranch':
+        elif self._state == "OutsideContractBranch":
             self._outside_contract_branch()
-        elif self._state == 'WaitInsideContract':
+        elif self._state == "WaitInsideContract":
             self._wait_inside_contract(results)
-        elif self._state == 'InsideContractBranch':
+        elif self._state == "InsideContractBranch":
             self._inside_contract_branch()
-        elif self._state == 'WaitShrink':
+        elif self._state == "WaitShrink":
             self._wait_shrink(results)
         else:
-            self.logger.error(f'Invalid state: {self._state}')
-            raise ValueError(f'Invalid state: {self._state}')
+            self.logger.error(f"Invalid state: {self._state}")
+            raise ValueError(f"Invalid state: {self._state}")
 
         return self._executing

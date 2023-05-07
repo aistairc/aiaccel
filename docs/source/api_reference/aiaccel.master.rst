@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 4
 
    aiaccel.master.evaluator
-   aiaccel.master.verification
 
 Submodules
 ----------

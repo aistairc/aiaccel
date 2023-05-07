@@ -3,29 +3,27 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from aiaccel.common import dict_storage
-from aiaccel.storage import Error
-from aiaccel.storage import Hp
-from aiaccel.storage import JobState
-from aiaccel.storage import Result
-from aiaccel.storage import TimeStamp
-from aiaccel.storage import Trial
-from aiaccel.storage import Serializer
+from aiaccel.storage.error import Error
+from aiaccel.storage.hp import Hp
+from aiaccel.storage.jobstate import JobState
+from aiaccel.storage.result import Result
+from aiaccel.storage.timestamp import TimeStamp
+from aiaccel.storage.trial import Trial
+from aiaccel.storage.variable import Serializer
 
 
 class Storage:
-    """Database
-    """
+    """Database"""
 
-    def __init__(self, ws: Path) -> None:
-        db_path = ws / dict_storage / "storage.db"
-        self.trial = Trial(db_path)
-        self.hp = Hp(db_path)
-        self.result = Result(db_path)
-        self.jobstate = JobState(db_path)
-        self.error = Error(db_path)
-        self.timestamp = TimeStamp(db_path)
-        self.variable = Serializer(db_path)
+    def __init__(self, _db_path: Path | str) -> None:
+        self.db_path = Path(_db_path)
+        self.trial = Trial(self.db_path)
+        self.hp = Hp(self.db_path)
+        self.result = Result(self.db_path)
+        self.jobstate = JobState(self.db_path)
+        self.error = Error(self.db_path)
+        self.timestamp = TimeStamp(self.db_path)
+        self.variable = Serializer(self.db_path)
 
     def current_max_trial_number(self) -> int | None:
         """Get the current maximum number of trials.
@@ -153,78 +151,99 @@ class Storage:
             else:  # pragma: no cover
                 pass  # not reached
 
-            hp.append(
-                {
-                    'parameter_name': param_name,
-                    'type': dtype,
-                    'value': value
-                }
-            )
+            hp.append({"parameter_name": param_name, "type": dtype, "value": value})
         result = self.result.get_any_trial_objective(trial_id=trial_id)
         start_time = self.timestamp.get_any_trial_start_time(trial_id=trial_id)
         end_time = self.timestamp.get_any_trial_end_time(trial_id=trial_id)
         error = self.error.get_any_trial_error(trial_id=trial_id)
 
         content: dict[str, str | int | float | list[Any]] = {}
-        content['trial_id'] = trial_id
-        content['parameters'] = hp
-        content['result'] = result
-        content['start_time'] = start_time
-        content['end_time'] = end_time
+        content["trial_id"] = trial_id
+        content["parameters"] = hp
+        content["result"] = result
+        content["start_time"] = start_time
+        content["end_time"] = end_time
 
         if error is not None and len(error) > 0:
-            content['error'] = error
+            content["error"] = error
 
         return content
 
-    def get_best_trial(self, goal: str) -> tuple[int | None, float | None]:
+    def get_best_trial(self, goals: list[str]) -> tuple[list[int] | None, list[float] | None]:
         """Get best trial number and best value.
 
         Args:
-            goal(str): minimize | maximize
+            goals(list[str]): minimize | maximize
 
         Returns:
             best(tuple): (trial_id, value)
         """
 
-        best_value = float('inf')
-        if goal.lower() == 'maximize':
-            best_value = float('-inf')
-
-        best_trial_id = 0
-
-        results = self.result.get_all_result()
-
-        for d in results:
-            value = d.objective
-            trial_id = d.trial_id
-
-            if goal.lower() == 'maximize':
-                if best_value < value:
-                    best_value = value
-                    best_trial_id = trial_id
-
-            elif goal.lower() == 'minimize':
-                if best_value > value:
-                    best_value = value
-                    best_trial_id = trial_id
-
+        best_values = []
+        for i in range(len(goals)):
+            if goals[i].lower() == "maximize":
+                best_values.append(float("-inf"))
+            elif goals[i].lower() == "minimize":
+                best_values.append(float("inf"))
             else:
                 return None, None
 
-        return best_trial_id, best_value
+        best_trial_id = 0
+        best_trial_ids = [0] * len(goals)
 
-    def get_best_trial_dict(self, goal: str) -> Any:
+        results_d = self.result.get_all_result()
+        for trial_id in results_d.keys():
+            value = results_d[trial_id]
+
+            if isinstance(value, float):
+                values = [value]
+            else:
+                values = value
+
+            if len(values) != len(goals):
+                return None, None
+
+            for i, val in enumerate(values):
+                try:
+                    float(val)
+                except (ValueError, TypeError):
+                    return None, None
+
+                best_value = best_values[i]
+                best_trial_id = best_trial_ids[i]
+
+                if goals[i].lower() == "maximize":
+                    if best_value < val:
+                        best_value = val
+                        best_trial_id = trial_id
+
+                elif goals[i].lower() == "minimize":
+                    if best_value > val:
+                        best_value = val
+                        best_trial_id = trial_id
+
+                best_values[i] = best_value
+                best_trial_ids[i] = best_trial_id
+
+        return best_trial_ids, best_values
+
+    def get_best_trial_dict(self, goals: list[str]) -> list[Any] | None:
         """Get best trial information in dict format.
 
         Args:
-            goal(str): minimize | maximize
+            goals(list[str]): minimize | maximize
 
         Returns:
             -(dict): Any trials information
         """
-        best_trial_id, _ = self.get_best_trial(goal)
-        return self.get_hp_dict(best_trial_id)
+        best_trial_ids, _ = self.get_best_trial(goals)
+        if best_trial_ids is None:
+            return None
+
+        hps = []
+        for trial_id in best_trial_ids:
+            hps.append(self.get_hp_dict(trial_id))
+        return hps
 
     def get_result_and_error(self, trial_id: int) -> tuple[Any, Any]:
         """Get results and errors for a given trial number.

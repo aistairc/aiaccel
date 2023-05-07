@@ -1,11 +1,13 @@
 generic:
   workspace: "/tmp/work"
-  job_command: "python original_main.py"
+  job_command: python original_main.py
+  python_file: original_main.py
+  function: main
   batch_job_timeout: 600
   sleep_time: 0
 
 resource:
-  type: "local"
+  type: python_local
   num_node: 10
 
 ABCI:
@@ -72,7 +74,6 @@ job_setting:
   expire_timeout: 60
   finished_retry: 3
   finished_timeout: 60
-  job_loop_duration: 0.5
   job_retry: 2
   job_timeout: 60
   kill_retry: 3
@@ -103,7 +104,3 @@ logger:
     master: "DEBUG"
     optimizer: "CRITICAL"
     scheduler: "CRITICAL"
-
-verification:
-  is_verified: false
-  condition: []

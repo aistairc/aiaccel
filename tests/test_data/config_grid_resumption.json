@@ -8,7 +8,7 @@
   },
   "resource": {
     "type": "python_local",
-    "num_node": 4
+    "num_node": 10
   },
   "ABCI": {
     "group": "[group]",
@@ -122,7 +122,6 @@
     "expire_timeout": 60,
     "finished_retry": 3,
     "finished_timeout": 60,
-    "job_loop_duration": 0.5,
     "job_retry": 2,
     "job_timeout": 60,
     "kill_retry": 3,
@@ -132,11 +131,6 @@
     "runner_timeout": 60,
     "running_retry": 3,
     "running_timeout": 60
-  },
-  "sleep_time": {
-    "master": 1,
-    "optimizer": 1,
-    "scheduler": 1
   },
   "logger": {
     "file": {
@@ -154,70 +148,5 @@
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     }
-  },
-  "verification": {
-    "is_verified": true,
-    "condition": [
-      {
-        "loop": 1,
-        "minimum": 0.0,
-        "maximum": 70.0
-      },
-      {
-        "loop": 5,
-        "minimum": 0.0,
-        "maximum": 60.0
-      },
-      {
-        "loop": 10,
-        "minimum": 0.0,
-        "maximum": 50.0
-      },
-      {
-        "loop": 20,
-        "minimum": 0.0,
-        "maximum": 10.0
-      },
-      {
-        "loop": 30,
-        "minimum": 0.0,
-        "maximum": 9.0
-      },
-      {
-        "loop": 40,
-        "minimum": 0.0,
-        "maximum": 8.0
-      },
-      {
-        "loop": 50,
-        "minimum": 0.0,
-        "maximum": 6.0
-      },
-      {
-        "loop": 60,
-        "minimum": 0.0,
-        "maximum": 5.0
-      },
-      {
-        "loop": 70,
-        "minimum": 0.0,
-        "maximum": 3.0
-      },
-      {
-        "loop": 80,
-        "minimum": 0.0,
-        "maximum": 1.0
-      },
-      {
-        "loop": 90,
-        "minimum": 0.0,
-        "maximum": 0.5
-      },
-      {
-        "loop": 100,
-        "minimum": 0.0,
-        "maximum": 0.1
-      }
-    ]
   }
 }

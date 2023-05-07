@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import Any
 
-from aiaccel.common import dict_lock
-from aiaccel.common import dict_result
+from omegaconf.dictconfig import DictConfig
+
 from aiaccel.common import file_final_result
-from aiaccel.config import Config
 from aiaccel.storage import Storage
-from aiaccel.util import create_yaml
-from aiaccel.util import TrialId
+from aiaccel.util import TrialId, create_yaml
+from aiaccel.workspace import Workspace
 
 
 class AbstractEvaluator(object):
@@ -25,36 +23,25 @@ class AbstractEvaluator(object):
             command line options as well as process name.
         config_path (Path): Path to the configuration file.
         config (Config): Config object.
-        ws (Path): Path to the workspace.
-        dict_lock (Path): Path to "lock', i.e. `ws`/lock.
         hp_result (dict): A dict object of the best optimized result.
         storage (Storage): Storage object.
-        goal (str): Goal of optimization ('minimize' or 'maximize').
+        goals (list[str]): Goal of optimization ('minimize' or 'maximize').
         trial_id (TrialId): TrialId object.
-
+        workspace (Workspace): Workspace object.
     """
 
-    def __init__(self, options: dict[str, Any]) -> None:
-        self.options = options
-        self.config_path = Path(self.options['config']).resolve()
-        self.config = Config(str(self.config_path))
-        self.ws = Path(self.config.workspace.get()).resolve()
-        self.dict_lock = self.ws / dict_lock
-        self.hp_result: dict[str, Any] | None = None
-        self.storage = Storage(self.ws)
-        self.goal = self.config.goal.get()
-        self.trial_id = TrialId(str(self.config_path))
-
-    def get_zero_padding_any_trial_id(self, trial_id: int) -> str:
-        """Returns string of trial id padded by zeros.
+    def __init__(self, config: DictConfig) -> None:
+        """Initial method for AbstractEvaluator.
 
         Args:
-            trial_id (int): Trial id.
-
-        Returns:
-            str: Trial id padded by zeros.
+            config (ConfileWrapper): A configuration object.
         """
-        return self.trial_id.zero_padding_any_trial_id(trial_id)
+        self.config = config
+        self.workspace = Workspace(self.config.generic.workspace)
+        self.hp_result: list[dict[str, Any]] | None = None
+        self.storage = Storage(self.workspace.storage_file_path)
+        self.goals = [item.value for item in self.config.optimize.goal]
+        self.trial_id = TrialId(self.config)
 
     def evaluate(self) -> None:
         """Run an evaluation.
@@ -62,8 +49,14 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        best_trial_id, _ = self.storage.get_best_trial(self.goal)
-        self.hp_result = self.storage.get_hp_dict(best_trial_id)
+        best_trial_ids, _ = self.storage.get_best_trial(self.goals)
+        if best_trial_ids is None:
+            return
+
+        hp_results: list[dict[str, Any]] = []
+        for best_trial_id in best_trial_ids:
+            hp_results.append(self.storage.get_hp_dict(best_trial_id))
+        self.hp_result = hp_results
 
     def print(self) -> None:
         """Print current results.
@@ -71,9 +64,12 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        logger = logging.getLogger('root.master.evaluator')
-        logger.info('Best hyperparameter is followings:')
-        logger.info(self.hp_result)
+        logger = logging.getLogger("root.master.evaluator")
+        if self.hp_result:
+            logger.info("Best hyperparameter is followings:")
+            logger.info(self.hp_result)
+        else:
+            logger.info("Evaluation not available (no results in storage.db).")
 
     def save(self) -> None:
         """Save current results to a file.
@@ -81,5 +77,5 @@ class AbstractEvaluator(object):
         Returns:
             None
         """
-        path = self.ws / dict_result / file_final_result
-        create_yaml(path, self.hp_result, self.dict_lock)
+        path = self.workspace.result / file_final_result
+        create_yaml(path, self.hp_result, self.workspace.lock)
