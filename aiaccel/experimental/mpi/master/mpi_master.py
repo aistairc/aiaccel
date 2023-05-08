@@ -1,8 +1,7 @@
-from aiaccel.master.local_master import LocalMaster
+from aiaccel.master import AbstractMaster
 
 
-class MpiMaster(LocalMaster):
-    """A master class running on a mpi systems.
+class MpiMaster(AbstractMaster):
+    """A master class running on a mpi systems."""
 
-    """
     pass

@@ -5,12 +5,17 @@ from threading import Thread
 from subprocess import Popen, PIPE, STDOUT, run
 from os import environ, path as os_path, linesep
 from logging import Logger
+import datetime
+import copy
+
+from omegaconf.dictconfig import DictConfig
 
 from mpi4py.futures import MPIPoolExecutor
 from mpi4py.MPI import Get_processor_name, COMM_WORLD
 from fasteners import InterProcessLock
 
 from aiaccel.common import resource_type_abci
+from aiaccel.util.time_tools import get_time_now_object, get_time_string_from_object
 from aiaccel.experimental.mpi.common import dict_experimental
 from aiaccel.experimental.mpi.common import dict_mpi
 from aiaccel.experimental.mpi.common import file_mpi_lock
@@ -18,7 +23,6 @@ from aiaccel.experimental.mpi.common import dict_rank_log
 from aiaccel.experimental.mpi.common import file_mpi_lock_timeout
 from aiaccel.experimental.mpi.util.error import MpiError
 from aiaccel.experimental.mpi.util.mpi_log import MpiLog
-from aiaccel.experimental.mpi.config import MpiConfig
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -28,6 +32,7 @@ if TYPE_CHECKING:
 
 class Mpi:
     func_end_id = 'MpiFuncEnd'
+    return_code_str = 'return_code='
     executor: MPIPoolExecutor | None = None
     lock: InterProcessLock | None = None
     rank_log_path = None
@@ -154,8 +159,9 @@ class Mpi:
                     s += o.decode().strip()
                 if e:
                     s += e.decode().strip()
-                comm.send(s, 0, tag=tag)
-                s = f'{cls.func_end_id} process finished.'
+                if s != '':
+                    comm.send(s, 0, tag=tag)
+                s = f'{cls.func_end_id} process finished. {cls.return_code_str}{proc.poll()}'
                 comm.send(s, 0, tag=tag)
                 break
 
@@ -260,38 +266,37 @@ class Mpi:
         environ['CUDA_VISIBLE_DEVICES'] = gpu
 
     @classmethod
-    def run_bat(cls, config: MpiConfig, logger: Logger) -> None:
-        mpi_env = config.mpi_enviroment.get()
+    def run_bat(cls, config: DictConfig, logger: Logger) -> None:
+        mpi_env = config.resource.mpi_enviroment
         if mpi_env.lower() != resource_type_abci:
             logger.error(f'{mpi_env}, the mpi_enviroment, is not supported.')
             return
-        if config.mpi_bat_make_file.get():
+        if config.resource.mpi_bat_make_file:
             cls._make_bat_file(config, logger)
         cls._run_bat_file(config, logger)
 
     @classmethod
-    def _run_bat_file(cls, config: MpiConfig, logger: Logger) -> None:
-        qsub_file = config.mpi_bat_file.get()
-        abci_group = config.abci_group.get()[1:-1]
+    def _run_bat_file(cls, config: DictConfig, logger: Logger) -> None:
+        qsub_file = config.resource.mpi_bat_file
+        abci_group = config.ABCI.group[1:-1]
         qsub_cmd = f'qsub -g {abci_group} {qsub_file}'
         proc = run(qsub_cmd.split(' '), stdout=PIPE, stderr=STDOUT)
         res = proc.stdout.decode('utf8')
         logger.info(f'{res} < {qsub_cmd}')
 
     @classmethod
-    def _make_bat_file(cls, config: MpiConfig, logger: Logger) -> None:
-        rt_type = config.mpi_bat_rt_type.get()
-        rt_num = config.mpi_bat_rt_num.get()
-        h_rt = config.mpi_bat_h_rt.get()
-        num_node = config.num_node.get()
-        # mpi_npernode = config.mpi_npernode.get()
-        root_path = Path(config.mpi_bat_root_dir.get())
-        venv_dir = str(root_path / config.mpi_bat_venv_dir.get())
-        aiaccel_dir = str(root_path / config.mpi_bat_aiaccel_dir.get())
-        config_path = root_path / config.mpi_bat_config_dir.get()
+    def _make_bat_file(cls, config: DictConfig, logger: Logger) -> None:
+        rt_type = config.resource.mpi_bat_rt_type
+        rt_num = config.resource.mpi_bat_rt_num
+        h_rt = config.resource.mpi_bat_h_rt
+        num_node = config.resource.num_node
+        root_path = Path(config.resource.mpi_bat_root_dir)
+        venv_dir = str(root_path / config.resource.mpi_bat_venv_dir)
+        aiaccel_dir = str(root_path / config.resource.mpi_bat_aiaccel_dir)
+        config_path = root_path / config.resource.mpi_bat_config_dir
         config_dir = str(config_path)
-        qsub_file_path = config_path / config.mpi_bat_file.get()
-        hostfile = str(config_path / config.mpi_hostfile.get())
+        qsub_file_path = config_path / config.resource.mpi_bat_file
+        hostfile = str(config_path / config.resource.mpi_hostfile)
         qsub_str = f'''#!/bin/bash
 
 #$ -l rt_{rt_type}={rt_num}
@@ -319,7 +324,7 @@ deactivate
         qsub_file_path.write_text(qsub_str)
 
     @classmethod
-    def make_hostfile(cls, config: MpiConfig, logger: Logger) -> None:
+    def make_hostfile(cls, config: DictConfig, logger: Logger) -> None:
         try:
             cls._make_hostfile(config, logger)
         except Exception as e:
@@ -327,12 +332,12 @@ deactivate
             raise e
 
     @classmethod
-    def _make_hostfile(cls, config: MpiConfig, logger: Logger) -> None:
-        root_path = Path(config.mpi_bat_root_dir.get())
-        hostfile_path = root_path / config.mpi_bat_config_dir.get() / config.mpi_hostfile.get()
-        rt_num = config.mpi_bat_rt_num.get()
-        mpi_npernode = config.mpi_npernode.get()
-        mpi_gpu_mode = config.mpi_gpu_mode.get()
+    def _make_hostfile(cls, config: DictConfig, logger: Logger) -> None:
+        root_path = Path(config.resource.mpi_bat_root_dir)
+        hostfile_path = root_path / config.resource.mpi_bat_config_dir / config.resource.mpi_hostfile
+        rt_num = config.resource.mpi_bat_rt_num
+        mpi_npernode = config.resource.mpi_npernode
+        mpi_gpu_mode = config.resource.mpi_gpu_mode
         istr = Path(environ['SGE_JOB_HOSTLIST']).read_text()
         hostlist = istr.split(linesep)
         ostr = ''
@@ -368,20 +373,53 @@ class MpiOutputHandler(Thread):
         self._storage: Storage | None = storage
         self._abort = False
 
+        self._returncode = None
+        self._stdouts: list[str] = []
+        self._stderrs: list[str] = []
+        self._start_time: datetime.datetime | None = None
+        self._end_time: datetime.datetime | None = None
+        
     def abort(self) -> None:
         self._abort = True
 
     def run(self) -> None:
         self._parent.logger.debug(f'{self._module_name}(tag={self._tag}) process started.')
+        self._start_time = get_time_now_object()
+        self._stdouts = []
+        self._stderrs = []
         while True:
             s = COMM_WORLD.recv(tag=self._tag)
             if s.find(Mpi.func_end_id) == 0:
                 self._parent.logger.debug(s)
+                i = s.find(Mpi.return_code_str)+len(Mpi.return_code_str)
+                self._parent.logger.debug(f'i={i} s[i:]=|{s[i:]}|')
+                self._returncode = int(s[i:])
                 break
-            print(s, flush=True)
+            self._stdouts.append(s)
+            print(f'debug=|{s}|', flush=True)
 
             if self._abort:
                 break
         Mpi.rm_trial_id(self._tag)
         if self._gpu_mode:
             Mpi.rm_gpu_num(self._processor, self._tag)
+        self._end_time = get_time_now_object()
+
+    def get_stdouts(self) -> list[str]:
+        return copy.deepcopy(self._stdouts)
+
+    def get_stderrs(self) -> list[str]:
+        return copy.deepcopy(self._stderrs)
+
+    def get_start_time(self) -> str | None:
+        if self._start_time is None:
+            return ""
+        return get_time_string_from_object(self._start_time)
+
+    def get_end_time(self) -> str | None:
+        if self._end_time is None:
+            return ""
+        return get_time_string_from_object(self._end_time)
+
+    def get_returncode(self) -> int | None:
+        return self._returncode
