@@ -125,6 +125,11 @@ class TestConvertedFloatParameter(BaseTestConvertedParameter):
             assert param.upper == np.log(self.float_param.upper)
             assert param.initial == np.log(self.float_param.initial)
 
+        with monkeypatch.context() as m:
+            m.setattr(self.float_param, "initial", [1.0, 1.5, 2.0])
+            param = ConvertedFloatParameter(self.float_param)
+            assert isinstance(param.initial, list)
+
     def test_sample(self, monkeypatch: pytest.MonkeyPatch) -> None:
         param = ConvertedFloatParameter(self.float_param)
         sampled_value = param.sample(self._rng)
@@ -168,6 +173,11 @@ class TestConvertedIntParameter(BaseTestConvertedParameter):
             assert param.lower == int(np.log(self.int_param.lower))
             assert param.upper == int(np.log(self.int_param.upper))
             assert param.initial == int(np.log(self.int_param.initial))
+
+        with monkeypatch.context() as m:
+            m.setattr(self.int_param, "initial", [1, 2])
+            param = ConvertedIntParameter(self.int_param)
+            assert isinstance(param.initial, list)
 
     def test_sample(self, monkeypatch: pytest.MonkeyPatch) -> None:
         param = ConvertedIntParameter(self.int_param)
@@ -225,7 +235,7 @@ class TestConvertedOrdinalParameter(BaseTestConvertedParameter):
 
 
 class TestWeightOfChoice(BaseTestConvertedParameter):
-    def test_init(self) -> None:
+    def test_init(self, monkeypatch: pytest.MonkeyPatch) -> None:
         choice_index = 0
         param = WeightOfChoice(self.categorical_param, choice_index)
         assert param.choice_index == choice_index
@@ -233,6 +243,12 @@ class TestWeightOfChoice(BaseTestConvertedParameter):
         assert param.name == f"{self.categorical_param.name}_{choice_index}"
         assert param.lower == 0.0
         assert param.upper == 1.0
+        assert param.initial == 1.0
+
+        with monkeypatch.context() as m:
+            m.setattr(self.categorical_param, "initial", ["a", "b", "c"])
+            param = WeightOfChoice(self.categorical_param, choice_index)
+            assert param.initial == [1.0, 0.0, 0.0]
 
     def test_sample(self) -> None:
         choice_index = 0

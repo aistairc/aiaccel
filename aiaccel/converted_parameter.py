@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from logging import getLogger
 from typing import Any
 
@@ -30,7 +31,10 @@ class ConvertedFloatParameter(ConvertedNumericalParameter):
         super().__init__(param, convert_log)
         self.lower = _convert_float(self, param.lower)
         self.upper = _convert_float(self, param.upper)
-        self.initial = _convert_float(self, param.initial) if param.initial is not None else None
+        if isinstance(param.initial, Iterable):  # For Nelder-Mead
+            self.initial = [_convert_float(self, value) for value in param.initial]
+        else:  # For others
+            self.initial = _convert_float(self, param.initial) if param.initial is not None else None
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, str | float]:
         if initial and self.initial is not None:
@@ -46,7 +50,10 @@ class ConvertedIntParameter(ConvertedNumericalParameter):
         self.convert_int = convert_int
         self.lower = _convert_int(self, param.lower)
         self.upper = _convert_int(self, param.upper)
-        self.initial = _convert_int(self, param.initial) if param.initial is not None else None
+        if isinstance(param.initial, Iterable):  # For Nelder-Mead
+            self.initial = [_convert_int(self, value) for value in param.initial]
+        else:  # For others
+            self.initial = _convert_int(self, param.initial) if param.initial is not None else None
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, str | float]:
         if initial and self.initial is not None:
@@ -96,11 +103,14 @@ class WeightOfChoice(ConvertedParameter):
         self.choices = param.choices if param.type.lower() == "categorical" else param.sequence
         self.lower = 0.0
         self.upper = 1.0
-        self.initial = (
-            float(list(self.choices).index(self.original_initial) == self.choice_index)
-            if self.original_initial is not None
-            else None
-        )
+        if isinstance(param.initial, Iterable) and not isinstance(param.initial, str):  # For Nelder-Mead
+            self.initial = [float(list(self.choices).index(value) == self.choice_index) for value in param.initial]
+        else:  # For others
+            self.initial = (
+                float(list(self.choices).index(self.original_initial) == self.choice_index)
+                if self.original_initial is not None
+                else None
+            )
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, str | float]:
         if initial and self.initial is not None:
@@ -180,8 +190,8 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
 
         Returns:
             dict[str, HyperParameter]: A dict object of ConvertedParameter.
-                Keys of the dict specifies name of parameters internaly
-                effective.
+                Keys of the dict specify internaly effective names of
+                parameters.
         """
         converted_params: dict[str, HyperParameter] = {}
         for param in params.get_parameter_list():
