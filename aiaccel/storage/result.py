@@ -98,10 +98,20 @@ class Result(Abstract):
         bests = np.zeros((len(goals), len(objectives[0])))
 
         for i in range(len(goals)):
-            if goals[i].lower() == "maximize":
-                bests[i, :] = np.max(objectives[:, i], axis=0)
+            objs = []
+            for obj in objectives[:, i]:
+                try:
+                    float(obj)
+                except (ValueError, TypeError):
+                    continue
+                objs.append(obj)
+
+            if len(objs) == 0:
+                bests[i, :] = None
+            elif goals[i].lower() == "maximize":
+                bests[i, :] = np.max(objs, axis=0)
             elif goals[i].lower() == "minimize":
-                bests[i, :] = np.min(objectives[:, i], axis=0)
+                bests[i, :] = np.min(objs, axis=0)
             else:
                 raise ValueError("Invalid goal value.")
 
