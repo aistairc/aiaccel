@@ -44,7 +44,7 @@ job_setting:
     running_retry: 3
     running_timeout: 60
     init_fail_count: 100
-    name_length: 6
+    name_length: 7
     random_scheduling: False
 
 logger:
