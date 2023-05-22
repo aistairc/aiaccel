@@ -18,7 +18,6 @@ class MpiScheduler(AbstractScheduler):
         self.stats = []
         trial_id_list = [job.trial_id for job in self.jobs]
 
-        print(f'debug get_stats()={Mpi.get_trial_id_list()}')
         for trial_id in Mpi.get_trial_id_list():
             if trial_id in trial_id_list:
                 self.stats.append({'name': str(trial_id)})

@@ -396,7 +396,6 @@ class MpiOutputHandler(Thread):
                 self._returncode = int(s[i:])
                 break
             self._stdouts.append(s)
-            print(f'debug=|{s}|', flush=True)
 
             if self._abort:
                 break
