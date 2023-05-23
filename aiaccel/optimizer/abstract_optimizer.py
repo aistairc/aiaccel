@@ -283,8 +283,14 @@ class AbstractOptimizer(AbstractModule):
             bool: True if there is no error.
         """
         error_trial_ids = self.storage.error.get_error_trial_id()
-        if len(error_trial_ids) == 0:
-            return True
+        failed_trial_ids = self.storage.error.get_failed_exitcode_trial_id()
+
+        if self.config.generic.is_ignore_warning:
+            if len(failed_trial_ids) == 0:
+                return True
+        else:
+            if len(failed_trial_ids) == 0 and len(error_trial_ids) == 0:
+                return True
 
         for trial_id in error_trial_ids:
             error_message = self.storage.error.get_any_trial_error(trial_id=trial_id)

@@ -169,7 +169,15 @@ class TestAbstractOptimizer(BaseTest):
         self.optimizer.storage.error.all_delete()
         assert self.optimizer.check_error() is True
 
-        self.optimizer.storage.error.set_any_trial_error(trial_id=0, error_message="test_error")
+        self.optimizer.storage.error.set_any_trial_error(trial_id=0, error_message="test warning")
+        assert self.optimizer.check_error() is True
+
+        self.optimizer.storage.error.set_any_trial_exitcode(trial_id=0, exitcode=1)
+        assert self.optimizer.check_error() is False
+
+        self.optimizer.storage.error.all_delete()
+        self.optimizer.config.generic.is_ignore_warning = False
+        self.optimizer.storage.error.set_any_trial_error(trial_id=0, error_message="test warning")
         assert self.optimizer.check_error() is False
 
     def test__serialize(self):

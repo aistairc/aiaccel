@@ -17,6 +17,7 @@ class ErrorTable(Base):
     __tablename__ = "errors"
     trial_id = Column(Integer, primary_key=True, nullable=False)
     error = Column(Text, nullable=True)
+    exitcode = Column(Integer, nullable=True)
 
 
 class TimestampTable(Base):
