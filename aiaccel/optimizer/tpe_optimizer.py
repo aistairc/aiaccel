@@ -8,8 +8,8 @@ import sqlalchemy.orm as sqlalchemy_orm
 from omegaconf.dictconfig import DictConfig
 from optuna.storages._rdb import models
 
-import aiaccel.parameter
 from aiaccel.optimizer import AbstractOptimizer
+from aiaccel.parameter import HyperParameterConfiguration
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):
@@ -146,7 +146,7 @@ class TpeOptimizer(AbstractOptimizer):
             parameters. None if `self.nelder_mead` is already defined.
         """
         enqueue_trial = {}
-        for hp in self.params.hps.values():
+        for hp in self.params.get_parameter_list():
             if hp.initial is not None:
                 enqueue_trial[hp.name] = hp.initial
 
@@ -161,7 +161,7 @@ class TpeOptimizer(AbstractOptimizer):
         for name, value in trial.params.items():
             new_param = {
                 "parameter_name": name,
-                "type": self.params.hps[name].type,
+                "type": self.params.get_hyperparameter(name).type,
                 "value": value,
             }
             new_params.append(new_param)
@@ -217,12 +217,12 @@ class TpeOptimizer(AbstractOptimizer):
 
 
 def create_distributions(
-    parameters: aiaccel.parameter.HyperParameterConfiguration,
+    parameters: HyperParameterConfiguration,
 ) -> dict[str, Any]:
     """Create an optuna.distributions dictionary for the parameters.
 
     Args:
-        parameters(aiaccel.parameter.HyperParameterConfiguration): A
+        parameters(HyperParameterConfiguration): A
             parameter configuration object.
 
     Raises:

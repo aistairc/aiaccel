@@ -37,9 +37,9 @@ class Error(Abstract):
                 if data is None:
                     new_row = ErrorTable(trial_id=trial_id, error=error_message)
                     session.add(new_row)
-                    session.commit()
                 else:
                     data.error = error_message
+                session.commit()
 
             except SQLAlchemyError as e:
                 session.rollback()
@@ -68,6 +68,59 @@ class Error(Abstract):
         return data.error
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
+    def set_any_trial_exitcode(self, trial_id: int, exitcode: int) -> None:
+        """Set any error message for any trial.
+
+        Args:
+            trial_id (int): Any trial id
+            error_message(str): Any error message
+
+        Returns:
+            None
+        """
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(ErrorTable)
+                    .filter(ErrorTable.trial_id == trial_id)
+                    .with_for_update(read=True)
+                    .one_or_none()
+                )
+
+                if data is None:
+                    new_row = ErrorTable(trial_id=trial_id, exitcode=exitcode)
+                    session.add(new_row)
+                else:
+                    data.exitcode = exitcode
+                session.commit()
+
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def get_any_trial_exitcode(self, trial_id: int) -> str | None:
+        """Get error messages for any trial.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            str | None:
+        """
+        with self.create_session() as session:
+            data = (
+                session.query(ErrorTable)
+                .filter(ErrorTable.trial_id == trial_id)
+                .with_for_update(read=True)
+                .one_or_none()
+            )
+
+        if data is None:
+            return None
+        return data.exitcode
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_error_trial_id(self) -> list[Any]:
         """Obtain a list of trial ids in which an error occurred.
 
@@ -76,6 +129,21 @@ class Error(Abstract):
         """
         with self.create_session() as session:
             data = session.query(ErrorTable).with_for_update(read=True).all()
+
+        if data is None or len(data) == 0:
+            return []
+
+        return [d.trial_id for d in data]
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def get_failed_exitcode_trial_id(self) -> list[Any]:
+        """Obtain a list of trial ids in which an error occurred.
+
+        Returns:
+            trial_ids(list): trial id list
+        """
+        with self.create_session() as session:
+            data = session.query(ErrorTable).filter(ErrorTable.exitcode != 0).with_for_update(read=True).all()
 
         if data is None or len(data) == 0:
             return []

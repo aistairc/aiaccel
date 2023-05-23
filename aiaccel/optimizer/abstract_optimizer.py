@@ -16,21 +16,26 @@ class AbstractOptimizer(AbstractModule):
     """An abstract class for Optimizer classes.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
+        config (DictConfig): A DictConfig object which contains optimization
+            settings specified by the configuration file and the command line
+            options.
 
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
-        hp_ready (int): A ready number of hyperparameters.
-        hp_running (int): A running number of hyperprameters.
-        hp_finished (int): A finished number of hyperparameters.
-        num_of_generated_parameter (int): A number of generated hyperparamters.
+        hp_ready (int): The number of ready parameters which are registered
+            with the storage and are not tried yet in the user program. The
+            state label in the storage is "ready".
+        hp_running (int): The number of parameters which the user program is
+            running with. The state label in the storage is "running".
+        hp_finished (int): The number of finished parameters which objective
+            values obtained from the user program executions with are
+            registered with the storage. The state label in the storage is
+            "finished".
+        num_of_generated_parameter (int): The number of generated paramters.
         all_parameters_generated (bool): Whether all parameters are generated.
             True if all parameters are generated.
-        params (HyperParameterConfiguration): Loaded hyper parameter
-            configuration object.
-        trial_id (TrialId): TrialId object.
+        params (HyperParameterConfiguration): A loaded parameter configuration
+            object.
+        trial_id (TrialId): A TrialId object.
     """
 
     def __init__(self, config: DictConfig) -> None:
@@ -284,8 +289,14 @@ class AbstractOptimizer(AbstractModule):
             bool: True if there is no error.
         """
         error_trial_ids = self.storage.error.get_error_trial_id()
-        if len(error_trial_ids) == 0:
-            return True
+        failed_trial_ids = self.storage.error.get_failed_exitcode_trial_id()
+
+        if self.config.generic.is_ignore_warning:
+            if len(failed_trial_ids) == 0:
+                return True
+        else:
+            if len(failed_trial_ids) == 0 and len(error_trial_ids) == 0:
+                return True
 
         for trial_id in error_trial_ids:
             error_message = self.storage.error.get_any_trial_error(trial_id=trial_id)
