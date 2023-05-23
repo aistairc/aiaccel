@@ -94,7 +94,7 @@ class HyperParameter(object):
         return {"name": self.name, "type": self.type, "value": value}
 
 
-class HyperParameterConfiguration(object):
+class HyperParameterConfiguration:
     """A configuration of hyper parameters.
 
     Args:
@@ -137,7 +137,7 @@ class HyperParameterConfiguration(object):
         """
         return list(self.hps.values())
 
-    def get_parameter_dict(self) -> dict[str, Any]:
+    def get_parameter_dict(self) -> dict[str, HyperParameter]:
         """Get a dictionary of hyper parameters.
 
         Returns:
