@@ -33,7 +33,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         )
         self.nelder_mead: Any = None
         self.parameter_pool: list[dict[str, Any]] = []
-        self.order: list[Any] = []
+        self.order: list[int] = []
 
         if is_multi_objective(self.config):
             raise NotImplementedError("Nelder-Mead optimizer does not support multi-objective optimization.")
@@ -105,7 +105,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         # Store results in order of HP file generation
         order = self.order[0]
         for nm_result in nm_results:
-            if order["vertex_id"] == nm_result["vertex_id"]:
+            if order == nm_result["vertex_id"]:
                 self.nelder_mead.add_result_parameters(nm_result)
                 self.order.pop(0)
                 break
@@ -221,31 +221,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
             if p["vertex_id"] not in self._get_all_trial_id() and p["vertex_id"] not in self._get_current_names():
                 self.parameter_pool.append(copy.copy(p))
 
-        new_params: list[Any] = []
-
         if len(self.parameter_pool) == 0:
-            return new_params
+            return None
 
         pool_p = self.parameter_pool.pop(0)
 
-        for param in self.params.get_parameter_list():
-            i = [p["parameter_name"] for p in pool_p["parameters"]].index(param.name)
-            if param.type.lower() == "float":
-                value = float(pool_p["parameters"][i]["value"])
-            elif param.type.lower() == "int":
-                value = int(pool_p["parameters"][i]["value"])
-            elif param.type.lower() == "ordinal":
-                index = int(pool_p["parameters"][i]["value"])
-                value = param.sequence[index]
-            else:
-                raise TypeError(
-                    "Invalid parameter type for NelderMeadSearch."
-                    f"FLOAT or INT is required, but {param.type} is given."
-                )
-
-            new_params.append({"parameter_name": param.name, "type": param.type, "value": value})
+        new_params = self.params.to_original_repr(pool_p["parameters"])
 
         self.update_ready_parameter_name(pool_p, self.trial_id.get())
-        self.order.append({"vertex_id": self.trial_id.get(), "parameters": new_params})
+        self.order.append(self.trial_id.get())
 
         return new_params
