@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from inspect import getframeinfo, stack
 from pathlib import Path
-from inspect import stack, getframeinfo
 from traceback import format_exc
 
 from aiaccel.experimental.mpi.util.time import get_now_str
@@ -16,12 +16,12 @@ class MpiError(Exception):
             st = stack()[1]  # stack
             fr = st[0]  # frame
             fi = getframeinfo(fr)  # frame info
-            strace += f'''
+            strace += f"""
 [{fi.lineno}, {fi.function}, {fi.filename}, {stime}]
 {format_exc()}
-'''
+"""
             if path is not None:
-                with path.open('a') as f:
+                with path.open("a") as f:
                     f.write(strace)
         finally:
             print(strace)

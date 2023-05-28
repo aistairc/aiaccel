@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-import re
 from typing import Any
 
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.experimental.mpi.scheduler.job.model.mpi_model import MpiModel
 from aiaccel.experimental.mpi.util.mpi import Mpi
+from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 
 
 class MpiScheduler(AbstractScheduler):
-    """A scheduler class running on a mpi systems.
+    """A scheduler class running on a mpi systems."""
 
-    """
     def get_stats(self) -> None:
         super().get_stats()
 
@@ -20,13 +18,13 @@ class MpiScheduler(AbstractScheduler):
 
         for trial_id in Mpi.get_trial_id_list():
             if trial_id in trial_id_list:
-                self.stats.append({'name': str(trial_id)})
+                self.stats.append({"name": str(trial_id)})
             else:
-                self.logger.warning(f'**** Unknown trial_id: {trial_id}')
+                self.logger.warning(f"**** Unknown trial_id: {trial_id}")
 
     def parse_trial_id(self, trial_id: str) -> Any:
         return trial_id
-        
+
     def create_model(self) -> MpiModel:
         """Creates model object of state machine.
 

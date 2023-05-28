@@ -1,38 +1,40 @@
 from __future__ import annotations
 
-from pathlib import Path
-from threading import Thread
-from subprocess import Popen, PIPE, STDOUT, run
-from os import environ, path as os_path, linesep
-from logging import Logger
-import datetime
 import copy
+import datetime
+from logging import Logger
+from os import environ, linesep
+from os import path as os_path
+from pathlib import Path
+from subprocess import PIPE, STDOUT, Popen, run
+from threading import Thread
+from typing import TYPE_CHECKING
 
+from fasteners import InterProcessLock
+from mpi4py.futures import MPIPoolExecutor
+from mpi4py.MPI import COMM_WORLD, Get_processor_name
 from omegaconf.dictconfig import DictConfig
 
-from mpi4py.futures import MPIPoolExecutor
-from mpi4py.MPI import Get_processor_name, COMM_WORLD
-from fasteners import InterProcessLock
-
 from aiaccel.common import resource_type_abci
-from aiaccel.util.time_tools import get_time_now_object, get_time_string_from_object
-from aiaccel.experimental.mpi.common import dict_experimental
-from aiaccel.experimental.mpi.common import dict_mpi
-from aiaccel.experimental.mpi.common import file_mpi_lock
-from aiaccel.experimental.mpi.common import dict_rank_log
-from aiaccel.experimental.mpi.common import file_mpi_lock_timeout
+from aiaccel.experimental.mpi.common import (
+    dict_experimental,
+    dict_mpi,
+    dict_rank_log,
+    file_mpi_lock,
+    file_mpi_lock_timeout,
+)
 from aiaccel.experimental.mpi.util.error import MpiError
 from aiaccel.experimental.mpi.util.mpi_log import MpiLog
+from aiaccel.util.time_tools import get_time_now_object, get_time_string_from_object
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from aiaccel.storage import Storage
     from aiaccel.scheduler import AbstractScheduler
+    from aiaccel.storage import Storage
 
 
 class Mpi:
-    func_end_id = 'MpiFuncEnd'
-    return_code_str = 'return_code='
+    func_end_id = "MpiFuncEnd"
+    return_code_str = "return_code="
     executor: MPIPoolExecutor | None = None
     lock: InterProcessLock | None = None
     rank_log_path = None
@@ -41,20 +43,20 @@ class Mpi:
     gpu_max = 0
     gpu_list: dict[str, list[list[int]]] = {}
     tag = 0
-    trial_id_list: list[[int, int]] = [] # [[trial_id, tag]]
+    trial_id_list: list[[int, int]] = []  # [[trial_id, tag]]
 
     @classmethod
     def prepare(cls, workspace_path: Path) -> None:
         mpi_path = workspace_path / dict_experimental / dict_mpi
-        cls.error_file_path = mpi_path / 'error.log'
+        cls.error_file_path = mpi_path / "error.log"
         lock_file_path = mpi_path / file_mpi_lock
         cls.rank_log_path = mpi_path / dict_rank_log
         cls.rank_log_path.mkdir(parents=True, exist_ok=True)
         cls.lock = InterProcessLock(str(lock_file_path))
         if cls.log is not None:
-            raise MpiError('cls.log is not None', cls.error_file_path)
+            raise MpiError("cls.log is not None", cls.error_file_path)
         cls.log = MpiLog(0, Get_processor_name(), cls.rank_log_path)
-        cls.log.write(f'prepare: rank=0 tag={cls.tag}', cls.tag, stdout=True)
+        cls.log.write(f"prepare: rank=0 tag={cls.tag}", cls.tag, stdout=True)
 
     @classmethod
     def abort(cls) -> None:
@@ -72,15 +74,15 @@ class Mpi:
     @classmethod
     def submit(cls, command: list[str], trial_id: int, gpu_mode: bool, silent: bool = True) -> tuple[str, int]:
         if cls.log is None:
-            raise MpiError('cls.lock is None')
+            raise MpiError("cls.lock is None")
         if cls.lock is None:
-            raise MpiError('cls.lock is None')
+            raise MpiError("cls.lock is None")
         if not cls.lock.acquire(timeout=file_mpi_lock_timeout):
-            raise MpiError('Failed to lock due to timeout.', cls.error_file_path)
+            raise MpiError("Failed to lock due to timeout.", cls.error_file_path)
         try:
             ret = cls._submit(command, trial_id, gpu_mode, silent)
         except Exception as e:
-            cls.log.write(f'submit(): catch Exception as {e}', stdout=True)
+            cls.log.write(f"submit(): catch Exception as {e}", stdout=True)
             cls.lock.release()
             raise e
         retf = ret
@@ -90,22 +92,22 @@ class Mpi:
     @classmethod
     def _submit(cls, command: list[str], trial_id: int, gpu_mode: bool, silent: bool) -> tuple[str, int]:
         if cls.log is None:
-            raise MpiError('cls.log is None')
+            raise MpiError("cls.log is None")
         cls.tag += 1
         tag = cls.tag
         if cls.executor is not None:
             cls.executor.submit(cls._func, command, gpu_mode, tag, str(cls.rank_log_path))
         comm = COMM_WORLD
         list_ = comm.recv(tag=tag)
-        cls.log.write(f'submit start: recv: tag={tag} trial_id={trial_id} list={list_}', cls.tag)
+        cls.log.write(f"submit start: recv: tag={tag} trial_id={trial_id} list={list_}", cls.tag)
         rank = list_[0]
         processor = list_[1]
         cls.trial_id_list.append([trial_id, tag])
         if gpu_mode:
             gpu_num = cls._get_gpu_num(processor, tag)
             comm.send(gpu_num, rank)
-            cls.log.write(f'send: rank={rank} tag={tag} gpu_num={gpu_num}')
-            cls.log.write(f'info: gpu_list={cls.gpu_list}')
+            cls.log.write(f"send: rank={rank} tag={tag} gpu_num={gpu_num}")
+            cls.log.write(f"info: gpu_list={cls.gpu_list}")
         return (processor, tag)
 
     @classmethod
@@ -114,8 +116,8 @@ class Mpi:
             cls._func_sub(command, gpu_mode, tag, rank_log_path_str)
         except Exception as e:
             if cls.log is None:
-                raise MpiError(f'cls.log is None. after catch Exception as {e}')
-            cls.log.write(f'_func(): catch Exception as {e}', stdout=True)
+                raise MpiError(f"cls.log is None. after catch Exception as {e}")
+            cls.log.write(f"_func(): catch Exception as {e}", stdout=True)
             raise e
 
     @classmethod
@@ -127,21 +129,17 @@ class Mpi:
             cls.rank_log_path = Path(rank_log_path_str)
             cls.log = MpiLog(rank, processor, cls.rank_log_path)
 
-        cls.log.write(f'_func_sub(): tag={tag} command={command}', tag)
+        cls.log.write(f"_func_sub(): tag={tag} command={command}", tag)
         comm.send([rank, processor], 0, tag=tag)
         if gpu_mode:
             gpu_num = comm.recv(source=0)
-            cls.log.write(f'start: recv: gpu_num={gpu_num}')
+            cls.log.write(f"start: recv: gpu_num={gpu_num}")
             cls._set_gpu(str(gpu_num))
-        proc = Popen(
-            command,
-            stdout=PIPE,
-            stderr=STDOUT
-        )
+        proc = Popen(command, stdout=PIPE, stderr=STDOUT)
         while True:
             if proc.stdout is None:
-                cls.log.write(f'_func_sub(): end: tag={tag} error.', stdout=True)
-                s = f'{cls.func_end_id} error.'
+                cls.log.write(f"_func_sub(): end: tag={tag} error.", stdout=True)
+                s = f"{cls.func_end_id} error."
                 comm.send(s, 0, tag=tag)
                 break
 
@@ -149,26 +147,26 @@ class Mpi:
 
             if line:
                 comm.send(line, 0, tag=tag)
-                cls.log.write(f'_func_sub(): debug: line={line}')  # for debug
+                cls.log.write(f"_func_sub(): debug: line={line}")  # for debug
 
             if not line and proc.poll() is not None:
-                cls.log.write(f'_func_sub(): end: tag={tag} process finished.')
+                cls.log.write(f"_func_sub(): end: tag={tag} process finished.")
                 o, e = proc.communicate()
-                s = ''
+                s = ""
                 if o:
                     s += o.decode().strip()
                 if e:
                     s += e.decode().strip()
-                if s != '':
+                if s != "":
                     comm.send(s, 0, tag=tag)
-                s = f'{cls.func_end_id} process finished. {cls.return_code_str}{proc.poll()}'
+                s = f"{cls.func_end_id} process finished. {cls.return_code_str}{proc.poll()}"
                 comm.send(s, 0, tag=tag)
                 break
 
     @classmethod
     def _get_gpu_num(cls, processor: str, tag: int) -> int:
         if cls.log is None:
-            raise MpiError('cls.log is None')
+            raise MpiError("cls.log is None")
         n = 0
         try:
             if processor not in cls.gpu_list:
@@ -177,18 +175,18 @@ class Mpi:
                 n = cls._get_empty_num(cls.gpu_list[processor])
                 cls.gpu_list[processor].append([n, tag])
         except Exception as e:
-            cls.log.write(f'_get_gpu_num(): catch Exception as {e}', stdout=True)
+            cls.log.write(f"_get_gpu_num(): catch Exception as {e}", stdout=True)
             raise e
         return n
 
     @classmethod
     def rm_trial_id(cls, tag: int) -> None:
         if cls.log is None:
-            raise MpiError('cls.log is None')
+            raise MpiError("cls.log is None")
         if cls.lock is None:
-            raise MpiError('cls.lock is None')
+            raise MpiError("cls.lock is None")
         if not cls.lock.acquire(timeout=file_mpi_lock_timeout):
-            raise MpiError('Failed to lock due to timeout.', cls.error_file_path)
+            raise MpiError("Failed to lock due to timeout.", cls.error_file_path)
         try:
             flag = False
             for a in cls.trial_id_list:
@@ -197,9 +195,9 @@ class Mpi:
                     flag = True
                     break
             if not flag:
-                raise MpiError(f'There is no element tag({tag}) in cls.trial_id_list({cls.trial_id_list}).')
+                raise MpiError(f"There is no element tag({tag}) in cls.trial_id_list({cls.trial_id_list}).")
         except Exception as e:
-            cls.log.write(f'rm_trial_id(): catch Exception as {e}', stdout=True)
+            cls.log.write(f"rm_trial_id(): catch Exception as {e}", stdout=True)
             cls.lock.release()
             raise e
         cls.lock.release()
@@ -207,34 +205,34 @@ class Mpi:
     @classmethod
     def get_trial_id_list(cls) -> list[int]:
         if cls.log is None:
-            raise MpiError('cls.log is None')
+            raise MpiError("cls.log is None")
         if cls.lock is None:
-            raise MpiError('cls.lock is None')
+            raise MpiError("cls.lock is None")
         if not cls.lock.acquire(timeout=file_mpi_lock_timeout):
-            raise MpiError('Failed to lock due to timeout.', cls.error_file_path)
+            raise MpiError("Failed to lock due to timeout.", cls.error_file_path)
         ret = []
         try:
             for a in cls.trial_id_list:
                 ret.append(a[0])
         except Exception as e:
-            cls.log.write(f'get_trial_id_list(): catch Exception as {e}', stdout=True)
+            cls.log.write(f"get_trial_id_list(): catch Exception as {e}", stdout=True)
             cls.lock.release()
             raise e
         cls.lock.release()
         return ret
-        
+
     @classmethod
     def rm_gpu_num(cls, processor: str, tag: int) -> None:
         if cls.log is None:
-            raise MpiError('cls.log is None')
+            raise MpiError("cls.log is None")
         if cls.lock is None:
-            raise MpiError('cls.lock is None')
+            raise MpiError("cls.lock is None")
         if not cls.lock.acquire(timeout=file_mpi_lock_timeout):
-            raise MpiError('Failed to lock due to timeout.', cls.error_file_path)
+            raise MpiError("Failed to lock due to timeout.", cls.error_file_path)
         try:
             cls._rm_gpu_num(processor, tag)
         except Exception as e:
-            cls.log.write(f'rm_gpu_num(): catch Exception as {e}', stdout=True)
+            cls.log.write(f"rm_gpu_num(): catch Exception as {e}", stdout=True)
             cls.lock.release()
             raise e
         cls.lock.release()
@@ -263,13 +261,13 @@ class Mpi:
 
     @classmethod
     def _set_gpu(cls, gpu: str) -> None:
-        environ['CUDA_VISIBLE_DEVICES'] = gpu
+        environ["CUDA_VISIBLE_DEVICES"] = gpu
 
     @classmethod
     def run_bat(cls, config: DictConfig, logger: Logger) -> None:
         mpi_env = config.resource.mpi_enviroment
         if mpi_env.lower() != resource_type_abci:
-            logger.error(f'{mpi_env}, the mpi_enviroment, is not supported.')
+            logger.error(f"{mpi_env}, the mpi_enviroment, is not supported.")
             return
         if config.resource.mpi_bat_make_file:
             cls._make_bat_file(config, logger)
@@ -279,10 +277,10 @@ class Mpi:
     def _run_bat_file(cls, config: DictConfig, logger: Logger) -> None:
         qsub_file = config.resource.mpi_bat_file
         abci_group = config.ABCI.group[1:-1]
-        qsub_cmd = f'qsub -g {abci_group} {qsub_file}'
-        proc = run(qsub_cmd.split(' '), stdout=PIPE, stderr=STDOUT)
-        res = proc.stdout.decode('utf8')
-        logger.info(f'{res} < {qsub_cmd}')
+        qsub_cmd = f"qsub -g {abci_group} {qsub_file}"
+        proc = run(qsub_cmd.split(" "), stdout=PIPE, stderr=STDOUT)
+        res = proc.stdout.decode("utf8")
+        logger.info(f"{res} < {qsub_cmd}")
 
     @classmethod
     def _make_bat_file(cls, config: DictConfig, logger: Logger) -> None:
@@ -297,7 +295,7 @@ class Mpi:
         config_dir = str(config_path)
         qsub_file_path = config_path / config.resource.mpi_bat_file
         hostfile = str(config_path / config.resource.mpi_hostfile)
-        qsub_str = f'''#!/bin/bash
+        qsub_str = f"""#!/bin/bash
 
 #$ -l rt_{rt_type}={rt_num}
 #$ -l h_rt={h_rt}
@@ -318,7 +316,7 @@ mpiexec -n {num_node+1} -hostfile {hostfile} \
 python -m mpi4py.futures -m aiaccel.experimental.mpi.cli.start --config config.yaml --clean --from_mpi_bat
 
 deactivate
-'''
+"""
         # 'mpiexec -n {num_node+1} -npernode {mpi_npernode}'
         qsub_file_path = Path(os_path.expanduser(str(qsub_file_path)))
         qsub_file_path.write_text(qsub_str)
@@ -338,15 +336,15 @@ deactivate
         rt_num = config.resource.mpi_bat_rt_num
         mpi_npernode = config.resource.mpi_npernode
         mpi_gpu_mode = config.resource.mpi_gpu_mode
-        istr = Path(environ['SGE_JOB_HOSTLIST']).read_text()
+        istr = Path(environ["SGE_JOB_HOSTLIST"]).read_text()
         hostlist = istr.split(linesep)
-        ostr = ''
+        ostr = ""
         for i in range(rt_num):
-            ostr += f'{hostlist[i]} slots='
+            ostr += f"{hostlist[i]} slots="
             if i == 0 and mpi_gpu_mode:
-                ostr += f'{mpi_npernode+1}'
+                ostr += f"{mpi_npernode+1}"
             else:
-                ostr += f'{mpi_npernode}'
+                ostr += f"{mpi_npernode}"
             ostr += linesep
         hostfile_path = Path(os_path.expanduser(str(hostfile_path)))
         hostfile_path.write_text(ostr)
@@ -361,7 +359,7 @@ class MpiOutputHandler(Thread):
         tag: int,
         module_name: str,
         trial_id: int,
-        storage: Storage | None = None
+        storage: Storage | None = None,
     ) -> None:
         super(MpiOutputHandler, self).__init__()
         self._parent = parent
@@ -378,12 +376,12 @@ class MpiOutputHandler(Thread):
         self._stderrs: list[str] = []
         self._start_time: datetime.datetime | None = None
         self._end_time: datetime.datetime | None = None
-        
+
     def abort(self) -> None:
         self._abort = True
 
     def run(self) -> None:
-        self._parent.logger.debug(f'{self._module_name}(tag={self._tag}) process started.')
+        self._parent.logger.debug(f"{self._module_name}(tag={self._tag}) process started.")
         self._start_time = get_time_now_object()
         self._stdouts = []
         self._stderrs = []
@@ -391,8 +389,8 @@ class MpiOutputHandler(Thread):
             s = COMM_WORLD.recv(tag=self._tag)
             if s.find(Mpi.func_end_id) == 0:
                 self._parent.logger.debug(s)
-                i = s.find(Mpi.return_code_str)+len(Mpi.return_code_str)
-                self._parent.logger.debug(f'i={i} s[i:]=|{s[i:]}|')
+                i = s.find(Mpi.return_code_str) + len(Mpi.return_code_str)
+                self._parent.logger.debug(f"i={i} s[i:]=|{s[i:]}|")
                 self._returncode = int(s[i:])
                 break
             self._stdouts.append(s)

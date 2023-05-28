@@ -2,12 +2,10 @@ from __future__ import annotations
 
 from typing import Type, Union
 
+from aiaccel.experimental.mpi.scheduler.mpi_scheduler import MpiScheduler
 from aiaccel.scheduler.abci_scheduler import AbciScheduler
 from aiaccel.scheduler.local_scheduler import LocalScheduler
 from aiaccel.scheduler.pylocal_scheduler import PylocalScheduler
-
-from aiaccel.experimental.mpi.scheduler.mpi_scheduler import MpiScheduler
-
 
 # TODO: Replace typing.Type with builtins.type when aiaccel supports python>=3.9.
 SchedulerType = Type[Union[AbciScheduler, LocalScheduler, PylocalScheduler, MpiScheduler]]

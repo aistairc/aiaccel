@@ -13,17 +13,15 @@ import yaml
 
 from aiaccel.cli import CsvWriter
 from aiaccel.common import dict_result, extension_hp
+from aiaccel.experimental.mpi.common import resource_type_mpi
+from aiaccel.experimental.mpi.config import load_config
+from aiaccel.experimental.mpi.master.create import create_master
+from aiaccel.experimental.mpi.scheduler.create import create_scheduler
+from aiaccel.experimental.mpi.util.mpi import Mpi
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import create_optimizer
 from aiaccel.tensorboard import TensorBoard
 from aiaccel.workspace import Workspace
-
-from aiaccel.experimental.mpi.config import load_config
-from aiaccel.experimental.mpi.common import resource_type_mpi
-from aiaccel.experimental.mpi.master.create import create_master
-from aiaccel.experimental.mpi.scheduler.create import create_scheduler
-from aiaccel.experimental.mpi.util.mpi import Mpi
-
 
 logger = getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -37,8 +35,8 @@ def main() -> None:  # pragma: no cover
     parser.add_argument("--resume", type=int, default=None)
     parser.add_argument("--clean", nargs="?", const=True, default=False)
 
-    parser.add_argument('--from_mpi_bat', action='store_true', help='Only aiaccel is used when mpi bat.')
-    parser.add_argument('--make_hostfile', action='store_true', help='Only aiaccel is used when mpi bat.')
+    parser.add_argument("--from_mpi_bat", action="store_true", help="Only aiaccel is used when mpi bat.")
+    parser.add_argument("--make_hostfile", action="store_true", help="Only aiaccel is used when mpi bat.")
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -47,7 +45,7 @@ def main() -> None:  # pragma: no cover
         return
 
     if config.resource.type.value.lower() != resource_type_mpi:
-        logger.error('Terminates because the resource type is not mpi.')
+        logger.error("Terminates because the resource type is not mpi.")
         return
     if args.make_hostfile:
         Mpi.make_hostfile(config, logger)
@@ -58,7 +56,7 @@ def main() -> None:  # pragma: no cover
     if Mpi.gpu_max == 0:
         Mpi.gpu_max = config.resource.mpi_npernode
     Mpi.run_main()
-    
+
     config.resume = args.resume
     config.clean = args.clean
 
@@ -81,10 +79,10 @@ def main() -> None:  # pragma: no cover
 
     logger.info(f"config: {str(pathlib.Path(config.config_path).resolve())}")
 
-    Master = create_master(config.resource.type.value)
-    Optimizer = create_optimizer(config.optimize.search_algorithm)
-    Scheduler = create_scheduler(config.resource.type.value)
-    modules: list[AbstractModule] = [Master(config), Optimizer(config), Scheduler(config), TensorBoard(config)]
+    master = create_master(config.resource.type.value)
+    optimizer = create_optimizer(config.optimize.search_algorithm)
+    scheduler = create_scheduler(config.resource.type.value)
+    modules: list[AbstractModule] = [master(config), optimizer(config), scheduler(config), TensorBoard(config)]
 
     time_s = time.time()
 
@@ -130,7 +128,7 @@ def main() -> None:  # pragma: no cover
             if best_id is not None and best_value is not None:
                 logger.info(f"Best result [{i}] : {dst}/{dict_result}/{best_id}.{extension_hp}")
                 logger.info(f"\tvalue : {best_value}")
-            
+
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
     logger.info("Done.")
 

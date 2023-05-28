@@ -2,12 +2,10 @@ from __future__ import annotations
 
 from typing import Type, Union
 
+from aiaccel.experimental.mpi.master.mpi_master import MpiMaster
 from aiaccel.master.abci_master import AbciMaster
 from aiaccel.master.local_master import LocalMaster
 from aiaccel.master.pylocal_master import PylocalMaster
-
-from aiaccel.experimental.mpi.master.mpi_master import MpiMaster
-
 
 # TODO: Replace typing.Type with builtins.type when aiaccel supports python>=3.9.
 MasterType = Type[Union[AbciMaster, LocalMaster, PylocalMaster, MpiMaster]]

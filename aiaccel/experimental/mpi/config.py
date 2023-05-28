@@ -69,6 +69,7 @@ class ResourceConifig:
     mpi_gpu_mode: bool
     mpi_bat_make_file: bool
 
+
 @dataclass
 class AbciConifig:
     group: str
