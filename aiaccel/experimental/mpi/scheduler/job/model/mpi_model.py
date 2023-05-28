@@ -43,7 +43,7 @@ class MpiModel(LocalModel):
             storage=obj.storage
         )
         obj.th_oh.start()
-        self.is_firsttime_called: bool = False
+        self.is_firsttime_called = False
 
     def conditions_result(self, obj: "Job") -> bool:
         if super().conditions_result(obj):

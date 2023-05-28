@@ -5,6 +5,7 @@ generic:
     function: ''
     batch_job_timeout: 600
     sleep_time: 0.01
+    is_ignore_warning: True
 
 resource:
     type: mpi
