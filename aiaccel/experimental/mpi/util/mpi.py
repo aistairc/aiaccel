@@ -43,7 +43,7 @@ class Mpi:
     gpu_max = 0
     gpu_list: dict[str, list[list[int]]] = {}
     tag = 0
-    trial_id_list: list[[int, int]] = []  # [[trial_id, tag]]
+    trial_id_list: list[list[int]] = []  # [[trial_id, tag]]
 
     @classmethod
     def prepare(cls, workspace_path: Path) -> None:
@@ -371,7 +371,7 @@ class MpiOutputHandler(Thread):
         self._storage: Storage | None = storage
         self._abort = False
 
-        self._returncode = None
+        self._returncode: int | None = None
         self._stdouts: list[str] = []
         self._stderrs: list[str] = []
         self._start_time: datetime.datetime | None = None
