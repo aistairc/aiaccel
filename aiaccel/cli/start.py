@@ -98,15 +98,16 @@ def main() -> None:  # pragma: no cover
     config_name = Path(args.config).name
     shutil.copy(Path(args.config), dst / config_name)
 
-    with open(workspace.final_result_file, "r") as f:
-        final_results: list[dict[str, Any]] = yaml.load(f, Loader=yaml.UnsafeLoader)
+    if os.path.exists(workspace.final_result_file):
+        with open(workspace.final_result_file, "r") as f:
+            final_results: list[dict[str, Any]] = yaml.load(f, Loader=yaml.UnsafeLoader)
 
-    for i, final_result in enumerate(final_results):
-        best_id = final_result["trial_id"]
-        best_value = final_result["result"][i]
-        if best_id is not None and best_value is not None:
-            logger.info(f"Best result [{i}] : {dst}/{dict_result}/{best_id}.{extension_hp}")
-            logger.info(f"\tvalue : {best_value}")
+        for i, final_result in enumerate(final_results):
+            best_id = final_result["trial_id"]
+            best_value = final_result["result"][i]
+            if best_id is not None and best_value is not None:
+                logger.info(f"Best result [{i}] : {dst}/{dict_result}/{best_id}.{extension_hp}")
+                logger.info(f"\tvalue : {best_value}")
 
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
     logger.info("Done.")
