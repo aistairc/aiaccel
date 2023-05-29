@@ -2,11 +2,10 @@
 import asyncio
 import os
 import time
+from datetime import datetime
 
 from aiaccel.common import goal_maximize
 from aiaccel.master import AbstractMaster
-from aiaccel.util import get_time_now_object
-
 from tests.base_test import BaseTest
 
 
@@ -102,7 +101,7 @@ class TestAbstractMaster(BaseTest):
 
         assert master.print_dict_state() is None
 
-        master.loop_start_time = get_time_now_object()
+        master.loop_start_time = datetime.now()
         assert master.print_dict_state() is None
 
         setup_hp_finished(1)

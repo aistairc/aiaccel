@@ -1,18 +1,19 @@
 from __future__ import annotations
 
+from datetime import datetime
 from importlib.util import module_from_spec, spec_from_file_location
 from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
 from subprocess import Popen
-from typing import Any, List
+from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import load_config
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.util import get_time_now
 from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
 from aiaccel.util.cast import cast_y
+from aiaccel.util.time_tools import format_datetime_to_str
 
 # These are for avoiding mypy-errors from initializer().
 # `global` does not work well.
@@ -27,7 +28,7 @@ class PylocalScheduler(AbstractScheduler):
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
         self.run = Run(self.config.config_path)
-        self.processes: List[Any] = []
+        self.processes: list[Any] = []
 
         Pool_ = Pool if self.num_node > 1 else ThreadPool
         self.pool = Pool_(self.num_node, initializer=initializer, initargs=(self.config.config_path,))
@@ -195,7 +196,7 @@ def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:
     """
     trial_id, xs = args
 
-    start_time = get_time_now()
+    start_time = format_datetime_to_str(datetime.now())
     set_logging_file_for_trial_id(workspace, trial_id)
 
     try:
@@ -211,6 +212,6 @@ def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:
     else:
         err = ""
 
-    end_time = get_time_now()
+    end_time = format_datetime_to_str(datetime.now())
 
     return trial_id, xs, y, err, start_time, end_time

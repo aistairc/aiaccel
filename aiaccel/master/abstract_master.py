@@ -8,7 +8,9 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.module import AbstractModule
-from aiaccel.util import create_yaml, get_time_now_object, get_time_string_from_object, str_to_logging_level
+from aiaccel.util.filesystem import create_yaml
+from aiaccel.util.logger import str_to_logging_level
+from aiaccel.util.time_tools import format_datetime_to_str
 
 
 class AbstractMaster(AbstractModule):
@@ -34,7 +36,7 @@ class AbstractMaster(AbstractModule):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config, "master")
-        self.start_time = get_time_now_object()
+        self.start_time = datetime.now()
         self.loop_start_time: datetime | None = None
         self.logger = logging.getLogger("root.master")
         self.logger.setLevel(logging.DEBUG)
@@ -62,7 +64,7 @@ class AbstractMaster(AbstractModule):
             IndexError: Causes when expire the count which cannot confirm to
                 run Optimizer and Scheduler.
         """
-        self.loop_start_time = get_time_now_object()
+        self.loop_start_time = datetime.now()
 
         return
 
@@ -86,7 +88,7 @@ class AbstractMaster(AbstractModule):
         Returns:
             None
         """
-        now = get_time_now_object()
+        now = datetime.now()
 
         if self.loop_start_time is None:
             end_estimated_time = "Unknown"
@@ -97,7 +99,7 @@ class AbstractMaster(AbstractModule):
                 one_loop_time = looping_time / self.hp_finished
                 hp_finished = self.hp_finished
                 finishing_time = now + (self.trial_number - hp_finished) * one_loop_time
-                end_estimated_time = get_time_string_from_object(finishing_time)
+                end_estimated_time = format_datetime_to_str(finishing_time)
             else:
                 end_estimated_time = "Unknown"
 

@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from aiaccel.util import get_time_delta, get_time_now_object, kill_process, retry
+from aiaccel.util.process import kill_process
+from aiaccel.util.retry import retry
 
 if TYPE_CHECKING:
     from aiaccel.scheduler import Job
+
+
+def _threshold_timeout(timeout_seconds: float) -> datetime:
+    return datetime.now() + timedelta(seconds=timeout_seconds)
 
 
 class AbstractModel(object):
@@ -79,7 +85,7 @@ class AbstractModel(object):
         """
         obj.to_file = self.get_runner_file(obj)
         obj.next_state = "running"
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.runner_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.runner_timeout)
         obj.threshold_retry = obj.runner_retry
 
     def before_runner_create(self, obj: "Job") -> None:
@@ -122,7 +128,7 @@ class AbstractModel(object):
             None
         """
         obj.next_state = "running"
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.running_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.running_timeout)
         obj.threshold_retry = obj.running_retry
 
     # JobRun
@@ -138,7 +144,7 @@ class AbstractModel(object):
             None
         """
         self.after_confirmed(obj)
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.job_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.job_timeout)
         obj.threshold_retry = obj.job_retry
 
     def before_job_submitted(self, obj: "Job") -> None:
@@ -207,7 +213,7 @@ class AbstractModel(object):
             None
         """
         self.after_confirmed(obj)
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.batch_job_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.batch_job_timeout)
         obj.threshold_retry = obj.result_retry
 
     def conditions_result(self, obj: "Job") -> bool:
@@ -240,7 +246,7 @@ class AbstractModel(object):
         self.after_confirmed(obj)
 
         obj.next_state = "finished"
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.finished_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.finished_timeout)
         obj.threshold_retry = obj.finished_retry
 
     def before_finished(self, obj: "Job") -> None:
@@ -271,7 +277,7 @@ class AbstractModel(object):
         """
 
         obj.next_state = "ready"
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.expire_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.expire_timeout)
         obj.threshold_retry = obj.expire_retry
 
     # Kill
@@ -286,7 +292,7 @@ class AbstractModel(object):
         Returns:
             None
         """
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.kill_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.kill_timeout)
         obj.threshold_retry = obj.kill_retry
 
     def before_kill_submitted(self, obj: "Job") -> None:
@@ -338,7 +344,7 @@ class AbstractModel(object):
             None
         """
         self.after_confirmed(obj)
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.batch_job_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.batch_job_timeout)
         obj.threshold_retry = obj.result_retry
 
     # Cancel
@@ -359,7 +365,7 @@ class AbstractModel(object):
         else:
             obj.logger.warning(f"Could not find any trial_id: {obj.trial_id}")
 
-        obj.threshold_timeout = get_time_now_object() + get_time_delta(obj.expire_timeout)
+        obj.threshold_timeout = _threshold_timeout(obj.expire_timeout)
         obj.threshold_retry = obj.expire_retry
 
     def change_state(self, obj: "Job") -> None:
