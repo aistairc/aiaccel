@@ -8,6 +8,6 @@ def format_datetime_to_str(d: datetime.datetime) -> str:
         d (datetime.datetime): A datetime object.
 
     Returns:
-        str: A time string from specified datetime object.
+        str: A time string in "%m/%d/%Y %H:%M:%S" format.
     """
     return d.strftime("%m/%d/%Y %H:%M:%S")
