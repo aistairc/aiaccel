@@ -72,8 +72,8 @@ class ParameterConfig:
     upper: Union[float, int]
     # initial: Optional[Union[None, float, int, str, List[Union[float, int]]]]  # Unions of containers are not supported
     initial: Optional[Any]
-    choices: Optional[List[Union[None, float, int, str]]]
-    sequence: Optional[List[Union[None, float, int, str]]]
+    choices: Optional[List[Any]]
+    sequence: Optional[List[Any]]
     log: Optional[bool]
     base: Optional[int]
     step: Optional[Union[int, float]]
