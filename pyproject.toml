@@ -70,7 +70,6 @@ dev = [
     "myst-parser",
     "pep8-naming",
     "pre-commit",
-    "pycodestyle",
     "sphinx",
     "sphinxcontrib-jquery",
     "sphinx-intl",
