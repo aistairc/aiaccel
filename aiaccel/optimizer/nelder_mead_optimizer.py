@@ -215,7 +215,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
         searched_params = self.nelder_mead_main()
 
         if searched_params is None:
-            return None
+            return []
 
         for p in searched_params:
             if p["vertex_id"] not in self._get_all_trial_id() and p["vertex_id"] not in self._get_current_names():
