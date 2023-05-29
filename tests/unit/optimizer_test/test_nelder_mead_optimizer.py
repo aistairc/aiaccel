@@ -89,7 +89,7 @@ class TestNelderMeadOptimizer(BaseTest):
         self.optimizer.generate_initial_parameter()
         with patch.object(self.optimizer, 'nelder_mead_main', return_value=[]):
             with patch.object(self.optimizer, 'parameter_pool', []):
-                assert self.optimizer.generate_parameter() == []
+                assert self.optimizer.generate_parameter() is None
 
     def test_generate_parameter2(
         self,
