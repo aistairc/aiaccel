@@ -18,8 +18,6 @@ classifiers = [
 dependencies = [
     "asciichartpy>=1.5.25,<2.0.0",
     "fasteners>=0.18,<1.0.0",
-    "importlib-resources>=5.12.0,<6.0.0",
-    "importlib-metadata>=6.1.0,<7.0.0",
     "numpy",
     "omegaconf",
     "optuna>=3.1.0,<4.0.0",
@@ -45,13 +43,9 @@ repository = "https://github.com/aistairc/aiaccel"
 [project.optional-dependencies]
 test = [
     "pytest",
-    "pytest-arraydiff",
-    "pytest-astropy",
     "pytest-cov",
     "pytest-subprocess",
-    "pytest-tornasync",
-    "pytest-trio",
-    "pytest-twisted",
+    "undecorated",
 ]
 github-actions = [
     "pytest-github-actions-annotate-failures",
@@ -70,6 +64,7 @@ dev = [
     "myst-parser",
     "pep8-naming",
     "pre-commit",
+    "pycodestyle",
     "sphinx",
     "sphinxcontrib-jquery",
     "sphinx-intl",
