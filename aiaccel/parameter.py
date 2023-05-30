@@ -151,7 +151,7 @@ class Parameter(AbstractParameter):
             raise TypeError(f"Invalid data_type: {data_type}")
 
 
-class HyperParameterConfiguration(object):
+class HyperParameterConfiguration:
     """A configuration of hyper parameters.
 
     Args:
@@ -192,7 +192,7 @@ class HyperParameterConfiguration(object):
         """
         return list(self.param.values())
 
-    def get_parameter_dict(self) -> dict[str, Any]:
+    def get_parameter_dict(self) -> dict[str, Parameter]:
         """Get a dictionary of hyper parameters.
 
         Returns:

@@ -6,16 +6,18 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import is_multi_objective
+from aiaccel.converted_parameter import ConvertedFloatParameter, ConvertedIntParameter, ConvertedParameterConfiguration
 from aiaccel.optimizer import AbstractOptimizer, NelderMead
-from aiaccel.parameter import FloatParameter, HyperParameterConfiguration, IntParameter, OrdinalParameter, Parameter
+from aiaccel.parameter import FloatParameter, IntParameter, OrdinalParameter
 
 
 class NelderMeadOptimizer(AbstractOptimizer):
     """An optimizer class with nelder mead algorithm.
 
     Args:
-        options (dict[str, str | int | bool]): A dictionary containing
-        command line options.
+        config (DictConfig): A DictConfig object which contains optimization
+            settings specified by the configuration file and the command line
+            options.
 
     Attributes:
         nelder_mead (NelderMead): A class object implementing Nelder-Mead
@@ -26,12 +28,15 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
+        self.params: ConvertedParameterConfiguration = ConvertedParameterConfiguration(
+            self.params, convert_log=True, convert_int=True, convert_choices=True, convert_sequence=True
+        )
         self.nelder_mead: Any = None
         self.parameter_pool: list[dict[str, Any]] = []
         self.order: list[Any] = []
 
         if is_multi_objective(self.config):
-            raise NotImplementedError("Nelder-Mead optimizer does not support multi-objective " "optimization.")
+            raise NotImplementedError("Nelder-Mead optimizer does not support multi-objective optimization.")
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
@@ -43,8 +48,6 @@ class NelderMeadOptimizer(AbstractOptimizer):
         initial_parameter = super().generate_initial_parameter()
         if self.nelder_mead is not None:
             return None
-
-        self.params = self.special_settings_when_using_ordinal(self.params)
 
         self.nelder_mead = NelderMead(
             self.params.get_parameter_list(), initial_parameters=initial_parameter, rng=self._rng
@@ -227,44 +230,23 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
         for param in self.params.get_parameter_list():
             i = [p["parameter_name"] for p in pool_p["parameters"]].index(param.name)
-            if isinstance(param, FloatParameter):
+            print(param)
+            if isinstance(param, (FloatParameter, ConvertedFloatParameter)):
                 value = float(pool_p["parameters"][i]["value"])
-            elif isinstance(param, IntParameter):
+            elif isinstance(param, IntParameter, ConvertedIntParameter):
                 value = int(pool_p["parameters"][i]["value"])
             elif isinstance(param, OrdinalParameter):
                 index = int(pool_p["parameters"][i]["value"])
                 value = param.sequence[index]
             else:
                 raise TypeError(
-                    "Invalid parameter type for NelderMeadSearch."
-                    f"FLOAT or INT is required, but {param.type} is given."
+                    "Invalid parameter type for NelderMeadSearch. "
+                    f"FLOAT or INT is required, but {type(param)} is given."
                 )
 
             new_params.append({"parameter_name": param.name, "type": param.type, "value": value})
 
         self.update_ready_parameter_name(pool_p, self.trial_id.get())
         self.order.append({"vertex_id": self.trial_id.get(), "parameters": new_params})
-
-        return new_params
-
-    def special_settings_when_using_ordinal(self, params: HyperParameterConfiguration) -> HyperParameterConfiguration:
-        """
-        When using ordinal types in NelderMead, the array index is predicted.
-        https://github.com/aistairc/aiaccel/issues/175
-        """
-        new_params = copy.deepcopy(params)
-        for param in params.get_parameter_list():
-            if isinstance(param, OrdinalParameter):
-                if param.name not in new_params.param.keys():
-                    assert False
-                new_params.param[param.name] = Parameter(
-                    {
-                        "name": param.name,
-                        "type": "ordinal",
-                        "lower": 0,
-                        "upper": len(param.sequence) - 1,
-                        "sequence": param.sequence,
-                    }
-                )
 
         return new_params

@@ -130,7 +130,6 @@ class NelderMead(object):
             [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
             for num_of_initials in range(self.n_dim + 1)
         ]
-
         return np.array(initial_values)
 
     def _create_initial_value(self, initial_parameters: Any, dim: int, num_of_initials: int) -> Any:
@@ -139,23 +138,33 @@ class NelderMead(object):
                 return self._rng.randint(len(self.params[dim].sequence))
             return self.params[dim].sample(rng=self._rng)["value"]
 
-        values = initial_parameters[dim]["value"]
-        if isinstance(values, (int, float, np.integer, np.floating)):
-            values = [values]
+        if not isinstance(initial_parameters[dim]["value"], (list, ListConfig)):
+            initial_parameters[dim]["value"] = [initial_parameters[dim]["value"]]
 
-        if not isinstance(values, (list, ListConfig)):
-            raise TypeError("Default parameter should be set as list.")
+        if num_of_initials < len(initial_parameters[dim]["value"]):
+            val = initial_parameters[dim]["value"][num_of_initials]
+            return val
 
-        if num_of_initials < len(values):
-            value = values[num_of_initials]
-            if isinstance(self.params[dim], OrdinalParameter):
-                return np.abs(np.array(self.params[dim].sequence) - value).argmin()
-            return value
         else:
-            value = self.params[dim].sample(rng=self._rng)["value"]
-            if isinstance(self.params[dim], OrdinalParameter):
-                return np.abs(np.array(self.params[dim].sequence) - value).argmin()
-            return value
+            val = self.params[dim].sample(rng=self._rng)["value"]
+            return val
+
+        # if initial_parameters is not None:
+        #     if isinstance(initial_parameters[dim]["value"], (int, float, np.integer, np.floating)):
+        #         initial_parameters[dim]["value"] = [initial_parameters[dim]["value"]]
+
+        #     if not isinstance(initial_parameters[dim]["value"], (list, ListConfig)):
+        #         raise TypeError("Default parameter should be set as list.")
+
+        #     if num_of_initials < len(initial_parameters[dim]["value"]):
+        #         val = initial_parameters[dim]["value"][num_of_initials]
+        #         return val
+        #     else:
+        #         val = self.params[dim].sample(rng=self._rng)["value"]
+        #         return val
+        # else:
+        #     val = self.params[dim].sample(rng=self._rng)["value"]
+        #     return val
 
     def _add_executing(self, y: np.ndarray[Any, Any], index: int | None = None) -> None:
         """Add a parameter set to an execution candidate.
