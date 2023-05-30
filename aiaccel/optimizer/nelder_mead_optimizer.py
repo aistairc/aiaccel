@@ -233,7 +233,7 @@ class NelderMeadOptimizer(AbstractOptimizer):
             print(param)
             if isinstance(param, (FloatParameter, ConvertedFloatParameter)):
                 value = float(pool_p["parameters"][i]["value"])
-            elif isinstance(param, IntParameter, ConvertedIntParameter):
+            elif isinstance(param, (IntParameter, ConvertedIntParameter)):
                 value = int(pool_p["parameters"][i]["value"])
             elif isinstance(param, OrdinalParameter):
                 index = int(pool_p["parameters"][i]["value"])
