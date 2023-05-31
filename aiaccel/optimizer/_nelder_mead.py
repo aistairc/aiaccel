@@ -149,23 +149,6 @@ class NelderMead(object):
             val = self.params[dim].sample(rng=self._rng)["value"]
             return val
 
-        # if initial_parameters is not None:
-        #     if isinstance(initial_parameters[dim]["value"], (int, float, np.integer, np.floating)):
-        #         initial_parameters[dim]["value"] = [initial_parameters[dim]["value"]]
-
-        #     if not isinstance(initial_parameters[dim]["value"], (list, ListConfig)):
-        #         raise TypeError("Default parameter should be set as list.")
-
-        #     if num_of_initials < len(initial_parameters[dim]["value"]):
-        #         val = initial_parameters[dim]["value"][num_of_initials]
-        #         return val
-        #     else:
-        #         val = self.params[dim].sample(rng=self._rng)["value"]
-        #         return val
-        # else:
-        #     val = self.params[dim].sample(rng=self._rng)["value"]
-        #     return val
-
     def _add_executing(self, y: np.ndarray[Any, Any], index: int | None = None) -> None:
         """Add a parameter set to an execution candidate.
 
