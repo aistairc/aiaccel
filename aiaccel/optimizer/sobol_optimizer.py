@@ -26,11 +26,11 @@ class SobolOptimizer(AbstractOptimizer):
 
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
+        self.params: ConvertedParameterConfiguration = ConvertedParameterConfiguration(self.params)
         self.num_generated_params = 0
         self.sampler = qmc.Sobol(
             d=len(self.params.get_parameter_list()), scramble=self.config.optimize.sobol_scramble, seed=self._rng
         )
-        self.params: ConvertedParameterConfiguration = ConvertedParameterConfiguration(self.params)
 
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
