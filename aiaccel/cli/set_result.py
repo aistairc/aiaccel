@@ -83,6 +83,8 @@ def main() -> None:
     if args.error == "":
         del contents["error"]
 
+    contents["result"] = [None if res == "None" else res for res in contents["result"]]
+
     print(contents)
 
     create_yaml(args.file, contents)
