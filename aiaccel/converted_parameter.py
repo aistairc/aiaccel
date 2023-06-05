@@ -100,7 +100,7 @@ class WeightOfChoice(ConvertedParameter):
         self.choice_index = choice_index
         self.original_name = self.name
         self.name = _make_weight_name(self.original_name, choice_index)
-        self.choices = param.choices if param.type.lower() == "categorical" else param.sequence
+        self.choices = list(param.choices if param.type.lower() == "categorical" else param.sequence)
         self.lower = 0.0
         self.upper = 1.0
         if isinstance(param.initial, Iterable) and not isinstance(param.initial, str):  # For Nelder-Mead
@@ -208,7 +208,8 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
                         converted_params[converted_param.name] = converted_param
                     logger = getLogger("root.optimizer")
                     logger.warning(
-                        f"The choices of {param.name} is converted to {len(param.choices)} float parameters."
+                        f"The choices of {param.name} ({param.type}) is converted to "
+                        f"{len(param.choices)} float parameters."
                     )
                 else:
                     converted_params[param.name] = ConvertedCategoricalParameter(param, convert_choices=convert_choices)
@@ -219,7 +220,8 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
                         converted_params[converted_param.name] = converted_param
                     logger = getLogger("root.optimizer")
                     logger.warning(
-                        f"The sequence of {param.name} is converted to {len(param.sequence)} float parameters."
+                        f"The sequence of {param.name} ({param.type}) is converted to "
+                        f"{len(param.sequence)} float parameters."
                     )
                 else:
                     converted_params[param.name] = ConvertedOrdinalParameter(param, convert_sequence=convert_sequence)
@@ -377,4 +379,8 @@ def _decode_weight_distribution(param: WeightOfChoice, weight_distribution: list
 
 
 def _make_structured_value(param: ConvertedParameter, value: Any) -> dict[str, Any]:
-    return {"parameter_name": param.name, "type": param.type, "value": value}
+    return {
+        "parameter_name": param.original_name if isinstance(param, WeightOfChoice) else param.name,
+        "type": param.type,
+        "value": value,
+    }
