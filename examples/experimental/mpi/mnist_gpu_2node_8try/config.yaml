@@ -1,0 +1,45 @@
+generic:
+  workspace: "./work"
+  job_command: "python user.py"
+  python_file: "./user.py"
+  function: "main"
+  batch_job_timeout: 600
+
+resource:
+  type: "mpi"
+  #type: "local"
+  #type: "ABCI"
+  #type: "python_local"
+  num_node: 8
+  mpi_npernode: 4
+  mpi_bat_rt_num: 2
+  mpi_bat_h_rt: "2:00:00"
+  mpi_bat_root_dir: "~/mpi_work"
+  mpi_bat_venv_dir: "./mpienv"
+  mpi_bat_aiaccel_dir: "./aiaccel"
+  mpi_bat_config_dir: "./mnist_gpu_2node_8try"
+  mpi_bat_file: "./qsub.sh"
+  mpi_hostfile: "./hostfile"
+  mpi_gpu_mode: True
+  mpi_bat_make_file: True
+
+ABCI:
+  group: "[your_group_id]"
+  job_script_preamble: "./job_script_preamble.sh"
+  job_execution_options: ""
+
+optimize:
+  #search_algorithm: "aiaccel.optimizer.NelderMeadOptimizer"
+  search_algorithm: "aiaccel.optimizer.RandomOptimizer"
+  #search_algorithm: "aiaccel.optimizer.SobolOptimizer"
+  #search_algorithm: "aiaccel.optimizer.GridOptimizer"
+  #search_algorithm: "aiaccel.optimizer.TpeOptimizer"
+  goal: "minimize"
+  trial_number: 8
+  rand_seed: 42
+  parameters:
+    -
+      name: "x1"
+      type: "uniform_float"
+      lower: 0.1
+      upper: 1.9
