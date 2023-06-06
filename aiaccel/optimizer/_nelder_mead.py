@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 from omegaconf.listconfig import ListConfig
 
-from aiaccel.parameter import HyperParameter
+from aiaccel.parameter import OrdinalParameter, Parameter
 from aiaccel.util import generate_random_name
 
 STATES = [
@@ -28,7 +28,7 @@ class NelderMead(object):
     """A class implementing Nelder-Mead method.
 
     Args:
-        params (list[HyperParameter]): A list of hyper parameter objects.
+        params (list[Parameter]): A list of hyper parameter objects.
         iteration (float | None, optional): A max iteration counts.
             Defaults to float('inf').
         coef (dict | None, optional): A coefficient values. Defaults to None.
@@ -44,7 +44,7 @@ class NelderMead(object):
         coef (dict[str, float]): A dictionary of coefficients.
         f (np.ndarray): A list of evaluated parameter results.
         logger (logging.Logger): A logger object.
-        params (list[HyperParameter]): A list of hyper parameters.
+        params (list[Parameter]): A list of hyper parameters.
         storage (dict[str, float | None]): A dictionary to store temporal
             calculation results.
         y (np.ndarray): A list of current evaluated parameters.
@@ -75,7 +75,7 @@ class NelderMead(object):
 
     def __init__(
         self,
-        params: list[HyperParameter],
+        params: list[Parameter],
         iteration: float = float("inf"),
         coef: dict[str, Any] | None = None,
         maximize: bool | None = False,
@@ -133,19 +133,18 @@ class NelderMead(object):
         return np.array(initial_values)
 
     def _create_initial_value(self, initial_parameters: Any, dim: int, num_of_initials: int) -> Any:
-        if initial_parameters is not None:
-            if isinstance(initial_parameters[dim]["value"], (int, float, np.integer, np.floating)):
-                initial_parameters[dim]["value"] = [initial_parameters[dim]["value"]]
+        if initial_parameters is None:
+            if isinstance(self.params[dim], OrdinalParameter):
+                return self._rng.randint(len(self.params[dim].sequence))
+            return self.params[dim].sample(rng=self._rng)["value"]
 
-            if not isinstance(initial_parameters[dim]["value"], (list, ListConfig)):
-                raise TypeError("Default parameter should be set as list.")
+        if not isinstance(initial_parameters[dim]["value"], (list, ListConfig)):
+            initial_parameters[dim]["value"] = [initial_parameters[dim]["value"]]
 
-            if num_of_initials < len(initial_parameters[dim]["value"]):
-                val = initial_parameters[dim]["value"][num_of_initials]
-                return val
-            else:
-                val = self.params[dim].sample(rng=self._rng)["value"]
-                return val
+        if num_of_initials < len(initial_parameters[dim]["value"]):
+            val = initial_parameters[dim]["value"][num_of_initials]
+            return val
+
         else:
             val = self.params[dim].sample(rng=self._rng)["value"]
             return val

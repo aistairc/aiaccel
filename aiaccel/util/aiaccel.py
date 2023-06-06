@@ -8,8 +8,15 @@ from pathlib import Path
 from typing import Any
 
 from aiaccel.config import load_config
-from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.parameter import (
+    CategoricalParameter,
+    FloatParameter,
+    HyperParameterConfiguration,
+    IntParameter,
+    OrdinalParameter,
+)
 from aiaccel.util import cast_y, get_time_now
+from aiaccel.util.data_type import str_or_float_or_int
 
 
 class CommandLineArgs:
@@ -30,14 +37,14 @@ class CommandLineArgs:
             self.parameters_config = HyperParameterConfiguration(self.config.optimize.parameters)
 
             for p in self.parameters_config.get_parameter_list():
-                if p.type.lower() == "float":
+                if isinstance(p, FloatParameter):
                     self.parser.add_argument(f"--{p.name}", type=float)
-                elif p.type.lower() == "int":
+                elif isinstance(p, IntParameter):
                     self.parser.add_argument(f"--{p.name}", type=int)
-                elif p.type.lower() == "categorical":
-                    self.parser.add_argument(f"--{p.name}", type=str)
-                elif p.type.lower() == "ordinal":
-                    self.parser.add_argument(f"--{p.name}", type=float)
+                elif isinstance(p, CategoricalParameter):
+                    self.parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
+                elif isinstance(p, OrdinalParameter):
+                    self.parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
                 else:
                     raise ValueError(f"Unknown parameter type: {p.type}")
             self.args = self.parser.parse_known_args()[0]
@@ -46,7 +53,7 @@ class CommandLineArgs:
             for unknown_arg in unknown_args_list:
                 if unknown_arg.startswith("--"):
                     name = unknown_arg.replace("--", "")
-                    self.parser.add_argument(f"--{name}", type=float)
+                    self.parser.add_argument(f"--{name}", type=str_or_float_or_int)
             self.args = self.parser.parse_known_args()[0]
 
     def get_xs_from_args(self) -> dict[str, Any]:
