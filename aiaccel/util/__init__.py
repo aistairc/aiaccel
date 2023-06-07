@@ -1,3 +1,4 @@
+from aiaccel.parameter import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter, Parameter
 from aiaccel.util.buffer import Buffer
 from aiaccel.util.cast import cast_y
 from aiaccel.util.easy_visualizer import EasyVisualizer
@@ -63,4 +64,9 @@ __all__ = [
     "retry",
     "str_to_logging_level",
     "subprocess_ps",
+    "CategoricalParameter",
+    "FloatParameter",
+    "IntParameter",
+    "OrdinalParameter",
+    "Parameter",
 ]
