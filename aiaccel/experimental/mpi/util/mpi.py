@@ -15,7 +15,7 @@ from mpi4py.futures import MPIPoolExecutor
 from mpi4py.MPI import COMM_WORLD, Get_processor_name
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import resource_type_abci
+from aiaccel.common import datetime_format, resource_type_abci
 from aiaccel.experimental.mpi.common import (
     dict_experimental,
     dict_mpi,
@@ -25,7 +25,6 @@ from aiaccel.experimental.mpi.common import (
 )
 from aiaccel.experimental.mpi.util.error import MpiError
 from aiaccel.experimental.mpi.util.mpi_log import MpiLog
-from aiaccel.util.time_tools import format_datetime_to_str
 
 if TYPE_CHECKING:
     from aiaccel.scheduler import AbstractScheduler
@@ -411,12 +410,12 @@ class MpiOutputHandler(Thread):
     def get_start_time(self) -> str | None:
         if self._start_time is None:
             return ""
-        return format_datetime_to_str(self._start_time)
+        return self._start_time.strftime(datetime_format)
 
     def get_end_time(self) -> str | None:
         if self._end_time is None:
             return ""
-        return format_datetime_to_str(self._end_time)
+        return self._end_time.strftime(datetime_format)
 
     def get_returncode(self) -> int | None:
         return self._returncode

@@ -8,9 +8,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from aiaccel.common import datetime_format
 from aiaccel.experimental.mpi.config import load_config
 from aiaccel.parameter import HyperParameterConfiguration
-from aiaccel.util import cast_y, format_datetime_to_str
+from aiaccel.util import cast_y
 
 
 class CommandLineArgs:
@@ -139,7 +140,7 @@ class Run:
         y = None
         err = ""
 
-        start_time = format_datetime_to_str(datetime.now())
+        start_time = datetime.now().strftime(datetime_format)
 
         try:
             y = cast_y(func(xs), y_data_type)
@@ -149,7 +150,7 @@ class Run:
         else:
             err = ""
 
-        end_time = format_datetime_to_str(datetime.now())
+        end_time = datetime.now().strftime(datetime_format)
 
         return xs, y, err, start_time, end_time
 

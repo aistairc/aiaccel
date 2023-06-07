@@ -9,11 +9,11 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
+from aiaccel.common import datetime_format
 from aiaccel.config import load_config
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
 from aiaccel.util.cast import cast_y
-from aiaccel.util.time_tools import format_datetime_to_str
 
 # These are for avoiding mypy-errors from initializer().
 # `global` does not work well.
@@ -196,7 +196,7 @@ def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:
     """
     trial_id, xs = args
 
-    start_time = format_datetime_to_str(datetime.now())
+    start_time = datetime.now().strftime(datetime_format)
     set_logging_file_for_trial_id(workspace, trial_id)
 
     try:
@@ -212,6 +212,6 @@ def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:
     else:
         err = ""
 
-    end_time = format_datetime_to_str(datetime.now())
+    end_time = datetime.now().strftime(datetime_format)
 
     return trial_id, xs, y, err, start_time, end_time

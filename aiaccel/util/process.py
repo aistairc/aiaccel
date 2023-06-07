@@ -10,7 +10,7 @@ from typing import Any
 
 import psutil
 
-from aiaccel.util.time_tools import format_datetime_to_str
+from aiaccel.common import datetime_format
 
 
 def exec_runner(command: list[Any]) -> Popen[bytes]:
@@ -169,12 +169,12 @@ class OutputHandler(threading.Thread):
     def get_start_time(self) -> str | None:
         if self._start_time is None:
             return ""
-        return format_datetime_to_str(self._start_time)
+        return self._start_time.strftime(datetime_format)
 
     def get_end_time(self) -> str | None:
         if self._end_time is None:
             return ""
-        return format_datetime_to_str(self._end_time)
+        return self._end_time.strftime(datetime_format)
 
     def get_returncode(self) -> int | None:
         return self._proc.poll()
