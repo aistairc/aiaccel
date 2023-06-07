@@ -1,12 +1,10 @@
 import pathlib
-
 from unittest.mock import patch
 
+from aiaccel.cli import CsvWriter
 from aiaccel.cli.report import main
 from aiaccel.config import load_config
-from aiaccel.cli import CsvWriter
 from aiaccel.workspace import Workspace
-
 
 ws = Workspace("test_work")
 config_path = pathlib.Path('tests/test_data/config.json')

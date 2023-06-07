@@ -98,6 +98,7 @@ def test_create_distributions(data_dir):
     assert type(dist) is dict
 
     config = load_config(data_dir / 'config_tpe_invalid_type.json')
-    params = HyperParameterConfiguration(config.optimize.parameters)
+
     with pytest.raises(TypeError):
+        params = HyperParameterConfiguration(config.optimize.parameters)
         create_distributions(params)

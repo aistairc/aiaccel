@@ -9,7 +9,13 @@ from omegaconf.dictconfig import DictConfig
 from optuna.storages._rdb import models
 
 from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.parameter import (
+    CategoricalParameter,
+    FloatParameter,
+    HyperParameterConfiguration,
+    IntParameter,
+    OrdinalParameter,
+)
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):
@@ -226,7 +232,7 @@ def create_distributions(
             parameter configuration object.
 
     Raises:
-        ValueError: Occurs when parameter type is other than 'float', 'int',
+        ValueError: Occurs when parameter type is other than 'uniform_float',uniform_int',
             'categorical', or 'ordinal'.
 
     Returns:
@@ -235,16 +241,16 @@ def create_distributions(
     distributions: dict[str, Any] = {}
 
     for p in parameters.get_parameter_list():
-        if p.type.lower() == "float":
+        if isinstance(p, FloatParameter):
             distributions[p.name] = optuna.distributions.FloatDistribution(p.lower, p.upper, log=p.log)
 
-        elif p.type.lower() == "int":
+        elif isinstance(p, IntParameter):
             distributions[p.name] = optuna.distributions.IntDistribution(p.lower, p.upper, log=p.log)
 
-        elif p.type.lower() == "categorical":
+        elif isinstance(p, CategoricalParameter):
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
 
-        elif p.type.lower() == "ordinal":
+        elif isinstance(p, OrdinalParameter):
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
 
         else:
