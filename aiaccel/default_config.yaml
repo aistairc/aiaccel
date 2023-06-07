@@ -9,7 +9,7 @@ generic:
 
 resource:
     type: local
-    num_node: 1
+    num_workers: 1
 
 ABCI:
     group: '[group]'

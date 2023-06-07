@@ -122,7 +122,7 @@ class TpeOptimizer(AbstractOptimizer):
         if (not self.is_startup_trials()) and (len(self.parameter_pool) >= 1):
             return None
 
-        if len(self.parameter_pool) >= self.config.resource.num_node:
+        if len(self.parameter_pool) >= self.config.resource.num_workers:
             return None
 
         new_params: list[dict[str, Any]] = []

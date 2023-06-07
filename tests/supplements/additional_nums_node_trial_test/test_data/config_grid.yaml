@@ -62,5 +62,5 @@ optimize:
   search_algorithm: aiaccel.optimizer.GridOptimizer
   trial_number: 3
 resource:
-  num_node: 2
+  num_workers: 2
   type: python_local

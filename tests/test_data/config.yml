@@ -37,10 +37,10 @@ job_setting:
 resource:
   # local settings
   type: "local"
-  num_node: 3
+  num_workers: 3
   # ABCI settings
   #type: "abci"
-  # num_node is the number how many ready files are allocated at a moment.
-  #num_node: 4
+  # num_workers is the number how many ready files are allocated at a moment.
+  #num_workers: 4
 ABCI:
   group: "[group]"

@@ -29,19 +29,19 @@ class AdditionalNumsNodeTrialTest(BaseTest):
         self.python_file = self.test_data_dir.joinpath(self.python_program)
 
     @pytest.mark.parametrize(
-        'num_node, num_trial',
+        'num_workers, num_trial',
         [
-            (2, 10),  # num_node < num_grid < num_trials
-            (5, 10),  # num_grid < num_node < num_trials
-            (10, 5),  # num_grid < num_trials < num_node
-            (10, 2),  # num_trials < num_grid < num_node
-            (3, 2),   # num_trials < num_node < num_grid
-            (2, 3)    # num_node < num_trials < num_grid
+            (2, 10),  # num_workers < num_grid < num_trials
+            (5, 10),  # num_grid < num_workers < num_trials
+            (10, 5),  # num_grid < num_trials < num_workers
+            (10, 2),  # num_trials < num_grid < num_workers
+            (3, 2),   # num_trials < num_workers < num_grid
+            (2, 3)    # num_workers < num_trials < num_grid
         ]
     )
     def test_run(
         self,
-        num_node: int,
+        num_workers: int,
         num_trial: int,
         work_dir: Path,
         create_tmp_config: Callable[[Path, Path]]
@@ -51,7 +51,7 @@ class AdditionalNumsNodeTrialTest(BaseTest):
         )
         with open(config_file, 'r') as f:
             cfg = yaml.load(f, Loader=yaml.SafeLoader)
-        cfg['resource']['num_node'] = num_node
+        cfg['resource']['num_workers'] = num_workers
         cfg['optimize']['trial_number'] = num_trial
         with open(config_file, 'w') as f:
             yaml.dump(cfg, f, default_flow_style=False)

@@ -1,6 +1,7 @@
+import omegaconf
+
 from aiaccel.config import load_config
 from tests.base_test import BaseTest
-import omegaconf
 
 
 class TestConfig(BaseTest):
@@ -11,7 +12,7 @@ class TestConfig(BaseTest):
         config = load_config(str(config_path))
         assert type(config) is omegaconf.dictconfig.DictConfig
         assert type(config.generic.workspace) is str
-        assert type(config.resource.num_node) is int
+        assert type(config.resource.num_workers) is int
         assert type(config.optimize.parameters) is omegaconf.listconfig.ListConfig
         assert type(config.optimize.parameters[0].lower) is float
 

@@ -161,7 +161,7 @@ msgid "**type** - 実行環境を指定します。 `ABCI` 、または `local` 
 msgstr ""
 
 #: ../../source/user_guide/basic_usage.md:125
-msgid "**num_node** - 使用するノード数を指定します。ローカルの場合はCPUコア数を指定してください。"
+msgid "**num_workers** - 使用するノード数を指定します。ローカルの場合はCPUコア数を指定してください。"
 msgstr ""
 
 #: ../../source/user_guide/basic_usage.md:127

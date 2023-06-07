@@ -144,7 +144,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             int: Pool size.
         """
-        max_pool_size = self.config.resource.num_node
+        max_pool_size = self.config.resource.num_workers
         hp_running = self.storage.get_num_running()
         hp_ready = self.storage.get_num_ready()
         available_pool_size = max_pool_size - hp_running - hp_ready

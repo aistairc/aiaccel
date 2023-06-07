@@ -108,7 +108,7 @@ msgid "**type** - 実行環境を指定します．ABCI 環境で実行するた
 msgstr ""
 
 #: ../../source/examples/abci_nelder_mead.md:57
-msgid "**num_node** - 使用するノード数を指定します．"
+msgid "**num_workers** - 使用するノード数を指定します．"
 msgstr ""
 
 #: ../../source/examples/abci_nelder_mead.md:58

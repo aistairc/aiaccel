@@ -73,7 +73,7 @@ class TestAbstractOptimizer(BaseTest):
 
     def test_get_pool_size(self, monkeypatch: pytest.MonkeyPatch) -> None:
         with monkeypatch.context() as m:
-            self.optimizer.config.resource.num_node = 10
+            self.optimizer.config.resource.num_workers = 10
             m.setattr(self.optimizer.storage, 'get_num_running', lambda: 1)
             m.setattr(self.optimizer.storage, 'get_num_ready', lambda: 1)
             assert self.optimizer.get_pool_size() == 10 - 1 - 1

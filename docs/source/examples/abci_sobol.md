@@ -41,11 +41,11 @@ generic:
 ```yaml
 resource:
   type: "abci"
-  num_node: 4
+  num_workers: 4
 ```
 
 - **type** - 実行環境を指定します．ABCI 環境で実行するためには `"abci"` で設定します．
-- **num_node** - 使用するノード数を指定します．
+- **num_workers** - 使用するノード数を指定します．
 
 
 #### ABCI

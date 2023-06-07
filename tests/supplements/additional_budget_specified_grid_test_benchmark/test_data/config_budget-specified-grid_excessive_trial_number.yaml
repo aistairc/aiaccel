@@ -7,7 +7,7 @@ generic:
 
 resource:
   type: python_local
-  num_node: 4
+  num_workers: 4
 
 abci:
   group: '[group]'

@@ -176,7 +176,7 @@ aiaccel で wrapper プログラムを最適化させる場合は，`job_command
 ```yaml
 resource:
   type: "local"
-  num_node: 4
+  num_workers: 4
 ```
 wrapper プログラムを最適化する場合，指定可能な実行タイプは `"local"` または `"ABCI"` です．
 `"python_local"` は選べません．

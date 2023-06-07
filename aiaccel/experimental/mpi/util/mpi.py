@@ -287,7 +287,7 @@ class Mpi:
         rt_type = config.resource.mpi_bat_rt_type
         rt_num = config.resource.mpi_bat_rt_num
         h_rt = config.resource.mpi_bat_h_rt
-        num_node = config.resource.num_node
+        num_workers = config.resource.num_workers
         root_path = Path(config.resource.mpi_bat_root_dir)
         venv_dir = str(root_path / config.resource.mpi_bat_venv_dir)
         aiaccel_dir = str(root_path / config.resource.mpi_bat_aiaccel_dir)
@@ -312,12 +312,12 @@ cd {config_dir}
 
 python -m aiaccel.experimental.mpi.cli.start --config config.yaml --make_hostfile
 
-mpiexec -n {num_node+1} -hostfile {hostfile} \
+mpiexec -n {num_workers+1} -hostfile {hostfile} \
 python -m mpi4py.futures -m aiaccel.experimental.mpi.cli.start --config config.yaml --clean --from_mpi_bat
 
 deactivate
 """
-        # 'mpiexec -n {num_node+1} -npernode {mpi_npernode}'
+        # 'mpiexec -n {num_workers+1} -npernode {mpi_npernode}'
         qsub_file_path = Path(os_path.expanduser(str(qsub_file_path)))
         qsub_file_path.write_text(qsub_str)
 
