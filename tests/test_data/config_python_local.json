@@ -11,7 +11,7 @@
   },
   "resource": {
     "type": "python_local",
-    "num_node": 10
+    "num_workers": 10
   },
   "ABCI": {
     "job_script_preamble": "wrapper_abci.sh",

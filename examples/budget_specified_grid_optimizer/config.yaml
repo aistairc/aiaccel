@@ -5,7 +5,7 @@ generic:
 
 resource:
   type: "local"
-  num_node: 4
+  num_workers: 4
 
 # ABCI:
 #   group: "[group]"

@@ -10,7 +10,7 @@ resource:
   #type: "local"
   #type: "ABCI"
   #type: "python_local"
-  num_node: 8
+  num_workers: 8
   mpi_npernode: 4
   mpi_bat_rt_num: 2
   mpi_bat_h_rt: "2:00:00"

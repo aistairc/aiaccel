@@ -50,11 +50,11 @@ generic:
 ```yaml
 resource:
   type: "abci"
-  num_node: 6
+  num_workers: 6
 ```
 
 - **type** - 実行環境を指定します．ABCI 環境で実行するためには `"abci"` で設定します．
-- **num_node** - 使用するノード数を指定します．
+- **num_workers** - 使用するノード数を指定します．
     - 参考 - 今回の例では，最適化アルゴリズムが `NelderMeadOptimizer`，パラメータ数が 5 のため，
     同時に計算されるシンプレックス頂点の最大数である `6` にノード数を設定します．
 

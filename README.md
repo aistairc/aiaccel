@@ -97,7 +97,7 @@ This tutorial describes how to run examples/sphere on ABCI.
     ```yaml
     resource:
         type: "abci"
-        num_node: 4
+        num_workers: 4
     ```
 
 4. Run on an (interactive) job
