@@ -52,22 +52,23 @@ class Plotter:
 
         plot_data = []
         captions = []
-        num_objectives = 0
-        for goal_, objectives_ in zip(self.goals, objectives):
+        for objective_id, (goal_, objectives_) in enumerate(zip(self.goals, objectives)):
             current_best = float("inf") if goal_ == "minimize" else float("-inf")
             comparator = min if goal_ == "minimize" else max
             best_trajectory = []
-            for objective in objectives_:
-                current_best = comparator(current_best, objective)
+            update_id = 0
+            for trial_id, objective in enumerate(objectives_):
+                if comparator(current_best, objective) == objective:
+                    current_best = objective
+                    update_id = trial_id
                 best_trajectory.append(current_best)
             plot_data.append(objectives_)
             plot_data.append(best_trajectory)
-            captions.append(f"objective ({num_objectives})")
-            captions.append(f"best value ({num_objectives})")
-            num_objectives += 1
+            captions.append(f"objective[{objective_id}]")
+            captions.append(f"best value[{objective_id}] (final={best_trajectory[-1]}@trial_id={update_id})")
 
         self.cplt.caption(captions)
-        self.cplt.line_plot(*plot_data)
+        self.cplt.line_plot(plot_data)
 
 
 def main() -> None:  # pragma: no cover

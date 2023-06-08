@@ -116,22 +116,21 @@ class EasyVisualizer:
             else:
                 raise Exception
 
-    def caption(self, *labels: Any) -> None:
+    def caption(self, labels: list[str]) -> None:
         """Set the any caption.
 
         Args:
             labels (tuple):
         """
-        labels = list(labels)[0]
-        for i in range(len(labels)):
-            color = self.line_colors[self.color_priority[i]]
-            print(f"{color}{list(labels)[i]}{reset}")
+        for label_id, label in enumerate(labels):
+            color = self.line_colors[self.color_priority[label_id]]
+            print(f"{color}{label}{reset}")
 
-    def line_plot(self, *data: list[float]) -> None:
+    def line_plot(self, data: list[list[float]]) -> None:
         """Plot the any data.
 
         Args:
-            data (tuple): Target data.
+            data (list[list[float]]): Target data.
 
         Note:
             data = ([plot_data_1[], plot_data_2[],...)
@@ -167,7 +166,6 @@ class EasyVisualizer:
                 return
             self.plot_data.append(data_[max(len(data_) - plot_width_max, 0) :])
 
-        print(len(self.plot_data))
         print(plot(series=self.plot_data, cfg=self.plot_config))
 
     def sort(self, data: list[Any], goal: str) -> list[Any] | None:
