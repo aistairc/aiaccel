@@ -124,7 +124,7 @@ generic:
 
 resource:
   type: "mpi"
-  num_node: 1
+  num_workers: 1
   mpi_npernode: 40
   mpi_bat_rt_num: 1
   mpi_bat_h_rt: "2:00:00"
@@ -321,7 +321,7 @@ generic:
 
 resource:
   type: "mpi"
-  num_node: 8
+  num_workers: 8
   mpi_npernode: 4
   mpi_bat_rt_num: 2
   mpi_bat_h_rt: "2:00:00"

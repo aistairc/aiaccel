@@ -50,12 +50,12 @@ class TestCreateAbciBatchFile(BaseTest):
             'parameters': [
                 {
                     'parameter_name': 'x1',
-                    'type': 'FLOAT',
+                    'type': 'uniform_float',
                     'value': -4.716525234779937
                 },
                 {
                     'parameter_name': 'x2',
-                    'type': 'FLOAT',
+                    'type': 'uniform_float',
                     'value': 123456
                 }
             ],

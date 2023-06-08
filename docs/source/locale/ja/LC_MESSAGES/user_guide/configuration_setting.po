@@ -108,7 +108,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/user_guide/configuration_setting.md:42
-msgid "num_node (int):"
+msgid "num_workers (int):"
 msgstr ""
 
 #: ../../source/user_guide/configuration_setting.md:43

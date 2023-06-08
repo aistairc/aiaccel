@@ -9,7 +9,7 @@ generic:
 
 resource:
     type: mpi
-    num_node: 1
+    num_workers: 1
     mpi_npernode: 4
     mpi_enviroment: "ABCI"
     mpi_bat_rt_type: "F"

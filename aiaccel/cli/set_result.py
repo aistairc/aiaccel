@@ -5,18 +5,15 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from aiaccel.config import load_config
-from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.parameter import (
+    CategoricalParameter,
+    FloatParameter,
+    HyperParameterConfiguration,
+    IntParameter,
+    OrdinalParameter,
+)
+from aiaccel.util.data_type import str_or_float_or_int
 from aiaccel.util.filesystem import create_yaml
-
-
-def str_or_float_or_int(value: str | float | int) -> str | float | int:
-    try:
-        return int(value)
-    except ValueError:
-        try:
-            return float(value)
-        except ValueError:
-            return value
 
 
 def main() -> None:
@@ -44,14 +41,14 @@ def main() -> None:
         parameters_config = HyperParameterConfiguration(config.optimize.parameters)
 
         for p in parameters_config.get_parameter_list():
-            if p.type.lower() == "float":
+            if isinstance(p, FloatParameter):
                 parser.add_argument(f"--{p.name}", type=float)
-            elif p.type.lower() == "int":
+            elif isinstance(p, IntParameter):
                 parser.add_argument(f"--{p.name}", type=int)
-            elif p.type.lower() == "categorical":
-                parser.add_argument(f"--{p.name}", type=str)
-            elif p.type.lower() == "ordinal":
-                parser.add_argument(f"--{p.name}", type=float)
+            elif isinstance(p, CategoricalParameter):
+                parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
+            elif isinstance(p, OrdinalParameter):
+                parser.add_argument(f"--{p.name}", type=str_or_float_or_int)
             else:
                 raise ValueError(f"Unknown parameter type: {p.type}")
         args = parser.parse_known_args()[0]
@@ -60,7 +57,7 @@ def main() -> None:
         for unknown_arg in unknown_args_list:
             if unknown_arg.startswith("--"):
                 name = unknown_arg.replace("--", "")
-                parser.add_argument(f"--{name}", type=float)
+                parser.add_argument(f"--{name}", type=str_or_float_or_int)
         args = parser.parse_known_args()[0]
 
     xs = vars(copy.deepcopy(args))

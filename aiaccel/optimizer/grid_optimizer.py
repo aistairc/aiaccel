@@ -8,7 +8,7 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.optimizer import AbstractOptimizer
-from aiaccel.parameter import HyperParameter
+from aiaccel.parameter import CategoricalParameter, FloatParameter, IntParameter, OrdinalParameter, Parameter
 
 
 def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool, Any]:
@@ -51,11 +51,11 @@ def get_grid_options(parameter_name: str, config: DictConfig) -> tuple[Any, bool
     raise KeyError(f"Invalid parameter name: {parameter_name}")
 
 
-def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict[str, Any]:
+def generate_grid_points(p: Parameter, config: DictConfig) -> dict[str, Any]:
     """Make a list of all parameters for this grid.
 
     Args:
-        p (HyperParameter): A hyper parameter object.
+        p (Parameter): A hyper parameter object.
         config (DictConfig): A configuration object.
 
     Returns:
@@ -67,7 +67,7 @@ def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict[str, Any
     """
     new_param = {"parameter_name": p.name, "type": p.type}
 
-    if p.type.lower() in ["int", "float"]:
+    if isinstance(p, FloatParameter) or isinstance(p, IntParameter):
         base, log, step = get_grid_options(p.name, config)
         lower = p.lower
         upper = p.upper
@@ -84,13 +84,13 @@ def generate_grid_points(p: HyperParameter, config: DictConfig) -> dict[str, Any
         else:
             n = int((upper - lower) / step) + 1
             new_param["parameters"] = [lower + i * step for i in range(0, n)]
-        if p.type.lower() == "int":
+        if isinstance(p, IntParameter):
             new_param["parameters"] = [int(i) for i in new_param["parameters"]]
 
-    elif p.type.lower() == "categorical":
+    elif isinstance(p, CategoricalParameter):
         new_param["parameters"] = p.choices
 
-    elif p.type.lower() == "ordinal":
+    elif isinstance(p, OrdinalParameter):
         new_param["parameters"] = p.sequence
 
     else:

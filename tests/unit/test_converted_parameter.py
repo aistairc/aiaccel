@@ -26,7 +26,7 @@ from aiaccel.converted_parameter import (
     _restore_float,
     _restore_int,
 )
-from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
+from aiaccel.parameter import HyperParameterConfiguration, Parameter
 
 float_parameter_dict = {
     "name": "x0",
@@ -64,10 +64,10 @@ ordinal_parameter_dict = {
 class BaseTestConvertedParameter:
     @pytest.fixture(autouse=True)
     def setup(self) -> Generator[None, None, None]:
-        self.float_param = HyperParameter(float_parameter_dict)
-        self.int_param = HyperParameter(int_parameter_dict)
-        self.categorical_param = HyperParameter(categorical_parameter_dict)
-        self.ordinal_param = HyperParameter(ordinal_parameter_dict)
+        self.float_param = Parameter(float_parameter_dict)
+        self.int_param = Parameter(int_parameter_dict)
+        self.categorical_param = Parameter(categorical_parameter_dict)
+        self.ordinal_param = Parameter(ordinal_parameter_dict)
 
         self._rng = RandomState(42)
 
@@ -447,7 +447,7 @@ def test_make_weight_name() -> None:
 
 
 def test_convert_numerics(monkeypatch: pytest.MonkeyPatch) -> None:
-    param = ConvertedFloatParameter(HyperParameter(float_parameter_dict))
+    param = ConvertedFloatParameter(Parameter(float_parameter_dict))
 
     with monkeypatch.context() as m:
         m.setattr(param, "convert_log", True)
@@ -465,7 +465,7 @@ def test_convert_numerics(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_convert_float() -> None:
-    param = ConvertedFloatParameter(HyperParameter(float_parameter_dict))
+    param = ConvertedFloatParameter(Parameter(float_parameter_dict))
 
     value_by_convert_float = _convert_float(param, 1.0)
     value_by_convert_numerics = _convert_numerics(param, 1.0)
@@ -474,7 +474,7 @@ def test_convert_float() -> None:
 
 
 def test_convert_int(monkeypatch: pytest.MonkeyPatch) -> None:
-    param = ConvertedIntParameter(HyperParameter(int_parameter_dict))
+    param = ConvertedIntParameter(Parameter(int_parameter_dict))
 
     with monkeypatch.context() as m:
         m.setattr(param, "convert_int", True)
@@ -490,7 +490,7 @@ def test_convert_int(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_restore_float(monkeypatch: pytest.MonkeyPatch) -> None:
-    param = ConvertedFloatParameter(HyperParameter(float_parameter_dict))
+    param = ConvertedFloatParameter(Parameter(float_parameter_dict))
 
     with monkeypatch.context() as m:
         m.setattr(param, "convert_log", True)
@@ -504,7 +504,7 @@ def test_restore_float(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_restore_int(monkeypatch: pytest.MonkeyPatch) -> None:
-    param = ConvertedIntParameter(HyperParameter(int_parameter_dict))
+    param = ConvertedIntParameter(Parameter(int_parameter_dict))
 
     with monkeypatch.context() as m:
         m.setattr(param, "convert_log", True)
@@ -520,7 +520,7 @@ def test_restore_int(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_is_weight_collected() -> None:
-    param = WeightOfChoice(HyperParameter(categorical_parameter_dict), 0)
+    param = WeightOfChoice(Parameter(categorical_parameter_dict), 0)
     weights = {
         param.original_name: {f"{param.name}_{i}": i * 0.1 for i in range(len(param.choices))}
     }
@@ -532,7 +532,7 @@ def test_is_weight_collected() -> None:
 
 
 def test_make_weight_distribution() -> None:
-    param = WeightOfChoice(HyperParameter(categorical_parameter_dict), 0)
+    param = WeightOfChoice(Parameter(categorical_parameter_dict), 0)
     weights = {
         param.original_name: {f"{param.original_name}_{i}": i * 0.1 for i in range(len(param.choices))}
     }
@@ -541,14 +541,14 @@ def test_make_weight_distribution() -> None:
 
 
 def test_decode_weight_distribution() -> None:
-    param = WeightOfChoice(HyperParameter(categorical_parameter_dict), 0)
+    param = WeightOfChoice(Parameter(categorical_parameter_dict), 0)
     weight_distribution = [1] + [0] * (len(param.choices) - 1)
     choosed_value = _decode_weight_distribution(param, weight_distribution)
     assert choosed_value == param.choices[0]
 
 
 def test_make_structured_value() -> None:
-    param = ConvertedFloatParameter(HyperParameter(float_parameter_dict))
+    param = ConvertedFloatParameter(Parameter(float_parameter_dict))
     value = param.lower
     structured_value = _make_structured_value(param, value)
     assert structured_value.get("parameter_name") == param.name

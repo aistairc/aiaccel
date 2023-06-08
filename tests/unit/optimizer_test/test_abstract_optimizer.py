@@ -46,8 +46,8 @@ class TestAbstractOptimizer(BaseTest):
 
     def test_register_new_parameters(self):
         params = [
-            {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1},
-            {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.1}
+            {'parameter_name': 'x1', 'type': 'uniform_float', 'value': 0.1},
+            {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 0.1}
         ]
 
         assert self.optimizer.register_new_parameters(params) is None
@@ -57,14 +57,14 @@ class TestAbstractOptimizer(BaseTest):
             assert self.optimizer.generate_initial_parameter() == []
 
         p = [
-            {'name': "x1", 'type': 'FLOAT', 'value': 1.0},
-            {'name': "x2", 'type': 'FLOAT', 'value': 2.0},
+            {'name': "x1", 'type': 'uniform_float', 'value': 1.0},
+            {'name': "x2", 'type': 'uniform_float', 'value': 2.0},
         ]
 
         with patch.object(self.optimizer.params, 'sample', return_value=p):
             assert self.optimizer.generate_initial_parameter() == [
-                {'parameter_name': 'x1', 'type': 'FLOAT', 'value': 1.0},
-                {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 2.0}
+                {'parameter_name': 'x1', 'type': 'uniform_float', 'value': 1.0},
+                {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 2.0}
             ]
 
     def test_generate_parameter(self) -> None:
@@ -73,7 +73,7 @@ class TestAbstractOptimizer(BaseTest):
 
     def test_get_pool_size(self, monkeypatch: pytest.MonkeyPatch) -> None:
         with monkeypatch.context() as m:
-            self.optimizer.config.resource.num_node = 10
+            self.optimizer.config.resource.num_workers = 10
             m.setattr(self.optimizer.storage, 'get_num_running', lambda: 1)
             m.setattr(self.optimizer.storage, 'get_num_ready', lambda: 1)
             assert self.optimizer.get_pool_size() == 10 - 1 - 1
@@ -96,10 +96,10 @@ class TestAbstractOptimizer(BaseTest):
         assert self.optimizer.post_process() is None
 
     def test_inner_loop_main_process(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        initial = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1},
-                   {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.1}]
-        param = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.2},
-                 {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 0.2}]
+        initial = [{'parameter_name': 'x1', 'type': 'uniform_float', 'value': 0.1},
+                   {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 0.1}]
+        param = [{'parameter_name': 'x1', 'type': 'uniform_float', 'value': 0.2},
+                 {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 0.2}]
 
         with monkeypatch.context() as m:
             m.setattr(self.optimizer, 'generate_initial_parameter', lambda: initial)
@@ -133,26 +133,26 @@ class TestAbstractOptimizer(BaseTest):
             assert self.optimizer.inner_loop_main_process() is True
 
     def test_cast(self):
-        org_params = [{'parameter_name': 'x1', 'type': 'INT', 'value': 0.1},
-                      {'parameter_name': 'x2', 'type': 'INT', 'value': 1.5}]
+        org_params = [{'parameter_name': 'x1', 'type': 'uniform_int', 'value': 0.1},
+                      {'parameter_name': 'x2', 'type': 'uniform_int', 'value': 1.5}]
         new_params = self.optimizer.cast(org_params)
         assert new_params[0]["value"] == 0
         assert new_params[1]["value"] == 1
 
-        org_params = [{'parameter_name': 'x1', 'type': 'FLOAT', 'value': 0.1},
-                      {'parameter_name': 'x2', 'type': 'FLOAT', 'value': 1.5}]
+        org_params = [{'parameter_name': 'x1', 'type': 'uniform_float', 'value': 0.1},
+                      {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 1.5}]
         new_params = self.optimizer.cast(org_params)
         assert new_params[0]["value"] == 0.1
         assert new_params[1]["value"] == 1.5
 
-        org_params = [{'parameter_name': 'x1', 'type': 'CATEGORICAL', 'value': 'a'},
-                      {'parameter_name': 'x2', 'type': 'CATEGORICAL', 'value': 'b'}]
+        org_params = [{'parameter_name': 'x1', 'type': 'categorical', 'value': 'a'},
+                      {'parameter_name': 'x2', 'type': 'categorical', 'value': 'b'}]
         new_params = self.optimizer.cast(org_params)
         assert new_params[0]["value"] == 'a'
         assert new_params[1]["value"] == 'b'
 
-        org_params = [{'parameter_name': 'x1', 'type': 'ORDINAL', 'value': [1, 2, 3]},
-                      {'parameter_name': 'x2', 'type': 'ORDINAL', 'value': [4, 5, 6]}]
+        org_params = [{'parameter_name': 'x1', 'type': 'ordinal', 'value': [1, 2, 3]},
+                      {'parameter_name': 'x2', 'type': 'ordinal', 'value': [4, 5, 6]}]
         new_params = self.optimizer.cast(org_params)
         assert new_params[0]["value"] == [1, 2, 3]
         assert new_params[1]["value"] == [4, 5, 6]

@@ -90,7 +90,7 @@ msgid "**type** - 実行環境を指定します．ローカル環境で実行�
 msgstr ""
 
 #: ../../source/examples/local_random.md:50
-msgid "**num_node** - 使用するノード数を指定します．"
+msgid "**num_workers** - 使用するノード数を指定します．"
 msgstr ""
 
 #: ../../source/examples/local_random.md:53

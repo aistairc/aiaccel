@@ -1,18 +1,15 @@
 from __future__ import annotations
 
 import functools
-from collections.abc import Callable
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
 
 import pytest
 from omegaconf.errors import MissingMandatoryValue
 
 from aiaccel.config import load_config
-from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
-from aiaccel.optimizer import GridOptimizer
-from aiaccel.optimizer import generate_grid_points
-from aiaccel.optimizer import get_grid_options
+from aiaccel.optimizer import GridOptimizer, generate_grid_points, get_grid_options
+from aiaccel.parameter import HyperParameterConfiguration, Parameter
 from tests.base_test import BaseTest
 
 
@@ -63,7 +60,7 @@ def test_generate_grid_points(grid_load_test_config):
     for p in params.get_parameter_list():
         generate_grid_points(p, config)
 
-    int_p = HyperParameter(
+    int_p = Parameter(
         {
             'name': 'x4',
             'type': 'uniform_int',
@@ -77,7 +74,7 @@ def test_generate_grid_points(grid_load_test_config):
 
     assert generate_grid_points(int_p, config)
 
-    cat_p = HyperParameter(
+    cat_p = Parameter(
         {
             'name': 'x3',
             'type': 'categorical',
@@ -102,7 +99,7 @@ def test_generate_grid_points(grid_load_test_config):
     except TypeError:
         assert True
 
-    cat_p = HyperParameter(
+    cat_p = Parameter(
         {
             'name': 'x3',
             'type': 'ordinal',

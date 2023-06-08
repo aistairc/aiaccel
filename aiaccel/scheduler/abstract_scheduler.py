@@ -40,13 +40,13 @@ class AbstractScheduler(AbstractModule):
             "Scheduler",
         )
 
-        self.max_resource = self.config.resource.num_node
+        self.max_resource = self.config.resource.num_workers
         self.available_resource = self.max_resource
         self.stats: list[Any] = []
         self.jobs: list[Any] = []
         self.job_status: dict[Any, Any] = {}
         self.algorithm: Any = None
-        self.num_node = self.config.resource.num_node
+        self.num_workers = self.config.resource.num_workers
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found

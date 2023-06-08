@@ -90,7 +90,7 @@
     ```yaml
     resource:
         type: "abci"
-        num_node: 4
+        num_workers: 4
     ```
 
 4. 実行

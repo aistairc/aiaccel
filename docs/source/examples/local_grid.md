@@ -43,11 +43,11 @@ Windows では，仮想環境の python で実行するためには `job_command
 ```yaml
 resource:
   type: "local"
-  num_node: 4
+  num_workers: 4
 ```
 
 - **type** - 実行環境を指定します．ローカル環境で実行するためには `"local"` で設定します．
-- **num_node** - 使用するノード数を指定します．
+- **num_workers** - 使用するノード数を指定します．
 
 
 #### optimize

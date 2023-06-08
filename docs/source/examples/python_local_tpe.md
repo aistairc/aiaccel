@@ -43,11 +43,11 @@ batch_job_timeout: 600
 ```yaml
 resource:
   type: "python_local"
-  num_node: 4
+  num_workers: 4
 ```
 
 - **type** - 実行環境を指定します．`python_local` モードを使用してローカルで実行するためには `"python_local"` と設定します．
-- **num_node** - 使用するノード数を指定します．
+- **num_workers** - 使用するノード数を指定します．
 
 
 #### optimize

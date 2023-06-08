@@ -18,17 +18,6 @@ class TestParameter(BaseTest):
         assert ps.name == 'x3'
 
     def test_sample(self):
-        # json_string = {
-        #     'parameters': [
-        #         {'name': 'a', 'type': 'uniform_int', 'lower': 0, 'upper': 10},
-        #         {'name': 'b', 'type': 'uniform_float', 'lower': 0.,
-        #          'upper': 10.},
-        #         {'name': 'c', 'type': 'categorical',
-        #          'choices': ['red', 'green', 'blue']},
-        #         {'name': 'd', 'type': 'ordinal',
-        #          'sequence': ['10', '20', '30']}
-        #     ]
-        # }
         json_string = [
             {
                 'name': 'a',
@@ -66,10 +55,8 @@ class TestParameter(BaseTest):
         assert len(p) == 4
 
         json_string.append({'name': 'e', 'type': 'invalid'})
-        hp = HyperParameterConfiguration(json_string)
-
         try:
-            hp.sample(rng=rng)
+            hp = HyperParameterConfiguration(json_string)
             assert False
         except TypeError:
             assert True
