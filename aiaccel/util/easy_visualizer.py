@@ -135,6 +135,12 @@ class EasyVisualizer:
         Note:
             data = ([plot_data_1[], plot_data_2[],...)
         """
+        # Type validation
+        if not isinstance(data, list):
+            message = "ERROR: data must be list"
+            print(f"{yellow}{message}{reset}")
+            return
+
         terminal_size = shutil.get_terminal_size().columns
         plot_width_max = terminal_size - 15
 
@@ -144,6 +150,10 @@ class EasyVisualizer:
 
         self.plot_data = []
         for data_ in data:
+            if not isinstance(data_, list):
+                message = "WARNING: result data must be list"
+                print(f"{yellow}{message}{reset}")
+                return
             if len(data_) == 0:
                 message = "WARNING: result data is empty"
                 print(f"{yellow}{message}{reset}")
