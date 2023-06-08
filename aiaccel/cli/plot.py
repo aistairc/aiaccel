@@ -67,7 +67,7 @@ class Plotter:
             num_objectives += 1
 
         self.cplt.caption(captions)
-        self.cplt.line_plot(plot_data)
+        self.cplt.line_plot(*plot_data)
 
 
 def main() -> None:  # pragma: no cover
