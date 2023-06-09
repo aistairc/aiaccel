@@ -100,7 +100,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/examples/python_local_tpe.md:50
-msgid "**num_node** - 使用するノード数を指定します．"
+msgid "**num_workers** - 使用するノード数を指定します．"
 msgstr ""
 
 #: ../../source/examples/python_local_tpe.md:53

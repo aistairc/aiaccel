@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 
 from aiaccel.config import load_config
-from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.optimizer import TpeOptimizer
 from aiaccel.optimizer.tpe_optimizer import TPESamplerWrapper, create_distributions
+from aiaccel.parameter import HyperParameterConfiguration
 from tests.base_test import BaseTest
 
 
@@ -53,11 +53,11 @@ class TestTpeOptimizer(BaseTest):
                 with patch.object(self.optimizer, "parameter_pool", [{}, {}, {}]):
                     assert self.optimizer.generate_parameter() is None
 
-        # if len(self.parameter_pool) >= self.config.resource.num_node
-        _tmp_num_node = self.optimizer.config.resource.num_node
-        self.optimizer.config.resource.num_node = 0
+        # if len(self.parameter_pool) >= self.config.resource.num_workers
+        _tmp_num_workers = self.optimizer.config.resource.num_workers
+        self.optimizer.config.resource.num_workers = 0
         assert self.optimizer.generate_parameter() is None
-        self.optimizer.config.resource.num_node = _tmp_num_node
+        self.optimizer.config.resource.num_workers = _tmp_num_workers
 
     def test_generate_initial_parameter(self):
         optimizer = TpeOptimizer(self.load_config_for_test(self.configs['config_tpe_2.json']))
@@ -98,6 +98,7 @@ def test_create_distributions(data_dir):
     assert type(dist) is dict
 
     config = load_config(data_dir / 'config_tpe_invalid_type.json')
-    params = HyperParameterConfiguration(config.optimize.parameters)
+
     with pytest.raises(TypeError):
+        params = HyperParameterConfiguration(config.optimize.parameters)
         create_distributions(params)

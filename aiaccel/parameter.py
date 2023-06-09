@@ -3,33 +3,30 @@ from __future__ import annotations
 from typing import Any
 
 from numpy.random import RandomState
+from omegaconf.base import UnionNode
+from omegaconf.listconfig import ListConfig
+from omegaconf.nodes import BooleanNode, BytesNode, FloatNode, IntegerNode, PathNode, StringNode
 
 
-def get_type(parameter: dict[str, Any]) -> str:
-    """Get a type of a specified parameter.
+def is_uniform_float(data_type: str) -> bool:
+    return data_type.lower() == "uniform_float"
 
-    Args:
-        parameter (dict): A parameter dictionary in a configuration file.
 
-    Returns:
-        str: A parameter type any of 'INT', 'FLOAT', 'CATEGORICAL' and
-        'ORDINAL'.
+def is_uniform_int(data_type: str) -> bool:
+    return data_type.lower() == "uniform_int"
+
+
+def is_categorical(data_type: str) -> bool:
+    return data_type.lower() == "categorical"
+
+
+def is_ordinal(data_type: str) -> bool:
+    return data_type.lower() == "ordinal"
+
+
+class AbstractParameter:
     """
-    if parameter["type"].lower() == "uniform_int":
-        return "INT"
-    elif parameter["type"].lower() == "uniform_float":
-        return "FLOAT"
-    elif parameter["type"].lower() == "categorical":
-        return "CATEGORICAL"
-    elif parameter["type"].lower() == "ordinal":
-        return "ORDINAL"
-    else:
-        return parameter["type"]
-
-
-class HyperParameter(object):
-    """
-    A hyper parameter class.
+    A parameter class.
 
     Args:
         parameter (dict): A parameter dictionary in a configuration file.
@@ -53,15 +50,15 @@ class HyperParameter(object):
     def __init__(self, parameter: dict[str, Any]) -> None:
         self._raw_dict = parameter
         self.name = parameter["name"]
-        self.type = get_type(parameter)
+        self.type = parameter["type"].lower()
         self.log = parameter.get("log", False)
         self.lower = parameter.get("lower", None)
         self.upper = parameter.get("upper", None)
-        self.choices = parameter.get("choices", None)
-        self.sequence = parameter.get("sequence", None)
         self.initial = parameter.get("initial", None)
         self.step = parameter.get("step", None)
         self.base = parameter.get("base", None)
+        self.choices = parameter.get("choices", None)
+        self.sequence = parameter.get("sequence", None)
         self.num_numeric_choices = parameter.get("num_numeric_choices", None)
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
@@ -78,41 +75,99 @@ class HyperParameter(object):
         Raises:
             TypeError: Causes when an invalid type is set.
         """
+        raise NotImplementedError
+
+    def unwrap(self, value: Any) -> Any:
+        if isinstance(value, UnionNode):
+            value = value._value()
+            if isinstance(value, (IntegerNode, PathNode, StringNode, BooleanNode, BytesNode, FloatNode)):
+                return value._value()
+            else:
+                assert False, f"Invalid type: {type(value)}"
+        elif isinstance(value, (IntegerNode, PathNode, StringNode, BooleanNode, BytesNode, FloatNode)):
+            return value._value()
+        else:
+            return value
+
+
+class IntParameter(AbstractParameter):
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         if initial and self.initial is not None:
             value = self.initial
-        elif self.type.lower() == "int":
-            value = rng.randint(self.lower, self.upper)
-        elif self.type.lower() == "float":
-            value = rng.uniform(self.lower, self.upper)
-        elif self.type.lower() == "categorical":
-            value = rng.choice(self.choices)
-        elif self.type.lower() == "ordinal":
-            value = rng.choice(self.sequence)
         else:
-            raise TypeError(f"Invalid hyper parameter type: {self.type}")
+            value = rng.randint(self.lower, self.upper)
+        return {"name": self.name, "type": self.type, "value": self.unwrap(value)}
 
-        return {"name": self.name, "type": self.type, "value": value}
+
+class FloatParameter(AbstractParameter):
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
+        if initial and self.initial is not None:
+            value = self.initial
+        else:
+            value = rng.uniform(self.lower, self.upper)
+        return {"name": self.name, "type": self.type, "value": self.unwrap(value)}
+
+
+class CategoricalParameter(AbstractParameter):
+    def __init__(self, parameter: dict[str, Any]) -> None:
+        super().__init__(parameter)
+        if self.choices is not None:
+            self.choices = [self.unwrap(v) for v in self.choices]
+
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
+        if initial and self.initial is not None:
+            value = self.initial
+        else:
+            value = rng.choice(self.choices)
+        return {"name": self.name, "type": self.type, "value": self.unwrap(value)}
+
+
+class OrdinalParameter(AbstractParameter):
+    def __init__(self, parameter: dict[str, Any]) -> None:
+        super().__init__(parameter)
+        if self.sequence is not None:
+            self.sequence = [self.unwrap(v) for v in self.sequence]
+
+    def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
+        if initial and self.initial is not None:
+            value = self.initial
+        else:
+            value = rng.choice(self.sequence)
+        return {"name": self.name, "type": self.type, "value": self.unwrap(value)}
+
+
+class Parameter(AbstractParameter):
+    def __new__(cls, parameter: dict[str, Any]) -> Any:
+        data_type = parameter["type"].lower()
+        if is_uniform_int(data_type):
+            return IntParameter(parameter)
+        elif is_uniform_float(data_type):
+            return FloatParameter(parameter)
+        elif is_categorical(data_type):
+            return CategoricalParameter(parameter)
+        elif is_ordinal(data_type):
+            return OrdinalParameter(parameter)
+        else:
+            raise TypeError(f"Invalid data_type: {data_type}")
 
 
 class HyperParameterConfiguration:
     """A configuration of hyper parameters.
 
     Args:
-        json_string (dict): A configuration dictionary of hyper parameters.
+        parameters (ListConfig): A configuration dictionary of hyperparameters.
 
     Attributes:
-        json_string (dict): A configuration dictionary of hyper parameters.
-        hps (dict): Hyper parameters.
+        param (dict): A dictionary containing hyperparameter configurations.
     """
 
-    def __init__(self, json_string: Any) -> None:
-        self.json_string = json_string
-        self.hps: dict[str, HyperParameter] = {}
+    def __init__(self, parameters: ListConfig) -> None:
+        self.param: dict[str, Parameter] = {}
 
-        for hps in self.json_string:
-            self.hps[hps["name"]] = HyperParameter(hps)
+        for param in parameters:
+            self.param[param["name"]] = Parameter(param)
 
-    def get_hyperparameter(self, name: str) -> HyperParameter:
+    def get_hyperparameter(self, name: str) -> Parameter:
         """Get a hyper parameter with a name.
 
         Args:
@@ -124,26 +179,26 @@ class HyperParameterConfiguration:
         Raises:
             KeyError: Causes when no matched hyper parameter is.
         """
-        if name in self.hps:
-            return self.hps[name]
+        if name in self.param:
+            return self.param[name]
         else:
             raise KeyError(f"The parameter name {name} does not exist.")
 
-    def get_parameter_list(self) -> list[HyperParameter]:
+    def get_parameter_list(self) -> list[Parameter]:
         """Get a list of hyper parameter objects.
 
         Returns:
             list[HyperParameter]: A list of hyper parameter objects.
         """
-        return list(self.hps.values())
+        return list(self.param.values())
 
-    def get_parameter_dict(self) -> dict[str, HyperParameter]:
+    def get_parameter_dict(self) -> dict[str, Parameter]:
         """Get a dictionary of hyper parameters.
 
         Returns:
             dict: A hyper parameter dictionary.
         """
-        return self.hps
+        return self.param
 
     def sample(self, rng: RandomState, initial: bool = False) -> list[dict[str, Any]]:
         """Sample a hyper parameters set.
@@ -157,18 +212,18 @@ class HyperParameterConfiguration:
             list[dict]: A hyper parameters set.
         """
         sampled_values = []
-        for hyperparameter in self.hps.values():
-            sampled_values.append(hyperparameter.sample(rng, initial))
+        for parameter in self.param.values():
+            sampled_values.append(parameter.sample(rng, initial))
         return sampled_values
 
 
-def load_parameter(json_string: dict[str, Any]) -> HyperParameterConfiguration:
+def load_parameter(parameters: ListConfig) -> HyperParameterConfiguration:
     """Load HyperParameterConfiguration object from a configuration file.
 
     Args:
-        json_string (dict): A hyper parameter configuration.
+        parameters (dict): A hyper parameter object.
 
     Returns:
         HyperParameterConfiguration: A hyper parameter configuration.
     """
-    return HyperParameterConfiguration(json_string)
+    return HyperParameterConfiguration(parameters)

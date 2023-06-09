@@ -82,7 +82,7 @@ class TestAbstractMaster(BaseTest):
                     trial_id=i,
                     param_name=f"x{j}",
                     param_value=0.0,
-                    param_type='flaot'
+                    param_type='uniform_float'
                 )
         assert master.post_process() is None
 

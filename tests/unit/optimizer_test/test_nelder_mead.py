@@ -96,7 +96,7 @@ class TestNelderMead(BaseTest):
                     trial_id=i,
                     param_name=f'x{j+1}',
                     param_value=0.0,
-                    param_type='float'
+                    param_type='uniform_float'
                 )
         storage.trial.set_any_trial_state(trial_id=1, state='finished')
         #

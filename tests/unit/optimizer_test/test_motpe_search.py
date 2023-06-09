@@ -49,8 +49,8 @@ class TestMOTpeOptimizer(BaseTest):
                 with patch.object(self.optimizer, 'parameter_pool', [{}, {}, {}]):
                     assert self.optimizer.generate_parameter() is None
 
-        # if len(self.parameter_pool) >= self.config.num_node.get()
-        self.optimizer.config.resource.num_node = 0
+        # if len(self.parameter_pool) >= self.config.num_workers.get()
+        self.optimizer.config.resource.num_workers = 0
         with patch.object(self.optimizer, 'is_startup_trials', return_value=False):
             assert self.optimizer.generate_parameter() is None
 

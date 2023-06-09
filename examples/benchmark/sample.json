@@ -46,7 +46,7 @@
   "resource": {
     "resource_name": "abci1",
     "type": "abci",
-    "num_node": 4
+    "num_workers": 4
   },
   "ABCI": {
     "abci_wrapper": "wrapper_abci.sh",

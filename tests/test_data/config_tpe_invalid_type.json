@@ -7,7 +7,7 @@
   },
   "resource": {
     "type": "local",
-    "num_node": 10
+    "num_workers": 10
   },
   "ABCI": {
     "group": "[group]",

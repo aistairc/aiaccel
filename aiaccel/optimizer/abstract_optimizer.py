@@ -8,7 +8,7 @@ from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import is_multi_objective
 from aiaccel.module import AbstractModule
-from aiaccel.parameter import HyperParameterConfiguration
+from aiaccel.parameter import HyperParameterConfiguration, is_categorical, is_ordinal, is_uniform_float, is_uniform_int
 from aiaccel.util import TrialId, str_to_logging_level
 
 
@@ -144,7 +144,7 @@ class AbstractOptimizer(AbstractModule):
         Returns:
             int: Pool size.
         """
-        max_pool_size = self.config.resource.num_node
+        max_pool_size = self.config.resource.num_workers
         hp_running = self.storage.get_num_running()
         hp_ready = self.storage.get_num_ready()
         available_pool_size = max_pool_size - hp_running - hp_ready
@@ -267,13 +267,12 @@ class AbstractOptimizer(AbstractModule):
                     _param["type"] = str(type(None))
 
             try:
-                if param_type.lower() == "categorical" or param_type.lower() == "ordinal":
+                if is_categorical(param_type) or is_ordinal(param_type):
                     casted_params.append(_param)
                     continue
-
-                if param_type.lower() == "float":
+                if is_uniform_float(param_type):
                     _param["value"] = float(param_value)
-                if param_type.lower() == "int":
+                if is_uniform_int(param_type):
                     _param["value"] = int(param_value)
                 casted_params.append(_param)
 

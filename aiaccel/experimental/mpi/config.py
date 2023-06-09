@@ -54,7 +54,7 @@ class GenericConfig:
 @dataclass
 class ResourceConifig:
     type: ResourceType
-    num_node: int
+    num_workers: int
     mpi_npernode: int
     mpi_enviroment: str
     mpi_bat_rt_type: str

@@ -7,11 +7,19 @@ from typing import Any
 import numpy as np
 from numpy.random import RandomState
 
-from aiaccel.parameter import HyperParameter, HyperParameterConfiguration
+from aiaccel.parameter import (
+    AbstractParameter,
+    CategoricalParameter,
+    FloatParameter,
+    HyperParameterConfiguration,
+    IntParameter,
+    OrdinalParameter,
+    Parameter,
+)
 
 
-class ConvertedParameter(HyperParameter):
-    def __init__(self, param: HyperParameter) -> None:
+class ConvertedParameter(AbstractParameter):
+    def __init__(self, param: Parameter) -> None:
         self.name = param.name
         self.type = param.type
         self.original_initial = param.initial
@@ -19,7 +27,7 @@ class ConvertedParameter(HyperParameter):
 
 
 class ConvertedNumericalParameter(ConvertedParameter):
-    def __init__(self, param: HyperParameter, convert_log: bool):
+    def __init__(self, param: Parameter, convert_log: bool = True):
         super().__init__(param)
         self.convert_log = convert_log and param.log
         self.original_lower = param.lower
@@ -27,7 +35,7 @@ class ConvertedNumericalParameter(ConvertedParameter):
 
 
 class ConvertedFloatParameter(ConvertedNumericalParameter):
-    def __init__(self, param: HyperParameter, convert_log: bool = True):
+    def __init__(self, param: Parameter, convert_log: bool = True):
         super().__init__(param, convert_log)
         self.lower = _convert_float(self, param.lower)
         self.upper = _convert_float(self, param.upper)
@@ -45,7 +53,7 @@ class ConvertedFloatParameter(ConvertedNumericalParameter):
 
 
 class ConvertedIntParameter(ConvertedNumericalParameter):
-    def __init__(self, param: HyperParameter, convert_log: bool = True, convert_int: bool = True) -> None:
+    def __init__(self, param: Parameter, convert_log: bool = True, convert_int: bool = True) -> None:
         super().__init__(param, convert_log)
         self.convert_int = convert_int
         self.lower = _convert_int(self, param.lower)
@@ -67,7 +75,7 @@ class ConvertedIntParameter(ConvertedNumericalParameter):
 
 
 class ConvertedCategoricalParameter(ConvertedParameter):
-    def __init__(self, param: HyperParameter, convert_choices: bool = True) -> None:
+    def __init__(self, param: Parameter, convert_choices: bool = True) -> None:
         super().__init__(param)
         self.choices = param.choices
         self.convert_choices = convert_choices
@@ -81,7 +89,7 @@ class ConvertedCategoricalParameter(ConvertedParameter):
 
 
 class ConvertedOrdinalParameter(ConvertedParameter):
-    def __init__(self, param: HyperParameter, convert_sequence: bool = True) -> None:
+    def __init__(self, param: Parameter, convert_sequence: bool = True) -> None:
         super().__init__(param)
         self.sequence = param.sequence
         self.convert_sequence = convert_sequence
@@ -95,7 +103,7 @@ class ConvertedOrdinalParameter(ConvertedParameter):
 
 
 class WeightOfChoice(ConvertedParameter):
-    def __init__(self, param: HyperParameter, choice_index: int) -> None:
+    def __init__(self, param: Parameter, choice_index: int) -> None:
         super().__init__(param)
         self.choice_index = choice_index
         self.original_name = self.name
@@ -158,7 +166,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         convert_int: bool = True,
         convert_choices: bool = True,
         convert_sequence: bool = True,
-    ) -> dict[str, HyperParameter]:
+    ) -> dict[str, AbstractParameter]:
         """Converts all of HyperParameter in the given list to the internal
         representation.
 
@@ -193,15 +201,15 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
                 Keys of the dict specify internaly effective names of
                 parameters.
         """
-        converted_params: dict[str, HyperParameter] = {}
+        converted_params: dict[str, AbstractParameter] = {}
         for param in params.get_parameter_list():
-            if param.type.lower() == "float":
+            if isinstance(param, FloatParameter):
                 converted_params[param.name] = ConvertedFloatParameter(param, convert_log=convert_log)
-            elif param.type.lower() == "int":
+            elif isinstance(param, IntParameter):
                 converted_params[param.name] = ConvertedIntParameter(
                     param, convert_log=convert_log, convert_int=convert_int
                 )
-            elif param.type.lower() == "categorical":
+            elif isinstance(param, CategoricalParameter):
                 if convert_choices:
                     for i in range(len(param.choices)):
                         converted_param = WeightOfChoice(param, choice_index=i)
@@ -213,7 +221,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
                     )
                 else:
                     converted_params[param.name] = ConvertedCategoricalParameter(param, convert_choices=convert_choices)
-            elif param.type.lower() == "ordinal":
+            elif isinstance(param, OrdinalParameter):
                 if convert_sequence:
                     for i in range(len(param.sequence)):
                         converted_param = WeightOfChoice(param, choice_index=i)
@@ -277,7 +285,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         sampled_values = [param.sample(rng, initial) for param in self._converted_params.values()]
         return sampled_values
 
-    def get_hyperparameter(self, name: str) -> HyperParameter:
+    def get_hyperparameter(self, name: str) -> Any:  # TODO fix type
         """Gets a ConvertedParameter object by specifying parameter name.
 
         Args:
@@ -294,7 +302,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         else:
             raise KeyError(f"Invalid parameter name: {name}")
 
-    def get_parameter_list(self) -> list[HyperParameter]:
+    def get_parameter_list(self) -> list[Any]:  # TODO fix type
         """Gets a list of parameters.
 
         Returns:
@@ -303,7 +311,7 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         """
         return list(self._converted_params.values())
 
-    def get_parameter_dict(self) -> dict[str, HyperParameter]:
+    def get_parameter_dict(self) -> dict[str, Any]:  # TODO fix type
         """Gets a dict object of ConvertedHyperparmaeters.
 
         Returns:

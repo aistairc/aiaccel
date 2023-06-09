@@ -9,7 +9,7 @@ resource:
   # type: "abci"
   # type: "local"
   type: "python_local"
-  num_node: 4
+  num_workers: 4
 
 ABCI:
   group: "[group]"
