@@ -13,12 +13,12 @@ class Plotter:
     """Provides method to prints a graph on a terminal.
 
     Args:
-        config (Config): Config object.
+        config (DictConfig): A DictConfig object.
 
     Attributes:
         workspace (Workspace): Workspace object.
         storage (Storage): Storage object.
-        goar (str): Goal of optimization ('minimize' or 'maximize').
+        goals (str): Goal of optimization ('minimize' or 'maximize').
         cplt (EasyVisualizer): EasyVisualizer object.
     """
 
@@ -32,45 +32,43 @@ class Plotter:
     def plot(self) -> None:
         """Retrieves information from the database and prints a graph on the
         terminal.
-
-        Returns:
-            None
         """
         objectives = self.storage.result.get_objectives()
         if len(objectives) == 0:
             print("Result data is empty")
             return
 
-        objectives = list(map(lambda x: list(x), zip(*objectives)))
-
-        bests = self.storage.result.get_bests(self.goals)
-
-        plot_datas = []
-        for i in range(len(self.goals)):
-            plot_datas.append(objectives[i])
-            plot_datas.append(bests[i])
-
-        caption_set = [
-            caption_set for caption_set in [[f"objective_y[{i}]", f"best value[{i}]"] for i in range(len(self.goals))]
-        ]
-
-        captions = []
-        for captions_ in caption_set:
-            for caption in captions_:
-                captions.append(caption)
+        objectives = list(map(list, zip(*objectives)))
 
         if len(objectives) == 0:
             print("Result data is empty")
             return
 
+        bests = self.storage.result.get_bests(self.goals)
+
         if len(objectives) != len(bests):
             print("Invalid data")
             return
 
-        self.cplt.caption(captions)
-        self.cplt.line_plot(plot_datas)
+        plot_data = []
+        captions = []
+        for objective_id, (goal_, objectives_) in enumerate(zip(self.goals, objectives)):
+            current_best = float("inf") if goal_ == "minimize" else float("-inf")
+            comparator = min if goal_ == "minimize" else max
+            best_trajectory = []
+            update_id = 0
+            for trial_id, objective in enumerate(objectives_):
+                if comparator(current_best, objective) == objective:
+                    current_best = objective
+                    update_id = trial_id
+                best_trajectory.append(current_best)
+            plot_data.append(objectives_)
+            plot_data.append(best_trajectory)
+            captions.append(f"objective[{objective_id}]")
+            captions.append(f"best value[{objective_id}] (final={best_trajectory[-1]}@trial_id={update_id})")
 
-        return
+        self.cplt.caption(captions)
+        self.cplt.line_plot(plot_data)
 
 
 def main() -> None:  # pragma: no cover
@@ -79,7 +77,7 @@ def main() -> None:  # pragma: no cover
     parser.add_argument("--config", "-c", type=str, default="config.yml")
     args = parser.parse_args()
 
-    config: DictConfig = load_config(args.config)
+    config = load_config(args.config)
 
     if Path(config.generic.workspace).exists() is False:
         print(f"{config.generic.workspace} is not found.")
