@@ -76,9 +76,9 @@ class EasyVisualizer:
         ]
         self.plot_config: dict[str, Any] = {
             "height": 15,
-            "colors": [self.line_colors[self.color_priority[0]], self.line_colors[self.color_priority[1]]],
+            "colors": [],
         }
-        self.plot_datas: list[list[Any]] = [[]]
+        self.plot_data: list[list[float]]
 
     def set_height(self, height: int) -> None:
         """Set the any height of vertical axis.
@@ -116,61 +116,67 @@ class EasyVisualizer:
             else:
                 raise Exception
 
-    def caption(self, *labels: Any) -> None:
+    def caption(self, labels: list[str]) -> None:
         """Set the any caption.
 
         Args:
             labels (tuple):
         """
-        labels = list(labels)[0]
-        for i in range(len(labels)):
-            color = self.line_colors[self.color_priority[i]]
-            print(f"{color}{list(labels)[i]}{reset}")
+        for label_id, label in enumerate(labels):
+            color = self.line_colors[self.color_priority[label_id]]
+            print(f"{color}{label}{reset}")
 
-    def line_plot(self, *data: Any) -> None:
+    def line_plot(self, data: list[list[float]]) -> None:
         """Plot the any data.
 
         Args:
-            data (tuple): Target data.
+            data (list[list[float]]): Target data.
 
         Note:
             data = ([plot_data_1[], plot_data_2[],...)
         """
+        # Type validation
+        if not isinstance(data, list):
+            message = "ERROR: data must be list"
+            print(f"{yellow}{message}{reset}")
+            return
+
         terminal_size = shutil.get_terminal_size().columns
         plot_width_max = terminal_size - 15
 
         if self.plot_config["colors"] == []:
-            colors = [self.color_priority[i] for i in range(len(data))]
+            colors = self.color_priority[: len(data)]
             self.set_colors(colors)
 
-        data = list(data)[0]
-        self.plot_datas = []
-
-        for i in range(len(data)):
-            if type(data[i]) is not list:
+        self.plot_data = []
+        for data_ in data:
+            if not isinstance(data_, list):
+                message = "WARNING: result data must be list"
+                print(f"{yellow}{message}{reset}")
                 return
-            if len(data[i]) == 0:
+            if len(data_) == 0:
+                message = "WARNING: result data is empty"
+                print(f"{yellow}{message}{reset}")
                 return
-            if None in data[i]:
+            if None in data_:
+                message = "WARNING: result data has 'None'"
+                print(f"{yellow}{message}{reset}")
                 return
-            if any(np.isnan(data[i])):
+            if np.nan in data_:
                 message = "WARNING: result data has 'nan'"
                 print(f"{yellow}{message}{reset}")
                 return
-            if float("inf") in data[i]:
+            if float("inf") in data_:
                 message = "WARNING: result data has 'inf'"
                 print(f"{yellow}{message}{reset}")
                 return
-            if float("-inf") in data[i]:
+            if float("-inf") in data_:
                 message = "WARNING: result data has '-inf'"
                 print(f"{yellow}{message}{reset}")
                 return
+            self.plot_data.append(data_[max(len(data_) - plot_width_max, 0) :])
 
-            if len(data[i]) >= plot_width_max:
-                self.plot_datas.append(data[i][(len(data[i]) - plot_width_max) :])
-            else:
-                self.plot_datas.append(data[i])
-        print(plot(series=self.plot_datas, cfg=self.plot_config))
+        print(plot(series=self.plot_data, cfg=self.plot_config))
 
     def sort(self, data: list[Any], goal: str) -> list[Any] | None:
         """Sort the any data to maximize or minimize.
