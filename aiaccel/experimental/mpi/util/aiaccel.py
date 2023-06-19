@@ -4,12 +4,14 @@ import logging
 import sys
 from argparse import ArgumentParser
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from aiaccel.common import datetime_format
 from aiaccel.experimental.mpi.config import load_config
 from aiaccel.parameter import HyperParameterConfiguration
-from aiaccel.util import cast_y, get_time_now
+from aiaccel.util import cast_y
 
 
 class CommandLineArgs:
@@ -138,7 +140,7 @@ class Run:
         y = None
         err = ""
 
-        start_time = get_time_now()
+        start_time = datetime.now().strftime(datetime_format)
 
         try:
             y = cast_y(func(xs), y_data_type)
@@ -148,7 +150,7 @@ class Run:
         else:
             err = ""
 
-        end_time = get_time_now()
+        end_time = datetime.now().strftime(datetime_format)
 
         return xs, y, err, start_time, end_time
 
