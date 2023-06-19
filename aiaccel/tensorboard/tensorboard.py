@@ -54,26 +54,23 @@ class TensorBoard(AbstractModule):
             if objective_ys is None or best_values is None:
                 continue
 
-            for i in range(len(self.goals)):
-                goal = self.goals[i]
-                objective_y = objective_ys[i]
-                best_value = best_values[i]
-
+            objectives = {}
+            for goal_id, (goal, objective_y, best_value) in enumerate(zip(self.goals, objective_ys, best_values)):
                 if len(self.goals) == 1:
                     tag_objective = "objective"
                     tag_min_or_max = "maximum" if goal == goal_maximize else "minimum"
                 else:
-                    tag_objective = f"objective_{i}_"
-                    tag_min_or_max = f"maximum_{i}_" if goal == goal_maximize else f"minimum_{i}_"
-
+                    tag_objective = f"objective_{goal_id}_"
+                    tag_min_or_max = f"maximum_{goal_id}_" if goal == goal_maximize else f"minimum_{goal_id}_"
                 self.writer.add_scalar(tag=tag_objective, scalar_value=objective_y, global_step=trial_id)
                 self.writer.add_scalar(tag=tag_min_or_max, scalar_value=best_value, global_step=trial_id)
 
-                # hyperparameters
-                params = self.storage.hp.get_any_trial_params_dict(trial_id)
-                _trial_id = TrialId(self.config).zero_padding_any_trial_id(trial_id)
+                objectives[tag_objective] = objective_y
 
-                self.writer.add_hparams(params, {tag_objective: objective_y}, name=_trial_id)
+            # hyperparameters
+            params = self.storage.hp.get_any_trial_params_dict(trial_id)
+            _trial_id = TrialId(self.config).zero_padding_any_trial_id(trial_id)
+            self.writer.add_hparams(params, objectives, name=_trial_id)
 
             self.writer.flush()
 
