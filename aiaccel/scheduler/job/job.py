@@ -11,7 +11,8 @@ from transitions import Machine
 from transitions.extensions.states import Tags, add_state_features
 
 from aiaccel.storage import Storage
-from aiaccel.util import Buffer, TrialId, get_time_now_object
+from aiaccel.util.buffer import Buffer
+from aiaccel.util.trialid import TrialId
 from aiaccel.workspace import Workspace
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -429,7 +430,7 @@ class Job:
 
     def is_timeout(self) -> bool:
         state = self.machine.get_state(self.model.state)
-        now = get_time_now_object()
+        now = datetime.now()
         if self.threshold_timeout is None:
             return False
         return now >= self.threshold_timeout and state.name in self.expirable_states
@@ -485,9 +486,7 @@ class Job:
 
         if self.is_timeout():
             self.logger.debug(
-                f"Timeout expire state: {state.name}, "
-                f"now: {get_time_now_object()}, "
-                f"timeout: {self.threshold_timeout}"
+                f"Timeout expire state: {state.name}, now: {datetime.now()}, timeout: {self.threshold_timeout}"
             )
             self.model.expire(self)
 

@@ -15,7 +15,7 @@ from mpi4py.futures import MPIPoolExecutor
 from mpi4py.MPI import COMM_WORLD, Get_processor_name
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import resource_type_abci
+from aiaccel.common import datetime_format, resource_type_abci
 from aiaccel.experimental.mpi.common import (
     dict_experimental,
     dict_mpi,
@@ -25,7 +25,6 @@ from aiaccel.experimental.mpi.common import (
 )
 from aiaccel.experimental.mpi.util.error import MpiError
 from aiaccel.experimental.mpi.util.mpi_log import MpiLog
-from aiaccel.util.time_tools import get_time_now_object, get_time_string_from_object
 
 if TYPE_CHECKING:
     from aiaccel.scheduler import AbstractScheduler
@@ -382,7 +381,7 @@ class MpiOutputHandler(Thread):
 
     def run(self) -> None:
         self._parent.logger.debug(f"{self._module_name}(tag={self._tag}) process started.")
-        self._start_time = get_time_now_object()
+        self._start_time = datetime.datetime.now()
         self._stdouts = []
         self._stderrs = []
         while True:
@@ -400,7 +399,7 @@ class MpiOutputHandler(Thread):
         Mpi.rm_trial_id(self._tag)
         if self._gpu_mode:
             Mpi.rm_gpu_num(self._processor, self._tag)
-        self._end_time = get_time_now_object()
+        self._end_time = datetime.datetime.now()
 
     def get_stdouts(self) -> list[str]:
         return copy.deepcopy(self._stdouts)
@@ -411,12 +410,12 @@ class MpiOutputHandler(Thread):
     def get_start_time(self) -> str | None:
         if self._start_time is None:
             return ""
-        return get_time_string_from_object(self._start_time)
+        return self._start_time.strftime(datetime_format)
 
     def get_end_time(self) -> str | None:
         if self._end_time is None:
             return ""
-        return get_time_string_from_object(self._end_time)
+        return self._end_time.strftime(datetime_format)
 
     def get_returncode(self) -> int | None:
         return self._returncode
