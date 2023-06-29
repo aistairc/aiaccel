@@ -16,6 +16,7 @@ def create_abci_batch_file(
     batch_file: Path,
     job_script_preamble: Path | str | None,
     command: str,
+    enable_command_argument: bool,
     dict_lock: Path,
 ) -> None:
     """Create a ABCI batch file.
@@ -40,29 +41,32 @@ def create_abci_batch_file(
     """
 
     commands = re.split(" +", command)
-
-    for param in param_content["parameters"]:
-        if "parameter_name" in param.keys() and "value" in param.keys():
-            commands.append(f'--{param["parameter_name"]}')
-            commands.append(f'${param["parameter_name"]}')
-    commands.append("--trial_id")
-    commands.append(str(trial_id))
-    commands.append("--config")
-    commands.append("$config_file_path")
+    if enable_command_argument:
+        for param in param_content["parameters"]:
+            if "parameter_name" in param.keys() and "value" in param.keys():
+                commands.append(f'--{param["parameter_name"]}=${param["parameter_name"]}')
+        commands.append(f"--trial_id={str(trial_id)}")
+        commands.append("--config=$config_file_path")
+    else:
+        for param in param_content["parameters"]:
+            if "parameter_name" in param.keys() and "value" in param.keys():
+                commands.append(f'${param["parameter_name"]}')
+        commands.append(str(trial_id))
+        commands.append("$config_file_path")
     commands.append("2>")
     commands.append("$error_file_path")
 
     set_retult = _generate_command_line(
         command="aiaccel-set-result",
         args=[
-            "--file $output_file_path",
-            "--trial_id $trial_id",
-            "--config $config_file_path",
-            "--start_time $start_time",
-            "--end_time $end_time",
-            "--objective $ys",
-            "--error $error",
-            "--exitcode $exitcode",
+            "--file=$output_file_path",
+            "--trial_id=$trial_id",
+            "--config=$config_file_path",
+            "--start_time=$start_time",
+            "--end_time=$end_time",
+            "--objective=$ys",
+            "--error=$error",
+            "--exitcode=$exitcode",
             _generate_param_args(param_content["parameters"]),
         ],
     )
@@ -70,13 +74,13 @@ def create_abci_batch_file(
     set_retult_no_error = _generate_command_line(
         command="aiaccel-set-result",
         args=[
-            "--file $output_file_path",
-            "--trial_id $trial_id",
-            "--config $config_file_path",
-            "--start_time $start_time",
-            "--end_time $end_time",
-            "--objective $ys",
-            "--exitcode $exitcode",
+            "--file=$output_file_path",
+            "--trial_id=$trial_id",
+            "--config=$config_file_path",
+            "--start_time=$start_time",
+            "--end_time=$end_time",
+            "--objective=$ys",
+            "--exitcode=$exitcode",
             _generate_param_args(param_content["parameters"]),
         ],
     )
@@ -133,5 +137,5 @@ def _generate_param_args(params: list[dict[str, Any]]) -> str:
     param_args = ""
     for param in params:
         if "parameter_name" in param.keys() and "value" in param.keys():
-            param_args += f'--{param["parameter_name"]} ${param["parameter_name"]} '
+            param_args += f'--{param["parameter_name"]}=${param["parameter_name"]} '
     return param_args

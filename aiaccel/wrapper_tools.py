@@ -9,7 +9,12 @@ from aiaccel.util import create_yaml
 
 
 def create_runner_command(
-    command: str, param_content: dict[str, Any], trial_id: int, config_path: str, command_error_output: str
+    command: str,
+    param_content: dict[str, Any],
+    trial_id: int,
+    config_path: str,
+    command_error_output: str,
+    enable_command_argument: bool
 ) -> list[str]:
     """Create a list of command strings to run a hyper parameter.
 
@@ -23,16 +28,18 @@ def create_runner_command(
     """
     commands = re.split(" +", command)
     params = param_content["parameters"]
-    for param in params:
-        # Fix a bug related a negative exponential parameters
-        # Need to modify wrapper.py as follows:
-        if "parameter_name" in param.keys() and "value" in param.keys():
-            commands.append(f'--{param["parameter_name"]}')
-            commands.append(f'{param["value"]}')
-    commands.append("--trial_id")
-    commands.append(str(trial_id))
-    commands.append("--config")
-    commands.append(config_path)
+    if enable_command_argument:
+        for param in params:
+            if "parameter_name" in param.keys() and "value" in param.keys():
+                commands.append(f'--{param["parameter_name"]}={param["value"]}')
+        commands.append(f"--trial_id={str(trial_id)}")
+        commands.append(f"--config={config_path}")
+    else:
+        for param in params:
+            if "parameter_name" in param.keys() and "value" in param.keys():
+                commands.append(f'{param["value"]}')
+        commands.append(str(trial_id))
+        commands.append(config_path)
     commands.append("2>")
     commands.append(command_error_output)
     return commands

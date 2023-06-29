@@ -47,6 +47,7 @@ class GenericConfig:
     function: str
     batch_job_timeout: int
     sleep_time: Union[float, int]
+    enable_command_argument: bool
     is_ignore_warning: bool
 
 

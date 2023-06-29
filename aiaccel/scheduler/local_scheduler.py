@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import shlex
 from typing import Any
 
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
@@ -42,19 +43,21 @@ class LocalScheduler(AbstractScheduler):
         Returns:
             str | None: An unique name.
         """
-        args = re.split(" +", command)
+
+        command_list = shlex.split(command)
         # args:
         # ['2', 'python', 'user.py', '--trial_id', '2',
         # '--config', 'config.yaml',
         #  '--x1=3.65996970905703', '--x2=2.99329242098518']
         #
-        trial_id_index = args.index("--trial_id")
-        index_offset = 1
 
-        if trial_id_index is None:
-            return None
+        trial_id = None
+        for arg in command_list:
+            if arg.startswith("--trial_id="):
+                trial_id = arg.split("=")[1]
+                break
 
-        return args[trial_id_index + index_offset]
+        return trial_id
 
     def create_model(self) -> LocalModel:
         """Creates model object of state machine.

@@ -31,7 +31,8 @@ class TestCeaterRunnerComand(BaseTest):
             get_one_parameter(),
             'name',
             'config.json',
-            error_output
+            error_output,
+            True
         )
         print(commands)
         assert commands[0] == 'python'
