@@ -1,6 +1,4 @@
-from aiaccel.scheduler import Job
-from aiaccel.scheduler import LocalScheduler
-
+from aiaccel.scheduler import Job, LocalScheduler
 from tests.base_test import BaseTest
 
 
@@ -32,6 +30,6 @@ class TestLocalScheduler(BaseTest):
         database_remove()
         config = self.load_config_for_test(self.configs['config.json'])
         scheduler = LocalScheduler(config)
-        s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
+        s = {"name": "2 python user.py --trial_id=5 --config=config.yaml --x1=1.0 --x2=1.0"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5
