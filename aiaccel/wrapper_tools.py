@@ -14,7 +14,7 @@ def create_runner_command(
     trial_id: int,
     config_path: str,
     command_error_output: str,
-    enable_command_argument: bool
+    enable_command_argument: bool,
 ) -> list[str]:
     """Create a list of command strings to run a hyper parameter.
 
