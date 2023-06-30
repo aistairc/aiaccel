@@ -201,7 +201,7 @@ class Run:
             err (str): Error string.
         """
 
-        sys.stdout.write(f"{y}\n")
+        sys.stdout.write(f"\n{y}\n")
         if err != "":
             sys.stderr.write(f"{err}\n")
             exit(1)
