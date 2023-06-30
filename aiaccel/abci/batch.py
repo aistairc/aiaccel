@@ -87,7 +87,7 @@ def create_abci_batch_file(
         f"output_file_path={str(output_file_path)}",
         f"error_file_path={str(error_file_path)}",
         'start_time=`date "+%Y-%m-%d %H:%M:%S"`',
-        f'result=`{" ".join(commands)}`',
+        f'result=$({" ".join(commands)} | tail -n 1)',
         "exitcode=$?",
         'ys=$(echo $result | tr -d "[],")',
         "error=`cat $error_file_path`",
