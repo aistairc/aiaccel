@@ -24,7 +24,7 @@ class AbciModel(AbstractModel):
             batch_file=obj.to_file,
             job_script_preamble=obj.config.ABCI.job_script_preamble,
             command=obj.config.generic.job_command,
-            enable_command_argument=obj.config.generic.enable_command_argument,
+            enable_name_in_optional_argument=obj.config.generic.enable_name_in_optional_argument,
             dict_lock=obj.workspace.lock,
         )
 

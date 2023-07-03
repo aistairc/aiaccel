@@ -14,7 +14,7 @@ def create_runner_command(
     trial_id: int,
     config_path: str,
     command_error_output: str,
-    enable_command_argument: bool,
+    enable_name_in_optional_argument: bool,
 ) -> list[str]:
     """Create a list of command strings to run a hyper parameter.
 
@@ -28,7 +28,7 @@ def create_runner_command(
     """
     commands = re.split(" +", command)
     params = param_content["parameters"]
-    if enable_command_argument:
+    if enable_name_in_optional_argument:
         for param in params:
             if "parameter_name" in param.keys() and "value" in param.keys():
                 commands.append(f'--{param["parameter_name"]}={param["value"]}')

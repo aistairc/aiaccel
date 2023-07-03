@@ -16,7 +16,7 @@ def create_abci_batch_file(
     batch_file: Path,
     job_script_preamble: Path | str | None,
     command: str,
-    enable_command_argument: bool,
+    enable_name_in_optional_argument: bool,
     dict_lock: Path,
 ) -> None:
     """Create a ABCI batch file.
@@ -41,7 +41,7 @@ def create_abci_batch_file(
     """
 
     commands = re.split(" +", command)
-    if enable_command_argument:
+    if enable_name_in_optional_argument:
         for param in param_content["parameters"]:
             if "parameter_name" in param.keys() and "value" in param.keys():
                 commands.append(f'--{param["parameter_name"]}=${param["parameter_name"]}')

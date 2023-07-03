@@ -28,7 +28,7 @@ class LocalModel(AbstractModel):
             obj.trial_id,
             str(obj.config.config_path),
             str(obj.command_error_output),
-            obj.config.generic.enable_command_argument,
+            obj.config.generic.enable_name_in_optional_argument,
         )
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
         obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE)
