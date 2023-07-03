@@ -70,7 +70,7 @@ def main() -> None:
     contents = {
         "trial_id": args.trial_id,
         "result": args.objective,
-        "paramerters": xs,
+        "parameters": xs,
         "start_time": args.start_time,
         "end_time": args.end_time,
         "exitcode": args.exitcode,
