@@ -67,10 +67,6 @@ class Mpi:
             cls.executor = MPIPoolExecutor()
 
     @classmethod
-    def run_worker(cls) -> None:
-        MPIPoolExecutor()
-
-    @classmethod
     def submit(cls, command: list[str], trial_id: int, gpu_mode: bool, silent: bool = True) -> tuple[str, int]:
         if cls.log is None:
             raise MpiError("cls.lock is None")
