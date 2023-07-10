@@ -21,6 +21,7 @@ from aiaccel.workspace import Workspace
 from aiaccel.util.logger import ColoredHandler
 import sys
 
+
 class AbstractModule(object):
     """An abstract class for Master, Optimizer and Scheduler.
 
