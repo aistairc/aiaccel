@@ -2,7 +2,7 @@ import logging
 
 
 class Color:
-    def __init__(self):
+    def __init__(self) -> None:
         self.black: str = "\033[30m"
         self.red: str = "\033[31m"
         self.green: str = "\033[32m"
@@ -23,8 +23,8 @@ class Color:
         self.reset: str = "\033[0m"
 
 
-class ColoredHandler(logging.StreamHandler):
-    def emit(self, record):
+class ColoredHandler(logging.StreamHandler):  # type: ignore
+    def emit(self, record: logging.LogRecord) -> None:
         if record.levelno == logging.DEBUG:
             color_start = Color().blue
         elif record.levelno == logging.INFO:
