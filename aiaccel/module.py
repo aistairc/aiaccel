@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -16,10 +17,8 @@ from aiaccel.common import (
     module_type_scheduler,
 )
 from aiaccel.storage import Storage
-from aiaccel.util import TrialId
+from aiaccel.util import ColoredHandler, TrialId
 from aiaccel.workspace import Workspace
-from aiaccel.util.logger import ColoredHandler
-import sys
 
 
 class AbstractModule(object):
