@@ -24,7 +24,7 @@ class TestCreateAbciBatchFile(BaseTest):
         dict_lock = work_dir.joinpath('lock')
         batch_file = work_dir.joinpath('runner', 'run_test.sh')
         command = config.generic.job_command
-        enable_name_in_optional_argument = config.generic.enable_name_in_optional_argument
+        enabled_variable_name_argumentation = config.generic.enabled_variable_name_argumentation
         trial_id = 99
 
         output_file_path = work_dir.joinpath('result', f'{trial_id}.yml')
@@ -41,7 +41,7 @@ class TestCreateAbciBatchFile(BaseTest):
             batch_file,
             job_script_preamble,
             command,
-            enable_name_in_optional_argument,
+            enabled_variable_name_argumentation,
             dict_lock
         )
         assert work_dir.joinpath('runner/run_test.sh').exists()

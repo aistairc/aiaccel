@@ -19,7 +19,7 @@ class MpiModel(LocalModel):
             obj.trial_id,
             str(obj.config.config_path),
             str(obj.command_error_output),
-            obj.config.generic.enable_name_in_optional_argument,
+            obj.config.generic.enabled_variable_name_argumentation,
         )
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
