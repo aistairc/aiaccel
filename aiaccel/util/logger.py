@@ -1,44 +1,24 @@
 import logging
 
+from colorama import Fore, init
 
-class Color:
-    def __init__(self) -> None:
-        self.black: str = "\033[30m"
-        self.red: str = "\033[31m"
-        self.green: str = "\033[32m"
-        self.yellow: str = "\033[33m"
-        self.blue: str = "\033[34m"
-        self.magenta: str = "\033[35m"
-        self.cyan: str = "\033[36m"
-        self.lightgray: str = "\033[37m"
-        self.default: str = "\033[39m"
-        self.darkgray: str = "\033[90m"
-        self.lightred: str = "\033[91m"
-        self.lightgreen: str = "\033[92m"
-        self.lightyellow: str = "\033[93m"
-        self.lightblue: str = "\033[94m"
-        self.lightmagenta: str = "\033[95m"
-        self.lightcyan: str = "\033[96m"
-        self.white: str = "\033[97m"
-        self.reset: str = "\033[0m"
+init(autoreset=True)
 
 
 class ColoredHandler(logging.StreamHandler):  # type: ignore
     def emit(self, record: logging.LogRecord) -> None:
         if record.levelno == logging.DEBUG:
-            color_start = Color().blue
+            self.stream.write(f"{Fore.BLUE}{self.format(record)}\n")
         elif record.levelno == logging.INFO:
-            color_start = Color().green
+            self.stream.write(f"{Fore.GREEN}{self.format(record)}\n")
         elif record.levelno == logging.WARNING:
-            color_start = Color().yellow
+            self.stream.write(f"{Fore.YELLOW}{self.format(record)}\n")
         elif record.levelno == logging.ERROR:
-            color_start = Color().red
+            self.stream.write(f"{Fore.RED}{self.format(record)}\n")
         elif record.levelno == logging.CRITICAL:
-            color_start = Color().magenta
-        else:
-            color_start = Color().default
-        color_end = Color().reset
-        self.stream.write(f"{color_start}{self.format(record)}{color_end}\n")
+            self.stream.write(f"{Fore.MAGENTA}{self.format(record)}\n")
+        else:  # default color
+            self.stream.write(f"{self.format(record)}\n")
 
 
 def str_to_logging_level(s: str) -> int:
