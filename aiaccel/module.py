@@ -18,7 +18,8 @@ from aiaccel.common import (
 from aiaccel.storage import Storage
 from aiaccel.util import TrialId
 from aiaccel.workspace import Workspace
-
+from aiaccel.util.logger import ColoredHandler
+import sys
 
 class AbstractModule(object):
     """An abstract class for Master, Optimizer and Scheduler.
@@ -150,7 +151,7 @@ class AbstractModule(object):
         fh.setFormatter(fh_formatter)
         fh.setLevel(file_level)
 
-        ch = logging.StreamHandler()
+        ch = ColoredHandler(sys.stdout)
         ch_formatter = logging.Formatter(f"{module_type} %(levelname)-8s %(message)s")
         ch.setFormatter(ch_formatter)
         ch.setLevel(stream_level)
