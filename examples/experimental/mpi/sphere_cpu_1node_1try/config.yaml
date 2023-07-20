@@ -11,7 +11,7 @@ resource:
   #type: "ABCI"
   #type: "python_local"
   num_workers: 1
-  mpi_npernode: 40
+  mpi_npernode: 2
   mpi_bat_rt_num: 1
   mpi_bat_h_rt: "2:00:00"
   mpi_bat_root_dir: "~/mpi_work"

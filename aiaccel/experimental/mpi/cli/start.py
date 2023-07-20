@@ -139,7 +139,3 @@ def main() -> None:  # pragma: no cover
 
 if __name__ == "__main__":  # pragma: no cover
     main()
-
-
-if __name__ == "__worker__":  # pragma: no cover
-    Mpi.run_worker()
