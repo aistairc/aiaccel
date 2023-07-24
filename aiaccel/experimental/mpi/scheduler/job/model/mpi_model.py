@@ -19,6 +19,7 @@ class MpiModel(LocalModel):
             obj.trial_id,
             str(obj.config.config_path),
             str(obj.command_error_output),
+            obj.config.generic.enabled_variable_name_argumentation,
         )
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
@@ -85,8 +86,7 @@ class MpiModel(LocalModel):
 
         commands = ["python", "-m", "aiaccel.experimental.mpi.cli.set_result"]
         for key in args.keys():
-            commands.append("--" + key)
-            commands.append(str(args[key]))
+            commands.append(f"--{key}={str(args[key])}")
 
         commands.append("--objective")
         for objective in objectives:
@@ -94,8 +94,7 @@ class MpiModel(LocalModel):
 
         for param in params:
             if "parameter_name" in param.keys() and "value" in param.keys():
-                commands.append("--" + param["parameter_name"])
-                commands.append(str(param["value"]))
+                commands.append(f"--{param['parameter_name']}={str(param['value'])}")
         print(commands)
         Popen(commands)
 

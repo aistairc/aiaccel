@@ -31,20 +31,18 @@ class TestCeaterRunnerComand(BaseTest):
             get_one_parameter(),
             'name',
             'config.json',
-            error_output
+            error_output,
+            True
         )
         print(commands)
         assert commands[0] == 'python'
         assert commands[1] == 'original_main.py'
-        assert commands[2] == '--x1'
-        assert commands[3] == '0.9932890709584586'
+        assert commands[2] == '--x1=0.9932890709584586'
         # skip --x2 ~ x10
-        assert commands[22] == '--trial_id'
-        assert commands[23] == 'name'
-        assert commands[24] == '--config'
-        assert commands[25] == 'config.json'
-        assert commands[26] == '2>'
-        assert commands[27] == error_output
+        assert commands[12] == '--trial_id=name'
+        assert commands[13] == '--config=config.json'
+        assert commands[14] == '2>'
+        assert commands[15] == error_output
 
         start_time = datetime.now().strftime(datetime_format)
         end_time = datetime.now().strftime(datetime_format)

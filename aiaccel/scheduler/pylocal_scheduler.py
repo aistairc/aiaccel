@@ -137,16 +137,14 @@ class PylocalScheduler(AbstractScheduler):
 
         commands = ["aiaccel-set-result"]
         for key in args.keys():
-            commands.append("--" + key)
-            commands.append(str(args[key]))
+            commands.append(f"--{key}={str(args[key])}")
 
         commands.append("--objective")
         for y in ys:
             commands.append(str(y))
 
         for key in xs.keys():
-            commands.append("--" + key)
-            commands.append(str(xs[key]))
+            commands.append(f"--{key}={str(xs[key])}")
 
         self.processes.append(Popen(commands))
 
