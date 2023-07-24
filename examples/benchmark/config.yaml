@@ -1,9 +1,10 @@
 generic:
   workspace: "./work"
   job_command: "python user.py"
-  # python_file: "./user.py"
-  # function: "main"
+  python_file: "./user.py"
+  function: "main"
   batch_job_timeout: 600
+  enabled_variable_name_argumentation: True
 
 resource:
   type: "abci"
