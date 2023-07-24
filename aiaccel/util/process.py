@@ -134,21 +134,19 @@ class OutputHandler(threading.Thread):
             None
         """
         self._start_time = datetime.datetime.now()
-        self._stdouts = []
-        self._stderrs = []
 
         while True:
             if self._proc.stdout is None:
                 break
 
-            stdout = self._proc.stdout.readline().decode().strip()
+            stdout = self._proc.stdout.readline()
             if stdout:
-                self._stdouts.append(stdout)
+                self._stdouts.append(stdout.decode().strip())
 
             if self._proc.stderr is not None:
-                stderr = self._proc.stderr.readline().decode().strip()
+                stderr = self._proc.stderr.readline()
                 if stderr:
-                    self._stderrs.append(stderr)
+                    self._stderrs.append(stderr.decode().strip())
             else:
                 stderr = None
 
