@@ -15,7 +15,7 @@ from aiaccel.util.filesystem import (
     make_directories,
     make_directory,
 )
-from aiaccel.util.logger import str_to_logging_level
+from aiaccel.util.logger import ColoredHandler, str_to_logging_level
 from aiaccel.util.name import generate_random_name
 from aiaccel.util.process import OutputHandler, exec_runner, is_process_running, kill_process, ps2joblist, subprocess_ps
 from aiaccel.util.retry import retry
@@ -27,6 +27,7 @@ from aiaccel.util.trialid import TrialId
 
 __all__ = [
     "Buffer",
+    "ColoredHandler",
     "EasyVisualizer",
     "OutputHandler",
     # 'Run',
