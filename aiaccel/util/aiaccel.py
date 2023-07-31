@@ -201,8 +201,9 @@ class Run:
             y (Any): Objective value.
             err (str): Error string.
         """
+
         if y is not None:
-            sys.stdout.write(f"{y}\n")
+            sys.stdout.write(f"\n{y}\n")
         if err != "":
             sys.stderr.write(f"{err}\n")
             exit(1)
