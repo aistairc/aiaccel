@@ -1,6 +1,6 @@
 generic:
   workspace: "./work"
-  job_command: "bash exe.sh"
+  job_command: "bash exe_parallel.sh"
   # python_file: "./user.py"
   # function: "main"
   batch_job_timeout: 6000
@@ -25,11 +25,12 @@ optimize:
   goal: "minimize"
   trial_number: 1
   rand_seed: 42
+  # To add a hyperparameter, modify the following "parameters".
   parameters:
     -
-      name: "path2traindb"
+      name: "dummy parameter"
       type: "categorical"
-      choices: ["./data/FractalDB-1000"]
+      choices: ["dummy"]
 
 job_setting:
   cancel_retry: 3
