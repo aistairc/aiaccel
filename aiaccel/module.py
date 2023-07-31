@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +17,7 @@ from aiaccel.common import (
     module_type_scheduler,
 )
 from aiaccel.storage import Storage
-from aiaccel.util import TrialId
+from aiaccel.util import ColoredHandler, TrialId
 from aiaccel.workspace import Workspace
 
 
@@ -150,7 +151,7 @@ class AbstractModule(object):
         fh.setFormatter(fh_formatter)
         fh.setLevel(file_level)
 
-        ch = logging.StreamHandler()
+        ch = ColoredHandler(sys.stdout)
         ch_formatter = logging.Formatter(f"{module_type} %(levelname)-8s %(message)s")
         ch.setFormatter(ch_formatter)
         ch.setLevel(stream_level)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import traceback
 from argparse import ArgumentParser
 from collections.abc import Callable
 from datetime import datetime
@@ -151,8 +152,8 @@ class Run:
 
         try:
             y = cast_y(func(xs), y_data_type)
-        except BaseException as e:
-            err = str(e)
+        except BaseException:
+            err = str(traceback.format_exc())
             y = None
         else:
             err = ""
@@ -201,7 +202,8 @@ class Run:
             err (str): Error string.
         """
 
-        sys.stdout.write(f"{y}\n")
+        if y is not None:
+            sys.stdout.write(f"\n{y}\n")
         if err != "":
             sys.stderr.write(f"{err}\n")
             exit(1)

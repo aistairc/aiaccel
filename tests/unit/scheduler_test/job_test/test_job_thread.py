@@ -5,12 +5,18 @@ from subprocess import Popen
 
 import pytest
 
-from aiaccel.common import (dict_hp_finished, dict_hp_ready, dict_hp_running,
-                            dict_lock, dict_result, dict_runner, goal_maximize,
-                            goal_minimize)
+from aiaccel.common import (
+    dict_hp_finished,
+    dict_hp_ready,
+    dict_hp_running,
+    dict_lock,
+    dict_result,
+    dict_runner,
+    goal_maximize,
+    goal_minimize,
+)
 from aiaccel.config import ResourceType
-from aiaccel.scheduler import (AbciModel, CustomMachine, Job, LocalModel,
-                               LocalScheduler, create_scheduler)
+from aiaccel.scheduler import AbciModel, CustomMachine, Job, LocalModel, LocalScheduler, create_scheduler
 from aiaccel.util.process import OutputHandler
 from tests.base_test import BaseTest
 
@@ -265,7 +271,7 @@ class TestModel(BaseTest):
         # self.job.scheduler.stats.append({'name': '001'})
         # self.job.scheduler.stats.append({'name': 0})
         self.job.scheduler.stats.append(
-            {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0'}
+            {'name': '2 python user.py --trial_id=0 --config=config.yaml --x1=1.0 --x2=1.0'}
         )
         assert not self.model.conditions_kill_confirmed(self.job)
 

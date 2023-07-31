@@ -26,6 +26,7 @@ dependencies = [
     "sqlalchemy>=2.0.7,<3.0.0",
     "tensorboardx",
     "transitions>=0.9.0,<1.0.0",
+    "colorama",
 ]
 
 [project.scripts]
