@@ -10,6 +10,7 @@ numof_thread=40
 arch=resnet50
 
 # Parameter search
+# require cv2 pandas h5py
 python param_search/ifs_search.py --rate=${fillrate} --category=${numof_category} --numof_point=${numof_point} --save_dir='./data'
 python param_search/parallel_dir.py --path2dir='./data' --rate=${fillrate} --category=${numof_category} --thread=${numof_thread}
 
@@ -24,6 +25,7 @@ done
 wait
 
 # FractalDB Pre-training
+# require torch torchvision
 python pretraining/main.py --path2traindb='./data/FractalDB-'${numof_category} --dataset='FractalDB-'${numof_category} --numof_classes=${numof_category} --usenet=${arch}
 
 # Fine-tuning
