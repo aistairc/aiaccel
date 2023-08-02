@@ -60,9 +60,9 @@ logger:
     optimizer: "optimizer.log"
     scheduler: "scheduler.log"
   log_level:
-    master: "DEBUG"
-    optimizer: "DEBUG"
-    scheduler: "DEBUG"
+    master: "CRITICAL"
+    optimizer: "CRITICAL"
+    scheduler: "CRITICAL"
   stream_level:
     master: "DEBUG"
     optimizer: "DEBUG"
