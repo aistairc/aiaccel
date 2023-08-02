@@ -36,10 +36,10 @@ if __name__ == "__main__":
 	args = conf()
 	csv_names = os.listdir(args.load_root)
 	csv_names.sort()
-	weights = np.genfromtxt(args.weight_csv,dtype=np.str,delimiter=',')
+	weights = np.genfromtxt(args.weight_csv,dtype=np.str_,delimiter=',')
 
 	if not os.path.exists(os.path.join(args.save_root)):
-		os.mkdir(os.path.join(args.save_root))
+		os.makedirs(os.path.join(args.save_root), exist_ok=True)
 
 	for csv_name in csv_names:
 		name, ext = os.path.splitext(csv_name)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
 			if args.draw_type == 'point_gray':
 				generators = ifs_function(prev_x=0.0,prev_y=0.0,save_root=args.save_root,fractal_name=name,fractal_weight_count=padded_fractal_weight)
-				params = np.genfromtxt(os.path.join(args.load_root, csv_name), dtype=np.str, delimiter=',')
+				params = np.genfromtxt(os.path.join(args.load_root, csv_name), dtype=np.str_, delimiter=',')
 				for param in params:
 					generators.set_param(float(param[0]), float(param[1]), float(param[2]), float(param[3]), float(param[4]), float(param[5]), float(param[6]),
 						weight_a = float(weight[0]), weight_b = float(weight[1]), weight_c = float(weight[2]), weight_d = float(weight[3]), weight_e = float(weight[4]), weight_f = float(weight[5]))
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 			
 			elif args.draw_type == 'point_color':
 				generators = ifs_function(prev_x=0.0,prev_y=0.0,save_root=args.save_root,fractal_name=name,fractal_weight_count=padded_fractal_weight)
-				params = np.genfromtxt(os.path.join(args.load_root, csv_name), dtype=np.str,delimiter=',')
+				params = np.genfromtxt(os.path.join(args.load_root, csv_name), dtype=np.str_,delimiter=',')
 				for param in params:
 					generators.set_param(float(param[0]), float(param[1]), float(param[2]), float(param[3]), float(param[4]), float(param[5]), float(param[6]),
 						weight_a=float(weight[0]), weight_b=float(weight[1]), weight_c=float(weight[2]), weight_d=float(weight[3]), weight_e=float(weight[4]), weight_f=float(weight[5]))
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 			elif args.draw_type == 'patch_gray':
 				for count in range(args.instance):
 					generators = ifs_function(prev_x=0.0, prev_y=0.0, save_root=args.save_root, fractal_name=name, fractal_weight_count=padded_fractal_weight)
-					params = np.genfromtxt(os.path.join(args.load_root, csv_name), dtype=np.str,delimiter=',')
+					params = np.genfromtxt(os.path.join(args.load_root, csv_name), dtype=np.str_,delimiter=',')
 					for param in params:
 						generators.set_param(float(param[0]), float(param[1]), float(param[2]), float(param[3]), float(param[4]), float(param[5]), float(param[6]),
 							weight_a=float(weight[0]), weight_b=float(weight[1]), weight_c=float(weight[2]), weight_d=float(weight[3]), weight_e=float(weight[4]), weight_f=float(weight[5]))
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 			elif args.draw_type == 'patch_color':
 				for count in range(args.instance):
 					generators = ifs_function(prev_x=0.0, prev_y=0.0, save_root=args.save_root, fractal_name=name, fractal_weight_count=padded_fractal_weight)
-					params = np.genfromtxt(os.path.join(args.load_root, csv_name), dtype=np.str, delimiter=",")
+					params = np.genfromtxt(os.path.join(args.load_root, csv_name), dtype=np.str_, delimiter=",")
 					for param in params:
 						generators.set_param(float(param[0]), float(param[1]), float(param[2]), float(param[3]), float(param[4]), float(param[5]), float(param[6]),
 							weight_a=float(weight[0]), weight_b=float(weight[1]), weight_c=float(weight[2]), weight_d=float(weight[3]), weight_e=float(weight[4]), weight_f=float(weight[5]))
