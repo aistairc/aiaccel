@@ -30,4 +30,4 @@ wait
 python pretraining/main.py --path2traindb=${data_dir}'/data/FractalDB-'${numof_category} --dataset='FractalDB-'${numof_category} --numof_classes=${numof_category} --usenet=${arch} --path2weight=${data_dir}'/data/weight'
 
 # # Fine-tuning
-python finetuning/main.py --path2db='/data/CIFAR10' --path2weight=${data_dir}'/data/weight' --dataset='FractalDB-'${numof_category} --ft_dataset='CIFAR10' --numof_pretrained_classes=${numof_category} --usenet=${arch}
+python finetuning/main.py --path2db=${data_dir}'/data/CIFAR10' --path2weight=${data_dir}'/data/weight' --dataset='FractalDB-'${numof_category} --ft_dataset='CIFAR10' --numof_pretrained_classes=${numof_category} --usenet=${arch}
