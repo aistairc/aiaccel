@@ -24,8 +24,24 @@ def worker_init_fn(worker_id):
 
 
 def model_select(args):
-    model = resnet50(pretrained=False, num_classes=args.numof_classes).to(device)
-    return model
+    if args.usenet == "resnet18":
+        model = resnet18(pretrained=False, num_classes=args.numof_classes).to(device)
+        return model
+    elif args.usenet == "resnet34":
+        model = resnet34(pretrained=False, num_classes=args.numof_classes).to(device)
+        return model
+    elif args.usenet == "resnet50":
+        model = resnet50(pretrained=False, num_classes=args.numof_classes).to(device)
+        return model
+    elif args.usenet == "resnet101":
+        model = resnet101(pretrained=False, num_classes=args.numof_classes).to(device)
+        return model
+    elif args.usenet == "resnet152":
+        model = resnet152(pretrained=False, num_classes=args.numof_classes).to(device)
+        return model
+    elif args.usenet == "resnet200":
+        model = resnet200(pretrained=False, num_classes=args.numof_classes).to(device)
+        return model
 
 
 if __name__== "__main__":
