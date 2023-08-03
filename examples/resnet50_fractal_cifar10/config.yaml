@@ -3,7 +3,7 @@ generic:
   job_command: "bash exe_parallel.sh"
   # python_file: "./user.py"
   # function: "main"
-  batch_job_timeout: 6000
+  batch_job_timeout: 180000
 
 resource:
   type: "abci"
