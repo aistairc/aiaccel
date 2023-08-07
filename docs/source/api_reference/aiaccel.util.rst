@@ -84,13 +84,6 @@ aiaccel.util.suffix module
    :undoc-members:
    :show-inheritance:
 
-aiaccel.util.time\_tools module
--------------------------------
-
-.. automodule:: aiaccel.util.time_tools
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 aiaccel.util.trialid module
 ---------------------------
