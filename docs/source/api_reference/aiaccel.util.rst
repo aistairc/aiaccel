@@ -28,6 +28,14 @@ aiaccel.util.cast module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.util.data\_type module
+------------------------------
+
+.. automodule:: aiaccel.util.data_type
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.util.easy\_visualizer module
 ------------------------------------
 
@@ -83,7 +91,6 @@ aiaccel.util.suffix module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 aiaccel.util.trialid module
 ---------------------------
