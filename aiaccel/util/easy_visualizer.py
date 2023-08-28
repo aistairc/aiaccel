@@ -106,7 +106,7 @@ class EasyVisualizer:
         Raises:
             Exception: An out-of-target color is specified.
         """
-        if not type(colors) == list:
+        if not isinstance(colors, list):
             raise Exception
 
         self.plot_config["colors"] = []
@@ -188,7 +188,7 @@ class EasyVisualizer:
         Returns:
             Sorted list, or None.
         """
-        if not type(data) == list:
+        if not isinstance(data, list):
             return None
 
         best_values = []
