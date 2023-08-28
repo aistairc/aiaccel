@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-03 15:32+0900\n"
+"POT-Creation-Date: 2023-08-07 12:53+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -603,271 +603,268 @@ msgid ""
 "HpFinishedFailed. Defaults to 60."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:277
-msgid "job_loop_duration (float, optional):"
-msgstr ""
-
 #: ../../source/user_guide/configuration_setting.md:278
-msgid "スケジューラジョブスレッドのループ 1 周あたりのスリープ時間を秒単位で指定します． デフォルトでは 0.5 (秒) に設定されています．"
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:281
-msgid "A sleep time each job loop. Defaults to 0.5."
-msgstr ""
-
-#: ../../source/user_guide/configuration_setting.md:284
 msgid "job_retry (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:285
+#: ../../source/user_guide/configuration_setting.md:279
 msgid ""
 "Max retry counts to transit the state from HpCancelFailed to "
 "HpCancelFailure. Defaults to 2."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:288
+#: ../../source/user_guide/configuration_setting.md:282
 msgid "job_timeout (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:289
+#: ../../source/user_guide/configuration_setting.md:283
 msgid ""
 "Timeout seconds to transit the state from JobChecking to JobFailed. "
 "Defaults to 60."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:292
+#: ../../source/user_guide/configuration_setting.md:286
 msgid "kill_retry (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:293
+#: ../../source/user_guide/configuration_setting.md:287
 msgid ""
 "Max retry counts to transit the state from KillFailed to KillFailure. "
 "Defaults to 3."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:296
+#: ../../source/user_guide/configuration_setting.md:290
 msgid "kill_timeout (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:297
+#: ../../source/user_guide/configuration_setting.md:291
 msgid ""
 "Timeout seconds to transit the state from KillChecking to KillFailed. "
 "Defaults to 60."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:300
+#: ../../source/user_guide/configuration_setting.md:294
 msgid "result_retry (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:301
+#: ../../source/user_guide/configuration_setting.md:295
 msgid ""
 "Max retry counts to transit the state from RunnerFailed to RunnerFailure."
 " Defaults to 1."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:304
+#: ../../source/user_guide/configuration_setting.md:298
 msgid "runner_retry (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:305
+#: ../../source/user_guide/configuration_setting.md:299
 msgid ""
 "Max retry counts to transit the state from RunnerFailed to RunnerFailure."
 " Defaults to 3."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:308
+#: ../../source/user_guide/configuration_setting.md:302
 msgid "runner_timeout (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:309
+#: ../../source/user_guide/configuration_setting.md:303
 msgid ""
 "Timeout seconds to transit the state from RunnerChecking to RunnerFailed."
 " Defaults to 60."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:312
+#: ../../source/user_guide/configuration_setting.md:306
 msgid "running_retry (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:313
+#: ../../source/user_guide/configuration_setting.md:307
 msgid ""
 "Max retry counts to transit the state from HpRunningFailed to "
 "HpRunningFailure. Defaults to 3."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:316
+#: ../../source/user_guide/configuration_setting.md:310
 msgid "running_timeout (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:317
+#: ../../source/user_guide/configuration_setting.md:311
 msgid ""
 "Timeout seconds to transit the state from HpRunningChecking to "
 "HpRunningFailed. Defaults to 60."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:320
+#: ../../source/user_guide/configuration_setting.md:314
 msgid "init_fail_count (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:321
+#: ../../source/user_guide/configuration_setting.md:315
 msgid "Defaults to 100."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:323
+#: ../../source/user_guide/configuration_setting.md:317
 msgid "name_length (int, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:324
+#: ../../source/user_guide/configuration_setting.md:318
 msgid ""
 "文字列としてのジョブ ID の長さです． この文字列は，結果を .hp ファイルに保存する際にファイル名として使用されます． デフォルトでは 6 "
 "に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:331
+#: ../../source/user_guide/configuration_setting.md:325
 msgid "**logger:**"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:334
+#: ../../source/user_guide/configuration_setting.md:328
 msgid "file:"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:335
+#: ../../source/user_guide/configuration_setting.md:329
 msgid "実行ログの保存先を設定します．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:337
-#: ../../source/user_guide/configuration_setting.md:388
+#: ../../source/user_guide/configuration_setting.md:331
+#: ../../source/user_guide/configuration_setting.md:382
 msgid "master (str, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:338
+#: ../../source/user_guide/configuration_setting.md:332
 msgid "マスターモジュールのログの保存先を設定します． デフォルトでは \"master.log\" に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:341
-#: ../../source/user_guide/configuration_setting.md:373
-#: ../../source/user_guide/configuration_setting.md:395
+#: ../../source/user_guide/configuration_setting.md:335
+#: ../../source/user_guide/configuration_setting.md:367
+#: ../../source/user_guide/configuration_setting.md:389
 msgid "optimizer (str, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:342
+#: ../../source/user_guide/configuration_setting.md:336
 msgid "オプティマイザモジュールのログの保存先を設定します． デフォルトでは \"optimizer.log\" に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:345
-#: ../../source/user_guide/configuration_setting.md:380
-#: ../../source/user_guide/configuration_setting.md:402
+#: ../../source/user_guide/configuration_setting.md:339
+#: ../../source/user_guide/configuration_setting.md:374
+#: ../../source/user_guide/configuration_setting.md:396
 msgid "scheduler (str, optional):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:346
+#: ../../source/user_guide/configuration_setting.md:340
 msgid "スケジューラモジュールのログの保存先を設定します． デフォルトでは \"scheduler.log\" に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:349
+#: ../../source/user_guide/configuration_setting.md:343
 msgid "log_level:"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:350
+#: ../../source/user_guide/configuration_setting.md:344
 msgid "master (str):"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:351
+#: ../../source/user_guide/configuration_setting.md:345
 msgid "マスターモジュールからのログファイル出力のログレベルを設定します． 以下の文字列が設定可能です．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:353
-#: ../../source/user_guide/configuration_setting.md:364
+#: ../../source/user_guide/configuration_setting.md:347
+#: ../../source/user_guide/configuration_setting.md:358
 msgid "'DEBUG'"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:354
-#: ../../source/user_guide/configuration_setting.md:365
+#: ../../source/user_guide/configuration_setting.md:348
+#: ../../source/user_guide/configuration_setting.md:359
 msgid "'INFO'"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:355
-#: ../../source/user_guide/configuration_setting.md:366
+#: ../../source/user_guide/configuration_setting.md:349
+#: ../../source/user_guide/configuration_setting.md:360
 msgid "'WARNING'"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:356
-#: ../../source/user_guide/configuration_setting.md:367
+#: ../../source/user_guide/configuration_setting.md:350
+#: ../../source/user_guide/configuration_setting.md:361
 msgid "'WARN'"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:357
-#: ../../source/user_guide/configuration_setting.md:368
+#: ../../source/user_guide/configuration_setting.md:351
+#: ../../source/user_guide/configuration_setting.md:362
 msgid "'ERROR'"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:358
-#: ../../source/user_guide/configuration_setting.md:369
+#: ../../source/user_guide/configuration_setting.md:352
+#: ../../source/user_guide/configuration_setting.md:363
 msgid "'CRITICAL"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:360
+#: ../../source/user_guide/configuration_setting.md:354
 msgid "デフォルトでは \"DEBUG\" に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:362
+#: ../../source/user_guide/configuration_setting.md:356
 msgid ""
 "A logging level for a log file output of master module. Following strings"
 " are available;"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:371
+#: ../../source/user_guide/configuration_setting.md:365
 msgid "Defaults to \"DEBUG\"."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:374
-#: ../../source/user_guide/configuration_setting.md:381
+#: ../../source/user_guide/configuration_setting.md:368
+#: ../../source/user_guide/configuration_setting.md:375
 msgid "オプティマイザモジュールからのログファイル出力のログレベルを設定します． デフォルトでは \"DEBUG\" に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:377
+#: ../../source/user_guide/configuration_setting.md:371
 msgid ""
 "A logging level for a log file output of optimizer module. Defaults to "
 "\"DEBUG\"."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:384
+#: ../../source/user_guide/configuration_setting.md:378
 msgid ""
 "A logging level for a log file output of scheduler module. Defaults to "
 "\"DEBUG\"."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:387
+#: ../../source/user_guide/configuration_setting.md:381
 msgid "stream_level:"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:389
+#: ../../source/user_guide/configuration_setting.md:383
 msgid "マスターモジュールからのストリーム出力のログレベルを設定します． デフォルトでは \"DEBUG\" に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:392
+#: ../../source/user_guide/configuration_setting.md:386
 msgid ""
 "A logging level for a stream output of master module. Defaults to "
 "\"DEBUG\"."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:396
+#: ../../source/user_guide/configuration_setting.md:390
 msgid "オプティマイザモジュールからのストリーム出力のログレベルを設定します． デフォルトでは \"DEBUG\" に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:399
+#: ../../source/user_guide/configuration_setting.md:393
 msgid ""
 "A logging level for a stream output of optimizer module. Defaults to "
 "\"DEBUG\"."
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:403
+#: ../../source/user_guide/configuration_setting.md:397
 msgid "スケジューラモジュールからのストリーム出力のログレベルを設定します． デフォルトでは \"DEBUG\" に設定されています．"
 msgstr ""
 
-#: ../../source/user_guide/configuration_setting.md:406
+#: ../../source/user_guide/configuration_setting.md:400
 msgid ""
 "A logging level for a stream output of scheduler module. Defaults to "
 "\"DEBUG\"."
 msgstr ""
+
+#~ msgid "job_loop_duration (float, optional):"
+#~ msgstr ""
+
+#~ msgid "スケジューラジョブスレッドのループ 1 周あたりのスリープ時間を秒単位で指定します． デフォルトでは 0.5 (秒) に設定されています．"
+#~ msgstr ""
+
+#~ msgid "A sleep time each job loop. Defaults to 0.5."
+#~ msgstr ""
 

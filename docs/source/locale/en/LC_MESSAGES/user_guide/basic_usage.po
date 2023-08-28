@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:51+0900\n"
+"POT-Creation-Date: 2023-08-07 12:53+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -157,7 +157,7 @@ msgid "resource"
 msgstr ""
 
 #: ../../source/user_guide/basic_usage.md:124
-msgid "**type** - 実行環境を指定します。 `ABCI` 、または `local` を指定します。"
+msgid "**type** - 実行環境を指定します。 `abci` 、または `local` を指定します。"
 msgstr ""
 
 #: ../../source/user_guide/basic_usage.md:125
@@ -461,4 +461,7 @@ msgstr ""
 #: ../../source/user_guide/basic_usage.md:549
 msgid "ローカル環境で実施する場合、 `job_script_preamble.sh` は不要です。 記述した内容は動作に反映されません。"
 msgstr ""
+
+#~ msgid "**type** - 実行環境を指定します。 `ABCI` 、または `local` を指定します。"
+#~ msgstr ""
 

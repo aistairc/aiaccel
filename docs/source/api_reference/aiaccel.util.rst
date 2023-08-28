@@ -28,6 +28,14 @@ aiaccel.util.cast module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.util.data\_type module
+------------------------------
+
+.. automodule:: aiaccel.util.data_type
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.util.easy\_visualizer module
 ------------------------------------
 
@@ -80,14 +88,6 @@ aiaccel.util.suffix module
 --------------------------
 
 .. automodule:: aiaccel.util.suffix
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-aiaccel.util.time\_tools module
--------------------------------
-
-.. automodule:: aiaccel.util.time_tools
    :members:
    :undoc-members:
    :show-inheritance:
