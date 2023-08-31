@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from aiaccel.experimental.mpi.scheduler.job.model.mpi_model import MpiModel
 from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
+from aiaccel.scheduler.job.model.mpi_model import MpiModel
 
 
 class MpiScheduler(AbstractScheduler):

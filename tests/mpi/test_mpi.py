@@ -7,7 +7,7 @@ def get_root():
 
 
 def get_rank_log():
-    return get_root()/'work/experimental/mpi/rank_log'
+    return get_root()/'work/mpi/rank_log'
 
 
 def test_logf():

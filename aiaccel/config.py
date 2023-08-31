@@ -16,6 +16,7 @@ class ResourceType(Enum):
     abci: str = "abci"
     local: str = "local"
     python_local: str = "python_local"
+    mpi: str = "mpi"
 
     @classmethod
     def _missing_(cls, value: Any) -> Any | None:
@@ -55,6 +56,19 @@ class GenericConfig:
 class ResourceConifig:
     type: ResourceType
     num_workers: int
+    mpi_npernode: Optional[int]
+    mpi_enviroment: Optional[str]
+    mpi_bat_rt_type: Optional[str]
+    mpi_bat_rt_num: Optional[int]
+    mpi_bat_h_rt: Optional[str]
+    mpi_bat_root_dir: Optional[str]
+    mpi_bat_venv_dir: Optional[str]
+    mpi_bat_aiaccel_dir: Optional[str]
+    mpi_bat_config_dir: Optional[str]
+    mpi_bat_file: Optional[str]
+    mpi_hostfile: Optional[str]
+    mpi_gpu_mode: Optional[bool]
+    mpi_bat_make_file: Optional[bool]
 
 
 @dataclass

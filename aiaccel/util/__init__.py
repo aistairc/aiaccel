@@ -20,10 +20,10 @@ from aiaccel.util.name import generate_random_name
 from aiaccel.util.process import OutputHandler, exec_runner, is_process_running, kill_process, ps2joblist, subprocess_ps
 from aiaccel.util.retry import retry
 from aiaccel.util.suffix import Suffix
+from aiaccel.util.time import get_now_str, get_timestamp
 from aiaccel.util.trialid import TrialId
 
 # from aiaccel.util.aiaccel import Run
-
 
 __all__ = [
     "Buffer",
@@ -58,4 +58,6 @@ __all__ = [
     "IntParameter",
     "OrdinalParameter",
     "Parameter",
+    "get_now_str",
+    "get_timestamp",
 ]

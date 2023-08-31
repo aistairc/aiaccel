@@ -3,8 +3,8 @@ from __future__ import annotations
 from subprocess import Popen
 from typing import TYPE_CHECKING, Any
 
-from aiaccel.experimental.mpi.util.mpi import Mpi, MpiOutputHandler
 from aiaccel.scheduler.job.model import LocalModel
+from aiaccel.util.mpi import Mpi, MpiOutputHandler
 from aiaccel.wrapper_tools import create_runner_command
 
 if TYPE_CHECKING:
@@ -84,7 +84,7 @@ class MpiModel(LocalModel):
         if len(error) == 0:
             del args["error"]
 
-        commands = ["python", "-m", "aiaccel.experimental.mpi.cli.set_result"]
+        commands = ["python", "-m", "aiaccel.cli.set_result"]
         for key in args.keys():
             commands.append(f"--{key}={str(args[key])}")
 

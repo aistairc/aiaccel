@@ -11,8 +11,9 @@ from typing import Any
 
 import yaml
 
+import aiaccel
 from aiaccel.cli import CsvWriter
-from aiaccel.common import dict_result, extension_hp
+from aiaccel.common import dict_result, extension_hp, resource_type_mpi
 from aiaccel.config import load_config
 from aiaccel.master import create_master
 from aiaccel.module import AbstractModule
@@ -25,6 +26,10 @@ logger = getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 logger.addHandler(StreamHandler())
 
+mpi_enable = aiaccel.util.mpi.mpi_enable
+if mpi_enable:
+    from aiaccel.util.mpi import Mpi
+
 
 def main() -> None:  # pragma: no cover
     """Parses command line options and executes optimization."""
@@ -32,12 +37,29 @@ def main() -> None:  # pragma: no cover
     parser.add_argument("--config", "-c", type=str, default="config.yml")
     parser.add_argument("--resume", type=int, default=None)
     parser.add_argument("--clean", nargs="?", const=True, default=False)
+
+    parser.add_argument("--from_mpi_bat", action="store_true", help="Only aiaccel is used when mpi bat.")
+    parser.add_argument("--make_hostfile", action="store_true", help="Only aiaccel is used when mpi bat.")
     args = parser.parse_args()
 
     config = load_config(args.config)
     if config is None:
         logger.error(f"Invalid workspace: {args.workspace} or config: {args.config}")
         return
+
+    if config.resource.type.value.lower() == resource_type_mpi:  # MPI
+        if not mpi_enable:
+            raise Exception("MPI is not enabled.")
+        if args.make_hostfile:
+            Mpi.make_hostfile(config, logger)
+            return
+        if not args.from_mpi_bat:
+            Mpi.run_bat(config, logger)
+            return
+        logger.info("MPI is enabled.")
+        if Mpi.gpu_max == 0:
+            Mpi.gpu_max = config.resource.mpi_npernode
+        Mpi.run_main()
 
     config.resume = args.resume
     config.clean = args.clean
@@ -70,6 +92,9 @@ def main() -> None:  # pragma: no cover
 
     for module in modules:
         module.pre_process()
+
+    if config.resource.type.value.lower() == resource_type_mpi and mpi_enable:  # MPI
+        Mpi.prepare(workspace.path)
 
     while True:
         for module in modules:

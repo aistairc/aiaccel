@@ -4,7 +4,7 @@ from inspect import getframeinfo, stack
 from pathlib import Path
 from traceback import format_exc
 
-from aiaccel.experimental.mpi.util.time import get_now_str
+from aiaccel.util.time import get_now_str
 
 
 class MpiError(Exception):
