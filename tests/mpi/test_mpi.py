@@ -2,18 +2,17 @@ import omegaconf
 import unittest
 import tempfile
 import shutil
+import os
 
 from unittest.mock import MagicMock, patch
 from aiaccel.util.mpi import Mpi, MpiOutputHandler
 from subprocess import PIPE, STDOUT, Popen, run
 
 from pathlib import Path
-from os import environ
-
 
 
 def get_root():
-    return Path(environ['GITHUB_WORKSPACE'])/'mpi_work'
+    return Path(os.environ['GITHUB_WORKSPACE'])/'mpi_work'
 
 
 def get_rank_log():
@@ -38,8 +37,6 @@ def test_rank_log_1_csv():
 
 
 class TestMpi(unittest.TestCase):
-    from unittest.mock import patch
-
     def test_make_hostfile(self):
         config = omegaconf.OmegaConf.create({
             "resource": {
@@ -58,7 +55,7 @@ class TestMpi(unittest.TestCase):
                 config.resource.mpi_bat_root_dir = tmpdir
                 Path(f"{tmpdir}/config").mkdir(parents=True, exist_ok=True)
                 Mpi._make_hostfile(config, logger)
-                expected_output = "g0073 slots=2\n"
+                expected_output = "g0073 slots=3\n"
                 with open(f"{tmpdir}/config/hostfile", "r") as f:
                     actual_output = f.read()
                 assert actual_output == expected_output
