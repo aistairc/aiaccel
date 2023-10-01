@@ -1,6 +1,6 @@
 import subprocess
 
-from aiaccel.experimental.mpi.util import aiaccel
+from aiaccel.util import aiaccel
 
 
 def execute(commands):

@@ -3,8 +3,8 @@ from __future__ import annotations
 from os import linesep
 from pathlib import Path
 
-from aiaccel.experimental.mpi.util.error import MpiError
-from aiaccel.experimental.mpi.util.time import get_now_str
+from aiaccel.util.error import MpiError
+from aiaccel.util.time import get_now_str
 
 
 class MpiLog:

@@ -41,8 +41,8 @@ jobs:
           cd $GITHUB_WORKSPACE
           mkdir mpi_work
           cd mpi_work
-          cp ../examples/experimental/mpi/sphere_cpu_1node_1try/config.yaml .
-          cp ../examples/experimental/mpi/sphere_cpu_1node_1try/user.py .
+          cp ../examples/mpi/sphere_cpu_1node_1try/config.yaml .
+          cp ../examples/mpi/sphere_cpu_1node_1try/user.py .
           echo `hostname` slots=2 > hostfile
 
       - name: Run aiaccel with mpi
@@ -51,12 +51,12 @@ jobs:
           pwd
           ls -l
           cat hostfile
-          PYTHONPATH=$GITHUB_WORKSPACE mpiexec -n 2 -hostfile hostfile python -m mpi4py.futures -m aiaccel.experimental.mpi.cli.start --config config.yaml --clean --from_mpi_bat 2>&1 | tee logf
+          PYTHONPATH=$GITHUB_WORKSPACE mpiexec -n 2 -hostfile hostfile python -m mpi4py.futures -m aiaccel.cli.start --config config.yaml --clean --from_mpi_bat 2>&1 | tee logf
 
       - name: Mpi Test
         run: |
           cd $GITHUB_WORKSPACE
-          ls -l mpi_work/work/experimental/mpi/rank_log
-          cat mpi_work/work/experimental/mpi/rank_log/0.csv
-          cat mpi_work/work/experimental/mpi/rank_log/1.csv
-          pytest -s -v tests/experimental/mpi/test_mpi.py
+          ls -l mpi_work/work/mpi/rank_log
+          cat mpi_work/work/mpi/rank_log/0.csv
+          cat mpi_work/work/mpi/rank_log/1.csv
+          pytest -s -v tests/mpi/test_mpi.py

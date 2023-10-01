@@ -11,30 +11,35 @@ from threading import Thread
 from typing import TYPE_CHECKING
 
 from fasteners import InterProcessLock
-from mpi4py.futures import MPIPoolExecutor
-from mpi4py.MPI import COMM_WORLD, Get_processor_name
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import datetime_format, resource_type_abci
-from aiaccel.experimental.mpi.common import (
-    dict_experimental,
+from aiaccel.common import (
+    datetime_format,
     dict_mpi,
     dict_rank_log,
     file_mpi_lock,
     file_mpi_lock_timeout,
+    resource_type_abci,
 )
-from aiaccel.experimental.mpi.util.error import MpiError
-from aiaccel.experimental.mpi.util.mpi_log import MpiLog
+from aiaccel.util.error import MpiError
+from aiaccel.util.mpi_log import MpiLog
 
 if TYPE_CHECKING:
     from aiaccel.scheduler import AbstractScheduler
     from aiaccel.storage import Storage
 
 
+mpi_enable = True
+try:
+    import mpi4py as m4p
+except ImportError:
+    mpi_enable = False
+
+
 class Mpi:
     func_end_id = "MpiFuncEnd"
     return_code_str = "return_code="
-    executor: MPIPoolExecutor | None = None
+    executor: m4p.futures.MPIPoolExecutor | None = None
     lock: InterProcessLock | None = None
     rank_log_path = None
     error_file_path = None
@@ -46,7 +51,7 @@ class Mpi:
 
     @classmethod
     def prepare(cls, workspace_path: Path) -> None:
-        mpi_path = workspace_path / dict_experimental / dict_mpi
+        mpi_path = workspace_path / dict_mpi
         cls.error_file_path = mpi_path / "error.log"
         lock_file_path = mpi_path / file_mpi_lock
         cls.rank_log_path = mpi_path / dict_rank_log
@@ -54,28 +59,28 @@ class Mpi:
         cls.lock = InterProcessLock(str(lock_file_path))
         if cls.log is not None:
             raise MpiError("cls.log is not None", cls.error_file_path)
-        cls.log = MpiLog(0, Get_processor_name(), cls.rank_log_path)
+        cls.log = MpiLog(0, m4p.MPI.Get_processor_name(), cls.rank_log_path)
         cls.log.write(f"prepare: rank=0 tag={cls.tag}", cls.tag, stdout=True)
 
     @classmethod
     def abort(cls) -> None:
-        COMM_WORLD.Abort()
+        m4p.MPI.COMM_WORLD.Abort()
 
     @classmethod
     def run_main(cls) -> None:
         if cls.executor is None:
-            cls.executor = MPIPoolExecutor()
+            cls.executor = m4p.futures.MPIPoolExecutor()
 
     @classmethod
-    def submit(cls, command: list[str], trial_id: int, gpu_mode: bool, silent: bool = True) -> tuple[str, int]:
+    def submit(cls, command: list[str], trial_id: int, gpu_mode: bool) -> tuple[str, int]:
         if cls.log is None:
-            raise MpiError("cls.lock is None")
+            raise MpiError("cls.log is None")
         if cls.lock is None:
             raise MpiError("cls.lock is None")
         if not cls.lock.acquire(timeout=file_mpi_lock_timeout):
             raise MpiError("Failed to lock due to timeout.", cls.error_file_path)
         try:
-            ret = cls._submit(command, trial_id, gpu_mode, silent)
+            ret = cls._submit(command, trial_id, gpu_mode)
         except Exception as e:
             cls.log.write(f"submit(): catch Exception as {e}", stdout=True)
             cls.lock.release()
@@ -85,14 +90,14 @@ class Mpi:
         return retf
 
     @classmethod
-    def _submit(cls, command: list[str], trial_id: int, gpu_mode: bool, silent: bool) -> tuple[str, int]:
+    def _submit(cls, command: list[str], trial_id: int, gpu_mode: bool) -> tuple[str, int]:
         if cls.log is None:
             raise MpiError("cls.log is None")
         cls.tag += 1
         tag = cls.tag
         if cls.executor is not None:
             cls.executor.submit(cls._func, command, gpu_mode, tag, str(cls.rank_log_path))
-        comm = COMM_WORLD
+        comm = m4p.MPI.COMM_WORLD
         list_ = comm.recv(tag=tag)
         cls.log.write(f"submit start: recv: tag={tag} trial_id={trial_id} list={list_}", cls.tag)
         rank = list_[0]
@@ -117,9 +122,9 @@ class Mpi:
 
     @classmethod
     def _func_sub(cls, command: list[str], gpu_mode: int, tag: int, rank_log_path_str: str) -> None:
-        comm = COMM_WORLD
+        comm = m4p.MPI.COMM_WORLD
         rank = comm.Get_rank()
-        processor = Get_processor_name()
+        processor = m4p.MPI.Get_processor_name()
         if cls.log is None:
             cls.rank_log_path = Path(rank_log_path_str)
             cls.log = MpiLog(rank, processor, cls.rank_log_path)
@@ -271,7 +276,8 @@ class Mpi:
     @classmethod
     def _run_bat_file(cls, config: DictConfig, logger: Logger) -> None:
         qsub_file = config.resource.mpi_bat_file
-        abci_group = config.ABCI.group[1:-1]
+        # abci_group = config.ABCI.group[1:-1]
+        abci_group = config.ABCI.group
         qsub_cmd = f"qsub -g {abci_group} {qsub_file}"
         proc = run(qsub_cmd.split(" "), stdout=PIPE, stderr=STDOUT)
         res = proc.stdout.decode("utf8")
@@ -279,6 +285,7 @@ class Mpi:
 
     @classmethod
     def _make_bat_file(cls, config: DictConfig, logger: Logger) -> None:
+        logger.info("make bat file")
         rt_type = config.resource.mpi_bat_rt_type
         rt_num = config.resource.mpi_bat_rt_num
         h_rt = config.resource.mpi_bat_h_rt
@@ -305,10 +312,10 @@ export PYTHONPATH={aiaccel_dir}/:$PYTHONPATH
 
 cd {config_dir}
 
-python -m aiaccel.experimental.mpi.cli.start --config config.yaml --make_hostfile
+python -m aiaccel.cli.start --config config.yaml --make_hostfile
 
 mpiexec -n {num_workers+1} -hostfile {hostfile} \
-python -m mpi4py.futures -m aiaccel.experimental.mpi.cli.start --config config.yaml --clean --from_mpi_bat
+python -m mpi4py.futures -m aiaccel.cli.start --config config.yaml --clean --from_mpi_bat
 
 deactivate
 """
@@ -326,6 +333,7 @@ deactivate
 
     @classmethod
     def _make_hostfile(cls, config: DictConfig, logger: Logger) -> None:
+        logger.info("make hostfile")
         root_path = Path(config.resource.mpi_bat_root_dir)
         hostfile_path = root_path / config.resource.mpi_bat_config_dir / config.resource.mpi_hostfile
         rt_num = config.resource.mpi_bat_rt_num
@@ -381,7 +389,7 @@ class MpiOutputHandler(Thread):
         self._stdouts = []
         self._stderrs = []
         while True:
-            s = COMM_WORLD.recv(tag=self._tag)
+            s = m4p.MPI.COMM_WORLD.recv(tag=self._tag)
             if s.find(Mpi.func_end_id) == 0:
                 self._parent.logger.debug(s)
                 i = s.find(Mpi.return_code_str) + len(Mpi.return_code_str)

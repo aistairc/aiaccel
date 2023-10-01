@@ -12,8 +12,10 @@ from aiaccel.common import (
     dict_jobstate,
     dict_lock,
     dict_log,
+    dict_mpi,
     dict_output,
     dict_pid,
+    dict_rank_log,
     dict_ready,
     dict_result,
     dict_runner,
@@ -67,6 +69,8 @@ class Workspace:
         self.jobstate = self.path / dict_jobstate
         self.lock = self.path / dict_lock
         self.log = self.path / dict_log
+        self.mpi = self.path / dict_mpi
+        self.rank_log = self.mpi / dict_rank_log
         self.output = self.path / dict_output
         self.pid = self.path / dict_pid
         self.result = self.path / dict_result
@@ -85,8 +89,10 @@ class Workspace:
             self.jobstate,
             self.lock,
             self.log,
+            self.mpi,
             self.output,
             self.pid,
+            self.rank_log,
             self.result,
             self.runner,
             self.storage,
