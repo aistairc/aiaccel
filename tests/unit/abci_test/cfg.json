@@ -7,9 +7,6 @@
     "objective_function_name": "main"
   },
   "logger": {
-    "master_logfile": "master.log",
-    "master_file_log_level": "DEBUG",
-    "master_stream_log_level": "DEBUG",
     "optimizer_logfile": "optimizer.log",
     "optimizer_file_log_level": "DEBUG",
     "optimizer_stream_log_level": "DEBUG",
@@ -19,9 +16,6 @@
   },
   "wrapper": {
     "job_command": "python wrapper.py"
-  },
-  "master": {
-    "sleep_time_master": 1
   },
   "optimizer": {
     "search_algorithm": "aiaccel.optimizer.TpeOptimizer",

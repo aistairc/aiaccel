@@ -131,7 +131,6 @@ class JobConfig:
 
 @dataclass
 class LoggingItemConifig:
-    master: str
     optimizer: str
     scheduler: str
 

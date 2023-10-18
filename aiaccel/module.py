@@ -8,21 +8,14 @@ from typing import Any
 import numpy as np
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.common import (
-    class_master,
-    class_optimizer,
-    class_scheduler,
-    module_type_master,
-    module_type_optimizer,
-    module_type_scheduler,
-)
+from aiaccel.common import class_optimizer, class_scheduler, module_type_optimizer, module_type_scheduler
 from aiaccel.storage import Storage
 from aiaccel.util import ColoredHandler, TrialId
 from aiaccel.workspace import Workspace
 
 
 class AbstractModule(object):
-    """An abstract class for Master, Optimizer and Scheduler.
+    """An abstract class for Optimizer and Scheduler.
 
     The procedure of this class is as follows:
 
@@ -94,10 +87,7 @@ class AbstractModule(object):
         Returns:
             str: Name of this module type.
         """
-
-        if class_master in self.__class__.__name__:
-            return module_type_master
-        elif class_optimizer in self.__class__.__name__:
+        if class_optimizer in self.__class__.__name__:
             return module_type_optimizer
         elif class_scheduler in self.__class__.__name__:
             return module_type_scheduler

@@ -6,17 +6,11 @@ import yaml
 
 from aiaccel.common import dict_result, file_final_result
 from aiaccel.config import is_multi_objective, load_config
-from aiaccel.master import LocalMaster, PylocalMaster, create_master
 from aiaccel.scheduler import (LocalScheduler, PylocalScheduler,
                                create_scheduler)
 from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
 from tests.base_test import BaseTest
-
-
-async def start_master(master):
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, master.start)
 
 
 class IntegrationTest(BaseTest):
@@ -39,10 +33,6 @@ class IntegrationTest(BaseTest):
             user_main_file = None
 
         with self.create_main(from_file_path=user_main_file):
-            # master
-            master = create_master(config.resource.type.value)
-            assert master == LocalMaster
-
             # scheduler
             scheduler = create_scheduler(config.resource.type.value)
             assert scheduler == LocalScheduler
@@ -75,10 +65,6 @@ class IntegrationTest(BaseTest):
             config = load_config(create_tmp_config(new_config_file_path))
             assert config.resource.type.value == 'python_local'
 
-            # master
-            master = create_master(config.resource.type.value)
-            assert master == PylocalMaster
-
             # scheduler
             scheduler = create_scheduler(config.resource.type.value)
             assert scheduler == PylocalScheduler
@@ -110,5 +96,4 @@ class IntegrationTest(BaseTest):
         assert running == 0
 
         if not is_multi_objective:
-            final_result = work_dir.joinpath(dict_result, file_final_result)
-            assert final_result.exists()
+            assert workspace.final_result_file.exists()

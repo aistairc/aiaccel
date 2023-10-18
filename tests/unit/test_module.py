@@ -4,10 +4,8 @@ import time
 
 import numpy as np
 import pytest
-from aiaccel.common import (module_type_master, module_type_optimizer,
-                            module_type_scheduler)
+from aiaccel.common import module_type_optimizer, module_type_scheduler
 
-from aiaccel.master import LocalMaster
 from aiaccel.module import AbstractModule
 
 from aiaccel.optimizer import RandomOptimizer
@@ -50,10 +48,6 @@ class TestAbstractModule(BaseTest):
     def test_get_module_type(self):
         module_type = self.module.get_module_type()
         assert module_type is None
-
-        master = LocalMaster(self.load_config_for_test(self.configs["config.json"]))
-        module_type = master.get_module_type()
-        assert module_type == module_type_master
 
         optimizer = RandomOptimizer(self.load_config_for_test(self.configs["config.json"]))
         module_type = optimizer.get_module_type()
@@ -142,9 +136,9 @@ class TestAbstractModule(BaseTest):
         self.module = AbstractModule(config, 'abstract')
         self.module.set_logger(
             'root.abstract',
-            self.module.workspace.log / self.module.config.logger.file.master,
-            str_to_logging_level(self.module.config.logger.log_level.master),
-            str_to_logging_level(self.module.config.logger.stream_level.master),
+            self.module.workspace.log / self.module.config.logger.file.scheduler,
+            str_to_logging_level(self.module.config.logger.log_level.scheduler),
+            str_to_logging_level(self.module.config.logger.stream_level.scheduler),
             'Abstract   '
         )
         self.module._serialize(1)

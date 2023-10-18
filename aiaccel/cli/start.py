@@ -15,7 +15,6 @@ import aiaccel
 from aiaccel.cli import CsvWriter
 from aiaccel.common import dict_result, extension_hp, resource_type_mpi
 from aiaccel.config import load_config
-from aiaccel.master import create_master
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer import create_optimizer
 from aiaccel.scheduler import create_scheduler
@@ -83,10 +82,10 @@ def main() -> None:  # pragma: no cover
 
     logger.info(f"config: {str(pathlib.Path(config.config_path).resolve())}")
 
-    Master = create_master(config.resource.type.value)
-    Optimizer = create_optimizer(config.optimize.search_algorithm)
-    Scheduler = create_scheduler(config.resource.type.value)
-    modules: list[AbstractModule] = [Master(config), Optimizer(config), Scheduler(config), TensorBoard(config)]
+    optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+    scheduler = create_scheduler(config.resource.type.value)(config)
+    tensorboard = TensorBoard(config)
+    modules: list[AbstractModule] = [optimizer, scheduler, tensorboard]
 
     time_s = time.time()
 
@@ -110,6 +109,8 @@ def main() -> None:  # pragma: no cover
 
     for module in modules:
         module.post_process()
+
+    scheduler.evaluate()
 
     csv_writer = CsvWriter(config)
     csv_writer.create()

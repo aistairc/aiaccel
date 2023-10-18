@@ -123,17 +123,14 @@
   },
   "logger": {
     "file": {
-      "master": "master.log",
       "scheduler": "scheduler.log",
       "optimizer": "optimizer.log"
     },
     "log_level": {
-      "master": "DEBUG",
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     },
     "stream_level": {
-      "master": "DEBUG",
       "scheduler": "DEBUG",
       "optimizer": "DEBUG"
     }
