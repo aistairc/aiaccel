@@ -23,11 +23,13 @@ from aiaccel.parameter import (
 
 class LazyRandomStateWrapper(LazyRandomState):
     def __init__(self, rng: numpy.random.RandomState | None = None) -> None:
+        super().__init__()
         self._rng = rng
 
 
 class RandomSamplerWrapper(RandomSampler):
     def __init__(self, rng: numpy.random.RandomState | None = None) -> None:
+        super().__init__()
         self._rng = LazyRandomStateWrapper(rng)
 
 
