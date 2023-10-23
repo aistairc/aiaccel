@@ -3,7 +3,12 @@ from __future__ import annotations
 import optuna
 from omegaconf.dictconfig import DictConfig
 
-from aiaccel.optimizer.tpe_optimizer import TpeOptimizer, TPESamplerWrapper
+from aiaccel.optimizer.tpe_optimizer import (
+    LazyRandomStateWrapper,
+    RandomSamplerWrapper,
+    TpeOptimizer,
+    TPESamplerWrapper,
+)
 
 
 class MOTpeOptimizer(TpeOptimizer):
@@ -30,8 +35,8 @@ class MOTpeOptimizer(TpeOptimizer):
         """
 
         sampler = TPESamplerWrapper()
-        sampler._rng = self._rng
-        sampler._random_sampler._rng = self._rng
+        sampler._rng = LazyRandomStateWrapper(rng=self._rng)
+        sampler._random_sampler = RandomSamplerWrapper(rng=self._rng)
         storage_path = str(f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
         load_if_exists = self.config.resume is not None

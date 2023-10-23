@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy
 import optuna
 import sqlalchemy
 import sqlalchemy.orm as sqlalchemy_orm
 from omegaconf.dictconfig import DictConfig
+from optuna.samplers._lazy_random_state import LazyRandomState
+from optuna.samplers._random import RandomSampler
 from optuna.storages._rdb import models
 
 from aiaccel.optimizer import AbstractOptimizer
@@ -16,6 +19,18 @@ from aiaccel.parameter import (
     IntParameter,
     OrdinalParameter,
 )
+
+
+class LazyRandomStateWrapper(LazyRandomState):
+    def __init__(self, rng: numpy.random.RandomState | None = None) -> None:
+        super().__init__()
+        self._rng = rng
+
+
+class RandomSamplerWrapper(RandomSampler):
+    def __init__(self, rng: numpy.random.RandomState | None = None) -> None:
+        super().__init__()
+        self._rng = LazyRandomStateWrapper(rng)
 
 
 class TPESamplerWrapper(optuna.samplers.TPESampler):
@@ -186,8 +201,8 @@ class TpeOptimizer(AbstractOptimizer):
         """
 
         sampler = TPESamplerWrapper()
-        sampler._rng = self._rng
-        sampler._random_sampler._rng = self._rng
+        sampler._rng = LazyRandomStateWrapper(rng=self._rng)
+        sampler._random_sampler = RandomSamplerWrapper(rng=self._rng)
         storage_path = str(f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db")
         storage = optuna.storages.RDBStorage(url=storage_path)
         load_if_exists = self.config.resume is not None
