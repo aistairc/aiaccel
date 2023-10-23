@@ -289,11 +289,15 @@ class AbstractScheduler(AbstractModule):
 
         best_trial_ids, _ = self.storage.get_best_trial(self.goals)
         if best_trial_ids is None:
-            self.logger.error(f"Failed to output {self.workspace.final_result_file}.")
+            self.logger.error(f"Failed to output {self.workspace.best_result_file}.")
             return
         hp_results = []
         for best_trial_id in best_trial_ids:
             hp_results.append(self.storage.get_hp_dict(best_trial_id))
-        create_yaml(self.workspace.final_result_file, hp_results, self.workspace.lock)
-        self.logger.info("Best hyperparameter is followings:")
-        self.logger.info(hp_results)
+
+        create_yaml(self.workspace.best_result_file, hp_results, self.workspace.lock)
+
+        finished = self.storage.get_num_finished()
+        if self.config.optimize.trial_number >= finished:
+            self.logger.info("Best hyperparameter is followings:")
+            self.logger.info(hp_results)

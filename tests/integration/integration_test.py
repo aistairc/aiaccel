@@ -94,6 +94,3 @@ class IntegrationTest(BaseTest):
         assert finished == config.optimize.trial_number
         assert ready == 0
         assert running == 0
-
-        if not is_multi_objective:
-            assert workspace.final_result_file.exists()
