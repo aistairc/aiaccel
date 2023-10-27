@@ -320,6 +320,15 @@ class ConvertedParameterConfiguration(HyperParameterConfiguration):
         """
         return self._converted_params
 
+    def get_parameter_names(self) -> list[str]:
+        return list(self.get_parameter_dict().keys())
+
+    def get_empty_parameter_dict(self) -> list[dict[str, Any]]:
+        base_params = []
+        for param in self.get_parameter_list():
+            base_params.append({"parameter_name": param.name, "type": param.type, "value": None})
+        return base_params
+
 
 def _make_weight_name(original_name: str, choice_index: int) -> str:
     """Makes name of internal parameter for weight of one of the choices.

@@ -3,12 +3,21 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from numpy import str_
+from numpy import isnan, str_
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.config import is_multi_objective
+from aiaccel.converted_parameter import ConvertedIntParameter
 from aiaccel.module import AbstractModule
-from aiaccel.parameter import HyperParameterConfiguration, is_categorical, is_ordinal, is_uniform_float, is_uniform_int
+from aiaccel.parameter import (
+    HyperParameterConfiguration,
+    IntParameter,
+    Parameter,
+    is_categorical,
+    is_ordinal,
+    is_uniform_float,
+    is_uniform_int,
+)
 from aiaccel.util import TrialId, str_to_logging_level
 
 
@@ -83,7 +92,7 @@ class AbstractOptimizer(AbstractModule):
         """
         return self.trial_number - self.hp_finished - self.hp_ready - self.hp_running == 0
 
-    def register_new_parameters(self, params: list[dict[str, float | int | str]]) -> None:
+    def register_new_parameters(self, params: list[dict[str, float | int | str]], state: str = "ready") -> None:
         """Create hyper parameter files.
 
         Args:
@@ -105,7 +114,7 @@ class AbstractOptimizer(AbstractModule):
         """
         self.storage.hp.set_any_trial_params(trial_id=self.trial_id.get(), params=params)
 
-        self.storage.trial.set_any_trial_state(trial_id=self.trial_id.get(), state="ready")
+        self.storage.trial.set_any_trial_state(trial_id=self.trial_id.get(), state=state)
 
         self.num_of_generated_parameter += 1
 
@@ -182,6 +191,28 @@ class AbstractOptimizer(AbstractModule):
         self.logger.info("Optimizer delete alive file.")
         self.logger.info("Optimizer finished.")
 
+    def convert_type_by_config(
+        self, temp_new_params: list[dict[str, float | int | str]]
+    ) -> list[dict[str, float | int | str]]:
+        """Convert the type of parameters by the configuration file.
+
+        Args:
+            new_params (list[dict[str, float | int | str]]): A list of
+                parameters.
+
+        Returns:
+            list[dict[str, float | int | str]]: A list of converted parameters.
+        """
+        new_params = copy.deepcopy(temp_new_params)
+        config_params: dict[str, Parameter] = self.params.get_parameter_dict()
+        for new_param in new_params:
+            name = str(new_param["parameter_name"])
+            if isinstance(config_params[name], IntParameter) or isinstance(config_params[name], ConvertedIntParameter):
+                if isnan(new_param["value"]):
+                    continue
+                new_param["value"] = int(new_param["value"])
+        return new_params
+
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
 
@@ -212,7 +243,7 @@ class AbstractOptimizer(AbstractModule):
         )
 
         if new_params := self.generate_new_parameter():
-            self.register_new_parameters(new_params)
+            self.register_new_parameters(self.convert_type_by_config(new_params))
             self.trial_id.increment()
             self._serialize(self.trial_id.integer)
             return True

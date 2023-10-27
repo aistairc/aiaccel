@@ -1,4 +1,5 @@
 import copy
+import unittest
 from unittest.mock import patch
 
 import numpy as np
@@ -8,415 +9,230 @@ from aiaccel.optimizer import NelderMead
 from aiaccel.parameter import HyperParameterConfiguration
 from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace
+from aiaccel.optimizer.value import Value
+from aiaccel.optimizer._nelder_mead import Simplex, Vertex
 from tests.base_test import BaseTest
 
 
-class TestNelderMead(BaseTest):
-
-    @pytest.fixture(autouse=True)
-    def setup_nelder_mead(self, load_test_config):
-        self.config = load_test_config()
-        params = HyperParameterConfiguration(self.config.optimize.parameters)
-        rng = np.random.RandomState(0)
-        # nm_coef = NelderMead(
-        #     params.get_parameter_list(),
-        #     coef={"r": 1.0, "ic": - 0.5, "oc": 0.5, "e": 2.0, "s": 0.5},
-        #     rng=rng
-        # )
-        self.nm = NelderMead(params.get_parameter_list(), rng=rng)
-        yield
-        self.nm = None
-
-    def test_init(self):
-        assert type(self.nm) is NelderMead
-
-    def test__create_initial_values(self):
-        params = HyperParameterConfiguration(self.config.optimize.parameters)
-        hps = params.get_parameter_list()
-        initial_parameters = [
-            {'parameter_name': 'x1', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x3', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x4', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x5', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x6', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x7', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x8', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x9', 'type': 'uniform_float', 'value': 1},
-            {'parameter_name': 'x10', 'type': 'uniform_float', 'value': 1},
-        ]
-        rng = np.random.RandomState(0)
-        NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
-
-        initial_parameters = [
-            {'parameter_name': 'x1', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x2', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x3', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x4', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x5', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x6', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x7', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x8', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x9', 'type': 'categorical', 'value': '1'},
-            {'parameter_name': 'x10', 'type': 'categorical', 'value': '1'},
-        ]
-        with pytest.raises(TypeError):
-            NelderMead(hps, initial_parameters=initial_parameters, rng=rng)
-
-    def test_add_executing(self):
-        assert self.nm._add_executing(self.nm.y[0]) is None
-
-        out_y = [[b[0] - 1., b[1] + 1.] for b in self.nm.bdrys]
-        assert self.nm._add_executing(out_y[0]) is None
-
-        with patch.object(self.nm, '_is_out_of_boundary', return_value=True):
-            with patch.object(self.nm, '_maximize', True):
-                assert self.nm._add_executing(out_y[0]) is None
-
-    def test_add_y_history(self):
-        assert self.nm._add_y_history() is None
-
-    def test_pop_result(self, work_dir, setup_hp_finished):
-        assert self.nm._pop_result() is None
-
-        # params = self.nm.get_ready_parameters()
-        params = self.nm._executing
-
-        for p, i in zip(params, range(1, len(self.nm.bdrys)+2)):
-            p['vertex_id'] = '{:03}'.format(i)
-
-        workspace = Workspace(work_dir)
-        storage = Storage(workspace.storage_file_path)
-
-        setup_hp_finished(1)
-        for i in range(1):
-            storage.result.set_any_trial_objective(trial_id=i, objective=0.0)
-            for j in range(2):
-                storage.hp.set_any_trial_param(
-                    trial_id=i,
-                    param_name=f'x{j+1}',
-                    param_value=0.0,
-                    param_type='uniform_float'
-                )
-        storage.trial.set_any_trial_state(trial_id=1, state='finished')
-        #
-        # c = load_yaml(work_dir.joinpath(dict_hp_finished, '001.hp'))
-        #
-        print(storage.get_finished())
-        print(storage.result.get_all_result())
-        c = storage.get_hp_dict(trial_id=0)
-        assert c is not None
-
-        param = copy.copy(params[[p['vertex_id'] for p in params].index('001')])
-        param['result'] = c['result']
-        self.nm.add_result_parameters(param)
-        self.nm._maximize = True
-        v = self.nm._pop_result()
-        assert v['vertex_id'] == '001'
-
-        param['vertex_id'] = '002'
-        param['out_of_boundary'] = True
-        self.nm.add_result_parameters(param)
-        self.nm._pop_result()
-
-        param['vertex_id'] = '003'
-        param['out_of_boundary'] = True
-        self.nm._state = 'WaitShrink'
-        self.nm.add_result_parameters(param)
-
-        # for d in self.nm._executing:
-        #     print(d['vertex_id'])
-
-        try:
-            self.nm._pop_result()
-            assert False
-        except ValueError:
-            assert True
-
-        param['vertex_id'] = 'invalid'
-        self.nm.add_result_parameters(param)
-        try:
-            self.nm._pop_result()
-            assert False
-        except ValueError:
-            assert True
-
-    def test_change_state(self):
-        assert self.nm._change_state('WaitShrink') is None
-
-        try:
-            self.nm._change_state('InvalidState')
-            assert False
-        except ValueError:
-            assert True
-
-    def test_wait_initialize(self):
-        results = [
-            {'state': 'WaitInitialize', 'result': i * .1}
-            for i in range(0, len(self.nm.y))
-        ]
-
-        assert self.nm._wait_initialize(results) is None
-
-        with patch.object(self.nm, '_state', 'WaitInitialize'):
-            assert self.nm._wait_initialize(results) is None
-
-        with patch.object(self.nm, '_state', 'Wait'):
-            assert self.nm._wait_initialize(results) is None
-
-    def test_initialize(self):
-        results = [
-            {'state': 'WaitInitialize', 'result': i * .1}
-            for i in range(0, len(self.nm.y))
-        ]
-        self.nm._wait_initialize(results)
-        assert self.nm._initialize() is None
-
-    def test_wait_reflect(self):
-        results = [
-            {'state': 'WaitInitialize', 'result': i * .1}
-            for i in range(0, len(self.nm.y))
-        ]
-        assert self.nm._wait_reflect(results) is None
-        assert self.nm._state == 'ReflectBranch'
-
-    def test_reflect_branch(self):
-        results = [
-            {'state': 'WaitInitialize', 'result': i * .1}
-            for i in range(0, len(self.nm.y))
-        ]
-        self.nm._wait_initialize(results)
-        self.nm.yc = 0.1
-        self.nm._fr = 0.05
-        assert self.nm._reflect_branch() is None
-
-        self.nm._fr = -0.1
-        assert self.nm._reflect_branch() is None
-
-        self.nm.f[-1] = 0.2
-        self.nm._fr = 0.15
-        assert self.nm._reflect_branch() is None
-
-        self.nm._fr = 0.3
-        assert self.nm._reflect_branch() is None
-
-        # not applicable
-        self.nm.f[0] = 0.22
-        self.nm.f[-1] = 0.3
-        self.nm.f[-2] = 0.201
-        self.nm._fr = 0.21
-        assert self.nm._reflect_branch() is None
-
-    def test_wait_expand(self):
-        results = [
-            {'state': 'WaitInitialize', 'result': i * .1}
-            for i in range(0, len(self.nm.y))
-        ]
-        assert self.nm._wait_expand(results) is None
-        assert self.nm._state == 'ExpandBranch'
-
-    def test_expand_branch(self):
-        self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
-        self.nm._fe = 0.1
-        self.nm._fr = 0.2
-        assert self.nm._expand_branch() is None
-
-        self.nm._fe = 0.3
-        self.nm._fr = 0.2
-        assert self.nm._expand_branch() is None
-
-    def test_wait_outside_contract(self):
-        results = [
-            {'state': 'WaitInitialize', 'result': i * .1}
-            for i in range(0, len(self.nm.y))
-        ]
-        assert self.nm._wait_outside_contract(results) is None
-
-    def test_outside_contract_branch(self):
-        self.nm._foc = 0.1
-        self.nm._fr = 0.2
-        self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
-        assert self.nm._outside_contract_branch() is None
-
-        self.nm._foc = 0.2
-        self.nm._fr = 0.1
-        assert self.nm._outside_contract_branch() is None
-
-    def test_wait_inside_contract(self):
-        results = [
-            {'state': 'WaitInitialize', 'result': i * .1}
-            for i in range(0, len(self.nm.y))
-        ]
-        assert self.nm._wait_inside_contract(results) is None
-
-    def test_inside_contract_branch(self):
-        self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
-        self.nm._fic = 0.1
-        assert self.nm._inside_contract_branch() is None
-
-        self.nm._fic = 0.3
-        assert self.nm._inside_contract_branch() is None
-
-    def test_wait_shrink(self):
-        results = [
-            {'state': 'WaitInitialize', 'result': i * .1, 'index': i}
-            for i in range(0, len(self.nm.y))
-        ]
-        self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
-        assert self.nm._wait_shrink(results) is None
-
-        print(results)
-        with patch.object(self.nm, '_state', 'WaitInitialize'):
-            assert self.nm._wait_shrink(results) is None
-
-        with patch.object(self.nm, '_state', 'InvalidState'):
-            assert self.nm._wait_shrink(results) is None
-
-    def test_finalize(self):
-        self.nm.f = [i * 0.1 for i in range(0, len(self.nm.y))]
-        assert self.nm._finalize() is None
-
-        self.nm._out_of_boundary = True
-        assert self.nm._finalize() is None
-
-    def test_order_by(self):
-        self.nm.f = np.array([i * 0.1 for i in range(0, len(self.nm.y))])
-        assert self.nm._order_by() is None
-
-    def test_centroid(self):
-        self.nm.f = np.array([i * 0.1 for i in range(0, len(self.nm.y))])
-        assert self.nm._centroid() is None
-
-    def test_reflect(self):
-        self.nm.yc = 0.1
-        assert self.nm._reflect() is None
-
-    def test_expand(self):
-        self.nm.yc = 0.1
-        assert self.nm._expand() is None
-
-    def test_inside_contract(self):
-        self.nm.yc = 0.1
-        assert self.nm._inside_contract() is None
-
-    def test_shrink(self):
-        assert self.nm._shrink() is None
-
-    def test_is_out_of_boundary(self):
-        assert not self.nm._is_out_of_boundary(self.nm.y[0])
-        assert self.nm._is_out_of_boundary([10., -10.])
-
-    def test_add_result_parameters(self):
-        assert self.nm.add_result_parameters({}) is None
-
-    def calc_and_add_results(self):
-        # params = self.nm.get_ready_parameters()
-        params = self.nm._executing
-
-        for p in params:
-            p['result'] = np.sum(
-                np.array([pp['value'] ** 2 for pp in p['parameters']])
-            )
-            self.nm.add_result_parameters(p)
-
-    def test_search(self):
-        self.nm.y = np.array([
-            [0.9, 0.9], [-0.9, -0.3], [0.1, 0.5]
-        ])
-        self.nm._executing = []
-        for y in self.nm.y:
-            self.nm._add_executing(y)
-
-        for i in range(0, 50):
-            self.calc_and_add_results()
-            assert type(self.nm.search()) is list
-
-        self.nm._state = 'WaitShrink'
-        self.calc_and_add_results()
-        assert type(self.nm.search()) is list
-
-        self.nm._state = 'InvalidState'
-        try:
-            self.nm.search()
-            assert False
-        except ValueError:
-            assert True
-
-        self.nm._max_itr = 0
-        assert self.nm.search() is None
-
-
-def test_nelder_mead_parameters(load_test_config):
-    debug = False
-    config = load_test_config()
-    params = HyperParameterConfiguration(
-        # config.get('optimize', 'parameters')
-        config.optimize.parameters
-    )
-    initial_parameters = None
-    rng = np.random.RandomState(0)
-    nelder_mead = NelderMead(
-        params.get_parameter_list(), initial_parameters=initial_parameters,
-        iteration=100,
-        maximize=(config.optimize.goal[0].value.lower() == 'maximize'),
-        rng=rng
-    )
-
-    c_max = 1000
-    c = 0
-    c_inside_of_boundary = 0
-    c_out_of_boundary = 0
-
-    if debug:
-        print()
-
-    while True:
-        c += 1
-
-        if debug:
-            print(c, 'NelderMead state:', nelder_mead._state,
-                  'executing:', nelder_mead._executing_index,
-                  'evaluated_itr:', nelder_mead._evaluated_itr)
-
-        # a functionality of NelderMeadOptimizer::check_result()
-        # ready_params = nelder_mead.get_ready_parameters()
-        ready_params = nelder_mead._executing
-
-        for rp in ready_params:
-            rp['result'] = sum([pp['value'] ** 2 for pp in rp['parameters']])
-            nelder_mead.add_result_parameters(rp)
-
-            if debug:
-                print('\tsum:', rp['result'])
-
-        # a functionality of NelderMeadOptimizer::generate_parameter()
-        searched_params = nelder_mead.search()
-
-        if searched_params is None:
-            if debug:
-                print('Reached to max iteration.')
-            break
-
-        if len(searched_params) == 0:
-            continue
-
-        if debug:
-            for sp in searched_params:
-                print('\t', sp['name'], sp['state'], sp['itr'],
-                      sp['out_of_boundary'])
-
-        for sp in searched_params:
-            if sp['out_of_boundary']:
-                c_out_of_boundary += 1
-            else:
-                c_inside_of_boundary += 1
-
-        if c >= c_max:
-            break
-
-    if debug:
-        print()
-        print('inside of boundary', c_inside_of_boundary)
-        print('out of boundary', c_out_of_boundary)
-
-    assert c_out_of_boundary == 0
+class TestVertex(unittest.TestCase):
+    def setUp(self):
+        self.xs = np.array([1.0, 2.0, 3.0])
+        self.value = 10.0
+        self.vertex = Vertex(self.xs, self.value)
+
+    def test_generate_random_name(self):
+        name = self.vertex.generate_random_name()
+        self.assertEqual(len(name), 10)
+
+    def test_coordinates(self):
+        self.assertTrue(np.array_equal(self.vertex.coordinates, self.xs))
+
+    def test_set_value(self):
+        new_value = 20.0
+        self.vertex.set_value(new_value)
+        self.assertEqual(self.vertex.value, new_value)
+
+    def test_set_id(self):
+        new_id = "new_id"
+        self.vertex.set_id(new_id)
+        self.assertEqual(self.vertex.id, new_id)
+
+    def test_set_new_id(self):
+        old_id = self.vertex.id
+        self.vertex.set_new_id()
+        self.assertNotEqual(self.vertex.id, old_id)
+
+    def test_set_xs(self):
+        new_xs = np.array([4.0, 5.0, 6.0])
+        self.vertex.set_xs(new_xs)
+        self.assertTrue(np.array_equal(self.vertex.xs, new_xs))
+
+    def test_update(self):
+        new_xs = np.array([4.0, 5.0, 6.0])
+        new_value = 20.0
+        self.vertex.update(new_xs, new_value)
+        self.assertTrue(np.array_equal(self.vertex.xs, new_xs))
+        self.assertEqual(self.vertex.value, new_value)
+
+    def test_add(self):
+        other = Vertex(np.array([1.0, 1.0, 1.0]))
+        new_vertex = self.vertex + other
+        expected_xs = np.array([2.0, 3.0, 4.0])
+        self.assertTrue(np.array_equal(new_vertex.xs, expected_xs))
+
+    def test_subtract(self):
+        other = Vertex(np.array([1.0, 1.0, 1.0]))
+        new_vertex = self.vertex - other
+        expected_xs = np.array([0.0, 1.0, 2.0])
+        self.assertTrue(np.array_equal(new_vertex.xs, expected_xs))
+
+    def test_multiply(self):
+        factor = 2.0
+        new_vertex = self.vertex * factor
+        expected_xs = np.array([2.0, 4.0, 6.0])
+        self.assertTrue(np.array_equal(new_vertex.xs, expected_xs))
+
+    def test_equal(self):
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value)
+        self.assertTrue(self.vertex == other)
+        self.assertFalse(self.vertex == 5.0)
+
+    def test_not_equal(self):
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value)
+        self.assertFalse(self.vertex != other)
+        self.assertTrue(self.vertex != 5.0)
+
+    def test_less_than(self):
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value + 1.0)
+        self.assertTrue(self.vertex < other)
+        self.assertTrue(self.vertex < 15.0)
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value - 1.0)
+        self.assertFalse(self.vertex < other)
+        self.assertFalse(self.vertex <other.value)
+
+    def test_less_than_or_equal(self):
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value + 1.0)
+        self.assertTrue(self.vertex <= other)
+        self.assertTrue(self.vertex <= 10.0)
+        self.assertTrue(self.vertex <= self.value)
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value - 1.0)
+        self.assertFalse(self.vertex <= other)
+        self.assertFalse(self.vertex <= other.value)
+
+    def test_greater_than(self):
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value - 1.0)
+        self.assertTrue(self.vertex > other)
+        self.assertTrue(self.vertex > self.value - 1.0)
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value + 1.0)
+        self.assertFalse(self.vertex > other)
+        self.assertFalse(self.vertex > other.value)
+
+    def test_greater_than_or_equal(self):
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value - 1.0)
+        self.assertTrue(self.vertex >= other)
+        self.assertTrue(self.vertex >= self.value)
+        other = Vertex(np.array([1.0, 2.0, 3.0]), self.value + 1.0)
+        self.assertFalse(self.vertex >= other)
+        self.assertFalse(self.vertex >= other.value)
+
+
+def test_simplex():
+    # Test initialization
+    simplex_coordinates = np.array([[1, 2], [3, 4], [5, 6]])
+    simplex = Simplex(simplex_coordinates)
+    assert simplex.n_dim == 2
+    assert len(simplex.vertices) == 3
+    assert isinstance(simplex.centroid, Vertex)
+
+    # Test get_simplex_coordinates
+    assert np.array_equal(simplex.get_simplex_coordinates(), simplex_coordinates)
+
+    # Test set_value
+    vertex_id = simplex.vertices[0].id
+    assert simplex.set_value(vertex_id, 10)
+    assert simplex.vertices[0].value == 10
+    assert not simplex.set_value("invalid_id", 20)
+
+    # Test order_by
+    simplex.vertices[0].set_value(5)
+    simplex.vertices[1].set_value(3)
+    simplex.vertices[2].set_value(7)
+    simplex.order_by()
+    assert simplex.vertices[0].value == 3
+    assert simplex.vertices[1].value == 5
+    assert simplex.vertices[2].value == 7
+
+    # Test calc_centroid
+    simplex.calc_centroid()
+    assert np.array_equal(simplex.centroid.xs, np.array([2, 3]))
+
+    # Test reflect
+    simplex.coef = {"r": 1}
+    xr = simplex.reflect()
+    assert np.array_equal(xr.xs, np.array([-1, 0]))
+
+    # Test expand
+    simplex.coef = {"e": 2}
+    xe = simplex.expand()
+    assert np.array_equal(xe.xs, np.array([-4, -3]))
+
+    # Test inside_contract
+    simplex.coef = {"ic": 0.5}
+    xic = simplex.inside_contract()
+    assert np.array_equal(xic.xs, np.array([0.5, 1.5]))
+
+    # Test outside_contract
+    simplex.coef = {"oc": 0.5}
+    xoc = simplex.outside_contract()
+    assert np.array_equal(xoc.xs, np.array([0.5, 1.5]))
+
+    # Test shrink
+    simplex.coef = {"s": 0.5}
+    shrunk_vertices = simplex.shrink()
+    assert np.array_equal(shrunk_vertices[0].xs, np.array([3., 4.]))
+    assert np.array_equal(shrunk_vertices[1].xs, np.array([2., 3.]))
+    assert np.array_equal(shrunk_vertices[2].xs, np.array([4., 5.]))
+
+
+
+@pytest.fixture
+def nelder_mead():
+    initial_parameters = np.array([[1, 2], [3, 4], [5, 6]])
+    return NelderMead(initial_parameters)
+
+
+def test_get_n_waits(nelder_mead):
+    assert nelder_mead.get_n_waits() == 3
+
+
+def test_get_n_dim(nelder_mead):
+    assert nelder_mead.get_n_dim() == 2
+
+
+def test_get_state(nelder_mead):
+    assert nelder_mead.get_state() == "initialize"
+
+
+def test_change_state(nelder_mead):
+    nelder_mead.change_state("reflect")
+    assert nelder_mead.get_state() == "reflect"
+
+
+def test_set_value(nelder_mead):
+    id = nelder_mead.simplex.vertices[0].id
+    nelder_mead.set_value(id, 10)
+    assert nelder_mead.simplex.vertices[0].value == 10
+
+
+def test_initialize(nelder_mead):
+    vertices = nelder_mead.initialize()
+    assert len(vertices) == 3
+    assert vertices[0].coordinates.tolist() == [1, 2]
+
+
+
+def test_expand(nelder_mead):
+    vertex = nelder_mead.expand()
+    assert vertex.coordinates.tolist() == [-10.0, -12.0]
+
+
+def test_inside_contract(nelder_mead):
+    vertex = nelder_mead.inside_contract()
+    assert vertex.coordinates.tolist() == [2.5, 3.0]
+
+
+def test_outside_contract(nelder_mead):
+    vertex = nelder_mead.outside_contract()
+    assert vertex.coordinates.tolist() == [-2.5, -3.0]
+
+
+def test_shrink(nelder_mead):
+    vertices = nelder_mead.shrink()
+    assert len(vertices) == 3
+    assert vertices[0].coordinates.tolist() == [1, 2]
+
+
+def test_search(nelder_mead):
+    vertices = nelder_mead.search()
+    assert len(vertices) == 3
+    assert vertices[0].coordinates.tolist() == [1, 2]
