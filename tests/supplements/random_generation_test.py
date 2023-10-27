@@ -56,7 +56,6 @@ class RandomGenerationTest(BaseTest):
             subprocess.Popen(['aiaccel-start', '--config', str(config_file), '--clean']).wait()
         final_result_neldermead = self.get_final_result(storage)
         print('nelder-mead', final_result_neldermead)
-
         assert final_result_random == final_result_neldermead
 
     def get_final_result(self, storage):

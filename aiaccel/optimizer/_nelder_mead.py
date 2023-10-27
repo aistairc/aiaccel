@@ -1,636 +1,346 @@
 from __future__ import annotations
 
-import logging
+import string
 from typing import Any
 
 import numpy as np
-from omegaconf.listconfig import ListConfig
+from numpy.random import RandomState
 
-from aiaccel.parameter import OrdinalParameter, Parameter
-from aiaccel.util import generate_random_name
+from aiaccel.optimizer.value import Value
 
-STATES = [
-    "WaitInitialize",
-    "Initialize",
-    "WaitReflect",
-    "ReflectBranch",
-    "WaitExpand",
-    "ExpandBranch",
-    "WaitOutsideContract",
-    "OutsideContractBranch",
-    "WaitInsideContract",
-    "InsideContractBranch",
-    "WaitShrink",
-]
+# constants for Nelder-Mead
+# r: reflect
+# e: expand
+# ic: inside_contract
+# oc: outside_contract
+# s: shrink
+coef: dict[str, float] = {"r": 1.0, "ic": -0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
+
+name_rng = RandomState(None)
 
 
-class NelderMead(object):
-    """A class implementing Nelder-Mead method.
+class Vertex:
+    def __init__(self, xs: np.ndarray[Any, Any], value: Any = None) -> None:
+        self.xs: np.ndarray[Any, Any] = xs
+        self.value: Any = value
+        self.id: str = self.generate_random_name()
 
-    Args:
-        params (list[Parameter]): A list of hyper parameter objects.
-        iteration (float | None, optional): A max iteration counts.
-            Defaults to float('inf').
-        coef (dict | None, optional): A coefficient values. Defaults to None.
-        maximize (bool | None, optional): Evaluate maximize or not. Defaults
-            to False.
-        initial_parameters (list[dict[str, str  |  float  |  list[float]]] | None, optional):
-            A initial parameters. Defaults to None.
-        rng (np.random.RandomState | None, optional): A reference to a random
-            generator. Defaults to None.
+    def generate_random_name(self, length: int = 10) -> str:
+        if length < 1:
+            raise ValueError("Name length should be greater than 0.")
+        rands = [name_rng.choice(list(string.ascii_letters + string.digits))[0] for _ in range(length)]
+        return "".join(rands)
 
-    Attributes:
-        bdrys (np.ndarray): A list of boundaries.
-        coef (dict[str, float]): A dictionary of coefficients.
-        f (np.ndarray): A list of evaluated parameter results.
-        logger (logging.Logger): A logger object.
-        params (list[Parameter]): A list of hyper parameters.
-        storage (dict[str, float | None]): A dictionary to store temporal
-            calculation results.
-        y (np.ndarray): A list of current evaluated parameters.
-        yc (float): A current centroid value of y.
-        _evaluated_itr (int): A count of evaluation each loop.
-        _executing (list[dict]): A list to store candidates to be executed.
-        _executing_index (int): A number to be added to executing list.
-        _fe (float): A temporal result of Expand.
-        _fic (float): A temporal result of Inside Contraction.
-        _foc (float): A temporal result of Outside Contraction.
-        _fr (float): A temporal result of Reflection
-        _history (dict[str, list[float | str]]): A storage of execution
-            history of each value and operator.
-        _maximize (bool): Evaluate the result as maximize or minimize.
-        _max_itr (int): A number of max iterations. This is compared with
-            _evaluated_itr.
-        _num_shrink (int): A number of Shrink.
-        _out_of_boundary (bool): Is a current iteration out of boundaries or
-            not.
-        _result (list[float]): A list of results for _executing.
-        _state (str): A current state.
-        _total_itr (int): A number of iterations. Currently same with
-            _evaluated_itr. It's different if counts out of boundaries.
+    @property
+    def coordinates(self) -> np.ndarray[Any, Any]:
+        return self.xs
 
-    Todo:
-        Fix float comparison errors.
-    """
+    def set_value(self, value: Any) -> None:
+        self.value = value
 
-    def __init__(
-        self,
-        params: list[Parameter],
-        iteration: float = float("inf"),
-        coef: dict[str, Any] | None = None,
-        maximize: bool | None = False,
-        initial_parameters: Any = None,
-        rng: np.random.RandomState | None = None,
-    ) -> None:
-        if coef is None:
-            coef = {"r": 1.0, "ic": -0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
+    def set_id(self, vertex_id: str) -> None:
+        self.id = vertex_id
 
-        self.logger = logging.getLogger("root.optimizer.nelder_mead")
-        self.params = params
-        self.bdrys = np.array([[p.lower, p.upper] for p in self.params])
+    def set_new_id(self) -> None:
+        self.id = self.generate_random_name()
+
+    def set_xs(self, xs: np.ndarray[Any, Any]) -> None:
+        self.xs = xs
+
+    def update(self, xs: np.ndarray[Any, Any], value: Any) -> None:
+        self.xs = xs
+        self.value = value
+
+    def __add__(self, other: Vertex | Any) -> Vertex:  # Add +
+        if isinstance(other, Vertex):
+            new_vertex = Vertex(self.coordinates + other.coordinates)
+            return new_vertex
+        try:
+            new_vertex = Vertex(self.coordinates + other)
+            return new_vertex
+        except TypeError:
+            raise TypeError("Unsupported operand type for +")
+
+    def __sub__(self, other: Vertex | Any) -> Vertex:  # Subtract -
+        if isinstance(other, Vertex):
+            new_vertex = Vertex(self.coordinates - other.coordinates)
+            return new_vertex
+        try:
+            new_vertex = Vertex(self.xs - other)
+            return new_vertex
+        except TypeError:
+            raise TypeError("Unsupported operand type for -")
+
+    def __mul__(self, other: Any) -> Vertex:  # Multiply *
+        new_vertex = Vertex(self.xs * other)
+        new_vertex.set_id(self.id)
+        return new_vertex
+
+    def __eq__(self, other: Vertex | Any) -> bool:  # Equal ==
+        if isinstance(other, Vertex):
+            return self.value == other.value
+        try:
+            return self.value == other
+        except TypeError:
+            raise TypeError("Unsupported operand type for ==")
+
+    def __ne__(self, other: Vertex | Any) -> bool:  # Not Equal !=
+        if isinstance(other, Vertex):
+            return self.value != other.value
+        try:
+            return self.value != other
+        except TypeError:
+            raise TypeError("Unsupported operand type for !=")
+
+    def __lt__(self, other: Vertex | Any) -> bool:  # Less Than <
+        if isinstance(other, Vertex):
+            return self.value < other.value
+        try:
+            return self.value < other
+        except TypeError:
+            raise TypeError("Unsupported operand type for <")
+
+    def __le__(self, other: Vertex | Any) -> bool:  # Less Than or Equal <=
+        if isinstance(other, Vertex):
+            return self.value <= other.value
+        try:
+            return self.value <= other
+        except TypeError:
+            raise TypeError("Unsupported operand type for <=")
+
+    def __gt__(self, other: Vertex | Any) -> bool:  # Greater Than >
+        if isinstance(other, Vertex):
+            return self.value > other.value
+        try:
+            return self.value > other
+        except TypeError:
+            raise TypeError("Unsupported operand type for >")
+
+    def __ge__(self, other: Vertex | Any) -> bool:  # Greater Than or Equal >=
+        if isinstance(other, Vertex):
+            return self.value >= other.value
+        try:
+            return self.value >= other
+        except TypeError:
+            raise TypeError("Unsupported operand type for >=")
+
+
+class Simplex:
+    def __init__(self, simplex_coordinates: np.ndarray[Any, Any]) -> None:
+        self.n_dim = simplex_coordinates.shape[1]
+        self.vertices: list[Vertex] = []
+        self.centroid: Vertex = Vertex(np.array([0.0] * self.n_dim))
         self.coef = coef
-        self.n_dim = len(self.bdrys)
-
-        if rng is None:
-            raise ValueError("rng (RandomState) is required to randomly generate initial parameters.")
-        self._rng = rng
-
-        self.y = self._create_initial_values(initial_parameters)
-
-        self.f: Any = []  # np.ndarray is assigned in self._wait_initialize().
-        self.yc = None
-        self._storage = {"r": None, "ic": None, "oc": None, "e": None, "s": None}
-        self._max_itr = iteration
-        self._total_itr = 0  # included out of boundary
-        self._evaluated_itr = 0  # not included out of boundary
-        self._history: dict[str, list[Any]] = {
-            "total_y": [],  # y each loop
-            "evaluated_y": [],  # y each loop not included out of boundary
-            "op": [],  # operations such as 'reflect' and so on.
-            "total_sample": [],  # sampled point each loop
-            "evaluated_sample": [],  # sampled point each loop not included out of boundary
-            "fyr_order": [],  # order of f(yr) in self.f
-        }
-        self._executing_index = 0
-        self._executing: list[Any] = []
-        self._fr: Any = None  # treated as "float" until self._finalize() where "None" is assigned.
-        self._fe: Any = None
-        self._fic: Any = None
-        self._foc: Any = None
-        self._maximize = maximize
-        self._num_shrink = 0
-        self._state = "WaitInitialize"
-        self._out_of_boundary = False
-        self._result: list[Any] = []
-        for y in self.y:
-            self._add_executing(y)
-
-    def _create_initial_values(self, initial_parameters: list[dict[str, Any]]) -> np.ndarray[Any, Any]:
-        initial_values = [
-            [self._create_initial_value(initial_parameters, dim, num_of_initials) for dim in range(len(self.params))]
-            for num_of_initials in range(self.n_dim + 1)
-        ]
-        return np.array(initial_values)
-
-    def _create_initial_value(self, initial_parameters: Any, dim: int, num_of_initials: int) -> Any:
-        if initial_parameters is None:
-            if isinstance(self.params[dim], OrdinalParameter):
-                return self._rng.randint(len(self.params[dim].sequence))
-            return self.params[dim].sample(rng=self._rng)["value"]
-
-        if not isinstance(initial_parameters[dim]["value"], (list, ListConfig)):
-            initial_parameters[dim]["value"] = [initial_parameters[dim]["value"]]
-
-        if num_of_initials < len(initial_parameters[dim]["value"]):
-            val = initial_parameters[dim]["value"][num_of_initials]
-            return val
-
-        else:
-            val = self.params[dim].sample(rng=self._rng)["value"]
-            return val
-
-    def _add_executing(self, y: np.ndarray[Any, Any], index: int | None = None) -> None:
-        """Add a parameter set to an execution candidate.
-
-        Args:
-            y (np.ndarray): A current y values.
-            index (int): An index to check Shrink results.
-
-        Returns:
-            None
-        """
-        out_of_boundary = False
-
-        if self._is_out_of_boundary(y):
-            out_of_boundary = True
-            self.logger.debug(f"_add_executing out of boundary y: {y}")
-
-        vertex_id = generate_random_name(self._rng)
-        params = []
-
-        for yi, p in zip(y, self.params):
-            params.append({"parameter_name": p.name, "value": yi})
-
-        self._executing.append(
-            {
-                "vertex_id": vertex_id,
-                "parameters": params,
-                "state": self._state,
-                "itr": self._evaluated_itr,
-                "index": index,
-                "out_of_boundary": out_of_boundary,
-            }
-        )
-
-        if out_of_boundary:
-            result = float("inf")
-            if self._maximize:
-                result = float("inf") * -1
-            self.add_result_parameters(
-                {
-                    "vertex_id": vertex_id,
-                    "parameters": params,
-                    "state": self._state,
-                    "itr": self._evaluated_itr,
-                    "index": index,
-                    "out_of_boundary": out_of_boundary,
-                    "result": result,
-                }
-            )
-
-        self._executing_index += 1
-        self.search()
-
-    def _add_y_history(self) -> None:
-        """Add current y to history.
-
-        Returns:
-            None
-        """
-        if not self._out_of_boundary:
-            self._history["evaluated_y"].append(self.y)
-        self._history["total_y"].append(self.y)
-
-    def _pop_result(self) -> dict[str, Any] | None:
-        """Pop a result.
-
-        Returns:
-            dict | None: It returns a result if exists. Otherwise, it
-                returns None.
-
-        Raises:
-            ValueError: Causes when the name of a popped result is not included
-                int _executing list.
-
-            ValueError: Causes when a current state is 'WaitShrink' and out of
-                boundary.
-        """
-        try:
-            r = self._result.pop()
-        except IndexError:
-            return None
-
-        try:
-            i = [e["vertex_id"] for e in self._executing].index(r["vertex_id"])
-        except ValueError:
-            self.logger.error(f"Could not find match for r: {r}")
-            raise ValueError(f"Could not find match for r: {r}")
-
-        if r["out_of_boundary"]:
-            if self._state == "WaitShrink":
-                self.logger.error(f"out of boundary in WaitShrink. r: {r}")
-                raise ValueError(f"out of boundary in WaitShrink. r: {r}")
-            r["result"] = float("inf")
-            self._out_of_boundary = True
-
-        if self._maximize:
-            r["result"] *= -1
-
-        self._executing.pop(i)
-        return r
-
-    def _change_state(self, state: str) -> None:
-        """Change current state.
-
-        Args:
-            state (str): A state string.
-
-        Returns:
-            None
-
-        Raises:
-            ValueError: Causes when unsupported state is given.
-        """
-        if state not in STATES:
-            self.logger.error(f"Unsupported state: {state}")
-            raise ValueError(f"Unsupported state: {state}")
-
-        self._state = state
-
-    def _wait_initialize(self, results: list[dict[str, Any]]) -> None:
-        """Wait first parameter results are finished.
-
-        Args:
-            results (list[dict]): A list of execution results.
-
-        Returns:
-            None
-        """
-        for r in results:
-            if self._state == r["state"]:
-                self.f = np.append(self.f, r["result"])
-
-        if len(self.y) == len(self.f):
-            self.f = np.array(self.f)
-            self._change_state("Initialize")
-
-    def _initialize(self) -> None:
-        """Initialize state method.
-
-        Returns:
-            None
-        """
-        self._centroid()
-        self._reflect()
-
-    def _wait_reflect(self, results: list[dict[str, Any]]) -> None:
-        """Wait Reflect calculations are finished.
-
-        Args:
-            results (list[dict]): A list of execution results.
-
-        Returns:
-            None
-        """
-        for r in results:
-            if r["state"] == self._state:
-                self._fr = r["result"]
-                self._change_state("ReflectBranch")
-
-    def _reflect_branch(self) -> None:
-        """Branch to change a state after Reflect.
-
-        Returns:
-            None
-        """
-        if self.f[0] <= self._fr < self.f[-2]:
-            self.y[-1] = self._storage["r"]
-            self.f[-1] = self._fr
-            self._finalize()
-        elif self._fr < self.f[0]:
-            self._expand()
-        elif self.f[-2] <= self._fr < self.f[-1]:
-            self._outside_contract()
-        elif self.f[-1] <= self._fr:
-            self._inside_contract()
-        else:  # pragma: no cover
-            pass  # not reached
-
-    def _wait_expand(self, results: list[dict[str, Any]]) -> None:
-        """Wait 'Expand' executions finished.
-
-        Args:
-            results (list[dict]): A list of execution results.
-
-        Returns:
-            None
-        """
-        for r in results:
-            if r["state"] == self._state:
-                self._fe = r["result"]
-                self._change_state("ExpandBranch")
-
-    def _expand_branch(self) -> None:
-        """Branch to change state after 'Expand'.
-
-        Returns:
-            None
-        """
-        if self._fe < self._fr:
-            self.y[-1] = self._storage["e"]
-            self.f[-1] = self._fe
-        else:
-            self.y[-1] = self._storage["r"]
-            self.f[-1] = self._fr
-        self._finalize()
-
-    def _wait_outside_contract(self, results: list[dict[str, Any]]) -> None:
-        """Wait the 'OutsideContract' execution finished.
-
-        Args:
-            results (list[dict]): A list of execution results.
-
-        Returns:
-            None
-        """
-        for r in results:
-            if r["state"] == self._state:
-                self._foc = r["result"]
-                self._change_state("OutsideContractBranch")
-
-    def _outside_contract_branch(self) -> None:
-        """Branch to change state after 'OutsideContract'.
-
-        Returns:
-            None
-        """
-        if self._foc <= self._fr:
-            self.y[-1] = self._storage["oc"]
-            self.f[-1] = self._foc
-            self._finalize()
-        else:
-            self._shrink()
-
-    def _wait_inside_contract(self, results: list[dict[str, Any]]) -> None:
-        """Wait the 'InsideContract' execution finished.
-
-        Args:
-            results (list[dict]): A list of execution results.
-
-        Returns:
-            None
-        """
-        for r in results:
-            if r["state"] == self._state:
-                self._fic = r["result"]
-                self._change_state("InsideContractBranch")
-
-    def _inside_contract_branch(self) -> None:
-        """Branch to change state after 'InsideContract'.
-
-        Returns:
-            None
-        """
-
-        if self._fic < self.f[-1]:
-            self.y[-1] = self._storage["ic"]
-            self.f[-1] = self._fic
-            self._finalize()
-        else:
-            self._shrink()
-
-    def _wait_shrink(self, results: list[dict[str, Any]]) -> None:
-        """Wait the 'Shrink' execution finished.
-
-        Args:
-            results (list[dict]): A list of execution results.
-
-        Returns:
-            None
-        """
-
-        for r in results:
-            if r["state"] == self._state:
-                self.f[r["index"]] = r["result"]
-                self._num_shrink += 1
-
-        if len(self.y) - 1 == self._num_shrink:
-            self._finalize()
-
-    def _finalize(self) -> None:
-        """Finalize a current loop.
-
-        Returns:
-            None
-        """
-        if not self._out_of_boundary:
-            self._evaluated_itr += 1
-            self._history["evaluated_sample"].append(self.y[-1])
-        else:
-            self.logger.debug(f'history: {self._history["op"]}')
-            self.logger.debug(f"y: {self.y}")
-            self.logger.debug(f"f: {self.f}")
-
-        self._total_itr += 1
-        self._add_y_history()
-        self._history["fyr_order"].append(np.argsort(np.argsort(self.f))[-1] + 1)
-        # If do shrink, should save it?
-        self._history["total_sample"].append(self.y[-1])
-
-        self._fr = None
-        self._fe = None
-        self._fic = None
-        self._foc = None
-        self._num_shrink = 0
-        self._out_of_boundary = False
-        self._change_state("Initialize")
-
-    def _order_by(self) -> None:
-        """Order the values.
-
-        Returns:
-            None
-        """
-        order = np.argsort(self.f)
-        self.y = self.y[order]
-        self.f = self.f[order]
-
-    def _centroid(self) -> None:
-        """Calculate the centroid of points.
-
-        Returns:
-            None
-        """
-        self._storage = {"r": None, "ic": None, "oc": None, "e": None, "s": None}
-        self._order_by()
-        self.yc = self.y[:-1].mean(axis=0)
-        self._history["op"].append("i")
-
-    def _reflect(self) -> None:
-        """Compute reflected point.
-
-        Returns:
-            None
-        """
-        yr = self.yc + self.coef["r"] * (self.yc - self.y[-1])
-        self._storage["r"] = yr
-        self._history["op"].append("r")
-        self._change_state("WaitReflect")
-        self._add_executing(yr)
-
-    def _expand(self) -> None:
-        """Compute the expanded point.
-
-        Returns:
-            None
-        """
-        ye = self.yc + self.coef["e"] * (self.yc - self.y[-1])
-        self._storage["e"] = ye
-        self._history["op"].append("e")
-        self._change_state("WaitExpand")
-        self._add_executing(ye)
-
-    def _inside_contract(self) -> None:
-        """Compute the contracted point according to ic (inside contract
-            coefficient).
-
-        Returns:
-            None
-        """
-        yic = self.yc + self.coef["ic"] * (self.yc - self.y[-1])
-        self._storage["ic"] = yic
-        self._history["op"].append("ic")
-        self._change_state("WaitInsideContract")
-        self._add_executing(yic)
-
-    def _outside_contract(self) -> None:
-        """Compute the contracted point according to ic (outside contract
-            coefficient).
-
-        Returns:
-            None
-        """
-        yoc = self.yc + self.coef["oc"] * (self.yc - self.y[-1])
-        self._storage["oc"] = yoc
-        self._history["op"].append("io")
-        self._change_state("WaitOutsideContract")
-        self._add_executing(yoc)
-
-    def _shrink(self) -> None:
-        """Shrink all points except y[0].
-
-        Returns:
-            None
-        """
-        for i in range(1, len(self.y)):
-            self.y[i] = self.y[0] + self.coef["s"] * (self.y[i] - self.y[0])
-            self._change_state("WaitShrink")
-            self._add_executing(self.y[i], i)
-
-        self._history["op"].append("s")
-
-    def _is_out_of_boundary(self, y: np.ndarray[Any, Any]) -> bool:
-        """Is points out of boundary or not.
-
-        Args:
-            y (np.ndarray): Current evaluated points.
-
-        Returns:
-            bool: Is points out of boundary or not.
-        """
-        for yi, b in zip(y, self.bdrys):
-            if b[0] > yi or yi > b[1]:
+        for xs in simplex_coordinates:
+            self.vertices.append(Vertex(xs))
+
+    def get_simplex_coordinates(self) -> np.ndarray[Any, Any]:
+        return np.array([v.xs for v in self.vertices])
+
+    def set_value(self, vertex_id: str, value: Any) -> bool:
+        for v in self.vertices:
+            if v.id == vertex_id:
+                v.set_value(value)
                 return True
-
         return False
 
-    def add_result_parameters(self, result: dict[str, Any]) -> None:
-        """Add a new result.
+    def order_by(self) -> None:
+        order = np.argsort([v.value for v in self.vertices])
+        self.vertices = [self.vertices[i] for i in order]
 
-        Args:
-            result (dict): A dictionary of a result parameter.
+    def calc_centroid(self) -> None:
+        self.order_by()
+        xs = self.get_simplex_coordinates()
+        self.centroid = Vertex(xs[:-1].mean(axis=0))
 
-        Returns:
-            None
-        """
-        self._result.append(result)
+    def reflect(self) -> Vertex:
+        xr = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["r"])
+        return xr
 
-    def search(self) -> list[dict[str, Any]] | None:
-        """Proceed a search step. One search method does not increment the
-        iteration. It increments when finalize method is called.
+    def expand(self) -> Vertex:
+        xe = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["e"])
+        return xe
 
-        The details of state transitions are as follows: ::
+    def inside_contract(self) -> Vertex:
+        xic = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["ic"])
+        return xic
 
-            -->: state change
-            indent: conditional branch
+    def outside_contract(self) -> Vertex:
+        xoc = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["oc"])
+        return xoc
 
-            WaitInitialize: wait first three executing
-            --> Initialize: add reflect executing
-            --> WaitReflect: wait executing reflect one
-            --> ReflectBranch: conditional jump using reflect
-                --> back to Initialize
-                --> WaitExpand: wait executing expand one
-                    --> ExpandBranch: calc using expand
-                        ---> back to Initialize
-                    --> WaitOutsideContract: wait executing oc one
-                        ---> OutsideContractBranch: conditional jump using oc
-                            --> back to Initialize
-                            --> WaitShrink: wait executing shrink f(y)
-                                ---> back to Initialize
-                    --> WaitInsideContract: wait executing ic one
-                        ---> InsideContractBranch: conditional jump using ic
-                            --> back to Initialize
-                            --> WaitShrink: wait executing shrink f(y)
-                                ---> back to Initialize
+    def shrink(self) -> list[Vertex]:
+        for i in range(1, len(self.vertices)):
+            self.vertices[i] = self.vertices[0] + (self.vertices[i] - self.vertices[0]) * self.coef["s"]
+        return self.vertices
 
-        Returns:
-            None
-        """
-        if self._evaluated_itr >= self._max_itr:
-            return None
 
-        results = []
+class Store:
+    def __init__(self) -> None:
+        self.r: Vertex | Any = None  # reflect
+        self.e: Vertex | Any = None  # expand
+        self.ic: Vertex | Any = None  # inside_contract
+        self.oc: Vertex | Any = None  # outside_contract
+        self.s: list[Vertex] | Any = None  # shrink
 
-        while True:
-            r = self._pop_result()
-            if r is None:
-                break
-            results.append(r)
 
-        if self._state == "WaitInitialize":
-            self._wait_initialize(results)
-        elif self._state == "Initialize":
-            self._initialize()
-        elif self._state == "WaitReflect":
-            self._wait_reflect(results)
-        elif self._state == "ReflectBranch":
-            self._reflect_branch()
-        elif self._state == "WaitExpand":
-            self._wait_expand(results)
-        elif self._state == "ExpandBranch":
-            self._expand_branch()
-        elif self._state == "WaitOutsideContract":
-            self._wait_outside_contract(results)
-        elif self._state == "OutsideContractBranch":
-            self._outside_contract_branch()
-        elif self._state == "WaitInsideContract":
-            self._wait_inside_contract(results)
-        elif self._state == "InsideContractBranch":
-            self._inside_contract_branch()
-        elif self._state == "WaitShrink":
-            self._wait_shrink(results)
+class NelderMead:
+    def __init__(self, initial_parameters: np.ndarray[Any, Any]) -> None:
+        self.simplex: Simplex = Simplex(initial_parameters)
+        self.state = "initialize"
+        self.store = Store()
+        self.waits = {
+            "initialize": self.simplex.n_dim + 1,
+            "shrink": self.simplex.n_dim + 1,
+            "expand": 1,
+            "inside_contract": 1,
+            "outside_contract": 1,
+            "reflect": 1,
+        }
+        self.n_waits = self.waits[self.state]
+
+    def get_n_waits(self) -> int:
+        return self.n_waits
+
+    def get_n_dim(self) -> int:
+        return self.simplex.n_dim
+
+    def get_state(self) -> str:
+        return self.state
+
+    def change_state(self, state: str) -> None:
+        self.state = state
+
+    def set_value(self, vertex_id: str, value: float | int) -> None:
+        self.simplex.set_value(vertex_id, value)
+
+    def initialize(self) -> list[Vertex]:
+        self.n_waits = self.waits["initialize"]
+        return self.simplex.vertices
+
+    def after_initialize(self, yis: list[Value]) -> None:
+        for y in yis:
+            self.simplex.set_value(y.id, y.value)
+        self.change_state("reflect")
+
+    def reflect(self) -> Vertex:
+        self.n_waits = self.waits["reflect"]
+        self.simplex.calc_centroid()
+        self.store.r = self.simplex.reflect()
+        return self.store.r
+
+    def after_reflect(self, yr: Value) -> None:
+        self.store.r.set_value(yr.value)
+        if self.simplex.vertices[0] <= self.store.r < self.simplex.vertices[-2]:
+            self.simplex.vertices[-1].update(self.store.r.coordinates, self.store.r.value)
+            self.change_state("reflect")
+        elif self.store.r < self.simplex.vertices[0]:
+            self.change_state("expand")
+        elif self.simplex.vertices[-2] <= self.store.r < self.simplex.vertices[-1]:
+            self.change_state("outside_contract")
+        elif self.simplex.vertices[-1] <= self.store.r:
+            self.change_state("inside_contract")
         else:
-            self.logger.error(f"Invalid state: {self._state}")
-            raise ValueError(f"Invalid state: {self._state}")
+            self.change_state("reflect")
 
-        return self._executing
+    def expand(self) -> Vertex:
+        self.n_waits = self.waits["expand"]
+        self.store.e = self.simplex.expand()
+        return self.store.e
+
+    def after_expand(self, ye: Value) -> None:
+        self.store.e.set_value(ye.value)
+        if self.store.e < self.store.r:
+            self.simplex.vertices[-1].update(self.store.e.coordinates, self.store.e.value)
+        else:
+            self.simplex.vertices[-1].update(self.store.r.coordinates, self.store.r.value)
+        self.change_state("reflect")
+
+    def inside_contract(self) -> Vertex:
+        self.n_waits = self.waits["inside_contract"]
+        self.store.ic = self.simplex.inside_contract()
+        return self.store.ic
+
+    def after_inside_contract(self, yic: Value) -> None:
+        self.store.ic.set_value(yic.value)
+        if self.store.ic < self.simplex.vertices[-1]:
+            self.simplex.vertices[-1].update(self.store.ic.coordinates, self.store.ic.value)
+            self.change_state("reflect")
+        else:
+            self.change_state("shrink")
+
+    def outside_contract(self) -> Vertex:
+        self.n_waits = self.waits["outside_contract"]
+        self.store.oc = self.simplex.outside_contract()
+        return self.store.oc
+
+    def after_outside_contract(self, yoc: Value) -> None:
+        self.store.oc.set_value(yoc.value)
+        if self.store.oc <= self.store.r:
+            self.simplex.vertices[-1].update(self.store.oc.coordinates, self.store.oc.value)
+            self.change_state("reflect")
+        else:
+            self.change_state("shrink")
+
+    def shrink(self) -> list[Vertex]:
+        self.n_waits = self.waits["shrink"]
+        self.store.s = self.simplex.shrink()
+        return self.store.s
+
+    def aftter_shrink(self, yss: list[Value]) -> None:
+        for ys in yss:
+            if not self.simplex.set_value(ys.id, ys.value):
+                raise BaseException("Error: vertex is not found.")
+        self.change_state("reflect")
+
+    def search(self) -> list[Vertex]:
+        if self.state == "initialize":
+            xs = self.initialize()
+            self.change_state("initialize_pending")
+            return xs
+
+        elif self.state == "initialize_pending":
+            return []
+
+        elif self.state == "reflect":
+            x = self.reflect()
+            self.change_state("reflect_pending")
+            return [x]
+
+        elif self.state == "reflect_pending":
+            return []
+
+        elif self.state == "expand":
+            x = self.expand()
+            self.change_state("expand_pending")
+            return [x]
+
+        elif self.state == "expand_pending":
+            return []
+
+        elif self.state == "inside_contract":
+            x = self.inside_contract()
+            self.change_state("inside_contract_pending")
+            return [x]
+
+        elif self.state == "inside_contract_pending":
+            return []
+
+        elif self.state == "outside_contract":
+            x = self.outside_contract()
+            self.change_state("outside_contract_pending")
+            return [x]
+
+        elif self.state == "outside_contract_pending":
+            return []
+
+        elif self.state == "shrink":
+            xs = self.shrink()
+            self.change_state("shrink_pending")
+            return xs
+
+        elif self.state == "shrink_pending":
+            return []
+
+        else:
+            raise ValueError("Unknown state.")
