@@ -78,8 +78,6 @@ include-package-data = true
 packages = [
     'aiaccel',
     'aiaccel.abci',
-    'aiaccel.master',
-    'aiaccel.master.evaluator',
     'aiaccel.optimizer',
     'aiaccel.scheduler',
     'aiaccel.scheduler.algorithm',

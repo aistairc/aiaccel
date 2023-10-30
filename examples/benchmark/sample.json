@@ -4,9 +4,6 @@
     "workspace": "/tmp/work"
   },
   "logger": {
-    "master_logfile": "master.log",
-    "master_file_log_level": "DEBUG",
-    "master_stream_log_level": "INFO",
     "optimizer_logfile": "optimizer.log",
     "optimizer_file_log_level": "DEBUG",
     "optimizer_stream_log_level": "WARNING",
@@ -18,12 +15,9 @@
     "$aistopt_wrapper": "wrapper_aistopt.sh",
     "wrapper_command": "python wrapper.py"
   },
-  "master": {
-    "sleep_time_master": 1
-  },
   "optimizer": {
     "search_algorithm": "NelderMeadSearch",
-    "parameter_pool_size": 5,
+    "parameter_pool_size": 5
   },
   "scheduler": {
     "cancel_retry": 3,

@@ -8,7 +8,7 @@ from aiaccel.module import AbstractModule
 from aiaccel.scheduler.algorithm import RandomSampling
 from aiaccel.scheduler.job.job import Job
 from aiaccel.scheduler.job.model.local_model import LocalModel
-from aiaccel.util import str_to_logging_level
+from aiaccel.util import create_yaml, str_to_logging_level
 
 
 class AbstractScheduler(AbstractModule):
@@ -279,3 +279,25 @@ class AbstractScheduler(AbstractModule):
             # TODO: Fix TestAbstractScheduler etc to return None.
         """
         return LocalModel()
+
+    def evaluate(self) -> None:
+        """Evaluate the result of optimization.
+
+        Returns:
+            None
+        """
+
+        best_trial_ids, _ = self.storage.get_best_trial(self.goals)
+        if best_trial_ids is None:
+            self.logger.error(f"Failed to output {self.workspace.best_result_file}.")
+            return
+        hp_results = []
+        for best_trial_id in best_trial_ids:
+            hp_results.append(self.storage.get_hp_dict(best_trial_id))
+
+        create_yaml(self.workspace.best_result_file, hp_results, self.workspace.lock)
+
+        finished = self.storage.get_num_finished()
+        if self.config.optimize.trial_number >= finished:
+            self.logger.info("Best hyperparameter is followings:")
+            self.logger.info(hp_results)

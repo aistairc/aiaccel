@@ -253,19 +253,16 @@
     },
     "logger": {
         "file": {
-            "master": "master.log",
             "scheduler": "scheduler.log",
             "optimizer": "optimizer.log",
             "user_option_file": "option"
         },
         "log_level": {
-            "master": "DEBUG",
             "scheduler": "DEBUG",
             "optimizer": "DEBUG",
             "user_option_log_level": "option"
         },
         "stream_level": {
-            "master": "DEBUG",
             "scheduler": "DEBUG",
             "optimizer": "DEBUG",
             "user_option_stream_level": "option"

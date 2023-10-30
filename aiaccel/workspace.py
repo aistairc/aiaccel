@@ -78,7 +78,6 @@ class Workspace:
         self.storage = self.path / dict_storage
         self.tensorboard = self.path / dict_tensorboard
         self.timestamp = self.path / dict_timestamp
-
         self.consists = [
             self.alive,
             self.error,
@@ -101,8 +100,9 @@ class Workspace:
         ]
         self.results = Path("./results")
         self.retults_csv_file = self.path / "results.csv"
-        self.final_result_file = self.path / dict_result / "final_result.result"
+        self.final_result_file = self.path / "final_result.result"
         self.storage_file_path = self.storage / "storage.db"
+        self.best_result_file = self.path / "best_result.yaml"
 
     def create(self) -> bool:
         """Create a work directory.

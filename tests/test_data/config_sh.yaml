@@ -56,20 +56,16 @@ job_setting:
   random_scheduling: false
 
 sleep_time:
-  master: 1.0
   scheduler: 1.0
   optimizer: 1.0
 
 logger:
   file:
-    master: master.log
     optimizer: optimizer.log
     scheduler: scheduler.log
   log_level:
-    master: INFO
     optimizer: INFO
     scheduler: INFO
   stream_level:
-    master: CRITICAL
     optimizer: CRITICAL
     scheduler: CRITICAL
