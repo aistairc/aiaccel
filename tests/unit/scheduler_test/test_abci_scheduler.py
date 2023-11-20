@@ -1,4 +1,5 @@
 from aiaccel.scheduler import AbciScheduler
+from aiaccel.optimizer import create_optimizer
 
 from tests.base_test import BaseTest
 
@@ -14,7 +15,9 @@ class TestAbciScheduler(BaseTest):
         database_remove
     ):
         database_remove()
-        scheduler = AbciScheduler(self.load_config_for_test(self.configs["config.json"]))
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbciScheduler(config, optimizer)
         xml_path = data_dir.joinpath('qstat.xml')
         fake_process.register_subprocess(['qstat', '-xml'], stdout=[])
         assert scheduler.get_stats() is None
@@ -34,7 +37,9 @@ class TestAbciScheduler(BaseTest):
         database_remove
     ):
         database_remove()
-        scheduler = AbciScheduler(self.load_config_for_test(self.configs["config.json"]))
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbciScheduler(config, optimizer)
         s = {"name": "run_000005.sh"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5

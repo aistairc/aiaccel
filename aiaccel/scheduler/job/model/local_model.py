@@ -25,7 +25,7 @@ class LocalModel(AbstractModel):
             obj.config.generic.enabled_variable_name_argumentation,
         )
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
-        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE)
+        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE, bufsize=0)
 
         obj.th_oh = OutputHandler(obj.proc)
         obj.th_oh.start()

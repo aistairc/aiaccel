@@ -6,6 +6,7 @@ from unittest.mock import patch
 import numpy as np
 
 from aiaccel.scheduler import AbstractScheduler
+from aiaccel.optimizer import create_optimizer
 
 from tests.base_test import BaseTest
 
@@ -44,38 +45,9 @@ class TestAbstractScheduler(BaseTest):
     #  logging modules are generated each method.
 
     def test_init(self, config_json):
-        assert type(AbstractScheduler(self.load_config_for_test(self.configs['config.json']))) is AbstractScheduler
-
-    def test_change_state_finished_trials(
-        self,
-        setup_hp_running,
-        setup_result,
-        database_remove
-    ):
-        database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
-        scheduler.print_dict_state()
-        setup_hp_running(1)
-        setup_result(1)
-        assert scheduler.change_state_finished_trials() is None
-
-    def test_get_stats(
-        self,
-        database_remove
-    ):
-        database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
-        scheduler.print_dict_state()
-        assert scheduler.get_stats() is None
-
-    def test_update_resource(
-        self,
-        database_remove
-    ):
-        database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
-        scheduler.print_dict_state()
-        assert scheduler.update_resource() is None
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        assert type(AbstractScheduler(config, optimizer)) is AbstractScheduler
 
     def test_pre_process(
         self,
@@ -84,20 +56,15 @@ class TestAbstractScheduler(BaseTest):
         database_remove
     ):
         database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
-        scheduler.print_dict_state()
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbstractScheduler(config, optimizer)
         setup_hp_running(2)
         setup_result(1)
 
         scheduler.pre_process()
 
-        # for job in scheduler.jobs:
-        #     machine = job.get_machine()
-        #     # machine.set_state('Success')
-        #     machine.set_state('success')
-        #     job.main()
-
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
+        scheduler = AbstractScheduler(config, optimizer)
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[]):
             assert scheduler.pre_process() is None
 
@@ -120,15 +87,15 @@ class TestAbstractScheduler(BaseTest):
         for i in range(10):
             jobs.append({'thread': dummy_job()})
 
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbstractScheduler(config, optimizer)
         assert scheduler.post_process() is None
 
-        with patch.object(scheduler, 'check_finished', return_value=False):
-            with patch.object(scheduler, 'jobs', jobs):
-                assert scheduler.post_process() is None
-
-        with patch.object(scheduler, 'check_finished', return_value=True):
+        with patch.object(scheduler, 'jobs', jobs):
             assert scheduler.post_process() is None
+
+        assert scheduler.post_process() is None
 
     def test_inner_loop_main_process(
         self,
@@ -138,18 +105,12 @@ class TestAbstractScheduler(BaseTest):
         database_remove
     ):
         database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbstractScheduler(config, optimizer)
         scheduler.pre_process()
         setup_hp_ready(1)
-
-        for job in scheduler.jobs:
-            machine = job.get_machine()
-            machine.set_state('success')
-            job.main()
-
-        with patch.object(scheduler, 'check_finished', return_value=True):
-            assert scheduler.inner_loop_main_process() is False
-
+        assert scheduler.inner_loop_main_process()
 
     def test_serialize(
         self,
@@ -158,10 +119,12 @@ class TestAbstractScheduler(BaseTest):
         database_remove
     ):
         database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbstractScheduler(config, optimizer)
         scheduler._rng = np.random.RandomState(0)
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        assert scheduler._serialize(trial_id=0) is None
+        assert scheduler.serialize(trial_id=0) is None
 
     def test_deserialize(
         self,
@@ -170,25 +133,20 @@ class TestAbstractScheduler(BaseTest):
         database_remove
     ):
         database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbstractScheduler(config, optimizer)
         scheduler.storage.trial.set_any_trial_state(trial_id=0, state="finished")
         scheduler._rng = np.random.RandomState(0)
-        scheduler._serialize(trial_id=0)
-        assert scheduler._deserialize(trial_id=0) is None
+        scheduler.serialize(trial_id=0)
+        assert scheduler.deserialize(trial_id=0) is None
 
-    def test_parse_trial_id(self, config_json, database_remove):
+    def test_is_error_free(self, config_json, database_remove):
         database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
-        s = "python wrapper.py --trial_id 001"
-        s = {"name": "2 python user.py --trial_id 5 --config config.yaml --x1=1.0 --x2=1.0"}
-        trial_id = scheduler.parse_trial_id(s['name'])
-        # assert name in '001'
-        assert trial_id is None
-
-    def test_check_error(self, config_json, database_remove):
-        database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
-        assert scheduler.check_error() is True
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbstractScheduler(config, optimizer)
+        assert scheduler.is_error_free() is True
 
         jobstates = [
             {'trial_id': 0, 'jobstate': 'failure'}
@@ -196,19 +154,21 @@ class TestAbstractScheduler(BaseTest):
 
         with patch.object(scheduler, 'job_status', {1: 'failure'}):
             with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
-                assert scheduler.check_error() is True
+                assert scheduler.is_error_free() is True
 
         with patch.object(scheduler, 'job_status', {0: 'failure'}):
             with patch.object(scheduler.storage.jobstate, 'get_all_trial_jobstate', return_value=jobstates):
-                assert scheduler.check_error() is False
+                assert scheduler.is_error_free() is False
 
     def test_resume(self, config_json):
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
+        config = self.load_config_for_test(self.configs['config.json'])
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = AbstractScheduler(config, optimizer)
         scheduler.pre_process()
-        scheduler._serialize(0)
-        scheduler._serialize(1)
+        scheduler.serialize(0)
+        scheduler.serialize(1)
 
-        scheduler.config.resume = 1
+        scheduler.config.resume = 0
         assert scheduler.resume() is None
 
         scheduler.config.resume = None

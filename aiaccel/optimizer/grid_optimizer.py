@@ -118,14 +118,6 @@ class GridOptimizer(AbstractOptimizer):
             self.ready_params.append(generate_grid_points(param, self.config))
         self.num_generated_params = 0
 
-    def pre_process(self) -> None:
-        """Pre-procedure before executing processes.
-
-        Returns:
-            None
-        """
-        super().pre_process()
-
         self.num_generated_params = (
             self.storage.get_num_ready() + self.storage.get_num_running() + self.storage.get_num_finished()
         )

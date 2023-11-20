@@ -19,6 +19,7 @@ from aiaccel.config import ResourceType
 from aiaccel.scheduler import AbciModel, CustomMachine, Job, LocalModel, LocalScheduler, create_scheduler
 from aiaccel.util.process import OutputHandler
 from tests.base_test import BaseTest
+from aiaccel.optimizer import create_optimizer
 
 
 async def async_start_job(job):
@@ -49,7 +50,8 @@ class TestModel(BaseTest):
         self.workspace.create()
 
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = create_scheduler(config.resource.type.value)(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = create_scheduler(config.resource.type.value)(config, optimizer)
 
         setup_hp_ready(1)
         trial_id = 0
@@ -74,7 +76,8 @@ class TestModel(BaseTest):
         config = self.load_config_for_test(self.configs['config.json'])
         config.resource.type = ResourceType('abci')
 
-        scheduler = create_scheduler(config.resource.type.value)(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = create_scheduler(config.resource.type.value)(config, optimizer)
 
         trial_id = 1
         self.abci_job = Job(
@@ -128,7 +131,8 @@ class TestJob(BaseTest):
         self.workspace.create()
 
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = create_scheduler(config.resource.type.value)(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = create_scheduler(config.resource.type.value)(config, optimizer)
 
         setup_hp_ready(1)
         trial_id = 1
@@ -151,7 +155,8 @@ class TestJob(BaseTest):
         database_remove
     ):
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = LocalScheduler(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = LocalScheduler(config, optimizer)
         # config = load_test_config()
         setup_hp_ready(1)
         trial_id = 1

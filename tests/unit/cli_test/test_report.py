@@ -23,7 +23,7 @@ def test_report(clean_work_dir, work_dir, create_tmp_config):
 
     csv_writer = CsvWriter(config)
 
-    assert csv_writer._get_zero_padding_trial_id(1) == '000001'
+    assert csv_writer._get_zero_padding_trial_id(1) == '0000001'
     assert csv_writer.create() is None
 
     hp = {

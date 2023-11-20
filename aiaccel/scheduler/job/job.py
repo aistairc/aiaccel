@@ -118,6 +118,14 @@ class Job:
         state = self.machine.get_state(self.model.state)
         return state.name
 
+    def set_state(self, state: str) -> None:
+        """Set a current state.
+
+        Args:
+            state (str): A current state.
+        """
+        self.machine.set_state(state)
+
     def write_start_time_to_storage(self) -> None:
         """Set a start time."""
         self.start_time = datetime.now()

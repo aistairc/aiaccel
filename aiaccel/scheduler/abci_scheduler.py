@@ -17,8 +17,6 @@ class AbciScheduler(AbstractScheduler):
         Returns:
             None
         """
-        super().get_stats()
-
         commands = "qstat -xml"
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
         stdout_data, _ = p.communicate()

@@ -5,6 +5,7 @@ generic:
   function: main
   batch_job_timeout: 600
   sleep_time: 0
+  logging_level: DEBUG
 
 resource:
   type: python_local

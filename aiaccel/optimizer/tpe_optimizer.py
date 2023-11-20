@@ -67,33 +67,13 @@ class TpeOptimizer(AbstractOptimizer):
     def __init__(self, config: DictConfig) -> None:
         super().__init__(config)
         self.parameter_pool: dict[str, Any] = {}
-        self.parameter_list: list[Any] = []
         self.study_name = "distributed-tpe"
         self.study: Any = None
         self.distributions: Any = None
         self.trial_pool: dict[str, Any] = {}
         self.randseed = self.config.optimize.rand_seed
-        self.resumed_list: list[Any] = []
-
-    def pre_process(self) -> None:
-        """Pre-Procedure before executing optimize processes."""
-
-        super().pre_process()
-
-        self.parameter_list = self.params.get_parameter_list()
-
-        if self.distributions is None:
-            self.distributions = create_distributions(self.params)
-
-        if self.config.resume is not None and self.config.resume > 0:
-            self.resume_trial()
-
+        self.distributions = create_distributions(self.params)
         self.create_study()
-
-    def post_process(self) -> None:
-        """Post-procedure after executed processes."""
-        self.check_result()
-        super().post_process()
 
     def check_result(self) -> None:
         """Check the result files and add it to sampler object.
@@ -218,23 +198,25 @@ class TpeOptimizer(AbstractOptimizer):
         optuna_trials = self.study.get_trials()
         storage_path = f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db"
         engine = sqlalchemy.create_engine(storage_path, echo=False)
-        Session = sqlalchemy_orm.sessionmaker(bind=engine)
-        session = Session()
-
+        session = sqlalchemy_orm.sessionmaker(bind=engine)()
         for optuna_trial in optuna_trials:
             if optuna_trial.number >= self.config.resume:
-                self.resumed_list.append(optuna_trial)
                 resumed_trial = session.query(models.TrialModel).filter_by(number=optuna_trial.number).first()
                 session.delete(resumed_trial)
-                self.logger.info(f"resume_trial deletes the trial number {resumed_trial.number} from optuna db.")
-
         session.commit()
-
         for trial_id in list(self.parameter_pool.keys()):
             objective = self.get_any_trial_objective(int(trial_id))
             if objective is not None:
                 del self.parameter_pool[trial_id]
                 self.logger.info(f"resume_trial trial_id {trial_id} is deleted from parameter_pool")
+
+    def resume(self) -> None:
+        super().resume()
+        if self.distributions is None:
+            self.distributions = create_distributions(self.params)
+        if self.config.resume is not None and self.config.resume > 0:
+            self.resume_trial()
+        self.create_study()
 
 
 def create_distributions(
@@ -258,17 +240,12 @@ def create_distributions(
     for p in parameters.get_parameter_list():
         if isinstance(p, FloatParameter):
             distributions[p.name] = optuna.distributions.FloatDistribution(p.lower, p.upper, log=p.log)
-
         elif isinstance(p, IntParameter):
             distributions[p.name] = optuna.distributions.IntDistribution(p.lower, p.upper, log=p.log)
-
         elif isinstance(p, CategoricalParameter):
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.choices)
-
         elif isinstance(p, OrdinalParameter):
             distributions[p.name] = optuna.distributions.CategoricalDistribution(p.sequence)
-
         else:
             raise TypeError("Unsupported parameter type")
-
     return distributions

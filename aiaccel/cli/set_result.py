@@ -17,6 +17,8 @@ def write_results_to_database(
     objective: list[str | float | int] | None,
     error: str,
     returncode: int | None,
+    start_time: str | None = None,
+    end_time: str | None = None,
 ) -> None:
     storage = Storage(storage_file_path)
 
@@ -27,6 +29,10 @@ def write_results_to_database(
         storage.returncode.set_any_trial_returncode(trial_id, returncode)
     if error != "":
         storage.error.set_any_trial_error(trial_id, error)
+    if start_time is not None:
+        storage.timestamp.set_any_trial_start_time(trial_id, start_time)
+    if end_time is not None:
+        storage.timestamp.set_any_trial_end_time(trial_id, end_time)
 
 
 def main() -> None:
