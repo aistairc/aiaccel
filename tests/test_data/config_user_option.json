@@ -22,7 +22,7 @@
     },
     "ABCI": {
         "job_script_preamble": "wrapper_abci.sh",
-        "group": "gaa"
+        "group": ""
     },
     "optimize": {
         "search_algorithm": "aiaccel.optimizer.NelderMeadOptimizer",

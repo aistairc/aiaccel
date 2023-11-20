@@ -19,7 +19,7 @@ def test_create_yaml(clean_work_dir, work_dir):
     clean_work_dir()
     dict_lock = work_dir.joinpath('lock')
     alive_dir = work_dir.joinpath('alive')
-    path = alive_dir.joinpath('scheduler.yml')
+    path = alive_dir.joinpath('manager.yml')
     assert create_yaml(path, {}) is None
     file_delete(path)
     assert create_yaml(path, {}, dict_lock) is None
@@ -28,7 +28,7 @@ def test_create_yaml(clean_work_dir, work_dir):
 def test_file_create(clean_work_dir, work_dir):
     clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
-    path = alive_dir.joinpath('scheduler.yml')
+    path = alive_dir.joinpath('manager.yml')
     file_create(path, 'hello')
     assert path.exists()
 
@@ -36,7 +36,7 @@ def test_file_create(clean_work_dir, work_dir):
 def test_file_delete(clean_work_dir, work_dir):
     clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
-    path = alive_dir.joinpath('scheduler.yml')
+    path = alive_dir.joinpath('manager.yml')
     dict_lock = work_dir.joinpath('lock')
     file_create(path, 'hello')
     file_delete(path)
@@ -50,7 +50,7 @@ def test_file_delete(clean_work_dir, work_dir):
 def test_file_read(clean_work_dir, work_dir):
     clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
-    path = alive_dir.joinpath('scheduler.yml')
+    path = alive_dir.joinpath('manager.yml')
     dict_lock = work_dir.joinpath('lock')
     file_create(path, 'hello')
     assert file_read(path) == 'hello'
@@ -61,7 +61,7 @@ def test_file_read(clean_work_dir, work_dir):
 def test_get_dict_files(clean_work_dir, work_dir):
     clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
-    path = alive_dir.joinpath('scheduler.yml')
+    path = alive_dir.joinpath('manager.yml')
     dict_lock = work_dir.joinpath('lock')
     file_create(path, 'hello')
     assert get_dict_files(alive_dir, '*.yml') == [path]
@@ -81,7 +81,7 @@ def test_get_file_result(clean_work_dir, setup_result, work_dir):
 def test_load_yaml(clean_work_dir, work_dir):
     clean_work_dir()
     alive_dir = work_dir.joinpath('alive')
-    path = alive_dir.joinpath('scheduler.yml')
+    path = alive_dir.joinpath('manager.yml')
     dict_lock = work_dir.joinpath('lock')
     create_yaml(path, {})
     assert load_yaml(path) == {}

@@ -46,7 +46,6 @@ class AbstractOptimizer(AbstractModule):
             logfile=self.workspace.log / "optimizer.log",
             file_level=self.config.generic.logging_level,
             stream_level=self.config.generic.logging_level,
-            module_type="Optimizer",
         )
 
         self.trial_number = self.config.optimize.trial_number

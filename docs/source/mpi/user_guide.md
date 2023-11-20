@@ -152,18 +152,18 @@ Cleaning workspace
 Workspace directory /home/your_user_name/mpi_work/sphere_cpu_1node_1try/work is cleaned.
 config: /home/your_user_name/mpi_work/sphere_cpu_1node_1try/config.yaml
 ^[[34mOptimizer DEBUG    create numpy random generator by seed: 42
-^[[0m^[[34mScheduler DEBUG    create numpy random generator by seed: 42
+^[[0m^[[34mManager DEBUG    create numpy random generator by seed: 42
 ^[[0m0,0,g0047.abci.local,"prepare: rank=0 tag=0",20230731-065737-671
 ^[[0m^[[0m^[[32mMaster    INFO     0/1 finished, ready: 0 ,running: 0, end estimated time: Unknown
 ^[[0m^[[32mOptimizer INFO     hp_ready: 0, hp_running: 0, hp_finished: 0, total: 1, pool_size: 1
 (中略)
-^[[0m^[[32mScheduler INFO     1/1, finished, ready: 0, running: 0
+^[[0m^[[32mManager INFO     1/1, finished, ready: 0, running: 0
 ^[[0m^[[32mMaster    INFO     Best hyperparameter is followings:
 ^[[0m^[[32mMaster    INFO     [{'trial_id': 0, 'parameters': [{'parameter_name': 'x1', 'type': 'uniform_float', 'value': -1.254598811526375}, {'parameter_name': 'x2', 'type': 'uniform_float', 'value': 4.507143064099161}, {'parameter_name': 'x3', 'type': 'uniform_float', 'value': 2.3199394181140507}, {'parameter_name': 'x4', 'type': 'uniform_float', 'value': 0.986584841970366}, {'parameter_name': 'x5', 'type': 'uniform_float', 'value': -3.439813595575635}], 'result': [40.07614290457259], 'start_time': '07/31/2023 06:57:39', 'end_time': '07/31/2023 06:57:41'}]
 ^[[0m^[[32mMaster    INFO     Master finished.
 ^[[0m^[[32mOptimizer INFO     Optimizer delete alive file.
 ^[[0m^[[32mOptimizer INFO     Optimizer finished.
-^[[0m^[[32mScheduler INFO     Scheduler finished.
+^[[0m^[[32mManager INFO     Manager finished.
 moving...
 Best result [0] : results/20230731_065743/result/0.hp
         value : 40.07614290457259

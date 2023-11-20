@@ -19,34 +19,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.11.0\n"
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:2
-msgid "aiaccel.scheduler.algorithm package"
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:2
+msgid "aiaccel.manager.algorithm package"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:5
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:5
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:8
-msgid "aiaccel.scheduler.algorithm.abstract\\_scheduling\\_algorithm module"
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:8
+msgid "aiaccel.manager.algorithm.abstract\\_scheduling\\_algorithm module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:16
-msgid "aiaccel.scheduler.algorithm.random\\_sampling module"
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:16
+msgid "aiaccel.manager.algorithm.random\\_sampling module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:24
-msgid "aiaccel.scheduler.algorithm.schedule\\_sampling module"
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:24
+msgid "aiaccel.manager.algorithm.schedule\\_sampling module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:32
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:32
 msgid "Module contents"
 msgstr ""
 
 #~ msgid "ベースクラス: :py:class:`object`"
 #~ msgstr ""
 
-#~ msgid "An abstract class for scheduling algorithms used for Scheduler."
+#~ msgid "An abstract class for scheduling algorithms used for Manager."
 #~ msgstr ""
 
 #~ msgid "パラメータ"
@@ -81,7 +81,7 @@ msgstr ""
 
 #~ msgid ""
 #~ "ベースクラス: "
-#~ ":py:class:`~aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm`"
+#~ ":py:class:`~aiaccel.manager.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm`"
 #~ msgstr ""
 
 #~ msgid "An algorithm to select hyper parameters."

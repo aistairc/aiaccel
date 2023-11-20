@@ -11,8 +11,8 @@ from omegaconf.dictconfig import DictConfig
 from aiaccel.cli.set_result import write_results_to_database
 from aiaccel.common import datetime_format
 from aiaccel.config import load_config
+from aiaccel.manager.abstract_manager import AbstractManager
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
 from aiaccel.util.aiaccel import set_logging_file_for_trial_id
 
 # These are for avoiding mypy-errors from initializer().
@@ -22,8 +22,8 @@ user_func: Any
 workspace: Path
 
 
-class PylocalScheduler(AbstractScheduler):
-    """A scheduler class running on a local computer."""
+class PylocalManager(AbstractManager):
+    """A manager class running on a local computer."""
 
     def __init__(self, config: DictConfig, optimizer: AbstractOptimizer) -> None:
         super().__init__(config, optimizer)
