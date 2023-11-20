@@ -70,6 +70,27 @@ class TimeStamp(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
+    def set_any_trial_start_time_and_end_time(self, trial_id: int, start_time: str, end_time: str) -> None:
+        with self.create_session() as session:
+            try:
+                data = (
+                    session.query(TimestampTable)
+                    .filter(TimestampTable.trial_id == trial_id)
+                    .with_for_update(read=True)
+                    .one_or_none()
+                )
+                if data is None:
+                    new_row = TimestampTable(trial_id=trial_id, start_time=start_time, end_time=end_time)
+                    session.add(new_row)
+                else:
+                    data.start_time = start_time
+                    data.end_time = end_time
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_start_time(self, trial_id: int) -> str | None:
         """Obtains the start time of the specified trial.
 

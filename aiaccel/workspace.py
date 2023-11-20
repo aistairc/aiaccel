@@ -202,3 +202,9 @@ class Workspace:
         if path.exists() is False:
             return None
         return load_yaml(path)
+
+    def get_error_output_file(self, trial_id: int) -> Path:
+        return self.error / f"{trial_id}.txt"
+
+    def get_runner_file(self, trial_id: int) -> Path:
+        return self.runner / f"run_{trial_id}.sh"

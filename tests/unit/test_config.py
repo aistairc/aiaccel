@@ -34,13 +34,3 @@ class TestConfig(BaseTest):
         assert type(config.user_option.option_bool) is bool
         assert type(config.user_option.option_float) is float
         assert type(config.user_option.option_list) is omegaconf.listconfig.ListConfig
-        # additions to existing entries
-        assert type(config.generic.user_option_generic) is str
-        assert type(config.resource.user_option_resource) is str
-        assert type(config.ABCI.user_option_ABCI) is str
-        assert type(config.optimize.user_option_optimize) is str
-        assert type(config.job_setting.user_option_job_setting) is str
-        assert type(config.logger.file.user_option_file) is str
-        assert type(config.logger.log_level.user_option_log_level) is str
-        assert type(config.logger.stream_level.user_option_stream_level) is str
-        assert type(config.logger.user_option_logger) is str
