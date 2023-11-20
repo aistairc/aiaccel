@@ -86,112 +86,8 @@ class TestModel(BaseTest):
         yield
         self.abci_job = None
 
-    def test_after_confirmed(self, database_remove):
-        assert self.model.after_confirmed(self.job) is None
-
-    def test_before_failed(self, database_remove):
-        assert self.model.before_failed(self.job) is None
-
-    def test_conditions_confirmed(self, work_dir, database_remove):
-        self.job.to_file = work_dir.joinpath(dict_hp_ready, '001.hp')
-        self.job.next_state = 'ready'
-        assert self.model.conditions_confirmed(self.job)
-
-    # def test_before_file_move(self, work_dir):
-    #     self.job.from_file = work_dir.joinpath(dict_hp_ready, '001.hp')
-    #     self.job.to_file = work_dir.joinpath(dict_hp_ready, '002.hp')
-    #     assert self.model.before_file_move(self.job) is None
-
-    def test_after_runner(self, database_remove):
-        assert self.model.after_runner(self.job) is None
-
-    def test_before_runner_create(
-        self,
-        cd_work,
-        setup_abci_job,
-        work_dir,
-        database_remove
-    ):
-        assert self.model.before_runner_create(self.job) is None
-
-        self.abci_job.to_file = work_dir.joinpath(dict_runner, 'run_001.sh')
-        assert self.model.before_runner_create(self.abci_job) is None
-
-    def test_conditions_runner_confirmed(
-        self,
-        setup_abci_job,
-        work_dir,
-        database_remove
-    ):
-        assert self.model.conditions_runner_confirmed(self.job)
-
-        self.abci_job.to_file = work_dir.joinpath(dict_hp_ready, '001.hp')
-        assert self.model.conditions_runner_confirmed(self.abci_job)
-
     def test_after_running(self, database_remove):
         assert self.model.after_running(self.job) is None
-
-    def test_after_job(self, database_remove):
-        assert self.model.after_job(self.job) is None
-
-    # def test_before_job_submitted(self, fake_process, setup_abci_job):
-        # """
-        #     Configファイルパスが環境によって変わるため，このUnitテストは不可．
-        #     実機試験等,他のテストで補う
-        # """
-        # fake_process.register_subprocess(
-        #     [
-        #         'python', 'wrapper.py',
-        #         '-i', '001',
-        #         '-c',
-        #         '/home/member/opt/working/opt/tests/test_data/config.json',
-        #         '-x1=0.9932890709584586',
-        #         '-x10=3.599465287952899',
-        #         '-x2=-3.791100401941936',
-        #         '-x3=-1.6730481463987088',
-        #         '-x4=2.2148440758326835',
-        #         '-x5=2.111917696952796',
-        #         '-x6=4.364405867994597',
-        #         '-x7=-0.7789300003858477',
-        #         '-x8=3.30035693274327',
-        #         '-x9=1.7030556641407104'
-        #     ],
-        #     stdout=[]
-        # )
-        # assert self.model.before_job_submitted(self.job) is None
-        #
-        # fake_process.register_subprocess(
-        #     [
-        #         'qsub', '-g', 'gaa*****',
-        #         '-j', 'y',
-        #         '-o', '/tmp/work/abci_output',
-        #         '/tmp/work/runner/run_001.sh'
-        #     ],
-        #     stdout=[], stderr=[]
-        # )
-        # assert self.model.before_job_submitted(self.abci_job) is None
-
-    def test_conditions_job_confirmed(self, database_remove):
-        assert not self.model.conditions_job_confirmed(self.job)
-
-        # self.job.scheduler.stats.append({'name': '001'})
-        # self.job.scheduler.stats.append({'name': 0})
-        # self.job.scheduler.stats.append(
-        #     {'name': '2 python user.py --trial_id 0 --config config.yaml --x1=1.0 --x2=1.0', }
-        # )
-        self.job.trial_id = 99
-        self.job.scheduler.storage.trial.set_any_trial_state(self.job.trial_id, 'running')
-        assert self.model.conditions_job_confirmed(self.job)
-
-    def test_after_result(self, database_remove):
-        assert self.model.after_result(self.job) is None
-
-    def test_after_wait_result(self, database_remove):
-        assert self.model.after_wait_result(self.job) is None
-
-    def test_conditions_result(self, database_remove):
-        self.job.th_oh = OutputHandler(Popen(['ls']))
-        assert not self.model.conditions_result(self.job)
 
     def test_after_finished(self, database_remove):
         assert self.model.after_finished(self.job) is None
@@ -203,29 +99,9 @@ class TestModel(BaseTest):
         work_dir,
         database_remove
     ):
-        # setup_hp_running(0)
-        # setup_result(0)
-        # print(self.job.trial_id_str)
-        # print(self.storage.result.get_result_trial_id_list())
-        print(self.job.storage.result.get_all_result())
-        for i in range(10):
-            self.job.storage.result.set_any_trial_objective(trial_id=i, objective=i*1.0)
-            self.job.storage.hp.set_any_trial_params(
-                trial_id=i,
-                params=[
-                    {'parameter_name': f'x{j+1}', 'value': 0.0, 'type': 'uniform_float'}
-                    for j in range(10)
-                ]
-            )
-        assert self.model.before_finished(self.job) is None
-
-        # self.job.storage.trial.all_delete()
-        # self.job.storage.hp.all_delete()
-
-        # setup_hp_running(1)
-        # setup_result(1)
 
         for i in range(10):
+            self.job.write_start_time_to_storage()
             self.job.storage.trial.set_any_trial_state(trial_id=i, state='finished')
             self.job.storage.hp.set_any_trial_params(
                 trial_id=i,
@@ -234,59 +110,7 @@ class TestModel(BaseTest):
                     for j in range(10)
                 ]
             )
-
-        self.job.next_state = 'finished'
-        self.job.from_file = work_dir.joinpath(dict_hp_running, '001.hp')
-        self.job.to_file = work_dir.joinpath(dict_hp_finished, '001.hp')
         assert self.model.before_finished(self.job) is None
-
-    def test_after_expire(self, database_remove):
-        assert self.model.after_expire(self.job) is None
-
-    def test_after_kill(self, database_remove):
-        assert self.model.after_kill(self.job) is None
-
-    def test_before_kill_submitted(self, fake_process, database_remove):
-        assert self.model.before_kill_submitted(self.job) is None
-
-        fake_pid = 99999999
-        # self.job.scheduler.stats.append({'name': '001', 'job-ID': fake_pid})
-        self.job.scheduler.stats.append(
-            {
-                'name': '2 python user.py --trial_id 1 --config config.yaml --x1=1.0 --x2=1.0',
-                'job-ID': fake_pid
-            }
-        )
-        fake_process.register_subprocess(
-            [
-                '/bin/kill', f'{fake_pid}'
-            ],
-            stdout=[]
-        )
-        assert self.model.before_kill_submitted(self.job) is None
-
-    def test_conditions_kill_confirmed(self, database_remove):
-        assert self.model.conditions_kill_confirmed(self.job)
-
-        # self.job.scheduler.stats.append({'name': '001'})
-        # self.job.scheduler.stats.append({'name': 0})
-        self.job.scheduler.stats.append(
-            {'name': '2 python user.py --trial_id=0 --config=config.yaml --x1=1.0 --x2=1.0'}
-        )
-        assert not self.model.conditions_kill_confirmed(self.job)
-
-    def test_after_check_result(self, database_remove):
-        assert self.model.after_check_result(self.job) is None
-
-    def test_after_cancel(
-        self,
-        setup_hp_running,
-        work_dir,
-        database_remove
-    ):
-        assert self.model.after_cancel(self.job) is None
-        setup_hp_running(1)
-        assert self.model.after_cancel(self.job) is None
 
 
 class TestJob(BaseTest):
@@ -339,32 +163,6 @@ class TestJob(BaseTest):
         )
         assert type(job) is Job
 
-    # def test_get_initial_timeout(self):
-    #    assert type(self.job.get_initial_timeout()) is datetime.datetime
-
-    def test_get_machine(self, database_remove):
-        assert type(self.job.get_machine()) is CustomMachine
-
-    def test_get_model(self, database_remove):
-        assert type(self.job.get_model()) is LocalModel or AbciModel
-
-    def test_get_state(self, database_remove):
-        assert self.job.get_state().name == 'Init'
 
     def test_get_state_name(self, database_remove):
-        assert self.job.get_state_name() == 'Init'
-
-    def test_schedule(self, database_remove):
-        self.job.get_machine().set_state('Scheduling')
-        assert self.job.schedule() is None
-
-    def test_run_2(self, database_remove):
-        self.job.scheduler.pre_process()
-        self.job.main()
-        self.job.threshold_timeout = datetime.datetime.now()
-        self.job.threshold_timeout = datetime.datetime.now() + datetime.timedelta(10)
-        self.job.get_machine().set_state('Init')
-        self.job.count_retry = 100
-        self.job.threshold_retry = 10
-        self.job.get_machine().set_state('Success')
-        self.job.main()
+        assert self.job.get_state_name() == 'ready'

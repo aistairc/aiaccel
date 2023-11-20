@@ -4,7 +4,6 @@ from datetime import datetime
 from importlib.util import module_from_spec, spec_from_file_location
 from multiprocessing.pool import Pool, ThreadPool
 from pathlib import Path
-from subprocess import Popen
 from typing import Any
 
 from omegaconf.dictconfig import DictConfig
@@ -53,9 +52,6 @@ class PylocalScheduler(AbstractScheduler):
         for trial_id, xs, ys, err, start_time, end_time in self.pool.imap_unordered(execute, args):
             self.report(trial_id, ys, err, start_time, end_time)
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state="finished")
-
-            self.create_result_file(trial_id, xs, ys, err, start_time, end_time)
-
         return True
 
     def post_process(self) -> None:
@@ -119,36 +115,6 @@ class PylocalScheduler(AbstractScheduler):
             PosixPath: A Path object which points to the result file.
         """
         return self.workspace.get_any_result_file_path(self.trial_id.get())
-
-    def create_result_file(
-        self, trial_id: int, xs: dict[str, Any], ys: list[Any], error: str, start_time: str, end_time: str
-    ) -> None:
-        args = {
-            "file": self.workspace.get_any_result_file_path(trial_id),
-            "trial_id": str(trial_id),
-            "config": self.config.config_path,
-            "start_time": start_time,
-            "end_time": end_time,
-            "error": error,
-        }
-
-        if len(error) == 0:
-            del args["error"]
-
-        commands = ["aiaccel-set-result"]
-        for key in args.keys():
-            commands.append(f"--{key}={str(args[key])}")
-
-        commands.append("--objective")
-        for y in ys:
-            commands.append(str(y))
-
-        for key in xs.keys():
-            commands.append(f"--{key}={str(xs[key])}")
-
-        self.processes.append(Popen(commands))
-
-        return None
 
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()

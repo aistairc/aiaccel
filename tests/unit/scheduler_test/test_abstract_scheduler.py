@@ -68,24 +68,6 @@ class TestAbstractScheduler(BaseTest):
         scheduler.print_dict_state()
         assert scheduler.get_stats() is None
 
-    def test_start_job(
-        self,
-        setup_hp_ready,
-        database_remove
-    ):
-        database_remove()
-        scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
-        scheduler.print_dict_state()
-        setup_hp_ready(1)
-        trial_id = 1
-        scheduler.start_job(trial_id)
-        assert scheduler.start_job(trial_id) is None
-
-        for job in scheduler.jobs:
-            machine = job.get_machine()
-            machine.set_state('Success')
-            job.main()
-
     def test_update_resource(
         self,
         database_remove
@@ -109,10 +91,11 @@ class TestAbstractScheduler(BaseTest):
 
         scheduler.pre_process()
 
-        for job in scheduler.jobs:
-            machine = job.get_machine()
-            machine.set_state('Success')
-            job.main()
+        # for job in scheduler.jobs:
+        #     machine = job.get_machine()
+        #     # machine.set_state('Success')
+        #     machine.set_state('success')
+        #     job.main()
 
         scheduler = AbstractScheduler(self.load_config_for_test(self.configs['config.json']))
         with patch.object(scheduler.storage.trial, 'get_running', return_value=[]):
@@ -159,24 +142,14 @@ class TestAbstractScheduler(BaseTest):
         scheduler.pre_process()
         setup_hp_ready(1)
 
-        assert scheduler.inner_loop_main_process()
-
         for job in scheduler.jobs:
             machine = job.get_machine()
-            machine.set_state('Scheduling')
-
-        assert scheduler.inner_loop_main_process()
-
-        for job in scheduler.jobs:
-            machine = job.get_machine()
-            machine.set_state('Success')
+            machine.set_state('success')
             job.main()
 
         with patch.object(scheduler, 'check_finished', return_value=True):
             assert scheduler.inner_loop_main_process() is False
 
-        with patch.object(scheduler, 'all_done', return_value=True):
-            assert scheduler.inner_loop_main_process() is False
 
     def test_serialize(
         self,

@@ -80,7 +80,6 @@ packages = [
     'aiaccel.abci',
     'aiaccel.optimizer',
     'aiaccel.scheduler',
-    'aiaccel.scheduler.algorithm',
     'aiaccel.scheduler.job',
     'aiaccel.scheduler.job.model',
     'aiaccel.tensorboard',

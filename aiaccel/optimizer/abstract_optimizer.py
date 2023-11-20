@@ -113,9 +113,7 @@ class AbstractOptimizer(AbstractModule):
 
         """
         self.storage.hp.set_any_trial_params(trial_id=self.trial_id.get(), params=params)
-
         self.storage.trial.set_any_trial_state(trial_id=self.trial_id.get(), state=state)
-
         self.num_of_generated_parameter += 1
 
     def generate_initial_parameter(self) -> Any:

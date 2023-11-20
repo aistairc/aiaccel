@@ -5,10 +5,9 @@ from typing import Any
 from omegaconf.dictconfig import DictConfig
 
 from aiaccel.module import AbstractModule
-from aiaccel.scheduler.algorithm import RandomSampling
 from aiaccel.scheduler.job.job import Job
 from aiaccel.scheduler.job.model.local_model import LocalModel
-from aiaccel.util import create_yaml, str_to_logging_level
+from aiaccel.util import Buffer, create_yaml, str_to_logging_level
 
 
 class AbstractScheduler(AbstractModule):
@@ -21,8 +20,6 @@ class AbstractScheduler(AbstractModule):
     Attributes:
         options (dict[str, str | int | bool]): A dictionary containing
             command line options.
-        algorithm (RandomSamplingSchedulingAlgorithm): A scheduling algorithm
-            to select hyper parameters from a parameter pool.
         available_resource (int): An available current resource number.
         jobs (list[dict]): A list to store job dictionaries.
         max_resource (int): A max resource number.
@@ -45,8 +42,13 @@ class AbstractScheduler(AbstractModule):
         self.stats: list[Any] = []
         self.jobs: list[Any] = []
         self.job_status: dict[Any, Any] = {}
-        self.algorithm: Any = None
         self.num_workers = self.config.resource.num_workers
+        self.trial_number = self.config.optimize.trial_number
+        self.start_trial_id = self.config.resume if self.config.resume is not None else 0
+        self.buff = Buffer([trial_id for trial_id in range(self.start_trial_id, self.trial_number)])
+        for trial_id in range(self.start_trial_id, self.trial_number):
+            self.buff.d[trial_id].set_max_len(2)
+        self.job_completed_count = 0
 
     def change_state_finished_trials(self) -> None:
         """Create finished hyper parameter files if result files can be found
@@ -124,18 +126,6 @@ class AbstractScheduler(AbstractModule):
         self.write_random_seed_to_debug_log()
         self.resume()
 
-        self.algorithm = RandomSampling(self.config)
-        self.change_state_finished_trials()
-
-        runnings = self.storage.trial.get_running()
-        for running in runnings:
-            job = self.start_job(running)
-            self.logger.info(f"restart hp files in previous running directory: {running}")
-
-            while job.get_state_name() != "Scheduling":
-                job.main()
-            job.schedule()
-
     def post_process(self) -> None:
         """Post-procedure after executed processes.
 
@@ -162,32 +152,28 @@ class AbstractScheduler(AbstractModule):
         for ready in readies:
             if ready not in [job.trial_id for job in self.jobs]:
                 self.start_job(ready)
-
-        scheduled_candidates = []
-        for job in self.jobs:
-            if job.get_state_name() == "Scheduling":
-                scheduled_candidates.append(job)
-
-        selected_jobs = self.algorithm.select_hp(scheduled_candidates, self.available_resource, rng=self._rng)
-
-        if len(selected_jobs) > 0:
-            for job in selected_jobs:
-                if job.get_state_name() == "Scheduling":
-                    self._serialize(job.trial_id)
-                    job.schedule()
-                    self.logger.debug(f"trial id: {job.trial_id} has been scheduled.")
-                    selected_jobs.remove(job)
+                self._serialize(ready)
 
         for job in self.jobs:
             job.main()
-            self.logger.info(f"name: {job.trial_id}, state: {job.get_state_name()}")
+            state_name = job.get_state_name()
+            if state_name in {"success", "failure", "timeout"}:
+                self.job_completed_count += 1
+                self.jobs.remove(job)
+                continue
+            # Only log if the state has changed.
+            if job.trial_id in self.buff.d.keys():
+                self.buff.d[job.trial_id].Add(state_name)
+                if self.buff.d[job.trial_id].has_difference():
+                    self.logger.info(f"name: {job.trial_id}, state: {state_name}")
 
         self.get_stats()
         self.update_resource()
         self.print_dict_state()
-        if self.all_done() is True:
-            return False
 
+        if self.trial_number == self.job_completed_count:
+            self.logger.info("All jobs are completed.")
+            return False
         return True
 
     def parse_trial_id(self, command: str) -> str | None:
@@ -224,26 +210,6 @@ class AbstractScheduler(AbstractModule):
                     )
                     return False
         return True
-
-    def all_done(self) -> bool:
-        done_states = [
-            "Success",
-            "HpCancelFailure",
-            "KillFailure",
-            "HpExpiredFailure",
-            "HpFinishedFailure",
-            "JobFailure",
-            "HpRunningFailure",
-            "RunnerFailure",
-        ]
-
-        jobstates = self.storage.jobstate.get_all_trial_jobstate()
-
-        num_trials = 0
-        for s in done_states:
-            num_trials += jobstates.count(s)
-
-        return num_trials >= self.config.optimize.trial_number
 
     def resume(self) -> None:
         """When in resume mode, load the previous optimization data in advance.

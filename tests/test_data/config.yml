@@ -16,21 +16,6 @@ optimize:
   search_algorithm: 'aiaccel.optimizer.NelderMeadOptimizer'
 job_setting:
   name_length: 32
-  runner_timeout: 10
-  running_timeout: 10
-  job_timeout: 60
-  finished_timeout: 10
-  kill_timeout: 30
-  cancel_timeout: 10
-  expire_timeout: 10
-  runner_retry: 3
-  running_retry: 3
-  job_retry: 2
-  result_retry: 1
-  finished_retry: 3
-  kill_retry: 3
-  cancel_retry: 3
-  expire_retry: 3
 resource:
   # local settings
   type: "local"

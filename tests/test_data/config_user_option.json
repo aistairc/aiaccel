@@ -14,18 +14,15 @@
         "workspace": "/tmp/work",
         "job_command": "python original_main.py",
         "python_file": "original_main.py",
-        "function": "main",
-        "user_option_generic": "option"
+        "function": "main"
     },
     "resource": {
         "type": "local",
-        "num_workers": 10,
-        "user_option_resource": "option"
+        "num_workers": 10
     },
     "ABCI": {
         "job_script_preamble": "wrapper_abci.sh",
-        "group": "gaa",
-        "user_option_ABCI": "option"
+        "group": "gaa"
     },
     "optimize": {
         "search_algorithm": "aiaccel.optimizer.NelderMeadOptimizer",
@@ -229,44 +226,23 @@
                     1.92
                 ]
             }
-        ],
-        "user_option_optimize": "option"
+        ]
     },
     "job_setting": {
-        "name_length": 6,
-        "cancel_retry": 3,
-        "cancel_timeout": 60,
-        "expire_retry": 3,
-        "expire_timeout": 60,
-        "finished_retry": 3,
-        "finished_timeout": 60,
-        "job_retry": 2,
-        "job_timeout": 60,
-        "kill_retry": 3,
-        "kill_timeout": 60,
-        "result_retry": 1,
-        "runner_retry": 3,
-        "runner_timeout": 60,
-        "running_retry": 3,
-        "running_timeout": 60,
-        "user_option_job_setting": "option"
+        "name_length": 6
     },
     "logger": {
         "file": {
             "scheduler": "scheduler.log",
-            "optimizer": "optimizer.log",
-            "user_option_file": "option"
+            "optimizer": "optimizer.log"
         },
         "log_level": {
             "scheduler": "DEBUG",
-            "optimizer": "DEBUG",
-            "user_option_log_level": "option"
+            "optimizer": "DEBUG"
         },
         "stream_level": {
             "scheduler": "DEBUG",
-            "optimizer": "DEBUG",
-            "user_option_stream_level": "option"
-        },
-        "user_option_logger": "option"
+            "optimizer": "DEBUG"
+        }
     }
 }
