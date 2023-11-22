@@ -15,8 +15,9 @@
     "num_workers": 10
   },
   "ABCI": {
-    "job_script_preamble": "wrapper_abci.sh",
-    "group": "gaa"
+    "job_script_preamble": "",
+    "job_script_preamble_path": "",
+    "group": "[group]"
   },
   "optimize": {
     "search_algorithm": "aiaccel.optimizer.NelderMeadOptimizer",
