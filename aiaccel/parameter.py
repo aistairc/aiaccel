@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
 from collections.abc import Iterable
+from typing import Any, List
 
 from numpy.random import RandomState
 from omegaconf.base import UnionNode
@@ -25,11 +25,11 @@ def is_ordinal(data_type: str) -> bool:
     return data_type.lower() == "ordinal"
 
 
-def is_within_range(initial_value: int | float, lower: int | float, upper: int | float):
+def is_within_range(initial_value: int | float, lower: int | float, upper: int | float) -> bool:
     return lower <= initial_value and initial_value <= upper
 
 
-def is_in_category(initial_value: Any, category_list: list):
+def is_in_category(initial_value: Any, category_list: List[Any]) -> bool:
     return initial_value in category_list
 
 
