@@ -39,10 +39,12 @@ class ConvertedFloatParameter(ConvertedNumericalParameter):
         super().__init__(param, convert_log)
         self.lower = _convert_float(self, param.lower)
         self.upper = _convert_float(self, param.upper)
-        if isinstance(param.initial, Iterable):  # For Nelder-Mead
-            self.initial = [_convert_float(self, value) for value in param.initial]
-        else:  # For others
-            self.initial = _convert_float(self, param.initial) if param.initial is not None else None
+        self.initial = param.initial
+        # if isinstance(param.initial, Iterable):  # For Nelder-Mead
+        #     self.initial = [_convert_float(self, value) for value in param.initial]
+        #     self.initial = param.initial
+        # else:  # For others
+        #     self.initial = _convert_float(self, param.initial) if param.initial is not None else None
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, str | float]:
         if initial and self.initial is not None:
