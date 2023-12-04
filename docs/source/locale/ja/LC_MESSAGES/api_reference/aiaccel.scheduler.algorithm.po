@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:51+0900\n"
+"POT-Creation-Date: 2023-08-07 12:53+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -19,138 +19,80 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.11.0\n"
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:2
-msgid "aiaccel.scheduler.algorithm package"
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:2
+msgid "aiaccel.manager.algorithm package"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:5
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:5
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:8
-msgid "aiaccel.scheduler.algorithm.abstract\\_scheduling\\_algorithm module"
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:8
+msgid "aiaccel.manager.algorithm.abstract\\_scheduling\\_algorithm module"
 msgstr ""
 
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:1
-#: of
-msgid "ベースクラス: :py:class:`object`"
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:16
+msgid "aiaccel.manager.algorithm.random\\_sampling module"
 msgstr ""
 
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:1
-#: of
-msgid "An abstract class for scheduling algorithms used for Scheduler."
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:24
+msgid "aiaccel.manager.algorithm.schedule\\_sampling module"
 msgstr ""
 
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp
-#: of
-msgid "パラメータ"
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:3
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:8
-#: of
-msgid "A configuration object."
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm
-#: of
-msgid "type"
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm:10
-#: of
-msgid "ConfileWrapper"
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:1
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:1
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:1
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:1
-#: of
-msgid "Select multiple hyper parameters."
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:3
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:3
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:3
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:3
-#: of
-msgid "A list of path of ready hyper parameters."
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:5
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:5
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:5
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:5
-#: of
-msgid "A number to select hyper parameters Defaults to 1."
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:8
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:8
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:8
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:8
-#: of
-msgid "A reference to a random generator. Defaults to None."
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp
-#: of
-msgid "例外"
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm.select_hp:12
-#: of
-msgid "Causes when the inherited class does not     implement."
-msgstr ""
-
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:16
-msgid "aiaccel.scheduler.algorithm.random\\_sampling module"
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm:1
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling:1
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling:1 of
-msgid ""
-"ベースクラス: "
-":py:class:`~aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm`"
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm:1
-#: of
-msgid "An algorithm to select hyper parameters."
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp
-#: of
-msgid "戻り値"
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp:12
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp:12
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp:12
-#: of
-msgid "Selected hyper parameters."
-msgstr ""
-
-#: aiaccel.scheduler.algorithm.random_sampling.RandomSamplingSchedulingAlgorithm.select_hp
-#: aiaccel.scheduler.algorithm.schedule_sampling.RandomSampling.select_hp
-#: aiaccel.scheduler.algorithm.schedule_sampling.SequentialSampling.select_hp
-#: of
-msgid "戻り値の型"
-msgstr ""
-
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:24
-msgid "aiaccel.scheduler.algorithm.schedule\\_sampling module"
-msgstr ""
-
-#: ../../source/api_reference/aiaccel.scheduler.algorithm.rst:32
+#: ../../source/api_reference/aiaccel.manager.algorithm.rst:32
 msgid "Module contents"
 msgstr ""
+
+#~ msgid "ベースクラス: :py:class:`object`"
+#~ msgstr ""
+
+#~ msgid "An abstract class for scheduling algorithms used for Manager."
+#~ msgstr ""
+
+#~ msgid "パラメータ"
+#~ msgstr ""
+
+#~ msgid "A configuration object."
+#~ msgstr ""
+
+#~ msgid "type"
+#~ msgstr ""
+
+#~ msgid "ConfileWrapper"
+#~ msgstr ""
+
+#~ msgid "Select multiple hyper parameters."
+#~ msgstr ""
+
+#~ msgid "A list of path of ready hyper parameters."
+#~ msgstr ""
+
+#~ msgid "A number to select hyper parameters Defaults to 1."
+#~ msgstr ""
+
+#~ msgid "A reference to a random generator. Defaults to None."
+#~ msgstr ""
+
+#~ msgid "例外"
+#~ msgstr ""
+
+#~ msgid "Causes when the inherited class does not     implement."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "ベースクラス: "
+#~ ":py:class:`~aiaccel.manager.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm`"
+#~ msgstr ""
+
+#~ msgid "An algorithm to select hyper parameters."
+#~ msgstr ""
+
+#~ msgid "戻り値"
+#~ msgstr ""
+
+#~ msgid "Selected hyper parameters."
+#~ msgstr ""
+
+#~ msgid "戻り値の型"
+#~ msgstr ""
 

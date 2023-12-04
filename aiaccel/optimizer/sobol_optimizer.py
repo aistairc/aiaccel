@@ -32,17 +32,6 @@ class SobolOptimizer(AbstractOptimizer):
             d=len(self.params.get_parameter_list()), scramble=self.config.optimize.sobol_scramble, seed=self._rng
         )
 
-    def pre_process(self) -> None:
-        """Pre-procedure before executing processes.
-
-        Returns:
-            None
-        """
-        super().pre_process()
-
-        finished = self.storage.trial.get_finished()
-        self.num_generated_params = len(finished)
-
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
@@ -50,13 +39,11 @@ class SobolOptimizer(AbstractOptimizer):
             list[dict[str, float | int | str]]: A list of new parameters.
         """
         vec = self.sampler.random()[0]
-
         self.num_generated_params += 1
         new_params = []
         for vec_i, param in zip(vec, self.params.get_parameter_list()):
             value = (param.upper - param.lower) * vec_i + param.lower
             new_params.append({"parameter_name": param.name, "type": param.type, "value": value})
-
         return self.params.to_original_repr(new_params)
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
@@ -72,5 +59,4 @@ class SobolOptimizer(AbstractOptimizer):
                     "Initial values cannot be specified for grid search. " "The set initial value has been invalidated."
                 )
                 break
-
         return self.generate_parameter()

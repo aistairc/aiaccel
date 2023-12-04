@@ -2,17 +2,15 @@
 
 Example: ::
 
-    from aiaccel.common import alive_master
+    from aiaccel.common import alive_optimizer
 
 """
 
-alive_master = "master.yml"
 alive_optimizer = "optimizer.yml"
-alive_scheduler = "scheduler.yml"
+alive_manager = "manager.yml"
 
-class_master = "Master"
 class_optimizer = "Optimizer"
-class_scheduler = "Scheduler"
+class_manager = "Manager"
 
 dict_work = "work_aiaccel"
 dict_alive = "alive"
@@ -35,6 +33,8 @@ dict_runner = "runner"
 dict_timestamp = "timestamp"
 dict_storage = "storage"
 dict_tensorboard = "tensorboard"
+dict_mpi = "mpi"
+dict_rank_log = "rank_log"
 
 extension_hp = "hp"
 extension_pickle = "pickle"
@@ -51,6 +51,9 @@ file_hp_count = "count.txt"
 file_hp_count_lock = "count.lock"
 file_hp_count_lock_timeout = 10
 
+file_mpi_lock = "mpi.lock"
+file_mpi_lock_timeout = 10
+
 goal_maximize = "maximize"
 goal_minimize = "minimize"
 
@@ -59,12 +62,10 @@ key_path = "path"
 key_pid = "pid"
 key_project_name = "project_name"
 
-module_type_master = "master"
-module_type_optimizer = "optimizer"
-module_type_scheduler = "scheduler"
-
 resource_type_local = "local"
 resource_type_abci = "abci"
+resource_type_mpi = "mpi"
+resource_type_python_local = "python_local"
 
 search_algorithm_budget_specified_grid = "aiaccel.optimizer.BudgetSpecifiedGridOptimizer"
 search_algorithm_grid = "aiaccel.optimizer.GridOptimizer"

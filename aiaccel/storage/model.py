@@ -43,6 +43,12 @@ class ResultTable(Base):
     objective = Column(PickleType, nullable=True)
 
 
+class ReturnCodeTable(Base):
+    __tablename__ = "returncode"
+    trial_id = Column(Integer, primary_key=True, nullable=False)
+    returncode = Column(Integer, nullable=False)
+
+
 class JobStateTable(Base):
     __tablename__ = "job_status"
     trial_id = Column(Integer, primary_key=True, nullable=False)

@@ -328,41 +328,16 @@ Defaults to 100.
 ### file:
 実行ログの保存先を設定します．
 
-#### master (str, optional): 
-マスターモジュールのログの保存先を設定します．
-デフォルトでは "master.log" に設定されています．
 
 #### optimizer (str, optional):
 オプティマイザモジュールのログの保存先を設定します．
 デフォルトでは "optimizer.log" に設定されています．
 
-#### scheduler (str, optional):
+#### manager (str, optional):
 スケジューラモジュールのログの保存先を設定します．
-デフォルトでは "scheduler.log" に設定されています．
+デフォルトでは "manager.log" に設定されています．
 
 ### log_level:
-#### master (str):
-マスターモジュールからのログファイル出力のログレベルを設定します．
-以下の文字列が設定可能です．
-- 'DEBUG'
-- 'INFO'
-- 'WARNING'
-- 'WARN'
-- 'ERROR'
-- 'CRITICAL
-
-デフォルトでは "DEBUG" に設定されています．
-
-A logging level for a log file output of master module.
-Following strings are available;
-- 'DEBUG'
-- 'INFO'
-- 'WARNING'
-- 'WARN'
-- 'ERROR'
-- 'CRITICAL
-
-Defaults to "DEBUG".
 
 #### optimizer (str, optional):
 オプティマイザモジュールからのログファイル出力のログレベルを設定します．
@@ -371,21 +346,22 @@ Defaults to "DEBUG".
 A logging level for a log file output of optimizer module.
 Defaults to "DEBUG".
 
-#### scheduler (str, optional):
+Following strings are available;
+- 'DEBUG'
+- 'INFO'
+- 'WARNING'
+- 'WARN'
+- 'ERROR'
+- 'CRITICAL
+
+#### manager (str, optional):
 オプティマイザモジュールからのログファイル出力のログレベルを設定します．
 デフォルトでは "DEBUG" に設定されています．
 
-A logging level for a log file output of scheduler module.
+A logging level for a log file output of manager module.
 Defaults to "DEBUG".
 
 ### stream_level:
-#### master (str, optional):
-マスターモジュールからのストリーム出力のログレベルを設定します．
-デフォルトでは "DEBUG" に設定されています．
-
-A logging level for a stream output of master module.
-Defaults to "DEBUG".
-
 #### optimizer (str, optional):
 オプティマイザモジュールからのストリーム出力のログレベルを設定します．
 デフォルトでは "DEBUG" に設定されています．
@@ -393,9 +369,9 @@ Defaults to "DEBUG".
 A logging level for a stream output of optimizer module.
 Defaults to "DEBUG".
 
-#### scheduler (str, optional):
+#### manager (str, optional):
 スケジューラモジュールからのストリーム出力のログレベルを設定します．
 デフォルトでは "DEBUG" に設定されています．
 
-A logging level for a stream output of scheduler module.
+A logging level for a stream output of manager module.
 Defaults to "DEBUG".

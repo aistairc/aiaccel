@@ -1,0 +1,284 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-07 12:53+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: ../../source/experimental/mpi/user_guide.md:1
+msgid "mpi機能の概要"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:3
+msgid ""
+"abciでmpiによりaiaccelのjobを並列実行させます。 mpi機能の実行環境は、通常のaiaccelとは完全に分離されています。 "
+"そのため、aiaccelインストール後に、mpi環境を整えて、mpi用aiaccelを実行します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:7
+msgid "なお、後述の使い方などの説明では、"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:11
+msgid "のフォルダを作成し、その構造を前提とします (config.yamlの設定などで構造を変更することは可能です)。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:14
+msgid "インストール"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:16
+msgid "まず、`~/mpi_work`フォルダを作成します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:20
+msgid ""
+"次に、mpi環境用のvenv、`~/mpi_work/mpienv`を作成します。 これにより、cpuのみによるテスト実行が可能になります。 "
+"さらに、gpuによるテスト実行のためのvenv、`~/mpi_work/ptenv`を作成します。 "
+"この部分などを入れ替えて、実際に使用されると思われます。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:25
+msgid "`~/mpi_work/mpienv`を作成(aiaccelとmpi4pyをインストール)"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:27
+msgid "通常のaiaccelのインスールとほぼ同じですが、"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:32
+msgid "などの部分が追加されています。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:34
+msgid "また、main branchへのmerge前のため、通常、"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:38
+msgid "の部分が、"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:42
+msgid "と変更されています。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:44
+msgid "テスト時の手順を以下に示します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:61
+msgid "`~/mpi_work/ptenv`を作成した後にmnist.pyの動作確認"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:63
+msgid ""
+"まず、gpuでのテストのためのvenv、`~/mpi_work/ptenv`を作成します。 "
+"その後に、gpuでのテストに使用する評価関数の動作確認をします。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:84
+msgid "使用方法"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:86
+msgid "mpi機能付きのaiaccelをgit clone"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:88
+msgid ""
+"まず、mpi機能付きのaiaccelをgit cloneします。 main branchへのmerge前のため、branch "
+"`feature/experimental/mpi`を指定しています。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:96
+msgid "cpuでの使用方法"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:98
+msgid "cpuとgpuで、パラメータの設定が若干違います。 まずは、cpuでの使用方法を説明します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:101
+#: ../../source/experimental/mpi/user_guide.md:286
+msgid ""
+"mpiによるqsubでの実行の指示のみのため、負荷がほとんどかかりません。 そのため、qrshはせずに、インタラクティブノードで実行します。 "
+"前述の`~/mpi_work/aiaccel`などがあることを前提にしています。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:114
+#: ../../source/experimental/mpi/user_guide.md:311
+msgid "vi config.yamlなどで、"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:118
+#: ../../source/experimental/mpi/user_guide.md:315
+msgid "の`your_group_id`を、適切なグループidに変更して下さい。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:120
+#: ../../source/experimental/mpi/user_guide.md:317
+msgid "config.yamlのmpi関連のパラメータを以下に抜粋します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:146
+msgid "詳細は後述しますが、 1tryだけでmpiの動作テストを行うため、 qsubのリクエスト待ち後の実行開始後、1分程で終了します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:153
+#: ../../source/experimental/mpi/user_guide.md:350
+msgid "abciの混雑状況にもよりますが、しばらくすると、"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:158
+#: ../../source/experimental/mpi/user_guide.md:355
+msgid "とのqsub requestが受け付けられた旨のメッセージが表示されます(テスト時のものを掲載しています)。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:160
+msgid ""
+"さらに1分程待つと、下記のフォルダとファイルが、 "
+"`~/mpi_work/aiaccel/examples/experimental/mpi/sphere_cpu_1node_1try`に作成されます"
+" (テスト時のものを掲載しています)。 (config.yaml)と(user.py)は実行前から存在している設定ファイルなどです。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:173
+#: ../../source/experimental/mpi/user_guide.md:372
+msgid "個別に説明します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:175
+#: ../../source/experimental/mpi/user_guide.md:374
+msgid "hostfile"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:177
+#: ../../source/experimental/mpi/user_guide.md:376
+msgid ""
+"通常、hostfileをユーザが閲覧、編集することはありません。 トラブル時に内容を確認できるように指定しています。 "
+"config.yamlの`mpi_hostfile: ./hostfile`で指定されたファイル名です。 mpi実行時に作成されます。 "
+"なお、mpi_hostfileは、`mpi_bat_config_dir`からの相対指定です。 "
+"以下、config.yamlの設定に従いテスト時に作成されたhostfileの内容です。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:187
+#: ../../source/experimental/mpi/user_guide.md:387
+msgid "qsub.sh"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:189
+#: ../../source/experimental/mpi/user_guide.md:389
+msgid ""
+"config.yamlの`mpi_bat_file: ./qsub.sh`で指定されたファイル名です。 `mpi_bat_make_file: "
+"True`であれば、mpi実行時に作成されます。 Falseの時は作成されません。 "
+"なお、mpi_bat_fileは、`mpi_bat_config_dir`からの相対指定です。 "
+"以下、config.yamlの設定に従いテスト時に作成されたqsub.shの内容です "
+"(mpiexecからの3行は元々1行だったものを見易いように加工しています)。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:219
+#: ../../source/experimental/mpi/user_guide.md:419
+msgid "qsub.shを直接変更したい場合は、config.yamlで`mpi_bat_make_file: False`とします。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:221
+msgid "qsub.sh.o39893256"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:223
+#: ../../source/experimental/mpi/user_guide.md:423
+msgid "qsub.shの出力ファイルです。abciがqsub request時のカレントフォルダに出力します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:248
+#: ../../source/experimental/mpi/user_guide.md:449
+msgid "results/"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:250
+#: ../../source/experimental/mpi/user_guide.md:451
+msgid "aiaccelの結果の出力フォルダです。 詳細についてはaiaccel本体のマニュアルなどをご参照いただきたく。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:253
+#: ../../source/experimental/mpi/user_guide.md:454
+msgid "work/"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:255
+#: ../../source/experimental/mpi/user_guide.md:456
+msgid "aiaccelの作業時の出力フォルダです。 全般的な詳細についてはaiaccel本体のマニュアルなどをご参照いただきたく。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:258
+#: ../../source/experimental/mpi/user_guide.md:459
+msgid "ここでは、mpiが出力するフォルダについて説明いたします。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:260
+#: ../../source/experimental/mpi/user_guide.md:461
+msgid "work/experimental/mpi/rank_log/"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:262
+#: ../../source/experimental/mpi/user_guide.md:463
+msgid "mpiのdebug用のフォルダです。 各rankの動作状況が出力されています。 n.csvのnがmpiのrank番号に対応しています。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:282
+msgid "gpuでの使用方法"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:284
+msgid "gpuでの使用方法を説明します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:299
+msgid ""
+"`main.py`は `~/mpi_work/examples/mnist/main.py` を修正したものですが、 "
+"dataをdownloadしないように変更してあります。 そのため、data/をmvしておきます。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:307
+msgid "また、`mnist.sh`に実行権限を付与しておきます。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:343
+msgid ""
+"詳細は後述しますが、 2node(1nodeのgpuボードが4枚)8tryでmpiの動作テストを行うため、 "
+"qsubのリクエスト待ち後の実行開始後、8並列実行のため、5分程で終了します。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:357
+msgid ""
+"さらに5分程待つと、下記のフォルダとファイルが、 "
+"`~/mpi_work/aiaccel/examples/experimental/mpi/mnist_gpu_2node_8try`に作成されます"
+" (テスト時のものを掲載しています)。 "
+"(config.yaml)、(main.py)、(mnist.sh)、(user.py)は実行前から存在している設定ファイルなどです。"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:421
+msgid "qsub.sh.o39894794"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:516
+msgid "WIP"
+msgstr ""
+
+#: ../../source/experimental/mpi/user_guide.md:518
+msgid "続きは作成中。"
+msgstr ""
+

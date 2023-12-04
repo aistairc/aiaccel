@@ -4,6 +4,7 @@ generic:
   python_file: ""
   function: ""
   batch_job_timeout: 600
+  logging_level: DEBUG
 
 resource:
   type: local
@@ -35,41 +36,4 @@ optimize:
       initial: 1
 
 job_setting:
-  cancel_retry: 3
-  cancel_timeout: 60
-  expire_retry: 3
-  expire_timeout: 60
-  finished_retry: 3
-  finished_timeout: 60
-  job_loop_duration: 0.1
-  job_retry: 2
-  job_timeout: 60
-  kill_retry: 3
-  kill_timeout: 60
-  result_retry: 1
-  runner_retry: 3
-  runner_timeout: 60
-  running_retry: 3
-  running_timeout: 60
-  init_fail_count: 100
   name_length: 6
-  random_scheduling: false
-
-sleep_time:
-  master: 1.0
-  scheduler: 1.0
-  optimizer: 1.0
-
-logger:
-  file:
-    master: master.log
-    optimizer: optimizer.log
-    scheduler: scheduler.log
-  log_level:
-    master: INFO
-    optimizer: INFO
-    scheduler: INFO
-  stream_level:
-    master: CRITICAL
-    optimizer: CRITICAL
-    scheduler: CRITICAL

@@ -12,8 +12,10 @@ from aiaccel.common import (
     dict_jobstate,
     dict_lock,
     dict_log,
+    dict_mpi,
     dict_output,
     dict_pid,
+    dict_rank_log,
     dict_ready,
     dict_result,
     dict_runner,
@@ -67,6 +69,8 @@ class Workspace:
         self.jobstate = self.path / dict_jobstate
         self.lock = self.path / dict_lock
         self.log = self.path / dict_log
+        self.mpi = self.path / dict_mpi
+        self.rank_log = self.mpi / dict_rank_log
         self.output = self.path / dict_output
         self.pid = self.path / dict_pid
         self.result = self.path / dict_result
@@ -74,7 +78,6 @@ class Workspace:
         self.storage = self.path / dict_storage
         self.tensorboard = self.path / dict_tensorboard
         self.timestamp = self.path / dict_timestamp
-
         self.consists = [
             self.alive,
             self.error,
@@ -85,8 +88,10 @@ class Workspace:
             self.jobstate,
             self.lock,
             self.log,
+            self.mpi,
             self.output,
             self.pid,
+            self.rank_log,
             self.result,
             self.runner,
             self.storage,
@@ -95,8 +100,9 @@ class Workspace:
         ]
         self.results = Path("./results")
         self.retults_csv_file = self.path / "results.csv"
-        self.final_result_file = self.path / dict_result / "final_result.result"
+        self.final_result_file = self.path / "final_result.result"
         self.storage_file_path = self.storage / "storage.db"
+        self.best_result_file = self.path / "best_result.yaml"
 
     def create(self) -> bool:
         """Create a work directory.
@@ -196,3 +202,9 @@ class Workspace:
         if path.exists() is False:
             return None
         return load_yaml(path)
+
+    def get_error_output_file(self, trial_id: int) -> Path:
+        return self.error / f"{trial_id}.txt"
+
+    def get_runner_file(self, trial_id: int) -> Path:
+        return self.runner / f"run_{trial_id}.sh"

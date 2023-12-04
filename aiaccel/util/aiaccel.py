@@ -145,22 +145,22 @@ class Run:
         if self.workspace is not None and self.args.trial_id is not None:
             set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
 
-        y = None
+        ys = None
         err = ""
 
         start_time = datetime.now().strftime(datetime_format)
 
         try:
-            y = cast_y(func(xs), y_data_type)
+            ys = cast_y(func(xs), y_data_type)
         except BaseException:
             err = str(traceback.format_exc())
-            y = None
+            ys = None
         else:
             err = ""
 
         end_time = datetime.now().strftime(datetime_format)
 
-        return xs, y, err, start_time, end_time
+        return xs, ys, err, start_time, end_time
 
     def execute_and_report(
         self, func: Callable[[dict[str, float | int | str]], float], y_data_type: str | None = None
@@ -189,12 +189,12 @@ class Run:
         """
 
         xs = self.args.get_xs_from_args()
-        y: Any = None
-        _, y, err, _, _ = self.execute(func, xs, y_data_type)
+        ys: Any = None
+        _, ys, err, _, _ = self.execute(func, xs, y_data_type)
 
-        self.report(y, err)
+        self.report(ys, err)
 
-    def report(self, y: Any, err: str) -> None:
+    def report(self, ys: Any, err: str) -> None:
         """Save the results to a text file.
 
         Args:
@@ -202,10 +202,21 @@ class Run:
             err (str): Error string.
         """
 
-        if y is not None:
-            sys.stdout.write(f"\n{y}\n")
+        if ys is not None:
+            if isinstance(ys, str):
+                ys = ys.replace(" ", "")
+                ys = ys.split(",")
+                for y in ys:
+                    sys.stdout.write(f"{y}\n")
+            elif isinstance(ys, (list, tuple)):
+                for y in ys:
+                    sys.stdout.write(f"{y}\n")
+            else:
+                sys.stdout.write(f"{ys}\n")
+            sys.stdout.flush()
         if err != "":
             sys.stderr.write(f"{err}\n")
+            sys.stdout.flush()
             exit(1)
 
 

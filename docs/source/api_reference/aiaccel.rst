@@ -9,10 +9,12 @@ Subpackages
 
    aiaccel.abci
    aiaccel.cli
+   aiaccel.experimental
    aiaccel.master
    aiaccel.optimizer
-   aiaccel.scheduler
+   aiaccel.manager
    aiaccel.storage
+   aiaccel.tensorboard
    aiaccel.util
 
 Submodules
@@ -30,6 +32,14 @@ aiaccel.config module
 ---------------------
 
 .. automodule:: aiaccel.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.converted\_parameter module
+-----------------------------------
+
+.. automodule:: aiaccel.converted_parameter
    :members:
    :undoc-members:
    :show-inheritance:
