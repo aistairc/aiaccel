@@ -36,7 +36,7 @@ class AbciModel(AbstractModel):
         runner_command = create_qsub_command(obj.config, runner_file_path)
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
-        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE)
+        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE, bufsize=0)
 
         obj.th_oh = OutputHandler(obj.proc)
         obj.th_oh.start()

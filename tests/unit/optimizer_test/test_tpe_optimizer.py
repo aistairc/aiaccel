@@ -24,27 +24,14 @@ class TestTpeOptimizer(BaseTest):
         yield
         self.optimizer = None
 
-    def test_pre_process(self):
-        assert self.optimizer.pre_process() is None
-
-    def test_post_process(self):
-        self.optimizer.pre_process()
-        assert self.optimizer.post_process() is None
-
     def test_check_result(self):
-        self.optimizer.pre_process()
-        self.optimizer.inner_loop_main_process()
-        with patch.object(
-            self.optimizer.storage.result, "get_any_trial_objective", return_value=[1]
-        ):
+        with patch.object(self.optimizer.storage.result, "get_any_trial_objective", return_value=[1]):
             assert self.optimizer.check_result() is None
 
     def test_is_startup_trials(self):
-        self.optimizer.pre_process()
         assert self.optimizer.is_startup_trials()
 
     def test_generate_parameter(self):
-        self.optimizer.pre_process()
         assert len(self.optimizer.generate_parameter()) > 0
 
         # if ((not self.is_startup_trials()) and (len(self.parameter_pool) >= 1))
@@ -60,30 +47,46 @@ class TestTpeOptimizer(BaseTest):
         self.optimizer.config.resource.num_workers = _tmp_num_workers
 
     def test_generate_initial_parameter(self):
-        optimizer = TpeOptimizer(self.load_config_for_test(self.configs['config_tpe_2.json']))
-        (optimizer.workspace.storage / 'storage.db').unlink()
+        config = self.load_config_for_test(self.configs['config_tpe_2.json'])
+        self.workspace.clean()
+        self.workspace.create()
+        optimizer = TpeOptimizer(config)
 
-        optimizer.__init__(self.load_config_for_test(self.configs['config_tpe_2.json']))
-        optimizer.pre_process()
+        self.workspace.clean()
+        self.workspace.create()
+        optimizer.__init__(config)
+
         assert len(optimizer.generate_initial_parameter()) > 0
         assert len(optimizer.generate_initial_parameter()) > 0
 
     def test_create_study(self):
-        assert self.optimizer.create_study() is None
+        self.workspace.clean()
+        self.workspace.create()
+        config = self.load_config_for_test(self.configs['config_tpe.json'])
+        optimizer = TpeOptimizer(config)
+        self.workspace.clean()
+        self.workspace.create()
+        assert optimizer.create_study() is None
 
     def test_serialize(self):
-        self.optimizer.create_study()
-        self.optimizer.trial_id.initial(num=0)
-        self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
-        self.optimizer._rng = np.random.RandomState(0)
-        assert self.optimizer._serialize(trial_id=0) is None
+        self.workspace.clean()
+        self.workspace.create()
+        config = self.load_config_for_test(self.configs['config_tpe.json'])
+        optimizer = TpeOptimizer(config)
+        optimizer.trial_id.initial(num=0)
+        optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
+        optimizer._rng = np.random.RandomState(0)
+        assert optimizer.serialize(trial_id=0) is None
 
     def test_deserialize(self):
-        self.optimizer.pre_process()
-        self.optimizer.trial_id.initial(num=0)
-        self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        self.optimizer._serialize(trial_id=0)
-        assert self.optimizer._deserialize(trial_id=0) is None
+        self.workspace.clean()
+        self.workspace.create()
+        config = self.load_config_for_test(self.configs['config_tpe.json'])
+        optimizer = TpeOptimizer(config)
+        optimizer.trial_id.initial(num=0)
+        optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
+        optimizer.serialize(trial_id=0)
+        assert optimizer.deserialize(trial_id=0) is None
 
 
 def test_create_distributions(data_dir):

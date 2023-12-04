@@ -123,19 +123,10 @@ class TestGridOptimizer(BaseTest):
         self.grid_config_json = self.load_config_for_test(self.configs['config_grid.json'])
         self.optimizer = GridOptimizer(self.grid_config_json)
 
-        self.optimizer.pre_process()
+        # self.optimizer.pre_process()
         yield
         self.optimzer = None
 
-    def test_pre_process(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        with monkeypatch.context() as m:
-            m.setattr(self.optimizer.storage, 'get_num_finished', lambda: 1)
-            m.setattr(self.optimizer.storage, 'get_num_running', lambda: 1)
-            m.setattr(self.optimizer.storage, 'get_num_ready', lambda: 1)
-            self.optimizer.pre_process()
-            num_params = len(self.optimizer.params.get_parameter_list())
-            assert len(self.optimizer.ready_params) == num_params
-            assert self.optimizer.num_generated_params == 1 + 1 + 1
 
     def test_get_parameter_index(self, monkeypatch: pytest.MonkeyPatch) -> None:
         with monkeypatch.context() as m:

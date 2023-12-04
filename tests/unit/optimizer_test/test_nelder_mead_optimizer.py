@@ -45,12 +45,6 @@ class TestNelderMeadOptimizer(BaseTest):
         with patch.object(self.optimizer, "nelder_mead", _nelder_mead):
             assert self.optimizer.generate_initial_parameter() is None
 
-    def test_pre_process(self):
-        assert self.optimizer.pre_process() is None
-        self.optimizer.config.optimize.goal = [goal_maximize]
-        self.optimizer.post_process()
-        assert self.optimizer.pre_process() is None
-
     def test_generate_parameter(
         self,
         load_test_config_org,
@@ -58,7 +52,6 @@ class TestNelderMeadOptimizer(BaseTest):
     ):
         config = self.load_config_for_test(self.configs["config_nelder_mead.json"])
         self.optimizer = NelderMeadOptimizer(config)
-        self.optimizer.pre_process()
         self.optimizer.params = ConvertedParameterConfiguration(
             HyperParameterConfiguration(config.optimize.parameters), convert_log=True, convert_int=True,
             convert_choices=True, convert_sequence=True,

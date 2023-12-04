@@ -6,6 +6,7 @@ generic:
   batch_job_timeout: 600
   function: main
   job_command: python original_main.py
+  logging_level: DEBUG
   python_file: original_main.py
   sleep_time: 0
   workspace: /tmp/work

@@ -1,4 +1,6 @@
 from aiaccel.scheduler import Job, LocalScheduler
+from aiaccel.optimizer import create_optimizer
+
 from tests.base_test import BaseTest
 
 
@@ -6,7 +8,8 @@ class TestLocalScheduler(BaseTest):
 
     def test_get_stats(self, clean_work_dir, config_json, fake_process):
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = LocalScheduler(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = LocalScheduler(config, optimizer)
         fake_process.register_subprocess(
             ['/bin/ps', '-eo', 'pid,user,stat,lstart,args'],
             stdout=[
@@ -29,7 +32,8 @@ class TestLocalScheduler(BaseTest):
     def test_parse_trial_id(self, config_json, database_remove):
         database_remove()
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = LocalScheduler(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        scheduler = LocalScheduler(config, optimizer)
         s = {"name": "2 python user.py --trial_id=5 --config=config.yaml --x1=1.0 --x2=1.0"}
         trial_id = int(scheduler.parse_trial_id(s['name']))
         assert trial_id == 5

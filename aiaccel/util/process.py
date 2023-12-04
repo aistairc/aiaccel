@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import copy
 import datetime
+import select
 import subprocess
+import sys
 import threading
 from typing import Any
 
@@ -73,35 +75,29 @@ class OutputHandler(threading.Thread):
         self._abort = True
 
     def run(self) -> None:
-        """Main thread.
-
-        Returns:
-            None
-        """
         self._start_time = datetime.datetime.now()
-
         while True:
-            if self._proc.stdout is None:
+            inputs = [self._proc.stdout, self._proc.stderr]
+            readable, _, _ = select.select(inputs, [], [], self._sleep_time)
+            for s in readable:
+                line = s.readline()
+                if s is self._proc.stdout and line:
+                    self._stdouts.append(line.decode().strip())
+                elif s is self._proc.stderr and line:
+                    self._stderrs.append(line.decode().strip())
+            if self.get_returncode() is not None:
+                # After the process has finished, read the remaining output.
+                for stream, storage in [(self._proc.stdout, self._stdouts), (self._proc.stderr, self._stderrs)]:
+                    if stream is None:
+                        continue
+                    for line in stream:
+                        storage.append(line.decode().strip())
                 break
-
-            stdout = self._proc.stdout.readline()
-            if stdout:
-                self._stdouts.append(stdout.decode().strip())
-
-            if self._proc.stderr is not None:
-                stderr = self._proc.stderr.readline()
-                if stderr:
-                    self._stderrs.append(stderr.decode().strip())
-            else:
-                stderr = None
-
-            if not (stdout or stderr) and self.get_returncode() is not None:
-                break
-
             if self._abort:
                 break
-
         self._end_time = datetime.datetime.now()
+        sys.stdout.flush()
+        sys.stderr.flush()
 
     def get_stdouts(self) -> list[str]:
         return copy.deepcopy(self._stdouts)

@@ -213,8 +213,10 @@ class Run:
                     sys.stdout.write(f"{y}\n")
             else:
                 sys.stdout.write(f"{ys}\n")
+            sys.stdout.flush()
         if err != "":
             sys.stderr.write(f"{err}\n")
+            sys.stdout.flush()
             exit(1)
 
 
