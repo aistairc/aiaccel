@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from aiaccel.scheduler import Job
+    from aiaccel.manager import Job
 
 
 def _threshold_timeout(timeout_seconds: float) -> datetime:

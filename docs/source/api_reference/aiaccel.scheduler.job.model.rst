@@ -1,29 +1,29 @@
-aiaccel.scheduler.job.model package
+aiaccel.manager.job.model package
 ===================================
 
 Submodules
 ----------
 
-aiaccel.scheduler.job.model.abci\_model module
+aiaccel.manager.job.model.abci\_model module
 ----------------------------------------------
 
-.. automodule:: aiaccel.scheduler.job.model.abci_model
+.. automodule:: aiaccel.manager.job.model.abci_model
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.scheduler.job.model.abstract\_model module
+aiaccel.manager.job.model.abstract\_model module
 --------------------------------------------------
 
-.. automodule:: aiaccel.scheduler.job.model.abstract_model
+.. automodule:: aiaccel.manager.job.model.abstract_model
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.scheduler.job.model.local\_model module
+aiaccel.manager.job.model.local\_model module
 -----------------------------------------------
 
-.. automodule:: aiaccel.scheduler.job.model.local_model
+.. automodule:: aiaccel.manager.job.model.local_model
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ aiaccel.scheduler.job.model.local\_model module
 Module contents
 ---------------
 
-.. automodule:: aiaccel.scheduler.job.model
+.. automodule:: aiaccel.manager.job.model
    :members:
    :undoc-members:
    :show-inheritance:

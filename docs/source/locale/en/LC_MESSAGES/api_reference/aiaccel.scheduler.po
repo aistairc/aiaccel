@@ -19,48 +19,48 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.11.0\n"
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:2
-msgid "aiaccel.scheduler package"
+#: ../../source/api_reference/aiaccel.manager.rst:2
+msgid "aiaccel.manager package"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:5
+#: ../../source/api_reference/aiaccel.manager.rst:5
 msgid "Subpackages"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:14
+#: ../../source/api_reference/aiaccel.manager.rst:14
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:17
-msgid "aiaccel.scheduler.abci\\_scheduler module"
+#: ../../source/api_reference/aiaccel.manager.rst:17
+msgid "aiaccel.manager.abci\\_manager module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:25
-msgid "aiaccel.scheduler.abstract\\_scheduler module"
+#: ../../source/api_reference/aiaccel.manager.rst:25
+msgid "aiaccel.manager.abstract\\_manager module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:33
-msgid "aiaccel.scheduler.create module"
+#: ../../source/api_reference/aiaccel.manager.rst:33
+msgid "aiaccel.manager.create module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:41
-msgid "aiaccel.scheduler.local\\_scheduler module"
+#: ../../source/api_reference/aiaccel.manager.rst:41
+msgid "aiaccel.manager.local\\_manager module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:49
-msgid "aiaccel.scheduler.pylocal\\_scheduler module"
+#: ../../source/api_reference/aiaccel.manager.rst:49
+msgid "aiaccel.manager.pylocal\\_manager module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.rst:57
+#: ../../source/api_reference/aiaccel.manager.rst:57
 msgid "Module contents"
 msgstr ""
 
 #~ msgid ""
 #~ "ベースクラス: "
-#~ ":py:class:`~aiaccel.scheduler.abstract_scheduler.AbstractScheduler`"
+#~ ":py:class:`~aiaccel.manager.abstract_manager.AbstractManager`"
 #~ msgstr ""
 
-#~ msgid "A scheduler class running on ABCI environment."
+#~ msgid "A manager class running on ABCI environment."
 #~ msgstr ""
 
 #~ msgid "Creates model object of state machine."
@@ -96,7 +96,7 @@ msgstr ""
 #~ msgid "ベースクラス: :py:class:`~aiaccel.module.AbstractModule`"
 #~ msgstr ""
 
-#~ msgid "An abstract class for AbciScheduler and LocalScheduler."
+#~ msgid "An abstract class for AbciManager and LocalManager."
 #~ msgstr ""
 
 #~ msgid "A dictionary containing command line options."
@@ -156,18 +156,18 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid ""
-#~ "Override with a Scheduler that uses "
-#~ "a Model. For example, LocalScheduler, "
-#~ "AbciScheduler, etc. By the way, "
-#~ "PylocalScheduler does not use Model."
+#~ "Override with a Manager that uses "
+#~ "a Model. For example, LocalManager, "
+#~ "AbciManager, etc. By the way, "
+#~ "PylocalManager does not use Model."
 #~ msgstr ""
 
 #~ msgid ""
 #~ "LocalModel object.  Should return None. "
 #~ "For that purpose, it is necessary "
-#~ "to modify TestAbstractScheduler etc "
+#~ "to modify TestAbstractManager etc "
 #~ "significantly. So it returns LocalModel.  "
-#~ "# TODO: Fix TestAbstractScheduler etc to"
+#~ "# TODO: Fix TestAbstractManager etc to"
 #~ " return None."
 #~ msgstr ""
 
@@ -177,11 +177,11 @@ msgstr ""
 #~ msgid ""
 #~ "Should return None. For that purpose,"
 #~ " it is necessary to modify "
-#~ "TestAbstractScheduler etc significantly. So it"
+#~ "TestAbstractManager etc significantly. So it"
 #~ " returns LocalModel."
 #~ msgstr ""
 
-#~ msgid "# TODO: Fix TestAbstractScheduler etc to return None."
+#~ msgid "# TODO: Fix TestAbstractManager etc to return None."
 #~ msgstr ""
 
 #~ msgid "Updates the number of files in hp(hyper parameter) directories."
@@ -217,7 +217,7 @@ msgstr ""
 #~ msgid "Update an available current resource number."
 #~ msgstr ""
 
-#~ msgid "Returns scheduler type."
+#~ msgid "Returns manager type."
 #~ msgstr ""
 
 #~ msgid "Path to configuration file."
@@ -230,13 +230,13 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid ""
-#~ "`LocalScheduler` , `PylocalScheduler` , or "
-#~ "`AbciScheduler` if resource type is "
+#~ "`LocalManager` , `PylocalManager` , or "
+#~ "`AbciManager` if resource type is "
 #~ "'local', 'python_local', or 'abci', "
 #~ "respectively."
 #~ msgstr ""
 
-#~ msgid "A scheduler class running on a local computer."
+#~ msgid "A manager class running on a local computer."
 #~ msgstr ""
 
 #~ msgid "Gets a parameter list of specific trial ID from Storage object."
@@ -307,7 +307,7 @@ msgstr ""
 
 #~ msgid ""
 #~ "ベースクラス: "
-#~ ":py:class:`~aiaccel.scheduler.job.model.abstract_model.AbstractModel`"
+#~ ":py:class:`~aiaccel.manager.job.model.abstract_model.AbstractModel`"
 #~ msgstr ""
 
 #~ msgid "State transition of 'before_job_submitted'."
@@ -400,7 +400,7 @@ msgstr ""
 #~ msgid "A target is in result files or not."
 #~ msgstr ""
 
-#~ msgid "An abstract class for scheduling algorithms used for Scheduler."
+#~ msgid "An abstract class for scheduling algorithms used for Manager."
 #~ msgstr ""
 
 #~ msgid "A configuration object."
@@ -439,7 +439,7 @@ msgstr ""
 #~ " expire works well?"
 #~ msgstr ""
 
-#~ msgid "A reference for scheduler object."
+#~ msgid "A reference for manager object."
 #~ msgstr ""
 
 #~ msgid "A reference for model object of state machine."
@@ -557,7 +557,7 @@ msgstr ""
 #~ msgid "A loop counter."
 #~ msgstr ""
 
-#~ msgid "LocalScheduler | AbciScheduler"
+#~ msgid "LocalManager | AbciManager"
 #~ msgstr ""
 
 #~ msgid "A unique name of this job."
@@ -626,7 +626,7 @@ msgstr ""
 
 #~ msgid ""
 #~ "ベースクラス: "
-#~ ":py:class:`~aiaccel.scheduler.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm`"
+#~ ":py:class:`~aiaccel.manager.algorithm.abstract_scheduling_algorithm.AbstractSchedulingAlgorithm`"
 #~ msgstr ""
 
 #~ msgid "Selected hyper parameters."

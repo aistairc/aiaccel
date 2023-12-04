@@ -47,10 +47,10 @@ job_setting:
 logger:
   file:
     optimizer: "optimizer.log"
-    scheduler: "scheduler.log"
+    manager: "manager.log"
   log_level:
     optimizer: "DEBUG"
-    scheduler: "DEBUG"
+    manager: "DEBUG"
   stream_level:
     optimizer: "DEBUG"
-    scheduler: "DEBUG"
+    manager: "DEBUG"

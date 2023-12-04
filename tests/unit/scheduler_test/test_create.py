@@ -1,14 +1,14 @@
 import pytest
 
-from aiaccel.scheduler import AbciScheduler
-from aiaccel.scheduler import LocalScheduler
-from aiaccel.scheduler import PylocalScheduler
-from aiaccel.scheduler import create_scheduler
+from aiaccel.manager import AbciManager
+from aiaccel.manager import LocalManager
+from aiaccel.manager import PylocalManager
+from aiaccel.manager import create_manager
 
 
 def test_create():
-    assert create_scheduler('abci') == AbciScheduler
-    assert create_scheduler('local') == LocalScheduler
-    assert create_scheduler('python_local') == PylocalScheduler
+    assert create_manager('abci') == AbciManager
+    assert create_manager('local') == LocalManager
+    assert create_manager('python_local') == PylocalManager
     with pytest.raises(ValueError):
-        assert create_scheduler('invalid')
+        assert create_manager('invalid')

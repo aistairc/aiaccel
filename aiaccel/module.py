@@ -14,7 +14,7 @@ from aiaccel.workspace import Workspace
 
 
 class AbstractModule(object):
-    """An abstract class for Optimizer and Scheduler.
+    """An abstract class for Optimizer and Manager.
 
     The procedure of this class is as follows:
 
@@ -81,7 +81,7 @@ class AbstractModule(object):
             process_name=self.module_name, labels=["native_random_state", "numpy_random_state", "state"]
         )
 
-    def set_logger(self, logger_name: str, logfile: Path, file_level: str, stream_level: str, module_type: str) -> None:
+    def set_logger(self, logger_name: str, logfile: Path, file_level: str, stream_level: str) -> None:
         """Set a default logger options.
 
         Args:
@@ -90,8 +90,6 @@ class AbstractModule(object):
             file_level (str): A logging level for a log file output. For
                 example logging.DEBUG
             stream_level (str): A logging level for a stream output.
-            module_type (str): A module type of a caller.
-
         Returns:
             None
         """
@@ -103,7 +101,7 @@ class AbstractModule(object):
         fh.setLevel(str_to_logging_level(file_level))
 
         ch = ColoredHandler(sys.stdout)
-        ch_formatter = logging.Formatter(f"[{module_type}]: %(levelname)-8s %(message)s")
+        ch_formatter = logging.Formatter("%(levelname)-8s %(message)s")
         ch.setFormatter(ch_formatter)
         ch.setLevel(str_to_logging_level(stream_level))
 

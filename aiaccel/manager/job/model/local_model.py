@@ -4,11 +4,11 @@ import re
 from subprocess import PIPE, Popen
 from typing import TYPE_CHECKING, Any
 
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
+from aiaccel.manager.job.model.abstract_model import AbstractModel
 from aiaccel.util import OutputHandler
 
 if TYPE_CHECKING:
-    from aiaccel.scheduler import Job
+    from aiaccel.manager import Job
 
 
 class LocalModel(AbstractModel):

@@ -1,4 +1,4 @@
-aiaccel.scheduler package
+aiaccel.manager package
 =========================
 
 Subpackages
@@ -7,48 +7,48 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   aiaccel.scheduler.algorithm
-   aiaccel.scheduler.job
+   aiaccel.manager.algorithm
+   aiaccel.manager.job
 
 Submodules
 ----------
 
-aiaccel.scheduler.abci\_scheduler module
+aiaccel.manager.abci\_manager module
 ----------------------------------------
 
-.. automodule:: aiaccel.scheduler.abci_scheduler
+.. automodule:: aiaccel.manager.abci_manager
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.scheduler.abstract\_scheduler module
+aiaccel.manager.abstract\_manager module
 --------------------------------------------
 
-.. automodule:: aiaccel.scheduler.abstract_scheduler
+.. automodule:: aiaccel.manager.abstract_manager
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.scheduler.create module
+aiaccel.manager.create module
 -------------------------------
 
-.. automodule:: aiaccel.scheduler.create
+.. automodule:: aiaccel.manager.create
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.scheduler.local\_scheduler module
+aiaccel.manager.local\_manager module
 -----------------------------------------
 
-.. automodule:: aiaccel.scheduler.local_scheduler
+.. automodule:: aiaccel.manager.local_manager
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.scheduler.pylocal\_scheduler module
+aiaccel.manager.pylocal\_manager module
 -------------------------------------------
 
-.. automodule:: aiaccel.scheduler.pylocal_scheduler
+.. automodule:: aiaccel.manager.pylocal_manager
    :members:
    :undoc-members:
    :show-inheritance:
@@ -56,7 +56,7 @@ aiaccel.scheduler.pylocal\_scheduler module
 Module contents
 ---------------
 
-.. automodule:: aiaccel.scheduler
+.. automodule:: aiaccel.manager
    :members:
    :undoc-members:
    :show-inheritance:

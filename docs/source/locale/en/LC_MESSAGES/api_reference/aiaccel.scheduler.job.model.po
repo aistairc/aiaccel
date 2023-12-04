@@ -19,33 +19,33 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.11.0\n"
 
-#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:2
-msgid "aiaccel.scheduler.job.model package"
+#: ../../source/api_reference/aiaccel.manager.job.model.rst:2
+msgid "aiaccel.manager.job.model package"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:5
+#: ../../source/api_reference/aiaccel.manager.job.model.rst:5
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:8
-msgid "aiaccel.scheduler.job.model.abci\\_model module"
+#: ../../source/api_reference/aiaccel.manager.job.model.rst:8
+msgid "aiaccel.manager.job.model.abci\\_model module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:16
-msgid "aiaccel.scheduler.job.model.abstract\\_model module"
+#: ../../source/api_reference/aiaccel.manager.job.model.rst:16
+msgid "aiaccel.manager.job.model.abstract\\_model module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:24
-msgid "aiaccel.scheduler.job.model.local\\_model module"
+#: ../../source/api_reference/aiaccel.manager.job.model.rst:24
+msgid "aiaccel.manager.job.model.local\\_model module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.model.rst:32
+#: ../../source/api_reference/aiaccel.manager.job.model.rst:32
 msgid "Module contents"
 msgstr ""
 
 #~ msgid ""
 #~ "ベースクラス: "
-#~ ":py:class:`~aiaccel.scheduler.job.model.abstract_model.AbstractModel`"
+#~ ":py:class:`~aiaccel.manager.job.model.abstract_model.AbstractModel`"
 #~ msgstr ""
 
 #~ msgid "State transition of 'before_job_submitted'."

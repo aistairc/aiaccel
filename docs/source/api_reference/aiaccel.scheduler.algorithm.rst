@@ -1,29 +1,29 @@
-aiaccel.scheduler.algorithm package
+aiaccel.manager.algorithm package
 ===================================
 
 Submodules
 ----------
 
-aiaccel.scheduler.algorithm.abstract\_scheduling\_algorithm module
+aiaccel.manager.algorithm.abstract\_scheduling\_algorithm module
 ------------------------------------------------------------------
 
-.. automodule:: aiaccel.scheduler.algorithm.abstract_scheduling_algorithm
+.. automodule:: aiaccel.manager.algorithm.abstract_scheduling_algorithm
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.scheduler.algorithm.random\_sampling module
+aiaccel.manager.algorithm.random\_sampling module
 ---------------------------------------------------
 
-.. automodule:: aiaccel.scheduler.algorithm.random_sampling
+.. automodule:: aiaccel.manager.algorithm.random_sampling
    :members:
    :undoc-members:
    :show-inheritance:
 
-aiaccel.scheduler.algorithm.schedule\_sampling module
+aiaccel.manager.algorithm.schedule\_sampling module
 -----------------------------------------------------
 
-.. automodule:: aiaccel.scheduler.algorithm.schedule_sampling
+.. automodule:: aiaccel.manager.algorithm.schedule_sampling
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ aiaccel.scheduler.algorithm.schedule\_sampling module
 Module contents
 ---------------
 
-.. automodule:: aiaccel.scheduler.algorithm
+.. automodule:: aiaccel.manager.algorithm
    :members:
    :undoc-members:
    :show-inheritance:

@@ -169,7 +169,7 @@ msgstr ""
 #~ msgid ""
 #~ "Causes when expire the count which "
 #~ "cannot confirm to     run Optimizer and"
-#~ " Scheduler."
+#~ " Manager."
 #~ msgstr ""
 
 #~ msgid ""

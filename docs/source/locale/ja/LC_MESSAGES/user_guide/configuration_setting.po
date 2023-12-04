@@ -745,11 +745,11 @@ msgstr ""
 #: ../../source/user_guide/configuration_setting.md:339
 #: ../../source/user_guide/configuration_setting.md:374
 #: ../../source/user_guide/configuration_setting.md:396
-msgid "scheduler (str, optional):"
+msgid "manager (str, optional):"
 msgstr ""
 
 #: ../../source/user_guide/configuration_setting.md:340
-msgid "スケジューラモジュールのログの保存先を設定します． デフォルトでは \"scheduler.log\" に設定されています．"
+msgid "スケジューラモジュールのログの保存先を設定します． デフォルトでは \"manager.log\" に設定されています．"
 msgstr ""
 
 #: ../../source/user_guide/configuration_setting.md:343
@@ -821,7 +821,7 @@ msgstr ""
 
 #: ../../source/user_guide/configuration_setting.md:378
 msgid ""
-"A logging level for a log file output of scheduler module. Defaults to "
+"A logging level for a log file output of manager module. Defaults to "
 "\"DEBUG\"."
 msgstr ""
 
@@ -855,7 +855,7 @@ msgstr ""
 
 #: ../../source/user_guide/configuration_setting.md:400
 msgid ""
-"A logging level for a stream output of scheduler module. Defaults to "
+"A logging level for a stream output of manager module. Defaults to "
 "\"DEBUG\"."
 msgstr ""
 

@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING, Any
 import fasteners
 
 from aiaccel.abci import create_qsub_command
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
+from aiaccel.manager.job.model.abstract_model import AbstractModel
 from aiaccel.util import OutputHandler
 
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job import Job
+    from aiaccel.manager.job import Job
 
 
 class AbciModel(AbstractModel):

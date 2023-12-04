@@ -4,12 +4,11 @@ import time
 
 import numpy as np
 import pytest
-from aiaccel.common import module_type_optimizer, module_type_scheduler
 
 from aiaccel.module import AbstractModule
 
 from aiaccel.optimizer import RandomOptimizer
-from aiaccel.scheduler import LocalScheduler
+from aiaccel.manager import LocalManager
 from aiaccel.util import str_to_logging_level
 from tests.base_test import BaseTest
 
@@ -45,8 +44,7 @@ class TestAbstractModule(BaseTest):
                 logger_name="root.optimizer",
                 logfile=work_dir.joinpath(self.module.workspace.log,  "optimizer.log"),
                 file_level=self.module.config.generic.logging_level,
-                stream_level=self.module.config.generic.logging_level,
-                module_type="Optimizer",
+                stream_level=self.module.config.generic.logging_level
             )
             is None
         )

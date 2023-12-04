@@ -12,7 +12,7 @@ Subpackages
    aiaccel.experimental
    aiaccel.master
    aiaccel.optimizer
-   aiaccel.scheduler
+   aiaccel.manager
    aiaccel.storage
    aiaccel.tensorboard
    aiaccel.util
