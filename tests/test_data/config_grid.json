@@ -4,7 +4,8 @@
     "job_command": "python original_main.py",
     "python_file": "original_main.py",
     "function": "main",
-    "batch_job_timeout": 600
+    "batch_job_timeout": 600,
+    "logging_level": "DEBUG"
   },
   "resource": {
     "type": "local",
@@ -112,22 +113,5 @@
         "upper": 5.0
       }
     ]
-  },
-  "job_setting": {
-    "name_length": 6
-  },
-  "logger": {
-    "file": {
-      "scheduler": "scheduler.log",
-      "optimizer": "optimizer.log"
-    },
-    "log_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    },
-    "stream_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    }
   }
 }

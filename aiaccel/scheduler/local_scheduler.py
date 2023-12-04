@@ -17,8 +17,6 @@ class LocalScheduler(AbstractScheduler):
         Returns:
             None
         """
-        super().get_stats()
-
         res = ps2joblist()
         command = self.config.generic.job_command
         self.stats = []

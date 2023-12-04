@@ -227,22 +227,5 @@
                 ]
             }
         ]
-    },
-    "job_setting": {
-        "name_length": 6
-    },
-    "logger": {
-        "file": {
-            "scheduler": "scheduler.log",
-            "optimizer": "optimizer.log"
-        },
-        "log_level": {
-            "scheduler": "DEBUG",
-            "optimizer": "DEBUG"
-        },
-        "stream_level": {
-            "scheduler": "DEBUG",
-            "optimizer": "DEBUG"
-        }
     }
 }

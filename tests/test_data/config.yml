@@ -1,15 +1,6 @@
 generic:
   workspace: "./hoge"
-logger:
-  file:
-    optimizer: "optimizer.log"
-    scheduler: "scheduler.log"
-  log_level:
-    optimizer: "DEBUG"
-    scheduler: "DEBUG"
-  stream_level:
-    optimizer: "DEBUG"
-    scheduler: "DEBUG"
+  logging_level: DEBUG
 optimize:
   goal: "minimize"
   trial_number: 10

@@ -13,34 +13,24 @@ class TestMOTpeOptimizer(BaseTest):
     @pytest.fixture(autouse=True)
     def setup_optimizer(self, data_dir, create_tmp_config):
         self.data_dir = data_dir
-        self.optimizer = MOTpeOptimizer(self.load_config_for_test(self.configs['config_motpe.json']))
+        self.config = self.load_config_for_test(self.configs['config_motpe.json'])
+        self.optimizer = MOTpeOptimizer(self.config)
         yield
         self.optimizer = None
 
-    def test_pre_process(self):
-        assert self.optimizer.pre_process() is None
-
-    def test_post_process(self):
-        self.optimizer.pre_process()
-        assert self.optimizer.post_process() is None
-
     def test_check_result(self, setup_hp_finished, setup_result, work_dir):
-        self.optimizer.pre_process()
-        self.optimizer.inner_loop_main_process()
+        # self.optimizer.inner_loop_main_process()
         with warnings.catch_warnings():
             warnings.simplefilter('error', UserWarning)
             with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=1):
-                with pytest.raises(UserWarning):
-                    self.optimizer.check_result()
+                self.optimizer.check_result()
         with patch.object(self.optimizer.storage.result, 'get_any_trial_objective', return_value=[0, 1]):
             assert self.optimizer.check_result() is None
 
     def test_is_startup_trials(self):
-        self.optimizer.pre_process()
         assert self.optimizer.is_startup_trials()
 
     def test_generate_parameter(self):
-        self.optimizer.pre_process()
         assert len(self.optimizer.generate_parameter()) > 0
 
         # if ((not self.is_startup_trials()) and (len(self.parameter_pool) >= 1))
@@ -55,29 +45,35 @@ class TestMOTpeOptimizer(BaseTest):
             assert self.optimizer.generate_parameter() is None
 
     def test_generate_initial_parameter(self, create_tmp_config):
-        config = self.optimizer.config.copy()
-        self.config_motpe_path = create_tmp_config(self.data_dir / 'config_motpe_no_initial_params.json')
-        optimizer = MOTpeOptimizer(self.optimizer.config)
-        (optimizer.workspace.path / 'storage' / 'storage.db').unlink()
-
+        self.workspace.clean()
+        self.workspace.create()
+        config = self.load_config_for_test(create_tmp_config(self.data_dir / 'config_motpe_no_initial_params.json'))
+        optimizer = MOTpeOptimizer(config)
+        self.workspace.clean()
+        self.workspace.create()
         optimizer.__init__(config)
-        optimizer.pre_process()
         assert len(optimizer.generate_initial_parameter()) > 0
         assert len(optimizer.generate_initial_parameter()) > 0
 
     def test_create_study(self):
+        self.workspace.clean()
+        self.workspace.create()
         assert self.optimizer.create_study() is None
 
     def test_serialize(self):
-        self.optimizer.create_study()
-        self.optimizer.trial_id.initial(num=0)
-        self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
-        self.optimizer._rng = np.random.RandomState(0)
-        assert self.optimizer._serialize(trial_id=0) is None
+        self.workspace.clean()
+        self.workspace.create()
+        optimizer = MOTpeOptimizer(self.config)
+        optimizer.trial_id.initial(num=0)
+        optimizer.storage.trial.set_any_trial_state(trial_id=0, state="ready")
+        optimizer._rng = np.random.RandomState(0)
+        assert optimizer.serialize(trial_id=0) is None
 
     def test_deserialize(self):
-        self.optimizer.pre_process()
-        self.optimizer.trial_id.initial(num=0)
-        self.optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
-        self.optimizer._serialize(trial_id=0)
-        assert self.optimizer._deserialize(trial_id=0) is None
+        self.workspace.clean()
+        self.workspace.create()
+        optimizer = MOTpeOptimizer(self.config)
+        optimizer.trial_id.initial(num=0)
+        optimizer.storage.trial.set_any_trial_state(trial_id=0, state="finished")
+        optimizer.serialize(trial_id=0)
+        assert optimizer.deserialize(trial_id=0) is None

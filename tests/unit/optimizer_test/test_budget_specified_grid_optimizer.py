@@ -45,8 +45,6 @@ class TestBudgetSpecifiedGridOptimizer(BaseTest):
             assert self.optimizer.__init__(self.optimizer.config) is None
 
     def test_generate_parameter(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        self.optimizer.pre_process()
-
         with monkeypatch.context() as m:
             m.setattr(self.optimizer, 'all_parameters_generated', lambda: True)
             assert self.optimizer.generate_parameter() is None
@@ -59,8 +57,6 @@ class TestBudgetSpecifiedGridOptimizer(BaseTest):
         assert len(self.optimizer.generate_parameter()) > 0
 
     def test_generate_initial_parameter(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        self.optimizer.pre_process()
-
         with monkeypatch.context() as m:
             hyperparameters = []
             for hyperparameter in self.optimizer.params.get_parameter_list():

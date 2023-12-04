@@ -3,7 +3,8 @@
     "workspace": "/tmp/work",
     "job_command": "python original_main.py",
     "python_file": "original_main.py",
-    "function": "main"
+    "function": "main",
+    "logging_level": "DEBUG"
   },
   "resource": {
     "type": "python_local",
@@ -104,29 +105,5 @@
         "initial": 0.0
       }
     ]
-  },
-  "job_setting": {
-    "name_length": 6
-  },
-  "sleep_time": {
-    "optimizer": 1,
-    "scheduler": 1
-  },
-  "logger": {
-    "file": {
-      "scheduler": "scheduler.log",
-      "optimizer": "optimizer.log"
-    },
-    "log_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    },
-    "stream_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    }
-  },
-  "ui": {
-    "silent_mode": true
   }
 }

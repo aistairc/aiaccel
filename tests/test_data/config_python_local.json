@@ -7,7 +7,8 @@
     "project_name": "sphere",
     "randseed": 1,
     "workspace": "/tmp/work",
-    "job_command": "python original_main.py"
+    "job_command": "python original_main.py",
+    "logging_level": "DEBUG"
   },
   "resource": {
     "type": "python_local",
@@ -300,26 +301,5 @@
         "initial": "red"
       }
     ]
-  },
-  "job_setting": {
-    "name_length": 6
-  },
-  "sleep_time": {
-    "optimizer": 1,
-    "scheduler": 1
-  },
-  "logger": {
-    "file": {
-      "scheduler": "scheduler.log",
-      "optimizer": "optimizer.log"
-    },
-    "log_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    },
-    "stream_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    }
   }
 }
