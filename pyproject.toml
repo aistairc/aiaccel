@@ -20,7 +20,7 @@ dependencies = [
     "fasteners>=0.18,<1.0.0",
     "numpy",
     "omegaconf",
-    "optuna>=3.1.0,<4.0.0",
+    "optuna>=3.4.0,<4.0.0",
     "psutil",
     "scipy>=1.10.1,<2.0.0",
     "sqlalchemy>=2.0.7,<3.0.0",
@@ -73,18 +73,28 @@ dev = [
     "sphinx-rtd-theme",
 ]
 
+nas = [
+    "torch",
+    "torchvision"
+]
+
 [tool.setuptools]
 include-package-data = true
 packages = [
     'aiaccel',
     'aiaccel.abci',
-    'aiaccel.master',
-    'aiaccel.master.evaluator',
+    'aiaccel.nas',
+    'aiaccel.nas.asng',
+    'aiaccel.nas.batch_dependent_lr_scheduler',
+    'aiaccel.nas.data_module',
+    'aiaccel.nas.module',
+    'aiaccel.nas.nas_model',
+    'aiaccel.nas.trainer',
+    'aiaccel.nas.utils',
     'aiaccel.optimizer',
-    'aiaccel.scheduler',
-    'aiaccel.scheduler.algorithm',
-    'aiaccel.scheduler.job',
-    'aiaccel.scheduler.job.model',
+    'aiaccel.manager',
+    'aiaccel.manager.job',
+    'aiaccel.manager.job.model',
     'aiaccel.tensorboard',
     'aiaccel.util',
     'aiaccel.cli',

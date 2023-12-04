@@ -1,0 +1,26 @@
+batch_size_supernet_train: 256
+batch_size_architecture_search: 256
+optimizer: MomentumSGD
+#choices: [MomentumSGD, NAG, RMSprop, Adam, AMSGrad, NAdam]
+initial_lr: 0.001  # default of torch.optim.Adam
+weight_decay: 0.0  # decault of torch.optim.Adam
+momentum: 0.0  # default of torch.optim.SGD and torch.optim.RMSprop
+dampening: 0.0  # default of torch.optim.SGD
+smoothing: 0.99  # default of torch.optim.RMSprop
+beta1: 0.9  # default of torch.optim.Adam
+beta2: 0.999  # defualt of torch.optim.Adam
+eps: 1.0e-08  # default of torch.optim.RMSprop, torch.optim.Adam, and torch.optim.NAdam
+momentum_decay: 0.004  # default of torch.optim.NAdam
+scheduler: Linear
+    #choices: [MultiStep, Linear, Exponential, Cosine]
+warmup_epochs: 1  # Usually 10% of all epochs
+milestone_step: 30
+milestone_start: 30
+gamma: 0.1  # = default for MultiStep in pytorch (positional for Exponential).
+start_factor: 0.3333333333333333  # = default in pytorch.
+end_factor: 1.0  # = default in pytorch.
+total_iters: 5  # = default in pytorch.
+alpha: 1.5
+epsilon: 0.0
+lam: 8   # lambda
+total_epochs: 2

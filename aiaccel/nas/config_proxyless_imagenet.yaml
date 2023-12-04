@@ -1,0 +1,17 @@
+search_range:
+  kernel_size: [3,5,7]
+  base_layer_num: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  layer_search_range: [0]
+  base_filter_size: [24,24,24,24,40,40,40,40,80,80,80,80,96,96,96,96,192,192,192,192,320]
+  filter_size_search_ratio: [1.0]
+  conv_ops: ["Zero","MBConv"]
+  expansion_ratio: [3,6]
+  skip_ops: ["skip"]
+  se_ratio: [0]
+
+settings:
+  class_num: 1000
+  strides: [2,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1]
+  first_conv_filter_size: 32
+  first_mbconv_filter_size: 16
+  last_ch: 1280

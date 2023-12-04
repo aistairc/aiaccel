@@ -1,0 +1,2 @@
+trainer:
+  _target_: nas.trainer.mnasnet_trainer.MnasnetTrainer

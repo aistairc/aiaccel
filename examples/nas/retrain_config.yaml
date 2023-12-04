@@ -1,0 +1,17 @@
+environment:
+  result_dir: ./architecture_search_results
+  device_ids: null
+  num_workers: 0
+
+dataset:
+  name: imagenet  # imagenet or cifar10 or cifar100
+  train: /path/to/train_dataset
+  test: /path/to/test_dataset
+  num_classes: 200
+
+hyperparameters:
+  batch_size: 64
+  num_epochs: 10
+  base_lr: 0.01
+  momentum: 0.0
+  weight_decay: 0.0

@@ -1,0 +1,193 @@
+generic:
+  workspace: ./work
+  job_command: python user.py
+  python_file: ./user.py
+  function: main
+  batch_job_timeout: 1000000
+
+resource:
+  # type: abci
+  # type: local
+  type: python_local
+  num_node: 1
+
+ABCI:
+  group: "[group]"
+  job_script_preamble: ./job_script_preamble.sh
+  job_execution_options: ""
+
+optimize:
+  # search_algorithm: aiaccel.optimizer.NelderMeadOptimizer
+  # search_algorithm: aiaccel.optimizer.RandomOptimizer
+  # search_algorithm: aiaccel.optimizer.SobolOptimizer
+  # search_algorithm: aiaccel.optimizer.GridOptimizer
+  search_algorithm: aiaccel.optimizer.TpeOptimizer
+  goal: maximize
+  trial_number: 15
+  rand_seed: 42
+  parameters:
+    -
+      name: batch_size_supernet_train
+      type: uniform_int
+      lower: 64
+      upper: 256
+      initial: 256
+    -
+      name: batch_size_architecture_search
+      type: uniform_int
+      lower: 64
+      upper: 256
+      initial: 256
+    -
+      name: optimizer
+      type: categorical
+      choices: [MomentumSGD, NAG, RMSprop, Adam, AMSGrad, NAdam]
+    -
+      name: initial_lr
+      # For All
+      type: uniform_float
+      lower: 1.0e-4
+      upper: 1.0
+      log: true
+      initial: 0.001  # default of torch.optim.Adam
+      # initial: null  # default of torch.optim.SGD
+      # initial: 0.01   # default of torch.optim.RMSprop
+      # initial: 0.002  # default of torch.optim.NAdam
+    -
+      name: weight_decay
+      # For All
+      type: uniform_float
+      lower: 0.0
+      upper: 1.0
+      log: false
+      initial: 0.0  # decault of torch.optim.Adam
+    -
+      name: momentum
+      # For Momentum SGD, NAG, and RMSprop
+      type: uniform_float
+      lower: 0.0
+      upper: 1.0
+      log: false
+      initial: 0.0  # default of torch.optim.SGD and torch.optim.RMSprop
+    -
+      name: dampening
+      # For Momentum SGD and NAG
+      type: uniform_float
+      lower: 0.0
+      upper: 1.0
+      log: false
+      initial: 0.0  # default of torch.optim.SGD
+    -
+      name: smoothing  # given as alpha in torch.optim.RMSprop
+      # For RMSprop
+      type: float
+      lower: 0.0
+      upper: 1.0
+      log: false
+      initial: 0.99  # default of torch.optim.RMSprop
+    -
+      name: beta1
+      # For Adam, AMSGrad, and NAdam
+      type: uniform_float
+      lower: 0.0
+      upper: 1.0
+      log: false
+      initial: 0.9  # default of torch.optim.Adam
+    -
+      name: beta2
+      # For Adam, AMSGrad, and NAdam
+      type: uniform_float
+      lower: 0.0
+      upper: 1.0
+      log: false
+      initial: 0.999  # defualt of torch.optim.Adam
+    -
+      name: eps
+      # For RMSprop, Adam, AMSGrad, and NAdam
+      type: uniform_float
+      lower: 1.0e-12
+      upper: 1.0e-06
+      log: false
+      initial: 1.0e-08  # default of torch.optim.RMSprop, torch.optim.Adam, and torch.optim.NAdam
+    -
+      name: momentum_decay
+      # For NAdam
+      type: uniform_float
+      lower: 0.0
+      upper: 1.0
+      log: false
+      initial: 0.004  # default of torch.optim.NAdam
+    -
+      name: scheduler
+      type: categorical
+      choices: [MultiStep, Linear, Exponential, Cosine]
+    -
+      name: warmup_epochs
+      type: uniform_int
+      lower: 0
+      upper: 2  # Usually 10% of all epochs
+      log: false
+    -
+      name: milestone_step
+      # For MultiStep
+      type: uniform_int
+      lower: 10
+      upper: 30
+      log: false
+      initial: 30
+    -
+      name: milestone_start
+      # For MultiStep
+      type: uniform_int
+      lower: 10
+      upper: 50
+      log: false
+      initial: 30
+    -
+      name: gamma
+      # For MultiStep and Exponential
+      type: uniform_float
+      lower: 0.5
+      upper: 1.0
+      log: false
+      initial: 0.5  # 0.1 = default for MultiStep in pytorch (positional for Exponential).
+    -
+      name: start_factor
+      # For Linear
+      type: uniform_float
+      lower: 0.0
+      upper: 1.0
+      log: false
+      initial: 0.3333333333333333  # = default in pytorch.
+    -
+      name: end_factor
+      # For Linear
+      type: uniform_float
+      lower: 0.0
+      upper: 1.0
+      initial: 1.0  # = default in pytorch.
+    -
+      name: total_epochs
+      # For Linear
+      type: uniform_int
+      lower: 1
+      upper: 15
+      initial: 5  # = default in pytorch.
+    -
+      name: alpha
+      type: uniform_float
+      lower: 0.0
+      upper: 10.0
+      initial: 1.5
+    -
+      name: epsilon
+      type: uniform_float
+      lower: 0.0
+      upper: 2.0
+      initial: 0.0
+    -
+      name: lambda
+      type: uniform_int
+      lower: 1
+      upper: 10
+      initial: 8
