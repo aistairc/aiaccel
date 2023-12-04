@@ -80,7 +80,7 @@ optimize:
     -
       name: smoothing  # given as alpha in torch.optim.RMSprop
       # For RMSprop
-      type: float
+      type: uniform_float
       lower: 0.0
       upper: 1.0
       log: false
