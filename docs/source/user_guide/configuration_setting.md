@@ -333,9 +333,9 @@ Defaults to 100.
 オプティマイザモジュールのログの保存先を設定します．
 デフォルトでは "optimizer.log" に設定されています．
 
-#### scheduler (str, optional):
+#### manager (str, optional):
 スケジューラモジュールのログの保存先を設定します．
-デフォルトでは "scheduler.log" に設定されています．
+デフォルトでは "manager.log" に設定されています．
 
 ### log_level:
 
@@ -354,11 +354,11 @@ Following strings are available;
 - 'ERROR'
 - 'CRITICAL
 
-#### scheduler (str, optional):
+#### manager (str, optional):
 オプティマイザモジュールからのログファイル出力のログレベルを設定します．
 デフォルトでは "DEBUG" に設定されています．
 
-A logging level for a log file output of scheduler module.
+A logging level for a log file output of manager module.
 Defaults to "DEBUG".
 
 ### stream_level:
@@ -369,9 +369,9 @@ Defaults to "DEBUG".
 A logging level for a stream output of optimizer module.
 Defaults to "DEBUG".
 
-#### scheduler (str, optional):
+#### manager (str, optional):
 スケジューラモジュールからのストリーム出力のログレベルを設定します．
 デフォルトでは "DEBUG" に設定されています．
 
-A logging level for a stream output of scheduler module.
+A logging level for a stream output of manager module.
 Defaults to "DEBUG".

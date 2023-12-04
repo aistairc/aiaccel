@@ -96,9 +96,5 @@
   },
   "job_setting": {
     "name_length": 6
-  },
-  "sleep_time": {
-    "optimizer": 1,
-    "scheduler": 1
   }
 }

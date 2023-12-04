@@ -7,10 +7,10 @@ Example: ::
 """
 
 alive_optimizer = "optimizer.yml"
-alive_scheduler = "scheduler.yml"
+alive_manager = "manager.yml"
 
 class_optimizer = "Optimizer"
-class_scheduler = "Scheduler"
+class_manager = "Manager"
 
 dict_work = "work_aiaccel"
 dict_alive = "alive"
@@ -61,9 +61,6 @@ key_module_type = "module_type"
 key_path = "path"
 key_pid = "pid"
 key_project_name = "project_name"
-
-module_type_optimizer = "optimizer"
-module_type_scheduler = "scheduler"
 
 resource_type_local = "local"
 resource_type_abci = "abci"

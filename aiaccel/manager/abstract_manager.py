@@ -4,15 +4,15 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
+from aiaccel.manager.job.job import Job
+from aiaccel.manager.job.model.local_model import LocalModel
 from aiaccel.module import AbstractModule
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
-from aiaccel.scheduler.job.job import Job
-from aiaccel.scheduler.job.model.local_model import LocalModel
 from aiaccel.util import Buffer, create_yaml
 
 
-class AbstractScheduler(AbstractModule):
-    """An abstract class for AbciScheduler and LocalScheduler.
+class AbstractManager(AbstractModule):
+    """An abstract class for AbciManager and LocalManager.
 
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
@@ -29,13 +29,12 @@ class AbstractScheduler(AbstractModule):
     """
 
     def __init__(self, config: DictConfig, optimizer: AbstractOptimizer) -> None:
-        super().__init__(config, "scheduler")
+        super().__init__(config, "manager")
         self.set_logger(
-            logger_name="root.scheduler",
-            logfile=self.workspace.log / "scheduler.log",
+            logger_name="root.manager",
+            logfile=self.workspace.log / "manager.log",
             file_level=self.config.generic.logging_level,
             stream_level=self.config.generic.logging_level,
-            module_type="Scheduler",
         )
         self.optimizer = optimizer
         self.num_workers = self.config.resource.num_workers
@@ -124,7 +123,7 @@ class AbstractScheduler(AbstractModule):
             None
         """
         self.optimizer.finalize_operation()
-        self.logger.info("scheduler finished.")
+        self.logger.info("finished.")
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -195,18 +194,18 @@ class AbstractScheduler(AbstractModule):
     def create_model(self) -> Any:
         """Creates model object of state machine.
 
-        Override with a Scheduler that uses a Model.
-        For example, LocalScheduler, AbciScheduler, etc.
-        By the way, PylocalScheduler does not use Model.
+        Override with a Manager that uses a Model.
+        For example, LocalManager, AbciManager, etc.
+        By the way, PylocalManager does not use Model.
 
         Returns:
             LocalModel: LocalModel object.
 
             Should return None.
-            For that purpose, it is necessary to modify TestAbstractScheduler etc significantly.
+            For that purpose, it is necessary to modify TestAbstractManager etc significantly.
             So it returns LocalModel.
 
-            # TODO: Fix TestAbstractScheduler etc to return None.
+            # TODO: Fix TestAbstractManager etc to return None.
         """
         return LocalModel()
 

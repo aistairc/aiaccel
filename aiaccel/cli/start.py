@@ -16,8 +16,8 @@ import aiaccel
 from aiaccel.cli import CsvWriter
 from aiaccel.common import datetime_format, resource_type_mpi
 from aiaccel.config import load_config
+from aiaccel.manager import create_manager
 from aiaccel.optimizer import create_optimizer
-from aiaccel.scheduler import create_scheduler
 from aiaccel.storage import Storage
 from aiaccel.tensorboard import TensorBoard
 from aiaccel.util.buffer import Buffer
@@ -85,7 +85,7 @@ def main() -> None:  # pragma: no cover
     logger.info(f"config: {str(pathlib.Path(config.config_path).resolve())}")
 
     optimizer = create_optimizer(config.optimize.search_algorithm)(config)
-    scheduler = create_scheduler(config.resource.type.value)(config, optimizer)
+    manager = create_manager(config.resource.type.value)(config, optimizer)
     tensorboard = TensorBoard(config)
     storage = Storage(workspace.storage_file_path)
 
@@ -97,20 +97,20 @@ def main() -> None:  # pragma: no cover
     buff.d["num_finished"].set_max_len(2)
     buff.d["available_pool_size"].set_max_len(2)
 
-    scheduler.pre_process()
+    manager.pre_process()
 
     if config.resource.type.value.lower() == resource_type_mpi and mpi_enable:  # MPI
         Mpi.prepare(workspace.path)
 
     while True:
         try:
-            if not scheduler.inner_loop_main_process():
+            if not manager.inner_loop_main_process():
                 break
-            if not scheduler.is_error_free():
+            if not manager.is_error_free():
                 break
             if int((time.time() - time_s)) % 10 == 0:
                 num_ready, num_running, num_finished = storage.get_num_running_ready_finished()
-                available_pool_size = scheduler.get_available_pool_size(num_ready, num_running, num_finished)
+                available_pool_size = manager.get_available_pool_size(num_ready, num_running, num_finished)
                 now = datetime.now()
                 looping_time = now - loop_start_time
 
@@ -121,7 +121,7 @@ def main() -> None:  # pragma: no cover
 
                 buff.d["num_finished"].Add(num_finished)
                 if buff.d["num_finished"].Len == 1 or buff.d["num_finished"].has_difference():
-                    scheduler.logger.info(
+                    manager.logger.info(
                         f"{num_finished}/{max_trial_number} finished, "
                         f"max trial number: {max_trial_number}, "
                         f"ready: {num_ready} ,"
@@ -134,7 +134,7 @@ def main() -> None:  # pragma: no cover
 
                 buff.d["available_pool_size"].Add(available_pool_size)
                 if buff.d["available_pool_size"].Len == 1 or buff.d["available_pool_size"].has_difference():
-                    scheduler.logger.info(f"pool_size: {available_pool_size}")
+                    manager.logger.info(f"pool_size: {available_pool_size}")
 
             time.sleep(config.generic.sleep_time)
 
@@ -143,8 +143,8 @@ def main() -> None:  # pragma: no cover
             logger.exception(e)
             break
 
-    scheduler.post_process()
-    scheduler.evaluate()
+    manager.post_process()
+    manager.evaluate()
 
     csv_writer = CsvWriter(config)
     csv_writer.create()
