@@ -254,6 +254,9 @@ class Cifar10SubsetRandomSamplingDataLoader(SubsetRandomSamplingDataLoader):
         """
         return self._num_train_data
 
+    def get_num_architecture_search_data(self):
+        return len(self._architecture_search_data_indices)
+
     def get_dims(self) -> tuple[int, int, int]:
         """Get dimensions of images of the data loaders.
 

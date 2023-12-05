@@ -7,11 +7,10 @@ from pathlib import Path
 import lightning
 import numpy as np
 import torch
-import torch.nn as nn
 from lightning.pytorch.callbacks import ModelCheckpoint
 from nas.asng.categorical_asng import CategoricalASNG
 from nas.data_module.cifar10_data_module import Cifar10SubsetRandomSamplingDataLoader
-from nas.data_module.nas_dataloader import NASDataLoader
+from nas.data_module.nas_dataloader import NAS1shotDataLoader
 from nas.mnas_structure_info import MnasNetStructureInfo
 from nas.nas_model.mnasnet_lightning_model import MnasnetSearchModel, MnasnetTrainModel
 from nas.nas_model.proxyless_model import MnasNetSearchSpace
@@ -24,6 +23,7 @@ from nas.utils.utils import (
     make_observed_values2,
 )
 from omegaconf import DictConfig
+from torch import nn
 from torch.utils.data import DataLoader
 
 
@@ -34,7 +34,7 @@ class MnasnetTrainer:
     _log_dir: Path
     _logger: Logger
     _los_func: nn.CrossEntropyLoss
-    _dataloader: NASDataLoader
+    _dataloader: NAS1shotDataLoader
     _supernet_dataloader: DataLoader
     _architecture_search_datalaoder: DataLoader
     _architecture_search_asng: CategoricalASNG
@@ -165,7 +165,7 @@ class MnasnetTrainer:
         self._log_dir = (
             Path(result_dir)
             / hashlib.sha3_512(
-                f"{datetime.now().strftime('%d/%m/%Y, %H:%M:%S,%f')} {self._parameter_config}".encode()
+                f"{datetime.now().strftime('%d/%m/%Y, %H:%M:%S,%f')} {self._parameter_config}".encode(),
             ).hexdigest()
         )
 
@@ -188,7 +188,7 @@ class MnasnetTrainer:
             self._supernet_dataloader = self._dataloader.get_supernet_train_dataloader()
             self._architecture_search_datalaoder = self._dataloader.get_architecture_search_dataloader()
         else:
-            raise ValueError(f"Invalid dataset name in search space config: {str(search_space_config_path)}")
+            raise ValueError(f"Invalid dataset name in search space config: {search_space_config_path!s}")
 
         self._logger.info("Dataset loaded")
         self._logger.info("Create dataloaders")
@@ -249,5 +249,5 @@ class MnasnetTrainer:
                 len(self._architecture_search_datalaoder.sampler),
             )
         else:
-            raise ValueError(f"Invalid model name in search space config: {str(search_space_config_path)}")
+            raise ValueError(f"Invalid model name in search space config: {search_space_config_path!s}")
         self._logger.info(f"Output features: {self._model.module.classifier.out_features}")

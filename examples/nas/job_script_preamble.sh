@@ -6,5 +6,5 @@
 #$ -l h_rt=72:00:00
 
 source /etc/profile.d/modules.sh
-module load gcc/11.2.0 python/3.8/3.8.13 cuda/10.1/10.1.243 cudnn/7.6/7.6.5
+module load gcc/12.2.0 python/3.11/3.11.2 cuda/12.3/12.3.0 cudnn/8.9/8.9.5
 source ~/optenv/bin/activate

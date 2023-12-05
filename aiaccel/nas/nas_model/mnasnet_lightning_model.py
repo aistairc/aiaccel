@@ -77,7 +77,7 @@ class MnasnetTrainModel(lightning.LightningModule):
         self._parameter_config = parameter_config
         self.categories = categories
         self.asng = asng
-        self.num_train_data = dataloader.get_num_train_data()
+        self.num_train_data = dataloader.get_num_supernet_train_data()
         self.num_train_data_sampler = num_train_data_sampler
         self.los_func = los_func
         self.lam = self._parameter_config.lam
@@ -204,7 +204,7 @@ class MnasnetSearchModel(lightning.LightningModule):
         self._parameter_config = parameter_config
         self.categories = categories
         self.asng = asng
-        self.num_train_data = dataloader.get_num_train_data()
+        self.num_train_data = dataloader.get_num_architecture_search_data()
         self.num_train_data_sampler = num_train_data_sampler
         self.los_func = los_func
         self.lam = self._parameter_config.lam
