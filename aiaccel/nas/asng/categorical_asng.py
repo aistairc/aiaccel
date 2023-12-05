@@ -1,5 +1,6 @@
 import numpy as np
-from nas.asng.categorical_dist import Categorical
+
+from aiaccel.nas.asng.categorical_dist import Categorical
 
 
 class CategoricalASNG:

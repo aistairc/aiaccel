@@ -3,7 +3,8 @@ from __future__ import annotations
 import math
 
 import torch
-from nas.batch_dependent_lr_scheduler import AbstractBatchDependentLRScheduler
+
+from aiaccel.nas.batch_dependent_lr_scheduler import AbstractBatchDependentLRScheduler
 
 
 class BatchDependentCosineLRScheduler(AbstractBatchDependentLRScheduler):

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from nas.data_module.nas_dataloader import NAS1shotDataLoader
 from torch.utils.data import SubsetRandomSampler
+
+from aiaccel.nas.data_module.nas_dataloader import NAS1shotDataLoader
 
 
 class SubsetRandomSamplingDataLoader(NAS1shotDataLoader):

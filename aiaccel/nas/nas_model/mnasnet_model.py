@@ -5,9 +5,12 @@ from typing import Any
 
 import numpy as np
 import torch
-from nas.mnas_structure_info import MnasNetStructureInfo
-from nas.module.nas_module import NASModule
-from nas.module.operations import (
+from ptflops import get_model_complexity_info
+from torch import nn
+
+from aiaccel.nas.mnas_structure_info import MnasNetStructureInfo
+from aiaccel.nas.module.nas_module import NASModule
+from aiaccel.nas.module.operations import (
     BatchNorm,
     Conv,
     MBConv,
@@ -15,8 +18,6 @@ from nas.module.operations import (
     SepConv,
     SkipOperation,
 )
-from ptflops import get_model_complexity_info
-from torch import nn
 
 INDENT = "    "
 
@@ -116,17 +117,17 @@ class MnasNetBaseConv(NASModule):
     def print_active_op(self, log_dir=None):
         params = self.get_param_num_list()
 
-        params_str = "params: {:>10} ".format(params)
+        params_str = f"params: {params:>10} "
 
         name_str_list = self.name.split("@")
 
-        conv_str = "{:<7} ".format(name_str_list[-1])
+        conv_str = f"{name_str_list[-1]:<7} "
 
-        kernel_size_str = "kernel_size: {}  ".format(self.kernel_size)
-        filter_size_str = "filter_size: {}  ".format(self.filter_size)
-        stride_str = "stride: {} ".format(self.get_stride())
-        skip_op_str = "skip_op: {}  ".format(self.skip_op_str)
-        se_ratio_str = "se_ratio: {}  ".format(self.se_ratio)
+        kernel_size_str = f"kernel_size: {self.kernel_size}  "
+        filter_size_str = f"filter_size: {self.filter_size}  "
+        stride_str = f"stride: {self.get_stride()} "
+        skip_op_str = f"skip_op: {self.skip_op_str}  "
+        se_ratio_str = f"se_ratio: {self.se_ratio}  "
 
         print(INDENT * 2 + conv_str + params_str)
         print(INDENT * 4 + kernel_size_str + filter_size_str + stride_str + skip_op_str + se_ratio_str)
@@ -218,7 +219,12 @@ class MnasNetMBConv(MnasNetBaseConv):
 
     def get_op(self, max_in_ch, max_out_ch, k_size, stride, max_expansion_ratio, max_se_ratio):
         return MBConv(
-            max_in_ch, max_out_ch, k_size, stride, max_expansion_ratio=max_expansion_ratio, max_se_ratio=max_se_ratio
+            max_in_ch,
+            max_out_ch,
+            k_size,
+            stride,
+            max_expansion_ratio=max_expansion_ratio,
+            max_se_ratio=max_se_ratio,
         )
 
     def build(self, config: dict[str, Any], **kwargs) -> None:
@@ -241,7 +247,7 @@ class MnasNetMBConv(MnasNetBaseConv):
 
         for k_size in kernel_size_list:
             self.candidate_ops.append(
-                self.get_op(max_in_ch, max_out_ch, k_size, self.stride, max_expansion_ratio, max_se_ratio)
+                self.get_op(max_in_ch, max_out_ch, k_size, self.stride, max_expansion_ratio, max_se_ratio),
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -253,7 +259,10 @@ class MnasNetMBConv(MnasNetBaseConv):
             torch.Tensor: A tensor after operation (batch size, output channel, height, width).
         """
         x_f = self.active_op(
-            x, filter_size=self.filter_size, se_ratio=self.se_ratio, expansion_ratio=self.expansion_ratio
+            x,
+            filter_size=self.filter_size,
+            se_ratio=self.se_ratio,
+            expansion_ratio=self.expansion_ratio,
         )
 
         if self.skip_op_str == "skip" and x.size()[1] == self.filter_size and self.stride == 1:
@@ -284,11 +293,16 @@ class MnasNetMBConv(MnasNetBaseConv):
         self.candidate_ops = nn.ModuleList({})
         stride = self.get_stride()
         self.active_op = self.get_op(
-            self.prev_filter_size, self.filter_size, self.kernel_size, stride, self.expansion_ratio, self.se_ratio
+            self.prev_filter_size,
+            self.filter_size,
+            self.kernel_size,
+            stride,
+            self.expansion_ratio,
+            self.se_ratio,
         )
 
     def print_active_op_sub(self, log_dir=None):
-        expansion_ratio_str = "expansion_ratio: {}  ".format(self.expansion_ratio)
+        expansion_ratio_str = f"expansion_ratio: {self.expansion_ratio}  "
 
         print(INDENT * 4 + expansion_ratio_str)
         if log_dir is not None:
@@ -297,7 +311,10 @@ class MnasNetMBConv(MnasNetBaseConv):
 
     def get_param_num_list(self):
         params = self.active_op.get_param_nums(
-            self.prev_filter_size, self.filter_size, self.expansion_ratio, self.se_ratio
+            self.prev_filter_size,
+            self.filter_size,
+            self.expansion_ratio,
+            self.se_ratio,
         )
 
         return params
@@ -595,7 +612,11 @@ class MnasNetLayerStack(NASModule):
         flops_list = []
         for layer in self.layers:
             flop, _ = get_model_complexity_info(
-                layer, x.size()[1:], as_strings=False, print_per_layer_stat=False, verbose=False
+                layer,
+                x.size()[1:],
+                as_strings=False,
+                print_per_layer_stat=False,
+                verbose=False,
             )
             flops_list.append(x)
             x = self.layer(x)
@@ -762,7 +783,7 @@ class MnasNetSearchSpace(NASModule):
 
         # blocks
         for block_idx in range(self.block_num):
-            name = "Block{}".format(block_idx)
+            name = f"Block{block_idx}"
             block = MnasNetBlock(name)
             block.build(config)
             self.blocks.append(block)
@@ -772,7 +793,9 @@ class MnasNetSearchSpace(NASModule):
 
         for in_ch in classifier_in_chs:
             self.conv_head_candidate_dict[str(in_ch)] = nn.Sequential(
-                nn.Conv2d(in_ch, self.last_ch, 1, padding=0, stride=1, bias=False), BatchNorm(self.last_ch), ReLUOp()
+                nn.Conv2d(in_ch, self.last_ch, 1, padding=0, stride=1, bias=False),
+                BatchNorm(self.last_ch),
+                ReLUOp(),
             )
 
         # With 200 classes when searching structure
@@ -871,9 +894,9 @@ class MnasNetSearchSpace(NASModule):
 
         # first conv layer
         params = 3 * self.first_conv_filter_size * 3 * 3 + self.first_conv_filter_size * 2
-        params_str = "params: {:>10} ".format(params)
+        params_str = f"params: {params:>10} "
         kernel_size_str = "kernel_size: 3 "
-        filter_size_str = "filter_size: {} ".format(self.first_conv_filter_size)
+        filter_size_str = f"filter_size: {self.first_conv_filter_size} "
         print("[first conv]    " + params_str + kernel_size_str + filter_size_str)
 
         if log_dir is not None:
@@ -891,8 +914,8 @@ class MnasNetSearchSpace(NASModule):
             + self.last_ch * self.n_classes
             + self.n_classes
         )
-        params_str = "params: {:>10} ".format(params)
-        n_classes_str = "class_num: {} ".format(self.n_classes)
+        params_str = f"params: {params:>10} "
+        n_classes_str = f"class_num: {self.n_classes} "
         print("[classifier]    " + params_str + n_classes_str)
 
         if log_dir is not None:
@@ -903,10 +926,10 @@ class MnasNetSearchSpace(NASModule):
         params_list = self.get_param_num_list()
         total_params = sum(sum(params) for params in params_list)
 
-        print("Total params: {}".format(total_params))
+        print(f"Total params: {total_params}")
         if log_dir is not None:
             with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
-                o.write("Total params: {}".format(total_params) + "\n")
+                o.write(f"Total params: {total_params}" + "\n")
 
     def get_param_num_list(self) -> list[Any]:
         """Gets a list of the number of parameters.

@@ -7,18 +7,19 @@ import lightning
 import numpy as np
 import torch
 import torch.utils
-from nas.batch_dependent_lr_scheduler import create_batch_dependent_lr_scheduler
-from nas.create_optimizer import create_optimizer
-from nas.utils import utils
-from nas.utils.logger import (
+from omegaconf import DictConfig, OmegaConf
+from torch import nn
+
+from aiaccel.nas.batch_dependent_lr_scheduler import create_batch_dependent_lr_scheduler
+from aiaccel.nas.create_optimizer import create_optimizer
+from aiaccel.nas.utils import utils
+from aiaccel.nas.utils.logger import (
     create_architecture_search_logger,
     create_architecture_search_report,
     create_supernet_train_logger,
     create_supernet_train_report,
 )
-from nas.utils.utils import make_observed_values2
-from omegaconf import DictConfig, OmegaConf
-from torch import nn
+from aiaccel.nas.utils.utils import make_observed_values2
 
 if TYPE_CHECKING:
     from pathlib import Path

@@ -74,6 +74,7 @@ dev = [
 ]
 
 nas = [
+    "hydra-core",
     "torch",
     "torchvision"
 ]

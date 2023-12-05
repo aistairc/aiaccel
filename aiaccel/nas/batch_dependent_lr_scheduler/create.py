@@ -2,14 +2,19 @@ from __future__ import annotations
 
 from typing import Any
 
-from nas.batch_dependent_lr_scheduler.abstract_batch_dependent_lr_shceduler import AbstractBatchDependentLRScheduler
-from nas.batch_dependent_lr_scheduler.batch_dependent_cosine_lr_scheduler import BatchDependentCosineLRScheduler
-from nas.batch_dependent_lr_scheduler.batch_dependent_exponential_lr_scheduler import (
+from torch.optim import Optimizer
+
+from aiaccel.nas.batch_dependent_lr_scheduler.abstract_batch_dependent_lr_shceduler import (
+    AbstractBatchDependentLRScheduler,
+)
+from aiaccel.nas.batch_dependent_lr_scheduler.batch_dependent_cosine_lr_scheduler import BatchDependentCosineLRScheduler
+from aiaccel.nas.batch_dependent_lr_scheduler.batch_dependent_exponential_lr_scheduler import (
     BatchDependentExponentialLRScheduler,
 )
-from nas.batch_dependent_lr_scheduler.batch_dependent_linear_lr_scheduler import BatchDependentLinearLRScheduler
-from nas.batch_dependent_lr_scheduler.batch_dependent_multi_step_lr_scheduler import BatchDependentMultiStepLRScheduler
-from torch.optim import Optimizer
+from aiaccel.nas.batch_dependent_lr_scheduler.batch_dependent_linear_lr_scheduler import BatchDependentLinearLRScheduler
+from aiaccel.nas.batch_dependent_lr_scheduler.batch_dependent_multi_step_lr_scheduler import (
+    BatchDependentMultiStepLRScheduler,
+)
 
 
 def create_batch_dependent_lr_scheduler(

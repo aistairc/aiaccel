@@ -8,23 +8,24 @@ import lightning
 import numpy as np
 import torch
 from lightning.pytorch.callbacks import ModelCheckpoint
-from nas.asng.categorical_asng import CategoricalASNG
-from nas.data_module.cifar10_data_module import Cifar10SubsetRandomSamplingDataLoader
-from nas.data_module.nas_dataloader import NAS1shotDataLoader
-from nas.mnas_structure_info import MnasNetStructureInfo
-from nas.nas_model.mnasnet_lightning_model import MnasnetSearchModel, MnasnetTrainModel
-from nas.nas_model.proxyless_model import MnasNetSearchSpace
-from nas.utils.logger import create_logger
-from nas.utils.utils import (
+from omegaconf import DictConfig
+from torch import nn
+from torch.utils.data import DataLoader
+
+from aiaccel.nas.asng.categorical_asng import CategoricalASNG
+from aiaccel.nas.data_module.cifar10_data_module import Cifar10SubsetRandomSamplingDataLoader
+from aiaccel.nas.data_module.nas_dataloader import NAS1shotDataLoader
+from aiaccel.nas.mnas_structure_info import MnasNetStructureInfo
+from aiaccel.nas.nas_model.mnasnet_lightning_model import MnasnetSearchModel, MnasnetTrainModel
+from aiaccel.nas.nas_model.proxyless_model import MnasNetSearchSpace
+from aiaccel.nas.utils.logger import create_logger
+from aiaccel.nas.utils.utils import (
     create_config_by_yaml,
     get_params2,
     get_search_space_config,
     make_categories2,
     make_observed_values2,
 )
-from omegaconf import DictConfig
-from torch import nn
-from torch.utils.data import DataLoader
 
 
 class MnasnetTrainer:

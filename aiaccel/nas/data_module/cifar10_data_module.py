@@ -3,10 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import lightning
-from nas.data_module.subset_random_sampling_dataloader import SubsetRandomSamplingDataLoader
-from nas.utils.utils import _data_transforms_cifar, get_random_indices
 from torch.utils.data import DataLoader, SubsetRandomSampler, random_split
 from torchvision.datasets import CIFAR10
+
+from aiaccel.nas.data_module.subset_random_sampling_dataloader import SubsetRandomSamplingDataLoader
+from aiaccel.nas.utils.utils import _data_transforms_cifar, get_random_indices
 
 if TYPE_CHECKING:
     from pathlib import Path

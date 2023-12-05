@@ -18,7 +18,8 @@ drastically when using `BatchDependentMultiStepLRScheduler`.
 from __future__ import annotations
 
 import torch
-from nas.batch_dependent_lr_scheduler import AbstractBatchDependentLRScheduler
+
+from aiaccel.nas.batch_dependent_lr_scheduler import AbstractBatchDependentLRScheduler
 
 
 class BatchDependentMultiStepLRScheduler(AbstractBatchDependentLRScheduler):
