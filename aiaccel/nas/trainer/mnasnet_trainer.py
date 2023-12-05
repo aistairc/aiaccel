@@ -52,7 +52,7 @@ class MnasnetTrainer:
         self._nas_config = nas_config
         self._parameter_config = parameter_config
         _search_space_config_path = get_search_space_config(nas_config.nas.search_space, nas_config.dataset.name)
-        self._search_space_config = create_config_by_yaml("nas/" + str(_search_space_config_path))
+        self._search_space_config = create_config_by_yaml("./" + str(_search_space_config_path))
         self._log_dir = None
         self._logger = None
         self._create_logger()
