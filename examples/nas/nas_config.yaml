@@ -1,7 +1,9 @@
 environment:
   result_dir: ./architecture_search_results  # A path to directory where search results are saved.
-  device_ids: null  # Indices of GPU for parallel processing.
+  device_ids: [0, 1, 2, 3]  # Indices of GPU for parallel processing.
   num_workers: 9  # The number of workers for dataloader.
+  gpus: null # The number of GPUs
+
 
 dataset:
   name: cifar10  # imagenet or cifar10 or cifar100

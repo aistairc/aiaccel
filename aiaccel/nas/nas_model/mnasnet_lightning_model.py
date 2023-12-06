@@ -70,10 +70,11 @@ class MnasnetTrainModel(lightning.LightningModule):
         self.width = _dims[1]
         self.height = _dims[2]
         self.num_classes = dataloader.get_num_classes()
-        device_ids = (
-            None if nas_config.environment.device_ids is None else list(map(int, nas_config.environment.device_ids))
-        )
-        self.model = nn.DataParallel(nn_model, device_ids=device_ids)
+        # device_ids = (
+        #    None if nas_config.environment.device_ids is None else list(map(int, nas_config.environment.device_ids))
+        # )
+        # self.model = nn.DataParallel(nn_model, device_ids=device_ids)
+        self.model = nn_model
         self._search_space_config = search_space_config
         self._parameter_config = parameter_config
         self.categories = categories
@@ -111,7 +112,8 @@ class MnasnetTrainModel(lightning.LightningModule):
             observed_values = np.argmax(observed_values_one_hot, axis=1)
             observed_values_new = make_observed_values2(observed_values, self._search_space_config, self.categories)
             self.structure_info.update_values(observed_values_new)
-            self.model.module.select_active_op(self.structure_info)
+            # self.model.module.select_active_op(self.structure_info)
+            self.model.select_active_op(self.structure_info)
 
             output = self.model(inputs)
             loss = self.los_func(output, target)
@@ -242,7 +244,8 @@ class MnasnetSearchModel(lightning.LightningModule):
                     self.categories,
                 )
                 self.structure_info.update_values(observed_values_new)
-                self.model.module.select_active_op(self.structure_info)
+                # self.model.module.select_active_op(self.structure_info)
+                self.model.select_active_op(self.structure_info)
                 h_valid = self.model(inputs)
                 loss = self.los_func(h_valid, target)
                 self.valid_loss += loss.item() * len(inputs) / (self.num_train_data_sampler * self.lam)

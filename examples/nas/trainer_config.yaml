@@ -1,2 +1,2 @@
 trainer:
-  _target_: nas.trainer.mnasnet_trainer.MnasnetTrainer
+  _target_: aiaccel.nas.trainer.mnasnet_trainer.MnasnetTrainer

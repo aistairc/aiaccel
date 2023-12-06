@@ -71,9 +71,12 @@ class MnasnetTrainer:
             monitor="train_acc1",
             save_top_k=1,
         )
+
+        devices = "auto" if self._nas_config.environment.gpus is None else self._nas_config.environment.gpus
         self._supernet_trainer = lightning.Trainer(
             max_epochs=self._nas_config.nas.num_epochs_supernet_train,
             accelerator="auto",
+            devices=devices,
             callbacks=[model_checkpoint_callback],
         )
         self._logger.info("Start supernet train")
@@ -83,7 +86,8 @@ class MnasnetTrainer:
         self._logger.info(f"Save state dict of supernet: {savepath}")
 
         try:
-            torch.save(self._model.module.state_dict(), savepath)
+            # torch.save(self._model.module.state_dict(), savepath)
+            torch.save(self._model.state_dict(), savepath)
         except BaseException as e:
             self._logger.exception(e)
             raise e
@@ -98,9 +102,11 @@ class MnasnetTrainer:
             monitor="valid_acc1",
             save_top_k=1,
         )
+        devices = "auto" if self._nas_config.environment.gpus is None else self._nas_config.environment.gpus
         self._search_trainer = lightning.Trainer(
             max_epochs=self._nas_config.nas.num_epochs_architecture_search,
             accelerator="auto",
+            devices=devices,
             callbacks=[model_checkpoint_callback],
         )
         self._search_trainer.fit(self._search_model, train_dataloaders=self._architecture_search_datalaoder)
@@ -117,9 +123,12 @@ class MnasnetTrainer:
         mle = np.argmax(mle_one_hot, axis=1)
         mle_new = make_observed_values2(mle, self._search_space_config, self._categories)
         self._structure_info.update_values(mle_new)
-        self._model.module.select_active_op(self._structure_info)
-        self._model.module.print_active_op(log_dir=self._log_dir)
-        params_list = self._model.module.get_param_num_list()
+        # self._model.module.select_active_op(self._structure_info)
+        self._model.select_active_op(self._structure_info)
+        # self._model.module.print_active_op(log_dir=self._log_dir)
+        self._model.print_active_op(log_dir=self._log_dir)
+        # params_list = self._model.module.get_param_num_list()
+        params_list = self._model.get_param_num_list()
 
         with open(savepath, "a") as o:
             o.write(f"First conv layer: {params_list[0][0]}\n")
@@ -251,4 +260,5 @@ class MnasnetTrainer:
             )
         else:
             raise ValueError(f"Invalid model name in search space config: {search_space_config_path!s}")
-        self._logger.info(f"Output features: {self._model.module.classifier.out_features}")
+        # self._logger.info(f"Output features: {self._model.module.classifier.out_features}")
+        self._logger.info(f"Output features: {self._model.classifier.out_features}")
