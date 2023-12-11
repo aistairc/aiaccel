@@ -11,7 +11,7 @@ from transitions.extensions.states import Tags, add_state_features
 
 from aiaccel.common import datetime_format
 from aiaccel.storage import Storage
-from aiaccel.util import Buffer
+from aiaccel.util import Buffer, create_job_script_preamble
 from aiaccel.workspace import Workspace
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -100,6 +100,9 @@ class Job:
             initial=JOB_STATES[0]["name"],
             auto_transitions=False,
             ordered_transitions=False,
+        )
+        self.job_script_preamble = create_job_script_preamble(
+            self.config.ABCI.job_script_preamble, self.config.ABCI.job_script_preamble_path
         )
         self.start_time: datetime | None = None
         self.end_time: datetime | None = None

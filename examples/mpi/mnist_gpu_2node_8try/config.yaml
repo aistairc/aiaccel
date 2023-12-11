@@ -26,7 +26,6 @@ resource:
 
 ABCI:
   group: "[your_group_id]"
-  job_script_preamble: "./job_script_preamble.sh"
   job_execution_options: ""
 
 optimize:

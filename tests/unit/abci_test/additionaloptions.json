@@ -29,8 +29,8 @@
     "$num_workers": 4
   },
   "ABCI": {
-    "job_script_preamble": "wrapper_abci.sh",
-    "group": "gaa",
+    "job_script_preamble": "",
+    "group": "[group]",
     "job_execution_options": "-hoge 12"
   },
   "hyperparameter": {
