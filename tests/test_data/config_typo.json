@@ -11,7 +11,8 @@
         "num_workers": 10
     },
     "ABCI": {
-        "job_script_preamble": "wrapper_abci.sh",
+        "job_script_preamble": "",
+        "job_script_preamble_path": "",
         "group": ""
     },
     "optimize": {
