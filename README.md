@@ -9,7 +9,7 @@
 [**日本語  (Japanese)**](https://github.com/aistairc/aiaccel/blob/main/README_JP.md)
 
 
-A hyperparameter optimization library for [AI Bridging Cloud Infrastructure (ABCI)](https://abci.ai/).
+A hyperparameter optimization and A network architecture search library for [AI Bridging Cloud Infrastructure (ABCI)](https://abci.ai/).
 This software solves hyperparameter optimizations related to AI technologies including deep learning and multi-agent simulation.
 The software currently supports five optimization algorithms: random search, grid search, sobol sequence, nelder-mead method, and TPE.
 

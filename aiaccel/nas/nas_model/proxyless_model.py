@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import torch
 from ptflops import get_model_complexity_info
 from torch import nn
 
-from aiaccel.nas.mnas_structure_info import MnasNetStructureInfo
 from aiaccel.nas.module.nas_module import NASModule
 from aiaccel.nas.module.operations import (
     BatchNorm,
@@ -19,6 +18,9 @@ from aiaccel.nas.module.operations import (
     SkipOperation,
     Zero,
 )
+
+if TYPE_CHECKING:
+    from aiaccel.nas.mnas_structure_info import MnasNetStructureInfo
 
 INDENT = "    "
 

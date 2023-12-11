@@ -1,7 +1,11 @@
 from __future__ import annotations
 
-from torch.optim import Optimizer
+from typing import TYPE_CHECKING
+
 from torch.optim.lr_scheduler import LRScheduler
+
+if TYPE_CHECKING:
+    from torch.optim import Optimizer
 
 
 class AbstractBatchDependentLRScheduler(LRScheduler):
@@ -53,8 +57,7 @@ class AbstractBatchDependentLRScheduler(LRScheduler):
     def get_lr(self):
         if self.is_before_warmup():
             return self.get_lr_before_warmup()
-        else:
-            return self.get_lr_after_warmup()
+        return self.get_lr_after_warmup()
 
     def step(self, epoch: int | None = None) -> None:
         """Updates internal variables.

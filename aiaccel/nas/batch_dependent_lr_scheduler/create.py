@@ -1,12 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from torch.optim import Optimizer
-
-from aiaccel.nas.batch_dependent_lr_scheduler.abstract_batch_dependent_lr_shceduler import (
-    AbstractBatchDependentLRScheduler,
-)
 from aiaccel.nas.batch_dependent_lr_scheduler.batch_dependent_cosine_lr_scheduler import BatchDependentCosineLRScheduler
 from aiaccel.nas.batch_dependent_lr_scheduler.batch_dependent_exponential_lr_scheduler import (
     BatchDependentExponentialLRScheduler,
@@ -15,6 +10,13 @@ from aiaccel.nas.batch_dependent_lr_scheduler.batch_dependent_linear_lr_schedule
 from aiaccel.nas.batch_dependent_lr_scheduler.batch_dependent_multi_step_lr_scheduler import (
     BatchDependentMultiStepLRScheduler,
 )
+
+if TYPE_CHECKING:
+    from torch.optim import Optimizer
+
+    from aiaccel.nas.batch_dependent_lr_scheduler.abstract_batch_dependent_lr_shceduler import (
+        AbstractBatchDependentLRScheduler,
+    )
 
 
 def create_batch_dependent_lr_scheduler(
