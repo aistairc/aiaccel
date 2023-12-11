@@ -76,6 +76,7 @@ class ResourceConifig:
 class AbciConifig:
     group: str
     job_script_preamble: str
+    job_script_preamble_path: Optional[str]
     job_execution_options: Optional[str]
     runner_search_pattern: Optional[str]
 
