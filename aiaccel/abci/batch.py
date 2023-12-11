@@ -14,7 +14,7 @@ def create_abci_batch_file(
     error_file_path: Path | str,
     config_file_path: Path | str,
     batch_file: Path,
-    job_script_preamble: Path | str | None,
+    job_script_preamble: str,
     command: str,
     enabled_variable_name_argumentation: bool,
     dict_lock: Path,
@@ -106,13 +106,8 @@ def create_abci_batch_file(
     script = ""
 
     # preamble
-    if job_script_preamble is not None:
-        with open(job_script_preamble, "r") as f:
-            lines = f.read().splitlines()
-            if len(lines) > 0:
-                for line in lines:
-                    script += line + "\n"
-
+    if job_script_preamble is not None and len(job_script_preamble) > 0:
+        script += job_script_preamble + "\n"
     script += "\n"
 
     # parameters

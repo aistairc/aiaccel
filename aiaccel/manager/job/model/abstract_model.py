@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from aiaccel.manager import Job
-
-
-def _threshold_timeout(timeout_seconds: float) -> datetime:
-    return datetime.now() + timedelta(seconds=timeout_seconds)
 
 
 class AbstractModel(object):

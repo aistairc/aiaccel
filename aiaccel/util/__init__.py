@@ -15,6 +15,7 @@ from aiaccel.util.filesystem import (
     make_directories,
     make_directory,
 )
+from aiaccel.util.job_script_preamble import create_job_script_preamble
 from aiaccel.util.logger import ColoredHandler, str_to_logging_level
 from aiaccel.util.name import generate_random_name
 from aiaccel.util.process import OutputHandler, ps2joblist
@@ -22,8 +23,6 @@ from aiaccel.util.retry import retry
 from aiaccel.util.suffix import Suffix
 from aiaccel.util.time import get_now_str, get_timestamp
 from aiaccel.util.trialid import TrialId
-
-# from aiaccel.util.aiaccel import Run
 
 __all__ = [
     "Buffer",
@@ -34,6 +33,7 @@ __all__ = [
     "Suffix",
     "TrialId",
     "cast_y",
+    "create_job_script_preamble",
     "create_yaml",
     "file_create",
     "file_delete",
