@@ -191,7 +191,7 @@ class NelderMead:
         self.store = Store()
         self.waits = {
             "initialize": self.simplex.n_dim + 1,
-            "shrink": self.simplex.n_dim + 1,
+            "shrink": self.simplex.n_dim,
             "expand": 1,
             "inside_contract": 1,
             "outside_contract": 1,
@@ -337,7 +337,7 @@ class NelderMead:
         elif self.state == "shrink":
             xs = self.shrink()
             self.change_state("shrink_pending")
-            return xs
+            return xs[1:]
 
         elif self.state == "shrink_pending":
             return []
