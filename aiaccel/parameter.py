@@ -26,7 +26,7 @@ def is_ordinal(data_type: str) -> bool:
 
 
 def is_within_range(initial_value: int | float, lower: int | float, upper: int | float) -> bool:
-    return lower <= initial_value and initial_value <= upper
+    return lower <= initial_value <= upper
 
 
 def is_in_category(initial_value: Any, category_list: List[Any]) -> bool:
