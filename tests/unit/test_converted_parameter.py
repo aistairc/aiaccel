@@ -123,7 +123,7 @@ class TestConvertedFloatParameter(BaseTestConvertedParameter):
             assert param.convert_log is True
             assert param.lower == np.log(self.float_param.lower)
             assert param.upper == np.log(self.float_param.upper)
-            assert param.initial == np.log(self.float_param.initial)
+            assert param.initial == self.float_param.initial
 
         with monkeypatch.context() as m:
             m.setattr(self.float_param, "initial", [1.0, 1.5, 2.0])
