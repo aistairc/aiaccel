@@ -534,7 +534,7 @@ msgstr ""
 #~ msgid "A wrapper object of the configuration."
 #~ msgstr ""
 
-#~ msgid "An abstract class for Master, Optimizer and Scheduler."
+#~ msgid "An abstract class for Master, Optimizer and Manager."
 #~ msgstr ""
 
 #~ msgid "The procedure of this class is as follows:"

@@ -51,7 +51,7 @@
     - tpe
     - mo-tpe
 
-- Scheduler
+- Manager
   - ジョブスケジューラ．`Optimizer` が生成したハイパパラメータを元にジョブを生成し，計算ノードにジョブを投入します．
 
 
@@ -61,9 +61,9 @@
 ![aiaccel_flow](images/aiaccel_flow.png)
 
 1. `aiaccel-start`コマンドからコンフィグレーションファイルのパスを入力として指定して実行します．
-2. `start.py`がコンフィグレーションファイルをロードし，`Optimizer` と `Scheduler` を生成します．
+2. `start.py`がコンフィグレーションファイルをロードし，`Optimizer` と `Manager` を生成します．
 3. `Optimizer` はコンフィグレーションファイルからハイパパラメータの情報を読み込み，最適化アルゴリズムに基づきハイパパラメータを生成し `Database` に保存します．
-4. `Scheduler` は `Database` から新しいハイパパラメータを読み込み，コンフィグレーションファイルに基づき指定の計算ノードで `User Program` を実行するジョブスクリプトファイルを生成し，計算ノードにジョブを投入します．
+4. `Manager` は `Database` から新しいハイパパラメータを読み込み，コンフィグレーションファイルに基づき指定の計算ノードで `User Program` を実行するジョブスクリプトファイルを生成し，計算ノードにジョブを投入します．
 5. `User Program` の処理が終了すると，`aiaccel` が `User Program` の結果を `Database` に保存します．
 6. 3-5 の一連の処理をトライアルと言います．コンフィグレーションファイルで指定したトライアル数に到達するまで繰り返し実行します．
 7. 全てのトライアルが完了すると `aiaccel` は停止します．
@@ -75,18 +75,18 @@
 `aiaccel` は `aiaccel-start` コマンドで実行を開始します． `aiaccel-start`は，`aiaccel/cli/start.py` を実行します．
 
 
-`Optimizer`，`Scheduler`，の初期化は以下のコードで行われます．
+`Optimizer`，`Manager`，の初期化は以下のコードで行われます．
 
 ```python
     Optimizer = create_optimizer(args.config)
-    Scheduler = create_scheduler(args.config)
+    Manager = create_manager(args.config)
 ```
 
 初期化されたモジュールは，以下のコードで実行されます.
 `pre_process()` で初期化し，`inner_loop_main_process()` でメインループでの処理を実行し，`post_process()` で終了処理を行います．
 
 ```python
-    modules = [Optimizer, Scheduler]
+    modules = [Optimizer, Manager]
     for module in modules:
         module.pre_process()
 
@@ -143,14 +143,14 @@ Optimizer = create_optimizer(args.config)
 ```
 
 
-### 3. Scheduler
+### 3. Manager
 
-`Scheduler` クラスは，`aiaccel/module.py` の `AbstractModule` クラスを継承しています．
-`Scheduler` は `create_scheduler()` で初期化されます．
+`Manager` クラスは，`aiaccel/module.py` の `AbstractModule` クラスを継承しています．
+`Manager` は `create_manager()` で初期化されます．
 コンフィグレーションファイルで設定したジョブスケジューラが読み込まれます．
 
 ```python
-Scheduler = create_scheduler(args.config)
+Manager = create_manager(args.config)
 ```
 
 - ジョブスケジューラ

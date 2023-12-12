@@ -4,7 +4,8 @@
     "job_command": "python original_main.py",
     "python_file": "original_main.py",
     "function": "main",
-    "batch_job_timeout": 600
+    "batch_job_timeout": 600,
+    "logging_level": "DEBUG"
   },
   "resource": {
     "type": "local",
@@ -12,8 +13,8 @@
   },
   "ABCI": {
     "group": "[group]",
-    "job_script_preamble": "./job_script_preamble.sh",
-    "job_execution_options": ""
+    "job_script_preamble": "",
+    "job_script_preamble_path": ""
   },
   "optimize": {
     "search_algorithm": "aiaccel.optimizer.BudgetSpecifiedGridOptimizer",
@@ -95,23 +96,5 @@
   },
   "job_setting": {
     "name_length": 6
-  },
-  "sleep_time": {
-    "optimizer": 1,
-    "scheduler": 1
-  },
-  "logger": {
-    "file": {
-      "scheduler": "scheduler.log",
-      "optimizer": "optimizer.log"
-    },
-    "log_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    },
-    "stream_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    }
   }
 }

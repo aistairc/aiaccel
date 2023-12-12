@@ -5,6 +5,7 @@ generic:
   function: "main"
   batch_job_timeout: 600
   enabled_variable_name_argumentation: True
+  logging_level: INFO
 
 resource:
   type: "abci"
@@ -14,7 +15,16 @@ resource:
 
 ABCI:
   group: "[group]"
-  job_script_preamble: "./job_script_preamble.sh"
+  job_script_preamble: |
+    #!/bin/bash
+    #$-l rt_C.small=1
+    #$-j y
+    #$-cwd
+    source /etc/profile.d/modules.sh
+    module load gcc/11.2.0
+    module load python/3.8/3.8.13
+    source ~/optenv/bin/activate
+  job_script_preamble_path: "./job_script_preamble.sh"
   job_execution_options: ""
 
 optimize:
@@ -41,15 +51,3 @@ optimize:
 
 job_setting:
   name_length: 6
-
-
-logger:
-  file:
-    optimizer: "optimizer.log"
-    scheduler: "scheduler.log"
-  log_level:
-    optimizer: "DEBUG"
-    scheduler: "DEBUG"
-  stream_level:
-    optimizer: "DEBUG"
-    scheduler: "DEBUG"

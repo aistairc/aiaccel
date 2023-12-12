@@ -4,6 +4,7 @@ generic:
   python_file: "./user.py"
   function: "main"
   batch_job_timeout: 600
+  logging_level: INFO
 
 resource:
   type: "mpi"
@@ -25,7 +26,6 @@ resource:
 
 ABCI:
   group: "[your_group_id]"
-  job_script_preamble: "./job_script_preamble.sh"
   job_execution_options: ""
 
 optimize:

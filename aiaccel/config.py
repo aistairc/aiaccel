@@ -49,12 +49,13 @@ class GenericConfig:
     batch_job_timeout: int
     sleep_time: Union[float, int]
     enabled_variable_name_argumentation: bool
+    logging_level: str
     is_ignore_warning: bool
 
 
 @dataclass
 class ResourceConifig:
-    type: ResourceType
+    type: ResourceType  # noqa: A003
     num_workers: int
     mpi_npernode: Optional[int]
     mpi_enviroment: Optional[str]
@@ -75,6 +76,7 @@ class ResourceConifig:
 class AbciConifig:
     group: str
     job_script_preamble: str
+    job_script_preamble_path: Optional[str]
     job_execution_options: Optional[str]
     runner_search_pattern: Optional[str]
 
@@ -82,7 +84,7 @@ class AbciConifig:
 @dataclass
 class ParameterConfig:
     name: str
-    type: str
+    type: str  # noqa: A003
     lower: Union[float, int]
     upper: Union[float, int]
     # initial: Optional[Union[None, float, int, str, List[Union[float, int]]]]  # Unions of containers are not supported
@@ -109,37 +111,7 @@ class OptimizeConifig:
 
 @dataclass
 class JobConfig:
-    cancel_retry: int
-    cancel_timeout: int
-    expire_retry: int
-    expire_timeout: int
-    finished_retry: int
-    finished_timeout: int
-    job_retry: int
-    job_timeout: int
-    kill_retry: int
-    kill_timeout: int
-    result_retry: int
-    runner_retry: int
-    runner_timeout: int
-    running_retry: int
-    running_timeout: int
-    init_fail_count: int
     name_length: int
-    random_scheduling: bool
-
-
-@dataclass
-class LoggingItemConifig:
-    optimizer: str
-    scheduler: str
-
-
-@dataclass
-class LoggerConfig:
-    file: LoggingItemConifig
-    log_level: LoggingItemConifig
-    stream_level: LoggingItemConifig
 
 
 @dataclass
@@ -158,7 +130,6 @@ class Config:
     ABCI: AbciConifig
     optimize: OptimizeConifig
     job_setting: JobConfig
-    logger: Optional[LoggerConfig]
     clean: Optional[bool]
     resume: Optional[Union[None, int]]
     config_path: Optional[Union[None, Path, str]]

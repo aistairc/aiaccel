@@ -5,6 +5,7 @@ generic:
   function: main
   batch_job_timeout: 600
   sleep_time: 0
+  logging_level: DEBUG
 
 resource:
   type: python_local
@@ -41,10 +42,10 @@ job_setting:
 logger:
   file:
     optimizer: "optimizer.log"
-    scheduler: "scheduler.log"
+    manager: "manager.log"
   log_level:
     optimizer: "DEBUG"
-    scheduler: "DEBUG"
+    manager: "DEBUG"
   stream_level:
     optimizer: "CRITICAL"
-    scheduler: "CRITICAL"
+    manager: "CRITICAL"

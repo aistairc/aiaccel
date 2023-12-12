@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING, Any
 import fasteners
 
 from aiaccel.abci import create_qsub_command
-from aiaccel.scheduler.job.model.abstract_model import AbstractModel
+from aiaccel.manager.job.model.abstract_model import AbstractModel
 from aiaccel.util import OutputHandler
 
 if TYPE_CHECKING:
-    from aiaccel.scheduler.job import Job
+    from aiaccel.manager.job import Job
 
 
 class AbciModel(AbstractModel):
@@ -25,7 +25,7 @@ class AbciModel(AbstractModel):
             error_file_path=obj.workspace.get_error_output_file(obj.trial_id),
             config_file_path=obj.config.config_path,
             runner_file_path=runner_file_path,
-            job_script_preamble=obj.config.ABCI.job_script_preamble,
+            job_script_preamble=obj.job_script_preamble,
             command=obj.config.generic.job_command,
             enabled_variable_name_argumentation=obj.config.generic.enabled_variable_name_argumentation,
             dict_lock=obj.workspace.lock,
@@ -36,7 +36,7 @@ class AbciModel(AbstractModel):
         runner_command = create_qsub_command(obj.config, runner_file_path)
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
-        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE)
+        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE, bufsize=0)
 
         obj.th_oh = OutputHandler(obj.proc)
         obj.th_oh.start()
@@ -59,7 +59,7 @@ class AbciModel(AbstractModel):
         error_file_path: Path | str,
         config_file_path: Path | str,
         runner_file_path: Path,
-        job_script_preamble: Path | str | None,
+        job_script_preamble: str,
         command: str,
         enabled_variable_name_argumentation: bool,
         dict_lock: Path,
@@ -135,12 +135,8 @@ class AbciModel(AbstractModel):
 
         script = ""
         # preamble
-        if job_script_preamble is not None:
-            with open(job_script_preamble, "r") as f:
-                lines = f.read().splitlines()
-                if len(lines) > 0:
-                    for line in lines:
-                        script += line + "\n"
+        if job_script_preamble is not None and job_script_preamble != "":
+            script += job_script_preamble + "\n"
         script += "\n"
         # parameters
         for param in param_content["parameters"]:
@@ -150,7 +146,6 @@ class AbciModel(AbstractModel):
         # main
         for s in main_parts:
             script += s + "\n"
-
         self.file_create(runner_file_path, script, dict_lock)
 
     def file_create(self, path: Path, content: str, dict_lock: Path | None = None) -> None:

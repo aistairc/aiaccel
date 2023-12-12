@@ -3,16 +3,17 @@ from aiaccel import (
     cli,
     common,
     config,
+    manager,
     module,
     optimizer,
     parameter,
-    scheduler,
     storage,
     tensorboard,
     util,
     workspace,
     wrapper_tools,
 )
+from aiaccel.util.aiaccel import Run
 
 __all__ = [
     "common",
@@ -24,8 +25,9 @@ __all__ = [
     "abci",
     "cli",
     "optimizer",
-    "scheduler",
+    "manager",
     "storage",
     "tensorboard",
     "util",
+    "Run",
 ]

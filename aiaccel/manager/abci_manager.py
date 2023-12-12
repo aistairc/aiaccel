@@ -4,12 +4,12 @@ import re
 import subprocess
 
 from aiaccel.abci import parse_qstat
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.scheduler.job.model.abci_model import AbciModel
+from aiaccel.manager.abstract_manager import AbstractManager
+from aiaccel.manager.job.model.abci_model import AbciModel
 
 
-class AbciScheduler(AbstractScheduler):
-    """A scheduler class running on ABCI environment."""
+class AbciManager(AbstractManager):
+    """A manager class running on ABCI environment."""
 
     def get_stats(self) -> None:
         """Get a current status and update.
@@ -17,8 +17,6 @@ class AbciScheduler(AbstractScheduler):
         Returns:
             None
         """
-        super().get_stats()
-
         commands = "qstat -xml"
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
         stdout_data, _ = p.communicate()

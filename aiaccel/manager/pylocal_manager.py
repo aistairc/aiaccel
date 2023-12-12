@@ -8,11 +8,12 @@ from typing import Any
 
 from omegaconf.dictconfig import DictConfig
 
+from aiaccel.cli.set_result import write_results_to_database
 from aiaccel.common import datetime_format
 from aiaccel.config import load_config
-from aiaccel.scheduler.abstract_scheduler import AbstractScheduler
-from aiaccel.util.aiaccel import Run, set_logging_file_for_trial_id
-from aiaccel.util.cast import cast_y
+from aiaccel.manager.abstract_manager import AbstractManager
+from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+from aiaccel.util.aiaccel import set_logging_file_for_trial_id
 
 # These are for avoiding mypy-errors from initializer().
 # `global` does not work well.
@@ -21,15 +22,14 @@ user_func: Any
 workspace: Path
 
 
-class PylocalScheduler(AbstractScheduler):
-    """A scheduler class running on a local computer."""
+class PylocalManager(AbstractManager):
+    """A manager class running on a local computer."""
 
-    def __init__(self, config: DictConfig) -> None:
-        super().__init__(config)
-        self.run = Run(self.config.config_path)
+    def __init__(self, config: DictConfig, optimizer: AbstractOptimizer) -> None:
+        super().__init__(config, optimizer)
         self.processes: list[Any] = []
 
-        Pool_ = Pool if self.num_workers > 1 else ThreadPool
+        Pool_ = Pool if self.num_workers > 1 else ThreadPool  # noqa: N806
         self.pool = Pool_(self.num_workers, initializer=initializer, initargs=(self.config.config_path,))
 
     def inner_loop_main_process(self) -> bool:
@@ -39,6 +39,12 @@ class PylocalScheduler(AbstractScheduler):
             bool: The process succeeds or not. The main loop exits if failed.
         """
 
+        num_ready, num_running, num_finished = self.storage.get_num_running_ready_finished()
+        self.search_hyperparameters(num_ready, num_running, num_finished)
+        if num_finished >= self.trial_number:
+            return False
+        if num_finished >= self.config.optimize.trial_number:
+            return False
         trial_ids = self.storage.trial.get_ready()
         if trial_ids is None or len(trial_ids) == 0:
             return True
@@ -47,10 +53,17 @@ class PylocalScheduler(AbstractScheduler):
         for trial_id in trial_ids:
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state="running")
             args.append([trial_id, self.get_any_trial_xs(trial_id)])
-            self._serialize(trial_id)
-
-        for trial_id, xs, ys, err, start_time, end_time in self.pool.imap_unordered(execute, args):
-            self.report(trial_id, ys, err, start_time, end_time)
+            self.serialize(trial_id)
+        for trial_id, _, ys, err, start_time, end_time in self.pool.imap_unordered(execute, args):
+            write_results_to_database(
+                storage_file_path=self.workspace.storage_file_path,
+                trial_id=trial_id,
+                objective=ys,
+                error=err,
+                returncode=None,
+                start_time=start_time,
+                end_time=end_time,
+            )
             self.storage.trial.set_any_trial_state(trial_id=trial_id, state="finished")
         return True
 
@@ -105,20 +118,8 @@ class PylocalScheduler(AbstractScheduler):
         """
         return None
 
-    def get_result_file_path(self) -> Path:
-        """Get a path to the result file.
-
-        Args:
-            trial_id (int): Trial Id.
-
-        Returns:
-            PosixPath: A Path object which points to the result file.
-        """
-        return self.workspace.get_any_result_file_path(self.trial_id.get())
-
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
-        del obj["run"]
         del obj["pool"]
         del obj["processes"]
         return obj
@@ -144,9 +145,7 @@ def initializer(config_path: str | Path) -> None:
     if spec.loader is None:
         raise ValueError("spec.loader not defined.")
     spec.loader.exec_module(module)
-
     user_func = getattr(module, config.generic.function)
-
     workspace = Path(config.generic.workspace).resolve()
 
 
@@ -162,20 +161,16 @@ def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:
 
     start_time = datetime.now().strftime(datetime_format)
     set_logging_file_for_trial_id(workspace, trial_id)
-
     try:
-        # y = cast_y(user_func(xs), y_data_type=None)
         y = user_func(xs)
         if isinstance(y, list):
-            y = [cast_y(yi, y_data_type=None) for yi in y]
+            ys = [yi for yi in y]
         else:
-            y = [cast_y(y, y_data_type=None)]
+            ys = [y]
     except BaseException as e:
         err = str(e)
-        y = [None]
+        ys = [None]
     else:
         err = ""
-
     end_time = datetime.now().strftime(datetime_format)
-
-    return trial_id, xs, y, err, start_time, end_time
+    return trial_id, xs, ys, err, start_time, end_time

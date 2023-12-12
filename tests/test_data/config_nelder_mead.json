@@ -3,15 +3,17 @@
     "workspace": "/tmp/work",
     "job_command": "python original_main.py",
     "python_file": "original_main.py",
-    "function": "main"
+    "function": "main",
+    "logging_level": "DEBUG"
   },
   "resource": {
     "type": "local",
     "num_workers": 10
   },
   "ABCI": {
-    "job_script_preamble": "wrapper_abci.sh",
-    "group": "gaa"
+    "job_script_preamble": "",
+    "job_script_preamble_path": "",
+    "group": "[group]"
   },
   "optimize": {
     "search_algorithm": "aiaccel.optimizer.NelderMeadOptimizer",
@@ -206,22 +208,5 @@
         ]
       }
     ]
-  },
-  "job_setting": {
-    "name_length": 6
-  },
-  "logger": {
-    "file": {
-      "scheduler": "scheduler.log",
-      "optimizer": "optimizer.log"
-    },
-    "log_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    },
-    "stream_level": {
-      "scheduler": "DEBUG",
-      "optimizer": "DEBUG"
-    }
   }
 }

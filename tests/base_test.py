@@ -210,7 +210,7 @@ class BaseTest(object):
             "config_tpe.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe.json')),
             "config_tpe_2.json": create_tmp_config(self.test_data_dir.joinpath('config_tpe_2.json')),
             "config_motpe.json": create_tmp_config(self.test_data_dir.joinpath('config_motpe.json')),
-            "config_abci_json": create_tmp_config(self.test_data_dir.joinpath('config_abci.json')),
+            "config_abci.json": create_tmp_config(self.test_data_dir.joinpath('config_abci.json')),
             "config_nelder_mead.json": create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead.json')),
             "config_nelder_mead_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_nelder_mead_resumption.json')),
             "config_random_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_random_resumption.json')),

@@ -5,6 +5,7 @@ generic:
   # function: "main"
   batch_job_timeout: 600
   enabled_variable_name_argumentation: True
+  logging_level: INFO
 
 resource:
   # type: "abci"
@@ -14,7 +15,15 @@ resource:
 
 ABCI:
   group: "[group]"
-  job_script_preamble: "./job_script_preamble.sh"
+  job_script_preamble: |
+    #!/bin/bash
+    #$-l rt_F=1
+    #$-j y
+    #$-cwd
+    #$ -l h_rt=2:00:00
+    source /etc/profile.d/modules.sh
+    module load gcc/11.2.0 python/3.8/3.8.13 cuda/10.1/10.1.243 cudnn/7.6/7.6.5
+  job_script_preamble_path: "./job_script_preamble.sh"
   job_execution_options: ""
 
 optimize:

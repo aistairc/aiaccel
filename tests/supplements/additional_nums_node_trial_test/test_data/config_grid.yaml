@@ -6,19 +6,20 @@ generic:
   batch_job_timeout: 600
   function: main
   job_command: python original_main.py
+  logging_level: DEBUG
   python_file: original_main.py
   sleep_time: 0
   workspace: /tmp/work
 logger:
   file:
     optimizer: optimizer.log
-    scheduler: scheduler.log
+    manager: manager.log
   log_level:
     optimizer: DEBUG
-    scheduler: DEBUG
+    manager: DEBUG
   stream_level:
     optimizer: CRITICAL
-    scheduler: CRITICAL
+    manager: CRITICAL
 optimize:
   goal: minimize
   parameters:

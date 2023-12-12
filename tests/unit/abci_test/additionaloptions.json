@@ -10,9 +10,9 @@
     "optimizer_logfile": "optimizer.log",
     "optimizer_file_log_level": "DEBUG",
     "optimizer_stream_log_level": "DEBUG",
-    "scheduler_logfile": "scheduler.log",
-    "scheduler_file_log_level": "DEBUG",
-    "scheduler_stream_log_level": "DEBUG"
+    "manager_logfile": "manager.log",
+    "manager_file_log_level": "DEBUG",
+    "manager_stream_log_level": "DEBUG"
   },
   "wrapper": {
     "job_command": "python wrapper.py"
@@ -29,8 +29,8 @@
     "$num_workers": 4
   },
   "ABCI": {
-    "job_script_preamble": "wrapper_abci.sh",
-    "group": "gaa",
+    "job_script_preamble": "",
+    "group": "[group]",
     "job_execution_options": "-hoge 12"
   },
   "hyperparameter": {

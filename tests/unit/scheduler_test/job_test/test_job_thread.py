@@ -16,9 +16,10 @@ from aiaccel.common import (
     goal_minimize,
 )
 from aiaccel.config import ResourceType
-from aiaccel.scheduler import AbciModel, CustomMachine, Job, LocalModel, LocalScheduler, create_scheduler
+from aiaccel.manager import AbciModel, CustomMachine, Job, LocalModel, LocalManager, create_manager
 from aiaccel.util.process import OutputHandler
 from tests.base_test import BaseTest
+from aiaccel.optimizer import create_optimizer
 
 
 async def async_start_job(job):
@@ -49,17 +50,18 @@ class TestModel(BaseTest):
         self.workspace.create()
 
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = create_scheduler(config.resource.type.value)(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        manager = create_manager(config.resource.type.value)(config, optimizer)
 
         setup_hp_ready(1)
         trial_id = 0
         self.job = Job(
             config,
-            scheduler,
-            scheduler.create_model(),
+            manager,
+            manager.create_model(),
             trial_id
         )
-        self.model = scheduler.create_model()
+        self.model = manager.create_model()
         yield
         self.job = None
         self.model = None
@@ -74,13 +76,14 @@ class TestModel(BaseTest):
         config = self.load_config_for_test(self.configs['config.json'])
         config.resource.type = ResourceType('abci')
 
-        scheduler = create_scheduler(config.resource.type.value)(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        manager = create_manager(config.resource.type.value)(config, optimizer)
 
         trial_id = 1
         self.abci_job = Job(
             config,
-            scheduler,
-            scheduler.create_model(),
+            manager,
+            manager.create_model(),
             trial_id
         )
         yield
@@ -128,14 +131,15 @@ class TestJob(BaseTest):
         self.workspace.create()
 
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = create_scheduler(config.resource.type.value)(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        manager = create_manager(config.resource.type.value)(config, optimizer)
 
         setup_hp_ready(1)
         trial_id = 1
         self.job = Job(
             config,
-            scheduler,
-            scheduler.create_model(),
+            manager,
+            manager.create_model(),
             trial_id
         )
         yield
@@ -151,14 +155,15 @@ class TestJob(BaseTest):
         database_remove
     ):
         config = self.load_config_for_test(self.configs['config.json'])
-        scheduler = LocalScheduler(config)
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        manager = LocalManager(config, optimizer)
         # config = load_test_config()
         setup_hp_ready(1)
         trial_id = 1
         job = Job(
             config,
-            scheduler,
-            scheduler.create_model(),
+            manager,
+            manager.create_model(),
             trial_id
         )
         assert type(job) is Job

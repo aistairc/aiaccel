@@ -19,23 +19,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.11.0\n"
 
-#: ../../source/api_reference/aiaccel.scheduler.job.rst:2
-msgid "aiaccel.scheduler.job package"
+#: ../../source/api_reference/aiaccel.manager.job.rst:2
+msgid "aiaccel.manager.job package"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.rst:5
+#: ../../source/api_reference/aiaccel.manager.job.rst:5
 msgid "Subpackages"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.rst:13
+#: ../../source/api_reference/aiaccel.manager.job.rst:13
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.rst:16
-msgid "aiaccel.scheduler.job.job module"
+#: ../../source/api_reference/aiaccel.manager.job.rst:16
+msgid "aiaccel.manager.job.job module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.scheduler.job.rst:24
+#: ../../source/api_reference/aiaccel.manager.job.rst:24
 msgid "Module contents"
 msgstr ""
 
@@ -63,7 +63,7 @@ msgstr ""
 #~ msgid "A configuration object."
 #~ msgstr ""
 
-#~ msgid "A reference for scheduler object."
+#~ msgid "A reference for manager object."
 #~ msgstr ""
 
 #~ msgid "A reference for model object of state machine."
@@ -196,7 +196,7 @@ msgstr ""
 #~ msgid "A loop counter."
 #~ msgstr ""
 
-#~ msgid "LocalScheduler | AbciScheduler"
+#~ msgid "LocalManager | AbciManager"
 #~ msgstr ""
 
 #~ msgid "A unique name of this job."
@@ -277,7 +277,7 @@ msgstr ""
 
 #~ msgid ""
 #~ "ベースクラス: "
-#~ ":py:class:`~aiaccel.scheduler.job.model.abstract_model.AbstractModel`"
+#~ ":py:class:`~aiaccel.manager.job.model.abstract_model.AbstractModel`"
 #~ msgstr ""
 
 #~ msgid "State transition of 'before_job_submitted'."

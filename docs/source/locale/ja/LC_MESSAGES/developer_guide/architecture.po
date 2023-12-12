@@ -43,7 +43,7 @@ msgid ""
 "ローカルコンピュータでも動作はしますが，その機能を最大限に発揮するためにはABCIを利用することが推奨されます． ABCIについては，[ABCI "
 "User Guide](https://docs.abci.ai/ja/)を参照してください． "
 "aiaccelは，ABCIのインタラクティブノード上で実行されることを想定されます． "
-"Configを入力として，aiaccelは内部でMaster, Optimizer, Scheduler "
+"Configを入力として，aiaccelは内部でMaster, Optimizer, Manager "
 "を起動し，Storage(ファイルシステムやデータベース)に状態を保存しながら，最適化対象であるユーザープログラムをABCI計算ノードにてジョブとして実行します．"
 " ABCI計算ノードで実行されたユーザープログラムは，結果をStorageに保存します．"
 msgstr ""
@@ -192,7 +192,7 @@ msgid "MasterがOptimizerを起動します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:78
-msgid "MasterがSchedulerを起動します．"
+msgid "MasterがManagerを起動します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:79
@@ -200,7 +200,7 @@ msgid "Optimizerはコンフィグからハイパーパラメータを読み込�
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:80
-msgid "SchedulerはStorageから新しいハイパーパラメータを読み込み，コンフィグに基づき指定の計算ノードでユーザープログラムをジョブとして実行します．"
+msgid "ManagerはStorageから新しいハイパーパラメータを読み込み，コンフィグに基づき指定の計算ノードでユーザープログラムをジョブとして実行します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:81
@@ -212,7 +212,7 @@ msgid "5-7 が指定のトライアル数まで繰り返されます．ハイパ
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:83
-msgid "全てのトライアル数分のハイパーパラメータが完了する，または停止命令を受けるとMaster, Optimizer, Scheduler は停止します．"
+msgid "全てのトライアル数分のハイパーパラメータが完了する，または停止命令を受けるとMaster, Optimizer, Manager は停止します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:85
@@ -230,7 +230,7 @@ msgstr ""
 #: ../../source/developer_guide/architecture.md:88
 msgid ""
 "aiaccelの処理フローでは，大まかにaiaccelではMaster, Optimizer, "
-"Schedulerが協調し，それぞれの役割を果たしていることについて述べた． では実際にコードレベルで，それらのフローを追ってみよう．"
+"Managerが協調し，それぞれの役割を果たしていることについて述べた． では実際にコードレベルで，それらのフローを追ってみよう．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:91
@@ -240,14 +240,14 @@ msgstr ""
 #: ../../source/developer_guide/architecture.md:93
 msgid ""
 "aiaccelはaiaccel-startスクリプトにより実行を開始する．aiaccel/cli/start.py を見てみるとまずMaster,"
-" Optimizer, Schedulerが初期化される"
+" Optimizer, Managerが初期化される"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:101
 msgid ""
 "初期化されたモジュールは，以下のコードで実行される． "
 "pre_processメソッドの後メインループが周り，メインループ後にpost_processメソッドが実行される． "
-"シンプルに表せば基本的にMasterもOptimizerもSchedulerは，これらの処理で説明できる．"
+"シンプルに表せば基本的にMasterもOptimizerもManagerは，これらの処理で説明できる．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:125
@@ -257,7 +257,7 @@ msgstr ""
 #: ../../source/developer_guide/architecture.md:127
 msgid ""
 "pre_processメソッド・メインループ・post_processメソッドの基本的な記述は aiaccel/module.py にある． "
-"module.py は，Master, Optimizer, Scheduler のスーパークラスにあたる AbstractModule "
+"module.py は，Master, Optimizer, Manager のスーパークラスにあたる AbstractModule "
 "クラスが定義されている．"
 msgstr ""
 
@@ -325,19 +325,19 @@ msgid "pool_size 変数は，計算ノードがどの程度空いているかに
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:173
-msgid "Scheduler"
+msgid "Manager"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:175
 msgid ""
-"Schedulerモジュールも，Master, Optimizer 同様のアーキテクチャとなっている． ここでは LocalScheduler "
+"Managerモジュールも，Master, Optimizer 同様のアーキテクチャとなっている． ここでは LocalManager "
 "クラスを見てみる．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:178
 msgid ""
-"aiaccel/scheduler/local_scheduler.py は，AbstractScheduler クラスを継承している． "
-"get_stats メソッドは，現在のジョブの状態を取得する役割を担う． LocalSchedulerクラスでは，ps "
+"aiaccel/manager/local_manager.py は，AbstractManager クラスを継承している． "
+"get_stats メソッドは，現在のジョブの状態を取得する役割を担う． LocalManagerクラスでは，ps "
 "コマンドをパースしてジョブの状態を取得していることが分かる．"
 msgstr ""
 

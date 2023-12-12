@@ -1,6 +1,7 @@
 from aiaccel.abci import create_abci_batch_file
 from aiaccel.util import create_yaml
 from aiaccel.wrapper_tools import create_runner_command
+from aiaccel.util.job_script_preamble import create_job_script_preamble
 from tests.base_test import BaseTest
 
 
@@ -29,9 +30,12 @@ class TestCreateAbciBatchFile(BaseTest):
 
         output_file_path = work_dir.joinpath('result', f'{trial_id}.yml')
         error_file_path = work_dir.joinpath('error', f'{trial_id}.txt')
-        config_file_path = self.configs['config.json']
+        config_file_path = self.configs['config_abci.json']
 
-        job_script_preamble = data_dir.joinpath(config.ABCI.job_script_preamble)
+        job_script_preamble = create_job_script_preamble(
+            config.ABCI.job_script_preamble,
+            config.ABCI.job_script_preamble_path
+        )
         create_abci_batch_file(
             trial_id,
             self.parameters(),

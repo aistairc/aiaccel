@@ -1,4 +1,4 @@
-aiaccel.scheduler.job package
+aiaccel.manager.job package
 =============================
 
 Subpackages
@@ -7,15 +7,15 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   aiaccel.scheduler.job.model
+   aiaccel.manager.job.model
 
 Submodules
 ----------
 
-aiaccel.scheduler.job.job module
+aiaccel.manager.job.job module
 --------------------------------
 
-.. automodule:: aiaccel.scheduler.job.job
+.. automodule:: aiaccel.manager.job.job
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ aiaccel.scheduler.job.job module
 Module contents
 ---------------
 
-.. automodule:: aiaccel.scheduler.job
+.. automodule:: aiaccel.manager.job
    :members:
    :undoc-members:
    :show-inheritance:
