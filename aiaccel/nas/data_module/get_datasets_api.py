@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 
-from aiaccel.nas.data_module.cifar10_data_module import CIFAR10DataModule
-
 if TYPE_CHECKING:
     from omegaconf import DictConfig
     from torch.utils.data import Dataset
