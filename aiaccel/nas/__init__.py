@@ -1,6 +1,6 @@
 from aiaccel.nas import asng, batch_dependent_lr_scheduler, data_module, module, nas_model, trainer, utils
 from aiaccel.nas.create_optimizer import create_optimizer
-from aiaccel.nas.mnas_structure_info import MnasStructureInfo
+from aiaccel.nas.mnas_structure_info import MnasNetStructureInfo
 
 __all__ = [
     "asng",
@@ -11,5 +11,5 @@ __all__ = [
     "trainer",
     "utils",
     "create_optimizer",
-    "MnasStructureInfo",
+    "MnasNetStructureInfo",
 ]
