@@ -5,6 +5,7 @@ from aiaccel import (
     config,
     manager,
     module,
+    nas,
     optimizer,
     parameter,
     storage,
@@ -28,4 +29,5 @@ __all__ = [
     "storage",
     "tensorboard",
     "util",
+    "nas",
 ]
