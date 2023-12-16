@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import io
+from contextlib import redirect_stdout
 from typing import TYPE_CHECKING
 
 import lightning
@@ -207,7 +209,9 @@ class Cifar10SubsetRandomSamplingDataLoader(SubsetRandomSamplingDataLoader):
         self._dims = (3, 32, 32)
         self._num_classes = 10
 
-        CIFAR10(data_dir, train=True, download=True)
+        with redirect_stdout(io.StringIO()):
+            CIFAR10(data_dir, train=True, download=True)
+
         _transform, _ = _data_transforms_cifar()
         self._cifar_full = CIFAR10(self._data_dir, train=True, transform=_transform)
         self._num_train_data = len(self._cifar_full)

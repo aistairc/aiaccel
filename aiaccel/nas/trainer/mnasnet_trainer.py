@@ -80,6 +80,9 @@ class MnasnetTrainer:
             devices=devices,
             strategy=self._nas_config.trainer.strategy,
             callbacks=[model_checkpoint_callback],
+            enable_progress_bar=self._nas_config.trainer.enable_progress_bar,
+            logger=self._nas_config.trainer.logger,
+            enable_model_summary=self._nas_config.trainer.enable_model_summary,
         )
         self._logger.info("Start supernet train")
         self._supernet_trainer.fit(self._train_model, train_dataloaders=self._supernet_dataloader)
@@ -111,6 +114,9 @@ class MnasnetTrainer:
             strategy=self._nas_config.trainer.strategy,
             devices=devices,
             callbacks=[model_checkpoint_callback],
+            enable_progress_bar=self._nas_config.trainer.enable_progress_bar,
+            logger=self._nas_config.trainer.logger,
+            enable_model_summary=self._nas_config.trainer.enable_model_summary,
         )
         self._search_trainer.fit(self._search_model, train_dataloaders=self._architecture_search_datalaoder)
         self._logger.info("Architecture search finished")

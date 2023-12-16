@@ -19,3 +19,6 @@ nas:
 
 trainer:
   strategy: ddp_find_unused_parameters_true
+  enable_progress_bar: false
+  logger: false
+  enable_model_summary: false
