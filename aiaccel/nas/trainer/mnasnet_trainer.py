@@ -1,3 +1,4 @@
+import contextlib
 import hashlib
 import pickle
 from datetime import datetime
@@ -77,6 +78,7 @@ class MnasnetTrainer:
             max_epochs=self._nas_config.nas.num_epochs_supernet_train,
             accelerator="auto",
             devices=devices,
+            strategy=self._nas_config.trainer.strategy,
             callbacks=[model_checkpoint_callback],
         )
         self._logger.info("Start supernet train")
@@ -106,6 +108,7 @@ class MnasnetTrainer:
         self._search_trainer = lightning.Trainer(
             max_epochs=self._nas_config.nas.num_epochs_architecture_search,
             accelerator="auto",
+            strategy=self._nas_config.trainer.strategy,
             devices=devices,
             callbacks=[model_checkpoint_callback],
         )
@@ -180,7 +183,8 @@ class MnasnetTrainer:
         )
 
         if not self._log_dir.exists():
-            self._log_dir.mkdir()
+            with contextlib.suppress(FileExistsError):
+                self._log_dir.mkdir()
 
         self._logger = create_logger(self._log_dir, "root.search")
         self._logger.info(f"log directory: {self._log_dir}")

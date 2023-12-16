@@ -16,3 +16,6 @@ nas:
   num_epochs_supernet_train: 2 #60
   num_epochs_architecture_search: 2 #60
   seed: 42
+
+trainer:
+  strategy: ddp_find_unused_parameters_true
