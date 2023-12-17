@@ -76,7 +76,7 @@ class MnasnetTrainer:
         devices = "auto" if self._nas_config.environment.gpus is None else self._nas_config.environment.gpus
         self._supernet_trainer = lightning.Trainer(
             max_epochs=self._nas_config.nas.num_epochs_supernet_train,
-            accelerator="auto",
+            accelerator=self._nas_config.trainer.accelerator,
             devices=devices,
             strategy=self._nas_config.trainer.strategy,
             callbacks=[model_checkpoint_callback],
@@ -110,7 +110,7 @@ class MnasnetTrainer:
         devices = "auto" if self._nas_config.environment.gpus is None else self._nas_config.environment.gpus
         self._search_trainer = lightning.Trainer(
             max_epochs=self._nas_config.nas.num_epochs_architecture_search,
-            accelerator="auto",
+            accelerator=self._nas_config.trainer.accelerator,
             strategy=self._nas_config.trainer.strategy,
             devices=devices,
             callbacks=[model_checkpoint_callback],
