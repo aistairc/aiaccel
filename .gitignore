@@ -120,6 +120,3 @@ docs/build/html
 # Docker
 .devcontainer
 Dockerfile
-
-# Ruff
-ruff.toml

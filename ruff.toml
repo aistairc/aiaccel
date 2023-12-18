@@ -1,0 +1,55 @@
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+]
+
+indent-width = 4
+line-length = 120
+
+target-version = "py38"
+
+[lint]
+# https://docs.astral.sh/ruff/rules
+ignore = [
+  "ANN",    # flake8-annotations
+  "D",      # pydocstyle
+  "E741",   # Error: Ambiguous variable name: {name}
+  "ERA001", # eradicate: Found commented-out code
+  "EXE002", # flake8-executable: The file is executable but no shebang is present
+  "FBT003", # flake8-boolean-trap: Boolean positional values in function call
+  "G004",   # flake8-logging-format: Logging statement uses f-string
+  "PLR0913",# Pylint: Too many arguments in function definition ({c_args} > {max_args})
+  "RUF100", # Ruff-specific rules: Unused noqa directive
+  "T201",   # flake8-print: print found
+]
+select = ["ALL"]
+fixable = ["ALL"]
+unfixable = ["F401"]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+indent-style = "space"
+quote-style = "double"
+
+skip-magic-trailing-comma = false # list等の最後の要素の後のコンマを削除しない。
+
+line-ending = "lf" # "auto" | "lf" | "cr-lf" | "native"
