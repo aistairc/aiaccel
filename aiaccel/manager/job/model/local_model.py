@@ -36,6 +36,8 @@ class LocalModel(AbstractModel):
             return True
         if obj.th_oh.get_returncode() is None or self.is_firsttime_called:
             return False
+        elif obj.th_oh.is_alive():
+            return False
         else:
             self.write_results_to_database(obj)
             self.is_firsttime_called = True
