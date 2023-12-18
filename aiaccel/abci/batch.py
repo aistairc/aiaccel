@@ -94,7 +94,7 @@ def create_abci_batch_file(
         f'result=$({" ".join(commands)} | tail -n 1)',
         "exitcode=$?",
         'ys=$(echo $result | tr -d "[],")',
-        'error="`cat $error_file_path`"',
+        "error=",
         'end_time=`date "+%Y-%m-%d %H:%M:%S"`',
         'if [ -n "$error" ]; then',
         "\t" + set_retult,
