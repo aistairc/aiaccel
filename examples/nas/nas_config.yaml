@@ -18,6 +18,7 @@ nas:
   seed: 42
 
 trainer:
+  distributed_backend: dp
   strategy: ddp_find_unused_parameters_true
   enable_progress_bar: false
   logger: false
