@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Iterable
+from typing import Any, List
 
 from numpy.random import RandomState
 from omegaconf.base import UnionNode
@@ -22,6 +23,14 @@ def is_categorical(data_type: str) -> bool:
 
 def is_ordinal(data_type: str) -> bool:
     return data_type.lower() == "ordinal"
+
+
+def is_within_range(initial_value: int | float, lower: int | float, upper: int | float) -> bool:
+    return lower <= initial_value <= upper
+
+
+def is_in_category(initial_value: Any, category_list: List[Any]) -> bool:
+    return initial_value in category_list
 
 
 class AbstractParameter:
@@ -91,6 +100,15 @@ class AbstractParameter:
 
 
 class IntParameter(AbstractParameter):
+    def __init__(self, parameter: dict[str, Any]) -> None:
+        super().__init__(parameter)
+        if isinstance(self.initial, Iterable):  # For Nelder-Mead
+            for value in self.initial:
+                if not is_within_range(value, self.lower, self.upper):
+                    assert False, "initial is out of range"
+        elif self.initial is not None and not is_within_range(self.initial, self.lower, self.upper):
+            assert False, "initial is out of range"
+
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         if initial and self.initial is not None:
             value = self.initial
@@ -100,6 +118,15 @@ class IntParameter(AbstractParameter):
 
 
 class FloatParameter(AbstractParameter):
+    def __init__(self, parameter: dict[str, Any]) -> None:
+        super().__init__(parameter)
+        if isinstance(self.initial, Iterable):  # For Nelder-Mead
+            for value in self.initial:
+                if not is_within_range(value, self.lower, self.upper):
+                    assert False, "initial is out of range"
+        elif self.initial is not None and not is_within_range(self.initial, self.lower, self.upper):
+            assert False, "initial is out of range"
+
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         if initial and self.initial is not None:
             value = self.initial
@@ -114,6 +141,9 @@ class CategoricalParameter(AbstractParameter):
         if self.choices is not None:
             self.choices = [self.unwrap(v) for v in self.choices]
 
+        if self.initial is not None and not is_in_category(self.initial, self.choices):
+            assert False, "initial is not included in choices"
+
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         if initial and self.initial is not None:
             value = self.initial
@@ -127,6 +157,9 @@ class OrdinalParameter(AbstractParameter):
         super().__init__(parameter)
         if self.sequence is not None:
             self.sequence = [self.unwrap(v) for v in self.sequence]
+
+        if self.initial is not None and not is_in_category(self.initial, self.sequence):
+            assert False, "initial is not included in sequence"
 
     def sample(self, rng: RandomState, initial: bool = False) -> dict[str, Any]:
         if initial and self.initial is not None:

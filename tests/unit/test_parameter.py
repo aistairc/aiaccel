@@ -60,3 +60,63 @@ class TestParameter(BaseTest):
             assert False
         except TypeError:
             assert True
+
+    def test_initial(self):
+        # If initial is out of range, raises AssertionError
+        json_string = [
+            {
+                'name': 'a',
+                'type': 'uniform_int',
+                'lower': 0,
+                'upper': 10,
+                'initial': -1
+            }
+        ]
+        try:
+            HyperParameterConfiguration(json_string)
+            assert False
+        except AssertionError:
+            assert True
+
+        json_string = [
+            {
+                'name': 'b',
+                'type': 'uniform_float',
+                'lower': 0.,
+                'upper': 10.,
+                'initial': -0.1
+            }
+        ]
+        try:
+            HyperParameterConfiguration(json_string)
+            assert False
+        except AssertionError:
+            assert True
+
+        json_string = [
+            {
+                'name': 'c',
+                'type': 'categorical',
+                'choices': ['red', 'green', 'blue'],
+                'initial': 'yellow'
+            }
+        ]
+        try:
+            HyperParameterConfiguration(json_string)
+            assert False
+        except AssertionError:
+            assert True
+
+        json_string = [
+            {
+                'name': 'd',
+                'type': 'ordinal',
+                'sequence': ['10', '20', '30'],
+                'initial': '40'
+            }
+        ]
+        try:
+            HyperParameterConfiguration(json_string)
+            assert False
+        except AssertionError:
+            assert True

@@ -123,7 +123,7 @@ class TestConvertedFloatParameter(BaseTestConvertedParameter):
             assert param.convert_log is True
             assert param.lower == np.log(self.float_param.lower)
             assert param.upper == np.log(self.float_param.upper)
-            assert param.initial == np.log(self.float_param.initial)
+            assert param.initial == self.float_param.initial
 
         with monkeypatch.context() as m:
             m.setattr(self.float_param, "initial", [1.0, 1.5, 2.0])
@@ -165,14 +165,14 @@ class TestConvertedIntParameter(BaseTestConvertedParameter):
             param = ConvertedIntParameter(self.int_param)
             assert param.lower == float(np.log(self.int_param.lower))
             assert param.upper == float(np.log(self.int_param.upper))
-            assert param.initial == float(np.log(self.int_param.initial))
+            assert param.initial == float(self.int_param.initial)
 
         with monkeypatch.context() as m:
             m.setattr(self.int_param, "log", True)
             param = ConvertedIntParameter(self.int_param, convert_int=False)
             assert param.lower == int(np.log(self.int_param.lower))
             assert param.upper == int(np.log(self.int_param.upper))
-            assert param.initial == int(np.log(self.int_param.initial))
+            assert param.initial == int(self.int_param.initial)
 
         with monkeypatch.context() as m:
             m.setattr(self.int_param, "initial", [1, 2])
