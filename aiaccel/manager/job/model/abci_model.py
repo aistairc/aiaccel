@@ -81,7 +81,7 @@ class AbciModel(AbstractModel):
             for param in param_content["parameters"]:
                 if "parameter_name" in param.keys() and "value" in param.keys():
                     commands.append(f'--{param["parameter_name"]}=${param["parameter_name"]}')
-            commands.append(f"--trial_id={str(trial_id)}")
+            commands.append(f"--trial_id={trial_id!s}")
             commands.append("--config=$config_file_path")
         else:
             for param in param_content["parameters"]:
@@ -99,7 +99,7 @@ class AbciModel(AbstractModel):
                 "--trial_id=$trial_id",
                 "--config=$config_file_path",
                 "--objective=$ys",
-                "--error=$error",
+                "--error=''",
                 "--returncode=$returncode",
                 self.generate_param_args(param_content["parameters"]),
             ],
@@ -118,10 +118,10 @@ class AbciModel(AbstractModel):
         )
 
         main_parts = [
-            f"trial_id={str(trial_id)}",
-            f"config_file_path={str(config_file_path)}",
-            f"storage_file_path={str(storage_file_path)}",
-            f"error_file_path={str(error_file_path)}",
+            f"trial_id={trial_id!s}",
+            f"config_file_path={config_file_path!s}",
+            f"storage_file_path={storage_file_path!s}",
+            f"error_file_path={error_file_path!s}",
             f'result=`{" ".join(commands)}`',
             "returncode=$?",
             'ys=$(echo $result | tr -d "[],")',
@@ -136,7 +136,7 @@ class AbciModel(AbstractModel):
         script = ""
         # preamble
         if job_script_preamble is not None:
-            with open(job_script_preamble, "r") as f:
+            with open(job_script_preamble) as f:
                 lines = f.read().splitlines()
                 if len(lines) > 0:
                     for line in lines:
