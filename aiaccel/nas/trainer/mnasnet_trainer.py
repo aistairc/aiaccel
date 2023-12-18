@@ -175,6 +175,10 @@ class MnasnetTrainer:
     def get_valid_acc(self):
         return self._search_model.valid_acc1
 
+    @property
+    def is_global_zero(self):
+        return self._search_trainer.is_global_zero
+
     def _create_logger(self):
         result_dir = Path(self._nas_config.environment.result_dir).resolve()
 
