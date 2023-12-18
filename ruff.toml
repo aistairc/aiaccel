@@ -50,6 +50,6 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 indent-style = "space"
 quote-style = "double"
 
-skip-magic-trailing-comma = false # list等の最後の要素の後のコンマを削除しない。
+skip-magic-trailing-comma = false
 
 line-ending = "lf" # "auto" | "lf" | "cr-lf" | "native"
