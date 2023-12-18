@@ -186,7 +186,7 @@ optimize:
       upper: 2.0
       initial: 0.0
     -
-      name: lambda
+      name: lam # lambda
       type: uniform_int
       lower: 1
       upper: 10

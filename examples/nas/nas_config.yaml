@@ -2,7 +2,7 @@ environment:
   result_dir: ./architecture_search_results  # A path to directory where search results are saved.
   device_ids: [0, 1, 2, 3]  # Indices of GPU for parallel processing.
   num_workers: 9  # The number of workers for dataloader.
-  gpus: 1 # The number of GPUs
+  gpus: 3 # The number of GPUs
 
 
 dataset:

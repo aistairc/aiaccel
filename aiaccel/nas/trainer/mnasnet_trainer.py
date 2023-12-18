@@ -75,15 +75,14 @@ class MnasnetTrainer:
 
         devices = "auto" if self._nas_config.environment.gpus is None else self._nas_config.environment.gpus
         self._supernet_trainer = lightning.Trainer(
-            max_epochs=self._nas_config.nas.num_epochs_supernet_train,
             accelerator=self._nas_config.trainer.accelerator,
-            devices=devices,
-            # strategy=self._nas_config.trainer.strategy,
-            distributed_backend=self._nas_config.trainer.distributed_backend,
             callbacks=[model_checkpoint_callback],
+            devices=devices,
+            enable_model_summary=self._nas_config.trainer.enable_model_summary,
             enable_progress_bar=self._nas_config.trainer.enable_progress_bar,
             logger=self._nas_config.trainer.logger,
-            enable_model_summary=self._nas_config.trainer.enable_model_summary,
+            max_epochs=self._nas_config.nas.num_epochs_supernet_train,
+            strategy=self._nas_config.trainer.strategy,
         )
         self._logger.info("Start supernet train")
         self._supernet_trainer.fit(self._train_model, train_dataloaders=self._supernet_dataloader)
@@ -112,8 +111,7 @@ class MnasnetTrainer:
         self._search_trainer = lightning.Trainer(
             max_epochs=self._nas_config.nas.num_epochs_architecture_search,
             accelerator=self._nas_config.trainer.accelerator,
-            # strategy=self._nas_config.trainer.strategy,
-            distributed_backend=self._nas_config.trainer.distributed_backend,
+            strategy=self._nas_config.trainer.strategy,
             devices=devices,
             callbacks=[model_checkpoint_callback],
             enable_progress_bar=self._nas_config.trainer.enable_progress_bar,
