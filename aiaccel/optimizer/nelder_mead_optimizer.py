@@ -49,14 +49,13 @@ class NelderMeadOptimizer(AbstractOptimizer):
     def convert_ndarray_to_parameter(self, ndarray: np.ndarray[Any, Any]) -> list[dict[str, float | int | str]]:
         """Convert a list of numpy.ndarray to a list of parameters."""
         new_params = copy.deepcopy(self.base_params)
-        for name, value, b in zip(self.param_names, ndarray, self.bdrys):
-            for new_param in new_params:
-                if new_param["parameter_name"] == name:
-                    new_param["value"] = value
-                if b[0] <= value <= b[1]:
-                    new_param["out_of_boundary"] = False
-                else:
-                    new_param["out_of_boundary"] = True
+        for name, value, b, new_param in zip(self.param_names, ndarray, self.bdrys, new_params):
+            if new_param["parameter_name"] == name:
+                new_param["value"] = value
+            if b[0] <= value <= b[1]:
+                new_param["out_of_boundary"] = False
+            else:
+                new_param["out_of_boundary"] = True
         return new_params
 
     def new_finished(self) -> list[int]:
