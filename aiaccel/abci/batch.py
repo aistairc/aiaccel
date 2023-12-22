@@ -56,7 +56,7 @@ def create_abci_batch_file(
     commands.append("2>")
     commands.append("$error_file_path")
 
-    set_retult = _generate_command_line(
+    set_result = _generate_command_line(
         command="aiaccel-set-result",
         args=[
             "--file=$output_file_path",
@@ -71,7 +71,7 @@ def create_abci_batch_file(
         ],
     )
 
-    set_retult_no_error = _generate_command_line(
+    set_result_no_error = _generate_command_line(
         command="aiaccel-set-result",
         args=[
             "--file=$output_file_path",
@@ -97,9 +97,9 @@ def create_abci_batch_file(
         "error=`cat $error_file_path`",
         'end_time=`date "+%Y-%m-%d %H:%M:%S"`',
         'if [ -n "$error" ]; then',
-        "\t" + set_retult,
+        "\t" + set_result,
         "else",
-        "\t" + set_retult_no_error,
+        "\t" + set_result_no_error,
         "fi",
     ]
 
