@@ -149,7 +149,11 @@ class AbstractManager(AbstractModule):
             if state_name in {"success", "failure", "timeout"}:
                 self.job_completed_count += 1
                 self.jobs.remove(job)
-                continue
+                if state_name == "success":
+                    continue
+                else:
+                    self.logger.info(f"Job: {job.trial_id} is {state_name}.")
+                    return False
             # Only log if the state has changed.
             if job.trial_id in self.buff.d.keys():
                 self.buff.d[job.trial_id].Add(state_name)
