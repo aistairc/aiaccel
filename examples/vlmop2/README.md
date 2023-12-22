@@ -45,7 +45,6 @@ resource:
 #     #!/bin/bash
 
 #     #$-l rt_C.small=1
-#     #$-j y
 #     #$-cwd
 
 #     source /etc/profile.d/modules.sh
@@ -204,7 +203,6 @@ resource:
 #     #!/bin/bash
 
 #     #$-l rt_C.small=1
-#     #$-j y
 #     #$-cwd
 
 #     source /etc/profile.d/modules.sh

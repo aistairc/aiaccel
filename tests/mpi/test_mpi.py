@@ -101,7 +101,6 @@ class TestMpi(unittest.TestCase):
 
 #$ -l rt_F=4
 #$ -l h_rt=01:00:00
-#$ -j y
 #$ -cwd
 
 source /etc/profile.d/modules.sh

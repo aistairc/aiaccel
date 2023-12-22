@@ -9,7 +9,6 @@ qsubで実行中の計算ノードの$SGE_LOCALDIRの内容を$HOMEなどに定�
 
 #$ -l rt_C.small=1
 #$ -l h_rt=1:00:00
-#$ -j y
 #$ -cwd
 
 source /etc/profile.d/modules.sh

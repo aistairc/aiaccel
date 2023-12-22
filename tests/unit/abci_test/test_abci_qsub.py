@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from aiaccel.common import dict_runner
-from aiaccel.common import dict_output
+from aiaccel.common import dict_stdout, dict_stderr
 from aiaccel.abci import create_qsub_command
 
 
@@ -22,8 +22,8 @@ def test_create_qsub_command(load_test_config):
     command = [
         'qsub',
         '-g', f'{config.ABCI.group}',
-        '-j', 'y',
-        '-o', f'{path / dict_output}',
+        '-o', f'{path / dict_stdout}',
+        '-e', f'{path / dict_error}',
         str(optimizer_file)
     ]
 

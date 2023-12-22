@@ -40,7 +40,6 @@ class AbstractModule(object):
         ws (Path): A path to a current workspace.
         dict_hp (Path): A path to hp directory.
         dict_lock (Path): A path to lock directory.
-        dict_output (Path): A path to output directory.
         dict_runner (Path): A path to runner directory.
         hp_finished (int): A number of files in hp/finished directory.
         hp_ready (int): A number of files in hp/ready directory.

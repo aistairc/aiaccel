@@ -13,7 +13,8 @@ from aiaccel.common import (
     dict_lock,
     dict_log,
     dict_mpi,
-    dict_output,
+    dict_stdout,
+    dict_stderr,
     dict_pid,
     dict_rank_log,
     dict_ready,
@@ -71,7 +72,8 @@ class Workspace:
         self.log = self.path / dict_log
         self.mpi = self.path / dict_mpi
         self.rank_log = self.mpi / dict_rank_log
-        self.output = self.path / dict_output
+        self.stdout = self.path / dict_stdout
+        self.stderr = self.path / dict_stderr
         self.pid = self.path / dict_pid
         self.result = self.path / dict_result
         self.runner = self.path / dict_runner
@@ -89,7 +91,8 @@ class Workspace:
             self.lock,
             self.log,
             self.mpi,
-            self.output,
+            self.stdout,
+            self.stderr,
             self.pid,
             self.rank_log,
             self.result,
