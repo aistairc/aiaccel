@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "aiaccel"
-version = "1.0.0"
+version = "2.0.0"
 description = "A hyperparameter optimization library for AI Bridging Cloud Infrastructure (ABCI). This software solves hyperparameter optimizations related to AI technologies including deep learning and multi-agent simulation. The software currently supports five optimization algorithms: random search, grid search, sobol sequence, nelder-mead method, and TPE."
 readme = "README.md"
 requires-python = ">=3.8.1,<3.12"
@@ -16,25 +16,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "asciichartpy>=1.5.25,<2.0.0",
-    "fasteners>=0.18,<1.0.0",
-    "numpy",
-    "omegaconf",
-    "optuna>=3.4.0,<4.0.0",
-    "psutil",
-    "scipy>=1.10.1,<2.0.0",
-    "sqlalchemy>=2.0.7,<3.0.0",
-    "tensorboardx",
-    "transitions>=0.9.0,<1.0.0",
-    "colorama",
+    "numpy"
 ]
 
 [project.scripts]
-aiaccel-plot= "aiaccel.cli.plot:main"
-aiaccel-report = "aiaccel.cli.report:main"
-aiaccel-start = "aiaccel.cli.start:main"
-aiaccel-view = "aiaccel.cli.view:main"
-aiaccel-set-result = "aiaccel.cli.set_result:main"
 
 [project.urls]
 homepage = "https://github.com/aistairc/aiaccel"
@@ -77,15 +62,7 @@ dev = [
 include-package-data = true
 packages = [
     'aiaccel',
-    'aiaccel.abci',
-    'aiaccel.optimizer',
-    'aiaccel.manager',
-    'aiaccel.manager.job',
-    'aiaccel.manager.job.model',
-    'aiaccel.tensorboard',
-    'aiaccel.util',
-    'aiaccel.cli',
-    'aiaccel.storage'
+    'aiaccel.sampler',
 ]
 
 [tool.setuptools.package-data]
