@@ -23,7 +23,7 @@ def test_create_qsub_command(load_test_config):
         'qsub',
         '-g', f'{config.ABCI.group}',
         '-o', f'{path / dict_stdout}',
-        '-e', f'{path / dict_error}',
+        '-e', f'{path / dict_stderr}',
         str(optimizer_file)
     ]
 
