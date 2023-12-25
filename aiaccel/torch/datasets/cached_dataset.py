@@ -2,18 +2,20 @@ from typing import Any
 
 from multiprocessing import Manager
 
+import numpy as np
+
 import torch
 
 
 class NumpiedTensor:
-    def __init__(self, tensor: torch.Tensor):
+    def __init__(self, tensor: torch.Tensor) -> None:
         self.array = tensor.numpy()
 
-    def to_tensor(self):
+    def to_tensor(self) -> torch.Tensor:
         return torch.tensor(self.array)
 
 
-def numpize_sample(sample: Any):
+def numpize_sample(sample: Any) -> Any:
     if isinstance(sample, torch.Tensor):
         return NumpiedTensor(sample)
     elif isinstance(sample, tuple):
@@ -26,7 +28,7 @@ def numpize_sample(sample: Any):
         return sample
 
 
-def tensorize_sample(sample: Any):
+def tensorize_sample(sample: Any) -> Any:
     if isinstance(sample, NumpiedTensor):
         return sample.to_tensor()
     elif isinstance(sample, tuple):
@@ -40,16 +42,16 @@ def tensorize_sample(sample: Any):
 
 
 class CachedDataset(torch.utils.data.Dataset):
-    def __init__(self, dataset: torch.utils.data.Dataset):
+    def __init__(self, dataset: torch.utils.data.Dataset) -> None:
         self.dataset = dataset
 
         self.manager = Manager()
         self.cache = self.manager.dict()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.dataset)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> Any:
         if index not in self.cache:
             self.cache[index] = numpize_sample(self.dataset[index])
 

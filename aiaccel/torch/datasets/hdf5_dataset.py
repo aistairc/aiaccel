@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Any
 
 from pathlib import Path
 
@@ -20,7 +20,7 @@ class RawHDF5Dataset(torch.utils.data.Dataset):
     def __len__(self) -> int:
         return len(self.grp_list)
 
-    def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
+    def __getitem__(self, index: int) -> dict[str, Any]:
         if self.f is None:
             self.f = h5.File(self.dataset_path, "r")
 
@@ -32,5 +32,5 @@ class RawHDF5Dataset(torch.utils.data.Dataset):
 
 
 class HDF5Dataset(RawHDF5Dataset):
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
         return {k: torch.as_tensor(v) for k, v in super().__getitem__(index).items()}

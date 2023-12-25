@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Any
 
 import numpy as np
 from numpy.random import Generator, PCG64
@@ -9,8 +9,8 @@ import torch.distributed as dist
 
 def scatter_dataset(
     dataset: torch.utils.data.Dataset,
-    permute_fn: Callable[[np.ndarray], np.ndarray] = Generator(PCG64(0)).permutation,
-):
+    permute_fn: Callable[[np.ndarray[Any, np.dtype[np.int64]]], np.ndarray[Any, np.dtype[np.int64]]] = Generator(PCG64(0)).permutation,
+) -> torch.utils.data.Subset:
     world_size = dist.get_world_size()
     rank = dist.get_rank()
 

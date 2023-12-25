@@ -17,18 +17,19 @@ class ABCIEnvironment(ClusterEnvironment):
         self._main_port = int(os.environ["MAIN_PORT"])
 
     @property
-    def creates_processes_externally(self):
+    def creates_processes_externally(self) -> bool:
         return True
 
     @property
-    def main_address(self):
+    def main_address(self) -> str:
         return self._main_address
 
     @property
-    def main_port(self):
+    def main_port(self) -> int:
         return self._main_port
-
-    def detect(self) -> bool:
+    
+    @staticmethod
+    def detect() -> bool:
         return True
 
     def world_size(self) -> int:
