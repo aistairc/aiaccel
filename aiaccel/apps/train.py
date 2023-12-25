@@ -11,7 +11,7 @@ import aiaccel
 from aiaccel.utils import print_config
 
 
-def main():
+def main() -> None:
     parser = ArgumentParser()
     parser.add_argument(
         "config",
@@ -27,7 +27,7 @@ def main():
     parser.add_argument(
         "--base_config",
         type=Path,
-        default=Path(aiaccel.__path__) / "apps" / "cfg" / "train.yaml",
+        default=Path(aiaccel.__path__[0]) / "apps" / "cfg" / "train.yaml",
         description="Base config file",
     )
     args, unk_args = parser.parse_known_args()
