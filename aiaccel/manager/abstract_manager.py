@@ -152,7 +152,7 @@ class AbstractManager(AbstractModule):
                 if state_name == "success":
                     continue
                 else:
-                    self.logger.info(f"Job: {job.trial_id} is {state_name}.")
+                    self.logger.error(f"Job: {job.trial_id} is {state_name}.")
                     return False
             # Only log if the state has changed.
             if job.trial_id in self.buff.d.keys():
