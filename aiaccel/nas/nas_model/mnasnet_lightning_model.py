@@ -133,6 +133,7 @@ class MnasnetTrainModel(lightning.LightningModule):
 
             del loss, output
 
+        loss_sum = torch.mean(self.all_gather(loss_sum))
         self.manual_backward(loss_sum)
         del loss_sum, inputs, target
         optimizer.step()
@@ -264,6 +265,8 @@ class MnasnetSearchModel(lightning.LightningModule):
                 del h_valid, loss
 
         losses, observed_values_one_hot_list = np.array(losses), np.array(observed_values_one_hot_list)
+        losses = torch.mean(self.all_gather(losses), 0, True)
+        observed_values_one_hot_list = torch.mean(self.all_gather(observed_values_one_hot_list), 0, True)
         self.asng.update(observed_values_one_hot_list, losses)
         del inputs, target
 
