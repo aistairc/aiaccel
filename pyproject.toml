@@ -59,7 +59,6 @@ packages = [
 aiaccel = ["default_config.yaml"]
 
 [tool.ruff]
-hooks = true
 line-length = 120
 target-version = "py38"
 fix = true
