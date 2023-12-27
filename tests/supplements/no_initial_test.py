@@ -3,7 +3,7 @@
 import subprocess
 from pathlib import Path
 
-from aiaccel.common import dict_result, file_final_result
+from aiaccel.common import file_final_result
 from aiaccel.config import load_config
 from aiaccel.storage import Storage
 from aiaccel.workspace import Workspace

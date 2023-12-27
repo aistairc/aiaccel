@@ -6,8 +6,6 @@ from typing import Any
 import fasteners
 import yaml
 
-from aiaccel.common import dict_result, extension_hp, extension_result
-
 
 def create_yaml(path: Path, content: Any, dict_lock: Path | None = None) -> None:
     """Create a yaml file.
@@ -84,58 +82,6 @@ def file_read(path: Path, dict_lock: Path | None = None) -> str | None:
                     lines = f.read()
 
     return lines
-
-
-def get_dict_files(directory: Path, pattern: str, dict_lock: Path | None = None) -> list[Path] | None:
-    """Get files matching a pattern in a directory.
-    Args:
-        directory (Path): A directory to search files.
-        pattern (str): A regular expression.
-        dict_lock (Path | None, optional): A directory to store lock files. Defaults to None.
-
-    Returns:
-        list | None: Matched files.
-    """
-    if directory.exists():
-        if dict_lock is None:
-            files = list(directory.glob(pattern))
-            if len(files) > 0:
-                files.sort()
-            return files
-        else:
-            with fasteners.InterProcessLock(interprocess_lock_file(directory, dict_lock)):
-                files = list(directory.glob(pattern))
-                if len(files) > 0:
-                    files.sort()
-                return files
-    else:
-        return None
-
-
-def get_file_result(path: Path, dict_lock: Path | None = None) -> list[Path] | None:
-    """Get files in result directory.
-    Args:
-        path (Path): A path to result directory.
-        dict_lock (Path | None, optional): A directory to store lock files. Defaults to None.
-
-    Returns:
-        list: Files in result directory.
-    """
-
-    return get_dict_files(path / dict_result, f"*.{extension_result}", dict_lock=dict_lock)
-
-
-def get_file_result_hp(path: Path, dict_lock: Path | None = None) -> Any:
-    """Get files in result directory.
-    Args:
-        path (Path): A path to result directory.
-        dict_lock (Path | None, optional): A directory to store lock files. Defaults to None.
-
-    Returns:
-        list: Files in result directory.
-    """
-
-    return get_dict_files(path / dict_result, f"*.{extension_hp}", dict_lock=dict_lock)
 
 
 def interprocess_lock_file(path: Path, dict_lock: Path) -> Path:

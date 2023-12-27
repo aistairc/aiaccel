@@ -38,7 +38,6 @@ class AbstractModule(object):
         config_path (Path): Path to the configuration file.
         config (Config): A config object.
         ws (Path): A path to a current workspace.
-        dict_hp (Path): A path to hp directory.
         dict_lock (Path): A path to lock directory.
         dict_runner (Path): A path to runner directory.
         hp_finished (int): A number of files in hp/finished directory.

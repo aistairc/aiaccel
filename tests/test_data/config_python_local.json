@@ -4,7 +4,6 @@
     "init_fail_count": 10,
     "$name_length": 32,
     "name_length": 3,
-    "project_name": "sphere",
     "randseed": 1,
     "workspace": "/tmp/work",
     "job_command": "python original_main.py",

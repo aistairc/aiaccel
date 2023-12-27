@@ -35,7 +35,6 @@
   },
   "hyperparameter": {
     "goal": "minimize",
-    "hyperparameter_file": "hyperparameter.json",
     "trial_number": 20,
     "$parallelism": 2,
     "grid_search_option": [

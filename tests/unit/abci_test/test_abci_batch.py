@@ -1,6 +1,5 @@
 from aiaccel.abci import create_abci_batch_file
 from aiaccel.util import create_yaml
-from aiaccel.wrapper_tools import create_runner_command
 from aiaccel.util.job_script_preamble import create_job_script_preamble
 from tests.base_test import BaseTest
 
