@@ -16,7 +16,8 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "numpy"
+    "numpy",
+    "optuna>=3.4.0,<4.0.0",
 ]
 
 [project.scripts]
