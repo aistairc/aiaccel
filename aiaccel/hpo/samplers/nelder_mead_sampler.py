@@ -29,9 +29,6 @@ class Vertex:
     def set_id(self, vertex_id: str) -> None:
         self.id = vertex_id
 
-    def set_new_id(self) -> None:
-        self.id = self.generate_random_name()
-
     def set_xs(self, xs: np.ndarray[Any, Any]) -> None:
         self.xs = xs
 
@@ -208,7 +205,7 @@ class SimplexForOptuna(Simplex):
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
-    def __init__(self, search_space: Mapping[str, Sequence[Union[float, float]]], seed: int = None) -> None:
+    def __init__(self, search_space: Mapping[str, Sequence[Union[float, float]]], seed: int | None = None) -> None:
         self._rng: LazyRandomState = LazyRandomState(seed)
         self.dimension: int = len(search_space)
 
@@ -221,11 +218,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.simplex: SimplexForOptuna = SimplexForOptuna()
         self.state: NelderMeadState = NelderMeadState()
         self.store: Store = Store()
+        self.x: np.ndarray[Any, Any] = np.ndarray([])
         self.xs: list[Vertex] = []
 
-    def infer_relative_search_space(
-        self, study: Study, trial: FrozenTrial
-    ) -> Dict[str, BaseDistribution]:
+    def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> Dict[str, BaseDistribution]:
         return {}
 
     def sample_relative(
@@ -307,7 +303,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 return False
         return True
 
-    def get_next_coordinates(self):
+    def get_next_coordinates(self) -> None:
         nm_state = self.state.get_state()
 
         if nm_state == "shrink":
@@ -354,7 +350,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
             return param_value
 
-    def set_objective(self, coordinates: np.ndarray[Any, Any], objective: float):
+    def set_objective(self, coordinates: np.ndarray[Any, Any], objective: float) -> None:
         nm_state = self.state.get_state()
         if nm_state == "initial":
             self.simplex.add_vertices(Vertex(coordinates, objective))
@@ -382,4 +378,5 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         values: Optional[Sequence[float]],
     ) -> None:
         coordinates = np.array([trial.params[name] for name in self.param_names])
-        self.set_objective(coordinates, values[0])
+        if type(values) is Sequence:
+            self.set_objective(coordinates, values[0])
