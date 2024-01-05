@@ -26,12 +26,6 @@ class Vertex:
     def set_value(self, value: Any) -> None:
         self.value = value
 
-    def set_id(self, vertex_id: str) -> None:
-        self.id = vertex_id
-
-    def set_xs(self, xs: np.ndarray[Any, Any]) -> None:
-        self.xs = xs
-
     def update(self, xs: np.ndarray[Any, Any], value: Any) -> None:
         self.xs = xs
         self.value = value
@@ -58,7 +52,6 @@ class Vertex:
 
     def __mul__(self, other: Any) -> Vertex:  # Multiply *
         new_vertex = Vertex(self.xs * other)
-        new_vertex.set_id(self.id)
         return new_vertex
 
     def __eq__(self, other: Vertex | Any) -> bool:  # Equal ==
@@ -111,23 +104,18 @@ class Vertex:
 
 
 class Simplex:
-    def __init__(self, simplex_coordinates: np.ndarray[Any, Any]) -> None:
-        self.n_dim = simplex_coordinates.shape[1]
+    def __init__(self) -> None:
         self.vertices: list[Vertex] = []
-        self.centroid: Vertex = Vertex(np.array([0.0] * self.n_dim))
-        self.coef = coef
-        for xs in simplex_coordinates:
-            self.vertices.append(Vertex(xs))
+        self.coef: dict[str, float] = coef
+
+    def add_vertices(self, v: Vertex) -> None:
+        self.vertices.append(v)
+
+    def num_of_vertices(self) -> int:
+        return len(self.vertices)
 
     def get_simplex_coordinates(self) -> np.ndarray[Any, Any]:
         return np.array([v.xs for v in self.vertices])
-
-    def set_value(self, vertex_id: str, value: Any) -> bool:
-        for v in self.vertices:
-            if v.id == vertex_id:
-                v.set_value(value)
-                return True
-        return False
 
     def order_by(self) -> None:
         order = np.argsort([v.value for v in self.vertices])
@@ -173,6 +161,9 @@ class NelderMeadState:
     def __init__(self) -> None:
         self.state: str = "initial"
 
+    def get_state(self) -> str:
+        return self.state
+
     def reflect(self) -> None:
         self.state = "reflect"
 
@@ -188,21 +179,6 @@ class NelderMeadState:
     def shrink(self) -> None:
         self.state = "shrink"
 
-    def get_state(self) -> str:
-        return self.state
-
-
-class SimplexForOptuna(Simplex):
-    def __init__(self) -> None:
-        self.vertices: list[Vertex] = []
-        self.coef: dict[str, float] = coef
-
-    def add_vertices(self, v: Vertex) -> None:
-        self.vertices.append(v)
-
-    def num_of_vertices(self) -> int:
-        return len(self.vertices)
-
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
     def __init__(self, search_space: Mapping[str, Sequence[Union[float, float]]], seed: int | None = None) -> None:
@@ -215,7 +191,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self._search_space[param_name] = list(param_values)
             self.param_names.append(param_name)
 
-        self.simplex: SimplexForOptuna = SimplexForOptuna()
+        self.simplex: Simplex = Simplex()
         self.state: NelderMeadState = NelderMeadState()
         self.store: Store = Store()
         self.x: np.ndarray[Any, Any] = np.ndarray([])
@@ -289,12 +265,12 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def shrink(self) -> list[Vertex]:
         self.store.s = self.simplex.shrink()
-        new_simplex = SimplexForOptuna()
+        new_simplex = Simplex()
         new_simplex.add_vertices(self.store.s[0])
         self.simplex = new_simplex
         return self.store.s
 
-    def aftter_shrink(self) -> None:
+    def after_shrink(self) -> None:
         self.state.reflect()
 
     def is_within_range(self, coordinates: np.ndarray[Any, Any]) -> bool:
@@ -368,7 +344,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.simplex.add_vertices(Vertex(coordinates, objective))
             self.xs.pop(0)
             if len(self.xs) == 0:
-                self.aftter_shrink()
+                self.after_shrink()
 
     def after_trial(
         self,
