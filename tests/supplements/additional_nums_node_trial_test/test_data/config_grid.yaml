@@ -12,14 +12,14 @@ generic:
   workspace: /tmp/work
 logger:
   file:
-    optimizer: optimizer.log
     manager: manager.log
+    optimizer: optimizer.log
   log_level:
-    optimizer: DEBUG
     manager: DEBUG
+    optimizer: DEBUG
   stream_level:
-    optimizer: CRITICAL
     manager: CRITICAL
+    optimizer: CRITICAL
 optimize:
   goal: minimize
   parameters:

@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import numpy as np
 
+from aiaccel.config import is_multi_objective
 from aiaccel.manager import AbstractManager
 from aiaccel.optimizer import create_optimizer
 
@@ -106,11 +107,17 @@ class TestAbstractManager(BaseTest):
     ):
         database_remove()
         config = self.load_config_for_test(self.configs['config.json'])
-        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
-        manager = AbstractManager(config, optimizer)
-        manager.pre_process()
-        setup_hp_ready(1)
-        assert manager.inner_loop_main_process()
+
+        if is_multi_objective(config):
+            user_main_file = self.test_data_dir.joinpath('original_main_mo.py')
+        else:
+            user_main_file = None
+        with self.create_main(from_file_path=user_main_file):
+            optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+            manager = AbstractManager(config, optimizer)
+            manager.pre_process()
+            setup_hp_ready(1)
+            assert manager.inner_loop_main_process()
 
     def test_serialize(
         self,

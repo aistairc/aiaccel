@@ -106,6 +106,9 @@ class LocalModel(AbstractModel):
         objective: str = "nan"
         objectives: list[str] = []
 
+        error = "\n".join(stderrs)
+        obj.logger.info(f"error: {error}")
+
         if len(stdouts) > 0:
             if len(stdouts) >= len(obj.goals):
                 objectives = stdouts[-len(obj.goals) :]
@@ -124,15 +127,11 @@ class LocalModel(AbstractModel):
                     f"Number of goals: {len(obj.goals)}"
                 )
 
-        error = "\n".join(stderrs)
         args = {
             "storage_file_path": str(obj.workspace.storage_file_path),
             "trial_id": str(trial_id),
-            "error": error,
             "returncode": returncode,
         }
-        if len(error) == 0:
-            del args["error"]
 
         # commands = ["aiaccel-set-result"]
         commands = ["python", "-m", "aiaccel.cli.set_result"]
@@ -140,6 +139,8 @@ class LocalModel(AbstractModel):
             commands.append(f"--{key}={str(args[key])}")
 
         commands.append("--objective")
+        if len(objectives) == 0:
+            raise Exception("Could not get objective")
         for objective in objectives:
             commands.append(str(objective))
 
