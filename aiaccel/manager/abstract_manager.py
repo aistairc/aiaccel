@@ -270,18 +270,6 @@ class AbstractManager(AbstractModule):
             self.logger.info("Best hyperparameter is followings:")
             self.logger.info(hp_results)
 
-    def write_error(self, trial_id: int, err: str) -> None:
-        """Writes error output to a file.
-
-        Args:
-            trial_id (int): Trial ID.
-            err (str): Error string.
-        """
-        if err == "":
-            return
-        with open(self.workspace.get_error_output_file(trial_id), "w") as f:
-            f.write(err)
-
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj["jobs"]

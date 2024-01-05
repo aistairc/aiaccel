@@ -99,6 +99,18 @@ class PylocalManager(AbstractManager):
 
         return xs
 
+    def write_error(self, trial_id: int, err: str) -> None:
+        """Writes error output to a file.
+
+        Args:
+            trial_id (int): Trial ID.
+            err (str): Error string.
+        """
+        if err == "":
+            return
+        with open(self.workspace.get_error_output_file(trial_id), "w") as f:
+            f.write(err)
+
     def create_model(self) -> None:
         """Creates model object of state machine.
         Returns:
