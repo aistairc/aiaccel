@@ -7,6 +7,7 @@ from pathlib import Path
 from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadSampler
 
 
+
 class TestNelderMead(unittest.TestCase):
     def setUp(self):
         search_space = {"x": [0, 10], "y": [0, 10]}

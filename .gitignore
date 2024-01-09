@@ -120,3 +120,6 @@ docs/build/html
 # Docker
 .devcontainer
 Dockerfile
+
+# ruff
+.ruff_cache
