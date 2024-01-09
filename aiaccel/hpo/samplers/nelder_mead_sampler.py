@@ -37,8 +37,8 @@ class Vertex:
         try:
             new_vertex = Vertex(self.coordinates + other)
             return new_vertex
-        except TypeError:
-            raise TypeError("Unsupported operand type for +")
+        except TypeError as err:
+            raise TypeError("Unsupported operand type for +") from err
 
     def __sub__(self, other: Vertex | Any) -> Vertex:  # Subtract -
         if isinstance(other, Vertex):
@@ -47,8 +47,8 @@ class Vertex:
         try:
             new_vertex = Vertex(self.xs - other)
             return new_vertex
-        except TypeError:
-            raise TypeError("Unsupported operand type for -")
+        except TypeError as err:
+            raise TypeError("Unsupported operand type for -") from err
 
     def __mul__(self, other: Any) -> Vertex:  # Multiply *
         new_vertex = Vertex(self.xs * other)
@@ -59,48 +59,48 @@ class Vertex:
             return self.value == other.value
         try:
             return self.value == other
-        except TypeError:
-            raise TypeError("Unsupported operand type for ==")
+        except TypeError as err:
+            raise TypeError("Unsupported operand type for ==") from err
 
     def __ne__(self, other: Vertex | Any) -> bool:  # Not Equal !=
         if isinstance(other, Vertex):
             return self.value != other.value
         try:
             return self.value != other
-        except TypeError:
-            raise TypeError("Unsupported operand type for !=")
+        except TypeError as err:
+            raise TypeError("Unsupported operand type for !=") from err
 
     def __lt__(self, other: Vertex | Any) -> bool:  # Less Than <
         if isinstance(other, Vertex):
             return self.value < other.value
         try:
             return self.value < other
-        except TypeError:
-            raise TypeError("Unsupported operand type for <")
+        except TypeError as err:
+            raise TypeError("Unsupported operand type for <") from err
 
     def __le__(self, other: Vertex | Any) -> bool:  # Less Than or Equal <=
         if isinstance(other, Vertex):
             return self.value <= other.value
         try:
             return self.value <= other
-        except TypeError:
-            raise TypeError("Unsupported operand type for <=")
+        except TypeError as err:
+            raise TypeError("Unsupported operand type for <=") from err
 
     def __gt__(self, other: Vertex | Any) -> bool:  # Greater Than >
         if isinstance(other, Vertex):
             return self.value > other.value
         try:
             return self.value > other
-        except TypeError:
-            raise TypeError("Unsupported operand type for >")
+        except TypeError as err:
+            raise TypeError("Unsupported operand type for >") from err
 
     def __ge__(self, other: Vertex | Any) -> bool:  # Greater Than or Equal >=
         if isinstance(other, Vertex):
             return self.value >= other.value
         try:
             return self.value >= other
-        except TypeError:
-            raise TypeError("Unsupported operand type for >=")
+        except TypeError as err:
+            raise TypeError("Unsupported operand type for >=") from err
 
 
 class Simplex:
@@ -354,5 +354,5 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         values: Optional[Sequence[float]],
     ) -> None:
         coordinates = np.array([trial.params[name] for name in self.param_names])
-        if type(values) is list:
+        if isinstance(values, list):
             self.set_objective(coordinates, values[0])
