@@ -354,5 +354,5 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         values: Optional[Sequence[float]],
     ) -> None:
         coordinates = np.array([trial.params[name] for name in self.param_names])
-        if type(values) is Sequence:
+        if type(values) is list:
             self.set_objective(coordinates, values[0])
