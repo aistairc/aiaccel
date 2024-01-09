@@ -42,18 +42,3 @@ optimize:
       name: "x3"
       type: "categorical"
       choices: [1, 5]
-
-job_setting:
-  name_length: 6
-
-
-logger:
-  file:
-    optimizer: "optimizer.log"
-    manager: "manager.log"
-  log_level:
-    optimizer: "DEBUG"
-    manager: "DEBUG"
-  stream_level:
-    optimizer: "CRITICAL"
-    manager: "CRITICAL"

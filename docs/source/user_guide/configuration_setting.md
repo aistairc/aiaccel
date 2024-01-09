@@ -25,6 +25,9 @@ aiaccel は実行時，python_file に書かれたファイルから，ここで
 最適化実行のメインループ 1 周あたりのスリープ時間を秒単位で指定します．
 デフォルトでは 0.01 (秒) に設定されています．
 
+### logging_level (str, optional):
+ログの出力レベルを指定します．DEBUG, INFO, WARNING, ERROR, CRITICAL のいずれかを設定します．
+
 
 <br>
 
@@ -250,69 +253,6 @@ aiaccel では以下のアルゴリズムをサポートしています．
 
 
 ## **job_setting:**
-### cancel_retry (int, optional):
-Max retry counts to transit the state from HpCancelFailed to HpCancelFailure.
-Defaults to 3.
-
-### cancel_timeout (int, optional): 
-Timeout seconds to transit the state from HpCancelChecking to HpCancelFailed.
-Defaults to 60.
-
-### expire_retry (int, optional):
-Max retry counts to transit the state from HpExpireFailed to HpExpireFailure.
-Defaults to 3.
-
-### expire_timeout (int, optional):
-Timeout seconds to transit the state from HpExpireChecking to HpExpireFailed.
-Defaults to 60.
-
-### finished_retry (int, optional):
-Max retry counts to transit the state from HpFinishedFailed to HpFinishedFailure.
-Defaults to 3.
-
-### finished_timeout (int, optional):
-Timeout seconds to transit the state from HpFinishedChecking to HpFinishedFailed.
-Defaults to 60.
-
-
-### job_retry (int, optional):
-Max retry counts to transit the state from HpCancelFailed to HpCancelFailure.
-Defaults to 2.
-
-### job_timeout (int, optional):
-Timeout seconds to transit the state from JobChecking to JobFailed.
-Defaults to 60.
-
-### kill_retry (int, optional):
-Max retry counts to transit the state from KillFailed to KillFailure.
-Defaults to 3.
-
-### kill_timeout (int, optional):
-Timeout seconds to transit the state from KillChecking to KillFailed.
-Defaults to 60.
-
-### result_retry (int, optional):
-Max retry counts to transit the state from RunnerFailed to RunnerFailure.
-Defaults to 1.
-
-### runner_retry (int, optional): 
-Max retry counts to transit the state from RunnerFailed to RunnerFailure.
-Defaults to 3.
-
-### runner_timeout (int, optional):
-Timeout seconds to transit the state from RunnerChecking to RunnerFailed.
-Defaults to 60.
-
-### running_retry (int, optional):
-Max retry counts to transit the state from HpRunningFailed to HpRunningFailure.
-Defaults to 3.
-
-### running_timeout (int, optional):
-Timeout seconds to transit the state from HpRunningChecking to HpRunningFailed.
-Defaults to 60.
-
-### init_fail_count (int, optional):
-Defaults to 100.
 
 ### name_length (int, optional):
 文字列としてのジョブ ID の長さです．
@@ -321,57 +261,3 @@ Defaults to 100.
 
 
 <br>
-
-## **logger:**
-
-
-### file:
-実行ログの保存先を設定します．
-
-
-#### optimizer (str, optional):
-オプティマイザモジュールのログの保存先を設定します．
-デフォルトでは "optimizer.log" に設定されています．
-
-#### manager (str, optional):
-スケジューラモジュールのログの保存先を設定します．
-デフォルトでは "manager.log" に設定されています．
-
-### log_level:
-
-#### optimizer (str, optional):
-オプティマイザモジュールからのログファイル出力のログレベルを設定します．
-デフォルトでは "DEBUG" に設定されています．
-
-A logging level for a log file output of optimizer module.
-Defaults to "DEBUG".
-
-Following strings are available;
-- 'DEBUG'
-- 'INFO'
-- 'WARNING'
-- 'WARN'
-- 'ERROR'
-- 'CRITICAL
-
-#### manager (str, optional):
-オプティマイザモジュールからのログファイル出力のログレベルを設定します．
-デフォルトでは "DEBUG" に設定されています．
-
-A logging level for a log file output of manager module.
-Defaults to "DEBUG".
-
-### stream_level:
-#### optimizer (str, optional):
-オプティマイザモジュールからのストリーム出力のログレベルを設定します．
-デフォルトでは "DEBUG" に設定されています．
-
-A logging level for a stream output of optimizer module.
-Defaults to "DEBUG".
-
-#### manager (str, optional):
-スケジューラモジュールからのストリーム出力のログレベルを設定します．
-デフォルトでは "DEBUG" に設定されています．
-
-A logging level for a stream output of manager module.
-Defaults to "DEBUG".
