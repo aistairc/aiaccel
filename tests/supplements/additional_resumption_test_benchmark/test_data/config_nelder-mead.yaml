@@ -34,18 +34,3 @@ optimize:
       lower: 0.0
       upper: 5.0
       initial: 1.0
-
-job_setting:
-  name_length: 6
-
-
-logger:
-  file:
-    optimizer: "optimizer.log"
-    manager: "manager.log"
-  log_level:
-    optimizer: "DEBUG"
-    manager: "DEBUG"
-  stream_level:
-    optimizer: "CRITICAL"
-    manager: "CRITICAL"
