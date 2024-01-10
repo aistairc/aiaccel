@@ -73,7 +73,7 @@ class PylocalManager(AbstractManager):
 
         super().post_process()
 
-    def get_any_trial_xs(self, trial_id: int) -> dict[str, Any] | None:
+    def get_any_trial_xs(self, trial_id: int) -> dict[str, Any]:
         """Gets a parameter list of specific trial ID from Storage object.
 
         Args:
