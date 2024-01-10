@@ -109,6 +109,10 @@ def main() -> None:  # pragma: no cover
             if not manager.is_error_free():
                 break
             if int((time.time() - time_s)) % 10 == 0:
+                returncodes = storage.returncode.get_all_trial_returncode()
+                if any(item != 0 for item in returncodes):
+                    logger.error("Some trials are failed.")
+                    break
                 num_ready, num_running, num_finished = storage.get_num_running_ready_finished()
                 available_pool_size = manager.get_available_pool_size(num_ready, num_running, num_finished)
                 now = datetime.now()

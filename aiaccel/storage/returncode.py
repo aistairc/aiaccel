@@ -54,3 +54,21 @@ class ReturnCode(Abstract):
             return None
 
         return data.returncode
+
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def get_all_trial_returncode(self) -> list[int | float | str] | None:
+        """Obtain the results of all trials.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            int | float | None:
+        """
+        with self.create_session() as session:
+            data = session.query(ReturnCodeTable).with_for_update(read=True).all()
+
+        if data is None:
+            return None
+
+        return [d.returncode for d in data]

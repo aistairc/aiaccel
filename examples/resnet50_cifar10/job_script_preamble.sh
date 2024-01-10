@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #$-l rt_F=1
-#$-j y
 #$-cwd
 #$ -l h_rt=2:00:00
 

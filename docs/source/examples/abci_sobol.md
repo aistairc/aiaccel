@@ -154,7 +154,6 @@ aiaccel から関数 `main()` にハイパーパラメータを渡し，`main()`
 #!/bin/bash
 
 #$-l rt_C.small=1
-#$-j y
 #$-cwd
 ```
 

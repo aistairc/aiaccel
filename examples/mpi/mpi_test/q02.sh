@@ -2,7 +2,6 @@
 
 #$ -l rt_F=2
 #$ -l h_rt=1:00:00
-#$ -j y
 #$ -cwd
 
 source /etc/profile.d/modules.sh
