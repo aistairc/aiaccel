@@ -1,4 +1,6 @@
 import unittest
+import optuna
+import datetime
 
 import numpy as np
 
@@ -272,34 +274,6 @@ class TestSimplexOperation(unittest.TestCase):
         self.assertTrue(np.array_equal(xsh[2].xs, shrink_xs[2]))
 
 
-class TestNelderMeadState(unittest.TestCase):
-    def setUp(self):
-        self.state = NelderMeadState()
-
-    def test_get_state(self):
-        self.assertEqual(self.state.get_state(), "initial")
-
-    def test_reflect(self):
-        self.state.reflect()
-        self.assertEqual(self.state.get_state(), "reflect")
-
-    def test_expand(self):
-        self.state.expand()
-        self.assertEqual(self.state.get_state(), "expand")
-
-    def test_inside_contract(self):
-        self.state.inside_contract()
-        self.assertEqual(self.state.get_state(), "inside_contract")
-
-    def test_outside_contract(self):
-        self.state.outside_contract()
-        self.assertEqual(self.state.get_state(), "outside_contract")
-
-    def test_shrink(self):
-        self.state.shrink()
-        self.assertEqual(self.state.get_state(), "shrink")
-
-
 class TestNelderMeadSamplerOperation(unittest.TestCase):
     def setUp(self):
         search_space = {"x": [-5, 5], "y": [-5, 5]}
@@ -316,7 +290,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
     def test_after_initialize(self):
         self.sampler.after_initialize()
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
 
     def test_reflect(self):
         reflect_xs = np.array([-1.0, 0.0])
@@ -332,7 +306,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.r = self.sampler.reflect()
         self.sampler.after_reflect(objective)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, reflect_xs))
         self.assertEqual(vertex.value, objective)
@@ -344,7 +318,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.r = self.sampler.reflect()
         self.sampler.after_reflect(objective)
 
-        self.assertEqual(self.sampler.state.get_state(), "expand")
+        self.assertEqual(self.sampler.state, NelderMeadState.Expand)
 
     def test_after_reflect_to_outside_contract(self):
         # self.simplex.vertices[-2] <= self.store.r < self.simplex.vertices[-1]
@@ -353,7 +327,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.r = self.sampler.reflect()
         self.sampler.after_reflect(objective)
 
-        self.assertEqual(self.sampler.state.get_state(), "outside_contract")
+        self.assertEqual(self.sampler.state, NelderMeadState.OutsideContract)
 
     def test_after_reflect_to_inside_contract(self):
         # self.simplex.vertices[-1] <= self.store.r
@@ -362,7 +336,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.r = self.sampler.reflect()
         self.sampler.after_reflect(objective)
 
-        self.assertEqual(self.sampler.state.get_state(), "inside_contract")
+        self.assertEqual(self.sampler.state, NelderMeadState.InsideContract)
 
     def test_expand(self):
         expand_xs = np.array([-4.0, -3.0])
@@ -382,7 +356,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.e = self.sampler.expand()
         self.sampler.after_expand(expand_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, expand_xs))
         self.assertEqual(vertex.value, expand_value)
@@ -398,7 +372,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.e = self.sampler.expand()
         self.sampler.after_expand(expand_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, reflect_xs))
         self.assertEqual(vertex.value, reflect_value)
@@ -421,7 +395,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.ic = self.sampler.inside_contract()
         self.sampler.after_inside_contract(inside_contract_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, inside_contract_xs))
         self.assertEqual(vertex.value, inside_contract_value)
@@ -436,7 +410,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.ic = self.sampler.inside_contract()
         self.sampler.after_inside_contract(inside_contract_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "shrink")
+        self.assertEqual(self.sampler.state, NelderMeadState.Shrink)
 
     def test_outside_contract(self):
         outside_contract_xs = np.array([0.5, 1.5])
@@ -455,7 +429,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.oc = self.sampler.outside_contract()
         self.sampler.after_outside_contract(outside_contract_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, outside_contract_xs))
         self.assertEqual(vertex.value, outside_contract_value)
@@ -470,7 +444,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         self.sampler.store.oc = self.sampler.outside_contract()
         self.sampler.after_outside_contract(outside_contract_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "shrink")
+        self.assertEqual(self.sampler.state, NelderMeadState.Shrink)
 
     def test_shrink(self):
         shrink_xs = [
@@ -491,7 +465,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
     def test_aftter_shrink(self):
         self.sampler.after_shrink()
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
 
     def test_is_within_range(self):
         # True
@@ -508,31 +482,35 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         coordinates = np.array([3.0, 6.0])
         self.assertFalse(self.sampler.is_within_range(coordinates))
 
+    def test_get_next_coordinates_initial(self):
+        self.sampler.get_next_coordinates()
+        self.assertTrue(np.array_equal(self.sampler.x, np.array([])))
+
     def test_get_next_coordinates_reflect(self):
         reflect_xs = np.array([-1.0, 0.0])
 
-        self.sampler.state.reflect()
+        self.sampler.state = NelderMeadState.Reflect
         self.sampler.get_next_coordinates()
         self.assertTrue(np.array_equal(self.sampler.x, reflect_xs))
 
     def test_get_next_coordinates_expand(self):
         expand_xs = np.array([-4.0, -3.0])
 
-        self.sampler.state.expand()
+        self.sampler.state = NelderMeadState.Expand
         self.sampler.get_next_coordinates()
         self.assertTrue(np.array_equal(self.sampler.x, expand_xs))
 
     def test_get_next_coordinates_inside_contract(self):
         inside_contract_xs = np.array([3.5, 4.5])
 
-        self.sampler.state.inside_contract()
+        self.sampler.state = NelderMeadState.InsideContract
         self.sampler.get_next_coordinates()
         self.assertTrue(np.array_equal(self.sampler.x, inside_contract_xs))
 
     def test_get_next_coordinates_outside_contract(self):
         outside_contract_xs = np.array([0.5, 1.5])
 
-        self.sampler.state.outside_contract()
+        self.sampler.state = NelderMeadState.OutsideContract
         self.sampler.get_next_coordinates()
         self.assertTrue(np.array_equal(self.sampler.x, outside_contract_xs))
 
@@ -542,7 +520,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
             np.array([4.0, 5.0])
         ]
 
-        self.sampler.state.shrink()
+        self.sampler.state = NelderMeadState.Shrink
         self.sampler.get_next_coordinates()
         self.assertTrue(np.array_equal(self.sampler.x, shrink_xs[0]))
         self.assertTrue(np.array_equal(self.sampler.xs[0], shrink_xs[0]))
@@ -552,7 +530,7 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         expand_xs = np.array([3.5, 4.5])
 
         self.sampler._search_space["x"] = [0.0, 5.0]
-        self.sampler.state.reflect()
+        self.sampler.state = NelderMeadState.Reflect
         self.sampler.get_next_coordinates()
         self.assertTrue(np.array_equal(self.sampler.x, expand_xs))
 
@@ -566,19 +544,19 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         initial_value = [5.0, 3.0, 7.0]
 
         self.sampler.set_objective(initial_xs[0], initial_value[0])
-        self.assertEqual(self.sampler.state.get_state(), "initial")
+        self.assertEqual(self.sampler.state, NelderMeadState.Initial)
         vertex = self.sampler.simplex.vertices[0]
         self.assertTrue(np.array_equal(vertex.xs, initial_xs[0]))
         self.assertEqual(vertex.value, initial_value[0])
 
         self.sampler.set_objective(initial_xs[1], initial_value[1])
-        self.assertEqual(self.sampler.state.get_state(), "initial")
+        self.assertEqual(self.sampler.state, NelderMeadState.Initial)
         vertex = self.sampler.simplex.vertices[1]
         self.assertTrue(np.array_equal(vertex.xs, initial_xs[1]))
         self.assertEqual(vertex.value, initial_value[1])
 
         self.sampler.set_objective(initial_xs[2], initial_value[2])
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[2]
         self.assertTrue(np.array_equal(vertex.xs, initial_xs[2]))
         self.assertEqual(vertex.value, initial_value[2])
@@ -587,11 +565,11 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         reflect_xs = np.array([-1.0, 0.0])
         reflect_value = 4.0
 
-        self.sampler.state.reflect()
+        self.sampler.state = NelderMeadState.Reflect
         self.sampler.store.r = self.sampler.reflect()
         self.sampler.set_objective(reflect_xs, reflect_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, reflect_xs))
         self.assertEqual(vertex.value, reflect_value)
@@ -601,13 +579,13 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         expand_value = 1.0
         expand_xs = np.array([-4.0, -3.0])
 
-        self.sampler.state.expand()
+        self.sampler.state = NelderMeadState.Expand
         self.sampler.store.r = self.sampler.reflect()
         self.sampler.after_reflect(reflect_value)
         self.sampler.store.e = self.sampler.expand()
         self.sampler.set_objective(expand_xs, expand_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, expand_xs))
         self.assertEqual(vertex.value, expand_value)
@@ -617,13 +595,13 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         inside_contract_value = 6.0
         inside_contract_xs = np.array([3.5, 4.5])
 
-        self.sampler.state.inside_contract()
+        self.sampler.state = NelderMeadState.InsideContract
         self.sampler.store.r = self.sampler.reflect()
         self.sampler.after_reflect(reflect_value)
         self.sampler.store.ic = self.sampler.inside_contract()
         self.sampler.set_objective(inside_contract_xs, inside_contract_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, inside_contract_xs))
         self.assertEqual(vertex.value, inside_contract_value)
@@ -633,13 +611,13 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
         outside_contract_value = 5.0
         outside_contract_xs = np.array([0.5, 1.5])
 
-        self.sampler.state.outside_contract()
+        self.sampler.state = NelderMeadState.OutsideContract
         self.sampler.store.r = self.sampler.reflect()
         self.sampler.after_reflect(reflect_value)
         self.sampler.store.oc = self.sampler.outside_contract()
         self.sampler.set_objective(outside_contract_xs, outside_contract_value)
 
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[-1]
         self.assertTrue(np.array_equal(vertex.xs, outside_contract_xs))
         self.assertEqual(vertex.value, outside_contract_value)
@@ -650,17 +628,89 @@ class TestNelderMeadSamplerOperation(unittest.TestCase):
             np.array([4.0, 5.0])
         ]
         shrink_value = [4.0, 6.0]
-        self.sampler.state.shrink()
+        self.sampler.state = NelderMeadState.Shrink
         self.sampler.xs = [v.coordinates for v in self.sampler.shrink()[1:]]
 
         self.sampler.set_objective(shrink_xs[0], shrink_value[0])
-        self.assertEqual(self.sampler.state.get_state(), "shrink")
+        self.assertEqual(self.sampler.state, NelderMeadState.Shrink)
         vertex = self.sampler.simplex.vertices[1]
         self.assertTrue(np.array_equal(vertex.xs, shrink_xs[0]))
         self.assertEqual(vertex.value, shrink_value[0])
 
         self.sampler.set_objective(shrink_xs[1], shrink_value[1])
-        self.assertEqual(self.sampler.state.get_state(), "reflect")
+        self.assertEqual(self.sampler.state, NelderMeadState.Reflect)
         vertex = self.sampler.simplex.vertices[2]
         self.assertTrue(np.array_equal(vertex.xs, shrink_xs[1]))
         self.assertEqual(vertex.value, shrink_value[1])
+
+class TestNelderMeadSampler(unittest.TestCase):
+    def setUp(self):
+        search_space = {"x": [-5, 5], "y": [-5, 5]}
+        self.sampler = NelderMeadSampler(search_space=search_space, seed=42)
+
+        self.study = optuna.create_study(sampler=self.sampler)
+        self.state = optuna.trial.TrialState.COMPLETE
+        self.param_distribution = optuna.distributions.FloatDistribution(-5, 5)
+        self.trial = optuna.trial.FrozenTrial(
+            number = 0,
+            state = self.state,
+            value = [0],
+            datetime_start = datetime.datetime.now(),
+            datetime_complete = datetime.datetime.now(),
+            params = {"x": 0.0, "y": 1.0},
+            distributions = self.param_distribution,
+            user_attrs = {},
+            system_attrs = {},
+            intermediate_values = {},
+            trial_id = 0,
+        )
+
+    def test_infer_relative_search_space(self):
+        self.assertEqual(self.sampler.infer_relative_search_space(self.study, self.trial), {})
+
+    def test_sample_relative(self):
+        self.assertEqual(self.sampler.sample_relative(self.study, self.trial, self.param_distribution), {})
+
+    def test_before_trial(self):
+        self.sampler.before_trial(self.study, self.trial)
+        self.assertTrue(np.array_equal(self.sampler.x, np.array([])))
+
+    def test_sample_independent_initial(self):
+        value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
+        self.assertIsInstance(value, float)
+        self.assertGreaterEqual(value, -5)
+        self.assertLessEqual(value, 5)
+
+        value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
+        self.assertIsInstance(value, float)
+        self.assertGreaterEqual(value, -5)
+        self.assertLessEqual(value, 5)
+
+    def test_sample_independent_reflect(self):
+        vertices = [
+            Vertex(np.array([1.0, 2.0]), 5),
+            Vertex(np.array([3.0, 4.0]), 3),
+            Vertex(np.array([5.0, 6.0]), 7)
+        ]
+        for vertex in vertices:
+            self.sampler.simplex.add_vertices(vertex)
+        self.sampler.simplex.calc_centroid()
+        self.sampler.state = NelderMeadState.Reflect
+        self.sampler.before_trial(self.study, self.trial)
+
+        reflect_xs = [-1.0, 0.0]
+        value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
+        self.assertEqual(value, reflect_xs[0])
+
+        value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
+        self.assertEqual(value, reflect_xs[1])
+
+    def test_after_trial(self):
+        values = [0.0]
+        initial_xs = np.array([0.0, 1.0])
+        self.sampler.after_trial(self.study, self.trial, self.state, values)
+
+        self.assertEqual(self.sampler.state, NelderMeadState.Initial)
+        vertex = self.sampler.simplex.vertices[0]
+        self.assertTrue(np.array_equal(vertex.xs, initial_xs))
+        self.assertEqual(vertex.value, values[0])
