@@ -4,6 +4,7 @@ from typing import Any, Dict, Mapping, Optional, Sequence, Union
 
 import numpy as np
 import optuna
+from enum import Enum
 from optuna import distributions
 from optuna._transform import _SearchSpaceTransform
 from optuna.distributions import BaseDistribution
@@ -157,27 +158,13 @@ class Store:
         self.s: list[Vertex] | Any = None  # shrink
 
 
-class NelderMeadState:
-    def __init__(self) -> None:
-        self.state: str = "initial"
-
-    def get_state(self) -> str:
-        return self.state
-
-    def reflect(self) -> None:
-        self.state = "reflect"
-
-    def expand(self) -> None:
-        self.state = "expand"
-
-    def inside_contract(self) -> None:
-        self.state = "inside_contract"
-
-    def outside_contract(self) -> None:
-        self.state = "outside_contract"
-
-    def shrink(self) -> None:
-        self.state = "shrink"
+class NelderMeadState(Enum):
+    Initial = 0
+    Reflect = 1
+    Expand = 2
+    InsideContract = 3
+    OutsideContract = 4
+    Shrink = 5
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
@@ -192,9 +179,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.param_names.append(param_name)
 
         self.simplex: Simplex = Simplex()
-        self.state: NelderMeadState = NelderMeadState()
+        self.state: NelderMeadState = NelderMeadState.Initial
         self.store: Store = Store()
-        self.x: np.ndarray[Any, Any] = np.ndarray([])
+        self.x: np.ndarray[Any, Any] = np.array([])
         self.xs: list[Vertex] = []
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> Dict[str, BaseDistribution]:
@@ -206,7 +193,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def after_initialize(self) -> None:
-        self.state.reflect()
+        self.state = NelderMeadState.Reflect
 
     def reflect(self) -> Vertex:
         self.simplex.calc_centroid()
@@ -217,15 +204,15 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.store.r.set_value(yr)
         if self.simplex.vertices[0] <= self.store.r < self.simplex.vertices[-2]:
             self.simplex.vertices[-1].update(self.store.r.coordinates, self.store.r.value)
-            self.state.reflect()
+            self.state = NelderMeadState.Reflect
         elif self.store.r < self.simplex.vertices[0]:
-            self.state.expand()
+            self.state = NelderMeadState.Expand
         elif self.simplex.vertices[-2] <= self.store.r < self.simplex.vertices[-1]:
-            self.state.outside_contract()
+            self.state = NelderMeadState.OutsideContract
         elif self.simplex.vertices[-1] <= self.store.r:
-            self.state.inside_contract()
+            self.state = NelderMeadState.InsideContract
         else:
-            self.state.reflect()
+            self.state = NelderMeadState.Reflect
 
     def expand(self) -> Vertex:
         self.store.e = self.simplex.expand()
@@ -237,7 +224,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.simplex.vertices[-1].update(self.store.e.coordinates, self.store.e.value)
         else:
             self.simplex.vertices[-1].update(self.store.r.coordinates, self.store.r.value)
-        self.state.reflect()
+        self.state = NelderMeadState.Reflect
 
     def inside_contract(self) -> Vertex:
         self.store.ic = self.simplex.inside_contract()
@@ -247,9 +234,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.store.ic.set_value(yic)
         if self.store.ic < self.simplex.vertices[-1]:
             self.simplex.vertices[-1].update(self.store.ic.coordinates, self.store.ic.value)
-            self.state.reflect()
+            self.state = NelderMeadState.Reflect
         else:
-            self.state.shrink()
+            self.state = NelderMeadState.Shrink
 
     def outside_contract(self) -> Vertex:
         self.store.oc = self.simplex.outside_contract()
@@ -259,9 +246,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.store.oc.set_value(yoc)
         if self.store.oc <= self.store.r:
             self.simplex.vertices[-1].update(self.store.oc.coordinates, self.store.oc.value)
-            self.state.reflect()
+            self.state = NelderMeadState.Reflect
         else:
-            self.state.shrink()
+            self.state = NelderMeadState.Shrink
 
     def shrink(self) -> list[Vertex]:
         self.store.s = self.simplex.shrink()
@@ -271,7 +258,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return self.store.s
 
     def after_shrink(self) -> None:
-        self.state.reflect()
+        self.state = NelderMeadState.Reflect
 
     def is_within_range(self, coordinates: np.ndarray[Any, Any]) -> bool:
         for ss, co in zip(self._search_space.values(), coordinates):
@@ -280,22 +267,20 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return True
 
     def get_next_coordinates(self) -> None:
-        nm_state = self.state.get_state()
-
-        if nm_state == "shrink":
+        if self.state == NelderMeadState.Shrink:
             if len(self.xs) == 0:
                 self.xs = [v.coordinates for v in self.shrink()[1:]]
             self.x = self.xs[0]
         else:
-            if nm_state == "initial":
+            if self.state == NelderMeadState.Initial:
                 return
-            elif nm_state == "reflect":
+            elif self.state == NelderMeadState.Reflect:
                 self.x = self.reflect().coordinates
-            elif nm_state == "expand":
+            elif self.state == NelderMeadState.Expand:
                 self.x = self.expand().coordinates
-            elif nm_state == "inside_contract":
+            elif self.state == NelderMeadState.InsideContract:
                 self.x = self.inside_contract().coordinates
-            elif nm_state == "outside_contract":
+            elif self.state == NelderMeadState.OutsideContract:
                 self.x = self.outside_contract().coordinates
 
             if not self.is_within_range(self.x):
@@ -312,7 +297,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: distributions.BaseDistribution,
     ) -> Any:
-        if self.state.get_state() == "initial":
+        if self.state == NelderMeadState.Initial:
             # initial random search
             search_space = {param_name: param_distribution}
             trans = _SearchSpaceTransform(search_space)
@@ -327,20 +312,19 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             return param_value
 
     def set_objective(self, coordinates: np.ndarray[Any, Any], objective: float) -> None:
-        nm_state = self.state.get_state()
-        if nm_state == "initial":
+        if self.state == NelderMeadState.Initial:
             self.simplex.add_vertices(Vertex(coordinates, objective))
             if self.simplex.num_of_vertices() == self.dimension + 1:
                 self.after_initialize()
-        elif nm_state == "reflect":
+        elif self.state == NelderMeadState.Reflect:
             self.after_reflect(objective)
-        elif nm_state == "expand":
+        elif self.state == NelderMeadState.Expand:
             self.after_expand(objective)
-        elif nm_state == "inside_contract":
+        elif self.state == NelderMeadState.InsideContract:
             self.after_inside_contract(objective)
-        elif nm_state == "outside_contract":
+        elif self.state == NelderMeadState.OutsideContract:
             self.after_outside_contract(objective)
-        elif nm_state == "shrink":
+        elif self.state == NelderMeadState.Shrink:
             self.simplex.add_vertices(Vertex(coordinates, objective))
             self.xs.pop(0)
             if len(self.xs) == 0:
