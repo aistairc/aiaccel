@@ -30,8 +30,8 @@ class TrialId:
         self.name_length = self.config.job_setting.name_length
         self.file_hp_count_fmt = f"%0{self.name_length}d"
 
-        self.count_path = self.workspace.hp / file_hp_count
-        self.lock_path = self.workspace.hp / file_hp_count_lock
+        self.count_path = self.workspace.path / file_hp_count
+        self.lock_path = self.workspace.path / file_hp_count_lock
         self.lock = fasteners.InterProcessLock(str(self.lock_path))
 
         if self.get() is None:

@@ -36,7 +36,7 @@ def test_increment_1(create_tmp_config):
     with patch.object(trial_id.lock, 'acquire', return_value=False):
         assert trial_id.increment() is None
 
-    (workspace / 'hp' / 'count.txt').unlink()
+    (workspace / 'count.txt').unlink()
     assert trial_id.increment() is None
 
 

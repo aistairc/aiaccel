@@ -49,9 +49,6 @@ class AbstractOptimizer(AbstractModule):
         )
 
         self.trial_number = self.config.optimize.trial_number
-        self.hp_ready = 0
-        self.hp_running = 0
-        self.hp_finished = 0
         self.num_of_generated_parameter = 0
         self.params = HyperParameterConfiguration(self.config.optimize.parameters)
         self.trial_id = TrialId(self.config)

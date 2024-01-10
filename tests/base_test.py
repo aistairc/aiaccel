@@ -219,14 +219,10 @@ class BaseTest(object):
             "config_grid_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_grid_resumption.json')),
             "config_budget-specified-grid_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_budget-specified-grid_resumption.json')),
             "config_motpe_resumption.json": create_tmp_config(self.test_data_dir.joinpath('config_motpe_resumption.json')),
+            "config_pylocal.json": create_tmp_config(self.test_data_dir.joinpath('config_pylocal.json')),
         }
 
         self.tmpdir_path = tmpdir
-
-        # for label in self.configs.keys():
-        #     self.configs[label].resume = None
-        #     self.configs[label].clean = None
-        #     self.configs[label].generic.workspace = self.tmpdir_path / 'work'
 
         self.workspace = Workspace(str(self.tmpdir_path / 'work'))
         if self.workspace.path.exists():
@@ -237,11 +233,6 @@ class BaseTest(object):
         self.test_result_data.append(d0)
         self.test_result_data.append(d1)
         self.test_result_data.append(d2)
-
-        for d in self.test_result_data:
-            name = f"{d['trial_id']}.yml"
-            path = work_dir / 'result' / name
-            create_yaml(path, d)
 
         self.result_comparison = []
 
