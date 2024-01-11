@@ -1,22 +1,28 @@
-"""時間関連。."""
-
 import datetime
 
 
 def get_now_str() -> str:
-    """現在時刻の文字列を取得。.
+    """
+    Get the current time as a string.
+
+    Args:
+        None
 
     Returns:
-        string: yyyymmdd-hhMMss-nnn という文字列を返す。nnnはmsec。
+        str: A string in the format of yyyymmdd-hhMMss-nnn, where nnn represents milliseconds.
     """
     return datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")[:-3]
 
 
 def get_timestamp(now_str: str) -> float:
-    """get_now_str()の文字列から時刻の文字列を取得。.
+    """
+    Get the timestamp from the string representation of a datetime.
+
+    Args:
+        now_str (str): The string representation of the datetime.
 
     Returns:
-        float: timestampを返す。
+        float: The timestamp value.
     """
     dt = datetime.datetime.strptime(now_str + "000", "%Y%m%d-%H%M%S-%f")
     return dt.timestamp()

@@ -98,11 +98,13 @@ class PylocalManager(AbstractManager):
 
         Args:
             trial_id (int): Trial ID.
-            xs (dict): A dictionary of parameters.
-            y (Any): Objective value.
+            ys (list): Objective values.
             err (str): Error string.
             start_time (str): Execution start time.
             end_time (str): Execution end time.
+
+        Returns:
+            None
         """
 
         self.storage.result.set_any_trial_objective(trial_id, ys)
@@ -110,13 +112,6 @@ class PylocalManager(AbstractManager):
         self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
         if err != "":
             self.storage.error.set_any_trial_error(trial_id, err)
-
-    def create_model(self) -> None:
-        """Creates model object of state machine.
-        Returns:
-            None: Because it does not use the state transition model.
-        """
-        return None
 
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
@@ -130,6 +125,7 @@ def initializer(config_path: str | Path) -> None:
 
     Args:
         config_path (str | Path): Path to the configuration file.
+
     Returns:
         None
     """

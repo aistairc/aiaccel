@@ -51,9 +51,3 @@ class TestPylocalManager(BaseTest):
             except Exception as e:
                 print(e)
                 assert False
-
-    def test_create_model(self):
-        config = self.load_config_for_test(self.configs['config_pylocal.json'])
-        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
-        manager = PylocalManager(config, optimizer)
-        assert manager.create_model() is None

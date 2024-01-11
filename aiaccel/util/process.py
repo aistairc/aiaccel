@@ -16,6 +16,9 @@ from aiaccel.common import datetime_format
 def ps2joblist() -> list[dict[str, Any]]:
     """Get a ps result and convert to a job list format.
 
+    Args:
+        None
+
     Returns:
         list[dict]: A job list of ps result.
 
@@ -53,10 +56,17 @@ class OutputHandler(threading.Thread):
     Args:
         proc (Popen): A reference for subprocess.Popen.
             For example, 'Optimizer'.
+
     Attributes:
         _proc (Popen): A reference for subprocess.Popen.
             For example, 'Optimizer'.
-        _sleep_time (int): A sleep time each loop.
+        _sleep_time (int): A sleep time for reading stdout and stderr.
+        _abort (bool): A flag to abort the subprocess.
+        _returncode (int): A returncode of the subprocess.
+        _stdouts (list[str]): A list of stdout.
+        _stderrs (list[str]): A list of stderr.
+        _start_time (datetime): A start time of the subprocess.
+        _end_time (datetime): An end time of the subprocess.
     """
 
     def __init__(self, proc: subprocess.Popen[bytes]) -> None:
@@ -72,9 +82,25 @@ class OutputHandler(threading.Thread):
         self._end_time: datetime.datetime | None = None
 
     def abort(self) -> None:
+        """Abort the subprocess.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self._abort = True
 
     def run(self) -> None:
+        """ Override threading.Thread.run
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self._start_time = datetime.datetime.now()
         while True:
             inputs = [self._proc.stdout, self._proc.stderr]
@@ -100,12 +126,36 @@ class OutputHandler(threading.Thread):
         sys.stderr.flush()
 
     def get_stdouts(self) -> list[str]:
+        """Get stdout.
+
+        Args:
+            None
+
+        Returns:
+            list[str]: A list of stdout.
+        """
         return copy.deepcopy(self._stdouts)
 
     def get_stderrs(self) -> list[str]:
+        """Get stderr.
+
+        Args:
+            None
+
+        Returns:
+            list[str]: A list of stderr.
+        """
         return copy.deepcopy(self._stderrs)
 
-    def get_start_time(self) -> str | None:
+    def get_start_time(self) -> str:
+        """Get a start time of the subprocess.
+
+        Args:
+            None
+
+        Returns:
+            str: A start time of the subprocess.
+        """
         if self._start_time is None:
             return ""
         return self._start_time.strftime(datetime_format)

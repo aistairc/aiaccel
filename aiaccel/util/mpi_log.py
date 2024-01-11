@@ -15,6 +15,16 @@ class MpiLog:
         self._tag: int | None = None
 
     def write(self, message: str, tag: int | None = None, stdout: bool = False) -> None:
+        """Write a message to a log file.
+
+        Args:
+            message (str): A message to be written.
+            tag (int | None, optional): A tag value. Defaults to None.
+            stdout (bool, optional): Whether to print to stdout. Defaults to False.
+
+        Returns:
+            None
+        """
         stime = get_now_str()
         if tag is not None:
             self._tag = tag

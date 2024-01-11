@@ -18,7 +18,6 @@ class Viewer:
         config (Config): Config object.
 
     Attributes:
-        config_path (Path): Path to the config file.
         workspace (Workspace): Workspace object.
         storage (Storage): Storage object.
     """

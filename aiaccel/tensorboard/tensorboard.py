@@ -11,12 +11,11 @@ from aiaccel.util.trialid import TrialId
 
 class TensorBoard(AbstractModule):
     """A class for TensorBoard.
+
     Args:
         options (dict[str, str | int | bool]): A dictionary containing
+
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
-        goal (str): A goal of optimization.
         writer (SummaryWriter): A SummaryWriter object.
         buff (Buffer): A Buffer object.
     """
@@ -27,6 +26,14 @@ class TensorBoard(AbstractModule):
         self.buff.d["finished"].set_max_len(2)
 
     def update(self) -> None:
+        """Update TensorBoard.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         self.buff.d["finished"].Add(self.storage.get_finished())
 
         if self.buff.d["finished"].Len == 0:

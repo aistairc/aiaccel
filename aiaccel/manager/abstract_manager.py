@@ -19,13 +19,15 @@ class AbstractManager(AbstractModule):
             command line options.
 
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
-        available_resource (int): An available current resource number.
-        jobs (list[dict]): A list to store job dictionaries.
-        max_resource (int): A max resource number.
-        stats (list[dict]): A list of current status which is updated using ps
-            command or qstat command.
+        optimizer (AbstractOptimizer): An optimizer object.
+        num_workers (int): The number of workers.
+        trial_number (int): The maximum number of trials.
+        stats (list[Any]): A list of statistics.
+        jobs (list[Any]): A list of jobs.
+        job_status (dict[Any, Any]): A dictionary of job status.
+        start_trial_id (int): The start trial id.
+        buff (Buffer): A buffer object.
+        job_completed_count (int): The number of completed jobs.
     """
 
     def __init__(self, config: DictConfig, optimizer: AbstractOptimizer) -> None:
@@ -48,7 +50,7 @@ class AbstractManager(AbstractModule):
             self.buff.d[trial_id].set_max_len(2)
         self.job_completed_count = 0
 
-    def start_job(self, trial_id: int) -> Any:
+    def start_job(self, trial_id: int) -> Job | None:
         """Start a new job.
 
         Args:
@@ -70,6 +72,16 @@ class AbstractManager(AbstractModule):
             return None
 
     def get_available_pool_size(self, num_ready: int, num_running: int, num_finished: int) -> int:
+        """Get the number of available pool size.
+
+        Args:
+            num_ready (int): The number of ready jobs.
+            num_running (int): The number of running jobs.
+            num_finished (int): The number of finished jobs.
+
+        Returns:
+            int: The number of available pool size.
+        """
         sum_status = num_ready + num_running + num_finished
         if sum_status >= self.trial_number:
             return 0
@@ -80,6 +92,11 @@ class AbstractManager(AbstractModule):
 
     def search_hyperparameters(self, num_ready: int, num_running: int, num_finished: int) -> None:
         """Start hyper parameter optimization.
+
+        Args:
+            num_ready (int): The number of ready jobs.
+            num_running (int): The number of running jobs.
+            num_finished (int): The number of finished jobs.
 
         Returns:
             None
@@ -110,6 +127,9 @@ class AbstractManager(AbstractModule):
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -127,6 +147,9 @@ class AbstractManager(AbstractModule):
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
+
+        Args:
+            None
 
         Returns:
             bool: The process succeeds or not. The main loop exits if failed.
@@ -180,6 +203,9 @@ class AbstractManager(AbstractModule):
     def is_error_free(self) -> bool:
         """Check if all trials are error free.
 
+        Args:
+            None
+
         Returns:
             bool: True if all trials are error free.
         """
@@ -197,6 +223,9 @@ class AbstractManager(AbstractModule):
         Override with a Manager that uses a Model.
         For example, LocalManager, AbciManager, etc.
         By the way, PylocalManager does not use Model.
+
+        Args:
+            None
 
         Returns:
             LocalModel: LocalModel object.
@@ -218,6 +247,10 @@ class AbstractManager(AbstractModule):
         generation limit should turn `all_parameters_generated` True when all
         of available parameters are generated.
 
+        Args:
+            num_ready (int): The number of ready jobs.
+            num_running (int): The number of running jobs.
+
         Returns:
             bool: True if all parameters are generated and are processed.
         """
@@ -229,6 +262,11 @@ class AbstractManager(AbstractModule):
 
         This method does not check whether the registered parameters have been
         processed.
+
+        Args:
+            num_ready (int): The number of ready jobs.
+            num_running (int): The number of running jobs.
+            num_finished (int): The number of finished jobs.
 
         Returns:
             bool: True if all parameters are registerd.
@@ -248,6 +286,9 @@ class AbstractManager(AbstractModule):
 
     def evaluate(self) -> None:
         """Evaluate the result of optimization.
+
+        Args:
+            None
 
         Returns:
             None

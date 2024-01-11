@@ -11,6 +11,18 @@ from aiaccel.util import retry
 
 
 class Abstract:
+    """Abstract class for storage.
+
+    Args:
+        file_name (Path): Path to the storage file.
+
+    Attributes:
+        url (str): URL to the storage file.
+        engine (Engine): Engine to the storage file.
+        metadata (MetaData): MetaData to the storage file.
+        session (Session): Session to the storage file.
+        lock_file (Path): Path to the lock file.
+    """
     @retry(_MAX_NUM=6, _DELAY=1.0)
     def __init__(self, file_name: Path) -> None:
         self.url = f"sqlite:///{file_name}"

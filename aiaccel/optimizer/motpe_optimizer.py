@@ -35,6 +35,9 @@ class MOTpeOptimizer(TpeOptimizer):
     def create_study(self) -> None:
         """Create the optuna.study object.
 
+        Args:
+            None
+
         Returns:
             None
         """

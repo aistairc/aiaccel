@@ -10,6 +10,9 @@ class MpiManager(AbstractManager):
     def create_model(self) -> MpiModel:
         """Creates model object of state machine.
 
+        Args:
+            None
+
         Returns:
             MpiModel: Model object.
         """

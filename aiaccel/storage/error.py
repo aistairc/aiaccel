@@ -124,6 +124,9 @@ class Error(Abstract):
     def get_error_trial_id(self) -> list[Any]:
         """Obtain a list of trial ids in which an error occurred.
 
+        Args:
+            None
+
         Returns:
             trial_ids(list): trial id list
         """
@@ -138,6 +141,9 @@ class Error(Abstract):
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_failed_exitcode_trial_id(self) -> list[Any]:
         """Obtain a list of trial ids in which an error occurred.
+
+        Args:
+            None
 
         Returns:
             trial_ids(list): trial id list
@@ -154,6 +160,9 @@ class Error(Abstract):
     def all_delete(self) -> None:
         """Clear table
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -167,7 +176,11 @@ class Error(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_error(self, trial_id: int) -> None:
-        """
+        """Delete any trial error.
+
+        Args:
+            trial_id (int): Any trial id
+
         Returns:
             None
         """

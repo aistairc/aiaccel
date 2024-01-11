@@ -70,6 +70,9 @@ class Result(Abstract):
     def get_all_result(self) -> dict[int, list[Any]]:
         """Get all results
 
+        Args:
+            None
+
         Returns:
             dict[int, list[Any]]: trial_id and result values
         """
@@ -82,8 +85,11 @@ class Result(Abstract):
     def get_objectives(self) -> list[Any]:
         """Get all results in list.
 
+        Args:
+            None
+
         Returns:
-           list: result values
+            list: result values
         """
         data = self.get_all_result()
 
@@ -91,6 +97,10 @@ class Result(Abstract):
 
     def get_bests(self, goals: list[str]) -> list[Any]:
         """Obtains the sorted result.
+
+        Args:
+            goals (list[str]): goals
+
         Returns:
             list: result values
         """
@@ -111,6 +121,9 @@ class Result(Abstract):
     def get_result_trial_id_list(self) -> list[Any] | None:
         """Obtains the sorted result.
 
+        Args:
+            None
+
         Returns:
             list | None: result values
         """
@@ -125,9 +138,11 @@ class Result(Abstract):
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_any_trial_objective_and_best_value(self, trial_id: int, goals: list[str]) -> tuple[list[Any], list[Any]]:
         """Obtain the results of an arbitrary trial.
+
         Args:
             trial_id (int): Any trial id
-            column_idx (int): Any column index of objectives and best_values
+            goals (list[str]): goals
+
         Returns:
             int | float | None:
         """
@@ -142,6 +157,9 @@ class Result(Abstract):
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def all_delete(self) -> None:
         """Clear table
+
+        Args:
+            None
 
         Returns:
             None
