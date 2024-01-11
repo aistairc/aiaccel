@@ -11,7 +11,7 @@ from omegaconf.dictconfig import DictConfig
 from aiaccel.cli.set_result import write_results_to_database
 from aiaccel.common import datetime_format
 from aiaccel.config import load_config
-from aiaccel.manager.abstract_manager import AbstractManager
+from aiaccel.manager.local_manager import LocalManager
 from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
 from aiaccel.util.aiaccel import set_logging_file_for_trial_id
 
@@ -22,7 +22,7 @@ user_func: Any
 workspace: Path
 
 
-class PylocalManager(AbstractManager):
+class PylocalManager(LocalManager):
     """A manager class running on a local computer."""
 
     def __init__(self, config: DictConfig, optimizer: AbstractOptimizer) -> None:
@@ -110,13 +110,6 @@ class PylocalManager(AbstractManager):
             return
         with open(self.workspace.get_error_output_file(trial_id), "w") as f:
             f.write(err)
-
-    def create_model(self) -> None:
-        """Creates model object of state machine.
-        Returns:
-            None: Because it does not use the state transition model.
-        """
-        return None
 
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()

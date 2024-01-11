@@ -4,15 +4,29 @@ import re
 import subprocess
 
 from aiaccel.abci import parse_qstat
-from aiaccel.manager.abstract_manager import AbstractManager
-from aiaccel.manager.job.model.abci_model import AbciModel
+from aiaccel.manager.job.model import AbciModel, AbstractModel
+from aiaccel.manager.local_manager import LocalManager
 
 
-class AbciManager(AbstractManager):
+class AbciManager(LocalManager):
     """A manager class running on ABCI environment."""
+
+    def create_model(self) -> AbstractModel:
+        """Creates model object of state machine.
+
+        Args:
+            None
+
+        Returns:
+            AbciModel: Model object.
+        """
+        return AbciModel()
 
     def get_stats(self) -> None:
         """Get a current status and update.
+
+        Args:
+            None
 
         Returns:
             None
@@ -48,11 +62,3 @@ class AbciManager(AbstractManager):
             return match.group()
         else:
             return None
-
-    def create_model(self) -> AbciModel:
-        """Creates model object of state machine.
-
-        Returns:
-            AbciModel: Model object.
-        """
-        return AbciModel()

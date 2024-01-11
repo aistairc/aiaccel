@@ -3,7 +3,7 @@ import datetime
 import pytest
 
 from aiaccel.config import ResourceType
-from aiaccel.manager import CustomMachine, Job, LocalModel, LocalManager, create_manager, AbstractManager
+from aiaccel.manager import CustomMachine, Job, LocalModel, LocalManager, create_manager
 from aiaccel.manager.job.model import AbstractModel
 from aiaccel.util.process import OutputHandler
 from tests.base_test import BaseTest

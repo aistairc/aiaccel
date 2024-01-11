@@ -25,7 +25,7 @@ from aiaccel.util.error import MpiError
 from aiaccel.util.mpi_log import MpiLog
 
 if TYPE_CHECKING:
-    from aiaccel.manager import AbstractManager
+    from aiaccel.manager import LocalManager
     from aiaccel.storage import Storage
 
 
@@ -355,7 +355,7 @@ deactivate
 class MpiOutputHandler(Thread):
     def __init__(
         self,
-        parent: AbstractManager,
+        parent: LocalManager,
         gpu_mode: bool,
         processor: str,
         tag: int,

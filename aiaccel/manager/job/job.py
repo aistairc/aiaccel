@@ -15,7 +15,7 @@ from aiaccel.util import Buffer, create_job_script_preamble
 from aiaccel.workspace import Workspace
 
 if TYPE_CHECKING:  # pragma: no cover
-    from aiaccel.manager import AbstractManager, AbstractModel
+    from aiaccel.manager import AbstractModel, LocalManager
 
 
 JOB_STATES = [
@@ -72,7 +72,7 @@ class CustomMachine(Machine):
 class Job:
     """A job thread to manage running jobs on local computer or ABCI."""
 
-    def __init__(self, config: DictConfig, manager: AbstractManager, model: AbstractModel, trial_id: int) -> None:
+    def __init__(self, config: DictConfig, manager: LocalManager, model: AbstractModel, trial_id: int) -> None:
         super(Job, self).__init__()
         # === Load config file===
         self.config = config
