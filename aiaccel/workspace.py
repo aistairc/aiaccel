@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Any
 
 from aiaccel.common import (
     dict_error,
@@ -14,12 +13,12 @@ from aiaccel.common import (
     dict_stderr,
     dict_stdout,
     dict_tensorboard,
-    file_final_result,
     file_best_result,
+    file_final_result,
     file_result_csv,
     file_storage,
 )
-from aiaccel.util import Suffix, load_yaml, make_directories
+from aiaccel.util import Suffix, make_directories
 
 
 class Workspace:
