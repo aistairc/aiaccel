@@ -93,7 +93,7 @@ class OutputHandler(threading.Thread):
         self._abort = True
 
     def run(self) -> None:
-        """ Override threading.Thread.run
+        """Override threading.Thread.run
 
         Args:
             None

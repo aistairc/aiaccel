@@ -38,6 +38,7 @@ class CommandLineArgs:
         parameters_config (HyperParameterConfiguration | None):
             Hyper parameter configuration.
     """
+
     def __init__(self) -> None:
         self.parser = ArgumentParser()
         self.parser.add_argument("--trial_id", type=int, required=False)

@@ -25,5 +25,7 @@ def retry(_MAX_NUM: int = 60, _DELAY: float = 1.0) -> Callable[[Any], Any]:
                         raise e
                     time.sleep(_DELAY)
                     continue
+
         return _wrapper
+
     return _retry

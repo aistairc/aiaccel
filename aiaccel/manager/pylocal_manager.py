@@ -114,6 +114,17 @@ class PylocalManager(AbstractManager):
         with open(self.workspace.get_error_output_file(trial_id), "w") as f:
             f.write(err)
 
+    def create_model(self) -> None:
+        """Creates model object of state machine.
+
+        Args:
+            None
+
+        Returns:
+            None: Because it does not use the state transition model.
+        """
+        return None
+
     def __getstate__(self) -> dict[str, Any]:
         obj = super().__getstate__()
         del obj["pool"]

@@ -44,7 +44,7 @@ class JobState(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def set_any_trial_jobstates(self, states: dict[str, Any]) -> None:
+    def set_any_trial_jobstates(self, states: Any) -> None:
         """Set the specified jobstate to the specified trial.
 
         Args:

@@ -23,6 +23,7 @@ class Abstract:
         session (Session): Session to the storage file.
         lock_file (Path): Path to the lock file.
     """
+
     @retry(_MAX_NUM=6, _DELAY=1.0)
     def __init__(self, file_name: Path) -> None:
         self.url = f"sqlite:///{file_name}"

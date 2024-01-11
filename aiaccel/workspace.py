@@ -234,7 +234,7 @@ class Workspace:
         return load_yaml(path)
 
     def get_error_output_file(self, trial_id: int) -> Path:
-        """ Get error output file path
+        """Get error output file path
 
         Args:
             trial_id(int): Any trial id

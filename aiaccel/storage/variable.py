@@ -70,7 +70,8 @@ class Variable(Abstract):
                 .with_for_update(read=True)
                 .one_or_none()
             )
-
+            if data is None:
+                return None
             return data.value
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
@@ -127,6 +128,7 @@ class Value(Variable):
         label (str): Label
         value (Any): Value
     """
+
     def __init__(self, file_name: Path, label: str) -> None:
         super().__init__(file_name)
         self.process_name: Any = None
@@ -190,6 +192,7 @@ class Serializer:
         file_name (Path): File name
         d (dict[str, Value]): Dictionary of Value class
     """
+
     def __init__(self, file_name: Path) -> None:
         self.file_name: Path = file_name
         self.d: dict[str, Value] = {}
