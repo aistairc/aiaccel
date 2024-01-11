@@ -18,7 +18,6 @@ ABCI:
   job_script_preamble: |
     #!/bin/bash
     #$-l rt_C.small=1
-    #$-j y
     #$-cwd
     source /etc/profile.d/modules.sh
     module load gcc/11.2.0

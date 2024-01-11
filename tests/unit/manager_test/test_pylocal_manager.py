@@ -37,17 +37,8 @@ class TestPylocalManager(BaseTest):
             xs = manager.get_any_trial_xs(1)
             assert xs == {'x1': 1.69, 'x2': 2.27, 'x3': 4.38, 'x4': 2.0, 'x5': 3.9, 'x6': 4.62, 'x7': -2.2, 'x8': 4.77, 'x9': -3.66, 'x10': 3.59}
 
-    def test_report(self, setup_hp_ready):
+    def test_create_model(self):
         config = self.load_config_for_test(self.configs['config_pylocal.json'])
-        with self.create_main():
-            optimizer = create_optimizer(config.optimize.search_algorithm)(config)
-            manager = PylocalManager(config, optimizer)
-            try:
-                manager.pre_process()
-                setup_hp_ready(1)
-                manager.inner_loop_main_process()
-                manager.report(trial_id=1, ys=[1], err="hoge", start_time="1.01", end_time="1.02")
-                assert True
-            except Exception as e:
-                print(e)
-                assert False
+        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
+        manager = PylocalManager(config, optimizer)
+        assert manager.create_model() is None

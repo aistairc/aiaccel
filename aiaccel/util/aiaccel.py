@@ -20,6 +20,7 @@ from aiaccel.parameter import (
 )
 from aiaccel.util import cast_y
 from aiaccel.util.data_type import str_or_float_or_int
+from aiaccel.workspace import Workspace
 
 
 class CommandLineArgs:
@@ -137,7 +138,7 @@ class Run:
         self.config_path = self.args.config_path or config_path
         self.config = self.args.config
         if self.config is not None:
-            self.workspace = Path(self.config.generic.workspace).resolve()
+            self.workspace = Workspace(self.config.generic.workspace)
 
     def execute(
         self,
@@ -159,7 +160,7 @@ class Run:
                 string.
         """
         if self.workspace is not None and self.args.trial_id is not None:
-            set_logging_file_for_trial_id(self.workspace, self.args.trial_id)
+            set_logging_file_for_trial_id(self.workspace.path, self.args.trial_id)
 
         ys = None
         err = ""

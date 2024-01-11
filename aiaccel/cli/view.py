@@ -44,10 +44,11 @@ class Viewer:
             job = self.storage.jobstate.get_any_trial_jobstate(trial_id)
             result = self.storage.result.get_any_trial_objective(trial_id)
 
-            error = str(self.storage.error.get_any_trial_error(trial_id))
-            if error == "None":
-                error = ""
-            else:
+            error_file = self.workspace.get_error_output_file(trial_id)
+            error = ""
+            if error_file.exists():
+                with open(error_file, "r") as f:
+                    error = f.read()
                 if len(error) > 4:
                     error = error[0:3] + "..."
 

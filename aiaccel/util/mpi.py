@@ -301,7 +301,6 @@ class Mpi:
 
 #$ -l rt_{rt_type}={rt_num}
 #$ -l h_rt={h_rt}
-#$ -j y
 #$ -cwd
 
 source /etc/profile.d/modules.sh
