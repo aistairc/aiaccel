@@ -30,7 +30,10 @@ class PylocalManager(AbstractManager):
         self.processes: list[Any] = []
 
         Pool_ = Pool if self.num_workers > 1 else ThreadPool  # noqa: N806
-        self.pool = Pool_(self.num_workers, initializer=initializer, initargs=(self.config.config_path,))
+        try:
+            self.pool = Pool_(self.num_workers, initializer=initializer, initargs=(self.config.config_path,))
+        except BaseException as e:
+            raise Exception("Could not create Pool.") from e
 
     def inner_loop_main_process(self) -> bool:
         """A main loop process. This process is repeated every main loop.
@@ -55,11 +58,14 @@ class PylocalManager(AbstractManager):
             args.append([trial_id, self.get_any_trial_xs(trial_id)])
             self.serialize(trial_id)
         for trial_id, _, ys, err, start_time, end_time in self.pool.imap_unordered(execute, args):
+            if err != "":
+                self.logger.error(err)
+                self.write_error(trial_id, err)
+                return False
             write_results_to_database(
                 storage_file_path=self.workspace.storage_file_path,
                 trial_id=trial_id,
                 objective=ys,
-                error=err,
                 returncode=None,
                 start_time=start_time,
                 end_time=end_time,
@@ -93,23 +99,17 @@ class PylocalManager(AbstractManager):
 
         return xs
 
-    def report(self, trial_id: int, ys: list[Any], err: str, start_time: str, end_time: str) -> None:
-        """Saves results in the Storage object.
+    def write_error(self, trial_id: int, err: str) -> None:
+        """Writes error output to a file.
 
         Args:
             trial_id (int): Trial ID.
-            xs (dict): A dictionary of parameters.
-            y (Any): Objective value.
             err (str): Error string.
-            start_time (str): Execution start time.
-            end_time (str): Execution end time.
         """
-
-        self.storage.result.set_any_trial_objective(trial_id, ys)
-        self.storage.timestamp.set_any_trial_start_time(trial_id, start_time)
-        self.storage.timestamp.set_any_trial_end_time(trial_id, end_time)
-        if err != "":
-            self.storage.error.set_any_trial_error(trial_id, err)
+        if err == "":
+            return
+        with open(self.workspace.get_error_output_file(trial_id), "w") as f:
+            f.write(err)
 
     def create_model(self) -> None:
         """Creates model object of state machine.
@@ -136,6 +136,7 @@ def initializer(config_path: str | Path) -> None:
     global user_func, workspace
 
     config = load_config(config_path)
+    workspace = Path(config.generic.workspace).resolve()
 
     # Load the specified module from the specified python program.
     spec = spec_from_file_location("user_module", config.generic.python_file)
@@ -146,7 +147,6 @@ def initializer(config_path: str | Path) -> None:
         raise ValueError("spec.loader not defined.")
     spec.loader.exec_module(module)
     user_func = getattr(module, config.generic.function)
-    workspace = Path(config.generic.workspace).resolve()
 
 
 def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:
@@ -168,8 +168,8 @@ def execute(args: Any) -> tuple[int, dict[str, Any], list[Any], str, str, str]:
         else:
             ys = [y]
     except BaseException as e:
+        ys = []
         err = str(e)
-        ys = [None]
     else:
         err = ""
     end_time = datetime.now().strftime(datetime_format)
