@@ -112,14 +112,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.x: np.ndarray[Any, Any] = np.array([])
         self.xs: np.ndarray[Any, Any] = np.array([])
 
-    def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> Dict[str, BaseDistribution]:
-        return {}
-
-    def sample_relative(
-        self, study: Study, trial: FrozenTrial, search_space: Dict[str, BaseDistribution]
-    ) -> Dict[str, Any]:
-        return {}
-
     def after_initialize(self) -> None:
         self.state = NelderMeadState.Reflect
 
@@ -189,14 +181,14 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return True
 
     def get_next_coordinates(self) -> None:
-        if self.state == NelderMeadState.Shrink:
+        if self.state == NelderMeadState.Initial:
+            return
+        elif self.state == NelderMeadState.Shrink:
             if len(self.xs) == 0:
                 self.xs = self.shrink()[1:]
             self.x = self.xs[0]
         else:
-            if self.state == NelderMeadState.Initial:
-                return
-            elif self.state == NelderMeadState.Reflect:
+            if self.state == NelderMeadState.Reflect:
                 self.x = self.reflect()
             elif self.state == NelderMeadState.Expand:
                 self.x = self.expand()
@@ -208,6 +200,34 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             if not self.is_within_range(self.x):
                 self.set_objective(self.x, np.inf)
                 self.get_next_coordinates()
+
+    def set_objective(self, coordinates: np.ndarray[Any, Any], objective: float) -> None:
+        if self.state == NelderMeadState.Initial:
+            self.simplex.add_vertices(coordinates, objective)
+            if self.simplex.num_of_vertices() == self.dimension + 1:
+                self.after_initialize()
+        elif self.state == NelderMeadState.Reflect:
+            self.after_reflect(objective)
+        elif self.state == NelderMeadState.Expand:
+            self.after_expand(objective)
+        elif self.state == NelderMeadState.InsideContract:
+            self.after_inside_contract(objective)
+        elif self.state == NelderMeadState.OutsideContract:
+            self.after_outside_contract(objective)
+        elif self.state == NelderMeadState.Shrink:
+            self.simplex.add_vertices(coordinates, objective)
+            self.xs = np.delete(self.xs, 0, axis=0)
+            if len(self.xs) == 0:
+                self.after_shrink()
+
+    # Related to optuna.samplers
+    def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> Dict[str, BaseDistribution]:
+        return {}
+
+    def sample_relative(
+        self, study: Study, trial: FrozenTrial, search_space: Dict[str, BaseDistribution]
+    ) -> Dict[str, Any]:
+        return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         self.get_next_coordinates()
@@ -232,25 +252,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             param_value = self.x[param_index]
 
             return param_value
-
-    def set_objective(self, coordinates: np.ndarray[Any, Any], objective: float) -> None:
-        if self.state == NelderMeadState.Initial:
-            self.simplex.add_vertices(coordinates, objective)
-            if self.simplex.num_of_vertices() == self.dimension + 1:
-                self.after_initialize()
-        elif self.state == NelderMeadState.Reflect:
-            self.after_reflect(objective)
-        elif self.state == NelderMeadState.Expand:
-            self.after_expand(objective)
-        elif self.state == NelderMeadState.InsideContract:
-            self.after_inside_contract(objective)
-        elif self.state == NelderMeadState.OutsideContract:
-            self.after_outside_contract(objective)
-        elif self.state == NelderMeadState.Shrink:
-            self.simplex.add_vertices(coordinates, objective)
-            self.xs = np.delete(self.xs, 0, axis=0)
-            if len(self.xs) == 0:
-                self.after_shrink()
 
     def after_trial(
         self,

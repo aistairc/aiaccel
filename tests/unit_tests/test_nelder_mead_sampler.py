@@ -93,6 +93,10 @@ class TestSimplexOperation(unittest.TestCase):
         self.simplex.calc_centroid()
         xsh = self.simplex.shrink()
         self.assertTrue(np.array_equal(xsh, shrink_xs))
+        self.assertTrue(np.array_equal(self.simplex.vertices[0], self.vertices[1]))
+        self.assertTrue(np.array_equal(self.simplex.values[0], self.values[1]))
+        self.assertEqual(len(self.simplex.vertices), 1)
+        self.assertEqual(len(self.simplex.values), 1)
 
 
 class TestNelderMeadSamplerOperation(unittest.TestCase):
@@ -499,13 +503,13 @@ class TestNelderMeadSampler(unittest.TestCase):
     def test_sample_independent_initial(self):
         value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
         self.assertIsInstance(value, float)
-        self.assertGreaterEqual(value, -5)
-        self.assertLessEqual(value, 5)
+        self.assertGreaterEqual(value, -5.0)
+        self.assertLessEqual(value, 5.0)
 
         value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
         self.assertIsInstance(value, float)
-        self.assertGreaterEqual(value, -5)
-        self.assertLessEqual(value, 5)
+        self.assertGreaterEqual(value, -5.0)
+        self.assertLessEqual(value, 5.0)
 
     def test_sample_independent_reflect(self):
         self.vertices = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
