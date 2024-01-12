@@ -17,16 +17,16 @@ coef: dict[str, float] = {"r": 1.0, "ic": -0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
 
 class Simplex:
     def __init__(self) -> None:
-        self.vertices: np.ndarray[Any, Any] | None = None
-        self.values: np.ndarray[Any, Any] | None = None
+        self.vertices: np.ndarray[Any, Any] = np.array([])
+        self.values: np.ndarray[Any, Any] = np.array([])
         self.coef: dict[str, float] = coef
 
     def add_vertices(self, vertex: np.ndarray[Any, Any], value: Any = None) -> None:
-        if self.vertices is None:
+        if len(self.vertices) == 0:
             self.vertices = np.array([vertex])
         else:
             self.vertices = np.append(self.vertices, [vertex], axis=0)
-        if self.values is None:
+        if len(self.values) == 0:
             self.values = np.array([value])
         else:
             self.values = np.append(self.values, value)
