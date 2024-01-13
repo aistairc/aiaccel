@@ -42,20 +42,10 @@ github-actions = [
     "pytest-github-actions-annotate-failures",
 ]
 dev = [
-    "black",
-    "flake8",
-    "flake8-bugbear",
-    "flake8-builtins",
-    "flake8-isort",
-    "flake8-pyproject",
-    "flake8-pytest-style",
-    "flake8-unused-arguments",
-    "isort",
+    "ruff",
     "mypy",
     "myst-parser",
-    "pep8-naming",
     "pre-commit",
-    "pycodestyle",
     "sphinx",
     "sphinxcontrib-jquery",
     "sphinx-intl",
@@ -73,19 +63,20 @@ packages = [
 [tool.setuptools.package-data]
 aiaccel = ["default_config.yaml"]
 
-[tool.black]
-target-version = ['py38']
+[tool.ruff]
 line-length = 120
-
-[tool.isort]
-profile = "black"
-py_version = 38
-line_length = 120
-
-[tool.flake8]
-max-line-length = 120
-# E203: whitespace before ':'
-extend-ignore = "E203,"
+target-version = "py38"
+fix = true
+select = [
+    "E", # all errors
+    "W", # all warnings
+    "B", # all bugs
+    "I", # import order
+    "C", # code style
+]
+ignore = [
+    "E203", # exclude colon whitespace error
+]
 
 [tool.mypy]
 python_version="3.8"
