@@ -38,6 +38,9 @@ class LocalManager(AbstractManager):
     def create_model(self) -> LocalModel:
         """Creates model object of state machine.
 
+        Args:
+            None
+
         Returns:
             LocalModel: Model object.
         """

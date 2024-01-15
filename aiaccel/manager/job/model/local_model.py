@@ -16,6 +16,14 @@ class LocalModel(AbstractModel):
         pass
 
     def job_submitted(self, obj: Job) -> None:
+        """Submit a job.
+
+        Args:
+            obj (Job): A job object.
+
+        Returns:
+            None
+        """
         runner_command = self.create_runner_command(
             obj.config.generic.job_command,
             obj.content,
@@ -32,6 +40,14 @@ class LocalModel(AbstractModel):
         self.is_firsttime_called = False
 
     def conditions_job_finished(self, obj: "Job") -> bool:
+        """Check if a job is finished.
+
+        Args:
+            obj (Job): A job object.
+
+        Returns:
+            bool: True if a job is finished.
+        """
         if super().conditions_job_finished(obj):
             return True
         if obj.th_oh.get_returncode() is None or self.is_firsttime_called:
@@ -44,6 +60,14 @@ class LocalModel(AbstractModel):
             return False
 
     def stop_job(self, obj: Job) -> None:
+        """Stop a job.
+
+        Args:
+            obj (Job): A job object.
+
+        Returns:
+            None
+        """
         obj.th_oh.enforce_kill()
 
     def create_runner_command(
@@ -61,6 +85,9 @@ class LocalModel(AbstractModel):
             command (str): A string command.
             param_content (dict): A hyper parameter content.
             trial_id (str): A unique name of a hyper parameter.
+            config_path (str): A path to a config file.
+            command_error_output (str): A path to a error output file.
+            enabled_variable_name_argumentation (bool): A flag to enable variable name argumentation.
 
         Returns:
             list[str]: A list of command strings.

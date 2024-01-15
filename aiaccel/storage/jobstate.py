@@ -44,12 +44,19 @@ class JobState(Abstract):
                 raise e
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
-    def set_any_trial_jobstates(self, states: list[Any]) -> None:
+    def set_any_trial_jobstates(self, states: Any) -> None:
         """Set the specified jobstate to the specified trial.
 
         Args:
-            trial_id (int): Any trial id
-            state (str): Any jobstate
+            states (dict[str, Any]): Any jobstate
+                Example:
+                    states = [
+                        {'trial_id': 0, 'jobstate': 'finished'},
+                        {'trial_id': 1, 'jobstate': 'finished'},
+                        {'trial_id': 2, 'jobstate': 'finished'},
+                        {'trial_id': 3, 'jobstate': 'finished'},
+                        {'trial_id': 4, 'jobstate': 'finished'}
+                    ]
 
         Returns:
             None
@@ -87,6 +94,14 @@ class JobState(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_all_trial_jobstate(self) -> list[Any]:
+        """Get the job status of all trials.
+
+        Args:
+            None
+
+        Returns:
+            list[Any]: Some kind of jobstate
+        """
         with self.create_session() as session:
             data = session.query(JobStateTable).with_for_update(read=True).all()
 
@@ -98,7 +113,11 @@ class JobState(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_jobstate(self, trial_id: int) -> None:
-        """
+        """Delete the jobstate of the specified trial.
+
+        Args:
+            trial_id (int): Any trial id
+
         Returns:
             None
         """

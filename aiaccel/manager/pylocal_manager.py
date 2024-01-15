@@ -105,6 +105,9 @@ class PylocalManager(AbstractManager):
         Args:
             trial_id (int): Trial ID.
             err (str): Error string.
+
+        Returns:
+            None
         """
         if err == "":
             return
@@ -113,6 +116,10 @@ class PylocalManager(AbstractManager):
 
     def create_model(self) -> None:
         """Creates model object of state machine.
+
+        Args:
+            None
+
         Returns:
             None: Because it does not use the state transition model.
         """
@@ -130,6 +137,7 @@ def initializer(config_path: str | Path) -> None:
 
     Args:
         config_path (str | Path): Path to the configuration file.
+
     Returns:
         None
     """

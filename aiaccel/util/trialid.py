@@ -11,16 +11,18 @@ from aiaccel.workspace import Workspace
 
 class TrialId:
     """Provides interface to current trial id.
+
     Args:
         config_path (str): Path to the config file.
+
     Attributes:
         config (Config): Config object.
-        ws (Path): Path to the workspace.
+        workspace (Path): Path to the workspace.
         name_length (int): Name length of hp files.
         file_hp_count_fmt (str): String format of hp file name.
         count_path (Path): Path to "count.txt" containing current trial id,
-            i.e. `ws`/hp/count.txt.
-        lock_path (Path): Path to "count.lock", i.e. `ws`/hp/count.lock.
+            i.e. `workspace`/count.txt.
+        lock_path (Path): Path to "count.lock", i.e. `workspace`/hp/count.lock.
         lock (fasteners.InterProcessLock): An interprocess lock.
     """
 
@@ -39,15 +41,24 @@ class TrialId:
 
     def zero_padding_any_trial_id(self, trial_id: int) -> str:
         """Returns string of trial id padded by zeros.
+
         Args:
             trial_id (int): Trial id.
+
         Returns:
             str: Trial id padded by zeros.
         """
         return self.file_hp_count_fmt % trial_id
 
     def increment(self) -> None:
-        """Increments trial id."""
+        """Increments trial id.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         if self.lock.acquire(timeout=file_hp_count_lock_timeout):
             trial_id = 0
             if self.count_path.exists():
@@ -58,6 +69,10 @@ class TrialId:
 
     def get(self) -> Any:
         """Returns trial id.
+
+        Args:
+            None
+
         Returns:
             int | None: Trial id. None if count.txt does not exist.
         """
@@ -69,6 +84,9 @@ class TrialId:
         """Initialize trial id.
         Args:
             num (int, optional): _description_. Defaults to 0.
+
+        Returns:
+            None
         """
         if self.lock.acquire(timeout=file_hp_count_lock_timeout):
             trial_id = num

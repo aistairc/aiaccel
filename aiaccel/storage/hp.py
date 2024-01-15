@@ -103,6 +103,9 @@ class Hp(Abstract):
     def all_delete(self) -> None:
         """Clear table
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -117,6 +120,10 @@ class Hp(Abstract):
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_params(self, trial_id: int) -> None:
         """
+
+        Args:
+            trial_id(int): Any trial id.
+
         Returns:
             None
         """

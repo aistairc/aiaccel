@@ -24,6 +24,21 @@ from aiaccel.workspace import Workspace
 
 
 class CommandLineArgs:
+    """Command line arguments.
+
+    Args:
+        None
+
+    Attributes:
+        parser (ArgumentParser): Argument parser.
+        args (Namespace): Namespace of arguments.
+        trial_id (int | None): Trial ID.
+        config_path (Path | None): Path to configuration file.
+        config (dict[str, Any] | None): A dictionary of configuration.
+        parameters_config (HyperParameterConfiguration | None):
+            Hyper parameter configuration.
+    """
+
     def __init__(self) -> None:
         self.parser = ArgumentParser()
         self.parser.add_argument("--trial_id", type=int, required=False)
@@ -61,6 +76,14 @@ class CommandLineArgs:
             self.args = self.parser.parse_known_args()[0]
 
     def get_xs_from_args(self) -> dict[str, Any]:
+        """Get a dictionary of parameters from command line arguments.
+
+        Args:
+            args (Namespace): Namespace of arguments.
+
+        Returns:
+            dict[str, Any]: A dictionary of parameters.
+        """
         xs = vars(self.args)
         delete_keys = ["trial_id", "config"]
         for key in delete_keys:
@@ -78,19 +101,15 @@ class Run:
             Defaults to None.
 
     Attributes:
-        args (dict): A dictionary object which contains command line arguments
-            given by aiaccel.
-        trial_id (int): Trial Id.
-        config_path (Path): A Path object which points to the
-            configuration file.
-        config (Config): A Config object.
-        workspace (Path): A Path object which points to the workspace.
-        logger (Logger): A Logger object.
+        config_path (str | Path | None): A path to configration file.
+        config (dict[str, Any] | None): A dictionary of configuration.
+        workspace (Path | None): A path to workspace.
+        args (CommandLineArgs): Command line arguments.
 
     Examples:
         *User program* ::
 
-            from aiaccel.util import aiaccel
+            import aiaccel
 
             run = aiaccel.Run()
             run.execute_and_report("execute user_program")
@@ -101,7 +120,7 @@ class Run:
 
         *Python function* ::
 
-            from aiaccel.util import aiaccel
+            import aiaccel
 
             def func(p: dict[str, Any]) -> float:
                 # Write your operation to calculate objective value.
@@ -114,10 +133,8 @@ class Run:
     """
 
     def __init__(self, config_path: str | Path | None = None) -> None:
-        self.config_path = None
         self.config = None
         self.workspace = None
-
         self.args = CommandLineArgs()
         self.config_path = self.args.config_path or config_path
         self.config = self.args.config
@@ -199,7 +216,7 @@ class Run:
         """Save the results to a text file.
 
         Args:
-            y (Any): Objective value.
+            ys (Any): Objective values.
             err (str): Error string.
         """
 

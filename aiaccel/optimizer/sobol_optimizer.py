@@ -35,6 +35,9 @@ class SobolOptimizer(AbstractOptimizer):
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
+        Args:
+            None
+
         Returns:
             list[dict[str, float | int | str]]: A list of new parameters.
         """
@@ -48,6 +51,9 @@ class SobolOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate initial parameters.
+
+        Args:
+            None
 
         Returns:
             list[dict[str, float | int | str]]: A list of new parameters.

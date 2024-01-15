@@ -12,7 +12,6 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
     Args:
         options (dict[str, str | int | bool]): A dictionary containing command line options.
 
-
     Raises:
         ValueError: Causes when the number of trials is smaller than the least
             space size determined by the parameters of which the number of
@@ -44,6 +43,9 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
     def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generates parameters.
 
+        Args:
+            None
+
         Returns:
             list[dict[str, float | int | str]] | None: A list of new parameters.
         """
@@ -62,6 +64,9 @@ class BudgetSpecifiedGridOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]]:
         """Generates initial parameters.
+
+        Args:
+            None
 
         Raises:
             ValueError: Causes when initial parameter could not be generated.

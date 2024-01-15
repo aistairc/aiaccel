@@ -31,6 +31,9 @@ class AbciManager(AbstractManager):
     def create_model(self) -> AbciModel:
         """Creates model object of state machine.
 
+        Args:
+            None
+
         Returns:
             AbciModel: Model object.
         """
