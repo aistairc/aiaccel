@@ -14,6 +14,15 @@ class ReturnCode(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_returncode(self, trial_id: int, returncode: int) -> None:
+        """Set any returncode for any trial.
+
+        Args:
+            trial_id (int): Any trial id
+            returncode(int): Any returncode
+
+        Returns:
+            None
+        """
         with self.create_session() as session:
             try:
                 data = (
@@ -40,7 +49,7 @@ class ReturnCode(Abstract):
             trial_id (int): Any trial id
 
         Returns:
-            int | float | None:
+            int | float | None: Any returncode
         """
         with self.create_session() as session:
             data = (

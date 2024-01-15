@@ -22,21 +22,12 @@ class AbstractOptimizer(AbstractModule):
             options.
 
     Attributes:
-        hp_ready (int): The number of ready parameters which are registered
-            with the storage and are not tried yet in the user program. The
-            state label in the storage is "ready".
-        hp_running (int): The number of parameters which the user program is
-            running with. The state label in the storage is "running".
-        hp_finished (int): The number of finished parameters which objective
-            values obtained from the user program executions with are
-            registered with the storage. The state label in the storage is
-            "finished".
-        num_of_generated_parameter (int): The number of generated paramters.
-        all_parameters_generated (bool): Whether all parameters are generated.
-            True if all parameters are generated.
-        params (HyperParameterConfiguration): A loaded parameter configuration
+        trial_number (int): A number of trials.
+        num_of_generated_parameter (int): A number of generated parameters.
+        params (HyperParameterConfiguration): A HyperParameterConfiguration
             object.
         trial_id (TrialId): A TrialId object.
+        all_parameters_generated (bool): True if all parameters are generated.
     """
 
     def __init__(self, config: DictConfig) -> None:
@@ -57,6 +48,9 @@ class AbstractOptimizer(AbstractModule):
     def get_trial_id(self) -> int:
         """Get the current trial ID.
 
+        Args:
+            None
+
         Returns:
             int: The current trial ID.
         """
@@ -64,6 +58,9 @@ class AbstractOptimizer(AbstractModule):
 
     def is_all_parameters_generated(self) -> bool:
         """Check if all parameters are generated.
+
+        Args:
+            None
 
         Returns:
             bool: True if all parameters are generated.
@@ -98,6 +95,9 @@ class AbstractOptimizer(AbstractModule):
     def generate_initial_parameter(self) -> Any:
         """Generate a list of initial parameters.
 
+        Args:
+            None
+
         Returns:
             list[dict[str, float | int | str]]: A created list of initial
             parameters.
@@ -114,6 +114,9 @@ class AbstractOptimizer(AbstractModule):
     def generate_parameter(self) -> Any:
         """Generate a list of parameters.
 
+        Args:
+            None
+
         Raises:
             NotImplementedError: Causes when the inherited class does not
                 implement.
@@ -126,6 +129,9 @@ class AbstractOptimizer(AbstractModule):
 
     def generate_new_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate a list of parameters.
+
+        Args:
+            None
 
         Returns:
             list[dict[str, float | int | str]] | None: A created list of
@@ -140,6 +146,9 @@ class AbstractOptimizer(AbstractModule):
     def pre_process(self) -> None:
         """Pre-procedure before executing processes.
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -148,6 +157,9 @@ class AbstractOptimizer(AbstractModule):
 
     def post_process(self) -> None:
         """Post-procedure after executed processes.
+
+        Args:
+            None
 
         Returns:
             None
@@ -220,6 +232,9 @@ class AbstractOptimizer(AbstractModule):
 
     def is_error_free(self) -> bool:
         """Check if all trials are error free.
+
+        Args:
+            None
 
         Returns:
             bool: True if all trials are error free.

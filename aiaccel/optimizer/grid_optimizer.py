@@ -125,6 +125,9 @@ class GridOptimizer(AbstractOptimizer):
     def get_parameter_index(self) -> list[int] | None:
         """Get a next parameter index.
 
+        Args:
+            None
+
         Returns:
             list[int] | None: It returns None if all parameters are
             already generated.
@@ -153,6 +156,9 @@ class GridOptimizer(AbstractOptimizer):
     def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
+        Args:
+            None
+
         Returns:
             list[dict[str, float | int | str]] | None: A list of new
                 parameters. None if all of parameters are generated.
@@ -176,6 +182,9 @@ class GridOptimizer(AbstractOptimizer):
 
         Grid search algorithm always ignores the initial values in
         configulation file even if given.
+
+        Args:
+            None
 
         Raises:
             ValueError: Causes when the parameter is not generated.

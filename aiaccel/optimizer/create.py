@@ -10,6 +10,14 @@ OptimizerType = Type[AbstractOptimizer]
 
 
 def create_optimizer(search_algorithm: str) -> type:
+    """Creates an optimizer class.
+
+    Args:
+        search_algorithm (str): Optimizer class name, e.g. aiaccel.optimizer.NelderMeadOptimizer
+
+    Returns:
+        type: Subclass of aiaccel.optimizer.abstract_optimizer.AbstractOptimizer.
+    """
     return import_and_getattr(search_algorithm)
 
 

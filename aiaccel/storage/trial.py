@@ -88,6 +88,9 @@ class Trial(Abstract):
     def all_delete(self) -> None:
         """Clear table
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -101,6 +104,14 @@ class Trial(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_state(self, trial_id: int) -> None:
+        """Delete any trials numbers.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            None
+        """
         with self.create_session() as session:
             try:
                 session.query(TrialTable).filter(TrialTable.trial_id == trial_id).delete()
@@ -112,6 +123,9 @@ class Trial(Abstract):
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_ready(self) -> list[int]:
         """Get the trial id whose status is ready.
+
+        Args:
+            None
 
         Returns:
             trial ids(list[int])
@@ -125,6 +139,9 @@ class Trial(Abstract):
     def get_running(self) -> list[int]:
         """Get the trial id whose status is running.
 
+        Args:
+            None
+
         Returns:
             trial ids(list[int])
         """
@@ -136,6 +153,9 @@ class Trial(Abstract):
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_finished(self) -> list[Any]:
         """Get the trial id whose status is finished.
+
+        Args:
+            None
 
         Returns:
             trial ids(list[int])
@@ -149,8 +169,11 @@ class Trial(Abstract):
     def get_num_running_ready_finished(self) -> tuple[int, int, int]:
         """Get num_of_ready, num_of_running, num_of_finished.
 
+        Args:
+            None
+
         Returns:
-            tuple(int, int, int)
+            tuple(int, int, int): num_of_ready, num_of_running, num_of_finished
         """
         with self.create_session() as session:
             num_of_ready = (
@@ -166,7 +189,11 @@ class Trial(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def get_all_trial_id(self) -> list[int] | None:
-        """
+        """Get all trial id.
+
+        Args:
+            None
+
         Returns:
             list[int] | None: A list of trial ids.
         """

@@ -46,6 +46,9 @@ class GridCondition(ABC):
     def has_choices(self) -> bool:
         """Whether the object has available choices.
 
+        Args:
+            None
+
         Returns:
             bool: True if the objecti has available choices.
         """
@@ -54,6 +57,9 @@ class GridCondition(ABC):
     def has_num_choices(self) -> bool:
         """Whether the nonzero number of choices is set.
 
+        Args:
+            None
+
         Returns:
             bool: True if the number of choices is not zero.
         """
@@ -61,6 +67,9 @@ class GridCondition(ABC):
 
     def num_choices_incrementable(self) -> bool:
         """Whether the number of choices can be incremented.
+
+        Args:
+            None
 
         Returns:
             bool: True if the number of choices can be incremented.
@@ -126,6 +135,9 @@ class FloatGridCondition(NumericGridCondition):
 
         Args:
             hyperparameter (Parameter): A hyperparameter object.
+
+        Returns:
+            None
         """
         start = hyperparameter.lower
         stop = hyperparameter.upper

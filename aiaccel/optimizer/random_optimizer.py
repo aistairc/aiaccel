@@ -23,6 +23,9 @@ class RandomOptimizer(AbstractOptimizer):
     def generate_parameter(self) -> list[dict[str, float | int | str]]:
         """Generate parameters.
 
+        Args:
+            None
+
         Returns:
             list[dict[str, float | int | str]]: A list of created parameters.
         """

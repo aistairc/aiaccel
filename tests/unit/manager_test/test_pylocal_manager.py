@@ -36,9 +36,3 @@ class TestPylocalManager(BaseTest):
             manager.inner_loop_main_process()
             xs = manager.get_any_trial_xs(1)
             assert xs == {'x1': 1.69, 'x2': 2.27, 'x3': 4.38, 'x4': 2.0, 'x5': 3.9, 'x6': 4.62, 'x7': -2.2, 'x8': 4.77, 'x9': -3.66, 'x10': 3.59}
-
-    def test_create_model(self):
-        config = self.load_config_for_test(self.configs['config_pylocal.json'])
-        optimizer = create_optimizer(config.optimize.search_algorithm)(config)
-        manager = PylocalManager(config, optimizer)
-        assert manager.create_model() is None

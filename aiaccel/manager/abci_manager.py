@@ -14,6 +14,9 @@ class AbciManager(AbstractManager):
     def get_stats(self) -> None:
         """Get a current status and update.
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -51,6 +54,9 @@ class AbciManager(AbstractManager):
 
     def create_model(self) -> AbciModel:
         """Creates model object of state machine.
+
+        Args:
+            None
 
         Returns:
             AbciModel: Model object.

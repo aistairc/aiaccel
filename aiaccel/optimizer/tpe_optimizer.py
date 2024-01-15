@@ -78,6 +78,9 @@ class TpeOptimizer(AbstractOptimizer):
     def check_result(self) -> None:
         """Check the result files and add it to sampler object.
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -91,6 +94,9 @@ class TpeOptimizer(AbstractOptimizer):
 
     def is_startup_trials(self) -> bool:
         """Is a current trial startup trial or not.
+
+        Args:
+            None
 
         Returns:
             bool: Is a current trial startup trial or not.
@@ -142,6 +148,9 @@ class TpeOptimizer(AbstractOptimizer):
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
 
+        Args:
+            None
+
         Returns:
             list[dict[str, float | int | str]] | None: A list of new
             parameters. None if `self.nelder_mead` is already defined.
@@ -176,6 +185,9 @@ class TpeOptimizer(AbstractOptimizer):
     def create_study(self) -> None:
         """Create the optuna.study object and store it.
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -195,6 +207,14 @@ class TpeOptimizer(AbstractOptimizer):
         )
 
     def resume_trial(self) -> None:
+        """Resume the trial.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         optuna_trials = self.study.get_trials()
         storage_path = f"sqlite:///{self.workspace.path}/optuna-{self.study_name}.db"
         engine = sqlalchemy.create_engine(storage_path, echo=False)
@@ -211,6 +231,14 @@ class TpeOptimizer(AbstractOptimizer):
                 self.logger.info(f"resume_trial trial_id {trial_id} is deleted from parameter_pool")
 
     def resume(self) -> None:
+        """Resume the optimizer.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         super().resume()
         if self.distributions is None:
             self.distributions = create_distributions(self.params)

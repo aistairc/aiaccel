@@ -5,11 +5,12 @@ from pathlib import Path
 
 def create_job_script_preamble(job_script_preamble: str, job_script_preamble_path: Path | str | None) -> str:
     """Create a job script preamble.
-    args:
+
+    Args:
         job_script_preamble_path (Path | str | None): A path to a job script preamble file.
         content (str): A content of a job script preamble. It is a written in a config file.
 
-    returns:
+    Returns:
         str: A job script preamble.
     """
     content = job_script_preamble

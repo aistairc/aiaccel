@@ -30,11 +30,11 @@ class Storage:
     def current_max_trial_number(self) -> int | None:
         """Get the current maximum number of trials.
 
+        Args:
+            None
+
         Returns:
             trial_id (int): Any trial id
-
-        Todo:
-            Refuctoring
         """
 
         trial_ids = self.trial.get_all_trial_id()
@@ -46,6 +46,9 @@ class Storage:
     def get_ready(self) -> list[Any]:
         """Get a trial number for the ready state.
 
+        Args:
+            None
+
         Returns:
             trial_ids (list): trial ids in ready states
         """
@@ -53,6 +56,9 @@ class Storage:
 
     def get_running(self) -> list[Any]:
         """Get a trial number for the running state.
+
+        Args:
+            None
 
         Returns:
             trial_ids (list): trial ids in running states
@@ -62,6 +68,9 @@ class Storage:
     def get_finished(self) -> list[Any]:
         """Get a trial number for the finished state.
 
+        Args:
+            None
+
         Returns:
             trial_ids (list): trial ids in finished states
         """
@@ -69,6 +78,9 @@ class Storage:
 
     def get_num_ready(self) -> int:
         """Get the number of trials in the ready state.
+
+        Args:
+            None
 
         Returns:
             int: number of ready state in trials
@@ -78,6 +90,9 @@ class Storage:
     def get_num_running(self) -> int:
         """Get the number of trials in the running state.
 
+        Args:
+            None
+
         Returns:
             int: number of running state in trials
         """
@@ -86,6 +101,9 @@ class Storage:
     def get_num_finished(self) -> int:
         """Get the number of trials in the finished state.
 
+        Args:
+            None
+
         Returns:
             int: number of finished state in trials
         """
@@ -93,6 +111,9 @@ class Storage:
 
     def get_num_running_ready_finished(self) -> tuple[int, int, int]:
         """Get the number of trials in the all state.
+
+        Args:
+            None
 
         Returns:
             int: number of all state in trials
@@ -106,7 +127,7 @@ class Storage:
             trial_id (int): Any trial id
 
         Returns:
-            bool
+            bool: True if the specified trial ID is ready.
         """
         return trial_id in self.trial.get_ready()
 
@@ -117,7 +138,7 @@ class Storage:
             trial_id (int): Any trial id
 
         Returns:
-            bool
+            bool: True if the specified trial ID is running.
         """
         return trial_id in self.trial.get_running()
 
@@ -128,7 +149,7 @@ class Storage:
             trial_id (int): Any trial id
 
         Returns:
-            bool
+            bool: True if the specified trial ID is finished.
         """
         return trial_id in self.trial.get_finished()
 
@@ -269,12 +290,28 @@ class Storage:
         return (r, e)
 
     def delete_trial_data_after_this(self, trial_id: int) -> None:
+        """Delete all data after the specified trial ID.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            None
+        """
         max_trial_id = self.current_max_trial_number()
         if max_trial_id is not None:
             for i in range(trial_id + 1, max_trial_id + 1):
                 self.delete_trial(i)
 
     def delete_trial(self, trial_id: int) -> None:
+        """Delete all data for the specified trial ID.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            None
+        """
         self.error.delete_any_trial_error(trial_id)
         self.jobstate.delete_any_trial_jobstate(trial_id)
         self.result.delete_any_trial_objective(trial_id)
@@ -284,6 +321,14 @@ class Storage:
         self.hp.delete_any_trial_params(trial_id)
 
     def rollback_to_ready(self, trial_id: int) -> None:
+        """Rollback to ready state.
+
+        Args:
+            trial_id (int): Any trial id
+
+        Returns:
+            None
+        """
         if self.hp.get_any_trial_params(trial_id) is None:
             self.delete_trial(trial_id)
             return

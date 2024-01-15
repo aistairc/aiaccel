@@ -47,7 +47,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
         self.completed_trial_ids: list[int] = []
 
     def convert_ndarray_to_parameter(self, ndarray: np.ndarray[Any, Any]) -> list[dict[str, float | int | str]]:
-        """Convert a list of numpy.ndarray to a list of parameters."""
+        """Convert a list of numpy.ndarray to a list of parameters.
+
+        Args:
+            ndarray (np.ndarray): A list of numpy.ndarray.
+
+        Returns:
+            list[dict[str, float | int | str]]: A list of parameters.
+        """
         new_params = copy.deepcopy(self.base_params)
         for name, value in zip(self.param_names, ndarray):
             for new_param in new_params:
@@ -61,6 +68,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
         return new_params
 
     def new_finished(self) -> list[int]:
+        """Get new finished trial ids.
+
+        Args:
+            None
+
+        Returns:
+            list[int]: A list of new finished trial ids.
+        """
         finished = self.storage.get_finished()
         return list(set(finished) ^ set(self.completed_trial_ids))
 
@@ -81,6 +96,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
 
     def generate_initial_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate initial parameters.
+
+        Args:
+            None
 
         Returns:
             list[dict[str, float | int | str]] | None: A list of new
@@ -106,6 +124,9 @@ class NelderMeadOptimizer(AbstractOptimizer):
     def generate_parameter(self) -> list[dict[str, float | int | str]] | None:
         """Generate parameters.
 
+        Args:
+            None
+
         Returns:
             list[dict[str, float | int | str]] | None: A list of created
             parameters.
@@ -124,6 +145,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
         return new_param
 
     def run_optimizer(self) -> None:
+        """Run optimization.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         if new_params := self.generate_new_parameter():
             if self.out_of_boundary(new_params):
                 self.logger.debug(f"out of boundary: {new_params}")
@@ -140,6 +169,14 @@ class NelderMeadOptimizer(AbstractOptimizer):
             self.serialize(self.trial_id.integer)
 
     def out_of_boundary(self, params: list[dict[str, float | int | str]]) -> bool:
+        """Check if the parameters are out of boundary.
+
+        Args:
+            params (list[dict[str, float | int | str]]): A list of parameters.
+
+        Returns:
+            bool: True if the parameters are out of boundary.
+        """
         for param in params:
             if param["out_of_boundary"]:
                 return True
