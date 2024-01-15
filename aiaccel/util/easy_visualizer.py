@@ -85,6 +85,9 @@ class EasyVisualizer:
 
         Args:
             height (int): height of vertical axis.
+
+        Returns:
+            None
         """
         self.plot_config["height"] = height
 

@@ -71,6 +71,16 @@ class TimeStamp(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def set_any_trial_start_time_and_end_time(self, trial_id: int, start_time: str, end_time: str) -> None:
+        """Set the specified start time and end time for the specified trial.
+
+        Args:
+            trial_id(int): Any trial id
+            start_time(str): "MM/DD/YYYY hh:mm:ss"
+            end_time(str): "MM/DD/YYYY hh:mm:ss"
+
+        Returns:
+            None
+        """
         with self.create_session() as session:
             try:
                 data = (
@@ -144,6 +154,9 @@ class TimeStamp(Abstract):
     def all_delete(self) -> None:
         """Clear table
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -157,6 +170,14 @@ class TimeStamp(Abstract):
 
     @retry(_MAX_NUM=60, _DELAY=1.0)
     def delete_any_trial_timestamp(self, trial_id: Any) -> None:
+        """Delete the specified trial.
+
+        Args:
+            trial_id(int): Any trial id
+
+        Returns:
+            None
+        """
         with self.create_session() as session:
             try:
                 session.query(TimestampTable).filter(TimestampTable.trial_id == trial_id).delete()

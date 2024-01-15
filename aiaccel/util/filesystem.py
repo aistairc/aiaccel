@@ -11,6 +11,7 @@ from aiaccel.common import dict_result, extension_hp, extension_result
 
 def create_yaml(path: Path, content: Any, dict_lock: Path | None = None) -> None:
     """Create a yaml file.
+
     Args:
         path (Path): The path of the created yaml file.
         content (dict): The content of the created yaml file.
@@ -30,6 +31,7 @@ def create_yaml(path: Path, content: Any, dict_lock: Path | None = None) -> None
 
 def file_create(path: Path, content: str, dict_lock: Path | None = None) -> None:
     """Create a text file.
+
     Args:
         path (Path): The path of the created file.
         content (str): The content of the created file.
@@ -49,6 +51,7 @@ def file_create(path: Path, content: str, dict_lock: Path | None = None) -> None
 
 def file_delete(path: Path, dict_lock: Path | None = None) -> None:
     """Delete a file.
+
     Args:
         path (Path): A deleted file path.
         dict_lock (Path | None, optional): A path to store lock files. Defaults to None.
@@ -66,6 +69,7 @@ def file_delete(path: Path, dict_lock: Path | None = None) -> None:
 
 def file_read(path: Path, dict_lock: Path | None = None) -> str | None:
     """Read a file.
+
     Args:
         path (Path): A path of reading file.
         dict_lock (Path | None, optional): A path to store lock files. Defaults to None.
@@ -88,6 +92,7 @@ def file_read(path: Path, dict_lock: Path | None = None) -> str | None:
 
 def get_dict_files(directory: Path, pattern: str, dict_lock: Path | None = None) -> list[Path] | None:
     """Get files matching a pattern in a directory.
+
     Args:
         directory (Path): A directory to search files.
         pattern (str): A regular expression.
@@ -114,6 +119,7 @@ def get_dict_files(directory: Path, pattern: str, dict_lock: Path | None = None)
 
 def get_file_result(path: Path, dict_lock: Path | None = None) -> list[Path] | None:
     """Get files in result directory.
+
     Args:
         path (Path): A path to result directory.
         dict_lock (Path | None, optional): A directory to store lock files. Defaults to None.
@@ -151,6 +157,7 @@ def interprocess_lock_file(path: Path, dict_lock: Path) -> Path:
 
 def load_yaml(path: Path, dict_lock: Path | None = None) -> dict[str, Any]:
     """Load a content of a yaml file.
+
     Args:
         path (Path): A path of a yaml file.
         dict_lock (Path | None, optional): A directory to store lock files. Defaults to None.
@@ -170,6 +177,7 @@ def load_yaml(path: Path, dict_lock: Path | None = None) -> dict[str, Any]:
 
 def make_directory(d: Path, dict_lock: Path | None = None) -> None:
     """Make a directory.
+
     Args:
         d (Path): A path of making directory.
         dict_lock (Path | None, optional): A directory to store lock files. Defaluts to None.
@@ -188,6 +196,7 @@ def make_directory(d: Path, dict_lock: Path | None = None) -> None:
 
 def make_directories(ds: list[Path], dict_lock: Path | None = None) -> None:
     """Make directories.
+
     Args:
         ds (list[Path]): A list of making directories.
         dict_lock (Path | None, optional): A directory to store lock files. Defaults to None.

@@ -14,6 +14,9 @@ class LocalManager(AbstractManager):
     def get_stats(self) -> None:
         """Get a current status and update.
 
+        Args:
+            None
+
         Returns:
             None
         """
@@ -58,6 +61,9 @@ class LocalManager(AbstractManager):
 
     def create_model(self) -> LocalModel:
         """Creates model object of state machine.
+
+        Args:
+            None
 
         Returns:
             LocalModel: Model object.

@@ -57,9 +57,6 @@ class AbstractModule(object):
         self.ch: Any = None
         self.ch_formatter: Any = None
         self.loop_count = 0
-        self.hp_ready = 0
-        self.hp_running = 0
-        self.hp_finished = 0
         self.seed = self.config.optimize.rand_seed
         self.storage = Storage(self.workspace.storage_file_path)
         self.trial_id = TrialId(self.config)

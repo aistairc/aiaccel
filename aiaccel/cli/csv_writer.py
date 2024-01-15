@@ -49,7 +49,14 @@ class CsvWriter:
         return self.trialid.zero_padding_any_trial_id(trial_id)
 
     def create(self) -> None:
-        """Creates repoprt."""
+        """Creates repoprt.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         data = []
         header = []
 
