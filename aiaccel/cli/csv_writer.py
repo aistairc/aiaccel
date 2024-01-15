@@ -32,7 +32,7 @@ class CsvWriter:
     def __init__(self, config: DictConfig):
         self.config = config
         self.workspace = Workspace(self.config.generic.workspace)
-        self.fp = self.workspace.retults_csv_file
+        self.fp = self.workspace.result_csv_file
         self.trialid = TrialId(self.config)
         self.storage = Storage(self.workspace.storage_file_path)
         self.lock_file = {"result_txt": str(self.workspace.lock / "result_txt")}

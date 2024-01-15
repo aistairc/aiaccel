@@ -6,11 +6,7 @@ from subprocess import Popen
 import pytest
 
 from aiaccel.common import (
-    dict_hp_finished,
-    dict_hp_ready,
-    dict_hp_running,
     dict_lock,
-    dict_result,
     dict_runner,
     goal_maximize,
     goal_minimize,

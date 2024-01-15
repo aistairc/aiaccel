@@ -224,11 +224,6 @@ class BaseTest(object):
 
         self.tmpdir_path = tmpdir
 
-        # for label in self.configs.keys():
-        #     self.configs[label].resume = None
-        #     self.configs[label].clean = None
-        #     self.configs[label].generic.workspace = self.tmpdir_path / 'work'
-
         self.workspace = Workspace(str(self.tmpdir_path / 'work'))
         if self.workspace.path.exists():
             self.workspace.clean()
@@ -238,11 +233,6 @@ class BaseTest(object):
         self.test_result_data.append(d0)
         self.test_result_data.append(d1)
         self.test_result_data.append(d2)
-
-        for d in self.test_result_data:
-            name = f"{d['trial_id']}.yml"
-            path = work_dir / 'result' / name
-            create_yaml(path, d)
 
         self.result_comparison = []
 

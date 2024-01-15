@@ -11,7 +11,6 @@ from aiaccel import (
     tensorboard,
     util,
     workspace,
-    wrapper_tools,
 )
 from aiaccel.util.aiaccel import Run
 
@@ -21,7 +20,6 @@ __all__ = [
     "module",
     "parameter",
     "workspace",
-    "wrapper_tools",
     "abci",
     "cli",
     "optimizer",

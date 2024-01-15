@@ -201,7 +201,7 @@ def test_all_delete_exception():
             error_message=mess[i]
         )
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         all_delete = undecorated(storage.error.all_delete)
         all_delete(storage.error)
@@ -255,7 +255,7 @@ def test_delete_any_trial_error_exception():
             error_message=messages[i]
         )
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         delete_any_trial_error = undecorated(storage.error.delete_any_trial_error)
         delete_any_trial_error(storage.error, trial_id=0)

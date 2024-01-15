@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from aiaccel.common import dict_result, file_final_result
+from aiaccel.common import file_final_result
 from aiaccel.config import is_multi_objective, load_config
 from aiaccel.manager import (LocalManager, PylocalManager,
                                create_manager)

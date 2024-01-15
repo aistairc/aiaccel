@@ -33,19 +33,19 @@ class AbstractModule(object):
             command line options.
 
     Attributes:
-        options (dict[str, str | int | bool]): A dictionary containing
-            command line options.
-        config_path (Path): Path to the configuration file.
-        config (Config): A config object.
-        ws (Path): A path to a current workspace.
-        dict_hp (Path): A path to hp directory.
-        dict_lock (Path): A path to lock directory.
-        dict_runner (Path): A path to runner directory.
-        hp_finished (int): A number of files in hp/finished directory.
-        hp_ready (int): A number of files in hp/ready directory.
-        hp_running (int): A number of files in hp/running directory.
+        config (Config): Config object.
+        workspace (Workspace): Workspace object.
+        goals (list[str]): A list of goals.
         logger (logging.Logger): A logger object.
-        loop_count (int): A loop count that is incremented in loop method.
+        fh (logging.FileHandler): A file handler for logging.
+        ch (ColoredHandler): A colored handler for logging.
+        ch_formatter (logging.Formatter): A formatter for colored handler.
+        loop_count (int): A loop count.
+        seed (int): A random seed.
+        storage (Storage): A storage object.
+        trial_id (TrialId): A trial id object.
+        _rng (np.random.RandomState): A random generator.
+        module_name (str): A name of this module.
     """
 
     def __init__(self, config: DictConfig, module_name: str) -> None:

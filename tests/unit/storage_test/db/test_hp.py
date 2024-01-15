@@ -35,7 +35,7 @@ def test_set_any_trial_param():
     param_value = 0.01
     param_type = "float"
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         set_any_trial_param = undecorated(storage.hp.set_any_trial_param)
         set_any_trial_param(
@@ -120,7 +120,7 @@ def test_set_any_trial_params_exception():
         }
     ]
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         set_any_trial_params = undecorated(storage.hp.set_any_trial_params)
         set_any_trial_params(
@@ -201,7 +201,7 @@ def test_all_delete_exception():
         param_type=param_type
     )
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         all_delete = undecorated(storage.hp.all_delete)
         all_delete(storage.hp)
@@ -292,7 +292,7 @@ def test_delete_any_trial_params():
 def test_delete_any_trial_params_exception():
     storage = get_storage()
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         delete_any_trial_params = undecorated(storage.hp.delete_any_trial_params)
         delete_any_trial_params(storage.hp, trial_id=0)

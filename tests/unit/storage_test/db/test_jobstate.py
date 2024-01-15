@@ -34,7 +34,7 @@ def test_set_any_trial_jobstate_exception():
     trial_id = 0
     state = "test_state"
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         set_any_trial_jobstate = undecorated(storage.jobstate.set_any_trial_jobstate)
         set_any_trial_jobstate(
@@ -103,7 +103,7 @@ def test_set_any_trial_jobstates_exception():
         {'trial_id': 4, 'jobstate': 'stata_4'}
     ]
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         set_any_trial_jobstates = undecorated(storage.jobstate.set_any_trial_jobstates)
         set_any_trial_jobstates(storage.jobstate, states)
@@ -221,7 +221,7 @@ def test_delete_any_trial_jobstate_exception():
         state=state
     )
 
-    (ws.path / 'storage/storage.db').unlink()
+    (ws.path / 'storage.db').unlink()
     with pytest.raises(SQLAlchemyError):
         delete_any_trial_jobstate = undecorated(storage.jobstate.delete_any_trial_jobstate)
         delete_any_trial_jobstate(storage.jobstate, trial_id=0)

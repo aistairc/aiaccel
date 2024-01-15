@@ -2,31 +2,23 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Any
 
 from aiaccel.common import (
-    dict_alive,
     dict_error,
-    dict_finished,
-    dict_hp,
-    dict_jobstate,
     dict_lock,
     dict_log,
     dict_mpi,
-    dict_pid,
     dict_rank_log,
-    dict_ready,
-    dict_result,
     dict_runner,
-    dict_running,
     dict_stderr,
     dict_stdout,
-    dict_storage,
     dict_tensorboard,
-    dict_timestamp,
-    extension_hp,
+    file_best_result,
+    file_final_result,
+    file_result_csv,
+    file_storage,
 )
-from aiaccel.util import Suffix, load_yaml, make_directories
+from aiaccel.util import Suffix, make_directories
 
 
 class Workspace:
@@ -37,75 +29,51 @@ class Workspace:
 
     Attributes:
         path (Path): Path to the workspace.
-        alive (Path): Path to "alive", i.e. `path`/alive.
-        error (Path): Path to "error", i.e. 'path`/error.
-        hp (Path): Path to "hp", i.e. `path`/hp.
-        hp_ready (Path): Path to "ready", i.e. `path`/hp/ready.
-        hp_running (Path): Path to "running", i.e. `path`/hp/running.
-        hp_finished (Path): Path to "finished", i.e. `path`/hp/finished.
-        jobstate (Path): Path to "jobstate", i.e. `path`/jobstate.
-        lock (Path): Path to "lock", i.e. `path`/lock.
-        log (Path): Path to "log", i.e. `path`/log.
-        output (Path): Path to "abci_output", i.e. `path`/abci_output.
-        pid (Path): Path to "pid", i.e. `path`/pid.
-        result (Path): Path to "result", i.e. `path`/result.
-        runner (Path): Path to "runner", i.e. `path`/runner.
-        storage (Path): Path to "storage", i.e. `path`/storage.
-        timestamp (Path): Path to "timestamp", i.e. `path`/timestamp.
-        consists (list[Path]): A list of pathes under the workspace.
-        results (Path): Path to the results which is prepared in the execution
-            directory, i.e. "./results".
-
+        error (Path): Path to the error directory.
+        lock (Path): Path to the lock directory.
+        log (Path): Path to the log directory.
+        mpi (Path): Path to the mpi directory.
+        rank_log (Path): Path to the rank_log directory.
+        stderr (Path): Path to the stderr directory.
+        stdout (Path): Path to the stdout directory.
+        runner (Path): Path to the runner directory.
+        tensorboard (Path): Path to the tensorboard directory.
+        consists (list[Path]): List of required directories.
+        results (Path): Path to the results directory.
+        result_csv_file (Path): Path to the result.csv file.
+        final_result_file (Path): Path to the final_result.yaml file.
+        storage_file_path (Path): Path to the storage.db file.
+        best_result_file (Path): Path to the best_result.yaml file.
     """
 
     def __init__(self, base_path: str):
         self.path = Path(base_path).resolve()
 
-        self.alive = self.path / dict_alive
         self.error = self.path / dict_error
-        self.hp = self.path / dict_hp
-        self.hp_ready = self.path / dict_hp / dict_ready
-        self.hp_running = self.path / dict_hp / dict_running
-        self.hp_finished = self.path / dict_hp / dict_finished
-        self.jobstate = self.path / dict_jobstate
         self.lock = self.path / dict_lock
         self.log = self.path / dict_log
         self.mpi = self.path / dict_mpi
         self.rank_log = self.mpi / dict_rank_log
         self.stderr = self.path / dict_stderr
         self.stdout = self.path / dict_stdout
-        self.pid = self.path / dict_pid
-        self.result = self.path / dict_result
         self.runner = self.path / dict_runner
-        self.storage = self.path / dict_storage
         self.tensorboard = self.path / dict_tensorboard
-        self.timestamp = self.path / dict_timestamp
         self.consists = [
-            self.alive,
             self.error,
-            self.hp,
-            self.hp_ready,
-            self.hp_running,
-            self.hp_finished,
-            self.jobstate,
             self.lock,
             self.log,
             self.mpi,
             self.stdout,
             self.stderr,
-            self.pid,
             self.rank_log,
-            self.result,
             self.runner,
-            self.storage,
             self.tensorboard,
-            self.timestamp,
         ]
         self.results = Path("./results")
-        self.retults_csv_file = self.path / "results.csv"
-        self.final_result_file = self.path / "final_result.result"
-        self.storage_file_path = self.storage / "storage.db"
-        self.best_result_file = self.path / "best_result.yaml"
+        self.result_csv_file = self.path / file_result_csv
+        self.final_result_file = self.path / file_final_result
+        self.storage_file_path = self.path / file_storage
+        self.best_result_file = self.path / file_best_result
 
     def create(self) -> bool:
         """Create a work directory.
@@ -195,43 +163,6 @@ class Workspace:
 
         shutil.copytree(self.path, dst, ignore=ignptn)
         return dst
-
-    def get_any_result_file_path(self, trial_id: int) -> Path:
-        """Get result file path.
-
-        Args:
-            trial_id(int): Any trial id
-
-        Returns:
-            PosixPath: Path to result file.
-        """
-        return self.result / f"{trial_id}.{extension_hp}"
-
-    def result_file_exists(self, trial_id: int) -> bool:
-        """Check result file exists or not.
-
-        Args:
-            trial_id(int): Any trial id
-
-        Returns:
-            bool: True if result file exists.
-        """
-        path = self.get_any_result_file_path(trial_id)
-        return path.exists()
-
-    def get_any_trial_result(self, trial_id: int) -> dict[str, Any] | None:
-        """Get any trial result.
-
-        Args:
-            trial_id(int): Any trial id
-
-        Returns:
-            dict: Trial result.
-        """
-        path = self.get_any_result_file_path(trial_id)
-        if path.exists() is False:
-            return None
-        return load_yaml(path)
 
     def get_error_output_file(self, trial_id: int) -> Path:
         """Get error output file path
