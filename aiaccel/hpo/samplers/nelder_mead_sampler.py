@@ -17,11 +17,11 @@ coef: dict[str, float] = {"r": 1.0, "ic": -0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
 
 class Simplex:
     def __init__(self) -> None:
-        self.vertices: np.ndarray[Any, Any] = np.array([])
-        self.values: np.ndarray[Any, Any] = np.array([])
+        self.vertices: np.ndarray[float, float] = np.array([])
+        self.values: np.ndarray[float, float] = np.array([])
         self.coef: dict[str, float] = coef
 
-    def add_vertices(self, vertex: np.ndarray[Any, Any], value: Any = None) -> None:
+    def add_vertices(self, vertex: np.ndarray[float, float], value: float | None = None) -> None:
         if len(self.vertices) == 0:
             self.vertices = np.array([vertex])
         else:
@@ -31,7 +31,7 @@ class Simplex:
         else:
             self.values = np.append(self.values, value)
 
-    def update_vertices(self, index: int, vertex: np.ndarray[Any, Any], value: Any = None) -> None:
+    def update_vertices(self, index: int, vertex: np.ndarray[float, float], value: float | None = None) -> None:
         self.vertices[index] = vertex
         self.values[index] = value
 
@@ -48,23 +48,23 @@ class Simplex:
         self.order_by()
         self.centroid = self.vertices[:-1].mean(axis=0)
 
-    def reflect(self) -> np.ndarray[Any, Any]:
+    def reflect(self) -> np.ndarray[float, float]:
         xr = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["r"])
         return xr
 
-    def expand(self) -> np.ndarray[Any, Any]:
+    def expand(self) -> np.ndarray[float, float]:
         xe = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["e"])
         return xe
 
-    def inside_contract(self) -> np.ndarray[Any, Any]:
+    def inside_contract(self) -> np.ndarray[float, float]:
         xic = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["ic"])
         return xic
 
-    def outside_contract(self) -> np.ndarray[Any, Any]:
+    def outside_contract(self) -> np.ndarray[float, float]:
         xoc = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["oc"])
         return xoc
 
-    def shrink(self) -> np.ndarray[Any, Any]:
+    def shrink(self) -> np.ndarray[float, float]:
         shrinked_vertices = np.array([self.vertices[0]])
         for i in range(1, len(self.vertices)):
             shrinked_vertex = self.vertices[0] + (self.vertices[i] - self.vertices[0]) * self.coef["s"]
@@ -78,12 +78,12 @@ class Simplex:
 
 class Store:
     def __init__(self) -> None:
-        self.r: np.ndarray[Any, Any] | Any = None  # reflect
-        self.e: np.ndarray[Any, Any] | Any = None  # expand
-        self.ic: np.ndarray[Any, Any] | Any = None  # inside_contract
-        self.oc: np.ndarray[Any, Any] | Any = None  # outside_contract
-        self.s: np.ndarray[Any, Any] | Any = None  # shrink
-        self.yr: float | Any = None  # value of reflect vertex
+        self.r: np.ndarray[float, float] | None = None  # reflect
+        self.e: np.ndarray[float, float] | None = None  # expand
+        self.ic: np.ndarray[float, float] | None = None  # inside_contract
+        self.oc: np.ndarray[float, float] | None = None  # outside_contract
+        self.s: np.ndarray[float, float] | None = None  # shrink
+        self.yr: float | None = None  # value of reflect vertex
 
 
 class NelderMeadState(Enum):
@@ -109,13 +109,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.simplex: Simplex = Simplex()
         self.state: NelderMeadState = NelderMeadState.Initial
         self.store: Store = Store()
-        self.x: np.ndarray[Any, Any] = np.array([])
-        self.xs: np.ndarray[Any, Any] = np.array([])
+        self.x: np.ndarray[float, float] = np.array([])
+        self.xs: np.ndarray[float, float] = np.array([])
 
     def after_initialize(self) -> None:
         self.state = NelderMeadState.Reflect
 
-    def reflect(self) -> np.ndarray[Any, Any]:
+    def reflect(self) -> np.ndarray[float, float]:
         self.simplex.calc_centroid()
         self.store.r = self.simplex.reflect()
         return self.store.r
@@ -134,18 +134,20 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         else:
             self.state = NelderMeadState.Reflect
 
-    def expand(self) -> np.ndarray[Any, Any]:
+    def expand(self) -> np.ndarray[float, float]:
         self.store.e = self.simplex.expand()
         return self.store.e
 
     def after_expand(self, ye: float) -> None:
+        if self.store.yr is None:
+            raise TypeError
         if ye < self.store.yr:
             self.simplex.update_vertices(-1, self.store.e, ye)
         else:
             self.simplex.update_vertices(-1, self.store.r, self.store.yr)
         self.state = NelderMeadState.Reflect
 
-    def inside_contract(self) -> np.ndarray[Any, Any]:
+    def inside_contract(self) -> np.ndarray[float, float]:
         self.store.ic = self.simplex.inside_contract()
         return self.store.ic
 
@@ -156,25 +158,27 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         else:
             self.state = NelderMeadState.Shrink
 
-    def outside_contract(self) -> np.ndarray[Any, Any]:
+    def outside_contract(self) -> np.ndarray[float, float]:
         self.store.oc = self.simplex.outside_contract()
         return self.store.oc
 
     def after_outside_contract(self, yoc: float) -> None:
+        if self.store.yr is None:
+            raise TypeError
         if yoc <= self.store.yr:
             self.simplex.update_vertices(-1, self.store.oc, yoc)
             self.state = NelderMeadState.Reflect
         else:
             self.state = NelderMeadState.Shrink
 
-    def shrink(self) -> np.ndarray[Any, Any]:
+    def shrink(self) -> np.ndarray[float, float]:
         self.store.s = self.simplex.shrink()
         return self.store.s
 
     def after_shrink(self) -> None:
         self.state = NelderMeadState.Reflect
 
-    def is_within_range(self, coordinates: np.ndarray[Any, Any]) -> bool:
+    def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
         for ss, co in zip(self._search_space.values(), coordinates):
             if co < ss[0] or ss[1] < co:
                 return False
@@ -201,7 +205,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 self.set_objective(self.x, np.inf)
                 self.get_next_coordinates()
 
-    def set_objective(self, coordinates: np.ndarray[Any, Any], objective: float) -> None:
+    def set_objective(self, coordinates: np.ndarray[float, float], objective: float) -> None:
         if self.state == NelderMeadState.Initial:
             self.simplex.add_vertices(coordinates, objective)
             if self.simplex.num_of_vertices() == self.dimension + 1:
