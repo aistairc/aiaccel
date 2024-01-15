@@ -1,34 +1,13 @@
 from __future__ import annotations
 
 import re
-import subprocess
 
-from aiaccel.abci import parse_qstat
 from aiaccel.manager.abstract_manager import AbstractManager
 from aiaccel.manager.job.model.abci_model import AbciModel
 
 
 class AbciManager(AbstractManager):
     """A manager class running on ABCI environment."""
-
-    def get_stats(self) -> None:
-        """Get a current status and update.
-
-        Returns:
-            None
-        """
-        commands = "qstat -xml"
-        p = subprocess.Popen(commands, stdout=subprocess.PIPE, shell=True)
-        stdout_data, _ = p.communicate()
-        stats = stdout_data.decode("utf-8")
-
-        if len(stats) < 1:
-            return
-
-        self.stats = parse_qstat(stats)
-
-        for stat in self.stats:
-            self.logger.info(f'stat job-ID: {stat["job-ID"]}, ' f'name: {stat["name"]}, ' f'state: {stat["state"]}')
 
     def parse_trial_id(self, command: str) -> str | None:
         """Parse a command string and extract an unique name.

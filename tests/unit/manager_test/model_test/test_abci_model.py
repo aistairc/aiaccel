@@ -1,3 +1,9 @@
+import os
+
+import copy
+from pathlib import Path
+from unittest.mock import patch
+
 import time
 import pytest
 
@@ -15,6 +21,9 @@ from tests.base_test import BaseTest
 from aiaccel.optimizer import create_optimizer
 from aiaccel.util.job_script_preamble import create_job_script_preamble
 from aiaccel.manager.job.model import AbciModel, AbstractModel, LocalModel, MpiModel
+
+from aiaccel.common import dict_runner
+from aiaccel.common import dict_stdout, dict_stderr
 
 
 class TestModel(BaseTest):
@@ -105,3 +114,33 @@ class TestModel(BaseTest):
             'start_time': '11/03/2020 16:07:40',
             'end_time': '11/03/2020 16:07:40'
         }
+
+    def test_create_qsub_command(self):
+        runner_file = os.path.join(
+            os.path.join('', dict_runner),
+            ""
+        )
+        qsub_command = self.model.create_qsub_command(self.config, runner_file)
+        assert type(qsub_command) is list
+
+        path = Path(self.config.generic.workspace).resolve()
+        command = [
+            'qsub',
+            '-g', f'{self.config.ABCI.group}',
+            '-o', f'{path / dict_stdout}',
+            '-e', f'{path / dict_stderr}',
+            str(runner_file)
+        ]
+
+        tmp_config = copy.deepcopy(self.config)
+        tmp_config.ABCI.job_execution_options = None
+        assert self.model.create_qsub_command(tmp_config, runner_file) == command
+
+        tmp_config.ABCI.job_execution_options = ''
+        assert self.model.create_qsub_command(tmp_config, runner_file) == command
+
+        tmp_config.ABCI.job_execution_options = 'aaa bbb'
+        command_tmp = command.copy()
+        for cmd in 'aaa bbb'.split(' '):
+            command_tmp.insert(-1, cmd)
+        assert self.model.create_qsub_command(tmp_config, runner_file) == command_tmp
