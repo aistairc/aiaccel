@@ -134,7 +134,8 @@ class LocalModel(AbstractModel):
         objectives: list[str] = []
 
         error = "\n".join(stderrs)
-        obj.logger.info(f"error: {error}")
+        if len(error) > 0:
+            obj.logger.info(f"error: {error}")
 
         if len(stdouts) > 0:
             if len(stdouts) >= len(obj.goals):
