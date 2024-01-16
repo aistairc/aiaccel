@@ -93,14 +93,14 @@ class Simplex:
 class NelderMeadAlgorism:
     def __init__(self,
                  search_space: dict[str, list[float]],
-                 **coef: float) -> None:
+                 coef: Coef) -> None:
         self.dimension: int = len(search_space)
 
         self._search_space = {}
         for param_name, param_values in sorted(search_space.items()):
             self._search_space[param_name] = list(param_values)
 
-        self.simplex: Simplex = Simplex(Coef(**coef))
+        self.simplex: Simplex = Simplex(coef)
         self.state: NelderMeadState = NelderMeadState.Initial
         self.xs: np.ndarray[float, float] = np.array([])
 
@@ -235,7 +235,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         for param_name in sorted(search_space.keys()):
             self.param_names.append(param_name)
 
-        self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(search_space, **coef)
+        self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(search_space, Coef(**coef))
         self.x: np.ndarray[float, float] = np.array([])
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
