@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 from enum import Enum
 from typing import Any, Dict, Mapping, Optional, Sequence, Union
 
@@ -42,10 +43,7 @@ class Simplex:
             self.vertices = np.array([vertex])
         else:
             self.vertices = np.append(self.vertices, [vertex], axis=0)
-        if len(self.values) == 0:
-            self.values = np.array([value])
-        else:
-            self.values = np.append(self.values, value)
+        self.values = np.append(self.values, value)
 
     def update_vertices(self, index: int, vertex: np.ndarray[float, float], value: float | None = None) -> None:
         self.vertices[index] = vertex
@@ -99,10 +97,8 @@ class NelderMeadAlgorism:
         self.dimension: int = len(search_space)
 
         self._search_space = {}
-        self.param_names = []  # パラメータの順序を記憶
         for param_name, param_values in sorted(search_space.items()):
             self._search_space[param_name] = list(param_values)
-            self.param_names.append(param_name)
 
         self.simplex: Simplex = Simplex(Coef(**coef))
         self.state: NelderMeadState = NelderMeadState.Initial
@@ -187,26 +183,28 @@ class NelderMeadAlgorism:
                 return False
         return True
 
-    def get_next_coordinates(self) -> None:
+    def get_next_coordinates(self) -> np.ndarray[float, float] | None:
         if self.state == NelderMeadState.Initial:
-            return
+            return None
         elif self.state == NelderMeadState.Shrink:
             if len(self.xs) == 0:
                 self.xs = self.shrink()[1:]
-            self.x = self.xs[0]
+            return self.xs[0]
         else:
             if self.state == NelderMeadState.Reflect:
-                self.x = self.reflect()
+                x = self.reflect()
             elif self.state == NelderMeadState.Expand:
-                self.x = self.expand()
+                x = self.expand()
             elif self.state == NelderMeadState.InsideContract:
-                self.x = self.inside_contract()
+                x = self.inside_contract()
             elif self.state == NelderMeadState.OutsideContract:
-                self.x = self.outside_contract()
+                x = self.outside_contract()
 
-            if not self.is_within_range(self.x):
-                self.set_objective(self.x, np.inf)
-                self.get_next_coordinates()
+            if not self.is_within_range(x):
+                self.set_objective(x, np.inf)
+                return self.get_next_coordinates()
+            else:
+                return x
 
     def set_objective(self, coordinates: np.ndarray[float, float], objective: float) -> None:
         if self.state == NelderMeadState.Initial:
@@ -252,7 +250,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        self.get_next_coordinates()
+        self.x = self.NelderMead.get_next_coordinates()
 
     def sample_independent(
         self,
@@ -261,7 +259,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: distributions.BaseDistribution,
     ) -> Any:
-        if self.state == NelderMeadState.Initial:
+        if self.NelderMead.state == NelderMeadState.Initial:
             # initial random search
             search_space = {param_name: param_distribution}
             trans = _SearchSpaceTransform(search_space)
@@ -284,4 +282,4 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     ) -> None:
         coordinates = np.array([trial.params[name] for name in self.param_names])
         if isinstance(values, list):
-            self.set_objective(coordinates, values[0])
+            self.NelderMead.set_objective(coordinates, values[0])
