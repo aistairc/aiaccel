@@ -12,14 +12,30 @@ from optuna.samplers._lazy_random_state import LazyRandomState
 from optuna.study import Study
 from optuna.trial import FrozenTrial, TrialState
 
-coef: dict[str, float] = {"r": 1.0, "ic": -0.5, "oc": 0.5, "e": 2.0, "s": 0.5}
+
+@dataclasses.dataclass
+class Coef:
+    r: float = 1.0
+    ic: float = -0.5
+    oc: float = 0.5
+    e: float = 2.0
+    s: float = 0.5
+
+
+class NelderMeadState(Enum):
+    Initial = 0
+    Reflect = 1
+    Expand = 2
+    InsideContract = 3
+    OutsideContract = 4
+    Shrink = 5
 
 
 class Simplex:
-    def __init__(self) -> None:
+    def __init__(self, coef: Coef) -> None:
         self.vertices: np.ndarray[float, float] = np.array([])
         self.values: np.ndarray[float, float] = np.array([])
-        self.coef: dict[str, float] = coef
+        self.coef: Coef = coef
 
     def add_vertices(self, vertex: np.ndarray[float, float], value: float | None = None) -> None:
         if len(self.vertices) == 0:
@@ -49,25 +65,25 @@ class Simplex:
         self.centroid = self.vertices[:-1].mean(axis=0)
 
     def reflect(self) -> np.ndarray[float, float]:
-        xr = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["r"])
+        xr = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef.r)
         return xr
 
     def expand(self) -> np.ndarray[float, float]:
-        xe = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["e"])
+        xe = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef.e)
         return xe
 
     def inside_contract(self) -> np.ndarray[float, float]:
-        xic = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["ic"])
+        xic = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef.ic)
         return xic
 
     def outside_contract(self) -> np.ndarray[float, float]:
-        xoc = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef["oc"])
+        xoc = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef.oc)
         return xoc
 
     def shrink(self) -> np.ndarray[float, float]:
         shrinked_vertices = np.array([self.vertices[0]])
         for i in range(1, len(self.vertices)):
-            shrinked_vertex = self.vertices[0] + (self.vertices[i] - self.vertices[0]) * self.coef["s"]
+            shrinked_vertex = self.vertices[0] + (self.vertices[i] - self.vertices[0]) * self.coef.s
             shrinked_vertices = np.append(shrinked_vertices, [shrinked_vertex], axis=0)
 
         self.vertices = self.vertices[:1]
@@ -76,28 +92,10 @@ class Simplex:
         return shrinked_vertices
 
 
-class Store:
-    def __init__(self) -> None:
-        self.r: np.ndarray[float, float] | None = None  # reflect
-        self.e: np.ndarray[float, float] | None = None  # expand
-        self.ic: np.ndarray[float, float] | None = None  # inside_contract
-        self.oc: np.ndarray[float, float] | None = None  # outside_contract
-        self.s: np.ndarray[float, float] | None = None  # shrink
-        self.yr: float | None = None  # value of reflect vertex
-
-
-class NelderMeadState(Enum):
-    Initial = 0
-    Reflect = 1
-    Expand = 2
-    InsideContract = 3
-    OutsideContract = 4
-    Shrink = 5
-
-
-class NelderMeadSampler(optuna.samplers.BaseSampler):
-    def __init__(self, search_space: Mapping[str, Sequence[Union[float, float]]], seed: int | None = None) -> None:
-        self._rng: LazyRandomState = LazyRandomState(seed)
+class NelderMeadAlgorism:
+    def __init__(self,
+                 search_space: Mapping[str, Sequence[Union[float, float]]],
+                 **coef: float) -> None:
         self.dimension: int = len(search_space)
 
         self._search_space = {}
@@ -106,7 +104,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self._search_space[param_name] = list(param_values)
             self.param_names.append(param_name)
 
-        self.simplex: Simplex = Simplex()
+        self.simplex: Simplex = Simplex(Coef(**coef))
         self.state: NelderMeadState = NelderMeadState.Initial
         self.store: Store = Store()
         self.x: np.ndarray[float, float] = np.array([])
@@ -224,7 +222,22 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             if len(self.xs) == 0:
                 self.after_shrink()
 
-    # Related to optuna.samplers
+
+class NelderMeadSampler(optuna.samplers.BaseSampler):
+    def __init__(self,
+                 search_space: Mapping[str, Sequence[Union[float, float]]],
+                 seed: int | None = None,
+                 **coef: float
+                 ) -> None:
+        self._rng: LazyRandomState = LazyRandomState(seed)
+
+        self.param_names = []  # パラメータの順序を記憶
+        for param_name in sorted(search_space.keys()):
+            self.param_names.append(param_name)
+
+        self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(search_space, **coef)
+        self.x: np.ndarray[float, float] = np.array([])
+
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> Dict[str, BaseDistribution]:
         return {}
 
