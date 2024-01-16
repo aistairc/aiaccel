@@ -106,22 +106,27 @@ class NelderMeadAlgorism:
 
         self.simplex: Simplex = Simplex(Coef(**coef))
         self.state: NelderMeadState = NelderMeadState.Initial
-        self.store: Store = Store()
-        self.x: np.ndarray[float, float] = np.array([])
         self.xs: np.ndarray[float, float] = np.array([])
+
+        self.r: np.ndarray[float, float] | None = None  # reflect
+        self.e: np.ndarray[float, float] | None = None  # expand
+        self.ic: np.ndarray[float, float] | None = None  # inside_contract
+        self.oc: np.ndarray[float, float] | None = None  # outside_contract
+        self.s: np.ndarray[float, float] | None = None  # shrink
+        self.yr: float | None = None  # value of reflect vertex
 
     def after_initialize(self) -> None:
         self.state = NelderMeadState.Reflect
 
     def reflect(self) -> np.ndarray[float, float]:
         self.simplex.calc_centroid()
-        self.store.r = self.simplex.reflect()
-        return self.store.r
+        self.r = self.simplex.reflect()
+        return self.r
 
     def after_reflect(self, yr: float) -> None:
-        self.store.yr = yr
+        self.yr = yr
         if self.simplex.values[0] <= yr < self.simplex.values[-2]:
-            self.simplex.update_vertices(-1, self.store.r, yr)
+            self.simplex.update_vertices(-1, self.r, yr)
             self.state = NelderMeadState.Reflect
         elif yr < self.simplex.values[0]:
             self.state = NelderMeadState.Expand
@@ -133,45 +138,45 @@ class NelderMeadAlgorism:
             self.state = NelderMeadState.Reflect
 
     def expand(self) -> np.ndarray[float, float]:
-        self.store.e = self.simplex.expand()
-        return self.store.e
+        self.e = self.simplex.expand()
+        return self.e
 
     def after_expand(self, ye: float) -> None:
-        if self.store.yr is None:
+        if self.yr is None:
             raise TypeError
-        if ye < self.store.yr:
-            self.simplex.update_vertices(-1, self.store.e, ye)
+        if ye < self.yr:
+            self.simplex.update_vertices(-1, self.e, ye)
         else:
-            self.simplex.update_vertices(-1, self.store.r, self.store.yr)
+            self.simplex.update_vertices(-1, self.r, self.yr)
         self.state = NelderMeadState.Reflect
 
     def inside_contract(self) -> np.ndarray[float, float]:
-        self.store.ic = self.simplex.inside_contract()
-        return self.store.ic
+        self.ic = self.simplex.inside_contract()
+        return self.ic
 
     def after_inside_contract(self, yic: float) -> None:
         if yic < self.simplex.values[-1]:
-            self.simplex.update_vertices(-1, self.store.ic, yic)
+            self.simplex.update_vertices(-1, self.ic, yic)
             self.state = NelderMeadState.Reflect
         else:
             self.state = NelderMeadState.Shrink
 
     def outside_contract(self) -> np.ndarray[float, float]:
-        self.store.oc = self.simplex.outside_contract()
-        return self.store.oc
+        self.oc = self.simplex.outside_contract()
+        return self.oc
 
     def after_outside_contract(self, yoc: float) -> None:
-        if self.store.yr is None:
+        if self.yr is None:
             raise TypeError
-        if yoc <= self.store.yr:
-            self.simplex.update_vertices(-1, self.store.oc, yoc)
+        if yoc <= self.yr:
+            self.simplex.update_vertices(-1, self.oc, yoc)
             self.state = NelderMeadState.Reflect
         else:
             self.state = NelderMeadState.Shrink
 
     def shrink(self) -> np.ndarray[float, float]:
-        self.store.s = self.simplex.shrink()
-        return self.store.s
+        self.s = self.simplex.shrink()
+        return self.s
 
     def after_shrink(self) -> None:
         self.state = NelderMeadState.Reflect
