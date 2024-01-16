@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from enum import Enum
-from typing import Any, Dict, Mapping, Optional, Sequence, Union
+from typing import Any, Sequence
 
 import numpy as np
 import optuna
@@ -92,7 +92,7 @@ class Simplex:
 
 class NelderMeadAlgorism:
     def __init__(self,
-                 search_space: Mapping[str, Sequence[Union[float, float]]],
+                 search_space: dict[str, list[float]],
                  **coef: float) -> None:
         self.dimension: int = len(search_space)
 
@@ -178,10 +178,7 @@ class NelderMeadAlgorism:
         self.state = NelderMeadState.Reflect
 
     def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
-        for ss, co in zip(self._search_space.values(), coordinates):
-            if co < ss[0] or ss[1] < co:
-                return False
-        return True
+        return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
 
     def get_next_coordinates(self) -> np.ndarray[float, float] | None:
         if self.state == NelderMeadState.Initial:
@@ -228,7 +225,7 @@ class NelderMeadAlgorism:
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
     def __init__(self,
-                 search_space: Mapping[str, Sequence[Union[float, float]]],
+                 search_space: dict[str, list[float]],
                  seed: int | None = None,
                  **coef: float
                  ) -> None:
@@ -241,12 +238,12 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(search_space, **coef)
         self.x: np.ndarray[float, float] = np.array([])
 
-    def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> Dict[str, BaseDistribution]:
+    def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
 
     def sample_relative(
-        self, study: Study, trial: FrozenTrial, search_space: Dict[str, BaseDistribution]
-    ) -> Dict[str, Any]:
+        self, study: Study, trial: FrozenTrial, search_space: dict[str, BaseDistribution]
+    ) -> dict[str, Any]:
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
@@ -278,7 +275,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         study: Study,
         trial: FrozenTrial,
         state: TrialState,
-        values: Optional[Sequence[float]],
+        values: Sequence[float] | None,
     ) -> None:
         coordinates = np.array([trial.params[name] for name in self.param_names])
         if isinstance(values, list):
