@@ -93,15 +93,18 @@ class Simplex:
 class NelderMeadAlgorism:
     def __init__(self,
                  search_space: dict[str, list[float]],
-                 coef: Coef) -> None:
+                 coef: Coef,
+                 seed: int | None = None) -> None:
         self.dimension: int = len(search_space)
+        self._rng: LazyRandomState = LazyRandomState(seed)
 
         self._search_space = {}
-        for param_name, param_values in sorted(search_space.items()):
-            self._search_space[param_name] = list(param_values)
+        for param_name, param_distribution in sorted(search_space.items()):
+            self._search_space[param_name] = list(param_distribution)
 
         self.simplex: Simplex = Simplex(coef)
         self.state: NelderMeadState = NelderMeadState.Initial
+        self.NumofInitialCreateTrial: int = 0
         self.xs: np.ndarray[float, float] = np.array([])
 
         self.r: np.ndarray[float, float] | None = None  # reflect
@@ -139,7 +142,7 @@ class NelderMeadAlgorism:
 
     def after_expand(self, ye: float) -> None:
         if self.yr is None:
-            raise TypeError
+            raise ValueError("The value of reflect is not stored.")
         if ye < self.yr:
             self.simplex.update_vertices(-1, self.e, ye)
         else:
@@ -163,7 +166,7 @@ class NelderMeadAlgorism:
 
     def after_outside_contract(self, yoc: float) -> None:
         if self.yr is None:
-            raise TypeError
+            raise ValueError("The value of reflect is not stored.")
         if yoc <= self.yr:
             self.simplex.update_vertices(-1, self.oc, yoc)
             self.state = NelderMeadState.Reflect
@@ -180,13 +183,24 @@ class NelderMeadAlgorism:
     def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
         return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
 
-    def get_next_coordinates(self) -> np.ndarray[float, float] | None:
+    def get_next_coordinates(self) -> (np.ndarray[float, float] | None, int):
         if self.state == NelderMeadState.Initial:
-            return None
+            initial_param = []
+            for param_name, param_distribution in self._search_space.items():
+                search_space = {
+                    param_name: optuna.distributions.FloatDistribution(param_distribution[0], param_distribution[1])
+                    }
+                trans = _SearchSpaceTransform(search_space)
+                trans_params = self._rng.rng.uniform(trans.bounds[:, 0], trans.bounds[:, 1])
+                initial_param.append(trans.untransform(trans_params)[param_name])
+            self.NumofInitialCreateTrial += 1
+            return np.array(initial_param), self.dimension + 1 - self.NumofInitialCreateTrial
         elif self.state == NelderMeadState.Shrink:
             if len(self.xs) == 0:
                 self.xs = self.shrink()[1:]
-            return self.xs[0]
+            xs = self.xs[0]
+            self.xs = np.delete(self.xs, 0, axis=0)
+            return xs, len(self.xs)
         else:
             if self.state == NelderMeadState.Reflect:
                 x = self.reflect()
@@ -201,7 +215,7 @@ class NelderMeadAlgorism:
                 self.set_objective(x, np.inf)
                 return self.get_next_coordinates()
             else:
-                return x
+                return x, 0
 
     def set_objective(self, coordinates: np.ndarray[float, float], objective: float) -> None:
         if self.state == NelderMeadState.Initial:
@@ -218,8 +232,7 @@ class NelderMeadAlgorism:
             self.after_outside_contract(objective)
         elif self.state == NelderMeadState.Shrink:
             self.simplex.add_vertices(coordinates, objective)
-            self.xs = np.delete(self.xs, 0, axis=0)
-            if len(self.xs) == 0:
+            if self.simplex.num_of_vertices() == self.dimension + 1:
                 self.after_shrink()
 
 
@@ -229,14 +242,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                  seed: int | None = None,
                  **coef: float
                  ) -> None:
-        self._rng: LazyRandomState = LazyRandomState(seed)
-
         self.param_names = []  # パラメータの順序を記憶
         for param_name in sorted(search_space.keys()):
             self.param_names.append(param_name)
 
-        self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(search_space, Coef(**coef))
-        self.x: np.ndarray[float, float] = np.array([])
+        self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(search_space, Coef(**coef), seed)
+        self.ParallelLimit: int = len(search_space) + 1
+        self.NumOfRunningTrial: int = 0
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
@@ -247,7 +259,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        self.x = self.NelderMead.get_next_coordinates()
+        if self.NumOfRunningTrial == 0 or self.ParallelLimit > 0:
+            trial.user_attrs["Coordinates"], self.ParallelLimit = self.NelderMead.get_next_coordinates()
+            trial.user_attrs["ParallelEnabled"] = self.ParallelLimit > 0
+            self.NumOfRunningTrial += 1
+        else:
+            trial.user_attrs["Coordinates"] = None
+            trial.user_attrs["ParallelEnabled"] = False
 
     def sample_independent(
         self,
@@ -256,19 +274,12 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: distributions.BaseDistribution,
     ) -> Any:
-        if self.NelderMead.state == NelderMeadState.Initial:
-            # initial random search
-            search_space = {param_name: param_distribution}
-            trans = _SearchSpaceTransform(search_space)
-            trans_params = self._rng.rng.uniform(trans.bounds[:, 0], trans.bounds[:, 1])
+        if trial.user_attrs["Coordinates"] is None:
+            raise ValueError('trial.user_attrs["Coordinates"] is None')
+        param_index = self.param_names.index(param_name)
+        param_value = trial.user_attrs["Coordinates"][param_index]
 
-            return trans.untransform(trans_params)[param_name]
-        else:
-            # nelder-mead
-            param_index = self.param_names.index(param_name)
-            param_value = self.x[param_index]
-
-            return param_value
+        return param_value
 
     def after_trial(
         self,
@@ -280,3 +291,4 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         coordinates = np.array([trial.params[name] for name in self.param_names])
         if isinstance(values, list):
             self.NelderMead.set_objective(coordinates, values[0])
+            self.NumOfRunningTrial -= 1
