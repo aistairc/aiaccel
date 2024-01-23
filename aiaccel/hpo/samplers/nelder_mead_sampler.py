@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
-import queue
 import itertools
+import queue
 from collections.abc import Generator
 from typing import Any, Sequence
 
@@ -131,7 +131,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.parallel_limit: int = len(search_space) + 1
         self.num_running_trial: int = 0
 
-        self.stack: dict[int, float] = dict()
+        self.stack: dict[int, float] = {}
 
     def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
         return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
@@ -184,4 +184,4 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             if self.num_running_trial == 0:
                 for value in [item[1] for item in sorted(self.stack.items())]:
                     self.NelderMead.vertex_queue.put(value)
-                self.stack = dict()
+                self.stack = {}
