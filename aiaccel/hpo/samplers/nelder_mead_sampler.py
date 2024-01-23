@@ -101,7 +101,6 @@ class NelderMeadAlgorism:
                 yield (yic := yc + self.coef.ic * (yc - self.vertices[-1]))
                 fic = self.vertex_queue.get()
                 if fic < self.values[-1]:
-                    shrink_requied = False
                     self.vertices[-1], self.values[-1] = yic, fic
                 else:
                     shrink_requied = True
