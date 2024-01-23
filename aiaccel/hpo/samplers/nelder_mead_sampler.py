@@ -55,14 +55,15 @@ class NelderMeadAlgorism:
             self.num_initial_create_trial += 1
             initial_params.append(np.array(initial_param))
             yield np.array(initial_param), self.dimension + 1 - self.num_initial_create_trial
-        self.vertices = np.array(initial_params)
-        self.values = np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
+        self.vertices, self.values = (
+            np.array(initial_params),
+            np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
+            )
 
     def order_by(self) -> None:
         order = np.argsort(self.values)
 
-        self.vertices = self.vertices[order]
-        self.values = self.values[order]
+        self.vertices, self.values = self.vertices[order], self.values[order]
 
     def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
         for i in range(1, len(self.vertices)):
@@ -74,30 +75,25 @@ class NelderMeadAlgorism:
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
         yield from self.initial()
         for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
-            shrink_requied = False
             self.order_by()
             self.yc = self.vertices[:-1].mean(axis=0)
             yield (yr := self.yc + self.coef.r * (self.yc - self.vertices[-1])), 0
             fr = self.vertex_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
-                self.vertices[-1] = yr
-                self.values[-1] = fr
+                self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:
                 yield (ye := self.yc + self.coef.e * (self.yc - self.vertices[-1])), 0
                 fe = self.vertex_queue.get()
                 if fe < fr:
-                    self.vertices[-1] = ye
-                    self.values[-1] = fe
+                    self.vertices[-1], self.values[-1] = ye, fe
                 else:
-                    self.vertices[-1] = yr
-                    self.values[-1] = fr
+                    self.vertices[-1], self.values[-1] = yr, fr
             elif self.values[-2] <= fr < self.values[-1]:
                 yield (yoc := self.yc + self.coef.oc * (self.yc - self.vertices[-1])), 0
                 foc = self.vertex_queue.get()
                 if foc <= fr:
-                    self.vertices[-1] = yoc
-                    self.values[-1] = foc
+                    self.vertices[-1], self.values[-1] = yoc, foc
                 else:
                     shrink_requied = True
             elif self.values[-1] <= fr:
@@ -105,12 +101,12 @@ class NelderMeadAlgorism:
                 fic = self.vertex_queue.get()
                 if fic < self.values[-1]:
                     shrink_requied = False
-                    self.vertices[-1] = yic
-                    self.values[-1] = fic
+                    self.vertices[-1], self.values[-1] = yic, fic
                 else:
                     shrink_requied = True
             if shrink_requied:
                 yield from self.shrink()
+                shrink_requied = False
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
@@ -126,8 +122,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.param_names.append(param_name)
             self._search_space[param_name] = list(param_distribution)
 
-        self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(self._search_space, Coef(**coef), seed, num_iterations)
-        self.generator = self.NelderMead.__iter__()
+        self.nelder_mead: NelderMeadAlgorism = NelderMeadAlgorism(
+            self._search_space, Coef(**coef), seed, num_iterations
+            )
+        self.generator = self.nelder_mead.__iter__()
         self.parallel_limit: int = len(search_space) + 1
         self.num_running_trial: int = 0
 
@@ -151,7 +149,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 trial.user_attrs["ParallelEnabled"] = self.parallel_limit > 0
                 self.num_running_trial += 1
             else:
-                self.NelderMead.vertex_queue.put(np.inf)
+                self.nelder_mead.vertex_queue.put(np.inf)
                 self.before_trial(study, trial)
         else:
             trial.user_attrs["Coordinate"] = None
@@ -183,5 +181,5 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.stack[trial._trial_id] = values[0]
             if self.num_running_trial == 0:
                 for value in [item[1] for item in sorted(self.stack.items())]:
-                    self.NelderMead.vertex_queue.put(value)
+                    self.nelder_mead.vertex_queue.put(value)
                 self.stack = {}
