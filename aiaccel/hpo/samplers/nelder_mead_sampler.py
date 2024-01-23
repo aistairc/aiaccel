@@ -123,6 +123,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     def __init__(self,
                  search_space: dict[str, list[float]],
                  seed: int | None = None,
+                 num_iterations: int = 0,
                  **coef: float
                  ) -> None:
         self.param_names = []  # パラメータの順序を記憶
@@ -131,7 +132,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.param_names.append(param_name)
             self._search_space[param_name] = list(param_distribution)
 
-        self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(self._search_space, Coef(**coef), seed)
+        self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(self._search_space, Coef(**coef), seed, num_iterations)
         self.generator = self.NelderMead.search()
         self.ParallelLimit: int = len(search_space) + 1
         self.NumOfRunningTrial: int = 0
