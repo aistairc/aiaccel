@@ -9,9 +9,7 @@ from typing import Any, Sequence
 import numpy as np
 import optuna
 from optuna import distributions
-from optuna._transform import _SearchSpaceTransform
 from optuna.distributions import BaseDistribution
-from optuna.samplers._lazy_random_state import LazyRandomState
 from optuna.study import Study
 from optuna.trial import FrozenTrial, TrialState
 
@@ -33,27 +31,24 @@ class NelderMeadAlgorism:
                  num_iterations: int = 0) -> None:
         self._search_space = search_space
         self.dimension: int = len(search_space)
-        self._rng: LazyRandomState = LazyRandomState(seed)
+        # self._rng: LazyRandomState = LazyRandomState(seed)
         self.vertices: np.ndarray[float, float] = np.array([])
         self.values: np.ndarray[float, float] = np.array([])
         self.coef: Coef = coef
         self.num_iterations: int = num_iterations
         self.num_initial_create_trial: int = 0
         self.vertex_queue: queue.Queue[float] = queue.Queue()
+        np.random.seed(seed)
 
     def initial(self) -> Generator[np.ndarray[float, float], None, None]:
-        initial_params = []
-        for _ in range(self.dimension + 1):
-            initial_param = []
-            for param_name, param_distribution in self._search_space.items():
-                search_space = {
-                    param_name: optuna.distributions.FloatDistribution(param_distribution[0], param_distribution[1])
-                    }
-                trans = _SearchSpaceTransform(search_space)
-                trans_params = self._rng.rng.uniform(trans.bounds[:, 0], trans.bounds[:, 1])
-                initial_param.append(trans.untransform(trans_params)[param_name])
+        # initial_params = []
+        initial_params = np.random.uniform(
+                [param_distribution[0] for param_distribution in self._search_space.values()],
+                [param_distribution[1] for param_distribution in self._search_space.values()],
+                [self.dimension + 1, self.dimension])
+
+        for initial_param in initial_params:
             self.num_initial_create_trial += 1
-            initial_params.append(np.array(initial_param))
             yield np.array(initial_param)
         self.vertices, self.values = (
             np.array(initial_params),
