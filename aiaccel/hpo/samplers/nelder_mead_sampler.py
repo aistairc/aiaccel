@@ -22,10 +22,13 @@ class NelderMeadCoefficient:
 
 
 class NelderMeadAlgorism:
+    vertices: np.ndarray[float, float]
+    values: np.ndarray[float, float]
+
     def __init__(
         self,
         search_space: dict[str, list[float]],
-        coeff: NelderMeadCoefficient | None,
+        coeff: NelderMeadCoefficient | None = None,
         seed: int | None = None,
     ) -> None:
         self._search_space = search_space
@@ -83,9 +86,7 @@ class NelderMeadAlgorism:
 
             # shrink
             if shrink_requied:
-                self.vertices[1:] = [
-                    self.vertices[0] + self.coeff.s * (v - self.vertices[0]) for v in self.vertices[1:]
-                ]
+                self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
                 yield from iter(self.vertices[1:])
 
                 self.values[1:] = [self.vertex_queue.get() for _ in range(len(self.vertices) - 1)]
