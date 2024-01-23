@@ -76,15 +76,15 @@ class NelderMeadAlgorism:
             order = np.argsort(self.values)
             self.vertices, self.values = self.vertices[order], self.values[order]
             # reflect
-            self.yc = self.vertices[:-1].mean(axis=0)
-            yield (yr := self.yc + self.coef.r * (self.yc - self.vertices[-1])), 0
+            yc = self.vertices[:-1].mean(axis=0)
+            yield (yr := yc + self.coef.r * (yc - self.vertices[-1])), 0
             fr = self.vertex_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:
                 # expand
-                yield (ye := self.yc + self.coef.e * (self.yc - self.vertices[-1])), 0
+                yield (ye := yc + self.coef.e * (yc - self.vertices[-1])), 0
                 fe = self.vertex_queue.get()
                 if fe < fr:
                     self.vertices[-1], self.values[-1] = ye, fe
@@ -92,7 +92,7 @@ class NelderMeadAlgorism:
                     self.vertices[-1], self.values[-1] = yr, fr
             elif self.values[-2] <= fr < self.values[-1]:
                 # outside contract
-                yield (yoc := self.yc + self.coef.oc * (self.yc - self.vertices[-1])), 0
+                yield (yoc := yc + self.coef.oc * (yc - self.vertices[-1])), 0
                 foc = self.vertex_queue.get()
                 if foc <= fr:
                     self.vertices[-1], self.values[-1] = yoc, foc
@@ -100,7 +100,7 @@ class NelderMeadAlgorism:
                     shrink_requied = True
             elif self.values[-1] <= fr:
                 # inside contract
-                yield (yic := self.yc + self.coef.ic * (self.yc - self.vertices[-1])), 0
+                yield (yic := yc + self.coef.ic * (yc - self.vertices[-1])), 0
                 fic = self.vertex_queue.get()
                 if fic < self.values[-1]:
                     shrink_requied = False
