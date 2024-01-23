@@ -86,10 +86,8 @@ class NelderMeadAlgorism:
                 # expand
                 yield (ye := yc + self.coef.e * (yc - self.vertices[-1])), 0
                 fe = self.vertex_queue.get()
-                if fe < fr:
-                    self.vertices[-1], self.values[-1] = ye, fe
-                else:
-                    self.vertices[-1], self.values[-1] = yr, fr
+
+                self.vertices[-1], self.values[-1] = ye, fe if fe < fr else yr, fr
             elif self.values[-2] <= fr < self.values[-1]:
                 # outside contract
                 yield (yoc := yc + self.coef.oc * (yc - self.vertices[-1])), 0
