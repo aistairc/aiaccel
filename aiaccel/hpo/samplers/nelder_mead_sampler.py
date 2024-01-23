@@ -30,48 +30,17 @@ class NelderMeadAlgorism:
                  seed: int | None = None,
                  num_iterations: int = 0) -> None:
         self._search_space = search_space
-<<<<<<< HEAD
-        self.dimension: int = len(search_space)
-        self.vertices: np.ndarray[float, float] = np.array([])
-        self.values: np.ndarray[float, float] = np.array([])
-=======
-
->>>>>>> 88b4180aa158fa175e26b9fee6067f9cc4455436
         self.coef: Coef = coef
         self.num_iterations: int = num_iterations
 
-        self.num_iterations: int = num_iterations
+        # self.num_iterations: int = num_iterations
 
         self.dimension: int = len(search_space)
 
         self.vertex_queue: queue.Queue[float] = queue.Queue()
         np.random.seed(seed)
 
-<<<<<<< HEAD
-    def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
-        for i in range(1, len(self.vertices)):
-            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0]))
-            self.vertices[i] = ysh
-        self.values[1:] = [self.vertex_queue.get() for _ in range(1, len(self.vertices))]
-
-    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
-        # initial
-        initial_params = np.random.uniform(
-                [param_distribution[0] for param_distribution in self._search_space.values()],
-                [param_distribution[1] for param_distribution in self._search_space.values()],
-                [self.dimension + 1, self.dimension])
-
-        for initial_param in initial_params:
-            self.num_initial_create_trial += 1
-            yield np.array(initial_param)
-        self.vertices, self.values = (
-            np.array(initial_params),
-            np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
-            )
-        # nelder_mead
-=======
-    def generate_initial_vertices(self) -> Generator[np.ndarray[float, float], None, None]:
-        # initial_params = []
+    def generate_initial_vertices(self) -> np.ndarray:
         vertices = np.random.uniform(
             [param_distribution[0] for param_distribution in self._search_space.values()],
             [param_distribution[1] for param_distribution in self._search_space.values()],
@@ -86,7 +55,6 @@ class NelderMeadAlgorism:
         values = np.array([self.vertex_queue.get() for _ in range(len(vertices))])
 
         # main loop
->>>>>>> 88b4180aa158fa175e26b9fee6067f9cc4455436
         shrink_requied = False
         for _ in range(self.num_iterations) if self.num_iterations >= 0 else itertools.count():
             # sort vertices by their values
