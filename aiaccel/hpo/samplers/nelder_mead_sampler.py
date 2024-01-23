@@ -54,7 +54,7 @@ class NelderMeadAlgorism:
                 initial_param.append(trans.untransform(trans_params)[param_name])
             self.num_initial_create_trial += 1
             initial_params.append(np.array(initial_param))
-            yield np.array(initial_param), self.dimension + 1 - self.num_initial_create_trial
+            yield np.array(initial_param)
         self.vertices, self.values = (
             np.array(initial_params),
             np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
@@ -62,7 +62,7 @@ class NelderMeadAlgorism:
 
     def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
         for i in range(1, len(self.vertices)):
-            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0])), 0
+            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0]))
             self.vertices[i] = ysh
         for i in range(1, len(self.vertices)):
             self.values[i] = self.vertex_queue.get()
@@ -77,20 +77,20 @@ class NelderMeadAlgorism:
             self.vertices, self.values = self.vertices[order], self.values[order]
             # reflect
             yc = self.vertices[:-1].mean(axis=0)
-            yield (yr := yc + self.coef.r * (yc - self.vertices[-1])), 0
+            yield (yr := yc + self.coef.r * (yc - self.vertices[-1]))
             fr = self.vertex_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:
                 # expand
-                yield (ye := yc + self.coef.e * (yc - self.vertices[-1])), 0
+                yield (ye := yc + self.coef.e * (yc - self.vertices[-1]))
                 fe = self.vertex_queue.get()
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:
                 # outside contract
-                yield (yoc := yc + self.coef.oc * (yc - self.vertices[-1])), 0
+                yield (yoc := yc + self.coef.oc * (yc - self.vertices[-1]))
                 foc = self.vertex_queue.get()
                 if foc <= fr:
                     self.vertices[-1], self.values[-1] = yoc, foc
@@ -98,7 +98,7 @@ class NelderMeadAlgorism:
                     shrink_requied = True
             elif self.values[-1] <= fr:
                 # inside contract
-                yield (yic := yc + self.coef.ic * (yc - self.vertices[-1])), 0
+                yield (yic := yc + self.coef.ic * (yc - self.vertices[-1]))
                 fic = self.vertex_queue.get()
                 if fic < self.values[-1]:
                     shrink_requied = False
@@ -128,7 +128,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self._search_space, Coef(**coef), seed, num_iterations
             )
         self.generator = self.nelder_mead.__iter__()
-        self.parallel_limit: int = len(search_space) + 1
         self.num_running_trial: int = 0
 
         self.stack: dict[int, float] = {}
@@ -145,17 +144,15 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        if self.num_running_trial == 0 or self.parallel_limit > 0:
-            trial.user_attrs["Coordinate"], self.parallel_limit = next(self.generator)
+        if self.num_running_trial == 0:
+            trial.user_attrs["Coordinate"] = next(self.generator)
             if self.is_within_range(trial.user_attrs["Coordinate"]):
-                trial.user_attrs["ParallelEnabled"] = self.parallel_limit > 0
                 self.num_running_trial += 1
             else:
                 self.nelder_mead.vertex_queue.put(np.inf)
                 self.before_trial(study, trial)
         else:
             trial.user_attrs["Coordinate"] = None
-            trial.user_attrs["ParallelEnabled"] = False
 
     def sample_independent(
         self,
