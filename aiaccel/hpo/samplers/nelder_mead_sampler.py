@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import dataclasses
+from dataclasses import dataclass
 import itertools
 import queue
 from collections.abc import Generator
@@ -8,14 +8,13 @@ from typing import Any, Sequence
 
 import numpy as np
 import optuna
-from optuna import distributions
 from optuna.distributions import BaseDistribution
 from optuna.study import Study
 from optuna.trial import FrozenTrial, TrialState
 
 
-@dataclasses.dataclass
-class Coef:
+@dataclass
+class NelderMeadCoefficient:
     r: float = 1.0
     ic: float = -0.5
     oc: float = 0.5
@@ -24,33 +23,33 @@ class Coef:
 
 
 class NelderMeadAlgorism:
-    def __init__(self,
-                 search_space: dict[str, list[float]],
-                 coef: Coef,
-                 seed: int | None = None,
-                 num_iterations: int = 0) -> None:
+    def __init__(
+        self,
+        search_space: dict[str, list[float]],
+        coef: NelderMeadCoefficient,
+        seed: int | None = None,
+        num_iterations: int | None = None,
+    ) -> None:
         self._search_space = search_space
-        self.coef: Coef = coef
-        self.num_iterations: int = num_iterations
+        self.coef = coef
+        self.num_iterations = num_iterations
 
-        self.dimension: int = len(search_space)
+        self.dimension = len(search_space)
 
         self.vertex_queue: queue.Queue[float] = queue.Queue()
         np.random.seed(seed)
 
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
         # initialization
-        vertices = np.random.uniform(
-            [param_distribution[0] for param_distribution in self._search_space.values()],
-            [param_distribution[1] for param_distribution in self._search_space.values()],
-            [self.dimension + 1, self.dimension]
-        )
+        lows, highs = zip(*self._search_space.values())
+        vertices = np.random.uniform(lows, highs, (self.dimension + 1, self.dimension))
+
         yield from iter(vertices)
         values = np.array([self.vertex_queue.get() for _ in range(len(vertices))])
 
         # main loop
         shrink_requied = False
-        for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
+        for _ in range(self.num_iterations) if self.num_iterations is not None else itertools.count():
             # sort vertices by their values
             order = np.argsort(values)
             vertices, values = vertices[order], values[order]
@@ -63,7 +62,7 @@ class NelderMeadAlgorism:
 
             if values[0] <= fr < values[-2]:
                 vertices[-1], values[-1] = yr, fr
-            elif fr < values[0]:   # expand
+            elif fr < values[0]:  # expand
                 yield (ye := yc + self.coef.e * (yc - vertices[-1]))
                 fe = self.vertex_queue.get()
 
@@ -96,44 +95,46 @@ class NelderMeadAlgorism:
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
-    def __init__(self,
-                 search_space: dict[str, list[float]],
-                 seed: int | None = None,
-                 num_iterations: int = 0,
-                 **coef: float
-                 ) -> None:
+    def __init__(
+        self,
+        search_space: dict[str, list[float]],
+        seed: int | None = None,
+        num_iterations: int | None = None,
+        coef: NelderMeadCoefficient = NelderMeadCoefficient(),
+    ) -> None:
         self.param_names = []  # パラメータの順序を記憶
         self._search_space = {}
         for param_name, param_distribution in sorted(search_space.items()):
             self.param_names.append(param_name)
             self._search_space[param_name] = list(param_distribution)
 
-        self.nelder_mead: NelderMeadAlgorism = NelderMeadAlgorism(
-            self._search_space, Coef(**coef), seed, num_iterations
-            )
-        self.generator = self.nelder_mead.__iter__()
+        self.nm = NelderMeadAlgorism(self._search_space, coef, seed, num_iterations)
+        self.nm_generator = iter(self.nm)
         self.num_running_trial: int = 0
 
         self.stack: dict[int, float] = {}
 
     def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
-        return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
+        return all(low < x < high for x, (low, high) in zip(coordinates, self._search_space.values()))
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
 
     def sample_relative(
-        self, study: Study, trial: FrozenTrial, search_space: dict[str, BaseDistribution]
+        self,
+        study: Study,
+        trial: FrozenTrial,
+        search_space: dict[str, BaseDistribution],
     ) -> dict[str, Any]:
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         if self.num_running_trial == 0:
-            trial.user_attrs["Coordinate"] = next(self.generator)
+            trial.user_attrs["Coordinate"] = next(self.nm_generator)
             if self.is_within_range(trial.user_attrs["Coordinate"]):
                 self.num_running_trial += 1
             else:
-                self.nelder_mead.vertex_queue.put(np.inf)
+                self.nm.vertex_queue.put(np.inf)
                 self.before_trial(study, trial)
         else:
             trial.user_attrs["Coordinate"] = None
@@ -143,7 +144,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         study: Study,
         trial: FrozenTrial,
         param_name: str,
-        param_distribution: distributions.BaseDistribution,
+        param_distribution: BaseDistribution,
     ) -> Any:
         if trial.user_attrs["Coordinate"] is None:
             raise ValueError('trial.user_attrs["Coordinate"] is None')
@@ -164,5 +165,5 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.stack[trial._trial_id] = values[0]
             if self.num_running_trial == 0:
                 for value in [item[1] for item in sorted(self.stack.items())]:
-                    self.nelder_mead.vertex_queue.put(value)
+                    self.nm.vertex_queue.put(value)
                 self.stack = {}
