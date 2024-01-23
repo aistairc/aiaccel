@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
-from enum import Enum
+import queue
+from collections.abc import Generator
 from typing import Any, Sequence
 
 import numpy as np
@@ -23,71 +24,19 @@ class Coef:
     s: float = 0.5
 
 
-class NelderMeadState(Enum):
-    Initial = 0
-    Reflect = 1
-    Expand = 2
-    InsideContract = 3
-    OutsideContract = 4
-    Shrink = 5
+@dataclasses.dataclass
+class Storage:
+    r: np.ndarray[float, float] | None = None  # reflect
+    e: np.ndarray[float, float] | None = None  # expand
+    ic: np.ndarray[float, float] | None = None  # inside_contract
+    oc: np.ndarray[float, float] | None = None  # outside_contract
+    s: np.ndarray[float, float] | None = None  # shrink
 
 
-class Simplex:
-    def __init__(self, coef: Coef) -> None:
-        self.vertices: np.ndarray[float, float] = np.array([])
-        self.values: np.ndarray[float, float] = np.array([])
-        self.coef: Coef = coef
-
-    def add_vertices(self, vertex: np.ndarray[float, float], value: float | None = None) -> None:
-        if len(self.vertices) == 0:
-            self.vertices = np.array([vertex])
-        else:
-            self.vertices = np.append(self.vertices, [vertex], axis=0)
-        self.values = np.append(self.values, value)
-
-    def update_vertices(self, index: int, vertex: np.ndarray[float, float], value: float | None = None) -> None:
-        self.vertices[index] = vertex
-        self.values[index] = value
-
-    def num_of_vertices(self) -> int:
-        return len(self.vertices)
-
-    def order_by(self) -> None:
-        order = np.argsort(self.values)
-
-        self.vertices = self.vertices[order]
-        self.values = self.values[order]
-
-    def calc_centroid(self) -> None:
-        self.order_by()
-        self.centroid = self.vertices[:-1].mean(axis=0)
-
-    def reflect(self) -> np.ndarray[float, float]:
-        xr = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef.r)
-        return xr
-
-    def expand(self) -> np.ndarray[float, float]:
-        xe = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef.e)
-        return xe
-
-    def inside_contract(self) -> np.ndarray[float, float]:
-        xic = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef.ic)
-        return xic
-
-    def outside_contract(self) -> np.ndarray[float, float]:
-        xoc = self.centroid + ((self.centroid - self.vertices[-1]) * self.coef.oc)
-        return xoc
-
-    def shrink(self) -> np.ndarray[float, float]:
-        shrinked_vertices = np.array([self.vertices[0]])
-        for i in range(1, len(self.vertices)):
-            shrinked_vertex = self.vertices[0] + (self.vertices[i] - self.vertices[0]) * self.coef.s
-            shrinked_vertices = np.append(shrinked_vertices, [shrinked_vertex], axis=0)
-
-        self.vertices = self.vertices[:1]
-        self.values = self.values[:1]
-
-        return shrinked_vertices
+@dataclasses.dataclass
+class Vertex:
+    coordinate: np.ndarray[float, float]
+    value: float
 
 
 class NelderMeadAlgorism:
@@ -102,89 +51,18 @@ class NelderMeadAlgorism:
         for param_name, param_distribution in sorted(search_space.items()):
             self._search_space[param_name] = list(param_distribution)
 
-        self.simplex: Simplex = Simplex(coef)
-        self.state: NelderMeadState = NelderMeadState.Initial
+        self.vertices: np.ndarray[float, float] = np.array([])
+        self.values: np.ndarray[float, float] = np.array([])
+        self.coef: Coef = coef
+
         self.NumofInitialCreateTrial: int = 0
-        self.xs: np.ndarray[float, float] = np.array([])
 
-        self.r: np.ndarray[float, float] | None = None  # reflect
-        self.e: np.ndarray[float, float] | None = None  # expand
-        self.ic: np.ndarray[float, float] | None = None  # inside_contract
-        self.oc: np.ndarray[float, float] | None = None  # outside_contract
-        self.s: np.ndarray[float, float] | None = None  # shrink
-        self.yr: float | None = None  # value of reflect vertex
+        self.storage: Storage = Storage()
 
-    def after_initialize(self) -> None:
-        self.state = NelderMeadState.Reflect
+        self.vertex_queue: queue.Queue[Vertex] = queue.Queue()
 
-    def reflect(self) -> np.ndarray[float, float]:
-        self.simplex.calc_centroid()
-        self.r = self.simplex.reflect()
-        return self.r
-
-    def after_reflect(self, yr: float) -> None:
-        self.yr = yr
-        if self.simplex.values[0] <= yr < self.simplex.values[-2]:
-            self.simplex.update_vertices(-1, self.r, yr)
-            self.state = NelderMeadState.Reflect
-        elif yr < self.simplex.values[0]:
-            self.state = NelderMeadState.Expand
-        elif self.simplex.values[-2] <= yr < self.simplex.values[-1]:
-            self.state = NelderMeadState.OutsideContract
-        elif self.simplex.values[-1] <= yr:
-            self.state = NelderMeadState.InsideContract
-        else:
-            self.state = NelderMeadState.Reflect
-
-    def expand(self) -> np.ndarray[float, float]:
-        self.e = self.simplex.expand()
-        return self.e
-
-    def after_expand(self, ye: float) -> None:
-        if self.yr is None:
-            raise ValueError("The value of reflect is not stored.")
-        if ye < self.yr:
-            self.simplex.update_vertices(-1, self.e, ye)
-        else:
-            self.simplex.update_vertices(-1, self.r, self.yr)
-        self.state = NelderMeadState.Reflect
-
-    def inside_contract(self) -> np.ndarray[float, float]:
-        self.ic = self.simplex.inside_contract()
-        return self.ic
-
-    def after_inside_contract(self, yic: float) -> None:
-        if yic < self.simplex.values[-1]:
-            self.simplex.update_vertices(-1, self.ic, yic)
-            self.state = NelderMeadState.Reflect
-        else:
-            self.state = NelderMeadState.Shrink
-
-    def outside_contract(self) -> np.ndarray[float, float]:
-        self.oc = self.simplex.outside_contract()
-        return self.oc
-
-    def after_outside_contract(self, yoc: float) -> None:
-        if self.yr is None:
-            raise ValueError("The value of reflect is not stored.")
-        if yoc <= self.yr:
-            self.simplex.update_vertices(-1, self.oc, yoc)
-            self.state = NelderMeadState.Reflect
-        else:
-            self.state = NelderMeadState.Shrink
-
-    def shrink(self) -> np.ndarray[float, float]:
-        self.s = self.simplex.shrink()
-        return self.s
-
-    def after_shrink(self) -> None:
-        self.state = NelderMeadState.Reflect
-
-    def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
-        return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
-
-    def get_next_coordinates(self) -> (np.ndarray[float, float] | None, int):
-        if self.state == NelderMeadState.Initial:
+    def initial(self) -> Generator[np.ndarray[float, float], None, None]:
+        for _ in range(self.dimension + 1):
             initial_param = []
             for param_name, param_distribution in self._search_space.items():
                 search_space = {
@@ -194,46 +72,110 @@ class NelderMeadAlgorism:
                 trans_params = self._rng.rng.uniform(trans.bounds[:, 0], trans.bounds[:, 1])
                 initial_param.append(trans.untransform(trans_params)[param_name])
             self.NumofInitialCreateTrial += 1
-            return np.array(initial_param), self.dimension + 1 - self.NumofInitialCreateTrial
-        elif self.state == NelderMeadState.Shrink:
-            if len(self.xs) == 0:
-                self.xs = self.shrink()[1:]
-            xs = self.xs[0]
-            self.xs = np.delete(self.xs, 0, axis=0)
-            return xs, len(self.xs)
+            yield np.array(initial_param), self.dimension + 1 - self.NumofInitialCreateTrial
+        temp = []
+        for _ in range(self.dimension + 1):
+            temp.append(self.vertex_queue.get())
+        self.vertices = np.array([vertex.coordinate for vertex in temp])
+        self.values = np.array([vertex.value for vertex in temp])
+
+    def order_by(self) -> None:
+        order = np.argsort(self.values)
+
+        self.vertices = self.vertices[order]
+        self.values = self.values[order]
+
+    def centroid(self) -> None:
+        self.storage = Storage()
+        self.order_by()
+        self.yc = self.vertices[:-1].mean(axis=0)
+
+    def reflect(self) -> Generator[np.ndarray[float, float], None, None]:
+        yr = self.yc + self.coef.r * (self.yc - self.vertices[-1])
+        self.storage.r = yr
+        yield from self.func(yr)
+
+    def expand(self) -> Generator[np.ndarray[float, float], None, None]:
+        ye = self.yc + self.coef.e * (self.yc - self.vertices[-1])
+        self.storage.e = ye
+        yield from self.func(ye)
+
+    def inside_contract(self) -> Generator[np.ndarray[float, float], None, None]:
+        yic = self.yc + self.coef.ic * (self.yc - self.vertices[-1])
+        self.storage.ic = yic
+        yield from self.func(yic)
+
+    def outside_contract(self) -> Generator[np.ndarray[float, float], None, None]:
+        yoc = self.yc + self.coef.oc * (self.yc - self.vertices[-1])
+        self.storage.oc = yoc
+        yield from self.func(yoc)
+
+    def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
+        for i in range(1, len(self.vertices)):
+            yield self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0]), 0
+        for i in range(1, len(self.vertices)):
+            vertex = self.vertex_queue.get()
+            self.vertices[i] = vertex.coordinate
+            self.values[i] = vertex.value
+
+    def func(self, y: np.ndarray[float, float]) -> Generator[np.ndarray[float, float], None, None]:
+        if self.is_within_range(y):
+            yield y, 0
         else:
-            if self.state == NelderMeadState.Reflect:
-                x = self.reflect()
-            elif self.state == NelderMeadState.Expand:
-                x = self.expand()
-            elif self.state == NelderMeadState.InsideContract:
-                x = self.inside_contract()
-            elif self.state == NelderMeadState.OutsideContract:
-                x = self.outside_contract()
+            self.vertex_queue.put(Vertex(y, np.inf))
 
-            if not self.is_within_range(x):
-                self.set_objective(x, np.inf)
-                return self.get_next_coordinates()
-            else:
-                return x, 0
+    def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
+        return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
 
-    def set_objective(self, coordinates: np.ndarray[float, float], objective: float) -> None:
-        if self.state == NelderMeadState.Initial:
-            self.simplex.add_vertices(coordinates, objective)
-            if self.simplex.num_of_vertices() == self.dimension + 1:
-                self.after_initialize()
-        elif self.state == NelderMeadState.Reflect:
-            self.after_reflect(objective)
-        elif self.state == NelderMeadState.Expand:
-            self.after_expand(objective)
-        elif self.state == NelderMeadState.InsideContract:
-            self.after_inside_contract(objective)
-        elif self.state == NelderMeadState.OutsideContract:
-            self.after_outside_contract(objective)
-        elif self.state == NelderMeadState.Shrink:
-            self.simplex.add_vertices(coordinates, objective)
-            if self.simplex.num_of_vertices() == self.dimension + 1:
-                self.after_shrink()
+    def search(self) -> Generator[np.ndarray[float, float], None, None]:
+        yield from self.initial()
+        while True:
+
+            self.centroid()
+            yield from self.reflect()
+            fr = self.vertex_queue.get().value
+
+            if self.values[0] <= fr < self.values[-2]:
+
+                self.vertices[-1] = self.storage.r
+                self.values[-1] = fr
+
+            elif fr < self.values[0]:
+
+                yield from self.expand()
+                fe = self.vertex_queue.get().value
+
+                if fe < fr:
+                    self.vertices[-1] = self.storage.e
+                    self.values[-1] = fe
+
+                else:
+                    self.vertices[-1] = self.storage.r
+                    self.values[-1] = fr
+
+            elif self.values[-2] <= fr < self.values[-1]:
+
+                yield from self.outside_contract()
+                foc = self.vertex_queue.get().value
+
+                if foc <= fr:
+                    self.vertices[-1] = self.storage.oc
+                    self.values[-1] = foc
+
+                else:
+                    self.shrink()
+
+            elif self.values[-1] <= fr:
+
+                yield from self.inside_contract()
+                fic = self.vertex_queue.get().value
+
+                if fic < self.values[-1]:
+                    self.vertices[-1] = self.storage.ic
+                    self.values[-1] = fic
+
+                else:
+                    yield from self.shrink()
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
@@ -247,6 +189,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.param_names.append(param_name)
 
         self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(search_space, Coef(**coef), seed)
+        self.generator = self.NelderMead.search()
         self.ParallelLimit: int = len(search_space) + 1
         self.NumOfRunningTrial: int = 0
 
@@ -260,11 +203,11 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         if self.NumOfRunningTrial == 0 or self.ParallelLimit > 0:
-            trial.user_attrs["Coordinates"], self.ParallelLimit = self.NelderMead.get_next_coordinates()
+            trial.user_attrs["Coordinate"], self.ParallelLimit = next(self.generator)
             trial.user_attrs["ParallelEnabled"] = self.ParallelLimit > 0
             self.NumOfRunningTrial += 1
         else:
-            trial.user_attrs["Coordinates"] = None
+            trial.user_attrs["Coordinate"] = None
             trial.user_attrs["ParallelEnabled"] = False
 
     def sample_independent(
@@ -274,10 +217,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: distributions.BaseDistribution,
     ) -> Any:
-        if trial.user_attrs["Coordinates"] is None:
-            raise ValueError('trial.user_attrs["Coordinates"] is None')
+        if trial.user_attrs["Coordinate"] is None:
+            raise ValueError('trial.user_attrs["Coordinate"] is None')
         param_index = self.param_names.index(param_name)
-        param_value = trial.user_attrs["Coordinates"][param_index]
+        param_value = trial.user_attrs["Coordinate"][param_index]
 
         return param_value
 
@@ -288,7 +231,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         state: TrialState,
         values: Sequence[float] | None,
     ) -> None:
-        coordinates = np.array([trial.params[name] for name in self.param_names])
+        coordinate = np.array([trial.params[name] for name in self.param_names])
         if isinstance(values, list):
-            self.NelderMead.set_objective(coordinates, values[0])
+            self.NelderMead.vertex_queue.put(Vertex(coordinate, values[0]))
             self.NumOfRunningTrial -= 1
