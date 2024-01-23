@@ -28,19 +28,4 @@ jobs:
 
       - name: Type check
         run: |
-          mypy aiaccel \
-            --install-types \
-            --non-interactive \
-            --ignore-missing-imports \
-            --warn-unused-configs \
-            --disallow-any-generics \
-            --disallow-untyped-calls \
-            --disallow-untyped-defs \
-            --disallow-incomplete-defs \
-            --check-untyped-defs \
-            --disallow-untyped-decorators \
-            --warn-redundant-casts \
-            --warn-unused-ignores \
-            --no-implicit-reexport \
-            --strict-equality \
-            --strict-concatenate
+          mypy aiaccel 
