@@ -30,79 +30,76 @@ class NelderMeadAlgorism:
                  seed: int | None = None,
                  num_iterations: int = 0) -> None:
         self._search_space = search_space
-        self.dimension: int = len(search_space)
-        # self._rng: LazyRandomState = LazyRandomState(seed)
-        self.vertices: np.ndarray[float, float] = np.array([])
-        self.values: np.ndarray[float, float] = np.array([])
+
         self.coef: Coef = coef
         self.num_iterations: int = num_iterations
-        self.num_initial_create_trial: int = 0
+
+        self.num_iterations: int = num_iterations
+
+        self.dimension: int = len(search_space)
+
         self.vertex_queue: queue.Queue[float] = queue.Queue()
         np.random.seed(seed)
 
-    def initial(self) -> Generator[np.ndarray[float, float], None, None]:
+    def generate_initial_vertices(self) -> Generator[np.ndarray[float, float], None, None]:
         # initial_params = []
-        initial_params = np.random.uniform(
-                [param_distribution[0] for param_distribution in self._search_space.values()],
-                [param_distribution[1] for param_distribution in self._search_space.values()],
-                [self.dimension + 1, self.dimension])
+        vertices = np.random.uniform(
+            [param_distribution[0] for param_distribution in self._search_space.values()],
+            [param_distribution[1] for param_distribution in self._search_space.values()],
+            [self.dimension + 1, self.dimension]
+        )
 
-        for initial_param in initial_params:
-            self.num_initial_create_trial += 1
-            yield np.array(initial_param)
-        self.vertices, self.values = (
-            np.array(initial_params),
-            np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
-            )
-
-    def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
-        for i in range(1, len(self.vertices)):
-            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0]))
-            self.vertices[i] = ysh
-        for i in range(1, len(self.vertices)):
-            self.values[i] = self.vertex_queue.get()
+        return vertices
 
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
-        # initial
-        yield from self.initial()
-        # nelder_mead
+        # initialization
+        vertices = self.generate_initial_vertices()
+        values = np.array([self.vertex_queue.get() for _ in range(len(vertices))])
+
+        # main loop
         shrink_requied = False
-        for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
+        for _ in range(self.num_iterations) if self.num_iterations >= 0 else itertools.count():
             # sort vertices by their values
-            order = np.argsort(self.values)
-            self.vertices, self.values = self.vertices[order], self.values[order]
+            order = np.argsort(values)
+            vertices, values = vertices[order], values[order]
+
             # reflect
-            yc = self.vertices[:-1].mean(axis=0)
-            yield (yr := yc + self.coef.r * (yc - self.vertices[-1]))
+            yc = vertices[:-1].mean(axis=0)
+            yield (yr := yc + self.coef.r * (yc - vertices[-1]))
+
             fr = self.vertex_queue.get()
 
-            if self.values[0] <= fr < self.values[-2]:
-                self.vertices[-1], self.values[-1] = yr, fr
-            elif fr < self.values[0]:
-                # expand
-                yield (ye := yc + self.coef.e * (yc - self.vertices[-1]))
+            if values[0] <= fr < values[-2]:
+                vertices[-1], values[-1] = yr, fr
+            elif fr < values[0]:   # expand
+                yield (ye := yc + self.coef.e * (yc - vertices[-1]))
                 fe = self.vertex_queue.get()
 
-                self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
-            elif self.values[-2] <= fr < self.values[-1]:
-                # outside contract
-                yield (yoc := yc + self.coef.oc * (yc - self.vertices[-1]))
+                vertices[-1], values[-1] = (ye, fe) if fe < fr else (yr, fr)
+            elif values[-2] <= fr < values[-1]:  # outside contract
+                yield (yoc := yc + self.coef.oc * (yc - vertices[-1]))
                 foc = self.vertex_queue.get()
+
                 if foc <= fr:
-                    self.vertices[-1], self.values[-1] = yoc, foc
+                    vertices[-1], values[-1] = yoc, foc
                 else:
                     shrink_requied = True
-            elif self.values[-1] <= fr:
-                # inside contract
-                yield (yic := yc + self.coef.ic * (yc - self.vertices[-1]))
+            elif values[-1] <= fr:  # inside contract
+                yield (yic := yc + self.coef.ic * (yc - vertices[-1]))
                 fic = self.vertex_queue.get()
-                if fic < self.values[-1]:
-                    self.vertices[-1], self.values[-1] = yic, fic
+
+                if fic < values[-1]:
+                    vertices[-1], values[-1] = yic, fic
                 else:
                     shrink_requied = True
+
+            # shrink
             if shrink_requied:
-                # shrink
-                yield from self.shrink()
+                vertices[1:] = [vertices[0] + self.coef.s * (v - vertices[0]) for v in vertices[1:]]
+                yield from iter(vertices[1:])
+
+                values[1:] = [self.vertex_queue.get() for _ in range(len(vertices) - 1)]
+
                 shrink_requied = False
 
 
