@@ -6,24 +6,8 @@ repos:
         args: [ --fix ]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.1.1
+    rev: v1.8.0
     hooks:
       - id: mypy
-        args: [
-          "--install-types",
-          "--non-interactive",
-          "--ignore-missing-imports",
-          "--warn-unused-configs",
-          "--disallow-any-generics",
-          "--disallow-untyped-calls",
-          "--disallow-untyped-defs",
-          "--disallow-incomplete-defs",
-          "--check-untyped-defs",
-          "--disallow-untyped-decorators",
-          "--warn-redundant-casts",
-          "--warn-unused-ignores",
-          "--no-implicit-reexport",
-          "--strict-equality",
-          "--strict-concatenate",
-        ]
+        additional_dependencies: [numpy]
         exclude:  ^(?:examples|tests)/.*
