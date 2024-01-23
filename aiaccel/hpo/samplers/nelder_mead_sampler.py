@@ -77,7 +77,7 @@ class NelderMeadAlgorism:
             self.vertices[i] = vertex.coordinate
             self.values[i] = vertex.value
 
-    def search(self) -> Generator[np.ndarray[float, float], None, None]:
+    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
         yield from self.initial()
         for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
             shrink_requied = False
@@ -133,7 +133,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self._search_space[param_name] = list(param_distribution)
 
         self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(self._search_space, Coef(**coef), seed, num_iterations)
-        self.generator = self.NelderMead.search()
+        self.generator = self.NelderMead.__iter__()
         self.ParallelLimit: int = len(search_space) + 1
         self.NumOfRunningTrial: int = 0
 
