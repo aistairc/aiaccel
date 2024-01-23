@@ -41,8 +41,7 @@ class NelderMeadAlgorism:
         self.num_initial_create_trial: int = 0
         self.vertex_queue: queue.Queue[float] = queue.Queue()
 
-    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
-        # initial
+    def initial(self) -> Generator[np.ndarray[float, float], None, None]:
         initial_params = []
         for _ in range(self.dimension + 1):
             initial_param = []
@@ -61,6 +60,16 @@ class NelderMeadAlgorism:
             np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
             )
 
+    def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
+        for i in range(1, len(self.vertices)):
+            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0])), 0
+            self.vertices[i] = ysh
+        for i in range(1, len(self.vertices)):
+            self.values[i] = self.vertex_queue.get()
+
+    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
+        # initial
+        yield from self.initial()
         # nelder_mead
         for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
             # order by
@@ -100,11 +109,7 @@ class NelderMeadAlgorism:
                     shrink_requied = True
             if shrink_requied:
                 # shrink
-                for i in range(1, len(self.vertices)):
-                    yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0])), 0
-                    self.vertices[i] = ysh
-                for i in range(1, len(self.vertices)):
-                    self.values[i] = self.vertex_queue.get()
+                yield from self.shrink()
                 shrink_requied = False
 
 
