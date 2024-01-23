@@ -65,9 +65,7 @@ class NelderMeadAlgorism:
                 initial_param.append(trans.untransform(trans_params)[param_name])
             self.num_initial_create_trial += 1
             yield np.array(initial_param), self.dimension + 1 - self.num_initial_create_trial
-        temp = []
-        for _ in range(self.dimension + 1):
-            temp.append(self.vertex_queue.get())
+        temp = [self.vertex_queue.get() for _ in range(self.dimension + 1)]
         self.vertices = np.array([vertex.coordinate for vertex in temp])
         self.values = np.array([vertex.value for vertex in temp])
 
@@ -85,34 +83,22 @@ class NelderMeadAlgorism:
             self.vertices[i] = vertex.coordinate
             self.values[i] = vertex.value
 
-    def func(self, y: np.ndarray[float, float]) -> Generator[np.ndarray[float, float], None, None]:
-        if self.is_within_range(y):
-            yield y, 0
-        else:
-            self.vertex_queue.put(Vertex(y, np.inf))
-
-    def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
-        return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
-
     def search(self) -> Generator[np.ndarray[float, float], None, None]:
         yield from self.initial()
         for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
 
+            shrink_requied = False
             self.order_by()
             self.yc = self.vertices[:-1].mean(axis=0)
-            yr = self.yc + self.coef.r * (self.yc - self.vertices[-1])
-            yield from self.func(yr)
+            yield (yr := self.yc + self.coef.r * (self.yc - self.vertices[-1])), 0
             fr = self.vertex_queue.get().value
 
             if self.values[0] <= fr < self.values[-2]:
-
                 self.vertices[-1] = yr
                 self.values[-1] = fr
 
             elif fr < self.values[0]:
-
-                ye = self.yc + self.coef.e * (self.yc - self.vertices[-1])
-                yield from self.func(ye)
+                yield (ye := self.yc + self.coef.e * (self.yc - self.vertices[-1])), 0
                 fe = self.vertex_queue.get().value
 
                 if fe < fr:
@@ -124,9 +110,7 @@ class NelderMeadAlgorism:
                     self.values[-1] = fr
 
             elif self.values[-2] <= fr < self.values[-1]:
-
-                yoc = self.yc + self.coef.oc * (self.yc - self.vertices[-1])
-                yield from self.func(yoc)
+                yield (yoc := self.yc + self.coef.oc * (self.yc - self.vertices[-1])), 0
                 foc = self.vertex_queue.get().value
 
                 if foc <= fr:
@@ -134,20 +118,22 @@ class NelderMeadAlgorism:
                     self.values[-1] = foc
 
                 else:
-                    yield from self.shrink()
+                    shrink_requied = True
 
             elif self.values[-1] <= fr:
-
-                yic = self.yc + self.coef.ic * (self.yc - self.vertices[-1])
-                yield from self.func(yic)
+                yield (yic := self.yc + self.coef.ic * (self.yc - self.vertices[-1])), 0
                 fic = self.vertex_queue.get().value
 
                 if fic < self.values[-1]:
+                    shrink_requied = False
                     self.vertices[-1] = yic
                     self.values[-1] = fic
 
                 else:
-                    yield from self.shrink()
+                    shrink_requied = True
+
+            if shrink_requied:
+                yield from self.shrink()
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
@@ -157,13 +143,18 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                  **coef: float
                  ) -> None:
         self.param_names = []  # パラメータの順序を記憶
-        for param_name in sorted(search_space.keys()):
+        self._search_space = {}
+        for param_name, param_distribution in sorted(search_space.items()):
             self.param_names.append(param_name)
+            self._search_space[param_name] = list(param_distribution)
 
         self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(search_space, Coef(**coef), seed)
         self.generator = self.NelderMead.search()
         self.ParallelLimit: int = len(search_space) + 1
         self.NumOfRunningTrial: int = 0
+
+    def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
+        return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
@@ -176,8 +167,12 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         if self.NumOfRunningTrial == 0 or self.ParallelLimit > 0:
             trial.user_attrs["Coordinate"], self.ParallelLimit = next(self.generator)
-            trial.user_attrs["ParallelEnabled"] = self.ParallelLimit > 0
-            self.NumOfRunningTrial += 1
+            if self.is_within_range(trial.user_attrs["Coordinate"]):
+                trial.user_attrs["ParallelEnabled"] = self.ParallelLimit > 0
+                self.NumOfRunningTrial += 1
+            else:
+                self.NelderMead.vertex_queue.put(Vertex(trial.user_attrs["Coordinate"], np.inf))
+                self.before_trial(study, trial)
         else:
             trial.user_attrs["Coordinate"] = None
             trial.user_attrs["ParallelEnabled"] = False
