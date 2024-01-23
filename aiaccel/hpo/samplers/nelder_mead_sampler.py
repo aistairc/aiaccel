@@ -33,30 +33,24 @@ class NelderMeadAlgorism:
         self.coef: Coef = coef
         self.num_iterations: int = num_iterations
 
-        # self.num_iterations: int = num_iterations
-
         self.dimension: int = len(search_space)
 
         self.vertex_queue: queue.Queue[float] = queue.Queue()
         np.random.seed(seed)
 
-    def generate_initial_vertices(self) -> np.ndarray:
+    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
+        # initialization
         vertices = np.random.uniform(
             [param_distribution[0] for param_distribution in self._search_space.values()],
             [param_distribution[1] for param_distribution in self._search_space.values()],
             [self.dimension + 1, self.dimension]
         )
-
-        return vertices
-
-    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
-        # initialization
-        vertices = self.generate_initial_vertices()
+        yield from iter(vertices)
         values = np.array([self.vertex_queue.get() for _ in range(len(vertices))])
 
         # main loop
         shrink_requied = False
-        for _ in range(self.num_iterations) if self.num_iterations >= 0 else itertools.count():
+        for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
             # sort vertices by their values
             order = np.argsort(values)
             vertices, values = vertices[order], values[order]
