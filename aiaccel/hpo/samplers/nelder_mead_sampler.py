@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import itertools
 import queue
 from collections.abc import Generator
+from dataclasses import dataclass
 from typing import Any, Sequence
 
 import numpy as np
@@ -26,12 +26,12 @@ class NelderMeadAlgorism:
     def __init__(
         self,
         search_space: dict[str, list[float]],
-        coef: NelderMeadCoefficient,
+        coeff: NelderMeadCoefficient | None,
         seed: int | None = None,
         num_iterations: int | None = None,
     ) -> None:
         self._search_space = search_space
-        self.coef = coef
+        self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
         self.num_iterations = num_iterations
 
         self.dimension = len(search_space)
@@ -56,19 +56,19 @@ class NelderMeadAlgorism:
 
             # reflect
             yc = vertices[:-1].mean(axis=0)
-            yield (yr := yc + self.coef.r * (yc - vertices[-1]))
+            yield (yr := yc + self.coeff.r * (yc - vertices[-1]))
 
             fr = self.vertex_queue.get()
 
             if values[0] <= fr < values[-2]:
                 vertices[-1], values[-1] = yr, fr
             elif fr < values[0]:  # expand
-                yield (ye := yc + self.coef.e * (yc - vertices[-1]))
+                yield (ye := yc + self.coeff.e * (yc - vertices[-1]))
                 fe = self.vertex_queue.get()
 
                 vertices[-1], values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif values[-2] <= fr < values[-1]:  # outside contract
-                yield (yoc := yc + self.coef.oc * (yc - vertices[-1]))
+                yield (yoc := yc + self.coeff.oc * (yc - vertices[-1]))
                 foc = self.vertex_queue.get()
 
                 if foc <= fr:
@@ -76,7 +76,7 @@ class NelderMeadAlgorism:
                 else:
                     shrink_requied = True
             elif values[-1] <= fr:  # inside contract
-                yield (yic := yc + self.coef.ic * (yc - vertices[-1]))
+                yield (yic := yc + self.coeff.ic * (yc - vertices[-1]))
                 fic = self.vertex_queue.get()
 
                 if fic < values[-1]:
@@ -86,7 +86,7 @@ class NelderMeadAlgorism:
 
             # shrink
             if shrink_requied:
-                vertices[1:] = [vertices[0] + self.coef.s * (v - vertices[0]) for v in vertices[1:]]
+                vertices[1:] = [vertices[0] + self.coeff.s * (v - vertices[0]) for v in vertices[1:]]
                 yield from iter(vertices[1:])
 
                 values[1:] = [self.vertex_queue.get() for _ in range(len(vertices) - 1)]
@@ -100,7 +100,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         search_space: dict[str, list[float]],
         seed: int | None = None,
         num_iterations: int | None = None,
-        coef: NelderMeadCoefficient = NelderMeadCoefficient(),
+        coeff: NelderMeadCoefficient | None = None,
     ) -> None:
         self.param_names = []  # パラメータの順序を記憶
         self._search_space = {}
@@ -108,9 +108,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.param_names.append(param_name)
             self._search_space[param_name] = list(param_distribution)
 
-        self.nm = NelderMeadAlgorism(self._search_space, coef, seed, num_iterations)
+        self.nm = NelderMeadAlgorism(self._search_space, coeff, seed, num_iterations)
         self.nm_generator = iter(self.nm)
-        self.num_running_trial: int = 0
+        self.num_running_trial = 0
 
         self.stack: dict[int, float] = {}
 
