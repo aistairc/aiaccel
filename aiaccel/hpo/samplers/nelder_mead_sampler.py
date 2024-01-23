@@ -31,7 +31,6 @@ class NelderMeadAlgorism:
                  num_iterations: int = 0) -> None:
         self._search_space = search_space
         self.dimension: int = len(search_space)
-        # self._rng: LazyRandomState = LazyRandomState(seed)
         self.vertices: np.ndarray[float, float] = np.array([])
         self.values: np.ndarray[float, float] = np.array([])
         self.coef: Coef = coef
@@ -40,8 +39,14 @@ class NelderMeadAlgorism:
         self.vertex_queue: queue.Queue[float] = queue.Queue()
         np.random.seed(seed)
 
-    def initial(self) -> Generator[np.ndarray[float, float], None, None]:
-        # initial_params = []
+    def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
+        for i in range(1, len(self.vertices)):
+            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0]))
+            self.vertices[i] = ysh
+        self.values[1:] = [self.vertex_queue.get() for _ in range(1, len(self.vertices))]
+
+    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
+        # initial
         initial_params = np.random.uniform(
                 [param_distribution[0] for param_distribution in self._search_space.values()],
                 [param_distribution[1] for param_distribution in self._search_space.values()],
@@ -54,17 +59,6 @@ class NelderMeadAlgorism:
             np.array(initial_params),
             np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
             )
-
-    def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
-        for i in range(1, len(self.vertices)):
-            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0]))
-            self.vertices[i] = ysh
-        for i in range(1, len(self.vertices)):
-            self.values[i] = self.vertex_queue.get()
-
-    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
-        # initial
-        yield from self.initial()
         # nelder_mead
         shrink_requied = False
         for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
