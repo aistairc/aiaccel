@@ -25,12 +25,6 @@ class Coef:
     s: float = 0.5
 
 
-@dataclasses.dataclass
-class Vertex:
-    coordinate: np.ndarray[float, float]
-    value: float
-
-
 class NelderMeadAlgorism:
     def __init__(self,
                  search_space: dict[str, list[float]],
@@ -45,9 +39,10 @@ class NelderMeadAlgorism:
         self.coef: Coef = coef
         self.num_iterations: int = num_iterations
         self.num_initial_create_trial: int = 0
-        self.vertex_queue: queue.Queue[Vertex] = queue.Queue()
+        self.vertex_queue: queue.Queue[float] = queue.Queue()
 
     def initial(self) -> Generator[np.ndarray[float, float], None, None]:
+        initial_params = []
         for _ in range(self.dimension + 1):
             initial_param = []
             for param_name, param_distribution in self._search_space.items():
@@ -58,10 +53,10 @@ class NelderMeadAlgorism:
                 trans_params = self._rng.rng.uniform(trans.bounds[:, 0], trans.bounds[:, 1])
                 initial_param.append(trans.untransform(trans_params)[param_name])
             self.num_initial_create_trial += 1
+            initial_params.append(np.array(initial_param))
             yield np.array(initial_param), self.dimension + 1 - self.num_initial_create_trial
-        temp = [self.vertex_queue.get() for _ in range(self.dimension + 1)]
-        self.vertices = np.array([vertex.coordinate for vertex in temp])
-        self.values = np.array([vertex.value for vertex in temp])
+        self.vertices = np.array(initial_params)
+        self.values = np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
 
     def order_by(self) -> None:
         order = np.argsort(self.values)
@@ -71,11 +66,10 @@ class NelderMeadAlgorism:
 
     def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
         for i in range(1, len(self.vertices)):
-            yield self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0]), 0
+            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0])), 0
+            self.vertices[i] = ysh
         for i in range(1, len(self.vertices)):
-            vertex = self.vertex_queue.get()
-            self.vertices[i] = vertex.coordinate
-            self.values[i] = vertex.value
+            self.values[i] = self.vertex_queue.get()
 
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
         yield from self.initial()
@@ -84,14 +78,14 @@ class NelderMeadAlgorism:
             self.order_by()
             self.yc = self.vertices[:-1].mean(axis=0)
             yield (yr := self.yc + self.coef.r * (self.yc - self.vertices[-1])), 0
-            fr = self.vertex_queue.get().value
+            fr = self.vertex_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1] = yr
                 self.values[-1] = fr
             elif fr < self.values[0]:
                 yield (ye := self.yc + self.coef.e * (self.yc - self.vertices[-1])), 0
-                fe = self.vertex_queue.get().value
+                fe = self.vertex_queue.get()
                 if fe < fr:
                     self.vertices[-1] = ye
                     self.values[-1] = fe
@@ -100,7 +94,7 @@ class NelderMeadAlgorism:
                     self.values[-1] = fr
             elif self.values[-2] <= fr < self.values[-1]:
                 yield (yoc := self.yc + self.coef.oc * (self.yc - self.vertices[-1])), 0
-                foc = self.vertex_queue.get().value
+                foc = self.vertex_queue.get()
                 if foc <= fr:
                     self.vertices[-1] = yoc
                     self.values[-1] = foc
@@ -108,7 +102,7 @@ class NelderMeadAlgorism:
                     shrink_requied = True
             elif self.values[-1] <= fr:
                 yield (yic := self.yc + self.coef.ic * (self.yc - self.vertices[-1])), 0
-                fic = self.vertex_queue.get().value
+                fic = self.vertex_queue.get()
                 if fic < self.values[-1]:
                     shrink_requied = False
                     self.vertices[-1] = yic
@@ -134,8 +128,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         self.NelderMead: NelderMeadAlgorism = NelderMeadAlgorism(self._search_space, Coef(**coef), seed, num_iterations)
         self.generator = self.NelderMead.__iter__()
-        self.ParallelLimit: int = len(search_space) + 1
-        self.NumOfRunningTrial: int = 0
+        self.parallel_limit: int = len(search_space) + 1
+        self.num_running_trial: int = 0
+
+        self.stack: dict[int, float] = dict()
 
     def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
         return all(not (co < ss[0] or ss[1] < co) for ss, co in zip(self._search_space.values(), coordinates))
@@ -149,13 +145,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        if self.NumOfRunningTrial == 0 or self.ParallelLimit > 0:
-            trial.user_attrs["Coordinate"], self.ParallelLimit = next(self.generator)
+        if self.num_running_trial == 0 or self.parallel_limit > 0:
+            trial.user_attrs["Coordinate"], self.parallel_limit = next(self.generator)
             if self.is_within_range(trial.user_attrs["Coordinate"]):
-                trial.user_attrs["ParallelEnabled"] = self.ParallelLimit > 0
-                self.NumOfRunningTrial += 1
+                trial.user_attrs["ParallelEnabled"] = self.parallel_limit > 0
+                self.num_running_trial += 1
             else:
-                self.NelderMead.vertex_queue.put(Vertex(trial.user_attrs["Coordinate"], np.inf))
+                self.NelderMead.vertex_queue.put(np.inf)
                 self.before_trial(study, trial)
         else:
             trial.user_attrs["Coordinate"] = None
@@ -182,7 +178,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         state: TrialState,
         values: Sequence[float] | None,
     ) -> None:
-        coordinate = np.array([trial.params[name] for name in self.param_names])
         if isinstance(values, list):
-            self.NelderMead.vertex_queue.put(Vertex(coordinate, values[0]))
-            self.NumOfRunningTrial -= 1
+            self.num_running_trial -= 1
+            self.stack[trial._trial_id] = values[0]
+            if self.num_running_trial == 0:
+                for value in [item[1] for item in sorted(self.stack.items())]:
+                    self.NelderMead.vertex_queue.put(value)
+                self.stack = dict()
