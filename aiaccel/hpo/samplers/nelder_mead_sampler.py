@@ -26,15 +26,6 @@ class Coef:
 
 
 @dataclasses.dataclass
-class Storage:
-    r: np.ndarray[float, float] | None = None  # reflect
-    e: np.ndarray[float, float] | None = None  # expand
-    ic: np.ndarray[float, float] | None = None  # inside_contract
-    oc: np.ndarray[float, float] | None = None  # outside_contract
-    s: np.ndarray[float, float] | None = None  # shrink
-
-
-@dataclasses.dataclass
 class Vertex:
     coordinate: np.ndarray[float, float]
     value: float
@@ -58,9 +49,7 @@ class NelderMeadAlgorism:
         self.coef: Coef = coef
         self.num_iterations: int = num_iterations
 
-        self.NumofInitialCreateTrial: int = 0
-
-        self.storage: Storage = Storage()
+        self.num_initial_create_trial: int = 0
 
         self.vertex_queue: queue.Queue[Vertex] = queue.Queue()
 
@@ -74,8 +63,8 @@ class NelderMeadAlgorism:
                 trans = _SearchSpaceTransform(search_space)
                 trans_params = self._rng.rng.uniform(trans.bounds[:, 0], trans.bounds[:, 1])
                 initial_param.append(trans.untransform(trans_params)[param_name])
-            self.NumofInitialCreateTrial += 1
-            yield np.array(initial_param), self.dimension + 1 - self.NumofInitialCreateTrial
+            self.num_initial_create_trial += 1
+            yield np.array(initial_param), self.dimension + 1 - self.num_initial_create_trial
         temp = []
         for _ in range(self.dimension + 1):
             temp.append(self.vertex_queue.get())
@@ -87,31 +76,6 @@ class NelderMeadAlgorism:
 
         self.vertices = self.vertices[order]
         self.values = self.values[order]
-
-    def centroid(self) -> None:
-        self.storage = Storage()
-        self.order_by()
-        self.yc = self.vertices[:-1].mean(axis=0)
-
-    def reflect(self) -> Generator[np.ndarray[float, float], None, None]:
-        yr = self.yc + self.coef.r * (self.yc - self.vertices[-1])
-        self.storage.r = yr
-        yield from self.func(yr)
-
-    def expand(self) -> Generator[np.ndarray[float, float], None, None]:
-        ye = self.yc + self.coef.e * (self.yc - self.vertices[-1])
-        self.storage.e = ye
-        yield from self.func(ye)
-
-    def inside_contract(self) -> Generator[np.ndarray[float, float], None, None]:
-        yic = self.yc + self.coef.ic * (self.yc - self.vertices[-1])
-        self.storage.ic = yic
-        yield from self.func(yic)
-
-    def outside_contract(self) -> Generator[np.ndarray[float, float], None, None]:
-        yoc = self.yc + self.coef.oc * (self.yc - self.vertices[-1])
-        self.storage.oc = yoc
-        yield from self.func(yoc)
 
     def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
         for i in range(1, len(self.vertices)):
@@ -134,47 +98,52 @@ class NelderMeadAlgorism:
         yield from self.initial()
         for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
 
-            self.centroid()
-            yield from self.reflect()
+            self.order_by()
+            self.yc = self.vertices[:-1].mean(axis=0)
+            yr = self.yc + self.coef.r * (self.yc - self.vertices[-1])
+            yield from self.func(yr)
             fr = self.vertex_queue.get().value
 
             if self.values[0] <= fr < self.values[-2]:
 
-                self.vertices[-1] = self.storage.r
+                self.vertices[-1] = yr
                 self.values[-1] = fr
 
             elif fr < self.values[0]:
 
-                yield from self.expand()
+                ye = self.yc + self.coef.e * (self.yc - self.vertices[-1])
+                yield from self.func(ye)
                 fe = self.vertex_queue.get().value
 
                 if fe < fr:
-                    self.vertices[-1] = self.storage.e
+                    self.vertices[-1] = ye
                     self.values[-1] = fe
 
                 else:
-                    self.vertices[-1] = self.storage.r
+                    self.vertices[-1] = yr
                     self.values[-1] = fr
 
             elif self.values[-2] <= fr < self.values[-1]:
 
-                yield from self.outside_contract()
+                yoc = self.yc + self.coef.oc * (self.yc - self.vertices[-1])
+                yield from self.func(yoc)
                 foc = self.vertex_queue.get().value
 
                 if foc <= fr:
-                    self.vertices[-1] = self.storage.oc
+                    self.vertices[-1] = yoc
                     self.values[-1] = foc
 
                 else:
-                    self.shrink()
+                    yield from self.shrink()
 
             elif self.values[-1] <= fr:
 
-                yield from self.inside_contract()
+                yic = self.yc + self.coef.ic * (self.yc - self.vertices[-1])
+                yield from self.func(yic)
                 fic = self.vertex_queue.get().value
 
                 if fic < self.values[-1]:
-                    self.vertices[-1] = self.storage.ic
+                    self.vertices[-1] = yic
                     self.values[-1] = fic
 
                 else:
