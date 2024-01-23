@@ -72,7 +72,7 @@ class NelderMeadAlgorism:
         yield from self.initial()
         # nelder_mead
         for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
-            # order by
+            # sort vertices by their values
             order = np.argsort(self.values)
             self.vertices, self.values = self.vertices[order], self.values[order]
             # reflect
