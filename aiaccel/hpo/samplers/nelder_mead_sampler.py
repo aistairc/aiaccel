@@ -41,7 +41,8 @@ class NelderMeadAlgorism:
         self.num_initial_create_trial: int = 0
         self.vertex_queue: queue.Queue[float] = queue.Queue()
 
-    def initial(self) -> Generator[np.ndarray[float, float], None, None]:
+    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
+        # initial
         initial_params = []
         for _ in range(self.dimension + 1):
             initial_param = []
@@ -60,22 +61,12 @@ class NelderMeadAlgorism:
             np.array([self.vertex_queue.get() for _ in range(self.dimension + 1)])
             )
 
-    def order_by(self) -> None:
-        order = np.argsort(self.values)
-
-        self.vertices, self.values = self.vertices[order], self.values[order]
-
-    def shrink(self) -> Generator[np.ndarray[float, float], None, None]:
-        for i in range(1, len(self.vertices)):
-            yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0])), 0
-            self.vertices[i] = ysh
-        for i in range(1, len(self.vertices)):
-            self.values[i] = self.vertex_queue.get()
-
-    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
-        yield from self.initial()
+        # nelder_mead
         for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
-            self.order_by()
+            # order by
+            order = np.argsort(self.values)
+            self.vertices, self.values = self.vertices[order], self.values[order]
+            # reflect
             self.yc = self.vertices[:-1].mean(axis=0)
             yield (yr := self.yc + self.coef.r * (self.yc - self.vertices[-1])), 0
             fr = self.vertex_queue.get()
@@ -83,6 +74,7 @@ class NelderMeadAlgorism:
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:
+                # expand
                 yield (ye := self.yc + self.coef.e * (self.yc - self.vertices[-1])), 0
                 fe = self.vertex_queue.get()
                 if fe < fr:
@@ -90,6 +82,7 @@ class NelderMeadAlgorism:
                 else:
                     self.vertices[-1], self.values[-1] = yr, fr
             elif self.values[-2] <= fr < self.values[-1]:
+                # outside contract
                 yield (yoc := self.yc + self.coef.oc * (self.yc - self.vertices[-1])), 0
                 foc = self.vertex_queue.get()
                 if foc <= fr:
@@ -97,6 +90,7 @@ class NelderMeadAlgorism:
                 else:
                     shrink_requied = True
             elif self.values[-1] <= fr:
+                # inside contract
                 yield (yic := self.yc + self.coef.ic * (self.yc - self.vertices[-1])), 0
                 fic = self.vertex_queue.get()
                 if fic < self.values[-1]:
@@ -105,7 +99,12 @@ class NelderMeadAlgorism:
                 else:
                     shrink_requied = True
             if shrink_requied:
-                yield from self.shrink()
+                # shrink
+                for i in range(1, len(self.vertices)):
+                    yield (ysh := self.vertices[0] + self.coef.s * (self.vertices[i] - self.vertices[0])), 0
+                    self.vertices[i] = ysh
+                for i in range(1, len(self.vertices)):
+                    self.values[i] = self.vertex_queue.get()
                 shrink_requied = False
 
 
