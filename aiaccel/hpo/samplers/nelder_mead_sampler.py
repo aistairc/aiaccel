@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import itertools
 import queue
 from collections.abc import Generator
 from dataclasses import dataclass
@@ -28,11 +27,9 @@ class NelderMeadAlgorism:
         search_space: dict[str, list[float]],
         coeff: NelderMeadCoefficient | None,
         seed: int | None = None,
-        num_iterations: int | None = None,
     ) -> None:
         self._search_space = search_space
         self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
-        self.num_iterations = num_iterations
 
         self.dimension = len(search_space)
 
@@ -49,7 +46,7 @@ class NelderMeadAlgorism:
 
         # main loop
         shrink_requied = False
-        for _ in range(self.num_iterations) if self.num_iterations is not None else itertools.count():
+        while True:
             # sort self.vertices by their self.values
             order = np.argsort(self.values)
             self.vertices, self.values = self.vertices[order], self.values[order]
@@ -101,7 +98,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self,
         search_space: dict[str, list[float]],
         seed: int | None = None,
-        num_iterations: int | None = None,
         coeff: NelderMeadCoefficient | None = None,
     ) -> None:
         self.param_names = []  # パラメータの順序を記憶
@@ -110,7 +106,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.param_names.append(param_name)
             self._search_space[param_name] = list(param_distribution)
 
-        self.nm = NelderMeadAlgorism(self._search_space, coeff, seed, num_iterations)
+        self.nm = NelderMeadAlgorism(self._search_space, coeff, seed)
         self.nm_generator = iter(self.nm)
         self.num_running_trial = 0
 
