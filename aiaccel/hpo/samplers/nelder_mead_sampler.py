@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import queue
+import itertools
 from collections.abc import Generator
 from typing import Any, Sequence
 
@@ -43,7 +44,8 @@ class NelderMeadAlgorism:
     def __init__(self,
                  search_space: dict[str, list[float]],
                  coef: Coef,
-                 seed: int | None = None) -> None:
+                 seed: int | None = None,
+                 num_iterations: int = 0) -> None:
         self.dimension: int = len(search_space)
         self._rng: LazyRandomState = LazyRandomState(seed)
 
@@ -54,6 +56,7 @@ class NelderMeadAlgorism:
         self.vertices: np.ndarray[float, float] = np.array([])
         self.values: np.ndarray[float, float] = np.array([])
         self.coef: Coef = coef
+        self.num_iterations: int = num_iterations
 
         self.NumofInitialCreateTrial: int = 0
 
@@ -129,7 +132,7 @@ class NelderMeadAlgorism:
 
     def search(self) -> Generator[np.ndarray[float, float], None, None]:
         yield from self.initial()
-        while True:
+        for _ in range(self.num_iterations) if self.num_iterations > 0 else itertools.count():
 
             self.centroid()
             yield from self.reflect()
