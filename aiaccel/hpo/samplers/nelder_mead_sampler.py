@@ -36,7 +36,7 @@ class NelderMeadAlgorism:
 
         self.dimension = len(search_space)
 
-        self.vertex_queue: queue.Queue[float] = queue.Queue()
+        self.value_queue: queue.Queue[float] = queue.Queue()
         self._rng: np.random.RandomState = np.random.RandomState(seed)
 
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
@@ -45,7 +45,7 @@ class NelderMeadAlgorism:
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
         yield from iter(self.vertices)
-        self.values = np.array([self.vertex_queue.get() for _ in range(len(self.vertices))])
+        self.values = np.array([self.value_queue.get() for _ in range(len(self.vertices))])
 
         # main loop
         shrink_requied = False
@@ -58,18 +58,18 @@ class NelderMeadAlgorism:
             yc = self.vertices[:-1].mean(axis=0)
             yield (yr := yc + self.coeff.r * (yc - self.vertices[-1]))
 
-            fr = self.vertex_queue.get()
+            fr = self.value_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
                 yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
-                fe = self.vertex_queue.get()
+                fe = self.value_queue.get()
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
                 yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
-                foc = self.vertex_queue.get()
+                foc = self.value_queue.get()
 
                 if foc <= fr:
                     self.vertices[-1], self.values[-1] = yoc, foc
@@ -77,7 +77,7 @@ class NelderMeadAlgorism:
                     shrink_requied = True
             elif self.values[-1] <= fr:  # inside contract
                 yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
-                fic = self.vertex_queue.get()
+                fic = self.value_queue.get()
 
                 if fic < self.values[-1]:
                     self.vertices[-1], self.values[-1] = yic, fic
@@ -89,7 +89,7 @@ class NelderMeadAlgorism:
                 self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
                 yield from iter(self.vertices[1:])
 
-                self.values[1:] = [self.vertex_queue.get() for _ in range(len(self.vertices) - 1)]
+                self.values[1:] = [self.value_queue.get() for _ in range(len(self.vertices) - 1)]
 
                 shrink_requied = False
 
@@ -133,7 +133,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             if self.is_within_range(trial.user_attrs["Coordinate"]):
                 self.num_running_trial += 1
             else:
-                self.nm.vertex_queue.put(np.inf)
+                self.nm.value_queue.put(np.inf)
                 self.before_trial(study, trial)
         else:
             trial.user_attrs["Coordinate"] = None
@@ -164,5 +164,5 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.stack[trial._trial_id] = values[0]
             if self.num_running_trial == 0:
                 for value in [item[1] for item in sorted(self.stack.items())]:
-                    self.nm.vertex_queue.put(value)
+                    self.nm.value_queue.put(value)
                 self.stack = {}
