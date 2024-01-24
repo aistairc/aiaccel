@@ -37,12 +37,12 @@ class NelderMeadAlgorism:
         self.dimension = len(search_space)
 
         self.vertex_queue: queue.Queue[float] = queue.Queue()
-        np.random.seed(seed)
+        self._rng: np.random.RandomState = np.random.RandomState(seed)
 
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
         # initialization
         lows, highs = zip(*self._search_space.values())
-        self.vertices = np.random.uniform(lows, highs, (self.dimension + 1, self.dimension))
+        self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
         yield from iter(self.vertices)
         self.values = np.array([self.vertex_queue.get() for _ in range(len(self.vertices))])
