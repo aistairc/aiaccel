@@ -7,7 +7,6 @@ from optuna import logging
 from optuna.study import Study
 from optuna.study._study_direction import StudyDirection
 
-
 _logger = logging.get_logger(__name__)
 
 
@@ -21,11 +20,6 @@ def create_study(
     load_if_exists: bool = False,
     directions: Sequence[str | StudyDirection] | None = None,
 ) -> Study:
-
-    # debug
-    storage = "sqlite:///example.db"
-    load_if_exists = True
-
     return optuna.create_study(
         storage=storage,
         sampler=sampler,
