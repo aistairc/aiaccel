@@ -39,6 +39,7 @@ class NelderMeadAlgorism:
 
         self.value_queue: queue.Queue[float] = queue.Queue()
         self._rng: np.random.RandomState = np.random.RandomState(seed)
+        self._enable_coordinate_output: bool = True
 
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
         # initialization
@@ -46,6 +47,7 @@ class NelderMeadAlgorism:
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
         yield from iter(self.vertices)
+        self._enable_coordinate_output = False
         self.values = np.array([self.value_queue.get() for _ in range(len(self.vertices))])
 
         # main loop
@@ -57,19 +59,26 @@ class NelderMeadAlgorism:
 
             # reflect
             yc = self.vertices[:-1].mean(axis=0)
+            self._enable_coordinate_output = True
             yield (yr := yc + self.coeff.r * (yc - self.vertices[-1]))
+            self._enable_coordinate_output = False
 
             fr = self.value_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
+                self._enable_coordinate_output = True
                 yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
+                self._enable_coordinate_output = False
+
                 fe = self.value_queue.get()
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
+                self._enable_coordinate_output = True
                 yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
+                self._enable_coordinate_output = False
                 foc = self.value_queue.get()
 
                 if foc <= fr:
@@ -77,7 +86,9 @@ class NelderMeadAlgorism:
                 else:
                     shrink_requied = True
             elif self.values[-1] <= fr:  # inside contract
+                self._enable_coordinate_output = True
                 yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
+                self._enable_coordinate_output = False
                 fic = self.value_queue.get()
 
                 if fic < self.values[-1]:
@@ -88,7 +99,9 @@ class NelderMeadAlgorism:
             # shrink
             if shrink_requied:
                 self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
+                self._enable_coordinate_output = True
                 yield from iter(self.vertices[1:])
+                self._enable_coordinate_output = False
 
                 self.values[1:] = [self.value_queue.get() for _ in range(len(self.vertices) - 1)]
 
@@ -112,6 +125,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.nm_generator = iter(self.nm)
         self.num_running_trial = 0
 
+        self.running_trial_id: list[int] = []
         self.stack: dict[int, float] = {}
 
     def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
@@ -129,15 +143,15 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        if self.num_running_trial == 0:
-            trial.user_attrs["Coordinate"] = next(self.nm_generator)
-            if self.is_within_range(trial.user_attrs["Coordinate"]):
-                self.num_running_trial += 1
-            else:
-                self.nm.value_queue.put(np.inf)
-                self.before_trial(study, trial)
+        while not self.nm._enable_coordinate_output:
+            continue
+        trial.set_user_attr("Coordinate", next(self.nm_generator))
+        if self.is_within_range(trial.user_attrs["Coordinate"]):
+            self.num_running_trial += 1
+            self.running_trial_id.append(trial._trial_id)
         else:
-            trial.user_attrs["Coordinate"] = None
+            self.nm.value_queue.put(np.inf)
+            self.before_trial(study, trial)
 
     def sample_independent(
         self,
@@ -171,6 +185,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.num_running_trial -= 1
             self.stack[trial._trial_id] = values[0]
             if self.num_running_trial == 0:
-                for value in [item[1] for item in sorted(self.stack.items())]:
-                    self.nm.value_queue.put(value)
+                for trial_id in self.running_trial_id:
+                    self.nm.value_queue.put(self.stack[trial_id])
+                self.running_trial_id = []
                 self.stack = {}
