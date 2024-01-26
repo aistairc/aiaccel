@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import queue
+import warnings
 from collections.abc import Generator
 from dataclasses import dataclass
 from typing import Any, Sequence
@@ -147,9 +148,16 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     ) -> Any:
         if trial.user_attrs["Coordinate"] is None:
             raise ValueError('trial.user_attrs["Coordinate"] is None')
+        if param_name not in self._search_space:
+            raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
         param_index = self.param_names.index(param_name)
         param_value = trial.user_attrs["Coordinate"][param_index]
-
+        contains = param_distribution._contains(param_distribution.to_internal_repr(param_value))
+        if not contains:
+            warnings.warn(
+                f"The value `{param_value}` is out of range of the parameter `{param_name}`. "
+                f"The value will be used but the actual distribution is: `{param_distribution}`."
+            )
         return param_value
 
     def after_trial(
