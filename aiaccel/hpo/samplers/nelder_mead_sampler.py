@@ -170,8 +170,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if not contains:
             warnings.warn(
                 f"The value `{param_value}` is out of range of the parameter `{param_name}`. "
-                f"The value will be used but the actual distribution is: `{param_distribution}`."
-            )
+                f"The value will be used but the actual distribution is: `{param_distribution}`.", stacklevel=2)
         return param_value
 
     def after_trial(
