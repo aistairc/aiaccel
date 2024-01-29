@@ -23,8 +23,8 @@ class NelderMeadCoefficient:
 
 
 class NelderMeadAlgorism:
-    vertices: np.ndarray[float, float]
-    values: np.ndarray[float, float]
+    vertices: np.ndarray[Any, Any]
+    values: np.ndarray[Any, Any]
 
     def __init__(
         self,
@@ -41,7 +41,7 @@ class NelderMeadAlgorism:
         self._rng: np.random.RandomState = np.random.RandomState(seed)
         self.is_ready: bool = True
 
-    def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
+    def __iter__(self) -> Generator[np.ndarray[Any, Any], None, None]:
         # initialization
         lows, highs = zip(*self._search_space.values())
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
@@ -122,7 +122,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.running_trial_id: list[int] = []
         self.stack: dict[int, float] = {}
 
-    def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
+    def is_within_range(self, coordinates: np.ndarray[Any, Any]) -> bool:
         return all(low < x < high for x, (low, high) in zip(coordinates, self._search_space.values()))
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
