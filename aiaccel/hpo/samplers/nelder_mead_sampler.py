@@ -39,15 +39,16 @@ class NelderMeadAlgorism:
 
         self.value_queue: queue.Queue[float] = queue.Queue()
         self._rng: np.random.RandomState = np.random.RandomState(seed)
-        self._enable_coordinate_output: bool = True
+        self.is_ready: bool = True
 
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
         # initialization
         lows, highs = zip(*self._search_space.values())
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
-        yield from iter(self.vertices)
-        self._enable_coordinate_output = False
+        yield from iter(self.vertices[:-1])
+        self.is_ready = False
+        yield self.vertices[-1]
         self.values = np.array([self.value_queue.get() for _ in range(len(self.vertices))])
 
         # main loop
@@ -59,26 +60,20 @@ class NelderMeadAlgorism:
 
             # reflect
             yc = self.vertices[:-1].mean(axis=0)
-            self._enable_coordinate_output = True
             yield (yr := yc + self.coeff.r * (yc - self.vertices[-1]))
-            self._enable_coordinate_output = False
 
             fr = self.value_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
-                self._enable_coordinate_output = True
                 yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
-                self._enable_coordinate_output = False
 
                 fe = self.value_queue.get()
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
-                self._enable_coordinate_output = True
                 yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
-                self._enable_coordinate_output = False
                 foc = self.value_queue.get()
 
                 if foc <= fr:
@@ -86,9 +81,7 @@ class NelderMeadAlgorism:
                 else:
                     shrink_requied = True
             elif self.values[-1] <= fr:  # inside contract
-                self._enable_coordinate_output = True
                 yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
-                self._enable_coordinate_output = False
                 fic = self.value_queue.get()
 
                 if fic < self.values[-1]:
@@ -99,9 +92,10 @@ class NelderMeadAlgorism:
             # shrink
             if shrink_requied:
                 self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
-                self._enable_coordinate_output = True
-                yield from iter(self.vertices[1:])
-                self._enable_coordinate_output = False
+                self.is_ready = True
+                yield from iter(self.vertices[1:-1])
+                self.is_ready = False
+                yield self.vertices[-1]
 
                 self.values[1:] = [self.value_queue.get() for _ in range(len(self.vertices) - 1)]
 
@@ -143,9 +137,16 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        while not self.nm._enable_coordinate_output:
-            continue
+        # Raise RuntimeError if cannot output parameters. (include parallel execution)
+        # TODO: support parallel execution
+        if not self.nm.is_ready and self.num_running_trial > 0:
+            raise RuntimeError("Cannot output parameters.")
+        # Raise RuntimeError if use study.enqueue_trial()
+        # TODO: support study.enqueue_trial()
+        if "fixed_params" in trial.system_attrs:
+            raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
         trial.set_user_attr("Coordinate", next(self.nm_generator))
+        trial.set_user_attr("IsReady", self.nm.is_ready)
         if self.is_within_range(trial.user_attrs["Coordinate"]):
             self.num_running_trial += 1
             self.running_trial_id.append(trial._trial_id)
