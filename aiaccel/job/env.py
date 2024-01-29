@@ -9,12 +9,18 @@ from aiaccel.job.parameter import Parameter
 
 class Local:
     def __init__(
-        self, script_name: str, job_file: str, stdout_file: str, stderr_file: str
+        self,
+        script_name: str,
+        preamble: str,
+        job_file_path: str,
+        stdout_file_path: str,
+        stderr_file_path: str
     ):
         self.script_name = script_name
-        self.job_file = job_file
-        self.stdout_file = stdout_file
-        self.stderr_file = stderr_file
+        self.preamble = preamble
+        self.job_file_path = job_file_path
+        self.stdout_file_path = stdout_file_path
+        self.stderr_file_path = stderr_file_path
 
     def generate_objective_command(self, param: Parameter) -> str:
         """Create a shell command to execute the job."""
@@ -24,23 +30,28 @@ class Local:
 
     def generate_submit_command(self) -> list[str]:
         """Create a shell command to execute the objective function."""
-        cmd = ["sh", f"{self.job_file}"]
+        cmd = ["sh", f"{self.job_file_path}"]
         return cmd
 
     def create(self, trial: Trial, param: Parameter) -> None:
         """Create a executable file to run the job."""
         cmd = self.generate_objective_command(param)
-        with open(self.job_file, "w") as f:
+        with open(self.job_file_path, "w") as f:
             f.write("#!/bin/bash\n")
             ...
             ...
             ...
             f.write(f"{cmd}\n")
 
-    def run(self) -> None:
-        """Run the job with the given hyperparameters."""
+    def run(self) -> int:
+        """Run the job with the given hyperparameters.
+
+        return:
+            int: The result of the job (objective value).
+        """
         cmds = self.generate_submit_command()
-        _run(cmds, self.stdout_file, self.stderr_file)
+        print(f"Running the job with the command: `{' '.join(cmds)}`")
+        return _run(cmds, self.stdout_file_path, self.stderr_file_path)
 
     def collect_result(self) -> str | None:
         """Collect the result of the job.
@@ -48,7 +59,7 @@ class Local:
         return:
             The result of the job (objective value).
         """
-        return _collect_result(self.stdout_file)
+        return _collect_result(self.stdout_file_path)
 
     ...
 
@@ -56,15 +67,17 @@ class Local:
 class Abci(Local):
     def __init__(
         self,
-        objective: str,
+        script_name: str,
+        preamble: str,
         group: str,
-        job_file: str,
+        job_file_path: str,
         stdout_dir: str,
         stderr_dir: str,
     ):
-        self.objective = objective
+        self.script_name = script_name
+        self.preamble = preamble
         self.group = group
-        self.job_file = job_file
+        self.job_file_path = job_file_path
         self.stdout_dir = stdout_dir
         self.stderr_dir = stderr_dir
 
@@ -76,10 +89,8 @@ class Abci(Local):
     ...
 
 
-def _run(cmds: list[str], stdout_file: str, stderr_file: str) -> None:
+def _run(cmds: list[str], stdout_file: str, stderr_file: str) -> int:
     """Run the job with the given hyperparameters."""
-    cmd = " ".join(cmds)
-    print(f"Running the job with the command: `{cmd}`")
     result = subprocess.run(cmds, capture_output=True, text=True)
 
     with open(stdout_file, "w") as f:
@@ -91,6 +102,8 @@ def _run(cmds: list[str], stdout_file: str, stderr_file: str) -> None:
     if result.returncode != 0:
         print(result.stderr)
         raise RuntimeError("Failed to submit the job.")
+
+    return result.returncode
 
 
 def _collect_result(stdout_file: str) -> str | None:

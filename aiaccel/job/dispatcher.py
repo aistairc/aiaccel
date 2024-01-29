@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sys
+import time
+
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any, Callable
@@ -32,26 +34,47 @@ if args.params:
         hp_args[key] = value
 
 
+__local__ = "local"
+__abci__ = "abci"
+
+
 class JobCreator:
-    def __init__(self, trial_id: int, platform: str, group: str, work_dir: Path):
+    def __init__(
+        self, trial_id: int,
+        platform: str,
+        group: str,
+        preamble: str,
+        timeout_seconds: int,
+        work_dir: Path,
+    ):
         self.trial_id = trial_id
         self.platform = platform
         self.group = group
+        self.preamble = preamble
         self.work_dir = work_dir
+        self.timeout_seconds = timeout_seconds
+        self._start_time = None
+        self._end_time = None
+        self._returncode = None
 
-        self.job_file = str(self.work_dir / f"job{self.trial_id}.sh")
-        self.stdout_file = str(self.work_dir / f"o{self.trial_id}")
-        self.stderr_file = str(self.work_dir / f"e{self.trial_id}")
+        self.job_file_path = str(self.work_dir / f"job{self.trial_id}.sh")
+        self.stdout_file_path = str(self.work_dir / f"o{self.trial_id}")
+        self.stderr_file_path = str(self.work_dir / f"e{self.trial_id}")
 
-        if self.platform == "local":
+        if self.platform == __local__:
             self.excution_environment = Local(
-                script_name, self.job_file, self.stdout_file, self.stderr_file
+                script_name,
+                self.preamble,
+                self.job_file_path,
+                self.stdout_file_path,
+                self.stderr_file_path
             )
-        elif self.platform == "abci":
+        elif self.platform == __abci__:
             self.excution_environment = Abci(
                 script_name,
+                self.preamble,
                 self.group,
-                self.job_file,
+                self.job_file_path,
                 self.work_dir,
                 self.work_dir,
             )
@@ -64,11 +87,44 @@ class JobCreator:
 
     def run(self) -> None:
         """Run the job with the given hyperparameters."""
-        self.excution_environment.run()
+        self._start_time = time.time()
+        self._returncode = self.excution_environment.run()
+        self._end_time = time.time()
 
     def collect_result(self) -> str | None:
         """Collect the result of the job."""
         return self.excution_environment.collect_result()
+
+    # ========================
+    # check status
+    # ========================
+
+    def is_finished(self) -> bool:
+        """Check if the job finished."""
+        return self._returncode is not None
+
+    def is_error_free(self) -> bool:
+        """Check if the job finished without error."""
+        return self._returncode == 0
+
+    # ========================
+    # properties
+    # ========================
+
+    @property
+    def returncode(self) -> int | None:
+        """Get the return code of the job."""
+        return self._returncode
+
+    # ========================
+    # setter/getter
+    # ========================
+
+    def get_elapsed_time(self) -> float:
+        """Get the elapsed time."""
+        if self._start_time is None:
+            raise RuntimeError("Job not started.")
+        return time.time() - self._start_time
 
 
 class JobDispatcher:
@@ -80,6 +136,8 @@ class JobDispatcher:
         platform: str = "local",
         group: str = "",
         n_jobs: int = 1,
+        retry_num: int = 0,
+        preamble: str = "",
         timeout_seconds: int = -1,
         work_dir: str = "./",
     ):
@@ -89,6 +147,8 @@ class JobDispatcher:
         self.platform = platform.lower()
         self.group = group
         self.n_jobs = n_jobs
+        self.preamble = preamble
+        self.retry_num = retry_num
         self.timeout_seconds = timeout_seconds
         self.work_dir = Path(work_dir).resolve()
 
@@ -104,8 +164,26 @@ class JobDispatcher:
     def running_job_count(self) -> int:
         return sum(trial.state == TrialState.RUNNING for trial in self.study.trials)
 
+    def get_running_trial_ids(self) -> list[int]:
+        return [trial._trial_id for trial in self.study.trials if trial.state == TrialState.RUNNING]
+
+    def get_required_parallel_num(self) -> int:
+        """Get the number of parallel jobs required to run the next trial for the study."""
+        ...
+        return 1
+
     def get_abvailable_worker_count(self) -> int:
-        return self._n_jobs - self.running_job_count()
+        return min((self._n_jobs - self.running_job_count()), self.get_required_parallel_num())
+
+    def wait_for_finished_job(self, trial_ids: list) -> None:
+        """Wait for the specified jobs to finish."""
+        ...
+
+    def retry_failed_job(self, trial_ids: list) -> None:
+        """Retry the specified jobs."""
+        if self.retry_num == 0:
+            return
+        ...
 
     # ========================
     # ask/tell
@@ -155,7 +233,7 @@ class JobDispatcher:
             sys.exit(0)
         else:
             # Create and run the job.
-            job = JobCreator(trial._trial_id, self.platform, self.group, self.work_dir)
+            job = JobCreator(trial._trial_id, self.platform, self.group, self.preamble,self.timeout_seconds,  self.work_dir)
             params = suggest_hyperparameter(trial, self.parameter)
             job.create(trial, params)  # create job file (***.sh)
             job.run()
@@ -202,5 +280,4 @@ if __name__ == "__main__":
         y = jobs.run(trial)
         jobs.tell(trial, y)
 ```
-
 """

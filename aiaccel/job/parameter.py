@@ -39,6 +39,7 @@ class Parameter:
 
 def suggest_hyperparameter(trial: Trial, parameter: Parameter) -> Parameter:
     """Suggest hyperparameters."""
+
     for name in parameter.names:
         if parameter.type[name] == "int":
             parameter.values[name] = trial.suggest_int(
