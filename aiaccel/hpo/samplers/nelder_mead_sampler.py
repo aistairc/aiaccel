@@ -39,13 +39,14 @@ class NelderMeadAlgorism:
 
         self.value_queue: queue.Queue[float] = queue.Queue()
         self._rng: np.random.RandomState = np.random.RandomState(seed)
-        self.is_ready: bool = True
+        self.is_ready: bool = False
 
     def __iter__(self) -> Generator[np.ndarray[Any, Any], None, None]:
         # initialization
         lows, highs = zip(*self._search_space.values())
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
+        self.is_ready = True
         yield from iter(self.vertices[:-1])
         self.is_ready = False
         yield self.vertices[-1]
