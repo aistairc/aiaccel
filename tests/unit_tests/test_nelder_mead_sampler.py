@@ -258,7 +258,7 @@ class TestNelderMeadSampler(unittest.TestCase):
 
     def test_sample_independent_reflect(self):
         self.setup_initialize()
-        self.sampler.before_trial(self.study, self.trial)
+        self.sampler.before_trial(self.study, self.trial)  # reflect
 
         reflect_xs = np.array([-1.0, 0.0])
         value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
@@ -272,7 +272,7 @@ class TestNelderMeadSampler(unittest.TestCase):
         self.sampler = NelderMeadSampler(search_space=self.search_space, seed=42)
 
         self.setup_initialize()
-        self.sampler.before_trial(self.study, self.trial)
+        self.sampler.before_trial(self.study, self.trial)  # reflect(out of range) -> inside_contract
 
         inside_contract_xs = np.array([3.5, 4.5])
         value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
@@ -287,7 +287,7 @@ class TestNelderMeadSampler(unittest.TestCase):
         reflect_xs = np.array([-1.0, 0.0])
         reflect_value = [4.0]
 
-        self.sampler.before_trial(self.study, self.trial)
+        self.sampler.before_trial(self.study, self.trial)  # reflect
         self.sampler.after_trial(self.study, self.trial, self.state, reflect_value)
         self.assertEqual(self.sampler.num_running_trial, 0)
         self.assertEqual(self.sampler.running_trial_id, [])
