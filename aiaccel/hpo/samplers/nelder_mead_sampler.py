@@ -110,10 +110,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         seed: int | None = None,
         coeff: NelderMeadCoefficient | None = None,
     ) -> None:
-        self.param_names = []  # パラメータの順序を記憶
-        self._search_space = {}
+        self._search_space = {}  # Memorise parameter order.
         for param_name, param_distribution in sorted(search_space.items()):
-            self.param_names.append(param_name)
             self._search_space[param_name] = list(param_distribution)
 
         self.nm = NelderMeadAlgorism(self._search_space, coeff, seed)
@@ -147,6 +145,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if "fixed_params" in trial.system_attrs:
             raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
         trial.set_user_attr("Coordinate", next(self.nm_generator))
+        # bool variable indicating whether the coordinates can be output or not
         trial.set_user_attr("IsReady", self.nm.is_ready)
         if self.is_within_range(trial.user_attrs["Coordinate"]):
             self.num_running_trial += 1
@@ -166,7 +165,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             raise ValueError('trial.user_attrs["Coordinate"] is None')
         if param_name not in self._search_space:
             raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
-        param_index = self.param_names.index(param_name)
+        param_index = list(self._search_space.keys()).index(param_name)
         param_value = trial.user_attrs["Coordinate"][param_index]
         contains = param_distribution._contains(param_distribution.to_internal_repr(param_value))
         if not contains:
