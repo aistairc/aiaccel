@@ -119,6 +119,8 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         reflect_value = 6.0
         outside_contract_value = 7.0
         shrink_xss = np.array([[2.0, 3.0], [4.0, 5.0]])
+        shrink_values = [1.0, 2.0]
+        reflect_xs2 = [3.0, 4.0]
 
         # self.values[-2] <= fr < self.values[-1]
         next(self.nm_generator)  # reflect
@@ -135,6 +137,12 @@ class TestNelderMeadAlgorism(unittest.TestCase):
             else:
                 self.assertFalse(self.nm.is_ready)
             self.assertTrue(np.array_equal(shrink_xs, xsh))
+
+        for shrink_value in shrink_values:
+            self.nm.value_queue.put(shrink_value)
+
+        xr2 = next(self.nm_generator)
+        self.assertTrue(np.array_equal(xr2, reflect_xs2))
 
     def test_reflect_to_inside_contract(self):
         self.setup_initialize()
@@ -252,12 +260,26 @@ class TestNelderMeadSampler(unittest.TestCase):
         self.setup_initialize()
         self.sampler.before_trial(self.study, self.trial)
 
-        reflect_xs = [-1.0, 0.0]
+        reflect_xs = np.array([-1.0, 0.0])
         value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
         self.assertEqual(value, reflect_xs[0])
 
         value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
         self.assertEqual(value, reflect_xs[1])
+
+    def test_sample_independent_out_of_range(self):
+        self.search_space = {"x": [0, 5], "y": [0, 5]}
+        self.sampler = NelderMeadSampler(search_space=self.search_space, seed=42)
+
+        self.setup_initialize()
+        self.sampler.before_trial(self.study, self.trial)
+
+        inside_contract_xs = np.array([3.5, 4.5])
+        value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
+        self.assertEqual(value, inside_contract_xs[0])
+
+        value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
+        self.assertEqual(value, inside_contract_xs[1])
 
     def test_after_trial_reflect_to_reflect(self):
         self.setup_initialize()
