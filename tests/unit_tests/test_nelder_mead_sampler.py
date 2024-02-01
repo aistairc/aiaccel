@@ -3,6 +3,7 @@ import optuna
 import datetime
 
 import numpy as np
+from unittest.mock import patch
 
 from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadSampler
 from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadAlgorism
@@ -208,9 +209,6 @@ class TestNelderMeadSampler(unittest.TestCase):
             trial_id=self.trial_id,
         )
 
-        self.vertices = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
-        self.values = np.array([5.0, 3.0, 7.0])
-
     def test_is_within_range(self):
         # True
         coordinates = np.array([3.0, 4.0])
@@ -233,32 +231,35 @@ class TestNelderMeadSampler(unittest.TestCase):
         self.assertEqual(self.sampler.sample_relative(self.study, self.trial, self.param_distribution), {})
 
     def test_before_trial(self):
-        self.sampler.before_trial(self.study, self.trial)
-        self.assertEqual(self.sampler.num_running_trial, 1)
-        self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.__iter__") as mock_iter:
+            def side_effect():
+                yield np.array([-1.0, 0.0])
+            mock_iter.side_effect = side_effect
+            self.sampler.nm_generator = iter(self.sampler.nm)
 
-    def test_sample_independent_initial(self):
-        self.sampler.before_trial(self.study, self.trial)
-        value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
-        self.assertIsInstance(value, float)
-        self.assertGreaterEqual(value, -5.0)
-        self.assertLessEqual(value, 5.0)
+            self.sampler.before_trial(self.study, self.trial)
+            self.assertEqual(self.sampler.num_running_trial, 1)
+            self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
 
-        value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
-        self.assertIsInstance(value, float)
-        self.assertGreaterEqual(value, -5.0)
-        self.assertLessEqual(value, 5.0)
+            self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-1.0, 0.0])))
+            self.assertFalse(self.trial.user_attrs["IsReady"])
 
-    def setup_initialize(self):
-        for _ in range(len(self.search_space) + 1):
-            next(self.sampler.nm_generator)
-        self.sampler.nm.vertices = self.vertices
-        for value in self.values:
-            self.sampler.nm.value_queue.put(value)
+    def test_before_trial_out_of_range(self):
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.__iter__") as mock_iter:
+            def side_effect():
+                yield np.array([-6.0, 0.0])
+                yield np.array([-2.0, 0.0])
+            mock_iter.side_effect = side_effect
+            self.sampler.nm_generator = iter(self.sampler.nm)
 
-    def test_sample_independent_reflect(self):
-        self.setup_initialize()
-        self.sampler.before_trial(self.study, self.trial)  # reflect
+            self.sampler.before_trial(self.study, self.trial)
+            self.assertEqual(self.sampler.num_running_trial, 1)
+            self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
+
+            self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-2.0, 0.0])))
+
+    def test_sample_independent(self):
+        self.trial.set_user_attr("Coordinate", np.array([-1.0, 0.0]))
 
         reflect_xs = np.array([-1.0, 0.0])
         value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
@@ -267,33 +268,17 @@ class TestNelderMeadSampler(unittest.TestCase):
         value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
         self.assertEqual(value, reflect_xs[1])
 
-    def test_sample_independent_out_of_range(self):
-        self.search_space = {"x": [0, 5], "y": [0, 5]}
-        self.sampler = NelderMeadSampler(search_space=self.search_space, seed=42)
+    def test_after_trial(self):
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler.before_trial") as mock_iter:
+            def side_effect(study, trial):
+                trial.set_user_attr("Coordinate", np.array([-1.0, 0.0]))
+            mock_iter.side_effect = side_effect
+            reflect_value = [4.0]
 
-        self.setup_initialize()
-        self.sampler.before_trial(self.study, self.trial)  # reflect(out of range) -> inside_contract
+            self.sampler.before_trial(self.study, self.trial)
+            self.sampler.num_running_trial += 1
+            self.sampler.running_trial_id.append(self.trial._trial_id)
 
-        inside_contract_xs = np.array([3.5, 4.5])
-        value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
-        self.assertEqual(value, inside_contract_xs[0])
-
-        value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
-        self.assertEqual(value, inside_contract_xs[1])
-
-    def test_after_trial_reflect_to_reflect(self):
-        self.setup_initialize()
-
-        reflect_xs = np.array([-1.0, 0.0])
-        reflect_value = [4.0]
-
-        self.sampler.before_trial(self.study, self.trial)  # reflect
-        self.sampler.after_trial(self.study, self.trial, self.state, reflect_value)
-        self.assertEqual(self.sampler.num_running_trial, 0)
-        self.assertEqual(self.sampler.running_trial_id, [])
-
-        self.sampler.before_trial(self.study, self.trial)
-        vertex = self.sampler.nm.vertices[1]
-        self.assertTrue(np.array_equal(vertex, reflect_xs))
-        value = self.sampler.nm.values[1]
-        self.assertEqual(value, reflect_value[0])
+            self.sampler.after_trial(self.study, self.trial, self.state, reflect_value)
+            self.assertEqual(self.sampler.num_running_trial, 0)
+            self.assertEqual(self.sampler.running_trial_id, [])
