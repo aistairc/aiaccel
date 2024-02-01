@@ -259,26 +259,24 @@ class TestNelderMeadSampler(unittest.TestCase):
             self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-2.0, 0.0])))
 
     def test_sample_independent(self):
-        self.trial.set_user_attr("Coordinate", np.array([-1.0, 0.0]))
+        xs = np.array([-1.0, 0.0])
+        self.trial.set_user_attr("Coordinate", xs)
 
-        reflect_xs = np.array([-1.0, 0.0])
         value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
-        self.assertEqual(value, reflect_xs[0])
+        self.assertEqual(value, xs[0])
 
         value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
-        self.assertEqual(value, reflect_xs[1])
+        self.assertEqual(value, xs[1])
 
     def test_after_trial(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler.before_trial") as mock_iter:
-            def side_effect(study, trial):
-                trial.set_user_attr("Coordinate", np.array([-1.0, 0.0]))
-            mock_iter.side_effect = side_effect
-            reflect_value = [4.0]
+        put_value = 4.0
+        self.trial.set_user_attr("Coordinate", np.array([-1.0, 0.0]))
+        self.sampler.num_running_trial += 1
+        self.sampler.running_trial_id.append(self.trial._trial_id)
 
-            self.sampler.before_trial(self.study, self.trial)
-            self.sampler.num_running_trial += 1
-            self.sampler.running_trial_id.append(self.trial._trial_id)
+        self.sampler.after_trial(self.study, self.trial, self.state, [put_value])
+        self.assertEqual(self.sampler.num_running_trial, 0)
+        self.assertEqual(self.sampler.running_trial_id, [])
 
-            self.sampler.after_trial(self.study, self.trial, self.state, reflect_value)
-            self.assertEqual(self.sampler.num_running_trial, 0)
-            self.assertEqual(self.sampler.running_trial_id, [])
+        value = self.sampler.nm.value_queue.get(block=False)
+        self.assertEqual(value, put_value)
