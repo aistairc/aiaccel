@@ -45,6 +45,7 @@ repository = "https://github.com/aistairc/aiaccel"
 test = [
     "pytest",
     "pytest-cov",
+    "pytest-mock",
     "pytest-subprocess",
     "undecorated",
 ]

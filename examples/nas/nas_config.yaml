@@ -1,26 +1,40 @@
-environment:
-  result_dir: ./architecture_search_results  # A path to directory where search results are saved.
-  device_ids: [0, 1, 2, 3]  # Indices of GPU for parallel processing.
-  num_workers: 9  # The number of workers for dataloader.
-  gpus: 3 # The number of GPUs
-
-
 dataset:
   name: cifar10  # imagenet or cifar10 or cifar100
-  path: ../data
-  num_search_classes: 10  # The number of data classes for supernet train and architecture search.
   num_data_architecture_search: 10000  # The number of data for architecture search. Others are used in supernet train.
+  num_search_classes: 10  # The number of data classes for supernet train and architecture search.
+  path: ../data
+  retrain:
+    train: ../data
+    test: ../data
+
+environment:
+  device_ids: [0, 1, 2, 3]  # Indices of GPU for parallel processing.
+  gpus: 3 # The number of GPUs
+  num_workers: 9  # The number of workers for dataloader.
+  result_dir: ./architecture_search_results  # A path to directory where search results are saved.
 
 nas:
-  search_space: proxyless
-  num_epochs_supernet_train: 2 #60
   num_epochs_architecture_search: 2 #60
+  num_epochs_supernet_train: 2 #60
+  num_epochs_retrain: 2 #60
+  search_space: proxyless
+  search_space_config_path: "./"
   seed: 42
+  skip_architecture_search: true
+  skip_retrain: false
+  skip_train: true
+
+retrain:
+  hyperparameters:
+    base_lr: 0.01
+    batch_size: 64
+    momentum: 0.0
+    num_epochs: 10
+    weight_decay: 0.0
 
 trainer:
-  distributed_backend: dp
-  strategy: ddp_find_unused_parameters_true
+  accelerator: gpu
+  enable_model_summary: false
   enable_progress_bar: false
   logger: false
-  enable_model_summary: false
-  accelerator: gpu
+  strategy: ddp_find_unused_parameters_true

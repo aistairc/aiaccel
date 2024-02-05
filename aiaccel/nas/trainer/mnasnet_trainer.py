@@ -1,23 +1,29 @@
+from __future__ import annotations
+
 import contextlib
 import hashlib
 import pickle
 from datetime import datetime
-from logging import Logger
 from pathlib import Path
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from logging import Logger
+
+    from omegaconf import DictConfig
+    from torch.utils.data import DataLoader
+
+    from aiaccel.nas.data_module.nas_dataloader import NAS1shotDataLoader
 import lightning
 import numpy as np
 import torch
 from lightning.pytorch.callbacks import ModelCheckpoint
-from omegaconf import DictConfig
 from torch import nn
-from torch.utils.data import DataLoader
 
 from aiaccel.nas.asng.categorical_asng import CategoricalASNG
 from aiaccel.nas.data_module.cifar10_data_module import Cifar10SubsetRandomSamplingDataLoader
-from aiaccel.nas.data_module.nas_dataloader import NAS1shotDataLoader
 from aiaccel.nas.mnas_structure_info import MnasNetStructureInfo
-from aiaccel.nas.nas_model.mnasnet_lightning_model import MnasnetSearchModel, MnasnetTrainModel
+from aiaccel.nas.nas_model.mnasnet_lightning_model import MnasnetRerainModel, MnasnetSearchModel, MnasnetTrainModel
 from aiaccel.nas.nas_model.proxyless_model import MnasNetSearchSpace
 from aiaccel.nas.utils.logger import create_logger
 from aiaccel.nas.utils.utils import (
@@ -45,6 +51,7 @@ class MnasnetTrainer:
     _model: MnasNetSearchSpace
     _train_model: MnasnetTrainModel
     _search_model: MnasnetSearchModel
+    _retrain_model: MnasnetRerainModel
     _supernet_trainer: lightning.Trainer
     _search_trainer: lightning.Trainer
     _valid_acc: float
@@ -53,7 +60,9 @@ class MnasnetTrainer:
         self._nas_config = nas_config
         self._parameter_config = parameter_config
         _search_space_config_path = get_search_space_config(nas_config.nas.search_space, nas_config.dataset.name)
-        self._search_space_config = create_config_by_yaml("./" + str(_search_space_config_path))
+        self._search_space_config = create_config_by_yaml(
+            nas_config.nas.search_space_config_path + str(_search_space_config_path),
+        )
         self._log_dir = None
         self._logger = None
         self._create_logger()
@@ -93,9 +102,9 @@ class MnasnetTrainer:
         try:
             # torch.save(self._model.module.state_dict(), savepath)
             torch.save(self._model.state_dict(), savepath)
-        except BaseException as e:
-            self._logger.exception(e)
-            raise e
+        except BaseException as exc:
+            self._logger.exception("The train model could not be saved.")
+            raise BaseException from exc
 
         self._logger.info("Supernet model saved")
 
@@ -122,7 +131,25 @@ class MnasnetTrainer:
         self._logger.info("Architecture search finished")
 
     def retrain(self):
-        pass
+        model_checkpoint_callback = ModelCheckpoint(
+            dirpath=self._log_dir,
+            filename="mnasnet_retrain_model-{epoch:02d}-{train_acc1:.2f}",
+            monitor="valid_acc1",
+            save_top_k=1,
+        )
+        devices = "auto" if self._nas_config.environment.gpus is None else self._nas_config.environment.gpus
+        self._retrain_trainer = lightning.Trainer(
+            max_epochs=self._nas_config.nas.num_epochs_retrain,
+            accelerator=self._nas_config.trainer.accelerator,
+            strategy=self._nas_config.trainer.strategy,
+            devices=devices,
+            callbacks=[model_checkpoint_callback],
+            enable_progress_bar=self._nas_config.trainer.enable_progress_bar,
+            logger=self._nas_config.trainer.logger,
+            enable_model_summary=self._nas_config.trainer.enable_model_summary,
+        )
+        self._retrain_trainer.fit(self._retrain_model)
+        self._logger.info("Retrain finished")
 
     def save(self):
         savepath = self._log_dir / "params_num_list.txt"
@@ -132,14 +159,11 @@ class MnasnetTrainer:
         mle = np.argmax(mle_one_hot, axis=1)
         mle_new = make_observed_values2(mle, self._search_space_config, self._categories)
         self._structure_info.update_values(mle_new)
-        # self._model.module.select_active_op(self._structure_info)
         self._model.select_active_op(self._structure_info)
-        # self._model.module.print_active_op(log_dir=self._log_dir)
         self._model.print_active_op(log_dir=self._log_dir)
-        # params_list = self._model.module.get_param_num_list()
         params_list = self._model.get_param_num_list()
 
-        with open(savepath, "a") as o:
+        with savepath.open("a") as o:
             o.write(f"First conv layer: {params_list[0][0]}\n")
 
             for i in range(len(params_list) - 2):
@@ -160,20 +184,23 @@ class MnasnetTrainer:
         self._logger.info(f"Save result: {savepath}")
         trained_theta = self._architecture_search_asng.p_model.theta
         result = {
-            "validation_accuracy": self.get_valid_acc(),
+            "validation_accuracy": self.get_search_valid_acc(),
             "trained_theta": trained_theta,
             "structure_info": self._structure_info,
             "hyperparameters": self._parameter_config,
             "nas_config": self._nas_config,
         }
 
-        with open(self._log_dir / "result.pkl", "wb") as f:
+        with (self._log_dir / "result.pkl").open("wb") as f:
             pickle.dump(result, f)
 
         self._logger.info("Result saved")
 
-    def get_valid_acc(self):
+    def get_search_valid_acc(self):
         return self._search_model.valid_acc1
+
+    def get_retrain_test_acc(self):
+        return self._retrain_model.test_acc1
 
     @property
     def is_global_zero(self):
@@ -212,67 +239,85 @@ class MnasnetTrainer:
             self._supernet_dataloader = self._dataloader.get_supernet_train_dataloader()
             self._architecture_search_datalaoder = self._dataloader.get_architecture_search_dataloader()
         else:
-            raise ValueError(f"Invalid dataset name in search space config: {search_space_config_path!s}")
+            raise ValueError(search_space_config_path)
 
         self._logger.info("Dataset loaded")
         self._logger.info("Create dataloaders")
 
     def _create_model(self, search_space_config_path: Path):
         if "proxyless" in str(search_space_config_path) or "mnasnet" in str(search_space_config_path):
-            self._model = MnasNetSearchSpace("MnasNetSearchSpace")
-            self._model.build(self._search_space_config)
-            category_dic = self._model.enumerate_categorical_variables()
-            self._structure_info = MnasNetStructureInfo(list(category_dic.keys()))
-            self._categories = make_categories2(category_dic, self._search_space_config)
-            init_delta = 1.0 / sum(self._categories)
-            params = get_params2(self._model, self._structure_info, self._search_space_config, self._categories)
-            supernet_asng = CategoricalASNG(
-                self._categories,
-                params,
-                alpha=self._parameter_config.alpha,
-                eps=0,
-                init_delta=init_delta,
-                init_theta=None,
-            )
-            self._logger.info(f"The total number of parameters for a categorical distribution: {sum(self._categories)}")
-            self._logger.info(f"init_delta: {init_delta}")
-            self._train_model = MnasnetTrainModel(
-                self._dataloader,
-                self._model,
-                self._search_space_config,
-                self._parameter_config,
-                self._categories,
-                supernet_asng,
-                self._structure_info,
-                self._los_func,
-                self._log_dir,
-                "root.search",
-                self._nas_config,
-                len(self._supernet_dataloader.sampler),
-            )
-            self._model = self._train_model.model
-            self._architecture_search_asng = CategoricalASNG(
-                self._categories,
-                params,
-                alpha=self._parameter_config.alpha,
-                eps=self._parameter_config.eps,
-                init_delta=init_delta,
-                init_theta=None,
-            )
-            self._search_model = MnasnetSearchModel(
-                self._dataloader,
-                self._model,
-                self._search_space_config,
-                self._parameter_config,
-                self._categories,
-                self._architecture_search_asng,
-                self._structure_info,
-                self._los_func,
-                self._log_dir,
-                "root.search",
-                len(self._architecture_search_datalaoder.sampler),
-            )
+            self._create_train_model()
+            self._create_architecture_search_model()
+            self._create_retrain_model()
         else:
-            raise ValueError(f"Invalid model name in search space config: {search_space_config_path!s}")
-        # self._logger.info(f"Output features: {self._model.module.classifier.out_features}")
+            raise ValueError(search_space_config_path)
         self._logger.info(f"Output features: {self._model.classifier.out_features}")
+
+    def _create_train_model(self):
+        self._model = MnasNetSearchSpace("MnasNetSearchSpace")
+        self._model.build(self._search_space_config)
+        category_dic = self._model.enumerate_categorical_variables()
+        self._structure_info = MnasNetStructureInfo(list(category_dic.keys()))
+        self._categories = make_categories2(category_dic, self._search_space_config)
+        init_delta = 1.0 / sum(self._categories)
+        params = get_params2(self._model, self._structure_info, self._search_space_config, self._categories)
+        supernet_asng = CategoricalASNG(
+            self._categories,
+            params,
+            alpha=self._parameter_config.alpha,
+            eps=0,
+            init_delta=init_delta,
+            init_theta=None,
+        )
+        self._logger.info(f"The total number of parameters for a categorical distribution: {sum(self._categories)}")
+        self._logger.info(f"init_delta: {init_delta}")
+        self._train_model = MnasnetTrainModel(
+            self._dataloader,
+            self._model,
+            self._search_space_config,
+            self._parameter_config,
+            self._categories,
+            supernet_asng,
+            self._structure_info,
+            self._los_func,
+            self._log_dir,
+            "root.search",
+            self._nas_config,
+            len(self._supernet_dataloader.sampler),
+        )
+        self._model = self._train_model.model
+
+    def _create_architecture_search_model(self):
+        params = get_params2(self._model, self._structure_info, self._search_space_config, self._categories)
+        init_delta = 1.0 / sum(self._categories)
+        self._architecture_search_asng = CategoricalASNG(
+            self._categories,
+            params,
+            alpha=self._parameter_config.alpha,
+            eps=self._parameter_config.eps,
+            init_delta=init_delta,
+            init_theta=None,
+        )
+        self._search_model = MnasnetSearchModel(
+            self._dataloader,
+            self._model,
+            self._search_space_config,
+            self._parameter_config,
+            self._categories,
+            self._architecture_search_asng,
+            self._structure_info,
+            self._los_func,
+            self._log_dir,
+            "root.search",
+            self._nas_config,
+            len(self._architecture_search_datalaoder.sampler),
+        )
+
+    def _create_retrain_model(self):
+        self._retrain_model = MnasnetRerainModel(
+            self._parameter_config,
+            self._search_space_config,
+            self._nas_config,
+            self._log_dir,
+            "root.retrain",
+        )

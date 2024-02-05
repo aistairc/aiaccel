@@ -1,32 +1,63 @@
 from __future__ import annotations
 
+import gc
+import glob
+import math
+import pickle
+import shutil
 import time
+from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import lightning
 import numpy as np
 import torch
 import torch.utils
+import torchvision
 from omegaconf import DictConfig, OmegaConf
+from ptflops import get_model_complexity_info
 from torch import nn
+from torch.optim import SGD
+from torch.utils.data import DataLoader
 
+from aiaccel.nas.asng.categorical_asng import CategoricalASNG
 from aiaccel.nas.batch_dependent_lr_scheduler import create_batch_dependent_lr_scheduler
 from aiaccel.nas.create_optimizer import create_optimizer
+from aiaccel.nas.nas_model.proxyless_model import MnasNetSearchSpace
 from aiaccel.nas.utils import utils
 from aiaccel.nas.utils.logger import (
     create_architecture_search_logger,
     create_architecture_search_report,
+    create_logger,
+    create_retrain_report,
     create_supernet_train_logger,
     create_supernet_train_report,
 )
-from aiaccel.nas.utils.utils import make_observed_values2
+from aiaccel.nas.utils.utils import (
+    _data_transforms_cifar,
+    _data_transforms_imagenet,
+    create_config_by_yaml,
+    cross_entropy_with_label_smoothing,
+    get_device,
+    get_params2,
+    get_random_dataset_directory,
+    get_search_space_config,
+    load_imagenet_dataset,
+    make_categories2,
+    make_observed_values2,
+)
 
 if TYPE_CHECKING:
-    from pathlib import Path
+    from os import PathLike
+    from typing import Callable
 
+    from _typeshed import FileDescriptorOrPath
     from nas.module.nas_module import NASModule
     from torch.nn import Module
     from torch.optim import Optimizer
+
+    from aiaccel.nas.mnas_structure_info import MnasNetStructureInfo
 
 
 def _create_batch_dependent_lr_scheduler(
@@ -47,13 +78,131 @@ def _create_optimizer(
     return create_optimizer(nn_module, hyperparameters)
 
 
+def _adjust_learning_rate(
+    optimizer,
+    epoch,
+    epochs,
+    batch_idx,
+    len_train_loader,
+    base_lr,
+    adjust_type="cosine",
+    warmup_epochs=5,
+    h_size=3,
+):
+    lr_adj = 0
+
+    if epoch < warmup_epochs:
+        epoch += float(batch_idx + 1) / len_train_loader
+        lr_adj = 1.0 / h_size * (epoch * (h_size - 1) / warmup_epochs + 1)
+    elif adjust_type == "linear":
+        if epoch < 30:
+            lr_adj = 1.0
+        elif epoch < 60:
+            lr_adj = 1e-1
+        elif epoch < 90:
+            lr_adj = 1e-2
+        else:
+            lr_adj = 1e-3
+    elif adjust_type == "cosine":
+        run_epochs = epoch - warmup_epochs
+        total_epochs = epochs - warmup_epochs
+        t_cur = float(run_epochs * len_train_loader) + batch_idx
+        t_total = float(total_epochs * len_train_loader)
+
+        lr_adj = 0.5 * (1 + math.cos(math.pi * t_cur / t_total))
+
+    for param_group in optimizer.param_groups:
+        param_group["lr"] = base_lr * lr_adj
+
+
+def _get_best_result_directory(log_root_dir: PathLike) -> Path:
+    """Gets directory name of the best architecture search log.
+
+    Args:
+        log_root_dir (PathLike): Path to root directory of log.
+
+    Raises:
+        FileNotFoundError: Causes when no log file is found in the specified
+            log_root_dir.
+
+    Returns:
+        Path: Absolute path to directory for best architecture search log.
+    """
+    if result_files := glob.glob(str(log_root_dir / "*" / "result.pkl")):
+        current_best_accuracy = -float("inf")
+        current_best_result_directory = ""
+
+        for log_dir in result_files:
+            with (Path(log_dir).resolve()).open("rb") as f:
+                result = pickle.load(f)
+
+            if (
+                isinstance(result, dict)
+                and "validation_accuracy" in result
+                and result["validation_accuracy"] > current_best_accuracy
+            ):
+                current_best_result_directory = log_dir
+                current_best_accuracy = result["validation_accuracy"]
+
+        return Path(current_best_result_directory).resolve()
+    raise FileNotFoundError(log_root_dir)
+
+
+class MnasnetTrainer:
+    _nas_config: DictConfig
+    _parameter_config: DictConfig
+    _search_space_config: dict
+
+
+def _test(
+    nn_model: nn.DataParallel,
+    loss_func: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
+    dataloader: DataLoader,
+) -> tuple[float, float, float]:
+    """Function for deterministic evaluation.
+
+    The most likely architecture is used.
+
+    Args:
+        nn_model (nn.DataParallel): _description_
+        loss_func (Callable[[torch.Tensor, torch.Tensor], torch.Tensor]): _description_
+        dataloader (DataLoader): _description_
+
+    Returns:
+        tuple[float, float, float]: _description_
+
+    Note::
+
+        test_loader = DataLoader(test_data, batch_size, shuffle=False, num_workers=12)
+    """
+    device = get_device()
+    num_data = len(dataloader.sampler)
+
+    nn_model.eval()
+
+    loss_avg = 0.0
+    acc1_avg = 0.0
+    acc5_avg = 0.0
+
+    with torch.no_grad():
+        for X, t in dataloader:
+            X, t = X.to(device), t.to(device)
+
+            output = nn_model(X)
+            loss_avg += loss_func(output, t).item() * len(X) / num_data
+
+            acc1_avg += utils.accuracy(output, t, topk=(1,))[0].item() * len(X) / num_data
+            acc5_avg += utils.accuracy(output, t, topk=(5,))[0].item() * len(X) / num_data
+
+    return loss_avg, acc1_avg, acc5_avg
+
+
 class MnasnetTrainModel(lightning.LightningModule):
     def __init__(
         self,
         dataloader,
         nn_model: NASModule,
         search_space_config: tuple[int, dict[str, Any] | None],
-        # hyperparameters: dict[str, ParameterType],
         parameter_config: DictConfig,
         categories,
         asng,
@@ -70,10 +219,6 @@ class MnasnetTrainModel(lightning.LightningModule):
         self.width = _dims[1]
         self.height = _dims[2]
         self.num_classes = dataloader.get_num_classes()
-        # device_ids = (
-        #    None if nas_config.environment.device_ids is None else list(map(int, nas_config.environment.device_ids))
-        # )
-        # self.model = nn.DataParallel(nn_model, device_ids=device_ids)
         self.model = nn_model
         self._search_space_config = search_space_config
         self._parameter_config = parameter_config
@@ -112,7 +257,6 @@ class MnasnetTrainModel(lightning.LightningModule):
             observed_values = np.argmax(observed_values_one_hot, axis=1)
             observed_values_new = make_observed_values2(observed_values, self._search_space_config, self.categories)
             self.structure_info.update_values(observed_values_new)
-            # self.model.module.select_active_op(self.structure_info)
             self.model.select_active_op(self.structure_info)
 
             output = self.model(inputs)
@@ -133,8 +277,11 @@ class MnasnetTrainModel(lightning.LightningModule):
 
             del loss, output
 
-        loss_sum = np.average(self.all_gather(loss_sum).numpy(force=True))
-        self.manual_backward(loss_sum)
+        if self.nas_config.environment.gpus is not None and self.nas_config.environment.gpus > 1:
+            loss_sum = np.average(self.all_gather(loss_sum).numpy(force=True))
+            self.manual_backward(float(loss_sum))
+        else:
+            self.manual_backward(loss_sum)
         del loss_sum, inputs, target
         optimizer.step()
         self.scheduler.step()
@@ -195,6 +342,7 @@ class MnasnetSearchModel(lightning.LightningModule):
         los_func: nn.CrossEntropyLoss,
         log_dir: Path,
         parent_logger_name: str,
+        nas_config: DictConfig,
         num_train_data_sampler: int,
     ):
         super().__init__()
@@ -214,6 +362,7 @@ class MnasnetSearchModel(lightning.LightningModule):
         self.lam = self._parameter_config.lam
         self.log_dir = log_dir
         self.parent_logger_name = parent_logger_name
+        self.nas_config = nas_config
 
         self.structure_info = structure_info
         self.automatic_optimization = False  # Activates manual optimization in training_step method.
@@ -245,7 +394,6 @@ class MnasnetSearchModel(lightning.LightningModule):
                     self.categories,
                 )
                 self.structure_info.update_values(observed_values_new)
-                # self.model.module.select_active_op(self.structure_info)
                 self.model.select_active_op(self.structure_info)
                 h_valid = self.model(inputs)
                 loss = self.los_func(h_valid, target)
@@ -265,11 +413,16 @@ class MnasnetSearchModel(lightning.LightningModule):
                 del h_valid, loss
 
         losses, observed_values_one_hot_list = np.array(losses), np.array(observed_values_one_hot_list)
-        losses = np.average(self.all_gather(losses).numpy(force=True), axis=0)
-        observed_values_one_hot_list = np.average(
-            self.all_gather(observed_values_one_hot_list).numpy(force=True),
-            axis=0,
-        )
+        if (
+            self.nas_config is not None
+            and self.nas_config.environment.gpus is not None
+            and self.nas_config.environment.gpus > 1
+        ):
+            losses = np.average(self.all_gather(losses).numpy(force=True), axis=0)
+            observed_values_one_hot_list = np.average(
+                self.all_gather(observed_values_one_hot_list).numpy(force=True),
+                axis=0,
+            )
         self.asng.update(observed_values_one_hot_list, losses)
         del inputs, target
 
@@ -305,4 +458,272 @@ class MnasnetSearchModel(lightning.LightningModule):
 
 
 class MnasnetRerainModel(lightning.LightningModule):
-    pass
+    def __init__(
+        self,
+        search_space_config: tuple[int, dict[str, Any] | None],
+        parameter_config: DictConfig,
+        nas_config: DictConfig,
+        log_dir: Path,
+        parent_logger_name: str = "root",
+    ):
+        super().__init__()
+        self._search_space_config = search_space_config
+        self._parameter_config = parameter_config
+        self._nas_config = nas_config
+        self.log_dir = log_dir
+        self.parent_logger_name = parent_logger_name
+
+        self.train_loss = 0.0
+        self.train_acc1 = 0.0
+        self.train_acc5 = 0.0
+        self.test_loss = 0.0
+        self.test_acc1 = 0.0
+        self.test_acc5 = 0.0
+
+        self.start = None
+        self.custom_logger = None
+        self.log_dir = log_dir
+
+    def forward(self, x):
+        return self.model(x)
+
+    def training_step(self, batch, batch_idx):
+        optimizer = self.optimizers()
+        _adjust_learning_rate(
+            optimizer,
+            self.current_epoch,
+            self.n_epochs,
+            batch_idx,
+            self.num_train_batches,
+            self.base_lr,
+        )
+        inputs, target = batch
+        optimizer.zero_grad()
+        output = self.model(inputs)
+        loss = self.loss_func(output, target)
+
+        if math.isnan(loss.item()):
+            raise (optimizer.param_groups[0]["lr"])
+
+        loss.backward()
+        optimizer.step()
+        self.train_loss += loss.item() * len(inputs) / self.num_train_data
+        self.train_acc1 += utils.accuracy(output, target, topk=(1,))[0].item() * len(inputs) / self.num_train_data
+        self.train_acc5 += utils.accuracy(output, target, topk=(5,))[0].item() * len(inputs) / self.num_train_data
+
+    def train_dataloader(self):
+        return self._train_dataloader
+
+    def configure_optimizers(self):
+        return self.optimizer
+
+    def on_train_start(self):
+        retrain_environment = self._nas_config.environment
+        result_dir = Path(retrain_environment.result_dir).resolve()
+        num_workers = int(retrain_environment.num_workers)
+        retrain_dataset = self._nas_config.dataset
+        train_data_path = Path(retrain_dataset.retrain.train)
+        test_data_path = Path(retrain_dataset.retrain.test) if retrain_dataset.retrain.test else None
+        num_classes = int(retrain_dataset.num_search_classes)
+
+        retrain_hyperparameters = self._nas_config.retrain.hyperparameters
+        batch_size = int(retrain_hyperparameters.batch_size)
+        self.n_epochs = int(retrain_hyperparameters.num_epochs)
+        self.base_lr = float(retrain_hyperparameters.base_lr)
+        momentum = float(retrain_hyperparameters.momentum)
+        weight_decay = float(retrain_hyperparameters.weight_decay)
+
+        self.log_dir = self.log_dir / f"retrain-{datetime.now().strftime('%d-%m-%Y-%H-%M-%S-%f')}"
+        if not self.log_dir.exists():
+            self.log_dir.mkdir(parents=True)
+
+        logger = create_logger(self.log_dir, "root.retrain")
+        logger.info(str(self.log_dir))
+
+        try:
+            best_result_directory = _get_best_result_directory(result_dir)
+        except BaseException as exc:
+            logger.exception("Could not find best result directory.")
+            raise BaseException from exc
+
+        logger.info(f"Best result of architecture search: {best_result_directory.parent}")
+
+        shutil.copytree(best_result_directory.parent, str(self.log_dir / "architecture_search_result"))
+
+        with best_result_directory.open("rb") as f:
+            result = pickle.load(f)
+
+        trained_theta: list[np.ndarray[Any, np.dtype[float]]] = result["trained_theta"]
+        structure_info: MnasNetStructureInfo = result["structure_info"]
+
+        hyperparameters: dict[str, Any] = result["hyperparameters"]
+        alpha = hyperparameters["alpha"]
+        epsilon = hyperparameters["epsilon"]
+
+        logger.info("Retraining")
+
+        _search_space_config_path = get_search_space_config(
+            self._nas_config.nas.search_space,
+            self._nas_config.dataset.name,
+        )
+        self._search_space_config = create_config_by_yaml(
+            self._nas_config.nas.search_space_config_path + str(_search_space_config_path),
+        )
+
+        if retrain_dataset.name == "imagenet":
+            directory_list, label_map = get_random_dataset_directory(train_data_path, num_classes=num_classes)
+            train_transform, test_transform = _data_transforms_imagenet()
+            train_dataset = load_imagenet_dataset(
+                train_data_path,
+                directory_list,
+                label_map,
+                transform=train_transform,
+                train=True,
+            )
+        elif retrain_dataset.name == "cifar10":
+            train_transform, test_transform = _data_transforms_cifar()
+            train_dataset = torchvision.datasets.CIFAR10(
+                train_data_path,
+                train=True,
+                transform=train_transform,
+                download=True,
+            )
+        elif retrain_dataset.name == "cifar100":
+            train_transform, test_transform = _data_transforms_cifar()
+            train_dataset = torchvision.datasets.CIFAR100(
+                train_data_path,
+                train=True,
+                transform=train_transform,
+                download=True,
+            )
+        self.train_dataloader = DataLoader(
+            train_dataset,
+            batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+            pin_memory=False,
+        )
+        self.num_train_batches = len(self.train_dataloader)
+        self.num_train_data = len(self.train_dataloader.sampler)
+
+        if test_data_path is not None and test_data_path.exists() and retrain_dataset.name == "imagenet":
+            valid_dataset = load_imagenet_dataset(
+                test_data_path,
+                directory_list,
+                label_map,
+                transform=test_transform,
+                train=False,
+            )
+            self.valid_dataloader = DataLoader(valid_dataset, batch_size, shuffle=False, num_workers=num_workers)
+        elif test_data_path is not None and test_data_path.exists() and retrain_dataset.name == "cifar10":
+            valid_dataset = torchvision.datasets.CIFAR10(
+                test_data_path,
+                train=False,
+                transform=test_transform,
+                download=True,
+            )
+            self.valid_dataloader = DataLoader(valid_dataset, batch_size, shuffle=False, num_workers=num_workers)
+        elif test_data_path is not None and test_data_path.exists() and retrain_dataset.name == "cifar100":
+            valid_dataset = torchvision.datasets.CIFAR100(
+                test_data_path,
+                train=False,
+                transform=test_transform,
+                download=True,
+            )
+            self.valid_dataloader = DataLoader(valid_dataset, batch_size, shuffle=False, num_workers=num_workers)
+        else:
+            self.valid_dataloader = None
+
+        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = get_device()
+
+        self.model = MnasNetSearchSpace("MnasNetSearchSpace")
+        self.model.build(self._search_space_config)
+        category_dic = self.model.enumerate_categorical_variables()
+        categories = make_categories2(category_dic, self._search_space_config)
+        params = get_params2(self.model, structure_info, self._search_space_config, categories)
+        init_delta = 1.0 / sum(categories)
+
+        self.asng = CategoricalASNG(
+            categories,
+            params,
+            alpha=alpha,
+            eps=epsilon,
+            init_delta=init_delta,
+            init_theta=trained_theta,
+        )
+
+        mle_one_hot = self.asng.p_model.mle()
+        mle = np.argmax(mle_one_hot, axis=1)
+        mle_new = make_observed_values2(mle, self._search_space_config, categories)
+
+        structure_info.update_values(mle_new)
+        self.model.select_active_op(structure_info)
+        self.model.fix_arc()
+
+        logger.info(f"The numbers of parameters: {self.model.get_param_num_list()}")
+
+        p = 0
+        for param in self.model.parameters():
+            p += param.numel()
+
+        macs, params_count = get_model_complexity_info(
+            self.model,
+            (3, 224, 224),
+            as_strings=False,
+            print_per_layer_stat=False,
+            verbose=False,
+        )
+        logger.info(f"flops: {macs / 1e6}")
+
+        with (self.log_dir / "description.txt").open("a") as o:
+            o.write("flops(after search)_" + str(epsilon) + ": %fM\n" % (macs / 1e6))
+
+        if device.type == "cuda":
+            gc.collect()
+            torch.cuda.empty_cache()
+
+        self.optimizer = SGD(
+            self.model.parameters(),
+            lr=self.base_lr,
+            momentum=momentum,
+            weight_decay=weight_decay,
+        )
+        self.loss_func = cross_entropy_with_label_smoothing
+        self.custom_logger = create_supernet_train_logger(
+            self.log_dir,
+            self.parent_logger_name + ".retrain_result",
+        )
+        self.start = time.time()
+
+    def on_train_epoch_start(self):
+        self.model.train()
+        self.train_loss = 0.0
+        self.train_acc1 = 0.0
+        self.train_acc5 = 0.0
+
+    def on_train_epoch_end(self):
+        self.test_loss = self.test_acc1 = self.test_acc5 = np.nan
+        optimizer = self.optimizers()
+
+        if self.valid_dataloader is not None:
+            self.test_loss, self.test_acc1, self.test_acc5 = _test(self.model, self.loss_func, self.valid_dataloader)
+
+        elapsed_time = time.time() - self.start
+        convergence = self.asng.p_model.theta.max(axis=1).mean()
+
+        self.custom_logger.info(
+            msg="",
+            extra=create_retrain_report(
+                epoch=self.current_epoch,
+                elapsed_time=elapsed_time,
+                train_loss=self.train_loss,
+                top_1_train_acc=self.train_acc1,
+                top_5_train_acc=self.train_acc5,
+                test_loss=self.test_loss,
+                top_1_test_acc=self.test_acc1,
+                top_5_test_acc=self.test_acc5,
+                convergence=convergence,
+                learning_rate=optimizer.param_groups[0]["lr"],
+            ),
+        )

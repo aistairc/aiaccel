@@ -481,7 +481,6 @@ class MnasNetLayer(NASModule):
         kernel_idx = self.kernel_size_list.index(kernel_size)
 
         self.active_op = self.candidate_ops[structure_info(self.conv_op_str_key)]
-
         # recursively setting
         self.active_op.select_active_op(
             structure_info,
@@ -526,7 +525,8 @@ class MnasNetLayer(NASModule):
 
     def enumerate_active_variables(self):
         # categorical keys/variables(filter_size, kernel_size, conv_op_str, skip_op_str, se_ratio)
-        conv_op_str = self.active_op.name.split("@")[-1]
+        # conv_op_str = self.active_op.name.split("@")[-1]
+        conv_op_str = self.active_op.__class__.__name__
         active_variables = {
             self.filter_size_key: (self.filter_size_list).index(self.active_op.filter_size),
             self.kernel_size_key: (self.kernel_size_list).index(self.active_op.kernel_size),
@@ -685,13 +685,13 @@ class MnasNetLayerStack(NASModule):
         for layer in self.layers:
             flop, _ = get_model_complexity_info(
                 layer,
-                x.size()[1:],
+                tuple(x.size()[1:]),
                 as_strings=False,
                 print_per_layer_stat=False,
                 verbose=False,
             )
             flops_list.append(x)
-            x = self.layer(x)
+            x = layer(x)
 
         return flops_list, x
 

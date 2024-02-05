@@ -14,7 +14,16 @@ class CategoricalASNG:
         init_theta (numpy.ndarray): Initial parameter of theta. Its shape must be (len(categories), max(categories)).
     """
 
-    def __init__(self, categories, params=None, alpha=1.5, eps=0, init_delta=1.0, delta_max=np.inf, init_theta=None):
+    def __init__(
+        self,
+        categories: np.ndarray,
+        params: np.ndarray = None,
+        alpha: float = 1.5,
+        eps=0,
+        init_delta: float = 1.0,
+        delta_max: float = np.inf,
+        init_theta: np.ndarray = None,
+    ) -> None:
         self.p_model = Categorical(categories)
 
         if init_theta is not None:
@@ -64,7 +73,9 @@ class CategoricalASNG:
             print("skip update")
             return
 
-        self.p_model.theta += delta * (ngrad - self.eps * nreg / np.max(self.params))
+        # self.p_model.theta += delta * (ngrad - self.eps * nreg / np.max(self.params))
+        nreg_divide = np.divide(nreg, np.max(self.params), out=np.zeros_like(nreg), where=np.max(self.params) != 0)
+        self.p_model.theta += delta * (ngrad - self.eps * nreg_divide)
 
         for i in range(self.p_model.d):
             ci = self.p_model.C[i]

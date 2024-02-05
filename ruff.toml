@@ -39,6 +39,7 @@ ignore = [
   "G004",   # flake8-logging-format: Logging statement uses f-string
   "PLR0913",# Pylint: Too many arguments in function definition ({c_args} > {max_args})
   "RUF100", # Ruff-specific rules: Unused noqa directive
+  "S101",   # Derived from the flake8-bandit linter.
   "T201",   # flake8-print: print found
 ]
 select = ["ALL"]

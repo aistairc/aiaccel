@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from collections.abc import Callable
 from logging import FileHandler, Formatter, Logger, LogRecord, getLogger
 from pathlib import Path
@@ -15,7 +14,7 @@ def create_supernet_train_report(
     top_5_train_acc: float | None = None,
     learning_rate: float | None = None,
 ) -> dict[str, Any]:
-    report = {
+    return {
         "result": "",
         "epoch": epoch,
         "elapsed_time": elapsed_time,
@@ -24,7 +23,6 @@ def create_supernet_train_report(
         "top_5_train_acc": top_5_train_acc,
         "learning_rate": learning_rate,
     }
-    return report
 
 
 def create_architecture_search_report(
@@ -35,7 +33,7 @@ def create_architecture_search_report(
     top_5_valid_acc: float | None = None,
     convergence: float | None = None,
 ) -> dict[str, Any]:
-    report = {
+    return {
         "result": "",
         "epoch": epoch,
         "elapsed_time": elapsed_time,
@@ -44,7 +42,6 @@ def create_architecture_search_report(
         "top_5_valid_acc": top_5_valid_acc,
         "convergence": convergence,
     }
-    return report
 
 
 def create_retrain_report(
@@ -59,7 +56,7 @@ def create_retrain_report(
     convergence: float | None = None,
     learning_rate: float | None = None,
 ) -> dict[str, Any]:
-    report = {
+    return {
         "result": "",
         "epoch": epoch,
         "elapsed_time": elapsed_time,
@@ -72,7 +69,6 @@ def create_retrain_report(
         "convergence": convergence,
         "learning_rate": learning_rate,
     }
-    return report
 
 
 def _create_logger(
@@ -95,9 +91,10 @@ def _create_logger(
 
 
 def create_supernet_train_logger(
-    workdir: str | Path | None = None, name: str = "root.search.supernet_train_result"
+    workdir: str | Path | None = None,
+    name: str = "root.search.supernet_train_result",
 ) -> Logger:
-    workdir = Path(workdir if workdir else os.getcwd()).resolve()
+    workdir = Path(workdir if workdir else Path.cwd()).resolve()
     if not workdir.exists():
         workdir.mkdir(parents=True)
     logger = _create_logger(
@@ -127,7 +124,7 @@ def create_architecture_search_logger(
     workdir: str | Path | None = None,
     name: str = "root.search.architecture_search_result",
 ) -> Logger:
-    workdir = Path(workdir if workdir else os.getcwd()).resolve()
+    workdir = Path(workdir if workdir else Path.cwd()).resolve()
     if not workdir.exists():
         workdir.mkdir(parents=True)
     logger = _create_logger(
@@ -154,7 +151,7 @@ def create_architecture_search_logger(
 
 
 def create_retrain_logger(workdir: str | Path | None = None, name="root.retrain.retrain_result") -> Logger:
-    workdir = Path(workdir if workdir else os.getcwd()).resolve()
+    workdir = Path(workdir if workdir else Path.cwd()).resolve()
     if not workdir.exists():
         workdir.mkdir(parents=True)
     logger = _create_logger(
@@ -185,17 +182,18 @@ def create_retrain_logger(workdir: str | Path | None = None, name="root.retrain.
 
 
 def create_logger(workdir: str | Path | None = None, name: str = "root") -> Logger:
-    workdir = Path(workdir if workdir else os.getcwd()).resolve()
+    workdir = Path(workdir if workdir else Path.cwd()).resolve()
+
     if not workdir.exists():
         workdir.mkdir(parents=True)
-    logger = _create_logger(
+
+    return _create_logger(
         name,
         "DEBUG",
         workdir / f"{name.split('.')[-1]}.log",
         _result_filter,
         "%(asctime)s %(levelname)-7s %(name)s:%(filename)s:%(lineno)s %(message)s",
     )
-    return logger
 
 
 def _supernet_train_result_filter(record: LogRecord) -> bool:
@@ -211,7 +209,7 @@ def _supernet_train_result_filter(record: LogRecord) -> bool:
                     record.top_5_train_acc,
                     record.learning_rate,
                 ],
-            )
+            ),
         )
         record.result = result
         return True
@@ -231,7 +229,7 @@ def _architecture_search_result_filter(record: LogRecord) -> bool:
                     record.top_5_valid_acc,
                     record.convergence,
                 ],
-            )
+            ),
         )
         record.result = result
         return True
@@ -255,7 +253,7 @@ def _retrain_result_filter(record: LogRecord) -> bool:
                     record.convergence,
                     record.learning_rate,
                 ],
-            )
+            ),
         )
         record.result = result
         return True
@@ -292,14 +290,14 @@ def _result_filter(record: LogRecord) -> bool:
                 f"epoch: {getattr(record, 'epoch', None):8d}, "
                 f"elapsed time: {getattr(record, 'elapsed_time', None):17.6f}, "
                 f" train loss: {getattr(record, 'train_loss', None):10.6f}, "
-                f" top-1 train acc.: {getattr(record, 'train_acc1', None):10.6f}, "
-                f" top-5 train acc.: {getattr(record, 'train_acc5', None):10.6f}, "
+                f" top-1 train acc.: {getattr(record, 'top_1_train_acc', None):10.6f}, "
+                f" top-5 train acc.: {getattr(record, 'top_5_train_acc', None):10.6f}, "
                 f"valid. loss: {getattr(record, 'valid_loss', None):10.6f}, "
-                f"top-1 valid. acc.: {getattr(record, 'valid_acc1', None):10.6f}, "
-                f"top-5 valid. acc.: {getattr(record, 'valid_acc5', None):10.6f}, "
+                f"top-1 valid. acc.: {getattr(record, 'top_1_valid_acc', None):10.6f}, "
+                f"top-5 valid. acc.: {getattr(record, 'top_5_valid_acc', None):10.6f}, "
                 f"  test loss: {getattr(record, 'test_loss', None):10.6f}, "
-                f"  top-1 test acc.: {getattr(record, 'test_acc1', None):10.6f}, "
-                f"  top-5 test acc.: {getattr(record, 'test_acc5', None):10.6f}, "
+                f"  top-1 test acc.: {getattr(record, 'top_1_test_acc', None):10.6f}, "
+                f"  top-5 test acc.: {getattr(record, 'top_5_test_acc', None):10.6f}, "
                 f"  convergence: {getattr(record, 'convergence', None):10.6f}, "
                 f"learning rate: {getattr(record, 'learning_rate', None):10.6f}"
             )

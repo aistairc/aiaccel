@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 
 def count_params(module):
-    return np.sum(np.prod(param.size()) for param in module.parameters())
+    # return np.sum(np.prod(param.size()) for param in module.parameters())
+    return sum(np.prod(param.size()) for param in module.parameters())
 
 
 def ch_pad_clip(x: torch.Tensor, trg_ch_size: int) -> torch.Tensor:
@@ -58,7 +59,13 @@ class Conv(nn.Module):
         super(Conv, self).__init__()
         self.max_in_ch = max_in_ch
         self.conv = nn.Conv2d(
-            max_in_ch, max_out_ch, k_size, stride=stride, padding=k_size // 2, groups=int(groups), bias=False
+            max_in_ch,
+            max_out_ch,
+            k_size,
+            stride=stride,
+            padding=k_size // 2,
+            groups=int(groups),
+            bias=False,
         )
 
         if max_se_ratio > 0:
@@ -189,19 +196,15 @@ class SepConv(nn.Module):
         params += self.pw_linear.get_param_nums(in_ch, filter_size)
         return params
 
-    def init_weights(self, conv_weight: int, se_weight: int) -> None:
-        """initialize weights (for debug)
+    def init_weights(self) -> None:
+        """initialize weights (for debug)"""
+        self.dw.init_weights()
 
-        Args:
-            conv_weight (int): conv weight value to be set.
-            se_weight (int): SE weight value to be set.
-        """
-        self.dw.init_weights(conv_weight, se_weight)
         if hasattr(self, "se_op"):
             print("se_op")
-            self.se_op.init_weights(se_weight)
+            self.se_op.init_weights()
 
-        self.pw_linear.init_weights(conv_weight, se_weight)
+        self.pw_linear.init_weights()
 
 
 class MBConv(nn.Module):
@@ -244,7 +247,11 @@ class MBConv(nn.Module):
         self.pw_linear = Conv(max_in_ch * max_expansion_ratio, max_out_ch, k_size=1, stride=1, bn=True, relu=False)
 
     def forward(
-        self, x: torch.Tensor, filter_size: int | None = None, se_ratio: float = 0, expansion_ratio: float = 1
+        self,
+        x: torch.Tensor,
+        filter_size: int | None = None,
+        se_ratio: float = 0,
+        expansion_ratio: float = 1,
     ) -> torch.Tensor:
         """Forward function.
 
@@ -284,19 +291,15 @@ class MBConv(nn.Module):
         params += self.pw_linear.get_param_nums(in_ch * expansion_ratio, filter_size)
         return params
 
-    def init_weights(self, conv_weight: int, se_weight: int) -> None:
-        """Initialize weights (for debug).
+    def init_weights(self) -> None:
+        """Initialize weights (for debug)."""
+        self.pw.init_weights()
+        self.dw.init_weights()
 
-        Args:
-            conv_weight (int): Conv weight value to be set.
-            se_weight (int): SE weight value to be set.
-        """
-        self.pw.init_weights(conv_weight, se_weight)
-        self.dw.init_weights(conv_weight, se_weight)
         if hasattr(self, "se_op"):
-            self.se_op.init_weights(se_weight)
+            self.se_op.init_weights()
 
-        self.pw_linear.init_weights(conv_weight, se_weight)
+        self.pw_linear.init_weights()
 
 
 class Zero(nn.Module):
