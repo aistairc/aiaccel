@@ -14,7 +14,7 @@ import yaml
 
 import aiaccel
 from aiaccel.cli import CsvWriter
-from aiaccel.common import datetime_format, resource_type_mpi
+from aiaccel.common import datetime_format, file_result_csv, resource_type_mpi
 from aiaccel.config import load_config
 from aiaccel.manager import create_manager
 from aiaccel.optimizer import create_optimizer
@@ -172,7 +172,7 @@ def main() -> None:  # pragma: no cover
             if best_id is not None and best_value is not None:
                 logger.info(f"Best trial [{i}] : {best_id}")
                 logger.info(f"\tvalue : {best_value}")
-    logger.info(f"result file : {dst}/{'results.csv'}")
+    logger.info(f"result file : {dst}/{file_result_csv}")
     logger.info(f"Total time [s] : {round(time.time() - time_s)}")
     logger.info("Done.")
     return

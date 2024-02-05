@@ -15,7 +15,7 @@ from aiaccel.util.filesystem import (
 from aiaccel.util.job_script_preamble import create_job_script_preamble
 from aiaccel.util.logger import ColoredHandler, str_to_logging_level
 from aiaccel.util.name import generate_random_name
-from aiaccel.util.process import OutputHandler, ps2joblist
+from aiaccel.util.process import OutputHandler
 from aiaccel.util.retry import retry
 from aiaccel.util.suffix import Suffix
 from aiaccel.util.time import get_now_str, get_timestamp
@@ -40,7 +40,6 @@ __all__ = [
     "load_yaml",
     "make_directories",
     "make_directory",
-    "ps2joblist",
     "retry",
     "str_to_logging_level",
     "CategoricalParameter",

@@ -6,48 +6,8 @@ import select
 import subprocess
 import sys
 import threading
-from typing import Any
-
-import psutil
 
 from aiaccel.common import datetime_format
-
-
-def ps2joblist() -> list[dict[str, Any]]:
-    """Get a ps result and convert to a job list format.
-
-    Args:
-        None
-
-    Returns:
-        list[dict]: A job list of ps result.
-
-    Raises:
-        KeyError: Causes when required keys are not contained in a ps result.
-    """
-
-    job_list = []
-
-    for p_info in psutil.process_iter(["pid", "username", "status", "create_time", "cmdline"]):
-        # p_info = proc.as_dict(
-        #    attrs=['pid', 'username', 'status', 'create_time', 'cmdline'])
-        d = {
-            "job-ID": p_info.info["pid"],
-            "prior": None,
-            "user": p_info.info["username"],
-            "state": p_info.info["status"],
-            "queue": None,
-            "jclass": None,
-            "slots": None,
-            "ja-task-ID": None,
-            "name": " ".join(p_info.info["cmdline"] or []),
-            "submit/start at": datetime.datetime.fromtimestamp(p_info.info["create_time"]).strftime(
-                "%Y-%m-%d %H:%M:%S"
-            ),
-        }
-        job_list.append(d)
-
-    return job_list
 
 
 class OutputHandler(threading.Thread):

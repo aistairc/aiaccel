@@ -6,8 +6,10 @@ from subprocess import PIPE, Popen
 from typing import TYPE_CHECKING, Any
 
 import fasteners
+from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
 
-from aiaccel.abci import create_qsub_command
+from aiaccel.common import dict_stderr, dict_stdout
 from aiaccel.manager.job.model.abstract_model import AbstractModel
 from aiaccel.util import OutputHandler
 
@@ -49,7 +51,7 @@ class AbciModel(AbstractModel):
             None
         """
         runner_file_path = obj.workspace.get_runner_file(obj.trial_id)
-        runner_command = create_qsub_command(obj.config, runner_file_path)
+        runner_command = self.create_qsub_command(obj.config, runner_file_path)
 
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
         obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE, bufsize=0)
@@ -193,3 +195,53 @@ class AbciModel(AbstractModel):
             with fasteners.InterProcessLock(lock_file):
                 with open(path, "w") as f:
                     f.write(content)
+
+    def create_qsub_command(self, config: DictConfig, runner_file: Path) -> list[str]:
+        """Create ABCI 'qsub' command.
+
+        Args:
+            config (Config): A Config object.
+            runner_file (Path): A path of 'qsub' batch file.
+
+        Returns:
+            list: A list to run 'qsub' command.
+        """
+        path = Path(config.generic.workspace).resolve()
+        job_execution_options = config.ABCI.job_execution_options
+
+        command = [
+            "qsub",
+            "-g",
+            f"{config.ABCI.group}",
+            "-o",
+            f"{path / dict_stdout}",
+            "-e",
+            f"{path / dict_stderr}",
+            str(runner_file),
+        ]
+
+        #
+        # additional option
+        #
+
+        # no additional option
+        command_tmp = command.copy()
+        if job_execution_options is None:
+            return command
+        if job_execution_options == "":
+            return command
+        if job_execution_options == []:
+            return command
+
+        # add option
+        if isinstance(job_execution_options, str):
+            for cmd in job_execution_options.split(" "):
+                command_tmp.insert(-1, cmd)
+        elif isinstance(job_execution_options, list) or isinstance(job_execution_options, ListConfig):
+            for option in job_execution_options:
+                for cmd in option.split(" "):
+                    command_tmp.insert(-1, cmd)
+        else:
+            raise ValueError(f"job_execution_options: {job_execution_options} is invalid value")
+
+        return command_tmp
