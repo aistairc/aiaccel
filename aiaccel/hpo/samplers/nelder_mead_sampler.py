@@ -38,9 +38,9 @@ class NelderMeadAlgorism:
         self.dimension = len(search_space)
 
         self.value_queue: queue.Queue[float] = queue.Queue()
-        self._rng: np.random.RandomState = np.random.RandomState(seed)
-        self.is_ready: bool = False
-        self.is_all_trials_finished: bool = True
+        self._rng = np.random.RandomState(seed)
+        self.is_ready = False
+        self.is_all_trials_finished = True
         self.num_running_trial: int = 0
 
     def yield_vertices(self, vertices: np.ndarray[Any, Any]) -> Generator[np.ndarray[Any, Any], None, None]:
