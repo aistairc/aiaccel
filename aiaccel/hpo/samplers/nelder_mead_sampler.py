@@ -43,7 +43,7 @@ class NelderMeadAlgorism:
         self.is_all_trials_finished: bool = True
         self.num_running_trial: int = 0
 
-    def yield_vertices(self, vertices: np.ndarray[Any, Any]):
+    def yield_vertices(self, vertices: np.ndarray[Any, Any]) -> Generator[np.ndarray[Any, Any], None, None]:
         num_of_vertex = len(vertices)
         self.num_running_trial = num_of_vertex
         self.is_ready, self.is_all_trials_finished = True, False
@@ -52,7 +52,7 @@ class NelderMeadAlgorism:
                 self.is_ready = False
             yield vertex
 
-    def finish_trial(self):
+    def finish_trial(self) -> None:
         self.num_running_trial -= 1
         if self.num_running_trial == 0:
             self.is_all_trials_finished = True
@@ -74,20 +74,20 @@ class NelderMeadAlgorism:
 
             # reflect
             yc = self.vertices[:-1].mean(axis=0)
-            yield from self.yield_vertices([yr := yc + self.coeff.r * (yc - self.vertices[-1])])
+            yield from self.yield_vertices(np.array([yr := yc + self.coeff.r * (yc - self.vertices[-1])]))
 
             fr = self.value_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
-                yield from self.yield_vertices([ye := yc + self.coeff.e * (yc - self.vertices[-1])])
+                yield from self.yield_vertices(np.array([ye := yc + self.coeff.e * (yc - self.vertices[-1])]))
 
                 fe = self.value_queue.get()
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
-                yield from self.yield_vertices([yoc := yc + self.coeff.oc * (yc - self.vertices[-1])])
+                yield from self.yield_vertices(np.array([yoc := yc + self.coeff.oc * (yc - self.vertices[-1])]))
                 foc = self.value_queue.get()
 
                 if foc <= fr:
@@ -95,7 +95,7 @@ class NelderMeadAlgorism:
                 else:
                     shrink_requied = True
             elif self.values[-1] <= fr:  # inside contract
-                yield from self.yield_vertices([yic := yc + self.coeff.ic * (yc - self.vertices[-1])])
+                yield from self.yield_vertices(np.array([yic := yc + self.coeff.ic * (yc - self.vertices[-1])]))
                 fic = self.value_queue.get()
 
                 if fic < self.values[-1]:
