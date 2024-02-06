@@ -121,8 +121,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         coeff: NelderMeadCoefficient | None = None,
     ) -> None:
         self._search_space = {}  # Memorise parameter order.
-        for param_name, param_distribution in sorted(search_space.items()):
-            self._search_space[param_name] = list(param_distribution)
+        self._search_space = {name: list(dist) for name, dist in search_space.items()}
 
         self.nm = NelderMeadAlgorism(self._search_space, coeff, seed)
         self.nm_generator = iter(self.nm)
