@@ -2,10 +2,6 @@ from __future__ import annotations
 
 import subprocess
 
-from optuna.trial import Trial
-
-from aiaccel.job.parameter import Parameter
-
 
 class Local:
     def __init__(
@@ -14,7 +10,7 @@ class Local:
         preamble: str,
         job_file_path: str,
         stdout_file_path: str,
-        stderr_file_path: str
+        stderr_file_path: str,
     ):
         self.script_name = script_name
         self.preamble = preamble
@@ -22,9 +18,15 @@ class Local:
         self.stdout_file_path = stdout_file_path
         self.stderr_file_path = stderr_file_path
 
-    def generate_objective_command(self, param: Parameter) -> str:
-        """Create a shell command to execute the job."""
-        args = " ".join([f"{name}={value}" for name, value in param.values.items()])
+    def generate_objective_command(self, param: dict) -> str:
+        """Create a shell command to execute the job.
+        params: {
+            'x': 0.5,
+            'y': 0.3,
+            ...
+        }
+        """
+        args = " ".join([f"{k}={v}" for k, v in param.items()])
         cmd = f"python {self.script_name} -e --params {args}"
         return cmd
 
@@ -33,7 +35,7 @@ class Local:
         cmd = ["sh", f"{self.job_file_path}"]
         return cmd
 
-    def create(self, trial: Trial, param: Parameter) -> None:
+    def create(self, param: dict) -> None:
         """Create a executable file to run the job."""
         cmd = self.generate_objective_command(param)
         with open(self.job_file_path, "w") as f:
