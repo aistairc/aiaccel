@@ -46,6 +46,7 @@ class NelderMeadAlgorism:
     def yield_vertices(self, vertices: np.ndarray[Any, Any]) -> Generator[np.ndarray[Any, Any], None, None]:
         num_of_vertex = len(vertices)
         self.num_running_trial = num_of_vertex
+
         self.is_ready, self.is_all_trials_finished = True, False
         for i, vertex in enumerate(vertices):
             if i == num_of_vertex - 1:
@@ -145,13 +146,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         # Raise RuntimeError if cannot output parameters. (include parallel execution)
         # TODO: support parallel execution
-        # if not self.nm.is_ready and self.num_running_trial > 0:
         if not self.nm.is_ready and not self.nm.is_all_trials_finished:
             raise RuntimeError("Cannot output parameters.")
         # Raise RuntimeError if use study.enqueue_trial()
         # TODO: support study.enqueue_trial()
         if "fixed_params" in trial.system_attrs:
             raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
+
         trial.set_user_attr("Coordinate", self._get_cooridinate())
         # bool variable indicating whether the coordinates can be output or not
         trial.set_user_attr("IsReady", self.nm.is_ready)
@@ -159,6 +160,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def _get_cooridinate(self) -> np.ndarray[Any, Any]:
         cooridinate = next(self.nm_generator)
+
         if self.is_within_range(cooridinate):
             return cooridinate
         else:
@@ -176,8 +178,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             raise ValueError('trial.user_attrs["Coordinate"] is None')
         if param_name not in self._search_space:
             raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
+
         param_index = list(self._search_space.keys()).index(param_name)
         param_value = trial.user_attrs["Coordinate"][param_index]
+
         contains = param_distribution._contains(param_distribution.to_internal_repr(param_value))
         if not contains:
             warnings.warn(
@@ -195,6 +199,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if isinstance(values, list):
             self.stack[trial._trial_id] = values[0]
             self.nm.finish_trial()
+
             if self.nm.is_all_trials_finished:
                 for trial_id in self.running_trial_id:
                     self.nm.value_queue.put(self.stack[trial_id])
