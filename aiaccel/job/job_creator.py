@@ -4,13 +4,16 @@ import sys
 import time
 
 from pathlib import Path
-from aiaccel.job.env import Abci, Local
+import subprocess
 
 import json
 
+from aiaccel.job.command_creator import (
+    create_submit_command,
+    create_execute_objective_command,
+)
+
 script_name = sys.argv[0]
-__local__ = "local"  # for debug
-__abci__ = "abci"
 
 
 class JobCreator:
@@ -32,54 +35,46 @@ class JobCreator:
         self._start_time = None
         self._end_time = None
         self._returncode = None
-
+        self.script_name = script_name
         self.job_file_path = str(self.work_dir / f"job{self.trial_id}.sh")
         self.stdout_file_path = str(self.work_dir / f"o{self.trial_id}")
         self.stderr_file_path = str(self.work_dir / f"e{self.trial_id}")
 
-        if self.platform == __local__:
-            self.excution_environment = Local(
-                script_name,
-                self.preamble,
-                self.job_file_path,
-                self.stdout_file_path,
-                self.stderr_file_path,
-            )
-        elif self.platform == __abci__:
-            self.excution_environment = Abci(
-                script_name,
-                self.preamble,
-                self.group,
-                self.job_file_path,
-                self.work_dir,
-                self.work_dir,
-            )
-        else:
-            raise NotImplementedError(f"Platform '{self.platform}' not implemented.")
-
     def create(self, param: dict) -> None:
         """Create a executable file to run the job."""
-        self.excution_environment.create(param)
+        cmd = create_execute_objective_command(self.script_name, param)
+        with open(self.job_file_path, "w") as f:
+            f.write("#!/bin/bash\n")
+            ...
+            ...
+            ...
+            f.write(f"{cmd}\n")
 
     def run(self) -> None:
         """Run the job with the given hyperparameters."""
+        cmd = create_submit_command(
+            self.platform,
+            self.script_name,
+            self.group,
+            self.job_file_path,
+            self.stdout_file_path,
+            self.stderr_file_path,
+        )
+        print(f"Running the job with the command: `{cmd}`")
+        cmds = cmd.split()
         self._start_time = time.time()
-        self._returncode = self.excution_environment.run()
+        self._returncode = _run(
+            cmds, self.stdout_file_path, self.stderr_file_path, self.timeout_seconds
+        )
         self._end_time = time.time()
 
     def collect_result(self) -> str | None:
         """Collect the result of the job."""
-        return self.excution_environment.collect_result()
+        return _collect_result(self.stdout_file_path)
 
     def create_result_json(self, result: dict) -> None:
-        """Create a result file.
-        retult: dict
-        {
-            "trial_id": int,
-            "x": float,
-            ...
-            "objective_value": float,
-        }
+        """Create a json file to store the result of the job.
+        The file name is `result{trial_id}.json`.
         """
         result_file_path = str(self.work_dir / f"result{self.trial_id}.json")
         with open(result_file_path, "w") as f:
@@ -98,8 +93,62 @@ class JobCreator:
         """Get the return code of the job."""
         return self._returncode
 
+    @property
+    def start_time(self) -> float | None:
+        """Get the start time of the job."""
+        return self._start_time
+
+    @property
+    def end_time(self) -> float | None:
+        """Get the end time of the job."""
+        return self._end_time
+
     def get_elapsed_time(self) -> float:
         """Get the elapsed time."""
         if self._start_time is None:
             raise RuntimeError("Job not started.")
         return time.time() - self._start_time
+
+
+def _run(
+    cmds: list[str], stdout_file: str, stderr_file: str, timeout_seconds: float | int
+) -> int:
+    """Run the job with the given hyperparameters."""
+    if timeout_seconds <= 0:
+        result = subprocess.run(cmds, capture_output=True, text=True)
+    else:
+        result = subprocess.run(
+            cmds, capture_output=True, text=True, timeout=timeout_seconds
+        )
+
+    with open(stdout_file, "w") as f:
+        f.write(result.stdout)
+
+    with open(stderr_file, "w") as f:
+        f.write(result.stderr)
+
+    if result.returncode != 0:
+        print(result.stderr)
+        raise RuntimeError("Failed to submit the job.")
+
+    return result.returncode
+
+
+def _collect_result(stdout_file: str) -> str | None:
+    """Collect the result of the job.
+
+    return:
+        The result of the job (objective value).
+    """
+    try:
+        with open(stdout_file, encoding="utf-8") as file:
+            lines = file.readlines()
+            if lines:
+                return lines[-1].strip()
+            else:
+                return None
+    except FileNotFoundError:
+        return None
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        return None

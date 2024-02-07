@@ -38,7 +38,7 @@ if args.params:
 class JobDispatcher:
     def __init__(
         self,
-        platform: str = "local",
+        platform: str = "",
         group: str = "",
         preamble: str = "",
         n_jobs: int = __default_n_jobs__,
@@ -48,52 +48,30 @@ class JobDispatcher:
     ):
         self.platform = platform.lower()
         self.group = group
-        self.n_jobs = n_jobs
+        self._n_jobs = n_jobs
         self.preamble = preamble
         self.retry_num = retry_num
         self.timeout_seconds = timeout_seconds
         self.work_dir = Path(work_dir).resolve()
+        self.executor = ThreadPoolExecutor(max_workers=n_jobs)
+        self.futures = []
+        self.results = []
+        self._finished_job_count = 0
+        self.all_result = []
 
         if not self.work_dir.exists():
             self.work_dir.mkdir(parents=True)
 
-    ...
+    @property
+    def abvailable_worker_count(self) -> int:
+        return self._n_jobs - len(self.futures)
 
-    # ========================
-    # manage resources
-    # ========================
+    @property
+    def finished_job_count(self) -> int:
+        """Get the number of finished jobs."""
+        return self._finished_job_count
 
-    def running_job_count(self) -> int:
-        ...
-
-    def get_running_trial_ids(self) -> list[int]:
-        ...
-
-    def get_required_parallel_num(self) -> int:
-        """Get the number of parallel jobs required to run the next trial for the study."""
-        ...
-        return 1
-
-    def get_abvailable_worker_count(self) -> int:
-        return min(
-            (self._n_jobs - self.running_job_count()), self.get_required_parallel_num()
-        )
-
-    def wait_for_finished_job(self, trial_ids: list) -> None:
-        """Wait for the specified jobs to finish."""
-        ...
-
-    def retry_failed_job(self, trial_ids: list) -> None:
-        """Retry the specified jobs."""
-        if self.retry_num == 0:
-            return
-        ...
-
-    # ========================
-    # job
-    # ========================
-
-    def submit(self, objective: Callable, hparams: dict, trial_id: int) -> float:
+    def _run(self, objective: Callable, hparams: dict, trial_id: int) -> float:
         """Run the job with the specified hyperparameters and collect the objective value."""
         if args.e:
             # Called by the job script file (***.sh), not invoked by the job dispatcher.
@@ -103,6 +81,7 @@ class JobDispatcher:
                 hparams[k] = float(v)
             y = _run_objective(objective, hparams)
             sys.stdout.write(f"{str(y)}\n")
+            sys.stdout.flush()
             sys.exit(0)
         else:
             # Create and run the job.
@@ -117,49 +96,47 @@ class JobDispatcher:
             job.create(hparams)  # create job file (***.sh)
             job.run()
             y = job.collect_result()
-            job.create_result_json(_create_result(hparams, float(y), trial_id))
+            job.create_result_json(_create_result(trial_id, hparams, float(y)))
             return float(y)
 
-    def submit_parallel(self, objective, hparams_list, trial_ids) -> list[float]:
-        results = []
-        with ThreadPoolExecutor(max_workers=self.n_jobs) as executor:
-            future_to_job = {executor.submit(self.submit, objective, hparams, trial_id): trial_id for hparams, trial_id in zip(hparams_list, trial_ids)}
-            for future in as_completed(future_to_job):
-                trial_id = future_to_job[future]
-                try:
-                    result = future.result()
-                    results.append(result)
-                except Exception as exc:
-                    print(f'Trial {trial_id} generated an exception: {exc}')
-        return results
+    def submit(self, objective, hparams, trial_id, _tag_) -> None:
+        """Submit a job to the job dispatcher."""
+        future = self.executor.submit(self._run, objective, hparams, trial_id)
+        self.futures.append((future, trial_id, hparams, _tag_))
 
     def wait(self) -> None:
         """Wait for the running jobs to finish."""
-        ...
+        futures = [f for f, _, _, _ in self.futures]
+        for future in as_completed(futures):
+            result = future.result()
+            _, trial_id, hparams, _tag_ = next(
+                (f, tid, hps, t) for f, tid, hps, t in self.futures if f == future
+            )
+            self.results.append((trial_id, hparams, result, _tag_))
+            self._finished_job_count += 1
+        self.futures = []
 
-    def collect_results(self) -> list[dict[str, Any]]:
+    def collect_results(self) -> list[tuple[float, Any]]:
         """Collect the results of the finished jobs.
 
         return:
-            list[tuple[float, int]]: The objective values and trial IDs of the finished jobs.
-            [{"trial_id": 1", "params": {"x": 1.0, "y": 0.3}, "objective_value": 0.3}, ...]
+            List of tuples containing the objective value and the corresponding trial object.
         """
-        ...
+        collected_results = []
+        for trial_id, hparams, result, _tag_ in self.results:
+            collected_results.append((result, _tag_))
+            self.all_result.append(
+                {"trial_id": trial_id, "hparams": hparams, "objective": result}
+            )
+        self.results = []  # Reset the results after collecting
+        return collected_results
 
     ...
 
-def _submit(self):
-    """Submit the job."""
-    ...
 
-def _submit_parallel(self):
-    """Submit the job in parallel."""
-    ...
-
-
-def _create_result(hparams: dict, y: float, trial_id: int) -> dict:
+def _create_result(trial_id: int, hparams: dict, y: float) -> dict:
     """Create a result dictionary."""
-    result = {"trial_id": trial_id, "objective_value": y}
+    result = {"trial_id": trial_id, "objective": y}
     result.update(hparams)
     return result
 
@@ -167,90 +144,3 @@ def _create_result(hparams: dict, y: float, trial_id: int) -> dict:
 def _run_objective(objective: Callable, params: dict) -> Any:
     """Run the objective function."""
     return objective(params)
-
-
-"""
-
-``` bash
-python ex01.py
-```
-
-- ex01.py
-``` python
-
-import aiaccel
-import optuna
-
-from aiaccel import NelderMeadSampler
-
-
-def objective(hparams: dict) -> float:
-    x = hparams["x"]
-    ...
-
-    return (x - 2) ** 2
-
-
-if __name__ == "__main__":
-
-    study = optuna.create_study(
-        direction='minimize',
-        sampler=NelderMeadSampler(...)
-    )
-
-    jobs = aiaccel.JobDispatcher()
-    n_trial = 100
-
-    # Run the optimization loop
-    for _ in range(n_trial):
-        trial = study.ask()
-        hparams = {
-            'job_id': trial._trial_id,
-            'x': trial.suggest_float('x', 0, 10),
-        }
-        trial, y = jobs.submit(objective, hparams, _tag_=trial)
-        study.tell(trial, y)
-
-    # ===================================================
-    # Run the optimization loop with parallel execution
-    # ===================================================
-    # while True:
-    #     for _ in range(jobs.availavle_n_jobs):
-    #         trial = jobs.ask()
-    #         hparams = {
-    #             'x': trial.suggest_float('x', 0, 10),
-    #             'job_id': 0
-    #         }
-    #         jobs.submit(objective, hparams, _tag_=trial)
-
-    #     jobs.wait()
-
-    #     for y, trial in jobs.collect_results():
-    #         jobs.tell(trial, y)
-
-```
-"""
-
-def objective(hparams: dict) -> float:
-    x = hparams["x"]
-    ...
-
-    return (x - 2) ** 2
-
-# ===================================================
-# Run the optimization loop with parallel execution
-# ===================================================
-jobs = JobDispatcher()
-while True:
-    for _ in range(jobs.availavle_n_jobs):
-        trial = jobs.ask()
-        hparams = {
-            'x': trial.suggest_float('x', 0, 10),
-            'job_id': 0
-        }
-        jobs.submit(objective, hparams, _tag_=trial)
-
-    jobs.wait()
-
-    for y, trial in jobs.collect_results():
-        jobs.tell(trial, y)
