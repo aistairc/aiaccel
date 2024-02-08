@@ -6,15 +6,13 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any, Callable
 from aiaccel.job.job_creator import JobCreator
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 
 __default_work_dir__ = "./work"
 __default_timeout_seconds__ = -1  # no timeout
 __default_retry_num__ = 0  # no retry
 __default_n_jobs__ = 1  # no parallel execution
-
-script_name = sys.argv[0]
 
 hp_args = {}
 
@@ -46,6 +44,7 @@ class JobDispatcher:
         timeout_seconds: int = __default_timeout_seconds__,
         work_dir: str = __default_work_dir__,
     ):
+        self.script_name = sys.argv[0]
         self.platform = platform.lower()
         self.group = group
         self._n_jobs = n_jobs
@@ -53,56 +52,37 @@ class JobDispatcher:
         self.retry_num = retry_num
         self.timeout_seconds = timeout_seconds
         self.work_dir = Path(work_dir).resolve()
-        self.executor = ThreadPoolExecutor(max_workers=n_jobs)
         self.futures = []
         self.results = []
         self._finished_job_count = 0
+        self._submit_job_count = 0
         self.all_result = []
 
         if not self.work_dir.exists():
             self.work_dir.mkdir(parents=True)
 
-    @property
-    def abvailable_worker_count(self) -> int:
-        return self._n_jobs - len(self.futures)
+        self.executor = ProcessPoolExecutor(max_workers=n_jobs)
 
-    @property
-    def finished_job_count(self) -> int:
-        """Get the number of finished jobs."""
-        return self._finished_job_count
-
-    def _run(self, objective: Callable, hparams: dict, trial_id: int) -> float:
-        """Run the job with the specified hyperparameters and collect the objective value."""
+    def submit(self, objective: Callable, hparams: dict, trial_id: int, _tag_: Any):
+        """Submit a job to the job dispatcher."""
+        self._submit_job_count += 1
         if args.e:
-            # Called by the job script file (***.sh), not invoked by the job dispatcher.
-            # Retrieve hyperparameter values from command-line arguments and update the parameter object.
-            # Execute the objective function and print the result.
             for k, v in hp_args.items():
                 hparams[k] = float(v)
-            y = _run_objective(objective, hparams)
-            sys.stdout.write(f"{str(y)}\n")
-            sys.stdout.flush()
-            sys.exit(0)
+            _run_job(objective, hparams)
         else:
-            # Create and run the job.
-            job = JobCreator(
+            future = self.executor.submit(
+                _create_and_run,
+                self.script_name,
                 trial_id,
                 self.platform,
                 self.group,
                 self.preamble,
                 self.timeout_seconds,
                 self.work_dir,
+                hparams,
             )
-            job.create(hparams)  # create job file (***.sh)
-            job.run()
-            y = job.collect_result()
-            job.create_result_json(_create_result(trial_id, hparams, float(y)))
-            return float(y)
-
-    def submit(self, objective, hparams, trial_id, _tag_) -> None:
-        """Submit a job to the job dispatcher."""
-        future = self.executor.submit(self._run, objective, hparams, trial_id)
-        self.futures.append((future, trial_id, hparams, _tag_))
+            self.futures.append((future, trial_id, hparams, _tag_))
 
     def wait(self) -> None:
         """Wait for the running jobs to finish."""
@@ -131,7 +111,62 @@ class JobDispatcher:
         self.results = []  # Reset the results after collecting
         return collected_results
 
+    @property
+    def abvailable_worker_count(self) -> int:
+        return self._n_jobs - len(self.futures)
+
+    @property
+    def finished_job_count(self) -> int:
+        """Get the number of finished jobs."""
+        return self._finished_job_count
+
+    @property
+    def submit_job_count(self) -> int:
+        """Get the number of submitted jobs."""
+        return self._submit_job_count
+
     ...
+
+
+def _run_job(objective: Callable, hparams: dict):
+    # Called by the job script file (***.sh), not invoked by the job dispatcher.
+    # Retrieve hyperparameter values from command-line arguments and update the parameter object.
+    # Execute the objective function and print the result.
+    y = _run_objective(objective, hparams)
+    sys.stdout.write(f"{str(y)}\n")
+    sys.stdout.flush()
+    sys.exit(0)
+
+
+def _create_and_run(
+    script_name: str,
+    trial_id: int,
+    platform: str,
+    group: str,
+    preamble: str,
+    timeout_seconds: int,
+    work_dir: Path,
+    hparams: dict,
+):
+    job = JobCreator(
+        script_name,
+        trial_id,
+        platform,
+        group,
+        preamble,
+        timeout_seconds,
+        work_dir,
+    )
+    job.create(hparams)  # create job file (***.sh)
+    job.run()
+    y = job.collect_result()
+    job.create_result_json(_create_result(trial_id, hparams, float(y)))
+    return float(y)
+
+
+def _run_objective(objective: Callable, params: dict) -> Any:
+    """Run the objective function."""
+    return objective(params)
 
 
 def _create_result(trial_id: int, hparams: dict, y: float) -> dict:
@@ -139,8 +174,3 @@ def _create_result(trial_id: int, hparams: dict, y: float) -> dict:
     result = {"trial_id": trial_id, "objective": y}
     result.update(hparams)
     return result
-
-
-def _run_objective(objective: Callable, params: dict) -> Any:
-    """Run the objective function."""
-    return objective(params)

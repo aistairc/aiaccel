@@ -62,7 +62,7 @@ def create_submit_command(
         raise NotImplementedError(f"Platform '{platform}' not implemented.")
 
 
-def create_execute_objective_command(script_name: str, param: dict) -> str:
+def create_execute_command(script_name: str, param: dict) -> str:
     """Create a shell command to execute the job.
     params: {
         'x': 0.5,
@@ -72,4 +72,17 @@ def create_execute_objective_command(script_name: str, param: dict) -> str:
     """
     args = " ".join([f"{k}={v}" for k, v in param.items()])
     cmd = f"python {script_name} -e --params {args}"
+    return cmd
+
+
+def create_execute_command_with_mpi4py(script_name: str, param: dict) -> str:
+    """Create a shell command to execute the job with mpi4py.
+    params: {
+        'x': 0.5,
+        'y': 0.3,
+        ...
+    }
+    """
+    args = " ".join([f"{k}={v}" for k, v in param.items()])
+    cmd = f"mpiexec -n 4 python {script_name} -e --params {args}"
     return cmd

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 import time
 
 from pathlib import Path
@@ -10,15 +9,14 @@ import json
 
 from aiaccel.job.command_creator import (
     create_submit_command,
-    create_execute_objective_command,
+    create_execute_command,
 )
-
-script_name = sys.argv[0]
 
 
 class JobCreator:
     def __init__(
         self,
+        script_name: str,
         trial_id: int,
         platform: str,
         group: str,
@@ -26,6 +24,7 @@ class JobCreator:
         timeout_seconds: int,
         work_dir: Path,
     ):
+        self.script_name = script_name
         self.trial_id = trial_id
         self.platform = platform
         self.group = group
@@ -35,14 +34,13 @@ class JobCreator:
         self._start_time = None
         self._end_time = None
         self._returncode = None
-        self.script_name = script_name
         self.job_file_path = str(self.work_dir / f"job{self.trial_id}.sh")
         self.stdout_file_path = str(self.work_dir / f"o{self.trial_id}")
         self.stderr_file_path = str(self.work_dir / f"e{self.trial_id}")
 
     def create(self, param: dict) -> None:
         """Create a executable file to run the job."""
-        cmd = create_execute_objective_command(self.script_name, param)
+        cmd = create_execute_command(self.script_name, param)
         with open(self.job_file_path, "w") as f:
             f.write("#!/bin/bash\n")
             ...
