@@ -231,20 +231,29 @@ class TestNelderMeadSampler(unittest.TestCase):
         self.assertEqual(self.sampler.sample_relative(self.study, self.trial, self.param_distribution), {})
 
     def test_before_trial(self):
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler._get_cooridinate") as mock_iter:
+            def side_effect():
+                return np.array([-1.0, 0.0])
+            mock_iter.side_effect = side_effect
+
+            self.sampler.before_trial(self.study, self.trial)
+            self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
+
+            self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-1.0, 0.0])))
+            self.assertFalse(self.trial.user_attrs["IsReady"])
+
+    def test_get_coordinate(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.__iter__") as mock_iter:
             def side_effect():
                 yield np.array([-1.0, 0.0])
             mock_iter.side_effect = side_effect
             self.sampler.nm_generator = iter(self.sampler.nm)
 
-            self.sampler.before_trial(self.study, self.trial)
-            self.assertEqual(self.sampler.num_running_trial, 1)
-            self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
+            coordinate = self.sampler._get_cooridinate()
 
-            self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-1.0, 0.0])))
-            self.assertFalse(self.trial.user_attrs["IsReady"])
+            self.assertTrue(np.array_equal(coordinate, np.array([-1.0, 0.0])))
 
-    def test_before_trial_out_of_range(self):
+    def test_get_coordinate_out_of_range(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.__iter__") as mock_iter:
             def side_effect():
                 yield np.array([-6.0, 0.0])
@@ -252,11 +261,9 @@ class TestNelderMeadSampler(unittest.TestCase):
             mock_iter.side_effect = side_effect
             self.sampler.nm_generator = iter(self.sampler.nm)
 
-            self.sampler.before_trial(self.study, self.trial)
-            self.assertEqual(self.sampler.num_running_trial, 1)
-            self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
+            coordinate = self.sampler._get_cooridinate()
 
-            self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-2.0, 0.0])))
+            self.assertTrue(np.array_equal(coordinate, np.array([-2.0, 0.0])))
 
     def test_sample_independent(self):
         xs = np.array([-1.0, 0.0])
@@ -271,11 +278,9 @@ class TestNelderMeadSampler(unittest.TestCase):
     def test_after_trial(self):
         put_value = 4.0
         self.trial.set_user_attr("Coordinate", np.array([-1.0, 0.0]))
-        self.sampler.num_running_trial += 1
         self.sampler.running_trial_id.append(self.trial._trial_id)
 
         self.sampler.after_trial(self.study, self.trial, self.state, [put_value])
-        self.assertEqual(self.sampler.num_running_trial, 0)
         self.assertEqual(self.sampler.running_trial_id, [])
 
         value = self.sampler.nm.value_queue.get(block=False)
