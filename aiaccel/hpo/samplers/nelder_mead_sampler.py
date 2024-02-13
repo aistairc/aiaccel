@@ -144,11 +144,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        # Raise RuntimeError if cannot output parameters. (include parallel execution)
         # TODO: support parallel execution
         if not self.nm.is_ready and not self.nm.is_all_trials_finished:
-            raise RuntimeError("Cannot output parameters.")
-        # Raise RuntimeError if use study.enqueue_trial()
+            raise RuntimeError("No more parallel calls to ask() are possible.")
         # TODO: support study.enqueue_trial()
         if "fixed_params" in trial.system_attrs:
             raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
