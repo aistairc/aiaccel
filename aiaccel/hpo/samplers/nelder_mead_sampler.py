@@ -148,6 +148,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if not self.nm.is_ready and not self.nm.is_all_trials_finished:
             raise RuntimeError("No more parallel calls to ask() are possible.")
         # TODO: support study.enqueue_trial()
+        # TODO: system_attrs is deprecated.
         if "fixed_params" in trial.system_attrs:
             raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
 
