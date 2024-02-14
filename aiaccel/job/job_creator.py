@@ -1,23 +1,18 @@
 from __future__ import annotations
 
-import time
-
-from pathlib import Path
-import subprocess
-
 import json
+import subprocess
+import time
+from pathlib import Path
 
-from aiaccel.job.command_creator import (
-    create_submit_command,
-    create_execute_command,
-)
+from aiaccel.job.command_creator import create_execute_command, create_submit_command
 
 
 class JobCreator:
     def __init__(
         self,
         script_name: str,
-        trial_id: int,
+        job_name: int,
         platform: str,
         group: str,
         preamble: str,
@@ -25,7 +20,7 @@ class JobCreator:
         work_dir: Path,
     ):
         self.script_name = script_name
-        self.trial_id = trial_id
+        self.job_name = job_name
         self.platform = platform
         self.group = group
         self.preamble = preamble
@@ -34,9 +29,9 @@ class JobCreator:
         self._start_time = None
         self._end_time = None
         self._returncode = None
-        self.job_file_path = str(self.work_dir / f"job{self.trial_id}.sh")
-        self.stdout_file_path = str(self.work_dir / f"o{self.trial_id}")
-        self.stderr_file_path = str(self.work_dir / f"e{self.trial_id}")
+        self.job_file_path = str(self.work_dir / f"{self.job_name}.sh")
+        self.stdout_file_path = str(self.work_dir / f"o{self.job_name}")
+        self.stderr_file_path = str(self.work_dir / f"e{self.job_name}")
 
     def create(self, param: dict) -> None:
         """Create a executable file to run the job."""
@@ -72,9 +67,9 @@ class JobCreator:
 
     def create_result_json(self, result: dict) -> None:
         """Create a json file to store the result of the job.
-        The file name is `result{trial_id}.json`.
+        The file name is `result{job_name}.json`.
         """
-        result_file_path = str(self.work_dir / f"result{self.trial_id}.json")
+        result_file_path = str(self.work_dir / f"result{self.job_name}.json")
         with open(result_file_path, "w") as f:
             json.dump(result, f)
 

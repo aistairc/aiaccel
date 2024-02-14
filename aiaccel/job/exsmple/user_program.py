@@ -1,4 +1,5 @@
 import optuna
+
 from aiaccel import JobDispatcher
 
 
@@ -8,23 +9,20 @@ def objective(hparams: dict) -> float:
 
 
 if __name__ == "__main__":
-    search_space = {"x": [0, 10], "y": [0, 10]}
-    sampler = optuna.samplers.RandomSampler(seed=42)
+    sampler = optuna.samplers.TPESampler(seed=42)
+    # sampler = optuna.samplers.RandomSampler(seed=42)
     study = optuna.create_study(direction="minimize", sampler=sampler)
-    jobs = JobDispatcher(n_jobs=4)
-    n_trial = 10
 
-    while True:
-        n = min(n_trial - jobs.submit_job_count, jobs.abvailable_worker_count)
-        for _ in range(n):
-            trial = study.ask()
-            hparams = {"x": trial.suggest_float("x", 0, 10)}
-            jobs.submit(objective, hparams, trial.number, trial)
+    n_trials = 50
+    n_jobs = 1
 
-        jobs.wait()
+    jobs = JobDispatcher(objective, n_trials, n_jobs=n_jobs)
 
+    for n in range(n_trials):
+        trial = study.ask()
+        hparams = {"x": trial.suggest_float("x", 0, 10)}
+        jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:08}")
         for y, trial in jobs.collect_results():
             study.tell(trial, y)
 
-        if jobs.finished_job_count >= n_trial:
-            break
+    [print(result) for result in jobs.results]

@@ -1,13 +1,14 @@
 from __future__ import annotations
-
+import copy
 import sys
-
+import time
 from argparse import ArgumentParser
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Callable
+import uuid
 from aiaccel.job.job_creator import JobCreator
-from concurrent.futures import ProcessPoolExecutor, as_completed
-
+import ast
 
 __default_work_dir__ = "./work"
 __default_timeout_seconds__ = -1  # no timeout
@@ -33,9 +34,18 @@ if args.params:
         hp_args[key] = value
 
 
+def _eval(s: str) -> Any:
+    try:
+        return ast.literal_eval(s)
+    except ValueError:
+        return s
+
+
 class JobDispatcher:
     def __init__(
         self,
+        func: Callable,
+        n_trials: int,
         platform: str = "",
         group: str = "",
         preamble: str = "",
@@ -44,7 +54,15 @@ class JobDispatcher:
         timeout_seconds: int = __default_timeout_seconds__,
         work_dir: str = __default_work_dir__,
     ):
-        self.script_name = sys.argv[0]
+        self.func = func
+        if args.e:
+            hparams = {}
+            for k, v in hp_args.items():
+                hparams[k] = _eval(v)
+            _run_job(self.func, hparams)
+            sys.exit(0)
+        # ====
+        self.n_trials = n_trials
         self.platform = platform.lower()
         self.group = group
         self._n_jobs = n_jobs
@@ -53,48 +71,47 @@ class JobDispatcher:
         self.timeout_seconds = timeout_seconds
         self.work_dir = Path(work_dir).resolve()
         self.futures = []
-        self.results = []
-        self._finished_job_count = 0
+        self._all_future = []
         self._submit_job_count = 0
-        self.all_result = []
+        self.all_results = []
+        self.script_name = sys.argv[0]
 
         if not self.work_dir.exists():
             self.work_dir.mkdir(parents=True)
 
         self.executor = ProcessPoolExecutor(max_workers=n_jobs)
 
-    def submit(self, objective: Callable, hparams: dict, trial_id: int, _tag_: Any):
+    def submit(
+        self, hparams: dict, tag: Any = None, job_name: int | None = None
+    ) -> None:
         """Submit a job to the job dispatcher."""
         self._submit_job_count += 1
-        if args.e:
-            for k, v in hp_args.items():
-                hparams[k] = float(v)
-            _run_job(objective, hparams)
-        else:
-            future = self.executor.submit(
-                _create_and_run,
-                self.script_name,
-                trial_id,
-                self.platform,
-                self.group,
-                self.preamble,
-                self.timeout_seconds,
-                self.work_dir,
-                hparams,
-            )
-            self.futures.append((future, trial_id, hparams, _tag_))
+        job_name = job_name if job_name is not None else self.get_job_name()
 
-    def wait(self) -> None:
-        """Wait for the running jobs to finish."""
-        futures = [f for f, _, _, _ in self.futures]
-        for future in as_completed(futures):
-            result = future.result()
-            _, trial_id, hparams, _tag_ = next(
-                (f, tid, hps, t) for f, tid, hps, t in self.futures if f == future
-            )
-            self.results.append((trial_id, hparams, result, _tag_))
-            self._finished_job_count += 1
-        self.futures = []
+        future = self.executor.submit(
+            _create_and_run,
+            self.script_name,
+            job_name,
+            self.platform,
+            self.group,
+            self.preamble,
+            self.timeout_seconds,
+            self.work_dir,
+            hparams,
+        )
+        self.futures.append((future, job_name, hparams, tag))
+        self._all_future.append(future)
+
+        # Wait for at least one available worker
+        while True:
+            if self.available_worker_count > 0:
+                break
+            if self.all_done():
+                break
+            time.sleep(0.1)
+
+    def _update_working_feature_list(self):
+        self.futures = [f for f in self.futures if not f[0].done()]
 
     def collect_results(self) -> list[tuple[float, Any]]:
         """Collect the results of the finished jobs.
@@ -102,28 +119,57 @@ class JobDispatcher:
         return:
             List of tuples containing the objective value and the corresponding trial object.
         """
+        fdone = [f for f in self.futures if f[0].done()]
+        if len(fdone) == 0:
+            return []
+
         collected_results = []
-        for trial_id, hparams, result, _tag_ in self.results:
-            collected_results.append((result, _tag_))
-            self.all_result.append(
-                {"trial_id": trial_id, "hparams": hparams, "objective": result}
+        for future in [f for f, _, _, _ in fdone]:
+            result = future.result()
+            _, job_name, hparams, tag = next(
+                (f, tid, hps, t) for f, tid, hps, t in self.futures if f == future
             )
-        self.results = []  # Reset the results after collecting
+            collected_results.append((result, tag))
+            self.all_results.append(
+                {"job_name": job_name, "value": result, "hparams": hparams}
+            )
+
+        self._update_working_feature_list()
         return collected_results
 
     @property
-    def abvailable_worker_count(self) -> int:
-        return self._n_jobs - len(self.futures)
+    def available_worker_count(self) -> int:
+        _working_feature_count = len([f for f in self.futures if not f[0].done()])
+        return min(
+            self.n_trials - self.submit_job_count, self._n_jobs - _working_feature_count
+        )
 
     @property
     def finished_job_count(self) -> int:
         """Get the number of finished jobs."""
-        return self._finished_job_count
+        if len(self._all_future) == 0:
+            return 0
+        return len([f for f in self._all_future if f.done()])
 
     @property
     def submit_job_count(self) -> int:
         """Get the number of submitted jobs."""
         return self._submit_job_count
+
+    def all_done(self) -> bool:
+        if len(self._all_future) >= self.n_trials:
+            return all([f.done() for f in self._all_future])
+        else:
+            return False
+
+    def get_job_name(self) -> int:
+        return str(uuid.uuid4())
+
+    @property
+    def results(self) -> list[dict]:
+        all_results = copy.deepcopy(self.all_results)
+        all_results.sort(key=lambda x: x["job_name"])
+        return all_results
 
     ...
 
@@ -135,12 +181,11 @@ def _run_job(objective: Callable, hparams: dict):
     y = _run_objective(objective, hparams)
     sys.stdout.write(f"{str(y)}\n")
     sys.stdout.flush()
-    sys.exit(0)
 
 
 def _create_and_run(
     script_name: str,
-    trial_id: int,
+    job_name: int,
     platform: str,
     group: str,
     preamble: str,
@@ -150,7 +195,7 @@ def _create_and_run(
 ):
     job = JobCreator(
         script_name,
-        trial_id,
+        job_name,
         platform,
         group,
         preamble,
@@ -160,8 +205,8 @@ def _create_and_run(
     job.create(hparams)  # create job file (***.sh)
     job.run()
     y = job.collect_result()
-    job.create_result_json(_create_result(trial_id, hparams, float(y)))
-    return float(y)
+    job.create_result_json(_create_result(job_name, hparams, float(y)))
+    return _eval(y)
 
 
 def _run_objective(objective: Callable, params: dict) -> Any:
@@ -169,8 +214,8 @@ def _run_objective(objective: Callable, params: dict) -> Any:
     return objective(params)
 
 
-def _create_result(trial_id: int, hparams: dict, y: float) -> dict:
+def _create_result(job_name: int, hparams: dict, y: float) -> dict:
     """Create a result dictionary."""
-    result = {"trial_id": trial_id, "objective": y}
+    result = {"job_name": job_name, "velue": y}
     result.update(hparams)
     return result
