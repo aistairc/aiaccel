@@ -102,6 +102,7 @@ optimize:
         - uniform_int - 整数
         - categorical - カテゴリカル変数
     - **lower / upper** - ハイパパラメータ最小値 / 最大値を設定します．
+    - **log** -  対数スケールでパラメータ空間を分割するかを `true` または `false` で設定します．
     - **initial** - ハイパパラメータの初期値を設定します．
 
 ### user.py の作成
