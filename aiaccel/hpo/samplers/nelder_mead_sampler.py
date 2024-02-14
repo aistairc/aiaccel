@@ -23,8 +23,8 @@ class NelderMeadCoefficient:
 
 
 class NelderMeadAlgorism:
-    vertices: np.ndarray[Any, Any]
-    values: np.ndarray[Any, Any]
+    vertices: np.ndarray
+    values: np.ndarray
 
     def __init__(
         self,
@@ -43,7 +43,7 @@ class NelderMeadAlgorism:
         self.is_all_trials_finished = True
         self.num_running_trial: int = 0
 
-    def yield_vertices(self, vertices: np.ndarray[Any, Any]) -> Generator[np.ndarray[Any, Any], None, None]:
+    def yield_vertices(self, vertices: list[np.ndarray]) -> Generator[np.ndarray, None, None]:
         num_of_vertex = len(vertices)
         self.num_running_trial = num_of_vertex
 
@@ -58,7 +58,7 @@ class NelderMeadAlgorism:
         if self.num_running_trial == 0:
             self.is_all_trials_finished = True
 
-    def __iter__(self) -> Generator[np.ndarray[Any, Any], None, None]:
+    def __iter__(self) -> Generator[np.ndarray, None, None]:
         # initialization
         lows, highs = zip(*self._search_space.values())
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
@@ -75,20 +75,20 @@ class NelderMeadAlgorism:
 
             # reflect
             yc = self.vertices[:-1].mean(axis=0)
-            yield from self.yield_vertices(np.array([yr := yc + self.coeff.r * (yc - self.vertices[-1])]))
+            yield from self.yield_vertices([yr := yc + self.coeff.r * (yc - self.vertices[-1])])
 
             fr = self.value_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
-                yield from self.yield_vertices(np.array([ye := yc + self.coeff.e * (yc - self.vertices[-1])]))
+                yield from self.yield_vertices([ye := yc + self.coeff.e * (yc - self.vertices[-1])])
 
                 fe = self.value_queue.get()
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
-                yield from self.yield_vertices(np.array([yoc := yc + self.coeff.oc * (yc - self.vertices[-1])]))
+                yield from self.yield_vertices([yoc := yc + self.coeff.oc * (yc - self.vertices[-1])])
                 foc = self.value_queue.get()
 
                 if foc <= fr:
@@ -96,7 +96,7 @@ class NelderMeadAlgorism:
                 else:
                     shrink_requied = True
             elif self.values[-1] <= fr:  # inside contract
-                yield from self.yield_vertices(np.array([yic := yc + self.coeff.ic * (yc - self.vertices[-1])]))
+                yield from self.yield_vertices([yic := yc + self.coeff.ic * (yc - self.vertices[-1])])
                 fic = self.value_queue.get()
 
                 if fic < self.values[-1]:
@@ -129,7 +129,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.running_trial_id: list[int] = []
         self.stack: dict[int, float] = {}
 
-    def is_within_range(self, coordinates: np.ndarray[Any, Any]) -> bool:
+    def is_within_range(self, coordinates: np.ndarray) -> bool:
         return all(low < x < high for x, (low, high) in zip(coordinates, self._search_space.values()))
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
@@ -157,7 +157,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         trial.set_user_attr("IsReady", self.nm.is_ready)
         self.running_trial_id.append(trial._trial_id)
 
-    def _get_cooridinate(self) -> np.ndarray[Any, Any]:
+    def _get_cooridinate(self) -> np.ndarray:
         cooridinate = next(self.nm_generator)
 
         if self.is_within_range(cooridinate):
