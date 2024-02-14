@@ -30,7 +30,7 @@ class NelderMeadAlgorism:
         self,
         search_space: dict[str, list[float]],
         coeff: NelderMeadCoefficient | None = None,
-        seed: int | None = None,
+        rng: np.random.RandomState | None = None,
     ) -> None:
         self._search_space = search_space
         self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
@@ -38,7 +38,7 @@ class NelderMeadAlgorism:
         self.dimension = len(search_space)
 
         self.value_queue: queue.Queue[float] = queue.Queue()
-        self._rng = np.random.RandomState(seed)
+        self._rng = rng if rng is not None else np.random.RandomState()
         self.is_ready = False
         self.is_all_trials_finished = True
         self.num_running_trial: int = 0
@@ -123,7 +123,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     ) -> None:
         self._search_space = {name: list(dist) for name, dist in search_space.items()}  # Memorise parameter order.
 
-        self.nm = NelderMeadAlgorism(self._search_space, coeff, seed)
+        self.nm = NelderMeadAlgorism(self._search_space, coeff, np.random.RandomState(seed))
         self.nm_generator = iter(self.nm)
 
         self.running_trial_id: list[int] = []
