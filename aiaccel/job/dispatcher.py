@@ -108,7 +108,7 @@ class JobDispatcher:
                 break
             if self.all_done():
                 break
-            time.sleep(0.1)
+            time.sleep(0.01)
 
     def _update_working_feature_list(self):
         self.futures = [f for f in self.futures if not f[0].done()]
