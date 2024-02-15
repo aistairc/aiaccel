@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import queue
+import threading
 import warnings
-from collections.abc import Generator
 from dataclasses import dataclass
 from typing import Any, Sequence
 
@@ -37,33 +37,28 @@ class NelderMeadAlgorism:
 
         self.dimension = len(search_space)
 
+        self.vertex_queue: queue.Queue[np.ndarray] = queue.Queue()
         self.value_queue: queue.Queue[float] = queue.Queue()
         self._rng = rng if rng is not None else np.random.RandomState()
-        self.is_ready = False
-        self.is_all_trials_finished = True
-        self.num_running_trial: int = 0
+        self.is_ready = True
 
-    def yield_vertices(self, vertices: list[np.ndarray]) -> Generator[np.ndarray, None, None]:
-        num_of_vertex = len(vertices)
-        self.num_running_trial = num_of_vertex
+    def get_vertex(self) -> np.ndarray:
+        vertex = self.vertex_queue.get()
+        if self.vertex_queue.empty():
+            self.is_ready = False
+        return vertex
 
-        self.is_ready, self.is_all_trials_finished = True, False
-        for i, vertex in enumerate(vertices):
-            if i == num_of_vertex - 1:
-                self.is_ready = False
-            yield vertex
+    def put_vertices(self, vertices: list[np.ndarray]) -> None:
+        self.is_ready = True
+        for vertex in vertices:
+            self.vertex_queue.put(vertex)
 
-    def finish_trial(self) -> None:
-        self.num_running_trial -= 1
-        if self.num_running_trial == 0:
-            self.is_all_trials_finished = True
-
-    def __iter__(self) -> Generator[np.ndarray, None, None]:
+    def generator(self) -> None:
         # initialization
         lows, highs = zip(*self._search_space.values())
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
-        yield from self.yield_vertices(self.vertices)
+        self.put_vertices(self.vertices)
         self.values = np.array([self.value_queue.get() for _ in range(len(self.vertices))])
 
         # main loop
@@ -75,20 +70,20 @@ class NelderMeadAlgorism:
 
             # reflect
             yc = self.vertices[:-1].mean(axis=0)
-            yield from self.yield_vertices([yr := yc + self.coeff.r * (yc - self.vertices[-1])])
+            self.put_vertices([yr := yc + self.coeff.r * (yc - self.vertices[-1])])
 
             fr = self.value_queue.get()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
-                yield from self.yield_vertices([ye := yc + self.coeff.e * (yc - self.vertices[-1])])
+                self.put_vertices([ye := yc + self.coeff.e * (yc - self.vertices[-1])])
 
                 fe = self.value_queue.get()
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
-                yield from self.yield_vertices([yoc := yc + self.coeff.oc * (yc - self.vertices[-1])])
+                self.put_vertices([yoc := yc + self.coeff.oc * (yc - self.vertices[-1])])
                 foc = self.value_queue.get()
 
                 if foc <= fr:
@@ -96,7 +91,7 @@ class NelderMeadAlgorism:
                 else:
                     shrink_requied = True
             elif self.values[-1] <= fr:  # inside contract
-                yield from self.yield_vertices([yic := yc + self.coeff.ic * (yc - self.vertices[-1])])
+                self.put_vertices([yic := yc + self.coeff.ic * (yc - self.vertices[-1])])
                 fic = self.value_queue.get()
 
                 if fic < self.values[-1]:
@@ -107,7 +102,7 @@ class NelderMeadAlgorism:
             # shrink
             if shrink_requied:
                 self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
-                yield from self.yield_vertices(self.vertices[1:])
+                self.put_vertices(self.vertices[1:])
 
                 self.values[1:] = [self.value_queue.get() for _ in range(len(self.vertices) - 1)]
 
@@ -124,7 +119,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self._search_space = {name: list(dist) for name, dist in search_space.items()}  # Memorise parameter order.
 
         self.nm = NelderMeadAlgorism(self._search_space, coeff, np.random.RandomState(seed))
-        self.nm_generator = iter(self.nm)
+        self.nm_generator = threading.Thread(target=self.nm.generator, daemon=True)
+        self.nm_generator.start()
 
         self.running_trial_id: list[int] = []
         self.stack: dict[int, float] = {}
@@ -145,7 +141,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         # TODO: support parallel execution
-        if not self.nm.is_ready and not self.nm.is_all_trials_finished:
+        if not self.nm.is_ready:
             raise RuntimeError("No more parallel calls to ask() are possible.")
         # TODO: support study.enqueue_trial()
         # TODO: system_attrs is deprecated.
@@ -158,7 +154,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.running_trial_id.append(trial._trial_id)
 
     def _get_cooridinate(self) -> np.ndarray:
-        cooridinate = next(self.nm_generator)
+        cooridinate = self.nm.vertex_queue.get()
+        self.nm.vertex_queue.task_done()
 
         if self.is_within_range(cooridinate):
             return cooridinate
@@ -197,9 +194,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     ) -> None:
         if isinstance(values, list):
             self.stack[trial._trial_id] = values[0]
-            self.nm.finish_trial()
 
-            if self.nm.is_all_trials_finished:
+            if len(self.running_trial_id) == len(self.stack):
                 for trial_id in self.running_trial_id:
                     self.nm.value_queue.put(self.stack[trial_id])
                 self.running_trial_id = []
