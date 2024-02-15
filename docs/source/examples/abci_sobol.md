@@ -32,10 +32,14 @@ generic:
   workspace: "./work"
   job_command: "python user.py"
   batch_job_timeout: 600
+  enabled_variable_name_argumentation: True
+  logging_level: INFO
 ```
 - **workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．
 - **job_command** - ユーザープログラムを実行するためのコマンドです．
 - **batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]
+- **enabled_variable_name_argumentation** - `"True"` or `"False"` によって，コマンドライン引数の指定方法が変わります．(参照： [aiaccel/examples/vlmop2/README.md](https://github.com/aistairc/aiaccel/blob/0c2559fedee384694cc7ca72d8082b8bed4dc7ad/examples/vlmop2/README.md?plain=1#L35))
+- **logging_level** - ログの出力レベルを `"INFO"` に設定します．
 
 #### resource
 ```yaml
@@ -52,13 +56,22 @@ resource:
 ```yaml
 ABCI:
   group: "[group]"
-  job_script_preamble: "./job_script_preamble.sh"
+  job_script_preamble: |
+    #!/bin/bash
+    #$-l rt_C.small=1
+    #$-cwd
+    source /etc/profile.d/modules.sh
+    module load gcc/11.2.0
+    module load python/3.8/3.8.13
+    source ~/optenv/bin/activate
+  job_script_preamble_path: "./job_script_preamble.sh"
   job_execution_options: ""
 
 ```
 
 - **group** - 所属している ABCI グループを指定します．
-- **job_script_preamble** - ABCI の設定を記述したシェルスクリプトのファイルを指定します．
+- **job_script_preamble** - ABCI の設定をここで記述します．詳細は下記の `"job_script_preamble.shの作成"` を参照してください．
+- **job_script_preamble_path** - ABCI の設定を記述したシェルスクリプトのファイルパスを指定します．
 
 
 #### optimize
@@ -92,7 +105,7 @@ optimize:
     - **lower / upper** - ハイパパラメータ最小値 / 最大値を設定します．
     - **log** -  対数スケールでパラメータ空間を分割するかを `true` または `false` で設定します．
 
-**注意**: ソボルオプティマイザを使用する際は，パラメータの初期値を設定することができません．
+> **注意**：ソボルオプティマイザを使用する際はパラメータの初期値を設定することができません．
 
 ### user.py の作成
 
@@ -189,16 +202,13 @@ aiaccel-start --config config.yaml --clean
 
 ## 4. 結果の確認
 
-aiaccel の正常終了後，最適化の結果は以下の 2 か所に保存されます．
+aiaccel の正常終了後，最適化の結果は以下に保存されます．
 
 - ./work/results.csv
-- ./work/result/{trial_id}.hp
 
 ここで，./work はコンフィグファイルの workspace に設定したディレクトリです．
 
 results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています．
-result/{trial_id}.hp は，{trial_id} 回目の試行のパラメータと関数の値が YAML 形式で保存されています．
-さらに，同じフォルダには final_result.result というファイルが作成され，全試行中で最良のパラメータと目的関数の値が YAML 形式で保存されます．
 
 上で実行した最適化の結果は以下のようになります．
 
