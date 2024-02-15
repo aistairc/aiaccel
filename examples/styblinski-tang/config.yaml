@@ -4,6 +4,7 @@ generic:
   python_file: "./user.py"
   function: "main"
   batch_job_timeout: 600
+  enabled_variable_name_argumentation: True
   logging_level: INFO
 
 resource:
@@ -34,7 +35,7 @@ optimize:
   trial_number: 30
   rand_seed: 42
   parameters:
--
+    -
       name: "x1"
       type: "uniform_float"
       lower: -5.0
