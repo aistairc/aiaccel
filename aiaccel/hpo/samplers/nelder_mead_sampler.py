@@ -40,16 +40,8 @@ class NelderMeadAlgorism:
         self.vertex_queue: queue.Queue[np.ndarray] = queue.Queue()
         self.value_queue: queue.Queue[float] = queue.Queue()
         self._rng = rng if rng is not None else np.random.RandomState()
-        self.is_ready = True
-
-    def get_vertex(self) -> np.ndarray:
-        vertex = self.vertex_queue.get()
-        if self.vertex_queue.empty():
-            self.is_ready = False
-        return vertex
 
     def put_vertices(self, vertices: list[np.ndarray]) -> None:
-        self.is_ready = True
         for vertex in vertices:
             self.vertex_queue.put(vertex)
 
@@ -84,6 +76,7 @@ class NelderMeadAlgorism:
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
                 self.put_vertices([yoc := yc + self.coeff.oc * (yc - self.vertices[-1])])
+
                 foc = self.value_queue.get()
 
                 if foc <= fr:
@@ -92,6 +85,7 @@ class NelderMeadAlgorism:
                     shrink_requied = True
             elif self.values[-1] <= fr:  # inside contract
                 self.put_vertices([yic := yc + self.coeff.ic * (yc - self.vertices[-1])])
+
                 fic = self.value_queue.get()
 
                 if fic < self.values[-1]:
@@ -124,6 +118,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         self.running_trial_id: list[int] = []
         self.stack: dict[int, float] = {}
+        self.is_ready = True
 
     def is_within_range(self, coordinates: np.ndarray) -> bool:
         return all(low < x < high for x, (low, high) in zip(coordinates, self._search_space.values()))
@@ -141,7 +136,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         # TODO: support parallel execution
-        if not self.nm.is_ready:
+        if not self.is_ready:
             raise RuntimeError("No more parallel calls to ask() are possible.")
         # TODO: support study.enqueue_trial()
         # TODO: system_attrs is deprecated.
@@ -150,12 +145,12 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         trial.set_user_attr("Coordinate", self._get_cooridinate())
         # bool variable indicating whether the coordinates can be output or not
-        trial.set_user_attr("IsReady", self.nm.is_ready)
+        self.is_ready = not self.nm.vertex_queue.empty()
+        trial.set_user_attr("IsReady", self.is_ready)
         self.running_trial_id.append(trial._trial_id)
 
     def _get_cooridinate(self) -> np.ndarray:
         cooridinate = self.nm.vertex_queue.get()
-        self.nm.vertex_queue.task_done()
 
         if self.is_within_range(cooridinate):
             return cooridinate
@@ -200,3 +195,4 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                     self.nm.value_queue.put(self.stack[trial_id])
                 self.running_trial_id = []
                 self.stack = {}
+                self.is_ready = True
