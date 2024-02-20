@@ -145,7 +145,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         self.running_trial_id: list[int] = []
         self.stack: dict[int, float] = {}
-        self.is_ready = True
 
     def is_within_range(self, coordinates: np.ndarray) -> bool:
         return all(low < x < high for x, (low, high) in zip(coordinates, self._search_space.values()))
@@ -216,4 +215,3 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 self.nm.put_values([self.stack[trial_id] for trial_id in self.running_trial_id])
                 self.running_trial_id = []
                 self.stack = {}
-                self.is_ready = True
