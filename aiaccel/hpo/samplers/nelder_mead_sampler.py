@@ -51,7 +51,7 @@ class NelderMeadAlgorism:
             self.vertex_queue.put(vertex)
         self.lock.release()
 
-    def set_values(self, values: list[float]) -> None:
+    def put_values(self, values: list[float]) -> None:
         self.num_running_trials -= len(values)
         for value in values:
             self.value_queue.put(value)
@@ -169,7 +169,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if self.is_within_range(cooridinate):
             return cooridinate
         else:
-            self.nm.set_values([np.inf])
+            self.nm.put_values([np.inf])
             return self._get_cooridinate()
 
     def sample_independent(
@@ -205,7 +205,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.stack[trial._trial_id] = values[0]
 
             if len(self.running_trial_id) == len(self.stack):
-                self.nm.set_values([self.stack[trial_id] for trial_id in self.running_trial_id])
+                self.nm.put_values([self.stack[trial_id] for trial_id in self.running_trial_id])
                 self.running_trial_id = []
                 self.stack = {}
                 self.is_ready = True
