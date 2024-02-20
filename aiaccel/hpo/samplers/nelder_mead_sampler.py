@@ -45,6 +45,9 @@ class NelderMeadAlgorism:
         self.lock.acquire()
         self.num_running_trials: int = 0
 
+        nm_generator = threading.Thread(target=self.generator, daemon=True)
+        nm_generator.start()
+
     def put_vertices(self, vertices: list[np.ndarray]) -> None:
         self.num_running_trials = len(vertices)
         for vertex in vertices:
@@ -58,13 +61,26 @@ class NelderMeadAlgorism:
         if self.num_running_trials == 0:
             self.lock.acquire()
 
+    def get_vertex(self) -> np.ndarray:
+        self.lock.acquire()
+        try:
+            vertex = self.vertex_queue.get(block=False)
+        except queue.Empty as e:
+            raise e
+        finally:
+            self.lock.release()
+        return vertex
+
+    def get_value(self) -> float:
+        return self.value_queue.get()
+
     def generator(self) -> None:
         # initialization
         lows, highs = zip(*self._search_space.values())
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
         self.put_vertices(self.vertices)
-        self.values = np.array([self.value_queue.get() for _ in range(len(self.vertices))])
+        self.values = np.array([self.get_value() for _ in range(len(self.vertices))])
 
         # main loop
         shrink_requied = False
@@ -77,20 +93,20 @@ class NelderMeadAlgorism:
             yc = self.vertices[:-1].mean(axis=0)
             self.put_vertices([yr := yc + self.coeff.r * (yc - self.vertices[-1])])
 
-            fr = self.value_queue.get()
+            fr = self.get_value()
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
                 self.put_vertices([ye := yc + self.coeff.e * (yc - self.vertices[-1])])
 
-                fe = self.value_queue.get()
+                fe = self.get_value()
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
                 self.put_vertices([yoc := yc + self.coeff.oc * (yc - self.vertices[-1])])
 
-                foc = self.value_queue.get()
+                foc = self.get_value()
 
                 if foc <= fr:
                     self.vertices[-1], self.values[-1] = yoc, foc
@@ -99,7 +115,7 @@ class NelderMeadAlgorism:
             elif self.values[-1] <= fr:  # inside contract
                 self.put_vertices([yic := yc + self.coeff.ic * (yc - self.vertices[-1])])
 
-                fic = self.value_queue.get()
+                fic = self.get_value()
 
                 if fic < self.values[-1]:
                     self.vertices[-1], self.values[-1] = yic, fic
@@ -111,7 +127,7 @@ class NelderMeadAlgorism:
                 self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
                 self.put_vertices(self.vertices[1:])
 
-                self.values[1:] = [self.value_queue.get() for _ in range(len(self.vertices) - 1)]
+                self.values[1:] = [self.get_value() for _ in range(len(self.vertices) - 1)]
 
                 shrink_requied = False
 
@@ -126,8 +142,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self._search_space = {name: list(dist) for name, dist in search_space.items()}  # Memorise parameter order.
 
         self.nm = NelderMeadAlgorism(self._search_space, coeff, np.random.RandomState(seed))
-        self.nm_generator = threading.Thread(target=self.nm.generator, daemon=True)
-        self.nm_generator.start()
 
         self.running_trial_id: list[int] = []
         self.stack: dict[int, float] = {}
@@ -158,13 +172,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.running_trial_id.append(trial._trial_id)
 
     def _get_cooridinate(self) -> np.ndarray:
-        self.nm.lock.acquire()
-        try:
-            cooridinate = self.nm.vertex_queue.get(block=False)
-        except queue.Empty as e:
-            raise e
-        finally:
-            self.nm.lock.release()
+        cooridinate = self.nm.get_vertex()
 
         if self.is_within_range(cooridinate):
             return cooridinate
