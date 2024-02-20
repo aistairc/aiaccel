@@ -41,9 +41,22 @@ class NelderMeadAlgorism:
         self.value_queue: queue.Queue[float] = queue.Queue()
         self._rng = rng if rng is not None else np.random.RandomState()
 
+        self.lock = threading.Lock()
+        self.lock.acquire()
+        self.num_running_trials: int = 0
+
     def put_vertices(self, vertices: list[np.ndarray]) -> None:
+        self.num_running_trials = len(vertices)
         for vertex in vertices:
             self.vertex_queue.put(vertex)
+        self.lock.release()
+
+    def set_values(self, values: list[float]) -> None:
+        self.num_running_trials -= len(values)
+        for value in values:
+            self.value_queue.put(value)
+        if self.num_running_trials == 0:
+            self.lock.acquire()
 
     def generator(self) -> None:
         # initialization
@@ -136,26 +149,27 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         # TODO: support parallel execution
-        if not self.is_ready:
-            raise RuntimeError("No more parallel calls to ask() are possible.")
         # TODO: support study.enqueue_trial()
         # TODO: system_attrs is deprecated.
         if "fixed_params" in trial.system_attrs:
             raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
 
         trial.set_user_attr("Coordinate", self._get_cooridinate())
-        # bool variable indicating whether the coordinates can be output or not
-        self.is_ready = not self.nm.vertex_queue.empty()
-        trial.set_user_attr("IsReady", self.is_ready)
         self.running_trial_id.append(trial._trial_id)
 
     def _get_cooridinate(self) -> np.ndarray:
-        cooridinate = self.nm.vertex_queue.get()
+        self.nm.lock.acquire()
+        try:
+            cooridinate = self.nm.vertex_queue.get(block=False)
+        except queue.Empty as e:
+            raise e
+        finally:
+            self.nm.lock.release()
 
         if self.is_within_range(cooridinate):
             return cooridinate
         else:
-            self.nm.value_queue.put(np.inf)
+            self.nm.set_values([np.inf])
             return self._get_cooridinate()
 
     def sample_independent(
@@ -191,8 +205,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             self.stack[trial._trial_id] = values[0]
 
             if len(self.running_trial_id) == len(self.stack):
-                for trial_id in self.running_trial_id:
-                    self.nm.value_queue.put(self.stack[trial_id])
+                self.nm.set_values([self.stack[trial_id] for trial_id in self.running_trial_id])
                 self.running_trial_id = []
                 self.stack = {}
                 self.is_ready = True
