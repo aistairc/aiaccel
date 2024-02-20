@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+from typing import Callable
+
 __local__ = "local"  # for debug
 __abci__ = "abci"
 
@@ -31,7 +33,7 @@ class Local(SubmitCommandCreator):
     """For debug"""
 
     def create_submit_command(self) -> str:
-        return f"sh {self.job_file_path}"
+        return f"bash {self.job_file_path}"
 
 
 class Abci(SubmitCommandCreator):
@@ -62,7 +64,7 @@ def create_submit_command(
         raise NotImplementedError(f"Platform '{platform}' not implemented.")
 
 
-def create_execute_command(script_name: str, param: dict) -> str:
+def create_execute_command(script_name: str, hparams_str: str) -> str:
     """Create a shell command to execute the job.
     params: {
         'x': 0.5,
@@ -70,8 +72,8 @@ def create_execute_command(script_name: str, param: dict) -> str:
         ...
     }
     """
-    args = " ".join([f"{k}={v}" for k, v in param.items()])
-    cmd = f"python {script_name} -e --params {args}"
+    # args = " ".join([f"{k}={v}" for k, v in param.items()])
+    cmd = f"python {script_name} -e --params {hparams_str}"
     return cmd
 
 

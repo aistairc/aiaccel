@@ -1,14 +1,17 @@
 from __future__ import annotations
+
 import copy
 import sys
 import time
 from argparse import ArgumentParser
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Any, Callable
 import uuid
 from aiaccel.job.job_creator import JobCreator
-import ast
+from aiaccel.job.functions import param_to_args_key_value
+from aiaccel.job.eval import param_str_eval
+
 
 __default_work_dir__ = "./work"
 __default_timeout_seconds__ = -1  # no timeout
@@ -31,14 +34,7 @@ args = parser.parse_known_args()[0]
 if args.params:
     for option in args.params:
         key, value = option.split("=")
-        hp_args[key] = value
-
-
-def _eval(s: str) -> Any:
-    try:
-        return ast.literal_eval(s)
-    except ValueError:
-        return s
+        hp_args[key] = param_str_eval(value)
 
 
 class JobDispatcher:
@@ -50,30 +46,30 @@ class JobDispatcher:
         group: str = "",
         preamble: str = "",
         n_jobs: int = __default_n_jobs__,
+        param_to_args_fn: Callable = param_to_args_key_value,
         retry_num: int = __default_retry_num__,
         timeout_seconds: int = __default_timeout_seconds__,
         work_dir: str = __default_work_dir__,
     ):
         self.func = func
         if args.e:
-            hparams = {}
-            for k, v in hp_args.items():
-                hparams[k] = _eval(v)
-            _run_job(self.func, hparams)
+            _run_job(self.func, hp_args)
             sys.exit(0)
         # ====
         self.n_trials = n_trials
         self.platform = platform.lower()
         self.group = group
         self._n_jobs = n_jobs
-        self.preamble = preamble
-        self.retry_num = retry_num
-        self.timeout_seconds = timeout_seconds
+        self.param_to_args_fn = param_to_args_fn
+        self.preamble = preamble    # not used yet
+        self.retry_num = retry_num  # not used yet
+        self.timeout_seconds = timeout_seconds  # not used yet
         self.work_dir = Path(work_dir).resolve()
         self.futures = []
         self._all_future = []
         self._submit_job_count = 0
-        self.all_results = []
+        self._all_results = []
+
         self.script_name = sys.argv[0]
 
         if not self.work_dir.exists():
@@ -82,12 +78,15 @@ class JobDispatcher:
         self.executor = ProcessPoolExecutor(max_workers=n_jobs)
 
     def submit(
-        self, hparams: dict, tag: Any = None, job_name: int | None = None
+        self,
+        hparams: dict,
+        tag: Any = None,
+        job_name: int | None = None,
     ) -> None:
         """Submit a job to the job dispatcher."""
         self._submit_job_count += 1
-        job_name = job_name if job_name is not None else self.get_job_name()
-
+        job_name = job_name if job_name is not None else _get_job_name()
+        hparams_str = self.param_to_args_fn(hparams)
         future = self.executor.submit(
             _create_and_run,
             self.script_name,
@@ -98,6 +97,7 @@ class JobDispatcher:
             self.timeout_seconds,
             self.work_dir,
             hparams,
+            hparams_str,
         )
         self.futures.append((future, job_name, hparams, tag))
         self._all_future.append(future)
@@ -113,6 +113,10 @@ class JobDispatcher:
     def _update_working_feature_list(self):
         self.futures = [f for f in self.futures if not f[0].done()]
 
+    ########################################
+    # collect result
+    ########################################
+
     def collect_results(self) -> list[tuple[float, Any]]:
         """Collect the results of the finished jobs.
 
@@ -125,17 +129,37 @@ class JobDispatcher:
 
         collected_results = []
         for future in [f for f, _, _, _ in fdone]:
-            result = future.result()
+            result = future.result()  # wait for the completion of the job
             _, job_name, hparams, tag = next(
                 (f, tid, hps, t) for f, tid, hps, t in self.futures if f == future
             )
             collected_results.append((result, tag))
-            self.all_results.append(
-                {"job_name": job_name, "value": result, "hparams": hparams}
-            )
+            result = {"job_name": job_name, "value": result, "hparams": hparams}
+            self._all_results.append(result)
+            print(result)
 
         self._update_working_feature_list()
         return collected_results
+
+    def result(self) -> Any:
+        """Get the result of the job dispatcher."""
+        future = self.futures.pop(0)  # get the first finished job
+        result = future[0].result()  # wait for the completion of the job
+        result = {"job_name": future[1], "value": result, "hparams": future[2]}
+        self._all_results.append(result)
+        print(result)
+        self._update_working_feature_list()
+        return result
+
+    @property
+    def results(self) -> list[dict]:
+        _all_results = copy.deepcopy(self._all_results)
+        _all_results.sort(key=lambda x: x["job_name"])
+        return _all_results
+
+    ########################################
+    # status
+    ########################################
 
     @property
     def available_worker_count(self) -> int:
@@ -162,16 +186,11 @@ class JobDispatcher:
         else:
             return False
 
-    def get_job_name(self) -> int:
-        return str(uuid.uuid4())
-
-    @property
-    def results(self) -> list[dict]:
-        all_results = copy.deepcopy(self.all_results)
-        all_results.sort(key=lambda x: x["job_name"])
-        return all_results
-
     ...
+
+
+def _get_job_name() -> int:
+    return str(uuid.uuid4())
 
 
 def _run_job(objective: Callable, hparams: dict):
@@ -192,6 +211,7 @@ def _create_and_run(
     timeout_seconds: int,
     work_dir: Path,
     hparams: dict,
+    hparams_str: str,
 ):
     job = JobCreator(
         script_name,
@@ -202,11 +222,11 @@ def _create_and_run(
         timeout_seconds,
         work_dir,
     )
-    job.create(hparams)  # create job file (***.sh)
+    job.create(hparams_str)  # create job file (***.sh)
     job.run()
     y = job.collect_result()
     job.create_result_json(_create_result(job_name, hparams, float(y)))
-    return _eval(y)
+    return param_str_eval(y)
 
 
 def _run_objective(objective: Callable, params: dict) -> Any:

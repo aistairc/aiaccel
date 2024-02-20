@@ -42,10 +42,14 @@ class NelderMeadAlgorism:
     def __iter__(self) -> Generator[np.ndarray[float, float], None, None]:
         # initialization
         lows, highs = zip(*self._search_space.values())
-        self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
+        self.vertices = self._rng.uniform(
+            lows, highs, (self.dimension + 1, self.dimension)
+        )
 
         yield from iter(self.vertices)
-        self.values = np.array([self.value_queue.get() for _ in range(len(self.vertices))])
+        self.values = np.array(
+            [self.value_queue.get() for _ in range(len(self.vertices))]
+        )
 
         # main loop
         shrink_requied = False
@@ -86,10 +90,14 @@ class NelderMeadAlgorism:
 
             # shrink
             if shrink_requied:
-                self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
+                self.vertices = self.vertices[0] + self.coeff.s * (
+                    self.vertices - self.vertices[0]
+                )
                 yield from iter(self.vertices[1:])
 
-                self.values[1:] = [self.value_queue.get() for _ in range(len(self.vertices) - 1)]
+                self.values[1:] = [
+                    self.value_queue.get() for _ in range(len(self.vertices) - 1)
+                ]
 
                 shrink_requied = False
 
@@ -114,9 +122,14 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.stack: dict[int, float] = {}
 
     def is_within_range(self, coordinates: np.ndarray[float, float]) -> bool:
-        return all(low < x < high for x, (low, high) in zip(coordinates, self._search_space.values()))
+        return all(
+            low < x < high
+            for x, (low, high) in zip(coordinates, self._search_space.values())
+        )
 
-    def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
+    def infer_relative_search_space(
+        self, study: Study, trial: FrozenTrial
+    ) -> dict[str, BaseDistribution]:
         return {}
 
     def sample_relative(

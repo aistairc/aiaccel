@@ -7,6 +7,21 @@ from pathlib import Path
 
 from aiaccel.job.command_creator import create_execute_command, create_submit_command
 
+from typing import Callable
+
+preamble = """
+#!/bin/bash
+
+#$-l rt_C.small=1
+#$-cwd
+
+source /etc/profile.d/modules.sh
+module load gcc/12.2.0
+module load python/3.10/3.10.10
+module load cuda/11.8
+module load cudnn/8.6
+"""
+
 
 class JobCreator:
     def __init__(
@@ -30,12 +45,12 @@ class JobCreator:
         self._end_time = None
         self._returncode = None
         self.job_file_path = str(self.work_dir / f"{self.job_name}.sh")
-        self.stdout_file_path = str(self.work_dir / f"o{self.job_name}")
-        self.stderr_file_path = str(self.work_dir / f"e{self.job_name}")
+        self.stdout_file_path = str(self.work_dir / f"{self.job_name}.o")
+        self.stderr_file_path = str(self.work_dir / f"{self.job_name}.e")
 
-    def create(self, param: dict) -> None:
+    def create(self, hparams_str: str) -> None:
         """Create a executable file to run the job."""
-        cmd = create_execute_command(self.script_name, param)
+        cmd = create_execute_command(self.script_name, hparams_str)
         with open(self.job_file_path, "w") as f:
             f.write("#!/bin/bash\n")
             ...
@@ -53,7 +68,7 @@ class JobCreator:
             self.stdout_file_path,
             self.stderr_file_path,
         )
-        print(f"Running the job with the command: `{cmd}`")
+        # print(f"Running the job with the command: `{cmd}`")
         cmds = cmd.split()
         self._start_time = time.time()
         self._returncode = _run(
