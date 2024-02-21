@@ -3,12 +3,6 @@ import optuna
 from aiaccel import JobDispatcher
 
 
-def objective(hparams: dict) -> float:
-    x1 = hparams["x1"]
-    x2 = hparams["x2"]
-    return (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-
-
 def param_to_args_fn(param: dict) -> str:
     """
     Example:
@@ -19,7 +13,7 @@ def param_to_args_fn(param: dict) -> str:
     }
     return "x=0.5 y=0.3 ..."
     """
-    return " ".join([f"{k}={v}" for k, v in param.items()])
+    return " ".join([f"{v}" for k, v in param.items()])
 
 
 if __name__ == "__main__":
@@ -31,7 +25,9 @@ if __name__ == "__main__":
     n_trials = 50
     n_jobs = 4
 
-    jobs = JobDispatcher(objective, n_trials, n_jobs=n_jobs, parser=param_to_args_fn)
+    jobs = JobDispatcher(
+        "./a.out", n_trials, n_jobs=n_jobs, param_to_args_fn=param_to_args_fn
+    )
 
     for n in range(n_trials):
         trial = study.ask()

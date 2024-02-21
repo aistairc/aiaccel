@@ -28,6 +28,8 @@ class JobCreator:
         self,
         script_name: str,
         job_name: int,
+        execute_cmd: str | None,
+        python_execute_cmd: str,
         platform: str,
         group: str,
         preamble: str,
@@ -36,6 +38,8 @@ class JobCreator:
     ):
         self.script_name = script_name
         self.job_name = job_name
+        self.execute_cmd = execute_cmd
+        self.python_execute_cmd = python_execute_cmd
         self.platform = platform
         self.group = group
         self.preamble = preamble
@@ -48,9 +52,11 @@ class JobCreator:
         self.stdout_file_path = str(self.work_dir / f"{self.job_name}.o")
         self.stderr_file_path = str(self.work_dir / f"{self.job_name}.e")
 
-    def create(self, hparams_str: str) -> None:
+    def create(self) -> None:
         """Create a executable file to run the job."""
-        cmd = create_execute_command(self.script_name, hparams_str)
+        cmd = create_execute_command(
+            self.execute_cmd, self.script_name, self.python_execute_cmd
+        )
         with open(self.job_file_path, "w") as f:
             f.write("#!/bin/bash\n")
             ...
@@ -58,7 +64,7 @@ class JobCreator:
             ...
             f.write(f"{cmd}\n")
 
-    def run(self) -> None:
+    def run(self, hparams_str: str) -> None:
         """Run the job with the given hyperparameters."""
         cmd = create_submit_command(
             self.platform,
@@ -67,8 +73,9 @@ class JobCreator:
             self.job_file_path,
             self.stdout_file_path,
             self.stderr_file_path,
+            hparams_str,
         )
-        # print(f"Running the job with the command: `{cmd}`")
+        print(f"Running the job with the command: `{cmd}`")
         cmds = cmd.split()
         self._start_time = time.time()
         self._returncode = _run(
@@ -82,9 +89,9 @@ class JobCreator:
 
     def create_result_json(self, result: dict) -> None:
         """Create a json file to store the result of the job.
-        The file name is `result{job_name}.json`.
+        The file name is `{job_name}.json`.
         """
-        result_file_path = str(self.work_dir / f"result{self.job_name}.json")
+        result_file_path = str(self.work_dir / f"{self.job_name}.json")
         with open(result_file_path, "w") as f:
             json.dump(result, f)
 

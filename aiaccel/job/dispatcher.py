@@ -13,10 +13,11 @@ from aiaccel.job.functions import param_to_args_key_value
 from aiaccel.job.eval import param_str_eval
 
 
-__default_work_dir__ = "./work"
-__default_timeout_seconds__ = -1  # no timeout
-__default_retry_num__ = 0  # no retry
-__default_n_jobs__ = 1  # no parallel execution
+__DEFAULT_WORK_DIR__ = "./work"
+__DEFAULT_TOUT_SEC__ = -1  # no timeout
+__DEFAULT_RETRY_NUM__ = 0  # no retry
+__DEFAULT_N_JOBS__ = 1  # no parallel execution
+__DEFAULT_PYTHON_CMD__ = "python"
 
 hp_args = {}
 
@@ -40,31 +41,40 @@ if args.params:
 class JobDispatcher:
     def __init__(
         self,
-        func: Callable,
+        func: Callable | str,
         n_trials: int,
         platform: str = "",
         group: str = "",
         preamble: str = "",
-        n_jobs: int = __default_n_jobs__,
+        n_jobs: int = __DEFAULT_N_JOBS__,
         param_to_args_fn: Callable = param_to_args_key_value,
-        retry_num: int = __default_retry_num__,
-        timeout_seconds: int = __default_timeout_seconds__,
-        work_dir: str = __default_work_dir__,
+        retry_num: int = __DEFAULT_RETRY_NUM__,
+        timeout_seconds: int = __DEFAULT_TOUT_SEC__,
+        work_dir: str = __DEFAULT_WORK_DIR__,
+        python_execute_cmd: str = __DEFAULT_PYTHON_CMD__,
     ):
         self.func = func
         if args.e:
             _run_job(self.func, hp_args)
             sys.exit(0)
         # ====
+        if isinstance(func, str):
+            self.execute_cmd = func
+            self.func = None
+        else:
+            self.execute_cmd = None
+
         self.n_trials = n_trials
         self.platform = platform.lower()
         self.group = group
         self._n_jobs = n_jobs
         self.param_to_args_fn = param_to_args_fn
-        self.preamble = preamble    # not used yet
+        self.preamble = preamble  # not used yet
         self.retry_num = retry_num  # not used yet
         self.timeout_seconds = timeout_seconds  # not used yet
         self.work_dir = Path(work_dir).resolve()
+        self.python_execute_cmd = python_execute_cmd
+
         self.futures = []
         self._all_future = []
         self._submit_job_count = 0
@@ -91,6 +101,8 @@ class JobDispatcher:
             _create_and_run,
             self.script_name,
             job_name,
+            self.execute_cmd,
+            self.python_execute_cmd,
             self.platform,
             self.group,
             self.preamble,
@@ -205,6 +217,8 @@ def _run_job(objective: Callable, hparams: dict):
 def _create_and_run(
     script_name: str,
     job_name: int,
+    execute_cmd: str | None,
+    python_execute_cmd,
     platform: str,
     group: str,
     preamble: str,
@@ -216,14 +230,16 @@ def _create_and_run(
     job = JobCreator(
         script_name,
         job_name,
+        execute_cmd,
+        python_execute_cmd,
         platform,
         group,
         preamble,
         timeout_seconds,
         work_dir,
     )
-    job.create(hparams_str)  # create job file (***.sh)
-    job.run()
+    job.create()  # create job file (***.sh)
+    job.run(hparams_str)
     y = job.collect_result()
     job.create_result_json(_create_result(job_name, hparams, float(y)))
     return param_str_eval(y)
