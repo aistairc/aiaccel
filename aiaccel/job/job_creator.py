@@ -9,19 +9,6 @@ from aiaccel.job.command_creator import create_execute_command, create_submit_co
 
 from typing import Callable
 
-preamble = """
-#!/bin/bash
-
-#$-l rt_C.small=1
-#$-cwd
-
-source /etc/profile.d/modules.sh
-module load gcc/12.2.0
-module load python/3.10/3.10.10
-module load cuda/11.8
-module load cudnn/8.6
-"""
-
 
 class JobCreator:
     def __init__(
@@ -32,7 +19,8 @@ class JobCreator:
         python_execute_cmd: str,
         platform: str,
         group: str,
-        preamble: str,
+        template: str,
+        template_file: Path | None,
         timeout_seconds: int,
         work_dir: Path,
     ):
@@ -42,7 +30,8 @@ class JobCreator:
         self.python_execute_cmd = python_execute_cmd
         self.platform = platform
         self.group = group
-        self.preamble = preamble
+        self.template = template
+        self.template_file = template_file
         self.work_dir = work_dir
         self.timeout_seconds = timeout_seconds
         self._start_time = None
@@ -57,11 +46,21 @@ class JobCreator:
         cmd = create_execute_command(
             self.execute_cmd, self.script_name, self.python_execute_cmd
         )
+        template = ""
+        if self.template_file is not None:
+            if self.template_file.exists():
+                with open(self.template_file, "r") as f:
+                    template = f.read()
+            else:
+                raise FileNotFoundError(
+                    f"template file not found: {self.template_file}"
+                )
+        else:
+            template = self.template
+
         with open(self.job_file_path, "w") as f:
-            f.write("#!/bin/bash\n")
-            ...
-            ...
-            ...
+            if template:
+                f.write(f"{template}\n")
             f.write(f"{cmd}\n")
 
     def run(self, hparams_str: str) -> None:

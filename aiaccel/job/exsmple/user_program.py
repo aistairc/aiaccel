@@ -2,6 +2,19 @@ import optuna
 
 from aiaccel import JobDispatcher
 
+template = """
+#!/bin/bash
+
+#$-l rt_C.small=1
+#$-cwd
+
+source /etc/profile.d/modules.sh
+module load gcc/12.2.0
+module load python/3.10/3.10.10
+module load cuda/11.8
+module load cudnn/8.6
+"""
+
 
 def objective(hparams: dict) -> float:
     x1 = hparams["x1"]
@@ -31,7 +44,13 @@ if __name__ == "__main__":
     n_trials = 50
     n_jobs = 4
 
-    jobs = JobDispatcher(objective, n_trials, n_jobs=n_jobs, parser=param_to_args_fn)
+    jobs = JobDispatcher(
+        objective,
+        n_trials,
+        n_jobs=n_jobs,
+        param_to_args_fn=param_to_args_fn,
+        template=template,
+    )
 
     for n in range(n_trials):
         trial = study.ask()

@@ -45,7 +45,8 @@ class JobDispatcher:
         n_trials: int,
         platform: str = "",
         group: str = "",
-        preamble: str = "",
+        template: str = "",
+        template_file: Path | str | None = None,
         n_jobs: int = __DEFAULT_N_JOBS__,
         param_to_args_fn: Callable = param_to_args_key_value,
         retry_num: int = __DEFAULT_RETRY_NUM__,
@@ -69,7 +70,13 @@ class JobDispatcher:
         self.group = group
         self._n_jobs = n_jobs
         self.param_to_args_fn = param_to_args_fn
-        self.preamble = preamble  # not used yet
+        self.template = template
+        if isinstance(template_file, str):
+            self.template_file = Path(template_file).resolve()
+        elif isinstance(template_file, Path):
+            self.template_file = template_file.resolve()
+        else:
+            self.template_file = template_file
         self.retry_num = retry_num  # not used yet
         self.timeout_seconds = timeout_seconds  # not used yet
         self.work_dir = Path(work_dir).resolve()
@@ -105,7 +112,8 @@ class JobDispatcher:
             self.python_execute_cmd,
             self.platform,
             self.group,
-            self.preamble,
+            self.template,
+            self.template_file,
             self.timeout_seconds,
             self.work_dir,
             hparams,
@@ -221,7 +229,8 @@ def _create_and_run(
     python_execute_cmd,
     platform: str,
     group: str,
-    preamble: str,
+    template: str,
+    template_file: Path | None,
     timeout_seconds: int,
     work_dir: Path,
     hparams: dict,
@@ -234,7 +243,8 @@ def _create_and_run(
         python_execute_cmd,
         platform,
         group,
-        preamble,
+        template,
+        template_file,
         timeout_seconds,
         work_dir,
     )
