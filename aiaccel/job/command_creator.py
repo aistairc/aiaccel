@@ -40,6 +40,8 @@ class Local(SubmitCommandCreator):
 
 class Abci(SubmitCommandCreator):
     def create_submit_command(self) -> str:
+        if self.group == "":
+            raise ValueError("Group name is required for ABCI.")
         return f"qsub -g {self.group} -o {self.stdout_dir} -e {self.stderr_dir} {self.job_file_path} {self.hparams_str}"
 
 

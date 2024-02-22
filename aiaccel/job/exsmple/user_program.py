@@ -19,6 +19,7 @@ module load cudnn/8.6
 def objective(hparams: dict) -> float:
     x1 = hparams["x1"]
     x2 = hparams["x2"]
+    print("Your job 41780660 (hpo-0002.sh) has been submitted")
     return (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
 
 
