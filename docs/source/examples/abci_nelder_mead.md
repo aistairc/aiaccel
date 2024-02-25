@@ -40,11 +40,15 @@ generic:
   workspace: "./work"
   job_command: "python user.py"
   batch_job_timeout: 7200
+  enabled_variable_name_argumentation: True
+  logging_level: INFO
 ```
 - **workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．
 - **job_command** - ユーザープログラムを実行するためのコマンドです．
 - **batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]
     - 参考 - 100 epoch の学習に最長 60 分程かかるため，`7200` と長めに設定します．
+- **enabled_variable_name_argumentation** - `"True"` or `"False"` によって，コマンドライン引数の指定方法が変わります．(参照： [aiaccel/examples/vlmop2/README.md](https://github.com/aistairc/aiaccel/blob/0c2559fedee384694cc7ca72d8082b8bed4dc7ad/examples/vlmop2/README.md?plain=1#L35))
+- **logging_level** - ログの出力レベルを `"INFO"` に設定します．
 
 #### resource
 ```yaml
@@ -63,13 +67,22 @@ resource:
 ```yaml
 ABCI:
   group: "[group]"
-  job_script_preamble: "./job_script_preamble.sh"
+  job_script_preamble: |
+    #!/bin/bash
+    #$-l rt_F=1
+    #$-cwd
+    #$ -l h_rt=2:00:00
+    source /etc/profile.d/modules.sh
+    module load gcc/11.2.0 python/3.8/3.8.13 cuda/10.1/10.1.243 cudnn/7.6/7.6.5
+    source ~/optenv/bin/activate
+  job_script_preamble_path: "./job_script_preamble.sh"
   job_execution_options: ""
 
 ```
 
 - **group** - 所属している ABCI グループを指定します．
-- **job_script_preamble** - ABCI の設定を記述したシェルスクリプトのファイルを指定します．
+- **job_script_preamble** - ABCI の設定をここで記述します．詳細は下記の `"job_script_preamble.shの作成"` を参照してください．
+- **job_script_preamble_path** - ABCI の設定を記述したシェルスクリプトのファイルパスを指定します．
 
 
 #### optimize
@@ -122,6 +135,7 @@ optimize:
     - **name** - ハイパパラメータの名前を設定します．
     - **type** - ハイパパラメータのデータ型を設定します．
     - **lower / upper** - ハイパパラメータ最小値 / 最大値を設定します．
+    - **log** -  対数スケールでパラメータ空間を分割するかを `true` または `false` で設定します．
     - **initial** - ハイパパラメータの初期値を設定します．`NelderMeadOptimizer` の場合は，シンプレックスの頂点数 (=パラメータ数 + 1) と要素数が同じリストを設定します．頂点数未満の数値リストが与えられた場合，足りない初期値は aiaccel によってランダムに設定されます．今回の例では，各ハイパパラメータに 1 個の初期値しか与えていないため，足りない 5 個の初期値は aiaccel によって設定されます．
 
 
@@ -173,7 +187,7 @@ source ~/optenv/bin/activate
 
 
 ## 3. 動作説明
-- aiaccel と PyTorch 動作する環境が必要です．
+- aiaccel と PyTorch が動作する環境が必要です．
     - ABCIにおけるPyTorch導入手順(出典:https://docs.abci.ai/ja/apps/pytorch/)
         - aiaccelの仮想環境作成・activate後、下記コマンドを実行してください．
 
@@ -186,9 +200,17 @@ source ~/optenv/bin/activate
 
     ```yaml
     ABCI:
-        group: "[group]"
-        job_script_preamble: "./job_script_preamble.sh"
-        job_execution_options: ""
+      group: "[group]"
+      job_script_preamble: |
+        #!/bin/bash
+        #$-l rt_F=1
+        #$-cwd
+        #$ -l h_rt=2:00:00
+        source /etc/profile.d/modules.sh
+        module load gcc/11.2.0 python/3.8/3.8.13 cuda/10.1/10.1.243 cudnn/7.6/7.6.5
+        source ~/optenv/bin/activate
+      job_script_preamble_path: "./job_script_preamble.sh"
+      job_execution_options: ""
     ```
 
 - 事前に `python3 setup_dataset.py` を実行し，データセットのダウンロードを行ってください．
@@ -206,16 +228,13 @@ aiaccel-start --config config.yaml --clean
 
 ## 4. 結果の確認
 
-aiaccel の正常終了後，最適化の結果は以下の 2 か所に保存されます．
+aiaccel の正常終了後，最適化の結果は以下に保存されます．
 
 - ./work/results.csv
-- ./work/result/{trial_id}.hp
 
 ここで，./work はコンフィグファイルの workspace に設定したディレクトリです．
 
 results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています．
-result/{trial_id}.hp は，{trial_id} 回目の試行のパラメータと関数の値が YAML 形式で保存されています．
-さらに，同じフォルダには final_result.result というファイルが作成され，全試行中で最良のパラメータと目的関数の値が YAML 形式で保存されます．
 
 上で実行した最適化の結果は以下のようになります．
 

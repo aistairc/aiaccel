@@ -25,14 +25,18 @@ generic:
   workspace: "./work"
   job_command: "python user.py"
   batch_job_timeout: 600
+  enabled_variable_name_argumentation: True
+  logging_level: INFO
 ```
 - **workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．
 - **job_command** - ユーザープログラムを実行するためのコマンドです．
 - **batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]
+- **enabled_variable_name_argumentation** - `"True"` or `"False"` によって，コマンドライン引数の指定方法が変わります．(参照： [aiaccel/examples/vlmop2/README.md](https://github.com/aistairc/aiaccel/blob/0c2559fedee384694cc7ca72d8082b8bed4dc7ad/examples/vlmop2/README.md?plain=1#L35))
+- **logging_level** - ログの出力レベルを `"INFO"` に設定します．
 
-```{note}
-Windows では，仮想環境の python で実行するためには `job_command` の欄を `"optenv/Scripts/python.exe"` のように設定する必要があります．
-```
+
+> Windows では，仮想環境の python で実行するためには `job_command` の欄を `"optenv/Scripts/python.exe"` のように設定する必要があります．
+
 
 **resource**
 ```yaml
@@ -47,7 +51,7 @@ resource:
 
 **ABCI**
 
-ローカル実行なので使用しません．
+ローカル実行のため使用しません．
 
 **optimize**
 ```yaml
@@ -109,7 +113,7 @@ optimize:
     - **choices** - データ型が "categorical" の場合，ハイパパラメータの選択肢をリストとして設定します．
     - **sequence** - データ型が "ordinal" の場合，ハイパパラメータの選択肢をリストとして設定します．
     
-**注意**: バジェット指定型グリッドオプティマイザでは，パラメータの初期値を設定することができません．
+> **注意**: バジェット指定型グリッドオプティマイザでは，パラメータの初期値を設定することができません．
 
 ### user.py の作成
 
@@ -183,16 +187,13 @@ aiaccel から関数 `main()` にハイパパラメータを渡し，`main()` �
 
 ## 4. 結果の確認
 
-aiaccel の正常終了後，最適化の結果は以下の 2 か所に保存されます．
+aiaccel の正常終了後，最適化の結果は以下に保存されます．
 
 - ./work/results.csv
-- ./work/result/{trial_id}.hp
 
 ここで，./work はコンフィグファイルの workspace に設定したディレクトリです．
 
 results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています．
-result/{trial_id}.hp は，{trial_id} 回目の試行のパラメータと関数の値が YAML 形式で保存されています．
-さらに，同じフォルダには final_result.result というファイルが作成され，全試行中で最良のパラメータと目的関数の値が YAML 形式で保存されます．
 
 上で実行した最適化の結果は以下のようになります．
 
