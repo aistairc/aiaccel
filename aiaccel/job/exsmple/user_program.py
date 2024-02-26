@@ -46,12 +46,14 @@ if __name__ == "__main__":
 
     jobs = JobDispatcher(
         objective,
-        n_trials,
         n_jobs=n_jobs,
         param_to_args_fn=param_to_args_fn,
         template=template,
     )
 
+    # ====================================
+    # # n_jobs = 1 の場合の例
+    # ====================================
     for n in range(n_trials):
         trial = study.ask()
         hparams = {
@@ -59,10 +61,27 @@ if __name__ == "__main__":
             "x2": trial.suggest_float("x", 0, 10),
         }
 
-        jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
+        jobs.submit(hparams, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
 
-        # y = jobs.result()  # n_jobs = 1 の場合
-        # study.tell(trial, y)
+        y = jobs.result()
+        study.tell(trial, y)
 
-        for y, trial in jobs.collect_results():  # n_jobs > 1 の場合
-            study.tell(trial, y)
+    # ====================================
+    # n_jobs > 1 の場合の例
+    # ====================================
+    # n = 0
+    # while True:
+    #     if jobs.finished_job_count >= n_trials:
+    #         break
+
+    #     trial = study.ask()
+    #     hparams = {
+    #         "x1": trial.suggest_float("x", 0, 10),
+    #         "x2": trial.suggest_float("x", 0, 10),
+    #     }
+
+    #     jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
+
+    #     for y, trial in jobs.collect_results():
+    #         study.tell(trial, y)
+    #     n += 1

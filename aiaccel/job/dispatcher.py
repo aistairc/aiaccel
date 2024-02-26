@@ -42,7 +42,7 @@ class JobDispatcher:
     def __init__(
         self,
         func: Callable | str,
-        n_trials: int,
+        # n_trials: int,
         platform: str = "",
         group: str = "",
         template: str = "",
@@ -65,7 +65,7 @@ class JobDispatcher:
         else:
             self.execute_cmd = None
 
-        self.n_trials = n_trials
+        # self.n_trials = n_trials
         self.platform = platform.lower()
         self.group = group
         self._n_jobs = n_jobs
@@ -126,8 +126,8 @@ class JobDispatcher:
         while True:
             if self.available_worker_count > 0:
                 break
-            if self.all_done():
-                break
+            # if self.all_done():
+            #     break
             time.sleep(0.01)
 
     def _update_working_feature_list(self):
@@ -164,12 +164,12 @@ class JobDispatcher:
     def result(self) -> Any:
         """Get the result of the job dispatcher."""
         future = self.futures.pop(0)  # get the first finished job
-        result = future[0].result()  # wait for the completion of the job
-        result = {"job_name": future[1], "value": result, "hparams": future[2]}
+        y = future[0].result()  # wait for the completion of the job
+        result = {"job_name": future[1], "value": y, "hparams": future[2]}
         self._all_results.append(result)
         print(result)
         self._update_working_feature_list()
-        return result
+        return y
 
     @property
     def results(self) -> list[dict]:
@@ -181,12 +181,17 @@ class JobDispatcher:
     # status
     ########################################
 
+    # @property
+    # def available_worker_count(self) -> int:
+    #     _working_feature_count = len([f for f in self.futures if not f[0].done()])
+    #     return min(
+    #         self.n_trials - self.submit_job_count, self._n_jobs - _working_feature_count
+    #     )
+
     @property
     def available_worker_count(self) -> int:
         _working_feature_count = len([f for f in self.futures if not f[0].done()])
-        return min(
-            self.n_trials - self.submit_job_count, self._n_jobs - _working_feature_count
-        )
+        return self._n_jobs - _working_feature_count
 
     @property
     def finished_job_count(self) -> int:
@@ -200,11 +205,11 @@ class JobDispatcher:
         """Get the number of submitted jobs."""
         return self._submit_job_count
 
-    def all_done(self) -> bool:
-        if len(self._all_future) >= self.n_trials:
-            return all([f.done() for f in self._all_future])
-        else:
-            return False
+    # def all_done(self) -> bool:
+    #     if len(self._all_future) >= self.n_trials:
+    #         return all([f.done() for f in self._all_future])
+    #     else:
+    #         return False
 
     ...
 

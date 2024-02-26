@@ -1,10 +1,39 @@
-# aiaccel V2
+# aiaccel V2: JobDispatcherの設計
 
 aiaccel v2 のジョブディスパッチャーの設計について記述する．
 - コード: https://github.com/aistairc/aiaccel/tree/feature/v2-draft-jobdispatcher
-- commit: 486548f
+- branch: feature/v2-draft-jobdispatcher
 
-目次
+
+- `v2-draft-jobdispatcher`の`example`の実行手順
+    - インストール
+    ~~~ bash
+    $ git clone git@github.com:aistairc/aiaccel.git
+    $ cd aiaccel
+    $ git checkout feature/v2-draft-jobdispatcher
+    $ pip install -e .
+    ~~~
+
+    - exampleの実行
+    ~~~ bash
+    $ cd aiaccel/job
+    $ python user_program.py
+    ~~~
+
+    - 実行結果
+    ~~~ bash
+    $ python user_program.py
+    [I 2024-02-26 12:34:41,331] A new study created in memory with name: no-name-9dd39abe-26df-4e13-896a-1e1089063359
+    Running the job with the command: `bash /home/user/aiaccel/aiaccel/job/exsmple/work/hpo-0000.sh x1=3.745401188473625 x2=3.745401188473625`
+    {'job_name': 'hpo-0000', 'value': -4.698975879748483, 'hparams': {'x1': 3.745401188473625, 'x2': 3.745401188473625}}
+    Running the job with the command: `bash /home/user/aiaccel/aiaccel/job/exsmple/work/hpo-0001.sh x1=9.50714306409916 x2=9.50714306409916`
+    {'job_name': 'hpo-0001', 'value': 42.850053920752984, 'hparams': {'x1': 9.50714306409916, 'x2': 9.50714306409916}}
+    Running the job with the command: `bash /home/user/aiaccel/aiaccel/job/exsmple/work/hpo-0002.sh x1=7.319939418114051 x2=7.319939418114051`
+    {'job_name': 'hpo-0002', 'value': 16.98181599428962, 'hparams': {'x1': 7.319939418114051, 'x2': 7.319939418114051}}
+    ...
+    ~~~
+
+## 目次
 1. [ユーザープログラムの例](#1-ユーザープログラムの例)
 2. [目的関数](#2-目的関数)
 3. [ジョブファイル](#3-ジョブファイル)
@@ -44,10 +73,9 @@ aiaccel v2 のジョブディスパッチャーの設計について記述する
         sampler = optuna.samplers.TPESampler(seed=42)
         study = optuna.create_study(direction="minimize", sampler=sampler)
         n_trials = 50
-        n_jobs = 4
+        n_jobs = 1
         jobs = JobDispatcher(
             objective,
-            n_trials,
             n_jobs=n_jobs,
             param_to_args_fn=param_to_args_fn
         )
@@ -59,13 +87,10 @@ aiaccel v2 のジョブディスパッチャーの設計について記述する
                 "x2": trial.suggest_float("x", 0, 10),
             }
 
-            jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}") # ジョブプールが空かないと帰ってこない
+            jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")
 
-            # y = jobs.result()  # n_jobs = 1 の場合
-            # study.tell(trial, y)
-
-            for y, trial in jobs.collect_results():  # n_jobs > 1 の場合
-                study.tell(trial, y)
+            y = jobs.result()
+            study.tell(trial, y)
     ~~~
 
     - objective: 目的関数
@@ -104,14 +129,18 @@ if __name__ == "__main__":
     n_jobs = 1
     jobs = JobDispatcher(
         objective,
-        n_trials,
         n_jobs=n_jobs,
         param_to_args_fn=param_to_args_fn
     )
 
     for n in range(n_trials):
+        trial = study.ask()
+        hparams = {
+            "x1": trial.suggest_float("x", 0, 10),
+            "x2": trial.suggest_float("x", 0, 10),
+        }
 
-        ...(中略)...
+        jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")
 
         y = jobs.result()
         study.tell(trial, y)
@@ -133,17 +162,26 @@ if __name__ == "__main__":
     n_jobs = 4
     jobs = JobDispatcher(
         objective,
-        n_trials,
         n_jobs=n_jobs,
         param_to_args_fn=param_to_args_fn
     )
 
-    for n in range(n_trials):
+    n = 0
+    while True:
+        if jobs.finished_job_count >= n_trials:
+            break
 
-        ...(中略)...
+        trial = study.ask()
+        hparams = {
+            "x1": trial.suggest_float("x", 0, 10),
+            "x2": trial.suggest_float("x", 0, 10),
+        }
+
+        jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")
 
         for y, trial in jobs.collect_results():
             study.tell(trial, y)
+        n += 1
 ~~~
 
 
@@ -243,7 +281,7 @@ if __name__ == "__main__":
     n_jobs = 4
 
     jobs = JobDispatcher(
-        "./a.out", n_trials, n_jobs=n_jobs, param_to_args_fn=param_to_args_fn
+        "./a.out", n_jobs=n_jobs, param_to_args_fn=param_to_args_fn
     )
 
     for n in range(n_trials):
@@ -418,7 +456,7 @@ class JobDispatcher:
     """
     ジョブのディスパッチと管理を行うクラス
     """
-    def __init__(self, func: Callable | str, n_trials: int, ...):
+    def __init__(self, func: Callable | str, n_jobs: int, param_to_args_fn: Callable | None = None, ...):
         ...
 
     def submit(self, hparams: dict, tag: Any = None, job_name: int | None = None) -> None:
@@ -499,3 +537,13 @@ class JobDispatcher:
         """
         ...
 ~~~
+
+<br>
+<br>
+
+## 改定履歴
+
+ver | 改定内容 | 日付
+--- | -------- | ----
+初版 | - | 2024-02-22
+改定A | `n_trial`をJobDispatcherの引数から削除. <br> `available_worker_count()`は`n_trial`を使用せず算出するように変更.<br> ユーザープログラムの並列の記述例を変更.<br> | 2024-02-26
