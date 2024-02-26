@@ -313,11 +313,25 @@ if __name__ == "__main__":
 ### 3.1 ジョブファイルの例
 - python を実行する場合
     ``` bash
-    #!/bin/bash
+        #!/bin/bash
 
-    # モジュールのロード処理など
+        #$-l rt_C.small=1
+        #$-cwd
 
-    python user_program.py -e --params $@
+        source /etc/profile.d/modules.sh
+        module load gcc/12.2.0
+        module load python/3.10/3.10.10
+        module load cuda/11.8
+        module load cudnn/8.6
+
+        LOCKFILE=/home/member/v2/aiaccel/aiaccel/job/exsmple/work/hpo-0000.lock
+        if [ ! -f "$LOCKFILE" ]; then
+        touch $LOCKFILE
+        fi
+        flock -x -n $LOCKFILE
+        python user_program.py -e --params $@
+        flock -u $LOCKFILE
+        rm -f $LOCKFILE
     ```
     - --params 移行の引数はハイパパラメータを表す．(ジョブファイルに対するコマンドライン引数をそのまま渡す)
     - -e オプションは, user_program.py がジョブファイルから実行されたことを示す．-e で実行された場合は，ユーザープログラムで指定したobjective関数を実行して終了する．
