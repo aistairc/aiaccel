@@ -95,10 +95,11 @@ class JobCreator:
             f.write(f"  touch $LOCKFILE\n")
             f.write(f"fi\n")
             # lock
-            f.write("flock -x -n " + self.lock_file_path + "\n")
+            f.write(f"flock -x -n $LOCKFILE\n")
             f.write(f"{cmd}\n")
             # unlock
-            f.write("flock -u " + self.lock_file_path + "\n")
+            f.write(f"flock -u $LOCKFILE\n")
+            f.write(f"rm -f $LOCKFILE\n")
 
     def run(self, hparams_str: str) -> None:
         """Run the job with the given hyperparameters."""
@@ -196,15 +197,18 @@ def _run2(cmds: list[str], lock_file_path: str) -> None:
     """Run the job with the given hyperparameters.
     This function is for ABCI.
     """
-    subprocess.run(cmds, capture_output=True, text=True)
+    subprocess.run(cmds, capture_output=True, text=True)  # is run in the another node
     _wait_for_lock_file_creation(lock_file_path)
     _wait_for_unlock(lock_file_path)
-    _delete_lock_file(lock_file_path)
+    # finish the job
     return
 
 
 def _wait_for_unlock(lock_file_path: str) -> None:
     """Wait until the lock file is unlocked."""
+    if not Path(lock_file_path).exists():
+        return
+
     while True:
         with open(lock_file_path, "r") as f:
             try:
@@ -220,11 +224,6 @@ def _wait_for_lock_file_creation(lock_file_path: str) -> None:
         if Path(lock_file_path).exists():
             break
         time.sleep(0.01)
-
-
-def _delete_lock_file(lock_file_path: str) -> None:
-    """Delete the lock file."""
-    Path(lock_file_path).unlink()
 
 
 # def _collect_result(stdout_file: str) -> str | None:

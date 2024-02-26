@@ -14,15 +14,15 @@ class SubmitCommandCreator(ABC):
         script_name: str,
         group: str,
         job_file_path: str,
-        stdout_dir: str,
-        stderr_dir: str,
+        stdout_path: str,
+        stderr_path: str,
         hparams_str: str,
     ):
         self.script_name = script_name
         self.group = group
         self.job_file_path = job_file_path
-        self.stdout_dir = stdout_dir
-        self.stderr_dir = stderr_dir
+        self.stdout_path = stdout_path
+        self.stderr_path = stderr_path
         self.hparams_str = hparams_str
 
     @abstractmethod
@@ -42,7 +42,7 @@ class Abci(SubmitCommandCreator):
     def create_submit_command(self) -> str:
         if self.group == "":
             raise ValueError("Group name is required for ABCI.")
-        return f"qsub -g {self.group} -o {self.stdout_dir} -e {self.stderr_dir} {self.job_file_path} {self.hparams_str}"
+        return f"qsub -g {self.group} -o {self.stdout_path} -e {self.stderr_path} {self.job_file_path} {self.hparams_str}"
 
 
 def create_submit_command(
@@ -50,8 +50,8 @@ def create_submit_command(
     script_name: str,
     group: str,
     job_file_path: str,
-    stdout_dir: str,
-    stderr_dir: str,
+    stdout_path: str,
+    stderr_path: str,
     hparams_str: str,
 ) -> str:
     """
@@ -59,11 +59,11 @@ def create_submit_command(
     """
     if platform == __local__ or platform == "":
         return Local(
-            script_name, group, job_file_path, stdout_dir, stderr_dir, hparams_str
+            script_name, group, job_file_path, stdout_path, stderr_path, hparams_str
         ).create_submit_command()
     elif platform == __abci__:
         return Abci(
-            script_name, group, job_file_path, stdout_dir, stderr_dir, hparams_str
+            script_name, group, job_file_path, stdout_path, stderr_path, hparams_str
         ).create_submit_command()
     else:
         raise NotImplementedError(f"Platform '{platform}' not implemented.")
