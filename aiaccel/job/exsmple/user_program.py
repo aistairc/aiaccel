@@ -2,25 +2,6 @@ import optuna
 
 from aiaccel import JobDispatcher
 
-template = """
-#!/bin/bash
-
-#$-l rt_C.small=1
-#$-cwd
-
-source /etc/profile.d/modules.sh
-module load gcc/12.2.0
-module load python/3.10/3.10.10
-module load cuda/11.8
-module load cudnn/8.6
-"""
-
-
-def objective(hparams: dict) -> float:
-    x1 = hparams["x1"]
-    x2 = hparams["x2"]
-    return (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-
 
 def param_to_args_fn(param: dict) -> str:
     """
@@ -32,7 +13,7 @@ def param_to_args_fn(param: dict) -> str:
     }
     return "x=0.5 y=0.3 ..."
     """
-    return " ".join([f"{k}={v}" for k, v in param.items()])
+    return " ".join([f"--{k}={v}" for k, v in param.items()])
 
 
 if __name__ == "__main__":
@@ -44,12 +25,7 @@ if __name__ == "__main__":
     n_trials = 50
     n_jobs = 4
 
-    jobs = JobDispatcher(
-        objective,
-        n_jobs=n_jobs,
-        param_to_args_fn=param_to_args_fn,
-        template=template,
-    )
+    jobs = JobDispatcher("job.sh", n_jobs=n_jobs, param_to_args_fn=param_to_args_fn)
 
     # ====================================
     # # n_jobs = 1 の場合の例
@@ -66,22 +42,24 @@ if __name__ == "__main__":
         y = jobs.result()
         study.tell(trial, y)
 
+    """
     # ====================================
     # n_jobs > 1 の場合の例
     # ====================================
-    # n = 0
-    # while True:
-    #     if jobs.finished_job_count >= n_trials:
-    #         break
+    n = 0
+    while True:
+        if jobs.finished_job_count >= n_trials:
+            break
 
-    #     trial = study.ask()
-    #     hparams = {
-    #         "x1": trial.suggest_float("x", 0, 10),
-    #         "x2": trial.suggest_float("x", 0, 10),
-    #     }
+        trial = study.ask()
+        hparams = {
+            "x1": trial.suggest_float("x", 0, 10),
+            "x2": trial.suggest_float("x", 0, 10),
+        }
 
-    #     jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
+        jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
 
-    #     for y, trial in jobs.collect_results():
-    #         study.tell(trial, y)
-    #     n += 1
+        for y, trial in jobs.collect_results():
+            study.tell(trial, y)
+        n += 1
+    """

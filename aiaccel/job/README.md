@@ -1,6 +1,6 @@
 # aiaccel V2: JobDispatcherの設計
 
-aiaccel v2 のジョブディスパッチャーの設計について記述する．
+aiaccel v2 のジョブディスパッチャーの使用方法と設計について記述する．
 - コード: https://github.com/aistairc/aiaccel/tree/feature/v2-draft-jobdispatcher
 - branch: feature/v2-draft-jobdispatcher
 
@@ -34,26 +34,125 @@ aiaccel v2 のジョブディスパッチャーの設計について記述する
     ~~~
 
 ## 目次
-1. [ユーザープログラムの例](#1-ユーザープログラムの例)
-2. [目的関数](#2-目的関数)
-3. [ジョブファイル](#3-ジョブファイル)
-4. [JobCreatorクラスの実装](#4-jobcreatorクラスの実装)
-5. [JobDispatcherクラスの実装](#5-jobdispatcherクラスの実装)
+1. [はじめに](#1-はじめに)
+2. [使い方](#2-使い方)
+    1. [オブジェクティブファイル (目的関数) の作成](#21-オブジェクティブファイル-目的関数-の作成)
+    2. [ジョブスクリプト の作成](#22-ジョブスクリプト-の作成)
+    3. [ユーザープログラム の作成](#23-ユーザープログラム-の作成)
+    4. [実行](#24-実行)
+3. [JobCreatorクラスの実装](#3-jobcreatorクラスの実装)
+4. [JobDispatcherクラスの実装](#4-jobdispatcherクラスの実装)
+5. [改定履歴](#改定履歴)
 
 
-## 1. ユーザープログラムの例
+## 1. はじめに
+
+ユーザーは，`オブジェクティブファイル`, `ジョブファイル`, `ユーザープログラム`を作成する．<br>
+
+- オブジェクティブファイル: 最適化する目的関数を記述したファイル
+- ジョブファイル: ジョブを実行するためのスクリプトファイル(ABCIに投入するバッチファイル)
+- ユーザープログラム: 最適化を行うためのプログラム
+
+
+## 2. 使い方
+
+### 2.1 オブジェクティブファイル (目的関数) の作成
+オブジェクティブファイルは，最適化する目的関数を記述したファイルを指す．<br>
+オブジェクティブファイルは，コマンドライン引数でハイパーパラメーターを受け取り，標準出力に結果を出力する．<br>
+
+以下に，`Python` のオブジェクティブファイルの例と，`Fortran` のオブジェクティブファイルの例を示す．<br>
+
+- `Python` のオブジェクティブファイルの例
+    ~~~ python
+    from argparse import ArgumentParser
+
+
+    def func(hparams: dict) -> float:
+        x1 = hparams["x1"]
+        x2 = hparams["x2"]
+        return (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
+
+
+    if __name__ == "__main__":
+        parser = ArgumentParser()
+        parser.add_argument("--x1", type=float)
+        parser.add_argument("--x2", type=float)
+        args = parser.parse_args()
+
+        hparams = {
+            "x1": args.x1,
+            "x2": args.x2,
+        }
+
+        print(func(hparams))
+    ~~~
+
+
+- `Fortran95` のオブジェクティブファイルの例
+    ~~~ Fortran 95
+    program objective
+        implicit none
+        real :: arg1, arg2, result
+        character(len=32) :: arg1_str, arg2_str
+
+        ! Get the input arguments from the command line
+        call get_command_argument(1, arg1_str)
+        call get_command_argument(2, arg2_str)
+
+        ! Convert the input arguments from string to real
+        read(arg1_str, *) arg1
+        read(arg2_str, *) arg2
+
+        ! Call the function to optimize
+        result = function_to_optimize(arg1, arg2)
+        write(*, '(F0.16)') result
+
+    contains
+
+        real function function_to_optimize(x1, x2)
+            real, intent(in) :: x1, x2
+            function_to_optimize = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
+        end function function_to_optimize
+
+    end program objective
+    ~~~
+
+**[注意]**
+- `aiaccel` は，標準出力に出力された値を取得する．必ず，数値のみを出力するようにする．
+
+<br>
+
+### 2.2 ジョブスクリプト の作成
+
+ジョブスクリプト(*.sh)は，オブジェクティブファイルを実行するためのスクリプトファイルを指す．<br>
+ジョブスクリプトは，`ABCI` で実行するためのスクリプトファイルである．<br>
+
+- job.sh
+
+    ~~~ bash
+    #!/bin/bash
+
+    #$-l rt_C.small=1
+    #$-cwd
+
+    source /etc/profile.d/modules.sh
+    module load gcc/12.2.0
+    module load python/3.10/3.10.10
+
+    python objective.py $@
+    ~~~
+
+<br>
+
+### 2.3 ユーザープログラム の作成
+ユーザープログラムは，最適化を行うためのプログラムを指す．<br>
+ユーザープログラムは，`Python` で記述されたプログラムである．<br>
 
 - user_program.py
     ~~~ python
     import optuna
 
     from aiaccel import JobDispatcher
-
-
-    def objective(hparams: dict) -> float:
-        x1 = hparams["x1"]
-        x2 = hparams["x2"]
-        return (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
 
 
     def param_to_args_fn(param: dict) -> str:
@@ -66,19 +165,19 @@ aiaccel v2 のジョブディスパッチャーの設計について記述する
         }
         return "x=0.5 y=0.3 ..."
         """
-        return " ".join([f"{k}={v}" for k, v in param.items()])
+        return " ".join([f"--{k}={v}" for k, v in param.items()])
 
 
     if __name__ == "__main__":
         sampler = optuna.samplers.TPESampler(seed=42)
+        # sampler = optuna.samplers.RandomSampler(seed=42)
+
         study = optuna.create_study(direction="minimize", sampler=sampler)
+
         n_trials = 50
-        n_jobs = 1
-        jobs = JobDispatcher(
-            objective,
-            n_jobs=n_jobs,
-            param_to_args_fn=param_to_args_fn
-        )
+        n_jobs = 4
+
+        jobs = JobDispatcher("job.sh", n_jobs=n_jobs, param_to_args_fn=param_to_args_fn)
 
         for n in range(n_trials):
             trial = study.ask()
@@ -87,7 +186,7 @@ aiaccel v2 のジョブディスパッチャーの設計について記述する
                 "x2": trial.suggest_float("x", 0, 10),
             }
 
-            jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")
+            jobs.submit(hparams, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
 
             y = jobs.result()
             study.tell(trial, y)
@@ -105,16 +204,14 @@ aiaccel v2 のジョブディスパッチャーの設計について記述する
     - 例：
         ~~~ python
         jobs = JobDispatcher(
-            objective,
-            n_trials,
-            n_jobs=n_jobs,
+            ...,
             param_to_args_fn=aiaccel.parser.param_to_args_fn
         )
         ~~~
 
+<br>
 
-
-### 1.1 逐次実行
+#### 2.3.1 逐次実行
 
 逐次実行の例を以下に示す．逐次実行では，JobDispatcherの引数 `n_jobs` に 1 を指定し，`jobs.result()` メソッドを使ってジョブの結果を取得する．<br>
 
@@ -128,7 +225,7 @@ if __name__ == "__main__":
 
     n_jobs = 1
     jobs = JobDispatcher(
-        objective,
+        "job.sh",
         n_jobs=n_jobs,
         param_to_args_fn=param_to_args_fn
     )
@@ -146,8 +243,9 @@ if __name__ == "__main__":
         study.tell(trial, y)
 ~~~
 
+<br>
 
-### 1.2 並列実行
+#### 2.3.2 並列実行
 
 並列実行の例を以下に示す．並列実行では，JobDispatcherの引数 `n_jobs` に 1以上の値を指定し，`jobs.collect_results()` メソッドを使ってジョブの結果を取得する．<br>
 
@@ -161,7 +259,7 @@ if __name__ == "__main__":
 
     n_jobs = 4
     jobs = JobDispatcher(
-        objective,
+        "job.sh",
         n_jobs=n_jobs,
         param_to_args_fn=param_to_args_fn
     )
@@ -184,201 +282,22 @@ if __name__ == "__main__":
         n += 1
 ~~~
 
-
-<br>
 <br>
 
-## 2. 目的関数
-目的関数は，1. ユーザープログラム内に記述する場合(Pythonコードとして記述)，2. 外部ファイルとして記述する場合 の2種類を想定.<br>
-外部ファイルとは，例えば，FortranやC言語で記述されたプログラムを指す．
+### 2.4 実行
+- オブジェクティブファイル: `objective.py`
+- ジョブスクリプト: `job.sh`
+- ユーザープログラム: `user_program.py`
+の3つのファイルを作成し，`user_program.py` を実行する．<br>
 
-以下に，`Python` の目的関数の例と，`Fortran` の目的関数の例を示す．<br>
-
-
-### 2.1 python の場合
-
-~~~ python
-def objective(hparams: dict) -> float:
-    ...
-    return y
+~~~ bash
+$ python user_program.py
 ~~~
 
-- パラメータは辞書形式で目的関数の引数として渡す
-- `aiaccel` に渡す値を `return` する
-
-
-### 2.2 Python以外
-
-`aiaccel` で `Python` 以外のプログラムを最適化する場合，以下の機能を持つプログラムを作成する．
-- パラメータはコマンドライン引数で渡される．
-- `aiaccel` に渡す値を標準出力に出力する．
-
-例として `Fortran 95` のコードを以下に示す.
-
-~~~ Fortran 95
-program objective
-    implicit none
-    real :: arg1, arg2, result
-    character(len=32) :: arg1_str, arg2_str
-
-    ! Get the input arguments from the command line
-    call get_command_argument(1, arg1_str)
-    call get_command_argument(2, arg2_str)
-
-    ! Convert the input arguments from string to real
-    read(arg1_str, *) arg1
-    read(arg2_str, *) arg2
-
-    ! Call the function to optimize
-    result = function_to_optimize(arg1, arg2)
-    write(*, '(F0.16)') result
-
-contains
-
-    real function function_to_optimize(x1, x2)
-        real, intent(in) :: x1, x2
-        function_to_optimize = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-    end function function_to_optimize
-
-end program objective
-~~~
-
-**[注意]**
-- `aiaccel` は，標準出力に出力された値を取得する．必ず，数値のみを出力するようにする．
-
-
-#### 2.2.1 ユーザープログラムの例
-
-`Fortran 95` プログラムを最適化させる場合のユーザープログラムの例を示す．<br>
-事前に，`a.out` という名前でコンパイルされたプログラムがあると仮定する．
-
-~~~ python
-import optuna
-
-from aiaccel import JobDispatcher
-
-
-def param_to_args_fn(param: dict) -> str:
-    """
-    Example:
-    param = {
-        'x': 0.5,
-        'y': 0.3,
-        ...
-    }
-    return "0.5 0.3 ..."
-    """
-    return " ".join([f"{v}" for k, v in param.items()])
-
-
-if __name__ == "__main__":
-    sampler = optuna.samplers.TPESampler(seed=42)
-    # sampler = optuna.samplers.RandomSampler(seed=42)
-
-    study = optuna.create_study(direction="minimize", sampler=sampler)
-
-    n_trials = 50
-    n_jobs = 4
-
-    jobs = JobDispatcher(
-        "./a.out", n_jobs=n_jobs, param_to_args_fn=param_to_args_fn
-    )
-
-    for n in range(n_trials):
-        trial = study.ask()
-        hparams = {
-            "x1": trial.suggest_float("x", 0, 10),
-            "x2": trial.suggest_float("x", 0, 10),
-        }
-
-        jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
-
-        # y = jobs.result()  # n_jobs = 1 の場合
-        # study.tell(trial, y)
-
-        for y, trial in jobs.collect_results():  # n_jobs > 1 の場合
-            study.tell(trial, y)
-~~~
-"`Python` の目的関数を最適化する場合" との違いは，
-1. `param_to_args_fn`をFotran向けのコマンドライン引数に変換する関数に変更
-2. `JobDispatcher`の初期化時に，`"./a.out"` を目的関数として渡す
-
-<br>
-<br>
-
-## 3. ジョブファイル
-
-ジョブファイル(*.sh)は，`aiaccel` がジョブごとに生成し，実行するスクリプトファイルである．
-
-### 3.1 ジョブファイルの例
-- python を実行する場合
-    ``` bash
-        #!/bin/bash
-
-        #$-l rt_C.small=1
-        #$-cwd
-
-        source /etc/profile.d/modules.sh
-        module load gcc/12.2.0
-        module load python/3.10/3.10.10
-        module load cuda/11.8
-        module load cudnn/8.6
-
-        LOCKFILE=/home/member/v2/aiaccel/aiaccel/job/exsmple/work/hpo-0000.lock
-        if [ ! -f "$LOCKFILE" ]; then
-        touch $LOCKFILE
-        fi
-        flock -x -n $LOCKFILE
-        python user_program.py -e --params $@
-        flock -u $LOCKFILE
-        rm -f $LOCKFILE
-    ```
-    - --params 移行の引数はハイパパラメータを表す．(ジョブファイルに対するコマンドライン引数をそのまま渡す)
-    - -e オプションは, user_program.py がジョブファイルから実行されたことを示す．-e で実行された場合は，ユーザープログラムで指定したobjective関数を実行して終了する．
-
-        **[補足]**
-
-        ~~~ bash
-        $ python user_program.py
-        ~~~
-        と実行した場合は，最適化処理を実行する．
-
-        ~~~ bash
-        $ python user_program.py -e --params x1=0.5 x2=0.3
-        ~~~
-        と実行した場合は，ユーザープログラムで指定したobjective関数のみを実行し，最適化は行わない．
-
-    **[補足]**
-
-    `-e` オプションと `--params` オプションは，最適化対象が `Python` プログラムの場合にのみ付加する.
-
-- Fortran を実行する場合
-    ``` bash
-    #!/bin/bash
-
-    # モジュールのロード処理など
-
-    ./a.out $@
-    ```
-
-    **[補足]**
-
-    `Python`の事例で挙げたようなオプションは不要．
-
-### 3.2 ジョブファイルの実行
-ジョブファイルは，`aiaccel` が `subprocess` モジュールを使って実行する．
-
-- `aiaccel` によるジョブファイルの実行コマンドの例
-    ~~~ bash
-    $ bash job-0001.sh x1=0.5 x2=0.3
-    ~~~
-
-
-<br>
 <br>
 
 
-## 4. JobCreatorクラスの実装
+## 3. JobCreatorクラスの実装
 
 `JobCreator`は，ジョブの作成，実行，結果の収集を行うクラスである．`JobCreator`は，`JobDispatcher`によって生成され，`JobDispatcher`によって管理される．<br>
 `JobCreator`のインスタンスは，`JobDispatcher`がジョブごとに生成する．
@@ -391,6 +310,7 @@ if __name__ == "__main__":
 - ジョブの終了判定
 - ジョブの合否判定(エラーの有無)
 
+コード: https://github.com/aistairc/aiaccel/blob/feature/v2-draft-jobdispatcher/aiaccel/job/job_creator.py
 ~~~ python
 class JobCreator:
     def __init__(...):
@@ -451,7 +371,9 @@ class JobCreator:
 <br>
 <br>
 
-## 5. JobDispatcherクラスの実装
+## 4. JobDispatcherクラスの実装
+
+
 
 `JobDispatcher`は，ジョブの投入と管理を行うクラスである．`JobDispatcher`は，利用可能なワーカー数を管理し，`JobCreator`でジョブを作成，実行，結果の収集を行う．
 
@@ -464,6 +386,8 @@ class JobCreator:
 - 投入したジョブ数の管理
 - 全てのジョブが完了したかどうかの判定
 - 全てのジョブの結果の取得
+
+コード: https://github.com/aistairc/aiaccel/blob/feature/v2-draft-jobdispatcher/aiaccel/job/dispatcher.py
 
 ~~~ python
 class JobDispatcher:
@@ -559,5 +483,4 @@ class JobDispatcher:
 
 ver | 改定内容 | 日付
 --- | -------- | ----
-初版 | - | 2024-02-22
-改定A | `n_trial`をJobDispatcherの引数から削除. <br> `available_worker_count()`は`n_trial`を使用せず算出するように変更.<br> ユーザープログラムの並列の記述例を変更.<br> | 2024-02-26
+初版 | - | 2024-02-27

@@ -1,4 +1,4 @@
-program user_program
+program objective
     implicit none
     real :: arg1, arg2, result
     character(len=32) :: arg1_str, arg2_str
@@ -22,5 +22,4 @@ contains
         function_to_optimize = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
     end function function_to_optimize
 
-end program user_program
-
+end program objective

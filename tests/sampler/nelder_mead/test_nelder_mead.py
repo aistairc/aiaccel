@@ -13,7 +13,7 @@ class TestNelderMead(unittest.TestCase):
         self.sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
         cwd = Path(__file__).resolve().parent
-        self.results_csv_path = cwd.joinpath('results.csv')
+        self.results_csv_path = cwd.joinpath("results.csv")
 
     def test_sampler(self):
         study = optuna.create_study(sampler=self.sampler)
@@ -33,7 +33,11 @@ class TestNelderMead(unittest.TestCase):
         Y = trial.suggest_float("y", 0, 10)
 
         # Ackley function
-        y = -20*np.exp(-0.2*np.sqrt(0.5*(X**2+Y**2)))-np.exp(0.5 *
-                                                             (np.cos(2*np.pi*X)+np.cos(2*np.pi*Y)))+np.e+20
+        y = (
+            -20 * np.exp(-0.2 * np.sqrt(0.5 * (X**2 + Y**2)))
+            - np.exp(0.5 * (np.cos(2 * np.pi * X) + np.cos(2 * np.pi * Y)))
+            + np.e
+            + 20
+        )
 
         return float(y)

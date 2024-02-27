@@ -5,7 +5,7 @@ import subprocess
 import time
 from pathlib import Path
 
-from aiaccel.job.command_creator import create_execute_command, create_submit_command
+from aiaccel.job.command_creator import create_submit_command
 
 from typing import Callable
 import fcntl
@@ -41,25 +41,17 @@ def retry(_MAX_NUM: int = 60, _DELAY: float = 1.0) -> Callable[[Any], Any]:
 class JobCreator:
     def __init__(
         self,
-        script_name: str,
+        base_job_file_path: str,
         job_name: int,
-        execute_cmd: str | None,
-        python_execute_cmd: str,
         platform: str,
         group: str,
-        template: str,
-        template_file: Path | None,
         timeout_seconds: int,
         work_dir: Path,
     ):
-        self.script_name = script_name
+        self.base_job_file_path = base_job_file_path
         self.job_name = job_name
-        self.execute_cmd = execute_cmd
-        self.python_execute_cmd = python_execute_cmd
         self.platform = platform
         self.group = group
-        self.template = template
-        self.template_file = template_file
         self.work_dir = work_dir
         self.timeout_seconds = timeout_seconds
         self._start_time = None
@@ -72,40 +64,31 @@ class JobCreator:
 
     def create(self) -> None:
         """Create a executable file to run the job."""
-        cmd = create_execute_command(
-            self.execute_cmd, self.script_name, self.python_execute_cmd
-        )
-        template = ""
-        if self.template_file is not None:
-            if self.template_file.exists():
-                with open(self.template_file, "r") as f:
-                    template = f.read()
-            else:
-                raise FileNotFoundError(
-                    f"template file not found: {self.template_file}"
-                )
-        else:
-            template = self.template
+        if self.platform != "abci":
+            return
+
+        with open(self.base_job_file_path, "r") as f:
+            batch_file = f.read()
 
         with open(self.job_file_path, "w") as f:
-            if template:
-                f.write(f"{template}\n")
+            f.write(f"#!/bin/bash\n")
             f.write(f"LOCKFILE={self.lock_file_path}\n")
             f.write(f'if [ ! -f "$LOCKFILE" ]; then\n')
-            f.write(f"  touch $LOCKFILE\n")
+            f.write(f'  touch "$LOCKFILE"\n')
             f.write(f"fi\n")
             # lock
-            f.write(f"flock -x -n $LOCKFILE\n")
-            f.write(f"{cmd}\n")
+            f.write(f'flock -x -n "$LOCKFILE"\n')
+            if batch_file:
+                f.write(f"\n{batch_file}\n")
             # unlock
-            f.write(f"flock -u $LOCKFILE\n")
-            f.write(f"rm -f $LOCKFILE\n")
+            f.write(f'flock -u "$LOCKFILE"\n')
+            f.write(f'rm -f "$LOCKFILE"\n')
 
     def run(self, hparams_str: str) -> None:
         """Run the job with the given hyperparameters."""
         cmd = create_submit_command(
             self.platform,
-            self.script_name,
+            self.base_job_file_path,
             self.group,
             self.job_file_path,
             self.stdout_file_path,
@@ -202,6 +185,33 @@ def _run2(cmds: list[str], lock_file_path: str) -> None:
     _wait_for_unlock(lock_file_path)
     # finish the job
     return
+
+
+def _create_lock_file(lock_file_path: str) -> None:
+    """Create a lock file."""
+    with open(lock_file_path, "w") as f:
+        f.write("")
+    return
+
+
+def _remove_lock_file(lock_file_path: str) -> None:
+    """Remove a lock file."""
+    if Path(lock_file_path).exists():
+        Path(lock_file_path).unlink()
+
+
+def _lock(lock_file_path: str) -> None:
+    """Lock the lock file."""
+    with open(lock_file_path, "w") as f:
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _unlock(lock_file_path: str) -> None:
+    """Unlock the lock file."""
+    if not Path(lock_file_path).exists():
+        return
+    with open(lock_file_path, "w") as f:
+        fcntl.flock(f, fcntl.LOCK_UN)
 
 
 def _wait_for_unlock(lock_file_path: str) -> None:

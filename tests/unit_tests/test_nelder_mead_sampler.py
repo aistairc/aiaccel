@@ -360,11 +360,7 @@ class TestNelderMeadAlgorism(unittest.TestCase):
 
     def test_set_objective_initial(self):
         self.NelderMead.simplex = Simplex(Coef())
-        initial_xs = [
-            np.array([1.0, 2.0]),
-            np.array([3.0, 4.0]),
-            np.array([5.0, 6.0])
-        ]
+        initial_xs = [np.array([1.0, 2.0]), np.array([3.0, 4.0]), np.array([5.0, 6.0])]
         initial_value = [5.0, 3.0, 7.0]
 
         self.NelderMead.set_objective(initial_xs[0], initial_value[0])
@@ -497,22 +493,33 @@ class TestNelderMeadSampler(unittest.TestCase):
         )
 
     def test_infer_relative_search_space(self):
-        self.assertEqual(self.sampler.infer_relative_search_space(self.study, self.trial), {})
+        self.assertEqual(
+            self.sampler.infer_relative_search_space(self.study, self.trial), {}
+        )
 
     def test_sample_relative(self):
-        self.assertEqual(self.sampler.sample_relative(self.study, self.trial, self.param_distribution), {})
+        self.assertEqual(
+            self.sampler.sample_relative(
+                self.study, self.trial, self.param_distribution
+            ),
+            {},
+        )
 
     def test_before_trial(self):
         self.sampler.before_trial(self.study, self.trial)
         self.assertEqual(self.sampler.x, None)
 
     def test_sample_independent_initial(self):
-        value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
+        value = self.sampler.sample_independent(
+            self.study, self.trial, "x", self.param_distribution
+        )
         self.assertIsInstance(value, float)
         self.assertGreaterEqual(value, -5.0)
         self.assertLessEqual(value, 5.0)
 
-        value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
+        value = self.sampler.sample_independent(
+            self.study, self.trial, "y", self.param_distribution
+        )
         self.assertIsInstance(value, float)
         self.assertGreaterEqual(value, -5.0)
         self.assertLessEqual(value, 5.0)
@@ -527,10 +534,14 @@ class TestNelderMeadSampler(unittest.TestCase):
         self.sampler.before_trial(self.study, self.trial)
 
         reflect_xs = [-1.0, 0.0]
-        value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
+        value = self.sampler.sample_independent(
+            self.study, self.trial, "x", self.param_distribution
+        )
         self.assertEqual(value, reflect_xs[0])
 
-        value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
+        value = self.sampler.sample_independent(
+            self.study, self.trial, "y", self.param_distribution
+        )
         self.assertEqual(value, reflect_xs[1])
 
     def test_after_trial(self):
