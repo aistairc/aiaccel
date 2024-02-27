@@ -84,8 +84,9 @@ class JobCreator:
             f.write(f'flock -u "$LOCKFILE"\n')
             f.write(f'rm -f "$LOCKFILE"\n')
 
-    def run(self, hparams_str: str) -> None:
+    def run(self, args: list) -> None:
         """Run the job with the given hyperparameters."""
+        args_str = " ".join(args)
         cmd = create_submit_command(
             self.platform,
             self.base_job_file_path,
@@ -93,7 +94,7 @@ class JobCreator:
             self.job_file_path,
             self.stdout_file_path,
             self.stderr_file_path,
-            hparams_str,
+            args_str,
         )
         print(f"Running the job with the command: `{cmd}`")
         cmds = cmd.split()
@@ -185,34 +186,6 @@ def _run2(cmds: list[str], lock_file_path: str) -> None:
     _wait_for_unlock(lock_file_path)
     # finish the job
     return
-
-
-def _create_lock_file(lock_file_path: str) -> None:
-    """Create a lock file."""
-    with open(lock_file_path, "w") as f:
-        f.write("")
-    return
-
-
-def _remove_lock_file(lock_file_path: str) -> None:
-    """Remove a lock file."""
-    if Path(lock_file_path).exists():
-        Path(lock_file_path).unlink()
-
-
-def _lock(lock_file_path: str) -> None:
-    """Lock the lock file."""
-    with open(lock_file_path, "w") as f:
-        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-
-
-def _unlock(lock_file_path: str) -> None:
-    """Unlock the lock file."""
-    if not Path(lock_file_path).exists():
-        return
-    with open(lock_file_path, "w") as f:
-        fcntl.flock(f, fcntl.LOCK_UN)
-
 
 def _wait_for_unlock(lock_file_path: str) -> None:
     """Wait until the lock file is unlocked."""

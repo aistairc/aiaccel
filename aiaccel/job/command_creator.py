@@ -16,14 +16,14 @@ class SubmitCommandCreator(ABC):
         job_file_path: str,
         stdout_path: str,
         stderr_path: str,
-        hparams_str: str,
+        args_str: str,
     ):
         self.base_job_file_path = base_job_file_path
         self.group = group
         self.job_file_path = job_file_path
         self.stdout_path = stdout_path
         self.stderr_path = stderr_path
-        self.hparams_str = hparams_str
+        self.args_str = args_str
 
     @abstractmethod
     def create_submit_command(self) -> str:
@@ -35,15 +35,15 @@ class Local(SubmitCommandCreator):
     """For debug"""
 
     def create_submit_command(self) -> str:
-        return f"bash {self.base_job_file_path} {self.hparams_str}"
+        return f"bash {self.base_job_file_path} {self.args_str}"
 
 
 class Abci(SubmitCommandCreator):
     def create_submit_command(self) -> str:
         if self.group == "":
             raise ValueError("Group name is required for ABCI.")
-        # return f"qsub -g {self.group} -o {self.stdout_path} -e {self.stderr_path} {self.base_job_file_path} {self.hparams_str}"
-        return f"qsub -g {self.group} -o {self.stdout_path} -e {self.stderr_path} {self.job_file_path} {self.hparams_str}"
+        # return f"qsub -g {self.group} -o {self.stdout_path} -e {self.stderr_path} {self.base_job_file_path} {self.args_str}"
+        return f"qsub -g {self.group} -o {self.stdout_path} -e {self.stderr_path} {self.job_file_path} {self.args_str}"
 
 
 def create_submit_command(
@@ -53,7 +53,7 @@ def create_submit_command(
     job_file_path: str,
     stdout_path: str,
     stderr_path: str,
-    hparams_str: str,
+    args_str: str,
 ) -> str:
     """
     return a shell command to execute the job
@@ -65,7 +65,7 @@ def create_submit_command(
             job_file_path,
             stdout_path,
             stderr_path,
-            hparams_str,
+            args_str,
         ).create_submit_command()
     elif platform == __abci__:
         return Abci(
@@ -74,7 +74,7 @@ def create_submit_command(
             job_file_path,
             stdout_path,
             stderr_path,
-            hparams_str,
+            args_str,
         ).create_submit_command()
     else:
         raise NotImplementedError(f"Platform '{platform}' not implemented.")
