@@ -1,4 +1,4 @@
-# aiaccel V2: JobDispatcherの設計
+# aiaccel V2: AbciJobExecutorの設計
 
 aiaccel v2 のジョブディスパッチャーの使用方法と設計について記述する．
 - コード: https://github.com/aistairc/aiaccel/tree/feature/v2-draft-jobdispatcher
@@ -24,12 +24,14 @@ aiaccel v2 のジョブディスパッチャーの使用方法と設計につい
     ~~~ bash
     $ python user_program.py
     [I 2024-02-26 12:34:41,331] A new study created in memory with name: no-name-9dd39abe-26df-4e13-896a-1e1089063359
-    Running the job with the command: `bash /home/user/aiaccel/aiaccel/job/exsmple/work/hpo-0000.sh x1=3.745401188473625 x2=3.745401188473625`
-    {'job_name': 'hpo-0000', 'value': -4.698975879748483, 'hparams': {'x1': 3.745401188473625, 'x2': 3.745401188473625}}
-    Running the job with the command: `bash /home/user/aiaccel/aiaccel/job/exsmple/work/hpo-0001.sh x1=9.50714306409916 x2=9.50714306409916`
-    {'job_name': 'hpo-0001', 'value': 42.850053920752984, 'hparams': {'x1': 9.50714306409916, 'x2': 9.50714306409916}}
-    Running the job with the command: `bash /home/user/aiaccel/aiaccel/job/exsmple/work/hpo-0002.sh x1=7.319939418114051 x2=7.319939418114051`
-    {'job_name': 'hpo-0002', 'value': 16.98181599428962, 'hparams': {'x1': 7.319939418114051, 'x2': 7.319939418114051}}
+    Running the job with the command: `bash /home/member/v2/aiaccel/aiaccel/job/exsmple/job.sh --x1 3.7454 --x2 9.5071`
+    Running the job with the command: `bash /home/member/v2/aiaccel/aiaccel/job/exsmple/job.sh --x1 7.3199 --x2 5.9866`
+    Running the job with the command: `bash /home/member/v2/aiaccel/aiaccel/job/exsmple/job.sh --x1 1.5602 --x2 1.5599`
+    Running the job with the command: `bash /home/member/v2/aiaccel/aiaccel/job/exsmple/job.sh --x1 0.5808 --x2 8.6618`
+    Running the job with the command: `bash /home/member/v2/aiaccel/aiaccel/job/exsmple/job.sh --x1 6.0112 --x2 7.0807`
+    Running the job with the command: `bash /home/member/v2/aiaccel/aiaccel/job/exsmple/job.sh --x1 0.2058 --x2 9.6991`
+    Running the job with the command: `bash /home/member/v2/aiaccel/aiaccel/job/exsmple/job.sh --x1 8.3244 --x2 2.1234`
+    Running the job with the command: `bash /home/member/v2/aiaccel/aiaccel/job/exsmple/job.sh --x1 1.8182 --x2 1.8340`
     ...
     ~~~
 
@@ -41,7 +43,7 @@ aiaccel v2 のジョブディスパッチャーの使用方法と設計につい
     3. [ユーザープログラム の作成](#23-ユーザープログラム-の作成)
     4. [実行](#24-実行)
 3. [JobCreatorクラスの実装](#3-jobcreatorクラスの実装)
-4. [JobDispatcherクラスの実装](#4-jobdispatcherクラスの実装)
+4. [AbciJobExecutorクラスの実装](#4-jobdispatcherクラスの実装)
 5. [改定履歴](#改定履歴)
 
 
@@ -146,140 +148,87 @@ aiaccel v2 のジョブディスパッチャーの使用方法と設計につい
 
 ### 2.3 ユーザープログラム の作成
 ユーザープログラムは，最適化を行うためのプログラムを指す．<br>
-ユーザープログラムは，`Python` で記述されたプログラムである．<br>
+ユーザープログラムは，`Python` で記述する．<br>
 
 - user_program.py
     ~~~ python
     import optuna
 
-    from aiaccel import JobDispatcher
+    from aiaccel import AbciJobExecutor
 
 
-    def param_to_args_fn(param: dict) -> str:
-        """
-        Example:
-        param = {
-            'x': 0.5,
-            'y': 0.3,
-            ...
-        }
-        return "x=0.5 y=0.3 ..."
-        """
-        return " ".join([f"--{k}={v}" for k, v in param.items()])
+    sampler = optuna.samplers.TPESampler(seed=42)
+    study = optuna.create_study(direction="minimize", sampler=sampler)
 
+    n_trials = 50
 
-    if __name__ == "__main__":
-        sampler = optuna.samplers.TPESampler(seed=42)
-        # sampler = optuna.samplers.RandomSampler(seed=42)
+    jobs = AbciJobExecutor("job.sh", n_jobs=4)
 
-        study = optuna.create_study(direction="minimize", sampler=sampler)
+    for n in range(n_trials):
+        trial = study.ask()
+        args = [
+            "--x1", f"{trial.suggest_float('x1', 0, 10):.4f}",
+            "--x2", f"{trial.suggest_float('x2', 0, 10):.4f}",
+        ]
 
-        n_trials = 50
-        n_jobs = 4
-
-        jobs = JobDispatcher("job.sh", n_jobs=n_jobs, param_to_args_fn=param_to_args_fn)
-
-        for n in range(n_trials):
-            trial = study.ask()
-            hparams = {
-                "x1": trial.suggest_float("x", 0, 10),
-                "x2": trial.suggest_float("x", 0, 10),
-            }
-
-            jobs.submit(hparams, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
-
-            y = jobs.result()
-            study.tell(trial, y)
+        job = jobs.submit(args, job_name=f"hpo-{n:04}")
+        y = job.get_result()
+        study.tell(trial, y)
     ~~~
 
     - objective: 目的関数
     - param_to_args_fn: ハイパーパラメーターをコマンドライン引数に変換する関数 (任意)
 
-
-    ### Memo
-
-    上記例では `param_to_args_fn` をユーザープログラム内で書いているが，幾つかのパターンを `aiaccel` の組み込み関数として提供するのも良いかもしれない.<br>
-    その場合は，`param_to_args_fn=aiaccel.parser.param_to_args_fn`のように記述する．
-
-    - 例：
-        ~~~ python
-        jobs = JobDispatcher(
-            ...,
-            param_to_args_fn=aiaccel.parser.param_to_args_fn
-        )
-        ~~~
-
 <br>
 
 #### 2.3.1 逐次実行
 
-逐次実行の例を以下に示す．逐次実行では，JobDispatcherの引数 `n_jobs` に 1 を指定し，`jobs.result()` メソッドを使ってジョブの結果を取得する．<br>
+逐次実行の例を以下に示す．逐次実行では，AbciJobExecutorの引数 `n_jobs` に 1 を指定し，`jobs.result()` メソッドを使ってジョブの結果を取得する．<br>
 
 ~~~ python
-
 ...(省略)...
 
-if __name__ == "__main__":
+jobs = AbciJobExecutor("job.sh", n_jobs=1)
 
-    ...(省略)...
+for n in range(n_trials):
+    trial = study.ask()
+    args = [
+        "--x1", f"{trial.suggest_float('x1', 0, 10):.4f}",
+        "--x2", f"{trial.suggest_float('x2', 0, 10):.4f}",
+    ]
 
-    n_jobs = 1
-    jobs = JobDispatcher(
-        "job.sh",
-        n_jobs=n_jobs,
-        param_to_args_fn=param_to_args_fn
-    )
-
-    for n in range(n_trials):
-        trial = study.ask()
-        hparams = {
-            "x1": trial.suggest_float("x", 0, 10),
-            "x2": trial.suggest_float("x", 0, 10),
-        }
-
-        jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")
-
-        y = jobs.result()
-        study.tell(trial, y)
+    job = jobs.submit(args, job_name=f"hpo-{n:04}")
+    y = job.get_result()
+    study.tell(trial, y)
 ~~~
 
 <br>
 
 #### 2.3.2 並列実行
 
-並列実行の例を以下に示す．並列実行では，JobDispatcherの引数 `n_jobs` に 1以上の値を指定し，`jobs.collect_results()` メソッドを使ってジョブの結果を取得する．<br>
+並列実行の例を以下に示す．並列実行では，AbciJobExecutorの引数 `n_jobs` に 1以上の値を指定し，`jobs.get_results()` メソッドを使ってジョブの結果を取得する．<br>
 
 ~~~ python
-
 ...(省略)...
 
-if __name__ == "__main__":
+jobs = AbciJobExecutor("job.sh", n_jobs=4)
 
-    ...(省略)...
+n = 0
+while True:
+    if jobs.finished_job_count >= n_trials:
+        break
 
-    n_jobs = 4
-    jobs = JobDispatcher(
-        "job.sh",
-        n_jobs=n_jobs,
-        param_to_args_fn=param_to_args_fn
-    )
+    trial = study.ask()
+    args = [
+        "--x1", f"{trial.suggest_float('x1', 0, 10):.4f}",
+        "--x2", f"{trial.suggest_float('x2', 0, 10):.4f}",
+    ]
 
-    n = 0
-    while True:
-        if jobs.finished_job_count >= n_trials:
-            break
+    jobs.submit(args, tag=trial, job_name=f"hpo-{n:04}")
 
-        trial = study.ask()
-        hparams = {
-            "x1": trial.suggest_float("x", 0, 10),
-            "x2": trial.suggest_float("x", 0, 10),
-        }
-
-        jobs.submit(hparams, tag=trial, job_name=f"hpo-{n:04}")
-
-        for y, trial in jobs.collect_results():
-            study.tell(trial, y)
-        n += 1
+    for y, trial in jobs.get_results():
+        study.tell(trial, y)
+    n += 1
 ~~~
 
 <br>
@@ -299,8 +248,8 @@ $ python user_program.py
 
 ## 3. JobCreatorクラスの実装
 
-`JobCreator`は，ジョブの作成，実行，結果の収集を行うクラスである．`JobCreator`は，`JobDispatcher`によって生成され，`JobDispatcher`によって管理される．<br>
-`JobCreator`のインスタンスは，`JobDispatcher`がジョブごとに生成する．
+`JobCreator`は，ジョブの作成，実行，結果の収集を行うクラスである．`JobCreator`は，`AbciJobExecutor`によって生成され，`AbciJobExecutor`によって管理される．<br>
+`JobCreator`のインスタンスは，`AbciJobExecutor`がジョブごとに生成する．
 
 主な機能は以下の通りである．
 - ジョブファイルの作成
@@ -371,13 +320,13 @@ class JobCreator:
 <br>
 <br>
 
-## 4. JobDispatcherクラスの実装
+## 4. AbciJobExecutorクラスの実装
 
 
 
-`JobDispatcher`は，ジョブの投入と管理を行うクラスである．`JobDispatcher`は，利用可能なワーカー数を管理し，`JobCreator`でジョブを作成，実行，結果の収集を行う．
+`AbciJobExecutor`は，ジョブの投入と管理を行うクラスである．`AbciJobExecutor`は，利用可能なワーカー数を管理し，`JobCreator`でジョブを作成，実行，結果の収集を行う．
 
-主な機能は以下の通りである．
+主要機能を以下に示す.
 - ジョブの投入
 - ジョブの結果の収集 (並列実行の場合)
 - ジョブの結果の取得 (逐次実行の場合)
@@ -390,7 +339,30 @@ class JobCreator:
 コード: https://github.com/aistairc/aiaccel/blob/feature/v2-draft-jobdispatcher/aiaccel/job/dispatcher.py
 
 ~~~ python
-class JobDispatcher:
+
+@dataclass
+class AbciJob:
+    future: Future
+    job_name: str
+    args: list
+    tag: Any
+
+    def is_finished(self) -> bool:
+        return self.future.done()
+
+    def retrieve_result(self) -> Any:
+        return self.future.result()
+
+    def get_result(self, interval: float = 1.0) -> Any:
+        while not self.is_finished():
+            time.sleep(interval)
+        return self.retrieve_result()
+
+    def cancel(self) -> None:
+        self.future.cancel()
+
+
+class AbciJobExecutor:
     """
     ジョブのディスパッチと管理を行うクラス
     """
@@ -408,16 +380,32 @@ class JobDispatcher:
         """
         ...
 
-    def collect_results(self) -> list[tuple[float, Any]]:
+    def is_finished(self, job: AbciJob) -> bool:
         """
-        結果を収集するメソッド
+        ジョブが終了したかどうかを判定するメソッド
+
+        入力:
+            job: AbciJob - ジョブ
 
         出力:
-            list[tuple[float, Any]] - 目的関数の結果とそれに対応するタグのリスト
+            bool - ジョブが終了している場合はTrue、そうでない場合はFalse
         """
-        ...
+        return job.future.done()
 
-    def result(self) -> Any:
+    def retrieve_result(self, job: AbciJob) -> Any:
+        """
+        ジョブの結果を取得するメソッド
+
+        入力:
+            job: AbciJob - ジョブ
+
+        出力:
+            Any - ジョブの結果
+        """
+        return job.future.result()
+
+
+    def get_result(self) -> Any:
         """
         ジョブの結果を取得するメソッド. n_jobs=1の場合で使用する
 
@@ -426,13 +414,12 @@ class JobDispatcher:
         """
         ...
 
-    @property
-    def results(self) -> list[dict]:
+    def get_results(self) -> Generator:
         """
-        全ての結果を取得するプロパティ
+        結果を収集するメソッド
 
         出力:
-            list[dict] - 全てのジョブの結果のリスト
+            tuple[tuple[float, Any]] - 目的関数の結果とそれに対応するタグ
         """
         ...
 
@@ -463,15 +450,6 @@ class JobDispatcher:
 
         出力:
             int - 投入済みのジョブ数
-        """
-        ...
-
-    def all_done(self) -> bool:
-        """
-        全てのジョブが完了したかどうかを判定するメソッド
-
-        出力:
-            bool - 全てのジョブが完了している場合はTrue、そうでない場合はFalse
         """
         ...
 ~~~

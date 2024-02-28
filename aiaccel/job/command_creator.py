@@ -31,19 +31,19 @@ class SubmitCommandCreator(ABC):
         raise NotImplementedError
 
 
-class Local(SubmitCommandCreator):
-    """For debug"""
-
-    def create_submit_command(self) -> str:
-        return f"bash {self.base_job_file_path} {self.args_str}"
-
-
 class Abci(SubmitCommandCreator):
     def create_submit_command(self) -> str:
         if self.group == "":
             raise ValueError("Group name is required for ABCI.")
         # return f"qsub -g {self.group} -o {self.stdout_path} -e {self.stderr_path} {self.base_job_file_path} {self.args_str}"
         return f"qsub -g {self.group} -o {self.stdout_path} -e {self.stderr_path} {self.job_file_path} {self.args_str}"
+
+
+class Local(SubmitCommandCreator):
+    """For debug"""
+
+    def create_submit_command(self) -> str:
+        return f"bash {self.base_job_file_path} {self.args_str}"
 
 
 def create_submit_command(

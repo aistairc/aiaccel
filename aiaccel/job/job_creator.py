@@ -6,36 +6,12 @@ import time
 from pathlib import Path
 
 from aiaccel.job.command_creator import create_submit_command
+from aiaccel.job.retry import retry
 
 from typing import Callable
 import fcntl
 from functools import wraps
 from typing import Any
-
-
-def retry(_MAX_NUM: int = 60, _DELAY: float = 1.0) -> Callable[[Any], Any]:
-    """Decorator to retry function.
-
-    Args:
-        _MAX_NUM (int, optional): Maximum number of retries. Defaults to 60.
-        _DELAY (float, optional): Retry interval in seconds. Defaults to 1.0.
-    """
-
-    def _retry(func: Callable[[Any], Any]) -> Any:
-        @wraps(func)
-        def _wrapper(*args: Any, **kwargs: Any) -> Any:
-            for i in range(_MAX_NUM):
-                try:
-                    return func(*args, **kwargs)
-                except BaseException as e:
-                    if i == _MAX_NUM - 1:
-                        raise e
-                    time.sleep(_DELAY)
-                    continue
-
-        return _wrapper
-
-    return _retry
 
 
 class JobCreator:
@@ -187,6 +163,7 @@ def _run2(cmds: list[str], lock_file_path: str) -> None:
     # finish the job
     return
 
+
 def _wait_for_unlock(lock_file_path: str) -> None:
     """Wait until the lock file is unlocked."""
     if not Path(lock_file_path).exists():
@@ -207,26 +184,6 @@ def _wait_for_lock_file_creation(lock_file_path: str) -> None:
         if Path(lock_file_path).exists():
             break
         time.sleep(0.01)
-
-
-# def _collect_result(stdout_file: str) -> str | None:
-#     """Collect the result of the job.
-
-#     return:
-#         The result of the job (objective value).
-#     """
-#     try:
-#         with open(stdout_file, encoding="utf-8") as file:
-#             lines = file.readlines()
-#             if lines:
-#                 return lines[-1].strip()
-#             else:
-#                 return None
-#     except FileNotFoundError:
-#         return None
-#     except Exception as e:
-#         print(f"Error reading file: {e}")
-#         return None
 
 
 @retry(_MAX_NUM=60, _DELAY=1.0)

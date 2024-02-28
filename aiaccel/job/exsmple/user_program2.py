@@ -1,6 +1,6 @@
 import optuna
 
-from aiaccel import JobDispatcher
+from aiaccel import AbciJobExecutor
 
 
 def param_to_args_fn(param: dict) -> str:
@@ -16,7 +16,6 @@ def param_to_args_fn(param: dict) -> str:
     return " ".join([f"--{k}={v}" for k, v in param.items()])
 
 
-
 sampler = optuna.samplers.TPESampler(seed=42)
 # sampler = optuna.samplers.RandomSampler(seed=42)
 
@@ -25,7 +24,7 @@ study = optuna.create_study(direction="minimize", sampler=sampler)
 n_trials = 50
 n_jobs = 4
 
-jobs = JobDispatcher("job2.sh", n_jobs=n_jobs)
+jobs = AbciJobExecutor("job2.sh", n_jobs=n_jobs)
 
 # ====================================
 # # n_jobs = 1 の場合の例
@@ -57,7 +56,7 @@ while True:
 
     jobs.submit(args, tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
 
-    for y, trial in jobs.collect_results():
+    for y, trial in jobs.get_results():
         study.tell(trial, y)
     n += 1
 jobs.wait()
