@@ -12,34 +12,31 @@ from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadAlgorism
 class TestNelderMeadAlgorism(unittest.TestCase):
     def setUp(self):
         self.search_space = {"x": [-5, 5], "y": [-5, 5]}
-        self.nm = NelderMeadAlgorism(self.search_space)
-        self.nm_generator = iter(self.nm)
+        self.nm = NelderMeadAlgorism(search_space=self.search_space, block=False)
         self.vertices = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         self.values = np.array([5.0, 3.0, 7.0])
 
     def test_initialize(self):
-        for i in range(len(self.search_space) + 1):
-            xi = next(self.nm_generator)
-            if i < len(self.search_space):
-                self.assertTrue(self.nm.is_ready)
-            else:
-                self.assertFalse(self.nm.is_ready)
+        for _ in range(len(self.search_space) + 1):
+            xi = self.nm.get_vertex()
             for co, ss in zip(xi, self.search_space.values()):
                 self.assertIsInstance(co, float)
                 self.assertGreaterEqual(co, ss[0])
                 self.assertLessEqual(co, ss[1])
+        xi = self.nm.get_vertex()
+        self.assertIsNone(xi)
 
     def setup_initialize(self):
         for _ in range(len(self.search_space) + 1):
-            next(self.nm_generator)
+            self.nm.get_vertex()
         self.nm.vertices = self.vertices
         for value in self.values:
-            self.nm.value_queue.put(value)
+            self.nm.put_value(value)
 
     def test_reflect(self):
         self.setup_initialize()
         reflect_xs = np.array([-1.0, 0.0])
-        xr = next(self.nm_generator)
+        xr = self.nm.get_vertex()
 
         self.assertTrue(np.array_equal(xr, reflect_xs))
 
@@ -50,10 +47,10 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         reflect_value = 4.0
 
         # self.values[0] <= fr < self.values[-2]
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.nm.value_queue.put(reflect_value)
 
-        xr2 = next(self.nm_generator)
+        xr2 = self.nm.get_vertex()
         self.assertTrue(np.array_equal(xr2, reflect_xs2))
 
         self.assertTrue(np.array_equal(self.nm.vertices[1], reflect_xs))
@@ -66,15 +63,15 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         expand_value = 1.0
 
         # fr < self.values[0]
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.nm.value_queue.put(reflect_value)
 
-        xe = next(self.nm_generator)  # expand
+        xe = self.nm.get_vertex()  # expand
         self.assertTrue(np.array_equal(xe, expand_xs))
 
         # fe < fr
         self.nm.value_queue.put(expand_value)
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.assertTrue(np.array_equal(self.nm.vertices[0], expand_xs))
         self.assertTrue(np.array_equal(self.nm.values[0], expand_value))
 
@@ -85,14 +82,14 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         expand_value = 3.0
 
         # fr < self.values[0]
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.nm.value_queue.put(reflect_value)
 
-        next(self.nm_generator)  # expand
+        self.nm.get_vertex()  # expand
 
         # else (fe > fr)
         self.nm.value_queue.put(expand_value)
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.assertTrue(np.array_equal(self.nm.vertices[0], reflect_xs))
         self.assertTrue(np.array_equal(self.nm.values[0], reflect_value))
 
@@ -103,15 +100,15 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         outside_contract_value = 5.5
 
         # self.values[-2] <= fr < self.values[-1]
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.nm.value_queue.put(reflect_value)
 
-        xoc = next(self.nm_generator)  # outside_contract
+        xoc = self.nm.get_vertex()  # outside_contract
         self.assertTrue(np.array_equal(xoc, outside_contract_xs))
 
         # foc <= fr
         self.nm.value_queue.put(outside_contract_value)
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.assertTrue(np.array_equal(self.nm.vertices[2], outside_contract_xs))
         self.assertTrue(np.array_equal(self.nm.values[2], outside_contract_value))
 
@@ -124,25 +121,24 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         reflect_xs2 = [3.0, 4.0]
 
         # self.values[-2] <= fr < self.values[-1]
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.nm.value_queue.put(reflect_value)
 
-        next(self.nm_generator)  # outside_contract
+        self.nm.get_vertex()  # outside_contract
 
         # else (foc > fr)
         self.nm.value_queue.put(outside_contract_value)
-        for i, shrink_xs in enumerate(shrink_xss):
-            xsh = next(self.nm_generator)  # shrink
-            if i < len(shrink_xss) - 1:
-                self.assertTrue(self.nm.is_ready)
-            else:
-                self.assertFalse(self.nm.is_ready)
+        for shrink_xs in shrink_xss:
+            xsh = self.nm.get_vertex()  # shrink
             self.assertTrue(np.array_equal(shrink_xs, xsh))
+
+        shrink_xs = self.nm.get_vertex()
+        self.assertIsNone(shrink_xs)
 
         for shrink_value in shrink_values:
             self.nm.value_queue.put(shrink_value)
 
-        xr2 = next(self.nm_generator)
+        xr2 = self.nm.get_vertex()
         self.assertTrue(np.array_equal(xr2, reflect_xs2))
 
     def test_reflect_to_inside_contract(self):
@@ -152,14 +148,14 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         inside_contract_value = 6.0
 
         # self.values[-1] <= fr
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.nm.value_queue.put(reflect_value)
-        xic = next(self.nm_generator)  # inside_contract
+        xic = self.nm.get_vertex()  # inside_contract
         self.assertTrue(np.array_equal(xic, inside_contract_xs))
 
         # fic < self.values[-1]
         self.nm.value_queue.put(inside_contract_value)
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.assertTrue(np.array_equal(self.nm.vertices[2], inside_contract_xs))
         self.assertTrue(np.array_equal(self.nm.values[2], inside_contract_value))
 
@@ -171,19 +167,18 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         shrink_xss = np.array([[2.0, 3.0], [4.0, 5.0]])
 
         # self.values[-1] <= fr
-        next(self.nm_generator)  # reflect
+        self.nm.get_vertex()  # reflect
         self.nm.value_queue.put(reflect_value)
-        next(self.nm_generator)  # inside_contract
+        self.nm.get_vertex()  # inside_contract
 
         # else (fic > self.values[-1])
         self.nm.value_queue.put(inside_contract_value)
-        for i, shrink_xs in enumerate(shrink_xss):
-            xsh = next(self.nm_generator)  # shrink
-            if i < len(shrink_xss) - 1:
-                self.assertTrue(self.nm.is_ready)
-            else:
-                self.assertFalse(self.nm.is_ready)
+        for shrink_xs in shrink_xss:
+            xsh = self.nm.get_vertex()  # shrink
             self.assertTrue(np.array_equal(shrink_xs, xsh))
+
+        shrink_xs = self.nm.get_vertex()
+        self.assertIsNone(shrink_xs)
 
 
 class TestNelderMeadSampler(unittest.TestCase):
@@ -240,26 +235,26 @@ class TestNelderMeadSampler(unittest.TestCase):
             self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
 
             self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-1.0, 0.0])))
-            self.assertFalse(self.trial.user_attrs["IsReady"])
+            # self.assertFalse(self.trial.user_attrs["IsReady"])
 
     def test_get_coordinate(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.__iter__") as mock_iter:
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._generator") as mock_iter:
             def side_effect():
                 yield np.array([-1.0, 0.0])
             mock_iter.side_effect = side_effect
-            self.sampler.nm_generator = iter(self.sampler.nm)
+            self.sampler.nm.generator = iter(self.sampler.nm._generator())
 
             coordinate = self.sampler._get_cooridinate()
 
             self.assertTrue(np.array_equal(coordinate, np.array([-1.0, 0.0])))
 
     def test_get_coordinate_out_of_range(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.__iter__") as mock_iter:
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._generator") as mock_iter:
             def side_effect():
                 yield np.array([-6.0, 0.0])
                 yield np.array([-2.0, 0.0])
             mock_iter.side_effect = side_effect
-            self.sampler.nm_generator = iter(self.sampler.nm)
+            self.sampler.nm.generator = iter(self.sampler.nm._generator())
 
             coordinate = self.sampler._get_cooridinate()
 
