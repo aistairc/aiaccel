@@ -48,7 +48,7 @@ class NelderMeadAlgorism:
         self.generator = iter(self._generator())
         self._num_waiting = 0
 
-    def get_vertex(self) -> int:
+    def get_vertex(self) -> np.ndarray:
         return next(self.generator)
 
     def put_value(self, value: float) -> None:
@@ -65,7 +65,7 @@ class NelderMeadAlgorism:
 
         return results
 
-    def _generator(self) -> Generator[np.ndarray[Any, Any], None, None]:
+    def _generator(self) -> Generator[np.ndarray, None, None]:
         # initialization
         lows, highs = zip(*self._search_space.values())
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
