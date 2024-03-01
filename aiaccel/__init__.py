@@ -1,6 +1,6 @@
 from __future__ import annotations
 
 from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadSampler
-from aiaccel.job import AbciJobExecutor, LocalJobExecutor
+from aiaccel.job import AbciJobExecutor
 
-__all__ = ["AbciJobExecutor", "LocalJobExecutor", "NelderMeadSampler"]
+__all__ = ["AbciJobExecutor", "NelderMeadSampler"]

@@ -11,11 +11,6 @@ from aiaccel.job.eval import param_str_eval
 from dataclasses import dataclass
 
 
-__DEFAULT_WORK_DIR__ = "./work"
-__DEFAULT_TOUT_SEC__ = -1  # no timeout
-__DEFAULT_RETRY_NUM__ = 0  # no retry
-__DEFAULT_N_JOBS__ = 1  # no parallel execution
-
 
 @dataclass
 class AbciJob:
@@ -44,13 +39,12 @@ class AbciJobExecutor:
         self,
         base_job_file_path: str,
         group: str = "",
-        n_jobs: int = __DEFAULT_N_JOBS__,
-        retry_num: int = __DEFAULT_RETRY_NUM__,
-        timeout_seconds: float = __DEFAULT_TOUT_SEC__,
-        work_dir: str = __DEFAULT_WORK_DIR__,
+        n_jobs: int = 1,
+        retry_num: int = 0,
+        timeout_seconds: float = -1.0,
+        work_dir: str = "./work",
     ):
         self.base_job_file_path = str(Path(base_job_file_path).resolve())
-        self.platform = "abci"
         self.group: str = group
         self._n_jobs: int = n_jobs
         self.retry_num: int = retry_num  # not used yet
@@ -74,7 +68,6 @@ class AbciJobExecutor:
             _create_and_run,
             self.base_job_file_path,
             job_name,
-            self.platform,
             self.group,
             self.timeout_seconds,
             self.work_dir,
@@ -125,24 +118,6 @@ class AbciJobExecutor:
     ...
 
 
-class LocalJobExecutor(AbciJobExecutor):
-    def __init__(
-        self,
-        base_job_file_path: str,
-        n_jobs: int = __DEFAULT_N_JOBS__,
-        retry_num: int = __DEFAULT_RETRY_NUM__,
-        timeout_seconds: int = __DEFAULT_TOUT_SEC__,
-        work_dir: str = __DEFAULT_WORK_DIR__,
-    ):
-        super().__init__(
-            base_job_file_path,
-            n_jobs=n_jobs,
-            retry_num=retry_num,
-            timeout_seconds=timeout_seconds,
-            work_dir=work_dir,
-        )
-        self.platform = "local"
-
 
 def _get_job_name() -> int:
     return str(uuid.uuid4())
@@ -151,7 +126,6 @@ def _get_job_name() -> int:
 def _create_and_run(
     base_job_file_path: str,
     job_name: int,
-    platform: str,
     group: str,
     timeout_seconds: int,
     work_dir: Path,
@@ -160,7 +134,6 @@ def _create_and_run(
     job_file = JobCreator(
         base_job_file_path,
         job_name,
-        platform,
         group,
         timeout_seconds,
         work_dir,
@@ -168,12 +141,7 @@ def _create_and_run(
     job_file.create()
     job_file.run(args)
     y = job_file.collect_result()
-    job_file.create_result_json(_create_result(job_name, args, float(y)))
-    return param_str_eval(y)
-
-
-def _create_result(job_name: int, args: list, y: float) -> dict:
-    """Create a result dictionary."""
     result = {"job_name": job_name, "velue": y}
     result.update({"args": args})
-    return result
+    job_file.create_result_json(result)
+    return param_str_eval(y)
