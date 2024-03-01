@@ -6,10 +6,15 @@ from concurrent.futures import Future
 from pathlib import Path
 from typing import Any, Generator
 import uuid
-from aiaccel.job.job_creator import JobCreator
 from aiaccel.job.eval import param_str_eval
 from dataclasses import dataclass
 
+
+from aiaccel.job.retry import retry
+import fcntl
+
+import subprocess
+import json
 
 
 @dataclass
@@ -66,12 +71,15 @@ class AbciJobExecutor:
         job_name = job_name if job_name is not None else _get_job_name()
         future = self.executor.submit(
             _create_and_run,
-            self.base_job_file_path,
             job_name,
             self.group,
-            self.timeout_seconds,
-            self.work_dir,
             args,
+            self.base_job_file_path,
+            self.get_job_file_path(job_name),
+            self.get_lock_file_path(job_name),
+            self.get_stdout_file_path(job_name),
+            self.get_stderr_file_path(job_name),
+            self.get_result_file_path(job_name),
         )
         return AbciJob(future, job_name, args, tag)
 
@@ -115,6 +123,21 @@ class AbciJobExecutor:
     def submit_job_count(self) -> int:
         return self._submit_job_count
 
+    def get_job_file_path(self, job_name: str) -> Path:
+        return self.work_dir / f"{job_name}.sh"
+
+    def get_stdout_file_path(self, job_name: int) -> Path:
+        return self.work_dir / f"{job_name}.o"
+
+    def get_stderr_file_path(self, job_name: int) -> Path:
+        return self.work_dir / f"{job_name}.e"
+
+    def get_lock_file_path(self, job_name: int) -> Path:
+        return self.work_dir / f"{job_name}.lock"
+
+    def get_result_file_path(self, job_name: int) -> Path:
+        return self.work_dir / f"{job_name}.json"
+
     ...
 
 
@@ -123,25 +146,134 @@ def _get_job_name() -> int:
     return str(uuid.uuid4())
 
 
-def _create_and_run(
+def create_submit_command(
+    group: str,
+    stdout_file_path: str,
+    stderr_file_path: str,
+    job_file_path: str,
+    args: list
+) -> str:
+    args_str = " ".join(args)
+    return f"qsub -g {group} -o {stdout_file_path} -e {stderr_file_path} {job_file_path} {args_str}"
+
+
+def create_job_file(
     base_job_file_path: str,
+    job_file_path: str,
+    lock_file_path: str,
+) -> None:
+    """Create a executable file to run the job."""
+    with open(base_job_file_path, "r") as f:
+        batch_file = f.read()
+
+    with open(job_file_path, "w") as f:
+        f.write(f"#!/bin/bash\n")
+        f.write(f"LOCKFILE={lock_file_path}\n")
+        f.write(f'if [ ! -f "$LOCKFILE" ]; then\n')
+        f.write(f'  touch "$LOCKFILE"\n')
+        f.write(f"fi\n")
+        # lock
+        f.write(f'flock -x -n "$LOCKFILE"\n')
+        if batch_file:
+            f.write(f"\n{batch_file}\n")
+        # unlock
+        f.write(f'flock -u "$LOCKFILE"\n')
+        f.write(f'rm -f "$LOCKFILE"\n')
+
+
+def run(
+    group: str,
+    job_file_path: str,
+    stdout_file_path: str,
+    stderr_file_path: str,
+    lock_file_path: str,
+    args: list
+) -> None:
+    """Run the job with the given hyperparameters."""
+
+    def _wait_for_unlock() -> None:
+        """Wait until the lock file is unlocked."""
+        if not Path(lock_file_path).exists():
+            return
+
+        while True:
+            with open(lock_file_path, "r") as f:
+                try:
+                    fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except IOError:
+                    time.sleep(0.01)
+
+    def _wait_for_lock_file_creation() -> None:
+        """Wait until the lock file is created."""
+        while True:
+            if Path(lock_file_path).exists():
+                break
+            time.sleep(0.01)
+
+    cmd = create_submit_command(
+        group,
+        stdout_file_path,
+        stderr_file_path,
+        job_file_path,
+        args
+    )
+
+    print(f"Running the job with the command: `{cmd}`")
+    cmds = cmd.split()
+    subprocess.run(cmds, capture_output=True, text=True)  # is run in the another node
+    _wait_for_lock_file_creation()
+    _wait_for_unlock()
+
+
+@retry(_MAX_NUM=60, _DELAY=1.0)
+def collect_result(stdout_file_path: str) -> str | None:
+    """Collect the result of the job.
+
+    return:
+        The result of the job (objective value).
+
+    Note:
+        Retry reading the file if it is not found.
+        This is because the file metadata may not be updated immediately after the job finishes.
+    """
+    with open(stdout_file_path, encoding="utf-8") as file:
+        lines = file.readlines()
+        if lines:
+            return lines[-1].strip()
+        else:
+            raise ValueError("No result found.")
+
+
+def create_result_json(result_file_path, result: dict) -> None:
+    """Create a json file to store the result of the job.
+    The file name is `{job_name}.json`.
+    """
+    with open(result_file_path, "w") as f:
+        json.dump(result, f)
+
+def _create_and_run(
     job_name: int,
     group: str,
-    timeout_seconds: int,
-    work_dir: Path,
     args: list,
+    base_job_file_path: str,
+    job_file_path: str,
+    lock_file_path: str,
+    stdout_file_path: str,
+    stderr_file_path: str,
+    result_file_path: str,
 ):
-    job_file = JobCreator(
-        base_job_file_path,
-        job_name,
+    create_job_file(base_job_file_path, job_file_path, lock_file_path)
+    run(
         group,
-        timeout_seconds,
-        work_dir,
+        job_file_path,
+        stdout_file_path,
+        stderr_file_path,
+        lock_file_path,
+        args
     )
-    job_file.create()
-    job_file.run(args)
-    y = job_file.collect_result()
+    y = collect_result(stdout_file_path)
     result = {"job_name": job_name, "velue": y}
     result.update({"args": args})
-    job_file.create_result_json(result)
+    create_result_json(result_file_path, result)
     return param_str_eval(y)

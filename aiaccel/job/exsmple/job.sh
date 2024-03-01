@@ -2,6 +2,7 @@
 
 #$-l rt_C.small=1
 #$-cwd
+#$-g gaa50001
 
 source /etc/profile.d/modules.sh
 module load gcc/12.2.0
