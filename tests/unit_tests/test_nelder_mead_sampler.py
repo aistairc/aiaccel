@@ -16,6 +16,24 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         self.vertices = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         self.values = np.array([5.0, 3.0, 7.0])
 
+    def test_put_value(self):
+        before_num_waiting = self.nm._num_waiting
+        self.nm.put_value(0.0)
+        self.assertFalse(self.nm.value_queue.empty())
+        self.assertEqual(before_num_waiting - 1, self.nm._num_waiting)
+
+    def test_waiting_for(self):
+        self.nm._num_waiting = 1
+        # queue is Empty
+        result = yield from self.nm._waiting_for(1)
+        self.assertIsNone(result)
+
+        # queue is not Empty
+        value = 1.0
+        self.nm.value_queue.put(value)
+        result = yield from self.nm._waiting_for(1)
+        self.assertEqual(result, value)
+
     def test_initialize(self):
         for _ in range(len(self.search_space) + 1):
             xi = self.nm.get_vertex()
@@ -50,7 +68,7 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         self.nm.get_vertex()  # reflect
         self.nm.value_queue.put(reflect_value)
 
-        xr2 = self.nm.get_vertex()
+        xr2 = self.nm.get_vertex()  # reflect
         self.assertTrue(np.array_equal(xr2, reflect_xs2))
 
         self.assertTrue(np.array_equal(self.nm.vertices[1], reflect_xs))
@@ -235,7 +253,6 @@ class TestNelderMeadSampler(unittest.TestCase):
             self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
 
             self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-1.0, 0.0])))
-            # self.assertFalse(self.trial.user_attrs["IsReady"])
 
     def test_get_coordinate(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._generator") as mock_iter:
