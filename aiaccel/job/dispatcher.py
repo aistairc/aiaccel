@@ -19,10 +19,20 @@ import json
 
 @dataclass
 class AbciJob:
+    work_dir: InitVar[Path]
     future: Future
-    job_name: str
     args: list
     tag: Any
+
+    def __post_init__(self, work_dir: Path):  # 定数類はABCIJobで管理すると良いかと
+        self.job_name = str(uuid.uuid4())
+        
+        self.job_filename = work_dir / f"{self.job_name}.sh"
+        self.stdout_filename = work_dir / f"{self.job_name}.o"
+        self.stderr_filename = work_dir / f"{self.job_name}.e"
+
+        self.lock_filename = work_dir / f"{self.job_name}.lock"
+        self.result_filename = work_dir / f"{self.job_name}.json"
 
     def is_finished(self) -> bool:
         return self.future.done()
