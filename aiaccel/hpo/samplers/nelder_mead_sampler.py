@@ -46,13 +46,11 @@ class NelderMeadAlgorism:
         self.timeout = timeout
 
         self.generator = iter(self._generator())
-        self._num_waiting = 0
 
     def get_vertex(self) -> np.ndarray:
         return next(self.generator)
 
     def put_value(self, value: float) -> None:
-        self._num_waiting -= 1
         self.value_queue.put(value)
 
     def _waiting_for(self, num_waiting: int) -> Generator[None, None, list[float]]:
