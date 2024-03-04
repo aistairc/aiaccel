@@ -159,20 +159,20 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if "fixed_params" in trial.system_attrs:
             raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
 
-        trial.set_user_attr("Coordinate", self._get_cooridinate())
+        trial.set_user_attr("Coordinate", self._get_coordinate())
         self.running_trial_id.append(trial._trial_id)
 
-    def _get_cooridinate(self) -> np.ndarray:
-        cooridinate = self.nm.get_vertex()
+    def _get_coordinate(self) -> np.ndarray:
+        coordinate = self.nm.get_vertex()
 
-        if cooridinate is None:
+        if coordinate is None:
             raise RuntimeError("No more parallel calls to ask() are possible.")
 
-        if self.is_within_range(cooridinate):
-            return cooridinate
+        if all(low < x < high for x, (low, high) in zip(coordinate, self._search_space.values())):
+            return coordinate
         else:
             self.nm.put_value(np.inf)
-            return self._get_cooridinate()
+            return self._get_coordinate()
 
     def sample_independent(
         self,
