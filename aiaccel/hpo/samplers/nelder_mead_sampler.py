@@ -70,7 +70,6 @@ class NelderMeadAlgorism:
 
         yield from self.vertices
         results = yield from self._waiting_for(len(self.vertices))
-
         self.values = np.array(results)
 
         # main loop
