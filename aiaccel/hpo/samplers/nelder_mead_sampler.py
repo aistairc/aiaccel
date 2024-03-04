@@ -163,16 +163,17 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.running_trial_id.append(trial._trial_id)
 
     def _get_coordinate(self) -> np.ndarray:
-        coordinate = self.nm.get_vertex()
+        while True:
+            coordinate = self.nm.get_vertex()
 
-        if coordinate is None:
-            raise RuntimeError("No more parallel calls to ask() are possible.")
+            if coordinate is None:
+                raise RuntimeError("No more parallel calls to ask() are possible.")
 
-        if all(low < x < high for x, (low, high) in zip(coordinate, self._search_space.values())):
-            return coordinate
-        else:
-            self.nm.put_value(np.inf)
-            return self._get_coordinate()
+            if all(low < x < high for x, (low, high) in zip(coordinate, self._search_space.values())):
+                break
+            else:
+                self.nm.put_value(np.inf)
+        return coordinate
 
     def sample_independent(
         self,
