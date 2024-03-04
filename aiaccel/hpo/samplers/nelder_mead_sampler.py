@@ -69,7 +69,9 @@ class NelderMeadAlgorism:
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
         yield from self.vertices
-        self.values = np.asarray(yield from self._waiting_for(len(self.vertices)))
+        results = yield from self._waiting_for(len(self.vertices))
+
+        self.values = np.array(results)
 
         # main loop
         shrink_requied = False
@@ -81,24 +83,18 @@ class NelderMeadAlgorism:
             # reflect
             yc = self.vertices[:-1].mean(axis=0)
             yield (yr := yc + self.coeff.r * (yc - self.vertices[-1]))
-            results = yield from self._waiting_for(1)
-
-            fr = results[0]
+            fr = yield from self._waiting_for(1)
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
                 yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
-                results = yield from self._waiting_for(1)
-
-                fe = results[0]
+                fe = yield from self._waiting_for(1)
 
                 self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
                 yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
-                results = yield from self._waiting_for(1)
-
-                foc = results[0]
+                foc = yield from self._waiting_for(1)
 
                 if foc <= fr:
                     self.vertices[-1], self.values[-1] = yoc, foc
@@ -106,9 +102,7 @@ class NelderMeadAlgorism:
                     shrink_requied = True
             elif self.values[-1] <= fr:  # inside contract
                 yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
-                results = yield from self._waiting_for(1)
-
-                fic = results[0]
+                fic = yield from self._waiting_for(1)
 
                 if fic < self.values[-1]:
                     self.vertices[-1], self.values[-1] = yic, fic
