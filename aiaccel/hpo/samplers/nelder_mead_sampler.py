@@ -69,9 +69,7 @@ class NelderMeadAlgorism:
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
 
         yield from self.vertices
-        results = yield from self._waiting_for(len(self.vertices))
-
-        self.values = np.array(results)
+        self.values = np.asarray(yield from self._waiting_for(len(self.vertices)))
 
         # main loop
         shrink_requied = False
@@ -121,9 +119,7 @@ class NelderMeadAlgorism:
             if shrink_requied:
                 self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
                 yield from self.vertices[1:]
-                results = yield from self._waiting_for(len(self.vertices[1:]))
-
-                self.values[1:] = results
+                self.values[1:] = yield from self._waiting_for(len(self.vertices[1:]))
 
                 shrink_requied = False
 
