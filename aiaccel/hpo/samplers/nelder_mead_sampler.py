@@ -120,7 +120,7 @@ class NelderMeadAlgorism:
 class NelderMeadSampler(optuna.samplers.BaseSampler):
     def __init__(
         self,
-        search_space: dict[str, list[float]],
+        search_space: dict[str, tuple[float, float]],
         seed: int | None = None,
         coeff: NelderMeadCoefficient | None = None,
     ) -> None:
