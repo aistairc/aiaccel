@@ -28,7 +28,7 @@ class NelderMeadAlgorism:
 
     def __init__(
         self,
-        search_space: dict[str, list[float]],
+        search_space: dict[str, tuple[float, float]],
         coeff: NelderMeadCoefficient | None = None,
         rng: np.random.RandomState | None = None,
         block: bool = True,
