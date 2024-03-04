@@ -63,7 +63,7 @@ class NelderMeadAlgorism:
             except queue.Empty:
                 yield None
 
-        return results
+        return results[0] if len(results) == 1 else results
 
     def _generator(self) -> Generator[np.ndarray, None, None]:
         # initialization
