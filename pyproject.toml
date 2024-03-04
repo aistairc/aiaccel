@@ -78,6 +78,9 @@ ignore = [
     "E203", # exclude colon whitespace error
 ]
 
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
 [tool.mypy]
 python_version="3.8"
 install_types = true

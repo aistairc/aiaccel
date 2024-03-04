@@ -27,7 +27,7 @@ class ABCIEnvironment(ClusterEnvironment):
     @property
     def main_port(self) -> int:
         return self._main_port
-    
+
     @staticmethod
     def detect() -> bool:
         return True
