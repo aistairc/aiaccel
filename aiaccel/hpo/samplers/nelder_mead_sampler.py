@@ -121,9 +121,7 @@ class NelderMeadAlgorism:
             if shrink_requied:
                 self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
                 yield from self.vertices[1:]
-                results = yield from self._waiting_for(len(self.vertices[1:]))
-
-                self.values[1:] = results
+                self.values[1:] = yield from self._waiting_for(len(self.vertices[1:]))
 
                 shrink_requied = False
 
