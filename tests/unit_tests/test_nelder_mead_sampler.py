@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import unittest
 import optuna
 import datetime
@@ -17,21 +19,18 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         self.values = np.array([5.0, 3.0, 7.0])
 
     def test_put_value(self):
-        before_num_waiting = self.nm._num_waiting
         self.nm.put_value(0.0)
         self.assertFalse(self.nm.value_queue.empty())
-        self.assertEqual(before_num_waiting - 1, self.nm._num_waiting)
 
     def test_waiting_for(self):
-        self.nm._num_waiting = 1
         # queue is Empty
-        result = yield from self.nm._waiting_for(1)
+        result = yield from self.nm._waiting_for_float()
         self.assertIsNone(result)
 
         # queue is not Empty
         value = 1.0
         self.nm.value_queue.put(value)
-        result = yield from self.nm._waiting_for(1)
+        result = yield from self.nm._waiting_for_float()
         self.assertEqual(result, value)
 
     def test_initialize(self):
@@ -44,159 +43,109 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         xi = self.nm.get_vertex()
         self.assertIsNone(xi)
 
-    def setup_initialize(self):
+    def compare_results(self, vertices: list[np.ndarray], values: list[float] | None = None):
+        values = values if values is not None else []
+        # initialize
         for _ in range(len(self.search_space) + 1):
             self.nm.get_vertex()
         self.nm.vertices = self.vertices
         for value in self.values:
             self.nm.put_value(value)
 
-    def test_reflect(self):
-        self.setup_initialize()
-        reflect_xs = np.array([-1.0, 0.0])
-        xr = self.nm.get_vertex()
+        # main loop
+        x = self.nm.get_vertex()
+        self.assertTrue(np.array_equal(x, vertices[0]))
+        for vertex, value in zip(vertices[1:], values):
+            self.nm.value_queue.put(value)
+            x = self.nm.get_vertex()
 
-        self.assertTrue(np.array_equal(xr, reflect_xs))
+            self.assertTrue(np.array_equal(x, vertex))
+
+    def test_reflect(self):
+        reflect_xs = np.array([-1.0, 0.0])
+        self.compare_results([reflect_xs])
 
     def test_reflect_to_reflect(self):
-        self.setup_initialize()
         reflect_xs = np.array([-1.0, 0.0])
-        reflect_xs2 = np.array([1.0, 2.0])
         reflect_value = 4.0
+        reflect_xs2 = np.array([1.0, 2.0])
 
-        # self.values[0] <= fr < self.values[-2]
-        self.nm.get_vertex()  # reflect
-        self.nm.value_queue.put(reflect_value)
-
-        xr2 = self.nm.get_vertex()  # reflect
-        self.assertTrue(np.array_equal(xr2, reflect_xs2))
-
-        self.assertTrue(np.array_equal(self.nm.vertices[1], reflect_xs))
-        self.assertTrue(np.array_equal(self.nm.values[1], reflect_value))
+        # reflect -> self.values[0] <= fr < self.values[-2] -> reflect
+        self.compare_results([reflect_xs, reflect_xs2], [reflect_value])
 
     def test_reflect_to_expand_less_than_r(self):
-        self.setup_initialize()
+        reflect_xs = np.array([-1.0, 0.0])
         reflect_value = 2.0
         expand_xs = np.array([-4.0, -3.0])
         expand_value = 1.0
+        reflect_xs2 = np.array([-2.0, -1.0])
 
-        # fr < self.values[0]
-        self.nm.get_vertex()  # reflect
-        self.nm.value_queue.put(reflect_value)
-
-        xe = self.nm.get_vertex()  # expand
-        self.assertTrue(np.array_equal(xe, expand_xs))
-
-        # fe < fr
-        self.nm.value_queue.put(expand_value)
-        self.nm.get_vertex()  # reflect
-        self.assertTrue(np.array_equal(self.nm.vertices[0], expand_xs))
-        self.assertTrue(np.array_equal(self.nm.values[0], expand_value))
+        # reflect -> fr < self.values[0] -> expand -> fe < fr -> reflect
+        self.compare_results([reflect_xs, expand_xs, reflect_xs2], [reflect_value, expand_value])
 
     def test_reflect_to_expand_more_than_r(self):
-        self.setup_initialize()
         reflect_xs = np.array([-1.0, 0.0])
         reflect_value = 2.0
+        expand_xs = np.array([-4.0, -3.0])
         expand_value = 3.0
+        reflect_xs2 = np.array([1.0, 2.0])
 
-        # fr < self.values[0]
-        self.nm.get_vertex()  # reflect
-        self.nm.value_queue.put(reflect_value)
-
-        self.nm.get_vertex()  # expand
-
-        # else (fe > fr)
-        self.nm.value_queue.put(expand_value)
-        self.nm.get_vertex()  # reflect
-        self.assertTrue(np.array_equal(self.nm.vertices[0], reflect_xs))
-        self.assertTrue(np.array_equal(self.nm.values[0], reflect_value))
+        # reflect -> fr < self.values[0] -> expand -> else (fe > fr) -> reflect
+        self.compare_results([reflect_xs, expand_xs, reflect_xs2], [reflect_value, expand_value])
 
     def test_reflect_to_outside_contract(self):
-        self.setup_initialize()
+        reflect_xs = np.array([-1.0, 0.0])
         reflect_value = 6.0
         outside_contract_xs = np.array([0.5, 1.5])
         outside_contract_value = 5.5
+        reflect_xs2 = np.array([3.5, 4.5])
 
-        # self.values[-2] <= fr < self.values[-1]
-        self.nm.get_vertex()  # reflect
-        self.nm.value_queue.put(reflect_value)
-
-        xoc = self.nm.get_vertex()  # outside_contract
-        self.assertTrue(np.array_equal(xoc, outside_contract_xs))
-
-        # foc <= fr
-        self.nm.value_queue.put(outside_contract_value)
-        self.nm.get_vertex()  # reflect
-        self.assertTrue(np.array_equal(self.nm.vertices[2], outside_contract_xs))
-        self.assertTrue(np.array_equal(self.nm.values[2], outside_contract_value))
+        # reflect -> self.values[-2] <= fr < self.values[-1] -> outside_contract -> foc <= fr -> reflect
+        self.compare_results([reflect_xs, outside_contract_xs, reflect_xs2], [reflect_value, outside_contract_value])
 
     def test_reflect_to_outside_contract_shrink(self):
-        self.setup_initialize()
+        reflect_xs = np.array([-1.0, 0.0])
         reflect_value = 6.0
+        outside_contract_xs = np.array([0.5, 1.5])
         outside_contract_value = 7.0
-        shrink_xss = np.array([[2.0, 3.0], [4.0, 5.0]])
-        shrink_values = [1.0, 2.0]
-        reflect_xs2 = [3.0, 4.0]
+        shrink_xs1 = np.array([2.0, 3.0])
+        shrink_value1 = 1.0
+        shrink_xs2 = np.array([4.0, 5.0])
+        shrink_value2 = 2.0
+        reflect_xs2 = np.array([3.0, 4.0])
 
-        # self.values[-2] <= fr < self.values[-1]
-        self.nm.get_vertex()  # reflect
-        self.nm.value_queue.put(reflect_value)
-
-        self.nm.get_vertex()  # outside_contract
-
-        # else (foc > fr)
-        self.nm.value_queue.put(outside_contract_value)
-        for shrink_xs in shrink_xss:
-            xsh = self.nm.get_vertex()  # shrink
-            self.assertTrue(np.array_equal(shrink_xs, xsh))
-
-        shrink_xs = self.nm.get_vertex()
-        self.assertIsNone(shrink_xs)
-
-        for shrink_value in shrink_values:
-            self.nm.value_queue.put(shrink_value)
-
-        xr2 = self.nm.get_vertex()
-        self.assertTrue(np.array_equal(xr2, reflect_xs2))
+        # reflect -> self.values[-2] <= fr < self.values[-1] -> outside_contract -> else (foc > fr) -> shrink -> reflect
+        self.compare_results(
+            [reflect_xs, outside_contract_xs, shrink_xs1, shrink_xs2, reflect_xs2],
+            [reflect_value, outside_contract_value, shrink_value1, shrink_value2]
+            )
 
     def test_reflect_to_inside_contract(self):
-        self.setup_initialize()
+        reflect_xs = np.array([-1.0, 0.0])
         reflect_value = 8.0
         inside_contract_xs = np.array([3.5, 4.5])
         inside_contract_value = 6.0
+        reflect_xs2 = np.array([0.5, 1.5])
 
-        # self.values[-1] <= fr
-        self.nm.get_vertex()  # reflect
-        self.nm.value_queue.put(reflect_value)
-        xic = self.nm.get_vertex()  # inside_contract
-        self.assertTrue(np.array_equal(xic, inside_contract_xs))
-
-        # fic < self.values[-1]
-        self.nm.value_queue.put(inside_contract_value)
-        self.nm.get_vertex()  # reflect
-        self.assertTrue(np.array_equal(self.nm.vertices[2], inside_contract_xs))
-        self.assertTrue(np.array_equal(self.nm.values[2], inside_contract_value))
+        # reflect -> self.values[-1] <= fr -> inside_contract -> fic < self.values[-1] -> reflect
+        self.compare_results([reflect_xs, inside_contract_xs, reflect_xs2], [reflect_value, inside_contract_value])
 
     def test_reflect_to_inside_contract_shrink(self):
-        self.setup_initialize()
-        # else (self.simplex.vertices[-1] <= self.ic)
+        reflect_xs = np.array([-1.0, 0.0])
         reflect_value = 8.0
+        inside_contract_xs = np.array([3.5, 4.5])
         inside_contract_value = 8.5
-        shrink_xss = np.array([[2.0, 3.0], [4.0, 5.0]])
+        shrink_xs1 = np.array([2.0, 3.0])
+        shrink_value1 = 1.0
+        shrink_xs2 = np.array([4.0, 5.0])
+        shrink_value2 = 2.0
+        reflect_xs2 = np.array([3.0, 4.0])
 
-        # self.values[-1] <= fr
-        self.nm.get_vertex()  # reflect
-        self.nm.value_queue.put(reflect_value)
-        self.nm.get_vertex()  # inside_contract
-
-        # else (fic > self.values[-1])
-        self.nm.value_queue.put(inside_contract_value)
-        for shrink_xs in shrink_xss:
-            xsh = self.nm.get_vertex()  # shrink
-            self.assertTrue(np.array_equal(shrink_xs, xsh))
-
-        shrink_xs = self.nm.get_vertex()
-        self.assertIsNone(shrink_xs)
+        # reflect -> self.values[-1] <= fr -> inside_contract -> else (fic > self.values[-1]) -> shrink -> reflect
+        self.compare_results(
+            [reflect_xs, inside_contract_xs, shrink_xs1, shrink_xs2, reflect_xs2],
+            [reflect_value, inside_contract_value, shrink_value1, shrink_value2]
+            )
 
 
 class TestNelderMeadSampler(unittest.TestCase):
@@ -244,7 +193,7 @@ class TestNelderMeadSampler(unittest.TestCase):
         self.assertEqual(self.sampler.sample_relative(self.study, self.trial, self.param_distribution), {})
 
     def test_before_trial(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler._get_cooridinate") as mock_iter:
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler._get_coordinate") as mock_iter:
             def side_effect():
                 return np.array([-1.0, 0.0])
             mock_iter.side_effect = side_effect
@@ -261,7 +210,7 @@ class TestNelderMeadSampler(unittest.TestCase):
             mock_iter.side_effect = side_effect
             self.sampler.nm.generator = iter(self.sampler.nm._generator())
 
-            coordinate = self.sampler._get_cooridinate()
+            coordinate = self.sampler._get_coordinate()
 
             self.assertTrue(np.array_equal(coordinate, np.array([-1.0, 0.0])))
 
@@ -273,7 +222,7 @@ class TestNelderMeadSampler(unittest.TestCase):
             mock_iter.side_effect = side_effect
             self.sampler.nm.generator = iter(self.sampler.nm._generator())
 
-            coordinate = self.sampler._get_cooridinate()
+            coordinate = self.sampler._get_coordinate()
 
             self.assertTrue(np.array_equal(coordinate, np.array([-2.0, 0.0])))
 
