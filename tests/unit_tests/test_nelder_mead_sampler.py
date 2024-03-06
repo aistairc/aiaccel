@@ -194,9 +194,7 @@ class TestNelderMeadSampler(unittest.TestCase):
 
     def test_before_trial(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler._get_coordinate") as mock_iter:
-            def side_effect():
-                return np.array([-1.0, 0.0])
-            mock_iter.side_effect = side_effect
+            mock_iter.side_effect = [np.array([-1.0, 0.0])]
 
             self.sampler.before_trial(self.study, self.trial)
             self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
@@ -204,23 +202,16 @@ class TestNelderMeadSampler(unittest.TestCase):
             self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-1.0, 0.0])))
 
     def test_get_coordinate(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._generator") as mock_iter:
-            def side_effect():
-                yield np.array([-1.0, 0.0])
-            mock_iter.side_effect = side_effect
-            self.sampler.nm.generator = iter(self.sampler.nm._generator())
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+            mock_iter.side_effect = [np.array([-1.0, 0.0])]
 
             coordinate = self.sampler._get_coordinate()
 
             self.assertTrue(np.array_equal(coordinate, np.array([-1.0, 0.0])))
 
     def test_get_coordinate_out_of_range(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._generator") as mock_iter:
-            def side_effect():
-                yield np.array([-6.0, 0.0])
-                yield np.array([-2.0, 0.0])
-            mock_iter.side_effect = side_effect
-            self.sampler.nm.generator = iter(self.sampler.nm._generator())
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+            mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([-2.0, 0.0])]
 
             coordinate = self.sampler._get_coordinate()
 
