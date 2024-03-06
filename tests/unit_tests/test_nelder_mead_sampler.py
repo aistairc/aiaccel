@@ -27,11 +27,21 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         result = yield from self.nm._waiting_for_float()
         self.assertIsNone(result)
 
+        result = yield from self.nm._waiting_for_list(2)
+        self.assertIsNone(result)
+
         # queue is not Empty
         value = 1.0
         self.nm.value_queue.put(value)
         result = yield from self.nm._waiting_for_float()
         self.assertEqual(result, value)
+
+        value1 = 1.0
+        self.nm.value_queue.put(value1)
+        value2 = 2.0
+        self.nm.value_queue.put(value2)
+        result = yield from self.nm._waiting_for_list(2)
+        self.assertEqual(result, [value1, value2])
 
     def test_initialize(self):
         for _ in range(len(self.search_space) + 1):
