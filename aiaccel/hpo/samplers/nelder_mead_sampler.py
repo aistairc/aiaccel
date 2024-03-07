@@ -139,10 +139,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             )
 
         self.running_trial_id: list[int] = []
-        self.stack: dict[int, float] = {}
-
-    def is_within_range(self, coordinates: np.ndarray) -> bool:
-        return all(low < x < high for x, (low, high) in zip(coordinates, self._search_space.values()))
+        self.result_stack: dict[int, float] = {}
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
@@ -167,16 +164,16 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def _get_params(self) -> np.ndarray:
         while True:
-            coordinate = self.nm.get_vertex()
+            params = self.nm.get_vertex()
 
-            if coordinate is None:
+            if params is None:
                 raise RuntimeError("No more parallel calls to ask() are possible.")
 
-            if all(low < x < high for x, (low, high) in zip(coordinate, self._search_space.values())):
+            if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
                 break
             else:
                 self.nm.put_value(np.inf)
-        return coordinate
+        return params
 
     def sample_independent(
         self,
