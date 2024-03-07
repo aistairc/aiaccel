@@ -181,21 +181,6 @@ class TestNelderMeadSampler(unittest.TestCase):
             trial_id=self.trial_id,
         )
 
-    def test_is_within_range(self):
-        # True
-        coordinates = np.array([3.0, 4.0])
-        self.assertTrue(self.sampler.is_within_range(coordinates))
-
-        # False
-        coordinates = np.array([-6.0, 4.0])
-        self.assertFalse(self.sampler.is_within_range(coordinates))
-        coordinates = np.array([6.0, 4.0])
-        self.assertFalse(self.sampler.is_within_range(coordinates))
-        coordinates = np.array([3.0, -6.0])
-        self.assertFalse(self.sampler.is_within_range(coordinates))
-        coordinates = np.array([3.0, 6.0])
-        self.assertFalse(self.sampler.is_within_range(coordinates))
-
     def test_infer_relative_search_space(self):
         self.assertEqual(self.sampler.infer_relative_search_space(self.study, self.trial), {})
 
@@ -221,7 +206,7 @@ class TestNelderMeadSampler(unittest.TestCase):
 
     def test_get_params_out_of_range(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
-            mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([-2.0, 0.0])]
+            mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([0.0, -6.0]), np.array([-2.0, 0.0])]
 
             coordinate = self.sampler._get_params()
 
