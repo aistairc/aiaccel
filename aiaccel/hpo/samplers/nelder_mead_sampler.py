@@ -162,10 +162,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if "fixed_params" in trial.system_attrs:
             raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
 
-        trial.set_user_attr("Coordinate", self._get_coordinate())
+        trial.set_user_attr("params", self._get_params())
         self.running_trial_id.append(trial._trial_id)
 
-    def _get_coordinate(self) -> np.ndarray:
+    def _get_params(self) -> np.ndarray:
         while True:
             coordinate = self.nm.get_vertex()
 
@@ -185,13 +185,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: BaseDistribution,
     ) -> Any:
-        if trial.user_attrs["Coordinate"] is None:
-            raise ValueError('trial.user_attrs["Coordinate"] is None')
+        if trial.user_attrs["params"] is None:
+            raise ValueError('trial.user_attrs["params"] is None')
         if param_name not in self._search_space:
             raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
 
         param_index = list(self._search_space.keys()).index(param_name)
-        param_value = trial.user_attrs["Coordinate"][param_index]
+        param_value = trial.user_attrs["params"][param_index]
 
         contains = param_distribution._contains(param_distribution.to_internal_repr(param_value))
         if not contains:

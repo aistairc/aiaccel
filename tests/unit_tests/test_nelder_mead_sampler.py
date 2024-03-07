@@ -203,33 +203,33 @@ class TestNelderMeadSampler(unittest.TestCase):
         self.assertEqual(self.sampler.sample_relative(self.study, self.trial, self.param_distribution), {})
 
     def test_before_trial(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler._get_coordinate") as mock_iter:
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler._get_params") as mock_iter:
             mock_iter.side_effect = [np.array([-1.0, 0.0])]
 
             self.sampler.before_trial(self.study, self.trial)
             self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
 
-            self.assertTrue(np.array_equal(self.trial.user_attrs["Coordinate"], np.array([-1.0, 0.0])))
+            self.assertTrue(np.array_equal(self.trial.user_attrs["params"], np.array([-1.0, 0.0])))
 
-    def test_get_coordinate(self):
+    def test_get_params(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
             mock_iter.side_effect = [np.array([-1.0, 0.0])]
 
-            coordinate = self.sampler._get_coordinate()
+            coordinate = self.sampler._get_params()
 
             self.assertTrue(np.array_equal(coordinate, np.array([-1.0, 0.0])))
 
-    def test_get_coordinate_out_of_range(self):
+    def test_get_params_out_of_range(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
             mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([-2.0, 0.0])]
 
-            coordinate = self.sampler._get_coordinate()
+            coordinate = self.sampler._get_params()
 
             self.assertTrue(np.array_equal(coordinate, np.array([-2.0, 0.0])))
 
     def test_sample_independent(self):
         xs = np.array([-1.0, 0.0])
-        self.trial.set_user_attr("Coordinate", xs)
+        self.trial.set_user_attr("params", xs)
 
         value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
         self.assertEqual(value, xs[0])
@@ -239,7 +239,7 @@ class TestNelderMeadSampler(unittest.TestCase):
 
     def test_after_trial(self):
         put_value = 4.0
-        self.trial.set_user_attr("Coordinate", np.array([-1.0, 0.0]))
+        self.trial.set_user_attr("params", np.array([-1.0, 0.0]))
         self.sampler.running_trial_id.append(self.trial._trial_id)
 
         self.sampler.after_trial(self.study, self.trial, self.state, [put_value])
