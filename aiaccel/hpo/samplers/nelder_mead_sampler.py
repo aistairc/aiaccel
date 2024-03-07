@@ -71,10 +71,10 @@ class NelderMeadAlgorism:
         # initialization
         lows, highs = zip(*self._search_space.values())
         self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
+        self.values = np.empty(self.dimension + 1)
 
         yield from self.vertices
-        results = yield from self._waiting_for_list(len(self.vertices))
-        self.values = np.array(results)
+        self.values[:] = yield from self._waiting_for_list(len(self.vertices))
 
         # main loop
         shrink_requied = False
