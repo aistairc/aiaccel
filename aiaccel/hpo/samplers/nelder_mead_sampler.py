@@ -205,10 +205,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         values: Sequence[float] | None,
     ) -> None:
         if isinstance(values, list):
-            self.stack[trial._trial_id] = values[0]
+            self.result_stack[trial._trial_id] = values[0]
 
-            if len(self.running_trial_id) == len(self.stack):
+            if len(self.running_trial_id) == len(self.result_stack):
                 for trial_id in self.running_trial_id:
-                    self.nm.put_value(self.stack[trial_id])
+                    self.nm.put_value(self.result_stack[trial_id])
                 self.running_trial_id = []
-                self.stack = {}
+                self.result_stack = {}
