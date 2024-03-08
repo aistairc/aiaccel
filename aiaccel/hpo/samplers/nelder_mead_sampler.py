@@ -36,15 +36,11 @@ class NelderMeadAlgorism:
     ) -> None:
         self._search_space = search_space
         self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
-
-        self.dimension = len(search_space)
-
-        self.value_queue: queue.Queue[float] = queue.Queue()
         self._rng = rng if rng is not None else np.random.RandomState()
-
         self.block = block
         self.timeout = timeout
 
+        self.value_queue: queue.Queue[float] = queue.Queue()
         self.generator = iter(self._generator())
 
     def get_vertex(self) -> np.ndarray:
@@ -69,9 +65,10 @@ class NelderMeadAlgorism:
 
     def _generator(self) -> Generator[np.ndarray, None, None]:
         # initialization
+        dimension = len(self._search_space)
         lows, highs = zip(*self._search_space.values())
-        self.vertices = self._rng.uniform(lows, highs, (self.dimension + 1, self.dimension))
-        self.values = np.empty(self.dimension + 1)
+        self.vertices = self._rng.uniform(lows, highs, (dimension + 1, dimension))
+        self.values = np.empty(dimension + 1)
 
         yield from self.vertices
         self.values[:] = yield from self._waiting_for_list(len(self.vertices))
