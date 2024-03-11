@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
+from typing import Any
 
 
-def xmltodict(xml_str: str) -> dict:
-    def _element_to_dict(element: ET.Element) -> dict:
-        result = {}
+def xmltodict(xml_str: str) -> dict[str, Any]:
+    def _element_to_dict(element: ET.Element) -> dict[str, Any]:
+        result: dict[str, Any] = {}
         for child in element:
             if len(child) == 0:
                 result[child.tag] = child.text.strip() if child.text else None
