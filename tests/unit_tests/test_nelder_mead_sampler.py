@@ -206,7 +206,7 @@ class TestNelderMeadSampler(unittest.TestCase):
 
     def test_get_params_out_of_range(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
-            mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([0.0, -6.0]), np.array([-2.0, 0.0])]
+            mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([0.0, 6.0]), np.array([-2.0, 0.0])]
 
             coordinate = self.sampler._get_params()
 
