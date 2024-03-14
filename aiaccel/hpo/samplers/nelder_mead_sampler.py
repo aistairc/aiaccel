@@ -12,6 +12,8 @@ from optuna.distributions import BaseDistribution
 from optuna.study import Study
 from optuna.trial import FrozenTrial, TrialState
 
+import threading
+
 
 @dataclass
 class NelderMeadCoefficient:
@@ -42,8 +44,16 @@ class NelderMeadAlgorism:
 
         self.value_queue: queue.Queue[float] = queue.Queue()
         self.generator = iter(self._generator())
+        self.enqueue_vertex: np.ndarray | None = None
 
-    def get_vertex(self) -> np.ndarray:
+    def get_vertex(self, enqueue_params: dict[str, float] | None = None) -> np.ndarray:
+        if enqueue_params is not None:
+            self.enqueue_vertex = np.array([
+                enqueue_params[param_name] if param_name in enqueue_params else self._rng.uniform(*param_distrbution)
+                for param_name, param_distrbution in self._search_space.items()
+                ])
+        else:
+            self.enqueue_vertex = None
         return next(self.generator)
 
     def put_value(self, value: float) -> None:
@@ -63,14 +73,27 @@ class NelderMeadAlgorism:
 
         return results
 
+    def _yield_vertex(self, vertex: np.ndarray):
+        if self.enqueue_vertex is None:
+            yield vertex
+        else:
+            temp_vertex = self.enqueue_vertex
+            self.enqueue_vertex = None
+            yield temp_vertex
+
     def _generator(self) -> Generator[np.ndarray, None, None]:
         # initialization
         dimension = len(self._search_space)
         lows, highs = zip(*self._search_space.values())
-        self.vertices = self._rng.uniform(lows, highs, (dimension + 1, dimension))
+        self.vertices = np.empty((dimension + 1, dimension))
         self.values = np.empty(dimension + 1)
 
-        yield from self.vertices
+        for i in range(dimension + 1):
+            if self.enqueue_vertex is None:
+                yield (yield_vertex := self._rng.uniform(lows, highs, dimension))
+            else:
+                yield (yield_vertex := self.enqueue_vertex)
+            self.vertices[i] = yield_vertex
         self.values[:] = yield from self._waiting_for_list(len(self.vertices))
 
         # main loop
@@ -131,12 +154,14 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             search_space=self._search_space,
             coeff=coeff,
             rng=np.random.RandomState(seed),
-            block=False,
+            # block=False,
+            block=True,
             timeout=None
             )
 
         self.running_trial_id: list[int] = []
         self.result_stack: dict[int, float] = {}
+        self.lock = threading.Lock()
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
@@ -154,22 +179,27 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         # TODO: support study.enqueue_trial()
         # TODO: system_attrs is deprecated.
         if "fixed_params" in trial.system_attrs:
-            raise RuntimeError("NelderMeadSampler does not support enqueue_trial.")
+            enqueue_params = trial.system_attrs["fixed_params"]
+        else:
+            enqueue_params = None
 
-        trial.set_user_attr("params", self._get_params())
+        trial.set_user_attr("params", self._get_params(enqueue_params))
         self.running_trial_id.append(trial._trial_id)
 
-    def _get_params(self) -> np.ndarray:
-        while True:
-            params = self.nm.get_vertex()
+    def _get_params(self, enqueue_params) -> np.ndarray:
+        with self.lock:
+            params = self.nm.get_vertex(enqueue_params)
 
-            if params is None:
-                raise RuntimeError("No more parallel calls to ask() are possible.")
+            while True:
+                if params is None:
+                    raise RuntimeError("No more parallel calls to ask() are possible.")
 
-            if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
-                break
-            else:
-                self.nm.put_value(np.inf)
+                if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
+                    break
+                else:
+                    self.nm.put_value(np.inf)
+                    params = self.nm.get_vertex()
+
         return params
 
     def sample_independent(
