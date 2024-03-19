@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import queue
+import threading
 import warnings
 from collections.abc import Generator
 from dataclasses import dataclass
@@ -11,8 +12,6 @@ import optuna
 from optuna.distributions import BaseDistribution
 from optuna.study import Study
 from optuna.trial import FrozenTrial, TrialState
-
-import threading
 
 
 @dataclass
@@ -73,7 +72,7 @@ class NelderMeadAlgorism:
 
         return results
 
-    def _yield_vertex(self, vertex: np.ndarray):
+    def _yield_vertex(self, vertex: np.ndarray) -> Generator[np.ndarray, None, None]:
         if self.enqueue_vertex is None:
             yield vertex
         else:
@@ -81,8 +80,7 @@ class NelderMeadAlgorism:
             self.enqueue_vertex = None
             yield temp_vertex
 
-    def _generator(self) -> Generator[np.ndarray, None, None]:
-        # initialization
+    def _initialization(self) -> Generator[np.ndarray, None, None]:
         dimension = len(self._search_space)
         lows, highs = zip(*self._search_space.values())
         self.vertices = np.empty((dimension + 1, dimension))
@@ -95,6 +93,10 @@ class NelderMeadAlgorism:
                 yield (yield_vertex := self.enqueue_vertex)
             self.vertices[i] = yield_vertex
         self.values[:] = yield from self._waiting_for_list(len(self.vertices))
+
+    def _generator(self) -> Generator[np.ndarray, None, None]:
+        # initialization
+        yield from self._initialization()
 
         # main loop
         shrink_requied = False
@@ -147,6 +149,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         search_space: dict[str, tuple[float, float]],
         seed: int | None = None,
         coeff: NelderMeadCoefficient | None = None,
+        parallel_enabled: bool = False,
     ) -> None:
         self._search_space = search_space
 
@@ -154,8 +157,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             search_space=self._search_space,
             coeff=coeff,
             rng=np.random.RandomState(seed),
-            # block=False,
-            block=True,
+            block=parallel_enabled,
             timeout=None
             )
 
@@ -178,15 +180,12 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         # TODO: support parallel execution
         # TODO: support study.enqueue_trial()
         # TODO: system_attrs is deprecated.
-        if "fixed_params" in trial.system_attrs:
-            enqueue_params = trial.system_attrs["fixed_params"]
-        else:
-            enqueue_params = None
+        enqueue_params = trial.system_attrs["fixed_params"] if "fixed_params" in trial.system_attrs else None
 
         trial.set_user_attr("params", self._get_params(enqueue_params))
         self.running_trial_id.append(trial._trial_id)
 
-    def _get_params(self, enqueue_params) -> np.ndarray:
+    def _get_params(self, enqueue_params: dict[str, float] | None) -> np.ndarray:
         with self.lock:
             params = self.nm.get_vertex(enqueue_params)
 
