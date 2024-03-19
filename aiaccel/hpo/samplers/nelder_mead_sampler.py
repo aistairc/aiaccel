@@ -44,16 +44,15 @@ class NelderMeadAlgorism:
         self.value_queue: queue.Queue[float] = queue.Queue()
         self.generator = iter(self._generator())
         self.enqueue_vertex: np.ndarray | None = None
+        self.lock = threading.Lock()
 
     def get_vertex(self, enqueue_params: dict[str, float] | None = None) -> np.ndarray:
-        if enqueue_params is not None:
+        with self.lock:
             self.enqueue_vertex = np.array([
                 enqueue_params[param_name] if param_name in enqueue_params else self._rng.uniform(*param_distrbution)
                 for param_name, param_distrbution in self._search_space.items()
-                ])
-        else:
-            self.enqueue_vertex = None
-        return next(self.generator)
+                ]) if enqueue_params is not None else None
+            return next(self.generator)
 
     def put_value(self, value: float) -> None:
         self.value_queue.put(value)
@@ -163,7 +162,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         self.running_trial_id: list[int] = []
         self.result_stack: dict[int, float] = {}
-        self.lock = threading.Lock()
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
@@ -186,18 +184,17 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.running_trial_id.append(trial._trial_id)
 
     def _get_params(self, enqueue_params: dict[str, float] | None) -> np.ndarray:
-        with self.lock:
-            params = self.nm.get_vertex(enqueue_params)
+        params = self.nm.get_vertex(enqueue_params)
 
-            while True:
-                if params is None:
-                    raise RuntimeError("No more parallel calls to ask() are possible.")
+        while True:
+            if params is None:
+                raise RuntimeError("No more parallel calls to ask() are possible.")
 
-                if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
-                    break
-                else:
-                    self.nm.put_value(np.inf)
-                    params = self.nm.get_vertex()
+            if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
+                break
+            else:
+                self.nm.put_value(np.inf)
+                params = self.nm.get_vertex()
 
         return params
 
