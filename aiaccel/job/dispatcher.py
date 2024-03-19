@@ -66,16 +66,49 @@ class AbciJob:
         self._update_output_files_path()
         self._wait_for_job_submit_confirm()
 
+    def get_job_status(self, job_number: int | None) -> str | None:
+        """
+        Get the status of the job.
+        """
+        if job_number is None:
+            return None
+        cmd = "qstat -xml"
+        data = subprocess.run(cmd.split(), capture_output=True, text=True)
+        qstat_dict = xmltodict(data.stdout)
+        for queue_info in qstat_dict["queue_info"]:
+            for job_list in queue_info["job_list"]:
+                if int(job_list["JB_job_number"]) == job_number:
+                    return job_list["state"]
+        return None
+
     def update_state(self) -> None:
         if self._job_number is None:
             self._update_job_number()
-        self._state = get_job_status(self._job_number)
+        self._state = self.get_job_status(self._job_number)
 
     def get_state(self) -> str | None:
         return self._state
 
+    @retry(_MAX_NUM=60, _DELAY=1.0)
+    def collect_result(self) -> str:
+        """Collect the result of the job.
+
+        return:
+            The result of the job (objective value).
+
+        Note:
+            Retry reading the file if it is not found.
+            This is because the file metadata may not be updated immediately after the job finishes.
+        """
+        with open(str(self.stdout_file_path), encoding="utf-8") as file:
+            lines = file.readlines()
+            if lines:
+                return lines[-1].strip()
+            else:
+                raise ValueError("No result found.")
+
     def get_result(self) -> Any:
-        y = collect_result(self.stdout_file_path)
+        y = self.collect_result()
         try:
             y = ast.literal_eval(y)
         except ValueError:
@@ -83,9 +116,25 @@ class AbciJob:
         self.result = y
         return self.result
 
+    def get_job_numbers(self, job_name: str) -> list[int]:
+        """
+        Get the job numbers of the same job name.
+        """
+        cmd = "qstat -xml"
+        data = subprocess.run(cmd.split(), capture_output=True, text=True)
+        qstat_dict = xmltodict(data.stdout)
+        if qstat_dict["queue_info"] == "":
+            return []
+        job_numbers = []
+        for queue_info in qstat_dict["queue_info"]:
+            for job_list in queue_info["job_list"]:
+                if job_list["JB_name"] == job_name:
+                    job_numbers.append(int(job_list["JB_job_number"]))
+        return job_numbers
+
     @retry(_MAX_NUM=60, _DELAY=3.0)
     def _update_job_number(self) -> None:
-        jn = get_job_numbers(self.job_name)
+        jn = self.get_job_numbers(self.job_name)
         for job_number in jn:
             if job_number not in self._seen_job_numbers:
                 self._job_number = job_number
@@ -152,7 +201,7 @@ class AbciJobExecutor:
         self,
         job_file_path: str,
         n_jobs: int = 1,
-        work_dir: str = "./work",
+        work_dir: Path | str = "./work",
     ):
         self.job_file_path = Path(job_file_path).resolve()
         self._n_jobs: int = n_jobs
@@ -169,7 +218,8 @@ class AbciJobExecutor:
     def submit(
         self, args: list[str], tag: Any | None = None, job_name: str = ""
     ) -> AbciJob:
-        cmd = create_run_command(self.job_file_path, args)
+        args_str = " ".join(args)
+        cmd = f"bash {self.job_file_path} {args_str}"
         # 生成コマンド例:
         #  bash [job_file_path] --x0 ... --x1 ...
 
@@ -194,13 +244,9 @@ class AbciJobExecutor:
     ) -> AbciJob:
         stdout_file_path = self.work_dir / f"{job_name}.o"
         stderr_file_path = self.work_dir / f"{job_name}.e"
-        qsub_cmd = create_qsub_command(
-            group,
-            job_name,
-            stdout_file_path,
-            stderr_file_path,
-            self.job_file_path,
-            args,
+        args_str = " ".join(args)
+        qsub_cmd = (
+            f"qsub -g {group} -N {job_name} -o {stdout_file_path} -e {stderr_file_path} {self.job_file_path} {args_str}"
         )
         # 生成コマンド例:
         #  qsub -g [group] -N [job_name] -o [stdout_file_path] -e [stderr_file_path] [job_file_path] [--x0 ... --x1 ...]
@@ -215,7 +261,6 @@ class AbciJobExecutor:
         #    ```
 
         # のように記述する.
-
         return self._execute(
             qsub_cmd, job_name, args, tag, stdout_file_path, stderr_file_path
         )
@@ -292,89 +337,3 @@ class AbciJobExecutor:
         return self._submit_job_count
 
     ...
-
-
-def create_run_command(job_file_path: Path | str, args: list[str]) -> str:
-    args_str = " ".join(args)
-    return f"bash {job_file_path} {args_str}"
-
-
-def create_qsub_command(
-    group: str,
-    job_name: str,
-    stdout_file_path: Path | str,
-    stderr_file_path: Path | str,
-    job_file_path: Path | str,
-    args: list[Any],
-) -> str:
-    args_str = " ".join(args)
-    return f"qsub -g {group} -N {job_name} -o {stdout_file_path} -e {stderr_file_path} {job_file_path} {args_str}"
-
-
-@retry(_MAX_NUM=60, _DELAY=1.0)
-def collect_result(stdout_file_path: str) -> str:
-    """Collect the result of the job.
-
-    return:
-        The result of the job (objective value).
-
-    Note:
-        Retry reading the file if it is not found.
-        This is because the file metadata may not be updated immediately after the job finishes.
-    """
-    with open(stdout_file_path, encoding="utf-8") as file:
-        lines = file.readlines()
-        if lines:
-            return lines[-1].strip()
-        else:
-            raise ValueError("No result found.")
-
-
-def get_job_number(job_name: str) -> int | None:
-    """
-    Get the job number of the job.
-    If more than one job is found, the first job number is returned.
-    """
-    cmd = "qstat -xml"
-    data = subprocess.run(cmd.split(), capture_output=True, text=True)
-    qstat_dict = xmltodict(data.stdout)
-    if qstat_dict["queue_info"] == "":
-        return None
-    for queue_info in qstat_dict["queue_info"]:
-        for job_list in queue_info["job_list"]:
-            if job_list["JB_name"] == job_name:
-                return int(job_list["JB_job_number"])
-    return None
-
-
-def get_job_numbers(job_name: str) -> list[int]:
-    """
-    Get the job numbers of the same job name.
-    """
-    cmd = "qstat -xml"
-    data = subprocess.run(cmd.split(), capture_output=True, text=True)
-    qstat_dict = xmltodict(data.stdout)
-    if qstat_dict["queue_info"] == "":
-        return []
-    job_numbers = []
-    for queue_info in qstat_dict["queue_info"]:
-        for job_list in queue_info["job_list"]:
-            if job_list["JB_name"] == job_name:
-                job_numbers.append(int(job_list["JB_job_number"]))
-    return job_numbers
-
-
-def get_job_status(job_number: int | None) -> str | None:
-    """
-    Get the status of the job.
-    """
-    if job_number is None:
-        return None
-    cmd = "qstat -xml"
-    data = subprocess.run(cmd.split(), capture_output=True, text=True)
-    qstat_dict = xmltodict(data.stdout)
-    for queue_info in qstat_dict["queue_info"]:
-        for job_list in queue_info["job_list"]:
-            if int(job_list["JB_job_number"]) == job_number:
-                return job_list["state"]
-    return None
