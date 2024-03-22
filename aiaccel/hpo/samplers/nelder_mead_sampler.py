@@ -43,25 +43,49 @@ class NelderMeadAlgorism:
 
         self.value_queue: queue.Queue[float] = queue.Queue()
         self.generator = iter(self._generator())
-        self.enqueue_vertex: np.ndarray | None = None
         self.lock = threading.Lock()
 
-    def get_vertex(self, enqueue_params: dict[str, float] | None = None) -> np.ndarray:
+        self.enqueue_vertex_queue: queue.Queue[np.ndarray] = queue.Queue()
+        self.enqueue_value_queue: queue.Queue[float] = queue.Queue()
+        self.num_enqueued = 0
+
+    def put_enqueue_vertex(self, enqueue_params: dict[str, float]) -> np.ndarray:
+        vertex = np.array([
+            enqueue_params[param_name] if param_name in enqueue_params
+            else self._rng.uniform(*param_distrbution)
+            for param_name, param_distrbution in self._search_space.items()
+        ])
+        self.enqueue_vertex_queue.put(vertex)
+        self.num_enqueued += 1
+        return vertex
+
+    def get_vertex(self) -> np.ndarray:
         with self.lock:
-            self.enqueue_vertex = np.array([
-                enqueue_params[param_name] if param_name in enqueue_params else self._rng.uniform(*param_distrbution)
-                for param_name, param_distrbution in self._search_space.items()
-                ]) if enqueue_params is not None else None
             return next(self.generator)
 
     def put_value(self, value: float) -> None:
         self.value_queue.put(value)
 
-    def _waiting_for_float(self) -> Generator[None, None, float]:
-        result = yield from self._waiting_for_list(1)
-        return result[0]
+    def put_enqueue_value(self, value: float) -> None:
+        self.enqueue_value_queue.put(value)
 
-    def _waiting_for_list(self, num_waiting: int) -> Generator[None, None, list[float]]:
+    def _waiting_for_float(self) -> Generator[None, None, tuple[float, list[float]]]:
+        result, enqueue_values = yield from self._waiting_for_list(1)
+        return result[0], enqueue_values
+
+    def _waiting_for_enqueue_list(self, num_waiting: int | None = None) -> Generator[None, None, list[float]]:
+        num_waiting = num_waiting if num_waiting is not None else self.num_enqueued
+        results: list[float] = []
+        while len(results) < num_waiting:
+            try:
+                results.append(self.enqueue_value_queue.get(self.block, self.timeout))
+            except queue.Empty:
+                yield None
+
+        self.num_enqueued -= num_waiting
+        return results
+
+    def _waiting_for_list(self, num_waiting: int) -> Generator[None, None, tuple[list[float], list[float]]]:
         results: list[float] = []
         while len(results) < num_waiting:
             try:
@@ -69,29 +93,96 @@ class NelderMeadAlgorism:
             except queue.Empty:
                 yield None
 
-        return results
+        enqueue_values = yield from self._waiting_for_enqueue_list()
 
-    def _yield_vertex(self, vertex: np.ndarray) -> Generator[np.ndarray, None, None]:
-        if self.enqueue_vertex is None:
-            yield vertex
-        else:
-            temp_vertex = self.enqueue_vertex
-            self.enqueue_vertex = None
-            yield temp_vertex
+        return results, enqueue_values
 
     def _initialization(self) -> Generator[np.ndarray, None, None]:
         dimension = len(self._search_space)
         lows, highs = zip(*self._search_space.values())
-        self.vertices = np.empty((dimension + 1, dimension))
-        self.values = np.empty(dimension + 1)
 
-        for i in range(dimension + 1):
-            if self.enqueue_vertex is None:
-                yield (yield_vertex := self._rng.uniform(lows, highs, dimension))
-            else:
-                yield (yield_vertex := self.enqueue_vertex)
-            self.vertices[i] = yield_vertex
-        self.values[:] = yield from self._waiting_for_list(len(self.vertices))
+        i = 0
+        # random
+        vertices_of_random = []
+        while i + self.num_enqueued < dimension + 1:
+            yield (yield_vertex := self._rng.uniform(lows, highs, dimension))
+            vertices_of_random.append(yield_vertex)
+            i += 1
+
+        values_of_random, _ = yield from self._waiting_for_list(i)
+
+        # enqueue
+        enqueue_vertices = []
+        while not self.enqueue_vertex_queue.empty():
+            enqueue_vertices.append(self.enqueue_vertex_queue.get(block=False))
+
+        enqueue_values = yield from self._waiting_for_enqueue_list()
+
+        self.vertices = np.array(vertices_of_random + enqueue_vertices)
+        self.values = np.array(values_of_random + enqueue_values)
+
+        if len(self.vertices) > dimension + 1:
+            order = np.argsort(self.values)
+            self.vertices, self.values = self.vertices[order][:dimension + 1], self.values[order][:dimension + 1]
+
+    def _recontract_simplex(
+            self,
+            vertices: list[np.ndarray],
+            values: list[float],
+            enqueue_values: list[float]
+            ) -> bool:
+        enqueue_vertices = []
+        while not self.enqueue_vertex_queue.empty():
+            enqueue_vertices.append(self.enqueue_vertex_queue.get(block=False))
+
+        if len([i for i in enqueue_values if i < min(values + [self.values[-1]])]) > 0:
+            # recontract_simplex
+            dimension = len(self._search_space)
+            new_vertices = np.array(list(self.vertices) + vertices + enqueue_vertices)
+            new_values = np.array(list(self.values) + values + enqueue_values)
+
+            order = np.argsort(new_values)
+            new_vertices, new_values = new_vertices[order][:dimension + 1], new_values[order][:dimension + 1]
+
+            return True
+        else:
+            return False
+
+    def _expand(self, yr: np.ndarray, fr: float, ye: np.ndarray, fe: float) -> tuple[list[np.ndarray], list[float]]:
+        self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
+        return ([yr], [fr]) if fe < fr else ([ye], [fe])
+
+    def _outside_contract(self,
+                          yr: np.ndarray,
+                          fr: float,
+                          yoc: np.ndarray,
+                          foc: float
+                          ) -> tuple[list[np.ndarray], list[float], bool]:
+        if foc <= fr:
+            self.vertices[-1], self.values[-1] = yoc, foc
+            shrink_requied = False
+            past_vertices, past_values = [yr], [fr]
+        else:
+            shrink_requied = True
+            past_vertices, past_values = [yr, yoc], [fr, foc]
+
+        return past_vertices, past_values, shrink_requied
+
+    def _inside_contract(self,
+                         yr: np.ndarray,
+                         fr: float,
+                         yic: np.ndarray,
+                         fic: float
+                         ) -> tuple[list[np.ndarray], list[float], bool]:
+        if fic < self.values[-1]:
+            self.vertices[-1], self.values[-1] = yic, fic
+            shrink_requied = False
+            past_vertices, past_values = [yr], [fr]
+        else:
+            shrink_requied = True
+            past_vertices, past_values = [yr, yic], [fr, fic]
+
+        return past_vertices, past_values, shrink_requied
 
     def _generator(self) -> Generator[np.ndarray, None, None]:
         # initialization
@@ -107,37 +198,42 @@ class NelderMeadAlgorism:
             # reflect
             yc = self.vertices[:-1].mean(axis=0)
             yield (yr := yc + self.coeff.r * (yc - self.vertices[-1]))
-            fr = yield from self._waiting_for_float()
+
+            fr, enqueue_values = yield from self._waiting_for_float()
+            past_vertices, past_values = [yr], [fr]
+
+            if self._recontract_simplex(past_vertices, past_values, enqueue_values):
+                continue
 
             if self.values[0] <= fr < self.values[-2]:
                 self.vertices[-1], self.values[-1] = yr, fr
             elif fr < self.values[0]:  # expand
                 yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
-                fe = yield from self._waiting_for_float()
 
-                self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
+                fe, enqueue_values = yield from self._waiting_for_float()
+                past_vertices, past_values = self._expand(yr, fr, ye, fe)
+
             elif self.values[-2] <= fr < self.values[-1]:  # outside contract
                 yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
-                foc = yield from self._waiting_for_float()
 
-                if foc <= fr:
-                    self.vertices[-1], self.values[-1] = yoc, foc
-                else:
-                    shrink_requied = True
+                foc, enqueue_values = yield from self._waiting_for_float()
+                past_vertices, past_values, shrink_requied = self._outside_contract(yr, fr, yoc, foc)
+
             elif self.values[-1] <= fr:  # inside contract
                 yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
-                fic = yield from self._waiting_for_float()
 
-                if fic < self.values[-1]:
-                    self.vertices[-1], self.values[-1] = yic, fic
-                else:
-                    shrink_requied = True
+                fic, enqueue_values = yield from self._waiting_for_float()
+                past_vertices, past_values, shrink_requied = self._inside_contract(yr, fr, yic, fic)
+
+            if self._recontract_simplex(past_vertices, past_values, enqueue_values):
+                continue
 
             # shrink
             if shrink_requied:
                 self.vertices = self.vertices[0] + self.coeff.s * (self.vertices - self.vertices[0])
                 yield from self.vertices[1:]
-                self.values[1:] = yield from self._waiting_for_list(len(self.vertices[1:]))
+                self.values[1:], enqueue_values = yield from self._waiting_for_list(len(self.vertices[1:]))
+                self._recontract_simplex([], [], enqueue_values)
 
                 shrink_requied = False
 
@@ -161,6 +257,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             )
 
         self.running_trial_id: list[int] = []
+        self.enqueue_running_trial_id: list[int] = []
         self.result_stack: dict[int, float] = {}
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
@@ -175,16 +272,19 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        # TODO: support parallel execution
-        # TODO: support study.enqueue_trial()
         # TODO: system_attrs is deprecated.
-        enqueue_params = trial.system_attrs["fixed_params"] if "fixed_params" in trial.system_attrs else None
+        if "fixed_params" in trial.system_attrs:
+            # enqueue_trial
+            params = self.nm.put_enqueue_vertex(trial.system_attrs["fixed_params"])
+            self.enqueue_running_trial_id.append(trial._trial_id)
+        else:
+            params = self._get_params()
+            self.running_trial_id.append(trial._trial_id)
 
-        trial.set_user_attr("params", self._get_params(enqueue_params))
-        self.running_trial_id.append(trial._trial_id)
+        trial.set_user_attr("params", params)
 
-    def _get_params(self, enqueue_params: dict[str, float] | None) -> np.ndarray:
-        params = self.nm.get_vertex(enqueue_params)
+    def _get_params(self) -> np.ndarray:
+        params = self.nm.get_vertex()
 
         while True:
             if params is None:
@@ -230,8 +330,11 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if isinstance(values, list):
             self.result_stack[trial._trial_id] = values[0]
 
-            if len(self.running_trial_id) == len(self.result_stack):
+            if len(self.running_trial_id) + len(self.enqueue_running_trial_id) == len(self.result_stack):
                 for trial_id in self.running_trial_id:
                     self.nm.put_value(self.result_stack[trial_id])
+                for trial_id in self.enqueue_running_trial_id:
+                    self.nm.put_enqueue_value(self.result_stack[trial_id])
                 self.running_trial_id = []
                 self.result_stack = {}
+                self.enqueue_running_trial_id = []
