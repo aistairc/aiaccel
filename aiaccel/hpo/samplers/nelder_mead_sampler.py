@@ -109,14 +109,12 @@ class NelderMeadAlgorism:
             vertices_of_random.append(yield_vertex)
             i += 1
 
-        values_of_random, _ = yield from self._waiting_for_list(i)
+        values_of_random, enqueue_values = yield from self._waiting_for_list(i)
 
         # enqueue
         enqueue_vertices = []
         while not self.enqueue_vertex_queue.empty():
             enqueue_vertices.append(self.enqueue_vertex_queue.get(block=False))
-
-        enqueue_values = yield from self._waiting_for_enqueue_list()
 
         self.vertices = np.array(vertices_of_random + enqueue_vertices)
         self.values = np.array(values_of_random + enqueue_values)
