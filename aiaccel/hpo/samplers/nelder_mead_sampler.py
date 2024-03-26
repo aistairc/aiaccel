@@ -241,15 +241,17 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self,
         search_space: dict[str, tuple[float, float]],
         seed: int | None = None,
+        rng: np.random.RandomState | None = None,
         coeff: NelderMeadCoefficient | None = None,
         parallel_enabled: bool = False,
     ) -> None:
         self._search_space = search_space
+        _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else np.random.RandomState()
 
         self.nm = NelderMeadAlgorism(
             search_space=self._search_space,
             coeff=coeff,
-            rng=np.random.RandomState(seed),
+            rng=_rng,
             block=parallel_enabled,
             timeout=None
             )
