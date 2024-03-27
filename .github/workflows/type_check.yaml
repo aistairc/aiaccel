@@ -25,9 +25,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install mypy
-          pip install poetry
-          poetry config virtualenvs.create false
-          poetry install --no-root --no-dev
+          pip install pip-tools
+          pip-compile --output-file requirements.txt pyproject.toml
+          pip install -r requirements.txt
 
       - name: Type check
         run: |
