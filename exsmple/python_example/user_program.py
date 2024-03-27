@@ -1,6 +1,6 @@
 import optuna
 
-from aiaccel import AbciJobExecutor
+from aiaccel.job import AbciJobExecutor
 
 sampler = optuna.samplers.TPESampler(seed=42)
 # sampler = optuna.samplers.RandomSampler(seed=42)
@@ -23,7 +23,7 @@ for n in range(n_trials):
         f"{trial.suggest_float('x2', 0, 10):.4f}",
     ]
 
-    job = jobs.submit(args, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
+    job = jobs.submit(args, "", job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
     y = job.get_result()
     study.tell(trial, y)
 
@@ -46,7 +46,7 @@ while True:
         f"{trial.suggest_float('x2', 0, 10):.4f}",
     ]
 
-    jobs.submit(args, tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
+    jobs.submit(args, "", tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
 
     for y, trial in jobs.get_results():
         study.tell(trial, y)
