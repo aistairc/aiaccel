@@ -3,7 +3,7 @@ import logging
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim.lr_manager import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchvision import datasets, models, transforms
 
 from aiaccel.util import aiaccel
