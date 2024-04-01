@@ -244,7 +244,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         parallel_enabled: bool = False,
     ) -> None:
         self._search_space = search_space
-        _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else np.random.RandomState()
+        _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
             search_space=self._search_space,
