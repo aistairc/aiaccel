@@ -55,25 +55,34 @@ class NelderMeadAlgorism:
         self.enqueue_value_queue: queue.Queue[float] = queue.Queue()
         self.num_enqueued = 0
 
-    def put_enqueue_vertex(self, enqueue_params: dict[str, float]) -> np.ndarray:
+    def get_vertex(self) -> np.ndarray:
+        with self.lock:
+            return next(self.generator)
+
+    def put_enqueue_vertex_queue(self, enqueue_params: dict[str, float]) -> np.ndarray:
         vertex = np.array([
-            enqueue_params[param_name] if param_name in enqueue_params
-            else self._rng.uniform(*param_distrbution)
+            enqueue_params[param_name] if param_name in enqueue_params  # enqueue
+            else self._rng.uniform(*param_distrbution)  # random
             for param_name, param_distrbution in self._search_space.items()
         ])
         self.enqueue_vertex_queue.put(vertex)
         self.num_enqueued += 1
         return vertex
 
-    def get_vertex(self) -> np.ndarray:
-        with self.lock:
-            return next(self.generator)
+    def get_enqueue_vertex_queue(self, block: bool = False, timeout: int | None = None):
+        return self.enqueue_vertex_queue.get(block=block, timeout=timeout)
 
-    def put_value(self, value: float) -> None:
+    def put_value_queue(self, value: float) -> None:
         self.value_queue.put(value)
 
-    def put_enqueue_value(self, value: float) -> None:
+    def get_value_queue(self, block: bool = False, timeout: int | None = None) -> float:
+        return self.value_queue.get(block=block, timeout=timeout)
+
+    def put_enqueue_value_queue(self, value: float) -> None:
         self.enqueue_value_queue.put(value)
+
+    def get_enqueue_value_queue(self, block: bool = False, timeout: int | None = None) -> float:
+        return self.enqueue_value_queue.get(block=block, timeout=timeout)
 
     def _waiting_for_float(self) -> Generator[None, None, tuple[float, list[float]]]:
         result, enqueue_values = yield from self._waiting_for_list(1)
@@ -84,7 +93,7 @@ class NelderMeadAlgorism:
         results: list[float] = []
         while len(results) < num_waiting:
             try:
-                results.append(self.enqueue_value_queue.get(self.block, self.timeout))
+                results.append(self.get_enqueue_value_queue(self.block, self.timeout))
             except queue.Empty:
                 yield None
 
@@ -95,7 +104,7 @@ class NelderMeadAlgorism:
         results: list[float] = []
         while len(results) < num_waiting:
             try:
-                results.append(self.value_queue.get(self.block, self.timeout))
+                results.append(self.get_value_queue(self.block, self.timeout))
             except queue.Empty:
                 yield None
 
@@ -120,7 +129,7 @@ class NelderMeadAlgorism:
         # enqueue
         enqueue_vertices = []
         while not self.enqueue_vertex_queue.empty():
-            enqueue_vertices.append(self.enqueue_vertex_queue.get(block=False))
+            enqueue_vertices.append(self.get_enqueue_vertex_queue())
 
         self.vertices = np.array(vertices_of_random + enqueue_vertices)
         self.values = np.array(values_of_random + enqueue_values)
@@ -149,7 +158,7 @@ class NelderMeadAlgorism:
             ) -> None:
         enqueue_vertices = []
         while not self.enqueue_vertex_queue.empty():
-            enqueue_vertices.append(self.enqueue_vertex_queue.get(block=False))
+            enqueue_vertices.append(self.get_enqueue_vertex_queue())
 
         worst_value = min(
             values_before_processing + [self.values[-1]]
@@ -284,7 +293,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
                 break
             else:
-                self.nm.put_value(np.inf)
+                self.nm.put_value_queue(np.inf)
                 params = self.nm.get_vertex()
 
         return params
@@ -323,9 +332,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
             if len(self.running_trial_id) + len(self.enqueue_running_trial_id) == len(self.result_stack):
                 for trial_id in self.running_trial_id:
-                    self.nm.put_value(self.result_stack[trial_id])
+                    self.nm.put_value_queue(self.result_stack[trial_id])
                 for trial_id in self.enqueue_running_trial_id:
-                    self.nm.put_enqueue_value(self.result_stack[trial_id])
+                    self.nm.put_enqueue_value_queue(self.result_stack[trial_id])
                 self.running_trial_id = []
                 self.result_stack = {}
                 self.enqueue_running_trial_id = []
