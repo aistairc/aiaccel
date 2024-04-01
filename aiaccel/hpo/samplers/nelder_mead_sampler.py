@@ -88,29 +88,26 @@ class NelderMeadAlgorism:
         result, enqueue_values = yield from self._waiting_for_list(1)
         return result[0], enqueue_values
 
-    def _waiting_for_enqueue_list(self, num_waiting: int | None = None) -> Generator[None, None, list[float]]:
-        num_waiting = num_waiting if num_waiting is not None else self.num_enqueued
-        results: list[float] = []
-        while len(results) < num_waiting:
-            try:
-                results.append(self.get_enqueue_value_queue(self.block, self.timeout))
-            except queue.Empty:
-                yield None
-
-        self.num_enqueued -= num_waiting
-        return results
-
     def _waiting_for_list(self, num_waiting: int) -> Generator[None, None, tuple[list[float], list[float]]]:
-        results: list[float] = []
-        while len(results) < num_waiting:
+        # values of nelder mead vertices
+        values: list[float] = []
+        while len(values) < num_waiting:
             try:
-                results.append(self.get_value_queue(self.block, self.timeout))
+                values.append(self.get_value_queue(self.block, self.timeout))
             except queue.Empty:
                 yield None
 
-        enqueue_values = yield from self._waiting_for_enqueue_list()
+        # values of enqueue vertices
+        enqueue_values: list[float] = []
+        while len(enqueue_values) < self.num_enqueued:
+            try:
+                enqueue_values.append(self.get_enqueue_value_queue(self.block, self.timeout))
+            except queue.Empty:
+                yield None
 
-        return results, enqueue_values
+        self.num_enqueued = 0
+
+        return values, enqueue_values
 
     def _initialization(self) -> Generator[np.ndarray, None, None]:
         dimension = len(self._search_space)
