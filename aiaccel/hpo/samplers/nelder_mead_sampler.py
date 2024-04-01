@@ -116,15 +116,15 @@ class NelderMeadAlgorism:
         dimension = len(self._search_space)
         lows, highs = zip(*self._search_space.values())
 
-        i = 0
         # random
+        num_generate_random = 0
         vertices_of_random = []
-        while i + self.num_enqueued < dimension + 1:
+        while num_generate_random + self.num_enqueued < dimension + 1:
             yield (yield_vertex := self._rng.uniform(lows, highs, dimension))
             vertices_of_random.append(yield_vertex)
-            i += 1
+            num_generate_random += 1
 
-        values_of_random, enqueue_values = yield from self._waiting_for_list(i)
+        values_of_random, enqueue_values = yield from self._waiting_for_list(num_generate_random)
 
         # enqueue
         enqueue_vertices = []
@@ -150,7 +150,7 @@ class NelderMeadAlgorism:
         order = np.argsort(new_values)
         self.vertices, self.values = new_vertices[order][:dimension + 1], new_values[order][:dimension + 1]
 
-    def validate_better_param_in_enqueue(
+    def _validate_better_param_in_enqueue(
             self,
             vertices_before_processing: list[np.ndarray],
             values_before_processing: list[float],
@@ -187,7 +187,7 @@ class NelderMeadAlgorism:
                 yield (yr := yc + self.coeff.r * (yc - self.vertices[-1]))
 
                 fr, enqueue_values = yield from self._waiting_for_float()
-                self.validate_better_param_in_enqueue([yr], [fr], enqueue_values)
+                self._validate_better_param_in_enqueue([yr], [fr], enqueue_values)
 
                 if self.values[0] <= fr < self.values[-2]:
                     self.vertices[-1], self.values[-1] = yr, fr
@@ -195,7 +195,7 @@ class NelderMeadAlgorism:
                     yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
 
                     fe, enqueue_values = yield from self._waiting_for_float()
-                    self.validate_better_param_in_enqueue([yr, ye], [fr, fe], enqueue_values)
+                    self._validate_better_param_in_enqueue([yr, ye], [fr, fe], enqueue_values)
 
                     self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
 
@@ -203,7 +203,7 @@ class NelderMeadAlgorism:
                     yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
 
                     foc, enqueue_values = yield from self._waiting_for_float()
-                    self.validate_better_param_in_enqueue([yr, yoc], [fr, foc], enqueue_values)
+                    self._validate_better_param_in_enqueue([yr, yoc], [fr, foc], enqueue_values)
 
                     if foc <= fr:
                         self.vertices[-1], self.values[-1] = yoc, foc
@@ -213,7 +213,7 @@ class NelderMeadAlgorism:
                     yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
 
                     fic, enqueue_values = yield from self._waiting_for_float()
-                    self.validate_better_param_in_enqueue([yr, yic], [fr, fic], enqueue_values)
+                    self._validate_better_param_in_enqueue([yr, yic], [fr, fic], enqueue_values)
 
                     if fic < self.values[-1]:
                         self.vertices[-1], self.values[-1] = yic, fic
@@ -228,7 +228,7 @@ class NelderMeadAlgorism:
                     self.values[1:], enqueue_values = yield from self._waiting_for_list(len(self.vertices[1:]))
                     shrink_requied = False
 
-                    self.validate_better_param_in_enqueue([], [], enqueue_values)
+                    self._validate_better_param_in_enqueue([], [], enqueue_values)
 
             except UpdateByEnqueue as e:
                 self._recontract_simplex(e.additional_vertices, e.additional_values)
