@@ -270,25 +270,20 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             params = self.nm.put_enqueue_vertex_queue(trial.system_attrs["fixed_params"])
             self.enqueue_running_trial_id.append(trial._trial_id)
         else:
-            params = self._get_params()
+            params = self.nm.get_vertex()
+
+            while True:
+                if params is None:
+                    raise RuntimeError("No more parallel calls to ask() are possible.")
+
+                if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
+                    break
+                else:
+                    self.nm.put_value_queue(np.inf)
+                    params = self.nm.get_vertex()
             self.running_trial_id.append(trial._trial_id)
 
         trial.set_user_attr("params", params)
-
-    def _get_params(self) -> np.ndarray:
-        params = self.nm.get_vertex()
-
-        while True:
-            if params is None:
-                raise RuntimeError("No more parallel calls to ask() are possible.")
-
-            if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
-                break
-            else:
-                self.nm.put_value_queue(np.inf)
-                params = self.nm.get_vertex()
-
-        return params
 
     def sample_independent(
         self,
