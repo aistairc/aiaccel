@@ -69,7 +69,7 @@ class NelderMeadAlgorism:
         self.num_enqueued += 1
         return vertex
 
-    def get_enqueue_vertex_queue(self, block: bool = False, timeout: int | None = None):
+    def get_enqueue_vertex_queue(self, block: bool = False, timeout: int | None = None) -> np.ndarray:
         return self.enqueue_vertex_queue.get(block=block, timeout=timeout)
 
     def put_value_queue(self, value: float) -> None:
