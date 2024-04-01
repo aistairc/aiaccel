@@ -207,7 +207,6 @@ class NelderMeadAlgorism:
 
                     if foc <= fr:
                         self.vertices[-1], self.values[-1] = yoc, foc
-                        shrink_requied = False
                     else:
                         shrink_requied = True
                 elif self.values[-1] <= fr:  # inside contract
@@ -218,7 +217,6 @@ class NelderMeadAlgorism:
 
                     if fic < self.values[-1]:
                         self.vertices[-1], self.values[-1] = yic, fic
-                        shrink_requied = False
                     else:
                         shrink_requied = True
 
@@ -275,7 +273,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         # TODO: system_attrs is deprecated.
         if "fixed_params" in trial.system_attrs:
             # enqueue_trial
-            params = self.nm.put_enqueue_vertex(trial.system_attrs["fixed_params"])
+            params = self.nm.put_enqueue_vertex_queue(trial.system_attrs["fixed_params"])
             self.enqueue_running_trial_id.append(trial._trial_id)
         else:
             params = self._get_params()
