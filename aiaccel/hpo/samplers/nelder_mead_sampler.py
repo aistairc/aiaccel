@@ -138,18 +138,6 @@ class NelderMeadAlgorism:
             order = np.argsort(self.values)
             self.vertices, self.values = self.vertices[order][:dimension + 1], self.values[order][:dimension + 1]
 
-    def _recontract_simplex(
-            self,
-            additional_vertices: list[np.ndarray],
-            additional_values: list[float],
-            ) -> None:
-        dimension = len(self._search_space)
-        new_vertices = np.array(list(self.vertices) + additional_vertices)
-        new_values = np.array(list(self.values) + additional_values)
-
-        order = np.argsort(new_values)
-        self.vertices, self.values = new_vertices[order][:dimension + 1], new_values[order][:dimension + 1]
-
     def _validate_better_param_in_enqueue(
             self,
             vertices_before_processing: list[np.ndarray],
@@ -231,7 +219,13 @@ class NelderMeadAlgorism:
                     self._validate_better_param_in_enqueue([], [], enqueue_values)
 
             except UpdateByEnqueue as e:
-                self._recontract_simplex(e.additional_vertices, e.additional_values)
+                # recontract_simplex
+                dimension = len(self._search_space)
+                new_vertices = np.array(list(self.vertices) + e.additional_vertices)
+                new_values = np.array(list(self.values) + e.additional_values)
+
+                order = np.argsort(new_values)
+                self.vertices, self.values = new_vertices[order][:dimension + 1], new_values[order][:dimension + 1]
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
