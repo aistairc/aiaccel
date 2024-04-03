@@ -1,12 +1,13 @@
-import unittest
-import optuna
 import csv
-import numpy as np
-
-from pathlib import Path
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadSampler
-
 import time
+import unittest
+from multiprocessing import Pool
+from pathlib import Path
+
+import numpy as np
+import optuna
+
+from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadSampler
 
 
 def ackley(x):
@@ -36,13 +37,16 @@ class AbstractTestNelderMead:
         self.results_csv_path = cwd.joinpath(result_file_name)
 
     def test_sampler(self):
-        self.study.optimize(self.func, n_trials=30, n_jobs=self.n_jobs)
+        self.optimize()
 
         with open(self.results_csv_path) as f:
             reader = csv.DictReader(f)
             results = [row for row in reader]
 
         self.validation(results)
+
+    def optimize(self):
+        self.study.optimize(self.func, n_trials=30, n_jobs=self.n_jobs)
 
     def validation(self):
         raise NotImplementedError()
@@ -100,3 +104,81 @@ class TestNelderMeadSphereParallel(AbstractTestNelderMead, unittest.TestCase):
                 except AssertionError:
                     continue
         self.assertTrue(almost_equal_trial_exists)
+
+
+class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
+    def setUp(self):
+        search_space = {"x": [-30, 30], "y": [-30, 30], "z": [-30, 30]}
+        self._rng = np.random.RandomState(seed=42)
+        sampler = NelderMeadSampler(search_space=search_space, rng=self._rng)
+
+        super().setUp(
+            search_space=search_space,
+            objective=shpere,
+            result_file_name='results_shpere_enqueue.csv',
+            study=optuna.create_study(sampler=sampler)
+        )
+
+    def optimize(self):
+        num_trial = 0
+        num_parallel = 5
+        p = Pool(num_parallel)
+        Trials = []
+        params = []
+        lows = []
+
+        while num_trial < 30 * num_parallel:
+            try:
+                # nelder mead
+                trial = self.study.ask()
+                X = trial.suggest_float("x", *self.search_space["x"])
+                Y = trial.suggest_float("y", *self.search_space["y"])
+                Z = trial.suggest_float("z", *self.search_space["z"])
+                Trials.append(trial)
+                params.append([X, Y, Z])
+                num_trial += 1
+
+                continue
+            except RuntimeError:
+                pass
+
+            while len(Trials) < num_parallel:
+                # random
+                self.study.enqueue_trial({
+                    "x": self._rng.uniform(*self.search_space["x"]),
+                    "y": self._rng.uniform(*self.search_space["y"]),
+                    "z": self._rng.uniform(*self.search_space["z"])
+                    })
+                trial = self.study.ask()
+                X = trial.suggest_float("x", *self.search_space["x"])
+                Y = trial.suggest_float("y", *self.search_space["y"])
+                Z = trial.suggest_float("z", *self.search_space["z"])
+                Trials.append(trial)
+                params.append([X, Y, Z])
+                num_trial += 1
+
+            results = []
+
+            try:
+                results = p.map(shpere, params)
+            except Exception as e:
+                print(e)
+
+            for trial, obj in zip(Trials, results):
+                print(f"trial {trial._trial_id} parameters {trial.params} value {obj}")
+                lows.append(list(trial.params.values()) + [obj])
+                self.study.tell(trial, obj)
+
+            Trials = []
+            params = []
+
+        with open('./results.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerows(lows)
+
+    def validation(self, results):
+        trials = [trial for trial in self.study.trials if len(trial.params) > 0]
+        for trial, result in zip(trials, results):
+            self.assertAlmostEqual(trial.params["x"], float(result["x"]))
+            self.assertAlmostEqual(trial.params["y"], float(result["y"]))
+            self.assertAlmostEqual(trial.values[0], float(result["objective"]))
