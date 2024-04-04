@@ -3,6 +3,7 @@ import time
 import unittest
 from multiprocessing import Pool
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 import numpy as np
 import optuna
@@ -10,7 +11,7 @@ import optuna
 from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadSampler
 
 
-def ackley(x):
+def ackley(x: List[float]) -> float:
     X = x[0]
     Y = x[1]
 
@@ -21,13 +22,18 @@ def ackley(x):
     return float(y)
 
 
-def shpere(x):
+def shpere(x: List[float]) -> float:
     time.sleep(0.001)
     return np.sum(np.array(x) ** 2)
 
 
 class AbstractTestNelderMead:
-    def setUp(self, search_space, objective, result_file_name, study, n_jobs=1):
+    def common_setUp(self,
+                     search_space: Dict[str, Tuple[float, float]],
+                     objective: Callable[[List[float]], float],
+                     result_file_name: str,
+                     study: optuna.study,
+                     n_jobs: int = 1) -> None:
         self.search_space = search_space
         self.objective = objective
         self.study = study
@@ -36,22 +42,21 @@ class AbstractTestNelderMead:
         cwd = Path(__file__).resolve().parent
         self.results_csv_path = cwd.joinpath(result_file_name)
 
-    def test_sampler(self):
+    def test_sampler(self) -> None:
         self.optimize()
 
         with open(self.results_csv_path) as f:
-            reader = csv.DictReader(f)
-            results = [row for row in reader]
+            results = list(csv.DictReader(f))
 
         self.validation(results)
 
-    def optimize(self):
+    def optimize(self) -> None:
         self.study.optimize(self.func, n_trials=30, n_jobs=self.n_jobs)
 
-    def validation(self):
+    def validation(self, results: List[Dict[Union[str, Any], Union[str, Any]]]) -> None:
         raise NotImplementedError()
 
-    def func(self, trial):
+    def func(self, trial: optuna.trial.FrozenTrial) -> float:
         params = []
         for name, distribution in self.search_space.items():
             params.append(trial.suggest_float(name, *distribution))
@@ -59,18 +64,18 @@ class AbstractTestNelderMead:
 
 
 class TestNelderMeadAckley(AbstractTestNelderMead, unittest.TestCase):
-    def setUp(self):
-        search_space = {"x": [0, 10], "y": [0, 10]}
+    def setUp(self) -> None:
+        search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
-        super().setUp(
+        self.common_setUp(
             search_space=search_space,
             objective=ackley,
             result_file_name='results_ackley.csv',
             study=optuna.create_study(sampler=sampler)
         )
 
-    def validation(self, results):
+    def validation(self, results: List[Dict[Union[str, Any], Union[str, Any]]]) -> None:
         for trial, result in zip(self.study.trials, results):
             self.assertAlmostEqual(trial.params["x"], float(result["x"]))
             self.assertAlmostEqual(trial.params["y"], float(result["y"]))
@@ -78,11 +83,11 @@ class TestNelderMeadAckley(AbstractTestNelderMead, unittest.TestCase):
 
 
 class TestNelderMeadSphereParallel(AbstractTestNelderMead, unittest.TestCase):
-    def setUp(self):
-        search_space = {"x": [-30, 30], "y": [-30, 30], "z": [-30, 30]}
+    def setUp(self) -> None:
+        search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42, parallel_enabled=True)
 
-        super().setUp(
+        self.common_setUp(
             search_space=search_space,
             objective=shpere,
             result_file_name='results_shpere_parallel.csv',
@@ -90,7 +95,7 @@ class TestNelderMeadSphereParallel(AbstractTestNelderMead, unittest.TestCase):
             n_jobs=4
         )
 
-    def validation(self, results):
+    def validation(self, results: List[Dict[Union[str, Any], Union[str, Any]]]) -> None:
         for trial in self.study.trials:
             almost_equal_trial_exists = False
             for result in results:
@@ -107,19 +112,19 @@ class TestNelderMeadSphereParallel(AbstractTestNelderMead, unittest.TestCase):
 
 
 class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
-    def setUp(self):
-        search_space = {"x": [-30, 30], "y": [-30, 30], "z": [-30, 30]}
+    def setUp(self) -> None:
+        search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
         self._rng = np.random.RandomState(seed=42)
         sampler = NelderMeadSampler(search_space=search_space, rng=self._rng)
 
-        super().setUp(
+        self.common_setUp(
             search_space=search_space,
             objective=shpere,
             result_file_name='results_shpere_enqueue.csv',
             study=optuna.create_study(sampler=sampler)
         )
 
-    def optimize(self):
+    def optimize(self) -> None:
         num_trial = 0
         num_parallel = 5
         p = Pool(num_parallel)
@@ -176,7 +181,7 @@ class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
             writer = csv.writer(f)
             writer.writerows(lows)
 
-    def validation(self, results):
+    def validation(self, results: List[Dict[Union[str, Any], Union[str, Any]]]) -> None:
         trials = [trial for trial in self.study.trials if len(trial.params) > 0]
         for trial, result in zip(trials, results):
             self.assertAlmostEqual(trial.params["x"], float(result["x"]))
