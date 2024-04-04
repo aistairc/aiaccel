@@ -145,9 +145,7 @@ class NelderMeadAlgorism:
         while not self.enqueue_vertex_queue.empty():
             enqueue_vertices.append(self.get_enqueue_vertex_queue())
 
-        worst_value = min(
-            values_before_processing + [self.values[-1]]
-            ) if len(values_before_processing) > 0 or len(self.values) > 0 else None
+        worst_value = self.values[-1] if len(self.values) > 0 else None
 
         if worst_value is not None and len([v for v in enqueue_values if v < worst_value]) > 0:
             raise UpdateByEnqueue(
