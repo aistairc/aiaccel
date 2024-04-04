@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import unittest
-import optuna
 import datetime
-
-import numpy as np
+import unittest
 from unittest.mock import patch
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadSampler
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadAlgorism
+import numpy as np
+import optuna
+
+from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadAlgorism, NelderMeadSampler
 
 
 class TestNelderMeadAlgorism(unittest.TestCase):
@@ -59,6 +58,7 @@ class TestNelderMeadAlgorism(unittest.TestCase):
                 yield None
             mock_iter.side_effect = side_effect
 
+            # initialization
             self.nm.get_vertex()
             self.nm.vertices = self.vertices
             self.nm.values = self.values
