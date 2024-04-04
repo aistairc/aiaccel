@@ -18,8 +18,8 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         self.vertices = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         self.values = np.array([5.0, 3.0, 7.0])
 
-    def test_put_value(self):
-        self.nm.put_value(0.0)
+    def test_put_value_queue(self):
+        self.nm.put_value_queue(0.0)
         self.assertFalse(self.nm.value_queue.empty())
 
     def test_waiting_for(self):
@@ -53,23 +53,24 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         xi = self.nm.get_vertex()
         self.assertIsNone(xi)
 
-    def compare_results(self, vertices: list[np.ndarray], values: list[float] | None = None):
-        values = values if values is not None else []
-        # initialize
-        for _ in range(len(self.search_space) + 1):
+    def compare_results(self, vertices: list[np.ndarray], values: list[float] = []):
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._initialization") as mock_iter:
+            def side_effect():
+                yield None
+            mock_iter.side_effect = side_effect
+
             self.nm.get_vertex()
-        self.nm.vertices = self.vertices
-        for value in self.values:
-            self.nm.put_value(value)
+            self.nm.vertices = self.vertices
+            self.nm.values = self.values
 
-        # main loop
-        x = self.nm.get_vertex()
-        self.assertTrue(np.array_equal(x, vertices[0]))
-        for vertex, value in zip(vertices[1:], values):
-            self.nm.value_queue.put(value)
+            # main loop
             x = self.nm.get_vertex()
+            self.assertTrue(np.array_equal(x, vertices[0]))
+            for vertex, value in zip(vertices[1:], values):
+                self.nm.value_queue.put(value)
+                x = self.nm.get_vertex()
 
-            self.assertTrue(np.array_equal(x, vertex))
+                self.assertTrue(np.array_equal(x, vertex))
 
     def test_reflect(self):
         reflect_xs = np.array([-1.0, 0.0])
@@ -188,7 +189,7 @@ class TestNelderMeadSampler(unittest.TestCase):
         self.assertEqual(self.sampler.sample_relative(self.study, self.trial, self.param_distribution), {})
 
     def test_before_trial(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadSampler._get_params") as mock_iter:
+        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
             mock_iter.side_effect = [np.array([-1.0, 0.0])]
 
             self.sampler.before_trial(self.study, self.trial)
@@ -196,21 +197,14 @@ class TestNelderMeadSampler(unittest.TestCase):
 
             self.assertTrue(np.array_equal(self.trial.user_attrs["params"], np.array([-1.0, 0.0])))
 
-    def test_get_params(self):
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
-            mock_iter.side_effect = [np.array([-1.0, 0.0])]
-
-            coordinate = self.sampler._get_params()
-
-            self.assertTrue(np.array_equal(coordinate, np.array([-1.0, 0.0])))
-
-    def test_get_params_out_of_range(self):
+    def test_before_trial_out_of_range(self):
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
             mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([0.0, 6.0]), np.array([-2.0, 0.0])]
 
-            coordinate = self.sampler._get_params()
+            self.sampler.before_trial(self.study, self.trial)
+            self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
 
-            self.assertTrue(np.array_equal(coordinate, np.array([-2.0, 0.0])))
+            self.assertTrue(np.array_equal(self.trial.user_attrs["params"], np.array([-2.0, 0.0])))
 
     def test_sample_independent(self):
         xs = np.array([-1.0, 0.0])
