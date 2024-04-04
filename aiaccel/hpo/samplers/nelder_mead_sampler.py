@@ -260,11 +260,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         # TODO: system_attrs is deprecated.
-        if "fixed_params" in trial.system_attrs:
-            # enqueue_trial
+        if "fixed_params" in trial.system_attrs:  # enqueue_trial
             params = self.nm.put_enqueue_vertex_queue(trial.system_attrs["fixed_params"])
             self.enqueue_running_trial_id.append(trial._trial_id)
-        else:
+        else:  # nelder mead
             while True:
                 params = self.nm.get_vertex()
                 if params is None:

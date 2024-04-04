@@ -108,7 +108,7 @@ class TestNelderMeadSphereParallel(AbstractTestNelderMead, unittest.TestCase):
                     break
                 except AssertionError:
                     continue
-        self.assertTrue(almost_equal_trial_exists)
+            self.assertTrue(almost_equal_trial_exists)
 
 
 class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
@@ -130,7 +130,6 @@ class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
         p = Pool(num_parallel)
         Trials = []
         params = []
-        lows = []
 
         while num_trial < 30 * num_parallel:
             try:
@@ -171,15 +170,10 @@ class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
 
             for trial, obj in zip(Trials, results):
                 print(f"trial {trial._trial_id} parameters {trial.params} value {obj}")
-                lows.append(list(trial.params.values()) + [obj])
                 self.study.tell(trial, obj)
 
             Trials = []
             params = []
-
-        with open('./results.csv', 'w') as f:
-            writer = csv.writer(f)
-            writer.writerows(lows)
 
     def validation(self, results: List[Dict[Union[str, Any], Union[str, Any]]]) -> None:
         trials = [trial for trial in self.study.trials if len(trial.params) > 0]
