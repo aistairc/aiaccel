@@ -24,6 +24,10 @@ class NelderMeadCoefficient:
     s: float = 0.5
 
 
+class Empty(Exception):
+    pass
+
+
 class UpdateByEnqueue(Exception):
     def __init__(self, additional_vertices: list[npt.NDArray[np.float64]], additional_values: list[float]) -> None:
         self.additional_vertices = additional_vertices
@@ -60,9 +64,9 @@ class NelderMeadAlgorism:
         with self.lock:
             vertex = next(self.generator)
             if vertex is None:
-                raise RuntimeError("Cannot generate new vertex now.")
-            else:
-                return vertex
+                raise Empty("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
+
+            return vertex
 
     def enqueue_vertex(self, enqueue_params: dict[str, float]) -> npt.NDArray[np.float64]:
         vertex = np.array(
@@ -266,8 +270,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         else:  # nelder mead
             while True:
                 params = self.nm.get_vertex()
-                if params is None:
-                    raise RuntimeError("No more parallel calls to ask() are possible.")
 
                 if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
                     break

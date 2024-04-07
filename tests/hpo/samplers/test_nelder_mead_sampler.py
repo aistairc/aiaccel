@@ -1,3 +1,4 @@
+import contextlib
 import csv
 import datetime
 import time
@@ -12,7 +13,7 @@ import numpy as np
 import numpy.typing as npt
 import optuna
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadAlgorism, NelderMeadSampler
+from aiaccel.hpo.samplers.nelder_mead_sampler import Empty, NelderMeadAlgorism, NelderMeadSampler
 
 
 class TestNelderMeadAlgorism(unittest.TestCase):
@@ -50,8 +51,9 @@ class TestNelderMeadAlgorism(unittest.TestCase):
                 self.assertIsInstance(co, float)
                 self.assertGreaterEqual(co, ss[0])
                 self.assertLessEqual(co, ss[1])
-        xi = self.nm.get_vertex()
-        self.assertIsNone(xi)
+
+        with self.assertRaises(Empty):
+            xi = self.nm.get_vertex()
 
     def compare_results(self, vertices: list[npt.NDArray[np.float64]], values: list[float] | None = None) -> None:
         if values is None:
@@ -65,7 +67,8 @@ class TestNelderMeadAlgorism(unittest.TestCase):
             mock_iter.side_effect = side_effect
 
             # initialization
-            self.nm.get_vertex()
+            with contextlib.suppress(Empty):
+                self.nm.get_vertex()
             self.nm.vertices = self.vertices
             self.nm.values = self.values
 
@@ -379,7 +382,7 @@ class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
                 num_trial += 1
 
                 continue
-            except RuntimeError:
+            except Empty:
                 pass
 
             while len(Trials) < num_parallel:
