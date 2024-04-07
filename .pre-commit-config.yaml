@@ -1,29 +1,13 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.9
+    rev: v0.3.5
     hooks:
       - id: ruff
-        args: [ --fix ]
+        args: [--fix]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.1.1
+    rev: v1.9.0
     hooks:
       - id: mypy
-        args: [
-          "--install-types",
-          "--non-interactive",
-          "--ignore-missing-imports",
-          "--warn-unused-configs",
-          "--disallow-any-generics",
-          "--disallow-untyped-calls",
-          "--disallow-untyped-defs",
-          "--disallow-incomplete-defs",
-          "--check-untyped-defs",
-          "--disallow-untyped-decorators",
-          "--warn-redundant-casts",
-          "--warn-unused-ignores",
-          "--no-implicit-reexport",
-          "--strict-equality",
-          "--strict-concatenate",
-        ]
-        exclude:  ^(?:examples|tests)/.*
+        language: system
+        args: [--config-file, mypy.ini]
