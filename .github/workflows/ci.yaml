@@ -1,0 +1,28 @@
+name: CI
+on:
+  - push
+  - pull_request
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-22.04']
+        python-version: ['3.10']
+        test_target: ['apps', 'hpo']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install .[dev,github-actions]
+      - name: Run pytest
+        run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/${{ strategy.target }}
+
