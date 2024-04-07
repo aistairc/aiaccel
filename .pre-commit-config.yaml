@@ -11,3 +11,12 @@ repos:
       - id: mypy
         language: system
         args: [--config-file, mypy.ini]
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest -s -v tests/
+        stages: [push]
+        language: system
+        pass_filenames: false
+        always_run: true
