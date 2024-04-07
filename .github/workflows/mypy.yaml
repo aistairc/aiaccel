@@ -1,32 +1,12 @@
-name: Type check
+name: Perform type checking
 on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    uses: ./.github/workflows/build.yaml
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ['3.10']
-
+  mypy:
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: pyproject.toml
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install mypy
-          pip install .
-
-      - name: Type check
+      - name: Perform mypy
         run: |
           mypy --config-file mypy.ini .

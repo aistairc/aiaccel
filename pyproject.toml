@@ -27,30 +27,28 @@ documentation = "https://aiaccel.readthedocs.io"
 repository = "https://github.com/aistairc/aiaccel"
 
 [project.optional-dependencies]
-test = [
-    "pytest",
-    "pytest-cov",
-    "pytest-subprocess",
-    "undecorated",
-]
-github-actions = [
-    "pytest-github-actions-annotate-failures",
-]
 dev = [
-    "ruff",
     "mypy",
     "myst-parser",
     "pre-commit",
+    "pytest",
+    "pytest-cov",
+    "pytest-subprocess",
+    "ruff",
     "sphinx",
     "sphinxcontrib-jquery",
     "sphinx-intl",
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
+    "undecorated",
+]
+github-actions = [
+    "pytest-github-actions-annotate-failures",
 ]
 
 [tool.ruff]
 line-length = 120
-target-version = "py38"
+target-version = "py310"
 fix = true
 
 select = ["E", "F", "W", "UP", "B", "SIM", "I", "C"]
