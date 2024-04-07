@@ -3,11 +3,12 @@ from __future__ import annotations
 import queue
 import threading
 import warnings
-from collections.abc import Generator
+from collections.abc import Generator, Sequence
 from dataclasses import dataclass
-from typing import Any, Sequence
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 import optuna
 from optuna.distributions import BaseDistribution
 from optuna.study import Study
@@ -24,14 +25,14 @@ class NelderMeadCoefficient:
 
 
 class UpdateByEnqueue(Exception):
-    def __init__(self, additional_vertices: list[np.ndarray], additional_values: list[float]) -> None:
+    def __init__(self, additional_vertices: list[npt.NDArray[np.float64]], additional_values: list[float]) -> None:
         self.additional_vertices = additional_vertices
         self.additional_values = additional_values
 
 
 class NelderMeadAlgorism:
-    vertices: np.ndarray
-    values: np.ndarray
+    vertices: npt.NDArray[np.float64]
+    values: npt.NDArray[np.float64]
 
     def __init__(
         self,
@@ -39,7 +40,7 @@ class NelderMeadAlgorism:
         coeff: NelderMeadCoefficient | None = None,
         rng: np.random.RandomState | None = None,
         block: bool = True,
-        timeout: int | None = None
+        timeout: int | None = None,
     ) -> None:
         self._search_space = search_space
         self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
@@ -51,32 +52,36 @@ class NelderMeadAlgorism:
         self.generator = iter(self._generator())
         self.lock = threading.Lock()
 
-        self.enqueue_vertex_queue: queue.Queue[np.ndarray] = queue.Queue()
+        self.enqueue_vertex_queue: queue.Queue[npt.NDArray[np.float64]] = queue.Queue()
         self.enqueue_value_queue: queue.Queue[float] = queue.Queue()
         self.num_enqueued = 0
 
-    def get_vertex(self) -> np.ndarray:
+    def get_vertex(self) -> npt.NDArray[np.float64]:
         with self.lock:
-            return next(self.generator)
+            vertex = next(self.generator)
+            if vertex is None:
+                raise RuntimeError("Cannot generate new vertex now.")
+            else:
+                return vertex
 
-    def put_enqueue_vertex_queue(self, enqueue_params: dict[str, float]) -> np.ndarray:
-        vertex = np.array([
-            enqueue_params[param_name] if param_name in enqueue_params  # enqueue
-            else self._rng.uniform(*param_distrbution)  # random
-            for param_name, param_distrbution in self._search_space.items()
-        ])
+    def enqueue_vertex(self, enqueue_params: dict[str, float]) -> npt.NDArray[np.float64]:
+        vertex = np.array(
+            [
+                enqueue_params[param_name]
+                if param_name in enqueue_params  # enqueue
+                else self._rng.uniform(*param_distrbution)  # random
+                for param_name, param_distrbution in self._search_space.items()
+            ]
+        )
         self.enqueue_vertex_queue.put(vertex)
         self.num_enqueued += 1
         return vertex
 
-    def get_enqueue_vertex_queue(self, block: bool = False, timeout: int | None = None) -> np.ndarray:
+    def get_enqueue_vertex(self, block: bool = False, timeout: int | None = None) -> npt.NDArray[np.float64]:
         return self.enqueue_vertex_queue.get(block=block, timeout=timeout)
 
-    def put_value_queue(self, value: float) -> None:
+    def put_value(self, value: float) -> None:
         self.value_queue.put(value)
-
-    def get_value_queue(self, block: bool = False, timeout: int | None = None) -> float:
-        return self.value_queue.get(block=block, timeout=timeout)
 
     def put_enqueue_value_queue(self, value: float) -> None:
         self.enqueue_value_queue.put(value)
@@ -93,7 +98,7 @@ class NelderMeadAlgorism:
         values: list[float] = []
         while len(values) < num_waiting:
             try:
-                values.append(self.get_value_queue(self.block, self.timeout))
+                values.append(self.value_queue.get(block=self.block, timeout=self.timeout))
             except queue.Empty:
                 yield None
 
@@ -109,9 +114,9 @@ class NelderMeadAlgorism:
 
         return values, enqueue_values
 
-    def _initialization(self) -> Generator[np.ndarray, None, None]:
+    def _initialization(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         dimension = len(self._search_space)
-        lows, highs = zip(*self._search_space.values())
+        lows, highs = zip(*self._search_space.values(), strict=False)
 
         # random
         num_generate_random = 0
@@ -126,34 +131,33 @@ class NelderMeadAlgorism:
         # enqueue
         enqueue_vertices = []
         while not self.enqueue_vertex_queue.empty():
-            enqueue_vertices.append(self.get_enqueue_vertex_queue())
+            enqueue_vertices.append(self.get_enqueue_vertex())
 
         self.vertices = np.array(vertices_of_random + enqueue_vertices)
         self.values = np.array(values_of_random + enqueue_values)
 
         if len(self.vertices) > dimension + 1:
             order = np.argsort(self.values)
-            self.vertices, self.values = self.vertices[order][:dimension + 1], self.values[order][:dimension + 1]
+            self.vertices, self.values = self.vertices[order][: dimension + 1], self.values[order][: dimension + 1]
 
     def _validate_better_param_in_enqueue(
-            self,
-            vertices_before_processing: list[np.ndarray],
-            values_before_processing: list[float],
-            enqueue_values: list[float]
-            ) -> None:
+        self,
+        vertices_before_processing: list[npt.NDArray[np.float64]],
+        values_before_processing: list[float],
+        enqueue_values: list[float],
+    ) -> None:
         enqueue_vertices = []
         while not self.enqueue_vertex_queue.empty():
-            enqueue_vertices.append(self.get_enqueue_vertex_queue())
+            enqueue_vertices.append(self.get_enqueue_vertex())
 
         worst_value = self.values[-1] if len(self.values) > 0 else None
 
         if worst_value is not None and len([v for v in enqueue_values if v < worst_value]) > 0:
             raise UpdateByEnqueue(
-                vertices_before_processing + enqueue_vertices,
-                values_before_processing + enqueue_values
-                )
+                vertices_before_processing + enqueue_vertices, values_before_processing + enqueue_values
+            )
 
-    def _generator(self) -> Generator[np.ndarray, None, None]:
+    def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         # initialization
         yield from self._initialization()
 
@@ -220,7 +224,7 @@ class NelderMeadAlgorism:
                 new_values = np.array(list(self.values) + e.additional_values)
 
                 order = np.argsort(new_values)
-                self.vertices, self.values = new_vertices[order][:dimension + 1], new_values[order][:dimension + 1]
+                self.vertices, self.values = new_vertices[order][: dimension + 1], new_values[order][: dimension + 1]
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
@@ -236,12 +240,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
-            search_space=self._search_space,
-            coeff=coeff,
-            rng=_rng,
-            block=parallel_enabled,
-            timeout=None
-            )
+            search_space=self._search_space, coeff=coeff, rng=_rng, block=parallel_enabled, timeout=None
+        )
 
         self.running_trial_id: list[int] = []
         self.enqueue_running_trial_id: list[int] = []
@@ -261,7 +261,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         # TODO: system_attrs is deprecated.
         if "fixed_params" in trial.system_attrs:  # enqueue_trial
-            params = self.nm.put_enqueue_vertex_queue(trial.system_attrs["fixed_params"])
+            params = self.nm.enqueue_vertex(trial.system_attrs["fixed_params"])
             self.enqueue_running_trial_id.append(trial._trial_id)
         else:  # nelder mead
             while True:
@@ -269,10 +269,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 if params is None:
                     raise RuntimeError("No more parallel calls to ask() are possible.")
 
-                if all(low < x < high for x, (low, high) in zip(params, self._search_space.values())):
+                if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
                     break
                 else:
-                    self.nm.put_value_queue(np.inf)
+                    self.nm.put_value(np.inf)
             self.running_trial_id.append(trial._trial_id)
 
         trial.set_user_attr("params", params)
@@ -296,7 +296,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if not contains:
             warnings.warn(
                 f"The value `{param_value}` is out of range of the parameter `{param_name}`. "
-                f"The value will be used but the actual distribution is: `{param_distribution}`.", stacklevel=2)
+                f"The value will be used but the actual distribution is: `{param_distribution}`.",
+                stacklevel=2,
+            )
         return param_value
 
     def after_trial(
@@ -311,7 +313,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
             if len(self.running_trial_id) + len(self.enqueue_running_trial_id) == len(self.result_stack):
                 for trial_id in self.running_trial_id:
-                    self.nm.put_value_queue(self.result_stack[trial_id])
+                    self.nm.put_value(self.result_stack[trial_id])
                 for trial_id in self.enqueue_running_trial_id:
                     self.nm.put_enqueue_value_queue(self.result_stack[trial_id])
                 self.running_trial_id = []
