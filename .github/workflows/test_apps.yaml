@@ -26,4 +26,4 @@ jobs:
           python -m pip install .[dev,github-actions,test]
 
       - name: Unit Test
-        run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/unit_tests
+        run: pytest -v --cov=aiaccel --cov-branch --cov-report=term-missing tests/apps/

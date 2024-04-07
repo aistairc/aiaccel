@@ -24,4 +24,4 @@ jobs:
 
       - name: Lint
         run: |
-          ruff check --line-length 120 --fix aiaccel
+          ruff check --fix aiaccel

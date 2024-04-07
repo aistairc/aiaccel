@@ -28,4 +28,4 @@ jobs:
 
       - name: Optimizer Algorithm Test
         run: |
-          pytest -s -v tests/sampler/nelder_mead/test_nelder_mead.py
+          pytest -s -v tests/hpo/
