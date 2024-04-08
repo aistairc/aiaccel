@@ -250,9 +250,11 @@ class AbciJobExecutor:
 
         if isinstance(job_list, dict):
             update_state(int(job_list["JB_job_number"]), job_list["state"])
-        else:
+        elif isinstance(job_list, list):
             for job in job_list:
                 update_state(int(job["JB_job_number"]), job["state"])
+        else:
+            raise NotImplementedError("Unexpected job_list type.")
 
     @property
     def available_worker_count(self) -> int:
