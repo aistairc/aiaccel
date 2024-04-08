@@ -1,25 +1,34 @@
 from __future__ import annotations
 
-import unittest
 import shutil
+import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 
 class TestAbciJob(unittest.TestCase):
     def test___init__(self) -> None:
         from aiaccel.job.dispatcher import AbciJob
+
         job_file_path = "job.sh"
         n_jobs = 1
         work_dir = Path("./test_work").resolve()
-        job = AbciJob(job_name="test", args=[], tag=None, job_file_path=job_file_path, stdout_file_path="stdout", stderr_file_path="stderr")
+        job = AbciJob(
+            job_name="test",
+            args=[],
+            tag=None,
+            job_file_path=job_file_path,
+            stdout_file_path="stdout",
+            stderr_file_path="stderr",
+        )
         self.assertEqual(job.__class__.__name__, "AbciJob")
         if work_dir.exists():
             shutil.rmtree(work_dir)
 
+
 class TestAbciJobExecutor(unittest.TestCase):
     def test___init__(self) -> None:
         from aiaccel.job.dispatcher import AbciJobExecutor
+
         job_file_path = "job.sh"
         n_jobs = 1
         work_dir = Path("./test_work").resolve()
@@ -76,7 +85,6 @@ class TestAbciJobExecutor(unittest.TestCase):
 
     def test_submit_job_count(self) -> None:
         pass
-
 
 
 def test_create_run_command() -> None:

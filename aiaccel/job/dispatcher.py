@@ -255,7 +255,7 @@ class AbciJobExecutor:
 
     @property
     def available_worker_count(self) -> int:
-        _working_job_count = len([j for j in self.working_job_list if not j.status == JobStatus.FINISHED])
+        _working_job_count = len([j for j in self.working_job_list if j.status != JobStatus.FINISHED])
         return self._n_jobs - _working_job_count
 
     @property
