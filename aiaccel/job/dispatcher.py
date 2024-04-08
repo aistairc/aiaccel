@@ -28,7 +28,7 @@ status_mapping = {
 }
 
 
-def qstat_xml() -> dict:
+def qstat_xml() -> dict[Any, Any]:
     cmd = "qstat -xml"
     data = subprocess.run(cmd.split(), capture_output=True, text=True)
     qstat_dict = xmltodict.parse(data.stdout)
@@ -52,7 +52,7 @@ class AbciJob:
         self.stdout_file_path = stdout_file_path
         self.stderr_file_path = stderr_file_path
         self.job_number: int | None = None
-        self.status = JobStatus.UNSUBMITTED
+        self.status: JobStatus = JobStatus.UNSUBMITTED
 
     def run(self, cmd: str) -> None:
         print(f"{cmd}")
@@ -87,12 +87,12 @@ class AbciJob:
         job_list = qstat["job_info"]["queue_info"]["job_list"]
         if isinstance(job_list, dict):
             if int(job_list["JB_job_number"]) == job_number:
-                return job_list["state"]
+                return str(job_list["state"])
             return None
 
         for job_list in qstat["job_info"]["queue_info"]["job_list"]:
             if int(job_list["JB_job_number"]) == job_number:
-                return job_list["state"]
+                return str(job_list["state"])
         return None
 
     def update_state(self) -> None:
@@ -105,7 +105,7 @@ class AbciJob:
             if status is not None:
                 self.status = status_mapping[status]
 
-    def set_state(self, state: int) -> None:
+    def set_state(self, state: JobStatus) -> None:
         self.status = state
 
     def collect_result(self, retry_left: int = 10, wait: float = 1.0) -> str:
@@ -221,7 +221,7 @@ class AbciJobExecutor:
 
     @classmethod
     def update_state_batch(cls) -> None:
-        def _update_state(job_number: int, state: str):
+        def _update_state(job_number: int, state: str) -> None:
             for job in cls.working_job_list:
                 if job.job_number == job_number:
                     job.set_state(status_mapping[state])

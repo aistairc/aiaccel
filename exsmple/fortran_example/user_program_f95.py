@@ -1,6 +1,6 @@
 import optuna
 
-from aiaccel import AbciJobExecutor
+from aiaccel.job import AbciJobExecutor
 
 sampler = optuna.samplers.TPESampler(seed=42)
 # sampler = optuna.samplers.RandomSampler(seed=42)

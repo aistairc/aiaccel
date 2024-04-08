@@ -9,7 +9,7 @@ class TestAbciJob(unittest.TestCase):
     def test___init__(self) -> None:
         from aiaccel.job.dispatcher import AbciJob
 
-        job_file_path = "job.sh"
+        job_file_path = Path("job.sh")
         n_jobs = 1
         work_dir = Path("./test_work").resolve()
         job = AbciJob(
@@ -17,8 +17,8 @@ class TestAbciJob(unittest.TestCase):
             args=[],
             tag=None,
             job_file_path=job_file_path,
-            stdout_file_path="stdout",
-            stderr_file_path="stderr",
+            stdout_file_path=Path("stdout"),
+            stderr_file_path=Path("stderr"),
         )
         self.assertEqual(job.__class__.__name__, "AbciJob")
         if work_dir.exists():
