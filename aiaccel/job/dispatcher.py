@@ -219,9 +219,16 @@ class AbciJobExecutor:
         else:
             return None
 
+    def update_state(self, job_number: int, state: str) -> None:
+        for job in self.working_job_list:
+            if job.job_number == job_number:
+                job.set_state(status_mapping[state])
+                break
+            job.set_state(JobStatus.FINISHED)
+
     @classmethod
     def update_state_batch(cls) -> None:
-        def _update_state(job_number: int, state: str) -> None:
+        def update_state(job_number: int, state: str) -> None:
             for job in cls.working_job_list:
                 if job.job_number == job_number:
                     job.set_state(status_mapping[state])
@@ -230,28 +237,22 @@ class AbciJobExecutor:
 
         qstat = qstat_xml()
         queue_info = qstat["job_info"].get("queue_info", None)
-        if queue_info is not None:
-            job_list = queue_info.get("job_list", None)
-            if job_list is not None:
-                if isinstance(job_list, dict):
-                    _update_state(int(job_list["JB_job_number"]), job_list["state"])
-                else:
-                    for job in job_list:
-                        _update_state(int(job["JB_job_number"]), job["state"])
-
         job_info = qstat["job_info"].get("job_info", None)
-        if job_info is not None:
+
+        if queue_info:
+            job_list = queue_info.get("job_list", None)
+        elif job_info:
             job_list = job_info.get("job_list", None)
-            if job_list is not None:
-                if isinstance(job_list, dict):
-                    _update_state(int(job_list["JB_job_number"]), job_list["state"])
-                else:
-                    for job in job_list:
-                        _update_state(int(job["JB_job_number"]), job["state"])
         else:
             for job in cls.working_job_list:
-                if job.status != JobStatus.UNSUBMITTED:
-                    job.set_state(JobStatus.FINISHED)
+                job.set_state(JobStatus.FINISHED)
+            return
+
+        if isinstance(job_list, dict):
+            update_state(int(job_list["JB_job_number"]), job_list["state"])
+        else:
+            for job in job_list:
+                update_state(int(job["JB_job_number"]), job["state"])
 
     @property
     def available_worker_count(self) -> int:
