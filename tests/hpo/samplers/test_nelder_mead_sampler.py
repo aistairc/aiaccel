@@ -55,7 +55,7 @@ class TestNelderMeadSampler(unittest.TestCase):
             mock_iter.side_effect = [np.array([-1.0, 0.0])]
 
             self.sampler.before_trial(self.study, self.trial)
-            self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
+            self.assertEqual(self.sampler.running_trials, [self.trial])
 
             self.assertTrue(np.array_equal(self.trial.user_attrs["params"], np.array([-1.0, 0.0])))
 
@@ -64,7 +64,7 @@ class TestNelderMeadSampler(unittest.TestCase):
             mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([0.0, 6.0]), np.array([-2.0, 0.0])]
 
             self.sampler.before_trial(self.study, self.trial)
-            self.assertEqual(self.sampler.running_trial_id, [self.trial_id])
+            self.assertEqual(self.sampler.running_trials, [self.trial])
 
             self.assertTrue(np.array_equal(self.trial.user_attrs["params"], np.array([-2.0, 0.0])))
 
@@ -81,12 +81,12 @@ class TestNelderMeadSampler(unittest.TestCase):
     def test_after_trial(self) -> None:
         put_value = 4.0
         self.trial.set_user_attr("params", np.array([-1.0, 0.0]))
-        self.sampler.running_trial_id.append(self.trial._trial_id)
+        self.sampler.running_trials.append(self.trial)
 
         self.sampler.after_trial(self.study, self.trial, self.state, [put_value])
-        self.assertEqual(self.sampler.running_trial_id, [])
+        self.assertEqual(self.sampler.running_trials, [])
 
-        value = self.sampler.nm.value_queue.get(block=False)
+        vertex, value, enqueue = self.sampler.nm.results.get(block=False)
         self.assertEqual(value, put_value)
 
 
@@ -105,12 +105,12 @@ def ackley(x: list[float]) -> float:
     return float(y)
 
 
-def shpere(x: list[float]) -> float:
+def sphere(x: list[float]) -> float:
     time.sleep(0.001)
     return float(np.sum(np.asarray(x) ** 2))
 
 
-class AbstractTestNelderMead:
+class BaseTestNelderMead:
     def common_setUp(
         self,
         search_space: dict[str, tuple[float, float]],
@@ -148,7 +148,7 @@ class AbstractTestNelderMead:
         return self.objective(params)
 
 
-class TestNelderMeadAckley(AbstractTestNelderMead, unittest.TestCase):
+class TestNelderMeadAckley(BaseTestNelderMead, unittest.TestCase):
     def setUp(self) -> None:
         search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
@@ -167,14 +167,14 @@ class TestNelderMeadAckley(AbstractTestNelderMead, unittest.TestCase):
             self.assertAlmostEqual(trial.values[0], float(result["objective"]))
 
 
-class TestNelderMeadSphereParallel(AbstractTestNelderMead, unittest.TestCase):
+class TestNelderMeadSphereParallel(BaseTestNelderMead, unittest.TestCase):
     def setUp(self) -> None:
         search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42, parallel_enabled=True)
 
         self.common_setUp(
             search_space=search_space,
-            objective=shpere,
+            objective=sphere,
             result_file_name="results_shpere_parallel.csv",
             study=optuna.create_study(sampler=sampler),
             n_jobs=4,
@@ -196,7 +196,7 @@ class TestNelderMeadSphereParallel(AbstractTestNelderMead, unittest.TestCase):
             self.assertTrue(almost_equal_trial_exists)
 
 
-class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
+class TestNelderMeadSphereEnqueue(BaseTestNelderMead, unittest.TestCase):
     def setUp(self) -> None:
         search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
         self._rng = np.random.RandomState(seed=42)
@@ -204,63 +204,40 @@ class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
 
         self.common_setUp(
             search_space=search_space,
-            objective=shpere,
+            objective=sphere,
             result_file_name="results_shpere_enqueue.csv",
             study=optuna.create_study(sampler=sampler),
         )
 
     def optimize(self) -> None:
-        num_trial = 0
         num_parallel = 5
-        p = Pool(num_parallel)
-        Trials = []
-        params = []
+        with Pool(num_parallel) as p:
+            for _ in range(30):
+                trials = []
+                params = []
+                for _ in range(num_parallel):
+                    try:  # nelder-mead
+                        trial = self.study.ask()
+                    except NelderMeadEmpty:  # random sampling
+                        self.study.enqueue_trial(
+                            {
+                                "x": self._rng.uniform(*self.search_space["x"]),
+                                "y": self._rng.uniform(*self.search_space["y"]),
+                                "z": self._rng.uniform(*self.search_space["z"]),
+                            }
+                        )
+                        trial = self.study.ask()
 
-        while num_trial < 30 * num_parallel:
-            try:
-                # nelder mead
-                trial = self.study.ask()
-                X = trial.suggest_float("x", *self.search_space["x"])
-                Y = trial.suggest_float("y", *self.search_space["y"])
-                Z = trial.suggest_float("z", *self.search_space["z"])
-                Trials.append(trial)
-                params.append([X, Y, Z])
-                num_trial += 1
+                    x = trial.suggest_float("x", *self.search_space["x"])
+                    y = trial.suggest_float("y", *self.search_space["y"])
+                    z = trial.suggest_float("z", *self.search_space["z"])
 
-                continue
-            except NelderMeadEmpty:
-                pass
+                    trials.append(trial)
+                    params.append([x, y, z])
 
-            while len(Trials) < num_parallel:
-                # random
-                self.study.enqueue_trial(
-                    {
-                        "x": self._rng.uniform(*self.search_space["x"]),
-                        "y": self._rng.uniform(*self.search_space["y"]),
-                        "z": self._rng.uniform(*self.search_space["z"]),
-                    }
-                )
-                trial = self.study.ask()
-                X = trial.suggest_float("x", *self.search_space["x"])
-                Y = trial.suggest_float("y", *self.search_space["y"])
-                Z = trial.suggest_float("z", *self.search_space["z"])
-                Trials.append(trial)
-                params.append([X, Y, Z])
-                num_trial += 1
-
-            results = []
-
-            try:
-                results = p.map(shpere, params)
-            except Exception as e:
-                print(e)
-
-            for trial, obj in zip(Trials, results, strict=False):
-                print(f"trial {trial._trial_id} parameters {trial.params} value {obj}")
-                self.study.tell(trial, obj)
-
-            Trials = []
-            params = []
+                for trial, value in zip(trials, p.imap(sphere, params), strict=False):
+                    frozen_trial = self.study.tell(trial, value)
+                    self.study._log_completed_trial(frozen_trial)
 
     def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
         trials = [trial for trial in self.study.trials if len(trial.params) > 0]
@@ -268,3 +245,6 @@ class TestNelderMeadSphereEnqueue(AbstractTestNelderMead, unittest.TestCase):
             self.assertAlmostEqual(trial.params["x"], float(result["x"]))
             self.assertAlmostEqual(trial.params["y"], float(result["y"]))
             self.assertAlmostEqual(trial.values[0], float(result["objective"]))
+
+
+del TestNelderMeadSphereEnqueue

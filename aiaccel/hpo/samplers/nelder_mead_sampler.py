@@ -28,12 +28,15 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
-            search_space=self._search_space, coeff=coeff, rng=_rng, block=parallel_enabled, timeout=None
+            search_space=self._search_space,
+            coeff=coeff,
+            rng=_rng,
+            block=parallel_enabled,
+            timeout=None,
         )
 
-        self.running_trial_id: list[int] = []
-        self.enqueue_running_trial_id: list[int] = []
-        self.result_stack: dict[int, float] = {}
+        self.running_trials: list[FrozenTrial] = []
+        self.finished_trials: list[tuple[FrozenTrial, float]] = []
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
@@ -47,21 +50,20 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        # TODO: system_attrs is deprecated.
-        if "fixed_params" in trial.system_attrs:  # enqueue_trial
-            params = self.nm.enqueue_vertex(trial.system_attrs["fixed_params"])
-            self.enqueue_running_trial_id.append(trial._trial_id)
-        else:  # nelder mead
+        if "fixed_params" in trial.system_attrs:  # enqueued trial
+            fixed_params = trial.system_attrs["fixed_params"]
+            params = np.array([fixed_params[name] for name in self._search_space])
+        else:
             while True:
                 params = self.nm.get_vertex()
-
                 if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
                     break
-                else:
-                    self.nm.put_value(np.inf)
-            self.running_trial_id.append(trial._trial_id)
+
+                self.nm.put_value(params, np.inf)
 
         trial.set_user_attr("params", params)
+
+        self.running_trials.append(trial)
 
     def sample_independent(
         self,
@@ -94,14 +96,28 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         state: TrialState,
         values: Sequence[float] | None,
     ) -> None:
-        if isinstance(values, list):
-            self.result_stack[trial._trial_id] = values[0]
+        if isinstance(values, Sequence) and len(values) != 1:  # trial was finished as multiobjective
+            raise RuntimeError(
+                "Multidimentional trial values are obtained. "
+                "NelderMeadSampler supports only single objective optimization."
+            )
 
-            if len(self.running_trial_id) + len(self.enqueue_running_trial_id) == len(self.result_stack):
-                for trial_id in self.running_trial_id:
-                    self.nm.put_value(self.result_stack[trial_id])
-                for trial_id in self.enqueue_running_trial_id:
-                    self.nm.put_enqueue_value_queue(self.result_stack[trial_id])
-                self.running_trial_id = []
-                self.result_stack = {}
-                self.enqueue_running_trial_id = []
+        self.finished_trials.insert(0, (trial, values[0] if isinstance(values, Sequence) else np.inf))
+
+        for tgt_idx, target_trial in enumerate(self.running_trials):
+            for fin_idx, (trial, value) in enumerate(self.finished_trials):
+                if trial._trial_id == target_trial._trial_id:
+                    self.nm.put_value(
+                        trial.user_attrs["params"],
+                        value,
+                        enqueue="fixed_params" in trial.user_attrs,
+                    )
+
+                    self.finished_trials.pop(fin_idx)
+
+                    break
+            else:
+                self.running_trials = self.running_trials[tgt_idx:]
+                break
+        else:
+            self.running_trials = []

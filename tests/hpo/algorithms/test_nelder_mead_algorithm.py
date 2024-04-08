@@ -19,23 +19,23 @@ class TestNelderMeadAlgorism(unittest.TestCase):
 
     def test_waiting_for(self) -> Generator[Any, Any, Any]:
         # queue is Empty
-        result = yield from self.nm._waiting_for_float()
+        result = yield from self.nm._waiting_for_result()
         self.assertIsNone(result)
 
-        result = yield from self.nm._waiting_for_list(2)
+        result = yield from self.nm._waiting_for_results(2)
         self.assertIsNone(result)
 
         # queue is not Empty
         value = 1.0
-        self.nm.value_queue.put(value)
-        result = yield from self.nm._waiting_for_float()
+        self.nm.put_value(np.zeros(2), value)
+        result = yield from self.nm._waiting_for_result()
         self.assertEqual(result, value)
 
         value1 = 1.0
-        self.nm.value_queue.put(value1)
+        self.nm.put_value(np.zeros(2), value1)
         value2 = 2.0
-        self.nm.value_queue.put(value2)
-        result = yield from self.nm._waiting_for_list(2)
+        self.nm.put_value(np.zeros(2), value2)
+        result = yield from self.nm._waiting_for_results(2)
         self.assertEqual(result, [value1, value2])
 
     def test_initialize(self) -> None:
@@ -70,7 +70,7 @@ class TestNelderMeadAlgorism(unittest.TestCase):
             x = self.nm.get_vertex()
             self.assertTrue(np.array_equal(x, vertices[0]))
             for vertex, value in zip(vertices[1:], values, strict=False):
-                self.nm.value_queue.put(value)
+                self.nm.put_value(np.zeros(2), value)
                 x = self.nm.get_vertex()
 
                 self.assertTrue(np.array_equal(x, vertex))
