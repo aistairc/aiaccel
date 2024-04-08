@@ -25,7 +25,7 @@ for n in range(n_trials):
 
     job = jobs.submit(args, "", job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
     y = job.get_result()
-    study.tell(trial, y)
+    study.tell(trial, (y))  # y は str のため float に変換
 
 
 # ====================================
@@ -49,5 +49,5 @@ while True:
     jobs.submit(args, "", tag=trial, job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
 
     for y, trial in jobs.get_results():
-        study.tell(trial, y)
+        study.tell(trial, float(y))  # y は str のため float に変換
     n += 1

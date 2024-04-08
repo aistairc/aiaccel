@@ -16,7 +16,8 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "numpy"
+    "numpy",
+    "xmltodict"
 ]
 
 [project.scripts]

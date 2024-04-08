@@ -1,22 +1,43 @@
 from __future__ import annotations
 
-import ast
+import re
 import subprocess
 import time
 import uuid
+from collections.abc import Generator
+from enum import Enum
+from pathlib import Path
+from typing import Any
 
 import xmltodict
 
-from pathlib import Path
-from typing import Any, Generator
 
-from aiaccel.job.retry import retry
+class JobStatus(Enum):
+    UNSUBMITTED = 0
+    WAITING = 1
+    RUNNING = 2
+    FINISHED = 3
+    ERROR = 4
+
+
+status_mapping = {
+    "r": JobStatus.RUNNING,  # running
+    "qw": JobStatus.WAITING,  # waiting
+    "d": JobStatus.RUNNING,  # deleting
+    "E": JobStatus.ERROR,  # Error
+}
+
+
+def qstat_xml() -> dict:
+    cmd = "qstat -xml"
+    data = subprocess.run(cmd.split(), capture_output=True, text=True)
+    qstat_dict = xmltodict.parse(data.stdout)
+    return qstat_dict
 
 
 class AbciJob:
     def __init__(
         self,
-        cmd: str,
         job_name: str,
         args: list[Any],
         tag: Any,
@@ -24,42 +45,41 @@ class AbciJob:
         stdout_file_path: Path,
         stderr_file_path: Path,
     ) -> None:
-        self.cmd = cmd
         self.job_name = job_name
         self.args = args
         self.tag = tag
         self.job_file_path = job_file_path
         self.stdout_file_path = stdout_file_path
         self.stderr_file_path = stderr_file_path
-        self._job_number: int | None = None
-        self._submitted: bool = False
-        self._seen_job_numbers: set[int] = set()
-        self._state: str | None = None
+        self.job_number: int | None = None
+        self.status = JobStatus.UNSUBMITTED
 
-    def is_finished(self) -> bool:
-        """
-        投入済み かつ qstat で 自job_number の state が取得できなければ 終了と判定
-        """
-        self.update_state()
-        if self._submitted and self.get_state() is None:
-            return True
-        return False
+    def run(self, cmd: str) -> None:
+        print(f"{cmd}")
 
-    def run(self) -> None:
-        self._cleanup_output_files()
-        self._execute_command()
-        self._update_job_number()
-        self.update_state()
-        if self.get_state() is not None and self.get_state().lower() == "e":
+        output = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        pattern = r"Your job (\d+)"
+        match = re.search(pattern, output.stdout)
+
+        if match:
+            self.job_number = int(match.group(1))
+        else:
             raise ValueError(f"Failed to submit the job: {self.job_name}")
-        self._submitted = True
 
-    def _get_job_status(self, job_number: int | None) -> str | None:
+        for _ in range(10):
+            self.update_state()
+            if self.status != JobStatus.UNSUBMITTED:
+                break
+            time.sleep(3)
+            # wait for the job to be submitted
+
+        if self.status == JobStatus.UNSUBMITTED:
+            raise ValueError(f"Failed to submit the job: {self.job_name}")
+
+    def _get_job_status(self, job_number: int) -> str | None:
         """
         Get the status of the job.
         """
-        if job_number is None:
-            return None
         qstat = qstat_xml()
         if qstat["job_info"]["queue_info"] is None:
             return None
@@ -76,18 +96,19 @@ class AbciJob:
         return None
 
     def update_state(self) -> None:
-        if self._job_number is None:
-            self._update_job_number()
-        self._state = self._get_job_status(self._job_number)
+        if self.job_number is None:
+            raise ValueError("Job number is not set.")
+        status = self._get_job_status(self.job_number)
+        if self.status != JobStatus.UNSUBMITTED and status is None:
+            self.status = JobStatus.FINISHED
+        else:
+            if status is not None:
+                self.status = status_mapping[status]
 
-    def get_state(self) -> str | None:
-        return self._state
+    def set_state(self, state: int) -> None:
+        self.status = state
 
-    def set_state(self, state: str) -> None:
-        self._state = state
-
-    @retry(_MAX_NUM=10, _DELAY=1.0)
-    def collect_result(self) -> str:
+    def collect_result(self, retry_left: int = 10, wait: float = 1.0) -> str:
         """Collect the result of the job.
 
         return:
@@ -97,69 +118,29 @@ class AbciJob:
             Retry reading the file if it is not found.
             This is because the file metadata may not be updated immediately after the job finishes.
         """
-        with open(str(self.stdout_file_path), encoding="utf-8") as file:
-            lines = file.readlines()
-            if lines:
-                return lines[-1].strip()
-            else:
-                raise ValueError("No result found.")
+        while retry_left > 0:
+            try:
+                with open(str(self.stdout_file_path), encoding="utf-8") as file:
+                    lines = file.readlines()
+                    if lines:
+                        return lines[-1].strip()
+                    else:
+                        raise ValueError("No result found.")
+
+            except FileNotFoundError:
+                time.sleep(wait)
+                retry_left -= 1
+
+            except ValueError:
+                time.sleep(wait)
+                retry_left -= 1
+
+        raise ValueError("No result found.")
 
     def get_result(self) -> Any:
         y = self.collect_result()
-        try:
-            y = ast.literal_eval(y)
-        except ValueError:
-            y = y
         self.result = y
         return self.result
-
-    def get_job_numbers(self, job_name: str) -> list[int]:
-        """
-        Get the job numbers of the same job name.
-        """
-        qstat = qstat_xml()
-        job_numbers = []
-
-        if qstat["job_info"]["queue_info"] is None:
-            return job_numbers
-
-        job_list = qstat["job_info"]["queue_info"]["job_list"]
-        if isinstance(job_list, dict):
-            job_numbers.append(int(job_list["JB_job_number"]))
-            return job_numbers
-
-        for job in qstat["job_info"]["queue_info"]["job_list"]:
-            if job["JB_name"] == job_name:
-                job_numbers.append(int(job["JB_job_number"]))
-        return job_numbers
-
-    @retry(_MAX_NUM=10, _DELAY=3.0)
-    def _update_job_number(self) -> None:
-        jn = self.get_job_numbers(self.job_name)
-        for job_number in jn:
-            if job_number not in self._seen_job_numbers:
-                self._job_number = job_number
-                self._seen_job_numbers.add(job_number)
-                break
-        if self._job_number is None:
-            raise ValueError(f"Job number not found: {self.job_name}")
-
-    def _cleanup_output_files(self) -> None:
-        if self.stdout_file_path.exists():
-            self.stdout_file_path.unlink()
-        if self.stderr_file_path.exists():
-            self.stderr_file_path.unlink()
-
-    def _execute_command(self) -> None:
-        print(f"{self.cmd}")
-        subprocess.run(self.cmd.split(), capture_output=True, text=True)
-
-    def set_seen_job_number(self, job_number: int) -> None:
-        self._seen_job_numbers.add(job_number)
-
-    @property
-    def job_number(self) -> int | None:
-        return self._job_number
 
 
 class AbciJobExecutor:
@@ -174,30 +155,21 @@ class AbciJobExecutor:
         self.job_file_path = Path(job_file_path).resolve()
         self._n_jobs: int = n_jobs
         self.work_dir: Path = Path(work_dir).resolve()
-        self._create_work_dir()
-
+        if not self.work_dir.exists():
+            self.work_dir.mkdir(parents=True)
         self._submit_job_count: int = 0
         self._finished_job_count: int = 0
 
-    def _create_work_dir(self) -> None:
-        if not self.work_dir.exists():
-            self.work_dir.mkdir(parents=True)
-
-    def submit(
-        self, args: list[str], group: str, job_name: str = "", tag: Any | None = None
-    ) -> AbciJob:
+    def submit(self, args: list[str], group: str, job_name: str = "", tag: Any | None = None) -> AbciJob:
         if job_name == "":
             job_name = str(uuid.uuid4())
         stdout_file_path = self.work_dir / f"{job_name}.o"
         stderr_file_path = self.work_dir / f"{job_name}.e"
         args_str = " ".join(args)
-        qsub_cmd = f"qsub -g {group} -N {job_name} -o {stdout_file_path} -e {stderr_file_path} {self.job_file_path} {args_str}"
-        # 生成コマンド例:
-        #  qsub -g [group] -N [job_name] -o [stdout_file_path] -e [stderr_file_path] [job_file_path] [--x0 ... --x1 ...]
-
-        return self._execute(
-            qsub_cmd, job_name, args, tag, stdout_file_path, stderr_file_path
+        qsub_cmd = (
+            f"qsub -g {group} -N {job_name} -o {stdout_file_path} -e {stderr_file_path} {self.job_file_path} {args_str}"
         )
+        return self._execute(qsub_cmd, job_name, args, tag, stdout_file_path, stderr_file_path)
 
     def _execute(
         self,
@@ -211,7 +183,6 @@ class AbciJobExecutor:
         self._submit_job_count += 1
 
         job = AbciJob(
-            cmd,
             job_name,
             args,
             tag,
@@ -220,11 +191,7 @@ class AbciJobExecutor:
             stderr_file_path,
         )
 
-        for j in self.working_job_list:
-            if j.job_number is not None:
-                job.set_seen_job_number(j.job_number)
-
-        job.run()
+        job.run(cmd)
         self.working_job_list.append(job)
 
         # Wait for at least one available worker
@@ -236,14 +203,16 @@ class AbciJobExecutor:
         return job
 
     def get_results(self) -> Generator[tuple[Any, Any], None, None]:
+        self.update_state_batch()
         for job in self.working_job_list:
-            if job.is_finished():
+            if job.status == JobStatus.FINISHED:
                 self.working_job_list.pop(self.working_job_list.index(job))
                 self._finished_job_count += 1
                 yield job.get_result(), job.tag
 
     def get_result(self) -> Any:
-        if self.working_job_list[-1].is_finished():
+        self.update_state_batch()
+        if self.working_job_list[-1].status == JobStatus.FINISHED:
             job = self.working_job_list.pop(0)
             self._finished_job_count += 1
             return job.get_result()
@@ -252,29 +221,41 @@ class AbciJobExecutor:
 
     @classmethod
     def update_state_batch(cls) -> None:
+        def _update_state(job_number: int, state: str):
+            for job in cls.working_job_list:
+                if job.job_number == job_number:
+                    job.set_state(status_mapping[state])
+                    break
+                job.set_state(JobStatus.FINISHED)
+
         qstat = qstat_xml()
-        qstat_job_list = qstat["job_info"]["queue_info"]["job_list"]
-        if qstat_job_list is None:
-            return
+        queue_info = qstat["job_info"].get("queue_info", None)
+        if queue_info is not None:
+            job_list = queue_info.get("job_list", None)
+            if job_list is not None:
+                if isinstance(job_list, dict):
+                    _update_state(int(job_list["JB_job_number"]), job_list["state"])
+                else:
+                    for job in job_list:
+                        _update_state(int(job["JB_job_number"]), job["state"])
 
-        qstat_states = {}
-        if isinstance(qstat_job_list, dict):
-            qstat_states[int(qstat_job_list["JB_job_number"])] = qstat_job_list["state"]
+        job_info = qstat["job_info"].get("job_info", None)
+        if job_info is not None:
+            job_list = job_info.get("job_list", None)
+            if job_list is not None:
+                if isinstance(job_list, dict):
+                    _update_state(int(job_list["JB_job_number"]), job_list["state"])
+                else:
+                    for job in job_list:
+                        _update_state(int(job["JB_job_number"]), job["state"])
         else:
-            for job in qstat_job_list:
-                qstat_states[int(job["JB_job_number"])] = job["state"]
-
-        for job in cls.working_job_list:
-            if job.job_number in qstat_states.keys():
-                job.set_state(qstat_states[job.job_number])
-            else:
-                job.set_state(None)
+            for job in cls.working_job_list:
+                if job.status != JobStatus.UNSUBMITTED:
+                    job.set_state(JobStatus.FINISHED)
 
     @property
     def available_worker_count(self) -> int:
-        _working_job_count = len(
-            [j for j in self.working_job_list if not j.is_finished()]
-        )
+        _working_job_count = len([j for j in self.working_job_list if not j.status == JobStatus.FINISHED])
         return self._n_jobs - _working_job_count
 
     @property
@@ -288,12 +269,3 @@ class AbciJobExecutor:
     @property
     def job_list(self) -> list[AbciJob]:
         return self.working_job_list
-
-    ...
-
-
-def qstat_xml() -> dict:
-    cmd = "qstat -xml"
-    data = subprocess.run(cmd.split(), capture_output=True, text=True)
-    qstat_dict = xmltodict.parse(data.stdout)
-    return qstat_dict

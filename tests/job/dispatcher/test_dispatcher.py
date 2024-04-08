@@ -12,21 +12,10 @@ class TestAbciJob(unittest.TestCase):
         job_file_path = "job.sh"
         n_jobs = 1
         work_dir = Path("./test_work").resolve()
-        job = AbciJob(job_file_path, n_jobs, work_dir=str(work_dir))
+        job = AbciJob(job_name="test", args=[], tag=None, job_file_path=job_file_path, stdout_file_path="stdout", stderr_file_path="stderr")
         self.assertEqual(job.__class__.__name__, "AbciJob")
         if work_dir.exists():
             shutil.rmtree(work_dir)
-
-    def test_is_finished(self) -> None:
-        from aiaccel.job.dispatcher import AbciJob
-        job_file_path = "job.sh"
-        n_jobs = 1
-        work_dir = Path("./test_work").resolve()
-        job = AbciJob(job_file_path, n_jobs, work_dir=str(work_dir))
-        self.assertEqual(job.is_finished(), False)
-        if work_dir.exists():
-            shutil.rmtree(work_dir)
-
 
 class TestAbciJobExecutor(unittest.TestCase):
     def test___init__(self) -> None:
@@ -36,16 +25,6 @@ class TestAbciJobExecutor(unittest.TestCase):
         work_dir = Path("./test_work").resolve()
         dispatcher = AbciJobExecutor(job_file_path, n_jobs, work_dir=str(work_dir))
         self.assertEqual(dispatcher.__class__.__name__, "AbciJobExecutor")
-        if work_dir.exists():
-            shutil.rmtree(work_dir)
-
-    def test__create_work_dir(self) -> None:
-        from aiaccel.job.dispatcher import AbciJobExecutor
-        job_file_path = "job.sh"
-        n_jobs = 1
-        work_dir = Path("./test_work").resolve()
-        dispatcher = AbciJobExecutor(job_file_path, n_jobs, work_dir=str(work_dir))
-        assert dispatcher._create_work_dir() is None
         if work_dir.exists():
             shutil.rmtree(work_dir)
 
@@ -93,9 +72,6 @@ class TestAbciJobExecutor(unittest.TestCase):
         pass
 
     def test_finished_job_count(self) -> None:
-        pass
-
-    def test_is_finished(self) -> None:
         pass
 
     def test_submit_job_count(self) -> None:
