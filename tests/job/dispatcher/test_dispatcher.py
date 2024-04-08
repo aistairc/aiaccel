@@ -10,7 +10,6 @@ class TestAbciJob(unittest.TestCase):
         from aiaccel.job.dispatcher import AbciJob
 
         job_file_path = Path("job.sh")
-        n_jobs = 1
         work_dir = Path("./test_work").resolve()
         job = AbciJob(
             job_name="test",

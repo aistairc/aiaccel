@@ -1,12 +1,13 @@
 from argparse import ArgumentParser
-from typing import Any, Dict
+from typing import Any
 
 
-def func(hparams: Dict[str, Any]) -> float:
+def func(hparams: dict[str, Any]) -> float:
     x1 = hparams["x1"]
     x2 = hparams["x2"]
     y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
     return float(y)
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
