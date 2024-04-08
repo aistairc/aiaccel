@@ -244,8 +244,8 @@ class AbciJobExecutor:
         elif job_info:
             job_list = job_info.get("job_list", None)
         else:
-            for job in cls.working_job_list:
-                job.set_state(JobStatus.FINISHED)
+            for working_job in cls.working_job_list:
+                working_job.set_state(JobStatus.FINISHED)
             return
 
         if isinstance(job_list, dict):
