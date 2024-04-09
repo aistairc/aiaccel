@@ -146,8 +146,6 @@ class NelderMeadAlgorism:
         except UnexpectedVerticesUpdate as e:
             self.vertices, self.values = e.updated_vertices, e.updated_values
 
-        print(self.vertices, self.values)
-
         # main loop
         shrink_requied = False
         while True:
