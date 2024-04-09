@@ -159,20 +159,18 @@ class NelderMeadAlgorism:
                 yc = np.mean(self.vertices[:-1], axis=0)
                 yield (yr := yc + self.coeff.r * (yc - self.vertices[-1]))
 
-                fr = yield from self._wait_for_result()
-
-                match True:
-                    case _ if self.values[0] <= fr < self.values[-2]:
+                match (yield from self._wait_for_result()):
+                    case fr if self.values[0] <= fr < self.values[-2]:
                         self.vertices[-1], self.values[-1] = yr, fr
 
-                    case _ if fr < self.values[0]:  # expand
+                    case fr if fr < self.values[0]:  # expand
                         yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
 
                         fe = yield from self._wait_for_result()
 
                         self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
 
-                    case _ if self.values[-2] <= fr < self.values[-1]:  # outside contract
+                    case fr if self.values[-2] <= fr < self.values[-1]:  # outside contract
                         yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
 
                         foc = yield from self._wait_for_result()
@@ -182,7 +180,7 @@ class NelderMeadAlgorism:
                         else:
                             shrink_requied = True
 
-                    case _ if self.values[-1] <= fr:  # inside contract
+                    case fr if self.values[-1] <= fr:  # inside contract
                         yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
 
                         fic = yield from self._wait_for_result()
