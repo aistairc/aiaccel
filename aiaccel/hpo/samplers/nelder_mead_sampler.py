@@ -51,6 +51,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         if "fixed_params" in trial.system_attrs:  # enqueued trial
+            self.nm.enqueued()
             fixed_params = trial.system_attrs["fixed_params"]
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
@@ -110,7 +111,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                     self.nm.put_value(
                         trial.user_attrs["params"],
                         value,
-                        enqueue="fixed_params" in trial.user_attrs,
+                        enqueue="fixed_params" in trial.system_attrs,
                     )
 
                     self.finished_trials.pop(fin_idx)

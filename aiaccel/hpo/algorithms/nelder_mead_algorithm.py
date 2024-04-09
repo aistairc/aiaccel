@@ -52,6 +52,7 @@ class NelderMeadAlgorism:
         self.timeout = timeout
 
         self.simplex_size = len(self._search_space) + 1
+        self.num_enqueued = 0
 
     def get_vertex(self) -> npt.NDArray[np.float64]:
         with self.lock:
@@ -61,6 +62,9 @@ class NelderMeadAlgorism:
             raise NelderMeadEmpty("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
 
         return vertex
+
+    def enqueued(self):
+        self.num_enqueued += 1
 
     def put_value(
         self,
@@ -83,12 +87,13 @@ class NelderMeadAlgorism:
         # collect results
         vertices, values = list[npt.NDArray[np.float64]](), list[float]()
         enqueued_vertices, enqueued_values = list[npt.NDArray[np.float64]](), list[float]()
-        while len(values) < num_waiting:
+        while len(values) < num_waiting + self.num_enqueued:
             try:
                 vertex, value, enqueue = self.results.get(block=self.block, timeout=self.timeout)
                 if enqueue:
                     enqueued_vertices.append(vertex)
                     enqueued_values.append(value)
+                    self.num_enqueued -= 1
                 else:
                     vertices.append(vertex)
                     values.append(value)
@@ -96,11 +101,11 @@ class NelderMeadAlgorism:
                 yield None
 
         # check if enqueued vertices change ordering
-        if len(enqueued_values) > 0 and max(list(self.values) + values + [-np.inf]) < min(enqueued_values):
+        if len(enqueued_values) > 0 and max(list(self.values)) > min(enqueued_values):
             new_vertices = np.array(list(self.vertices) + vertices + enqueued_vertices)
             new_values = np.array(list(self.values) + values + enqueued_values)
 
-            raise UnexpectedVerticesUpdate(new_values, new_vertices)
+            raise UnexpectedVerticesUpdate(new_vertices, new_values)
 
         return values
 
@@ -108,33 +113,26 @@ class NelderMeadAlgorism:
         self,
     ) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         lows, highs = zip(*self._search_space.values(), strict=False)
+        vertices = []
+        values = []
+        num_random_vertices = 0
 
-        # collect enqueued results first
-        vertices, values = [], []
-        while True:
+        while len(vertices) + num_random_vertices < self.simplex_size + self.num_enqueued:
+            random_vertex = self._rng.uniform(lows, highs, len(self._search_space))
+            num_random_vertices += 1
+            yield random_vertex
+
+        while len(values) < self.simplex_size + self.num_enqueued:
             try:
-                vertex, value, enqueue = self.results.get(block=False)
-                assert enqueue
-
+                vertex, value, _ = self.results.get(block=self.block)
                 vertices.append(vertex)
                 values.append(value)
             except queue.Empty:
-                break
+                yield None
 
         self.vertices = np.array(vertices)
         self.values = np.array(values)
-
-        # generate remaining initial vertices
-        try:
-            num_random_points = self.simplex_size - len(self.vertices)
-            yield from (random_vertices := self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
-
-            random_values = yield from self._waiting_for_results(num_random_points)
-
-            self.vertices = np.array(list(self.vertices) + list(random_vertices))
-            self.values = np.array(list(self.values) + random_values)
-        except UnexpectedVerticesUpdate as e:
-            self.vertices, self.values = e.updated_vertices, e.updated_values
+        self.num_enqueued = 0
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         # initialization
