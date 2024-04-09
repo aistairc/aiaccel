@@ -53,7 +53,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if "fixed_params" in trial.system_attrs:  # enqueued trial
             self.nm.enqueued()
             fixed_params = trial.system_attrs["fixed_params"]
-            params = np.array([fixed_params[name] for name in self._search_space])
+            if fixed_params.keys() == self._search_space.keys():
+                params = np.array([fixed_params[name] for name in self._search_space])
+            else:
+                raise RuntimeError("All parameters must be given when executing enqueue_trial.")
         else:
             while True:
                 params = self.nm.get_vertex()
