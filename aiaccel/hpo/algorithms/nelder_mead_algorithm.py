@@ -116,12 +116,12 @@ class NelderMeadAlgorism:
         vertices, values = list[npt.NDArray[np.float64]](), list[float]()
         num_random_vertices = 0
 
-        while len(vertices) + num_random_vertices < self.simplex_size + self.num_enqueued:
+        while num_random_vertices + self.num_enqueued  < self.simplex_size:
             random_vertex = self._rng.uniform(lows, highs, len(self._search_space))
             num_random_vertices += 1
             yield random_vertex
 
-        while len(values) < self.simplex_size + self.num_enqueued:
+        while len(values) < num_random_vertices + self.num_enqueued:
             try:
                 vertex, value, _ = self.results.get(block=self.block)
                 vertices.append(vertex)
