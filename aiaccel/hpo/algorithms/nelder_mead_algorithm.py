@@ -128,7 +128,7 @@ class NelderMeadAlgorism:
         values = yield from self._wait_for_results(1)
         return values[0]
 
-    def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
+    def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         # initialization
         lows, highs = zip(*self._search_space.values(), strict=False)
 
@@ -161,33 +161,36 @@ class NelderMeadAlgorism:
 
                 fr = yield from self._wait_for_result()
 
-                if self.values[0] <= fr < self.values[-2]:
-                    self.vertices[-1], self.values[-1] = yr, fr
-                elif fr < self.values[0]:  # expand
-                    yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
+                match fr:
+                    case _ if self.values[0] <= fr < self.values[-2]:
+                        self.vertices[-1], self.values[-1] = yr, fr
 
-                    fe = yield from self._wait_for_result()
+                    case _ if fr < self.values[0]:  # expand
+                        yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
 
-                    self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
+                        fe = yield from self._wait_for_result()
 
-                elif self.values[-2] <= fr < self.values[-1]:  # outside contract
-                    yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
+                        self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
 
-                    foc = yield from self._wait_for_result()
+                    case _ if self.values[-2] <= fr < self.values[-1]:  # outside contract
+                        yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
 
-                    if foc <= fr:
-                        self.vertices[-1], self.values[-1] = yoc, foc
-                    else:
-                        shrink_requied = True
-                elif self.values[-1] <= fr:  # inside contract
-                    yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
+                        foc = yield from self._wait_for_result()
 
-                    fic = yield from self._wait_for_result()
+                        if foc <= fr:
+                            self.vertices[-1], self.values[-1] = yoc, foc
+                        else:
+                            shrink_requied = True
 
-                    if fic < self.values[-1]:
-                        self.vertices[-1], self.values[-1] = yic, fic
-                    else:
-                        shrink_requied = True
+                    case _ if self.values[-1] <= fr:  # inside contract
+                        yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
+
+                        fic = yield from self._wait_for_result()
+
+                        if fic < self.values[-1]:
+                            self.vertices[-1], self.values[-1] = yic, fic
+                        else:
+                            shrink_requied = True
 
                 # shrink
                 if shrink_requied:
