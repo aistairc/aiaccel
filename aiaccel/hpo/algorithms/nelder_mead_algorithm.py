@@ -126,17 +126,17 @@ class NelderMeadAlgorism:
         values = yield from self._wait_for_results(1)
         return values[0]
 
-    def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:
+    def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
         # initialization
         lows, highs = zip(*self._search_space.values(), strict=False)
 
         self.vertices, self.values = self._collect_enqueued_results()
 
-        num_random_points = self.simplex_size - len(self.vertices)
-        random_vertices = list(self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
-        yield from random_vertices
-
         try:
+            num_random_points = self.simplex_size - len(self.vertices)
+            random_vertices = list(self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
+            yield from random_vertices
+
             random_values = yield from self._wait_for_results(num_random_points)
 
             self.vertices = self.vertices + random_vertices
@@ -157,36 +157,37 @@ class NelderMeadAlgorism:
                 yc = np.mean(self.vertices[:-1], axis=0)
                 yield (yr := yc + self.coeff.r * (yc - self.vertices[-1]))
 
-                match (yield from self._wait_for_result()):
-                    case fr if self.values[0] <= fr < self.values[-2]:
-                        self.vertices[-1], self.values[-1] = yr, fr
+                fr = yield from self._wait_for_result()
 
-                    case fr if fr < self.values[0]:  # expand
-                        yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
+                if self.values[0] <= fr < self.values[-2]:
+                    self.vertices[-1], self.values[-1] = yr, fr
 
-                        fe = yield from self._wait_for_result()
+                elif fr < self.values[0]:  # expand
+                    yield (ye := yc + self.coeff.e * (yc - self.vertices[-1]))
 
-                        self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
+                    fe = yield from self._wait_for_result()
 
-                    case fr if self.values[-2] <= fr < self.values[-1]:  # outside contract
-                        yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
+                    self.vertices[-1], self.values[-1] = (ye, fe) if fe < fr else (yr, fr)
 
-                        foc = yield from self._wait_for_result()
+                elif self.values[-2] <= fr < self.values[-1]:  # outside contract
+                    yield (yoc := yc + self.coeff.oc * (yc - self.vertices[-1]))
 
-                        if foc <= fr:
-                            self.vertices[-1], self.values[-1] = yoc, foc
-                        else:
-                            shrink_requied = True
+                    foc = yield from self._wait_for_result()
 
-                    case fr if self.values[-1] <= fr:  # inside contract
-                        yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
+                    if foc <= fr:
+                        self.vertices[-1], self.values[-1] = yoc, foc
+                    else:
+                        shrink_requied = True
 
-                        fic = yield from self._wait_for_result()
+                elif self.values[-1] <= fr:  # inside contract
+                    yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
 
-                        if fic < self.values[-1]:
-                            self.vertices[-1], self.values[-1] = yic, fic
-                        else:
-                            shrink_requied = True
+                    fic = yield from self._wait_for_result()
+
+                    if fic < self.values[-1]:
+                        self.vertices[-1], self.values[-1] = yic, fic
+                    else:
+                        shrink_requied = True
 
                 # shrink
                 if shrink_requied:
