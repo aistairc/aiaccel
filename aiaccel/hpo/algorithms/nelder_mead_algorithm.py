@@ -63,7 +63,7 @@ class NelderMeadAlgorism:
 
         return vertex
 
-    def enqueued(self):
+    def enqueued(self) -> None:
         self.num_enqueued += 1
 
     def put_value(
@@ -113,8 +113,7 @@ class NelderMeadAlgorism:
         self,
     ) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         lows, highs = zip(*self._search_space.values(), strict=False)
-        vertices = []
-        values = []
+        vertices, values = [], []
         num_random_vertices = 0
 
         while len(vertices) + num_random_vertices < self.simplex_size + self.num_enqueued:
