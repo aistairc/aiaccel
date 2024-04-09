@@ -116,7 +116,7 @@ class NelderMeadAlgorism:
         vertices, values = list[npt.NDArray[np.float64]](), list[float]()
         num_random_vertices = 0
 
-        while num_random_vertices + self.num_enqueued  < self.simplex_size:
+        while num_random_vertices + self.num_enqueued < self.simplex_size:
             random_vertex = self._rng.uniform(lows, highs, len(self._search_space))
             num_random_vertices += 1
             yield random_vertex
