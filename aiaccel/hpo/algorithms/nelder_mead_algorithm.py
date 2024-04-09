@@ -161,7 +161,7 @@ class NelderMeadAlgorism:
 
                 fr = yield from self._wait_for_result()
 
-                match fr:
+                match True:
                     case _ if self.values[0] <= fr < self.values[-2]:
                         self.vertices[-1], self.values[-1] = yr, fr
 
