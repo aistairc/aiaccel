@@ -246,5 +246,3 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead, unittest.TestCase):
             self.assertAlmostEqual(trial.params["y"], float(result["y"]))
             self.assertAlmostEqual(trial.values[0], float(result["objective"]))
 
-
-del TestNelderMeadSphereEnqueue
