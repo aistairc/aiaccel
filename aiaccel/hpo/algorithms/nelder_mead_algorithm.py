@@ -35,7 +35,7 @@ class NelderMeadAlgorism:
         search_space: dict[str, tuple[float, float]],
         coeff: NelderMeadCoefficient | None = None,
         rng: np.random.RandomState | None = None,
-        block: bool = True,
+        block: bool = False,
         timeout: int | None = None,
     ) -> None:
         self._search_space = search_space
@@ -52,7 +52,7 @@ class NelderMeadAlgorism:
         self.timeout = timeout
 
         self.simplex_size = len(self._search_space) + 1
-        self.num_enqueued = 0
+        # self.num_enqueued = 0
 
     def get_vertex(self) -> npt.NDArray[np.float64]:
         with self.lock:
@@ -63,8 +63,8 @@ class NelderMeadAlgorism:
 
         return vertex
 
-    def enqueued(self) -> None:
-        self.num_enqueued += 1
+    # def enqueued(self) -> None:
+    #     self.num_enqueued += 1
 
     def put_value(
         self,
@@ -87,13 +87,12 @@ class NelderMeadAlgorism:
         # collect results
         vertices, values = list[npt.NDArray[np.float64]](), list[float]()
         enqueued_vertices, enqueued_values = list[npt.NDArray[np.float64]](), list[float]()
-        while len(values) < num_waiting + self.num_enqueued:
+        while len(values) < num_waiting:
             try:
                 vertex, value, enqueue = self.results.get(block=self.block, timeout=self.timeout)
                 if enqueue:
                     enqueued_vertices.append(vertex)
                     enqueued_values.append(value)
-                    self.num_enqueued -= 1
                 else:
                     vertices.append(vertex)
                     values.append(value)
@@ -101,7 +100,7 @@ class NelderMeadAlgorism:
                 yield None
 
         # check if enqueued vertices change ordering
-        if len(enqueued_values) > 0 and max(list(self.values)) > min(enqueued_values):
+        if len(enqueued_values) > 0 and min(enqueued_values) < self.values.max():
             new_vertices = np.array(list(self.vertices) + vertices + enqueued_vertices)
             new_values = np.array(list(self.values) + values + enqueued_values)
 
@@ -113,25 +112,31 @@ class NelderMeadAlgorism:
         self,
     ) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         lows, highs = zip(*self._search_space.values(), strict=False)
+
         vertices, values = list[npt.NDArray[np.float64]](), list[float]()
-        num_random_vertices = 0
-
-        while num_random_vertices + self.num_enqueued < self.simplex_size:
-            random_vertex = self._rng.uniform(lows, highs, len(self._search_space))
-            num_random_vertices += 1
-            yield random_vertex
-
-        while len(values) < num_random_vertices + self.num_enqueued:
+        while True:
             try:
-                vertex, value, _ = self.results.get(block=self.block)
+                vertex, value, enqueue = self.results.get(block=False)
+                assert enqueue
+
                 vertices.append(vertex)
                 values.append(value)
             except queue.Empty:
-                yield None
+                break
 
         self.vertices = np.array(vertices)
         self.values = np.array(values)
-        self.num_enqueued = 0
+
+        num_random_points = self.simplex_size - len(self.vertices)
+        yield from (random_vertices := self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
+
+        try:
+            random_values = yield from self._waiting_for_results(num_random_points)
+
+            self.vertices = np.array(list(self.vertices) + list(random_vertices))
+            self.values = np.array(list(self.values) + random_values)
+        except UnexpectedVerticesUpdate as e:
+            self.vertices, self.values = e.updated_vertices, e.updated_values
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         # initialization

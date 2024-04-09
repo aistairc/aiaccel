@@ -22,7 +22,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         seed: int | None = None,
         rng: np.random.RandomState | None = None,
         coeff: NelderMeadCoefficient | None = None,
-        parallel_enabled: bool = False,
+        block: bool = False,
     ) -> None:
         self._search_space = search_space
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
@@ -31,8 +31,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             search_space=self._search_space,
             coeff=coeff,
             rng=_rng,
-            block=parallel_enabled,
-            timeout=None,
+            block=block,
         )
 
         self.running_trials: list[FrozenTrial] = []
@@ -51,12 +50,12 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         if "fixed_params" in trial.system_attrs:  # enqueued trial
-            self.nm.enqueued()
+            # self.nm.enqueued()
             fixed_params = trial.system_attrs["fixed_params"]
-            if fixed_params.keys() == self._search_space.keys():
-                params = np.array([fixed_params[name] for name in self._search_space])
-            else:
+            if fixed_params.keys() != self._search_space.keys():
                 raise RuntimeError("All parameters must be given when executing enqueue_trial.")
+
+            params = np.array([fixed_params[name] for name in self._search_space])
         else:
             while True:
                 params = self.nm.get_vertex()
