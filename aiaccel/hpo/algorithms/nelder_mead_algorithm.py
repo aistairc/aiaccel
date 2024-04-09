@@ -113,7 +113,7 @@ class NelderMeadAlgorism:
         self,
     ) -> Generator[npt.NDArray[np.float64] | None, None, None]:
         lows, highs = zip(*self._search_space.values(), strict=False)
-        vertices, values = list[float](), list[float]()
+        vertices, values = list[npt.NDArray[np.float64]](), list[float]()
         num_random_vertices = 0
 
         while len(vertices) + num_random_vertices < self.simplex_size + self.num_enqueued:
