@@ -1,8 +1,6 @@
-import contextlib
 import unittest
 from collections.abc import Generator
 from typing import Any
-from unittest.mock import patch
 
 import numpy as np
 import numpy.typing as npt
@@ -53,27 +51,17 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         if values is None:
             values = []
 
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._initialize_simplex") as mock_iter:
+        for vertex, value in zip(self.vertices, self.values, strict=False):
+            self.nm.put_value(vertex, value, True)
 
-            def side_effect() -> Generator[None, None, None]:
-                yield None
-
-            mock_iter.side_effect = side_effect
-
-            # initialization
-            with contextlib.suppress(NelderMeadEmpty):
-                self.nm.get_vertex()
-            self.nm.vertices = self.vertices
-            self.nm.values = self.values
-
-            # main loop
+        # main loop
+        x = self.nm.get_vertex()
+        self.assertTrue(np.array_equal(x, vertices[0]))
+        for vertex, value in zip(vertices[1:], values, strict=False):
+            self.nm.put_value(np.zeros(2), value)
             x = self.nm.get_vertex()
-            self.assertTrue(np.array_equal(x, vertices[0]))
-            for vertex, value in zip(vertices[1:], values, strict=False):
-                self.nm.put_value(np.zeros(2), value)
-                x = self.nm.get_vertex()
 
-                self.assertTrue(np.array_equal(x, vertex))
+            self.assertTrue(np.array_equal(x, vertex))
 
     def test_reflect(self) -> None:
         reflect_xs = np.array([-1.0, 0.0])

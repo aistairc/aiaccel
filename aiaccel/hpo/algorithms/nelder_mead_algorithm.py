@@ -128,9 +128,8 @@ class NelderMeadAlgorism:
         values = yield from self._wait_for_results(1)
         return values[0]
 
-    def _initialize_simplex(
-        self,
-    ) -> Generator[npt.NDArray[np.float64] | None, None, None]:
+    def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
+        # initialization
         lows, highs = zip(*self._search_space.values(), strict=False)
 
         self.vertices, self.values = self._collect_enqueued_results()
@@ -147,9 +146,7 @@ class NelderMeadAlgorism:
         except UnexpectedVerticesUpdate as e:
             self.vertices, self.values = e.updated_vertices, e.updated_values
 
-    def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:
-        # initialization
-        yield from self._initialize_simplex()
+        print(self.vertices, self.values)
 
         # main loop
         shrink_requied = False
