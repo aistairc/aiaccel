@@ -23,6 +23,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         rng: np.random.RandomState | None = None,
         coeff: NelderMeadCoefficient | None = None,
         parallel_enabled: bool = False,
+        sub_sampler: optuna.sampler | None = None,
     ) -> None:
         self._search_space = search_space
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
@@ -34,6 +35,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             block=parallel_enabled,
             timeout=None,
         )
+        # self.sub_sampler = sub_sampler
+        self.sub_study = optuna.create_study(sampler=sub_sampler) if sub_sampler is not None else None
 
         self.running_trials: list[FrozenTrial] = []
         self.finished_trials: list[tuple[FrozenTrial, float]] = []
@@ -63,7 +66,15 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
                     break
 
-                self.nm.put_value(params, np.inf)
+                try:
+                    self.nm.put_value(params, np.inf)
+                except NelderMeadEmpty as e:
+                    if self.sub_study is None:
+                        raise e
+                    else:
+                        sub_trial = self.sub_study.ask()
+                        trial.set_user_attr("sub_trial", sub_trial)
+                        params = np.array([sub_trial.params[name] for name in self._search_space])
 
         trial.set_user_attr("params", params)
 
@@ -114,10 +125,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                     self.nm.put_value(
                         trial.user_attrs["params"],
                         value,
-                        enqueue="fixed_params" in trial.system_attrs,
+                        enqueue="fixed_params" in trial.system_attrs or "is_sub_study" in trial.user_attrs,
                     )
 
                     self.finished_trials.pop(fin_idx)
+
+                    if "is_sub_study" in trial.user_attrs:
+                        self.sub_study.tell()
 
                     break
             else:
