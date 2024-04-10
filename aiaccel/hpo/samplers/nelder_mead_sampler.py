@@ -50,7 +50,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         if "fixed_params" in trial.system_attrs:  # enqueued trial
-            # self.nm.enqueued()
             fixed_params = trial.system_attrs["fixed_params"]
             if fixed_params.keys() != self._search_space.keys():
                 raise RuntimeError("All parameters must be given when executing enqueue_trial.")
