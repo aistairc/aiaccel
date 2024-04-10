@@ -133,7 +133,7 @@ class NelderMeadAlgorism:
         self.vertices, self.values = self._collect_enqueued_results()
 
         try:
-            num_random_points = self.simplex_size - len(self.vertices)
+            num_random_points = self.simplex_size - len(self.vertices) if self.simplex_size > len(self.vertices) else 0
             random_vertices = list(self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
             yield from random_vertices
 
