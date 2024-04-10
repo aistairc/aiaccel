@@ -45,10 +45,10 @@ class ABCIEnvironment(ClusterEnvironment):
         return self._local_rank
 
     def set_world_size(self, size: int) -> None:
-        log.debug("ABCIEnvironment.set_world_size was called. Ignored.")
+        log.warn("ABCIEnvironment.set_world_size was called. Ignored.")
 
     def set_global_rank(self, rank: int) -> None:
-        log.debug("ABCIEnvironment.set_global_rank was called. Ignored.")
+        log.warn("ABCIEnvironment.set_global_rank was called. Ignored.")
 
     def validate_settings(self, num_devices: int, num_nodes: int) -> None:
         if num_devices != self._local_size:
