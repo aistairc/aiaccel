@@ -5,8 +5,8 @@ from copy import deepcopy
 from pathlib import Path
 
 from colorama import Fore
+from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as oc
-from omegaconf import ListConfig, DictConfig
 
 
 def print_config(config: ListConfig | DictConfig, line_length: int = 80) -> None:
@@ -18,15 +18,15 @@ def print_config(config: ListConfig | DictConfig, line_length: int = 80) -> None
     print("=" * line_length)
 
 
-def pathlib2str_config(config: ListConfig | DictConfig):
+def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConfig:
     if isinstance(config, ListConfig):
-        for k in range(len(config)):
-            config[k] = pathlib2str_config(config[k])
+        for ii in range(len(config)):
+            config[ii] = pathlib2str_config(config[ii])
     elif isinstance(config, DictConfig):
         for k, v in config.items():
-            if isinstance(v, (ListConfig, DictConfig)):
+            if isinstance(v, ListConfig | DictConfig):
                 config[k] = pathlib2str_config(v)
             elif isinstance(v, Path):
                 config[k] = str(v)
-    
+
     return config

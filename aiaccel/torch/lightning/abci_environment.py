@@ -1,7 +1,7 @@
 import logging
 import os
 
-from lightning.fabric.plugins.environments import ClusterEnvironment
+from lightning.fabric.plugins.environments.cluster_environment import ClusterEnvironment
 
 log = logging.getLogger(__name__)
 
