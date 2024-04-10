@@ -34,7 +34,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             rng=_rng,
             block=block,
         )
-        # self.sub_sampler = sub_sampler
         self.sub_study = optuna.create_study(sampler=sub_sampler) if sub_sampler is not None else None
 
         self.running_trials: list[FrozenTrial] = []
@@ -60,19 +59,21 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
             while True:
-                params = self.nm.get_vertex()
-                if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
-                    break
-
                 try:
-                    self.nm.put_value(params, np.inf)
+                    params = self.nm.get_vertex()
                 except NelderMeadEmpty as e:
                     if self.sub_study is None:
                         raise e
                     else:
                         sub_trial = self.sub_study.ask()
                         trial.set_user_attr("sub_trial", sub_trial)
-                        params = np.array([sub_trial.params[name] for name in self._search_space])
+                        params = np.array([sub_trial.suggest_float(name, *distribution) for name, distribution in self._search_space.items()])
+                        print(params)
+
+                if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
+                    break
+
+                self.nm.put_value(params, np.inf)
 
         trial.set_user_attr("params", params)
 
@@ -123,13 +124,18 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                     self.nm.put_value(
                         trial.user_attrs["params"],
                         value,
-                        enqueue="fixed_params" in trial.system_attrs or "is_sub_study" in trial.user_attrs,
+                        enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
                     )
 
                     self.finished_trials.pop(fin_idx)
 
-                    if "is_sub_study" in trial.user_attrs:
-                        self.sub_study.tell()
+                    print(trial.user_attrs)
+                    # if "sub_trial" not in trial.user_attrs:
+                    #     print(trial.user_attrs)
+
+                    if "sub_trial" in trial.user_attrs:
+                        # print("debug tell")
+                        self.sub_study.tell(trial.user_attrs["sub_trial"], value)
 
                     break
             else:
