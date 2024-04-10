@@ -1,20 +1,21 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import h5py as h5
 import torch
+from torch.utils.data import Dataset
 
 
-class RawHDF5Dataset(torch.utils.data.Dataset):
+class RawHDF5Dataset(Dataset[Any]):
     def __init__(self, dataset_path: Path | str) -> None:
         self.dataset_path = dataset_path
 
         with h5.File(self.dataset_path, "r") as f:
-            self.grp_list = sorted(list(f.keys()))
+            self.grp_list = sorted(f.keys())
 
-        self.f: Optional[h5.File] = None
+        self.f: h5.File | None = None
 
     def __len__(self) -> int:
         return len(self.grp_list)

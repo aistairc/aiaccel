@@ -1,8 +1,8 @@
 from multiprocessing import Manager
-from typing import Any
+from typing import Any, TypeVar
 
-import numpy as np
 import torch
+from torch.utils.data import Dataset
 
 
 class NumpiedTensor:
@@ -39,15 +39,18 @@ def tensorize_sample(sample: Any) -> Any:
         return sample
 
 
-class CachedDataset(torch.utils.data.Dataset):
-    def __init__(self, dataset: torch.utils.data.Dataset) -> None:
+T = TypeVar("T")
+
+
+class CachedDataset(Dataset[T]):
+    def __init__(self, dataset: Dataset[T]) -> None:
         self.dataset = dataset
 
         self.manager = Manager()
         self.cache = self.manager.dict()
 
     def __len__(self) -> int:
-        return len(self.dataset)
+        return len(self.dataset)  # type: ignore[arg-type]
 
     def __getitem__(self, index: int) -> Any:
         if index not in self.cache:
