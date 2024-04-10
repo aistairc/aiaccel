@@ -170,7 +170,7 @@ class TestNelderMeadAckley(BaseTestNelderMead, unittest.TestCase):
 class TestNelderMeadSphereParallel(BaseTestNelderMead, unittest.TestCase):
     def setUp(self) -> None:
         search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
-        sampler = NelderMeadSampler(search_space=search_space, seed=42, parallel_enabled=True)
+        sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
 
         self.common_setUp(
             search_space=search_space,

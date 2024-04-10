@@ -1,8 +1,6 @@
-import contextlib
 import unittest
 from collections.abc import Generator
 from typing import Any
-from unittest.mock import patch
 
 import numpy as np
 import numpy.typing as npt
@@ -14,28 +12,28 @@ class TestNelderMeadAlgorism(unittest.TestCase):
     def setUp(self) -> None:
         self.search_space = {"x": (-5.0, 5.0), "y": (-5.0, 5.0)}
         self.nm = NelderMeadAlgorism(search_space=self.search_space, block=False)
-        self.vertices = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
-        self.values = np.array([5.0, 3.0, 7.0])
+        self.vertices = list(np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]))
+        self.values = [5.0, 3.0, 7.0]
 
     def test_waiting_for(self) -> Generator[Any, Any, Any]:
         # queue is Empty
-        result = yield from self.nm._waiting_for_result()
+        result = yield from self.nm._wait_for_result()
         self.assertIsNone(result)
 
-        result = yield from self.nm._waiting_for_results(2)
+        result = yield from self.nm._wait_for_results(2)
         self.assertIsNone(result)
 
         # queue is not Empty
         value = 1.0
         self.nm.put_value(np.zeros(2), value)
-        result = yield from self.nm._waiting_for_result()
+        result = yield from self.nm._wait_for_result()
         self.assertEqual(result, value)
 
         value1 = 1.0
         self.nm.put_value(np.zeros(2), value1)
         value2 = 2.0
         self.nm.put_value(np.zeros(2), value2)
-        result = yield from self.nm._waiting_for_results(2)
+        result = yield from self.nm._wait_for_results(2)
         self.assertEqual(result, [value1, value2])
 
     def test_initialize(self) -> None:
@@ -53,27 +51,17 @@ class TestNelderMeadAlgorism(unittest.TestCase):
         if values is None:
             values = []
 
-        with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._initialization") as mock_iter:
+        for vertex, value in zip(self.vertices, self.values, strict=False):
+            self.nm.put_value(vertex, value, True)
 
-            def side_effect() -> Generator[None, None, None]:
-                yield None
-
-            mock_iter.side_effect = side_effect
-
-            # initialization
-            with contextlib.suppress(NelderMeadEmpty):
-                self.nm.get_vertex()
-            self.nm.vertices = self.vertices
-            self.nm.values = self.values
-
-            # main loop
+        # main loop
+        x = self.nm.get_vertex()
+        self.assertTrue(np.array_equal(x, vertices[0]))
+        for vertex, value in zip(vertices[1:], values, strict=False):
+            self.nm.put_value(np.zeros(2), value)
             x = self.nm.get_vertex()
-            self.assertTrue(np.array_equal(x, vertices[0]))
-            for vertex, value in zip(vertices[1:], values, strict=False):
-                self.nm.put_value(np.zeros(2), value)
-                x = self.nm.get_vertex()
 
-                self.assertTrue(np.array_equal(x, vertex))
+            self.assertTrue(np.array_equal(x, vertex))
 
     def test_reflect(self) -> None:
         reflect_xs = np.array([-1.0, 0.0])
