@@ -6,7 +6,7 @@ import torch
 
 import h5py as h5
 
-from aiaccel.torch.datasets import HDF5Dataset, RawHDF5Dataset
+from aiaccel.torch.datasets.hdf5_dataset import HDF5Dataset, RawHDF5Dataset
 
 # with h5.File(Path(__file__).parent / "test_hdf5_dataset_assets" / "dataset.hdf5", "w") as f:
 #     for ii in range(10):
