@@ -23,7 +23,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         rng: np.random.RandomState | None = None,
         coeff: NelderMeadCoefficient | None = None,
         block: bool = False,
-        sub_sampler: optuna.sampler | None = None,
+        # sub_sampler: optuna.sampler | None = None,
     ) -> None:
         self._search_space = search_space
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
@@ -34,7 +34,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             rng=_rng,
             block=block,
         )
-        self.sub_study = optuna.create_study(sampler=sub_sampler) if sub_sampler is not None else None
+        # self.sub_study = optuna.create_study(sampler=sub_sampler) if sub_sampler is not None else None
 
         self.running_trials: list[FrozenTrial] = []
         self.finished_trials: list[tuple[FrozenTrial, float]] = []
@@ -59,7 +59,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
             while True:
+                print("debug before trial")
                 params = self.nm.get_vertex()
+                print(f"get_vertex {params}")
                 # try:
                 #     print("debug before_trial")
                 #     params = self.nm.get_vertex()
@@ -128,6 +130,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             print("debug after_trial")
             for fin_idx, (trial, value) in enumerate(self.finished_trials):
                 if trial._trial_id == target_trial._trial_id:
+                    print(f'put {trial.user_attrs["params"]} {value}')
                     self.nm.put_value(
                         trial.user_attrs["params"],
                         value,
