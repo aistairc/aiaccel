@@ -1,16 +1,20 @@
 from pathlib import Path
 
-import pytest
 from omegaconf import OmegaConf as oc
+
+import pytest
 
 from aiaccel.utils.config import pathlib2str_config, print_config
 
 
 def test_print_config(capfd: pytest.CaptureFixture[str]) -> None:
-    conf = oc.create({"foo": {"bar": Path("test/path")}})
+    conf = oc.create({"foo": {"bar": [1, 2, 3]}})
     print_config(conf)
 
     stdout, _ = capfd.readouterr()
+
+    # with open(Path(__file__).parent / "test_config_assets" / "print_config.txt", "w") as f:
+    #     f.write(stdout)
 
     with open(Path(__file__).parent / "test_config_assets" / "print_config.txt") as f:
         stdout_target = f.read()

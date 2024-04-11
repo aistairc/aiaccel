@@ -60,3 +60,28 @@ select = ["E", "F", "W", "UP", "B", "SIM", "I", "C"]
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+
+section-order = [
+    "future",
+    "typing",
+    "standard-library",
+    "utilities",
+    "datascience",
+    "torch",
+    "torch-third-party",
+    "third-party",
+    "audio",
+    "first-party",
+    "local-folder"
+]
+
+[tool.ruff.lint.isort.sections]
+"typing" = ["typing", "numpy.typing"]
+"utilities" = ["colorama", "hydra", "omegaconf", "progressbar", "rich"]
+"datascience" = ["numpy", "scipy", "pandas", "matplotlib", "opt_einsum", "einops"]
+"torch" = ["torch"]
+"torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
+"audio" = ["librosa", "pypesq", "pystoi", "soundfile"]
