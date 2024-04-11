@@ -5,6 +5,8 @@ from multiprocessing import Manager
 import torch
 from torch.utils.data import Dataset
 
+__all__ = ["CachedDataset"]
+
 
 class NumpiedTensor:
     def __init__(self, tensor: torch.Tensor) -> None:
@@ -40,11 +42,11 @@ def tensorize_sample(sample: Any) -> Any:
         return sample
 
 
-T = TypeVar("T")
+T_co = TypeVar("T_co", covariant=True)
 
 
-class CachedDataset(Dataset[T]):
-    def __init__(self, dataset: Dataset[T]) -> None:
+class CachedDataset(Dataset[T_co]):
+    def __init__(self, dataset: Dataset[T_co]) -> None:
         self.dataset = dataset
 
         self.manager = Manager()

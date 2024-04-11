@@ -37,6 +37,7 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-cov",
+    "pytest-mock",
     "pytest-subprocess",
     "ruff",
     "sphinx",
