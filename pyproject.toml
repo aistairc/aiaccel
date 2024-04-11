@@ -52,5 +52,5 @@ target-version = "py310"
 fix = true
 
 [tool.ruff.lint]
-select = ["F", "E", "W", "UP", "B", "SIM", "I", "C", "A", "ERA", "N"]
+select = ["F", "E", "W", "UP", "B", "SIM", "I", "C", "A", "ERA", "N", "C90"]
 
