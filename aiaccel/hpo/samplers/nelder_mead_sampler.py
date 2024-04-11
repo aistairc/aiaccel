@@ -59,20 +59,26 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
             while True:
-                try:
-                    params = self.nm.get_vertex()
-                except NelderMeadEmpty as e:
-                    if self.sub_study is None:
-                        raise e
-                    else:
-                        sub_trial = self.sub_study.ask()
-                        trial.set_user_attr("sub_trial", sub_trial)
-                        params = np.array([sub_trial.suggest_float(name, *distribution) for name, distribution in self._search_space.items()])
-                        print(params)
+                params = self.nm.get_vertex()
+                # try:
+                #     print("debug before_trial")
+                #     params = self.nm.get_vertex()
+                # except NelderMeadEmpty as e:
+                #     if self.sub_study is None:
+                #         raise e
+                #     else:
+                #         sub_trial = self.sub_study.ask()
+                #         trial.set_user_attr("sub_trial", sub_trial)
+                #         params = np.array([sub_trial.suggest_float(name, *distribution) for name, distribution in self._search_space.items()])
+                #         print(params)
 
                 if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
                     break
 
+                # if "sub_trial" in trial.user_attrs:
+                #     self.sub_study.tell(trial.user_attrs["sub_trial"], np.inf)
+                # else:
+                #     self.nm.put_value(params, np.inf)
                 self.nm.put_value(params, np.inf)
 
         trial.set_user_attr("params", params)
@@ -119,23 +125,25 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self.finished_trials.insert(0, (trial, values[0] if isinstance(values, Sequence) else np.inf))
 
         for tgt_idx, target_trial in enumerate(self.running_trials):
+            print("debug after_trial")
             for fin_idx, (trial, value) in enumerate(self.finished_trials):
                 if trial._trial_id == target_trial._trial_id:
                     self.nm.put_value(
                         trial.user_attrs["params"],
                         value,
-                        enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
+                        # enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
+                        enqueue="fixed_params" in trial.system_attrs
                     )
 
                     self.finished_trials.pop(fin_idx)
 
-                    print(trial.user_attrs)
-                    # if "sub_trial" not in trial.user_attrs:
-                    #     print(trial.user_attrs)
+                    # print(trial.user_attrs)
+                    # # if "sub_trial" not in trial.user_attrs:
+                    # #     print(trial.user_attrs)
 
-                    if "sub_trial" in trial.user_attrs:
-                        # print("debug tell")
-                        self.sub_study.tell(trial.user_attrs["sub_trial"], value)
+                    # if "sub_trial" in trial.user_attrs:
+                    #     # print("debug tell")
+                    #     self.sub_study.tell(trial.user_attrs["sub_trial"], value)
 
                     break
             else:
