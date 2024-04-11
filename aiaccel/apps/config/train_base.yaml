@@ -1,0 +1,8 @@
+trainer:
+  _target_: lightning.Trainer
+  default_root_dir: ${working_directory}
+
+  logger:
+    _target_: lightning.pytorch.loggers.TensorBoardLogger
+    save_dir: ${working_directory}
+    name: ''
