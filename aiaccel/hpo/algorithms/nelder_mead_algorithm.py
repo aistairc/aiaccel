@@ -99,7 +99,7 @@ class NelderMeadAlgorism:
         enqueued_vertices, enqueued_values = list[npt.NDArray[np.float64]](), list[float]()
         while len(values) < num_waiting:
             try:
-                vertex, value, enqueue = self.results.get(block=self.block)
+                vertex, value, enqueue = self.results.get(block=self.block, timeout=self.timeout)
                 if enqueue:
                     enqueued_vertices.append(vertex)
                     enqueued_values.append(value)
@@ -112,7 +112,7 @@ class NelderMeadAlgorism:
         enqueued_vertices, enqueued_values = self._collect_enqueued_results(enqueued_vertices, enqueued_values)
 
         # check if enqueued vertices change ordering
-        if len(self.values) == 0 or len(enqueued_values) > 0 and min(enqueued_values) < max(list(self.values)):
+        if len(self.values) == 0 or len(enqueued_values) > 0 and min(enqueued_values) < max(self.values):
             new_vertices = self.vertices + vertices + enqueued_vertices
             new_values = self.values + values + enqueued_values
 
