@@ -16,10 +16,11 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
+    "colorama",
     "numpy",
-    "lightning",
+    "lightning>=2.2.1",
     "hydra-core",
-    "torch",
+    "torch>=2.2.0",
     "omegaconf",
     "h5py"
 ]
