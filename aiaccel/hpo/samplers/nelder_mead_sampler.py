@@ -103,9 +103,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 "Multidimentional trial values are obtained. "
                 "NelderMeadSampler supports only single objective optimization."
             )
-
-        self.nm.put_value(
-            trial.user_attrs["params"],
-            values[0],
-            enqueue="fixed_params" in trial.system_attrs,
-        )
+        if isinstance(values, list):
+            self.nm.put_value(
+                trial.user_attrs["params"],
+                values[0],
+                enqueue="fixed_params" in trial.system_attrs,
+            )
