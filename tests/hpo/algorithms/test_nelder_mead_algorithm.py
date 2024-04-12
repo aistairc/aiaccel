@@ -61,7 +61,7 @@ class TestNelderMeadAlgorism(unittest.TestCase):
             self.nm.put_value(vertices[i], values[i])
             x = self.nm.get_vertex()
 
-            self.assertTrue(np.array_equal(x, vertices[i+1]))
+            self.assertTrue(np.array_equal(x, vertices[i + 1]))
 
     def test_reflect(self) -> None:
         reflect_xs = np.array([-1.0, 0.0])
