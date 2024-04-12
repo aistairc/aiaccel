@@ -112,7 +112,7 @@ class NelderMeadAlgorism:
         enqueued_vertices, enqueued_values = self._collect_enqueued_results(enqueued_vertices, enqueued_values)
 
         # check if enqueued vertices change ordering
-        if len(self.values) > 0 and len(enqueued_values) > 0 and min(enqueued_values) < max(self.values):
+        if (len(self.values) == 0 and len(enqueued_values) > 0) or (len(self.values) > 0 and len(enqueued_values) > 0 and min(enqueued_values) < max(self.values)):
             new_vertices = self.vertices + vertices + enqueued_vertices
             new_values = self.values + values + enqueued_values
 
