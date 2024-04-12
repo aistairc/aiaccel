@@ -10,9 +10,9 @@ from optuna.distributions import BaseDistribution
 from optuna.study import Study
 from optuna.trial import FrozenTrial, TrialState
 
-from aiaccel.hpo.algorithms import NelderMeadAlgorism, NelderMeadCoefficient, NelderMeadEmpty
+from aiaccel.hpo.algorithms import NelderMeadAlgorism, NelderMeadCoefficient, NelderMeadEmptyError
 
-__all__ = ["NelderMeadSampler", "NelderMeadEmpty"]
+__all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):

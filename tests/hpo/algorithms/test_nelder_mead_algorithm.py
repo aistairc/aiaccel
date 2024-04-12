@@ -5,7 +5,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
-from aiaccel.hpo.algorithms.nelder_mead_algorithm import NelderMeadAlgorism, NelderMeadEmpty
+from aiaccel.hpo.algorithms.nelder_mead_algorithm import NelderMeadAlgorism, NelderMeadEmptyError
 
 
 class TestNelderMeadAlgorism(unittest.TestCase):
@@ -44,7 +44,7 @@ class TestNelderMeadAlgorism(unittest.TestCase):
                 self.assertGreaterEqual(co, ss[0])
                 self.assertLessEqual(co, ss[1])
 
-        with self.assertRaises(NelderMeadEmpty):
+        with self.assertRaises(NelderMeadEmptyError):
             xi = self.nm.get_vertex()
 
     def compare_results(self, vertices: list[npt.NDArray[np.float64]], values: list[float] | None = None) -> None:

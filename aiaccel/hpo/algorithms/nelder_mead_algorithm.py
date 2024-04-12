@@ -16,12 +16,12 @@ class NelderMeadCoefficient:
     s: float = 0.5
 
 
-class NelderMeadEmpty(Exception):
+class NelderMeadEmptyError(Exception):
     pass
 
 
 @dataclass
-class UnexpectedVerticesUpdate(Exception):
+class UnexpectedVerticesUpdateError(Exception):
     updated_vertices: list[npt.NDArray[np.float64]]
     updated_values: list[float]
 
@@ -58,7 +58,7 @@ class NelderMeadAlgorism:
             vertex = next(self.generator)
 
         if vertex is None:
-            raise NelderMeadEmpty("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
+            raise NelderMeadEmptyError("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
 
         return vertex
 
@@ -118,7 +118,7 @@ class NelderMeadAlgorism:
             new_vertices = self.vertices + vertices + enqueued_vertices
             new_values = self.values + values + enqueued_values
 
-            raise UnexpectedVerticesUpdate(new_vertices, new_values)
+            raise UnexpectedVerticesUpdateError(new_vertices, new_values)
 
         return vertices, values
 
@@ -143,7 +143,7 @@ class NelderMeadAlgorism:
 
             self.vertices = self.vertices + random_vertices
             self.values = self.values + random_values
-        except UnexpectedVerticesUpdate as e:
+        except UnexpectedVerticesUpdateError as e:
             self.vertices, self.values = e.updated_vertices, e.updated_values
 
         # main loop
@@ -199,5 +199,5 @@ class NelderMeadAlgorism:
                     self.vertices[1:], self.values[1:] = yield from self._wait_for_results(len(self.vertices[1:]))
                     shrink_requied = False
 
-            except UnexpectedVerticesUpdate as e:
+            except UnexpectedVerticesUpdateError as e:
                 self.vertices, self.values = e.updated_vertices, e.updated_values
