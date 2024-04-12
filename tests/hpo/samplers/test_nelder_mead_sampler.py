@@ -11,7 +11,7 @@ from unittest.mock import patch
 import numpy as np
 import optuna
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmpty, NelderMeadSampler
+from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
 
 
 class TestNelderMeadSampler(unittest.TestCase):
@@ -81,23 +81,18 @@ class TestNelderMeadSampler(unittest.TestCase):
     def test_after_trial(self) -> None:
         put_value = 4.0
         self.trial.set_user_attr("params", np.array([-1.0, 0.0]))
-        self.sampler.running_trials.append(self.trial)
 
         self.sampler.after_trial(self.study, self.trial, self.state, [put_value])
-        self.assertEqual(self.sampler.running_trials, [])
 
         vertex, value, enqueue = self.sampler.nm.results.get(block=False)
         self.assertEqual(value, put_value)
 
 
 def ackley(x: list[float]) -> float:
-    X = x[0]
-    Y = x[1]
-
     # Ackley function
     y = (
-        -20 * np.exp(-0.2 * np.sqrt(0.5 * (X**2 + Y**2)))
-        - np.exp(0.5 * (np.cos(2 * np.pi * X) + np.cos(2 * np.pi * Y)))
+        -20 * np.exp(-0.2 * np.sqrt(0.5 * (x[0] ** 2 + x[1] ** 2)))
+        - np.exp(0.5 * (np.cos(2 * np.pi * x[0]) + np.cos(2 * np.pi * x[1])))
         + np.e
         + 20
     )
@@ -105,13 +100,26 @@ def ackley(x: list[float]) -> float:
     return float(y)
 
 
-def sphere(x: list[float]) -> float:
-    time.sleep(0.001)
+def ackley_sleep(x: list[float]) -> float:
+    time.sleep(np.random.uniform(0.001, 0.01))
+    # Ackley function
+    y = (
+        -20 * np.exp(-0.2 * np.sqrt(0.5 * (x[0] ** 2 + x[1] ** 2)))
+        - np.exp(0.5 * (np.cos(2 * np.pi * x[0]) + np.cos(2 * np.pi * x[1])))
+        + np.e
+        + 20
+    )
+
+    return float(y)
+
+
+def sphere_sleep(x: list[float]) -> float:
+    time.sleep(np.random.uniform(0.001, 0.01))
     return float(np.sum(np.asarray(x) ** 2))
 
 
 class BaseTestNelderMead:
-    def common_setUp(
+    def common_setup(
         self,
         search_space: dict[str, tuple[float, float]],
         objective: Callable[[list[float]], float],
@@ -153,7 +161,7 @@ class TestNelderMeadAckley(BaseTestNelderMead, unittest.TestCase):
         search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
-        self.common_setUp(
+        self.common_setup(
             search_space=search_space,
             objective=ackley,
             result_file_name="results_ackley.csv",
@@ -167,14 +175,42 @@ class TestNelderMeadAckley(BaseTestNelderMead, unittest.TestCase):
             self.assertAlmostEqual(trial.values[0], float(result["objective"]))
 
 
+class TestNelderMeadAckleyParallel(BaseTestNelderMead, unittest.TestCase):
+    def setUp(self) -> None:
+        search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
+        sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
+
+        self.common_setup(
+            search_space=search_space,
+            objective=ackley_sleep,
+            result_file_name="results_ackley.csv",
+            study=optuna.create_study(sampler=sampler),
+            n_jobs=3,
+        )
+
+    def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
+        for trial in self.study.trials:
+            almost_equal_trial_exists = False
+            for result in results:
+                try:
+                    self.assertAlmostEqual(trial.params["x"], float(result["x"]))
+                    self.assertAlmostEqual(trial.params["y"], float(result["y"]))
+                    self.assertAlmostEqual(trial.values[0], float(result["objective"]))
+                    almost_equal_trial_exists = True
+                    break
+                except AssertionError:
+                    continue
+            self.assertTrue(almost_equal_trial_exists)
+
+
 class TestNelderMeadSphereParallel(BaseTestNelderMead, unittest.TestCase):
     def setUp(self) -> None:
         search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
 
-        self.common_setUp(
+        self.common_setup(
             search_space=search_space,
-            objective=sphere,
+            objective=sphere_sleep,
             result_file_name="results_shpere_parallel.csv",
             study=optuna.create_study(sampler=sampler),
             n_jobs=4,
@@ -202,9 +238,9 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead, unittest.TestCase):
         self._rng = np.random.RandomState(seed=42)
         sampler = NelderMeadSampler(search_space=search_space, rng=self._rng)
 
-        self.common_setUp(
+        self.common_setup(
             search_space=search_space,
-            objective=sphere,
+            objective=sphere_sleep,
             result_file_name="results_shpere_enqueue.csv",
             study=optuna.create_study(sampler=sampler),
         )
@@ -218,7 +254,7 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead, unittest.TestCase):
                 for _ in range(num_parallel):
                     try:  # nelder-mead
                         trial = self.study.ask()
-                    except NelderMeadEmpty:  # random sampling
+                    except NelderMeadEmptyError:  # random sampling
                         self.study.enqueue_trial(
                             {
                                 "x": self._rng.uniform(*self.search_space["x"]),
@@ -235,7 +271,7 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead, unittest.TestCase):
                     trials.append(trial)
                     params.append([x, y, z])
 
-                for trial, value in zip(trials, p.imap(sphere, params), strict=False):
+                for trial, value in zip(trials, p.imap(sphere_sleep, params), strict=False):
                     frozen_trial = self.study.tell(trial, value)
                     self.study._log_completed_trial(frozen_trial)
 

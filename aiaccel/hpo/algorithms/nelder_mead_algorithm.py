@@ -16,12 +16,12 @@ class NelderMeadCoefficient:
     s: float = 0.5
 
 
-class NelderMeadEmpty(Exception):
+class NelderMeadEmptyError(Exception):
     pass
 
 
 @dataclass
-class UnexpectedVerticesUpdate(Exception):
+class UnexpectedVerticesUpdateError(Exception):
     updated_vertices: list[npt.NDArray[np.float64]]
     updated_values: list[float]
 
@@ -58,7 +58,7 @@ class NelderMeadAlgorism:
             vertex = next(self.generator)
 
         if vertex is None:
-            raise NelderMeadEmpty("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
+            raise NelderMeadEmptyError("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
 
         return vertex
 
@@ -93,7 +93,7 @@ class NelderMeadAlgorism:
     def _wait_for_results(
         self,
         num_waiting: int,
-    ) -> Generator[None, None, list[float]]:
+    ) -> Generator[None, None, tuple[list[npt.NDArray[np.float64]], list[float]]]:
         # collect results
         vertices, values = list[npt.NDArray[np.float64]](), list[float]()
         enqueued_vertices, enqueued_values = list[npt.NDArray[np.float64]](), list[float]()
@@ -112,18 +112,20 @@ class NelderMeadAlgorism:
         enqueued_vertices, enqueued_values = self._collect_enqueued_results(enqueued_vertices, enqueued_values)
 
         # check if enqueued vertices change ordering
-        if len(self.values) == 0 or len(enqueued_values) > 0 and min(enqueued_values) < max(self.values):
+        if (len(self.values) == 0 and len(enqueued_values) > 0) or (
+            len(self.values) > 0 and len(enqueued_values) > 0 and min(enqueued_values) < max(self.values)
+        ):
             new_vertices = self.vertices + vertices + enqueued_vertices
             new_values = self.values + values + enqueued_values
 
-            raise UnexpectedVerticesUpdate(new_vertices, new_values)
+            raise UnexpectedVerticesUpdateError(new_vertices, new_values)
 
-        return values
+        return vertices, values
 
     def _wait_for_result(
         self,
     ) -> Generator[None, None, float]:
-        values = yield from self._wait_for_results(1)
+        _, values = yield from self._wait_for_results(1)
         return values[0]
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
@@ -137,11 +139,11 @@ class NelderMeadAlgorism:
             random_vertices = list(self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
             yield from random_vertices
 
-            random_values = yield from self._wait_for_results(num_random_points)
+            random_vertices, random_values = yield from self._wait_for_results(num_random_points)
 
             self.vertices = self.vertices + random_vertices
             self.values = self.values + random_values
-        except UnexpectedVerticesUpdate as e:
+        except UnexpectedVerticesUpdateError as e:
             self.vertices, self.values = e.updated_vertices, e.updated_values
 
         # main loop
@@ -194,8 +196,8 @@ class NelderMeadAlgorism:
                     self.vertices = [(v0 := self.vertices[0]) + self.coeff.s * (v - v0) for v in self.vertices]
                     yield from self.vertices[1:]
 
-                    self.values[1:] = yield from self._wait_for_results(len(self.vertices[1:]))
+                    self.vertices[1:], self.values[1:] = yield from self._wait_for_results(len(self.vertices[1:]))
                     shrink_requied = False
 
-            except UnexpectedVerticesUpdate as e:
+            except UnexpectedVerticesUpdateError as e:
                 self.vertices, self.values = e.updated_vertices, e.updated_values

@@ -10,9 +10,9 @@ from optuna.distributions import BaseDistribution
 from optuna.study import Study
 from optuna.trial import FrozenTrial, TrialState
 
-from aiaccel.hpo.algorithms import NelderMeadAlgorism, NelderMeadCoefficient, NelderMeadEmpty
+from aiaccel.hpo.algorithms import NelderMeadAlgorism, NelderMeadCoefficient, NelderMeadEmptyError
 
-__all__ = ["NelderMeadSampler", "NelderMeadEmpty"]
+__all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
@@ -123,34 +123,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 "Multidimentional trial values are obtained. "
                 "NelderMeadSampler supports only single objective optimization."
             )
-
-        self.finished_trials.insert(0, (trial, values[0] if isinstance(values, Sequence) else np.inf))
-
-        for tgt_idx, target_trial in enumerate(self.running_trials):
-            print("debug after_trial")
-            for fin_idx, (trial, value) in enumerate(self.finished_trials):
-                if trial._trial_id == target_trial._trial_id:
-                    print(f'put {trial.user_attrs["params"]} {value}')
-                    self.nm.put_value(
-                        trial.user_attrs["params"],
-                        value,
-                        # enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
-                        enqueue="fixed_params" in trial.system_attrs
-                    )
-
-                    self.finished_trials.pop(fin_idx)
-
-                    # print(trial.user_attrs)
-                    # # if "sub_trial" not in trial.user_attrs:
-                    # #     print(trial.user_attrs)
-
-                    # if "sub_trial" in trial.user_attrs:
-                    #     # print("debug tell")
-                    #     self.sub_study.tell(trial.user_attrs["sub_trial"], value)
-
-                    break
-            else:
-                self.running_trials = self.running_trials[tgt_idx:]
-                break
-        else:
-            self.running_trials = []
+        if isinstance(values, list):
+            self.nm.put_value(
+                trial.user_attrs["params"],
+                values[0],
+                enqueue="fixed_params" in trial.system_attrs,
+            )
