@@ -104,22 +104,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 "NelderMeadSampler supports only single objective optimization."
             )
 
-        self.finished_trials.insert(0, (trial, values[0] if isinstance(values, Sequence) else np.inf))
-
-        for tgt_idx, target_trial in enumerate(self.running_trials):
-            for fin_idx, (trial, value) in enumerate(self.finished_trials):
-                if trial._trial_id == target_trial._trial_id:
-                    self.nm.put_value(
-                        trial.user_attrs["params"],
-                        value,
-                        enqueue="fixed_params" in trial.system_attrs,
-                    )
-
-                    self.finished_trials.pop(fin_idx)
-
-                    break
-            else:
-                self.running_trials = self.running_trials[tgt_idx:]
-                break
-        else:
-            self.running_trials = []
+        self.nm.put_value(
+            trial.user_attrs["params"],
+            values[0],
+            enqueue="fixed_params" in trial.system_attrs,
+        )
