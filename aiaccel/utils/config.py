@@ -6,7 +6,7 @@ import re
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig
-from omegaconf import OmegaConf as oc
+from omegaconf import OmegaConf as oc  # noqa:N813
 
 
 def print_config(config: ListConfig | DictConfig, line_length: int = 80) -> None:
