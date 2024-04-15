@@ -49,6 +49,7 @@ dev = [
     "sphinx-intl",
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
+    "types-colorama",
     "undecorated",
 ]
 github-actions = [

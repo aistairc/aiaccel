@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from omegaconf import OmegaConf as oc
+from omegaconf import OmegaConf as oc  # noqa: N813
 
 import pytest
 
@@ -14,7 +14,7 @@ def test_print_config(capfd: pytest.CaptureFixture[str]) -> None:
     stdout, _ = capfd.readouterr()
 
     # with open(Path(__file__).parent / "test_config_assets" / "print_config.txt", "w") as f:
-    #     f.write(stdout)
+    #     f.write(stdout)  # noqa: ERA001
 
     with open(Path(__file__).parent / "test_config_assets" / "print_config.txt") as f:
         stdout_target = f.read()

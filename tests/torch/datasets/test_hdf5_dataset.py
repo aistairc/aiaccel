@@ -10,12 +10,12 @@ from aiaccel.torch.datasets.hdf5_dataset import HDF5Dataset, RawHDF5Dataset
 
 # with h5.File(Path(__file__).parent / "test_hdf5_dataset_assets" / "dataset.hdf5", "w") as f:
 #     for ii in range(10):
-#         g = f.create_group(f"grp{ii}")
-#         g.create_dataset("foo", [2, 3, 4])
-#         g.create_dataset("bar", [5, 6])
+#         g = f.create_group(f"grp{ii}")  # noqa: ERA001
+#         g.create_dataset("foo", [2, 3, 4])  # noqa: ERA001
+#         g.create_dataset("bar", [5, 6])  # noqa: ERA001
 
-#         g["foo"][:] = np.random.randn(2, 3, 4)
-#         g["bar"][:] = np.random.randn(5, 6)
+#         g["foo"][:] = np.random.randn(2, 3, 4)  # noqa: ERA001
+#         g["bar"][:] = np.random.randn(5, 6)  # noqa: ERA001
 
 
 def test_raw_hdf5_dataset() -> None:
