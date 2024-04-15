@@ -4,7 +4,7 @@ import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig, ListConfig
-from omegaconf import OmegaConf as oc
+from omegaconf import OmegaConf as oc  # noqa: N813
 
 import lightning as lt
 from lightning.fabric.utilities.rank_zero import rank_zero_only
