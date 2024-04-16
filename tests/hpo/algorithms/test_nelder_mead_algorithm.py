@@ -194,12 +194,13 @@ class TestNelderMeadAlgorism:
             ([([-1.0, 0.0], 4.0, False), ([1.0, 3.0], 2.0, True), ([5.0, 7.0], None, False)]),
         ],
     )
-    def test_compare_results(self,
-                             vertices: list[npt.NDArray[np.float64]],
-                             values: list[float],
-                             nm: NelderMeadAlgorism,
-                             expected_results: list[tuple[list[float], float, bool]]
-                             ) -> None:
+    def test_compare_results(
+        self,
+        vertices: list[npt.NDArray[np.float64]],
+        values: list[float],
+        nm: NelderMeadAlgorism,
+        expected_results: list[tuple[list[float], float, bool]],
+    ) -> None:
         for vertex, value in zip(vertices, values, strict=False):
             nm.put_value(vertex, value, True)
 
