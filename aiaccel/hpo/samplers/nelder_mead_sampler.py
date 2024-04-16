@@ -23,7 +23,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         rng: np.random.RandomState | None = None,
         coeff: NelderMeadCoefficient | None = None,
         block: bool = False,
-        sub_sampler: optuna.sampler | None = None,
+        sub_sampler: optuna.samplers.BaseSampler | None = None,
     ) -> None:
         self._search_space = search_space
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
@@ -67,12 +67,17 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                     else:
                         sub_trial = self.sub_study.ask()
                         trial.set_user_attr("sub_trial", sub_trial)
-                        params = np.array([sub_trial.suggest_float(name, *distribution) for name, distribution in self._search_space.items()])
+                        params = np.array(
+                            [
+                                sub_trial.suggest_float(name, *distribution)
+                                for name, distribution in self._search_space.items()
+                            ]
+                        )
 
                 if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
                     break
 
-                if "sub_trial" in trial.user_attrs:
+                if "sub_trial" in trial.user_attrs and isinstance(self.sub_study, optuna.study.Study):
                     self.sub_study.tell(trial.user_attrs["sub_trial"], np.inf)
                 else:
                     self.nm.put_value(params, np.inf)
@@ -123,5 +128,5 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 values[0],
                 enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
             )
-            if "sub_trial" in trial.user_attrs:
+            if "sub_trial" in trial.user_attrs and isinstance(self.sub_study, optuna.study.Study):
                 self.sub_study.tell(trial.user_attrs["sub_trial"], values[0])
