@@ -10,82 +10,157 @@ from unittest.mock import patch
 
 import numpy as np
 import optuna
+import pytest
 
 from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
 
 
-class TestNelderMeadSampler(unittest.TestCase):
-    def setUp(self) -> None:
-        self.search_space = {"x": (-5.0, 5.0), "y": (-5.0, 5.0)}
-        self.sampler = NelderMeadSampler(search_space=self.search_space, seed=42)
+@pytest.fixture
+def search_space():
+    return {"x": (-5.0, 5.0), "y": (-5.0, 5.0)}
 
-        self.study = optuna.create_study(sampler=self.sampler)
-        self.state = optuna.trial.TrialState.COMPLETE
-        self.param_distribution = optuna.distributions.FloatDistribution(-5, 5)
-        self.trial_id = 0
-        self.trial = optuna.trial.FrozenTrial(
-            number=0,
-            state=self.state,
-            value=0.0,
-            datetime_start=datetime.datetime.now(),
-            datetime_complete=datetime.datetime.now(),
-            params={"x": 0.0, "y": 1.0},
-            distributions={"x": self.param_distribution, "y": self.param_distribution},
-            user_attrs={},
-            system_attrs={},
-            intermediate_values={},
-            trial_id=self.trial_id,
-        )
+@pytest.fixture
+def sampler(search_space):
+    return NelderMeadSampler(search_space=search_space, seed=42)
 
-    def test_infer_relative_search_space(self) -> None:
-        self.assertEqual(self.sampler.infer_relative_search_space(self.study, self.trial), {})
+@pytest.fixture
+def sub_sampler():
+    return optuna.samplers.RandomSampler()
 
-    def test_sample_relative(self) -> None:
-        self.assertEqual(
-            self.sampler.sample_relative(
-                self.study,
-                self.trial,
-                {"x": self.param_distribution, "y": self.param_distribution},
-            ),
-            {},
-        )
+@pytest.fixture
+def sampler_with_sub_sampler(search_space, sub_sampler):
+    return NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=sub_sampler)
 
-    def test_before_trial(self) -> None:
+@pytest.fixture
+def study(sampler):
+    return optuna.create_study(sampler=sampler)
+
+@pytest.fixture
+def study_with_sub_sampler(sampler_with_sub_sampler):
+    return optuna.create_study(sampler=sampler_with_sub_sampler)
+
+@pytest.fixture
+def state():
+    return optuna.trial.TrialState.COMPLETE
+
+@pytest.fixture
+def param_distribution():
+    return optuna.distributions.FloatDistribution(-5, 5)
+
+@pytest.fixture
+def trial_id():
+    return 0
+
+@pytest.fixture
+def trial(state, param_distribution, trial_id):
+    return optuna.trial.FrozenTrial(
+        number=0,
+        state=state,
+        value=0.0,
+        datetime_start=datetime.datetime.now(),
+        datetime_complete=datetime.datetime.now(),
+        params={"x": 0.0, "y": 1.0},
+        distributions={"x": param_distribution, "y": param_distribution},
+        user_attrs={},
+        system_attrs={},
+        intermediate_values={},
+        trial_id=trial_id,
+    )
+
+@pytest.fixture
+def trial_fixed_params(state, param_distribution, trial_id):
+    return optuna.trial.FrozenTrial(
+        number=0,
+        state=state,
+        value=0.0,
+        datetime_start=datetime.datetime.now(),
+        datetime_complete=datetime.datetime.now(),
+        params={"x": 0.0, "y": 1.0},
+        distributions={"x": param_distribution, "y": param_distribution},
+        user_attrs={},
+        system_attrs={"fixed_params":{"x": 2.0, "y": 3.0}},
+        intermediate_values={},
+        trial_id=trial_id,
+    )
+
+class TestNelderMeadSampler:
+    def test_infer_relative_search_space(self, sampler, study, trial) -> None:
+        assert sampler.infer_relative_search_space(study, trial) == {}
+
+    def test_sample_relative(self, sampler, study, trial, param_distribution) -> None:
+        assert sampler.sample_relative(study, trial, {"x": param_distribution, "y": param_distribution}) == {}
+
+    @pytest.mark.parametrize(
+        "side_effect, expect_vertex",
+        [
+            ([np.array([-1.0, 0.0])], np.array([-1.0, 0.0])),
+            ([np.array([-6.0, 0.0]), np.array([0.0, 6.0]), np.array([-2.0, 0.0])],
+             np.array([-2.0, 0.0])),  # out_of_range
+        ]
+    )
+    def test_before_trial(self, sampler, study, trial, side_effect, expect_vertex) -> None:
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
-            mock_iter.side_effect = [np.array([-1.0, 0.0])]
+            mock_iter.side_effect = side_effect
 
-            self.sampler.before_trial(self.study, self.trial)
-            self.assertEqual(self.sampler.running_trials, [self.trial])
+            sampler.before_trial(study, trial)
 
-            self.assertTrue(np.array_equal(self.trial.user_attrs["params"], np.array([-1.0, 0.0])))
+            assert sampler.running_trials == [trial]
+            assert np.array_equal(trial.user_attrs["params"], expect_vertex)
 
-    def test_before_trial_out_of_range(self) -> None:
+    def test_before_trial_enqueued(self, sampler, study, trial_fixed_params) -> None:
+        sampler.before_trial(study, trial_fixed_params)
+
+        assert sampler.running_trials == [trial_fixed_params]
+        assert np.array_equal(
+            trial_fixed_params.user_attrs["params"],
+            list(trial_fixed_params.system_attrs["fixed_params"].values())
+            )
+
+    def test_before_trial_sub_sampler(self,
+                                      sampler_with_sub_sampler,
+                                      study_with_sub_sampler,
+                                      trial, search_space
+                                      ) -> None:
         with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
-            mock_iter.side_effect = [np.array([-6.0, 0.0]), np.array([0.0, 6.0]), np.array([-2.0, 0.0])]
+            mock_iter.side_effect = NelderMeadEmptyError()
 
-            self.sampler.before_trial(self.study, self.trial)
-            self.assertEqual(self.sampler.running_trials, [self.trial])
+            sampler_with_sub_sampler.before_trial(study_with_sub_sampler, trial)
 
-            self.assertTrue(np.array_equal(self.trial.user_attrs["params"], np.array([-2.0, 0.0])))
+            assert sampler_with_sub_sampler.running_trials == [trial]
+            for random_x, distribution in zip(trial.user_attrs["params"], search_space.values(), strict=False):
+                assert isinstance(random_x, float) and distribution[0] <= random_x <= distribution[1]
+            assert isinstance(trial.user_attrs["sub_trial"], optuna.trial.BaseTrial)
 
-    def test_sample_independent(self) -> None:
+    def test_sample_independent(self, trial, sampler, study, param_distribution) -> None:
         xs = np.array([-1.0, 0.0])
-        self.trial.set_user_attr("params", xs)
+        trial.set_user_attr("params", xs)
 
-        value = self.sampler.sample_independent(self.study, self.trial, "x", self.param_distribution)
-        self.assertEqual(value, xs[0])
+        value = sampler.sample_independent(study, trial, "x", param_distribution)
+        assert value == xs[0]
 
-        value = self.sampler.sample_independent(self.study, self.trial, "y", self.param_distribution)
-        self.assertEqual(value, xs[1])
+        value = sampler.sample_independent(study, trial, "y", param_distribution)
+        assert value == xs[1]
 
-    def test_after_trial(self) -> None:
+    def test_after_trial(self, trial, sampler, study, state) -> None:
         put_value = 4.0
-        self.trial.set_user_attr("params", np.array([-1.0, 0.0]))
+        trial.set_user_attr("params", np.array([-1.0, 0.0]))
 
-        self.sampler.after_trial(self.study, self.trial, self.state, [put_value])
+        sampler.after_trial(study, trial, state, [put_value])
 
-        vertex, value, enqueue = self.sampler.nm.results.get(block=False)
-        self.assertEqual(value, put_value)
+        vertex, value, enqueue = sampler.nm.results.get(block=False)
+        assert value == put_value
+
+    def test_after_trial_sub_sampler(self, trial, sampler_with_sub_sampler, study_with_sub_sampler, state) -> None:
+        with patch("optuna.study.Study.tell") as mock_iter:
+            put_value = 4.0
+            trial.set_user_attr("params", np.array([-1.0, 0.0]))
+            trial.set_user_attr("sub_trial", study_with_sub_sampler.ask())
+
+            sampler_with_sub_sampler.after_trial(study_with_sub_sampler, trial, state, [put_value])
+
+            vertex, value, enqueue = sampler_with_sub_sampler.nm.results.get(block=False)
+            assert value == put_value
+            mock_iter.method.assert_not_called()
 
 
 def ackley(x: list[float]) -> float:
