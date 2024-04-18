@@ -151,7 +151,7 @@ class TestAbciJob(unittest.TestCase):
 class TestAbciJobExecutor(unittest.TestCase):
     job_file_path = "job.sh"
     n_jobs = 4
-    work_dir = None
+    work_dir = Path("./test_work").resolve()
 
     @pytest.fixture
     def tmpdir_fixture(self, tmpdir):  # type: ignore
