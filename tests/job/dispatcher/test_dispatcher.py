@@ -9,15 +9,6 @@ import pytest
 
 from aiaccel.job.dispatcher import AbciJob, AbciJobExecutor, JobStatus
 
-
-class Output:
-    stdout = 'Your job 42183931 ("hpo-0006") has been submitted'
-    stderr = ""
-
-
-# queue_info: 2 jobs
-# job_info  : None
-
 qstat_xml_dict = {
     "job_info": {
         "queue_info": {
@@ -51,6 +42,11 @@ qstat_xml_dict = {
         "job_info": None,
     }
 }
+
+
+class Output:
+    stdout = 'Your job 42183931 ("hpo-0006") has been submitted'
+    stderr = ""
 
 
 class TestAbciJob(unittest.TestCase):
@@ -188,12 +184,12 @@ class TestAbciJobExecutor(unittest.TestCase):
 
     @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
     def test_get_results(self) -> None:
-        JB_name = "hpo-0006"
-        stdout_file_path = self.work_dir / f"{JB_name}.o"
-        stderr_file_path = self.work_dir / f"{JB_name}.e"
+        job_name = "hpo-0006"
+        stdout_file_path = self.work_dir / f"{job_name}.o"
+        stderr_file_path = self.work_dir / f"{job_name}.e"
         dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=self.work_dir)
         job = AbciJob(
-            job_name=JB_name,
+            job_name=job_name,
             args=[],
             tag=None,
             job_file_path=Path("job.sh"),
@@ -218,13 +214,13 @@ class TestAbciJobExecutor(unittest.TestCase):
 
     @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
     def test_get_result(self) -> None:
-        JB_name = "hpo-0006"
-        stdout_file_path = self.work_dir / f"{JB_name}.o"
-        stderr_file_path = self.work_dir / f"{JB_name}.e"
+        job_name = "hpo-0006"
+        stdout_file_path = self.work_dir / f"{job_name}.o"
+        stderr_file_path = self.work_dir / f"{job_name}.e"
 
         dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=self.work_dir)
         job = AbciJob(
-            job_name=JB_name,
+            job_name=job_name,
             args=[],
             tag=None,
             job_file_path=Path("job.sh"),
@@ -249,16 +245,16 @@ class TestAbciJobExecutor(unittest.TestCase):
 
     @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
     def test_update_state_batch(self) -> None:
-        JB_names = ["hpo-0006", "hpo-0007"]
+        job_names = ["hpo-0006", "hpo-0007"]
         job_numbers = [42183931, 42183935]
         dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=self.work_dir)
 
-        for JB_name, job_number in zip(JB_names, job_numbers, strict=False):
-            stdout_file_path = self.work_dir / f"{JB_name}.o"
-            stderr_file_path = self.work_dir / f"{JB_name}.e"
+        for job_name, job_number in zip(job_names, job_numbers, strict=False):
+            stdout_file_path = self.work_dir / f"{job_name}.o"
+            stderr_file_path = self.work_dir / f"{job_name}.e"
 
             job = AbciJob(
-                job_name=JB_name,
+                job_name=job_name,
                 args=[],
                 tag=None,
                 job_file_path=Path("job.sh"),

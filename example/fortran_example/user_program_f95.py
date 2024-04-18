@@ -3,7 +3,6 @@ import optuna
 from aiaccel.job import AbciJobExecutor
 
 sampler = optuna.samplers.TPESampler(seed=42)
-# sampler = optuna.samplers.RandomSampler(seed=42)
 
 study = optuna.create_study(direction="minimize", sampler=sampler)
 
@@ -25,7 +24,7 @@ for n in range(n_trials):
 
     job = jobs.submit(args, "", job_name=f"hpo-{n:04}")  # ジョブプールが空かないと帰ってこない
     y = job.get_result()
-    study.tell(trial, float(y))  # y は str のため float に変換
+    study.tell(trial, (y))  # y は str のため float に変換
 
 
 # ====================================
