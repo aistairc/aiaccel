@@ -208,8 +208,10 @@ class TestAbciJobExecutor(unittest.TestCase):
             f.write("0.12")
 
         qstat_xml_dict = {"job_info": {"queue_info": None, "job_info": None}}
-        with patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict), \
-            patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
+        with (
+            patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict),
+            patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"),
+        ):
             results = dispatcher.get_results()
             for y, _ in results:
                 assert y == "0.12"
@@ -238,10 +240,12 @@ class TestAbciJobExecutor(unittest.TestCase):
             f.write("0.12")
 
         qstat_xml_dict = {"job_info": {"queue_info": None, "job_info": None}}
-        with patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict), \
-            patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
-                y = dispatcher.get_result()
-                assert y == "0.12"
+        with (
+            patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict),
+            patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"),
+        ):
+            y = dispatcher.get_result()
+            assert y == "0.12"
 
     @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
     def test_update_state_batch(self) -> None:
