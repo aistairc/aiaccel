@@ -114,23 +114,17 @@ class AbciJob:
                     if lines:
                         return lines[-1].strip()
                     else:
-                        raise ValueError(
-                            f"No result found in `{self.stdout_file_path}`."
-                        )
+                        raise ValueError(f"No result found in `{self.stdout_file_path}`.")
             except FileNotFoundError as e:
                 time.sleep(wait)
                 retry_left -= 1
                 if retry_left == 0:
-                    raise FileNotFoundError(
-                        f"result file not found in `{self.stdout_file_path}`."
-                    ) from e
+                    raise FileNotFoundError(f"result file not found in `{self.stdout_file_path}`.") from e
             except ValueError as e:
                 time.sleep(wait)
                 retry_left -= 1
                 if retry_left == 0:
-                    raise ValueError(
-                        f"No result found in `{self.stdout_file_path}`."
-                    ) from e
+                    raise ValueError(f"No result found in `{self.stdout_file_path}`.") from e
         return None
 
     def get_result(self) -> Any:
@@ -156,9 +150,7 @@ class AbciJobExecutor:
         self.submit_job_count: int = 0
         self.finished_job_count: int = 0
 
-    def submit(
-        self, args: list[str], group: str, job_name: str = "", tag: Any | None = None
-    ) -> AbciJob:
+    def submit(self, args: list[str], group: str, job_name: str = "", tag: Any | None = None) -> AbciJob:
         if job_name == "":
             job_name = str(uuid.uuid4())
         stdout_file_path = self.work_dir / f"{job_name}.o"
@@ -167,9 +159,7 @@ class AbciJobExecutor:
         qsub_cmd = (
             f"qsub -g {group} -N {job_name} -o {stdout_file_path} -e {stderr_file_path} {self.job_file_path} {args_str}"
         )
-        return self._execute(
-            qsub_cmd, job_name, args, tag, stdout_file_path, stderr_file_path
-        )
+        return self._execute(qsub_cmd, job_name, args, tag, stdout_file_path, stderr_file_path)
 
     def _execute(
         self,
@@ -271,9 +261,7 @@ class AbciJobExecutor:
             update_state(job_list)
 
     def get_available_worker_count(self) -> int:
-        _working_job_count = len(
-            [j for j in self.working_job_list if j.status != JobStatus.FINISHED]
-        )
+        _working_job_count = len([j for j in self.working_job_list if j.status != JobStatus.FINISHED])
         return self._n_jobs - _working_job_count
 
     @property
