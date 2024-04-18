@@ -4,7 +4,6 @@ import shutil
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from typing import Any
 
 import pytest
 
@@ -55,7 +54,6 @@ qstat_xml_dict = {
 
 
 class TestAbciJob(unittest.TestCase):
-
     @pytest.fixture
     def tmpdir_fixture(self, tmpdir):  # type: ignore
         tmpdir.mkdir("test_work")
@@ -120,7 +118,7 @@ class TestAbciJob(unittest.TestCase):
         job.set_state(JobStatus.RUNNING)
         assert job.status == JobStatus.RUNNING
 
-    @pytest.mark.usefixtures("tmpdir_fixture")
+    @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
     def test_collect_result(self) -> None:
         stdout_file_path = self.work_dir / "test.o"
         stderr_file_path = self.work_dir / "test.e"
@@ -146,9 +144,7 @@ class TestAbciJob(unittest.TestCase):
             stdout_file_path=Path("stdout"),
             stderr_file_path=Path("stderr"),
         )
-        with patch(
-            "aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"
-        ):
+        with patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
             assert job.get_result() == "0.12"
 
 
@@ -165,9 +161,7 @@ class TestAbciJobExecutor(unittest.TestCase):
 
     @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
     def test___init__(self) -> None:
-        dispatcher = AbciJobExecutor(
-            self.job_file_path, self.n_jobs, work_dir=str(self.work_dir)
-        )
+        dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=str(self.work_dir))
         self.assertEqual(dispatcher.__class__.__name__, "AbciJobExecutor")
 
     @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
@@ -176,9 +170,7 @@ class TestAbciJobExecutor(unittest.TestCase):
         job_name = "test"
         group = "test_group"
         tag = None
-        dispatcher = AbciJobExecutor(
-            self.job_file_path, self.n_jobs, work_dir=str(self.work_dir)
-        )
+        dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=str(self.work_dir))
         job = AbciJob(
             job_name=job_name,
             args=args,
@@ -200,9 +192,7 @@ class TestAbciJobExecutor(unittest.TestCase):
         stdout_file_path = self.work_dir / f"{JB_name}.o"
         stderr_file_path = self.work_dir / f"{JB_name}.e"
 
-        dispatcher = AbciJobExecutor(
-            self.job_file_path, self.n_jobs, work_dir=self.work_dir
-        )
+        dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=self.work_dir)
         job = AbciJob(
             job_name=JB_name,
             args=[],
@@ -221,9 +211,7 @@ class TestAbciJobExecutor(unittest.TestCase):
 
         qstat_xml_dict = {"job_info": {"queue_info": None, "job_info": None}}
         with patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict):
-            with patch(
-                "aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"
-            ):
+            with patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
                 for y, trial in dispatcher.get_results():
                     assert y == "0.12"
 
@@ -233,9 +221,7 @@ class TestAbciJobExecutor(unittest.TestCase):
         stdout_file_path = self.work_dir / f"{JB_name}.o"
         stderr_file_path = self.work_dir / f"{JB_name}.e"
 
-        dispatcher = AbciJobExecutor(
-            self.job_file_path, self.n_jobs, work_dir=self.work_dir
-        )
+        dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=self.work_dir)
         job = AbciJob(
             job_name=JB_name,
             args=[],
@@ -254,9 +240,7 @@ class TestAbciJobExecutor(unittest.TestCase):
 
         qstat_xml_dict = {"job_info": {"queue_info": None, "job_info": None}}
         with patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict):
-            with patch(
-                "aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"
-            ):
+            with patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
                 y = dispatcher.get_result()
                 assert y == "0.12"
 
@@ -264,11 +248,9 @@ class TestAbciJobExecutor(unittest.TestCase):
     def test_update_state_batch(self) -> None:
         JB_names = ["hpo-0006", "hpo-0007"]
         job_numbers = [42183931, 42183935]
-        dispatcher = AbciJobExecutor(
-            self.job_file_path, self.n_jobs, work_dir=self.work_dir
-        )
+        dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=self.work_dir)
 
-        for JB_name, job_number in zip(JB_names, job_numbers):
+        for JB_name, job_number in zip(JB_names, job_numbers, strict=False):
             stdout_file_path = self.work_dir / f"{JB_name}.o"
             stderr_file_path = self.work_dir / f"{JB_name}.e"
 
@@ -293,9 +275,7 @@ class TestAbciJobExecutor(unittest.TestCase):
 
     @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
     def test_get_available_worker_count(self) -> None:
-        dispatcher = AbciJobExecutor(
-            self.job_file_path, self.n_jobs, work_dir=str(self.work_dir)
-        )
+        dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=str(self.work_dir))
         for i in range(10):
             dispatcher.working_job_list.append(
                 AbciJob(
