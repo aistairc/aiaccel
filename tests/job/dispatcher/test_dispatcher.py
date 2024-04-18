@@ -76,7 +76,7 @@ class TestAbciJob(unittest.TestCase):
             shutil.rmtree(work_dir)
 
     def test_run(self) -> None:
-        with patch("subprocess.run", return_value=Output()) as mock_run:
+        with patch("subprocess.run", return_value=Output()):
             job_file_path = Path("job.sh")
             job = AbciJob(
                 job_name="test",
@@ -191,7 +191,6 @@ class TestAbciJobExecutor(unittest.TestCase):
         JB_name = "hpo-0006"
         stdout_file_path = self.work_dir / f"{JB_name}.o"
         stderr_file_path = self.work_dir / f"{JB_name}.e"
-
         dispatcher = AbciJobExecutor(self.job_file_path, self.n_jobs, work_dir=self.work_dir)
         job = AbciJob(
             job_name=JB_name,
@@ -201,7 +200,6 @@ class TestAbciJobExecutor(unittest.TestCase):
             stdout_file_path=stdout_file_path,
             stderr_file_path=stderr_file_path,
         )
-
         job.job_number = 42183931
         job.status = JobStatus.FINISHED
         dispatcher.working_job_list.append(job)
@@ -210,10 +208,11 @@ class TestAbciJobExecutor(unittest.TestCase):
             f.write("0.12")
 
         qstat_xml_dict = {"job_info": {"queue_info": None, "job_info": None}}
-        with patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict):
-            with patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
-                for y, trial in dispatcher.get_results():
-                    assert y == "0.12"
+        with patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict), \
+            patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
+            results = dispatcher.get_results()
+            for y, _ in results:
+                assert y == "0.12"
 
     @pytest.mark.usefixtures("tmpdir_fixture")  # type: ignore
     def test_get_result(self) -> None:
@@ -239,8 +238,8 @@ class TestAbciJobExecutor(unittest.TestCase):
             f.write("0.12")
 
         qstat_xml_dict = {"job_info": {"queue_info": None, "job_info": None}}
-        with patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict):
-            with patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
+        with patch("aiaccel.job.dispatcher.qstat_xml", return_value=qstat_xml_dict), \
+            patch("aiaccel.job.dispatcher.AbciJob.collect_result", return_value="0.12"):
                 y = dispatcher.get_result()
                 assert y == "0.12"
 

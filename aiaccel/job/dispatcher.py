@@ -115,16 +115,16 @@ class AbciJob:
                         return lines[-1].strip()
                     else:
                         raise ValueError(f"No result found in `{self.stdout_file_path}`.")
-            except FileNotFoundError:
+            except FileNotFoundError as e:
                 time.sleep(wait)
                 retry_left -= 1
                 if retry_left == 0:
-                    raise FileNotFoundError(f"result file not found in `{self.stdout_file_path}`.")
-            except ValueError:
+                    raise FileNotFoundError(f"result file not found in `{self.stdout_file_path}`.") from e
+            except ValueError as e:
                 time.sleep(wait)
                 retry_left -= 1
                 if retry_left == 0:
-                    raise ValueError(f"No result found in `{self.stdout_file_path}`.")
+                    raise ValueError(f"No result found in `{self.stdout_file_path}`.") from e
         return None
 
     def get_result(self) -> Any:
@@ -210,7 +210,7 @@ class AbciJobExecutor:
             return None
 
     @classmethod
-    def update_state_batch(cls) -> None:
+    def update_state_batch(cls) -> None:  # noqa: C901
         qstat = qstat_xml()
         queue_info = qstat["job_info"].get("queue_info", None)
         job_info = qstat["job_info"].get("job_info", None)
