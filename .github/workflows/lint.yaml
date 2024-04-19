@@ -21,10 +21,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install .[dev,github-actions]
+          pip install .[dev,dependencies,github-actions]
       - name: Perform ruff
         run: |
-          ruff check 
+          ruff check
           ruff format --check
       - name: Perform mypy
         run: |
