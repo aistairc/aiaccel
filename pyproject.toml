@@ -41,6 +41,7 @@ dev = [
     "sphinx-intl",
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
+    "types-xmltodict",
     "undecorated",
 ]
 github-actions = [
