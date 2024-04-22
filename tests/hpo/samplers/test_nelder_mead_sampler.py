@@ -25,6 +25,7 @@ def search_space() -> dict[str, tuple[float, float]]:
 def sampler(search_space: dict[str, tuple[float, float]]) -> NelderMeadSampler:
     return NelderMeadSampler(search_space=search_space, seed=42)
 
+
 @pytest.fixture
 def sampler_with_sub_sampler(search_space: dict[str, tuple[float, float]]) -> NelderMeadSampler:
     return NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=optuna.samplers.RandomSampler())
@@ -33,6 +34,7 @@ def sampler_with_sub_sampler(search_space: dict[str, tuple[float, float]]) -> Ne
 @pytest.fixture
 def study(sampler: NelderMeadSampler) -> optuna.study.Study:
     return optuna.create_study(sampler=sampler)
+
 
 @pytest.fixture
 def study_with_sub_sampler(sampler_with_sub_sampler: NelderMeadSampler) -> optuna.study.Study:
@@ -74,6 +76,7 @@ def trial(
         trial_id=trial_id,
     )
 
+
 @pytest.fixture
 def fixed_params() -> dict[str, float]:
     return {"x": 2.0, "y": 3.0}
@@ -84,7 +87,7 @@ def trial_with_fixed_params(
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
     trial_id: int,
-    fixed_params: dict[str, tuple[float, float]]
+    fixed_params: dict[str, tuple[float, float]],
 ) -> optuna.trial.FrozenTrial:
     return optuna.trial.FrozenTrial(
         number=0,
@@ -103,10 +106,7 @@ def trial_with_fixed_params(
 
 class TestNelderMeadSampler:
     def test_infer_relative_search_space(
-        self,
-        sampler: NelderMeadSampler,
-        study: optuna.study.Study,
-        trial: optuna.trial.FrozenTrial
+        self, sampler: NelderMeadSampler, study: optuna.study.Study, trial: optuna.trial.FrozenTrial
     ) -> None:
         assert sampler.infer_relative_search_space(study, trial) == {}
 
@@ -146,17 +146,14 @@ class TestNelderMeadSampler:
             assert np.array_equal(trial.user_attrs["params"], expect_vertex)
 
     def test_before_trial_enqueued(
-        self,
-        sampler: NelderMeadSampler,
-        study: optuna.study.Study,
-        trial_with_fixed_params: optuna.trial.FrozenTrial
+        self, sampler: NelderMeadSampler, study: optuna.study.Study, trial_with_fixed_params: optuna.trial.FrozenTrial
     ) -> None:
         sampler.before_trial(study, trial_with_fixed_params)
 
         assert sampler.running_trials == [trial_with_fixed_params]
         assert np.array_equal(
             trial_with_fixed_params.user_attrs["params"],
-            list(trial_with_fixed_params.system_attrs["fixed_params"].values())
+            list(trial_with_fixed_params.system_attrs["fixed_params"].values()),
         )
 
     def test_before_trial_sub_sampler(
