@@ -210,10 +210,8 @@ class TestNelderMeadAlgorism:
 
             if not enqueued:
                 x = nm.get_vertex()
-                print(x, expected_vertex)
                 assert np.array_equal(x, expected_vertex)
 
-            print(expected_value)
             if expected_value is None:
                 break
 
