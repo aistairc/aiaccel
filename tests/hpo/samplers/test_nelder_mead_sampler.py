@@ -1,7 +1,7 @@
 import csv
 import datetime
+import math
 import time
-import unittest
 from collections.abc import Callable
 from multiprocessing import Pool
 from pathlib import Path
@@ -25,23 +25,14 @@ def search_space() -> dict[str, tuple[float, float]]:
 def sampler(search_space: dict[str, tuple[float, float]]) -> NelderMeadSampler:
     return NelderMeadSampler(search_space=search_space, seed=42)
 
-
 @pytest.fixture
-def sub_sampler() -> optuna.samplers.RandomSampler:
-    return optuna.samplers.RandomSampler()
-
-
-@pytest.fixture
-def sampler_with_sub_sampler(
-    search_space: dict[str, tuple[float, float]], sub_sampler: optuna.samplers.RandomSampler
-) -> NelderMeadSampler:
-    return NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=sub_sampler)
+def sampler_with_sub_sampler(search_space: dict[str, tuple[float, float]]) -> NelderMeadSampler:
+    return NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=optuna.samplers.RandomSampler())
 
 
 @pytest.fixture
 def study(sampler: NelderMeadSampler) -> optuna.study.Study:
     return optuna.create_study(sampler=sampler)
-
 
 @pytest.fixture
 def study_with_sub_sampler(sampler_with_sub_sampler: NelderMeadSampler) -> optuna.study.Study:
@@ -65,7 +56,9 @@ def trial_id() -> int:
 
 @pytest.fixture
 def trial(
-    state: optuna.trial.TrialState, param_distribution: optuna.distributions.FloatDistribution, trial_id: int
+    state: optuna.trial.TrialState,
+    param_distribution: optuna.distributions.FloatDistribution,
+    trial_id: int,
 ) -> optuna.trial.FrozenTrial:
     return optuna.trial.FrozenTrial(
         number=0,
@@ -81,10 +74,17 @@ def trial(
         trial_id=trial_id,
     )
 
+@pytest.fixture
+def fixed_params() -> dict[str, float]:
+    return {"x": 2.0, "y": 3.0}
+
 
 @pytest.fixture
-def trial_fixed_params(
-    state: optuna.trial.TrialState, param_distribution: optuna.distributions.FloatDistribution, trial_id: int
+def trial_with_fixed_params(
+    state: optuna.trial.TrialState,
+    param_distribution: optuna.distributions.FloatDistribution,
+    trial_id: int,
+    fixed_params: dict[str, tuple[float, float]]
 ) -> optuna.trial.FrozenTrial:
     return optuna.trial.FrozenTrial(
         number=0,
@@ -95,7 +95,7 @@ def trial_fixed_params(
         params={"x": 0.0, "y": 1.0},
         distributions={"x": param_distribution, "y": param_distribution},
         user_attrs={},
-        system_attrs={"fixed_params": {"x": 2.0, "y": 3.0}},
+        system_attrs={"fixed_params": fixed_params},
         intermediate_values={},
         trial_id=trial_id,
     )
@@ -103,7 +103,10 @@ def trial_fixed_params(
 
 class TestNelderMeadSampler:
     def test_infer_relative_search_space(
-        self, sampler: NelderMeadSampler, study: optuna.study.Study, trial: optuna.trial.FrozenTrial
+        self,
+        sampler: NelderMeadSampler,
+        study: optuna.study.Study,
+        trial: optuna.trial.FrozenTrial
     ) -> None:
         assert sampler.infer_relative_search_space(study, trial) == {}
 
@@ -143,13 +146,17 @@ class TestNelderMeadSampler:
             assert np.array_equal(trial.user_attrs["params"], expect_vertex)
 
     def test_before_trial_enqueued(
-        self, sampler: NelderMeadSampler, study: optuna.study.Study, trial_fixed_params: optuna.trial.FrozenTrial
+        self,
+        sampler: NelderMeadSampler,
+        study: optuna.study.Study,
+        trial_with_fixed_params: optuna.trial.FrozenTrial
     ) -> None:
-        sampler.before_trial(study, trial_fixed_params)
+        sampler.before_trial(study, trial_with_fixed_params)
 
-        assert sampler.running_trials == [trial_fixed_params]
+        assert sampler.running_trials == [trial_with_fixed_params]
         assert np.array_equal(
-            trial_fixed_params.user_attrs["params"], list(trial_fixed_params.system_attrs["fixed_params"].values())
+            trial_with_fixed_params.user_attrs["params"],
+            list(trial_with_fixed_params.system_attrs["fixed_params"].values())
         )
 
     def test_before_trial_sub_sampler(
@@ -193,6 +200,7 @@ class TestNelderMeadSampler:
         state: optuna.trial.TrialState,
     ) -> None:
         put_value = 4.0
+
         trial.set_user_attr("params", np.array([-1.0, 0.0]))
 
         sampler.after_trial(study, trial, state, [put_value])
@@ -287,8 +295,8 @@ class BaseTestNelderMead:
         return self.objective(params)
 
 
-class TestNelderMeadAckley(BaseTestNelderMead, unittest.TestCase):
-    def setUp(self) -> None:
+class TestNelderMeadAckley(BaseTestNelderMead):
+    def setup_method(self) -> None:
         search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
@@ -301,13 +309,13 @@ class TestNelderMeadAckley(BaseTestNelderMead, unittest.TestCase):
 
     def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
         for trial, result in zip(self.study.trials, results, strict=False):
-            self.assertAlmostEqual(trial.params["x"], float(result["x"]))
-            self.assertAlmostEqual(trial.params["y"], float(result["y"]))
-            self.assertAlmostEqual(trial.values[0], float(result["objective"]))
+            assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+            assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+            assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
 
 
-class TestNelderMeadAckleyParallel(BaseTestNelderMead, unittest.TestCase):
-    def setUp(self) -> None:
+class TestNelderMeadAckleyParallel(BaseTestNelderMead):
+    def setup_method(self) -> None:
         search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
 
@@ -324,18 +332,18 @@ class TestNelderMeadAckleyParallel(BaseTestNelderMead, unittest.TestCase):
             almost_equal_trial_exists = False
             for result in results:
                 try:
-                    self.assertAlmostEqual(trial.params["x"], float(result["x"]))
-                    self.assertAlmostEqual(trial.params["y"], float(result["y"]))
-                    self.assertAlmostEqual(trial.values[0], float(result["objective"]))
+                    assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+                    assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+                    assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
                     almost_equal_trial_exists = True
                     break
                 except AssertionError:
                     continue
-            self.assertTrue(almost_equal_trial_exists)
+            assert almost_equal_trial_exists
 
 
-class TestNelderMeadSphereParallel(BaseTestNelderMead, unittest.TestCase):
-    def setUp(self) -> None:
+class TestNelderMeadSphereParallel(BaseTestNelderMead):
+    def setup_method(self) -> None:
         search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
 
@@ -352,19 +360,19 @@ class TestNelderMeadSphereParallel(BaseTestNelderMead, unittest.TestCase):
             almost_equal_trial_exists = False
             for result in results:
                 try:
-                    self.assertAlmostEqual(trial.params["x"], float(result["x"]))
-                    self.assertAlmostEqual(trial.params["y"], float(result["y"]))
-                    self.assertAlmostEqual(trial.params["z"], float(result["z"]))
-                    self.assertAlmostEqual(trial.values[0], float(result["objective"]))
+                    assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+                    assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+                    assert math.isclose(trial.params["z"], float(result["z"]), rel_tol=0.000001)
+                    assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
                     almost_equal_trial_exists = True
                     break
                 except AssertionError:
                     continue
-            self.assertTrue(almost_equal_trial_exists)
+            assert almost_equal_trial_exists
 
 
-class TestNelderMeadSphereEnqueue(BaseTestNelderMead, unittest.TestCase):
-    def setUp(self) -> None:
+class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
+    def setup_method(self) -> None:
         search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
         self._rng = np.random.RandomState(seed=42)
         sampler = NelderMeadSampler(search_space=search_space, rng=self._rng)
@@ -409,6 +417,47 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead, unittest.TestCase):
     def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
         trials = [trial for trial in self.study.trials if len(trial.params) > 0]
         for trial, result in zip(trials, results, strict=False):
-            self.assertAlmostEqual(trial.params["x"], float(result["x"]))
-            self.assertAlmostEqual(trial.params["y"], float(result["y"]))
-            self.assertAlmostEqual(trial.values[0], float(result["objective"]))
+            assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+            assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+            assert math.isclose(trial.params["z"], float(result["z"]), rel_tol=0.000001)
+            assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
+
+
+class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
+    def setup_method(self) -> None:
+        search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
+        tpe_sampler = optuna.samplers.TPESampler(seed=43)
+        sampler = NelderMeadSampler(search_space=search_space, seed=42, block=False, sub_sampler=tpe_sampler)
+
+        self.common_setup(
+            search_space=search_space,
+            objective=ackley_sleep,
+            result_file_name="results_ackley_sub_sampler.csv",
+            study=optuna.create_study(sampler=sampler),
+        )
+
+    def optimize(self) -> None:
+        num_parallel = 5
+        with Pool(num_parallel) as p:
+            for _ in range(30):
+                trials = []
+                params = []
+                for _ in range(num_parallel):
+                    trial = self.study.ask()
+
+                    x = trial.suggest_float("x", *self.search_space["x"])
+                    y = trial.suggest_float("y", *self.search_space["y"])
+
+                    trials.append(trial)
+                    params.append([x, y])
+
+                for trial, value in zip(trials, p.imap(ackley_sleep, params), strict=False):
+                    frozen_trial = self.study.tell(trial, value)
+                    self.study._log_completed_trial(frozen_trial)
+
+    def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
+        trials = [trial for trial in self.study.trials if len(trial.params) > 0]
+        for trial, result in zip(trials, results, strict=False):
+            assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+            assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+            assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
