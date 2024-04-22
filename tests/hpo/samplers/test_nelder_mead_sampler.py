@@ -407,7 +407,7 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
                     trials.append(trial)
                     params.append([x, y, z])
 
-                for trial, value in zip(trials, p.imap(sphere_sleep, params), strict=False):
+                for trial, value in zip(trials, p.imap(self.objective, params), strict=False):
                     frozen_trial = self.study.tell(trial, value)
                     self.study._log_completed_trial(frozen_trial)
 
@@ -448,7 +448,7 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
                     trials.append(trial)
                     params.append([x, y])
 
-                for trial, value in zip(trials, p.imap(ackley_sleep, params), strict=False):
+                for trial, value in zip(trials, p.imap(self.objective, params), strict=False):
                     frozen_trial = self.study.tell(trial, value)
                     self.study._log_completed_trial(frozen_trial)
 
