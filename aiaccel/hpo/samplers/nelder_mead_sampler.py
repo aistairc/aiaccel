@@ -34,7 +34,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             rng=_rng,
             block=block,
         )
-        self.sub_study = optuna.create_study(sampler=sub_sampler) if sub_sampler is not None else None
+        self.sub_sampler = sub_sampler
 
         self.running_trials: list[FrozenTrial] = []
         self.finished_trials: list[tuple[FrozenTrial, float]] = []
@@ -62,25 +62,17 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 try:
                     params = self.nm.get_vertex()
                 except NelderMeadEmptyError as e:
-                    if self.sub_study is None:
+                    if self.sub_sampler is None:
                         raise e
                     else:
-                        sub_trial = self.sub_study.ask()
-                        trial.set_user_attr("sub_trial", sub_trial)
-                        params = np.array(
-                            [
-                                sub_trial.suggest_float(name, *distribution)
-                                for name, distribution in self._search_space.items()
-                            ]
-                        )
+                        trial.set_user_attr("sub_trial", True)
+                        params = {}
+                        break
 
                 if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
                     break
 
-                if "sub_trial" in trial.user_attrs and isinstance(self.sub_study, optuna.study.Study):
-                    self.sub_study.tell(trial.user_attrs["sub_trial"], np.inf)
-                else:
-                    self.nm.put_value(params, np.inf)
+                self.nm.put_value(params, np.inf)
 
         trial.set_user_attr("params", params)
 
@@ -97,6 +89,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             raise ValueError('trial.user_attrs["params"] is None')
         if param_name not in self._search_space:
             raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
+
+        if "sub_trial" in trial.user_attrs:
+            param_value = self.sub_sampler.sample_independent(study, trial, param_name, param_distribution)
+            if self._search_space[param_name][0] <= param_value <= self._search_space[param_name][1]:
+                return param_value
+            else:
+                raise ValueError()
 
         param_index = list(self._search_space.keys()).index(param_name)
         param_value = trial.user_attrs["params"][param_index]
@@ -124,9 +123,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             )
         if isinstance(values, list):
             self.nm.put_value(
-                trial.user_attrs["params"],
+                np.array(list(trial.params.values())),
                 values[0],
                 enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
             )
-            if "sub_trial" in trial.user_attrs and isinstance(self.sub_study, optuna.study.Study):
-                self.sub_study.tell(trial.user_attrs["sub_trial"], values[0])
+            if "sub_trial" in trial.user_attrs:
+                self.sub_sampler.after_trial(study, trial, state, values)
