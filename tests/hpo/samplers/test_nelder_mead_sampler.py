@@ -32,9 +32,8 @@ def param_distribution() -> optuna.distributions.FloatDistribution:
 
 
 def create_sampler(
-        search_space: dict[str, tuple[float, float]],
-        sub_sampler: optuna.samplers.BaseSampler | None = None
-        ) -> NelderMeadSampler:
+    search_space: dict[str, tuple[float, float]], sub_sampler: optuna.samplers.BaseSampler | None = None
+) -> NelderMeadSampler:
     return NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=sub_sampler)
 
 
@@ -43,10 +42,10 @@ def create_study(sampler: NelderMeadSampler) -> optuna.study.Study:
 
 
 def create_trial(
-        state: optuna.trial.TrialState,
-        param_distribution: optuna.distributions.FloatDistribution,
-        fixed_params: dict[str, float] | None = None
-        )-> optuna.trial.FrozenTrial:
+    state: optuna.trial.TrialState,
+    param_distribution: optuna.distributions.FloatDistribution,
+    fixed_params: dict[str, float] | None = None,
+) -> optuna.trial.FrozenTrial:
     system_attrs = {"fixed_params": fixed_params} if fixed_params is not None else {}
     return optuna.trial.FrozenTrial(
         number=0,
@@ -62,6 +61,7 @@ def create_trial(
         trial_id=0,
     )
 
+
 def test_infer_relative_search_space(
     search_space: dict[str, tuple[float, float]],
     state: optuna.trial.TrialState,
@@ -72,6 +72,7 @@ def test_infer_relative_search_space(
     trial = create_trial(state, param_distribution)
     assert sampler.infer_relative_search_space(study, trial) == {}
 
+
 def test_sample_relative(
     search_space: dict[str, tuple[float, float]],
     state: optuna.trial.TrialState,
@@ -81,6 +82,7 @@ def test_sample_relative(
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
     assert sampler.sample_relative(study, trial, {"x": param_distribution, "y": param_distribution}) == {}
+
 
 @pytest.mark.parametrize(
     "side_effect, expect_vertex",
@@ -110,12 +112,13 @@ def test_before_trial(
         assert sampler.running_trials == [trial]
         assert np.array_equal(trial.user_attrs["params"], expect_vertex)
 
+
 def test_before_trial_enqueued(
     search_space: dict[str, tuple[float, float]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
-    fixed_params={"x": 2.0, "y": 3.0}
+    fixed_params = {"x": 2.0, "y": 3.0}
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution, fixed_params)
@@ -126,6 +129,7 @@ def test_before_trial_enqueued(
         trial.user_attrs["params"],
         list(fixed_params.values()),
     )
+
 
 def test_before_trial_sub_sampler(
     search_space: dict[str, tuple[float, float]],
@@ -144,6 +148,7 @@ def test_before_trial_sub_sampler(
         assert trial.user_attrs["params"] == {}
         assert trial.user_attrs["sub_trial"]
 
+
 def test_sample_independent(
     search_space: dict[str, tuple[float, float]],
     state: optuna.trial.TrialState,
@@ -161,6 +166,7 @@ def test_sample_independent(
     value = sampler.sample_independent(study, trial, "y", param_distribution)
     assert value == xs[1]
 
+
 def test_after_trial(
     search_space: dict[str, tuple[float, float]],
     state: optuna.trial.TrialState,
@@ -177,6 +183,7 @@ def test_after_trial(
 
     vertex, value, enqueue = sampler.nm.results.get(block=False)
     assert value == put_value
+
 
 def test_after_trial_sub_sampler(
     search_space: dict[str, tuple[float, float]],

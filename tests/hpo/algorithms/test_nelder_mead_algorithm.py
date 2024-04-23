@@ -38,12 +38,14 @@ def test_waiting_for_result_empty(nm: NelderMeadAlgorism) -> None:
     result_value = next(nm._wait_for_result())
     assert result_value is None
 
+
 def test_waiting_for_results_empty(nm: NelderMeadAlgorism) -> None:
     nm.vertices, nm.values = [], []
 
     # queue is Empty
     result_value = next(nm._wait_for_results(2))
     assert result_value is None
+
 
 def test_waiting_for_result(nm: NelderMeadAlgorism) -> None:
     nm.vertices, nm.values = [], []
@@ -57,6 +59,7 @@ def test_waiting_for_result(nm: NelderMeadAlgorism) -> None:
     except StopIteration as e:
         result = e.value
     assert result == expected_value
+
 
 def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
     nm.vertices, nm.values = [], []
@@ -73,10 +76,9 @@ def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
         result_values = e.value[1]
     assert result_values == [expected_value1, expected_value2]
 
+
 def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorism) -> None:
-    with patch(
-        "aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._collect_enqueued_results"
-    ) as mock_iter:
+    with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._collect_enqueued_results") as mock_iter:
         mock_iter.side_effect = [([np.array([-1.0, 0.0])], [0.5])]
 
         nm.vertices, nm.values = [], []
@@ -92,11 +94,13 @@ def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorism) -> None:
         except UnexpectedVerticesUpdateError:
             assert True
 
+
 def test_collect_enqueued_results_empty(nm: NelderMeadAlgorism) -> None:
     # queue is Empty
     result_vertices, result_values = nm._collect_enqueued_results()
     assert result_vertices == []
     assert result_values == []
+
 
 def test_collect_enqueued_results(nm: NelderMeadAlgorism) -> None:
     # queue is not Empty
@@ -111,6 +115,7 @@ def test_collect_enqueued_results(nm: NelderMeadAlgorism) -> None:
     assert np.array_equal(result_vertices, [expected_vertex1, expected_vertex2])
     assert result_values == [expected_value1, expected_value2]
 
+
 def test_initialize(search_space: dict[str, tuple[float, float]], nm: NelderMeadAlgorism) -> None:
     for _ in range(len(search_space) + 1):
         random_xs = nm.get_vertex()
@@ -121,6 +126,7 @@ def test_initialize(search_space: dict[str, tuple[float, float]], nm: NelderMead
         raise AssertionError()
     except NelderMeadEmptyError:
         assert True
+
 
 def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: NelderMeadAlgorism) -> None:
     # enqueued
@@ -142,6 +148,7 @@ def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: 
     except NelderMeadEmptyError:
         assert True
 
+
 def test_initialize_enqueued2(nm: NelderMeadAlgorism) -> None:
     # enqueued
     enqueud_vertices = [np.array([1.0, 2.0]), np.array([2.0, 3.0]), np.array([4.0, 5.0]), np.array([6.0, 7.0])]
@@ -153,6 +160,7 @@ def test_initialize_enqueued2(nm: NelderMeadAlgorism) -> None:
 
     x = nm.get_vertex()
     assert np.array_equal(x, expected_vertex)
+
 
 @pytest.mark.parametrize(
     "expected_results",  # (vertex, value, enqueue)
