@@ -85,17 +85,17 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: BaseDistribution,
     ) -> Any:
-        if trial.user_attrs["params"] is None:
-            raise ValueError('trial.user_attrs["params"] is None')
-        if param_name not in self._search_space:
-            raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
-
         if "sub_trial" in trial.user_attrs and self.sub_sampler is not None:
             param_value = self.sub_sampler.sample_independent(study, trial, param_name, param_distribution)
             if self._search_space[param_name][0] <= param_value <= self._search_space[param_name][1]:
                 return param_value
             else:
                 raise ValueError()
+
+        if trial.user_attrs["params"] is None:
+            raise ValueError('trial.user_attrs["params"] is None')
+        if param_name not in self._search_space:
+            raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
 
         param_index = list(self._search_space.keys()).index(param_name)
         param_value = trial.user_attrs["params"][param_index]

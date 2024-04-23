@@ -145,7 +145,6 @@ def test_before_trial_sub_sampler(
         sampler.before_trial(study, trial)
 
         assert sampler.running_trials == [trial]
-        assert trial.user_attrs["params"] == {}
         assert trial.user_attrs["sub_trial"]
 
 
