@@ -90,7 +90,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             if self._search_space[param_name][0] <= param_value <= self._search_space[param_name][1]:
                 return param_value
             else:
-                raise ValueError()
+                raise ValueError(f"Sub_sampler {self.sub_sampler} outputs out-of-range parameters. {param_name} : {param_value}")
 
         if trial.user_attrs["params"] is None:
             raise ValueError('trial.user_attrs["params"] is None')
