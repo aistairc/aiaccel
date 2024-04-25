@@ -65,6 +65,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                     if self.sub_sampler is None:
                         raise e
                     else:
+                        self.sub_sampler.before_trial(study, trial)
                         trial.set_user_attr("sub_trial", True)
                         break
 
