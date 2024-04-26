@@ -109,7 +109,6 @@ def test_before_trial(
 
         sampler.before_trial(study, trial)
 
-        assert sampler.running_trials == [trial]
         assert np.array_equal(trial.user_attrs["params"], expect_vertex)
 
 
@@ -124,7 +123,6 @@ def test_before_trial_enqueued(
     trial = create_trial(state, param_distribution, fixed_params)
     sampler.before_trial(study, trial)
 
-    assert sampler.running_trials == [trial]
     assert np.array_equal(
         trial.user_attrs["params"],
         list(fixed_params.values()),
@@ -144,7 +142,6 @@ def test_before_trial_sub_sampler(
 
         sampler.before_trial(study, trial)
 
-        assert sampler.running_trials == [trial]
         assert trial.user_attrs["sub_trial"]
 
 

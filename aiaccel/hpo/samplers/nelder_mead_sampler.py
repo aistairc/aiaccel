@@ -36,9 +36,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         )
         self.sub_sampler = sub_sampler
 
-        self.running_trials: list[FrozenTrial] = []
-        self.finished_trials: list[tuple[FrozenTrial, float]] = []
-
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
 
@@ -76,8 +73,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         if "sub_trial" not in trial.user_attrs:
             trial.set_user_attr("params", params)
-
-        self.running_trials.append(trial)
 
     def sample_independent(
         self,
