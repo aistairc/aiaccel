@@ -1,3 +1,4 @@
+import os
 from argparse import ArgumentParser
 from pathlib import Path
 import pickle as pkl
@@ -10,14 +11,6 @@ import lightning as lt
 from lightning.fabric.utilities.rank_zero import rank_zero_only
 
 from aiaccel.utils import print_config
-
-
-@rank_zero_only
-def print_and_save_config(config: DictConfig | ListConfig) -> None:
-    print_config(config)
-
-    with open(config.working_directory / "config.pkl", "wb") as f:
-        pkl.dump(config, f)
 
 
 def main() -> None:
@@ -42,7 +35,12 @@ def main() -> None:
         config,
     )
 
-    print_and_save_config(config)
+    if "OMPI_COMM_WORLD_RANK" not in os.environ or int(os.environ["OMPI_COMM_WORLD_RANK"]) == 0:
+        print_config(config)
+
+        with open(config.working_directory / "config.pkl", "wb") as f:
+            pkl.dump(config, f)
+
 
     # train
     trainer: lt.Trainer = instantiate(config.trainer)

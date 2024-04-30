@@ -45,10 +45,13 @@ class ABCIEnvironment(ClusterEnvironment):
         return self._local_rank
 
     def set_world_size(self, size: int) -> None:
-        log.warn("ABCIEnvironment.set_world_size was called. Ignored.")
+        if size != self.world_size():
+            raise ValueError(f"`size` is expected to be {self.world_size()}, buf {size} is given.")
 
     def set_global_rank(self, rank: int) -> None:
-        log.warn("ABCIEnvironment.set_global_rank was called. Ignored.")
+        if rank != self.global_rank():
+            raise ValueError(f"`rank` is expected to be {self.get_global_rank()}, buf {rank} is given.")
+        
 
     def validate_settings(self, num_devices: int, num_nodes: int) -> None:
         if num_devices != self._local_size:

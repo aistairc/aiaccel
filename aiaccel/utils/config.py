@@ -4,6 +4,8 @@ from copy import deepcopy
 from pathlib import Path
 import re
 
+import yaml
+
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as oc  # noqa:N813

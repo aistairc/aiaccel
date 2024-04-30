@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-class RawHDF5Dataset(Dataset[Any]):
+class RawHDF5Dataset(Dataset[int]):
     def __init__(self, dataset_path: Path | str) -> None:
         self.dataset_path = dataset_path
 
