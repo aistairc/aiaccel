@@ -28,7 +28,6 @@ class OptimizerLightningModule(lt.LightningModule):
             return optimizer
         else:
             assert self.optcfg.scheduler_interval is not None
-            assert self.optcfg.scheduler_monitor is not None
             return {
                 "optimizer": optimizer,
                 "lr_scheduler": {
