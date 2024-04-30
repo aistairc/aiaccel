@@ -34,7 +34,6 @@ class AbciJobExecutor:
         tag: Any = None,
         sleep_time: float = 5.0,
     ) -> AbciJob:
-
         job = AbciJob(
             self.job_filename,
             self.job_group,
