@@ -21,9 +21,9 @@ class JobStatus(IntEnum):
         match status:
             case "r":
                 return JobStatus.RUNNING
-            case "qw":
+            case "qw" | "h" | "t" | "s" | "S" | "T" | "Rq":
                 return JobStatus.WAITING
-            case "d":
+            case "d" | "Rr":
                 return JobStatus.RUNNING
             case "E":
                 return JobStatus.ERROR
@@ -63,8 +63,8 @@ class AbciJob:
         self.job_name = job_name if job_name is not None else self.job_filename.name
 
         self.cwd = Path(cwd) if cwd is not None else Path.cwd()
-        self.stdout_filename = Path(stdout_filename) if stdout_filename is not None else self.cwd / f"{job_name}.o"
-        self.stderr_filename = Path(stderr_filename) if stderr_filename is not None else self.cwd / f"{job_name}.o"
+        self.stdout_filename = Path(stdout_filename) if stdout_filename is not None else self.cwd / f"{self.job_name}.o"  #　(-> self.job_name: None回避)
+        self.stderr_filename = Path(stderr_filename) if stderr_filename is not None else self.cwd / f"{self.job_name}.o"
 
         self.tag = tag
 

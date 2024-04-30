@@ -18,13 +18,15 @@ def main() -> None:
 
     study = optuna.create_study(direction="minimize")
 
-    for _ in range(n_trials):
+    while jobs.get_finished_job_count() <= n_trials:
         for _ in range(jobs.available_slots()):
             trial = study.ask()
             hparams = {
                 "x1": trial.suggest_float("x1", 0, 10),
                 "x2": trial.suggest_float("x2", 0, 10),
             }
+
+            jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
             job = jobs.submit(
                 args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
