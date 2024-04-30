@@ -55,8 +55,7 @@ def test_waiting_for_result(nm: NelderMeadAlgorism) -> None:
     nm.put_value(np.zeros(2), expected_value)
     with pytest.raises(StopIteration) as e:
         next(nm._wait_for_result())
-        result = e.value
-        assert result == expected_value
+    assert e.value.value == expected_value
 
 
 def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
@@ -69,8 +68,9 @@ def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
     nm.put_value(np.zeros(2), expected_value2)
     with pytest.raises(StopIteration) as e:
         next(nm._wait_for_results(2))
-        result_values = e.value[1]
-        assert result_values == [expected_value1, expected_value2]
+    result_values = e.value.value[1]
+    assert result_values == [expected_value1, expected_value2]
+
 
 def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorism) -> None:
     with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._collect_enqueued_results") as mock_iter:
@@ -118,7 +118,6 @@ def test_initialize(search_space: dict[str, tuple[float, float]], nm: NelderMead
         nm.get_vertex()
 
 
-
 def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: NelderMeadAlgorism) -> None:
     # enqueued
     enqueued_vertex = np.array([1.0, 2.0])
@@ -135,6 +134,7 @@ def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: 
 
     with pytest.raises(NelderMeadEmptyError):
         nm.get_vertex()
+
 
 def test_initialize_enqueued2(nm: NelderMeadAlgorism) -> None:
     # enqueued
