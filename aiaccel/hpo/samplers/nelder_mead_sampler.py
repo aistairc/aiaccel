@@ -16,6 +16,36 @@ __all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
+    """NelderMead アルゴリズムを用いた Sampler
+
+    パラメータ数-1個の初期点計算と shrink 時のみ並列化可能で、それ以外は基本的には直列計算になる(optuna.optimize(n_jobs=2)等で設定しても、前述の時以外は直列で計算する)
+    並列化を有効にする場合は、引数 block = True にする必要がある。
+
+    optuna.enqueue_trial() 利用時は、NelderMeadSampler が決定するパラメータとは個別に計算され、良い結果が出れば NelderMead に取り込まれる。(Simplexの再構成を行う)また、optuna.enqueue_trial() で決定されたパラメータは、並列化が有効であれば NelderMead の決定するパラメータと並列で計算される。
+
+    Args:
+        search_space: dict[str, tuple[float, float]]
+            パラメータ名と対応した lower, upper を設定する
+            suggest_uniform とは個別に設定する必要がある(before_trial 時点でパラメータを決定する必要があるため)
+        seed: int | None = None
+            初期点計算をランダムで決定する際に利用されるシード値
+        rng: np.random.RandomState | None = None
+            初期点計算に用いられる RandomState
+            seed と同時に指定された場合、 rng が優先される
+        coeff: NelderMeadCoefficient | None = None
+            NelderMead で用いられるパラメータを設定する
+        block: bool = False
+            内部で用いられる queue を block するかどうかを設定する
+            optuna.optimize による並列化を有効にする場合は、 block = Trueで設定する必要がある
+        sub_sampler: optuna.samplers.BaseSampler | None = None
+            NelderMead がパラメータを出力出来ない時に、代わりにパラメータを出力する Sampler を設定する
+            主に並列化時に空いている計算ノードで利用することを想定している
+            sub_sampler 機能を有効にする場合は、 block = False で設定する必要がある
+
+    Attributes:
+        nm: NelderMeadAlgorism
+            NelderMead のアルゴリズムを管理するクラスのインスタンス
+    """
     def __init__(
         self,
         search_space: dict[str, tuple[float, float]],
@@ -48,6 +78,21 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
+        """trial の前処理
+
+        ここで NelderMead のパラメータを決定する
+        trial.user_attr["params"] に決定したパラメータが格納される
+        NelderMead のパラメータが出力出来なければ、sub_sampler = None の場合は NelderMeadEmptyError を raise する
+        sub_sampler が指定されている場合は、 sub_sampler.before_trial() を実行し、trial.user_attr["sub_trial"] = True とする
+
+        Args:
+            study: Study
+            trial: FrozenTrial
+
+        Returns:
+            None
+
+        """
         if "fixed_params" in trial.system_attrs:  # enqueued trial
             fixed_params = trial.system_attrs["fixed_params"]
             if fixed_params.keys() != self._search_space.keys():
@@ -81,6 +126,21 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: BaseDistribution,
     ) -> Any:
+        """パラメータを sample する
+
+        NelderMeadSampler の場合は before_trial でパラメータを決定済みなので、 trial.user_attr["params"] の対応したパラメータを返り値とする
+        trial.user_attr["sub_trial"] = True の場合は、 sub_sampler.sample_independent() を実行し、そのパラメータを返り値とする
+
+        Args:
+            study: Study
+            trial: FrozenTrial
+            param_name: str
+            param_distribution: BaseDistribution
+
+        Returns:
+            Any
+
+        """
         if "sub_trial" in trial.user_attrs and self.sub_sampler is not None:
             param_value = self.sub_sampler.sample_independent(study, trial, param_name, param_distribution)
             if self._search_space[param_name][0] <= param_value <= self._search_space[param_name][1]:
@@ -114,6 +174,21 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         state: TrialState,
         values: Sequence[float] | None,
     ) -> None:
+        """trial の後処理
+
+        パラメータ、計算結果の組を NelderMead アルゴリズムに渡す
+        trial.user_attr["sub_trial"] = True の場合は、 sub_sampler.after_trial() を実行する
+
+        Args:
+            study: Study
+            trial: FrozenTrial
+            state: TrialState
+            values: Sequence[float] | None
+
+        Return type:
+            None
+
+        """
         if isinstance(values, Sequence) and len(values) != 1:  # trial was finished as multiobjective
             raise RuntimeError(
                 "Multidimentional trial values are obtained. "

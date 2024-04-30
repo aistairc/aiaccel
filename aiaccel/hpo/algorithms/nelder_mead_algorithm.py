@@ -27,6 +27,24 @@ class UnexpectedVerticesUpdateError(Exception):
 
 
 class NelderMeadAlgorism:
+    """NelderMead アルゴリズムを管理するクラス
+
+    queue を用いて結果を受け取り、NelderMead のアルゴリズムを進める
+
+    Args:
+        search_space: dict[str, tuple[float, float]]
+        coeff: NelderMeadCoefficient | None = None
+        rng: np.random.RandomState | None = None
+        block: bool = False
+        timeout: int | None = None
+    Attributes:
+        vertices: list[npt.NDArray[np.float64]]
+        values: list[float]
+        generator: iterator
+        lock: threading.Lock
+        results: queue.Queue[tuple[npt.NDArray[np.float64], float, bool]]
+        simplex_size: int
+    """
     vertices: list[npt.NDArray[np.float64]]
     values: list[float]
 
