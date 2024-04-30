@@ -150,42 +150,52 @@ def test_initialize_enqueued2(nm: NelderMeadAlgorism) -> None:
 
 
 @pytest.mark.parametrize(
-    "expected_results",  # (vertex, value, enqueue)
+    "expected_results",
     [
-        # reflect
-        ([([-1.0, 0.0], None, False)]),
-        # reflect -> reflect
-        ([([-1.0, 0.0], 4.0, False), ([1.0, 2.0], None, False)]),
-        # reflect -> expand -> fe < fr -> reflect
-        ([([-1.0, 0.0], 2.0, False), ([-4.0, -3.0], 1.0, False), ([-2.0, -1.0], None, False)]),
-        # reflect -> expand -> else (fe > fr) -> reflect
-        ([([-1.0, 0.0], 2.0, False), ([-4.0, -3.0], 3.0, False), ([1.0, 2.0], None, False)]),
-        # reflect -> outside_contract -> foc <= fr -> reflect
-        ([([-1.0, 0.0], 6.0, False), ([0.5, 1.5], 5.5, False), ([3.5, 4.5], None, False)]),
-        # reflect -> outside_contract -> shrink -> reflect
-        (
-            [
-                ([-1.0, 0.0], 6.0, False),
-                ([0.5, 1.5], 7.0, False),
-                ([2.0, 3.0], 1.0, False),
-                ([4.0, 5.0], 2.0, False),
-                ([3.0, 4.0], None, False),
-            ]
-        ),
-        # reflect -> inside_contract -> fic < self.values[-1] -> reflect
-        ([([-1.0, 0.0], 8.0, False), ([3.5, 4.5], 6.0, False), ([0.5, 1.5], None, False)]),
-        # reflect -> inside_contract -> else (fic > self.values[-1]) -> shrink -> reflect
-        (
-            [
-                ([-1.0, 0.0], 8.0, False),
-                ([3.5, 4.5], 8.5, False),
-                ([2.0, 3.0], 1.0, False),
-                ([4.0, 5.0], 2.0, False),
-                ([3.0, 4.0], None, False),
-            ]
-        ),
-        # reflect -> UnexpectedVerticesUpdateError -> reflect
-        ([([-1.0, 0.0], 4.0, False), ([1.0, 3.0], 2.0, True), ([5.0, 7.0], None, False)]),
+        pytest.param([{"vertex": [-1.0, 0.0], "value": None, "enqueue": False}], id="reflect"),
+        pytest.param([
+            {"vertex": [-1.0, 0.0], "value": 4.0, "enqueue": False},
+            {"vertex": [1.0, 2.0], "value": None, "enqueue": False},
+            ], id="reflect -> reflect"),
+        pytest.param([
+            {"vertex": [-1.0, 0.0], "value": 2.0, "enqueue": False},
+            {"vertex": [-4.0, -3.0], "value": 1.0, "enqueue": False},
+            {"vertex": [-2.0, -1.0], "value": None, "enqueue": False},
+            ], id="reflect -> expand -> fe < fr -> reflect"),
+        pytest.param([
+            {"vertex": [-1.0, 0.0], "value": 2.0, "enqueue": False},
+            {"vertex": [-4.0, -3.0], "value": 3.0, "enqueue": False},
+            {"vertex": [1.0, 2.0], "value": None, "enqueue": False},
+            ], id="reflect -> expand -> else (fe > fr) -> reflect"),
+        pytest.param([
+            {"vertex": [-1.0, 0.0], "value": 6.0, "enqueue": False},
+            {"vertex": [0.5, 1.5], "value": 5.5, "enqueue": False},
+            {"vertex": [3.5, 4.5], "value": None, "enqueue": False},
+            ], id="reflect -> outside_contract -> foc <= fr -> reflect"),
+        pytest.param([
+            {"vertex": [-1.0, 0.0], "value": 6.0, "enqueue": False},
+            {"vertex": [0.5, 1.5], "value": 7.0, "enqueue": False},
+            {"vertex": [2.0, 3.0], "value": 1.0, "enqueue": False},
+            {"vertex": [4.0, 5.0], "value": 2.0, "enqueue": False},
+            {"vertex": [3.0, 4.0], "value": None, "enqueue": False},
+            ], id="reflect -> outside_contract -> shrink -> reflect"),
+        pytest.param([
+            {"vertex": [-1.0, 0.0], "value": 8.0, "enqueue": False},
+            {"vertex": [3.5, 4.5], "value": 6.0, "enqueue": False},
+            {"vertex": [0.5, 1.5], "value": None, "enqueue": False},
+            ], id="reflect -> inside_contract -> fic < self.values[-1] -> reflect"),
+        pytest.param([
+            {"vertex": [-1.0, 0.0], "value": 8.0, "enqueue": False},
+            {"vertex": [3.5, 4.5], "value": 8.5, "enqueue": False},
+            {"vertex": [2.0, 3.0], "value": 1.0, "enqueue": False},
+            {"vertex": [4.0, 5.0], "value": 2.0, "enqueue": False},
+            {"vertex": [3.0, 4.0], "value": None, "enqueue": False},
+            ], id="reflect -> inside_contract -> else (fic > self.values[-1]) -> shrink -> reflect"),
+        pytest.param([
+            {"vertex": [-1.0, 0.0], "value": 4.0, "enqueue": False},
+            {"vertex": [1.0, 3.0], "value": 2.0, "enqueue": True},
+            {"vertex": [5.0, 7.0], "value": None, "enqueue": False},
+            ], id="reflect -> UnexpectedVerticesUpdateError -> reflect"),
     ],
 )
 def test_compare_results(
@@ -199,7 +209,7 @@ def test_compare_results(
 
     # main loop
     for expected_result in expected_results:
-        expected_vertex, expected_value, enqueued = expected_result
+        expected_vertex, expected_value, enqueued = expected_result.values()
 
         if not enqueued:
             x = nm.get_vertex()
