@@ -53,12 +53,10 @@ def test_waiting_for_result(nm: NelderMeadAlgorism) -> None:
     # queue is not Empty
     expected_value = 1.0
     nm.put_value(np.zeros(2), expected_value)
-    try:
+    with pytest.raises(StopIteration) as e:
         next(nm._wait_for_result())
-        raise AssertionError()
-    except StopIteration as e:
         result = e.value
-    assert result == expected_value
+        assert result == expected_value
 
 
 def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
@@ -69,13 +67,10 @@ def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
     nm.put_value(np.zeros(2), expected_value1)
     expected_value2 = 2.0
     nm.put_value(np.zeros(2), expected_value2)
-    try:
+    with pytest.raises(StopIteration) as e:
         next(nm._wait_for_results(2))
-        raise AssertionError()
-    except StopIteration as e:
         result_values = e.value[1]
-    assert result_values == [expected_value1, expected_value2]
-
+        assert result_values == [expected_value1, expected_value2]
 
 def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorism) -> None:
     with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._collect_enqueued_results") as mock_iter:
@@ -88,11 +83,8 @@ def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorism) -> None:
         nm.put_value(np.zeros(2), expected_value1)
         expected_value2 = 2.0
         nm.put_value(np.zeros(2), expected_value2)
-        try:
+        with pytest.raises(UnexpectedVerticesUpdateError):
             next(nm._wait_for_results(2))
-            raise AssertionError()
-        except UnexpectedVerticesUpdateError:
-            assert True
 
 
 def test_collect_enqueued_results_empty(nm: NelderMeadAlgorism) -> None:
@@ -121,11 +113,10 @@ def test_initialize(search_space: dict[str, tuple[float, float]], nm: NelderMead
         random_xs = nm.get_vertex()
         for random_x, distribution in zip(random_xs, search_space.values(), strict=False):
             assert isinstance(random_x, float) and distribution[0] <= random_x <= distribution[1]
-    try:
+
+    with pytest.raises(NelderMeadEmptyError):
         nm.get_vertex()
-        raise AssertionError()
-    except NelderMeadEmptyError:
-        assert True
+
 
 
 def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: NelderMeadAlgorism) -> None:
@@ -142,12 +133,8 @@ def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: 
     assert np.array_equal(nm.vertices, [enqueued_vertex])
     assert nm.values == [enqueued_value]
 
-    try:
+    with pytest.raises(NelderMeadEmptyError):
         nm.get_vertex()
-        raise AssertionError()
-    except NelderMeadEmptyError:
-        assert True
-
 
 def test_initialize_enqueued2(nm: NelderMeadAlgorism) -> None:
     # enqueued
