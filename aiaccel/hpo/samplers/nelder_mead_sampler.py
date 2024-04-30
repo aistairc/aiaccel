@@ -69,9 +69,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 else:
                     self.sub_sampler.before_trial(study, trial)
                     trial.set_user_attr("sub_trial", True)
+                    return
 
-        if "sub_trial" not in trial.user_attrs:
-            trial.set_user_attr("params", params)
+        trial.set_user_attr("params", params)
 
     def sample_independent(
         self,
