@@ -100,24 +100,23 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
-            while True:
-                try:
+            try:
+                while True:
                     params = self.nm.get_vertex()
-                except NelderMeadEmptyError as e:
-                    if self.sub_sampler is None:
-                        raise e
-                    else:
-                        self.sub_sampler.before_trial(study, trial)
-                        trial.set_user_attr("sub_trial", True)
+
+                    if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
                         break
 
-                if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
-                    break
+                    self.nm.put_value(params, np.inf)
+            except NelderMeadEmptyError as e:
+                if self.sub_sampler is None:
+                    raise e
+                else:
+                    self.sub_sampler.before_trial(study, trial)
+                    trial.set_user_attr("sub_trial", True)
+                    return
 
-                self.nm.put_value(params, np.inf)
-
-        if "sub_trial" not in trial.user_attrs:
-            trial.set_user_attr("params", params)
+        trial.set_user_attr("params", params)
 
     def sample_independent(
         self,
@@ -150,8 +149,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                     f"Sub_sampler {self.sub_sampler} outputs out-of-range parameters. {param_name} : {param_value}"
                 )
 
-        if trial.user_attrs["params"] is None:
-            raise ValueError('trial.user_attrs["params"] is None')
         if param_name not in self._search_space:
             raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
 
