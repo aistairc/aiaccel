@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from pathlib import Path
+import pickle as pkl
 
 import torch
 from torch.utils.data import Dataset
@@ -16,11 +17,19 @@ __all__ = [
 
 
 class RawHDF5Dataset(Dataset[int]):
-    def __init__(self, dataset_path: Path | str) -> None:
+    def __init__(self, dataset_path: Path | str, grp_list: Path | str | list[str] | None = None) -> None:
         self.dataset_path = dataset_path
 
-        with h5.File(self.dataset_path, "r") as f:
-            self.grp_list = sorted(f.keys())
+        if grp_list is None:
+            with h5.File(self.dataset_path, "r") as f:
+                self.grp_list = list(f.keys())
+        elif isinstance(grp_list, (str, Path)):
+            with open(grp_list, "rb") as f:
+                self.grp_list = pkl.load(f)
+        elif isinstance(grp_list, list):
+            self.grp_list = grp_list
+        else:
+            raise NotImplementedError()
 
         self.f: h5.File | None = None
 
