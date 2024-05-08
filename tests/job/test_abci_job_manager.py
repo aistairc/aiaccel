@@ -31,7 +31,7 @@ class TestAbciJobExecutor(unittest.TestCase):
             self.job_group,
             job_name=self.job_name,
             work_dir=self.work_dir,
-            n_max_jobs=self.n_max_jobs
+            n_max_jobs=self.n_max_jobs,
         )
 
     def tearDown(self) -> None:
@@ -65,9 +65,8 @@ class TestAbciJobExecutor(unittest.TestCase):
         with patch("subprocess.run", return_value=qstat_xml("tests/job/qstat_dat.txt")):
             result = self.executor.available_slots()
 
-        num_available_slots = (
-            self.n_max_jobs
-            - len([j for j in self.executor.job_list if j.status == JobStatus.RUNNING or JobStatus.WAITING])
+        num_available_slots = self.n_max_jobs - len(
+            [j for j in self.executor.job_list if j.status == JobStatus.RUNNING or JobStatus.WAITING]
         )
         self.assertEqual(result, num_available_slots)
 
@@ -96,9 +95,8 @@ class TestAbciJobExecutor(unittest.TestCase):
         with patch("subprocess.run", return_value=qstat_xml("tests/job/qstat_dat 2r_1qw.txt")):
             result = self.executor.available_slots()
 
-        num_available_slots = (
-            self.n_max_jobs
-            - len([j for j in self.executor.job_list if j.status == JobStatus.RUNNING or JobStatus.WAITING])
+        num_available_slots = self.n_max_jobs - len(
+            [j for j in self.executor.job_list if j.status == JobStatus.RUNNING or JobStatus.WAITING]
         )
         self.assertEqual(result, num_available_slots)
 

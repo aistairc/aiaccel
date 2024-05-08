@@ -40,7 +40,7 @@ class TestAbciJob(unittest.TestCase):
             stderr_filename=self.stderr_filename,
             qsub_args=self.qsub_args,
             args=self.args,
-            tag=self.tag
+            tag=self.tag,
         )
 
     def tearDown(self) -> None:
@@ -59,9 +59,20 @@ class TestAbciJob(unittest.TestCase):
         self.assertEqual(
             self.job.cmd,
             [
-                "qsub", "-g", self.job_group, "-o", str(self.stdout_filename), "-e", str(self.stderr_filename),
-                "-N", self.job_name, "-l", str(self.job_filename), "arg1", "arg2"
-            ]
+                "qsub",
+                "-g",
+                self.job_group,
+                "-o",
+                str(self.stdout_filename),
+                "-e",
+                str(self.stderr_filename),
+                "-N",
+                self.job_name,
+                "-l",
+                str(self.job_filename),
+                "arg1",
+                "arg2",
+            ],
         )
 
     def test_submit(self) -> None:
