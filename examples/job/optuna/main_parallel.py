@@ -18,7 +18,9 @@ def main() -> None:
 
     study = optuna.create_study(direction="minimize")
 
-    while jobs.get_finished_job_count() <= n_trials:
+    finished_job_count = 0
+
+    while finished_job_count <= n_trials:
         for _ in range(jobs.available_slots()):
             trial = study.ask()
             hparams = {
@@ -40,6 +42,8 @@ def main() -> None:
                 y = pkl.load(f)
 
             study.tell(trial, y)
+
+            finished_job_count += 1
 
 
 if __name__ == "__main__":
