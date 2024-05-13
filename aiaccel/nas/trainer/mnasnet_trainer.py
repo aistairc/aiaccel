@@ -7,6 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from omegaconf import OmegaConf
+
 if TYPE_CHECKING:
     from logging import Logger
 
@@ -35,6 +37,12 @@ from aiaccel.nas.utils.utils import (
 )
 
 
+def _create_dict_config(config: DictConfig | Path | str) -> DictConfig:
+    if isinstance(config, (Path, str)):
+        return OmegaConf.load(config)
+    return config
+
+
 class MnasnetTrainer:
     _nas_config: DictConfig
     _parameter_config: DictConfig
@@ -56,17 +64,20 @@ class MnasnetTrainer:
     _search_trainer: lightning.Trainer
     _valid_acc: float
 
-    def __init__(self, nas_config: DictConfig, parameter_config: DictConfig):
-        self._nas_config = nas_config
-        self._parameter_config = parameter_config
-        _search_space_config_path = get_search_space_config(nas_config.nas.search_space, nas_config.dataset.name)
+    def __init__(self, nas_config: DictConfig | Path | str, parameter_config: DictConfig | Path | str):
+        self._nas_config = _create_dict_config(nas_config)
+        self._parameter_config = _create_dict_config(parameter_config)
+        _search_space_config_path = get_search_space_config(
+            self._nas_config.nas.search_space,
+            self._nas_config.dataset.name,
+        )
         self._search_space_config = create_config_by_yaml(
-            nas_config.nas.search_space_config_path + str(_search_space_config_path),
+            self._nas_config.nas.search_space_config_path + str(_search_space_config_path),
         )
         self._log_dir = None
         self._logger = None
         self._create_logger()
-        lightning.seed_everything(nas_config.nas.seed, workers=True)
+        lightning.seed_everything(self._nas_config.nas.seed, workers=True)
         self._los_func = nn.CrossEntropyLoss()
         self._dataloader = None
         self._supernet_dataloader = None
@@ -131,6 +142,8 @@ class MnasnetTrainer:
         self._logger.info("Architecture search finished")
 
     def retrain(self):
+        self._create_retrain_model()
+
         model_checkpoint_callback = ModelCheckpoint(
             dirpath=self._log_dir,
             filename="mnasnet_retrain_model-{epoch:02d}-{train_acc1:.2f}",
@@ -148,7 +161,11 @@ class MnasnetTrainer:
             logger=self._nas_config.trainer.logger,
             enable_model_summary=self._nas_config.trainer.enable_model_summary,
         )
-        self._retrain_trainer.fit(self._retrain_model)
+        self._retrain_trainer.fit(
+            self._retrain_model,
+            train_dataloaders=self._retrain_model.train_dataloader,
+            val_dataloaders=self._retrain_model.valid_dataloader,
+        )
         self._logger.info("Retrain finished")
 
     def save(self):
@@ -248,7 +265,7 @@ class MnasnetTrainer:
         if "proxyless" in str(search_space_config_path) or "mnasnet" in str(search_space_config_path):
             self._create_train_model()
             self._create_architecture_search_model()
-            self._create_retrain_model()
+            # self._create_retrain_model()
         else:
             raise ValueError(search_space_config_path)
         self._logger.info(f"Output features: {self._model.classifier.out_features}")

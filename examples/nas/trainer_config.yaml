@@ -1,2 +1,4 @@
 trainer:
   _target_: aiaccel.nas.trainer.mnasnet_trainer.MnasnetTrainer
+  nas_config: "./nas_config.yaml"
+  parameter_config: "./hyperparameter.yaml"

@@ -8,8 +8,8 @@ dataset:
     test: ../data
 
 environment:
-  device_ids: [0, 1, 2, 3]  # Indices of GPU for parallel processing.
-  gpus: 3 # The number of GPUs
+  device_ids: null
+  gpus: 1 # The number of GPUs
   num_workers: 9  # The number of workers for dataloader.
   result_dir: ./architecture_search_results  # A path to directory where search results are saved.
 
@@ -20,9 +20,9 @@ nas:
   search_space: proxyless
   search_space_config_path: "./"
   seed: 42
-  skip_architecture_search: true
+  skip_architecture_search: false
   skip_retrain: false
-  skip_train: true
+  skip_train: false
   type: separate  # simultaneous or separate
 
 retrain:
@@ -34,8 +34,8 @@ retrain:
     weight_decay: 0.0
 
 trainer:
-  accelerator: gpu
+  accelerator: mps
   enable_model_summary: false
   enable_progress_bar: false
   logger: false
-  strategy: ddp_find_unused_parameters_true
+  strategy: auto

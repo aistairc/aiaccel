@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -35,7 +36,7 @@ class MnasNetBaseConv(NASModule):
     """
 
     def __init__(self, name: str) -> None:
-        super(MnasNetBaseConv, self).__init__(name)
+        super(__class__, self).__init__(name)
 
         self.filter_size = -1
         self.kernel_size = -1
@@ -101,15 +102,11 @@ class MnasNetBaseConv(NASModule):
 
     def enumerate_categorical_variables(self):
         # This class does not have any categorical variables.
-        categorical_variables = {}
-
-        return categorical_variables
+        return {}
 
     def enumerate_active_variables(self):
         # This class does not have any categorical variables.
-        active_variables = {}
-
-        return active_variables
+        return {}
 
     def fix_arc(self, **kwargs):
         self.candidate_ops = nn.ModuleList({})
@@ -117,7 +114,7 @@ class MnasNetBaseConv(NASModule):
         stride = self.get_stride()
         self.active_op = self.get_op(self.prev_filter_size, self.filter_size, self.kernel_size, stride, self.se_ratio)
 
-    def print_active_op(self, log_dir=None):
+    def print_active_op(self, log_dir: Path | None = None):
         params = self.get_param_num_list()
 
         params_str = f"params: {params:>10} "
@@ -136,16 +133,14 @@ class MnasNetBaseConv(NASModule):
         # print(INDENT * 4 + kernel_size_str + filter_size_str + stride_str + skip_op_str + se_ratio_str)
 
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write(INDENT * 2 + conv_str + params_str + "\n")
                 o.write(INDENT * 4 + kernel_size_str + filter_size_str + stride_str + skip_op_str + se_ratio_str + "\n")
 
         self.print_active_op_sub(log_dir)
 
     def get_param_num_list(self):
-        params = self.active_op.get_param_nums(self.prev_filter_size, self.filter_size, se_ratio=self.se_ratio)
-
-        return params
+        return self.active_op.get_param_nums(self.prev_filter_size, self.filter_size, se_ratio=self.se_ratio)
 
     def get_hyperparameters(self, **kwargs):
         max_in_ch = kwargs["max_in_ch"]
@@ -157,9 +152,7 @@ class MnasNetBaseConv(NASModule):
         return max_in_ch, max_out_ch, stride, kernel_size_list, max_se_ratio
 
     def get_stride(self):
-        stride = self.skip_op.stride
-
-        return stride
+        return self.skip_op.stride
 
     def get_op(self):
         raise NotImplementedError
@@ -210,7 +203,7 @@ class MnasNetMBConv(MnasNetBaseConv):
     """
 
     def __init__(self, name):
-        super(MnasNetMBConv, self).__init__(name)
+        super(__class__, self).__init__(name)
 
         self.expansion_ratio = -1
 
@@ -277,19 +270,15 @@ class MnasNetMBConv(MnasNetBaseConv):
 
     def enumerate_categorical_variables(self):
         # categorical key/variable(expansion_ratio)
-        categorical_variables = {
+        return {
             self.expansion_ratio_key: len(self.expansion_ratio_list),
         }
 
-        return categorical_variables
-
     def enumerate_active_variables(self):
         # active key/variable(expansion_ratio)
-        active_variables = {
+        return {
             self.expansion_ratio_key: (self.expansion_ratio_list).index(self.expansion_ratio),
         }
-        # print(active_variables)
-        return active_variables
 
     def fix_arc(self, **kwargs):
         self.candidate_ops = nn.ModuleList({})
@@ -303,28 +292,26 @@ class MnasNetMBConv(MnasNetBaseConv):
             self.se_ratio,
         )
 
-    def print_active_op_sub(self, log_dir=None):
+    def print_active_op_sub(self, log_dir: Path | None = None):
         expansion_ratio_str = f"expansion_ratio: {self.expansion_ratio}  "
 
         # print(INDENT * 4 + expansion_ratio_str)
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write(INDENT * 4 + expansion_ratio_str + "\n")
 
     def get_param_num_list(self):
-        params = self.active_op.get_param_nums(
+        return self.active_op.get_param_nums(
             self.prev_filter_size,
             self.filter_size,
             self.expansion_ratio,
             self.se_ratio,
         )
 
-        return params
-
 
 class MnasNetZero(MnasNetBaseConv):
     def __init__(self, name):
-        super(MnasNetZero, self).__init__(name)
+        super(__class__, self).__init__(name)
 
     def get_op(self):
         return Zero()
@@ -353,19 +340,16 @@ class MnasNetZero(MnasNetBaseConv):
 
     def enumerate_categorical_variables(self):
         # categorical key/variable(expansion_ratio)
-        categorical_variables = {}
-
-        return categorical_variables
+        return {}
 
     def enumerate_active_variables(self):
         # active key/variable(expansion_ratio)
-        active_variables = {}
-        return active_variables
+        return {}
 
     def fix_arc(self, **kwargs):
         pass
 
-    def print_active_op(self, log_dir=None):
+    def print_active_op(self, log_dir: Path | None = None):
         params = self.get_param_num_list()
         params_str = f"params: {params:>10} "
         name_str_list = self.name.split("@")
@@ -379,14 +363,12 @@ class MnasNetZero(MnasNetBaseConv):
         # print(INDENT * 4 + filter_size_str + stride_str + skip_op_str)
 
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write(INDENT * 2 + conv_str + params_str + "\n")
                 o.write(INDENT * 4 + filter_size_str + stride_str + skip_op_str + "\n")
 
     def get_param_num_list(self):
-        params = self.active_op.get_param_nums()
-
-        return params
+        return self.active_op.get_param_nums()
 
 
 class MnasNetLayer(NASModule):
@@ -396,7 +378,7 @@ class MnasNetLayer(NASModule):
     """
 
     def __init__(self, name):
-        super(MnasNetLayer, self).__init__(name)
+        super(__class__, self).__init__(name)
 
         # filter size
         self.filter_size_key = self.name + "#filter_size_index"
@@ -492,7 +474,7 @@ class MnasNetLayer(NASModule):
             se_ratio=se_ratio,
         )
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward function
 
         Args:
@@ -501,8 +483,7 @@ class MnasNetLayer(NASModule):
         Returns
             torch.Tensor: A tensor after operation (batch size, output channel, height, width).
         """
-        X = self.active_op(X)
-        return X
+        return self.active_op(x)
 
     def enumerate_categorical_variables(self):
         # categorical keys/variables(filter_size, kernel_size, conv_op_str, skip_op_str, se_ratio)
@@ -552,9 +533,7 @@ class MnasNetLayer(NASModule):
         self.active_op.print_active_op(log_dir)
 
     def get_param_num_list(self):
-        params = self.active_op.get_param_num_list()
-
-        return params
+        return self.active_op.get_param_num_list()
 
     def get_filter_size(self):
         return self.active_op.filter_size
@@ -570,7 +549,7 @@ class MnasNetLayerStack(NASModule):
     """
 
     def __init__(self, name: str) -> None:
-        super(MnasNetLayerStack, self).__init__(name)
+        super(__class__, self).__init__(name)
 
         # List of MnasNetLayers
         self.layers = nn.ModuleList([])
@@ -617,7 +596,7 @@ class MnasNetLayerStack(NASModule):
 
         self.filter_size = prev_filter_size
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward function
 
         Args:
@@ -627,9 +606,9 @@ class MnasNetLayerStack(NASModule):
             torch.Tensor: A tensor after operation (batch size, output channel, height, width).
         """
         for layer in self.layers:
-            X = layer.active_op(X)
+            x = layer.active_op(x)
 
-        return X
+        return x
 
     def enumerate_categorical_variables(self):
         # This class does not have any categorical variables.
@@ -661,11 +640,11 @@ class MnasNetLayerStack(NASModule):
         for layer in self.layers:
             layer.fix_arc()
 
-    def print_active_op(self, log_dir=None):
+    def print_active_op(self, log_dir: Path | None = None):
         layer_num = len(self.layers)
         # print(INDENT + "LayerNum=" + str(layer_num))
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write(INDENT + "LayerNum=" + str(layer_num) + "\n")
 
         # recursively printing
@@ -706,7 +685,7 @@ class MnasNetBlock(NASModule):
     """
 
     def __init__(self, name: str) -> None:
-        super(MnasNetBlock, self).__init__(name)
+        super(__class__, self).__init__(name)
 
         # categorical variables key and list
         self.layer_stack_num_key = name + "#layer_stack_num_index"
@@ -743,7 +722,7 @@ class MnasNetBlock(NASModule):
 
         self.filter_size = self.active_op.filter_size
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward function
 
         Args:
@@ -752,10 +731,7 @@ class MnasNetBlock(NASModule):
         Returns
             torch.Tensor: A tensor after operation (batch size, output channel, height, width).
         """
-        X = self.active_op(
-            X,
-        )
-        return X
+        return self.active_op(x)
 
     def enumerate_categorical_variables(self):
         # categorical key/variable(layer_num)
@@ -788,10 +764,10 @@ class MnasNetBlock(NASModule):
 
         self.active_op.fix_arc()
 
-    def print_active_op(self, log_dir=None):
+    def print_active_op(self, log_dir: Path | None = None):
         # print("[" + self.name + "]")
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write("[" + self.name + "]" + "\n")
 
         # recursively printing
@@ -799,8 +775,7 @@ class MnasNetBlock(NASModule):
 
     def get_param_num_list(self):
         # recursively getting params
-        params = self.active_op.get_param_num_list()
-        return params
+        return self.active_op.get_param_num_list()
 
     def get_flops_num_list(self, x):
         flops, x = self.active_op.get_flops_num_list()
@@ -820,7 +795,7 @@ class MnasNetSearchSpace(NASModule):
     """
 
     def __init__(self, name: str, is_search: bool = False) -> None:
-        super(MnasNetSearchSpace, self).__init__(name)
+        super(__class__, self).__init__(name)
 
         self.n_classes = -1
         self.block_num = -1
@@ -882,7 +857,7 @@ class MnasNetSearchSpace(NASModule):
         else:
             self.classifier = nn.Linear(self.last_ch, self.n_classes, bias=True)
 
-    def forward(self, X: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward function
 
         Args:
@@ -892,20 +867,18 @@ class MnasNetSearchSpace(NASModule):
             torch.Tensor: A tensor after operation (batch size, output channel, height, width).
         """
 
-        X = self.first_conv(X)
-        X = self.first_batch(X)
-        X = self.first_relu(X)
-        X = self.first_mbconv(X)
+        x = self.first_conv(x)
+        x = self.first_batch(x)
+        x = self.first_relu(x)
+        x = self.first_mbconv(x)
         for block in self.blocks:
-            X = block(X)
+            x = block(x)
 
-        X = self.conv_head(X)
-        X = self.feature_mix_layer(X)
-        X = X.view(-1, self.last_ch)
-        X = self.dropout(X)
-        X = self.classifier(X)
-
-        return X
+        x = self.conv_head(x)
+        x = self.feature_mix_layer(x)
+        x = x.view(-1, self.last_ch)
+        x = self.dropout(x)
+        return self.classifier(x)
 
     def select_active_op(self, structure_info: MnasNetStructureInfo, **kwargs) -> None:
         """Set subnet based on structure_info. (There are no categorical variables belonging to this class.)
@@ -968,7 +941,7 @@ class MnasNetSearchSpace(NASModule):
         for block in self.blocks:
             block.fix_arc()
 
-    def print_active_op(self, log_dir=None):
+    def print_active_op(self, log_dir: Path | None = None):
         """Prints subnet information."""
 
         # first conv layer
@@ -979,7 +952,7 @@ class MnasNetSearchSpace(NASModule):
         # print("[first conv]    " + params_str + kernel_size_str + filter_size_str)
 
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write("[first conv]    " + params_str + kernel_size_str + filter_size_str + "\n")
 
         # first MBconv layer
@@ -993,7 +966,7 @@ class MnasNetSearchSpace(NASModule):
         # print("[first MBconv]    " + params_str + kernel_size_str + filter_size_str)
 
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write("[first MBconv]    " + params_str + kernel_size_str + filter_size_str + "\n")
 
         # blocks
@@ -1012,7 +985,7 @@ class MnasNetSearchSpace(NASModule):
         # print("[classifier]    " + params_str + n_classes_str)
 
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write("[classifier]    " + params_str + n_classes_str + "\n")
 
         # total params
@@ -1021,7 +994,7 @@ class MnasNetSearchSpace(NASModule):
 
         # print("Total params: {}".format(total_params))
         if log_dir is not None:
-            with open(os.path.join(log_dir, "architecture.txt"), "a") as o:
+            with Path.open(log_dir / "architecture.txt", "a") as o:
                 o.write(f"Total params: {total_params}" + "\n")
 
     def get_param_num_list(self) -> list[Any]:

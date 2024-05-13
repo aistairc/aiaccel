@@ -2,7 +2,7 @@ import random
 from collections import OrderedDict
 
 
-class MnasNetStructureInfo(object):
+class MnasNetStructureInfo:
     def __init__(self, keys):
         self.structure_info_dic = OrderedDict()
 

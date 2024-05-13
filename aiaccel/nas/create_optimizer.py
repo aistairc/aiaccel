@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from sys import float_info
+from typing import TYPE_CHECKING
 
-from torch.nn import Module
 from torch.optim import SGD, Adam, NAdam, RMSprop
 
-from aiaccel.nas.utils.utils import ParameterType
+if TYPE_CHECKING:
+    from torch.nn import Module
+
+    from aiaccel.nas.utils.utils import ParameterType
 
 
 def create_optimizer(

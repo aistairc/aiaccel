@@ -19,7 +19,7 @@ class CategoricalASNG:
         categories: np.ndarray,
         params: np.ndarray = None,
         alpha: float = 1.5,
-        eps=0,
+        eps: int = 0,
         init_delta: float = 1.0,
         delta_max: float = np.inf,
         init_theta: np.ndarray = None,

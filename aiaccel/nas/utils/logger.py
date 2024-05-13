@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from logging import FileHandler, Formatter, Logger, LogRecord, getLogger
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def create_supernet_train_report(
@@ -75,14 +77,14 @@ def _create_logger(
     name: str,
     level: str | int,
     filepath: Path | str,
-    filter: Callable[[LogRecord], bool],
-    format: str,
+    filter1: Callable[[LogRecord], bool],
+    format1: str,
 ) -> Logger:
     logger = getLogger(name)
     logger.setLevel(level)
     handler = FileHandler(filepath)
-    handler.addFilter(filter)
-    handler.setFormatter(Formatter(format))
+    handler.addFilter(filter1)
+    handler.setFormatter(Formatter(format1))
     for hdr in logger.handlers[:]:
         logger.removeHandler(hdr)
         hdr.close()
@@ -303,3 +305,108 @@ def _result_filter(record: LogRecord) -> bool:
             )
         record.msg = msg
     return True
+
+
+def _train_and_search_result_filter(record: LogRecord) -> bool:
+    if hasattr(record, "result") and record.name == "root.search.train_and_search_result":
+        result = ",".join(
+            map(
+                str,
+                [
+                    record.epoch,
+                    record.elapsed_time,
+                    record.train_loss,
+                    record.top_1_train_acc,
+                    record.top_5_train_acc,
+                    record.valid_loss,
+                    record.top_1_valid_acc,
+                    record.top_5_valid_acc,
+                    record.test_loss,
+                    record.top_1_test_acc,
+                    record.top_5_test_acc,
+                    record.convergence,
+                    record.learning_rate,
+                    record.upper_bound,
+                    record.threshold,
+                ],
+            ),
+        )
+        record.result = result
+        return True
+    return False
+
+
+def create_train_and_search_logger(
+    workdir: str | Path | None = None,
+    name: str = "root.search.train_and_search_result",
+) -> Logger:
+    workdir = Path(workdir if workdir else Path.getcwd()).resolve()
+    if not workdir.exists():
+        workdir.mkdir(parents=True)
+    logger = _create_logger(
+        name,
+        "DEBUG",
+        workdir / "supernet_train_and_search.csv",
+        _train_and_search_result_filter,
+        "%(result)s",
+    )
+    logger.propagate = False
+    logger.info(
+        "",
+        extra=create_train_and_search_report(
+            epoch="epoch",
+            elapsed_time="elapsed_time",
+            train_loss="train_loss",
+            top_1_train_acc="top_1_train_acc",
+            top_5_train_acc="top_5_train_acc",
+            valid_loss="valid_loss",
+            top_1_valid_acc="top_1_valid_acc",
+            top_5_valid_acc="top_5_valid_acc",
+            test_loss="test_loss",
+            top_1_test_acc="top_1_test_acc",
+            top_5_test_acc="top_5_test_acc",
+            convergence="convergence",
+            learning_rate="learning_rate",
+            upper_bound="upper_bound",
+            threshold="threshold",
+        ),
+    )
+    logger.propagate = True
+    return logger
+
+
+def create_train_and_search_report(
+    epoch: int | None = None,
+    elapsed_time: float | None = None,
+    train_loss: float | None = None,
+    top_1_train_acc: float | None = None,
+    top_5_train_acc: float | None = None,
+    valid_loss: float | None = None,
+    top_1_valid_acc: float | None = None,
+    top_5_valid_acc: float | None = None,
+    test_loss: float | None = None,
+    top_1_test_acc: float | None = None,
+    top_5_test_acc: float | None = None,
+    convergence: float | None = None,
+    learning_rate: float | None = None,
+    upper_bound: float | None = None,
+    threshold: float | None = None,
+) -> dict[str, Any]:
+    return {
+        "result": "",
+        "epoch": epoch,
+        "elapsed_time": elapsed_time,
+        "train_loss": train_loss,
+        "top_1_train_acc": top_1_train_acc,
+        "top_5_train_acc": top_5_train_acc,
+        "valid_loss": valid_loss,
+        "top_1_valid_acc": top_1_valid_acc,
+        "top_5_valid_acc": top_5_valid_acc,
+        "test_loss": test_loss,
+        "top_1_test_acc": top_1_test_acc,
+        "top_5_test_acc": top_5_test_acc,
+        "convergence": convergence,
+        "learning_rate": learning_rate,
+        "upper_bound": upper_bound,
+        "threshold": threshold,
+    }

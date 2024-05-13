@@ -10,6 +10,7 @@ def main(p):
     nas_config = OmegaConf.load("./nas_config.yaml")
     trainer = instantiate(trainer_config.trainer, _partial_=True)
     t = trainer(nas_config, parameter_config)
+    # t = instantiate(trainer_config.trainer)
 
     if not nas_config.nas.skip_train:
         t.train()
