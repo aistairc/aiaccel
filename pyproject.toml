@@ -17,7 +17,8 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "optuna"
+    "optuna",
+    "optuna>=3.4.0"
 ]
 
 [project.scripts]
