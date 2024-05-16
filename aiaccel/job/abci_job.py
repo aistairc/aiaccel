@@ -10,6 +10,24 @@ from xml.etree import ElementTree
 
 
 class JobStatus(IntEnum):
+    """
+    Represents the status of a job.
+
+    Attributes:
+        UNSUBMITTED: The job has not been submitted.
+        WAITING: The job is waiting to be executed.
+        RUNNING: The job is currently running.
+        FINISHED: The job has finished successfully.
+        ERROR: The job encountered an error.
+
+    Methods:
+        from_qsub(status: str) -> JobStatus:
+            Converts a status string from the qsub command to a JobStatus enum value.
+
+    Raises:
+        ValueError: If the status string is not recognized.
+    """
+
     UNSUBMITTED = auto()
     WAITING = auto()
     RUNNING = auto()
@@ -18,6 +36,18 @@ class JobStatus(IntEnum):
 
     @classmethod
     def from_qsub(cls, status: str) -> JobStatus:
+        """
+        Converts a status string from the qsub command to a JobStatus enum value.
+
+        Args:
+            status (str): The status string from the qsub command.
+
+        Returns:
+            JobStatus: The corresponding JobStatus enum value.
+
+        Raises:
+            ValueError: If the status string is not recognized.
+        """
         match status:
             case "r":
                 return JobStatus.RUNNING
@@ -32,6 +62,27 @@ class JobStatus(IntEnum):
 
 
 class AbciJob:
+    """
+    Represents a job to be submitted and managed on the ABCI system.
+
+    Attributes:
+        job_filename (Path): The path to the job file.
+        job_group (str): The job group.
+        job_name (str): The name of the job.
+        cwd (Path): The current working directory.
+        stdout_filename (Path): The path to the standard output file.
+        stderr_filename (Path): The path to the standard error file.
+        tag (Any): A tag associated with the job.
+        status (JobStatus): The status of the job.
+        job_number (int | None): The job number assigned by the system.
+
+    Methods:
+        submit: Submits the job to the system.
+        update_status: Updates the status of the job.
+        wait: Waits for the job to finish.
+        update_status_batch: Updates the status of a batch of jobs.
+    """
+
     job_filename: Path
     job_group: str
 
@@ -58,6 +109,24 @@ class AbciJob:
         args: list[str] | None = None,
         tag: Any = None,
     ):
+        """
+        Initializes a new instance of the AbciJob class.
+
+        Args:
+            job_filename (Path | str): The path to the job file.
+            job_group (str): The job group.
+            job_name (str | None, optional): The name of the job. If not provided, \
+                the name will be derived from the job filename.
+            cwd (Path | str | None, optional): The current working directory. If not provided, \
+                the current working directory will be used.
+            stdout_filename (Path | str | None, optional): The path to the standard output file. If not provided, \
+                a default filename will be used.
+            stderr_filename (Path | str | None, optional): The path to the standard error file. If not provided, \
+                a default filename will be used.
+            qsub_args (list[str] | None, optional): Additional arguments to pass to the qsub command. Defaults to None.
+            args (list[str] | None, optional): Additional arguments to pass to the job file. Defaults to None.
+            tag (Any, optional): A tag associated with the job. Defaults to None.
+        """
         self.job_filename = Path(job_filename)
         self.job_group = job_group
         self.job_name = job_name if job_name is not None else self.job_filename.name
@@ -82,6 +151,16 @@ class AbciJob:
             self.cmd += [arg.format(job=self) for arg in args]
 
     def submit(self) -> AbciJob:
+        """
+        Submits the job to the system.
+
+        Returns:
+            AbciJob: The submitted job.
+
+        Raises:
+            RuntimeError: If the job is already submitted.
+            RuntimeError: If the qsub result cannot be parsed.
+        """
         if self.status >= JobStatus.WAITING:
             raise RuntimeError(f"This job is already submited as {self.job_name} (id: {self.job_number})")
 
@@ -97,10 +176,25 @@ class AbciJob:
         return self
 
     def update_status(self) -> JobStatus:
+        """
+        Updates the status of the job.
+
+        Returns:
+            JobStatus: The updated status of the job.
+        """
         self.update_status_batch([self])
         return self.status
 
     def wait(self, sleep_time: float = 10.0) -> AbciJob:
+        """
+        Waits for the job to finish.
+
+        Args:
+            sleep_time (float, optional): The time to sleep between status updates. Defaults to 10.0.
+
+        Returns:
+            AbciJob: The finished job.
+        """
         while self.update_status() < JobStatus.FINISHED:
             time.sleep(sleep_time)
 
@@ -108,6 +202,12 @@ class AbciJob:
 
     @classmethod
     def update_status_batch(cls, job_list: list[AbciJob]) -> None:
+        """
+        Updates the status of a batch of jobs.
+
+        Args:
+            job_list (list[AbciJob]): The list of jobs to update.
+        """
         job_dict = {j.job_number: j for j in job_list if j.status not in [JobStatus.UNSUBMITTED, JobStatus.FINISHED]}
         p = subprocess.run(["qstat", "-xml"], capture_output=True, text=True, check=True)
 
