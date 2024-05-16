@@ -72,6 +72,13 @@ class NelderMeadAlgorism:
         self.simplex_size = len(self._search_space) + 1
 
     def get_vertex(self) -> npt.NDArray[np.float64]:
+        """ nelder mead の次のパラメータを返すメソッド
+
+        並列処理の都合でスレッドセーフとなっている
+
+        Returns:
+            npt.NDArray[np.float64]: nelder mead の次のパラメータ
+        """
         with self.lock:
             vertex = next(self.generator)
 
@@ -86,6 +93,16 @@ class NelderMeadAlgorism:
         value: float,
         enqueue: bool = False,
     ) -> None:
+        """ nelder mead にパラメータと結果の組を渡すメソッド
+
+        Args:
+            vertex: npt.NDArray[np.float64]: パラメータ
+            value: float: 計算結果
+            enqueue: bool = False: nelder mead から出力されたパラメータか否かを示す bool 変数
+
+        Returns:
+            None
+        """
         self.results.put((vertex, value, enqueue))
 
     def _collect_enqueued_results(
@@ -93,6 +110,17 @@ class NelderMeadAlgorism:
         vertices: list[npt.NDArray[np.float64]] | None = None,
         values: list[float] | None = None,
     ) -> tuple[list[npt.NDArray[np.float64]], list[float]]:
+        """ queue に残っているパラメータと計算結果を取得するメソッド
+
+        主に enqueue_trial で追加されたパラメータを取り出す
+
+        Args:
+            vertices: list[npt.NDArray[np.float64]] | None = None: 取得済みのパラメータ
+            values: list[float] | None = None: 取得済みの計算結果
+
+        Returns:
+            tuple[list[npt.NDArray[np.float64]], list[float]]: Args で渡されたものも含めた、 queue から取り出したパラメータと計算結果の組のタプル
+        """
         vertices = [] if vertices is None else vertices
         values = [] if values is None else values
 
@@ -112,6 +140,18 @@ class NelderMeadAlgorism:
         self,
         num_waiting: int,
     ) -> Generator[None, None, tuple[list[npt.NDArray[np.float64]], list[float]]]:
+        """ queue から nelder mead が生成した複数のパラメータと計算結果を取得するメソッド
+
+        nelder mead が生成したパラメータの他に、 enqueue_trial 等で追加されたパラメータと、その計算結果も取得している
+        それらのパラメータに nelder mead の simplex 及び計算中のパラメータの計算結果よりも良い物があれば、 UnexpectedVerticesUpdateError を raise する
+
+        Args:
+            num_waiting: int: nelder mead が生成したパラメータの数
+        Yields:
+            None
+        Returns:
+            tuple[list[npt.NDArray[np.float64]], list[float]]: 取得したパラメータと計算結果のタプル
+        """
         # collect results
         vertices, values = list[npt.NDArray[np.float64]](), list[float]()
         enqueued_vertices, enqueued_values = list[npt.NDArray[np.float64]](), list[float]()
@@ -143,10 +183,26 @@ class NelderMeadAlgorism:
     def _wait_for_result(
         self,
     ) -> Generator[None, None, float]:
+        """ queue から nelder mead が生成した単数の計算結果を取得するメソッド
+        Args:
+            None
+        Yields:
+            None
+        Returns:
+            float: 取得した計算結果
+        """
         _, values = yield from self._wait_for_results(1)
         return values[0]
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
+        """ nelder mead のアルゴリズムを実行し、パラメータを返すメソッド
+        Args:
+            None
+        Yields:
+            npt.NDArray[np.float64] | None
+        Returns:
+            None
+        """
         # initialization
         lows, highs = zip(*self._search_space.values(), strict=False)
 
