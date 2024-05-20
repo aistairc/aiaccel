@@ -17,10 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "optuna>=3.4.0",
-    "pandas",
-    "pandas-stubs",
-    "matplotlib"
+    "optuna>=3.4.0"
 ]
 
 [project.scripts]
@@ -44,7 +41,10 @@ dev = [
     "sphinx-intl",
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
-    "undecorated"
+    "undecorated",
+    "pandas",
+    "pandas-stubs",
+    "matplotlib"
 ]
 github-actions = [
     "pytest-github-actions-annotate-failures",
