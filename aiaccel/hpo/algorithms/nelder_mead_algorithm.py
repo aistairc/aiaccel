@@ -196,6 +196,14 @@ class NelderMeadAlgorism:
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
         """ nelder mead のアルゴリズムを実行し、パラメータを返すメソッド
+
+        initialization と main loop で構成されている
+        initialization では enqueue_trial で追加されたパラメータと、不足分をランダムなパラメータを用いて初期 simplex を決定する
+        main loop では neldermead のアルゴリズムを実行する
+        UnexpectedVerticesUpdateError が発生した場合は、e.updated_vertices, e.updated_values からより良いパラメータを新たな simplex として選択し、 main loop 中であれば、nelder mead のアルゴリズムをリスタートする
+
+        nelder mead のアルゴリズムを極力崩さないようにするため、 noqa: C901 で一部例外を無視している
+
         Args:
             None
         Yields:
