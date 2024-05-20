@@ -5,14 +5,14 @@ import optuna
 
 from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
 
-search_space={"x": (0.0, 10.0), "y": (0.0, 10.0)}
+search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
+
 
 def sphere(params: list[float]) -> float:
     return float(np.sum(np.asarray(params) ** 2))
 
 
 if __name__ == "__main__":
-
     study = optuna.create_study(sampler=NelderMeadSampler(search_space=search_space, seed=42))
     _rng = np.random.RandomState(seed=42)
     num_parallel = 5

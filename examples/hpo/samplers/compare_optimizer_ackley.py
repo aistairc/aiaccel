@@ -5,7 +5,7 @@ from multiprocessing import Pool
 
 import matplotlib
 
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 from collections.abc import Callable
 
 import matplotlib.pyplot as plt
@@ -21,12 +21,13 @@ def ackley(x: list[float]) -> float:
     # Ackley function
     x = np.asarray(x)
     t1 = 20
-    t2 = - 20 * np.exp(- 0.2 * np.sqrt(1.0 / len(x) * np.sum(x ** 2)))
+    t2 = -20 * np.exp(-0.2 * np.sqrt(1.0 / len(x) * np.sum(x**2)))
     t3 = np.e
-    t4 = - np.exp(1.0 / len(x) * np.sum(np.cos(2 * np.pi * x)))
+    t4 = -np.exp(1.0 / len(x) * np.sum(np.cos(2 * np.pi * x)))
     return float(t1 + t2 + t3 + t4)
 
-search_space={
+
+search_space = {
     "x1": (-32.768, 32.768),
     "x2": (-32.768, 32.768),
     "x3": (-32.768, 32.768),
@@ -37,17 +38,18 @@ search_space={
     "x8": (-32.768, 32.768),
     "x9": (-32.768, 32.768),
     "x10": (-32.768, 32.768),
-    }
+}
+
 
 def optimize(
-        study: optuna.Study,
-        func: Callable[[list[float]], float],
-        result_csv_name: str,
-        search_space: dict[str, tuple[float, float]] = search_space,
-        num_trial: int = 1000,
-        num_parallel: int = 10,
-        num_tell_trial: int = 1
-        ) -> None:
+    study: optuna.Study,
+    func: Callable[[list[float]], float],
+    result_csv_name: str,
+    search_space: dict[str, tuple[float, float]] = search_space,
+    num_trial: int = 1000,
+    num_parallel: int = 10,
+    num_tell_trial: int = 1,
+) -> None:
     trials: list[optuna.trial.Trial] = []
     params = []
     p = Pool(num_parallel)
@@ -93,10 +95,10 @@ def optimize(
         params = []
         results = []
 
-
-    with open(result_csv_name, 'w') as f:
+    with open(result_csv_name, "w") as f:
         writer = csv.writer(f)
         writer.writerows(csv_array)
+
 
 def get_min_values(values: list[float]) -> list[float]:
     min_values = []
@@ -108,6 +110,7 @@ def get_min_values(values: list[float]) -> list[float]:
 
     return min_values
 
+
 def plot(file_names: list[str], png_name: str, title: str) -> None:
     label_names = ["nelder_mead", "TPE", "nelder_mead+TPE"]
     colors = ["r", "g", "b"]
@@ -117,17 +120,17 @@ def plot(file_names: list[str], png_name: str, title: str) -> None:
     for file_name, color, label in zip(file_names, colors, label_names, strict=False):
         df = pd.read_csv(file_name)
 
-        step = df['step']
-        values = df['value']
+        step = df["step"]
+        values = df["value"]
 
-        plt.plot(step, values, marker='.', linewidth=0, color=color, alpha=0.2)
+        plt.plot(step, values, marker=".", linewidth=0, color=color, alpha=0.2)
 
         min_values = get_min_values(list(values))
         plt.plot(step, min_values, color=color, label=label)
 
     plt.title(title, fontsize=18)
-    plt.xlabel('Parallel Step', fontsize=18)
-    plt.ylabel('Value', fontsize=18)
+    plt.xlabel("Parallel Step", fontsize=18)
+    plt.ylabel("Value", fontsize=18)
     plt.legend()
 
     plt.savefig(png_name)
@@ -148,7 +151,7 @@ def plot_mean_std(file_patterns: list[str], png_name: str, title: str) -> None:
         min_values_array = []
 
         df = pd.read_csv(file_names[0])
-        df_min = df.groupby('step').min()
+        df_min = df.groupby("step").min()
         step = df_min.index
 
         for file_path in file_names:
@@ -161,15 +164,12 @@ def plot_mean_std(file_patterns: list[str], png_name: str, title: str) -> None:
 
         plt.plot(step, min_values_mean, color=color, label=label)
         plt.fill_between(
-            df_min.index,
-            min_values_mean + min_values_std,
-            min_values_mean - min_values_std,
-            alpha=0.2,
-            color=color)
+            df_min.index, min_values_mean + min_values_std, min_values_mean - min_values_std, alpha=0.2, color=color
+        )
 
     plt.title(title, fontsize=18)
-    plt.xlabel('Parallel Step', fontsize=18)
-    plt.ylabel('Value', fontsize=18)
+    plt.xlabel("Parallel Step", fontsize=18)
+    plt.ylabel("Value", fontsize=18)
     plt.legend()
 
     plt.savefig(png_name)
@@ -196,12 +196,9 @@ def compare_optimizer(num_trial: int, num_parallel: int, func: Callable[[list[fl
 
         study = optuna.create_study(
             sampler=NelderMeadSampler(
-                search_space=search_space,
-                seed=seed,
-                block=False,
-                sub_sampler=optuna.samplers.TPESampler(seed=seed)
-                )
+                search_space=search_space, seed=seed, block=False, sub_sampler=optuna.samplers.TPESampler(seed=seed)
             )
+        )
         optimize(study, func, result_csv_names[2], search_space, num_trial, num_parallel, num_tell_trial=10)
 
         plot(result_csv_names, f"{dir_name}/{dir_name}_seed{seed}_{num_trial}trial.png", f"{dir_name}")

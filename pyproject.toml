@@ -42,6 +42,9 @@ dev = [
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
     "undecorated",
+    "pandas",
+    "pandas-stubs",
+    "matplotlib"
 ]
 github-actions = [
     "pytest-github-actions-annotate-failures",

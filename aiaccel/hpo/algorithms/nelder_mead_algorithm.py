@@ -45,6 +45,7 @@ class NelderMeadAlgorism:
         results: queue.Queue[tuple[npt.NDArray[np.float64], float, bool]]
         simplex_size: int
     """
+
     vertices: list[npt.NDArray[np.float64]]
     values: list[float]
 
@@ -72,7 +73,7 @@ class NelderMeadAlgorism:
         self.simplex_size = len(self._search_space) + 1
 
     def get_vertex(self) -> npt.NDArray[np.float64]:
-        """ nelder mead の次のパラメータを返すメソッド
+        """nelder mead の次のパラメータを返すメソッド
 
         並列処理の都合でスレッドセーフとなっている
 
@@ -93,7 +94,7 @@ class NelderMeadAlgorism:
         value: float,
         enqueue: bool = False,
     ) -> None:
-        """ nelder mead にパラメータと結果の組を渡すメソッド
+        """nelder mead にパラメータと結果の組を渡すメソッド
 
         Args:
             vertex: npt.NDArray[np.float64]: パラメータ
@@ -110,7 +111,7 @@ class NelderMeadAlgorism:
         vertices: list[npt.NDArray[np.float64]] | None = None,
         values: list[float] | None = None,
     ) -> tuple[list[npt.NDArray[np.float64]], list[float]]:
-        """ queue に残っているパラメータと計算結果を取得するメソッド
+        """queue に残っているパラメータと計算結果を取得するメソッド
 
         主に enqueue_trial で追加されたパラメータを取り出す
 
@@ -119,7 +120,8 @@ class NelderMeadAlgorism:
             values: list[float] | None = None: 取得済みの計算結果
 
         Returns:
-            tuple[list[npt.NDArray[np.float64]], list[float]]: Args で渡されたものも含めた、 queue から取り出したパラメータと計算結果の組のタプル
+            tuple[list[npt.NDArray[np.float64]], list[float]]:
+                Args で渡されたものも含めた、 queue から取り出したパラメータと計算結果の組のタプル
         """
         vertices = [] if vertices is None else vertices
         values = [] if values is None else values
@@ -140,10 +142,11 @@ class NelderMeadAlgorism:
         self,
         num_waiting: int,
     ) -> Generator[None, None, tuple[list[npt.NDArray[np.float64]], list[float]]]:
-        """ queue から nelder mead が生成した複数のパラメータと計算結果を取得するメソッド
+        """queue から nelder mead が生成した複数のパラメータと計算結果を取得するメソッド
 
         nelder mead が生成したパラメータの他に、 enqueue_trial 等で追加されたパラメータと、その計算結果も取得している
-        それらのパラメータに nelder mead の simplex 及び計算中のパラメータの計算結果よりも良い物があれば、 UnexpectedVerticesUpdateError を raise する
+        それらのパラメータに nelder mead の simplex 及び計算中のパラメータの計算結果よりも良い物があれば、
+        UnexpectedVerticesUpdateError を raise する
 
         Args:
             num_waiting: int: nelder mead が生成したパラメータの数
@@ -183,7 +186,7 @@ class NelderMeadAlgorism:
     def _wait_for_result(
         self,
     ) -> Generator[None, None, float]:
-        """ queue から nelder mead が生成した単数の計算結果を取得するメソッド
+        """queue から nelder mead が生成した単数の計算結果を取得するメソッド
         Args:
             None
         Yields:
@@ -195,12 +198,15 @@ class NelderMeadAlgorism:
         return values[0]
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
-        """ nelder mead のアルゴリズムを実行し、パラメータを返すメソッド
+        """nelder mead のアルゴリズムを実行し、パラメータを返すメソッド
 
         initialization と main loop で構成されている
-        initialization では enqueue_trial で追加されたパラメータと、不足分をランダムなパラメータを用いて初期 simplex を決定する
+        initialization では enqueue_trial で追加されたパラメータと、
+        不足分をランダムなパラメータを用いて初期 simplex を決定する
         main loop では neldermead のアルゴリズムを実行する
-        UnexpectedVerticesUpdateError が発生した場合は、e.updated_vertices, e.updated_values からより良いパラメータを新たな simplex として選択し、 main loop 中であれば、nelder mead のアルゴリズムをリスタートする
+        UnexpectedVerticesUpdateError が発生した場合は、
+        e.updated_vertices, e.updated_values からより良いパラメータを新たな simplex として選択し、
+        main loop 中であれば、nelder mead のアルゴリズムをリスタートする
 
         nelder mead のアルゴリズムを極力崩さないようにするため、 noqa: C901 で一部例外を無視している
 

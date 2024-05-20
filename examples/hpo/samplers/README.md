@@ -34,10 +34,10 @@
 python example.py
 ```
 
-- compare_optimizer_ackley.py の実行には、 matplotlib のインストールが必要です.
+- compare_optimizer_ackley.py の実行には、pandas, pandas-stubs, matplotlib のインストールが必要です.
 
 ```bash
-pip install matplotlib pandas
+pip install pandas pandas-stubs matplotlib
 ```
 
 ## 3. 結果の確認

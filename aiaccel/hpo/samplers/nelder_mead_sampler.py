@@ -18,10 +18,14 @@ __all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
 class NelderMeadSampler(optuna.samplers.BaseSampler):
     """NelderMead アルゴリズムを用いた Sampler
 
-    パラメータ数-1個の初期点計算と shrink 時のみ並列化可能で、それ以外は基本的には直列計算になる(optuna.optimize(n_jobs=2)等で設定しても、前述の時以外は直列で計算する)
+    パラメータ数-1個の初期点計算と shrink 時のみ並列化可能で、
+    それ以外は基本的には直列計算になる(optuna.optimize(n_jobs=2)等で設定しても、前述の時以外は直列で計算する)
     並列化を有効にする場合は、引数 block = True にする必要がある。
 
-    optuna.enqueue_trial() 利用時は、NelderMeadSampler が決定するパラメータとは個別に計算され、良い結果が出れば NelderMead に取り込まれる。(Simplexの再構成を行う)また、optuna.enqueue_trial() で決定されたパラメータは、並列化が有効であれば NelderMead の決定するパラメータと並列で計算される。
+    optuna.enqueue_trial() 利用時は、NelderMeadSampler が決定するパラメータとは個別に計算され、
+    良い結果が出れば NelderMead に取り込まれる。(Simplexの再構成を行う)
+    また、optuna.enqueue_trial() で決定されたパラメータは、
+    並列化が有効であれば NelderMead の決定するパラメータと並列で計算される。
 
     Args:
         search_space: dict[str, tuple[float, float]]
@@ -46,6 +50,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         nm: NelderMeadAlgorism
             NelderMead のアルゴリズムを管理するクラスのインスタンス
     """
+
     def __init__(
         self,
         search_space: dict[str, tuple[float, float]],
@@ -83,7 +88,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         ここで NelderMead のパラメータを決定する
         trial.user_attr["params"] に決定したパラメータが格納される
         NelderMead のパラメータが出力出来なければ、sub_sampler = None の場合は NelderMeadEmptyError を raise する
-        sub_sampler が指定されている場合は、 sub_sampler.before_trial() を実行し、trial.user_attr["sub_trial"] = True とする
+        sub_sampler が指定されている場合は、 sub_sampler.before_trial() を実行し、
+        trial.user_attr["sub_trial"] = True とする
 
         Args:
             study: Study
@@ -127,8 +133,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     ) -> Any:
         """パラメータを sample する
 
-        NelderMeadSampler の場合は before_trial でパラメータを決定済みなので、 trial.user_attr["params"] の対応したパラメータを返り値とする
-        trial.user_attr["sub_trial"] = True の場合は、 sub_sampler.sample_independent() を実行し、そのパラメータを返り値とする
+        NelderMeadSampler の場合は before_trial でパラメータを決定済みなので、
+        trial.user_attr["params"] の対応したパラメータを返り値とする
+        trial.user_attr["sub_trial"] = True の場合は、
+        sub_sampler.sample_independent() を実行し、そのパラメータを返り値とする
 
         Args:
             study: Study
