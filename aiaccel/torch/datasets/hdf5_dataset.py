@@ -30,6 +30,7 @@ class RawHDF5Dataset(Dataset[int]):
             self.grp_list = grp_list
         else:
             raise NotImplementedError()
+        self.grp_list.sort()
 
         self.f: h5.File | None = None
 
