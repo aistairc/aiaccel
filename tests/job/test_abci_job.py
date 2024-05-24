@@ -21,6 +21,37 @@ def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> SubprocessRetur
     return p
 
 
+## JobStatus
+
+
+def test_from_qsub_running() -> None:
+    assert JobStatus.from_qsub("r") == JobStatus.RUNNING
+    assert JobStatus.from_qsub("d") == JobStatus.RUNNING
+    assert JobStatus.from_qsub("Rr") == JobStatus.RUNNING
+
+
+def test_from_qsub_waiting() -> None:
+    assert JobStatus.from_qsub("qw") == JobStatus.WAITING
+    assert JobStatus.from_qsub("h") == JobStatus.WAITING
+    assert JobStatus.from_qsub("t") == JobStatus.WAITING
+    assert JobStatus.from_qsub("s") == JobStatus.WAITING
+    assert JobStatus.from_qsub("S") == JobStatus.WAITING
+    assert JobStatus.from_qsub("T") == JobStatus.WAITING
+    assert JobStatus.from_qsub("Rq") == JobStatus.WAITING
+
+
+def test_from_qsub_error() -> None:
+    assert JobStatus.from_qsub("E") == JobStatus.ERROR
+
+
+def test_from_qsub_unexpected_status() -> None:
+    with pytest.raises(ValueError, match="Unexpected status: unexpected"):
+        JobStatus.from_qsub("unexpected")
+
+
+## AbciJob
+
+
 @pytest.fixture
 def job_instance(tmpdir: Path) -> Generator[AbciJob, None, None]:
     job_filename: str = "job.sh"
