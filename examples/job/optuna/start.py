@@ -63,9 +63,7 @@ def params_to_dict(arg_params: list[Any]) -> dict[str, Any]:
     return params_dict
 
 
-def execute_serially(
-    filename: Path, config: DictConfig, params: dict[str, Any]
-) -> None:
+def execute_serially(filename: Path, config: DictConfig, params: dict[str, Any]) -> None:
     """
     Execute the shell script serially.
 
@@ -94,8 +92,7 @@ def execute_serially(
         job = AbciJob(
             filename,
             config.group,
-            args=[result_filename_template]
-            + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
+            args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
         )
 
         job.submit()
@@ -107,9 +104,7 @@ def execute_serially(
         study.tell(trial, y)
 
 
-def execute_parallelly(
-    filename: Path, config: DictConfig, params: dict[str, Any]
-) -> None:
+def execute_parallelly(filename: Path, config: DictConfig, params: dict[str, Any]) -> None:
     """
     Execute the shell script in parallel.
 
@@ -142,8 +137,7 @@ def execute_parallelly(
             jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
             job = jobs.submit(
-                args=[result_filename_template]
-                + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
+                args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
                 tag=trial,
             )
 
@@ -159,13 +153,9 @@ def execute_parallelly(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Process some parameters and execute a shell script."
-    )
+    parser = argparse.ArgumentParser(description="Process some parameters and execute a shell script.")
     parser.add_argument("filename", type=str, help="The shell script to execute.")
-    parser.add_argument(
-        "params", nargs="*", help='Additional parameters in the form of key="value"'
-    )
+    parser.add_argument("params", nargs="*", help='Additional parameters in the form of key="value"')
     parser.add_argument("--config", nargs="?", default=None)
 
     args = parser.parse_args()
@@ -173,9 +163,7 @@ if __name__ == "__main__":
     print(args.params)
     params = params_to_dict(args.params)
     if len(params) == 0:
-        print(
-            "No parameters provided. Usage: python start.py <filename> <key1=value1> <key2=value2> ..."
-        )
+        print("No parameters provided. Usage: python start.py <filename> <key1=value1> <key2=value2> ...")
         sys.exit(1)
 
     config = load_config(args.config)
