@@ -1,0 +1,7 @@
+workspace: ""
+timeout: 600
+n_max_jobs: 1
+group: ""
+sampler: optuna.samplers.TPESampler
+direction: minimize
+n_trials: 30

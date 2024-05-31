@@ -1,0 +1,8 @@
+workspace: "./work"
+timeout: 600
+n_max_jobs: 4
+group: "gaa50000"
+# sampler: optuna.samplers.TPESampler
+sampler: aiaccel.hpo.samplers.NelderMeadSampler
+direction: minimize
+n_trials: 30
