@@ -8,15 +8,15 @@ import subprocess
 import sys
 import threading
 import time
-from typing import IO
+from typing import IO, Any
 
 from aiaccel.common import datetime_format
 
 
 def select_for_win(
-        rlist: list[IO[bytes], IO[bytes]],
+        rlist: list[IO[bytes]],
         timeout: int = 1
-) -> tuple[list, list]:
+) -> tuple[list[IO[bytes] | Any]]:
     """Alternative to select.select() on Windows.
 
     Args:
@@ -41,7 +41,7 @@ def select_for_win(
                     readable.append(fd_r)
             except BlockingIOError:
                 pass
-            except Exception as e:
+            except Exception:
                 errorlist.append(fd_r)
         if readable or errorlist:
             break
