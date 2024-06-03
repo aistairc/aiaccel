@@ -13,10 +13,7 @@ from typing import IO, Any
 from aiaccel.common import datetime_format
 
 
-def select_for_win(
-        rlist: list[IO[bytes]],
-        timeout: int = 1
-) -> list[IO[bytes]] | Any:
+def select_for_win(rlist: list[IO[bytes]], timeout: int = 1) -> list[IO[bytes]] | Any:
     """Alternative to select.select() on Windows.
 
     Args:
