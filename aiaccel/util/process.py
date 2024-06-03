@@ -8,7 +8,7 @@ import subprocess
 import sys
 import threading
 import time
-from typing import IO, Any
+from typing import IO, List, Union, Any
 
 from aiaccel.common import datetime_format
 
@@ -16,7 +16,7 @@ from aiaccel.common import datetime_format
 def select_for_win(
         rlist: list[IO[bytes]],
         timeout: int = 1
-) -> tuple[list[IO[bytes] | Any]]:
+) -> tuple[List[Union[IO[bytes], Any]]]:
     """Alternative to select.select() on Windows.
 
     Args:
