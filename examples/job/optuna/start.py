@@ -83,7 +83,7 @@ def execute_serially(filename: Path, config: DictConfig, params: dict[str, Any])
     if config.seed is None:
         study = optuna.create_study(sampler=sampler(), direction=config.direction)
     else:
-        study = optuna.create_study(sampler=sampler(), direction=config.direction, seed=config.seed)
+        study = optuna.create_study(sampler=sampler(seed=config.seed), direction=config.direction)
 
     for _ in range(config.n_trials):
         trial = study.ask()
@@ -129,7 +129,7 @@ def execute_parallelly(filename: Path, config: DictConfig, params: dict[str, Any
     if config.seed is None:
         study = optuna.create_study(sampler=sampler(), direction=config.direction)
     else:
-        study = optuna.create_study(sampler=sampler(), direction=config.direction, seed=config.seed)
+        study = optuna.create_study(sampler=sampler(seed=config.seed), direction=config.direction)
 
     finished_job_count = 0
 
