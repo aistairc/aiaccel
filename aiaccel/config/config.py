@@ -45,8 +45,3 @@ def load_config(config_path: Path | str | None) -> DictConfig:
         raise RuntimeError("The configuration is not a DictConfig object.")
 
     return config
-
-
-if __name__ == "__main__":
-    cfg = load_config("config.yaml")
-    print(cfg)

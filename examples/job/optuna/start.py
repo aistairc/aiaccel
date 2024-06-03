@@ -38,7 +38,7 @@ def import_and_getattr(search_algorithm: str) -> Any | None:
     return getattr(module, attr_name)
 
 
-def params_to_dict(arg_params: list[Any]) -> dict[str, Any]:
+def params_to_dict(arg_params: list[str]) -> dict[str, Any]:
     """
     Convert a list of parameters to a dictionary.
 
@@ -159,8 +159,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", nargs="?", default=None)
 
     args = parser.parse_args()
-    print(type(args.params))
-    print(args.params)
+
     params = params_to_dict(args.params)
     if len(params) == 0:
         print("No parameters provided. Usage: python start.py <filename> <key1=value1> <key2=value2> ...")
