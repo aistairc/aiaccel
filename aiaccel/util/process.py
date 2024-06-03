@@ -8,14 +8,25 @@ import subprocess
 import sys
 import threading
 import time
+from typing import IO
 
 from aiaccel.common import datetime_format
 
 
 def select_for_win(
-        rlist: list[subprocess.Popen[bytes], subprocess.Popen[bytes]],
-        timeout: float = 1.0
+        rlist: list[IO[bytes], IO[bytes]],
+        timeout: int = 1
 ) -> tuple[list, list]:
+    """Alternative to select.select() on Windows.
+
+    Args:
+        rlist (list): A list of IO objects. It waits until ready for reading.
+        timeout (int): An integer specifies a time-out in seconds.
+
+    Returns:
+        tuple[list, list]: A tuple consisting a list of readable objects
+        and Exceptions.
+    """
     start_time = time.time()
     readable, errorlist = [], []
 
