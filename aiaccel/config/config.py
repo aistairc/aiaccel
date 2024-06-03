@@ -11,14 +11,13 @@ from omegaconf.dictconfig import DictConfig
 
 @dataclass
 class Config:
-    workspace: str
     timeout: int
     n_max_jobs: int
     sampler: str
     group: str
     direction: str
     n_trials: int
-    seed: int
+    seed: int | None
 
 
 def set_structs_false(conf: Container) -> None:

@@ -80,7 +80,10 @@ def execute_serially(filename: Path, config: DictConfig, params: dict[str, Any])
     if sampler is None:
         raise ValueError("Sampler not found.")
 
-    study = optuna.create_study(sampler=sampler(), direction=config.direction)
+    if config.seed is None:
+        study = optuna.create_study(sampler=sampler(), direction=config.direction)
+    else:
+        study = optuna.create_study(sampler=sampler(), direction=config.direction, seed=config.seed)
 
     for _ in range(config.n_trials):
         trial = study.ask()
@@ -123,7 +126,10 @@ def execute_parallelly(filename: Path, config: DictConfig, params: dict[str, Any
     if sampler is None:
         raise ValueError("Sampler not found.")
 
-    study = optuna.create_study(sampler=sampler(), direction=config.direction)
+    if config.seed is None:
+        study = optuna.create_study(sampler=sampler(), direction=config.direction)
+    else:
+        study = optuna.create_study(sampler=sampler(), direction=config.direction, seed=config.seed)
 
     finished_job_count = 0
 
