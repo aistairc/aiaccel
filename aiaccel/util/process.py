@@ -8,7 +8,7 @@ import subprocess
 import sys
 import threading
 import time
-from typing import IO, List, Union, Any
+from typing import IO, Any
 
 from aiaccel.common import datetime_format
 
