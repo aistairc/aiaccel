@@ -24,7 +24,7 @@ def select_for_win(
         timeout (int): An integer specifies a time-out in seconds.
 
     Returns:
-        tuple[list, list]: A tuple consisting a list of readable objects
+        tuple[list]: A tuple consisting a list of readable objects
         and Exceptions.
     """
     start_time = time.time()
