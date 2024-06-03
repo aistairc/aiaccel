@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import sys
 from subprocess import PIPE, Popen
 from typing import TYPE_CHECKING, Any
 
@@ -33,7 +34,10 @@ class LocalModel(AbstractModel):
             obj.config.generic.enabled_variable_name_argumentation,
         )
         obj.logger.info(f'runner command: {" ".join(runner_command)}')
-        obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE, bufsize=0)
+        if sys.platform == "win32":
+            obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE, bufsize=0, shell=True)
+        else:
+            obj.proc = Popen(runner_command, stdout=PIPE, stderr=PIPE, bufsize=0)
 
         obj.th_oh = OutputHandler(obj.proc)
         obj.th_oh.start()
@@ -177,5 +181,5 @@ class LocalModel(AbstractModel):
                 commands.append(f'--{param["name"]}={param["value"]}')
 
         obj.logger.debug(f'{" ".join(commands)}')
-        Popen(commands)
+        Popen(commands, shell=True) if sys.platform == "win32" else Popen(commands)
         return None
