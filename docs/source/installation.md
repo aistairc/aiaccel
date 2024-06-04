@@ -2,13 +2,13 @@
 
 ここでは下記の環境におけるaiaccelのインストール方法について解説します．
 
-- [Linux](#Linux)
-- [ABCI](#ABCI)
-- [Windows](#Windows)
-- [macOS](#macOS)
+- [Linux](#linux)
+- [ABCI](#abci)
+- [Windows](#windows)
+- [macOS](#macos)
 
 
-## Linux <a id="Linux"></a>
+## Linux <a id="linux"></a>
 
 ### Git のインストール
 Git のインストール方法は指定しませんが， `apt` 等でインストールして事前に設定を済ませておいてください．
@@ -39,7 +39,7 @@ source optenv/bin/activate
 以降の作業はアクティベート済みのものとして進めます．
 
 
-> [!NOTE] 仮想環境の終了
+> [!NOTE]
 > 仮想環境を終了する際は下記のコマンドを実行します．
 > ~~~bash
 > deactivate
@@ -108,7 +108,7 @@ $ python
 
 <br>
 
-## ABCI [(AI Bridging Cloud Infrastructure)](https://abci.ai/ja/about_abci/) <a id="ABCI"></a>
+## ABCI [(AI Bridging Cloud Infrastructure)](https://abci.ai/ja/about_abci/) <a id="abci"></a>
 ABCI には計算ノード (V) と計算ノード (A) という２つのノードがあり，それぞれ使用しているディストリビューションが異なります．[ABCI システムの概要](https://docs.abci.ai/ja/system-overview/#software)を参照してください．
 
 ### Python 環境の構築
@@ -140,7 +140,7 @@ source optenv/bin/activate
 以降の作業はアクティベート済みのものとして進めます．
 
 
-> [!NOTE] 仮想環境の終了
+> [!NOTE]
 > 仮想環境を終了する際は下記のコマンドを実行します．
 > ~~~bash
 > deactivate
@@ -204,7 +204,7 @@ $ python
 
 <br>
 
-## Windows <a id="Windows"></a>
+## Windows <a id="windows"></a>
 
 ### 準備1: Git のインストール
 
@@ -324,6 +324,6 @@ aiaccel がインポートできることを確認します．
 
 <br>
 
-## macOS (WIP) <a id="macOS"></a>
+## macOS (WIP) <a id="macos"></a>
 
 [back to top](#top)
