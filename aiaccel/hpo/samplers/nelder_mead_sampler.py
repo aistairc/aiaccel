@@ -16,7 +16,19 @@ __all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
-    """NelderMead アルゴリズムを用いた Sampler
+    """Sampler using the NelderMead algorithm
+
+    Only the initial point and shrink (number of parameters - 1) can be calculated in parallel.
+    Others are basically series calculations.
+    (Even if set by e.g. optuna.optimize(n_jobs=2), the calculation is performed in series except in initial and shrink.)
+    If parallelisation is enabled, set block = True.
+
+    When using optuna.enqueue_trial(),
+    the enqueued parameters are calculated separately from the parameters determined by NelderMeadSampler
+    and are taken into NelderMead if a good result is obtained. (Simplex is reconstituted).
+    The enqueued parameters are calculated in parallel with the parameters determined by NelderMead if parallelisation is enabled.
+
+    NelderMead アルゴリズムを用いた Sampler
 
     パラメータ数-1個の初期点計算と shrink 時のみ並列化可能で、
     それ以外は基本的には直列計算になる(optuna.optimize(n_jobs=2)等で設定しても、前述の時以外は直列で計算する)
@@ -29,26 +41,39 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     Args:
         search_space: dict[str, tuple[float, float]]
-            パラメータ名と対応した lower, upper を設定する
-            suggest_uniform とは個別に設定する必要がある(before_trial 時点でパラメータを決定する必要があるため)
+            Parameter names and corresponding lower and upper limits.
+            Must be set separately from suggest_uniform (as the parameters must be determined at the time of before_trial).
+            パラメータ名と対応した lower, upper
+            suggest_uniform 等とは個別に設定する必要がある(before_trial 時点でパラメータを決定する必要があるため)
         seed: int | None = None
+            Random seed used for initial point calculation.
             初期点計算をランダムで決定する際に利用されるシード値
         rng: np.random.RandomState | None = None
+            RandomState used for initial point calculation.
+            If specified with seed, rng takes precedence.
             初期点計算に用いられる RandomState
             seed と同時に指定された場合、 rng が優先される
         coeff: NelderMeadCoefficient | None = None
-            NelderMead で用いられるパラメータを設定する
+            Parameters used in NelderMead Algorism.
+            NelderMead で用いられるパラメータ
         block: bool = False
+            Indicates whether the queue used internally is blocked or not.
+            If parallelisation by optuna.optimize is enabled, it must be set with block = True
             内部で用いられる queue を block するかどうかを設定する
             optuna.optimize による並列化を有効にする場合は、 block = Trueで設定する必要がある
         sub_sampler: optuna.samplers.BaseSampler | None = None
-            NelderMead がパラメータを出力出来ない時に、代わりにパラメータを出力する Sampler を設定する
+            Sampler to output parameters when NelderMead cannot output parameters.
+            Mainly intended for use on free computation nodes in parallel.
+            If the sub_sampler function is enabled, it must be set with block = False.
+            NelderMead がパラメータを出力出来ない時に、代わりにパラメータを出力する Sampler
             主に並列化時に空いている計算ノードで利用することを想定している
             sub_sampler 機能を有効にする場合は、 block = False で設定する必要がある
 
     Attributes:
         nm: NelderMeadAlgorism
+            Instance of a class that manages the NelderMead algorithm.
             NelderMead のアルゴリズムを管理するクラスのインスタンス
+
     """
 
     def __init__(
@@ -83,17 +108,28 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         return {}
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        """trial の前処理
+        """Trial pre-processing.
+
+        Preprocessing of the trial
+
+        This determines the parameters for NelderMead.
+        The determined parameters are stored in trial.user_attr["params"].
+        If the NelderMead parameters cannot be output and sub_sampler is None, a NelderMeadEmptyError is raised.
+        If sub_sampler is specified, sub_sampler.before_trial() is executed, and trial.user_attr["sub_trial"] is set to True.
+
+        trial の前処理
 
         ここで NelderMead のパラメータを決定する
         trial.user_attr["params"] に決定したパラメータが格納される
-        NelderMead のパラメータが出力出来なければ、sub_sampler = None の場合は NelderMeadEmptyError を raise する
+        NelderMead のパラメータが出力出来ないかつ、sub_sampler = None の場合は NelderMeadEmptyError を raise する
         sub_sampler が指定されている場合は、 sub_sampler.before_trial() を実行し、
         trial.user_attr["sub_trial"] = True とする
 
         Args:
             study: Study
+                Target study object.
             trial: FrozenTrial
+                Target trial object.
 
         Returns:
             None
@@ -131,7 +167,14 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: BaseDistribution,
     ) -> Any:
-        """パラメータを sample する
+        """Sample a parameter
+
+        For NelderMeadSampler, since the parameters are already determined in before_trial,
+        return the corresponding parameters in trial.user_attr["params"].
+        If trial.user_attr["sub_trial"] = True,
+        execute sub_sampler.sample_independent() and return its parameters.
+
+        パラメータを sample する
 
         NelderMeadSampler の場合は before_trial でパラメータを決定済みなので、
         trial.user_attr["params"] の対応したパラメータを返り値とする
@@ -140,12 +183,18 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         Args:
             study: Study
+                Target study object.
             trial: FrozenTrial
+                Target trial object.
+                Take a copy before modifying this object.
             param_name: str
+                Name of the sampled parameter.
             param_distribution: BaseDistribution
+                Distribution object that specifies a prior and/or scale of the sampling algorithm.
 
         Returns:
             Any
+                A parameter value.
 
         """
         if "sub_trial" in trial.user_attrs and self.sub_sampler is not None:
@@ -179,18 +228,28 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         state: TrialState,
         values: Sequence[float] | None,
     ) -> None:
-        """trial の後処理
+        """Trial post-processing.
+
+        Pass the parameter-result pairs to the NelderMead algorithm.
+        If trial.user_attr["sub_trial"] = True, execute sub_sampler.after_trial().
+
+        trial の後処理
 
         パラメータ、計算結果の組を NelderMead アルゴリズムに渡す
         trial.user_attr["sub_trial"] = True の場合は、 sub_sampler.after_trial() を実行する
 
         Args:
             study: Study
+                Target study object.
             trial: FrozenTrial
+                Target trial object.
+                Take a copy before modifying this object.
             state: TrialState
+                Resulting trial state.
             values: Sequence[float] | None
+                Resulting trial values. Guaranteed to not be :obj:`None` if trial succeeded.
 
-        Return type:
+        Returns:
             None
 
         """
