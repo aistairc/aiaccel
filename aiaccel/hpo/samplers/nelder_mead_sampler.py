@@ -20,13 +20,16 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     Only the initial point and shrink (number of parameters - 1) can be calculated in parallel.
     Others are basically series calculations.
-    (Even if set by e.g. optuna.optimize(n_jobs=2), the calculation is performed in series except in initial and shrink.)
+    (Even if set by e.g. optuna.optimize(n_jobs=2),
+    the calculation is performed in series except in initial and shrink.)
     If parallelisation is enabled, set block = True.
 
     When using optuna.enqueue_trial(),
     the enqueued parameters are calculated separately from the parameters determined by NelderMeadSampler
-    and are taken into NelderMead if a good result is obtained. (Simplex is reconstituted).
-    The enqueued parameters are calculated in parallel with the parameters determined by NelderMead if parallelisation is enabled.
+    and are taken into NelderMead if a good result is obtained.
+    (Simplex is reconstituted).
+    The enqueued parameters are calculated in parallel
+    with the parameters determined by NelderMead if parallelisation is enabled.
 
     NelderMead アルゴリズムを用いた Sampler
 
@@ -42,7 +45,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     Args:
         search_space: dict[str, tuple[float, float]]
             Parameter names and corresponding lower and upper limits.
-            Must be set separately from suggest_uniform (as the parameters must be determined at the time of before_trial).
+            Must be set separately from suggest_uniform
+            (as the parameters must be determined at the time of before_trial).
             パラメータ名と対応した lower, upper
             suggest_uniform 等とは個別に設定する必要がある(before_trial 時点でパラメータを決定する必要があるため)
         seed: int | None = None
@@ -115,7 +119,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         This determines the parameters for NelderMead.
         The determined parameters are stored in trial.user_attr["params"].
         If the NelderMead parameters cannot be output and sub_sampler is None, a NelderMeadEmptyError is raised.
-        If sub_sampler is specified, sub_sampler.before_trial() is executed, and trial.user_attr["sub_trial"] is set to True.
+        If sub_sampler is specified, sub_sampler.before_trial() is executed,
+        and trial.user_attr["sub_trial"] is set to True.
 
         trial の前処理
 

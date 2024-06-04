@@ -30,7 +30,7 @@ class NelderMeadAlgorism:
     """Class to manage the NelderMead algorithm
 
     Uses a queue to receive results and advance the NelderMead algorithm.
-    
+
     NelderMead アルゴリズムを管理するクラス
 
     queue を用いて結果を受け取り、NelderMead のアルゴリズムを進める
