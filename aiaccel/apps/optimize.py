@@ -11,7 +11,7 @@ from aiaccel.job import AbciJobExecutor
 
 """
 Usage:
-    python -m aiaccel.apps.optimize objective.sh x1="[0, 10]" x2="[0, 10]" --config config.yaml
+    python -m aiaccel.apps.optimize objective.sh params.x1="[0, 10]" params.x2="[0, 10]" --config config.yaml
 """
 
 
@@ -26,7 +26,7 @@ def main() -> None:
     params = oc.from_cli(args.params)
     """
     params example:
-        params = {'params': {'x': [0, 1], 'y': [0, 1]}}
+        params = {'params': {'x1': [0, 1], 'x2': [0, 1]}}
     """
 
     config = oc.load(args.config)
