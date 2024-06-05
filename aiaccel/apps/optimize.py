@@ -30,9 +30,7 @@ def main() -> None:
     """
 
     config = oc.load(args.config)
-    jobs = AbciJobExecutor(
-        Path(args.filename), config.group, n_max_jobs=config.n_max_jobs
-    )
+    jobs = AbciJobExecutor(Path(args.filename), config.group, n_max_jobs=config.n_max_jobs)
     study = instantiate(config.study)
 
     result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
@@ -50,8 +48,7 @@ def main() -> None:
             jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
             job = jobs.submit(
-                args=[result_filename_template]
-                + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
+                args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
                 tag=trial,
             )
 
