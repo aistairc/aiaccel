@@ -108,7 +108,7 @@ python -m pip show aiaccel
 <br>
 
 ## ABCI [(AI Bridging Cloud Infrastructure)](https://abci.ai/ja/about_abci/) <a id="abci"></a>
-ABCI には計算ノード (V) と計算ノード (A) という２つのノードがあり，それぞれ使用しているディストリビューションが異なります．[ABCI システムの概要](https://docs.abci.ai/ja/system-overview/#software)を参照してください．
+ABCI にはノード (V) とノード (A) という２つのノードがあり，それぞれ使用しているディストリビューションが異なります．[ABCI システムの概要](https://docs.abci.ai/ja/system-overview/#software)を参照してください．
 
 ### Python 環境の構築
 [ABCIユーザーガイド](https://docs.abci.ai/ja/python)に従って Python 環境を用意します．
@@ -197,6 +197,9 @@ python -m pip install .
 ~~~bash
 python -m pip show aiaccel
 ~~~
+
+> [!NOTE]
+> 当ガイドの内容は ABCI のインタラクティブノード (V) 上で正常に動作することを確認済みです．
 
 
 [back to top](#top)
