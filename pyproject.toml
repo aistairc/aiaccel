@@ -19,7 +19,8 @@ dependencies = [
     "numpy",
     "optuna",
     "optuna>=3.4.0",
-    "omegaconf"
+    "omegaconf",
+    "hydra-core",
 ]
 
 [project.scripts]

@@ -1,7 +1,12 @@
-timeout: 600
-n_max_jobs: 4
-group: "gaa50000"
-sampler: optuna.samplers.TPESampler
-direction: minimize
+study:
+  _target_: optuna.create_study
+  direction: minimize
+
+  sampler:
+    _target_: optuna.samplers.TPESampler
+    seed: 0
+
 n_trials: 30
-seed: 42
+n_max_jobs: 4
+
+group: gaa50000
