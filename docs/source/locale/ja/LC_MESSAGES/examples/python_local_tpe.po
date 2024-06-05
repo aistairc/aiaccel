@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:51+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/examples/python_local_tpe.md:1
 msgid "TPE オプティマイザのローカル環境 (python_local モード) での実行例"
@@ -67,247 +67,254 @@ msgstr ""
 msgid "generic"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:36
+#: ../../source/examples/python_local_tpe.md:37
 msgid "**workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:37
+#: ../../source/examples/python_local_tpe.md:38
 msgid ""
 "**job_command** - ユーザープログラムを実行するためのコマンドです．`python_local` "
 "モードでは使用されませんが，実行時に読み込むため，記述します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:38
+#: ../../source/examples/python_local_tpe.md:39
 msgid "**python_file** - python で実装された最適化対象の関数のファイルパスを設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:39
+#: ../../source/examples/python_local_tpe.md:40
 msgid "**function** - 最適化対象の関数名を設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:40
+#: ../../source/examples/python_local_tpe.md:41
 msgid "**batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]"
 msgstr ""
 
 #: ../../source/examples/python_local_tpe.md:42
+msgid ""
+"**enabled_variable_name_argumentation** - `\"True\"` or `\"False\"` "
+"によって，コマンドライン引数の指定方法が変わります．(参照： "
+"[aiaccel/examples/vlmop2/README.md](https://github.com/aistairc/aiaccel/blob/0c2559fedee384694cc7ca72d8082b8bed4dc7ad/examples/vlmop2/README.md?plain=1#L35))"
+msgstr ""
+
+#: ../../source/examples/python_local_tpe.md:43
+msgid "**logging_level** - ログの出力レベルを `\"INFO\"` に設定します．"
+msgstr ""
+
+#: ../../source/examples/python_local_tpe.md:45
 msgid "resource"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:49
+#: ../../source/examples/python_local_tpe.md:52
 msgid ""
 "**type** - 実行環境を指定します．`python_local` モードを使用してローカルで実行するためには "
 "`\"python_local\"` と設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:50
+#: ../../source/examples/python_local_tpe.md:53
 msgid "**num_workers** - 使用するノード数を指定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:53
+#: ../../source/examples/python_local_tpe.md:56
 msgid "optimize"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:93
+#: ../../source/examples/python_local_tpe.md:96
 msgid "**search_algorithm** - 最適化アルゴリズムを設定します．この例では TPE オプティマイザを設定しています．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:94
+#: ../../source/examples/python_local_tpe.md:97
 msgid "**goal** - 最適化の方向を設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:95
+#: ../../source/examples/python_local_tpe.md:98
 msgid "ベンチマーク関数 Styblinski-Tang を最小化することが目的であるため，`\"minimize\"` を設定しています．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:96
+#: ../../source/examples/python_local_tpe.md:99
 msgid "**trial_number** - 試行回数を設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:97
+#: ../../source/examples/python_local_tpe.md:100
 msgid "**rand_seed** - 乱数の生成に使用するシードを設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:98
+#: ../../source/examples/python_local_tpe.md:101
 msgid ""
 "**parameters** - ハイパパラメータの各種項目を設定します．ここでは 5 次元の Styblinski-Tang "
 "の最適化を行うため，5 種類のパラメータを用意しています．5 "
 "つのパラメータに対して，以下の項目をそれぞれ設定する必要があります．パラメータの範囲や初期値を，全て同じにする必要はありません．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:99
+#: ../../source/examples/python_local_tpe.md:102
 msgid "**name** - ハイパパラメータの名前を設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:100
+#: ../../source/examples/python_local_tpe.md:103
 msgid ""
 "**type** - ハイパパラメータのデータ型を設定します．ここでは例として `\"uniform_float\"` に設定していますが，TPE"
 " オプティマイザでは，以下の 3 つのタイプから選択することができます．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:101
+#: ../../source/examples/python_local_tpe.md:104
 msgid "uniform_float - 浮動小数点数"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:102
+#: ../../source/examples/python_local_tpe.md:105
 msgid "uniform_int - 整数"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:103
+#: ../../source/examples/python_local_tpe.md:106
 msgid "categorical - カテゴリカル変数"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:104
+#: ../../source/examples/python_local_tpe.md:107
 msgid "**lower / upper** - ハイパパラメータ最小値 / 最大値を設定します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:105
-msgid "**initial** - ハイパパラメータの初期値を設定します．"
-msgstr ""
-
-#: ../../source/examples/python_local_tpe.md:107
-msgid "user.py の作成"
+#: ../../source/examples/python_local_tpe.md:108
+msgid "**log** -  対数スケールでパラメータ空間を分割するかを `true` または `false` で設定します．"
 msgstr ""
 
 #: ../../source/examples/python_local_tpe.md:109
+msgid "**initial** - ハイパパラメータの初期値を設定します．"
+msgstr ""
+
+#: ../../source/examples/python_local_tpe.md:111
+msgid "user.py の作成"
+msgstr ""
+
+#: ../../source/examples/python_local_tpe.md:113
 msgid "`user.py` は以下のように記述します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:124
+#: ../../source/examples/python_local_tpe.md:128
 msgid "モジュール"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:130
+#: ../../source/examples/python_local_tpe.md:134
 msgid "必要なモジュールをインポートします．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:132
+#: ../../source/examples/python_local_tpe.md:136
 msgid "numpy - 関数 Styblinski-Tang を計算するために使用します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:135
+#: ../../source/examples/python_local_tpe.md:139
 msgid "main"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:146
+#: ../../source/examples/python_local_tpe.md:150
 msgid ""
 "最適化対象の関数で，aiaccel はこの関数の `return` 値を最小化します． 引数にハイパパラメータの辞書型オブジェクトを取ります． "
 "この例では，与えられたパラメータに対してベンチマーク関数 Styblinski-Tang の値を計算し，返却します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:150
+#: ../../source/examples/python_local_tpe.md:154
 msgid "注意"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:151
+#: ../../source/examples/python_local_tpe.md:155
 msgid ""
 "`python_local` モードで実行する場合，aiaccel は user.py から `main()` をインポートして使用します． "
 "そのため，`local` や `abci` の場合のように，user.py の内部で `aiaccel.util.aiaccel.Run` "
 "などを用いて関数の実行と Storage への結果の保存を行う必要はありません．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:157
+#: ../../source/examples/python_local_tpe.md:161
 msgid "3. 実行"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:159
+#: ../../source/examples/python_local_tpe.md:163
 msgid "作成した config.yaml と user.py が保存されているディレクトリに移動し，下記のコマンドで aiaccel を起動してください．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:164
+#: ../../source/examples/python_local_tpe.md:168
 msgid "コマンドラインオプション引数"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:165
+#: ../../source/examples/python_local_tpe.md:169
 msgid "`--config` - 設定ファイルを読み込むためのオプション引数です．読み込むコンフィグのパスを記述します．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:166
+#: ../../source/examples/python_local_tpe.md:170
 msgid ""
 "`--clean` - aiaccel の起動ディレクトリ内に config.yaml の workspace "
 "で指定したディレクトリが存在する場合，削除してから実行するためのオプション引数です．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:170
+#: ../../source/examples/python_local_tpe.md:174
 msgid "4. 結果の確認"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:172
-msgid "aiaccel の正常終了後，最適化の結果は以下の 2 か所に保存されます．"
+#: ../../source/examples/python_local_tpe.md:176
+msgid "aiaccel の正常終了後，最適化の結果は以下に保存されます．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:174
+#: ../../source/examples/python_local_tpe.md:178
 msgid "./work/results.csv"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:175
-msgid "./work/result/{trial_id}.hp"
-msgstr ""
-
-#: ../../source/examples/python_local_tpe.md:177
+#: ../../source/examples/python_local_tpe.md:180
 msgid "ここで，./work はコンフィグファイルの workspace に設定したディレクトリです．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:179
-msgid ""
-"results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています． "
-"result/{trial_id}.hp は，{trial_id} 回目の試行のパラメータと関数の値が YAML 形式で保存されています． "
-"さらに，同じフォルダには final_result.result というファイルが作成され，全試行中で最良のパラメータと目的関数の値が YAML "
-"形式で保存されます．"
+#: ../../source/examples/python_local_tpe.md:182
+msgid "results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:183
+#: ../../source/examples/python_local_tpe.md:184
 msgid "上で実行した最適化の結果は以下のようになります．"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:185
+#: ../../source/examples/python_local_tpe.md:186
 msgid "ハイパパラメータ"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:187
+#: ../../source/examples/python_local_tpe.md:188
 msgid "x1"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:188
+#: ../../source/examples/python_local_tpe.md:189
 msgid "x2"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:189
+#: ../../source/examples/python_local_tpe.md:190
 msgid "x3"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:190
+#: ../../source/examples/python_local_tpe.md:191
 msgid "x4"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:191
+#: ../../source/examples/python_local_tpe.md:192
 msgid "x5"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:193
+#: ../../source/examples/python_local_tpe.md:194
 msgid "評価値"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:195
+#: ../../source/examples/python_local_tpe.md:196
 msgid "Styblinski-Tang"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:197
+#: ../../source/examples/python_local_tpe.md:198
 msgid "最適化手法"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:198
+#: ../../source/examples/python_local_tpe.md:199
 msgid "TPE"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:200
+#: ../../source/examples/python_local_tpe.md:201
 msgid "結果比較"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:202
+#: ../../source/examples/python_local_tpe.md:203
 msgid "デフォルトパラメータ"
 msgstr ""
 
-#: ../../source/examples/python_local_tpe.md:213
+#: ../../source/examples/python_local_tpe.md:214
 msgid "最適化結果"
 msgstr ""
 

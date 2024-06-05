@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:51+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/examples/local_random.md:1
 msgid "ランダムオプティマイザのローカル環境での実行例"
@@ -63,253 +63,260 @@ msgstr ""
 msgid "generic"
 msgstr ""
 
-#: ../../source/examples/local_random.md:34
+#: ../../source/examples/local_random.md:36
 msgid "**workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:35
+#: ../../source/examples/local_random.md:37
 msgid "**job_command** - ユーザープログラムを実行するためのコマンドです．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:36
+#: ../../source/examples/local_random.md:38
 msgid "**batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]"
 msgstr ""
 
 #: ../../source/examples/local_random.md:39
 msgid ""
-"Windows では，仮想環境の python で実行するためには `job_command` の欄を "
-"`\"optenv/Scripts/python.exe\"` のように設定する必要があります．"
+"**enabled_variable_name_argumentation** - `\"True\"` or `\"False\"` "
+"によって，コマンドライン引数の指定方法が変わります．(参照： "
+"[aiaccel/examples/vlmop2/README.md](https://github.com/aistairc/aiaccel/blob/0c2559fedee384694cc7ca72d8082b8bed4dc7ad/examples/vlmop2/README.md?plain=1#L35))"
 msgstr ""
 
-#: ../../source/examples/local_random.md:42
+#: ../../source/examples/local_random.md:40
+msgid "**logging_level** - ログの出力レベルを `\"INFO\"` に設定します．"
+msgstr ""
+
+#: ../../source/examples/local_random.md:43
+msgid ""
+"Windows 上で仮想環境の python プログラムを実行するために `job_command` の欄を "
+"`\"optenv/Scripts/python.exe\"` と設定する必要があります．"
+msgstr ""
+
+#: ../../source/examples/local_random.md:46
 msgid "resource"
 msgstr ""
 
-#: ../../source/examples/local_random.md:49
+#: ../../source/examples/local_random.md:53
 msgid "**type** - 実行環境を指定します．ローカル環境で実行するためには `\"local\"` で設定します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:50
+#: ../../source/examples/local_random.md:54
 msgid "**num_workers** - 使用するノード数を指定します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:53
+#: ../../source/examples/local_random.md:57
 msgid "optimize"
 msgstr ""
 
-#: ../../source/examples/local_random.md:92
+#: ../../source/examples/local_random.md:96
 msgid "**search_algorithm** - 最適化アルゴリズムを設定します．この例ではランダムオプティマイザを設定しています．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:93
+#: ../../source/examples/local_random.md:97
 msgid "**goal** - 最適化の方向を設定します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:94
+#: ../../source/examples/local_random.md:98
 msgid "関数 sphere を最小化することが目的であるため，`\"minimize\"` を設定しています．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:95
+#: ../../source/examples/local_random.md:99
 msgid "**trial_number** - 試行回数を設定します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:96
+#: ../../source/examples/local_random.md:100
 msgid "**rand_seed** - 乱数の生成に使用するシードを設定します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:97
+#: ../../source/examples/local_random.md:101
 msgid ""
 "**parameters** - ハイパパラメータの各種項目を設定します．ここでは 5 次元の spehre の最適化を行うため，5 "
 "種類のパラメータを用意しています．5 "
 "つのパラメータに対して，以下の項目をそれぞれ設定する必要があります．パラメータの範囲や初期値を，全て同じにする必要はありません．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:98
+#: ../../source/examples/local_random.md:102
 msgid "**name** - ハイパパラメータの名前を設定します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:99
+#: ../../source/examples/local_random.md:103
 msgid ""
 "**type** - ハイパパラメータのデータ型を設定します．ここでは例として `\"uniform_float\"` "
 "に設定していますが，ランダムオプティマイザでは，以下の 4 つから選択することができます．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:100
+#: ../../source/examples/local_random.md:104
 msgid "uniform_float - 浮動小数点数"
 msgstr ""
 
-#: ../../source/examples/local_random.md:101
+#: ../../source/examples/local_random.md:105
 msgid "uniform_int - 整数"
 msgstr ""
 
-#: ../../source/examples/local_random.md:102
+#: ../../source/examples/local_random.md:106
 msgid "categorical - カテゴリカル変数"
 msgstr ""
 
-#: ../../source/examples/local_random.md:103
+#: ../../source/examples/local_random.md:107
 msgid "ordinal - オーディナル変数"
 msgstr ""
 
-#: ../../source/examples/local_random.md:104
+#: ../../source/examples/local_random.md:108
 msgid "**lower / upper** - ハイパパラメータ最小値 / 最大値を設定します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:105
+#: ../../source/examples/local_random.md:109
+msgid "**log** -  対数スケールでパラメータ空間を分割するかを `true` または `false` で設定します．"
+msgstr ""
+
+#: ../../source/examples/local_random.md:110
 msgid ""
 "**initial** - ハイパパラメータの初期値を設定します．上の例の `\"x5\"` の場合のように `initial` "
 "の項目がない場合，実行時にランダムな初期値が自動で設定されます．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:107
+#: ../../source/examples/local_random.md:112
 msgid "user.py の作成"
 msgstr ""
 
-#: ../../source/examples/local_random.md:109
+#: ../../source/examples/local_random.md:114
 msgid "`user.py` は以下のように記述します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:127
+#: ../../source/examples/local_random.md:132
 msgid "モジュール"
 msgstr ""
 
-#: ../../source/examples/local_random.md:134
+#: ../../source/examples/local_random.md:139
 msgid "必要なモジュールをインポートします．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:136
+#: ../../source/examples/local_random.md:141
 msgid "numpy - 関数 sphere を計算するために使用します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:137
+#: ../../source/examples/local_random.md:142
 msgid ""
 "aiaccel.util.aiaccel - ユーザープログラム内で定義される関数 `main()` と "
 "aiaccelとの間のインターフェイスを提供します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:140
+#: ../../source/examples/local_random.md:145
 msgid "main"
 msgstr ""
 
-#: ../../source/examples/local_random.md:148
+#: ../../source/examples/local_random.md:153
 msgid ""
 "最適化対象の関数で，aiaccel はこの関数の `return` 値を最小化します． "
 "引数にハイパパラメータの辞書型オブジェクトを取り，ハイパパラメータの二乗和を返却します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:151
+#: ../../source/examples/local_random.md:156
 msgid "実行部分"
 msgstr ""
 
-#: ../../source/examples/local_random.md:157
+#: ../../source/examples/local_random.md:162
 msgid ""
 "aiaccel から関数 `main()` にハイパパラメータを渡し，`main()` の返却値を Storage に保存します． `run` "
 "はそのインターフェイスとなるインスタンスです． メソッド `execute_and_report()` の内部で `main()` "
 "が値を計算し，Storage に計算結果が保存されます．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:164
+#: ../../source/examples/local_random.md:169
 msgid "3. 実行"
 msgstr ""
 
-#: ../../source/examples/local_random.md:166
+#: ../../source/examples/local_random.md:171
 msgid "作成した config.yaml と user.py が保存されているディレクトリに移動し，下記のコマンドで aiaccel を起動してください．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:172
+#: ../../source/examples/local_random.md:177
 msgid "コマンドラインオプション引数"
 msgstr ""
 
-#: ../../source/examples/local_random.md:173
+#: ../../source/examples/local_random.md:178
 msgid "`--config` - 設定ファイルを読み込むためのオプション引数です．読み込むコンフィグのパスを記述します．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:174
+#: ../../source/examples/local_random.md:179
 msgid ""
 "`--clean` - aiaccel の起動ディレクトリ内に config.yaml の workspace "
 "で指定したディレクトリが存在する場合，削除してから実行するためのオプション引数です．"
 msgstr ""
 
-#: ../../source/examples/local_random.md:178
+#: ../../source/examples/local_random.md:183
 msgid "4. 結果の確認"
 msgstr ""
 
-#: ../../source/examples/local_random.md:180
-msgid "aiaccel の正常終了後，最適化の結果は以下の 2 か所に保存されます．"
-msgstr ""
-
-#: ../../source/examples/local_random.md:182
-msgid "./work/results.csv"
-msgstr ""
-
-#: ../../source/examples/local_random.md:183
-msgid "./work/result/{trial_id}.hp"
-msgstr ""
-
 #: ../../source/examples/local_random.md:185
-msgid "ここで，./work はコンフィグファイルの workspace に設定したディレクトリです．"
+msgid "aiaccel の正常終了後，最適化の結果は以下に保存されます．"
 msgstr ""
 
 #: ../../source/examples/local_random.md:187
-msgid ""
-"results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています． "
-"result/{trial_id}.hp は，{trial_id} 回目の試行のパラメータと関数の値が YAML 形式で保存されています． "
-"さらに，同じフォルダには final_result.result というファイルが作成され，全試行中で最良のパラメータと目的関数の値が YAML "
-"形式で保存されます．"
+msgid "./work/results.csv"
+msgstr ""
+
+#: ../../source/examples/local_random.md:189
+msgid "ここで，./work はコンフィグファイルの workspace に設定したディレクトリです．"
 msgstr ""
 
 #: ../../source/examples/local_random.md:191
-msgid "上で実行した最適化の結果は以下のようになります．"
+msgid "results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています．"
 msgstr ""
 
 #: ../../source/examples/local_random.md:193
-msgid "ハイパパラメータ"
+msgid "上で実行した最適化の結果は以下のようになります．"
 msgstr ""
 
 #: ../../source/examples/local_random.md:195
-msgid "x1"
-msgstr ""
-
-#: ../../source/examples/local_random.md:196
-msgid "x2"
+msgid "ハイパパラメータ"
 msgstr ""
 
 #: ../../source/examples/local_random.md:197
-msgid "x3"
+msgid "x1"
 msgstr ""
 
 #: ../../source/examples/local_random.md:198
-msgid "x4"
+msgid "x2"
 msgstr ""
 
 #: ../../source/examples/local_random.md:199
-msgid "x5"
+msgid "x3"
+msgstr ""
+
+#: ../../source/examples/local_random.md:200
+msgid "x4"
 msgstr ""
 
 #: ../../source/examples/local_random.md:201
-msgid "評価値"
+msgid "x5"
 msgstr ""
 
 #: ../../source/examples/local_random.md:203
-msgid "sphere"
+msgid "評価値"
 msgstr ""
 
 #: ../../source/examples/local_random.md:205
+msgid "sphere"
+msgstr ""
+
+#: ../../source/examples/local_random.md:207
 msgid "最適化手法"
 msgstr ""
 
-#: ../../source/examples/local_random.md:206
+#: ../../source/examples/local_random.md:208
 msgid "Random"
 msgstr ""
 
-#: ../../source/examples/local_random.md:208
+#: ../../source/examples/local_random.md:210
 msgid "結果比較"
 msgstr ""
 
-#: ../../source/examples/local_random.md:210
+#: ../../source/examples/local_random.md:212
 msgid "デフォルトパラメータ"
 msgstr ""
 
-#: ../../source/examples/local_random.md:221
+#: ../../source/examples/local_random.md:223
 msgid "最適化結果"
 msgstr ""
 

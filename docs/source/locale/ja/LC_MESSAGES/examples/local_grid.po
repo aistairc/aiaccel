@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:51+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/examples/local_grid.md:1
 msgid "グリッドオプティマイザのローカル環境での実行例"
@@ -65,198 +65,199 @@ msgstr ""
 msgid "generic"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:34
+#: ../../source/examples/local_grid.md:36
 msgid "**workspace** - aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:35
+#: ../../source/examples/local_grid.md:37
 msgid "**job_command** - ユーザープログラムを実行するためのコマンドです．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:36
+#: ../../source/examples/local_grid.md:38
 msgid "**batch_job_timeout** - ジョブのタイムアウト時間を設定します．[単位: 秒]"
 msgstr ""
 
 #: ../../source/examples/local_grid.md:39
 msgid ""
-"Windows では，仮想環境の python で実行するためには `job_command` の欄を "
-"`\"optenv/Scripts/python.exe\"` のように設定する必要があります．"
+"**enabled_variable_name_argumentation** - `\"True\"` or `\"False\"` "
+"によって，コマンドライン引数の指定方法が変わります．(参照： "
+"[aiaccel/examples/vlmop2/README.md](https://github.com/aistairc/aiaccel/blob/0c2559fedee384694cc7ca72d8082b8bed4dc7ad/examples/vlmop2/README.md?plain=1#L35))"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:42
+#: ../../source/examples/local_grid.md:40
+msgid "**logging_level** - ログの出力レベルを `\"INFO\"` に設定します．"
+msgstr ""
+
+#: ../../source/examples/local_grid.md:43
 msgid "resource"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:49
+#: ../../source/examples/local_grid.md:50
 msgid "**type** - 実行環境を指定します．ローカル環境で実行するためには `\"local\"` で設定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:50
+#: ../../source/examples/local_grid.md:51
 msgid "**num_workers** - 使用するノード数を指定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:53
+#: ../../source/examples/local_grid.md:54
 msgid "optimize"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:103
+#: ../../source/examples/local_grid.md:104
 msgid "**search_algorithm** - 最適化アルゴリズムを設定します．この例ではグリッドオプティマイザを設定しています．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:104
+#: ../../source/examples/local_grid.md:105
 msgid "**goal** - 最適化の方向を設定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:105
+#: ../../source/examples/local_grid.md:106
 msgid "関数 Schwefel を最小化することが目的であるため，`\"minimize\"` を設定しています．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:106
+#: ../../source/examples/local_grid.md:107
 msgid "**trial_number** - 試行回数を設定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:107
+#: ../../source/examples/local_grid.md:108
 msgid "**rand_seed** - 乱数の生成に使用するシードを設定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:108
+#: ../../source/examples/local_grid.md:109
 msgid ""
 "**parameters** - ハイパパラメータの各種項目を設定します．ここでは 5 次元の Schwefel の最適化を行うため，5 "
 "種類のパラメータを用意しています．5 "
 "つのパラメータに対して，以下の項目をそれぞれ設定する必要があります．パラメータの範囲や初期値を，全て同じにする必要はありません．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:109
+#: ../../source/examples/local_grid.md:110
 msgid "**name** - ハイパパラメータの名前を設定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:110
+#: ../../source/examples/local_grid.md:111
 msgid ""
 "**type** - ハイパパラメータのデータ型を設定します．ここでは例として `\"uniform_float\"` "
 "に設定していますが，グリッドオプティマイザでは，以下の 4 つから選択することができます．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:111
+#: ../../source/examples/local_grid.md:112
 msgid "uniform_float - 浮動小数点数"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:112
+#: ../../source/examples/local_grid.md:113
 msgid "uniform_int - 整数"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:113
+#: ../../source/examples/local_grid.md:114
 msgid "categorical - カテゴリカル変数"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:114
+#: ../../source/examples/local_grid.md:115
 msgid "ordinal - オーディナル変数"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:115
+#: ../../source/examples/local_grid.md:116
 msgid "**lower / upper** - ハイパパラメータ最小値 / 最大値を設定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:116
+#: ../../source/examples/local_grid.md:117
 msgid "**step** - パラメータ空間を分割するステップサイズを設定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:117
+#: ../../source/examples/local_grid.md:118
 msgid "**log** -  対数スケールでパラメータ空間を分割するかを `true` または `false` で設定します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:118
+#: ../../source/examples/local_grid.md:119
 msgid ""
 "**base** - "
-"パラメータ空間を対数スケールで分割する際に使用する基数を設定します．対数スケールでパラメータ空間を分割しない場合は使用されませんが，必ず値を設定してください．設定されていない場合エラーになりまず．"
+"パラメータ空間を対数スケールで分割する際に使用する基数を設定します．対数スケールでパラメータ空間を分割しない場合は使用されませんが，必ず値を設定してください．設定されていない場合エラーになります．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:120
-msgid "**注意**: グリッドオプティマイザを使用する際は，パラメータの初期値を設定することができません．"
+#: ../../source/examples/local_grid.md:121
+msgid "**注意**: グリッドオプティマイザを使用する際はパラメータの初期値を設定することができません．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:122
+#: ../../source/examples/local_grid.md:123
 msgid "user.py の作成"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:124
+#: ../../source/examples/local_grid.md:125
 msgid "`user.py` は以下のように記述します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:142
+#: ../../source/examples/local_grid.md:143
 msgid "モジュール"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:149
+#: ../../source/examples/local_grid.md:150
 msgid "必要なモジュールをインポートします．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:151
+#: ../../source/examples/local_grid.md:152
 msgid "numpy - 関数 Schwefel を計算するために使用します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:152
+#: ../../source/examples/local_grid.md:153
 msgid ""
 "aiaccel.util.aiaccel - ユーザープログラム内で定義される関数 `main()` と "
 "aiaccelとの間のインターフェイスを提供します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:155
+#: ../../source/examples/local_grid.md:156
 msgid "main"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:163
+#: ../../source/examples/local_grid.md:164
 msgid ""
 "最適化対象の関数で，aiaccel はこの関数の `return` 値を最小化します． 引数にハイパパラメータの辞書型オブジェクトを取ります， "
 "この例では，関数 Schwefel の値を計算し，返却します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:167
+#: ../../source/examples/local_grid.md:168
 msgid "実行部分"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:173
+#: ../../source/examples/local_grid.md:174
 msgid ""
 "aiaccel から関数 `main()` にハイパパラメータを渡し，`main()` の返却値を Storage に保存します． `run` "
 "はそのインターフェイスとなるインスタンスです． メソッド `execute_and_report()` の内部で `main()` "
 "が値を計算し，Storage に計算結果が保存されます．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:180
+#: ../../source/examples/local_grid.md:181
 msgid "3. 実行"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:182
+#: ../../source/examples/local_grid.md:183
 msgid "作成した config.yaml と user.py が保存されているディレクトリに移動し，下記のコマンドで aiaccel を起動してください．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:188
+#: ../../source/examples/local_grid.md:189
 msgid "コマンドラインオプション引数"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:189
+#: ../../source/examples/local_grid.md:190
 msgid "`--config` - 設定ファイルを読み込むためのオプション引数です．読み込むコンフィグのパスを記述します．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:190
+#: ../../source/examples/local_grid.md:191
 msgid ""
 "`--clean` - aiaccel の起動ディレクトリ内に config.yaml の workspace "
 "で指定したディレクトリが存在する場合，削除してから実行するためのオプション引数です．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:194
+#: ../../source/examples/local_grid.md:195
 msgid "4. 結果の確認"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:196
-msgid "aiaccel の正常終了後，最適化の結果は以下の 2 か所に保存されます．"
-msgstr ""
-
-#: ../../source/examples/local_grid.md:198
-msgid "./work/results.csv"
+#: ../../source/examples/local_grid.md:197
+msgid "aiaccel の正常終了後，最適化の結果は以下に保存されます．"
 msgstr ""
 
 #: ../../source/examples/local_grid.md:199
-msgid "./work/result/{trial_id}.hp"
+msgid "./work/results.csv"
 msgstr ""
 
 #: ../../source/examples/local_grid.md:201
@@ -264,62 +265,58 @@ msgid "ここで，./work はコンフィグファイルの workspace に設定�
 msgstr ""
 
 #: ../../source/examples/local_grid.md:203
-msgid ""
-"results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています． "
-"result/{trial_id}.hp は，{trial_id} 回目の試行のパラメータと関数の値が YAML 形式で保存されています． "
-"さらに，同じフォルダには final_result.result というファイルが作成され，全試行中で最良のパラメータと目的関数の値が YAML "
-"形式で保存されます．"
+msgid "results.csv には，それぞれの試行でのパラメータの値と，そのパラメータに対する目的関数の値が保存されています．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:207
+#: ../../source/examples/local_grid.md:205
 msgid "上で実行した最適化の結果は以下のようになります．"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:209
+#: ../../source/examples/local_grid.md:207
 msgid "ハイパパラメータ"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:211
+#: ../../source/examples/local_grid.md:209
 msgid "x1"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:212
+#: ../../source/examples/local_grid.md:210
 msgid "x2"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:213
+#: ../../source/examples/local_grid.md:211
 msgid "x3"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:214
+#: ../../source/examples/local_grid.md:212
 msgid "x4"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:215
+#: ../../source/examples/local_grid.md:213
 msgid "x5"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:217
+#: ../../source/examples/local_grid.md:215
 msgid "評価値"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:219
+#: ../../source/examples/local_grid.md:217
 msgid "Schwefel"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:221
+#: ../../source/examples/local_grid.md:219
 msgid "最適化手法"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:223
+#: ../../source/examples/local_grid.md:221
 msgid "Grid"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:225
+#: ../../source/examples/local_grid.md:223
 msgid "結果比較"
 msgstr ""
 
-#: ../../source/examples/local_grid.md:227
+#: ../../source/examples/local_grid.md:225
 msgid "最適化結果"
 msgstr ""
 

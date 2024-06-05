@@ -20,16 +20,13 @@ jobs:
         run: |
           sphinx-apidoc -f -o docs/source/ ./aiaccel
           cd docs
-          make gettext
-          sphinx-intl update -p build/gettext -l en -l ja
-      - name: Sphinx build
-        run: |
-          sphinx-build docs/source/ _build
+          make html
+          cp index.html build/html/
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/feature/gh-pages' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: _build
+          publish_dir: docs/build/html
           force_orphan: true

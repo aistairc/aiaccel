@@ -20,6 +20,14 @@ aiaccel.cli.plot module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.cli.qrsh\-inherit module
+--------------------------------
+
+.. automodule:: aiaccel.cli.qrsh-inherit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.cli.report module
 -------------------------
 

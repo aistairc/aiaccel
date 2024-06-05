@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-07 12:53+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/api_reference/aiaccel.tensorboard.rst:2
 msgid "aiaccel.tensorboard package"
@@ -29,6 +29,55 @@ msgstr ""
 
 #: ../../source/api_reference/aiaccel.tensorboard.rst:8
 msgid "aiaccel.tensorboard.tensorboard module"
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.module.AbstractModule`"
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard:1 of
+msgid "A class for TensorBoard."
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard
+#: aiaccel.tensorboard.tensorboard.TensorBoard.update of
+msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard:3 of
+msgid "A dictionary containing"
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard:8 of
+msgid "A SummaryWriter object."
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard of
+msgid "type"
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard:10 of
+msgid "SummaryWriter"
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard:14 of
+msgid "A Buffer object."
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard:16 of
+msgid "Buffer"
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard.update:1 of
+msgid "Update TensorBoard."
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard.update of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.tensorboard.tensorboard.TensorBoard.update:5 of
+msgid "None"
 msgstr ""
 
 #: ../../source/api_reference/aiaccel.tensorboard.rst:16
