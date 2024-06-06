@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法 &mdash; aiaccel 1.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=144c8c96"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=4dbe4bdc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="リファレンス(WIP)" href="../references/references.html" />
+    <link rel="prev" title="qsubで実行中の計算ノードでコマンドを実行する方法" href="qrsh-inherit.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qsub-sh">テスト時のqsub.sh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rsync-py">テスト時のrsync.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-py">テスト時のユーザプログラムtest.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">テスト時のコマンド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vi-your-qsub-output-file">テスト時のvi your_qsub_output_fileの表示結果</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../ja/tips/rsync-localdir.html"
+                selected
+            >Japanese</option>
+            <option value="../../en/tips/rsync-localdir.html"
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sge-localdirhomersync">
+<h1>SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法<a class="headerlink" href="#sge-localdirhomersync" title="Link to this heading"></a></h1>
+<p>qsubで実行中の計算ノードの$SGE_LOCALDIRの内容を$HOMEなどに定期的にrsyncする方法を説明します。</p>
+<p>ユーザプログラムが終了した後に、再度1度だけrsyncしています。</p>
+<section id="qsub-sh">
+<h2>テスト時のqsub.sh<a class="headerlink" href="#qsub-sh" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+#$ -l rt_C.small=1
+#$ -l h_rt=1:00:00
+#$ -cwd
+
+source /etc/profile.d/modules.sh
+module load gcc/11.2.0
+module load python/3.8/3.8.13
+
+python3 rsync.py loop &amp;
+python3 test.py
+kill $!
+sleep 1
+python3 rsync.py
+</pre></div>
+</div>
+</section>
+<section id="rsync-py">
+<h2>テスト時のrsync.py<a class="headerlink" href="#rsync-py" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">sleep_time</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">src_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SGE_LOCALDIR&#39;</span><span class="p">]</span>
+<span class="n">dst_dir</span> <span class="o">=</span> <span class="s1">&#39;~/test_rsync_dir&#39;</span>
+<span class="n">proc</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">do_rsync</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">proc</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;exec rsync -avh </span><span class="si">{</span><span class="n">src_dir</span><span class="si">}</span><span class="s1">/ </span><span class="si">{</span><span class="n">dst_dir</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">proc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+
+<span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">handler</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;loop&#39;</span><span class="p">:</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+        <span class="n">do_rsync</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">do_rsync</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="test-py">
+<h2>テスト時のユーザプログラムtest.py<a class="headerlink" href="#test-py" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">sleep_time</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">src_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SGE_LOCALDIR&#39;</span><span class="p">])</span>
+
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">src_path</span><span class="o">/</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">-touch.txt&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>テスト時のコマンド<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">cd</span> <span class="n">your_directory</span>  <span class="c1"># with the above three files</span>
+
+<span class="o">&gt;</span> <span class="n">qsub</span> <span class="o">-</span><span class="n">g</span> <span class="n">your_group_id</span> <span class="n">qsub</span><span class="o">.</span><span class="n">sh</span>
+
+<span class="c1"># After the end</span>
+
+<span class="o">&gt;</span> <span class="n">ls</span> <span class="o">~/</span><span class="n">test_rsync_dir</span>
+<span class="mi">0</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>  <span class="mi">2</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>  <span class="mi">4</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>  <span class="mi">6</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>  <span class="mi">8</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+<span class="mi">1</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>  <span class="mi">3</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>  <span class="mi">5</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>  <span class="mi">7</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>  <span class="mi">9</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="o">&gt;</span> <span class="n">vi</span> <span class="n">your_qsub_output_file</span>
+</pre></div>
+</div>
+</section>
+<section id="vi-your-qsub-output-file">
+<h2>テスト時のvi your_qsub_output_fileの表示結果<a class="headerlink" href="#vi-your-qsub-output-file" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sending</span> <span class="n">incremental</span> <span class="n">file</span> <span class="nb">list</span>
+<span class="n">created</span> <span class="n">directory</span> <span class="o">/</span><span class="n">your_home_directory</span><span class="o">/</span><span class="n">test_rsync_dir</span>
+<span class="o">./</span>
+<span class="mi">0</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+<span class="mi">1</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+<span class="mi">2</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+<span class="mi">3</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="n">sent</span> <span class="mi">347</span> <span class="nb">bytes</span>  <span class="n">received</span> <span class="mi">149</span> <span class="nb">bytes</span>  <span class="mf">992.00</span> <span class="nb">bytes</span><span class="o">/</span><span class="n">sec</span>
+<span class="n">total</span> <span class="n">size</span> <span class="ow">is</span> <span class="mi">0</span>  <span class="n">speedup</span> <span class="ow">is</span> <span class="mf">0.00</span>
+<span class="n">sending</span> <span class="n">incremental</span> <span class="n">file</span> <span class="nb">list</span>
+<span class="o">./</span>
+<span class="mi">4</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+<span class="mi">5</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+<span class="mi">6</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="n">sent</span> <span class="mi">386</span> <span class="nb">bytes</span>  <span class="n">received</span> <span class="mi">76</span> <span class="nb">bytes</span>  <span class="mf">924.00</span> <span class="nb">bytes</span><span class="o">/</span><span class="n">sec</span>
+<span class="n">total</span> <span class="n">size</span> <span class="ow">is</span> <span class="mi">0</span>  <span class="n">speedup</span> <span class="ow">is</span> <span class="mf">0.00</span>
+<span class="n">sending</span> <span class="n">incremental</span> <span class="n">file</span> <span class="nb">list</span>
+<span class="o">./</span>
+<span class="mi">7</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+<span class="mi">8</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+<span class="mi">9</span><span class="o">-</span><span class="n">touch</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="n">sent</span> <span class="mi">464</span> <span class="nb">bytes</span>  <span class="n">received</span> <span class="mi">76</span> <span class="nb">bytes</span>  <span class="mf">360.00</span> <span class="nb">bytes</span><span class="o">/</span><span class="n">sec</span>
+<span class="n">total</span> <span class="n">size</span> <span class="ow">is</span> <span class="mi">0</span>  <span class="n">speedup</span> <span class="ow">is</span> <span class="mf">0.00</span>
+<span class="n">sending</span> <span class="n">incremental</span> <span class="n">file</span> <span class="nb">list</span>
+
+<span class="n">sent</span> <span class="mi">340</span> <span class="nb">bytes</span>  <span class="n">received</span> <span class="mi">12</span> <span class="nb">bytes</span>  <span class="mf">704.00</span> <span class="nb">bytes</span><span class="o">/</span><span class="n">sec</span>
+<span class="n">total</span> <span class="n">size</span> <span class="ow">is</span> <span class="mi">0</span>  <span class="n">speedup</span> <span class="ow">is</span> <span class="mf">0.00</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qrsh-inherit.html" class="btn btn-neutral float-left" title="qsubで実行中の計算ノードでコマンドを実行する方法" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../references/references.html" class="btn btn-neutral float-right" title="リファレンス(WIP)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

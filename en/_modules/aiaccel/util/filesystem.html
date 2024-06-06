@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aiaccel.util.filesystem &mdash; aiaccel 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../../../ja/_modules/aiaccel/util/filesystem.html"
+            >Japanese</option>
+            <option value="../../../../en/_modules/aiaccel/util/filesystem.html"
+                selected
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aiaccel.util.filesystem</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aiaccel.util.filesystem</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">fasteners</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+
+<div class="viewcode-block" id="create_yaml">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.util.html#aiaccel.util.filesystem.create_yaml">[docs]</a>
+<span class="k">def</span> <span class="nf">create_yaml</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a yaml file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (Path): The path of the created yaml file.</span>
+<span class="sd">        content (dict): The content of the created yaml file.</span>
+<span class="sd">        dict_lock (Path | None, optional): The path to store lock files. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dict_lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">fasteners</span><span class="o">.</span><span class="n">InterProcessLock</span><span class="p">(</span><span class="n">interprocess_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">)):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="file_create">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.util.html#aiaccel.util.filesystem.file_create">[docs]</a>
+<span class="k">def</span> <span class="nf">file_create</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a text file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (Path): The path of the created file.</span>
+<span class="sd">        content (str): The content of the created file.</span>
+<span class="sd">        dict_lock (Path | None, optional): The path to store lock files. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dict_lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">fasteners</span><span class="o">.</span><span class="n">InterProcessLock</span><span class="p">(</span><span class="n">interprocess_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">)):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="file_delete">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.util.html#aiaccel.util.filesystem.file_delete">[docs]</a>
+<span class="k">def</span> <span class="nf">file_delete</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete a file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (Path): A deleted file path.</span>
+<span class="sd">        dict_lock (Path | None, optional): A path to store lock files. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">dict_lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">fasteners</span><span class="o">.</span><span class="n">InterProcessLock</span><span class="p">(</span><span class="n">interprocess_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">)):</span>
+                <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="file_read">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.util.html#aiaccel.util.filesystem.file_read">[docs]</a>
+<span class="k">def</span> <span class="nf">file_read</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (Path): A path of reading file.</span>
+<span class="sd">        dict_lock (Path | None, optional): A path to store lock files. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A content of read file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">dict_lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">fasteners</span><span class="o">.</span><span class="n">InterProcessLock</span><span class="p">(</span><span class="n">interprocess_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">)):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+
+<div class="viewcode-block" id="interprocess_lock_file">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.util.html#aiaccel.util.filesystem.interprocess_lock_file">[docs]</a>
+<span class="k">def</span> <span class="nf">interprocess_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a directory of storing lock files.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        path (Path): This base name directory will be created in a dict_lock directory.</span>
+<span class="sd">        dict_lock (Path): A directory to store lock files.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Path: A directory which path and dict_lock is joined.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">dict_lock</span> <span class="o">/</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span></div>
+
+
+
+<div class="viewcode-block" id="load_yaml">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.util.html#aiaccel.util.filesystem.load_yaml">[docs]</a>
+<span class="k">def</span> <span class="nf">load_yaml</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a content of a yaml file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (Path): A path of a yaml file.</span>
+<span class="sd">        dict_lock (Path | None, optional): A directory to store lock files. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A loaded content.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dict_lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">yml</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">UnsafeLoader</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">fasteners</span><span class="o">.</span><span class="n">InterProcessLock</span><span class="p">(</span><span class="n">interprocess_lock_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">)):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">yml</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">UnsafeLoader</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">yml</span></div>
+
+
+
+<div class="viewcode-block" id="make_directory">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.util.html#aiaccel.util.filesystem.make_directory">[docs]</a>
+<span class="k">def</span> <span class="nf">make_directory</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make a directory.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        d (Path): A path of making directory.</span>
+<span class="sd">        dict_lock (Path | None, optional): A directory to store lock files. Defaluts to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dict_lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">fasteners</span><span class="o">.</span><span class="n">InterProcessLock</span><span class="p">(</span><span class="n">interprocess_lock_file</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="make_directories">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.util.html#aiaccel.util.filesystem.make_directories">[docs]</a>
+<span class="k">def</span> <span class="nf">make_directories</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">dict_lock</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make directories.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds (list[Path]): A list of making directories.</span>
+<span class="sd">        dict_lock (Path | None, optional): A directory to store lock files. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dict_lock</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="n">make_directory</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">fasteners</span><span class="o">.</span><span class="n">InterProcessLock</span><span class="p">(</span><span class="n">interprocess_lock_file</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">dict_lock</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">d</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                <span class="n">make_directory</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

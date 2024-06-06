@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aiaccel.optimizer.nelder_mead_optimizer &mdash; aiaccel 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../../../ja/_modules/aiaccel/optimizer/nelder_mead_optimizer.html"
+            >Japanese</option>
+            <option value="../../../../en/_modules/aiaccel/optimizer/nelder_mead_optimizer.html"
+                selected
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aiaccel.optimizer.nelder_mead_optimizer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aiaccel.optimizer.nelder_mead_optimizer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">omegaconf.dictconfig</span> <span class="kn">import</span> <span class="n">DictConfig</span>
+<span class="kn">from</span> <span class="nn">omegaconf.listconfig</span> <span class="kn">import</span> <span class="n">ListConfig</span>
+
+<span class="kn">from</span> <span class="nn">aiaccel.common</span> <span class="kn">import</span> <span class="n">goal_maximize</span>
+<span class="kn">from</span> <span class="nn">aiaccel.config</span> <span class="kn">import</span> <span class="n">is_multi_objective</span>
+<span class="kn">from</span> <span class="nn">aiaccel.converted_parameter</span> <span class="kn">import</span> <span class="n">ConvertedParameterConfiguration</span>
+<span class="kn">from</span> <span class="nn">aiaccel.optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+<span class="kn">from</span> <span class="nn">aiaccel.optimizer._nelder_mead</span> <span class="kn">import</span> <span class="n">NelderMead</span><span class="p">,</span> <span class="n">Vertex</span>
+<span class="kn">from</span> <span class="nn">aiaccel.optimizer.value</span> <span class="kn">import</span> <span class="n">Value</span>
+<span class="kn">from</span> <span class="nn">aiaccel.parameter</span> <span class="kn">import</span> <span class="n">OrdinalParameter</span>
+
+
+<div class="viewcode-block" id="NelderMeadOptimizer">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.optimizer.html#aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer">[docs]</a>
+<span class="k">class</span> <span class="nc">NelderMeadOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An optimizer class with nelder mead algorithm.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (DictConfig): A DictConfig object which contains optimization</span>
+<span class="sd">            settings specified by the configuration file and the command line</span>
+<span class="sd">            options.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        nelder_mead (NelderMead): A class object implementing Nelder-Mead</span>
+<span class="sd">            method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">DictConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span> <span class="n">ConvertedParameterConfiguration</span> <span class="o">=</span> <span class="n">ConvertedParameterConfiguration</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">convert_log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert_int</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert_choices</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">convert_sequence</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get_empty_parameter_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_params</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get_parameter_list</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get_parameter_names</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bdrys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">p</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">upper</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get_parameter_list</span><span class="p">()])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bdrys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">is_multi_objective</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Nelder-Mead optimizer does not support multi-objective optimization.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">single_or_multiple_trial_params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Vertex</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_trial_id_and_vertex_id</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">completed_trial_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="NelderMeadOptimizer.convert_ndarray_to_parameter">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.optimizer.html#aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.convert_ndarray_to_parameter">[docs]</a>
+    <span class="k">def</span> <span class="nf">convert_ndarray_to_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a list of numpy.ndarray to a list of parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ndarray (np.ndarray): A list of numpy.ndarray.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict[str, float | int | str]]: A list of parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_params</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_names</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">new_param</span> <span class="ow">in</span> <span class="n">new_params</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">new_param</span><span class="p">[</span><span class="s2">&quot;parameter_name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                    <span class="n">new_param</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">new_param</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bdrys</span><span class="p">,</span> <span class="n">new_params</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">new_param</span><span class="p">[</span><span class="s2">&quot;out_of_boundary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_param</span><span class="p">[</span><span class="s2">&quot;out_of_boundary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">new_params</span></div>
+
+
+<div class="viewcode-block" id="NelderMeadOptimizer.new_finished">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.optimizer.html#aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.new_finished">[docs]</a>
+    <span class="k">def</span> <span class="nf">new_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get new finished trial ids.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[int]: A list of new finished trial ids.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_finished</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">finished</span><span class="p">)</span> <span class="o">^</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">completed_trial_ids</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_generate_initial_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_parameters</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_of_initials</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get_parameter_list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">initial_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">OrdinalParameter</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">sequence</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="p">)[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_parameters</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">ListConfig</span><span class="p">)):</span>
+            <span class="n">initial_parameters</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">initial_parameters</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">num_of_initials</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_parameters</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">initial_parameters</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">][</span><span class="n">num_of_initials</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="p">)[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">val</span>
+
+<div class="viewcode-block" id="NelderMeadOptimizer.generate_initial_parameter">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.optimizer.html#aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_initial_parameter">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_initial_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate initial parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict[str, float | int | str]] | None: A list of new</span>
+<span class="sd">            parameters. None if `self.nelder_mead` is already defined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_initial_parameters</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">generate_initial_parameter</span><span class="p">()</span>
+        <span class="n">initial_parameters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_generate_initial_parameter</span><span class="p">(</span><span class="n">_initial_parameters</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">num_of_initials</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_params</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="k">for</span> <span class="n">num_of_initials</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;initial_parameters: </span><span class="si">{</span><span class="n">initial_parameters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span> <span class="o">=</span> <span class="n">NelderMead</span><span class="p">(</span><span class="n">initial_parameters</span><span class="o">=</span><span class="n">initial_parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_parameter</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="NelderMeadOptimizer.generate_parameter">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.optimizer.html#aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.generate_parameter">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict[str, float | int | str]] | None: A list of created</span>
+<span class="sd">            parameters.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: Causes when an invalid parameter type is set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">searched_params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Vertex</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead_main</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">searched_param</span> <span class="ow">in</span> <span class="n">searched_params</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">single_or_multiple_trial_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">searched_param</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">single_or_multiple_trial_params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">new_params</span><span class="p">:</span> <span class="n">Vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_or_multiple_trial_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_trial_id_and_vertex_id</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_params</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">new_param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_ndarray_to_parameter</span><span class="p">(</span><span class="n">new_params</span><span class="o">.</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_param</span></div>
+
+
+<div class="viewcode-block" id="NelderMeadOptimizer.run_optimizer">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.optimizer.html#aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.run_optimizer">[docs]</a>
+    <span class="k">def</span> <span class="nf">run_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_params</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_new_parameter</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_boundary</span><span class="p">(</span><span class="n">new_params</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;out of boundary: </span><span class="si">{</span><span class="n">new_params</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">register_new_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_type_by_config</span><span class="p">(</span><span class="n">new_params</span><span class="p">),</span> <span class="n">state</span><span class="o">=</span><span class="s2">&quot;finished&quot;</span><span class="p">)</span>
+                <span class="n">objective</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">goals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">goal_maximize</span><span class="p">:</span>
+                    <span class="n">objective</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set_any_trial_objective</span><span class="p">(</span><span class="n">trial_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="p">[</span><span class="n">objective</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_new_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_type_by_config</span><span class="p">(</span><span class="n">new_params</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NelderMeadOptimizer.out_of_boundary">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.optimizer.html#aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.out_of_boundary">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the parameters are out of boundary.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (list[dict[str, float | int | str]]): A list of parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the parameters are out of boundary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;out_of_boundary&quot;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="NelderMeadOptimizer.nelder_mead_main">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.optimizer.html#aiaccel.optimizer.nelder_mead_optimizer.NelderMeadOptimizer.nelder_mead_main">[docs]</a>
+    <span class="k">def</span> <span class="nf">nelder_mead_main</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Vertex</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Nelder Mead&#39;s main module.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            searched_params (list): Result of optimization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">nm_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">nm_state</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="s2">&quot;initialize_pending&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;reflect_pending&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;expand_pending&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;inside_contract_pending&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;outside_contract_pending&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;shrink_pending&quot;</span><span class="p">,</span>
+        <span class="p">}:</span>
+            <span class="n">new_finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_finished</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_finished</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">get_n_waits</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_finished</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">trial_id</span> <span class="ow">in</span> <span class="n">new_finished</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">completed_trial_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trial_id</span><span class="p">)</span>
+                        <span class="n">vertex_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_trial_id_and_vertex_id</span><span class="p">[</span><span class="n">trial_id</span><span class="p">]</span>
+                        <span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get_any_trial_objective</span><span class="p">(</span><span class="n">trial_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">goals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">goal_maximize</span><span class="p">:</span>
+                            <span class="n">objective</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span>
+                        <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Value</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">vertex_id</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">objective</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;initialize_pending&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">after_initialize</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;shrink_pending&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">aftter_shrink</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_finished</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">trial_id</span> <span class="o">=</span> <span class="n">new_finished</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">vertex_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_trial_id_and_vertex_id</span><span class="p">[</span><span class="n">trial_id</span><span class="p">]</span>
+                    <span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get_any_trial_objective</span><span class="p">(</span><span class="n">trial_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">goals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">goal_maximize</span><span class="p">:</span>
+                        <span class="n">objective</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">Value</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">vertex_id</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">objective</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">completed_trial_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trial_id</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;reflect_pending&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">after_reflect</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;expand_pending&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">after_expand</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;inside_contract_pending&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">after_inside_contract</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;outside_contract_pending&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">after_outside_contract</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;initialize&quot;</span><span class="p">:</span>
+            <span class="o">...</span>
+        <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;reflect&quot;</span><span class="p">:</span>
+            <span class="o">...</span>
+        <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;expand&quot;</span><span class="p">:</span>
+            <span class="o">...</span>
+        <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;inside_contract&quot;</span><span class="p">:</span>
+            <span class="o">...</span>
+        <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;outside_contract&quot;</span><span class="p">:</span>
+            <span class="o">...</span>
+        <span class="k">elif</span> <span class="n">nm_state</span> <span class="o">==</span> <span class="s2">&quot;shrink&quot;</span><span class="p">:</span>
+            <span class="o">...</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid state: </span><span class="si">{</span><span class="n">nm_state</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># not reachable</span>
+        <span class="n">searched_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nelder_mead</span><span class="o">.</span><span class="n">search</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">searched_params</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

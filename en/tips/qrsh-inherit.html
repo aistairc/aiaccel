@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsubで実行中の計算ノードでコマンドを実行する方法 &mdash; aiaccel 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法" href="rsync-localdir.html" />
+    <link rel="prev" title="Issues" href="../contribution_guide/contribution_guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">qsubで実行中の計算ノードでコマンドを実行する方法</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qsub-sh">テスト時のqsub.sh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">テスト時のコマンド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bin-bashshell">/bin/bashなどのshellの場合の注意事項</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../ja/tips/qrsh-inherit.html"
+            >Japanese</option>
+            <option value="../../en/tips/qrsh-inherit.html"
+                selected
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">qsubで実行中の計算ノードでコマンドを実行する方法</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsub">
+<h1>qsubで実行中の計算ノードでコマンドを実行する方法<a class="headerlink" href="#qsub" title="Link to this heading"></a></h1>
+<p>qsubで実行中の計算ノードでコマンドを実行する方法を説明します。</p>
+<p>参照資料<br>
+<a class="reference external" href="https://github.com/aistairc/abci-docs/issues/246">インタラクティブノードからのqrsh -inherit</a></p>
+<section id="qsub-sh">
+<h2>テスト時のqsub.sh<a class="headerlink" href="#qsub-sh" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1">#$ -l rt_C.small=1</span>
+<span class="c1">#$ -l h_rt=1:00:00</span>
+<span class="c1">#$ -cwd</span>
+
+<span class="n">sleep</span> <span class="mi">3600</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h2>テスト時のコマンド<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">qsub</span> <span class="o">-</span><span class="n">g</span> <span class="n">your_group_id</span> <span class="n">qsub</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">Your</span> <span class="n">job</span> <span class="mi">10607396</span> <span class="p">(</span><span class="s2">&quot;qsub.sh&quot;</span><span class="p">)</span> <span class="n">has</span> <span class="n">been</span> <span class="n">submitted</span>
+
+<span class="o">&gt;</span> <span class="n">qstat</span>  <span class="c1"># with some omissions</span>
+<span class="n">job</span><span class="o">-</span><span class="n">ID</span>    <span class="n">prior</span>  <span class="n">name</span>     <span class="n">user</span>  <span class="n">state</span>  <span class="n">submit</span><span class="o">/</span><span class="n">start</span> <span class="n">at</span>  <span class="n">queue</span>
+<span class="mi">10608572</span>  <span class="n">prior</span>  <span class="n">qsub</span><span class="o">.</span><span class="n">sh</span>  <span class="n">user</span>  <span class="n">r</span>      <span class="n">submit</span><span class="o">/</span><span class="n">start</span> <span class="n">at</span>  <span class="n">gpu</span><span class="nd">@g0001</span>
+
+<span class="o">&gt;</span> <span class="n">JOB_ID</span><span class="o">=</span><span class="mi">10608572</span> <span class="n">SGE_TASK_ID</span><span class="o">=</span><span class="n">undefined</span> <span class="n">qrsh</span> <span class="o">-</span><span class="n">inherit</span> <span class="n">g0001</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+<p>promptが表示されませんが、例えば、</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">ls</span>
+</pre></div>
+</div>
+<p>とコマンドを入力すると、結果が出力されます。</p>
+<p>終了時は必ず</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">exit</span>
+</pre></div>
+</div>
+</section>
+<section id="bin-bashshell">
+<h2>/bin/bashなどのshellの場合の注意事項<a class="headerlink" href="#bin-bashshell" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>キーボードからのControl-Cで、job自体の実行が停止されるようです。<br>
+そのため、終了には、exitコマンドを使用して下さい。</p></li>
+<li><p>コマンドプロンプトが出ないようです。<br>
+違和感が有りますが、コマンド-Enterでコマンドを実行できます。</p></li>
+<li><p>使用できないコマンド、出力が通常と違うコマンドが有ります。</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../contribution_guide/contribution_guide.html" class="btn btn-neutral float-left" title="Issues" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rsync-localdir.html" class="btn btn-neutral float-right" title="SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

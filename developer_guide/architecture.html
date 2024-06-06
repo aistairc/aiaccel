@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aiaccelの概要 &mdash; aiaccel 1.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=144c8c96"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=4dbe4bdc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="カスタムオプティマイザー作成ガイド" href="custom_optimizer.html" />
+    <link rel="prev" title="コンフィグレーションの設定ガイド (WIP)" href="../user_guide/configuration_setting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">aiaccelの概要</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">aiaccelの入出力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">aiaccelの構成モジュール</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">aiaccelの処理フロー</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#start-py">start.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optimizer">2. Optimizer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#randomoptimizer">RandomOptimizerの例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manager">3. Manager</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../ja/developer_guide/architecture.html"
+                selected
+            >Japanese</option>
+            <option value="../../en/developer_guide/architecture.html"
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">aiaccelの概要</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aiaccel">
+<h1>aiaccelの概要<a class="headerlink" href="#aiaccel" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">aiaccel</span></code> は，最適なハイパパラメータの組み合わせを見つけ出すハイパパラメータ最適化ライブラリです．
+<code class="docutils literal notranslate"><span class="pre">aiaccel</span></code> は，<code class="docutils literal notranslate"><span class="pre">ABCI</span></code>のインタラクティブノード上で実行することを想定しています．
+<code class="docutils literal notranslate"><span class="pre">ABCI</span></code>については，<a class="reference external" href="https://docs.abci.ai/ja/">ABCI User Guide</a>を参照ください．</p>
+<p>また，ローカル環境でも利用可能です．</p>
+<p><code class="docutils literal notranslate"><span class="pre">aiaccel</span></code> は，内部状態や最適化結果をデータベースで管理します．最適化対象のプログラム(ここでは <code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code>と呼称)の実行タスクを <code class="docutils literal notranslate"><span class="pre">ABCI</span></code> の計算ノードに渡し，結果をデータベースに保存します．</p>
+<p><img alt="aiaccel_system" src="../_images/aiaccel_system.png" /></p>
+<section id="id1">
+<h2>aiaccelの入出力<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p><img alt="aiaccel_input_output" src="../_images/aiaccel_input_output.png" /></p>
+<ul class="simple">
+<li><p>入力</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Config</span></code> - コンフィグレーションファイルです．最適化のパラメータの設定，最適化アルゴリズムの設定，最適化対象(<code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code>)等を記述します．コンフィグレーションファイルは，<code class="docutils literal notranslate"><span class="pre">Yaml</span></code> または <code class="docutils literal notranslate"><span class="pre">JSON</span></code> 形式で記述します.
+<br></p>
+<ul>
+<li><p>例：<code class="docutils literal notranslate"><span class="pre">examples/sphere/config.yaml</span></code> を参照ください．</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code> - 最適化対象のプログラムです．<br></p>
+<ul>
+<li><p>例： <code class="docutils literal notranslate"><span class="pre">examples/sphere/user.py</span></code> を参照ください．</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Job</span> <span class="pre">Script</span></code> - ジョブスクリプトファイルです．
+ジョブスクリプトファイルは，<code class="docutils literal notranslate"><span class="pre">ABCI</span></code> で実行するジョブを記述します．
+<code class="docutils literal notranslate"><span class="pre">aiaccel</span></code> は，指定したジョブスクリプトファイルを元に，新たにジョブスクリプトファイルを生成します．ここで指定するジョブスクリプトは，<code class="docutils literal notranslate"><span class="pre">load</span> <span class="pre">module</span></code> などの事前処理を記述します．</p>
+<ul>
+<li><p>例： <code class="docutils literal notranslate"><span class="pre">examples/sphere/job_script_preamble.sh</span></code> を参照ください．</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>出力</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Work</span> <span class="pre">Directory</span></code> - <code class="docutils literal notranslate"><span class="pre">aiaccel</span></code> 実行時に生成されるワークディレクトリです(以下，<code class="docutils literal notranslate"><span class="pre">work</span></code> と記述します)．
+<code class="docutils literal notranslate"><span class="pre">work</span></code> はコンフィグレーションファイルで指定したパスに生成されます．既に同名のディレクトリが存在する場合は実行を中止します．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Result</span> <span class="pre">Directory</span></code> - 実行結果を保存します．過去の実行結果は全てここに保存されます．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Database</span></code> - aiaccelの内部状態の管理・実行結果を保存するデータベースです．
+<code class="docutils literal notranslate"><span class="pre">work/storage/storage.db</span></code> に生成されます．
+データベースは <code class="docutils literal notranslate"><span class="pre">sqlite3</span></code> を採用しています．</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h2>aiaccelの構成モジュール<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p><img alt="aiaccel_overview" src="../_images/aiaccel_modules.png" /></p>
+<ul class="simple">
+<li><p>Optimizer</p>
+<ul>
+<li><p>最適化アルゴリズム</p>
+<ul>
+<li><p>grid search</p></li>
+<li><p>random</p></li>
+<li><p>sobol sequence</p></li>
+<li><p>nelder-mead</p></li>
+<li><p>tpe</p></li>
+<li><p>mo-tpe</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Manager</p>
+<ul>
+<li><p>ジョブスケジューラ．<code class="docutils literal notranslate"><span class="pre">Optimizer</span></code> が生成したハイパパラメータを元にジョブを生成し，計算ノードにジョブを投入します．</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>aiaccelの処理フロー<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p><img alt="aiaccel_flow" src="../_images/aiaccel_flow.png" /></p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">aiaccel-start</span></code>コマンドからコンフィグレーションファイルのパスを入力として指定して実行します．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">start.py</span></code>がコンフィグレーションファイルをロードし，<code class="docutils literal notranslate"><span class="pre">Optimizer</span></code> と <code class="docutils literal notranslate"><span class="pre">Manager</span></code> を生成します．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Optimizer</span></code> はコンフィグレーションファイルからハイパパラメータの情報を読み込み，最適化アルゴリズムに基づきハイパパラメータを生成し <code class="docutils literal notranslate"><span class="pre">Database</span></code> に保存します．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Manager</span></code> は <code class="docutils literal notranslate"><span class="pre">Database</span></code> から新しいハイパパラメータを読み込み，コンフィグレーションファイルに基づき指定の計算ノードで <code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code> を実行するジョブスクリプトファイルを生成し，計算ノードにジョブを投入します．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code> の処理が終了すると，<code class="docutils literal notranslate"><span class="pre">aiaccel</span></code> が <code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code> の結果を <code class="docutils literal notranslate"><span class="pre">Database</span></code> に保存します．</p></li>
+<li><p>3-5 の一連の処理をトライアルと言います．コンフィグレーションファイルで指定したトライアル数に到達するまで繰り返し実行します．</p></li>
+<li><p>全てのトライアルが完了すると <code class="docutils literal notranslate"><span class="pre">aiaccel</span></code> は停止します．</p></li>
+</ol>
+</section>
+<section id="start-py">
+<h2>start.py<a class="headerlink" href="#start-py" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">aiaccel</span></code> は <code class="docutils literal notranslate"><span class="pre">aiaccel-start</span></code> コマンドで実行を開始します． <code class="docutils literal notranslate"><span class="pre">aiaccel-start</span></code>は，<code class="docutils literal notranslate"><span class="pre">aiaccel/cli/start.py</span></code> を実行します．</p>
+<p><code class="docutils literal notranslate"><span class="pre">Optimizer</span></code>，<code class="docutils literal notranslate"><span class="pre">Manager</span></code>，の初期化は以下のコードで行われます．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="n">Optimizer</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">Manager</span> <span class="o">=</span> <span class="n">create_manager</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>初期化されたモジュールは，以下のコードで実行されます.
+<code class="docutils literal notranslate"><span class="pre">pre_process()</span></code> で初期化し，<code class="docutils literal notranslate"><span class="pre">inner_loop_main_process()</span></code> でメインループでの処理を実行し，<code class="docutils literal notranslate"><span class="pre">post_process()</span></code> で終了処理を行います．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="n">modules</span> <span class="o">=</span> <span class="p">[</span><span class="n">Optimizer</span><span class="p">,</span> <span class="n">Manager</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">:</span>
+        <span class="n">module</span><span class="o">.</span><span class="n">pre_process</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">module</span><span class="o">.</span><span class="n">inner_loop_main_process</span><span class="p">():</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">module</span><span class="o">.</span><span class="n">check_error</span><span class="p">():</span>
+                <span class="k">break</span>
+            <span class="n">module</span><span class="o">.</span><span class="n">loop_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">break</span>
+
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">:</span>
+        <span class="n">module</span><span class="o">.</span><span class="n">post_process</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="optimizer">
+<h2>2. Optimizer<a class="headerlink" href="#optimizer" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Optuiizer</span></code> クラスは，<code class="docutils literal notranslate"><span class="pre">aiaccel/module.py</span></code> の <code class="docutils literal notranslate"><span class="pre">AbstractModule</span></code> クラスを継承しています．
+<code class="docutils literal notranslate"><span class="pre">Optimize</span></code> は <code class="docutils literal notranslate"><span class="pre">create_optimizer()</span></code> で初期化されます．
+コンフィグレーションファイルで設定した最適化アルゴリズムが読み込まれます．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Optimizer</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>最適化アルゴリズム</p>
+<ul>
+<li><p>grid search</p></li>
+<li><p>random</p></li>
+<li><p>sobol sequence</p></li>
+<li><p>nelder-mead</p></li>
+<li><p>tpe</p></li>
+<li><p>mo-tpe</p></li>
+</ul>
+</li>
+</ul>
+<section id="randomoptimizer">
+<h3>RandomOptimizerの例<a class="headerlink" href="#randomoptimizer" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">RandomOptimizer</span></code> は，<code class="docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code>クラスを継承し，<code class="docutils literal notranslate"><span class="pre">generate_parameter()</span></code>メソッドをオーバーライドしています．
+<code class="docutils literal notranslate"><span class="pre">generate_parameter()</span></code> は，最適化アルゴリズム毎にオーバーライドし，固有の処理を記述します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">generate_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict[str, float | int | str]]: A list of created parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="p">):</span>
+            <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;parameter_name&quot;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">],</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]})</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">to_original_repr</span><span class="p">(</span><span class="n">new_params</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="manager">
+<h3>3. Manager<a class="headerlink" href="#manager" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Manager</span></code> クラスは，<code class="docutils literal notranslate"><span class="pre">aiaccel/module.py</span></code> の <code class="docutils literal notranslate"><span class="pre">AbstractModule</span></code> クラスを継承しています．
+<code class="docutils literal notranslate"><span class="pre">Manager</span></code> は <code class="docutils literal notranslate"><span class="pre">create_manager()</span></code> で初期化されます．
+コンフィグレーションファイルで設定したジョブスケジューラが読み込まれます．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Manager</span> <span class="o">=</span> <span class="n">create_manager</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>ジョブスケジューラ</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ABCI</span></code> - <code class="docutils literal notranslate"><span class="pre">ABCI</span></code>での実行</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Local</span></code> - ローカル環境での実行．このモードではスケジューラとしての機能はなく，<code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code> を直接実行します．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Python_Local</span></code> - <code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code> が <code class="docutils literal notranslate"><span class="pre">Python</span></code> ファイルである時に指定可能なモードです．このモードではスケジューラとしての機能はなく，<code class="docutils literal notranslate"><span class="pre">User</span> <span class="pre">Program</span></code> を直接実行します．</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../user_guide/configuration_setting.html" class="btn btn-neutral float-left" title="コンフィグレーションの設定ガイド (WIP)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="custom_optimizer.html" class="btn btn-neutral float-right" title="カスタムオプティマイザー作成ガイド" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

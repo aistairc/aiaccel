@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Issues &mdash; aiaccel 1.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=144c8c96"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=4dbe4bdc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="qsubで実行中の計算ノードでコマンドを実行する方法" href="../tips/qrsh-inherit.html" />
+    <link rel="prev" title="カスタムオプティマイザー作成ガイド" href="../developer_guide/custom_optimizer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Issues</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bug-report">バグの報告 (Bug report)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-request">機能リクエスト (Feature request)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#pull-request">Pull request</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">手順</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">初めて開発に参加する場合</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">開発</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">投稿</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">レビュープロセス</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#wip">ドキュメンテーション (WIP)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#docstrings">docstrings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">ドキュメント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">レンダリングの確認</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#id8">テスト</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id9">テストの追加</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">テストの実行 (WIP)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">追加コードに対するカバレッジ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id12">カバレッジの測定</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#id13">コーディング規約</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id14">基本的なルール</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id15">Docstrings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../ja/contribution_guide/contribution_guide.html"
+                selected
+            >Japanese</option>
+            <option value="../../en/contribution_guide/contribution_guide.html"
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Issues</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="issues">
+<h1>Issues<a class="headerlink" href="#issues" title="Link to this heading"></a></h1>
+<p>問題を発見した場合や追加機能の要望がある場合，すでに同様の issue が投稿されていないかの確認をお願いします．
+同様のテーマが話し合われていない場合，新しい issue を作成してください．</p>
+<section id="bug-report">
+<h2>バグの報告 (Bug report)<a class="headerlink" href="#bug-report" title="Link to this heading"></a></h2>
+<p>バグの報告では，以下の内容についての明確かつ簡潔な説明を含めてください．</p>
+<ul class="simple">
+<li><p>バグの内容</p></li>
+<li><p>バグを再現する手順</p></li>
+<li><p>あなたが起こると期待したこと</p></li>
+<li><p>実行環境</p></li>
+</ul>
+</section>
+<section id="feature-request">
+<h2>機能リクエスト (Feature request)<a class="headerlink" href="#feature-request" title="Link to this heading"></a></h2>
+<p>機能リクエストを行う際には，以下の内容についての明確かつ簡潔な説明を含めることを推奨します．</p>
+<ul class="simple">
+<li><p>バグが関連する場合，バグの内容</p></li>
+<li><p>実現したい機能の説明</p></li>
+<li><p>検討した実装の説明</p></li>
+</ul>
+</section>
+</section>
+<section id="pull-request">
+<h1>Pull request<a class="headerlink" href="#pull-request" title="Link to this heading"></a></h1>
+<p>aiaccel のコードを修正しリポジトリに反映して欲しい場合，pull request を実行してください．
+Pull request を行う際には，以下に注意してください．</p>
+<section id="id1">
+<h2>手順<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="id2">
+<h3>初めて開発に参加する場合<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul>
+<li><p>まず，GitHub 上で aiaccel をフォークします．</p></li>
+<li><p>フォークした後，aiaccel のリポジトリを clone します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/<span class="o">[</span>YOUR<span class="w"> </span>USERNAME<span class="o">]</span>/aiaccel.git
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h3>開発<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ul>
+<li><p>ローカルのリポジトリを最新の状態に更新します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>main
+git<span class="w"> </span>pull<span class="w"> </span>upstream<span class="w"> </span>main
+</pre></div>
+</div>
+</li>
+<li><p>ブランチを作成します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/add-new-feature
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">add</span></code> および <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code> を使用し，進行に合わせてローカルでコミットします．</p>
+<ul class="simple">
+<li><p>コミットメッセージでは，変更の動機，バグの性質，または拡張機能の詳細を説明します．</p></li>
+<li><p>メッセージは，コードを見なくても内容を理解できるように記述する必要があります．</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h3>投稿<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p><em>Pull request を行う前に，以下を確認してください</em>：</p>
+<ul class="simple">
+<li><p>事前に issue などで他の開発者と議論したか？</p></li>
+<li><p>MIT ライセンスで配布できるか？</p></li>
+<li><p>適切な<a class="reference internal" href="#%E3%83%86%E3%82%B9%E3%83%88"><span class="xref myst">ユニットテスト</span></a>は存在するか？</p></li>
+<li><p><a class="reference internal" href="#%E3%83%86%E3%82%B9%E3%83%88"><span class="xref myst">ユニットテスト</span></a>をローカル環境で実行できたか？</p></li>
+<li><p>パブリックな関数は docstring を持っているか？</p></li>
+<li><p><a class="reference internal" href="#%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3-wip"><span class="xref myst">ドキュメンテーション</span></a>は正しくレンダリングされるか？</p></li>
+<li><p><a class="reference internal" href="#%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E8%A6%8F%E7%B4%84"><span class="xref myst">コーディングスタイル</span></a>は適切か？</p></li>
+<li><p>コミットメッセージは適切か？</p></li>
+<li><p>大規模な追加の場合，例 (docs/source/examples) やモジュールレベルの説明はあるか？</p></li>
+<li><p>コンパイル済みのコードを追加する場合，setup.py を変更したか？</p></li>
+</ul>
+<p><em>上記を確認した後</em>:</p>
+<ul>
+<li><p>GitHub 上のフォークに変更をプッシュします．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/add-new-optimizer
+</pre></div>
+</div>
+</li>
+<li><p>GitHub のユーザーネームとパスワードを入力します．</p></li>
+<li><p>GitHub に移動します．以下に注意しながらタイトルとメッセージを記述します．</p>
+<ul class="simple">
+<li><p><strong>タイトル</strong></p>
+<ul>
+<li><p>変更を反映した簡単な説明を行うこと．</p></li>
+<li><p>コードはバックフォートでラップすること．</p></li>
+<li><p>ピリオドで終了しないこと．</p></li>
+</ul>
+</li>
+<li><p><strong>説明</strong></p>
+<ul>
+<li><p>動機を書くこと．</p></li>
+<li><p>変更点を書くこと．</p></li>
+<li><p>関連する issue を閉じることができる場合，<code class="docutils literal notranslate"><span class="pre">Close</span> <span class="pre">#N</span></code> で issue を閉じること．</p></li>
+<li><p>作業が進行中 (work-in-progress) であるなら，残りのタスクを書くこと．</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pull request を送信します．</p></li>
+</ul>
+</section>
+</section>
+<section id="id5">
+<h2>レビュープロセス<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>他の開発者は，pull request の実装，ドキュメント，コーディングスタイルを改善するためのコメントを投稿します．</p></li>
+<li><p>Pull request したコードの更新を行う際は，ローカルリポジトリで変更をコミットし，ローカル環境でのテストが成功した場合にのみフォークへプッシュします．</p></li>
+<li><p>aiaccel の開発チームのメンバー 1 人以上が pull request を検証し，承認された場合に main ブランチへマージされます．</p></li>
+</ul>
+</section>
+</section>
+<section id="wip">
+<h1>ドキュメンテーション (WIP)<a class="headerlink" href="#wip" title="Link to this heading"></a></h1>
+<section id="docstrings">
+<h2>docstrings<a class="headerlink" href="#docstrings" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>実装した関数の基本的な説明，パラメータや返却値の型と意味，使用例を docstrings として記述します．</p></li>
+<li><p><a class="reference external" href="https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings">Google Python Style Guide</a> に準拠する形で記述してください．</p></li>
+<li><p><a class="reference internal" href="#%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E8%A6%8F%E7%B4%84"><span class="xref myst">コーディング規約</span></a> も参考にしてください．</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2>ドキュメント<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>ドキュメントのソースファイルは docs の下のディレクトリに作成します．</p></li>
+<li><p>ドキュメントのファイル形式はマークダウン形式を推奨しています．</p></li>
+<li><p>大規模な機能の追加があった場合，ドキュメントを作成してください．</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>レンダリングの確認<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<p>ドキュメントの追加や変更・修正があった場合には，ローカル環境でレンダリングが正常に行われるかを確認してください．</p>
+<p>API リファレンスの生成を行うには，aiaccel に移動し，以下のコマンドを実行します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>aiaccel
+sphinx-apidoc<span class="w"> </span>-f<span class="w"> </span>-o<span class="w"> </span>docs/source/api_reference<span class="w"> </span>aiaccel
+</pre></div>
+</div>
+<p>ドキュメンテーションのレンダリングを確認するには，aiaccel/docs に移動し，HTML ファイルのビルドを行います．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>docs
+make<span class="w"> </span>html
+</pre></div>
+</div>
+<p>ビルドされた HTML 形式のファイルは docs/build/html の下に生成されます．</p>
+<p>多言語ドキュメントの生成を行うには，aiaccel/docs で以下のコマンドを実行します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>gettext
+sphinx-intl<span class="w"> </span>update<span class="w"> </span>-p<span class="w"> </span>build/gettext<span class="w"> </span>-l<span class="w"> </span>en<span class="w"> </span>-l<span class="w"> </span>ja
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id8">
+<h1>テスト<a class="headerlink" href="#id8" title="Link to this heading"></a></h1>
+<section id="id9">
+<h2>テストの追加<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>aiaccel では pytest を用いてテストを行います．</p></li>
+<li><p>ユニットテストは tests の下のディレクトリに作成します．</p>
+<ul>
+<li><p>aiaccel/tests/unit 以下のディレクトリ構造は，config.py などの一部のモジュールを除いて，aiaccel/aiaccel 以下の構造に対応します． 例えば，aiaccel/aiaccel/optimizer/abstract_optimizer.py のテストは aiaccel/tests/unit/optimzier_test/test_abstract_optimizer.py です．</p></li>
+</ul>
+</li>
+<li><p>新たな機能の追加，またはバグの修正を行った場合，テストコードを作成してください．</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2>テストの実行 (WIP)<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
+<p>ローカル環境ですべてのテストコードを実行するには，aiaccel に移動し，以下のコマンドを実行します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>aiaccel
+pytest
+</pre></div>
+</div>
+<p>特定のテストコードのみを実行したい場合には，ファイル名を引数として指定します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>tests/unit/optimizer_test/test_abstract_optimizer.py
+</pre></div>
+</div>
+<p>さらに，コーディングスタイルのチェックを行うため，以下のコマンドを実行します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pycodestyle<span class="w"> </span>aiaccel<span class="w"> </span>examples
+flake8<span class="w"> </span>aiaccel<span class="w"> </span>examples<span class="w"> </span>
+</pre></div>
+</div>
+</section>
+<section id="id11">
+<h2>追加コードに対するカバレッジ<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<p>コードカバレッジの厳密な基準は設定されていませんが，テストを設計する際にはこの値を十分に考慮します．
+特に，以下のような場合は注意が必要です．</p>
+<ul class="simple">
+<li><p>全体的なスコアが大幅に低下する場合．</p></li>
+<li><p>あるクラスやモジュールのカバレッジが異常に低い場合．</p></li>
+<li><p>テストが if 文の特定の分岐をカバーしていない場合．</p></li>
+</ul>
+<section id="id12">
+<h3>カバレッジの測定<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<p>C0 カバレッジを測定するには，オプション <code class="docutils literal notranslate"><span class="pre">--cov</span></code> を使用して pytest を実行します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>--cov<span class="o">=</span>aiaccel
+</pre></div>
+</div>
+<p>特定のテストコードのみのカバレッジを測定するには，aiaccel の部分を適切なパスに置き換えます．</p>
+<p>C1 カバレッジを測定するには，オプション <code class="docutils literal notranslate"><span class="pre">--cov</span></code> に加えて <code class="docutils literal notranslate"><span class="pre">--cov-branch</span></code> を使用して pytest を実行します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>--cov<span class="o">=</span>aiaccel<span class="w"> </span>--cov-branch
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id13">
+<h1>コーディング規約<a class="headerlink" href="#id13" title="Link to this heading"></a></h1>
+<section id="id14">
+<h2>基本的なルール<a class="headerlink" href="#id14" title="Link to this heading"></a></h2>
+<ul>
+<li><p>aiaccel のソースコードは Python で作成します．</p></li>
+<li><p>コーディングスタイルは PEP8 に従います．</p>
+<ul class="simple">
+<li><p>aiaccel では pycodestyle と flake8 を用いてコーディングスタイルの検証を行います．</p></li>
+</ul>
+  <!-- - オートフォーマッタとして pylint や black の使用を推奨しています． -->
+<ul class="simple">
+<li><p>下記の Docstrings についても確認してください．</p></li>
+</ul>
+</li>
+<li><p>aiaccel では型ヒントの検証は行いませんが，できる限り型ヒントを記述してください．</p>
+<ul class="simple">
+<li><p>aiaccel ではバージョン 3.8 の Python をサポートするため，ビルトインな &quot;<code class="docutils literal notranslate"><span class="pre">list</span></code>&quot; などを型ヒントに使用する際は，future-import を行ってください．</p></li>
+</ul>
+</li>
+<li><p>ランダムな値の生成には <a class="reference external" href="https://numpy.org/doc/1.16/reference/generated/numpy.random.RandomState.html"><code class="docutils literal notranslate"><span class="pre">numpy.random.RandomState</span></code></a> を使用して下さい．これは aiaccel が利用しているライブラリ <a class="reference external" href="https://github.com/optuna/optuna">optuna</a> との互換性を保つためです．</p></li>
+</ul>
+</section>
+<section id="id15">
+<h2>Docstrings<a class="headerlink" href="#id15" title="Link to this heading"></a></h2>
+<p>基本的には <a class="reference external" href="https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings">Google Python Style Guide</a> に準拠する形で docstrings を記述します．
+ただし，以下の例外についても注意してください．</p>
+<ul class="simple">
+<li><p>各モジュールの docstrings は必須ではありません．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Args:</span></code> セクションでは，パラメータ名の後ろにパラメータの型を括弧で括って記述します．</p></li>
+<li><p>必要に応じて <code class="docutils literal notranslate"><span class="pre">Example:</span></code> セクションを追加します．</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__init__</span></code> メソッドはクラスの docstring に含めます．<code class="docutils literal notranslate"><span class="pre">__init__</span></code> メソッドには記述しません．</p></li>
+<li><p>Python オブジェクトへのリンクは <em>sphinx-style</em> なリンクを使用します.</p></li>
+<li><p>エディタとして vscode を利用する場合，<a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=njpwerner.autodocstring">autoDocstring</a> が docstring 生成の役に立ちます．</p></li>
+</ul>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ExampleClass</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Summary of class.</span>
+
+<span class="sd">    There can be additional description(s) of this class.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (type_of_param1): Description of `param1` which</span>
+<span class="sd">            is given when __init__ method is called.</span>
+<span class="sd">        param2 (type_of_param2): Description of `param2`.</span>
+
+<span class="sd">    Attributions:</span>
+<span class="sd">        param1 (type_of_param1): Description of `param1`.</span>
+<span class="sd">        param2 (type_of_param2): Description of `param2`.</span>
+<span class="sd">        param3 (type_of_param3): Description of &#39;param3`. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param1</span><span class="p">:</span> <span class="n">type_of_param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">:</span> <span class="n">type_of_param2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param1</span> <span class="o">=</span> <span class="n">param1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param2</span> <span class="o">=</span> <span class="n">param2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param3</span> <span class="o">=</span> <span class="n">generate_param3</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg1</span><span class="p">:</span> <span class="n">type_of_arg1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">type_of_return</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recieves `type_of_arg1` object and returns return_of_method. </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            arg1 (type_of_arg1): Description of `arg1`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            type_of_return: Description of return value. If this method</span>
+<span class="sd">            returns nothing, this section can be omitted.</span>
+<span class="sd">        </span>
+<span class="sd">        Raise:</span>
+<span class="sd">            TypeOfException: Description of Exception.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+        <span class="k">return</span> <span class="n">return_of_method</span>
+
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../developer_guide/custom_optimizer.html" class="btn btn-neutral float-left" title="カスタムオプティマイザー作成ガイド" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tips/qrsh-inherit.html" class="btn btn-neutral float-right" title="qsubで実行中の計算ノードでコマンドを実行する方法" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aiaccel.manager.abstract_manager &mdash; aiaccel 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../../../ja/_modules/aiaccel/manager/abstract_manager.html"
+            >Japanese</option>
+            <option value="../../../../en/_modules/aiaccel/manager/abstract_manager.html"
+                selected
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aiaccel.manager.abstract_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aiaccel.manager.abstract_manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span> <span class="nn">omegaconf.dictconfig</span> <span class="kn">import</span> <span class="n">DictConfig</span>
+
+<span class="kn">from</span> <span class="nn">aiaccel.manager.job.job</span> <span class="kn">import</span> <span class="n">Job</span>
+<span class="kn">from</span> <span class="nn">aiaccel.manager.job.model.local_model</span> <span class="kn">import</span> <span class="n">LocalModel</span>
+<span class="kn">from</span> <span class="nn">aiaccel.module</span> <span class="kn">import</span> <span class="n">AbstractModule</span>
+<span class="kn">from</span> <span class="nn">aiaccel.optimizer.abstract_optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+<span class="kn">from</span> <span class="nn">aiaccel.util</span> <span class="kn">import</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">create_yaml</span>
+
+
+<div class="viewcode-block" id="AbstractManager">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager">[docs]</a>
+<span class="k">class</span> <span class="nc">AbstractManager</span><span class="p">(</span><span class="n">AbstractModule</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An abstract class for AbciManager and LocalManager.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        options (dict[str, str | int | bool]): A dictionary containing</span>
+<span class="sd">            command line options.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        optimizer (AbstractOptimizer): An optimizer object.</span>
+<span class="sd">        num_workers (int): The number of workers.</span>
+<span class="sd">        trial_number (int): The maximum number of trials.</span>
+<span class="sd">        stats (list[Any]): A list of statistics.</span>
+<span class="sd">        jobs (list[Any]): A list of jobs.</span>
+<span class="sd">        job_status (dict[Any, Any]): A dictionary of job status.</span>
+<span class="sd">        start_trial_id (int): The start trial id.</span>
+<span class="sd">        buff (Buffer): A buffer object.</span>
+<span class="sd">        job_completed_count (int): The number of completed jobs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">DictConfig</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">:</span> <span class="n">AbstractOptimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;manager&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_logger</span><span class="p">(</span>
+            <span class="n">logger_name</span><span class="o">=</span><span class="s2">&quot;root.manager&quot;</span><span class="p">,</span>
+            <span class="n">logfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">log</span> <span class="o">/</span> <span class="s2">&quot;manager.log&quot;</span><span class="p">,</span>
+            <span class="n">file_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">generic</span><span class="o">.</span><span class="n">logging_level</span><span class="p">,</span>
+            <span class="n">stream_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">generic</span><span class="o">.</span><span class="n">logging_level</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">num_workers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">trial_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">job_status</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_trial_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resume</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resume</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buff</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">([</span><span class="n">trial_id</span> <span class="k">for</span> <span class="n">trial_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_trial_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span><span class="p">)])</span>
+        <span class="k">for</span> <span class="n">trial_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_trial_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="n">trial_id</span><span class="p">]</span><span class="o">.</span><span class="n">set_max_len</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">job_completed_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="AbstractManager.start_job">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.start_job">[docs]</a>
+    <span class="k">def</span> <span class="nf">start_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Job</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start a new job.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hp (Path): A parameter file path</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Job | None: A reference for created job. It returns None if</span>
+<span class="sd">            specified hyper parameter file already exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">trial_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">job</span><span class="o">.</span><span class="n">trial_id</span> <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">trial_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">trial_ids</span><span class="p">:</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">Job</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_model</span><span class="p">(),</span> <span class="n">trial_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Submit a job: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">trial_id</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">job</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Specified trial </span><span class="si">{</span><span class="n">trial_id</span><span class="si">}</span><span class="s2"> is already running &quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.get_available_pool_size">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.get_available_pool_size">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_available_pool_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_ready</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_running</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_finished</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of available pool size.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            num_ready (int): The number of ready jobs.</span>
+<span class="sd">            num_running (int): The number of running jobs.</span>
+<span class="sd">            num_finished (int): The number of finished jobs.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The number of available pool size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sum_status</span> <span class="o">=</span> <span class="n">num_ready</span> <span class="o">+</span> <span class="n">num_running</span> <span class="o">+</span> <span class="n">num_finished</span>
+        <span class="k">if</span> <span class="n">sum_status</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span> <span class="o">-</span> <span class="n">sum_status</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span> <span class="o">-</span> <span class="n">sum_status</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">-</span> <span class="n">num_running</span> <span class="o">-</span> <span class="n">num_ready</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.search_hyperparameters">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.search_hyperparameters">[docs]</a>
+    <span class="k">def</span> <span class="nf">search_hyperparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_ready</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_running</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_finished</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start hyper parameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            num_ready (int): The number of ready jobs.</span>
+<span class="sd">            num_running (int): The number of running jobs.</span>
+<span class="sd">            num_finished (int): The number of finished jobs.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">available_pool_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_pool_size</span><span class="p">(</span><span class="n">num_ready</span><span class="p">,</span> <span class="n">num_running</span><span class="p">,</span> <span class="n">num_finished</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">available_pool_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">sum_status</span> <span class="o">=</span> <span class="n">num_ready</span> <span class="o">+</span> <span class="n">num_running</span> <span class="o">+</span> <span class="n">num_finished</span>
+        <span class="k">if</span> <span class="n">sum_status</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">is_all_parameters_generated</span><span class="p">():</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_parameters_processed</span><span class="p">(</span><span class="n">num_ready</span><span class="p">,</span> <span class="n">num_running</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_parameters_registered</span><span class="p">(</span>
+            <span class="n">num_ready</span><span class="p">,</span> <span class="n">num_running</span><span class="p">,</span> <span class="n">num_finished</span>
+        <span class="p">):</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">available_pool_size</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">run_optimizer</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">is_all_parameters_generated</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;All parameters are generated.&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;But the number of generated parameters is less than the number of trials.&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;So, the number of trials is updated. new trial number: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">update_trial_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
+                    <span class="k">break</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.pre_process">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.pre_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pre-procedure before executing processes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_random_seed_to_debug_log</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resume</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.post_process">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.post_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post-procedure after executed processes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">finalize_operation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;finished.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.inner_loop_main_process">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.inner_loop_main_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">inner_loop_main_process</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A main loop process. This process is repeated every main loop.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: The process succeeds or not. The main loop exits if failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_ready</span><span class="p">,</span> <span class="n">num_running</span><span class="p">,</span> <span class="n">num_finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_num_running_ready_finished</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_hyperparameters</span><span class="p">(</span><span class="n">num_ready</span><span class="p">,</span> <span class="n">num_running</span><span class="p">,</span> <span class="n">num_finished</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_finished</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">readies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">get_ready</span><span class="p">()</span>
+        <span class="c1"># find a new hp</span>
+        <span class="k">for</span> <span class="n">ready</span> <span class="ow">in</span> <span class="n">readies</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ready</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">job</span><span class="o">.</span><span class="n">trial_id</span> <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start_job</span><span class="p">(</span><span class="n">ready</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">ready</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+            <span class="n">state_name</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">get_state_name</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">state_name</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;failure&quot;</span><span class="p">,</span> <span class="s2">&quot;timeout&quot;</span><span class="p">}:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">job_completed_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">state_name</span> <span class="o">==</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Job: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">trial_id</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">state_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="c1"># Only log if the state has changed.</span>
+            <span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">trial_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="n">job</span><span class="o">.</span><span class="n">trial_id</span><span class="p">]</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">state_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="n">job</span><span class="o">.</span><span class="n">trial_id</span><span class="p">]</span><span class="o">.</span><span class="n">has_difference</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;name: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">trial_id</span><span class="si">}</span><span class="s2">, state: </span><span class="si">{</span><span class="n">state_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_completed_count</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;All jobs are completed.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.resume">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.resume">[docs]</a>
+    <span class="k">def</span> <span class="nf">resume</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;When in resume mode, load the previous optimization data in advance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resume</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resume</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">rollback_to_ready</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resume</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">delete_trial_data_after_this</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resume</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resume</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">trial_number</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">resume</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.is_error_free">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.is_error_free">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_error_free</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if all trials are error free.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if all trials are error free.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">jobstates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">jobstate</span><span class="o">.</span><span class="n">get_all_trial_jobstate</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">trial_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_status</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">jobstate</span> <span class="ow">in</span> <span class="n">jobstates</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">jobstate</span><span class="p">[</span><span class="s2">&quot;trial_id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">trial_id</span> <span class="ow">and</span> <span class="s2">&quot;failure&quot;</span> <span class="ow">in</span> <span class="n">jobstate</span><span class="p">[</span><span class="s2">&quot;jobstate&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Job: </span><span class="si">{</span><span class="n">trial_id</span><span class="si">}</span><span class="s2"> is Failed.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">is_error_free</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.create_model">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.create_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates model object of state machine.</span>
+
+<span class="sd">        Override with a Manager that uses a Model.</span>
+<span class="sd">        For example, LocalManager, AbciManager, etc.</span>
+<span class="sd">        By the way, PylocalManager does not use Model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            LocalModel: LocalModel object.</span>
+
+<span class="sd">            Should return None.</span>
+<span class="sd">            For that purpose, it is necessary to modify TestAbstractManager etc significantly.</span>
+<span class="sd">            So it returns LocalModel.</span>
+
+<span class="sd">            # TODO: Fix TestAbstractManager etc to return None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">LocalModel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.all_parameters_processed">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.all_parameters_processed">[docs]</a>
+    <span class="k">def</span> <span class="nf">all_parameters_processed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_ready</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_running</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks whether any unprocessed parameters are left.</span>
+
+<span class="sd">        This method is beneficial for the case that the maximum number of</span>
+<span class="sd">        parameter generation is limited by algorithm (e.g. grid search).</span>
+<span class="sd">        To make this method effective, the algorithm with the parameter</span>
+<span class="sd">        generation limit should turn `all_parameters_generated` True when all</span>
+<span class="sd">        of available parameters are generated.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            num_ready (int): The number of ready jobs.</span>
+<span class="sd">            num_running (int): The number of running jobs.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if all parameters are generated and are processed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">num_ready</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">num_running</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">is_all_parameters_generated</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.all_parameters_registered">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.all_parameters_registered">[docs]</a>
+    <span class="k">def</span> <span class="nf">all_parameters_registered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_ready</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_running</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_finished</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks whether all parameters that can be generated with the given</span>
+<span class="sd">        number of trials are registered.</span>
+
+<span class="sd">        This method does not check whether the registered parameters have been</span>
+<span class="sd">        processed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            num_ready (int): The number of ready jobs.</span>
+<span class="sd">            num_running (int): The number of running jobs.</span>
+<span class="sd">            num_finished (int): The number of finished jobs.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if all parameters are registerd.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span> <span class="o">-</span> <span class="n">num_finished</span> <span class="o">-</span> <span class="n">num_ready</span> <span class="o">-</span> <span class="n">num_running</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.update_trial_number">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.update_trial_number">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_trial_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the maximum number of trials.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            trial_number (int): The maximum number of trials.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial_number</span> <span class="o">=</span> <span class="n">trial_number</span></div>
+
+
+<div class="viewcode-block" id="AbstractManager.evaluate">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.manager.html#aiaccel.manager.abstract_manager.AbstractManager.evaluate">[docs]</a>
+    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the result of optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">best_trial_ids</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_best_trial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">goals</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">best_trial_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to output </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">best_result_file</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">hp_results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">best_trial_id</span> <span class="ow">in</span> <span class="n">best_trial_ids</span><span class="p">:</span>
+            <span class="n">hp_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_hp_dict</span><span class="p">(</span><span class="n">best_trial_id</span><span class="p">))</span>
+        <span class="n">create_yaml</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">best_result_file</span><span class="p">,</span> <span class="n">hp_results</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">lock</span><span class="p">)</span>
+        <span class="n">finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">get_num_finished</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">trial_number</span> <span class="o">&gt;=</span> <span class="n">finished</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Best hyperparameter is followings:&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">hp_results</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;jobs&quot;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

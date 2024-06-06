@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aiaccel.cli.start &mdash; aiaccel 1.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=144c8c96"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/translations.js?v=4dbe4bdc"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../../../ja/_modules/aiaccel/cli/start.html"
+                selected
+            >Japanese</option>
+            <option value="../../../../en/_modules/aiaccel/cli/start.html"
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">モジュールコード</a></li>
+      <li class="breadcrumb-item active">aiaccel.cli.start</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>aiaccel.cli.start のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">StreamHandler</span><span class="p">,</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+<span class="kn">import</span> <span class="nn">aiaccel</span>
+<span class="kn">from</span> <span class="nn">aiaccel.cli</span> <span class="kn">import</span> <span class="n">CsvWriter</span>
+<span class="kn">from</span> <span class="nn">aiaccel.common</span> <span class="kn">import</span> <span class="n">datetime_format</span><span class="p">,</span> <span class="n">file_result_csv</span><span class="p">,</span> <span class="n">resource_type_mpi</span>
+<span class="kn">from</span> <span class="nn">aiaccel.config</span> <span class="kn">import</span> <span class="n">load_config</span>
+<span class="kn">from</span> <span class="nn">aiaccel.manager</span> <span class="kn">import</span> <span class="n">create_manager</span>
+<span class="kn">from</span> <span class="nn">aiaccel.optimizer</span> <span class="kn">import</span> <span class="n">create_optimizer</span>
+<span class="kn">from</span> <span class="nn">aiaccel.storage</span> <span class="kn">import</span> <span class="n">Storage</span>
+<span class="kn">from</span> <span class="nn">aiaccel.tensorboard</span> <span class="kn">import</span> <span class="n">TensorBoard</span>
+<span class="kn">from</span> <span class="nn">aiaccel.util.buffer</span> <span class="kn">import</span> <span class="n">Buffer</span>
+<span class="kn">from</span> <span class="nn">aiaccel.workspace</span> <span class="kn">import</span> <span class="n">Workspace</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;LOG_LEVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">))</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">StreamHandler</span><span class="p">())</span>
+
+<span class="n">mpi_enable</span> <span class="o">=</span> <span class="n">aiaccel</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">mpi</span><span class="o">.</span><span class="n">mpi_enable</span>
+<span class="k">if</span> <span class="n">mpi_enable</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">aiaccel.util.mpi</span> <span class="kn">import</span> <span class="n">Mpi</span>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../../api_reference/aiaccel.cli.html#aiaccel.cli.start.main">[ドキュメント]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parses command line options and executes optimization.&quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--config&quot;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;config.yml&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--resume&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--clean&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--from_mpi_bat&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only aiaccel is used when mpi bat.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--make_hostfile&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only aiaccel is used when mpi bat.&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid workspace: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="si">}</span><span class="s2"> or config: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">resource_type_mpi</span><span class="p">:</span>  <span class="c1"># MPI</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mpi_enable</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;MPI is not enabled.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">make_hostfile</span><span class="p">:</span>
+            <span class="n">Mpi</span><span class="o">.</span><span class="n">make_hostfile</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">from_mpi_bat</span><span class="p">:</span>
+            <span class="n">Mpi</span><span class="o">.</span><span class="n">run_bat</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;MPI is enabled.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Mpi</span><span class="o">.</span><span class="n">gpu_max</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Mpi</span><span class="o">.</span><span class="n">gpu_max</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">mpi_npernode</span>
+        <span class="n">Mpi</span><span class="o">.</span><span class="n">run_main</span><span class="p">()</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">resume</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">resume</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">clean</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">clean</span>
+
+    <span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">generic</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">resume</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">clean</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cleaning workspace&quot;</span><span class="p">)</span>
+            <span class="n">workspace</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Workspace directory </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="si">}</span><span class="s2"> is cleaned.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">workspace</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;workspace exists.&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+    <span class="n">workspace</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">workspace</span><span class="o">.</span><span class="n">check_consists</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Creating workspace is Failed.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;config: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">config_path</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">search_algorithm</span><span class="p">)(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">manager</span> <span class="o">=</span> <span class="n">create_manager</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span><span class="p">)(</span><span class="n">config</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
+    <span class="n">tensorboard</span> <span class="o">=</span> <span class="n">TensorBoard</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">storage</span> <span class="o">=</span> <span class="n">Storage</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">storage_file_path</span><span class="p">)</span>
+
+    <span class="n">time_s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">loop_start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">max_trial_number</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">trial_number</span>
+    <span class="n">end_estimated_time</span> <span class="o">=</span> <span class="s2">&quot;Unknown&quot;</span>
+    <span class="n">buff</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">([</span><span class="s2">&quot;num_finished&quot;</span><span class="p">,</span> <span class="s2">&quot;available_pool_size&quot;</span><span class="p">])</span>
+    <span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;num_finished&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_max_len</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;available_pool_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_max_len</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">manager</span><span class="o">.</span><span class="n">pre_process</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">resource_type_mpi</span> <span class="ow">and</span> <span class="n">mpi_enable</span><span class="p">:</span>  <span class="c1"># MPI</span>
+        <span class="n">Mpi</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">manager</span><span class="o">.</span><span class="n">inner_loop_main_process</span><span class="p">():</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">manager</span><span class="o">.</span><span class="n">is_error_free</span><span class="p">():</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_s</span><span class="p">))</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">returncodes</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">returncode</span><span class="o">.</span><span class="n">get_all_trial_returncode</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">item</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">returncodes</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Some trials are failed.&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="n">num_ready</span><span class="p">,</span> <span class="n">num_running</span><span class="p">,</span> <span class="n">num_finished</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">get_num_running_ready_finished</span><span class="p">()</span>
+                <span class="n">available_pool_size</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_available_pool_size</span><span class="p">(</span><span class="n">num_ready</span><span class="p">,</span> <span class="n">num_running</span><span class="p">,</span> <span class="n">num_finished</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                <span class="n">looping_time</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">loop_start_time</span>
+
+                <span class="k">if</span> <span class="n">num_finished</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">one_loop_time</span> <span class="o">=</span> <span class="n">looping_time</span> <span class="o">/</span> <span class="n">num_finished</span>
+                    <span class="n">finishing_time</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="p">(</span><span class="n">max_trial_number</span> <span class="o">-</span> <span class="n">num_finished</span><span class="p">)</span> <span class="o">*</span> <span class="n">one_loop_time</span>
+                    <span class="n">end_estimated_time</span> <span class="o">=</span> <span class="n">finishing_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">datetime_format</span><span class="p">)</span>
+
+                <span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;num_finished&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">num_finished</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;num_finished&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">Len</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;num_finished&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">has_difference</span><span class="p">():</span>
+                    <span class="n">manager</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_finished</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">max_trial_number</span><span class="si">}</span><span class="s2"> finished, &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;max trial number: </span><span class="si">{</span><span class="n">max_trial_number</span><span class="si">}</span><span class="s2">, &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;ready: </span><span class="si">{</span><span class="n">num_ready</span><span class="si">}</span><span class="s2"> ,&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;running: </span><span class="si">{</span><span class="n">num_running</span><span class="si">}</span><span class="s2">, &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;end estimated time: </span><span class="si">{</span><span class="n">end_estimated_time</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># TensorBoard</span>
+                    <span class="n">tensorboard</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+                <span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;available_pool_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">available_pool_size</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;available_pool_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">Len</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">buff</span><span class="o">.</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;available_pool_size&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">has_difference</span><span class="p">():</span>
+                    <span class="n">manager</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pool_size: </span><span class="si">{</span><span class="n">available_pool_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">generic</span><span class="o">.</span><span class="n">sleep_time</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Unexpected error occurred.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">break</span>
+
+    <span class="n">manager</span><span class="o">.</span><span class="n">post_process</span><span class="p">()</span>
+    <span class="n">manager</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+
+    <span class="n">csv_writer</span> <span class="o">=</span> <span class="n">CsvWriter</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">csv_writer</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;moving...&quot;</span><span class="p">)</span>
+    <span class="n">dst</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">move_completed_data</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Moving data is failed.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">config_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">),</span> <span class="n">dst</span> <span class="o">/</span> <span class="n">config_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">best_result_file</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">best_result_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">final_results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">UnsafeLoader</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">final_result</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">final_results</span><span class="p">):</span>
+            <span class="n">best_id</span> <span class="o">=</span> <span class="n">final_result</span><span class="p">[</span><span class="s2">&quot;trial_id&quot;</span><span class="p">]</span>
+            <span class="n">best_value</span> <span class="o">=</span> <span class="n">final_result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">best_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">best_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best trial [</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] : </span><span class="si">{</span><span class="n">best_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">value : </span><span class="si">{</span><span class="n">best_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;result file : </span><span class="si">{</span><span class="n">dst</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">file_result_csv</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total time [s] : </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">time_s</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

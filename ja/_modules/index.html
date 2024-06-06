@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>概要: モジュールコード &mdash; aiaccel 1.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=144c8c96"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=4dbe4bdc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../ja/_modules/index.html"
+                selected
+            >Japanese</option>
+            <option value="../../en/_modules/index.html"
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">概要: モジュールコード</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>全モジュールのうち、コードを読めるもの</h1>
+<ul><li><a href="aiaccel/cli/csv_writer.html">aiaccel.cli.csv_writer</a></li>
+<li><a href="aiaccel/cli/plot.html">aiaccel.cli.plot</a></li>
+<li><a href="aiaccel/cli/report.html">aiaccel.cli.report</a></li>
+<li><a href="aiaccel/cli/set_result.html">aiaccel.cli.set_result</a></li>
+<li><a href="aiaccel/cli/start.html">aiaccel.cli.start</a></li>
+<li><a href="aiaccel/cli/view.html">aiaccel.cli.view</a></li>
+<li><a href="aiaccel/config.html">aiaccel.config</a></li>
+<li><a href="aiaccel/converted_parameter.html">aiaccel.converted_parameter</a></li>
+<li><a href="aiaccel/manager/abci_manager.html">aiaccel.manager.abci_manager</a></li>
+<li><a href="aiaccel/manager/abstract_manager.html">aiaccel.manager.abstract_manager</a></li>
+<li><a href="aiaccel/manager/create.html">aiaccel.manager.create</a></li>
+<li><a href="aiaccel/manager/job/job.html">aiaccel.manager.job.job</a></li>
+<li><a href="aiaccel/manager/job/model/abci_model.html">aiaccel.manager.job.model.abci_model</a></li>
+<li><a href="aiaccel/manager/job/model/abstract_model.html">aiaccel.manager.job.model.abstract_model</a></li>
+<li><a href="aiaccel/manager/job/model/local_model.html">aiaccel.manager.job.model.local_model</a></li>
+<li><a href="aiaccel/manager/job/model/mpi_model.html">aiaccel.manager.job.model.mpi_model</a></li>
+<li><a href="aiaccel/manager/local_manager.html">aiaccel.manager.local_manager</a></li>
+<li><a href="aiaccel/manager/mpi_manager.html">aiaccel.manager.mpi_manager</a></li>
+<li><a href="aiaccel/manager/pylocal_manager.html">aiaccel.manager.pylocal_manager</a></li>
+<li><a href="aiaccel/module.html">aiaccel.module</a></li>
+<li><a href="aiaccel/optimizer/_nelder_mead.html">aiaccel.optimizer._nelder_mead</a></li>
+<li><a href="aiaccel/optimizer/abstract_optimizer.html">aiaccel.optimizer.abstract_optimizer</a></li>
+<li><a href="aiaccel/optimizer/budget_specified_grid_optimizer.html">aiaccel.optimizer.budget_specified_grid_optimizer</a></li>
+<li><a href="aiaccel/optimizer/create.html">aiaccel.optimizer.create</a></li>
+<li><a href="aiaccel/optimizer/grid_optimizer.html">aiaccel.optimizer.grid_optimizer</a></li>
+<li><a href="aiaccel/optimizer/motpe_optimizer.html">aiaccel.optimizer.motpe_optimizer</a></li>
+<li><a href="aiaccel/optimizer/nelder_mead_optimizer.html">aiaccel.optimizer.nelder_mead_optimizer</a></li>
+<li><a href="aiaccel/optimizer/random_optimizer.html">aiaccel.optimizer.random_optimizer</a></li>
+<li><a href="aiaccel/optimizer/sobol_optimizer.html">aiaccel.optimizer.sobol_optimizer</a></li>
+<li><a href="aiaccel/optimizer/tpe_optimizer.html">aiaccel.optimizer.tpe_optimizer</a></li>
+<li><a href="aiaccel/optimizer/value.html">aiaccel.optimizer.value</a></li>
+<li><a href="aiaccel/parameter.html">aiaccel.parameter</a></li>
+<li><a href="aiaccel/storage/abstract.html">aiaccel.storage.abstract</a></li>
+<li><a href="aiaccel/storage/error.html">aiaccel.storage.error</a></li>
+<li><a href="aiaccel/storage/hp.html">aiaccel.storage.hp</a></li>
+<li><a href="aiaccel/storage/jobstate.html">aiaccel.storage.jobstate</a></li>
+<li><a href="aiaccel/storage/model.html">aiaccel.storage.model</a></li>
+<li><a href="aiaccel/storage/result.html">aiaccel.storage.result</a></li>
+<li><a href="aiaccel/storage/returncode.html">aiaccel.storage.returncode</a></li>
+<li><a href="aiaccel/storage/storage.html">aiaccel.storage.storage</a></li>
+<li><a href="aiaccel/storage/timestamp.html">aiaccel.storage.timestamp</a></li>
+<li><a href="aiaccel/storage/trial.html">aiaccel.storage.trial</a></li>
+<li><a href="aiaccel/storage/variable.html">aiaccel.storage.variable</a></li>
+<li><a href="aiaccel/tensorboard/tensorboard.html">aiaccel.tensorboard.tensorboard</a></li>
+<li><a href="aiaccel/util/aiaccel.html">aiaccel.util.aiaccel</a></li>
+<li><a href="aiaccel/util/buffer.html">aiaccel.util.buffer</a></li>
+<li><a href="aiaccel/util/cast.html">aiaccel.util.cast</a></li>
+<li><a href="aiaccel/util/data_type.html">aiaccel.util.data_type</a></li>
+<li><a href="aiaccel/util/easy_visualizer.html">aiaccel.util.easy_visualizer</a></li>
+<li><a href="aiaccel/util/error.html">aiaccel.util.error</a></li>
+<li><a href="aiaccel/util/filesystem.html">aiaccel.util.filesystem</a></li>
+<li><a href="aiaccel/util/job_script_preamble.html">aiaccel.util.job_script_preamble</a></li>
+<li><a href="aiaccel/util/logger.html">aiaccel.util.logger</a></li>
+<li><a href="aiaccel/util/mpi.html">aiaccel.util.mpi</a></li>
+<li><a href="aiaccel/util/mpi_log.html">aiaccel.util.mpi_log</a></li>
+<li><a href="aiaccel/util/name.html">aiaccel.util.name</a></li>
+<li><a href="aiaccel/util/process.html">aiaccel.util.process</a></li>
+<li><a href="aiaccel/util/retry.html">aiaccel.util.retry</a></li>
+<li><a href="aiaccel/util/suffix.html">aiaccel.util.suffix</a></li>
+<li><a href="aiaccel/util/time.html">aiaccel.util.time</a></li>
+<li><a href="aiaccel/util/trialid.html">aiaccel.util.trialid</a></li>
+<li><a href="aiaccel/workspace.html">aiaccel.workspace</a></li>
+</ul>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

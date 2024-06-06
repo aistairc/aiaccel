@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>カスタムオプティマイザー作成ガイド &mdash; aiaccel 1.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=144c8c96"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=4dbe4bdc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="Issues" href="../contribution_guide/contribution_guide.html" />
+    <link rel="prev" title="aiaccelの概要" href="architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">カスタムオプティマイザー作成ガイド</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">カスタムオプティマイザの実行確認</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">カスタムオプティマイザの編集</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">オプティマイザ内部からの目的関数の値の参照</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">例: 勾配降下法による最適化</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">オプティマイザの実装</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-parameter"><code class="docutils literal notranslate"><span class="pre">generate_parameter()</span></code> 内の処理の流れ</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prepare">状態: PREPARE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#calc-forward">状態: CALC_FORWARD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#wait-current-objective">状態: WAIT_CURRENT_OBJECTIVE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#wait-forward-objective">状態: WAIT_FORWARD_OBJECTIVE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#calc-next-param">状態: CALC_NEXT_PARAM</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">注意事項</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../ja/developer_guide/custom_optimizer.html"
+                selected
+            >Japanese</option>
+            <option value="../../en/developer_guide/custom_optimizer.html"
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">カスタムオプティマイザー作成ガイド</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>カスタムオプティマイザー作成ガイド<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>オプティマイザは，ハイパーパラメータを生成する機能を担うためどのハイパーパラメータの組を選択するかのアルゴリズムにより，最適化のパフォーマンスは大きく変わってきます．
+本稿では，ユーザーがaiaccelを用いた独自のオプティマイザを開発するための方法について解説します．</p>
+<section id="id2">
+<h2>カスタムオプティマイザの実行確認<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>それでは，まずカスタムオプティマイザを実行するための動作を確かめてみましょう．
+所謂Hello, Worldの位置づけです．
+ここで解説する内容は簡単にまとめると下記のようになります．</p>
+<ul class="simple">
+<li><p>カスタムオプティマイザのソースファイルを作成する</p></li>
+<li><p>カスタムオプティマイザのソースファイルをaiaccelが読み込めるようにする</p></li>
+<li><p>コンフィグレーションファイルを編集し，カスタムオプティマイザを実行できるようにする</p></li>
+</ul>
+<p>カスタムオプティマイザをどのように実行するかは環境に依存しますが，今回は自分で作成したワークスペースディレクトリに追加して実行してみます．
+その他にはソースコードに追加するなど，環境次第でやり方は異なりますので各自の環境に合わせて設定してください．</p>
+<ol class="arabic simple">
+<li><p>開発環境の確認</p></li>
+</ol>
+<p>まず環境の確認からします．
+本ガイドでは，各種インストールは終了しaiaccelが実行できる状態から始めます．
+インストールが未だの方はインストールガイドを参照してください．
+各ディレクトリ・ファイルは以下のとおりとします．
+皆さんの環境に読み替えて参考にしてください．</p>
+<ul class="simple">
+<li><p>aiaccelのソースディレクトリ: /workspace/aiaccel</p></li>
+<li><p>ワークスペースディレクトリ: /workspace/aiaccel/work</p></li>
+<li><p>例えばランダムオプティマイザのファイル: /workspace/aiaccel/aiaccel/optimizer/random_optimizer.py</p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>カスタムオプティマイザファイルの作成</p></li>
+</ol>
+<p>カスタムオプティマイザのソースファイルを作成します．
+今回はランダムオプティマイザをコピーします．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span><span class="nb">pwd</span>
+/workspace/aiaccel
+
+&gt;<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>work/lib/my_optimizer
+
+&gt;<span class="w"> </span>cp<span class="w"> </span>aiaccel/optimizer/random_optimizer.py<span class="w"> </span>work/lib/my_optimizer/custom_optimizer.py
+</pre></div>
+</div>
+<p>これでcustom_optimizer.pyが作成されました．</p>
+<ol class="arabic simple" start="3">
+<li><p>ファイルの編集</p></li>
+</ol>
+<p>このままではcustom_optimizer.pyの内容はランダムオプティマイザと同じですので，少しだけ編集します．</p>
+<p><em><strong>/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py</strong></em></p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span>from aiaccel.optimizer.abstract_optimizer import AbstractOptimizer
+
+
+<span class="gd">- class RandomOptimizer(AbstractOptimizer):</span>
+<span class="gi">+ class CustomOptimizer(AbstractOptimizer):</span>
+<span class="w"> </span>   &quot;&quot;&quot;An optimizer class with a random algorithm.
+
+<span class="w"> </span>   &quot;&quot;&quot;
+</pre></div>
+</div>
+<p>上記はdiff表記で削除された行頭に - 追加された行頭に + が付いています．
+クラス名をRandomOptimizerからCustomOptimizerに変更しました．
+変更したファイルは保存します．</p>
+<ol class="arabic simple" start="4">
+<li><p>パスの設定</p></li>
+</ol>
+<p>今custom_optimizer.pyにはランダムオプティマイザを全く同じ動作をするCustomOptimizerを定義しました．
+aiaccelから作成したCustomOptimizerクラスを実行する必要があるので，まず__init__.pyファイルを作成します．
+ここではaiaccel/optimizerにある__init__.pyを編集して利用します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span><span class="nb">pwd</span>
+/workspace/aiaccel
+
+&gt;<span class="w"> </span>cp<span class="w"> </span>aiaccel/optimizer/__init__.py<span class="w"> </span>work/lib/my_optimizer/
+</pre></div>
+</div>
+<p>追加したCustomOptimizerを読み込むように編集します．</p>
+<p><em><strong>/workspace/aiaccel/work/lib/my_optimizer/<strong>init</strong>.py</strong></em></p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="gd">- from .grid_optimizer import GridOptimizer</span>
+<span class="gd">- from .nelder_mead_optimizer import NelderMeadOptimizer</span>
+<span class="gd">- from .random_optimizer import RandomOptimizer</span>
+<span class="gd">- from .sobol_optimizer import SobolOptimizer</span>
+<span class="gd">- from .tpe_optimizer import TpeOptimizer</span>
+<span class="gi">+ from .custom_optimizer import CustomOptimizer</span>
+
+__all__ = [
+<span class="gd">-    GridOptimizer,</span>
+<span class="gd">-    RandomOptimizer,</span>
+<span class="gd">-    SobolOptimizer,</span>
+<span class="gd">-    NelderMeadOptimizer,</span>
+<span class="gd">-    TpeOptimizer</span>
+<span class="gi">+    CustomOptimizer</span>
+]
+</pre></div>
+</div>
+<p>次にパスの設定を行います．
+PYTHONPATHに，aiaccelと追加したcustom_optimizer.pyのディレクトリを追加します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$PYTHONPATH</span>
+
+&gt;<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span>/workspace/aiaccel:/workspace/aiaccel/work/lib
+
+&gt;<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$PYTHONPATH</span>
+/workspace/aiaccel:/workspace/aiaccel/work/lib
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>ユーザーファイルの作成</p></li>
+</ol>
+<p>カスタムオプティマイザを作成したので，実際に実行するユーザーファイルを作成します．
+今回は/workspace/aiaccel/examples/sphereディレクトリをコピーして作成します．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span><span class="nb">pwd</span>
+/workspace/aiaccel
+
+&gt;<span class="w"> </span>cp<span class="w"> </span>-R<span class="w"> </span>examples/sphere<span class="w"> </span>work/
+
+&gt;<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>work/sphere
+
+&gt;<span class="w"> </span><span class="nb">pwd</span>
+/workspace/aiaccel/work/sphere
+
+&gt;<span class="w"> </span>ls
+config.yaml<span class="w">       </span>user.py
+</pre></div>
+</div>
+<p>examples/sphereディレクトリをコピーし，sphereディレクトリに移動しました．
+次にコンフィグレーションファイルを編集します．
+オプティマイザに今回作成したカスタムオプティマイザを利用したいのでconfig.yamlを編集します．</p>
+<p><em><strong>/workspace/aiaccel/work/sphere/config.yaml</strong></em></p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span>optimize:
+<span class="gd">- search_algorithm: &quot;aiaccel.optimizer.NelderMeadOptimizer&quot;</span>
+<span class="gi">+ search_algorithm: &quot;my_optimizer.CustomOptimizer&quot;</span>
+<span class="w"> </span> goal: &quot;minimize&quot;
+<span class="w"> </span> trial_number: 30
+<span class="w"> </span> rand_seed: 42
+<span class="w"> </span> parameters:
+</pre></div>
+</div>
+<p>これでコンフィグレーションファイルの編集は一旦終了です．
+編集したファイルを保存します．</p>
+<ol class="arabic simple" start="6">
+<li><p>実行の確認</p></li>
+</ol>
+<p>それでは現在のディレクトリで実行してみます．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span><span class="nb">pwd</span>
+/workspace/aiaccel/work/sphere
+
+&gt;<span class="w"> </span>aiaccel-start<span class="w"> </span>--config<span class="w"> </span>config.yaml<span class="w"> </span>--clean
+</pre></div>
+</div>
+<p>正常に実行できれば成功です．
+このカスタムオプティマイザの中身はランダムオプティマイザと同じなので，ランダムにハイパーパラメータが選択されます．</p>
+<p>ここまででカスタムオプティマイザが実行できることが確認できたので，次節ではオプティマイザのソースコードを編集して実行する点を解説します．</p>
+</section>
+<section id="id3">
+<h2>カスタムオプティマイザの編集<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>前節でカスタムオプティマイザの実行確認を行いました．
+本節では，前節で作成したカスタムオプティマイザを編集しシンプルなアルゴリズムを実装します．
+簡単のため前節で作成したワークスペースを流用し５つのfloat型のハイパーパラメータに対し正規分布でハイパーパラメータを生成するオプティマイザを作成してみましょう．</p>
+<p>既存のオプティマイザには，ランダム・Sobol’列・グリッド・NelderMead・TPEがサポートされていますが，ランダムオプティマイザをコピーしたソースファイルから編集を始めます．</p>
+<ol class="arabic simple">
+<li><p>ランダムオプティマイザの確認</p></li>
+</ol>
+<p>前節でコピーしたカスタムオプティマイザのファイルを見てみましょう．</p>
+<p><em><strong>/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py</strong></em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">aiaccel.optimizer.abstract_optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+
+
+<span class="k">class</span> <span class="nc">CustomOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An optimizer class with a random algorithm.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">generate_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict[str, float | int | str]]: A list of created parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sample</span><span class="p">:</span>
+            <span class="n">new_param</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+            <span class="p">}</span>
+            <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_param</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_params</span>
+
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">CustomOptimizer</span></code> クラスは<code class="docutils literal notranslate"> <span class="pre">AbstractOptimizer</span></code> を継承し，<code class="docutils literal notranslate"><span class="pre">generate_parameter</span></code> メソッドのみを実装しています．
+<code class="docutils literal notranslate"><span class="pre">generate_parameter</span></code> 以外のオプティマイザとしての機能は <code class="docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code> に実装されているので，<code class="docutils literal notranslate"><span class="pre">generate_parameter</span></code> メソッドを実装すれば簡単なオプティマイザなら実装することができます．</p>
+<ol class="arabic simple" start="2">
+<li><p>ハイパーパラメータのソースコードの確認</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">generate_parameter</span></code> メソッドを見てみましょう．
+<code class="docutils literal notranslate"><span class="pre">self.params.sample</span></code> というメソッドを実行しています．
+このメソッドは，aiaccel/parameter.py の <code class="docutils literal notranslate"><span class="pre">HyperParameterConfiguration</span></code> インスタンスである <code class="docutils literal notranslate"><span class="pre">self.params</span></code> の <code class="docutils literal notranslate"><span class="pre">sample</span></code> メソッドです．
+引数として与えられている <code class="docutils literal notranslate"><span class="pre">self._rng</span></code> は 継承元の <code class="docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code> が持つ <code class="docutils literal notranslate"><span class="pre">numpy.random.RandomState</span></code> オブジェクトです．
+<code class="docutils literal notranslate"><span class="pre">sample</span></code> メソッド内では，さらに <code class="docutils literal notranslate"><span class="pre">HyperParameter</span></code> インスタンスである <code class="docutils literal notranslate"><span class="pre">value</span></code> から更に <code class="docutils literal notranslate"><span class="pre">sample</span></code> メソッドが呼ばれています．
+この２度目に呼ばれた <code class="docutils literal notranslate"><span class="pre">sample</span></code> メソッドは <code class="docutils literal notranslate"><span class="pre">HyperParameter</span></code> クラスのメソッドであり，中身を見てみるとハイパーパラメータのタイプごとに処理が分かれていますが，例えば <code class="docutils literal notranslate"><span class="pre">FLOAT</span></code> 型の場合 <code class="docutils literal notranslate"><span class="pre">numpy.random.RandomState.uniform</span></code> が実行されます．</p>
+<p><em><strong>/workspace/aiaccel/aiaccel/parameter.py</strong></em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>こうして生成されたランダムなハイパーパラメータを返すことが <code class="docutils literal notranslate"><span class="pre">generate_parameter</span></code> メソッドの役割となります．</p>
+<ol class="arabic simple" start="3">
+<li><p>正規分布オプティマイザの作成</p></li>
+</ol>
+<p>では，aiaccel/parameter.py の <code class="docutils literal notranslate"><span class="pre">HyperParameterConfiguration</span></code> クラスをもう少し詳しく見てみましょう．
+<code class="docutils literal notranslate"><span class="pre">sample</span></code> メソッドの他に，<code class="docutils literal notranslate"><span class="pre">get_parameter_list</span></code> というメソッドがあります．
+このメソッドは，<code class="docutils literal notranslate"><span class="pre">sample</span></code> メソッドでハイパーパラメータをランダムに選択する前のハイパーパラメータのリストを返します．</p>
+<p><em><strong>/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py</strong></em></p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>       new_params = []
+<span class="gi">+       hp_list = self.params.get_parameter_list()</span>
+<span class="gd">-       sample = self.params.sample(rng=self._rng)</span>
+
+<span class="w"> </span>       for s in sample:
+</pre></div>
+</div>
+<p>次に正規分布を用いてハイパーパラメータを生成します．
+aiaccel/parameter.py の <code class="docutils literal notranslate"><span class="pre">HyperParameter</span></code> クラスでは numpy の <code class="docutils literal notranslate"><span class="pre">random.RandomState.uniform</span></code> を実行していましたが，今回は正規分布なので numpy の <code class="docutils literal notranslate"><span class="pre">random.RandomState.normal</span></code> を利用します．</p>
+<p><em><strong>/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py</strong></em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">aiaccel.optimizer.abstract_optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+
+
+<span class="k">class</span> <span class="nc">CustomOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An optimizer class with a random algorithm.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">generate_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict[str, float | int | str]]: A list of created parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hp_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get_parameter_list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">hp</span> <span class="ow">in</span> <span class="n">hp_list</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">hp</span><span class="o">.</span><span class="n">lower</span><span class="p">),</span> <span class="n">hp</span><span class="o">.</span><span class="n">upper</span><span class="p">)</span>
+            <span class="n">new_param</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">hp</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">hp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span>
+            <span class="p">}</span>
+            <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_param</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_params</span>
+
+</pre></div>
+</div>
+<p>正規分布で生成したハイパーパラメータが，最大値・最小値を超えないよう修正を加えています．</p>
+<p><em><strong>/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py</strong></em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="n">value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">hp</span><span class="o">.</span><span class="n">lower</span><span class="p">),</span> <span class="n">hp</span><span class="o">.</span><span class="n">upper</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>正規分布オプティマイザの実行確認</p></li>
+</ol>
+<p>それでは現在のディレクトリで実行してみます．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span><span class="nb">pwd</span>
+/workspace/aiaccel/work/sphere
+
+&gt;<span class="w"> </span>aiaccel-start<span class="w"> </span>--config<span class="w"> </span>config.yaml<span class="w"> </span>--clean
+</pre></div>
+</div>
+<p>正常に終了すれば成功です．</p>
+<ol class="arabic simple" start="5">
+<li><p>オプティマイザへの変数の導入</p></li>
+</ol>
+<p>正規分布のオプティマイザの平均と分散の値はハードコーディングしていました．
+このようなオプティマイザに利用する変数はコンフィグレーションファイルや引数として渡したい値です．</p>
+<p>ここでは平均と分散をコンフィグレーションファイルから与える方法について解説します．</p>
+<p>まずコンフィグレーションファイルに以下の追加をします．</p>
+<p><em><strong>/workspace/aiaccel/work/sphere/config.yaml</strong></em></p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span>optimize:
+<span class="w"> </span> search_algorithm: &quot;my_optimizer.CustomOptimizer&quot;
+<span class="w"> </span> goal: &quot;minimize&quot;
+<span class="w"> </span> trial_number: 30
+<span class="w"> </span> rand_seed: 42
+<span class="gi">+ mu: 3</span>
+<span class="gi">+ sigma: 0.1</span>
+</pre></div>
+</div>
+<p>mu と sigma が追加されました．
+次に custom_optimizer.py を編集して，mu と sigma を取得できるようにします．</p>
+<p><em><strong>/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py</strong></em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aiaccel.optimizer.abstract_optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="k">class</span> <span class="nc">CustomOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An optimizer class with a random algorithm.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;optimize&#39;</span><span class="p">,</span> <span class="s1">&#39;mu&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;optimize&#39;</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">)</span>
+
+</pre></div>
+</div>
+<p><strong>init</strong> メソッドを追加し，コンフィグレーションから mu と sigma を取得し変数として保持しました．
+あとは <code class="docutils literal notranslate"><span class="pre">self._rng.normal</span></code> を呼ぶ際に mu と sigma を渡します．</p>
+<p><em><strong>/workspace/aiaccel/work/lib/my_optimizer/custom_optimizer.py</strong></em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aiaccel.optimizer.abstract_optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="k">class</span> <span class="nc">CustomOptimizer</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An optimizer class with a random algorithm.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;optimize&#39;</span><span class="p">,</span> <span class="s1">&#39;mu&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;optimize&#39;</span><span class="p">,</span> <span class="s1">&#39;sigma&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">generate_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            number (int | None): A number of generating parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hp_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get_parameter_list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">hp</span> <span class="ow">in</span> <span class="n">hp_list</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">hp</span><span class="o">.</span><span class="n">lower</span><span class="p">),</span> <span class="n">hp</span><span class="o">.</span><span class="n">upper</span><span class="p">)</span>
+            <span class="n">new_param</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">hp</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">hp</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span>
+            <span class="p">}</span>
+            <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_param</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_params</span>
+
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>正規分布オプティマイザの実行確認</p></li>
+</ol>
+<p>それでは現在のディレクトリで実行してみます．</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span><span class="nb">pwd</span>
+/workspace/aiaccel/work/sphere
+
+&gt;<span class="w"> </span>aiaccel-start<span class="w"> </span>--config<span class="w"> </span>config.yaml<span class="w"> </span>--clean
+</pre></div>
+</div>
+<p>/workspace/aiaccel/work/sphere/workディレクトリに実行結果が保存されます．
+前回事項した結果と異なることを確認してみてください．</p>
+</section>
+<section id="id4">
+<h2>オプティマイザ内部からの目的関数の値の参照<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p>この節では，オプティマイザの内部から過去に計算した目的関数の値を参照して，次のパラメータを決定する方法を確認します．
+aiaccel 上のジョブの ID が  <code class="docutils literal notranslate"><span class="pre">n</span></code> のときの目的関数の値は，<code class="docutils literal notranslate"><span class="pre">AbstractOptimizer</span></code> を継承して作成したカスタムオプティマイザの内部から，次のようにして取得できます．</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">objective_value</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get_any_trial_objective</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>この処理の後，<code class="docutils literal notranslate"><span class="pre">objective_value</span></code> は <code class="docutils literal notranslate"><span class="pre">n</span></code> で指定した目的関数の値か <code class="docutils literal notranslate"><span class="pre">None</span></code> を保持します．
+<code class="docutils literal notranslate"><span class="pre">None</span></code> が保持されるのは，<code class="docutils literal notranslate"><span class="pre">self.storage.result.get_any_trial_objective()</span></code> が呼ばれた時点で，目的関数の値を計算する user program が Storage に 計算結果を保存していない場合です．</p>
+<section id="id5">
+<h3>例: 勾配降下法による最適化<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p>勾配降下法では，着目する試行におけるパラメータが与える目的関数の勾配を元に，次のパラメータを決定します．
+一次元の場合， $n$ 試行目のパラメータを $W_n$ とし，目的関数を $f(W_n)$ と書くと， $n+1$ 試行目のパラメータは</p>
+<p>$$ W_{n+1} = W_n + \gamma f'(W_{n}) $$</p>
+<p>となります．ここで， $\gamma$ は学習率 (パラメータの更新をどの程度行うかの指標)， $f'(W_n)$ は $W_n$ における目的関数の勾配です．</p>
+<p>ここでは $f$ の解析的な形が分からない場合に，勾配を差分で置き換えることを考えます．
+簡単のため，前進差分のみを考えると，差分を用いた勾配の近似式は</p>
+<p>$$f'(W_n) \approx \frac{f(W_n + \delta) - f(W_n) } { \delta }$$</p>
+<p>となります．
+従って $n + 1$ 試行目におけるパラメータは</p>
+<p>$$W_{n + 1} \approx W_n + \gamma \frac{f(W_n + \delta) - f(W_n) } { \delta }$$</p>
+<p>と近似できます．</p>
+</section>
+<section id="id6">
+<h3>オプティマイザの実装<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p>上の例では $n + 1$ 試行目のパラメータを決定するために， $f(W_n)$ と $f(W_{n+1})$ という 2 つの目的関数の値を使用しました．
+カスタムオプティマイザでは，これらをメソッド <code class="docutils literal notranslate"><span class="pre">generate_parameter()</span></code> 内で取得する必要があります．
+以下に，前進差分を用いたオプティマイザの例を示します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">aiaccel.optimizer.abstract_optimizer</span> <span class="kn">import</span> <span class="n">AbstractOptimizer</span>
+
+
+<span class="k">class</span> <span class="nc">SearchState</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">PREPARE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">CALC_FORWARD</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">WAIT_CURRENT_OBJECTIVE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">WAIT_FORWARD_OBJECTIVE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">CALC_NEXT_PARAM</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">GradientDescent</span><span class="p">(</span><span class="n">AbstractOptimizer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s1">&#39;optimize&#39;</span><span class="p">,</span> <span class="s1">&#39;learning_rate&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-03</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span>
+                                  <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_initial_parameter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_parameters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span> <span class="n">SearchState</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_FORWARD</span>
+
+    <span class="k">def</span> <span class="nf">generate_parameter</span><span class="p">(</span><span class="bp">self</span>
+                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">PREPARE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_trial_id</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_FORWARD</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_FORWARD</span><span class="p">:</span>
+            <span class="n">new_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">)</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span><span class="p">]</span>
+            <span class="n">forward</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span>
+            <span class="p">}</span>
+            <span class="n">new_params</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span><span class="p">]</span> <span class="o">=</span> <span class="n">forward</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_trial_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_CURRENT_OBJECTIVE</span>
+            <span class="k">return</span> <span class="n">new_params</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_CURRENT_OBJECTIVE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_objective</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_FORWARD_OBJECTIVE</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_FORWARD_OBJECTIVE</span><span class="p">:</span>
+            <span class="n">forward_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span><span class="p">]</span>
+            <span class="n">forward_objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_objective</span><span class="p">(</span><span class="n">forward_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">forward_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">forward_objective</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span> <span class="o">==</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_NEXT_PARAM</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_NEXT_PARAM</span><span class="p">:</span>
+            <span class="n">new_params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">forward_objective</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span><span class="p">):</span>
+                <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span><span class="n">forward_objective</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span>
+                        <span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">*</span> <span class="n">grad</span>
+                <span class="n">new_param</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span>
+                <span class="p">}</span>
+                <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_param</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_params</span> <span class="o">=</span> <span class="n">new_params</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">PREPARE</span>
+            <span class="k">return</span> <span class="n">new_params</span>
+
+    <span class="k">def</span> <span class="nf">_get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get_any_trial_objective</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">current_trial_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span>
+</pre></div>
+</div>
+<p>このオプティマイザは以下で説明する 4 つの状態を取ります．</p>
+<ol class="arabic simple">
+<li><p>PREPARE: オプティマイザが保持する変数やリストの初期化を行います．</p></li>
+<li><p>CALC_FORWARD: $W_n + \delta$ を計算します．</p></li>
+<li><p>WAIT_CURRENT_OBJECTIVE: Storage に $W_n$ のときの目的関数の値が保存されるまで待機します．</p></li>
+<li><p>WAIT_FORWARD_OBJECTIVE: Storage に $W_n + \delta$ のときの目的関数の値が保存されるまで待機します．</p></li>
+<li><p>CALC_NEXT_PARAM: $n+1$ 試行目のパラメータを計算します．</p></li>
+</ol>
+<p>これらの状態を <code class="docutils literal notranslate"><span class="pre">Enum</span></code> モジュールを用いて実装しています．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SearchState</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">PREPARE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">CALC_FORWARD</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">WAIT_CURRENT_OBJECTIVE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">WAIT_FORWARD_OBJECTIVE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">CALC_NEXT_PARAM</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>オプティマイザが保持する変数は以下の通りです．</p>
+<ul class="simple">
+<li><p>learning_rate: 学習率．</p></li>
+<li><p>delta: 目的関数の前進値を計算するための変分 $\delta$.</p></li>
+<li><p>current_params: 現在 ( $n$ 試行目) のパラメータ $W_n$．</p></li>
+<li><p>num_parameters: 最適化するパラメータの数．</p></li>
+<li><p>forward_objectives: $W_n + \delta$ における目的関数の値 $f(W_n + \delta)$．</p></li>
+<li><p>num_generated_forwards: 既に生成された $W_n + \delta$ の数．</p></li>
+<li><p>num_calculated_forward_objectives: 計算が完了した $f(W_n + \delta)$ の数．</p></li>
+<li><p>forward_ids: $f(W_n + \delta)$ の計算が実行される aiaccel 上のジョブ ID (<code class="docutils literal notranslate"><span class="pre">trial_id</span></code>).</p></li>
+</ul>
+</section>
+<section id="generate-parameter">
+<h3><code class="docutils literal notranslate"><span class="pre">generate_parameter()</span></code> 内の処理の流れ<a class="headerlink" href="#generate-parameter" title="Link to this heading"></a></h3>
+<section id="prepare">
+<h4>状態: PREPARE<a class="headerlink" href="#prepare" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">PREPARE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_trial_id</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_FORWARD</span>
+            <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>オプティマイザが保持する変数やリストの初期化を行います．
+初期化を行った後，オプティマイザの状態を <code class="docutils literal notranslate"><span class="pre">PREPARE</span></code> から <code class="docutils literal notranslate"><span class="pre">CALC_FORWARD</span></code> に変更します．
+この状態では，メソッド <code class="docutils literal notranslate"><span class="pre">self.generate_parameters()</span></code> は必ず <code class="docutils literal notranslate"><span class="pre">None</span></code> を返却します．</p>
+</section>
+<section id="calc-forward">
+<h4>状態: CALC_FORWARD<a class="headerlink" href="#calc-forward" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_FORWARD</span><span class="p">:</span>
+            <span class="n">new_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">)</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span><span class="p">]</span>
+            <span class="n">forward</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span>
+            <span class="p">}</span>
+            <span class="n">new_params</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span><span class="p">]</span> <span class="o">=</span> <span class="n">forward</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_trial_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_CURRENT_OBJECTIVE</span>
+            <span class="k">return</span> <span class="n">new_params</span>
+</pre></div>
+</div>
+<p>パラメータの前進値 $W_n + \delta$ を <em><strong>1 回の呼び出しで 1 つだけ</strong></em>計算し，aiaccel のメインループに値を返却します．</p>
+<p>まず，パラメータのリストから前進値を計算するパラメータを一つずつ取り出します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="n">new_params</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">)</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>ここで <code class="docutils literal notranslate"><span class="pre">self.num_generated_forwards</span></code> は，既に生成されたパラメータの前進値の総数を表します．</p>
+<p>続いて，項目 <code class="docutils literal notranslate"><span class="pre">value</span></code> を $W_n + \delta$ で置き換えます．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="n">forward</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span>
+            <span class="p">}</span>
+            <span class="n">new_params</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span><span class="p">]</span> <span class="o">=</span> <span class="n">forward</span>
+</pre></div>
+</div>
+<p>同時に，返却するパラメータの前進値を計算する aiaccel 上のジョブ ID (<code class="docutils literal notranslate"><span class="pre">trial_id</span></code>) を保持します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_trial_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">self.current_id</span></code> は，この<em><strong>カスタムオプティマイザ内で</strong></em>以下のように定義されるプロパティです．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">current_trial_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial_id</span><span class="o">.</span><span class="n">integer</span>
+</pre></div>
+</div>
+<p>計算された前進値の数 <code class="docutils literal notranslate"><span class="pre">self.num_generated_forwards</span></code> をインクリメントします．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>全てのパラメータについて，その前進値が計算されたとき，オプティマイザの状態を <code class="docutils literal notranslate"><span class="pre">CALC_FORWARD</span></code> から <code class="docutils literal notranslate"><span class="pre">WAIT_CURRENT_OBJECTIVE</span></code> に変更します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_generated_forwards</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_CURRENT_OBJECTIVE</span>
+            <span class="k">return</span> <span class="n">new_params</span>
+</pre></div>
+</div>
+<p>注意: オプティマイザの状態が <code class="docutils literal notranslate"><span class="pre">CALC_FORWARD</span></code> のとき，メソッド <code class="docutils literal notranslate"><span class="pre">generate_parameters()</span></code> は最適化するパラメータの数と同じ回数だけ aiaccel のメインループに呼ばれます．</p>
+</section>
+<section id="wait-current-objective">
+<h4>状態: WAIT_CURRENT_OBJECTIVE<a class="headerlink" href="#wait-current-objective" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_CURRENT_OBJECTIVE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_objective</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_FORWARD_OBJECTIVE</span>
+            <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>現在のパラメータ $W_n$ における目的関数の値 $f(W_n)$ が Storage に保存されるまで待ち，その値を取得します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_objective</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">self._get_objective()</span></code> は<em><strong>カスタムオプティマイザ内</strong></em>で以下のように定義されるメソッドです．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="nf">_get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">get_any_trial_objective</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>このメソッドは，取得したい目的関数の値の <code class="docutils literal notranslate"><span class="pre">trial_id</span></code> (aiaccel 上のジョブ ID) を引数に取り，Storage から値を読み出します．
+ただし，呼び出された時点で Storage に値が保存されていなければ，<code class="docutils literal notranslate"><span class="pre">None</span></code> を返却します．</p>
+<p>メソッド <code class="docutils literal notranslate"><span class="pre">self._get_objective()</span></code> が目的関数の値を返した場合，オプティマイザの状態を <code class="docutils literal notranslate"><span class="pre">WAIT_CURRENT_OBJECTIVE</span></code> から <code class="docutils literal notranslate"><span class="pre">WAIR_FORWARD_OBJECTIVE</span></code> に変更します．
+この時点で， $f(W_n)$ の値はメンバ変数 <code class="docutils literal notranslate"><span class="pre">self.current_objective</span></code> に保持されています．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_FORWARD_OBJECTIVE</span>
+</pre></div>
+</div>
+<p>注意: オプティマイザが状態 <code class="docutils literal notranslate"><span class="pre">WAIT_CURRENT_OBJECTIVE</span></code> のとき，メソッド <code class="docutils literal notranslate"><span class="pre">self.generate_parameters()</span></code> は 1 回以上，Storage に対象とする目的関数の値が保存されるまで呼ばれます．
+また，Storage から目的関数の値を読み出せたか否かに関わらず，<code class="docutils literal notranslate"><span class="pre">WAIT_CURRENT_OBJECTIVE</span></code> 状態の <code class="docutils literal notranslate"><span class="pre">self.generate_parameters()</span></code> は <code class="docutils literal notranslate"><span class="pre">None</span></code> をメインループに返します．</p>
+</section>
+<section id="wait-forward-objective">
+<h4>状態: WAIT_FORWARD_OBJECTIVE<a class="headerlink" href="#wait-forward-objective" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">WAIT_FORWARD_OBJECTIVE</span><span class="p">:</span>
+            <span class="n">forward_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span><span class="p">]</span>
+            <span class="n">forward_objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_objective</span><span class="p">(</span><span class="n">forward_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">forward_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">forward_objective</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span> <span class="o">==</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_NEXT_PARAM</span>
+            <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>パラメータの前進値 $W_{n} + \delta$ における目的関数の値 $f(W_n + \delta)$ が Storage に保存されるのを待ち，その値を取得します．</p>
+<p>まず，取得する目的関数の aiaccel 上のジョブ ID (<code class="docutils literal notranslate"><span class="pre">trial_id</span></code>) をリストから読み出します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="n">forward_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_ids</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>ここで，<code class="docutils literal notranslate"><span class="pre">self.num_calculated_forward_objectives</span></code> は取得済みの前進値に対する目的関数の値の総数です．</p>
+<p>続いて，メソッド <code class="docutils literal notranslate"><span class="pre">self._get_objective()</span></code> に読み出した ID を渡して，Storage から目的関数の値を読み出します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="n">forward_objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_objective</span><span class="p">(</span><span class="n">forward_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>正常な値が返却された場合，返却された値をリストに保持し，取得済みの値の総数 <code class="docutils literal notranslate"><span class="pre">self.num_calculated_forward_objectives</span></code> をインクリメントします．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="k">if</span> <span class="n">forward_objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">forward_objective</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>このとき，すべての目的関数の値が取得できていれば，オプティマイザの状態を <code class="docutils literal notranslate"><span class="pre">WAIT_FORWARD_OBJECTIVE</span></code> から <code class="docutils literal notranslate"><span class="pre">CALC_NEXT_PARAM</span></code> に変更します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_calculated_forward_objectives</span> <span class="o">==</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_NEXT_PARAM</span>
+</pre></div>
+</div>
+<p>注意: オプティマイザが状態 <code class="docutils literal notranslate"><span class="pre">WAIT_FORWARD_OBJECTIVE</span></code> のとき，メソッド <code class="docutils literal notranslate"><span class="pre">self.generate_parameters()</span></code> は少なくとも最適化対象のパラメータの総数以上，Storage にすべての目的関数の値が保存されるまで呼ばれます．また，Storage から目的関数の値が読み出せたか否かや，すべての値の読み出しが完了したか否かに依らず，<code class="docutils literal notranslate"><span class="pre">WAIT_FORWARD_OBJECTIVE</span></code> 状態の <code class="docutils literal notranslate"><span class="pre">self.generate_parameters()</span></code> は <code class="docutils literal notranslate"><span class="pre">None</span></code> をメインループに返します．</p>
+</section>
+<section id="calc-next-param">
+<h4>状態: CALC_NEXT_PARAM<a class="headerlink" href="#calc-next-param" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">CALC_NEXT_PARAM</span><span class="p">:</span>
+            <span class="n">new_params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">forward_objective</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span><span class="p">):</span>
+                <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span><span class="n">forward_objective</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span>
+                        <span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">*</span> <span class="n">grad</span>
+                <span class="n">new_param</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span>
+                <span class="p">}</span>
+                <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_param</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_params</span> <span class="o">=</span> <span class="n">new_params</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">PREPARE</span>
+            <span class="k">return</span> <span class="n">new_params</span>
+</pre></div>
+</div>
+<p>Storage から読み出した $W_n$ における目的関数の値 $f(W_n)$ (<code class="docutils literal notranslate"><span class="pre">self.current_params</span></code>) と $W_{n+1}$ における目的関数の値 $f(W_{n+1})$ (<code class="docutils literal notranslate"><span class="pre">self.forward_objectives</span></code>) を用いて勾配を計算します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="n">new_params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">forward_objective</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_params</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">forward_objectives</span><span class="p">):</span>
+                <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span><span class="n">forward_objective</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_objective</span>
+                        <span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span>
+</pre></div>
+</div>
+<p>計算した勾配を用いて次のパラメータ $W_{n+1}$ を計算して <code class="docutils literal notranslate"><span class="pre">dict</span></code> 型オブジェクトを作成し，リストに保持します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>                <span class="n">value</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">*</span> <span class="n">grad</span>
+                <span class="n">new_param</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;parameter_name&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">param</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span>
+                <span class="p">}</span>
+                <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_param</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>オプティマイザの状態を <code class="docutils literal notranslate"><span class="pre">CALC_NEXT_PARAM</span></code> から <code class="docutils literal notranslate"><span class="pre">PREPARE</span></code> に変更し，作成した次のパラメータをメインループに返却します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">SearchState</span><span class="o">.</span><span class="n">PREPARE</span>
+            <span class="k">return</span> <span class="n">new_params</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id7">
+<h3>注意事項<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>一般に，パラメータの更新ステップ数 $n$ と aiaccel 上のジョブ ID (<code class="docutils literal notranslate"><span class="pre">trial_id</span></code>) は一致しないことに注意してください．
+例えば上の例において，最適化したいパラメータの数が 5 個の場合，パラメータを１度更新するために目的関数を 5 回計算する必要があります．
+この場合は 1 回のパラメータ更新で aiaccel の <code class="docutils literal notranslate"><span class="pre">trial_id</span></code> は 5 増加することになります．
+従って，config.yaml で指定した <code class="docutils literal notranslate"><span class="pre">trial_number</span></code> が，例えば 30 回の場合，初期値を除いて 4 回しかパラメータは更新されません．</p>
+<p>同様な ID の不一致は NelderMeadOptimizer を用いた際にも起こります．
+Nelder-Mead 法の 1 ステップに相当する処理が終了したとき，aiaccel 上では <code class="docutils literal notranslate"><span class="pre">trial_id</span></code> が <strong>パラメータ数 + 1</strong> だけ増加します．</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="architecture.html" class="btn btn-neutral float-left" title="aiaccelの概要" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../contribution_guide/contribution_guide.html" class="btn btn-neutral float-right" title="Issues" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

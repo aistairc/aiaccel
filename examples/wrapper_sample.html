@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wrapper の作成例 &mdash; aiaccel 1.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=144c8c96"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=4dbe4bdc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="基本的な使い方" href="../user_guide/basic_usage.html" />
+    <link rel="prev" title="ネルダーミードオプティマイザの ABCI 環境での実行例" href="abci_nelder_mead.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Wrapper の作成例</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">1. ファイル構成</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">ユーザープログラム</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wrapper-py">wrapper.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#config-yaml">config.yaml</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">2. ファイル作成手順</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">関数プログラムの作成</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">ユーザープログラムの例</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id6">モジュール</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">最適化対象の関数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">実行部分</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">wrapper.py の作成</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id10">モジュール</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Wrapper オブジェクトの作成</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">ユーザープログラムの実行</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">config.yaml の作成</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#generic">generic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resource">resource</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration_setting.html">コンフィグレーションの設定ガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../ja/examples/wrapper_sample.html"
+                selected
+            >Japanese</option>
+            <option value="../../en/examples/wrapper_sample.html"
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Wrapper の作成例</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="wrapper">
+<h1>Wrapper の作成例<a class="headerlink" href="#wrapper" title="Link to this heading"></a></h1>
+<p>必要に応じて wrapper プログラムを作成します．
+aiaccel はユーザーが作成した最適化対象の関数の値を計算するプログラムの wrapper を作成するための API を提供します．</p>
+<section id="id1">
+<h2>1. ファイル構成<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="id2">
+<h3>ユーザープログラム<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>与えられたパラメータから最適化したい目的関数の値を計算し，標準出力に出力します．</p></li>
+</ul>
+</section>
+<section id="wrapper-py">
+<h3>wrapper.py<a class="headerlink" href="#wrapper-py" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>aiaccel からパラメータをユーザープログラムに渡し，計算結果を aiaccel に返却します．</p></li>
+</ul>
+</section>
+<section id="config-yaml">
+<h3>config.yaml<a class="headerlink" href="#config-yaml" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>最適化およびソフトウェアの設定ファイルです．</p></li>
+</ul>
+</section>
+</section>
+<section id="id3">
+<h2>2. ファイル作成手順<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<section id="id4">
+<h3>関数プログラムの作成<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>以下のようなコマンドを実行した際に，最適化対象すべき値が標準出力に出力されるようなプログラムを作成します．</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; {cmd} --config={config} --trial_id={trial_id} --x1={x1} --x2={x2}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>cmd</strong> - ユーザープログラムを起動するコマンドです．</p></li>
+<li><p><strong>config</strong> - コンフィグファイルのパスです．</p></li>
+<li><p><strong>trial_id</strong> - aiaccel のジョブ ID です．</p></li>
+<li><p><strong>x1, x2, ...</strong> - 最適化するパラメータです．ここでは例として 2 つのパラメータに x1, x2 という名前を付けましたが，任意の名前のパラメータを必要な数だけ設定することができます．</p></li>
+</ul>
+<p>標準出力に出力される値は，以下のような形式である必要があります．</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">objective_y</span><span class="p">:{</span><span class="n">y</span><span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>y</strong> - 最適化対象の計算結果です，</p></li>
+</ul>
+</section>
+<section id="id5">
+<h3>ユーザープログラムの例<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p>ここでは例として，python で最適化対象の関数を実装する場合を確認します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">argparse</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">x1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">x2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">x2</span> <span class="o">-</span> <span class="p">(</span><span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--x1&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--x2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;x2&quot;</span><span class="p">])</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;objective_y:</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="id6">
+<h4>モジュール<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">argparse</span>
+</pre></div>
+</div>
+<p>必要なモジュールをインポートします．</p>
+<ul class="simple">
+<li><p>argparse - コマンドライン引数を取得するために使用するモジュールです．</p></li>
+</ul>
+</section>
+<section id="id7">
+<h4>最適化対象の関数<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">x1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">x2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">x2</span> <span class="o">-</span> <span class="p">(</span><span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span>
+</pre></div>
+</div>
+<p>最適化対象の関数を定義します．</p>
+</section>
+<section id="id8">
+<h4>実行部分<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--x1&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--x2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;x2&quot;</span><span class="p">])</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;objective_y:</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>以下の部分でパーサを作成し，コマンドライン引数を受け取ります．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--x1&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--x2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>この例にある最適化対象の関数では，コンフィグのパスとジョブの ID は使用しないため，パラメータ (<code class="docutils literal notranslate"><span class="pre">x1</span></code> と <code class="docutils literal notranslate"><span class="pre">x2</span></code>) のみを取得するような処理が行われています．</p>
+<p>パラメータを最適化対象の関数 (<code class="docutils literal notranslate"><span class="pre">main()</span></code>) に渡し，値を計算します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="n">y</span> <span class="o">=</span> <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s2">&quot;x2&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>計算結果を標準出力に出力します．
+このとき，計算された値の前に &quot;objective_y:&quot; を付け加えます．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;objective_y:</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>この python で実装されたプログラムの名前を user.py とすると，ユーザープログラムの起動コマンドは，<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">user.py</span></code> となります．
+例えばコンフィグのパスが <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>，ジョブの ID が 0，パラメータ <code class="docutils literal notranslate"><span class="pre">x1</span></code> が 1， パラメータ <code class="docutils literal notranslate"><span class="pre">x2</span></code> が 2 の場合，実行コマンドは次の通りです．</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; python user.py --config=condig.yaml --trial_id=0 --x1=1 --x2=2</span>
+</pre></div>
+</div>
+<p>このときの出力は以下のようになります．</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">objective_y:-3.0</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id9">
+<h3>wrapper.py の作成<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<p>以下のような wrapper プログラムを python で実装します．</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aiaccel.util</span> <span class="kn">import</span> <span class="n">aiaccel</span>
+
+<span class="n">run</span> <span class="o">=</span> <span class="n">aiaccel</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
+<span class="n">run</span><span class="o">.</span><span class="n">execute_and_report</span><span class="p">(</span><span class="s2">&quot;python user.py&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="id10">
+<h4>モジュール<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aiaccel.util</span> <span class="kn">import</span> <span class="n">aiaccel</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>aiaccel.util.aiaccel</strong> - wrapper オブジェクトを作成するためのモジュールです．</p></li>
+</ul>
+</section>
+<section id="id11">
+<h4>Wrapper オブジェクトの作成<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">run</span> <span class="o">=</span> <span class="n">aiaccel</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>aiaccel が提供する wrapper オブジェクトを作成します．</p>
+</section>
+<section id="id12">
+<h4>ユーザープログラムの実行<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">run</span><span class="o">.</span><span class="n">execute_and_report</span><span class="p">(</span><span class="s2">&quot;python user.py&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>ユーザープログラムを実行します．</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;python</span> <span class="pre">user.py&quot;</span></code> の部分は，自身のプログラムを実行するためのコマンドを記述してください．</p></li>
+<li><p>コマンドライン引数として渡される config, trial_id, パラメータは， <em><strong><code class="docutils literal notranslate"><span class="pre">run.execute_and_report()</span></code> の内部で自動的に追加されます</strong></em>．そのため，ここに記述する必要はありません．</p></li>
+</ul>
+</section>
+</section>
+<section id="id13">
+<h3>config.yaml の作成<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<section id="generic">
+<h4>generic<a class="headerlink" href="#generic" title="Link to this heading"></a></h4>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">generic</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">workspace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./work&quot;</span>
+<span class="w">    </span><span class="nt">job_command</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;python</span><span class="nv"> </span><span class="s">wrapper.py&quot;</span>
+<span class="w">    </span><span class="nt">batch_job_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span>
+</pre></div>
+</div>
+<p>aiaccel で wrapper プログラムを最適化させる場合は，<code class="docutils literal notranslate"><span class="pre">job_command</span></code> に作成した wrapper の実行コマンドを設定します．
+作成した python ファイルの名前が wrapper.py であれば，実行コマンドは <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">wrapper.py</span></code> です．</p>
+</section>
+<section id="resource">
+<h4>resource<a class="headerlink" href="#resource" title="Link to this heading"></a></h4>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">resource</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;local&quot;</span>
+<span class="w">  </span><span class="nt">num_workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+<p>wrapper プログラムを最適化する場合，指定可能な実行タイプは <code class="docutils literal notranslate"><span class="pre">&quot;local&quot;</span></code> または <code class="docutils literal notranslate"><span class="pre">&quot;ABCI&quot;</span></code> です．
+<code class="docutils literal notranslate"><span class="pre">&quot;python_local&quot;</span></code> は選べません．</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="abci_nelder_mead.html" class="btn btn-neutral float-left" title="ネルダーミードオプティマイザの ABCI 環境での実行例" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../user_guide/basic_usage.html" class="btn btn-neutral float-right" title="基本的な使い方" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

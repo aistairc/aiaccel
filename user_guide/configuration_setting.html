@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>コンフィグレーションの設定ガイド (WIP) &mdash; aiaccel 1.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=144c8c96"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=4dbe4bdc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="aiaccelの概要" href="../developer_guide/architecture.html" />
+    <link rel="prev" title="基本的な使い方" href="basic_usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aiaccel
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">オーバービュー:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html">aiaccel概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id1">クイックインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/overview.html#id2">実行例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">インストール:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">インストールガイド (WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">利用例:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/prepare_files.html">作業ファイルの準備</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_random.html">ランダムオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_budget_specified_grid_optimizer.html">バジェット指定型グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/local_grid.html">グリッドオプティマイザのローカル環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/python_local_tpe.html">TPE オプティマイザのローカル環境 (python_local モード) での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_sobol.html">ソボルオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/abci_nelder_mead.html">ネルダーミードオプティマイザの ABCI 環境での実行例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/wrapper_sample.html">Wrapper の作成例</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ユーザーガイド:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic_usage.html">基本的な使い方</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">コンフィグレーションの設定ガイド (WIP)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generic"><strong>generic:</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#workspace-str-optional">workspace (str, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#job-command-str">job_command (str):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-file-str-optional">python_file (str, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-str-optional">function (str, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#batch-job-timeout-int-optional">batch_job_timeout (int, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sleep-time-float-optional">sleep_time (float, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logging-level-str-optional">logging_level (str, optional):</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#resource"><strong>resource:</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#type-str">type (str):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#num-workers-int">num_workers (int):</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#abci"><strong>ABCI:</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#group-str">group (str):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#job-script-preamble-str">job_script_preamble (str):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#job-execution-options-str-list-str-optional">job_execution_options (str | list[str], optional):</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#optimize"><strong>optimize:</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#search-algorithm-str-optional">search_algorithm (str, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#goal-str-optional">goal (str, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trial-number-int">trial_number (int):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rand-seed-int-optional">rand_seed (int, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sobol-scramble-bool-optional">sobol_scramble (bool, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#grid-accept-small-trial-number-bool-optional">grid_accept_small_trial_number (bool, optional):</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameters-list">parameters (list):</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#job-setting"><strong>job_setting:</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#name-length-int-optional">name_length (int, optional):</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ディベロッパーガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/architecture.html">aiaccelの概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/custom_optimizer.html">カスタムオプティマイザー作成ガイド</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コントリビューションガイド:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html">Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#pull-request">Pull request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#wip">ドキュメンテーション (WIP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id8">テスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribution_guide/contribution_guide.html#id13">コーディング規約</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tips/qrsh-inherit.html">qsubで実行中の計算ノードでコマンドを実行する方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tips/rsync-localdir.html">SGE_LOCALDIRを定期的にHOMEなどにrsyncする方法</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references/references.html">リファレンス(WIP)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">コードリファレンス</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/modules.html">aiaccel</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aiaccel</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <div>
+        <select name="lang" onchange="location.href=value;">
+            <option value="../../ja/user_guide/configuration_setting.html"
+                selected
+            >Japanese</option>
+            <option value="../../en/user_guide/configuration_setting.html"
+            >English</option>
+        </select>
+      </div>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">コンフィグレーションの設定ガイド (WIP)</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="wip">
+<h1>コンフィグレーションの設定ガイド (WIP)<a class="headerlink" href="#wip" title="Link to this heading"></a></h1>
+<section id="generic">
+<h2><strong>generic:</strong><a class="headerlink" href="#generic" title="Link to this heading"></a></h2>
+<section id="workspace-str-optional">
+<h3>workspace (str, optional):<a class="headerlink" href="#workspace-str-optional" title="Link to this heading"></a></h3>
+<p>aiaccel の実行に必要な一時ファイルを保存するディレクトリを指定します．
+デフォルトでは &quot;./work&quot; に設定されています．</p>
+</section>
+<section id="job-command-str">
+<h3>job_command (str):<a class="headerlink" href="#job-command-str" title="Link to this heading"></a></h3>
+<p>ユーザープログラムを実行するためのコマンドです．</p>
+</section>
+<section id="python-file-str-optional">
+<h3>python_file (str, optional):<a class="headerlink" href="#python-file-str-optional" title="Link to this heading"></a></h3>
+<p>ローカル実行のモードの一つである python_local モードを用いる場合に，最適化対象の関数が実装されている python のファイルパスを指定します．
+実行モードが ABCI または通常の Local の場合には指定する必要はありません．</p>
+</section>
+<section id="function-str-optional">
+<h3>function (str, optional):<a class="headerlink" href="#function-str-optional" title="Link to this heading"></a></h3>
+<p>ローカル実行のモードの一つである python_local モードを用いる場合に，最適化対象の関数名を指定します．
+aiaccel は実行時，python_file に書かれたファイルから，ここで指定された名前の関数をインポートします．
+実行モードが ABCI または通常の Local の場合には指定する必要はありません．</p>
+</section>
+<section id="batch-job-timeout-int-optional">
+<h3>batch_job_timeout (int, optional):<a class="headerlink" href="#batch-job-timeout-int-optional" title="Link to this heading"></a></h3>
+<p>ジョブのタイムアウト時間を秒単位で設定します．
+デフォルトでは 600 (秒) に設定されています．</p>
+</section>
+<section id="sleep-time-float-optional">
+<h3>sleep_time (float, optional):<a class="headerlink" href="#sleep-time-float-optional" title="Link to this heading"></a></h3>
+<p>最適化実行のメインループ 1 周あたりのスリープ時間を秒単位で指定します．
+デフォルトでは 0.01 (秒) に設定されています．</p>
+</section>
+<section id="logging-level-str-optional">
+<h3>logging_level (str, optional):<a class="headerlink" href="#logging-level-str-optional" title="Link to this heading"></a></h3>
+<p>ログの出力レベルを指定します．DEBUG, INFO, WARNING, ERROR, CRITICAL のいずれかを設定します．</p>
+<br>
+</section>
+</section>
+<section id="resource">
+<h2><strong>resource:</strong><a class="headerlink" href="#resource" title="Link to this heading"></a></h2>
+<section id="type-str">
+<h3>type (str):<a class="headerlink" href="#type-str" title="Link to this heading"></a></h3>
+<p>実行環境を指定します．
+aiaccel は以下の 3 つの環境での実行をサポートしています．</p>
+<ul class="simple">
+<li><p>&quot;abci&quot; - ABCI 上で最適化を実行します．</p></li>
+<li><p>&quot;local&quot; - ローカル環境で最適化を実行します．</p></li>
+<li><p>&quot;python_local&quot; - ローカル環境で最適化を実行します．最適化対象の関数が python で実装されている必要がありますが，通常のローカル実行よりも高速に最適化を実行することが可能です．
+デフォルトでは &quot;local&quot; に設定されています．</p></li>
+</ul>
+</section>
+<section id="num-workers-int">
+<h3>num_workers (int):<a class="headerlink" href="#num-workers-int" title="Link to this heading"></a></h3>
+<p>使用するノード数を指定します．
+デフォルトでは 1 に設定されています．</p>
+<br>
+</section>
+</section>
+<section id="abci">
+<h2><strong>ABCI:</strong><a class="headerlink" href="#abci" title="Link to this heading"></a></h2>
+<section id="group-str">
+<h3>group (str):<a class="headerlink" href="#group-str" title="Link to this heading"></a></h3>
+<p>ユーザーが所属する ABCI のグループを指定します．</p>
+</section>
+<section id="job-script-preamble-str">
+<h3>job_script_preamble (str):<a class="headerlink" href="#job-script-preamble-str" title="Link to this heading"></a></h3>
+<p>ABCI の設定を記述したシェルスクリプトのファイルを指定します．</p>
+</section>
+<section id="job-execution-options-str-list-str-optional">
+<h3>job_execution_options (str | list[str], optional):<a class="headerlink" href="#job-execution-options-str-list-str-optional" title="Link to this heading"></a></h3>
+<p>aiaccel が ABCI の計算ノード上にジョブを投入する際に付加されるオプションのコマンドです．
+デフォルトでは &quot;&quot; (空の文字列) が設定されています．</p>
+<br>
+</section>
+</section>
+<section id="optimize">
+<h2><strong>optimize:</strong><a class="headerlink" href="#optimize" title="Link to this heading"></a></h2>
+<section id="search-algorithm-str-optional">
+<h3>search_algorithm (str, optional):<a class="headerlink" href="#search-algorithm-str-optional" title="Link to this heading"></a></h3>
+<p>最適化アルゴリズムを設定します．
+aiaccel では以下のアルゴリズムをサポートしています．</p>
+<ul class="simple">
+<li><p>&quot;aiaccel.optimizer.NelderMeadOptimizer&quot; (default) - Nelder-Mead 法でパラメータの探索を行います．</p></li>
+<li><p>&quot;aiaccel.optimizer.BudgetSpecifiedOptimizer&quot; - コンフィグで設定した試行回数 (<code class="docutils literal notranslate"><span class="pre">trial_number</span></code>) に応じて，探索空間を分割し，その中からパラメータを選択します．</p></li>
+<li><p>&quot;aiaccel.optimizer.GridOptimizer&quot; - 分割した探索空間からパラメータを選びます．</p></li>
+<li><p>&quot;aiaccel.optimizer.RandomOptimizer&quot; - パラメータをランダムに生成します．</p></li>
+<li><p>&quot;aiaccel.optimizer.SobolOptimizer&quot; - Sobol' 列を用いた準モンテカルロ的なサンプリングを行い，パラメータを生成します．</p></li>
+<li><p>&quot;aiaccel.optimizer.TpeOptimizer&quot; - ベイズ最適化を用いてパラメータの探索を行います．</p></li>
+</ul>
+<p>デフォルトでは &quot;aiaccel.optimizer.NelderMeadOptimizer&quot; に設定されています．</p>
+</section>
+<section id="goal-str-optional">
+<h3>goal (str, optional):<a class="headerlink" href="#goal-str-optional" title="Link to this heading"></a></h3>
+<p>最適化の向きを決定します．</p>
+<ul class="simple">
+<li><p>&quot;minimize&quot; - 目的関数が小さくなるようにパラメータを最適化します．</p></li>
+<li><p>&quot;maximize&quot; - 目的関数が大きくなるようにパラメータを最適化します．</p></li>
+</ul>
+<p>デフォルトでは &quot;minimize&quot; に設定されています．</p>
+</section>
+<section id="trial-number-int">
+<h3>trial_number (int):<a class="headerlink" href="#trial-number-int" title="Link to this heading"></a></h3>
+<p>試行回数を設定します．</p>
+</section>
+<section id="rand-seed-int-optional">
+<h3>rand_seed (int, optional):<a class="headerlink" href="#rand-seed-int-optional" title="Link to this heading"></a></h3>
+<p>乱数生成に用いるシードを設定します．設定可能な値の範囲は <code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng</span></code> が取り得る範囲に一致します．
+デフォルトでは None に設定されています．</p>
+</section>
+<section id="sobol-scramble-bool-optional">
+<h3>sobol_scramble (bool, optional):<a class="headerlink" href="#sobol-scramble-bool-optional" title="Link to this heading"></a></h3>
+<p>ソボルオプティマイザを使用する際に，<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.Sobol.html#scipy-stats-qmc-sobol">スクランブル</a>を使用するかを指定します．
+デフォルトでは <code class="docutils literal notranslate"><span class="pre">true</span></code> に設定されています．</p>
+</section>
+<section id="grid-accept-small-trial-number-bool-optional">
+<h3>grid_accept_small_trial_number (bool, optional):<a class="headerlink" href="#grid-accept-small-trial-number-bool-optional" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">true</span></code> に設定すると，バジェット指定型グリッドオプティマイザを使用する際，生成されるグリッド点の数より指定した試行回数が少ない場合にも，強制的に最適化を実行します．<code class="docutils literal notranslate"><span class="pre">false</span></code> に設定した場合，十分な試行回数が設定されていなければ，aiaccel は最適化を行わずに，警告を発して終了します．デフォルトでは <code class="docutils literal notranslate"><span class="pre">false</span></code> に設定されています．</p>
+</section>
+<section id="parameters-list">
+<h3>parameters (list):<a class="headerlink" href="#parameters-list" title="Link to this heading"></a></h3>
+<p>パラメータの探索条件をまとめたリストを設定します．
+最適化アルゴルズムとパラメータのデータ型に応じて，各要素には以下の項目が含まれます．</p>
+<ul class="simple">
+<li><p><em>name</em> - パラメータの名前を設定します．</p></li>
+<li><p><em>type</em> - パラメータのデータ型を設定します．aiaccel は次のデータ型をサポートします．</p>
+<ul>
+<li><p>&quot;uniform_float&quot; - 浮動小数点数型</p></li>
+<li><p>&quot;uniform_int&quot; - 整数型</p></li>
+<li><p>&quot;categorical&quot; - カテゴリカル型</p></li>
+<li><p>&quot;ordinal&quot; - オーディナル型</p></li>
+</ul>
+</li>
+<li><p><em>lower</em> - パラメータの最小値を設定します．</p></li>
+<li><p><em>upper</em> - パラメータの最大値を設定します．</p></li>
+<li><p><em>initial</em> - パラメータの初期値を設定します．</p></li>
+<li><p><em>step</em> - パラメータの分解能を設定します．</p></li>
+<li><p><em>log</em> - パラメータの探索空間を対数スケールで分割するかを指定します．対数スケールを使用する場合は <code class="docutils literal notranslate"><span class="pre">true</span></code> を，使用しない場合は <code class="docutils literal notranslate"><span class="pre">false</span></code> を設定します．</p></li>
+<li><p><em>base</em> - 対数スケールでパラメータの探索空間を分割する場合の対数の基数を指定します．</p></li>
+<li><p><em>choices</em> - データ型が categorical の場合に，選択肢のリストを設定します．</p></li>
+<li><p><em>sequence</em> - データ型が ordinal の場合に，選択肢のリストを設定します．</p></li>
+<li><p><em>comment</em> - コメントを設定します．</p></li>
+<li><p><em>num_grid_points</em> - バジェット指定型グリッドオプティマイザのみで使用します．パラメータを何通り考慮するかを指定します．例えば，<code class="docutils literal notranslate"><span class="pre">lower</span> <span class="pre">=</span> <span class="pre">0.0</span></code>，<code class="docutils literal notranslate"><span class="pre">upper</span> <span class="pre">=</span> <span class="pre">1.0</span></code> のときに <code class="docutils literal notranslate"><span class="pre">num_grid_points</span> <span class="pre">=</span> <span class="pre">5</span></code> であれば，対象のパラメータは <code class="docutils literal notranslate"><span class="pre">0.0,</span> <span class="pre">0.25,</span> <span class="pre">0.50,</span> <span class="pre">0.75,</span> <span class="pre">1.00</span></code> の中から選択されます．
+<br></p></li>
+</ul>
+<p>それぞれのアルゴリズムとデータ型で必要なパラメータは以下の通りです．</p>
+<p><strong>Nelder-Mead 法 (&quot;aiaccel.optimizer.NelderMeadOptimizer&quot;)</strong></p>
+<p>設定可能なデータ型は &quot;uniform_float&quot;，&quot;uniform_int&quot;，および &quot;ordinal&quot; です．</p>
+<p><em><strong>&quot;uniform_float&quot; または &quot;uniform_int&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;uniform_float&quot;, &quot;uniform_int&quot;)</em></p></li>
+<li><p><em>lower</em></p></li>
+<li><p><em>upper</em></p></li>
+<li><p><em>initial</em> - 要素数が <strong>パラメータ数 + 1</strong> の配列を設定します．initial の項目が存在しない場合，aiaccel はランダムに初期値の配列を設定します．また，設定された配列の要素数が <strong>パラメータ数 + 1</strong> より少ない場合，aiaccel は足りない初期値をランダムに生成し補います．</p></li>
+</ul>
+<p><em><strong>&quot;ordinal&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;ordinal&quot;)</em></p></li>
+<li><p><em>sequence</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+<li><p><em>initial</em> - 要素数が <strong>パラメータ数 + 1</strong> の配列を設定します．initial の項目が存在しない場合，aiaccel はランダムに初期値の配列を設定します．また，設定された配列の要素数が <strong>パラメータ数 + 1</strong> より少ない場合，aiaccel は足りない初期値をランダムに生成し補います．</p></li>
+</ul>
+<p><strong>バジェット指定型グリッドオプティマイザ (aiaccel.optimizer.BudgetSpecifiedOptimizer)</strong></p>
+<p>設定可能なデータ型は &quot;uniform_float&quot;，&quot;uniform_int&quot;，&quot;categorical&quot;，および &quot;ordinal&quot; です．</p>
+<p><em><strong>&quot;uniform_float&quot; または &quot;uniform_int&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;uniform_float&quot;, &quot;uniform_int&quot;)</em></p></li>
+<li><p><em>lower</em></p></li>
+<li><p><em>upper</em></p></li>
+<li><p><em>log</em> - (optional) 対数スケールでグリッド点を指定したい場合には <code class="docutils literal notranslate"><span class="pre">true</span></code> を設定します．この値が <code class="docutils literal notranslate"><span class="pre">true</span></code> のときは，<code class="docutils literal notranslate"><span class="pre">lower</span></code> と <code class="docutils literal notranslate"><span class="pre">upper</span></code> の値の符号が一致し，かつ何れも 0 ではない必要があります．指定されなかった場合，デフォルトでは <code class="docutils literal notranslate"><span class="pre">false</span></code> として扱われます．</p></li>
+<li><p><em>num_grid_points</em> - (optional) パラメータを何通り考慮するかを指定します．例えば，<code class="docutils literal notranslate"><span class="pre">lower</span> <span class="pre">=</span> <span class="pre">0.0</span></code>，<code class="docutils literal notranslate"><span class="pre">upper</span> <span class="pre">=</span> <span class="pre">1.0</span></code> のときに <code class="docutils literal notranslate"><span class="pre">num_grid_points</span> <span class="pre">=</span> <span class="pre">5</span></code> であれば，対象のパラメータは <code class="docutils literal notranslate"><span class="pre">0.0,</span> <span class="pre">0.25,</span> <span class="pre">0.50,</span> <span class="pre">0.75,</span> <span class="pre">1.00</span></code> の中から選択されます．設定されていない場合，他のパラメータの設定と試行回数から，自動で値が設定されます．</p></li>
+</ul>
+<p><em><strong>&quot;categorical&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;categorical&quot;)</em></p></li>
+<li><p><em>choices</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+</ul>
+<p><em><strong>&quot;ordinal&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;ordinal&quot;)</em></p></li>
+<li><p><em>sequence</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+</ul>
+<p><strong>グリッドオプティマイザ (&quot;aiaccel.optimizer.GridOptimizer&quot;)</strong></p>
+<p>設定可能なデータ型は &quot;uniform_float&quot;, &quot;uniform_int&quot;, &quot;categorical&quot;, および &quot;ordinal&quot; です．
+データ型に依らず，初期値は設定できません．</p>
+<p><em><strong>&quot;uniform_float&quot; または &quot;uniform_int&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;uniform_float&quot;, &quot;uniform_int&quot;)</em></p></li>
+<li><p><em>lower</em></p></li>
+<li><p><em>upper</em></p></li>
+<li><p><em>step</em></p></li>
+<li><p><em>log</em></p></li>
+<li><p><em>base</em></p></li>
+</ul>
+<p>(注意) <code class="docutils literal notranslate"><span class="pre">log</span></code> が <code class="docutils literal notranslate"><span class="pre">true</span></code> の場合，<code class="docutils literal notranslate"><span class="pre">lower</span></code>，<code class="docutils literal notranslate"><span class="pre">upper</span></code>，および <code class="docutils literal notranslate"><span class="pre">step</span></code> は対数スケールでの値として参照されます．
+即ち，探索の下限は ${base}^{lower}$，上限は ${base}^{upper}$ と解釈され， $n\ (=0, 1, \cdots)$ 番目の点は ${base}^{lower} {base}^{n \times step}$ で与えられます．
+一方で <code class="docutils literal notranslate"><span class="pre">log</span></code> が <code class="docutils literal notranslate"><span class="pre">false</span></code> の場合，<code class="docutils literal notranslate"><span class="pre">lower</span></code>，<code class="docutils literal notranslate"><span class="pre">upper</span></code>，および <code class="docutils literal notranslate"><span class="pre">step</span></code> は，それぞれ探索の下限，上限，およびステップに直接対応します．
+この場合，<code class="docutils literal notranslate"><span class="pre">base</span></code> の値は使用されませんが，何も値を設定していないとエラーが生じます．</p>
+<p><em><strong>&quot;categorical&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;categorical&quot;)</em></p></li>
+<li><p><em>choices</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+</ul>
+<p><em><strong>&quot;ordinal&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;ordinal&quot;)</em></p></li>
+<li><p><em>sequence</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+</ul>
+<p><strong>ランダムオプティマイザ (&quot;aiaccel.optimizer.RandomOptimizer&quot;)</strong></p>
+<p>設定可能なデータ型は &quot;uniform_float&quot;，&quot;uniform_int&quot;，&quot;categorical&quot;，および &quot;ordinal&quot; です．</p>
+<p><em><strong>&quot;uniform_float&quot; または &quot;uniform_int&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;uniform_float&quot;, &quot;uniform_int&quot;)</em></p></li>
+<li><p><em>lower</em></p></li>
+<li><p><em>upper</em></p></li>
+<li><p><em>initial</em></p></li>
+</ul>
+<p><em><strong>&quot;categorical&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;categorical&quot;)</em></p></li>
+<li><p><em>choices</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+<li><p><em>initial</em></p></li>
+</ul>
+<p><em><strong>&quot;ordinal&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;ordinal&quot;)</em></p></li>
+<li><p><em>sequence</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+<li><p><em>initial</em></p></li>
+</ul>
+<p><strong>ソボルオプティマイザ (&quot;aiaccel.optimizer.SobolOptimizer&quot;)</strong></p>
+<p>設定可能なデータ型は &quot;uniform_float&quot; と &quot;uniform_int&quot; です．
+データ型に依らず，初期値は設定できません．</p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;uniform_float&quot;, &quot;uniform_int&quot;)</em></p></li>
+<li><p><em>lower</em></p></li>
+<li><p><em>upper</em></p></li>
+</ul>
+<p><strong>TPE オプティマイザ (&quot;aiaccel.optimizer.TpeOptimizer&quot;)</strong></p>
+<p>設定可能なデータ型は &quot;uniform_float&quot;, &quot;uniform_int&quot;, &quot;categorical&quot;, および &quot;ordinal&quot; です．</p>
+<p><em><strong>&quot;uniform_float&quot; または &quot;uniform_int&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;unform_float&quot;, &quot;uniform_int&quot;)</em></p></li>
+<li><p><em>lower</em></p></li>
+<li><p><em>upper</em></p></li>
+<li><p><em>initial</em></p></li>
+<li><p><em>log</em></p></li>
+</ul>
+<p><em><strong>&quot;categorical&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;categorical&quot;)</em></p></li>
+<li><p><em>choices</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+<li><p><em>initial</em></p></li>
+</ul>
+<p><em><strong>&quot;ordinal&quot; の場合</strong></em></p>
+<ul class="simple">
+<li><p><em>name</em></p></li>
+<li><p><em>type (&quot;ordinal&quot;)</em></p></li>
+<li><p><em>sequence</em> - 選択肢の配列を設定します．配列の要素は float, int, または str 型です．</p></li>
+<li><p><em>initial</em></p></li>
+</ul>
+<br>
+</section>
+</section>
+<section id="job-setting">
+<h2><strong>job_setting:</strong><a class="headerlink" href="#job-setting" title="Link to this heading"></a></h2>
+<section id="name-length-int-optional">
+<h3>name_length (int, optional):<a class="headerlink" href="#name-length-int-optional" title="Link to this heading"></a></h3>
+<p>文字列としてのジョブ ID の長さです．
+この文字列は，結果を .hp ファイルに保存する際にファイル名として使用されます．
+デフォルトでは 6 に設定されています．</p>
+<br>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basic_usage.html" class="btn btn-neutral float-left" title="基本的な使い方" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../developer_guide/architecture.html" class="btn btn-neutral float-right" title="aiaccelの概要" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, AIST.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
