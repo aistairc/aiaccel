@@ -47,6 +47,7 @@ def main() -> None:
     trainer.fit(
         model=instantiate(config.task),
         datamodule=instantiate(config.datamodule),
+        ckpt_path=config.ckpt_path if "ckpt_path" in config else None,
     )
 
 
