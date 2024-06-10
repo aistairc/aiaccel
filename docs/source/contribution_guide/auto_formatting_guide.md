@@ -18,7 +18,7 @@ pip install .[dev]
 `git commit` を実行する前に pyproject.toml と .pre-commit-config.yaml を確認してください．
 必要であれば各フォーマットチェックの設定を追記することができます．
 
-### pre-commitの有効化
+### pre-commit の有効化
 下記コマンドにより pre-commit を有効にします．
 
 ~~~bash
