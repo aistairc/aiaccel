@@ -2,12 +2,47 @@ from __future__ import annotations
 
 import copy
 import datetime
+import os
 import select
 import subprocess
 import sys
 import threading
+import time
+from typing import IO, Any
 
 from aiaccel.common import datetime_format
+
+
+def select_for_win(rlist: list[IO[bytes]], timeout: int = 1) -> list[IO[bytes]] | Any:
+    """Alternative to select.select() on Windows.
+
+    Args:
+        rlist (list): A list of IO objects. It waits until ready for reading.
+        timeout (int): An integer specifies a time-out in seconds.
+
+    Returns:
+        tuple[list]: A tuple consisting a list of readable objects
+        and Exceptions.
+    """
+    start_time = time.time()
+    readable, errorlist = [], []
+
+    while True:
+        current_time = time.time()
+        elapsed_time = current_time - start_time
+        if timeout is not None and elapsed_time >= timeout:
+            break
+        for fd_r in rlist:
+            try:
+                if os.read(fd_r.fileno(), 1):
+                    readable.append(fd_r)
+            except BlockingIOError:
+                pass
+            except Exception:
+                errorlist.append(fd_r)
+        if readable or errorlist:
+            break
+    return readable, errorlist
 
 
 class OutputHandler(threading.Thread):
@@ -64,7 +99,10 @@ class OutputHandler(threading.Thread):
         self._start_time = datetime.datetime.now()
         while True:
             inputs = [self._proc.stdout, self._proc.stderr]
-            readable, _, _ = select.select(inputs, [], [], self._sleep_time)
+            if sys.platform == "win32":
+                readable, _ = select_for_win(inputs, self._sleep_time)
+            else:
+                readable, _, _ = select.select(inputs, [], [], self._sleep_time)
             for s in readable:
                 line = s.readline()
                 if s is self._proc.stdout and line:

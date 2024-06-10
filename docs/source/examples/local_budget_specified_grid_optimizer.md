@@ -35,7 +35,7 @@ generic:
 - **logging_level** - ログの出力レベルを `"INFO"` に設定します．
 
 
-> Windows では，仮想環境の python で実行するためには `job_command` の欄を `"optenv/Scripts/python.exe"` のように設定する必要があります．
+> Windows 上で仮想環境の python プログラムを実行するために `job_command` の欄を `"path\\to\\optenv\\Scripts\\python.exe user.py"` と設定する必要があります．`"path\\to\\"` の部分はご自身の環境のパスを絶対パスで指定してください．
 
 
 **resource**
