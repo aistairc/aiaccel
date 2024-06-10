@@ -44,6 +44,14 @@ aiaccel.util.easy\_visualizer module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.util.error module
+-------------------------
+
+.. automodule:: aiaccel.util.error
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.util.filesystem module
 ------------------------------
 
@@ -52,10 +60,34 @@ aiaccel.util.filesystem module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.util.job\_script\_preamble module
+-----------------------------------------
+
+.. automodule:: aiaccel.util.job_script_preamble
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.util.logger module
 --------------------------
 
 .. automodule:: aiaccel.util.logger
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.util.mpi module
+-----------------------
+
+.. automodule:: aiaccel.util.mpi
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.util.mpi\_log module
+----------------------------
+
+.. automodule:: aiaccel.util.mpi_log
    :members:
    :undoc-members:
    :show-inheritance:
@@ -88,6 +120,14 @@ aiaccel.util.suffix module
 --------------------------
 
 .. automodule:: aiaccel.util.suffix
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+aiaccel.util.time module
+------------------------
+
+.. automodule:: aiaccel.util.time
    :members:
    :undoc-members:
    :show-inheritance:

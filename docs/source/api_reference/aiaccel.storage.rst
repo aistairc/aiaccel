@@ -52,6 +52,14 @@ aiaccel.storage.result module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.storage.returncode module
+---------------------------------
+
+.. automodule:: aiaccel.storage.returncode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 aiaccel.storage.storage module
 ------------------------------
 

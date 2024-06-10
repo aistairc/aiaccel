@@ -1,0 +1,57 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, AIST
+# This file is distributed under the same license as the aiaccel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: aiaccel \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/_templates/breadcrumbs.html:22
+msgid "Page navigation"
+msgstr ""
+
+#: ../../source/_templates/breadcrumbs.html:48
+#: ../../source/_templates/breadcrumbs.html:50
+msgid "Edit on GitHub"
+msgstr ""
+
+#: ../../source/_templates/breadcrumbs.html:55
+#: ../../source/_templates/breadcrumbs.html:57
+msgid "Edit on Bitbucket"
+msgstr ""
+
+#: ../../source/_templates/breadcrumbs.html:62
+#: ../../source/_templates/breadcrumbs.html:64
+msgid "Edit on GitLab"
+msgstr ""
+
+#: ../../source/_templates/breadcrumbs.html:67
+#: ../../source/_templates/breadcrumbs.html:69
+msgid "View page source"
+msgstr ""
+
+#: ../../source/_templates/breadcrumbs.html:78
+msgid "Sequential page navigation"
+msgstr ""
+
+#: ../../source/_templates/breadcrumbs.html:80
+msgid "Previous"
+msgstr ""
+
+#: ../../source/_templates/breadcrumbs.html:83
+msgid "Next"
+msgstr ""
+

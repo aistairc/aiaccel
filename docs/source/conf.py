@@ -54,25 +54,6 @@ exclude_patterns = [
     ".DS_Store",
 ]
 
-# Add optional syntaxes for MyST-Parser which are disabled by default.
-# myst_enable_extensions = [
-# "amsmath",
-# "attrs_inline",
-# "colon_fence",
-# "deflist",
-# "dollarmath",
-# "fieldlist",
-# "html_admonition",
-# "html_image",
-# "inv_link",
-# "linkify",
-# "replacements",
-# "smartquotes",
-# "strikethrough",
-# "substitution",
-# "tasklist",
-# ]
-
 # Auto-generated header anchors
 # The MyST Parser can automatically generate label “slugs” for header anchors
 # so that you can reference them from markdown links. For example, you can use
@@ -90,9 +71,15 @@ exclude_patterns = [
 html_theme = "sphinx_rtd_theme"
 html_show_sourcelink = False
 html_show_sphinx = False
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 html_sidebars = {"**": ["search-field", "sidebar-nav-bs", "sidebar-ethical-ads"]}
 source_suffix = {".rst": "restructuredtext", ".txt": "markdown", ".md": "markdown"}
+html_context = {
+    "support_languages": {
+        "ja": "Japanese",
+        "en": "English",
+    }
+}
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
