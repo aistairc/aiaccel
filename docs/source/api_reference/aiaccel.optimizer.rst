@@ -76,6 +76,14 @@ aiaccel.optimizer.tpe\_optimizer module
    :undoc-members:
    :show-inheritance:
 
+aiaccel.optimizer.value module
+------------------------------
+
+.. automodule:: aiaccel.optimizer.value
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

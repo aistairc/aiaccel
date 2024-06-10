@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:51+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/tips/qrsh-inherit.md:1
 msgid "qsubで実行中の計算ノードでコマンドを実行する方法"
@@ -37,35 +37,35 @@ msgstr ""
 msgid "テスト時のqsub.sh"
 msgstr ""
 
-#: ../../source/tips/qrsh-inherit.md:19
+#: ../../source/tips/qrsh-inherit.md:18
 msgid "テスト時のコマンド"
 msgstr ""
 
-#: ../../source/tips/qrsh-inherit.md:30
+#: ../../source/tips/qrsh-inherit.md:29
 msgid "promptが表示されませんが、例えば、"
 msgstr ""
 
-#: ../../source/tips/qrsh-inherit.md:34
+#: ../../source/tips/qrsh-inherit.md:33
 msgid "とコマンドを入力すると、結果が出力されます。"
 msgstr ""
 
-#: ../../source/tips/qrsh-inherit.md:36
+#: ../../source/tips/qrsh-inherit.md:35
 msgid "終了時は必ず"
 msgstr ""
 
-#: ../../source/tips/qrsh-inherit.md:41
+#: ../../source/tips/qrsh-inherit.md:40
 msgid "/bin/bashなどのshellの場合の注意事項"
 msgstr ""
 
-#: ../../source/tips/qrsh-inherit.md:43
+#: ../../source/tips/qrsh-inherit.md:42
 msgid "キーボードからのControl-Cで、job自体の実行が停止されるようです。<br> そのため、終了には、exitコマンドを使用して下さい。"
 msgstr ""
 
-#: ../../source/tips/qrsh-inherit.md:46
+#: ../../source/tips/qrsh-inherit.md:45
 msgid "コマンドプロンプトが出ないようです。<br> 違和感が有りますが、コマンド-Enterでコマンドを実行できます。"
 msgstr ""
 
-#: ../../source/tips/qrsh-inherit.md:49
+#: ../../source/tips/qrsh-inherit.md:48
 msgid "使用できないコマンド、出力が通常と違うコマンドが有ります。"
 msgstr ""
 

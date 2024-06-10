@@ -7,12 +7,9 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   aiaccel.abci
    aiaccel.cli
-   aiaccel.experimental
-   aiaccel.master
-   aiaccel.optimizer
    aiaccel.manager
+   aiaccel.optimizer
    aiaccel.storage
    aiaccel.tensorboard
    aiaccel.util
@@ -64,14 +61,6 @@ aiaccel.workspace module
 ------------------------
 
 .. automodule:: aiaccel.workspace
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-aiaccel.wrapper\_tools module
------------------------------
-
-.. automodule:: aiaccel.wrapper_tools
    :members:
    :undoc-members:
    :show-inheritance:

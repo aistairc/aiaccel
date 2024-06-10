@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-07 12:53+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/api_reference/aiaccel.rst:2
 msgid "aiaccel package"
@@ -27,39 +27,61 @@ msgstr ""
 msgid "Subpackages"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:21
+#: ../../source/api_reference/aiaccel.rst:18
 msgid "Submodules"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:24
+#: ../../source/api_reference/aiaccel.rst:21
 msgid "aiaccel.common module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:32
+#: aiaccel.common:1 of
+msgid "Common variables and methods."
+msgstr ""
+
+#: aiaccel.common:3 of
+msgid "Example: ::"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.rst:29
 msgid "aiaccel.config module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:40
-msgid "aiaccel.converted\\_parameter module"
-msgstr ""
-
-#: ../../source/api_reference/aiaccel.rst:48
-msgid "aiaccel.module module"
-msgstr ""
-
-#: ../../source/api_reference/aiaccel.rst:56
-msgid "aiaccel.parameter module"
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter:1
-#: aiaccel.parameter.HyperParameterConfiguration:1 of
+#: aiaccel.config.AbciConifig:1 aiaccel.config.ConditionConfig:1
+#: aiaccel.config.Config:1 aiaccel.config.GenericConfig:1
+#: aiaccel.config.JobConfig:1 aiaccel.config.OptimizeConifig:1
+#: aiaccel.config.ParameterConfig:1 aiaccel.config.ResourceConifig:1
+#: aiaccel.module.AbstractModule:1 aiaccel.parameter.AbstractParameter:1
+#: aiaccel.parameter.HyperParameterConfiguration:1 aiaccel.util.aiaccel.Run:1
+#: aiaccel.workspace.Workspace:1 of
 msgid "ベースクラス: :py:class:`object`"
 msgstr ""
 
-#: aiaccel.parameter.AbstractParameter:1 of
-msgid "A parameter class."
+#: aiaccel.config.OptimizerDirection:1 aiaccel.config.ResourceType:1 of
+msgid "ベースクラス: :py:class:`~enum.Enum`"
 msgstr ""
 
+#: aiaccel.config.OptimizerDirection:1 aiaccel.config.ResourceType:1 of
+msgid "An enumeration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:1 of
+msgid "Is the multi-objective option set in the configuration."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_hyperparameter
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.sample
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.to_original_repr
+#: aiaccel.converted_parameter.WeightOfChoice.sample
+#: aiaccel.module.AbstractModule.set_logger
+#: aiaccel.module.AbstractModule.set_numpy_random_state
 #: aiaccel.parameter.AbstractParameter
 #: aiaccel.parameter.AbstractParameter.sample
 #: aiaccel.parameter.CategoricalParameter.sample
@@ -69,18 +91,654 @@ msgstr ""
 #: aiaccel.parameter.HyperParameterConfiguration.sample
 #: aiaccel.parameter.IntParameter.sample
 #: aiaccel.parameter.OrdinalParameter.sample aiaccel.parameter.load_parameter
-#: of
+#: aiaccel.util.aiaccel.Run aiaccel.util.aiaccel.Run.execute
+#: aiaccel.util.aiaccel.Run.execute_and_report aiaccel.util.aiaccel.Run.report
+#: aiaccel.workspace.Workspace aiaccel.workspace.Workspace.check_consists
+#: aiaccel.workspace.Workspace.clean aiaccel.workspace.Workspace.create
+#: aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.get_error_output_file
+#: aiaccel.workspace.Workspace.get_runner_file
+#: aiaccel.workspace.Workspace.move_completed_data of
 msgid "パラメータ"
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:3 of
+msgid "A configuration object."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_hyperparameter
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_dict
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_list
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.sample
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.to_original_repr
+#: aiaccel.converted_parameter.WeightOfChoice.sample
+#: aiaccel.module.AbstractModule.deserialize
+#: aiaccel.module.AbstractModule.get_numpy_random_state
+#: aiaccel.module.AbstractModule.is_error_free
+#: aiaccel.module.AbstractModule.serialize
+#: aiaccel.module.AbstractModule.set_logger
+#: aiaccel.parameter.AbstractParameter.sample
+#: aiaccel.parameter.CategoricalParameter.sample
+#: aiaccel.parameter.FloatParameter.sample
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
+#: aiaccel.parameter.HyperParameterConfiguration.sample
+#: aiaccel.parameter.IntParameter.sample
+#: aiaccel.parameter.OrdinalParameter.sample aiaccel.parameter.load_parameter
+#: aiaccel.util.aiaccel.Run.execute aiaccel.workspace.Workspace.check_consists
+#: aiaccel.workspace.Workspace.clean aiaccel.workspace.Workspace.create
+#: aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.get_error_output_file
+#: aiaccel.workspace.Workspace.get_runner_file
+#: aiaccel.workspace.Workspace.move_completed_data of
+msgid "戻り値"
+msgstr ""
+
+#: aiaccel.config.is_multi_objective:6 of
+msgid "Is the multi--objective option set in the configuration or not."
+msgstr ""
+
+#: aiaccel.config.is_multi_objective aiaccel.config.load_config
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_hyperparameter
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_dict
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_list
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.sample
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.to_original_repr
+#: aiaccel.converted_parameter.WeightOfChoice.sample
+#: aiaccel.module.AbstractModule.get_numpy_random_state
+#: aiaccel.module.AbstractModule.is_error_free
+#: aiaccel.parameter.AbstractParameter.sample
+#: aiaccel.parameter.CategoricalParameter.sample
+#: aiaccel.parameter.FloatParameter.sample
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
+#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
+#: aiaccel.parameter.HyperParameterConfiguration.sample
+#: aiaccel.parameter.IntParameter.sample
+#: aiaccel.parameter.OrdinalParameter.sample aiaccel.parameter.load_parameter
+#: aiaccel.util.aiaccel.Run.execute aiaccel.workspace.Workspace.check_consists
+#: aiaccel.workspace.Workspace.exists
+#: aiaccel.workspace.Workspace.get_error_output_file
+#: aiaccel.workspace.Workspace.get_runner_file
+#: aiaccel.workspace.Workspace.move_completed_data of
+msgid "戻り値の型"
+msgstr ""
+
+#: aiaccel.config.load_config:1 of
+msgid ""
+"Load any configuration files, return the DictConfig object. :param "
+"config_path: A path to a configuration file. :type config_path: str"
+msgstr ""
+
+#: aiaccel.config.load_config:5 of
+msgid "DictConfig object"
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.rst:37
+msgid "aiaccel.converted\\_parameter module"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter:1
+#: aiaccel.converted_parameter.ConvertedNumericalParameter:1
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter:1
+#: aiaccel.converted_parameter.WeightOfChoice:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.converted_parameter.ConvertedParameter`"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample:1
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample:1
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample:1
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample:1
+#: aiaccel.converted_parameter.WeightOfChoice.sample:1
+#: aiaccel.parameter.AbstractParameter.sample:1
+#: aiaccel.parameter.CategoricalParameter.sample:1
+#: aiaccel.parameter.FloatParameter.sample:1
+#: aiaccel.parameter.IntParameter.sample:1
+#: aiaccel.parameter.OrdinalParameter.sample:1 of
+msgid "Sample a parameter."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample:3
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample:3
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample:3
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample:3
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.sample:3
+#: aiaccel.converted_parameter.WeightOfChoice.sample:3
+#: aiaccel.module.AbstractModule:87
+#: aiaccel.parameter.AbstractParameter.sample:3
+#: aiaccel.parameter.CategoricalParameter.sample:3
+#: aiaccel.parameter.FloatParameter.sample:3
+#: aiaccel.parameter.HyperParameterConfiguration.sample:3
+#: aiaccel.parameter.IntParameter.sample:3
+#: aiaccel.parameter.OrdinalParameter.sample:3 of
+msgid "A random generator."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample:5
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample:5
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample:5
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample:5
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.sample:5
+#: aiaccel.converted_parameter.WeightOfChoice.sample:5
+#: aiaccel.parameter.AbstractParameter.sample:5
+#: aiaccel.parameter.CategoricalParameter.sample:5
+#: aiaccel.parameter.FloatParameter.sample:5
+#: aiaccel.parameter.HyperParameterConfiguration.sample:5
+#: aiaccel.parameter.IntParameter.sample:5
+#: aiaccel.parameter.OrdinalParameter.sample:5 of
+msgid ""
+"Whether to require a initial value. If True, returns the initial value. "
+"Defaults to False."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample:9
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample:9
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample:9
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample:9
+#: aiaccel.converted_parameter.WeightOfChoice.sample:9
+#: aiaccel.parameter.AbstractParameter.sample:9
+#: aiaccel.parameter.CategoricalParameter.sample:9
+#: aiaccel.parameter.FloatParameter.sample:9
+#: aiaccel.parameter.IntParameter.sample:9
+#: aiaccel.parameter.OrdinalParameter.sample:9 of
+msgid "A parameter dictionary."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_hyperparameter
+#: aiaccel.converted_parameter.WeightOfChoice.sample
+#: aiaccel.module.AbstractModule.is_error_free
+#: aiaccel.module.AbstractModule.resume
+#: aiaccel.parameter.AbstractParameter.sample
+#: aiaccel.parameter.CategoricalParameter.sample
+#: aiaccel.parameter.FloatParameter.sample
+#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
+#: aiaccel.parameter.IntParameter.sample
+#: aiaccel.parameter.OrdinalParameter.sample aiaccel.workspace.Workspace.create
+#: aiaccel.workspace.Workspace.move_completed_data of
+msgid "例外"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedCategoricalParameter.sample:12
+#: aiaccel.converted_parameter.ConvertedFloatParameter.sample:12
+#: aiaccel.converted_parameter.ConvertedIntParameter.sample:12
+#: aiaccel.converted_parameter.ConvertedOrdinalParameter.sample:12
+#: aiaccel.converted_parameter.WeightOfChoice.sample:12
+#: aiaccel.parameter.AbstractParameter.sample:12
+#: aiaccel.parameter.CategoricalParameter.sample:12
+#: aiaccel.parameter.FloatParameter.sample:12
+#: aiaccel.parameter.IntParameter.sample:12
+#: aiaccel.parameter.OrdinalParameter.sample:12 of
+msgid "Causes when an invalid type is set."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedFloatParameter:1
+#: aiaccel.converted_parameter.ConvertedIntParameter:1 of
+msgid ""
+"ベースクラス: "
+":py:class:`~aiaccel.converted_parameter.ConvertedNumericalParameter`"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameter:1
+#: aiaccel.parameter.CategoricalParameter:1 aiaccel.parameter.FloatParameter:1
+#: aiaccel.parameter.IntParameter:1 aiaccel.parameter.OrdinalParameter:1
+#: aiaccel.parameter.Parameter:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.parameter.AbstractParameter`"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration:1 of
+msgid "ベースクラス: :py:class:`~aiaccel.parameter.HyperParameterConfiguration`"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration:1 of
+msgid "Collection of ConvertedParameter objects."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration:3 of
+msgid "A HyperParameterConfiguration object."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration:6
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:13 of
+msgid ""
+"Whether to convert the numerical values between log and linear scale when"
+" log of the hyperparameter object is True. Defaults to True."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration:10
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:17 of
+msgid ""
+"Whether to convert the int value to float. For example, if convert_int = "
+"False and log-scale conversion is enabled, the value `v` will be "
+"converted as `int(numpy.log(v))`. Defaults to True."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration:15
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:22 of
+msgid ""
+"Whether to treat the choices of categorical parameter as float value "
+"corresponding to the index of choices. Defaults to True."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration:19
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:26 of
+msgid ""
+"Whether to treat the sequence of ordinal parameter as a float value "
+"corresponding to the index of sequence. Defaults to True."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:1 of
+msgid ""
+"Converts all of HyperParameter in the given list to the internal "
+"representation."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:4 of
+msgid ""
+"If `categorical` (`ordinal`) parameters are included, and "
+"`convert_choice` (`convert_sequence`) is `True`, the number of parameters"
+" in a returned list may different from the original one. This is because,"
+" each choice in `choices` (`sequence`) is treated as a float parameter "
+"bounded by lower and upper value of 0.0 and 1.0, respectively."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:11 of
+msgid "A list of HyperPrameter objects."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:31 of
+msgid "Causes when the type of parameter is invalid."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:33 of
+msgid ""
+"A dict object of ConvertedParameter.     Keys of the dict specify "
+"internaly effective names of     parameters."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:36 of
+msgid "A dict object of ConvertedParameter."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.convert:36 of
+msgid "Keys of the dict specify internaly effective names of parameters."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_hyperparameter:1
+#: of
+msgid "Gets a ConvertedParameter object by specifying parameter name."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_hyperparameter:3
+#: of
+msgid "Name of parameter."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_hyperparameter:6
+#: of
+msgid "Causes when no parameter matches the given parameter name."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_hyperparameter:8
+#: of
+msgid "Specified parameter name."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_dict:1
+#: of
+msgid "Gets a dict object of ConvertedHyperparmaeters."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_dict:3
+#: of
+msgid "A dict object of     ConvertedParameter objects."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_dict:5
+#: of
+msgid "A dict object of"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_dict:6
+#: of
+msgid "ConvertedParameter objects."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_list:1
+#: of
+msgid "Gets a list of parameters."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_list:3
+#: of
+msgid "A list of ConvertedParameter     objects."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_list:5
+#: of
+msgid "A list of ConvertedParameter"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.get_parameter_list:6
+#: of
+msgid "objects."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.sample:1
+#: aiaccel.parameter.HyperParameterConfiguration.sample:1 of
+msgid "Sample a hyper parameters set."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.sample:9
+#: aiaccel.parameter.HyperParameterConfiguration.sample:9 of
+msgid "A hyper parameters set."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.to_original_repr:1
+#: of
+msgid "Converts parameters in the original representation."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.to_original_repr:3
+#: of
+msgid ""
+"A list of dict objects containing each parameter information in the "
+"internal representation."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.to_original_repr:8
+#: of
+msgid ""
+"A list of dict objects containing each     parameter information in the "
+"original representation."
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.to_original_repr:10
+#: of
+msgid "A list of dict objects containing each"
+msgstr ""
+
+#: aiaccel.converted_parameter.ConvertedParameterConfiguration.to_original_repr:11
+#: of
+msgid "parameter information in the original representation."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.rst:45
+msgid "aiaccel.module module"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:1 of
+msgid "An abstract class for Optimizer and Manager."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:3 of
+msgid "The procedure of this class is as follows:"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:5 of
+msgid "At first, deserialize() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:6 of
+msgid "start() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:7 of
+msgid "pre_process() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:8 of
+msgid "loop() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule of
+msgid "4-1. in while loop, inner_loop_main_process() is called."
+msgstr ""
+
+#: aiaccel.module.AbstractModule of
+msgid "4-2. in while loop, loop_count is incremented."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:13 of
+msgid "call post_process()"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:17 of
+msgid "Args:"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:17 of
+msgid "options (dict[str, str | int | bool]): A dictionary containing"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:17 of
+msgid "command line options."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:21 of
+msgid "Config object."
+msgstr ""
+
+#: aiaccel.module.AbstractModule aiaccel.parameter.AbstractParameter
+#: aiaccel.parameter.HyperParameterConfiguration aiaccel.util.aiaccel.Run
+#: aiaccel.workspace.Workspace of
+msgid "type"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:23 of
+msgid "Config"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:27 of
+msgid "Workspace object."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:29 of
+msgid "Workspace"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:33 of
+msgid "A list of goals."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:35 of
+msgid "list[str]"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:39 of
+msgid "A logger object."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:41 of
+msgid "logging.Logger"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:45 of
+msgid "A file handler for logging."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:47 of
+msgid "logging.FileHandler"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:51 of
+msgid "A colored handler for logging."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:53 of
+msgid "ColoredHandler"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:57 of
+msgid "A formatter for colored handler."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:59 of
+msgid "logging.Formatter"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:63 of
+msgid "A loop count."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:65 aiaccel.module.AbstractModule:71 of
+msgid "int"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:69 of
+msgid "A random seed."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:75 of
+msgid "A storage object."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:77 of
+msgid "Storage"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:81 of
+msgid "A trial id object."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:83 of
+msgid "TrialId"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:89 of
+msgid "np.random.RandomState"
+msgstr ""
+
+#: aiaccel.module.AbstractModule:93 of
+msgid "A name of this module."
+msgstr ""
+
+#: aiaccel.module.AbstractModule:95 aiaccel.parameter.AbstractParameter:16
+#: aiaccel.parameter.AbstractParameter:23 of
+msgid "str"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.deserialize:1 of
+msgid "Deserialize this module."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.deserialize:3
+#: aiaccel.module.AbstractModule.serialize:3
+#: aiaccel.module.AbstractModule.set_logger:13
+#: aiaccel.workspace.Workspace.clean:7 aiaccel.workspace.Workspace.create:5 of
+msgid "None"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_numpy_random_state:1
+#: aiaccel.module.AbstractModule.set_numpy_random_state:1 of
+msgid "Gets random state."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_numpy_random_state:3 of
+msgid ""
+"A tuple representing the     internal state of the generator if legacy is"
+" True. If legacy is False, or the BitGenerator is not     MT19937, then "
+"state is returned as a dictionary."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_numpy_random_state:6 of
+msgid "A tuple representing the"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.get_numpy_random_state:6 of
+msgid ""
+"internal state of the generator if legacy is True. If legacy is False, or"
+" the BitGenerator is not MT19937, then state is returned as a dictionary."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.is_error_free:1 of
+msgid "Check if there has been an error."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.is_error_free:3 of
+msgid ""
+"This method should be implemented by subclasses to define how to check "
+"for errors."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.is_error_free:5 of
+msgid "True if there has been no error, False otherwise."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.is_error_free:8
+#: aiaccel.module.AbstractModule.resume:5 of
+msgid "If the subclass does not implement this method."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.resume:1 of
+msgid "Load previous optimization data when in resume mode."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.resume:3 of
+msgid ""
+"This method should be implemented by subclasses to define how to load "
+"previously saved optimization data."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.serialize:1 of
+msgid "Serialize this module."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:1 of
+msgid "Set a default logger options."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:3 of
+msgid "A name of a logger."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:5 of
+msgid "A path to a log file."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:7 of
+msgid "A logging level for a log file output. For example logging.DEBUG"
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_logger:10 of
+msgid "A logging level for a stream output."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.set_numpy_random_state:3 of
+msgid "A tuple or dictionary representing the internal state of the generator."
+msgstr ""
+
+#: aiaccel.module.AbstractModule.write_random_seed_to_debug_log:1 of
+msgid "Writes the random seed to the logger as debug information."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.rst:53
+msgid "aiaccel.parameter module"
+msgstr ""
+
+#: aiaccel.parameter.AbstractParameter:1 of
+msgid "A parameter class."
 msgstr ""
 
 #: aiaccel.parameter.AbstractParameter:3 aiaccel.parameter.AbstractParameter:8
 #: of
 msgid "A parameter dictionary in a configuration file."
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter
-#: aiaccel.parameter.HyperParameterConfiguration of
-msgid "type"
 msgstr ""
 
 #: aiaccel.parameter.AbstractParameter:10
@@ -90,11 +748,6 @@ msgstr ""
 
 #: aiaccel.parameter.AbstractParameter:14 of
 msgid "A parameter name."
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter:16
-#: aiaccel.parameter.AbstractParameter:23 of
-msgid "str"
 msgstr ""
 
 #: aiaccel.parameter.AbstractParameter:20 of
@@ -147,91 +800,6 @@ msgstr ""
 msgid "float | int | str"
 msgstr ""
 
-#: aiaccel.parameter.AbstractParameter.sample:1
-#: aiaccel.parameter.CategoricalParameter.sample:1
-#: aiaccel.parameter.FloatParameter.sample:1
-#: aiaccel.parameter.IntParameter.sample:1
-#: aiaccel.parameter.OrdinalParameter.sample:1 of
-msgid "Sample a parameter."
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter.sample:3
-#: aiaccel.parameter.CategoricalParameter.sample:3
-#: aiaccel.parameter.FloatParameter.sample:3
-#: aiaccel.parameter.HyperParameterConfiguration.sample:3
-#: aiaccel.parameter.IntParameter.sample:3
-#: aiaccel.parameter.OrdinalParameter.sample:3 of
-msgid "A random generator."
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter.sample:5
-#: aiaccel.parameter.CategoricalParameter.sample:5
-#: aiaccel.parameter.FloatParameter.sample:5
-#: aiaccel.parameter.HyperParameterConfiguration.sample:5
-#: aiaccel.parameter.IntParameter.sample:5
-#: aiaccel.parameter.OrdinalParameter.sample:5 of
-msgid ""
-"Whether to require a initial value. If True, returns the initial value. "
-"Defaults to False."
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter.sample
-#: aiaccel.parameter.CategoricalParameter.sample
-#: aiaccel.parameter.FloatParameter.sample
-#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
-#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
-#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
-#: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.IntParameter.sample
-#: aiaccel.parameter.OrdinalParameter.sample aiaccel.parameter.load_parameter
-#: of
-msgid "戻り値"
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter.sample:9
-#: aiaccel.parameter.CategoricalParameter.sample:9
-#: aiaccel.parameter.FloatParameter.sample:9
-#: aiaccel.parameter.IntParameter.sample:9
-#: aiaccel.parameter.OrdinalParameter.sample:9 of
-msgid "A parameter dictionary."
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter.sample
-#: aiaccel.parameter.CategoricalParameter.sample
-#: aiaccel.parameter.FloatParameter.sample
-#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
-#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_dict
-#: aiaccel.parameter.HyperParameterConfiguration.get_parameter_list
-#: aiaccel.parameter.HyperParameterConfiguration.sample
-#: aiaccel.parameter.IntParameter.sample
-#: aiaccel.parameter.OrdinalParameter.sample aiaccel.parameter.load_parameter
-#: of
-msgid "戻り値の型"
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter.sample
-#: aiaccel.parameter.CategoricalParameter.sample
-#: aiaccel.parameter.FloatParameter.sample
-#: aiaccel.parameter.HyperParameterConfiguration.get_hyperparameter
-#: aiaccel.parameter.IntParameter.sample
-#: aiaccel.parameter.OrdinalParameter.sample of
-msgid "例外"
-msgstr ""
-
-#: aiaccel.parameter.AbstractParameter.sample:12
-#: aiaccel.parameter.CategoricalParameter.sample:12
-#: aiaccel.parameter.FloatParameter.sample:12
-#: aiaccel.parameter.IntParameter.sample:12
-#: aiaccel.parameter.OrdinalParameter.sample:12 of
-msgid "Causes when an invalid type is set."
-msgstr ""
-
-#: aiaccel.parameter.CategoricalParameter:1 aiaccel.parameter.FloatParameter:1
-#: aiaccel.parameter.IntParameter:1 aiaccel.parameter.OrdinalParameter:1
-#: aiaccel.parameter.Parameter:1 of
-msgid "ベースクラス: :py:class:`~aiaccel.parameter.AbstractParameter`"
-msgstr ""
-
 #: aiaccel.parameter.HyperParameterConfiguration:1 of
 msgid "A configuration of hyper parameters."
 msgstr ""
@@ -276,14 +844,6 @@ msgstr ""
 msgid "A list of hyper parameter objects."
 msgstr ""
 
-#: aiaccel.parameter.HyperParameterConfiguration.sample:1 of
-msgid "Sample a hyper parameters set."
-msgstr ""
-
-#: aiaccel.parameter.HyperParameterConfiguration.sample:9 of
-msgid "A hyper parameters set."
-msgstr ""
-
 #: aiaccel.parameter.load_parameter:1 of
 msgid "Load HyperParameterConfiguration object from a configuration file."
 msgstr ""
@@ -296,521 +856,263 @@ msgstr ""
 msgid "A hyper parameter configuration."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:64
+#: ../../source/api_reference/aiaccel.rst:61
 msgid "aiaccel.workspace module"
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:72
-msgid "aiaccel.wrapper\\_tools module"
+#: aiaccel.workspace.Workspace:1 of
+msgid "Provides interface to workspace."
 msgstr ""
 
-#: ../../source/api_reference/aiaccel.rst:80
+#: aiaccel.workspace.Workspace:3 aiaccel.workspace.Workspace:8 of
+msgid "Path to the workspace."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:10 aiaccel.workspace.Workspace:16
+#: aiaccel.workspace.Workspace:22 aiaccel.workspace.Workspace:28
+#: aiaccel.workspace.Workspace:34 aiaccel.workspace.Workspace:40
+#: aiaccel.workspace.Workspace:46 aiaccel.workspace.Workspace:52
+#: aiaccel.workspace.Workspace:58 aiaccel.workspace.Workspace:64
+#: aiaccel.workspace.Workspace:76 aiaccel.workspace.Workspace:82
+#: aiaccel.workspace.Workspace:88 aiaccel.workspace.Workspace:94
+#: aiaccel.workspace.Workspace:100 of
+msgid "Path"
+msgstr ""
+
+#: aiaccel.workspace.Workspace:14 of
+msgid "Path to the error directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:20 of
+msgid "Path to the lock directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:26 of
+msgid "Path to the log directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:32 of
+msgid "Path to the mpi directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:38 of
+msgid "Path to the rank_log directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:44 of
+msgid "Path to the stderr directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:50 of
+msgid "Path to the stdout directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:56 of
+msgid "Path to the runner directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:62 of
+msgid "Path to the tensorboard directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:68 of
+msgid "List of required directories."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:70 of
+msgid "list[Path]"
+msgstr ""
+
+#: aiaccel.workspace.Workspace:74 of
+msgid "Path to the results directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:80 of
+msgid "Path to the result.csv file."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:86 of
+msgid "Path to the final_result.yaml file."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:92 of
+msgid "Path to the storage.db file."
+msgstr ""
+
+#: aiaccel.workspace.Workspace:98 of
+msgid "Path to the best_result.yaml file."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.check_consists:1 of
+msgid "Check required directories exist or not."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.check_consists:5 of
+msgid "All required directories exist or not."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.clean:1 of
+msgid "Delete a workspace."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.clean:3 of
+msgid "It is assumed to be the first one to be executed."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.create:1 of
+msgid "Create a work directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.create:7 of
+msgid "It raises if a workspace argument (self.path)     is not a directory."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.exists:1 of
+msgid "Returns whether workspace exists or not."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.exists:5 of
+msgid "True if the workspace exists."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_error_output_file:1 of
+msgid "Get error output file path"
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_error_output_file:3
+#: aiaccel.workspace.Workspace.get_runner_file:3 of
+msgid "Any trial id"
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_error_output_file:6 of
+msgid "The path to the error output file."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_runner_file:1 of
+msgid ""
+"Returns the file path for the runner script associated with the given "
+"trial ID."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.get_runner_file:6 of
+msgid "The file path for the runner script."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.move_completed_data:1 of
+msgid "Move workspace to under of results directory when finished."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.move_completed_data:5 of
+msgid "Path of destination."
+msgstr ""
+
+#: aiaccel.workspace.Workspace.move_completed_data:8 of
+msgid ""
+"Occurs if destination directory already exists     when the method is "
+"called."
+msgstr ""
+
+#: ../../source/api_reference/aiaccel.rst:69
 msgid "Module contents"
 msgstr ""
 
-#~ msgid "This is an interface for all config classes."
-#~ msgstr ""
-
-#~ msgid "workspace = ConfigEntry("
-#~ msgstr ""
-
-#~ msgid ""
-#~ "config=config, type=[str], default=_DEFAULT_WORKSPACE, "
-#~ "warning=warn, group=\"generic\", keys=(\"workspace\")"
-#~ msgstr ""
-
-#~ msgid ") workspace.get()"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "4-1. in while loop, inner_loop_main_process()"
-#~ " is called. 4-2. in while loop, "
-#~ "loop_count is incremented."
-#~ msgstr ""
-
-#~ msgid "set any random seed."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A best result value and a     file"
-#~ " path. It returns None if a "
-#~ "number of files is less than one."
-#~ msgstr ""
-
-#~ msgid "A best result value and a"
-#~ msgstr ""
-
-#~ msgid "file path. It returns None if a number of files is less than one."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A parameter type any of 'uniform_int',"
-#~ " 'uniform_float', 'categorical' and     "
-#~ "'ordinal'."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A parameter type any of 'uniform_int',"
-#~ " 'uniform_float', 'categorical' and"
-#~ msgstr ""
-
-#~ msgid "'ordinal'."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Create a list of command strings "
-#~ "to run a hyper parameter. :param "
-#~ "command: A string command. :type "
-#~ "command: str :param param_content: A "
-#~ "hyper parameter content. :type param_content:"
-#~ " dict :param trial_id: A unique name"
-#~ " of a hyper parameter. :type "
-#~ "trial_id: str"
-#~ msgstr ""
-
-#~ msgid "A Class for defining the configuration of a configuration file."
-#~ msgstr ""
-
-#~ msgid "Common variables and methods."
-#~ msgstr ""
-
-#~ msgid "Example: ::"
-#~ msgstr ""
-
-#~ msgid "An interface for all config classes."
-#~ msgstr ""
-
-#~ msgid "Fork by confile: https://github.com/777nancy/confile"
-#~ msgstr ""
-
-#~ msgid "Defines the configuration of a configuration file."
-#~ msgstr ""
-
-#~ msgid "A path of configuration file."
-#~ msgstr ""
-
-#~ msgid "A flag of print a warning or not. Defaults to False."
-#~ msgstr ""
-
-#~ msgid "A flag of do tha check format or not. Defaults to None."
-#~ msgstr ""
-
-#~ msgid "Path to the configuration file."
-#~ msgstr ""
-
-#~ msgid "Path"
-#~ msgstr ""
-
-#~ msgid "ConfileWrapper"
-#~ msgstr ""
-
-#~ msgid "ConfigEntry"
-#~ msgstr ""
-
-#~ msgid "Define the configuration of the configuration file"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A class for defining values in a"
-#~ " configuration file         or for holding"
-#~ " read values."
-#~ msgstr ""
-
-#~ msgid "A data type."
-#~ msgstr ""
-
-#~ msgid "A default value."
-#~ msgstr ""
-
-#~ msgid "A flag of print a warning or not."
-#~ msgstr ""
-
-#~ msgid "A name of the group to which the parameter belongs."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "A key to access the value For "
-#~ "example, a parameter under 'generic' "
-#~ "would be written as ('generic')"
-#~ msgstr ""
-
-#~ msgid "サンプル"
-#~ msgstr ""
-
-#~ msgid "If the value is not set, it will force an error to occur."
-#~ msgstr ""
-
-#~ msgid "self._value"
-#~ msgstr ""
-
-#~ msgid "Reads values from the configuration file."
-#~ msgstr ""
-
-#~ msgid "Args"
-#~ msgstr ""
-
-#~ msgid "value (any)"
-#~ msgstr ""
-
-#~ msgid "If the default value is used, a warning is displayed."
-#~ msgstr ""
-
-#~ msgid "A wrapper class for confile library."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Thins wrapper class supports to load "
-#~ "a configuration file in JSON object, "
-#~ "JSON file and YAML format. It "
-#~ "provides a simple method 'get' to "
-#~ "get a property for the specified "
-#~ "keys."
-#~ msgstr ""
-
-#~ msgid "A file path to configuration file."
-#~ msgstr ""
-
-#~ msgid "A file path to default configuration file."
-#~ msgstr ""
-
-#~ msgid "Get a property with specified keys."
-#~ msgstr ""
-
-#~ msgid "A key for the property"
-#~ msgstr ""
-
-#~ msgid "Nested eys for the property"
-#~ msgstr ""
-
-#~ msgid "A property for the specified keys."
-#~ msgstr ""
-
-#~ msgid "ベースクラス: :py:class:`~aiaccel.config.BaseConfig`"
-#~ msgstr ""
-
-#~ msgid "A wrapper for confile to support json, yaml object."
-#~ msgstr ""
-
-#~ msgid "A json or yaml object"
-#~ msgstr ""
-
-#~ msgid "'json_object' or 'yaml_object'."
-#~ msgstr ""
-
-#~ msgid "Get a property for specified keys."
-#~ msgstr ""
-
-#~ msgid "A key to get a property."
-#~ msgstr ""
-
-#~ msgid "Keys to get a property."
-#~ msgstr ""
-
-#~ msgid "A property for the keys."
-#~ msgstr ""
-
-#~ msgid "Convert the configuration to a dictionary object."
-#~ msgstr ""
-
-#~ msgid "The dictionary object of the configuration."
-#~ msgstr ""
-
-#~ msgid "Is the multi-objective option set in the configuration."
-#~ msgstr ""
-
-#~ msgid "A configuration object."
-#~ msgstr ""
-
-#~ msgid "Is the multi--objective option set in the configuration or not."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Load any configuration files, return the"
-#~ " ConfileWrapper object. :param config_path: "
-#~ "A path to a configuration file. "
-#~ ":type config_path: str"
-#~ msgstr ""
-
-#~ msgid "A wrapper object of the configuration."
-#~ msgstr ""
-
-#~ msgid "An abstract class for Master, Optimizer and Manager."
-#~ msgstr ""
-
-#~ msgid "The procedure of this class is as follows:"
-#~ msgstr ""
-
-#~ msgid "At first, deserialize() is called."
-#~ msgstr ""
-
-#~ msgid "start() is called."
-#~ msgstr ""
-
-#~ msgid "pre_process() is called."
-#~ msgstr ""
-
-#~ msgid "loop() is called."
-#~ msgstr ""
-
-#~ msgid "4-1. in while loop, inner_loop_main_process() is called."
-#~ msgstr ""
-
-#~ msgid "4-2. in while loop, loop_count is incremented."
-#~ msgstr ""
-
-#~ msgid "call post_process()"
-#~ msgstr ""
-
-#~ msgid "Args:"
-#~ msgstr ""
-
-#~ msgid "options (dict[str, str | int | bool]): A dictionary containing"
-#~ msgstr ""
-
-#~ msgid "command line options."
-#~ msgstr ""
-
-#~ msgid "A dictionary containing command line options."
-#~ msgstr ""
-
-#~ msgid "dict[str, str | int | bool]"
-#~ msgstr ""
-
-#~ msgid "A config object."
-#~ msgstr ""
-
-#~ msgid "Config"
-#~ msgstr ""
-
-#~ msgid "A path to a current workspace."
-#~ msgstr ""
-
-#~ msgid "A path to hp directory."
-#~ msgstr ""
-
-#~ msgid "A path to lock directory."
-#~ msgstr ""
-
-#~ msgid "A path to output directory."
-#~ msgstr ""
-
-#~ msgid "A path to runner directory."
-#~ msgstr ""
-
-#~ msgid "A number of files in hp/finished directory."
-#~ msgstr ""
-
-#~ msgid "int"
-#~ msgstr ""
-
-#~ msgid "A number of files in hp/ready directory."
-#~ msgstr ""
-
-#~ msgid "A number of files in hp/running directory."
-#~ msgstr ""
-
-#~ msgid "A logger object."
-#~ msgstr ""
-
-#~ msgid "logging.Logger"
-#~ msgstr ""
-
-#~ msgid "A loop count that is incremented in loop method."
-#~ msgstr ""
-
-#~ msgid "Check to confirm if an error has occurred."
-#~ msgstr ""
-
-#~ msgid "True if no error, False if with error."
-#~ msgstr ""
-
-#~ msgid "Checks whether all optimization finished."
-#~ msgstr ""
-
-#~ msgid "True if all optimizations are finished."
-#~ msgstr ""
-
-#~ msgid "create random generator using any random seed."
-#~ msgstr ""
-
-#~ msgid "None"
-#~ msgstr ""
-
-#~ msgid "Get this module type."
-#~ msgstr ""
-
-#~ msgid "Name of this module type."
-#~ msgstr ""
-
-#~ msgid "get random state."
-#~ msgstr ""
-
-#~ msgid "numpy.random.get_state (tuple)"
-#~ msgstr ""
-
-#~ msgid "A main loop process. This process is repeated every main loop."
-#~ msgstr ""
-
-#~ msgid "Causes when the inherited class does not     implement."
-#~ msgstr ""
-
-#~ msgid "Post-procedure after executed processes."
-#~ msgstr ""
-
-#~ msgid "Causes when he inherited class does not     implement."
-#~ msgstr ""
-
-#~ msgid "Pre-procedure before executing processes."
-#~ msgstr ""
-
-#~ msgid "Print hp(hyperparameter) directory states."
-#~ msgstr ""
-
-#~ msgid "When in resume mode, load the previous"
-#~ msgstr ""
-
-#~ msgid "optimization data in advance."
-#~ msgstr ""
-
-#~ msgid "Set a default logger options."
-#~ msgstr ""
-
-#~ msgid "A name of a logger."
-#~ msgstr ""
-
-#~ msgid "A path to a log file."
-#~ msgstr ""
-
-#~ msgid "A logging level for a log file output. For example logging.DEBUG"
-#~ msgstr ""
-
-#~ msgid "A logging level for a stream output."
-#~ msgstr ""
-
-#~ msgid "A module type of a caller."
-#~ msgstr ""
-
-#~ msgid "random state"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Updates hyperparameter counters for ready, "
-#~ "runnning, and finished states."
-#~ msgstr ""
-
-#~ msgid "A hyper parameter class."
-#~ msgstr ""
-
-#~ msgid "A quantization factor."
-#~ msgstr ""
-
-#~ msgid "A configuration dictionary of hyper parameters."
-#~ msgstr ""
-
-#~ msgid "Hyper parameters."
-#~ msgstr ""
-
-#~ msgid "Get a type of a specified parameter."
-#~ msgstr ""
-
-#~ msgid "Provides interface to workspace."
-#~ msgstr ""
-
-#~ msgid "Path to the workspace."
-#~ msgstr ""
-
-#~ msgid "Path to \"alive\", i.e. `path`/alive."
-#~ msgstr ""
-
-#~ msgid "Check required directories exist or not."
-#~ msgstr ""
-
-#~ msgid "All required directories exist or not."
-#~ msgstr ""
-
-#~ msgid "Delete a workspace."
-#~ msgstr ""
-
-#~ msgid "It is assumed to be the first one to be executed."
-#~ msgstr ""
-
-#~ msgid "Create a work directory."
-#~ msgstr ""
-
-#~ msgid "It raises if a workspace argument (self.path)     is not a directory."
-#~ msgstr ""
-
-#~ msgid "Returns whether workspace exists or not."
-#~ msgstr ""
-
-#~ msgid "True if the workspace exists."
-#~ msgstr ""
-
-#~ msgid "Get result file path."
-#~ msgstr ""
-
-#~ msgid "Path to result file."
-#~ msgstr ""
-
-#~ msgid "Get any trial result."
-#~ msgstr ""
-
-#~ msgid "Trial result."
-#~ msgstr ""
-
-#~ msgid "Move workspace to under of results directory when finished."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Occurs if destination directory already "
-#~ "exists     when the method is called."
-#~ msgstr ""
-
-#~ msgid "Path of destination."
-#~ msgstr ""
-
-#~ msgid "Check result file exists or not."
-#~ msgstr ""
-
-#~ msgid "True if result file exists."
-#~ msgstr ""
-
-#~ msgid "Create a list of command strings to run a hyper parameter."
-#~ msgstr ""
-
-#~ msgid "A string command."
-#~ msgstr ""
-
-#~ msgid "A hyper parameter content."
-#~ msgstr ""
-
-#~ msgid "A unique name of a hyper parameter."
-#~ msgstr ""
-
-#~ msgid "A list of command strings."
-#~ msgstr ""
-
-#~ msgid "Save a result file."
-#~ msgstr ""
-
-#~ msgid "A path of a workspace."
-#~ msgstr ""
-
-#~ msgid "A directory to store lock files."
-#~ msgstr ""
-
-#~ msgid "An unique name of a parameter set."
-#~ msgstr ""
-
-#~ msgid "A result of a parameter set."
-#~ msgstr ""
-
-#~ msgid "A start time string."
-#~ msgstr ""
-
-#~ msgid "An end time string."
-#~ msgstr ""
-
-#~ msgid "Error message from Wrapper (user program)"
-#~ msgstr ""
+#: aiaccel.util.aiaccel.Run:1 of
+msgid "An Interface between user program or python function object."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:3 of
+msgid "A path to configration file. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:9 of
+msgid "A path to configration file."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:11 of
+msgid "str | Path | None"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:15 of
+msgid "A dictionary of configuration."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:17 of
+msgid "dict[str, Any] | None"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:21 of
+msgid "A path to workspace."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:23 of
+msgid "Path | None"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:27 of
+msgid "Command line arguments."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:29 of
+msgid "CommandLineArgs"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:32 aiaccel.util.aiaccel.Run.execute_and_report:10
+#: of
+msgid "サンプル"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:33 of
+msgid "*User program* ::"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:40 of
+msgid ""
+"Note that `execute user_program` is a command to execute a user program. "
+"See :doc:`../examples/wrapper_sample`."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run:44 of
+msgid "*Python function* ::"
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:1 of
+msgid "Executes the target function."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:3
+#: aiaccel.util.aiaccel.Run.execute_and_report:3 of
+msgid "User-defined python function."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:5 of
+msgid "Trial ID."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:7 of
+msgid "Name of data type of objective value."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute:10 of
+msgid "A dictionary of parameters, a casted objective value, and error string."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute_and_report:1 of
+msgid "Executes the target function and report the results."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.execute_and_report:5 of
+msgid "Name of data type of objective value. Defaults to None."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:1 of
+msgid "Save the results to a text file."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:3 of
+msgid "Objective values."
+msgstr ""
+
+#: aiaccel.util.aiaccel.Run.report:5 of
+msgid "Error string."
+msgstr ""
 

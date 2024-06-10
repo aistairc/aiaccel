@@ -1,5 +1,5 @@
 aiaccel.manager.job package
-=============================
+===========================
 
 Subpackages
 -----------
@@ -13,7 +13,7 @@ Submodules
 ----------
 
 aiaccel.manager.job.job module
---------------------------------
+------------------------------
 
 .. automodule:: aiaccel.manager.job.job
    :members:

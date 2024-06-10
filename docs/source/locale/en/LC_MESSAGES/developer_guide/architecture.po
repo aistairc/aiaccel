@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:51+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,333 +17,277 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/developer_guide/architecture.md:1
-msgid "aiaccelアーキテクチャ"
+msgid "aiaccelの概要"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:3
-msgid "aiaccelは，与えられた入力ハイパーパラメータ群から最適なハイパーパラメータを出力するハイパーパラメータ最適化ライブラリです．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:5
+#: ../../source/developer_guide/architecture.md:2
 msgid ""
-"本章は，開発者に向けたドキュメントです． "
-"aiaccelのアーキテクチャやトピックごとにaiaccelの機能を解説し，aiaccelに関する開発の一助となることを目的としています．"
+"`aiaccel` は，最適なハイパパラメータの組み合わせを見つけ出すハイパパラメータ最適化ライブラリです． `aiaccel` "
+"は，`ABCI`のインタラクティブノード上で実行することを想定しています． `ABCI`については，[ABCI User "
+"Guide](https://docs.abci.ai/ja/)を参照ください．"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:6
+msgid "また，ローカル環境でも利用可能です．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:8
-msgid "aiaccelのシステム概要"
+msgid ""
+"`aiaccel` は，内部状態や最適化結果をデータベースで管理します．最適化対象のプログラム(ここでは `User "
+"Program`と呼称)の実行タスクを `ABCI` の計算ノードに渡し，結果をデータベースに保存します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:10
-msgid ""
-"aiaccelのシステムについて概説します． aiaccelは，ABCI上で実行することを想定したハイパーパラメータ最適化ライブラリです． "
-"ローカルコンピュータでも動作はしますが，その機能を最大限に発揮するためにはABCIを利用することが推奨されます． ABCIについては，[ABCI "
-"User Guide](https://docs.abci.ai/ja/)を参照してください． "
-"aiaccelは，ABCIのインタラクティブノード上で実行されることを想定されます． "
-"Configを入力として，aiaccelは内部でMaster, Optimizer, Manager "
-"を起動し，Storage(ファイルシステムやデータベース)に状態を保存しながら，最適化対象であるユーザープログラムをABCI計算ノードにてジョブとして実行します．"
-" ABCI計算ノードで実行されたユーザープログラムは，結果をStorageに保存します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:18
 msgid "![aiaccel_system](images/aiaccel_system.png)"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:18
+#: ../../source/developer_guide/architecture.md:10
 msgid "aiaccel_system"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:20
+#: ../../source/developer_guide/architecture.md:12
 msgid "aiaccelの入出力"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:22
-msgid "aiaccelの入出力をもう少しく詳しくみてみます．"
+#: ../../source/developer_guide/architecture.md:14
+msgid "![aiaccel_input_output](images/aiaccel_input_output.png)"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:23
+#: ../../source/developer_guide/architecture.md:14
+msgid "aiaccel_input_output"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:16
 msgid "入力"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:17
+msgid ""
+"`Config` - コンフィグレーションファイルです．最適化のパラメータの設定，最適化アルゴリズムの設定，最適化対象(`User "
+"Program`)等を記述します．コンフィグレーションファイルは，`Yaml` または `JSON` 形式で記述します. <br>"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:19
+msgid "例：`examples/sphere/config.yaml` を参照ください．"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:21
+msgid "`User Program` - 最適化対象のプログラムです．<br>"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:22
+msgid "例： `examples/sphere/user.py` を参照ください．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:24
 msgid ""
-"Config: コンフィグレーションファイルです． examples/sphere/config.yaml などが該当します． "
-"上記のシステム概要のConfigの一部です．"
+"`Job Script` - ジョブスクリプトファイルです． ジョブスクリプトファイルは，`ABCI` で実行するジョブを記述します． "
+"`aiaccel` "
+"は，指定したジョブスクリプトファイルを元に，新たにジョブスクリプトファイルを生成します．ここで指定するジョブスクリプトは，`load "
+"module` などの事前処理を記述します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:27
-msgid ""
-"User Program: ユーザープログラムです． examples/sphere/user.py などが該当します． user.py "
-"は上記のコンフィグレーションファイル内で指定します． "
-"user.pyである必要はありませんが，aiaccelがユーザープログラムを実行するためのインタフェースが user.py に記述されていますので"
-" user.py に該当するファイルは必要となります． Java, C++ などの実行ファイルを利用する場合は user.py "
-"に該当するファイルから呼び出して実行してください． 上記のシステム概要の\\<user program>.pyです．"
+msgid "例： `examples/sphere/job_script_preamble.sh` を参照ください．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:33
-msgid ""
-"Job Script: ジョブスクリプトファイルです． examples/sphere/job_script_preamble.sh "
-"などが該当します． ジョブスクリプトファイルは，ABCIを利用する際に必要となるファイルです． "
-"役割は，aiaccelがABCI上でuser.pyをジョブとして実行するためのスクリプトとなります． "
-"詳しくは[ABCIのバッチジョブに関するドキュメント](https://docs.abci.ai/ja/job-"
-"execution/)の記法を参照してください． 上記のシステム概要のConfigの一部です．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:39
+#: ../../source/developer_guide/architecture.md:30
 msgid "出力"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:40
+#: ../../source/developer_guide/architecture.md:31
 msgid ""
-"Work Directory: aiaccelを実行した際生成されるワークディレクトリです． aiaccelを実行した際 work "
-"という名前のディレクトリが生成されます． 上記のシステム概要のStorageの一部です．"
+"`Work Directory` - `aiaccel` 実行時に生成されるワークディレクトリです(以下，`work` と記述します)． "
+"`work` はコンフィグレーションファイルで指定したパスに生成されます．既に同名のディレクトリが存在する場合は実行を中止します．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:43
+#: ../../source/developer_guide/architecture.md:34
+msgid "`Result Directory` - 実行結果を保存します．過去の実行結果は全てここに保存されます．"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:36
 msgid ""
-"Result Directory: aiaccelを実行した際，実行結果を保存するリザルトディレクトリです． "
-"ワークディレクトリは，現在実行中・実行した状態を保存するディレクトリであるのに対し，リザルトディレクトリは過去に実行した結果を全て保存するディレクトリです．"
-" ただし，実行したディレクトリ内に生成されるため，実行するディレクトリを変更するとまた新しいリザルトディレクトリが生成されます． "
-"上記のシステム概要のStorageの一部です．"
+"`Database` - aiaccelの内部状態の管理・実行結果を保存するデータベースです． `work/storage/storage.db`"
+" に生成されます． データベースは `sqlite3` を採用しています．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:47
-msgid ""
-"Database: aiaccelの実行中の状態・実行結果を保存するデータベースです． work/storage/storage.db "
-"が該当します． work はワークディレクトリです． データベースはsqlite3を採用しています． "
-"上記のシステム概要のStorageの一部です．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:53
-msgid "![aiaccel_input_output](images/aiaccel_input_output.png)"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:53
-msgid "aiaccel_input_output"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:55
+#: ../../source/developer_guide/architecture.md:41
 msgid "aiaccelの構成モジュール"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:56
-msgid "aiaccelは，内部で３つのモジュールが連携しながら実行されます． 本節ではaiaccelの３つのモジュールの役割について説明します．"
+#: ../../source/developer_guide/architecture.md:43
+msgid "![aiaccel_overview](images/aiaccel_modules.png)"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:43
+msgid "aiaccel_overview"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:45
+msgid "Optimizer"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:46
+#: ../../source/developer_guide/architecture.md:118
+msgid "最適化アルゴリズム"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:47
+#: ../../source/developer_guide/architecture.md:119
+msgid "grid search"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:48
+#: ../../source/developer_guide/architecture.md:120
+msgid "random"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:49
+#: ../../source/developer_guide/architecture.md:121
+msgid "sobol sequence"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:50
+#: ../../source/developer_guide/architecture.md:122
+msgid "nelder-mead"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:51
+#: ../../source/developer_guide/architecture.md:123
+msgid "tpe"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:52
+#: ../../source/developer_guide/architecture.md:124
+msgid "mo-tpe"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:54
+msgid "Manager"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:55
+msgid "ジョブスケジューラ．`Optimizer` が生成したハイパパラメータを元にジョブを生成し，計算ノードにジョブを投入します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:59
-msgid "マスター"
+msgid "aiaccelの処理フロー"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:60
-msgid ""
-"スケジューラ・オプティマイザを管理します． 開始時に起動され，オプティマイザ・スケジューラを起動し，これら２つのモジュールの死活監視をします． "
-"オプティマイザ(またはスケジューラ)が停止すると実行中のスケジューラ(またはオプティマイザ)を停止させ，自身も終了します．"
+#: ../../source/developer_guide/architecture.md:61
+msgid "![aiaccel_flow](images/aiaccel_flow.png)"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:61
+msgid "aiaccel_flow"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:63
-msgid "オプティマイザ"
+msgid "`aiaccel-start`コマンドからコンフィグレーションファイルのパスを入力として指定して実行します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:64
-msgid "どのハイパーパラメータを次に実行するかを計算します．５つの最適化アルゴリズムをサポートしており，コンフィグに記述することで実行するアルゴリズムを選択します．"
+msgid "`start.py`がコンフィグレーションファイルをロードし，`Optimizer` と `Manager` を生成します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:65
-msgid "スケジューラ"
+msgid ""
+"`Optimizer` はコンフィグレーションファイルからハイパパラメータの情報を読み込み，最適化アルゴリズムに基づきハイパパラメータを生成し "
+"`Database` に保存します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:66
 msgid ""
-"オプティマイザが選択したハイパーパラメータをジョブとして実行し，そのジョブを管理します． "
-"ジョブは，ハイパーパラメータごとに生成されローカルコンピュータまたはABCI上で実行されます．"
+"`Manager` は `Database` から新しいハイパパラメータを読み込み，コンフィグレーションファイルに基づき指定の計算ノードで "
+"`User Program` を実行するジョブスクリプトファイルを生成し，計算ノードにジョブを投入します．"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:67
+msgid ""
+"`User Program` の処理が終了すると，`aiaccel` が `User Program` の結果を `Database` "
+"に保存します．"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:68
+msgid "3-5 の一連の処理をトライアルと言います．コンフィグレーションファイルで指定したトライアル数に到達するまで繰り返し実行します．"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:69
-msgid "![aiaccel_overview](images/aiaccel_modules.png)"
+msgid "全てのトライアルが完了すると `aiaccel` は停止します．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:69
-msgid "aiaccel_overview"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:71
-msgid "aiaccelの処理フロー"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:72
-msgid ""
-"aiaccelが内部でどのように実行されるかを別の視点から見てみます． "
-"以下の図でもマスター・オプティマイザ・スケジューラの３つのモジュールを軸に構成されています．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:75
-msgid "aiaccel-startコマンドからコンフィグを入力として指定して実行します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:76
-msgid "start.pyがコンフィグをロードし，Masterを起動します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:77
-msgid "MasterがOptimizerを起動します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:78
-msgid "MasterがManagerを起動します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:79
-msgid "Optimizerはコンフィグからハイパーパラメータを読み込み，最適化アルゴリズムに基づきハイパーパラメータを生成しStorageに保存します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:80
-msgid "ManagerはStorageから新しいハイパーパラメータを読み込み，コンフィグに基づき指定の計算ノードでユーザープログラムをジョブとして実行します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:81
-msgid "aiaccelのラッパーにより実行されたユーザープログラムが終了すると，aiaccelラッパーがユーザープログラムの結果をStorageに保存します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:82
-msgid "5-7 が指定のトライアル数まで繰り返されます．ハイパーパラメータの生成数や同時に実行できる計算ノード数などは全てコンフィグに記述します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:83
-msgid "全てのトライアル数分のハイパーパラメータが完了する，または停止命令を受けるとMaster, Optimizer, Manager は停止します．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:85
-msgid "![aiaccel_flow](images/aiaccel_flow.png)"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:85
-msgid "aiaccel_flow"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:87
-msgid "コードから見るaiaccelの処理フロー"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:88
-msgid ""
-"aiaccelの処理フローでは，大まかにaiaccelではMaster, Optimizer, "
-"Managerが協調し，それぞれの役割を果たしていることについて述べた． では実際にコードレベルで，それらのフローを追ってみよう．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:91
+#: ../../source/developer_guide/architecture.md:73
 msgid "start.py"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:93
+#: ../../source/developer_guide/architecture.md:75
 msgid ""
-"aiaccelはaiaccel-startスクリプトにより実行を開始する．aiaccel/cli/start.py を見てみるとまずMaster,"
-" Optimizer, Managerが初期化される"
+"`aiaccel` は `aiaccel-start` コマンドで実行を開始します． `aiaccel-"
+"start`は，`aiaccel/cli/start.py` を実行します．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:101
+#: ../../source/developer_guide/architecture.md:78
+msgid "`Optimizer`，`Manager`，の初期化は以下のコードで行われます．"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:85
 msgid ""
-"初期化されたモジュールは，以下のコードで実行される． "
-"pre_processメソッドの後メインループが周り，メインループ後にpost_processメソッドが実行される． "
-"シンプルに表せば基本的にMasterもOptimizerもManagerは，これらの処理で説明できる．"
+"初期化されたモジュールは，以下のコードで実行されます. `pre_process()` "
+"で初期化し，`inner_loop_main_process()` でメインループでの処理を実行し，`post_process()` "
+"で終了処理を行います．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:125
-msgid "module.py"
+#: ../../source/developer_guide/architecture.md:110
+msgid "2. Optimizer"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:127
+#: ../../source/developer_guide/architecture.md:111
 msgid ""
-"pre_processメソッド・メインループ・post_processメソッドの基本的な記述は aiaccel/module.py にある． "
-"module.py は，Master, Optimizer, Manager のスーパークラスにあたる AbstractModule "
-"クラスが定義されている．"
+"`Optuiizer` クラスは，`aiaccel/module.py` の `AbstractModule` クラスを継承しています． "
+"`Optimize` は `create_optimizer()` で初期化されます． "
+"コンフィグレーションファイルで設定した最適化アルゴリズムが読み込まれます．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:130
-msgid "Master"
+#: ../../source/developer_guide/architecture.md:126
+msgid "RandomOptimizerの例"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:132
+#: ../../source/developer_guide/architecture.md:128
 msgid ""
-"再度 aiaccel/cli/start.py を見てみる． Masterモジュールは create_master "
-"メソッドにより初期化されている． aiaccel/master/create.py "
-"を見てみると，コンフィグに記述されたresource_typeに基づき異なるMasterクラスが実行される．"
+"`RandomOptimizer` "
+"は，`AbstractOptimizer`クラスを継承し，`generate_parameter()`メソッドをオーバーライドしています． "
+"`generate_parameter()` は，最適化アルゴリズム毎にオーバーライドし，固有の処理を記述します．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:136
+#: ../../source/developer_guide/architecture.md:146
+msgid "3. Manager"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:148
 msgid ""
-"簡単のため，ここでは LocalMaster クラスを見てみる． aiaccel/master/local_master.py "
-"を見てみると，AbstractMasterクラスを継承しており特に追記はない．"
+"`Manager` クラスは，`aiaccel/module.py` の `AbstractModule` クラスを継承しています． "
+"`Manager` は `create_manager()` で初期化されます． "
+"コンフィグレーションファイルで設定したジョブスケジューラが読み込まれます．"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:139
-msgid ""
-"では更に aiaccel/master/abstract_master.py の AbstractMaster クラスを見てみる． "
-"時間に関するコードや Evaluator などがあるが，inner_loop_main_process "
-"メソッド内の以下のコードが終了判定をしている．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:147
-msgid ""
-"AbstractMaster クラスにおいては，ここで False "
-"が返る，つまり終了したハイパーパラメータ数がトライアル数以上になるとMasterが終了する．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:149
-msgid "Optimizer"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:151
-msgid ""
-"Optimizerモジュールも，Master同様 start.py にて create_optimizer メソッドにより初期化されている． "
-"aiaccel/optimizer/create.py "
-"を見てみると，コンフィグに記述された最適化アルゴリズム名に基づきOptimizerを初期化している．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:154
-msgid ""
-"ここでは簡単のため RandomOptimizer クラス を見てみる． "
-"aiaccel/optimizer/random_optimizer.py を見てみると，AbstractOptimzier "
-"クラスを継承しており，generate_parameter メソッドのみオーバーライドされている．"
+#: ../../source/developer_guide/architecture.md:156
+msgid "ジョブスケジューラ"
 msgstr ""
 
 #: ../../source/developer_guide/architecture.md:157
-msgid "RandomOptimizer クラスの generate_parameter メソッドは，以下のコードでランダムなハイパーパラメータを生成する．"
+msgid "`ABCI` - `ABCI`での実行"
 msgstr ""
 
-#: ../../source/developer_guide/architecture.md:163
+#: ../../source/developer_guide/architecture.md:158
+msgid "`Local` - ローカル環境での実行．このモードではスケジューラとしての機能はなく，`User Program` を直接実行します．"
+msgstr ""
+
+#: ../../source/developer_guide/architecture.md:159
 msgid ""
-"では更に aiaccel/optimizer/abstract_optimizer.py の AbstractOptimizer "
-"クラスを見てみる． メインループである inner_loop_main_process "
-"メソッドを見ると，以下のコードで新しいハイパーパラメータを生成している．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:171
-msgid "pool_size 変数は，計算ノードがどの程度空いているかに基づいた数値である．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:173
-msgid "Manager"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:175
-msgid ""
-"Managerモジュールも，Master, Optimizer 同様のアーキテクチャとなっている． ここでは LocalManager "
-"クラスを見てみる．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:178
-msgid ""
-"aiaccel/manager/local_manager.py は，AbstractManager クラスを継承している． "
-"get_stats メソッドは，現在のジョブの状態を取得する役割を担う． LocalManagerクラスでは，ps "
-"コマンドをパースしてジョブの状態を取得していることが分かる．"
-msgstr ""
-
-#: ../../source/developer_guide/architecture.md:182
-msgid ""
-"inner_loop_main_process メソッドはメインループであり，ジョブをプロセスとして実行する． その際の execute "
-"メソッドが実行コマンドを生成し実行する．"
+"`Python_Local` - `User Program` が `Python` "
+"ファイルである時に指定可能なモードです．このモードではスケジューラとしての機能はなく，`User Program` を直接実行します．"
 msgstr ""
 

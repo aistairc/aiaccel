@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-07 12:53+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/user_guide/basic_usage.md:1
 msgid "基本的な使い方"
@@ -396,72 +396,69 @@ msgid ""
 "このファイルには事前設定を記述します。ここに記述した設定が全てのジョブに適用されます。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:497
+#: ../../source/user_guide/basic_usage.md:496
 msgid "最適化実行"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:499
+#: ../../source/user_guide/basic_usage.md:498
 msgid "プロジェクトフォルダに移動し、次のコマンドを実行します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:508
+#: ../../source/user_guide/basic_usage.md:507
 msgid "実行するとターミナルに進捗状況を出力します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:510
+#: ../../source/user_guide/basic_usage.md:509
 msgid "オプション付きの実行"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:512
+#: ../../source/user_guide/basic_usage.md:511
 msgid "`start` コマンドの後に、追加オプションを指定できます。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:518
+#: ../../source/user_guide/basic_usage.md:517
 msgid "--clean : workspaceが既に存在する場合、最適化実行前にworkspaceを削除します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:519
+#: ../../source/user_guide/basic_usage.md:518
 msgid ""
 "--resume : "
 "workspaceが既に存在する場合、保存データが存在するトライアルを指定することで、指定のトライアルから再開することができます。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:521
+#: ../../source/user_guide/basic_usage.md:520
 msgid "例"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:526
+#: ../../source/user_guide/basic_usage.md:525
 msgid "ローカル環境での実行方法"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:527
+#: ../../source/user_guide/basic_usage.md:526
 msgid "ローカル環境でaiaccelを使用する場合は、次のように設定を変更します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:529
+#: ../../source/user_guide/basic_usage.md:528
 msgid "resourceの設定"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:530
+#: ../../source/user_guide/basic_usage.md:529
 msgid "コンフィグファイルの `resource` の `type` に `local` を指定します。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:538
+#: ../../source/user_guide/basic_usage.md:537
 msgid "ABCIの設定"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:539
+#: ../../source/user_guide/basic_usage.md:538
 msgid "ローカル環境で実施する場合, `ABCI` の設定は動作に反映されません。"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:548
+#: ../../source/user_guide/basic_usage.md:547
 msgid "job_script_preamble.sh"
 msgstr ""
 
-#: ../../source/user_guide/basic_usage.md:549
+#: ../../source/user_guide/basic_usage.md:548
 msgid "ローカル環境で実施する場合、 `job_script_preamble.sh` は不要です。 記述した内容は動作に反映されません。"
 msgstr ""
-
-#~ msgid "**type** - 実行環境を指定します。 `ABCI` 、または `local` を指定します。"
-#~ msgstr ""
 

@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2022, AIST
+# Copyright (C) 2024, AIST
 # This file is distributed under the same license as the aiaccel package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: aiaccel \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 10:51+0900\n"
+"POT-Creation-Date: 2024-06-06 08:49+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.11.0\n"
+"Generated-By: Babel 2.12.1\n"
 
 #: ../../source/examples/prepare_files.md:1
 msgid "作業ファイルの準備"
@@ -32,7 +32,7 @@ msgid "リポジトリのクローンを取得し，ディレクトリ examles �
 msgstr ""
 
 #: ../../source/examples/prepare_files.md:13
-msgid "examples 下には以下のフォルダが存在します．"
+msgid "examples 下には以下のディレクトリが存在します．"
 msgstr ""
 
 #: ../../source/examples/prepare_files.md:14
@@ -60,6 +60,6 @@ msgid "wrapper_sample"
 msgstr ""
 
 #: ../../source/examples/prepare_files.md:21
-msgid "使用するフォルダに移動して設定を行い， aiaccel を実行します． 例えば sphere に移動するには，以下のようにします．"
+msgid "使用するディレクトリに移動して設定を行い， aiaccel を実行します． 例えば sphere に移動するには，以下のようにします．"
 msgstr ""
 
