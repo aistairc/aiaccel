@@ -133,7 +133,7 @@ class AbciJob:
 
         self.cwd = Path(cwd) if cwd is not None else Path.cwd()
         self.stdout_filename = Path(stdout_filename) if stdout_filename is not None else self.cwd / f"{self.job_name}.o"
-        self.stderr_filename = Path(stderr_filename) if stderr_filename is not None else self.cwd / f"{self.job_name}.o"
+        self.stderr_filename = Path(stderr_filename) if stderr_filename is not None else self.cwd / f"{self.job_name}.e"
 
         self.tag = tag
 
