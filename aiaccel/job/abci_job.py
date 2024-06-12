@@ -219,4 +219,5 @@ class AbciJob:
             job_dict[job_number].status = JobStatus.FINISHED
 
         for job_number, status in status_dict.items():
-            job_dict[job_number].status = JobStatus.from_qsub(status)
+            if job_number in job_dict:
+                job_dict[job_number].status = JobStatus.from_qsub(status)
