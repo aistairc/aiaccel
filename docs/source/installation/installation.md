@@ -211,10 +211,10 @@ python -m pip show aiaccel
 > [!NOTE]
 > （注意）Windowsの場合，ご使用の環境によっては下記の手順が必要になります．
 > ### Execution Polisy の設定
-> 
+>
 > PowerShell を使用して仮想環境を作る場合，セキュリティ設定によって仮想環境をアクティベートするスクリプトが実行できないことがあります．
 > ***以下の手順でセキュリティ設定を変更することが可能ですが，セキュリティリスクが上がることに十分注意してください．詳細は[こちら](https://learn.microsoft.com/ja-jp/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.3)をご確認ください．***
-> 
+>
 > 以下のコマンドを実行して，PowerShell の設定を確認します．
 > ```console
 > > Get-ExecutionPolicy
@@ -224,13 +224,13 @@ python -m pip show aiaccel
 > ```console
 > > Set-ExecutionPolicy RemoteSigned
 > ```
-> 
+>
 > 実行後，コマンド `Get-ExecutionPolicy` を実行して，`RemoteSigned` と表示されれば設定完了です．
 > ```console
 > > Get-ExecutionPolicy
 > RemoteSigned
 > ```
-> 
+>
 > 使用中の PowerShell ウィンドウのみに変更を適用したい場合，以下のようにオプションを追加して設定します．
 > ```console
 > > Set-ExecutionPolicy RemoteSigned -Scope Process
