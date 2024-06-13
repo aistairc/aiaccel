@@ -270,7 +270,6 @@ The following procedures assume that the virtual environment is activated.
 > [!NOTE]
 > Warning: Content blocked by Windows security
 >
-> ご使用のアンチウイルスソフト(Defender 等)の設定によっては先ほど作成した仮想環境上での pip コマンドや Python コマンド等の操作がブロックされる可能性があります．
 > The commands `pip` and `python` executed on the virtual environment can be blocked depending on some anti-virus software, such as Windows Defender.
 
 ### Installing aiaccel
