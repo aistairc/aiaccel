@@ -217,6 +217,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_index = list(self._search_space.keys()).index(param_name)
         param_value = trial.user_attrs["params"][param_index]
 
+        if isinstance(param_distribution, optuna.distributions.IntDistribution):
+            param_value = int(param_value)
+
         contains = param_distribution._contains(param_distribution.to_internal_repr(param_value))
         if not contains:
             warnings.warn(
