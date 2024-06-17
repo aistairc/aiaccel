@@ -19,7 +19,7 @@ sys.path.insert(0, str(root_path.absolute()))
 # -- Project information -----------------------------------------------------
 
 project = "aiaccel"
-copyright = "2024, AIST"
+project_copyright = "2024, AIST"
 author = "AIST"
 
 # The full version, including alpha/beta/rc tags
@@ -61,7 +61,7 @@ exclude_patterns = [
 # [](path/to/file.md#header-anchor). To achieve this, use the
 # myst_heading_anchors = DEPTH configuration option, where DEPTH is the depth
 # of header levels for which you wish to generate links.
-# myst_heading_anchors = 3
+# myst_heading_anchors = 3 (commentout)
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -71,7 +71,7 @@ exclude_patterns = [
 html_theme = "sphinx_rtd_theme"
 html_show_sourcelink = False
 html_show_sphinx = False
-# html_static_path = ["_static"]
+# html_static_path = ["_static"] (commentout)
 html_sidebars = {"**": ["search-field", "sidebar-nav-bs", "sidebar-ethical-ads"]}
 source_suffix = {".rst": "restructuredtext", ".txt": "markdown", ".md": "markdown"}
 html_context = {
@@ -85,7 +85,7 @@ html_context = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+# html_static_path = ['_static'] (commentout)
 
 gettext_compact = False
 locale_dirs = ["locale/"]
@@ -93,4 +93,4 @@ language = "ja"
 
 # -- Extension configuration -------------------------------------------------
 todo_include_todos = True
-# autoclass_content = "both"
+# autoclass_content = "both" (commentout)
