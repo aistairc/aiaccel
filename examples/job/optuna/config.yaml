@@ -7,6 +7,7 @@ study:
     seed: 0
 
 params:
+  _convert_: partial
   _target_: aiaccel.apps.optimize.HparamsManager
   x1: [0, 1]
   x2:

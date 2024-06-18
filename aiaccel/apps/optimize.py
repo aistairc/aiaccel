@@ -1,10 +1,10 @@
 import argparse
 import pickle as pkl
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from hydra.utils import instantiate
-from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 from aiaccel.job import AbciJobExecutor
@@ -26,10 +26,11 @@ study:
     seed: 0
 
 params:
+  _convert_: partial
   _target_: aiaccel.apps.optimize.HparamsManager
   x1: [0, 1]
   x2:
-    _target_: opthuna.trial.Trial.suggest_float
+    _target_: aiaccel.apps.optimize.SuggestFloat
     low: 0.0
     high: 1.0
     log: false
@@ -48,39 +49,50 @@ class HparamsManager:
 
     def suggest_hparams(self, trial: Any) -> dict[str, int | float | str] | Exception:
         hparams = {}
-        for param_name, obj in self.params_def.items():
-            if isinstance(obj, ListConfig):
-                obj = oc.to_container(obj)
-            if isinstance(obj, list):
-                # e.g. [0, 1]
-                hparams[param_name] = trial.suggest_float(param_name, *obj)
-            elif isinstance(obj, Suggest):
-                # e.g. {'low': 0.0, 'high': 1.0, 'log': False}
-                # configで_targer_を指定した場合を想定
-                hparams[param_name] = obj.suggest_hparams(trial)
+
+        for name, param in self.params_def.items():
+            if isinstance(param, list):
+                low, high = param
+                hparams[name] = trial.suggest_float(name, low, high)
+            elif isinstance(param, Suggest):
+                hparams[name] = param(trial)
             else:
-                raise NotImplementedError
+                raise NotImplementedError(f"Unsupported parameter type: {type(param)}")
+
         return hparams
 
 
+@dataclass
 class Suggest:
-    def __init__(self, **kwargs: dict[str, float]) -> None:
-        self.param_def = oc.to_object(DictConfig(kwargs))
-
-    def suggest_hparams(self, trial: Any) -> int | float | str:
+    def __call__(self, trial: Any) -> int | float | str:
         raise NotImplementedError
 
 
+@dataclass
 class SuggestFloat(Suggest):
-    def suggest_hparams(self, trial):  # type: ignore
-        return trial.suggest_float(**self.param_def)
+    name: str
+    low: float
+    high: float
+    step: float | None | None = None
+    log: bool | None = False
+
+    def __call__(self, trial: Any) -> float:
+        return trial.suggest_float(name=self.name, low=self.low, high=self.high, step=self.step, log=self.log)  # type: ignore
 
 
+@dataclass
 class SuggestInt(Suggest):
-    def suggest_hparams(self, trial):  # type: ignore
-        return trial.suggest_int(**self.param_def)
+    name: str
+    low: int
+    high: int
+    step: int | None = 1
+    log: bool | None = False
+
+    def __call__(self, trial: Any) -> int:
+        return trial.suggest_int(name=self.name, low=self.low, high=self.high, step=self.step, log=self.log)  # type: ignore
 
 
+@dataclass
 class SuggestXXX(Suggest): ...
 
 
@@ -89,22 +101,22 @@ class SuggestXXX(Suggest): ...
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("filename", type=str, help="The shell script to execute.")
+    parser.add_argument("job_filename", type=str, help="The shell script to execute.")
     parser.add_argument("--config", nargs="?", default=None)
 
     args, unk_args = parser.parse_known_args()
     config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
 
-    jobs = AbciJobExecutor(Path(args.filename), config.group, n_max_jobs=config.n_max_jobs)
-    study = instantiate(oc.to_container(config.study))
-    params = instantiate(oc.to_container(config.params))
+    jobs = AbciJobExecutor(Path(args.job_filename), config.group, n_max_jobs=config.n_max_jobs)
+    study = instantiate(config.study)
+    params = instantiate(config.params)
 
     result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
 
     finished_job_count = 0
 
     while finished_job_count <= config.n_trials:
-        n_max_jobs = 1 if config.n_max_jobs == 1 else min(jobs.available_slots(), config.n_trials - finished_job_count)
+        n_max_jobs = min(jobs.available_slots(), config.n_trials - finished_job_count)
         for _ in range(n_max_jobs):
             trial = study.ask()
 
