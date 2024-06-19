@@ -3,6 +3,7 @@ import shutil
 import subprocess
 from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -10,7 +11,7 @@ import pytest
 from aiaccel.job import AbciJob, JobStatus
 
 
-def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> subprocess.CompletedProcess:
+def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> Any:
     p = subprocess.CompletedProcess([], returncode=0, stdout=b"", stderr=b"")
     with open(txt_data_path) as f:
         p.stdout = f.read().encode()
