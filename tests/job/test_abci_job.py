@@ -12,9 +12,13 @@ from aiaccel.job import AbciJob, JobStatus
 
 
 def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> Any:
-    p = subprocess.CompletedProcess([], returncode=0, stdout=b"", stderr=b"")
     with open(txt_data_path) as f:
-        p.stdout = f.read().encode()
+        p = subprocess.CompletedProcess(
+            [],
+            returncode=0,
+            stdout=f.read().encode(),
+            stderr=b"",
+        )
     return p
 
 
