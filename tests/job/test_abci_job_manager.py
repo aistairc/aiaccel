@@ -1,4 +1,5 @@
 import shutil
+import subprocess
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -8,15 +9,10 @@ import pytest
 from aiaccel.job import AbciJob, AbciJobExecutor, JobStatus
 
 
-class SubprocessReturn:
-    stdout = ""
-    stderr = ""
-
-
-def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> SubprocessReturn:
-    p = SubprocessReturn()
+def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> subprocess.CompletedProcess:
+    p = subprocess.CompletedProcess([], returncode=0, stdout=b"", stderr=b"")
     with open(txt_data_path) as f:
-        p.stdout = f.read()
+        p.stdout = f.read().encode()
     return p
 
 

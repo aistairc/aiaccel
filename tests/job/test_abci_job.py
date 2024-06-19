@@ -1,5 +1,6 @@
 import re
 import shutil
+import subprocess
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import patch
@@ -9,15 +10,10 @@ import pytest
 from aiaccel.job import AbciJob, JobStatus
 
 
-class SubprocessReturn:
-    stdout = ""
-    stderr = ""
-
-
-def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> SubprocessReturn:
-    p = SubprocessReturn()
+def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> subprocess.CompletedProcess:
+    p = subprocess.CompletedProcess([], returncode=0, stdout=b"", stderr=b"")
     with open(txt_data_path) as f:
-        p.stdout = f.read()
+        p.stdout = f.read().encode()
     return p
 
 
@@ -54,15 +50,15 @@ def test_from_qsub_unexpected_status() -> None:
 
 @pytest.fixture
 def job_instance(tmpdir: Path) -> Generator[AbciJob, None, None]:
-    job_filename: str = "job.sh"
-    job_group: str = "group"
-    job_name: str = "job"
-    cwd: Path = tmpdir / "cwd"
+    job_filename = "job.sh"
+    job_group = "group"
+    job_name = "job"
+    cwd = tmpdir / "cwd"
     cwd.mkdir()
-    stdout_filename: Path = Path(cwd) / f"{job_name}.o"
-    stderr_filename: Path = Path(cwd) / f"{job_name}.e"
-    qsub_args: list[str] = ["-l"]
-    args: list[str] = ["arg1", "arg2"]
+    stdout_filename = Path(cwd) / f"{job_name}.o"
+    stderr_filename = Path(cwd) / f"{job_name}.e"
+    qsub_args = ["-l"]
+    args = ["arg1", "arg2"]
     tag: None = None
 
     job: AbciJob = AbciJob(
