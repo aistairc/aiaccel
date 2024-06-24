@@ -5,39 +5,21 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from utils import qstat_xml
 
 from aiaccel.job import AbciJob, JobStatus
-
-
-class SubprocessReturn:
-    stdout = ""
-    stderr = ""
-
-
-def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> SubprocessReturn:
-    p = SubprocessReturn()
-    with open(txt_data_path) as f:
-        p.stdout = f.read()
-    return p
-
 
 ## JobStatus
 
 
 def test_from_qsub_running() -> None:
-    assert JobStatus.from_qsub("r") == JobStatus.RUNNING
-    assert JobStatus.from_qsub("d") == JobStatus.RUNNING
-    assert JobStatus.from_qsub("Rr") == JobStatus.RUNNING
+    for status in ["r", "d", "Rr"]:
+        assert JobStatus.from_qsub(status) == JobStatus.RUNNING
 
 
 def test_from_qsub_waiting() -> None:
-    assert JobStatus.from_qsub("qw") == JobStatus.WAITING
-    assert JobStatus.from_qsub("h") == JobStatus.WAITING
-    assert JobStatus.from_qsub("t") == JobStatus.WAITING
-    assert JobStatus.from_qsub("s") == JobStatus.WAITING
-    assert JobStatus.from_qsub("S") == JobStatus.WAITING
-    assert JobStatus.from_qsub("T") == JobStatus.WAITING
-    assert JobStatus.from_qsub("Rq") == JobStatus.WAITING
+    for status in ["qw", "h", "t", "s", "S", "T", "Rq"]:
+        assert JobStatus.from_qsub(status) == JobStatus.WAITING
 
 
 def test_from_qsub_error() -> None:
@@ -54,30 +36,22 @@ def test_from_qsub_unexpected_status() -> None:
 
 @pytest.fixture
 def job_instance(tmpdir: Path) -> Generator[AbciJob, None, None]:
-    job_filename: str = "job.sh"
-    job_group: str = "group"
-    job_name: str = "job"
-    cwd: Path = tmpdir / "cwd"
+    cwd = tmpdir / "cwd"
     cwd.mkdir()
-    stdout_filename: Path = Path(cwd) / f"{job_name}.o"
-    stderr_filename: Path = Path(cwd) / f"{job_name}.e"
-    qsub_args: list[str] = ["-l"]
-    args: list[str] = ["arg1", "arg2"]
-    tag: None = None
 
-    job: AbciJob = AbciJob(
-        job_filename,
-        job_group,
+    job_name = "job"
+
+    yield AbciJob(
+        job_filename="job.sh",
+        job_group="group",
         job_name=job_name,
         cwd=str(cwd),
-        stdout_filename=stdout_filename,
-        stderr_filename=stderr_filename,
-        qsub_args=qsub_args,
-        args=args,
-        tag=tag,
+        stdout_filename=cwd / f"{job_name}.o",
+        stderr_filename=cwd / f"{job_name}.e",
+        qsub_args=["-l"],
+        args=["arg1", "arg2"],
+        tag=None,
     )
-
-    yield job
 
     shutil.rmtree(str(cwd))
 
@@ -90,21 +64,15 @@ def test_init(job_instance: AbciJob) -> None:
     assert isinstance(job.stderr_filename, Path)
     assert job.status == JobStatus.UNSUBMITTED
     assert job.job_number is None
-    assert job.cmd == [
-        "qsub",
-        "-g",
-        job.job_group,
-        "-o",
-        str(job.stdout_filename),
-        "-e",
-        str(job.stderr_filename),
-        "-N",
-        job.job_name,
-        "-l",
-        str(job.job_filename),
-        "arg1",
-        "arg2",
-    ]
+    assert job.cmd == (
+        ["qsub"]
+        + ["-g", job.job_group]
+        + ["-o", str(job.stdout_filename)]
+        + ["-e", str(job.stderr_filename)]
+        + ["-N", job.job_name]
+        + ["-l", str(job.job_filename)]
+        + ["arg1", "arg2"]
+    )
 
 
 def test_submit(job_instance: AbciJob) -> None:
@@ -186,32 +154,16 @@ def test_update_status_batch() -> None:
         - RUNNING: 4
     """
 
-    job_filename = "job.sh"
-    job_group = "group"
-    job_name = "job"
+    job_list: list[AbciJob] = []
+    for ii in range(4):
+        job = AbciJob(job_filename="job.sh", job_group="group", job_name="job")
+        job.status = JobStatus.WAITING
+        job.job_number = 42340793 + 2 * ii
 
-    job1 = AbciJob(job_filename, job_group, job_name=job_name)
-    job1.status = JobStatus.WAITING
-    job1.job_number = 42340793
-
-    job2 = AbciJob(job_filename, job_group, job_name=job_name)
-    job2.status = JobStatus.WAITING
-    job2.job_number = 42340795
-
-    job3 = AbciJob(job_filename, job_group, job_name=job_name)
-    job3.status = JobStatus.WAITING
-    job3.job_number = 42340797
-
-    job4 = AbciJob(job_filename, job_group, job_name=job_name)
-    job4.status = JobStatus.WAITING
-    job4.job_number = 42340799
-
-    job_list = [job1, job2, job3, job4]
+        job_list.append(job)
 
     with patch("subprocess.run", return_value=qstat_xml("tests/job/qstat_dat.txt")):
         AbciJob.update_status_batch(job_list)
 
-    assert job1.status == JobStatus.RUNNING
-    assert job2.status == JobStatus.RUNNING
-    assert job3.status == JobStatus.RUNNING
-    assert job4.status == JobStatus.RUNNING
+    for job in job_list:
+        assert job.status == JobStatus.RUNNING

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from aiaccel.job.abci_job import AbciJob, JobStatus
 from aiaccel.job.abci_job_manager import AbciJobExecutor
 
