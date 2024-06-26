@@ -31,6 +31,7 @@ params:
   x1: [0, 1]
   x2:
     _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x2
     low: 0.0
     high: 1.0
     log: false
@@ -45,31 +46,26 @@ group: gaa50000
 
 class HparamsManager:
     def __init__(self, **params_def: dict[str, float]) -> None:
-        self.params_def = params_def
+        self.params = {}
+        for name, param in params_def.items():
+            if isinstance(param, list):
+                low, high = param
+                self.params[name] = lambda trial, name=name, low=low, high=high: trial.suggest_float(name, low, high)
+            else:
+                self.params[name] = param
 
     def suggest_hparams(self, trial: Any) -> dict[str, int | float | str] | Exception:
         hparams = {}
-
-        for name, param in self.params_def.items():
-            if isinstance(param, list):
-                low, high = param
-                hparams[name] = trial.suggest_float(name, low, high)
-            elif isinstance(param, Suggest):
-                hparams[name] = param(trial)
+        for param_name, hp_generator in self.params.items():
+            if callable(hp_generator):
+                hparams[param_name] = hp_generator(trial)
             else:
-                raise NotImplementedError(f"Unsupported parameter type: {type(param)}")
-
+                hparams[param_name] = hp_generator
         return hparams
 
 
 @dataclass
-class Suggest:
-    def __call__(self, trial: Any) -> int | float | str:
-        raise NotImplementedError
-
-
-@dataclass
-class SuggestFloat(Suggest):
+class SuggestFloat:
     name: str
     low: float
     high: float
@@ -81,7 +77,7 @@ class SuggestFloat(Suggest):
 
 
 @dataclass
-class SuggestInt(Suggest):
+class SuggestInt:
     name: str
     low: int
     high: int
@@ -93,7 +89,7 @@ class SuggestInt(Suggest):
 
 
 @dataclass
-class SuggestXXX(Suggest): ...
+class SuggestXXX: ...
 
 
 ...
