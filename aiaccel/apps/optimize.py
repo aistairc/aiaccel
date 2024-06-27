@@ -10,12 +10,15 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 from aiaccel.job import AbciJobExecutor
 
 """
-Usage:
+Usage (if parameters are not defined in a config file):
     python -m aiaccel.apps.optimize objective.sh params.x1="[0, 10]" params.x2="[0, 10]" --config config.yaml
+
+Usage (if parameters are defined in a config file):
+    python -m aiaccel.apps.optimize objective.sh --config config.yaml
 """
 
 """
-config.yaml:
+config file (yaml) example:
 
 study:
   _target_: optuna.create_study
@@ -44,32 +47,27 @@ group: gaa50000
 """
 
 
-class HparamsManager:
-    def __init__(self, **params_def: dict[str, float]) -> None:
-        self.params = {}
-        for name, param in params_def.items():
-            if isinstance(param, list):
-                low, high = param
-                self.params[name] = lambda trial, name=name, low=low, high=high: trial.suggest_float(name, low, high)
-            else:
-                self.params[name] = param
-
-    def suggest_hparams(self, trial: Any) -> dict[str, int | float | str] | Exception:
-        hparams = {}
-        for param_name, hp_generator in self.params.items():
-            if callable(hp_generator):
-                hparams[param_name] = hp_generator(trial)
-            else:
-                hparams[param_name] = hp_generator
-        return hparams
+@dataclass
+class Suggest:
+    def __call__(self, trial: Any) -> Any:
+        raise NotImplementedError
 
 
 @dataclass
-class SuggestFloat:
+class Const(Suggest):
+    name: str
+    value: Any
+
+    def __call__(self, _: Any) -> Any:
+        return self.value
+
+
+@dataclass
+class SuggestFloat(Suggest):
     name: str
     low: float
     high: float
-    step: float | None | None = None
+    step: float | None = None
     log: bool | None = False
 
     def __call__(self, trial: Any) -> float:
@@ -77,7 +75,7 @@ class SuggestFloat:
 
 
 @dataclass
-class SuggestInt:
+class SuggestInt(Suggest):
     name: str
     low: int
     high: int
@@ -89,10 +87,26 @@ class SuggestInt:
 
 
 @dataclass
-class SuggestXXX: ...
+class SuggestXXX(Suggest): ...
 
 
 ...
+
+
+class HparamsManager:
+    def __init__(self, **params_def: dict[str, int | float | list[float | int] | Suggest]) -> None:
+        self.params = {}
+        for name, param in params_def.items():
+            if not callable(param):
+                if isinstance(param, list):
+                    low, high = param
+                    param = lambda trial, name=name, low=low, high=high: SuggestFloat(name, low, high)(trial)  # type: ignore # noqa: E731
+                else:
+                    param = lambda trial, name=name, value=param: Const(name, value)(trial)  # type: ignore # noqa: E731
+            self.params[name] = param
+
+    def suggest_hparams(self, trial: Any) -> dict[str, int | float | str]:
+        return {name: param_fn(trial) for name, param_fn in self.params.items()}  # type: ignore
 
 
 def main() -> None:
@@ -117,7 +131,7 @@ def main() -> None:
             trial = study.ask()
 
             hparams = params.suggest_hparams(trial)
-
+            print(hparams)
             jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
             job = jobs.submit(
