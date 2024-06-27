@@ -48,15 +48,23 @@ def plot_dim_vs_min_value(ax: Axes, csv_names_for_dim: list[list[list[str]]], ti
         values_mean = np.array(values).mean(axis=1)
         values_std = np.array(values).std(axis=1)
         ax.errorbar(
-            dim, values_mean, yerr = values_std, capsize=5, markersize=10,
-            ecolor=colors[i], markeredgecolor = colors[i], color=colors[i], label=label_names[i]
-            )
+            dim,
+            values_mean,
+            yerr=values_std,
+            capsize=5,
+            markersize=10,
+            ecolor=colors[i],
+            markeredgecolor=colors[i],
+            color=colors[i],
+            label=label_names[i],
+        )
 
     if title == "f6":
         ax.set_ylim(-1000, 10000)
     ax.set_title(title)
-    ax.grid(axis='both')
+    ax.grid(axis="both")
     ax.legend(fontsize=6)
+
 
 def compare_optimizer(base_dir: str = ".") -> None:
     fig, ax = plt.subplots(5, 5, figsize=(16, 20))
@@ -76,7 +84,7 @@ def compare_optimizer(base_dir: str = ".") -> None:
 
         plot_dim_vs_min_value(
             ax[int((num_of_f - 1) / 5), int((num_of_f - 1) % 5)], result_csv_list_for_dim, f"f{num_of_f}"
-            )
+        )
 
     plt.savefig("result_bbob_dim_vs_value-fopt_parallel.png")
     plt.show()

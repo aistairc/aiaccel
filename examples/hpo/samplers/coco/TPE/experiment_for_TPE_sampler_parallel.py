@@ -15,10 +15,8 @@ from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError
 
 
 def _optimize_sequential(
-        study: optuna.Study,
-        func: Callable[[list[float]], float],
-        search_space: dict[str, tuple[float, float]]
-        ) -> float | None:
+    study: optuna.Study, func: Callable[[list[float]], float], search_space: dict[str, tuple[float, float]]
+) -> float | None:
     try:
         trial = study.ask()
     except NelderMeadEmptyError:
@@ -53,7 +51,7 @@ def optimize(
         for step in range(int(num_trial / num_parallel)):
             results = executor.map(
                 _optimize_sequential_wrapper, [(study, func, search_space) for _ in range(num_parallel)]
-                )
+            )
             for result in results:
                 if result is not None:
                     csv_array.append([step, result])
@@ -63,12 +61,7 @@ def optimize(
         writer.writerows(csv_array)
 
 
-def create_optuna_result(
-    study: optuna.Study,
-    output_folder: str,
-    problem: Any,
-    optuna_seed: int
-) -> None:
+def create_optuna_result(study: optuna.Study, output_folder: str, problem: Any, optuna_seed: int) -> None:
     study_df = study.trials_dataframe()
     result_dir = "optuna_csv/" + output_folder + f"/f{problem.id_function}/DM{problem.dimension:02}"
     os.makedirs(result_dir, exist_ok=True)
@@ -113,13 +106,17 @@ if __name__ == "__main__":
             sampler=optuna.samplers.TPESampler(seed=optuna_seed, consider_magic_clip=True, multivariate=False)
         )
 
-        num_trial = budget_multiplier*problem.dimension
+        num_trial = budget_multiplier * problem.dimension
         step_csv_dir = "step_csv/" + output_folder + f"/f{problem.id_function}/DM{problem.dimension:02}/"
         os.makedirs(step_csv_dir, exist_ok=True)
         optimize(
-            study, problem, search_space,
-            step_csv_dir + f"result_{problem.id}_{optuna_seed:03}.csv", num_trial, num_parallel
-            )
+            study,
+            problem,
+            search_space,
+            step_csv_dir + f"result_{problem.id}_{optuna_seed:03}.csv",
+            num_trial,
+            num_parallel,
+        )
 
         create_optuna_result(study, output_folder, problem, optuna_seed)
 
@@ -133,7 +130,7 @@ if __name__ == "__main__":
             "exdata/"
             + f"{output_folder}/"
             + f"data_f{problem.id_function}/bbobexp_f{problem.id_function}_DIM{problem.dimension}_i1.rdat"
-            )
+        )
 
         with open(coco_file_path) as f:
             data = f.readlines()
