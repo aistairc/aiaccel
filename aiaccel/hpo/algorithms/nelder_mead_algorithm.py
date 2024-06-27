@@ -27,6 +27,57 @@ class UnexpectedVerticesUpdateError(Exception):
 
 
 class NelderMeadAlgorism:
+    """Class to manage the NelderMead algorithm
+
+    Uses a queue to receive results and advance the NelderMead algorithm.
+
+    NelderMead アルゴリズムを管理するクラス
+
+    queue を用いて結果を受け取り、NelderMead のアルゴリズムを進める
+
+    Args:
+        search_space: dict[str, tuple[float, float]]
+            Lower and upper bounds corresponding to each parameter name.
+            Needs to be set individually from suggest_uniform
+            (since parameters need to be determined at the time of before_trial).
+            パラメータ名と対応した lower, upper
+            suggest_uniform とは個別に設定する必要がある
+            (before_trial 時点でパラメータを決定する必要があるため)
+        coeff: NelderMeadCoefficient | None = None
+            Parameters used in NelderMead.
+            NelderMead で用いられるパラメータ
+        rng: np.random.RandomState | None = None
+            RandomState used for calculating initial points.
+            初期点計算に用いられる RandomState
+        block: bool = False
+            Sets whether to block the queue used internally.
+            内部で用いられる queue を block するかどうかを設定する
+        timeout: int | None = None
+            Time to block the queue.
+            queue を block する時間
+    Attributes:
+        vertices: list[npt.NDArray[np.float64]]
+            List of simplex parameters.
+            simplex のパラメータのリスト
+        values: list[float]
+            List of simplex calculation results.
+            simplex の計算結果のリスト
+        generator: iterator
+            Generator for NelderMead parameters.
+            neldermead のパラメータのジェネレータ
+        lock: threading.Lock
+            threading.Lock variable used for thread-safe processing.
+             スレッドセーフ処理に用いる threading.Lock 変数
+        results: queue.Queue[tuple[npt.NDArray[np.float64], float, bool]]
+            Queue to receive tuples of parameters, calculation results,
+            and a boolean indicating whether the parameters were output by NelderMead.
+            外部からパラメータ・計算結果・nelder mead から出力されたパラメータか否かを示す bool 変数
+            のタプルを受け取る queue
+        simplex_size: int
+            Number of vertices in the simplex.
+            simplex の頂点の個数
+    """
+
     vertices: list[npt.NDArray[np.float64]]
     values: list[float]
 
@@ -54,6 +105,19 @@ class NelderMeadAlgorism:
         self.simplex_size = len(self._search_space) + 1
 
     def get_vertex(self) -> npt.NDArray[np.float64]:
+        """Method to return the next parameters for NelderMead
+
+        Thread-safe due to parallel processing requirements.
+
+        nelder mead の次のパラメータを返すメソッド
+
+        並列処理の都合でスレッドセーフとなっている
+
+        Returns:
+            npt.NDArray[np.float64]:
+                The next parameters for NelderMead.
+                nelder mead の次のパラメータ
+        """
         with self.lock:
             vertex = next(self.generator)
 
@@ -68,6 +132,17 @@ class NelderMeadAlgorism:
         value: float,
         enqueue: bool = False,
     ) -> None:
+        """Method to pass a pair of parameters and results to NelderMead
+
+        nelder mead にパラメータと結果の組を渡すメソッド
+
+        Args:
+            vertex: npt.NDArray[np.float64]: Parameters パラメータ
+            value: float: Calculation result 計算結果
+            enqueue: bool = False:
+                Boolean indicating whether the parameters were output by NelderMead.
+                nelder mead から出力されたパラメータか否かを示す bool 変数
+        """
         self.results.put((vertex, value, enqueue))
 
     def _collect_enqueued_results(
