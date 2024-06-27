@@ -1,9 +1,9 @@
 import glob
 
 import matplotlib.pyplot as plt
-from matplotlib.axes._axes import Axes
 import numpy as np
 import pandas as pd
+from matplotlib.axes._axes import Axes
 
 
 def get_min_values(values: list[float]) -> list[float]:
