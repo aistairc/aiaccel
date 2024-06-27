@@ -18,7 +18,9 @@ classifiers = [
 dependencies = [
     "numpy",
     "optuna",
-    "optuna>=3.4.0"
+    "optuna>=3.4.0",
+    "omegaconf",
+    "hydra-core",
 ]
 
 [project.scripts]
