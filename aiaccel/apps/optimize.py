@@ -11,7 +11,7 @@ from optuna.trial import Trial
 
 from aiaccel.job import AbciJobExecutor
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 """
 Usage (if parameters are not defined in a config file):
@@ -49,6 +49,7 @@ n_max_jobs: 4
 group: gaa50000
 
 """
+
 
 @dataclass
 class Suggest(Generic[T]):
