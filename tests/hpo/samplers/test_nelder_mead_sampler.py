@@ -217,8 +217,8 @@ def ackley_sleep(x: list[float]) -> float:
     time.sleep(np.random.uniform(0.001, 0.01))
     # Ackley function
     y = (
-        -20 * np.exp(-0.2 * np.sqrt(0.5 * (x[0] ** 2 + x[1] ** 2)))
-        - np.exp(0.5 * (np.cos(2 * np.pi * x[0]) + np.cos(2 * np.pi * x[1])))
+        -20 * np.exp(-0.2 * np.sqrt(1.0 / len(x) * np.sum(np.array(x) ** 2)))
+        - np.exp(1.0 / len(x) * np.sum(np.cos(2 * np.pi * np.array(x))))
         + np.e
         + 20
     )
@@ -461,3 +461,22 @@ class TestNelderMeadAckleyInteger(BaseTestNelderMead):
         params.append(trial.suggest_float("y", *self.search_space["y"]))
 
         return self.objective(params)
+
+
+class TestNelderMeadAckleyLogScale(BaseTestNelderMead):
+    def setup_method(self) -> None:
+        search_space = {"x": (1.0e-5, 1.0e5), "y": (1.0e-5, 1.0e5)}
+        sampler = NelderMeadSampler(search_space=search_space, seed=42, log={"x": True, "y": True})
+
+        self.common_setup(
+            search_space=search_space,
+            objective=ackley,
+            result_file_name="results_ackley_logscale.csv",
+            study=optuna.create_study(sampler=sampler),
+        )
+
+    def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
+        for trial, result in zip(self.study.trials, results, strict=False):
+            assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000000001)
+            assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000000001)
+            assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000000001)
