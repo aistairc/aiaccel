@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import math
 import warnings
 from collections.abc import Sequence
@@ -27,12 +28,11 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         sub_sampler: optuna.samplers.BaseSampler | None = None,
         log: dict[str, bool] | None = None,
     ) -> None:
-        self._search_space = search_space
-        self._log = log
-        if self._log is not None:
-            for key, enable_log_scale in self._log.items():
-                if key in search_space and enable_log_scale:
-                    search_space[key] = (math.log(search_space[key][0]), math.log(search_space[key][1]))
+        self._search_space = copy.deepcopy(search_space)
+        self._log = {name: False for name in search_space} | {} if log is None else log
+        for key, enable_log_scale in self._log.items():
+            if key in self._search_space and enable_log_scale:
+                self._search_space[key] = (math.log(self._search_space[key][0]), math.log(self._search_space[key][1]))
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
@@ -89,7 +89,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     ) -> Any:
         if "sub_trial" in trial.user_attrs and self.sub_sampler is not None:
             param_value = self.sub_sampler.sample_independent(study, trial, param_name, param_distribution)
-            if self._search_space[param_name][0] <= param_value <= self._search_space[param_name][1]:
+            value = math.log(param_value) if self._log[param_name] else param_value
+            if self._search_space[param_name][0] <= value <= self._search_space[param_name][1]:
                 return param_value
             else:
                 raise ValueError(
@@ -105,6 +106,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if isinstance(param_distribution, optuna.distributions.IntDistribution):
             param_value = int(param_value)
 
+        if param_name in self._log and self._log[param_name]:
+            param_value = math.exp(param_value)
+
         contains = param_distribution._contains(param_distribution.to_internal_repr(param_value))
         if not contains:
             warnings.warn(
@@ -112,9 +116,6 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 f"The value will be used but the actual distribution is: `{param_distribution}`.",
                 stacklevel=2,
             )
-
-        if self._log is not None and param_name in self._log and self._log[param_name]:
-            param_value = math.exp(param_value)
 
         return param_value
 
@@ -131,10 +132,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 "NelderMeadSampler supports only single objective optimization."
             )
         if isinstance(values, list):
-            if self._log is not None:
-                params = [math.log(value) if key in self._log else value for key, value in trial.params.items()]
-            else:
-                params = list(trial.params.values())
+            params = [math.log(value) if self._log[key] else value for key, value in trial.params.items()]
             self.nm.put_value(
                 np.array(params),
                 values[0],
