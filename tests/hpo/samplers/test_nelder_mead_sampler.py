@@ -480,3 +480,9 @@ class TestNelderMeadAckleyLogScale(BaseTestNelderMead):
             assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000000001)
             assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000000001)
             assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000000001)
+
+    def func(self, trial: optuna.trial.Trial) -> float:
+        params = []
+        for name, distribution in self.search_space.items():
+            params.append(trial.suggest_float(name, *distribution, log=True))
+        return self.objective(params)
