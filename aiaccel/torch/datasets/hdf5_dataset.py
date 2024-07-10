@@ -6,8 +6,8 @@ from pathlib import Path
 import pickle as pkl
 
 import torch
-from torch.utils.data import Dataset
 from torch import distributed as dist
+from torch.utils.data import Dataset
 
 import h5py as h5
 
@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-class RawHDF5Dataset(Dataset[int]):
+class RawHDF5Dataset(Dataset[Any]):
     def __init__(self, dataset_path: Path | str, grp_list: Path | str | list[str] | None = None) -> None:
         self.dataset_path = dataset_path
 
@@ -25,9 +25,9 @@ class RawHDF5Dataset(Dataset[int]):
             if grp_list is None:
                 with h5.File(self.dataset_path, "r") as f:
                     self.grp_list = list(f.keys())
-            elif isinstance(grp_list, (str, Path)):
+            elif isinstance(grp_list, str | Path):
                 with open(grp_list, "rb") as f:
-                    self.grp_list: list[str] = pkl.load(f)
+                    self.grp_list = pkl.load(f)
             elif isinstance(grp_list, list):
                 self.grp_list = grp_list
             else:
@@ -35,10 +35,10 @@ class RawHDF5Dataset(Dataset[int]):
             self.grp_list.sort()
 
         if dist.is_initialized():
-            bc_obj_list = [self.grp_list] if dist.get_rank() == 0 else [None]
+            bc_obj_list = [self.grp_list] if dist.get_rank() == 0 else [None]  # type: ignore
             dist.broadcast_object_list(bc_obj_list, src=0)
 
-            self.grp_list = bc_obj_list[0]  # type: ignore
+            self.grp_list = bc_obj_list[0]
 
         self.f: h5.File | None = None
 
