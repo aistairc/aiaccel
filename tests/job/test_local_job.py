@@ -31,10 +31,7 @@ def test_init(job_instance: LocalJob) -> None:
     assert isinstance(job.job_filename, Path)
     assert isinstance(job.cwd, Path)
     assert job.status == JobStatus.UNSUBMITTED
-    assert job.cmd == (
-        ["bash"]
-        + ["job.sh", "arg1", "arg2"]
-    )
+    assert job.cmd == (["bash"] + ["job.sh", "arg1", "arg2"])
 
 
 def test_submit(job_instance: LocalJob) -> None:

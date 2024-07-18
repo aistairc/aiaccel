@@ -14,7 +14,6 @@ class JobStatus(IntEnum):
 
 
 class LocalJob:
-
     job_filename: Path
     job_name: str
 
@@ -30,7 +29,6 @@ class LocalJob:
         args: list[str] | None = None,
         tag: Any = None,
     ):
-
         self.job_filename = Path(job_filename)
         self.job_name = job_name if job_name is not None else self.job_filename.name
 

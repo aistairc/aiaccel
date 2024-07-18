@@ -37,7 +37,6 @@ class LocalJobExecutor:
         LocalJob.update_status_batch(self.job_list)
         return self.n_max_jobs - len([job for job in self.job_list if job.status < JobStatus.FINISHED])
 
-
     def submit(
         self,
         args: list[str],

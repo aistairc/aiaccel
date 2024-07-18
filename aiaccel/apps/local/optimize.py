@@ -12,6 +12,7 @@ Usage:
     python -m aiaccel.apps.local.optimize objective.sh --config config.yaml
 """
 
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")

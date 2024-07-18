@@ -40,8 +40,8 @@ def test_available_slots_full(executor: LocalJobExecutor) -> None:
         executor.job_list.append(job)
 
     assert executor.available_slots() == executor.n_max_jobs - len(
-        [j for j in executor.job_list if j.status <= JobStatus.RUNNING])
-
+        [j for j in executor.job_list if j.status <= JobStatus.RUNNING]
+    )
 
 
 def test_available_slots_pending(executor: LocalJobExecutor) -> None:
