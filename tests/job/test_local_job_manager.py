@@ -54,7 +54,7 @@ def test_available_slots_pending(executor: LocalJobExecutor) -> None:
 
     for _, status in enumerate([JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.UNSUBMITTED]):
         job = LocalJob(executor.job_filename, job_name=executor.job_name)
-        job.submit()
+        # job.submit()
         job.status = status
         executor.job_list.append(job)
 

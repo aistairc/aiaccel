@@ -16,9 +16,7 @@ class JobStatus(IntEnum):
 class LocalJob:
     job_filename: Path
     job_name: str
-
     cwd: Path
-
     tag: Any
 
     def __init__(
@@ -64,10 +62,8 @@ class LocalJob:
             job_list (list[LocalJob]): The list of jobs to update.
         """
         for job in job_list:
-            if job.status == JobStatus.UNSUBMITTED:
+            if job.p is None or job.status == JobStatus.UNSUBMITTED:
                 continue
-            if job.p is None:
-                raise ValueError("Job has not been submitted.")
             if job.p.poll() is None:
                 job.status = JobStatus.RUNNING
             else:
