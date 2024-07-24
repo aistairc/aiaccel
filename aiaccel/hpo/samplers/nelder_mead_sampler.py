@@ -20,19 +20,19 @@ __all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
 class NelderMeadSampler(optuna.samplers.BaseSampler):
     def __init__(
         self,
-        search_space: dict[str, tuple[float, float]],
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
         seed: int | None = None,
         rng: np.random.RandomState | None = None,
         coeff: NelderMeadCoefficient | None = None,
         block: bool = False,
         sub_sampler: optuna.samplers.BaseSampler | None = None,
-        log: dict[str, bool] | None = None,
     ) -> None:
-        self._search_space = copy.deepcopy(search_space)
-        self._log = {name: False for name in search_space} | {} if log is None else log
-        for key, enable_log_scale in self._log.items():
-            if key in self._search_space and enable_log_scale:
-                self._search_space[key] = (math.log(self._search_space[key][0]), math.log(self._search_space[key][1]))
+        _search_space = copy.deepcopy(search_space)
+        self._search_space: dict[str, tuple[int | float, int | float]] = {
+            key: (math.log(value[0]), math.log(value[1])) if len(value) == 3 and value[2] else (value[0], value[1])
+            for key, value in _search_space.items()
+        }
+        self._log = {key: value[2] if len(value) == 3 else False for key, value in _search_space.items()}
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(

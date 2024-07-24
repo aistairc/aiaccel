@@ -32,7 +32,8 @@ def param_distribution() -> optuna.distributions.FloatDistribution:
 
 
 def create_sampler(
-    search_space: dict[str, tuple[float, float]], sub_sampler: optuna.samplers.BaseSampler | None = None
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    sub_sampler: optuna.samplers.BaseSampler | None = None,
 ) -> NelderMeadSampler:
     return NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=sub_sampler)
 
@@ -63,7 +64,7 @@ def create_trial(
 
 
 def test_infer_relative_search_space(
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -74,7 +75,7 @@ def test_infer_relative_search_space(
 
 
 def test_sample_relative(
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -95,7 +96,7 @@ def test_sample_relative(
     ],
 )
 def test_before_trial(
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
     side_effect: list[npt.NDArray[np.float64]],
@@ -113,7 +114,7 @@ def test_before_trial(
 
 
 def test_before_trial_enqueued(
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -130,7 +131,7 @@ def test_before_trial_enqueued(
 
 
 def test_before_trial_sub_sampler(
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -146,7 +147,7 @@ def test_before_trial_sub_sampler(
 
 
 def test_sample_independent(
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -164,7 +165,7 @@ def test_sample_independent(
 
 
 def test_after_trial(
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -182,7 +183,7 @@ def test_after_trial(
 
 
 def test_after_trial_sub_sampler(
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -234,7 +235,7 @@ def sphere_sleep(x: list[float]) -> float:
 class BaseTestNelderMead:
     def common_setup(
         self,
-        search_space: dict[str, tuple[int | float, int | float]],
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
         objective: Callable[[list[float]], float],
         result_file_name: str,
         study: optuna.Study,
@@ -271,7 +272,10 @@ class BaseTestNelderMead:
 
 class TestNelderMeadAckley(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
+            "x": (0.0, 10.0),
+            "y": (0.0, 10.0),
+        }
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
         self.common_setup(
@@ -290,7 +294,10 @@ class TestNelderMeadAckley(BaseTestNelderMead):
 
 class TestNelderMeadAckleyParallel(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
+            "x": (0.0, 10.0),
+            "y": (0.0, 10.0),
+        }
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
 
         self.common_setup(
@@ -318,7 +325,11 @@ class TestNelderMeadAckleyParallel(BaseTestNelderMead):
 
 class TestNelderMeadSphereParallel(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
+            "x": (-30.0, 30.0),
+            "y": (-30.0, 30.0),
+            "z": (-30.0, 30.0),
+        }
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
 
         self.common_setup(
@@ -347,7 +358,11 @@ class TestNelderMeadSphereParallel(BaseTestNelderMead):
 
 class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space = {"x": (-30.0, 30.0), "y": (-30.0, 30.0), "z": (-30.0, 30.0)}
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
+            "x": (-30.0, 30.0),
+            "y": (-30.0, 30.0),
+            "z": (-30.0, 30.0),
+        }
         self._rng = np.random.RandomState(seed=42)
         sampler = NelderMeadSampler(search_space=search_space, rng=self._rng)
 
@@ -399,7 +414,10 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
 
 class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
+            "x": (0.0, 10.0),
+            "y": (0.0, 10.0),
+        }
         tpe_sampler = optuna.samplers.TPESampler(seed=43)
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=False, sub_sampler=tpe_sampler)
 
@@ -439,7 +457,10 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
 
 class TestNelderMeadAckleyInteger(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space = {"x": (-10, 10), "y": (-10.0, 10.0)}
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
+            "x": (-10, 10),
+            "y": (-10.0, 10.0),
+        }
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
         self.common_setup(
@@ -465,8 +486,11 @@ class TestNelderMeadAckleyInteger(BaseTestNelderMead):
 
 class TestNelderMeadAckleyLogScale(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space = {"x": (1.0e-5, 1.0e5), "y": (1.0e-5, 1.0e5)}
-        sampler = NelderMeadSampler(search_space=search_space, seed=42, log={"x": True, "y": True})
+        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
+            "x": (1.0e-5, 1.0e5, True),
+            "y": (1.0e-5, 1.0e5, True),
+        }
+        sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
         self.common_setup(
             search_space=search_space,
@@ -484,5 +508,9 @@ class TestNelderMeadAckleyLogScale(BaseTestNelderMead):
     def func(self, trial: optuna.trial.Trial) -> float:
         params = []
         for name, distribution in self.search_space.items():
-            params.append(trial.suggest_float(name, *distribution, log=True))
+            params.append(
+                trial.suggest_float(
+                    name, distribution[0], distribution[1], log=distribution[2] if len(distribution) == 3 else False
+                )
+            )
         return self.objective(params)
