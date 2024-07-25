@@ -87,6 +87,16 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_name: str,
         param_distribution: BaseDistribution,
     ) -> Any:
+        if (
+            isinstance(
+                param_distribution, optuna.distributions.IntDistribution | optuna.distributions.FloatDistribution
+            )
+            and param_distribution.log != self._log[param_name]
+        ):
+            raise ValueError(
+                f"Parameter {param_name} is set with log={self._log[param_name]} "
+                f"but optuna.distributions.param_distribution.log={param_distribution.log}"
+            )
         if "sub_trial" in trial.user_attrs and self.sub_sampler is not None:
             param_value = self.sub_sampler.sample_independent(study, trial, param_name, param_distribution)
             value = math.log(param_value) if self._log[param_name] else param_value
