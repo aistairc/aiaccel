@@ -7,7 +7,6 @@ from optuna.trial import Trial
 T = TypeVar("T")
 
 
-
 @dataclass
 class Suggest(Generic[T]):
     name: str
