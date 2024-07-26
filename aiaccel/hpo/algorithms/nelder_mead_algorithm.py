@@ -6,6 +6,8 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 
+from aiaccel.hpo.algorithms.generate_initial_simplex import generate_initial_simplex
+
 
 @dataclass
 class NelderMeadCoefficient:
@@ -136,8 +138,9 @@ class NelderMeadAlgorism:
 
         try:
             num_random_points = self.simplex_size - len(self.vertices) if self.simplex_size > len(self.vertices) else 0
-            random_vertices = list(self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
-            yield from random_vertices
+            initial_simplex = generate_initial_simplex(dim=len(self._search_space), rng=self._rng)
+            random_vertices = [(np.array(highs) - np.array(lows)) * value + np.array(lows) for value in initial_simplex]
+            yield from random_vertices[:num_random_points]
 
             random_vertices, random_values = yield from self._wait_for_results(num_random_points)
 
