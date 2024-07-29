@@ -1,17 +1,15 @@
 import argparse
 import pickle as pkl
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 from optuna.trial import Trial
 
+from aiaccel.hpo.optuna.wrapper import Const, Suggest, SuggestFloat, T
 from aiaccel.job import AbciJobExecutor
-
-T = TypeVar("T")
 
 """
 Usage (if parameters are not defined in a config file):
@@ -49,53 +47,6 @@ n_max_jobs: 4
 group: gaa50000
 
 """
-
-
-@dataclass
-class Suggest(Generic[T]):
-    name: str
-
-    def __call__(self, trial: Any) -> T:
-        raise NotImplementedError
-
-
-@dataclass
-class Const(Suggest[T]):
-    value: T
-
-    def __call__(self, _: Any) -> T:
-        return self.value
-
-
-@dataclass
-class SuggestFloat(Generic[T]):
-    name: str
-    low: float
-    high: float
-    step: float | None | None = None
-    log: bool = False
-
-    def __call__(self, trial: Trial) -> float:
-        return trial.suggest_float(self.name, self.low, self.high, step=self.step, log=self.log)
-
-
-@dataclass
-class SuggestInt(Generic[T]):
-    name: str
-    low: int
-    high: int
-    step: int = 1
-    log: bool = False
-
-    def __call__(self, trial: Trial) -> int:
-        return trial.suggest_int(name=self.name, low=self.low, high=self.high, step=self.step, log=self.log)
-
-
-@dataclass
-class SuggestXXX: ...
-
-
-...
 
 
 class HparamsManager:
