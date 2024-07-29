@@ -28,7 +28,7 @@ class SuggestFloat(Suggest[float]):
     name: str
     low: float
     high: float
-    step: float | None | None = None
+    step: float | None = None
     log: bool = False
 
     def __call__(self, trial: Trial) -> float:
