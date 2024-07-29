@@ -40,20 +40,14 @@ class RawHDF5Dataset(Dataset[Any]):
 
             self.grp_list = bc_obj_list[0]
 
-        self.f: h5.File | None = None
-
     def __len__(self) -> int:
         return len(self.grp_list)
 
     def __getitem__(self, index: int) -> dict[str, Any]:
-        if self.f is None:
-            self.f = h5.File(self.dataset_path, "r")
+        with h5.File(self.dataset_path, "r") as f:
+            ret = {k: v[:] for k, v in f[self.grp_list[index]].items()}
 
-        return {k: v[:] for k, v in self.f[self.grp_list[index]].items()}
-
-    def __del__(self) -> None:
-        if self.f is not None:
-            self.f.close()
+        return ret
 
 
 class HDF5Dataset(RawHDF5Dataset):
