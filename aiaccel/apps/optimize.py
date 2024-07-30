@@ -75,6 +75,8 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
     config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
 
+    jobs: AbciJobExecutor | LocalJobExecutor | None = None
+
     if args.executor.lower() == "local":
         jobs = LocalJobExecutor(args.job_filename, n_max_jobs=config.n_max_jobs)
     elif args.executor.lower() == "abci":
