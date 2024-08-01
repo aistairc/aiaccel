@@ -8,13 +8,14 @@ from aiaccel.job import AbciJobExecutor
 
 def main() -> None:
     n_trials = 50
+    n_max_jobs = 4
 
     job_filename = Path("objective.sh")
     job_group = "gaa50000"
 
     result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
 
-    jobs = AbciJobExecutor(job_filename, job_group)
+    jobs = AbciJobExecutor(job_filename, job_group, n_max_jobs=n_max_jobs)
 
     study = optuna.create_study(direction="minimize")
 
