@@ -68,6 +68,8 @@ def plot_dim_vs_min_value(ax: Axes, csv_names_for_dim: list[list[list[str]]], ti
 
 def compare_optimizer(base_dir: str = ".") -> None:
     fig, ax = plt.subplots(5, 5, figsize=(16, 20))
+    if isinstance(ax, Axes):
+        return
 
     for num_of_f in range(1, 25):
         result_csv_list_for_dim = []
