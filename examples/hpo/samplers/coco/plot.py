@@ -73,9 +73,9 @@ def compare_optimizer(base_dir: str = ".") -> None:
         result_csv_list_for_dim = []
         for num_of_dm in [2, 3, 5, 10, 20, 40]:
             result_csv_patterns = [
-                f"{base_dir}/nelder-mead/optuna_csv/optuna-neldermead-func_id{num_of_f}-dim{num_of_dm}/f{num_of_f}/DM{num_of_dm:02}/result_bbob_f{num_of_f:03}_i*_d{num_of_dm:02}_*_fopt.csv",
-                f"{base_dir}/TPE/optuna_csv/optuna-TPE-mcTmvF-func_id{num_of_f}-dim{num_of_dm}/f{num_of_f}/DM{num_of_dm:02}/result_bbob_f{num_of_f:03}_i*_d{num_of_dm:02}_*_fopt.csv",
-                f"{base_dir}/nelder-mead_subTPE/optuna_csv/optuna-neldermead-subTPE-mcTmvF-func_id{num_of_f}-dim{num_of_dm}/f{num_of_f}/DM{num_of_dm:02}/result_bbob_f{num_of_f:03}_i*_d{num_of_dm:02}_*_fopt.csv",
+                f"{base_dir}/nelder-mead/optuna_csv/optuna-neldermead-func_id{num_of_f}-dim{num_of_dm}-instance*/f{num_of_f}/DM{num_of_dm:02}/result_bbob_f{num_of_f:03}_i*_d{num_of_dm:02}_*_fopt.csv",
+                f"{base_dir}/TPE/optuna_csv/optuna-TPE-mcTmvF-func_id{num_of_f}-dim{num_of_dm}-instance*/f{num_of_f}/DM{num_of_dm:02}/result_bbob_f{num_of_f:03}_i*_d{num_of_dm:02}_*_fopt.csv",
+                f"{base_dir}/nelder-mead_subTPE/optuna_csv/optuna-neldermead-subTPE-mcTmvF-func_id{num_of_f}-dim{num_of_dm}-instance*/f{num_of_f}/DM{num_of_dm:02}/result_bbob_f{num_of_f:03}_i*_d{num_of_dm:02}_*_fopt.csv",
             ]
 
             result_csv_list = [sorted(glob.glob(pattern)) for pattern in result_csv_patterns]
