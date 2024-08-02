@@ -68,29 +68,32 @@ def create_optuna_result(study: optuna.Study, output_folder: str, problem: Any, 
     study_df.to_csv(result_dir + f"/result_{problem.id}_{optuna_seed:03}.csv")
 
 
-if __name__ == "__main__":
+def experiment_bbob() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--func_id")
     parser.add_argument("--dim")
-    args = parser.parse_args()
+    parser.add_argument("--instance")
+    parser.add_argument("--optuna_seed")
+    args, _ = parser.parse_known_args()
 
     func_id = int(args.func_id)
     dim = int(args.dim)
+    instance = int(args.instance)
+    optuna_seed = int(args.optuna_seed)
 
     ### input
     suite_name = "bbob"
-    output_folder = f"optuna-TPE-mcTmvF-func_id{func_id}-dim{dim}"
+    output_folder = f"optuna-TPE-mcTmvF-func_id{func_id}-dim{dim}-instance{instance}"
     budget_multiplier = 200  # increase to 10, 100, ...
 
     ### prepare
-    suite_options = f"function_indices: {func_id} dimensions: {dim}"
+    suite_options = f"function_indices: {func_id} dimensions: {dim} instance_indices: {instance}"
     print(suite_options)
     suite = cocoex.Suite(suite_name, "", suite_options)
     observer = cocoex.Observer(suite_name, "result_folder: " + output_folder)
     minimal_print = cocoex.utilities.MiniPrint()
 
     num_parallel = 10
-    optuna_seed = 1
 
     # ### go
     for problem in suite:  # this loop will take several minutes or longer
@@ -129,7 +132,7 @@ if __name__ == "__main__":
         coco_file_path = (
             "exdata/"
             + f"{output_folder}/"
-            + f"data_f{problem.id_function}/bbobexp_f{problem.id_function}_DIM{problem.dimension}_i1.rdat"
+            + f"data_f{problem.id_function}/bbobexp_f{problem.id_function}_DIM{problem.dimension}.rdat"
         )
 
         with open(coco_file_path) as f:
@@ -152,3 +155,7 @@ if __name__ == "__main__":
 
         print(df)
         df.to_csv(step_csv_dir + f"result_{problem.id}_{optuna_seed:03}_fopt.csv")
+
+
+if __name__ == "__main__":
+    experiment_bbob()
