@@ -2,7 +2,6 @@
 
 #$-l rt_C.small=1
 #$-cwd
-#$ -l h_rt=1:00:00
 
 source /etc/profile.d/modules.sh
 module load gcc/13.2.0
