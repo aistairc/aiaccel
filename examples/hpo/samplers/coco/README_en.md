@@ -18,7 +18,7 @@
 
    - This code submits jobs for each function and dimension using job_dispatcher.
 
-   ### objective_dim*.sh
+   ### objective.sh
 
    - Qsub scripts that set the execution time for each dimension.
 

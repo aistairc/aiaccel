@@ -18,7 +18,7 @@
 
    - job_dispatcher を用いて各関数・次元毎にジョブを投入するコードです.
 
-   ### objective_dim*.sh
+   ### objective.sh
 
    - 各次元毎の実行時間を設定した qsub 用のスクリプトです.
 
