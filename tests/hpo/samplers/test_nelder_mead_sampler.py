@@ -13,12 +13,12 @@ import numpy.typing as npt
 import optuna
 import pytest
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
+from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler, SearchSpace
 
 
 @pytest.fixture
-def search_space() -> dict[str, tuple[float, float]]:
-    return {"x": (-5.0, 5.0), "y": (-5.0, 5.0)}
+def search_space() -> dict[str, SearchSpace]:
+    return {"x": {"low": -5.0, "high": 5.0}, "y": {"low": -5.0, "high": 5.0}}
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def param_distribution() -> optuna.distributions.FloatDistribution:
 
 
 def create_sampler(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     sub_sampler: optuna.samplers.BaseSampler | None = None,
 ) -> NelderMeadSampler:
     return NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=sub_sampler)
@@ -64,7 +64,7 @@ def create_trial(
 
 
 def test_infer_relative_search_space(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -75,7 +75,7 @@ def test_infer_relative_search_space(
 
 
 def test_sample_relative(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -96,7 +96,7 @@ def test_sample_relative(
     ],
 )
 def test_before_trial(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
     side_effect: list[npt.NDArray[np.float64]],
@@ -114,7 +114,7 @@ def test_before_trial(
 
 
 def test_before_trial_enqueued(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -131,7 +131,7 @@ def test_before_trial_enqueued(
 
 
 def test_before_trial_sub_sampler(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -147,7 +147,7 @@ def test_before_trial_sub_sampler(
 
 
 def test_sample_independent(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -165,7 +165,7 @@ def test_sample_independent(
 
 
 def test_after_trial(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -183,7 +183,7 @@ def test_after_trial(
 
 
 def test_after_trial_sub_sampler(
-    search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+    search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
 ) -> None:
@@ -235,7 +235,7 @@ def sphere_sleep(x: list[float]) -> float:
 class BaseTestNelderMead:
     def common_setup(
         self,
-        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]],
+        search_space: dict[str, SearchSpace],
         objective: Callable[[list[float]], float],
         result_file_name: str,
         study: optuna.Study,
@@ -266,15 +266,15 @@ class BaseTestNelderMead:
     def func(self, trial: optuna.trial.Trial) -> float:
         params = []
         for name, distribution in self.search_space.items():
-            params.append(trial.suggest_float(name, *distribution))
+            params.append(trial.suggest_float(name, distribution["low"], distribution["high"]))
         return self.objective(params)
 
 
 class TestNelderMeadAckley(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
-            "x": (0.0, 10.0),
-            "y": (0.0, 10.0),
+        search_space: dict[str, SearchSpace] = {
+            "x": {"low": 0.0, "high": 10.0},
+            "y": {"low": 0.0, "high": 10.0},
         }
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
@@ -294,9 +294,9 @@ class TestNelderMeadAckley(BaseTestNelderMead):
 
 class TestNelderMeadAckleyParallel(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
-            "x": (0.0, 10.0),
-            "y": (0.0, 10.0),
+        search_space: dict[str, SearchSpace] = {
+            "x": {"low": 0.0, "high": 10.0},
+            "y": {"low": 0.0, "high": 10.0},
         }
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
 
@@ -325,10 +325,10 @@ class TestNelderMeadAckleyParallel(BaseTestNelderMead):
 
 class TestNelderMeadSphereParallel(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
-            "x": (-30.0, 30.0),
-            "y": (-30.0, 30.0),
-            "z": (-30.0, 30.0),
+        search_space: dict[str, SearchSpace] = {
+            "x": {"low": -30.0, "high": 30.0},
+            "y": {"low": -30.0, "high": 30.0},
+            "z": {"low": -30.0, "high": 30.0},
         }
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=True)
 
@@ -358,10 +358,10 @@ class TestNelderMeadSphereParallel(BaseTestNelderMead):
 
 class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
-            "x": (-30.0, 30.0),
-            "y": (-30.0, 30.0),
-            "z": (-30.0, 30.0),
+        search_space: dict[str, SearchSpace] = {
+            "x": {"low": -30.0, "high": 30.0},
+            "y": {"low": -30.0, "high": 30.0},
+            "z": {"low": -30.0, "high": 30.0},
         }
         self._rng = np.random.RandomState(seed=42)
         sampler = NelderMeadSampler(search_space=search_space, rng=self._rng)
@@ -385,16 +385,16 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
                     except NelderMeadEmptyError:  # random sampling
                         self.study.enqueue_trial(
                             {
-                                "x": self._rng.uniform(*self.search_space["x"]),
-                                "y": self._rng.uniform(*self.search_space["y"]),
-                                "z": self._rng.uniform(*self.search_space["z"]),
+                                "x": self._rng.uniform(self.search_space["x"]["low"], self.search_space["x"]["high"]),
+                                "y": self._rng.uniform(self.search_space["y"]["low"], self.search_space["y"]["high"]),
+                                "z": self._rng.uniform(self.search_space["z"]["low"], self.search_space["z"]["high"]),
                             }
                         )
                         trial = self.study.ask()
 
-                    x = trial.suggest_float("x", *self.search_space["x"])
-                    y = trial.suggest_float("y", *self.search_space["y"])
-                    z = trial.suggest_float("z", *self.search_space["z"])
+                    x = trial.suggest_float("x", self.search_space["x"]["low"], self.search_space["x"]["high"])
+                    y = trial.suggest_float("y", self.search_space["y"]["low"], self.search_space["y"]["high"])
+                    z = trial.suggest_float("z", self.search_space["z"]["low"], self.search_space["z"]["high"])
 
                     trials.append(trial)
                     params.append([x, y, z])
@@ -414,9 +414,9 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
 
 class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
-            "x": (0.0, 10.0),
-            "y": (0.0, 10.0),
+        search_space: dict[str, SearchSpace] = {
+            "x": {"low": 0.0, "high": 10.0},
+            "y": {"low": 0.0, "high": 10.0},
         }
         tpe_sampler = optuna.samplers.TPESampler(seed=43)
         sampler = NelderMeadSampler(search_space=search_space, seed=42, block=False, sub_sampler=tpe_sampler)
@@ -437,8 +437,8 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
                 for _ in range(num_parallel):
                     trial = self.study.ask()
 
-                    x = trial.suggest_float("x", *self.search_space["x"])
-                    y = trial.suggest_float("y", *self.search_space["y"])
+                    x = trial.suggest_float("x", self.search_space["x"]["low"], self.search_space["x"]["high"])
+                    y = trial.suggest_float("y", self.search_space["y"]["low"], self.search_space["y"]["high"])
 
                     trials.append(trial)
                     params.append([x, y])
@@ -457,9 +457,9 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
 
 class TestNelderMeadAckleyInteger(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
-            "x": (-10, 10),
-            "y": (-10.0, 10.0),
+        search_space: dict[str, SearchSpace] = {
+            "x": {"low": -10, "high": 10},
+            "y": {"low": -10.0, "high": 10.0},
         }
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
@@ -478,17 +478,17 @@ class TestNelderMeadAckleyInteger(BaseTestNelderMead):
 
     def func(self, trial: optuna.trial.Trial) -> float:
         params: list[int | float] = []
-        params.append(trial.suggest_int("x", *[int(item) for item in self.search_space["x"]]))
-        params.append(trial.suggest_float("y", *self.search_space["y"]))
+        params.append(trial.suggest_int("x", int(self.search_space["x"]["low"]), int(self.search_space["x"]["high"])))
+        params.append(trial.suggest_float("y", self.search_space["y"]["low"], self.search_space["y"]["high"]))
 
         return self.objective(params)
 
 
 class TestNelderMeadAckleyLogScale(BaseTestNelderMead):
     def setup_method(self) -> None:
-        search_space: dict[str, tuple[int | float, int | float] | tuple[int | float, int | float, bool]] = {
-            "x": (1.0e-5, 1.0e5, True),
-            "y": (1.0e-5, 1.0e5, True),
+        search_space: dict[str, SearchSpace] = {
+            "x": {"low": 1.0e-5, "high": 1.0e5, "log": True},
+            "y": {"low": 1.0e-5, "high": 1.0e5, "log": True},
         }
         sampler = NelderMeadSampler(search_space=search_space, seed=42)
 
@@ -508,9 +508,5 @@ class TestNelderMeadAckleyLogScale(BaseTestNelderMead):
     def func(self, trial: optuna.trial.Trial) -> float:
         params = []
         for name, distribution in self.search_space.items():
-            params.append(
-                trial.suggest_float(
-                    name, distribution[0], distribution[1], log=distribution[2] if len(distribution) == 3 else False
-                )
-            )
+            params.append(trial.suggest_float(name, distribution["low"], distribution["high"], log=distribution["log"]))
         return self.objective(params)
