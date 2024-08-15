@@ -26,19 +26,22 @@ class UnexpectedVerticesUpdateError(Exception):
     updated_values: list[float]
 
 
+normalize_range = (0.0, 1.0)
+
+
 class NelderMeadAlgorism:
     vertices: list[npt.NDArray[np.float64]]
     values: list[float]
 
     def __init__(
         self,
-        search_space: dict[str, tuple[float, float]],
+        dimension: int,
         coeff: NelderMeadCoefficient | None = None,
         rng: np.random.RandomState | None = None,
         block: bool = False,
         timeout: int | None = None,
     ) -> None:
-        self._search_space = search_space
+        self._search_space = [normalize_range for _ in range(dimension)]
         self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
 
         self._rng = rng if rng is not None else np.random.RandomState()
@@ -55,10 +58,17 @@ class NelderMeadAlgorism:
 
     def get_vertex(self) -> npt.NDArray[np.float64]:
         with self.lock:
-            vertex = next(self.generator)
+            while True:
+                vertex = next(self.generator)
 
-        if vertex is None:
-            raise NelderMeadEmptyError("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
+                if vertex is None:
+                    raise NelderMeadEmptyError(
+                        "Cannot generate new vertex now. Maybe get_vertex is called in parallel."
+                    )
+
+                if all(normalize_range[0] < x < normalize_range[1] for x in vertex):
+                    break
+                self.put_value(vertex, np.inf)
 
         return vertex
 
@@ -130,7 +140,7 @@ class NelderMeadAlgorism:
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
         # initialization
-        lows, highs = zip(*self._search_space.values(), strict=False)
+        lows, highs = zip(*self._search_space, strict=False)
 
         self.vertices, self.values = self._collect_enqueued_results()
 

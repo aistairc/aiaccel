@@ -29,7 +29,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
-            search_space=self._search_space,
+            dimension=len(self._search_space),
             coeff=coeff,
             rng=_rng,
             block=block,
@@ -56,13 +56,11 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
             try:
-                while True:
-                    params = self.nm.get_vertex()
-
-                    if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
-                        break
-
-                    self.nm.put_value(params, np.inf)
+                params = self.nm.get_vertex()
+                params = np.array([
+                    (high - low) * value + low
+                    for value, (low, high) in zip(params, self._search_space.values(), strict=False)
+                ])
             except NelderMeadEmptyError as e:
                 if self.sub_sampler is None:
                     raise e
@@ -121,7 +119,12 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             )
         if isinstance(values, list):
             self.nm.put_value(
-                np.array(list(trial.params.values())),
+                np.array(
+                    [
+                        (value - low) / (high - low)
+                        for value, (low, high) in zip(trial.params.values(), self._search_space.values(), strict=False)
+                    ]
+                ),
                 values[0],
                 enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
             )
