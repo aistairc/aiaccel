@@ -18,7 +18,7 @@ def search_space() -> dict[str, tuple[float, float]]:
 
 @pytest.fixture
 def nm(search_space: dict[str, tuple[float, float]]) -> NelderMeadAlgorism:
-    return NelderMeadAlgorism(search_space=search_space, block=False)
+    return NelderMeadAlgorism(dimension=len(search_space), block=False)
 
 
 @pytest.fixture
