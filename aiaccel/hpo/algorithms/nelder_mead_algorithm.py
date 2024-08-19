@@ -127,7 +127,6 @@ class NelderMeadAlgorism:
                         "Cannot generate new vertex now. Maybe get_vertex is called in parallel."
                     )
 
-                # if all(normalize_range[0] < x < normalize_range[1] for x in vertex):
                 if all(0 < x < 1 for x in vertex):
                     break
                 self.put_value(vertex, np.inf)
