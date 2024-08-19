@@ -26,9 +26,6 @@ class UnexpectedVerticesUpdateError(Exception):
     updated_values: list[float]
 
 
-normalize_range = (0.0, 1.0)
-
-
 class NelderMeadAlgorism:
     """Class to manage the NelderMead algorithm
 
@@ -92,7 +89,6 @@ class NelderMeadAlgorism:
         block: bool = False,
         timeout: int | None = None,
     ) -> None:
-        self._search_space = [normalize_range for _ in range(dimension)]
         self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
 
         self._rng = rng if rng is not None else np.random.RandomState()
@@ -105,7 +101,8 @@ class NelderMeadAlgorism:
         self.block = block
         self.timeout = timeout
 
-        self.simplex_size = len(self._search_space) + 1
+        self.dimension = dimension
+        self.simplex_size = dimension + 1
 
     def get_vertex(self) -> npt.NDArray[np.float64]:
         """Method to return the next parameters for NelderMead
@@ -130,7 +127,8 @@ class NelderMeadAlgorism:
                         "Cannot generate new vertex now. Maybe get_vertex is called in parallel."
                     )
 
-                if all(normalize_range[0] < x < normalize_range[1] for x in vertex):
+                # if all(normalize_range[0] < x < normalize_range[1] for x in vertex):
+                if all(0 < x < 1 for x in vertex):
                     break
                 self.put_value(vertex, np.inf)
 
@@ -215,13 +213,12 @@ class NelderMeadAlgorism:
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
         # initialization
-        lows, highs = zip(*self._search_space, strict=False)
 
         self.vertices, self.values = self._collect_enqueued_results()
 
         try:
             num_random_points = self.simplex_size - len(self.vertices) if self.simplex_size > len(self.vertices) else 0
-            random_vertices = list(self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
+            random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimension)))
             yield from random_vertices
 
             random_vertices, random_values = yield from self._wait_for_results(num_random_points)
