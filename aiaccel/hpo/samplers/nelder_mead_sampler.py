@@ -56,13 +56,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
             try:
-                params = self.nm.get_vertex()
-                params = np.array(
-                    [
-                        (high - low) * value + low
-                        for value, (low, high) in zip(params, self._search_space.values(), strict=False)
-                    ]
-                )
+                iter_ = zip(self.nm.get_vertex(), self._search_space.values(), strict=False)
+                params = np.array([(high - low) * value + low for value, (low, high) in iter_])
             except NelderMeadEmptyError as e:
                 if self.sub_sampler is None:
                     raise e
