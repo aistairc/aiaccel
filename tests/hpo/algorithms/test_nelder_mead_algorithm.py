@@ -73,7 +73,9 @@ def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
 
 
 def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorism) -> None:
-    with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism._collect_enqueued_results") as mock_iter:
+    with patch(
+        "aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism._collect_enqueued_results"
+    ) as mock_iter:
         mock_iter.side_effect = [([np.array([-1.0, 0.0])], [0.5])]
 
         nm.vertices, nm.values = [], []

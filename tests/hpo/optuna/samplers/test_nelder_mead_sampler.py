@@ -12,7 +12,7 @@ import numpy as np
 import optuna
 import pytest
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ def test_before_trial(
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
-    with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
         mock_iter.side_effect = [np.array([0.4, 0.5])]
 
         sampler.before_trial(study, trial)
@@ -124,7 +124,7 @@ def test_before_trial_sub_sampler(
     sampler = create_sampler(search_space, optuna.samplers.RandomSampler())
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
-    with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
         mock_iter.side_effect = NelderMeadEmptyError()
 
         sampler.before_trial(study, trial)
