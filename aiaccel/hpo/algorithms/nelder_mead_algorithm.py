@@ -83,7 +83,7 @@ class NelderMeadAlgorism:
 
     def __init__(
         self,
-        dimension: int,
+        dimensions: int | None = None,
         coeff: NelderMeadCoefficient | None = None,
         rng: np.random.RandomState | None = None,
         block: bool = False,
@@ -101,10 +101,10 @@ class NelderMeadAlgorism:
         self.block = block
         self.timeout = timeout
 
-        self.dimension = dimension
-        self.simplex_size = dimension + 1
+        self.dimensions = dimensions
+        self.simplex_size = dimensions + 1
 
-    def get_vertex(self) -> npt.NDArray[np.float64]:
+    def get_vertex(self, dimensions: int | None = None) -> npt.NDArray[np.float64]:
         """Method to return the next parameters for NelderMead
 
         Thread-safe due to parallel processing requirements.
@@ -118,10 +118,20 @@ class NelderMeadAlgorism:
                 The next parameters for NelderMead.
                 nelder mead の次のパラメータ
         """
-        with self.lock:
-            while True:
-                vertex = next(self.generator)
 
+        if dimensions is not None:
+            if self.dimensions is None:
+                self.dimensions = dimensions
+            else:
+                assert self.dimensiosn == dimensions
+        elif dimensions is None and self.dimensions is None:
+            raise ValueError(
+                "dimensions is not set yet."
+                "Please provide it on __init__ or get_vertex or call put_vertex in advance."
+            )
+    
+        with self.lock:
+            for vertex in self.generator:
                 if vertex is None:
                     raise NelderMeadEmptyError(
                         "Cannot generate new vertex now. Maybe get_vertex is called in parallel."
@@ -150,6 +160,12 @@ class NelderMeadAlgorism:
                 Boolean indicating whether the parameters were output by NelderMead.
                 nelder mead から出力されたパラメータか否かを示す bool 変数
         """
+
+        if self.dimensions is None:
+            self.dimensions = len(vertex)
+        else:
+            assert self.dimensions == len(vertex)
+        
         self.results.put((vertex, value, enqueue))
 
     def _collect_enqueued_results(
@@ -217,7 +233,7 @@ class NelderMeadAlgorism:
 
         try:
             num_random_points = self.simplex_size - len(self.vertices) if self.simplex_size > len(self.vertices) else 0
-            random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimension)))
+            random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimensions)))
             yield from random_vertices
 
             random_vertices, random_values = yield from self._wait_for_results(num_random_points)
