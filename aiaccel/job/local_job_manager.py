@@ -1,8 +1,19 @@
+import subprocess
+import sys
 import time
+import traceback
+from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
 from typing import Any
 
-from aiaccel.job.local_job import JobStatus, LocalJob
+
+def run(cmd: list[str], cwd: Path) -> None:
+    try:
+        subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=cwd)
+    except Exception as e:
+        error_msg = f"Error executing command: {e}\n{traceback.format_exc()}"
+        print(error_msg, file=sys.stderr, flush=True)
+        raise
 
 
 class LocalJobExecutor:
@@ -11,7 +22,7 @@ class LocalJobExecutor:
         job_filename: Path | str,
         job_name: str | None = None,
         work_dir: Path | str | None = None,
-        n_max_jobs: int = 100,
+        n_max_jobs: int = 1,
     ):
         """
         Initialize the AbciJobManager object.
@@ -26,23 +37,29 @@ class LocalJobExecutor:
         self.job_filename = job_filename if isinstance(job_filename, Path) else Path(job_filename)
         self.job_name = job_name if job_name is not None else self.job_filename.name
 
-        self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
-        self.work_dir.mkdir(parents=True, exist_ok=True)
+        self.cwd = Path(work_dir) if work_dir is not None else Path.cwd()
+        self.cwd.mkdir(parents=True, exist_ok=True)
 
         self.n_max_jobs = n_max_jobs
+        self.executor = ProcessPoolExecutor(max_workers=n_max_jobs)
 
-        self.job_list: list[LocalJob] = []
+        self.job_list: list[Future[None]] = []
 
     def available_slots(self) -> int:
-        LocalJob.update_status_batch(self.job_list)
-        return self.n_max_jobs - len([job for job in self.job_list if job.status < JobStatus.FINISHED])
+        """
+        Returns the number of available slots for new jobs.
+
+        Returns:
+            int: The number of available job slots.
+        """
+        return self.n_max_jobs - len(self.job_list)
 
     def submit(
         self,
         args: list[str],
         tag: Any = None,
         sleep_time: float = 5.0,
-    ) -> LocalJob:
+    ) -> Future[None]:
         """
         Submits a job to the job manager.
 
@@ -57,27 +74,38 @@ class LocalJobExecutor:
         while self.available_slots() == 0:
             time.sleep(sleep_time)
 
-        job = LocalJob(
-            self.job_filename,
-            job_name=self.job_name,
-            args=args,
-            tag=tag,
-        )
+        cmd = ["bash", str(self.job_filename)]
+        if args is not None:
+            cmd += [arg.format(job=self) for arg in args]
 
-        job.submit()
-        self.job_list.append(job)
+        future = self.executor.submit(run, cmd, self.cwd)
 
-        return job
+        future.job_name = self.job_name  # type: ignore
+        future.job_filename = self.job_filename  # type: ignore
+        future.cwd = self.cwd  # type: ignore
+        future.tag = tag  # type: ignore
 
-    def collect_finished(self) -> list[LocalJob]:
+        self.job_list.append(future)
+
+        return future
+
+    def collect_finished(self) -> list[Future[None]]:
         """
         Collects and removes all finished jobs from the job list.
 
         Returns:
-            A list of finished AbciJob objects.
+            A list of finished jobs.
         """
-        finished_jobs = [job for job in self.job_list if job.status == JobStatus.FINISHED]
-        for job in finished_jobs:
-            self.job_list.remove(job)
+        finished_jobs = []
+        still_running = []
+
+        for future in list(self.job_list):
+            if future.done():
+                future.result()
+                finished_jobs.append(future)
+            else:
+                still_running.append(future)
+
+        self.job_list = still_running
 
         return finished_jobs

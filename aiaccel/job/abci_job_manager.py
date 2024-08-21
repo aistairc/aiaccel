@@ -89,9 +89,6 @@ class AbciJobExecutor:
         """
         Returns the number of available slots for new jobs.
 
-        The available slots are calculated by subtracting the number of finished jobs
-        from the maximum number of jobs allowed.
-
         Returns:
             int: The number of available slots.
         """

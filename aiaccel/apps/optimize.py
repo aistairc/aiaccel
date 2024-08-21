@@ -106,14 +106,18 @@ def main() -> None:
             )
 
         for job in jobs.collect_finished():
-            trial = job.tag
+            if hasattr(job, "tag"):
+                trial = job.tag
 
-            with open(result_filename_template.format(job=job), "rb") as f:
-                y = pkl.load(f)
+                with open(result_filename_template.format(job=job), "rb") as f:
+                    y = pkl.load(f)
 
-            study.tell(trial, y)
+                study.tell(trial, y)
 
-            finished_job_count += 1
+                finished_job_count += 1
+
+            else:
+                raise ValueError("Job does not have a tag attribute")
 
 
 if __name__ == "__main__":

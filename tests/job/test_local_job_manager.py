@@ -1,12 +1,12 @@
 import shutil
 from collections.abc import Generator
+from concurrent.futures import Future
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
-from aiaccel.job import LocalJob, LocalJobExecutor
-from aiaccel.job.local_job import JobStatus
+from aiaccel.job import LocalJobExecutor
 
 
 @pytest.fixture
@@ -33,31 +33,21 @@ def test_available_slots_full(executor: LocalJobExecutor) -> None:
         - available: 0
     """
 
-    for _ in range(4):
-        job = LocalJob(executor.job_filename, job_name=executor.job_name)
-        job.submit()
-        job.status = JobStatus.RUNNING
-        executor.job_list.append(job)
+    executor.job_list = [MagicMock(spec=Future) for _ in range(4)]
 
-    assert executor.available_slots() == executor.n_max_jobs - len(
-        [j for j in executor.job_list if j.status <= JobStatus.RUNNING]
-    )
+    assert executor.available_slots() == 0
 
 
 def test_available_slots_pending(executor: LocalJobExecutor) -> None:
     """
     - Job status:
         - RUNNING: 2
-        - UNSUBMITTED: 1
-    - available: 1
+    - available: 2
     """
 
-    for _, status in enumerate([JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.UNSUBMITTED]):
-        job = LocalJob(executor.job_filename, job_name=executor.job_name)
-        job.status = status
-        executor.job_list.append(job)
+    executor.job_list = [MagicMock(spec=Future) for _ in range(2)]
 
-    assert executor.available_slots() == 1
+    assert executor.available_slots() == 2
 
 
 def test_available_slots_empty(executor: LocalJobExecutor) -> None:
@@ -72,17 +62,24 @@ def test_available_slots_empty(executor: LocalJobExecutor) -> None:
 
 
 def test_collect_finished(executor: LocalJobExecutor) -> None:
-    job_list: list[LocalJob] = []
-    for status in [JobStatus.FINISHED, JobStatus.RUNNING, JobStatus.FINISHED]:
-        job = MagicMock(spec=LocalJob)
-        job.status = status
+    """
+    - Job status:
+        - RUNNING: 2
+        - WAITING: 1
+        - FINISHED: 1
+    - finished: 1
+    - still_running: 2
+    """
 
-        job_list.append(job)
-        executor.job_list.append(job)
+    executor.job_list = [
+        MagicMock(spec=Future, done=lambda: False),
+        MagicMock(spec=Future, done=lambda: False),
+        MagicMock(spec=Future, done=lambda: True),
+        MagicMock(spec=Future, done=lambda: True),
+    ]
 
     result = executor.collect_finished()
-    assert result == [job_list[0], job_list[2]]
-    assert executor.job_list == [job_list[1]]
+    assert len(result) == 2
 
 
 def test_collect_finished_empty(executor: LocalJobExecutor) -> None:
