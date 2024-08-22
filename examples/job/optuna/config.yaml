@@ -1,0 +1,22 @@
+study:
+  _target_: optuna.create_study
+  direction: minimize
+
+  sampler:
+    _target_: optuna.samplers.TPESampler
+    seed: 0
+
+params:
+  _convert_: partial
+  _target_: aiaccel.apps.optimize.HparamsManager
+  x1: [0, 1]
+  x2:
+    _target_: aiaccel.apps.optimize.SuggestFloat
+    low: 0.0
+    high: 1.0
+    log: false
+
+n_trials: 30
+n_max_jobs: 4
+
+group: gaa50000
