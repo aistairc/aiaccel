@@ -20,11 +20,12 @@ def run(cmd: list[str], cwd: Path) -> None:
 
 class JobFuture:
     def __init__(
-        self, future: Future[None],
+        self,
+        future: Future[None],
         job_name: str | None = None,
         job_filename: Path | None = None,
         cwd: Path | None = None,
-        tag: Any = None
+        tag: Any = None,
     ):
         self.future = future
         self.job_name = job_name
@@ -100,11 +101,7 @@ class LocalJobExecutor(BaseJobExecutor):
 
         future = self.executor.submit(run, cmd, self.cwd)
         job_future = JobFuture(
-            future,
-            job_name=self.job_name,
-            job_filename=self.job_filename,
-            cwd=self.work_dir,
-            tag=tag
+            future, job_name=self.job_name, job_filename=self.job_filename, cwd=self.work_dir, tag=tag
         )
 
         self.job_list.append(job_future)
