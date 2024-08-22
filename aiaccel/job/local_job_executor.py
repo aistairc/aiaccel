@@ -6,6 +6,8 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
 from typing import Any
 
+from aiaccel.job.base_job_executor import BaseJobExecutor
+
 
 def run(cmd: list[str], cwd: Path) -> None:
     try:
@@ -16,7 +18,28 @@ def run(cmd: list[str], cwd: Path) -> None:
         raise
 
 
-class LocalJobExecutor:
+class JobFuture:
+    def __init__(
+        self, future: Future[None],
+        job_name: str | None = None,
+        job_filename: Path | None = None,
+        cwd: Path | None = None,
+        tag: Any = None
+    ):
+        self.future = future
+        self.job_name = job_name
+        self.job_filename = job_filename
+        self.cwd = cwd
+        self.tag = tag
+
+    def done(self) -> bool:
+        return self.future.done()
+
+    def result(self) -> None:
+        return self.future.result()
+
+
+class LocalJobExecutor(BaseJobExecutor):
     def __init__(
         self,
         job_filename: Path | str,
@@ -34,16 +57,13 @@ class LocalJobExecutor:
             work_dir (Path | str | None, optional): The working directory for the job. Defaults to None.
             n_max_jobs (int, optional): The maximum number of jobs. Defaults to 100.
         """
-        self.job_filename = job_filename if isinstance(job_filename, Path) else Path(job_filename)
-        self.job_name = job_name if job_name is not None else self.job_filename.name
+        super().__init__(job_filename, "", job_name, work_dir, n_max_jobs)
+        self.executor = ProcessPoolExecutor(max_workers=n_max_jobs)
 
         self.cwd = Path(work_dir) if work_dir is not None else Path.cwd()
         self.cwd.mkdir(parents=True, exist_ok=True)
 
-        self.n_max_jobs = n_max_jobs
-        self.executor = ProcessPoolExecutor(max_workers=n_max_jobs)
-
-        self.job_list: list[Future[None]] = []
+        self.job_list: list[JobFuture] = []
 
     def available_slots(self) -> int:
         """
@@ -59,7 +79,7 @@ class LocalJobExecutor:
         args: list[str],
         tag: Any = None,
         sleep_time: float = 5.0,
-    ) -> Future[None]:
+    ) -> JobFuture:
         """
         Submits a job to the job manager.
 
@@ -79,17 +99,19 @@ class LocalJobExecutor:
             cmd += [arg.format(job=self) for arg in args]
 
         future = self.executor.submit(run, cmd, self.cwd)
+        job_future = JobFuture(
+            future,
+            job_name=self.job_name,
+            job_filename=self.job_filename,
+            cwd=self.work_dir,
+            tag=tag
+        )
 
-        future.job_name = self.job_name  # type: ignore
-        future.job_filename = self.job_filename  # type: ignore
-        future.cwd = self.cwd  # type: ignore
-        future.tag = tag  # type: ignore
+        self.job_list.append(job_future)
 
-        self.job_list.append(future)
+        return job_future
 
-        return future
-
-    def collect_finished(self) -> list[Future[None]]:
+    def collect_finished(self) -> list[JobFuture]:
         """
         Collects and removes all finished jobs from the job list.
 
@@ -99,12 +121,12 @@ class LocalJobExecutor:
         finished_jobs = []
         still_running = []
 
-        for future in list(self.job_list):
-            if future.done():
-                future.result()
-                finished_jobs.append(future)
+        for job_future in list(self.job_list):
+            if job_future.done():
+                job_future.result()
+                finished_jobs.append(job_future)
             else:
-                still_running.append(future)
+                still_running.append(job_future)
 
         self.job_list = still_running
 

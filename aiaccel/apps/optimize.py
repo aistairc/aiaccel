@@ -8,8 +8,8 @@ from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 from optuna.trial import Trial
 
-from aiaccel.hpo.optuna.wrapper import Const, Suggest, SuggestFloat, T
-from aiaccel.job import AbciJobExecutor, LocalJobExecutor
+from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
+from aiaccel.job import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 
 """
 Usage (if parameters are not defined in a config file):
@@ -75,7 +75,7 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
     config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
 
-    jobs: AbciJobExecutor | LocalJobExecutor | None = None
+    jobs: BaseJobExecutor | None = None
 
     if args.executor.lower() == "local":
         jobs = LocalJobExecutor(args.job_filename, n_max_jobs=config.n_max_jobs)
@@ -106,18 +106,14 @@ def main() -> None:
             )
 
         for job in jobs.collect_finished():
-            if hasattr(job, "tag"):
-                trial = job.tag
+            trial = job.tag
 
-                with open(result_filename_template.format(job=job), "rb") as f:
-                    y = pkl.load(f)
+            with open(result_filename_template.format(job=job), "rb") as f:
+                y = pkl.load(f)
 
-                study.tell(trial, y)
+            study.tell(trial, y)
 
-                finished_job_count += 1
-
-            else:
-                raise ValueError("Job does not have a tag attribute")
+            finished_job_count += 1
 
 
 if __name__ == "__main__":

@@ -3,9 +3,10 @@ from pathlib import Path
 from typing import Any
 
 from aiaccel.job.abci_job import AbciJob, JobStatus
+from aiaccel.job.base_job_executor import BaseJobExecutor
 
 
-class AbciJobExecutor:
+class AbciJobExecutor(BaseJobExecutor):
     """
     Executes and manages jobs on the ABCI system.
 
@@ -41,15 +42,7 @@ class AbciJobExecutor:
             work_dir (Path | str | None, optional): The working directory for the job. Defaults to None.
             n_max_jobs (int, optional): The maximum number of jobs. Defaults to 100.
         """
-        self.job_filename = job_filename if isinstance(job_filename, Path) else Path(job_filename)
-        self.job_group = job_group
-        self.job_name = job_name
-
-        self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
-        self.work_dir.mkdir(parents=True, exist_ok=True)
-
-        self.n_max_jobs = n_max_jobs
-
+        super().__init__(job_filename, job_group, job_name, work_dir, n_max_jobs)
         self.job_list: list[AbciJob] = []
 
     def submit(
