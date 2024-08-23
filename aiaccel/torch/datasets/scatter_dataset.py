@@ -15,6 +15,20 @@ def scatter_dataset(
     dataset: Dataset[T],
     permute_fn: Callable[[npt.NDArray[np.int64]], npt.NDArray[np.int64]] | None = None,
 ) -> Subset[T]:
+    """
+    Splits a dataset into subsets and returns the subset corresponding to the current process rank.
+
+    Args:
+        dataset (Dataset[T]): The input dataset to be split.
+        permute_fn (Callable[[npt.NDArray[np.int64]], npt.NDArray[np.int64]] | None, optional):
+            A function that takes an array of indices and returns a permuted version of the array.
+            If None, a default permutation function using np.random.Generator is used.
+            Defaults to None.
+
+    Returns:
+        Subset[T]: The subset of the input dataset corresponding to the current process rank.
+    """
+
     if permute_fn is None:
         permute_fn = np.random.Generator(np.random.PCG64(0)).permutation
 
