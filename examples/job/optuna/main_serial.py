@@ -1,5 +1,5 @@
-import pickle as pkl
 from pathlib import Path
+import pickle as pkl
 
 import optuna
 

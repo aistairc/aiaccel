@@ -50,8 +50,7 @@ class ABCIEnvironment(ClusterEnvironment):
 
     def set_global_rank(self, rank: int) -> None:
         if rank != self.global_rank():
-            raise ValueError(f"`rank` is expected to be {self.get_global_rank()}, buf {rank} is given.")
-        
+            raise ValueError(f"`rank` is expected to be {self.global_rank()}, buf {rank} is given.")
 
     def validate_settings(self, num_devices: int, num_nodes: int) -> None:
         if num_devices != self._local_size:

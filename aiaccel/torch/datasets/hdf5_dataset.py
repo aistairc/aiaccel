@@ -16,14 +16,14 @@ __all__ = [
 ]
 
 
-class RawHDF5Dataset(Dataset[int]):
+class RawHDF5Dataset(Dataset[dict[str, Any]]):
     def __init__(self, dataset_path: Path | str, grp_list: Path | str | list[str] | None = None) -> None:
         self.dataset_path = dataset_path
 
         if grp_list is None:
             with h5.File(self.dataset_path, "r") as f:
                 self.grp_list = list(f.keys())
-        elif isinstance(grp_list, (str, Path)):
+        elif isinstance(grp_list, (str | Path)):
             with open(grp_list, "rb") as f:
                 self.grp_list = pkl.load(f)
         elif isinstance(grp_list, list):
