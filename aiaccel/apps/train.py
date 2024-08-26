@@ -1,14 +1,12 @@
-import os
 from argparse import ArgumentParser
+import os
 from pathlib import Path
 import pickle as pkl
 
 from hydra.utils import instantiate
-from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import lightning as lt
-from lightning.fabric.utilities.rank_zero import rank_zero_only
 
 from aiaccel.utils import print_config
 
@@ -40,7 +38,6 @@ def main() -> None:
 
         with open(config.working_directory / "config.pkl", "wb") as f:
             pkl.dump(config, f)
-
 
     # train
     trainer: lt.Trainer = instantiate(config.trainer)

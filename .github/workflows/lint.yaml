@@ -24,7 +24,7 @@ jobs:
           pip install .[dev,github-actions]
       - name: Perform ruff
         run: |
-          ruff check 
+          ruff check
           ruff format --check
       - name: Perform mypy
         run: |
