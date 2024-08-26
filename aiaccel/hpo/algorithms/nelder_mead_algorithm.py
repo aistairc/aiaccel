@@ -102,7 +102,6 @@ class NelderMeadAlgorism:
         self.timeout = timeout
 
         self.dimensions = dimensions
-        self.simplex_size = dimensions + 1
 
     def get_vertex(self, dimensions: int | None = None) -> npt.NDArray[np.float64]:
         """Method to return the next parameters for NelderMead
@@ -123,13 +122,13 @@ class NelderMeadAlgorism:
             if self.dimensions is None:
                 self.dimensions = dimensions
             else:
-                assert self.dimensiosn == dimensions
+                assert self.dimensions == dimensions
         elif dimensions is None and self.dimensions is None:
             raise ValueError(
                 "dimensions is not set yet."
                 "Please provide it on __init__ or get_vertex or call put_vertex in advance."
             )
-    
+
         with self.lock:
             for vertex in self.generator:
                 if vertex is None:
@@ -140,6 +139,9 @@ class NelderMeadAlgorism:
                 if all(0 < x < 1 for x in vertex):
                     break
                 self.put_value(vertex, np.inf)
+
+        if vertex is None:
+            raise ValueError("vertex is None.")
 
         return vertex
 
@@ -165,7 +167,7 @@ class NelderMeadAlgorism:
             self.dimensions = len(vertex)
         else:
             assert self.dimensions == len(vertex)
-        
+
         self.results.put((vertex, value, enqueue))
 
     def _collect_enqueued_results(
@@ -231,8 +233,13 @@ class NelderMeadAlgorism:
 
         self.vertices, self.values = self._collect_enqueued_results()
 
+        if self.dimensions is None:
+            raise ValueError("dimensions is None.")
+
         try:
-            num_random_points = self.simplex_size - len(self.vertices) if self.simplex_size > len(self.vertices) else 0
+            num_random_points = (
+                self.dimensions + 1 - len(self.vertices) if self.dimensions + 1 > len(self.vertices) else 0
+            )
             random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimensions)))
             yield from random_vertices
 
@@ -248,7 +255,7 @@ class NelderMeadAlgorism:
         while True:
             try:
                 # sort self.vertices by their self.values
-                order = np.argsort(self.values)[: self.simplex_size]
+                order = np.argsort(self.values)[: self.dimensions + 1]
                 self.vertices = [self.vertices[idx] for idx in order]
                 self.values = [self.values[idx] for idx in order]
 
