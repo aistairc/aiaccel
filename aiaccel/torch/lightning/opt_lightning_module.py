@@ -14,6 +14,10 @@ if TYPE_CHECKING:
 
 @dataclass
 class OptimizerConfig:
+    """
+    Configuration class for the optimizer and scheduler in the LightningModule.
+    """
+
     optimizer_generator: Callable[..., optim.optimizer.Optimizer]
     scheduler_generator: Callable[..., optim.lr_scheduler.LRScheduler] | None = None
     scheduler_interval: str | None = "step"
@@ -21,12 +25,31 @@ class OptimizerConfig:
 
 
 class OptimizerLightningModule(lt.LightningModule):
+    """
+    LightningModule subclass for models that use custom optimizers and schedulers.
+
+    Args:
+        optimizer_config (OptimizerConfig): Configuration object for the optimizer.
+
+    Attributes:
+        optcfg (OptimizerConfig): Configuration object for the optimizer.
+
+    Methods:
+        configure_optimizers: Configures the optimizer and scheduler for training.
+    """
+
     def __init__(self, optimizer_config: OptimizerConfig):
         super().__init__()
 
         self.optcfg = optimizer_config
 
     def configure_optimizers(self) -> optim.optimizer.Optimizer | OptimizerLRSchedulerConfig:
+        """
+        Configures the optimizer and scheduler for training.
+
+        Returns:
+            Union[optim.optimizer.Optimizer, OptimizerLRSchedulerConfig]: The optimizer and scheduler configuration.
+        """
         optimizer = self.optcfg.optimizer_generator(params=self.parameters())
         if self.optcfg.scheduler_generator is None:
             return optimizer

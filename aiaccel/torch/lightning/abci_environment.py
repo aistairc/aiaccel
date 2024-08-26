@@ -7,6 +7,13 @@ log = logging.getLogger(__name__)
 
 
 class ABCIEnvironment(ClusterEnvironment):
+    """
+    Environment class for ABCI.
+
+    This class provides methods to interact with the ABCI environment,
+    such as retrieving the world size, global rank, node rank, and local rank.
+    """
+
     def __init__(self) -> None:
         self._world_size = int(os.environ["OMPI_COMM_WORLD_SIZE"])
         self._rank = int(os.environ["OMPI_COMM_WORLD_RANK"])
