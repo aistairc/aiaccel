@@ -93,7 +93,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
-            dimension=len(self._search_space),
+            dimensions=len(self._search_space),
             coeff=coeff,
             rng=_rng,
             block=block,
