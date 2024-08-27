@@ -237,7 +237,7 @@ class NelderMeadAlgorism:
             raise ValueError("dimensions is None.")
 
         try:
-            if self.dimensions + 1 > **len(self.vertices):
+            if self.dimensions + 1 > len(self.vertices):
                 num_random_points = self.dimensions + 1 - len(self.vertices)
             else:
                 num_random_points = 0
