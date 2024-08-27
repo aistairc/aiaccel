@@ -237,9 +237,10 @@ class NelderMeadAlgorism:
             raise ValueError("dimensions is None.")
 
         try:
-            num_random_points = (
-                self.dimensions + 1 - len(self.vertices) if self.dimensions + 1 > len(self.vertices) else 0
-            )
+            if self.dimensions + 1 > **len(self.vertices):
+                num_random_points = self.dimensions + 1 - len(self.vertices)
+            else:
+                num_random_points = 0
             random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimensions)))
             yield from random_vertices
 
