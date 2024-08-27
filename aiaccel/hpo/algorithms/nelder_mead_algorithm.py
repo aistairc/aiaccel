@@ -34,15 +34,11 @@ class NelderMeadAlgorism:
     NelderMead アルゴリズムを管理するクラス
 
     queue を用いて結果を受け取り、NelderMead のアルゴリズムを進める
+    次元数のみを参照して、正規化された範囲でパラメータを返す
 
     Args:
-        search_space: dict[str, tuple[float, float]]
-            Lower and upper bounds corresponding to each parameter name.
-            Needs to be set individually from suggest_uniform
-            (since parameters need to be determined at the time of before_trial).
-            パラメータ名と対応した lower, upper
-            suggest_uniform とは個別に設定する必要がある
-            (before_trial 時点でパラメータを決定する必要があるため)
+        dimensions: int | None = None
+            探索範囲の次元数
         coeff: NelderMeadCoefficient | None = None
             Parameters used in NelderMead.
             NelderMead で用いられるパラメータ
