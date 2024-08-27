@@ -148,8 +148,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
             try:
-                params = self.nm.get_vertex()
-                it = zip(params, self._search_space.values(), strict=False)
+                it = zip(self.nm.get_vertex(), self._search_space.values(), strict=False)
                 params = np.array([(high - low) * value + low for value, (low, high) in it])
             except NelderMeadEmptyError as e:
                 if self.sub_sampler is None:
@@ -264,8 +263,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             )
         if isinstance(values, list):
             it = zip(trial.params.values(), self._search_space.values(), strict=False)
+            params = np.array([(value - low) / (high - low) for value, (low, high) in it])
             self.nm.put_value(
-                np.array([(value - low) / (high - low) for value, (low, high) in it]),
+                params,
                 values[0],
                 enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
             )
