@@ -267,9 +267,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 "NelderMeadSampler supports only single objective optimization."
             )
         if isinstance(values, list):
-            self.nm.put_value(
             it = zip(trial.params.values(), self._search_space.values(), strict=False)
-            ...
+            self.nm.put_value(
                 np.array([(value - low) / (high - low) for value, (low, high) in it]),
                 values[0],
                 enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
