@@ -30,14 +30,16 @@ class NelderMeadAlgorism:
     """Class to manage the NelderMead algorithm
 
     Uses a queue to receive results and advance the NelderMead algorithm.
+    Return parameters within the normalization range by referring only to the number of dimensions.
 
     NelderMead アルゴリズムを管理するクラス
 
     queue を用いて結果を受け取り、NelderMead のアルゴリズムを進める
-    次元数のみを参照して、正規化された範囲でパラメータを返す
+    次元数のみを参照して、正規化範囲でパラメータを返す
 
     Args:
         dimensions: int | None = None
+            The number of dimensions in the search space.
             探索範囲の次元数
         coeff: NelderMeadCoefficient | None = None
             Parameters used in NelderMead.
