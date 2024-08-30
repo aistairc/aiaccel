@@ -58,7 +58,7 @@ class LocalJobExecutor(BaseJobExecutor):
         job_filename: Path | str,
         job_name: str | None = None,
         work_dir: Path | str | None = None,
-        n_max_jobs: int = 5.0,
+        n_max_jobs: int = 1,
     ):
         """
         Initialize the AbciJobManager object.
@@ -101,7 +101,7 @@ class LocalJobExecutor(BaseJobExecutor):
         cmd = ["bash", str(self.job_filename)]
         if args is not None:
             cmd += [arg.format(job=self) for arg in args]
-        print(cmd)
+
         future = self.executor.submit(run, cmd, self.cwd)
         job_future = JobFuture(
             future, job_name=self.job_name, job_filename=self.job_filename, cwd=self.work_dir, tag=tag

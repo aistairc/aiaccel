@@ -64,7 +64,6 @@ class BaseJobExecutor(ABC):
         """
         pass
 
-
     def available_slots(self) -> int:
         """
         Returns the number of available slots for new jobs.
@@ -96,4 +95,3 @@ class BaseJobExecutor(ABC):
             list[JobFuture]: A list of running jobs.
         """
         return [job for job in self.job_list if job.status == JobStatus.RUNNING]
-

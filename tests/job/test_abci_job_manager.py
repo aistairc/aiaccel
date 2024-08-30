@@ -7,7 +7,7 @@ import pytest
 from utils import qstat_xml
 
 from aiaccel.job import AbciJob, AbciJobExecutor
-from aiaccel.job.abci_job import JobStatus
+from aiaccel.job.job_status import JobStatus
 
 
 @pytest.fixture
