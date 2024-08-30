@@ -7,6 +7,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from aiaccel.job import LocalJobExecutor
+from aiaccel.job.job_status import JobStatus
+from aiaccel.job.local_job_executor import JobFuture
 
 
 @pytest.fixture
@@ -26,56 +28,35 @@ def executor(tmpdir: Path) -> Generator[LocalJobExecutor, None, None]:
     shutil.rmtree(str(work_dir))
 
 
+def create_mock_job_future(status: JobStatus) -> JobFuture:
+    mock_future = MagicMock(spec=Future)
+    mock_future.done.return_value = status in [JobStatus.FINISHED, JobStatus.ERROR]
+    mock_future.running.return_value = status == JobStatus.RUNNING
+    job_future = JobFuture(mock_future)
+    job_future.status = status
+    return job_future
+
+
 def test_available_slots_full(executor: LocalJobExecutor) -> None:
-    """
-    - Job status:
-        - RUNNING: 4
-        - available: 0
-    """
-
-    executor.job_list = [MagicMock(spec=Future) for _ in range(4)]
-
+    executor.job_list = [create_mock_job_future(JobStatus.RUNNING) for _ in range(4)]
     assert executor.available_slots() == 0
 
 
 def test_available_slots_pending(executor: LocalJobExecutor) -> None:
-    """
-    - Job status:
-        - RUNNING: 2
-    - available: 2
-    """
-
-    executor.job_list = [MagicMock(spec=Future) for _ in range(2)]
-
+    executor.job_list = [create_mock_job_future(JobStatus.RUNNING) for _ in range(2)]
     assert executor.available_slots() == 2
 
 
 def test_available_slots_empty(executor: LocalJobExecutor) -> None:
-    """
-    - Job status:
-        - RUNNING: 0
-        - WAITING: 0
-    - available: 4
-    """
-
     assert executor.available_slots() == 4
 
 
 def test_collect_finished(executor: LocalJobExecutor) -> None:
-    """
-    - Job status:
-        - RUNNING: 2
-        - WAITING: 1
-        - FINISHED: 1
-    - finished: 1
-    - still_running: 2
-    """
-
     executor.job_list = [
-        MagicMock(spec=Future, done=lambda: False),
-        MagicMock(spec=Future, done=lambda: False),
-        MagicMock(spec=Future, done=lambda: True),
-        MagicMock(spec=Future, done=lambda: True),
+        create_mock_job_future(JobStatus.RUNNING),
+        create_mock_job_future(JobStatus.RUNNING),
+        create_mock_job_future(JobStatus.FINISHED),
+        create_mock_job_future(JobStatus.FINISHED),
     ]
 
     result = executor.collect_finished()

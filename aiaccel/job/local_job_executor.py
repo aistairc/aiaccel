@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import subprocess
-import sys
 import time
 import traceback
 from concurrent.futures import Future, ProcessPoolExecutor
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from aiaccel.job.base_job_executor import BaseJobExecutor
+from aiaccel.job.job_status import JobStatus
 
 
 def run(cmd: list[str], cwd: Path) -> None:
@@ -14,8 +16,7 @@ def run(cmd: list[str], cwd: Path) -> None:
         subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=cwd)
     except Exception as e:
         error_msg = f"Error executing command: {e}\n{traceback.format_exc()}"
-        print(error_msg, file=sys.stderr, flush=True)
-        raise
+        raise RuntimeError(error_msg) from e
 
 
 class JobFuture:
@@ -32,12 +33,23 @@ class JobFuture:
         self.job_filename = job_filename
         self.cwd = cwd
         self.tag = tag
+        self.status = JobStatus.UNSUBMITTED
 
-    def done(self) -> bool:
-        return self.future.done()
+    def update_status(self) -> JobStatus:
+        self.update_status_batch([self])
+        return self.status
 
-    def result(self) -> None:
-        return self.future.result()
+    @classmethod
+    def update_status_batch(cls, job_list: list[JobFuture]) -> None:
+        for job in job_list:
+            if job.future.done():
+                job.status = JobStatus.FINISHED
+                if job.future.exception() is not None:
+                    job.status = JobStatus.ERROR
+            elif job.future.running():
+                job.status = JobStatus.RUNNING
+            else:
+                job.status = JobStatus.WAITING
 
 
 class LocalJobExecutor(BaseJobExecutor):
@@ -46,7 +58,7 @@ class LocalJobExecutor(BaseJobExecutor):
         job_filename: Path | str,
         job_name: str | None = None,
         work_dir: Path | str | None = None,
-        n_max_jobs: int = 1,
+        n_max_jobs: int = 5.0,
     ):
         """
         Initialize the AbciJobManager object.
@@ -58,22 +70,13 @@ class LocalJobExecutor(BaseJobExecutor):
             work_dir (Path | str | None, optional): The working directory for the job. Defaults to None.
             n_max_jobs (int, optional): The maximum number of jobs. Defaults to 100.
         """
-        super().__init__(job_filename, "", job_name, work_dir, n_max_jobs)
+        super().__init__(job_filename, job_name, work_dir, n_max_jobs)
         self.executor = ProcessPoolExecutor(max_workers=n_max_jobs)
 
         self.cwd = Path(work_dir) if work_dir is not None else Path.cwd()
         self.cwd.mkdir(parents=True, exist_ok=True)
 
         self.job_list: list[JobFuture] = []
-
-    def available_slots(self) -> int:
-        """
-        Returns the number of available slots for new jobs.
-
-        Returns:
-            int: The number of available job slots.
-        """
-        return self.n_max_jobs - len(self.job_list)
 
     def submit(
         self,
@@ -98,7 +101,7 @@ class LocalJobExecutor(BaseJobExecutor):
         cmd = ["bash", str(self.job_filename)]
         if args is not None:
             cmd += [arg.format(job=self) for arg in args]
-
+        print(cmd)
         future = self.executor.submit(run, cmd, self.cwd)
         job_future = JobFuture(
             future, job_name=self.job_name, job_filename=self.job_filename, cwd=self.work_dir, tag=tag
@@ -108,23 +111,5 @@ class LocalJobExecutor(BaseJobExecutor):
 
         return job_future
 
-    def collect_finished(self) -> list[JobFuture]:
-        """
-        Collects and removes all finished jobs from the job list.
-
-        Returns:
-            A list of finished jobs.
-        """
-        finished_jobs = []
-        still_running = []
-
-        for job_future in list(self.job_list):
-            if job_future.done():
-                job_future.result()
-                finished_jobs.append(job_future)
-            else:
-                still_running.append(job_future)
-
-        self.job_list = still_running
-
-        return finished_jobs
+    def update_status_batch(self) -> None:
+        JobFuture.update_status_batch(self.job_list)

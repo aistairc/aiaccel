@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
+from aiaccel.job.job_status import JobStatus
+
 
 class BaseJobExecutor(ABC):
     """
@@ -9,8 +11,6 @@ class BaseJobExecutor(ABC):
 
     Attributes:
         job_filename (Path): The path to the job file.
-        job_group (str): The group to which the job belongs.
-        job_name (str | None): The name of the job.
         work_dir (Path): The working directory for the job.
         n_max_jobs (int): The maximum number of jobs.
         job_list (List[Any]): The list of submitted jobs.
@@ -24,15 +24,12 @@ class BaseJobExecutor(ABC):
     def __init__(
         self,
         job_filename: Path | str,
-        job_group: str,
         job_name: str | None = None,
         work_dir: Path | str | None = None,
         n_max_jobs: int = 100,
     ):
         self.job_filename = job_filename if isinstance(job_filename, Path) else Path(job_filename)
-        self.job_group = job_group
         self.job_name = job_name
-
         self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
@@ -61,6 +58,13 @@ class BaseJobExecutor(ABC):
         pass
 
     @abstractmethod
+    def update_status_batch(self) -> None:
+        """
+        Updates the status of a batch of jobs.
+        """
+        pass
+
+
     def available_slots(self) -> int:
         """
         Returns the number of available slots for new jobs.
@@ -68,14 +72,28 @@ class BaseJobExecutor(ABC):
         Returns:
             int: The number of available slots.
         """
-        pass
+        self.update_status_batch()
+        return self.n_max_jobs - len([job for job in self.job_list if job.status < JobStatus.FINISHED])
 
-    @abstractmethod
     def collect_finished(self) -> list[Any]:
         """
         Collects and removes all finished jobs from the job list.
 
         Returns:
-            A list of finished job objects.
+            A list of finished Job objects.
         """
-        pass
+        finished_jobs = [job for job in self.job_list if job.status >= JobStatus.FINISHED]
+        for job in finished_jobs:
+            self.job_list.remove(job)
+
+        return finished_jobs
+
+    def get_running_jobs(self) -> list[Any]:
+        """
+        Returns a list of running jobs.
+
+        Returns:
+            list[JobFuture]: A list of running jobs.
+        """
+        return [job for job in self.job_list if job.status == JobStatus.RUNNING]
+

@@ -2,7 +2,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from aiaccel.job.abci_job import AbciJob, JobStatus
+from aiaccel.job.abci_job import AbciJob
 from aiaccel.job.base_job_executor import BaseJobExecutor
 
 
@@ -42,7 +42,8 @@ class AbciJobExecutor(BaseJobExecutor):
             work_dir (Path | str | None, optional): The working directory for the job. Defaults to None.
             n_max_jobs (int, optional): The maximum number of jobs. Defaults to 100.
         """
-        super().__init__(job_filename, job_group, job_name, work_dir, n_max_jobs)
+        super().__init__(job_filename, job_name, work_dir, n_max_jobs)
+        self.job_group = job_group
         self.job_list: list[AbciJob] = []
 
     def submit(
@@ -78,25 +79,8 @@ class AbciJobExecutor(BaseJobExecutor):
 
         return job
 
-    def available_slots(self) -> int:
+    def update_status_batch(self) -> None:
         """
-        Returns the number of available slots for new jobs.
-
-        Returns:
-            int: The number of available slots.
+        Updates the status of a batch of jobs.
         """
         AbciJob.update_status_batch(self.job_list)
-        return self.n_max_jobs - len([job for job in self.job_list if job.status < JobStatus.FINISHED])
-
-    def collect_finished(self) -> list[AbciJob]:
-        """
-        Collects and removes all finished jobs from the job list.
-
-        Returns:
-            A list of finished AbciJob objects.
-        """
-        finished_jobs = [job for job in self.job_list if job.status >= JobStatus.FINISHED]
-        for job in finished_jobs:
-            self.job_list.remove(job)
-
-        return finished_jobs
