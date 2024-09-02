@@ -1,7 +1,8 @@
+from typing import Any
+
 from collections.abc import KeysView, Sequence
 from pathlib import Path
 from types import TracebackType
-from typing import Any
 
 # This stub is just for passing mypy.
 class File:
@@ -16,3 +17,13 @@ class File:
     def keys(self) -> KeysView[str]: ...
     def __getitem__(self, key: str) -> dict[str, Sequence[Any]]: ...
     def close(self) -> None: ...
+
+#     def create_group(self, name: str) -> Group:
+#         pass
+
+# class Group:
+#     def create_dataset(self, name: str, shape: Sequence[int] | None) -> Dataset:
+#         pass
+
+# class Dataset:
+#     ...

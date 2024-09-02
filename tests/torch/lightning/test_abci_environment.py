@@ -1,6 +1,8 @@
 import os
 from unittest import mock
 
+import pytest
+
 from aiaccel.torch.lightning.abci_environment import ABCIEnvironment
 
 
@@ -28,3 +30,11 @@ def test_abci_environment() -> None:
     assert env.global_rank() == 6
     assert env.node_rank() == 1
     assert env.local_rank() == 2
+
+    env.validate_settings(4, 2)
+
+    with pytest.raises(ValueError, match=r"^`num_devices` should match.*"):
+        env.validate_settings(3, 2)
+
+    with pytest.raises(ValueError, match=r"^`num_devices \* num_nodes` should match.*"):
+        env.validate_settings(4, 1)

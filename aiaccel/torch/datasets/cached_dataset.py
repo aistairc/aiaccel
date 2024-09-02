@@ -1,5 +1,6 @@
-from multiprocessing import Manager
 from typing import Any, TypeVar
+
+from multiprocessing import Manager
 
 import torch
 from torch.utils.data import Dataset

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import re
 from copy import deepcopy
 from pathlib import Path
+import re
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig

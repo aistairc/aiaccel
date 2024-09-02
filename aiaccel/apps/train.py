@@ -1,11 +1,12 @@
-import os
-import pickle as pkl
 from argparse import ArgumentParser
+import os
 from pathlib import Path
+import pickle as pkl
 
-import lightning as pl
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc
+
+import lightning as pl
 
 from aiaccel.utils import print_config
 

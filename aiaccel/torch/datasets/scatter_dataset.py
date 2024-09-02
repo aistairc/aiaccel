@@ -1,8 +1,10 @@
-from collections.abc import Callable
+import numpy.typing as npt
 from typing import TypeVar
 
+from collections.abc import Callable
+
 import numpy as np
-import numpy.typing as npt
+
 import torch.distributed as dist
 from torch.utils.data import Dataset, Subset
 
