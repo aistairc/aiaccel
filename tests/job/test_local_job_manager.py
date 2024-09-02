@@ -69,3 +69,40 @@ def test_collect_finished_empty(executor: LocalJobExecutor) -> None:
     result = executor.collect_finished()
     assert result == []
     assert executor.job_list == []
+
+
+def test_update_status_batch(executor: LocalJobExecutor) -> None:
+    job_list: list[JobFuture] = []
+
+    # Create job futures with different statuses
+    job1 = JobFuture(Future())
+    job1.status = JobStatus.WAITING
+    job_list.append(job1)
+
+    job2 = JobFuture(Future())
+    job2.status = JobStatus.RUNNING
+    job_list.append(job2)
+
+    job3 = JobFuture(Future())
+    job3.status = JobStatus.FINISHED
+    job_list.append(job3)
+
+    job4 = JobFuture(Future())
+    job4.status = JobStatus.ERROR
+    job_list.append(job4)
+
+    executor.job_list = job_list
+
+    assert len(executor.job_list) == 4
+    assert executor.job_list[0].status == JobStatus.WAITING  # type: ignore
+    assert executor.job_list[1].status == JobStatus.RUNNING  # type: ignore
+    assert executor.job_list[2].status == JobStatus.FINISHED  # type: ignore
+    assert executor.job_list[3].status == JobStatus.ERROR  # type: ignore
+
+    # Update the status batch
+    executor.update_status_batch()
+
+    assert executor.job_list[0].status == JobStatus.WAITING  # type: ignore
+    assert executor.job_list[1].status == JobStatus.WAITING  # type: ignore
+    assert executor.job_list[2].status == JobStatus.WAITING  # type: ignore
+    assert executor.job_list[3].status == JobStatus.WAITING  # type: ignore

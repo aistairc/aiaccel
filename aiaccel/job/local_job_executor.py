@@ -12,6 +12,13 @@ from aiaccel.job.job_status import JobStatus
 
 
 def run(cmd: list[str], cwd: Path) -> None:
+    """
+    Executes a command.
+
+    Args:
+        cmd (List[str]): The command to execute.
+        cwd (Path): The current working directory.
+    """
     try:
         subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=cwd)
     except Exception as e:
@@ -36,11 +43,23 @@ class JobFuture:
         self.status = JobStatus.UNSUBMITTED
 
     def update_status(self) -> JobStatus:
+        """
+        Updates the status of the job.
+
+        Returns:
+            JobStatus: The updated status of the job.
+        """
         self.update_status_batch([self])
         return self.status
 
     @classmethod
     def update_status_batch(cls, job_list: list[JobFuture]) -> None:
+        """
+        Updates the status of a batch of jobs.
+
+        Args:
+            job_list (List[JobFuture]): The list of jobs
+        """
         for job in job_list:
             if job.future.done():
                 job.status = JobStatus.FINISHED
@@ -112,4 +131,7 @@ class LocalJobExecutor(BaseJobExecutor):
         return job_future
 
     def update_status_batch(self) -> None:
+        """
+        Updates the status of a batch of jobs.
+        """
         JobFuture.update_status_batch(self.job_list)
