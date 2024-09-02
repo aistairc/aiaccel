@@ -1,0 +1,3 @@
+trainer:
+  _target_: lightning.Trainer
+  default_root_dir: ${working_directory}
