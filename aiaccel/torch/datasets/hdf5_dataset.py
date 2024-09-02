@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from typing import Optional, Any
-
 from pathlib import Path
+from typing import Any, Optional
 
-import torch
 import h5py as h5
+import torch
 
 
 class RawHDF5Dataset(torch.utils.data.Dataset):

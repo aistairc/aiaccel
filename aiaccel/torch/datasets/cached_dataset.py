@@ -1,9 +1,7 @@
+from multiprocessing import Manager
 from typing import Any
 
-from multiprocessing import Manager
-
 import numpy as np
-
 import torch
 
 

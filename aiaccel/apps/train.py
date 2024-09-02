@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from argparse import ArgumentParser
+import pickle as pkl
 
 from omegaconf import OmegaConf as oc
 from hydra.utils import instantiate
@@ -15,26 +16,19 @@ def main() -> None:
     parser = ArgumentParser()
     parser.add_argument(
         "config",
-        type=Path,
-        description="Config file in YAML format",
+        type=str,
+        help="Config file in YAML format",
     )
     parser.add_argument(
         "--working_directory",
-        type=Path,
-        default=Path.cwd(),
-        description="Working directory",
-    )
-    parser.add_argument(
-        "--base_config",
-        type=Path,
-        default=Path(aiaccel.__path__[0]) / "apps" / "cfg" / "train.yaml",
-        description="Base config file",
+        type=str,
+        default=str(Path.cwd()),  # todo: treat path as Path
+        help="Working directory",
     )
     args, unk_args = parser.parse_known_args()
 
     # load config
     config = oc.merge(
-        oc.load(args.base_config),
         oc.load(args.config),
         vars(args),
         oc.from_cli(unk_args),
@@ -43,10 +37,13 @@ def main() -> None:
     if "OMPI_COMM_WORLD_RANK" not in os.environ or int(os.environ["OMPI_COMM_WORLD_RANK"]) == 0:
         print_config(config)
 
+        with open(Path(config.working_directory) / "config.pkl", "wb") as f:
+            pkl.dump(config, f)
+
     # train
     trainer: pl.Trainer = instantiate(config.trainer)
     trainer.fit(
-        model=instantiate(config.model),
+        model=instantiate(config.task),
         datamodule=instantiate(config.datamodule),
     )
 

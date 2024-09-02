@@ -1,10 +1,9 @@
-from typing import Callable, Any
+from typing import Any, Callable
 
 import numpy as np
-from numpy.random import Generator, PCG64
-
 import torch
 import torch.distributed as dist
+from numpy.random import PCG64, Generator
 
 
 def scatter_dataset(
