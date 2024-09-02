@@ -1,12 +1,5 @@
 from __future__ import annotations
 
-<<<<<<< HEAD
-import warnings
-from collections.abc import Sequence
-from typing import Any
-
-import numpy as np
-=======
 from typing import Any
 
 from collections.abc import Sequence
@@ -14,7 +7,6 @@ import warnings
 
 import numpy as np
 
->>>>>>> 0caccda (update v2 torch   (#383))
 import optuna
 from optuna.distributions import BaseDistribution
 from optuna.study import Study

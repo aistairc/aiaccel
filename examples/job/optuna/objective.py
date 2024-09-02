@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-import pickle as pkl
-from argparse import ArgumentParser
-from pathlib import Path
-=======
 from argparse import ArgumentParser
 from pathlib import Path
 import pickle as pkl
->>>>>>> 0caccda (update v2 torch   (#383))
 
 
 def main() -> None:
