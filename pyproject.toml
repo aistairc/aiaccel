@@ -16,15 +16,15 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "colorama",
     "numpy",
     "optuna",
     "optuna>=3.4.0",
-    "lightning>=2.2.1",
-    "hydra-core",
-    "torch>=2.2.0",
     "omegaconf",
     "hydra-core",
+    "colorama",
+    "lightning>=2.2.1",
+    "torch>=2.2.0",
+    "h5py"
 ]
 
 [project.scripts]
