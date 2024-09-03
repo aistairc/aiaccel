@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import copy
+import math
 import warnings
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, TypedDict
 
 import numpy as np
 import optuna
@@ -13,6 +15,23 @@ from optuna.trial import FrozenTrial, TrialState
 from aiaccel.hpo.algorithms import NelderMeadAlgorism, NelderMeadCoefficient, NelderMeadEmptyError
 
 __all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
+
+
+class SearchSpaceRequired(TypedDict):
+    """
+    Required keys
+    """
+
+    low: int | float
+    high: int | float
+
+
+class SearchSpace(SearchSpaceRequired, total=False):
+    """
+    Optional keys
+    """
+
+    log: bool
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
@@ -82,14 +101,20 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def __init__(
         self,
-        search_space: dict[str, tuple[float, float]],
+        search_space: dict[str, SearchSpace],
         seed: int | None = None,
         rng: np.random.RandomState | None = None,
         coeff: NelderMeadCoefficient | None = None,
         block: bool = False,
         sub_sampler: optuna.samplers.BaseSampler | None = None,
     ) -> None:
-        self._search_space = search_space
+        _search_space = copy.deepcopy(search_space)
+        self._search_space: dict[str, SearchSpace] = {
+            key: {"low": math.log(value["low"]), "high": math.log(value["high"]), "log": value["log"]}
+            if "log" in value and value["log"]
+            else {"low": value["low"], "high": value["high"], "log": False}
+            for key, value in _search_space.items()
+        }
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
@@ -149,7 +174,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         else:
             try:
                 it = zip(self.nm.get_vertex(), self._search_space.values(), strict=False)
-                params = np.array([(high - low) * value + low for value, (low, high) in it])
+                params = np.array([(space["high"] - space["low"]) * value + space["low"] for value, space in it])
             except NelderMeadEmptyError as e:
                 if self.sub_sampler is None:
                     raise e
@@ -197,9 +222,20 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 A parameter value.
 
         """
+        if (
+            isinstance(
+                param_distribution, optuna.distributions.IntDistribution | optuna.distributions.FloatDistribution
+            )
+            and param_distribution.log != self._search_space[param_name]["log"]
+        ):
+            raise ValueError(
+                f"Parameter {param_name} is set with log={self._search_space[param_name]['log']} "
+                f"but optuna.distributions.param_distribution.log={param_distribution.log}"
+            )
         if "sub_trial" in trial.user_attrs and self.sub_sampler is not None:
             param_value = self.sub_sampler.sample_independent(study, trial, param_name, param_distribution)
-            if self._search_space[param_name][0] <= param_value <= self._search_space[param_name][1]:
+            value = math.log(param_value) if self._search_space[param_name]["log"] else param_value
+            if self._search_space[param_name]["low"] <= value <= self._search_space[param_name]["high"]:
                 return param_value
             else:
                 raise ValueError(
@@ -211,6 +247,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         param_index = list(self._search_space.keys()).index(param_name)
         param_value = trial.user_attrs["params"][param_index]
+
+        if self._search_space[param_name]["log"]:
+            param_value = math.exp(param_value)
 
         if isinstance(param_distribution, optuna.distributions.IntDistribution):
             param_value = int(param_value)
@@ -262,8 +301,11 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 "NelderMeadSampler supports only single objective optimization."
             )
         if isinstance(values, list):
-            it = zip(trial.params.values(), self._search_space.values(), strict=False)
-            params = np.array([(value - low) / (high - low) for value, (low, high) in it])
+            params = [
+                math.log(value) if self._search_space[key]["log"] else value for key, value in trial.params.items()
+            ]
+            it = zip(params, self._search_space.values(), strict=False)
+            params = np.array([(value - space["low"]) / (space["high"] - space["low"]) for value, space in it])
             self.nm.put_value(
                 params,
                 values[0],
