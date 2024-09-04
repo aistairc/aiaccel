@@ -9,7 +9,6 @@ from typing import Any
 from unittest.mock import patch
 
 import numpy as np
-import numpy.typing as npt
 import optuna
 import pytest
 
@@ -85,22 +84,17 @@ def test_sample_relative(
     assert sampler.sample_relative(study, trial, {"x": param_distribution, "y": param_distribution}) == {}
 
 
-@pytest.mark.parametrize(
-    "side_effect, expect_vertex",
-    [
-        ([np.array([0.4, 0.5])], np.array([-1.0, 0.0])),
-    ],
-)
 def test_before_trial(
     search_space: dict[str, SearchSpace],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
-    side_effect: list[npt.NDArray[np.float64]],
-    expect_vertex: npt.NDArray[np.float64],
 ) -> None:
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
+    side_effect = [np.array([0.4, 0.5])]
+    expect_vertex = np.array([-1.0, 0.0])
+
     with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
         mock_iter.side_effect = side_effect
 
