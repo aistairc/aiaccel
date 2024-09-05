@@ -1,7 +1,7 @@
 import numpy as np
 import optuna
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadSampler
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadSampler
 
 search_space = {"x": (0.0, 10.0), "y": (0.0, 10.0)}
 

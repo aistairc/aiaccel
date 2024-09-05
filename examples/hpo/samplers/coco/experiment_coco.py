@@ -11,7 +11,7 @@ import cocoex
 import optuna
 import pandas as pd
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
 
 
 def _optimize_sequential(
