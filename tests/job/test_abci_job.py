@@ -14,20 +14,42 @@ from aiaccel.job.job_status import JobStatus
 
 
 def test_from_qsub_running() -> None:
+    """
+    Test the 'from_qsub' method of the JobStatus class when the status is 'r', 'd', or 'Rr'.
+    It asserts that the returned value is JobStatus.RUNNING.
+    """
     for status in ["r", "d", "Rr"]:
         assert JobStatus.from_qsub(status) == JobStatus.RUNNING
 
 
 def test_from_qsub_waiting() -> None:
+    """
+    Test the 'from_qsub' method of the JobStatus class when the status is 'qw', 'h', 't', 's', 'S', 'T', or 'Rq'.
+    It asserts that the returned value is JobStatus.WAITING.
+    """
     for status in ["qw", "h", "t", "s", "S", "T", "Rq"]:
         assert JobStatus.from_qsub(status) == JobStatus.WAITING
 
 
 def test_from_qsub_error() -> None:
+    """
+    Test the 'from_qsub' method of the JobStatus class when the qsub status is 'E'.
+    It asserts that the returned value is JobStatus.ERROR.
+    """
     assert JobStatus.from_qsub("E") == JobStatus.ERROR
 
 
 def test_from_qsub_unexpected_status() -> None:
+    """
+    Test case for the `from_qsub` method of the `JobStatus` class when an unexpected status is encountered.
+
+    This test verifies that a `ValueError` is raised with the appropriate error message
+    when an unexpected status is passed to the `from_qsub` method.
+
+    Raises:
+        ValueError: If the status is unexpected.
+
+    """
     with pytest.raises(ValueError, match="Unexpected status: unexpected"):
         JobStatus.from_qsub("unexpected")
 
@@ -77,6 +99,15 @@ def test_init(job_instance: AbciJob) -> None:
 
 
 def test_submit(job_instance: AbciJob) -> None:
+    """
+    Test the submit method of the AbciJob class.
+
+    Args:
+        job_instance (AbciJob): An instance of the AbciJob class.
+
+    Returns:
+        None
+    """
     job = job_instance
     job_number = 123456
 
@@ -93,6 +124,17 @@ def test_submit(job_instance: AbciJob) -> None:
 
 
 def test_submit_already_submitted(job_instance: AbciJob) -> None:
+    """
+    Test case to verify that submitting an already submitted job raises a RuntimeError.
+
+    Args:
+        job_instance (AbciJob): An instance of the AbciJob class.
+
+    Raises:
+        RuntimeError: If the job is already submitted.
+
+    """
+
     job = job_instance
     job.job_number = 123456
     error_message = f"This job is already submited as {job.job_name} (id: {job.job_number})"
@@ -103,6 +145,15 @@ def test_submit_already_submitted(job_instance: AbciJob) -> None:
 
 
 def test_submit_qsub_result_cannot_be_parsed(job_instance: AbciJob) -> None:
+    """
+    Test case to verify that an error is raised when the qsub result cannot be parsed.
+
+    Args:
+        job_instance (AbciJob): An instance of the AbciJob class.
+
+    Returns:
+        None
+    """
     job = job_instance
     error_message = "The following qsub result cannot be parsed: Invalid qsub result"
 
@@ -116,6 +167,16 @@ def test_submit_qsub_result_cannot_be_parsed(job_instance: AbciJob) -> None:
 
 
 def test_update_status(job_instance: AbciJob) -> None:
+    """
+    Test the update_status method of the AbciJob class.
+
+    Args:
+        job_instance (AbciJob): An instance of the AbciJob class.
+
+    Returns:
+        None
+    """
+
     job = job_instance
     job.job_number = 42340793
 
@@ -127,6 +188,16 @@ def test_update_status(job_instance: AbciJob) -> None:
 
 
 def test_wait(job_instance: AbciJob) -> None:
+    """
+    Test the wait method of the AbciJob class.
+
+    Args:
+        job_instance (AbciJob): An instance of the AbciJob class.
+
+    Returns:
+        None
+    """
+    # Test implementation code...
     job = job_instance
 
     with patch.object(job, "update_status") as mock_update_status:

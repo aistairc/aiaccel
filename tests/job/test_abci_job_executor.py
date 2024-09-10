@@ -30,6 +30,14 @@ def executor(tmpdir: Path) -> Generator[AbciJobExecutor, None, None]:
 
 def test_available_slots_full(executor: AbciJobExecutor) -> None:
     """
+    Test case to verify the behavior of the `available_slots` method when all slots are full.
+
+    Args:
+        executor (AbciJobExecutor): The instance of the AbciJobExecutor class.
+
+    Returns:
+        None
+
     - Job status:
         - RUNNING: 4
         - available: 0
@@ -49,6 +57,14 @@ def test_available_slots_full(executor: AbciJobExecutor) -> None:
 
 def test_available_slots_pending(executor: AbciJobExecutor) -> None:
     """
+    Test case to verify the behavior of the `available_slots` method when there are pending jobs.
+
+    Args:
+        executor (LocalJobExecutor): An instance of the LocalJobExecutor class.
+
+    Returns:
+        None
+
     - Job status:
         - RUNNING: 2
         - WAITING: 1
@@ -66,9 +82,21 @@ def test_available_slots_pending(executor: AbciJobExecutor) -> None:
         slots = executor.available_slots()
         assert slots == 1
 
+    """
+
+    """
+
 
 def test_available_slots_full_running(executor: AbciJobExecutor) -> None:
     """
+    Test case to verify the behavior of the `available_slots` method when all slots are full and all jobs are running.
+
+    Args:
+        executor (AbciJobExecutor): An instance of the AbciJobExecutor class.
+
+    Returns:
+        None
+
     - Job status:
         - RUNNING: 4
         - WAITING: 0
@@ -87,19 +115,37 @@ def test_available_slots_full_running(executor: AbciJobExecutor) -> None:
         assert result == 0
 
 
-def test_available_slots_empty(executor: AbciJobExecutor) -> None:
+def test_available_slots_free(executor: AbciJobExecutor) -> None:
     """
-    - Job status:
-        - RUNNING: 0
-        - WAITING: 0
-    - available: 4
+    Test case to verify the available slots when all slots are free.
+
+    Args:
+        executor (AbciJobExecutor): The instance of the AbciJobExecutor class.
+
+    Returns:
+        None
     """
-    with patch("subprocess.run", return_value=qstat_xml("tests/job/qstat_dat_empty.txt")):
+    with patch("subprocess.run", return_value=qstat_xml("tests/job/qstat_dat_free.txt")):
         result = executor.available_slots()
         assert result == 4
 
 
 def test_collect_finished(executor: AbciJobExecutor) -> None:
+    """
+    Test case for the `collect_finished` method of the `AbciJobExecutor` class.
+
+    This test verifies that the `collect_finished` method correctly collects
+    the finished jobs from the executor's job list.
+
+    Parameters:
+    - executor (AbciJobExecutor): An instance of the `AbciJobExecutor` class.
+
+    Returns:
+    - None
+
+    Raises:
+    - AssertionError: If the collected finished jobs do not match the expected result.
+    """
     job_list: list[AbciJob] = []
     for status in [JobStatus.FINISHED, JobStatus.RUNNING, JobStatus.FINISHED]:
         job = MagicMock(spec=AbciJob)
@@ -114,6 +160,19 @@ def test_collect_finished(executor: AbciJobExecutor) -> None:
 
 
 def test_collect_finished_empty(executor: AbciJobExecutor) -> None:
+    """
+    Test case for the `collect_finished` method of the `AbciJobExecutor` class when the job list is empty.
+
+    Args:
+        executor (AbciJobExecutor): An instance of the `AbciJobExecutor` class.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the result of `collect_finished` is not an empty list.
+        AssertionError: If the `job_list` attribute of the executor is not an empty list.
+    """
     executor.job_list = []
 
     result = executor.collect_finished()
