@@ -13,7 +13,7 @@ import numpy.typing as npt
 import optuna
 import pytest
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
 
 
 @pytest.fixture
@@ -104,7 +104,7 @@ def test_before_trial(
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
-    with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
         mock_iter.side_effect = side_effect
 
         sampler.before_trial(study, trial)
@@ -137,7 +137,7 @@ def test_before_trial_sub_sampler(
     sampler = create_sampler(search_space, optuna.samplers.RandomSampler())
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
-    with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
         mock_iter.side_effect = NelderMeadEmptyError()
 
         sampler.before_trial(study, trial)
@@ -201,7 +201,7 @@ def test_after_trial_sub_sampler(
         mock_iter.method.assert_not_called()
 
 
-def ackley(x: list[float]) -> float:
+def ackley(x: list[int | float]) -> float:
     # Ackley function
     y = (
         -20 * np.exp(-0.2 * np.sqrt(0.5 * (x[0] ** 2 + x[1] ** 2)))
@@ -234,7 +234,7 @@ def sphere_sleep(x: list[float]) -> float:
 class BaseTestNelderMead:
     def common_setup(
         self,
-        search_space: dict[str, tuple[float, float]],
+        search_space: dict[str, tuple[int | float, int | float]],
         objective: Callable[[list[float]], float],
         result_file_name: str,
         study: optuna.Study,
@@ -435,3 +435,29 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
             assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
             assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
             assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
+
+
+class TestNelderMeadAckleyInteger(BaseTestNelderMead):
+    def setup_method(self) -> None:
+        search_space = {"x": (-10, 10), "y": (-10.0, 10.0)}
+        sampler = NelderMeadSampler(search_space=search_space, seed=42)
+
+        self.common_setup(
+            search_space=search_space,
+            objective=ackley,
+            result_file_name="results_ackley_int.csv",
+            study=optuna.create_study(sampler=sampler),
+        )
+
+    def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
+        for trial, result in zip(self.study.trials, results, strict=False):
+            assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+            assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+            assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
+
+    def func(self, trial: optuna.trial.Trial) -> float:
+        params: list[int | float] = []
+        params.append(trial.suggest_int("x", *[int(item) for item in self.search_space["x"]]))
+        params.append(trial.suggest_float("y", *self.search_space["y"]))
+
+        return self.objective(params)
