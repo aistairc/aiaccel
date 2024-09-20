@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
-
-from enum import IntEnum, auto
-from pathlib import Path
 import re
 import subprocess
 import time
+from enum import IntEnum, auto
+from pathlib import Path
+from typing import Any
 from xml.etree import ElementTree
 
 

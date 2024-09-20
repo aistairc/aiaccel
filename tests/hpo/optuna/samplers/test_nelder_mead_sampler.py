@@ -1,17 +1,15 @@
-import numpy.typing as npt
-from typing import Any
-
-from collections.abc import Callable
 import csv
 import datetime
 import math
+import time
+from collections.abc import Callable
 from multiprocessing import Pool
 from pathlib import Path
-import time
+from typing import Any
 from unittest.mock import patch
 
 import numpy as np
-
+import numpy.typing as npt
 import optuna
 import pytest
 

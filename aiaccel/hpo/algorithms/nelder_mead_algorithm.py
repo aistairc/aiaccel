@@ -1,11 +1,10 @@
-import numpy.typing as npt
-
-from collections.abc import Generator
-from dataclasses import dataclass
 import queue
 import threading
+from collections.abc import Generator
+from dataclasses import dataclass
 
 import numpy as np
+import numpy.typing as npt
 
 
 @dataclass

@@ -1,7 +1,6 @@
-from typing import Any
-
-from pathlib import Path
 import time
+from pathlib import Path
+from typing import Any
 
 from aiaccel.job.abci_job import AbciJob, JobStatus
 

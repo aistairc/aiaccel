@@ -1,6 +1,6 @@
+import pickle as pkl
 from argparse import ArgumentParser
 from pathlib import Path
-import pickle as pkl
 
 
 def main() -> None:
