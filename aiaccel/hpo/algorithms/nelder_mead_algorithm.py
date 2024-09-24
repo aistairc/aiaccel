@@ -138,8 +138,7 @@ class NelderMeadAlgorism:
                     break
                 self.put_value(vertex, np.inf)
 
-        if vertex is None:
-            raise ValueError("vertex is None.")
+        assert vertex is not None
 
         return vertex
 
