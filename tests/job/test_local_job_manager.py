@@ -8,7 +8,7 @@ import pytest
 
 from aiaccel.job import LocalJobExecutor
 from aiaccel.job.job_status import JobStatus
-from aiaccel.job.local_job_executor import JobFuture
+from aiaccel.job.local_job import LocalJob
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def executor(tmpdir: Path) -> Generator[LocalJobExecutor, None, None]:
     n_max_jobs = 4
 
     yield LocalJobExecutor(
-        job_filename="main.sh",
+        job_filename=Path("main.sh"),
         job_name="job",
         work_dir=str(work_dir),
         n_max_jobs=n_max_jobs,
@@ -28,11 +28,11 @@ def executor(tmpdir: Path) -> Generator[LocalJobExecutor, None, None]:
     shutil.rmtree(str(work_dir))
 
 
-def create_mock_job_future(status: JobStatus) -> JobFuture:
+def create_mock_job_future(status: JobStatus) -> LocalJob:
     mock_future = MagicMock(spec=Future)
     mock_future.done.return_value = status in [JobStatus.FINISHED, JobStatus.ERROR]
     mock_future.running.return_value = status == JobStatus.RUNNING
-    job_future = JobFuture(mock_future)
+    job_future = LocalJob(mock_future, Path("main.sh"))
     job_future.status = status
     return job_future
 
@@ -72,22 +72,22 @@ def test_collect_finished_empty(executor: LocalJobExecutor) -> None:
 
 
 def test_update_status_batch(executor: LocalJobExecutor) -> None:
-    job_list: list[JobFuture] = []
+    job_list: list[LocalJob] = []
 
     # Create job futures with different statuses
-    job1 = JobFuture(Future())
+    job1 = LocalJob(Future(), Path("main.sh"))
     job1.status = JobStatus.WAITING
     job_list.append(job1)
 
-    job2 = JobFuture(Future())
+    job2 = LocalJob(Future(), Path("main.sh"))
     job2.status = JobStatus.RUNNING
     job_list.append(job2)
 
-    job3 = JobFuture(Future())
+    job3 = LocalJob(Future(), Path("main.sh"))
     job3.status = JobStatus.FINISHED
     job_list.append(job3)
 
-    job4 = JobFuture(Future())
+    job4 = LocalJob(Future(), Path("main.sh"))
     job4.status = JobStatus.ERROR
     job_list.append(job4)
 

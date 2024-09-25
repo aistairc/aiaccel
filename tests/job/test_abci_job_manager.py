@@ -18,7 +18,7 @@ def executor(tmpdir: Path) -> Generator[AbciJobExecutor, None, None]:
     n_max_jobs = 4
 
     yield AbciJobExecutor(
-        job_filename="main.sh",
+        job_filename=Path("main.sh"),
         job_group="group",
         job_name="job",
         work_dir=str(work_dir),

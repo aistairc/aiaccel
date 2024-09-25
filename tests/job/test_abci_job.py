@@ -9,27 +9,28 @@ from utils import qstat_xml
 
 from aiaccel.job import AbciJob
 from aiaccel.job.job_status import JobStatus
+from aiaccel.job.job_status import from_qsub
 
 ## JobStatus
 
 
 def test_from_qsub_running() -> None:
     for status in ["r", "d", "Rr"]:
-        assert JobStatus.from_qsub(status) == JobStatus.RUNNING
+        assert from_qsub(status) == JobStatus.RUNNING
 
 
 def test_from_qsub_waiting() -> None:
     for status in ["qw", "h", "t", "s", "S", "T", "Rq"]:
-        assert JobStatus.from_qsub(status) == JobStatus.WAITING
+        assert from_qsub(status) == JobStatus.WAITING
 
 
 def test_from_qsub_error() -> None:
-    assert JobStatus.from_qsub("E") == JobStatus.ERROR
+    assert from_qsub("E") == JobStatus.ERROR
 
 
 def test_from_qsub_unexpected_status() -> None:
     with pytest.raises(ValueError, match="Unexpected status: unexpected"):
-        JobStatus.from_qsub("unexpected")
+        from_qsub("unexpected")
 
 
 ## AbciJob
@@ -43,7 +44,7 @@ def job_instance(tmpdir: Path) -> Generator[AbciJob, None, None]:
     job_name = "job"
 
     yield AbciJob(
-        job_filename="job.sh",
+        job_filename=Path("./job.sh"),
         job_group="group",
         job_name=job_name,
         cwd=str(cwd),
@@ -157,7 +158,7 @@ def test_update_status_batch() -> None:
 
     job_list: list[AbciJob] = []
     for ii in range(4):
-        job = AbciJob(job_filename="job.sh", job_group="group", job_name="job")
+        job = AbciJob(job_filename=Path("job.sh"), job_group="group", job_name="job")
         job.status = JobStatus.WAITING
         job.job_number = 42340793 + 2 * ii
 

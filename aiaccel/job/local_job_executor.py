@@ -3,12 +3,12 @@ from __future__ import annotations
 import subprocess
 import time
 import traceback
-from concurrent.futures import Future, ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Any
 
 from aiaccel.job.base_job_executor import BaseJobExecutor
-from aiaccel.job.job_status import JobStatus
+from aiaccel.job.local_job import LocalJob
 
 
 def run(cmd: list[str], cwd: Path) -> None:
@@ -26,55 +26,10 @@ def run(cmd: list[str], cwd: Path) -> None:
         raise RuntimeError(error_msg) from e
 
 
-class JobFuture:
-    def __init__(
-        self,
-        future: Future[None],
-        job_name: str | None = None,
-        job_filename: Path | None = None,
-        cwd: Path | None = None,
-        tag: Any = None,
-    ):
-        self.future = future
-        self.job_name = job_name
-        self.job_filename = job_filename
-        self.cwd = cwd
-        self.tag = tag
-        self.status = JobStatus.UNSUBMITTED
-
-    def update_status(self) -> JobStatus:
-        """
-        Updates the status of the job.
-
-        Returns:
-            JobStatus: The updated status of the job.
-        """
-        self.update_status_batch([self])
-        return self.status
-
-    @classmethod
-    def update_status_batch(cls, job_list: list[JobFuture]) -> None:
-        """
-        Updates the status of a batch of jobs.
-
-        Args:
-            job_list (List[JobFuture]): The list of jobs
-        """
-        for job in job_list:
-            if job.future.done():
-                job.status = JobStatus.FINISHED
-                if job.future.exception() is not None:
-                    job.status = JobStatus.ERROR
-            elif job.future.running():
-                job.status = JobStatus.RUNNING
-            else:
-                job.status = JobStatus.WAITING
-
-
 class LocalJobExecutor(BaseJobExecutor):
     def __init__(
         self,
-        job_filename: Path | str,
+        job_filename: Path,
         job_name: str | None = None,
         work_dir: Path | str | None = None,
         n_max_jobs: int = 1,
@@ -95,14 +50,14 @@ class LocalJobExecutor(BaseJobExecutor):
         self.cwd = Path(work_dir) if work_dir is not None else Path.cwd()
         self.cwd.mkdir(parents=True, exist_ok=True)
 
-        self.job_list: list[JobFuture] = []
+        self.job_list: list[LocalJob] = []
 
     def submit(
         self,
         args: list[str],
         tag: Any = None,
         sleep_time: float = 5.0,
-    ) -> JobFuture:
+    ) -> LocalJob:
         """
         Submits a job to the job manager.
 
@@ -122,8 +77,8 @@ class LocalJobExecutor(BaseJobExecutor):
             cmd += [arg.format(job=self) for arg in args]
 
         future = self.executor.submit(run, cmd, self.cwd)
-        job_future = JobFuture(
-            future, job_name=self.job_name, job_filename=self.job_filename, cwd=self.work_dir, tag=tag
+        job_future = LocalJob(
+            future, job_filename=self.job_filename, job_name=self.job_name, cwd=self.work_dir, tag=tag
         )
 
         self.job_list.append(job_future)
@@ -134,4 +89,4 @@ class LocalJobExecutor(BaseJobExecutor):
         """
         Updates the status of a batch of jobs.
         """
-        JobFuture.update_status_batch(self.job_list)
+        LocalJob.update_status_batch(self.job_list)

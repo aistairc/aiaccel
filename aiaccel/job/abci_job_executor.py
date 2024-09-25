@@ -26,7 +26,7 @@ class AbciJobExecutor(BaseJobExecutor):
 
     def __init__(
         self,
-        job_filename: Path | str,
+        job_filename: Path,
         job_group: str,
         job_name: str | None = None,
         work_dir: Path | str | None = None,
