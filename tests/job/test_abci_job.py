@@ -8,8 +8,7 @@ import pytest
 from utils import qstat_xml
 
 from aiaccel.job import AbciJob
-from aiaccel.job.job_status import JobStatus
-from aiaccel.job.job_status import from_qsub
+from aiaccel.job.job_status import JobStatus, from_qsub
 
 ## JobStatus
 
