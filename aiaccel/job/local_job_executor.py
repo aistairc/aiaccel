@@ -11,21 +11,6 @@ from aiaccel.job.base_job_executor import BaseJobExecutor
 from aiaccel.job.local_job import LocalJob
 
 
-def run(cmd: list[str], cwd: Path) -> None:
-    """
-    Executes a command.
-
-    Args:
-        cmd (List[str]): The command to execute.
-        cwd (Path): The current working directory.
-    """
-    try:
-        subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=cwd)
-    except Exception as e:
-        error_msg = f"Error executing command: {e}\n{traceback.format_exc()}"
-        raise RuntimeError(error_msg) from e
-
-
 class LocalJobExecutor(BaseJobExecutor):
     def __init__(
         self,
@@ -76,7 +61,7 @@ class LocalJobExecutor(BaseJobExecutor):
         if args is not None:
             cmd += [arg.format(job=self) for arg in args]
 
-        future = self.executor.submit(run, cmd, self.cwd)
+        future = self.executor.submit(self.run, cmd, self.cwd)
         job_future = LocalJob(
             future, job_filename=self.job_filename, job_name=self.job_name, cwd=self.work_dir, tag=tag
         )
@@ -90,3 +75,19 @@ class LocalJobExecutor(BaseJobExecutor):
         Updates the status of a batch of jobs.
         """
         LocalJob.update_status_batch(self.job_list)
+
+    @staticmethod
+    def run(cmd: list[str], cwd: Path) -> None:
+        """
+        Executes a command.
+
+        Args:
+            cmd (List[str]): The command to execute.
+            cwd (Path): The current working directory.
+        """
+        try:
+            subprocess.run(cmd, capture_output=True, text=True, check=True, cwd=cwd)
+        except Exception as e:
+            error_msg = f"Error executing command: {e}\n{traceback.format_exc()}"
+            raise RuntimeError(error_msg) from e
+
