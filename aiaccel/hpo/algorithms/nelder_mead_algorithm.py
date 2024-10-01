@@ -30,19 +30,17 @@ class NelderMeadAlgorism:
     """Class to manage the NelderMead algorithm
 
     Uses a queue to receive results and advance the NelderMead algorithm.
+    Return parameters within the normalization range by referring only to the number of dimensions.
 
     NelderMead アルゴリズムを管理するクラス
 
     queue を用いて結果を受け取り、NelderMead のアルゴリズムを進める
+    次元数のみを参照して、正規化範囲でパラメータを返す
 
     Args:
-        search_space: dict[str, tuple[float, float]]
-            Lower and upper bounds corresponding to each parameter name.
-            Needs to be set individually from suggest_uniform
-            (since parameters need to be determined at the time of before_trial).
-            パラメータ名と対応した lower, upper
-            suggest_uniform とは個別に設定する必要がある
-            (before_trial 時点でパラメータを決定する必要があるため)
+        dimensions: int | None = None
+            The number of dimensions in the search space.
+            探索範囲の次元数
         coeff: NelderMeadCoefficient | None = None
             Parameters used in NelderMead.
             NelderMead で用いられるパラメータ
@@ -83,13 +81,12 @@ class NelderMeadAlgorism:
 
     def __init__(
         self,
-        search_space: dict[str, tuple[float, float]],
+        dimensions: int | None = None,
         coeff: NelderMeadCoefficient | None = None,
         rng: np.random.RandomState | None = None,
         block: bool = False,
         timeout: int | None = None,
     ) -> None:
-        self._search_space = search_space
         self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
 
         self._rng = rng if rng is not None else np.random.RandomState()
@@ -102,9 +99,9 @@ class NelderMeadAlgorism:
         self.block = block
         self.timeout = timeout
 
-        self.simplex_size = len(self._search_space) + 1
+        self.dimensions = dimensions
 
-    def get_vertex(self) -> npt.NDArray[np.float64]:
+    def get_vertex(self, dimensions: int | None = None) -> npt.NDArray[np.float64]:
         """Method to return the next parameters for NelderMead
 
         Thread-safe due to parallel processing requirements.
@@ -118,11 +115,30 @@ class NelderMeadAlgorism:
                 The next parameters for NelderMead.
                 nelder mead の次のパラメータ
         """
-        with self.lock:
-            vertex = next(self.generator)
 
-        if vertex is None:
-            raise NelderMeadEmptyError("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
+        if dimensions is not None:
+            if self.dimensions is None:
+                self.dimensions = dimensions
+            else:
+                assert self.dimensions == dimensions
+        elif dimensions is None and self.dimensions is None:
+            raise ValueError(
+                "dimensions is not set yet. "
+                "Please provide it on __init__ or get_vertex or call put_vertex in advance."
+            )
+
+        with self.lock:
+            for vertex in self.generator:
+                if vertex is None:
+                    raise NelderMeadEmptyError(
+                        "Cannot generate new vertex now. Maybe get_vertex is called in parallel."
+                    )
+
+                if all(0 < x < 1 for x in vertex):
+                    break
+                self.put_value(vertex, np.inf)
+
+        assert vertex is not None
 
         return vertex
 
@@ -143,6 +159,12 @@ class NelderMeadAlgorism:
                 Boolean indicating whether the parameters were output by NelderMead.
                 nelder mead から出力されたパラメータか否かを示す bool 変数
         """
+
+        if self.dimensions is None:
+            self.dimensions = len(vertex)
+        else:
+            assert self.dimensions == len(vertex)
+
         self.results.put((vertex, value, enqueue))
 
     def _collect_enqueued_results(
@@ -205,28 +227,35 @@ class NelderMeadAlgorism:
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
         # initialization
-        lows, highs = zip(*self._search_space.values(), strict=False)
 
         self.vertices, self.values = self._collect_enqueued_results()
 
-        try:
-            num_random_points = self.simplex_size - len(self.vertices) if self.simplex_size > len(self.vertices) else 0
-            random_vertices = list(self._rng.uniform(lows, highs, (num_random_points, len(self._search_space))))
-            yield from random_vertices
+        if self.dimensions is None:
+            raise ValueError(
+                "dimensions is not set yet. "
+                "Please provide it on __init__ or get_vertex or call put_vertex in advance."
+            )
 
-            random_vertices, random_values = yield from self._wait_for_results(num_random_points)
+        if self.dimensions + 1 > len(self.vertices):
+            try:
+                num_random_points = self.dimensions + 1 - len(self.vertices)
 
-            self.vertices = self.vertices + random_vertices
-            self.values = self.values + random_values
-        except UnexpectedVerticesUpdateError as e:
-            self.vertices, self.values = e.updated_vertices, e.updated_values
+                random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimensions)))
+                yield from random_vertices
+
+                random_vertices, random_values = yield from self._wait_for_results(num_random_points)
+    
+                self.vertices = self.vertices + random_vertices
+                self.values = self.values + random_values
+            except UnexpectedVerticesUpdateError as e:
+                self.vertices, self.values = e.updated_vertices, e.updated_values
 
         # main loop
         shrink_requied = False
         while True:
             try:
                 # sort self.vertices by their self.values
-                order = np.argsort(self.values)[: self.simplex_size]
+                order = np.argsort(self.values)[: self.dimensions + 1]
                 self.vertices = [self.vertices[idx] for idx in order]
                 self.values = [self.values[idx] for idx in order]
 
