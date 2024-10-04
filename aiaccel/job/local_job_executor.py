@@ -12,6 +12,9 @@ from aiaccel.job.local_job import LocalJob
 
 
 class LocalJobExecutor(BaseJobExecutor):
+
+    JobClass = LocalJob
+
     def __init__(
         self,
         job_filename: Path,
@@ -69,12 +72,6 @@ class LocalJobExecutor(BaseJobExecutor):
         self.job_list.append(job_future)
 
         return job_future
-
-    def update_status_batch(self) -> None:
-        """
-        Updates the status of a batch of jobs.
-        """
-        LocalJob.update_status_batch(self.job_list)
 
     @staticmethod
     def run(cmd: list[str], cwd: Path) -> None:

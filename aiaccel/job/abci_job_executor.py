@@ -7,6 +7,9 @@ from aiaccel.job.base_job_executor import BaseJobExecutor
 
 
 class AbciJobExecutor(BaseJobExecutor):
+
+    JobClass = AbciJob
+
     """
     Executes and manages jobs on the ABCI system.
 
@@ -78,9 +81,3 @@ class AbciJobExecutor(BaseJobExecutor):
         self.job_list.append(job)
 
         return job
-
-    def update_status_batch(self) -> None:
-        """
-        Updates the status of a batch of jobs.
-        """
-        AbciJob.update_status_batch(self.job_list)

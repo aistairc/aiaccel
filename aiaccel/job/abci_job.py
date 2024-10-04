@@ -97,6 +97,7 @@ class AbciJob(BaseJob):
             raise RuntimeError(f"This job is already submited as {self.job_name} (id: {self.job_number})")
 
         p = subprocess.run(self.cmd, capture_output=True, text=True, check=True)
+        print(self.cmd)
 
         match = re.search(r"Your job (\d+)", p.stdout)
         if match is None:

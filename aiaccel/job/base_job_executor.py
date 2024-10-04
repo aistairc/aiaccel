@@ -2,10 +2,14 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
+from aiaccel.job.base_job import BaseJob
 from aiaccel.job.job_status import JobStatus
 
 
 class BaseJobExecutor(ABC):
+
+    JobClass: BaseJob
+
     """
     Abstract base class for job executors.
 
@@ -57,12 +61,12 @@ class BaseJobExecutor(ABC):
         """
         pass
 
-    @abstractmethod
     def update_status_batch(self) -> None:
         """
         Updates the status of a batch of jobs.
         """
-        pass
+        self.JobClass.update_status_batch(self.job_list)
+
 
     def available_slots(self) -> int:
         """
