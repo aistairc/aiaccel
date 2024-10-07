@@ -32,7 +32,8 @@ class BaseJob(ABC):
         return self.status
 
     @abstractmethod
-    def update_status_batch(self, job_list: list[Any]) -> None:
+    @staticmethod
+    def update_status_batch(job_list: list[Any]) -> None:
         """
         Updates the status of a batch of jobs.
 
