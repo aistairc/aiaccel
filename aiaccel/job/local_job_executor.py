@@ -12,7 +12,6 @@ from aiaccel.job.local_job import LocalJob
 
 
 class LocalJobExecutor(BaseJobExecutor):
-
     JobClass = LocalJob
 
     def __init__(

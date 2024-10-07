@@ -7,7 +7,6 @@ from aiaccel.job.base_job_executor import BaseJobExecutor
 
 
 class AbciJobExecutor(BaseJobExecutor):
-
     JobClass = AbciJob
 
     """

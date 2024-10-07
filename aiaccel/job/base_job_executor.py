@@ -7,7 +7,6 @@ from aiaccel.job.job_status import JobStatus
 
 
 class BaseJobExecutor(ABC):
-
     JobClass: BaseJob
 
     """
@@ -66,7 +65,6 @@ class BaseJobExecutor(ABC):
         Updates the status of a batch of jobs.
         """
         self.JobClass.update_status_batch(self.job_list)
-
 
     def available_slots(self) -> int:
         """
