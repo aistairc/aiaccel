@@ -8,7 +8,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 from aiaccel.job.base_job import BaseJob
-from aiaccel.job.job_status import JobStatus, from_qsub
+from aiaccel.job.job_status import JobStatus
 
 
 class AbciJob(BaseJob):
@@ -142,4 +142,30 @@ class AbciJob(BaseJob):
             job_dict[job_number].status = JobStatus.FINISHED
 
         for job_number, status in status_dict.items():
-            job_dict[job_number].status = from_qsub(status)
+            job_dict[job_number].status = cls.from_qsub(status)
+
+    @staticmethod
+    def from_qsub(status: str) -> JobStatus:
+        """
+        Converts a status string from the qsub command to a JobStatus enum value.
+
+        Args:
+            status (str): The status string from the qsub command.
+
+        Returns:
+            JobStatus: The corresponding JobStatus enum value.
+
+        Raises:
+            ValueError: If the status string is not recognized.
+        """
+        match status:
+            case "r":
+                return JobStatus.RUNNING
+            case "qw" | "h" | "t" | "s" | "S" | "T" | "Rq":
+                return JobStatus.WAITING
+            case "d" | "Rr":
+                return JobStatus.RUNNING
+            case "E":
+                return JobStatus.ERROR
+            case _:
+                raise ValueError(f"Unexpected status: {status}")

@@ -8,28 +8,27 @@ import pytest
 from utils import qstat_xml
 
 from aiaccel.job import AbciJob
-from aiaccel.job.job_status import JobStatus, from_qsub
+from aiaccel.job.job_status import JobStatus
 
-## JobStatus
 
 
 def test_from_qsub_running() -> None:
     for status in ["r", "d", "Rr"]:
-        assert from_qsub(status) == JobStatus.RUNNING
+        assert AbciJob.from_qsub(status) == JobStatus.RUNNING
 
 
 def test_from_qsub_waiting() -> None:
     for status in ["qw", "h", "t", "s", "S", "T", "Rq"]:
-        assert from_qsub(status) == JobStatus.WAITING
+        assert AbciJob.from_qsub(status) == JobStatus.WAITING
 
 
 def test_from_qsub_error() -> None:
-    assert from_qsub("E") == JobStatus.ERROR
+    assert AbciJob.from_qsub("E") == JobStatus.ERROR
 
 
 def test_from_qsub_unexpected_status() -> None:
     with pytest.raises(ValueError, match="Unexpected status: unexpected"):
-        from_qsub("unexpected")
+        AbciJob.from_qsub("unexpected")
 
 
 ## AbciJob
