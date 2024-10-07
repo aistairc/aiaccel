@@ -1,6 +1,6 @@
 import optuna
 
-from aiaccel.hpo.optuna.wrapper import (
+from aiaccel.hpo.optuna.suggest_wrapper import (
     Const,
     SuggestCategorical,
     SuggestDiscreteUniform,
