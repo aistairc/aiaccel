@@ -480,6 +480,7 @@ class TestNelderMeadAckleyResumption(BaseTestNelderMead):
 
         # No resumption
         study = optuna.create_study(sampler=sampler)
+        study.enqueue_trial({"x": 1.0, "y": 2.0})
         study.optimize(func=self.func, n_trials=30)
         study_name = "test-study"
 
@@ -492,9 +493,10 @@ class TestNelderMeadAckleyResumption(BaseTestNelderMead):
                 storage=f"sqlite:///{dname}/optuna_study.db",
                 load_if_exists=True,
             )
-            study_resumption.optimize(func=self.func, n_trials=10)
+            study_resumption.enqueue_trial({"x": 1.0, "y": 2.0})
+            study_resumption.optimize(func=self.func, n_trials=1)
 
-            for _ in range(2):
+            for _ in range(29):
                 sampler = NelderMeadSampler(search_space=self.search_space, seed=42)
                 study_resumption = optuna.create_study(
                     sampler=sampler,
@@ -502,7 +504,7 @@ class TestNelderMeadAckleyResumption(BaseTestNelderMead):
                     storage=f"sqlite:///{dname}/optuna_study.db",
                     load_if_exists=True,
                 )
-                study_resumption.optimize(func=self.func, n_trials=10)
+                study_resumption.optimize(func=self.func, n_trials=1)
 
         for trial, trial_resumption in zip(study.trials, study_resumption.trials, strict=False):
             assert math.isclose(trial.params["x"], trial_resumption.params["x"], rel_tol=0.000001)
