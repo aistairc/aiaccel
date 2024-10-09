@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-import warnings
-from collections.abc import Sequence
+import numpy.typing as npt
 from typing import Any
 
+from collections.abc import Sequence
+import warnings
+
 import numpy as np
+
 import optuna
 from optuna.distributions import BaseDistribution
 from optuna.study import Study
@@ -93,7 +96,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
-            search_space=self._search_space,
+            dimensions=len(self._search_space),
             coeff=coeff,
             rng=_rng,
             block=block,
@@ -112,6 +115,31 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     ) -> dict[str, Any]:
         return {}
 
+    def _get_params(self, study: Study, trial: FrozenTrial) -> npt.NDArray[np.float64] | None:
+        try:
+            it = zip(self.nm.get_vertex(), self._search_space.values(), strict=False)
+            params = np.array([(high - low) * value + low for value, (low, high) in it])
+        except NelderMeadEmptyError as e:
+            if self.sub_sampler is None:
+                raise e
+            else:
+                self.sub_sampler.before_trial(study, trial)
+                return None
+        return params
+
+    def _put_params(self, study: Study, trial: FrozenTrial, state: TrialState, values: Sequence[float] | None) -> None:
+        if isinstance(values, list):
+            system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
+            it = zip(trial.params.values(), self._search_space.values(), strict=False)
+            params = np.array([(value - low) / (high - low) for value, (low, high) in it])
+            self.nm.put_value(
+                params,
+                values[0],
+                enqueue="fixed_params" in system_attr or "sub_trial" in system_attr,
+            )
+            if "sub_trial" in system_attr and self.sub_sampler is not None:
+                self.sub_sampler.after_trial(study, trial, state, values)
+
     def _resumption(self, study: Study) -> None:
         trials = study._storage.get_all_trials(study._study_id, deepcopy=False)
 
@@ -122,31 +150,11 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
             # ask
             system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
-            if "fixed_params" not in system_attr:  # enqueued trial
-                try:
-                    while True:
-                        params = self.nm.get_vertex()
-
-                        if all(
-                            low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)
-                        ):
-                            break
-
-                        self.nm.put_value(params, np.inf)
-                except NelderMeadEmptyError as e:
-                    if self.sub_sampler is None:
-                        raise e
-                    else:
-                        self.sub_sampler.before_trial(study, trial)
+            if "fixed_params" not in system_attr:  # not enqueued trial
+                self._get_params(study, trial)
 
             # tell
-            self.nm.put_value(
-                np.array(list(trial.params.values())),
-                trial.values[0],
-                enqueue="fixed_params" in system_attr or "sub_trial" in system_attr,
-            )
-            if "sub_trial" in system_attr and self.sub_sampler is not None:
-                self.sub_sampler.after_trial(study, trial, trial.state, trial.values)
+            self._put_params(study, trial, trial.state, trial.values)
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         """Trial pre-processing.
@@ -180,6 +188,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if self.num_trial < trial._trial_id:  # resumption
             self._resumption(study)
         self.num_trial += 1
+        params: npt.NDArray[np.float64] | None
 
         if "fixed_params" in trial.system_attrs:  # enqueued trial
             fixed_params = trial.system_attrs["fixed_params"]
@@ -189,21 +198,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
-            try:
-                while True:
-                    params = self.nm.get_vertex()
-
-                    if all(low < x < high for x, (low, high) in zip(params, self._search_space.values(), strict=False)):
-                        break
-
-                    self.nm.put_value(params, np.inf)
-            except NelderMeadEmptyError as e:
-                if self.sub_sampler is None:
-                    raise e
-                else:
-                    self.sub_sampler.before_trial(study, trial)
-                    study._storage.set_trial_system_attr(trial._trial_id, "sub_trial", True)
-                    return
+            params = self._get_params(study, trial)
+            if params is None:  # sub trial
+                study._storage.set_trial_system_attr(trial._trial_id, "sub_trial", True)
+                return
 
         study._storage.set_trial_system_attr(trial._trial_id, "params", list(params))
 
@@ -304,17 +302,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             None
 
         """
-        system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
         if isinstance(values, Sequence) and len(values) != 1:  # trial was finished as multiobjective
             raise RuntimeError(
                 "Multidimentional trial values are obtained. "
                 "NelderMeadSampler supports only single objective optimization."
             )
-        if isinstance(values, list):
-            self.nm.put_value(
-                np.array(list(trial.params.values())),
-                values[0],
-                enqueue="fixed_params" in system_attr or "sub_trial" in system_attr,
-            )
-            if "sub_trial" in system_attr and self.sub_sampler is not None:
-                self.sub_sampler.after_trial(study, trial, state, values)
+        self._put_params(study, trial, state, values)
