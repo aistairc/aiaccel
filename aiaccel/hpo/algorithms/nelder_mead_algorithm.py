@@ -1,10 +1,11 @@
-import queue
-import threading
+import numpy.typing as npt
+
 from collections.abc import Generator
 from dataclasses import dataclass
+import queue
+import threading
 
 import numpy as np
-import numpy.typing as npt
 
 
 @dataclass
@@ -123,7 +124,7 @@ class NelderMeadAlgorism:
                 assert self.dimensions == dimensions
         elif dimensions is None and self.dimensions is None:
             raise ValueError(
-                "dimensions is not set yet."
+                "dimensions is not set yet. "
                 "Please provide it on __init__ or get_vertex or call put_vertex in advance."
             )
 
@@ -138,8 +139,7 @@ class NelderMeadAlgorism:
                     break
                 self.put_value(vertex, np.inf)
 
-        if vertex is None:
-            raise ValueError("vertex is None.")
+        assert vertex is not None
 
         return vertex
 
@@ -232,22 +232,24 @@ class NelderMeadAlgorism:
         self.vertices, self.values = self._collect_enqueued_results()
 
         if self.dimensions is None:
-            raise ValueError("dimensions is None.")
+            raise ValueError(
+                "dimensions is not set yet. "
+                "Please provide it on __init__ or get_vertex or call put_vertex in advance."
+            )
 
-        try:
-            if self.dimensions + 1 > len(self.vertices):
+        if self.dimensions + 1 > len(self.vertices):
+            try:
                 num_random_points = self.dimensions + 1 - len(self.vertices)
-            else:
-                num_random_points = 0
-            random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimensions)))
-            yield from random_vertices
 
-            random_vertices, random_values = yield from self._wait_for_results(num_random_points)
+                random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimensions)))
+                yield from random_vertices
 
-            self.vertices = self.vertices + random_vertices
-            self.values = self.values + random_values
-        except UnexpectedVerticesUpdateError as e:
-            self.vertices, self.values = e.updated_vertices, e.updated_values
+                random_vertices, random_values = yield from self._wait_for_results(num_random_points)
+
+                self.vertices = self.vertices + random_vertices
+                self.values = self.values + random_values
+            except UnexpectedVerticesUpdateError as e:
+                self.vertices, self.values = e.updated_vertices, e.updated_values
 
         # main loop
         shrink_requied = False

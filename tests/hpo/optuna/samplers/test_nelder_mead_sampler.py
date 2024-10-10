@@ -1,14 +1,16 @@
+from typing import Any
+
+from collections.abc import Callable
 import csv
 import datetime
 import math
-import time
-from collections.abc import Callable
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Any
+import time
 from unittest.mock import patch
 
 import numpy as np
+
 import optuna
 import pytest
 
@@ -92,15 +94,13 @@ def test_before_trial(
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
-    side_effect = [np.array([0.4, 0.5])]
-    expect_vertex = np.array([-1.0, 0.0])
 
     with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
-        mock_iter.side_effect = side_effect
+        mock_iter.side_effect = [np.array([0.4, 0.5])]
 
         sampler.before_trial(study, trial)
-        print(trial.user_attrs["params"], expect_vertex)
-        assert np.array_equal(trial.user_attrs["params"], expect_vertex)
+
+        assert np.array_equal(trial.user_attrs["params"], np.array([-1.0, 0.0]))
 
 
 def test_before_trial_enqueued(

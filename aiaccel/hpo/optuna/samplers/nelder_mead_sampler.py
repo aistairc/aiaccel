@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from typing import Any, TypedDict
+
+from collections.abc import Sequence
 import copy
 import math
 import warnings
-from collections.abc import Sequence
-from typing import Any, TypedDict
 
 import numpy as np
+
 import optuna
 from optuna.distributions import BaseDistribution
 from optuna.study import Study
