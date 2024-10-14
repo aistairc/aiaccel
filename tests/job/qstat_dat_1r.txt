@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+<job_info  xmlns:xsd="http://www.univa.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="file:///home/system/uge/latest/util/resources/xsd/qstat/qstat.xsd file:///home/system/uge/latest/util/resources/xsd/qstat/message.xsd file:///home/system/uge/latest/util/resources/xsd/qstat/detailed_job_info.xsd">
+  <queue_info>
+    <job_list state="running">
+      <JB_job_number>42340793</JB_job_number>
+      <JAT_prio>0.25586</JAT_prio>
+      <JB_name>objective.sh_0</JB_name>
+      <JB_owner>group_name</JB_owner>
+      <state>r</state>
+      <JAT_start_time>2024-05-07T15:17:56.963</JAT_start_time>
+      <queue_name>gpu@g1026</queue_name>
+      <jclass_name></jclass_name>
+      <slots>10</slots>
+    </job_list>
+  </queue_info>
+  <job_info>
+  </job_info>
+</job_info>

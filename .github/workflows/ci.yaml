@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install .[dev,github-actions]
+          pip install -e .[dev,github-actions]
       - name: Run pytest
         run: pytest -v --cov=aiaccel/${{ strategy.target }} --cov-branch --cov-report=term-missing tests/${{ strategy.target }}
 
