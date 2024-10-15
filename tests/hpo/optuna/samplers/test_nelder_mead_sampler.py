@@ -9,11 +9,10 @@ from typing import Any
 from unittest.mock import patch
 
 import numpy as np
-import numpy.typing as npt
 import optuna
 import pytest
 
-from aiaccel.hpo.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
 
 
 @pytest.fixture
@@ -84,32 +83,20 @@ def test_sample_relative(
     assert sampler.sample_relative(study, trial, {"x": param_distribution, "y": param_distribution}) == {}
 
 
-@pytest.mark.parametrize(
-    "side_effect, expect_vertex",
-    [
-        ([np.array([-1.0, 0.0])], np.array([-1.0, 0.0])),
-        (
-            [np.array([-6.0, 0.0]), np.array([0.0, 6.0]), np.array([-2.0, 0.0])],
-            np.array([-2.0, 0.0]),
-        ),  # out_of_range
-    ],
-)
 def test_before_trial(
     search_space: dict[str, tuple[float, float]],
     state: optuna.trial.TrialState,
     param_distribution: optuna.distributions.FloatDistribution,
-    side_effect: list[npt.NDArray[np.float64]],
-    expect_vertex: npt.NDArray[np.float64],
 ) -> None:
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
-    with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
-        mock_iter.side_effect = side_effect
+    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+        mock_iter.side_effect = [np.array([0.4, 0.5])]
 
         sampler.before_trial(study, trial)
 
-        assert np.array_equal(trial.user_attrs["params"], expect_vertex)
+        assert np.array_equal(trial.user_attrs["params"], np.array([-1.0, 0.0]))
 
 
 def test_before_trial_enqueued(
@@ -137,7 +124,7 @@ def test_before_trial_sub_sampler(
     sampler = create_sampler(search_space, optuna.samplers.RandomSampler())
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
-    with patch("aiaccel.hpo.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
         mock_iter.side_effect = NelderMeadEmptyError()
 
         sampler.before_trial(study, trial)

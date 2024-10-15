@@ -18,7 +18,13 @@ classifiers = [
 dependencies = [
     "numpy",
     "optuna",
-    "optuna>=3.4.0"
+    "optuna>=3.4.0",
+    "omegaconf",
+    "hydra-core",
+    "colorama",
+    "lightning>=2.2.1",
+    "torch>=2.2.0",
+    "h5py"
 ]
 
 [project.scripts]
@@ -35,6 +41,7 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-cov",
+    "pytest-mock",
     "pytest-subprocess",
     "ruff",
     "sphinx",
@@ -42,6 +49,7 @@ dev = [
     "sphinx-intl",
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
+    "types-colorama",
     "undecorated",
 ]
 github-actions = [
@@ -56,3 +64,30 @@ fix = true
 [tool.ruff.lint]
 select = ["F", "E", "W", "UP", "B", "SIM", "I", "C", "A", "ERA", "N", "C90"]
 
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+
+section-order = [
+    "future",
+    "typing",
+    "standard-library",
+    "utilities",
+    "datascience",
+    "torch",
+    "torch-third-party",
+    "third-party",
+    "audio",
+    "first-party",
+    "local-folder"
+]
+
+[tool.ruff.lint.isort.sections]
+"typing" = ["typing", "numpy.typing"]
+"utilities" = ["colorama", "hydra", "omegaconf", "progressbar", "rich"]
+"datascience" = ["numpy", "scipy", "pandas", "matplotlib", "opt_einsum", "einops"]
+"torch" = ["torch"]
+"torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
+"audio" = ["librosa", "pypesq", "pystoi", "soundfile"]

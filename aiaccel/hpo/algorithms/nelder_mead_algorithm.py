@@ -1,10 +1,11 @@
-import queue
-import threading
+import numpy.typing as npt
+
 from collections.abc import Generator
 from dataclasses import dataclass
+import queue
+import threading
 
 import numpy as np
-import numpy.typing as npt
 
 from aiaccel.hpo.algorithms.generate_initial_simplex import generate_initial_simplex
 
@@ -29,18 +30,66 @@ class UnexpectedVerticesUpdateError(Exception):
 
 
 class NelderMeadAlgorism:
+    """Class to manage the NelderMead algorithm
+
+    Uses a queue to receive results and advance the NelderMead algorithm.
+    Return parameters within the normalization range by referring only to the number of dimensions.
+
+    NelderMead アルゴリズムを管理するクラス
+
+    queue を用いて結果を受け取り、NelderMead のアルゴリズムを進める
+    次元数のみを参照して、正規化範囲でパラメータを返す
+
+    Args:
+        dimensions: int | None = None
+            The number of dimensions in the search space.
+            探索範囲の次元数
+        coeff: NelderMeadCoefficient | None = None
+            Parameters used in NelderMead.
+            NelderMead で用いられるパラメータ
+        rng: np.random.RandomState | None = None
+            RandomState used for calculating initial points.
+            初期点計算に用いられる RandomState
+        block: bool = False
+            Sets whether to block the queue used internally.
+            内部で用いられる queue を block するかどうかを設定する
+        timeout: int | None = None
+            Time to block the queue.
+            queue を block する時間
+    Attributes:
+        vertices: list[npt.NDArray[np.float64]]
+            List of simplex parameters.
+            simplex のパラメータのリスト
+        values: list[float]
+            List of simplex calculation results.
+            simplex の計算結果のリスト
+        generator: iterator
+            Generator for NelderMead parameters.
+            neldermead のパラメータのジェネレータ
+        lock: threading.Lock
+            threading.Lock variable used for thread-safe processing.
+             スレッドセーフ処理に用いる threading.Lock 変数
+        results: queue.Queue[tuple[npt.NDArray[np.float64], float, bool]]
+            Queue to receive tuples of parameters, calculation results,
+            and a boolean indicating whether the parameters were output by NelderMead.
+            外部からパラメータ・計算結果・nelder mead から出力されたパラメータか否かを示す bool 変数
+            のタプルを受け取る queue
+        simplex_size: int
+            Number of vertices in the simplex.
+            simplex の頂点の個数
+    """
+
     vertices: list[npt.NDArray[np.float64]]
     values: list[float]
 
     def __init__(
         self,
-        search_space: dict[str, tuple[float, float]],
+        dimensions: int | None = None,
         coeff: NelderMeadCoefficient | None = None,
         rng: np.random.RandomState | None = None,
         block: bool = False,
         timeout: int | None = None,
     ) -> None:
-        self._search_space = search_space
         self.coeff = coeff if coeff is not None else NelderMeadCoefficient()
 
         self._rng = rng if rng is not None else np.random.RandomState()
@@ -53,14 +102,46 @@ class NelderMeadAlgorism:
         self.block = block
         self.timeout = timeout
 
-        self.simplex_size = len(self._search_space) + 1
+        self.dimensions = dimensions
 
-    def get_vertex(self) -> npt.NDArray[np.float64]:
+    def get_vertex(self, dimensions: int | None = None) -> npt.NDArray[np.float64]:
+        """Method to return the next parameters for NelderMead
+
+        Thread-safe due to parallel processing requirements.
+
+        nelder mead の次のパラメータを返すメソッド
+
+        並列処理の都合でスレッドセーフとなっている
+
+        Returns:
+            npt.NDArray[np.float64]:
+                The next parameters for NelderMead.
+                nelder mead の次のパラメータ
+        """
+
+        if dimensions is not None:
+            if self.dimensions is None:
+                self.dimensions = dimensions
+            else:
+                assert self.dimensions == dimensions
+        elif dimensions is None and self.dimensions is None:
+            raise ValueError(
+                "dimensions is not set yet. "
+                "Please provide it on __init__ or get_vertex or call put_vertex in advance."
+            )
+
         with self.lock:
-            vertex = next(self.generator)
+            for vertex in self.generator:
+                if vertex is None:
+                    raise NelderMeadEmptyError(
+                        "Cannot generate new vertex now. Maybe get_vertex is called in parallel."
+                    )
 
-        if vertex is None:
-            raise NelderMeadEmptyError("Cannot generate new vertex now. Maybe get_vertex is called in parallel.")
+                if all(0 < x < 1 for x in vertex):
+                    break
+                self.put_value(vertex, np.inf)
+
+        assert vertex is not None
 
         return vertex
 
@@ -70,6 +151,23 @@ class NelderMeadAlgorism:
         value: float,
         enqueue: bool = False,
     ) -> None:
+        """Method to pass a pair of parameters and results to NelderMead
+
+        nelder mead にパラメータと結果の組を渡すメソッド
+
+        Args:
+            vertex: npt.NDArray[np.float64]: Parameters パラメータ
+            value: float: Calculation result 計算結果
+            enqueue: bool = False:
+                Boolean indicating whether the parameters were output by NelderMead.
+                nelder mead から出力されたパラメータか否かを示す bool 変数
+        """
+
+        if self.dimensions is None:
+            self.dimensions = len(vertex)
+        else:
+            assert self.dimensions == len(vertex)
+
         self.results.put((vertex, value, enqueue))
 
     def _collect_enqueued_results(
@@ -132,29 +230,36 @@ class NelderMeadAlgorism:
 
     def _generator(self) -> Generator[npt.NDArray[np.float64] | None, None, None]:  # noqa: C901
         # initialization
-        lows, highs = zip(*self._search_space.values(), strict=False)
 
         self.vertices, self.values = self._collect_enqueued_results()
 
-        try:
-            num_random_points = self.simplex_size - len(self.vertices) if self.simplex_size > len(self.vertices) else 0
-            initial_simplex = generate_initial_simplex(dim=len(self._search_space), rng=self._rng)
-            random_vertices = [(np.array(highs) - np.array(lows)) * value + np.array(lows) for value in initial_simplex]
-            yield from random_vertices[:num_random_points]
+        if self.dimensions is None:
+            raise ValueError(
+                "dimensions is not set yet. "
+                "Please provide it on __init__ or get_vertex or call put_vertex in advance."
+            )
 
-            random_vertices, random_values = yield from self._wait_for_results(num_random_points)
+        if self.dimensions + 1 > len(self.vertices):
+            try:
+                num_random_points = self.dimensions + 1 - len(self.vertices)
 
-            self.vertices = self.vertices + random_vertices
-            self.values = self.values + random_values
-        except UnexpectedVerticesUpdateError as e:
-            self.vertices, self.values = e.updated_vertices, e.updated_values
+                initial_vertices = generate_initial_simplex(dim=self.dimensions, rng=self._rng)
+
+                yield from initial_vertices[:num_random_points]
+
+                random_vertices, random_values = yield from self._wait_for_results(num_random_points)
+
+                self.vertices = self.vertices + random_vertices
+                self.values = self.values + random_values
+            except UnexpectedVerticesUpdateError as e:
+                self.vertices, self.values = e.updated_vertices, e.updated_values
 
         # main loop
         shrink_requied = False
         while True:
             try:
                 # sort self.vertices by their self.values
-                order = np.argsort(self.values)[: self.simplex_size]
+                order = np.argsort(self.values)[: self.dimensions + 1]
                 self.vertices = [self.vertices[idx] for idx in order]
                 self.values = [self.values[idx] for idx in order]
 
