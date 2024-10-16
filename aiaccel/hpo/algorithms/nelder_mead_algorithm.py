@@ -1,10 +1,13 @@
-import queue
-import threading
+import numpy.typing as npt
+
 from collections.abc import Generator
 from dataclasses import dataclass
+import queue
+import threading
 
 import numpy as np
-import numpy.typing as npt
+
+from aiaccel.hpo.algorithms.generate_initial_simplex import generate_initial_simplex
 
 
 @dataclass
@@ -240,11 +243,12 @@ class NelderMeadAlgorism:
             try:
                 num_random_points = self.dimensions + 1 - len(self.vertices)
 
-                random_vertices = list(self._rng.uniform(0, 1, (num_random_points, self.dimensions)))
-                yield from random_vertices
+                initial_vertices = generate_initial_simplex(dim=self.dimensions, rng=self._rng)
+
+                yield from initial_vertices[:num_random_points]
 
                 random_vertices, random_values = yield from self._wait_for_results(num_random_points)
-    
+
                 self.vertices = self.vertices + random_vertices
                 self.values = self.values + random_values
             except UnexpectedVerticesUpdateError as e:
