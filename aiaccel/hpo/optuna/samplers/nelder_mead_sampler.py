@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-import warnings
-from collections.abc import Sequence
 from typing import Any
 
+from collections.abc import Sequence
+import warnings
+
 import numpy as np
+
 import optuna
 from optuna.distributions import BaseDistribution
 from optuna.study import Study
@@ -262,7 +264,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 "NelderMeadSampler supports only single objective optimization."
             )
         if isinstance(values, list):
-            it = zip(trial.params.values(), self._search_space.values(), strict=False)
+            if "params" in trial.user_attrs:
+                it = zip(trial.user_attrs["params"], self._search_space.values(), strict=False)
+            else:  # sub_sampler
+                it = zip(trial.params.values(), self._search_space.values(), strict=False)
             params = np.array([(value - low) / (high - low) for value, (low, high) in it])
             self.nm.put_value(
                 params,
