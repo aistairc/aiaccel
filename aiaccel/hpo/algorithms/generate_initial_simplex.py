@@ -1,5 +1,6 @@
-import numpy as np
 import numpy.typing as npt
+
+import numpy as np
 
 
 def generate_initial_simplex(

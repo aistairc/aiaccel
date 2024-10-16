@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-import warnings
-from collections.abc import Sequence
 from typing import Any
 
+from collections.abc import Sequence
+import warnings
+
 import numpy as np
+
 import optuna
 from optuna.distributions import BaseDistribution
 from optuna.study import Study
