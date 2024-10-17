@@ -216,6 +216,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
         if isinstance(param_distribution, optuna.distributions.IntDistribution):
             param_value = int(param_value)
+        if hasattr(param_distribution, "step") and param_distribution.step is not None:
+            assert hasattr(param_distribution, "low")
+            param_value -= (param_value - param_distribution.low) % param_distribution.step
 
         contains = param_distribution._contains(param_distribution.to_internal_repr(param_value))
         if not contains:
