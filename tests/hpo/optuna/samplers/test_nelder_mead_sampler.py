@@ -556,5 +556,5 @@ class TestNelderMeadAckleyResumption(BaseTestNelderMead):
     def func(self, trial: optuna.trial.Trial) -> float:
         params = []
         for name, distribution in self.search_space.items():
-            params.append(trial.suggest_float(name, distribution["low"], distribution["high"], log=distribution["log"]))
+            params.append(trial.suggest_float(name, distribution["low"], distribution["high"]))
         return self.objective(params)
