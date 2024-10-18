@@ -1,63 +1,59 @@
-# coco を利用した NelderMeadSampler の検証用コード
+# Verification Code for NelderMeadSampler Using COCO
 
-## 1. ファイル構成
+## 1. File Structure
 
 ### nelder-mead
 ### nelder-mead-subTPE
 ### TPE
 
-- 各 sampler の最適化結果の csv が格納されるディレクトリです.
+- These directories store the CSV files containing the optimization results for each sampler.
 
 ### experiment_coco.py
 
-- coco を用いて検証を行う本体のコードです.
-- 次元数*20　step、10並列での実行を想定しています.
-- 実行すると optuna の結果した結果が `optuna_csv` に、並列ステップ毎の結果が `step_csv` に出力されます.
+- This is the main code for validation using COCO.
+- It is designed to run with dimensions * 20 steps and 10 parallel executions.
+- Upon execution, the results from Optuna are output to `optuna_csv`, and results for each parallel step are output to `step_csv`.
 
 ### main_parallel_coco.py
 
-- `job_dispatcher` を用いて各 sampler ・関数・次元毎にジョブを投入するコードです.
+- This code uses `job_dispatcher` to submit jobs for each sampler, function, and dimension.
 
 ### objective.sh
 
-- `job_dispatcher` で投入する qsub 用のスクリプトです.
+- This is a script for qsub submission used by `job_dispatcher`.
 
 ### plot.py
 
-- matplotlib を用いて各 sampler の結果をグラフ化するコードです.
-- 各 sampler のディレクトリの `optuna_csv` を参照します.
+- This code uses matplotlib to graph the results of each sampler.
+- It references the `optuna_csv` files in each sampler's directory.
 
 ### result_bbob_dim_vs_value-fopt_parallel.png
 
-- `plot.py` を実行して出力した検証結果を可視化したグラフ画像です.
-- 横軸 次元数 縦軸 最適化結果の平均・偏差 のグラフが、ベンチマーク関数24個分並んでいます.
+- This is a graph image visualizing the validation results output by running `plot.py`.
+- The graph displays 24 benchmark functions with the number of dimensions on the horizontal axis and the mean and standard deviation of optimization results on the vertical axis.
 
-## 2. 動作説明
+## 2. Execution Instructions
 
-- aiaccel のインストール・仮想環境の activate を行ってください.
+- Install aiaccel and activate the virtual environment.
 
-- coco インストールを行ってください.
-  - 詳細は下記 git を参照してください.
+- Install COCO.
+  - For details, please refer to the following GitHub repository:
     https://github.com/numbbo/coco
 
-- `objective.sh` の仮想環境、 `main_parallel_coco.py` の job_group を適切なパス・ ID に書き換えてください.
-- `main_parallel.py` を実行すると、各 sampler の検証が実行されます.
-- 結果は各ディレクトリ直下の `optuna_csv`, `step_csv` に保存されます.
+- Please replace the virtual environment path in `objective.sh` and the `job_group` in `main_parallel_coco.py` with the appropriate paths and IDs.
+- When you run `main_parallel.py`, the validation for each sampler will be executed.
+- The results are saved in `optuna_csv` and `step_csv` under each directory.
 
-```bash
 cd nelder-mead
 python main_parallel.py
-```
 
-- `plot.py` の実行には、pandas, matplotlib のインストールが必要です.
+- To run `plot.py`, you need to install pandas and matplotlib.
 
-```bash
 pip install pandas matplotlib
 python plot.py
-```
 
-## 3. 結果の確認
+## 3. Checking the Results
 
-- 各 sampler の検証結果は sampler に対応したディレクトリ以下の `optuna_csv`, `step_csv` に出力されます.
-- `plot.py` の可視化結果は `result_bbob_dim_vs_value-fopt_parallel.png` に出力されます.
-  - 可視化結果からは、並列実行時には nelder-mead-subTPE の方が良い結果が出やすい傾向があることが分かります. ただし、関数によっては nelder-mead の方が良い結果が出ることもあります.
+- The validation results for each sampler are output to `optuna_csv` and `step_csv` under the corresponding sampler's directory.
+- The visualization results from `plot.py` are output to `result_bbob_dim_vs_value-fopt_parallel.png`.
+  - From the visualization results, it can be observed that `nelder-mead_subTPE` tends to yield better results during parallel execution. However, in some cases, `nelder-mead` may perform better depending on the function.

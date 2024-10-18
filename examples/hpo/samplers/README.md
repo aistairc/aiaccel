@@ -1,42 +1,42 @@
-# NelderMeadSampler の examples
+# Examples of NelderMeadSampler
 
-## 1. ファイル構成
+## 1. File Structure
 
 ### example.py
 
-- 一般的な NelderMeadSampler の使い方を示したコードです.
-- 最適化対象はベンチマーク関数 shpere になっています.(以下の example も記述が無い場合は同様)
+- This code demonstrates the general usage of NelderMeadSampler.
+- The optimization target is the benchmark function Sphere (this applies to the following examples unless otherwise specified).
 
 ### example_parallel.py
 
-- 並列実行時の NelderMeadSampler の使い方を示したコードです.
-- NelderMeadSampler の引数 block=True, study.optimize の引数 n_jobs=3 として、並列実行を有効にしています.
-- 並列実行を有効にすることで、初期点計算と shrink 時の計算を並列化でき、直列実行と比べて高速化できます.
+- This code demonstrates the usage of NelderMeadSampler in parallel execution.
+- Parallel execution is enabled by setting the NelderMeadSampler argument block=True and the study.optimize argument n_jobs=3.
+- By enabling parallel execution, the initial point calculation and the computation during shrinking can be parallelized, leading to faster execution compared to serial execution.
 
 ### example_enqueue.py
 
-- optuna.study.enqueue_trial 利用時の NelderMeadSampler の使い方を示したコードです.
-- ask-tell インタフェースを利用し、 NelderMeadSampler がパラメータの出力に失敗した時に、ランダムなパラメータを enqueue_trial で探索しています.
+- This code demonstrates the usage of NelderMeadSampler with optuna.study.enqueue_trial.
+- Utilizing the ask-tell interface, random parameters are explored using enqueue_trial when NelderMeadSampler fails to output parameters.
 
 ### example_sub_sampler.py
 
-- sub_sampler 機能の利用時の NelderMeadSampler の使い方を示したコードです.
-- NelderMeadSampler の引数 sub_sampler=optuna.samplers.TPESampler として、NelderMeadSampler がパラメータの出力に失敗した時に、TPESampler で探索しています.
-- sub_sampler 機能の利用時は、並列であっても引数 block=False にする必要があります. (block=False でも並列実行は可能です.)
+- This code demonstrates the usage of the sub_sampler feature of NelderMeadSampler.
+- When sub_sampler=optuna.samplers.TPESampler is set as an argument for NelderMeadSampler, TPESampler is used for exploration when NelderMeadSampler fails to output parameters.
+- When using the sub_sampler function, the argument block=False must be set even if it is parallel. (Parallel execution is possible even with block=False.)
 
 ### coco
 
-- ブラックボックス最適化評価用フレームワーク coco を用いた NelderMeadSampler の検証用コードを含んだディレクトリです.
-- 詳細は該当ディレクトリ内の README.md を参照してください.
+- This directory contains code for verifying NelderMeadSampler using the black-box optimization evaluation framework coco.
+- For details, please refer to the README.md in the relevant directory.
 
-## 2. 動作説明
+## 2. Instructions
 
-- aiaccel のインストール・仮想環境の activate 後に、該当ファイルを実行してください.
+- After installing aiaccel and activating the virtual environment, run the corresponding file.
 
 ```bash
 python example.py
 ```
 
-## 3. 結果の確認
+## 3. Checking Results
 
-- example コードの実行結果は、標準出力に表示されます.
+- The execution results of the example code are displayed in the standard output.
