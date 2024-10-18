@@ -1,14 +1,16 @@
+from typing import Any
+
+from collections.abc import Callable
 import csv
 import datetime
 import math
-import time
-from collections.abc import Callable
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Any
+import time
 from unittest.mock import patch
 
 import numpy as np
+
 import optuna
 import pytest
 
@@ -446,5 +448,31 @@ class TestNelderMeadAckleyInteger(BaseTestNelderMead):
         params: list[int | float] = []
         params.append(trial.suggest_int("x", *[int(item) for item in self.search_space["x"]]))
         params.append(trial.suggest_float("y", *self.search_space["y"]))
+
+        return self.objective(params)
+
+
+class TestNelderMeadAckleyStep(BaseTestNelderMead):
+    def setup_method(self) -> None:
+        search_space = {"x": (-30, 30), "y": (-30.0, 30.0)}
+        sampler = NelderMeadSampler(search_space=search_space, seed=42)
+
+        self.common_setup(
+            search_space=search_space,
+            objective=ackley,
+            result_file_name="results_ackley_step.csv",
+            study=optuna.create_study(sampler=sampler),
+        )
+
+    def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
+        for trial, result in zip(self.study.trials, results, strict=False):
+            assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+            assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+            assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
+
+    def func(self, trial: optuna.trial.Trial) -> float:
+        params: list[int | float] = []
+        params.append(trial.suggest_int("x", *[int(item) for item in self.search_space["x"]], step=2))
+        params.append(trial.suggest_float("y", *self.search_space["y"], step=0.5))
 
         return self.objective(params)
