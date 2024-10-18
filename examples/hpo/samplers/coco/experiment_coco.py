@@ -1,21 +1,23 @@
 #!/usr/bin/env python
+from typing import Any
+
 import argparse
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 import csv
 import os
 import time
-from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+
+import pandas as pd
 
 import cocoex
 import optuna
-import pandas as pd
 
-from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler, SearchSpace
 
 
 def _optimize_sequential(
-    study: optuna.Study, func: Callable[[list[float]], float], search_space: dict[str, tuple[float, float]]
+    study: optuna.Study, func: Callable[[list[float]], float], search_space: dict[str, SearchSpace]
 ) -> float | None:
     try:
         trial = study.ask()
@@ -23,7 +25,7 @@ def _optimize_sequential(
         return None
     param = []
     for name, distribution in search_space.items():
-        param.append(trial.suggest_float(name, *distribution))
+        param.append(trial.suggest_float(name, distribution["low"], distribution["high"]))
 
     result = func(param)
     time.sleep(0.1)
@@ -40,7 +42,7 @@ def _optimize_sequential_wrapper(args: list[Any]) -> float | None:
 def optimize(
     study: optuna.Study,
     func: Callable[[list[float]], float],
-    search_space: dict[str, tuple[float, float]],
+    search_space: dict[str, SearchSpace],
     result_csv_name: str,
     num_trial: int = 1000,
     num_parallel: int = 10,
@@ -103,9 +105,9 @@ def experiment_bbob() -> None:
     for problem in suite:  # this loop will take several minutes or longer
         problem.observe_with(observer)  # generates the data for cocopp post-processing
 
-        search_space = {}
+        search_space: dict[str, SearchSpace] = {}
         for i in range(problem.dimension):
-            search_space[f"x{i}"] = (-5.0, 5.0)
+            search_space[f"x{i}"] = {"low": -5.0, "high": 5.0}
         print(search_space)
 
         if sampler_name == "nelder-mead":
