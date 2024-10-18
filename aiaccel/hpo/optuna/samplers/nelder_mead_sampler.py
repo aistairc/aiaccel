@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy.typing as npt
 from typing import Any, TypedDict
 
 from collections.abc import Sequence
@@ -126,6 +127,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             block=block,
         )
         self.sub_sampler = sub_sampler
+        self.num_trial = 1
 
     def infer_relative_search_space(self, study: Study, trial: FrozenTrial) -> dict[str, BaseDistribution]:
         return {}
@@ -137,6 +139,51 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         search_space: dict[str, BaseDistribution],
     ) -> dict[str, Any]:
         return {}
+
+    def _get_params(self, study: Study, trial: FrozenTrial) -> npt.NDArray[np.float64] | None:
+        try:
+            it = zip(self.nm.get_vertex(), self._search_space.values(), strict=False)
+            params = np.array([(space["high"] - space["low"]) * value + space["low"] for value, space in it])
+        except NelderMeadEmptyError as e:
+            if self.sub_sampler is None:
+                raise e
+            else:
+                self.sub_sampler.before_trial(study, trial)
+                return None
+        return params
+
+    def _put_params(self, study: Study, trial: FrozenTrial, state: TrialState, values: Sequence[float] | None) -> None:
+        if isinstance(values, list):
+            system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
+            params = [
+                math.log(value) if self._search_space[key]["log"] else value for key, value in trial.params.items()
+            ]
+            it = zip(params, self._search_space.values(), strict=False)
+            params = np.array([(value - space["low"]) / (space["high"] - space["low"]) for value, space in it])
+
+            self.nm.put_value(
+                params,
+                values[0],
+                enqueue="fixed_params" in system_attr or "sub_trial" in system_attr,
+            )
+            if "sub_trial" in system_attr and self.sub_sampler is not None:
+                self.sub_sampler.after_trial(study, trial, state, values)
+
+    def _resumption(self, study: Study) -> None:
+        trials = study._storage.get_all_trials(study._study_id, deepcopy=False)
+
+        for trial in trials:
+            self.num_trial += 1
+            if trial.values is None:
+                continue
+
+            # ask
+            system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
+            if "fixed_params" not in system_attr:  # not enqueued trial
+                self._get_params(study, trial)
+
+            # tell
+            self._put_params(study, trial, trial.state, trial.values)
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
         """Trial pre-processing.
@@ -167,25 +214,25 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             None
 
         """
+        if self.num_trial < trial._trial_id:  # resumption
+            self._resumption(study)
+        self.num_trial += 1
+        params: npt.NDArray[np.float64] | None
+
         if "fixed_params" in trial.system_attrs:  # enqueued trial
             fixed_params = trial.system_attrs["fixed_params"]
             if fixed_params.keys() != self._search_space.keys():
                 raise RuntimeError("All parameters must be given when executing enqueue_trial.")
+            study._storage.set_trial_system_attr(trial._trial_id, "fixed_params", trial.system_attrs["fixed_params"])
 
             params = np.array([fixed_params[name] for name in self._search_space])
         else:
-            try:
-                it = zip(self.nm.get_vertex(), self._search_space.values(), strict=False)
-                params = np.array([(space["high"] - space["low"]) * value + space["low"] for value, space in it])
-            except NelderMeadEmptyError as e:
-                if self.sub_sampler is None:
-                    raise e
-                else:
-                    self.sub_sampler.before_trial(study, trial)
-                    trial.set_user_attr("sub_trial", True)
-                    return
+            params = self._get_params(study, trial)
+            if params is None:  # sub trial
+                study._storage.set_trial_system_attr(trial._trial_id, "sub_trial", True)
+                return
 
-        trial.set_user_attr("params", params)
+        study._storage.set_trial_system_attr(trial._trial_id, "params", list(params))
 
     def sample_independent(
         self,
@@ -234,7 +281,8 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 f"Parameter {param_name} is set with log={self._search_space[param_name]['log']} "
                 f"but optuna.distributions.param_distribution.log={param_distribution.log}"
             )
-        if "sub_trial" in trial.user_attrs and self.sub_sampler is not None:
+        system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
+        if "sub_trial" in system_attr and self.sub_sampler is not None:
             param_value = self.sub_sampler.sample_independent(study, trial, param_name, param_distribution)
             value = math.log(param_value) if self._search_space[param_name]["log"] else param_value
             if self._search_space[param_name]["low"] <= value <= self._search_space[param_name]["high"]:
@@ -248,7 +296,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             raise ValueError(f"The parameter name, {param_name}, is not found in the given search_space.")
 
         param_index = list(self._search_space.keys()).index(param_name)
-        param_value = trial.user_attrs["params"][param_index]
+        param_value = system_attr["params"][param_index]
 
         if self._search_space[param_name]["log"]:
             param_value = math.exp(param_value)
@@ -302,16 +350,4 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 "Multidimentional trial values are obtained. "
                 "NelderMeadSampler supports only single objective optimization."
             )
-        if isinstance(values, list):
-            params = [
-                math.log(value) if self._search_space[key]["log"] else value for key, value in trial.params.items()
-            ]
-            it = zip(params, self._search_space.values(), strict=False)
-            params = np.array([(value - space["low"]) / (space["high"] - space["low"]) for value, space in it])
-            self.nm.put_value(
-                params,
-                values[0],
-                enqueue="fixed_params" in trial.system_attrs or "sub_trial" in trial.user_attrs,
-            )
-            if "sub_trial" in trial.user_attrs and self.sub_sampler is not None:
-                self.sub_sampler.after_trial(study, trial, state, values)
+        self._put_params(study, trial, state, values)
