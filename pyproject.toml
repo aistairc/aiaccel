@@ -51,6 +51,9 @@ dev = [
     "sphinx-rtd-theme",
     "types-colorama",
     "undecorated",
+    "pandas",
+    "pandas-stubs",
+    "matplotlib"
 ]
 github-actions = [
     "pytest-github-actions-annotate-failures",
