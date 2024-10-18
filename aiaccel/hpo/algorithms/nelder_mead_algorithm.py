@@ -1,10 +1,11 @@
-import queue
-import threading
+import numpy.typing as npt
+
 from collections.abc import Generator
 from dataclasses import dataclass
+import queue
+import threading
 
 import numpy as np
-import numpy.typing as npt
 
 
 @dataclass
@@ -244,7 +245,7 @@ class NelderMeadAlgorism:
                 yield from random_vertices
 
                 random_vertices, random_values = yield from self._wait_for_results(num_random_points)
-    
+
                 self.vertices = self.vertices + random_vertices
                 self.values = self.values + random_values
             except UnexpectedVerticesUpdateError as e:
