@@ -132,8 +132,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
 
             raw_params = system_attr["params"] if "params" in system_attr else trial.params.values()
+            search_space = self._search_space.values()
             params = np.array(
-                [(value - low) / (high - low) for value, (low, high) in zip(raw_params, self._search_space.values())]
+                [(value - low) / (high - low) for value, (low, high) in zip(raw_params, search_space, strict=False)]
             )
 
             self.nm.put_value(
