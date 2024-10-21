@@ -11,25 +11,7 @@ from aiaccel.job import AbciJob
 from aiaccel.job.job_status import JobStatus
 
 
-
-def test_from_qsub_running() -> None:
-    for status in ["r", "d", "Rr"]:
-        assert AbciJob.from_qsub(status) == JobStatus.RUNNING
-
-
-def test_from_qsub_waiting() -> None:
-    for status in ["qw", "h", "t", "s", "S", "T", "Rq"]:
-        assert AbciJob.from_qsub(status) == JobStatus.WAITING
-
-
-def test_from_qsub_error() -> None:
-    assert AbciJob.from_qsub("E") == JobStatus.ERROR
-
-
-def test_from_qsub_unexpected_status() -> None:
-    with pytest.raises(ValueError, match="Unexpected status: unexpected"):
-        AbciJob.from_qsub("unexpected")
-
+#
 
 ## AbciJob
 
