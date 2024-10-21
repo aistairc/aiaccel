@@ -1,7 +1,9 @@
+import numpy.typing as npt
+
 from unittest.mock import patch
 
 import numpy as np
-import numpy.typing as npt
+
 import pytest
 
 from aiaccel.hpo.algorithms.nelder_mead_algorithm import (

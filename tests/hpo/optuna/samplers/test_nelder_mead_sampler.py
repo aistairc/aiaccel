@@ -1,14 +1,17 @@
+from typing import Any
+
+from collections.abc import Callable
 import csv
 import datetime
 import math
-import time
-from collections.abc import Callable
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Any
+import tempfile
+import time
 from unittest.mock import patch
 
 import numpy as np
+
 import optuna
 import pytest
 
@@ -22,7 +25,7 @@ def search_space() -> dict[str, tuple[float, float]]:
 
 @pytest.fixture
 def state() -> optuna.trial.TrialState:
-    return optuna.trial.TrialState.COMPLETE
+    return optuna.trial.TrialState.RUNNING
 
 
 @pytest.fixture
@@ -51,7 +54,7 @@ def create_trial(
         state=state,
         value=0.0,
         datetime_start=datetime.datetime.now(),
-        datetime_complete=datetime.datetime.now(),
+        datetime_complete=None,
         params={"x": 0.0, "y": 1.0},
         distributions={"x": param_distribution, "y": param_distribution},
         user_attrs={},
@@ -91,12 +94,14 @@ def test_before_trial(
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
+    study.add_trial(trial)
     with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
         mock_iter.side_effect = [np.array([0.4, 0.5])]
 
         sampler.before_trial(study, trial)
 
-        assert np.array_equal(trial.user_attrs["params"], np.array([-1.0, 0.0]))
+        system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
+        assert np.array_equal(system_attr["params"], np.array([-1.0, 0.0]))
 
 
 def test_before_trial_enqueued(
@@ -108,10 +113,12 @@ def test_before_trial_enqueued(
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution, fixed_params)
+    study.add_trial(trial)
     sampler.before_trial(study, trial)
 
+    system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
     assert np.array_equal(
-        trial.user_attrs["params"],
+        system_attr["params"],
         list(fixed_params.values()),
     )
 
@@ -124,12 +131,14 @@ def test_before_trial_sub_sampler(
     sampler = create_sampler(search_space, optuna.samplers.RandomSampler())
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
+    study.add_trial(trial)
     with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
         mock_iter.side_effect = NelderMeadEmptyError()
 
         sampler.before_trial(study, trial)
 
-        assert trial.user_attrs["sub_trial"]
+        system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
+        assert system_attr["sub_trial"]
 
 
 def test_sample_independent(
@@ -140,8 +149,9 @@ def test_sample_independent(
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
+    study.add_trial(trial)
     xs = np.array([-1.0, 0.0])
-    trial.set_user_attr("params", xs)
+    study._storage.set_trial_system_attr(trial._trial_id, "params", list(xs))
 
     value = sampler.sample_independent(study, trial, "x", param_distribution)
     assert value == xs[0]
@@ -158,9 +168,10 @@ def test_after_trial(
     sampler = create_sampler(search_space)
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
+    study.add_trial(trial)
     put_value = 4.0
 
-    trial.set_user_attr("params", np.array([-1.0, 0.0]))
+    study._storage.set_trial_system_attr(trial._trial_id, "params", [-1.0, 0.0])
 
     sampler.after_trial(study, trial, state, [put_value])
 
@@ -448,3 +459,43 @@ class TestNelderMeadAckleyInteger(BaseTestNelderMead):
         params.append(trial.suggest_float("y", *self.search_space["y"]))
 
         return self.objective(params)
+
+
+class TestNelderMeadAckleyResumption(BaseTestNelderMead):
+    def test_sampler(self) -> None:
+        self.search_space = {"x": (-10, 10), "y": (-10.0, 10.0)}
+        self.objective = ackley
+        sampler = NelderMeadSampler(search_space=self.search_space, seed=42)
+
+        # No resumption
+        study = optuna.create_study(sampler=sampler)
+        study.enqueue_trial({"x": 1.0, "y": 2.0})
+        study.optimize(func=self.func, n_trials=30)
+        study_name = "test-study"
+
+        # Resumption
+        with tempfile.TemporaryDirectory() as dname:
+            sampler = NelderMeadSampler(search_space=self.search_space, seed=42)
+            study_resumption = optuna.create_study(
+                sampler=sampler,
+                study_name=study_name,
+                storage=f"sqlite:///{dname}/optuna_study.db",
+                load_if_exists=True,
+            )
+            study_resumption.enqueue_trial({"x": 1.0, "y": 2.0})
+            study_resumption.optimize(func=self.func, n_trials=1)
+
+            for _ in range(29):
+                sampler = NelderMeadSampler(search_space=self.search_space, seed=42)
+                study_resumption = optuna.create_study(
+                    sampler=sampler,
+                    study_name=study_name,
+                    storage=f"sqlite:///{dname}/optuna_study.db",
+                    load_if_exists=True,
+                )
+                study_resumption.optimize(func=self.func, n_trials=1)
+
+        for trial, trial_resumption in zip(study.trials, study_resumption.trials, strict=False):
+            assert math.isclose(trial.params["x"], trial_resumption.params["x"], rel_tol=0.000001)
+            assert math.isclose(trial.params["y"], trial_resumption.params["y"], rel_tol=0.000001)
+            assert math.isclose(trial.values[0], trial_resumption.values[0], rel_tol=0.000001)
