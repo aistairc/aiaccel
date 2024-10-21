@@ -155,11 +155,14 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     def _put_params(self, study: Study, trial: FrozenTrial, state: TrialState, values: Sequence[float] | None) -> None:
         if isinstance(values, list):
             system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
-            params = [
-                math.log(value) if self._search_space[key]["log"] else value for key, value in trial.params.items()
-            ]
-            it = zip(params, self._search_space.values(), strict=False)
-            params = np.array([(value - space["low"]) / (space["high"] - space["low"]) for value, space in it])
+            raw_params = system_attr["params"] if "params" in system_attr else trial.params.values()
+            search_space = self._search_space.values()
+            params = np.array(
+                [
+                    (value - space["low"]) / (space["high"] - space["low"])
+                    for value, space in zip(raw_params, search_space, strict=False)
+                ]
+            )
 
             self.nm.put_value(
                 params,
