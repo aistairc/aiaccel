@@ -111,13 +111,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         block: bool = False,
         sub_sampler: optuna.samplers.BaseSampler | None = None,
     ) -> None:
-        _search_space = copy.deepcopy(search_space)
-        self._search_space: dict[str, SearchSpace] = {
-            key: {"low": math.log(value["low"]), "high": math.log(value["high"]), "log": value["log"]}
-            if "log" in value and value["log"]
-            else {"low": value["low"], "high": value["high"], "log": False}
-            for key, value in _search_space.items()
-        }
+        self._search_space = {}
+        for key, value in search_space.items():
+            if "log" in value and value["log"]:
+                self._search_space[key] = dict(low=math.log(value["low"]), high=math.log(value["high"]), log=value["log"])
+            else:
+                self._search_space[key] = value | dict(log=False)
+
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
@@ -156,12 +156,9 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         if isinstance(values, list):
             system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
             raw_params = system_attr["params"] if "params" in system_attr else trial.params.values()
-            search_space = self._search_space.values()
+            search_space = [(space["low"], space["high"]) for space in self._search_space.values()]
             params = np.array(
-                [
-                    (value - space["low"]) / (space["high"] - space["low"])
-                    for value, space in zip(raw_params, search_space, strict=False)
-                ]
+                [(value - low) / (high - low) for value, (low, high) in zip(raw_params, search_space, strict=False)]
             )
 
             self.nm.put_value(
