@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import Any
+
 from concurrent.futures import Future
 from pathlib import Path
-from typing import Any
 
 from aiaccel.job.base_job import BaseJob
 from aiaccel.job.job_status import JobStatus

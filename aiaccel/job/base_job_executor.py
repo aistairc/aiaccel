@@ -1,15 +1,16 @@
+from typing import Any
+
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Type
 
-from aiaccel.job.base_job import BaseJob
-from aiaccel.job.local_job import LocalJob
 from aiaccel.job.abci_job import AbciJob
+from aiaccel.job.base_job import BaseJob
 from aiaccel.job.job_status import JobStatus
+from aiaccel.job.local_job import LocalJob
 
 
 class BaseJobExecutor(ABC):
-    JobClass: Type[BaseJob | AbciJob | LocalJob]
+    JobClass: type[BaseJob | AbciJob | LocalJob]
 
     """
     Abstract base class for job executors.

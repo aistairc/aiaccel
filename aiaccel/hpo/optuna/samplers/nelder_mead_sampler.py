@@ -4,7 +4,6 @@ import numpy.typing as npt
 from typing import Any, TypedDict
 
 from collections.abc import Sequence
-import copy
 import math
 import warnings
 
@@ -114,9 +113,13 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self._search_space = {}
         for key, value in search_space.items():
             if "log" in value and value["log"]:
-                self._search_space[key] = dict(low=math.log(value["low"]), high=math.log(value["high"]), log=value["log"])
+                self._search_space[key] = {
+                    "low": math.log(value["low"]),
+                    "high": math.log(value["high"]),
+                    "log": value["log"],
+                }
             else:
-                self._search_space[key] = value | dict(log=False)
+                self._search_space[key] = value | {"log": False}  # type: ignore[assignment]
 
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
