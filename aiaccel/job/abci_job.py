@@ -1,67 +1,18 @@
 from __future__ import annotations
 
+from typing import Any
+
+from pathlib import Path
 import re
 import subprocess
 import time
-from enum import IntEnum, auto
-from pathlib import Path
-from typing import Any
 from xml.etree import ElementTree
 
-
-class JobStatus(IntEnum):
-    """
-    Represents the status of a job.
-
-    Attributes:
-        UNSUBMITTED: The job has not been submitted.
-        WAITING: The job is waiting to be executed.
-        RUNNING: The job is currently running.
-        FINISHED: The job has finished successfully.
-        ERROR: The job encountered an error.
-
-    Methods:
-        from_qsub(status: str) -> JobStatus:
-            Converts a status string from the qsub command to a JobStatus enum value.
-
-    Raises:
-        ValueError: If the status string is not recognized.
-    """
-
-    UNSUBMITTED = auto()
-    WAITING = auto()
-    RUNNING = auto()
-    FINISHED = auto()
-    ERROR = auto()
-
-    @classmethod
-    def from_qsub(cls, status: str) -> JobStatus:
-        """
-        Converts a status string from the qsub command to a JobStatus enum value.
-
-        Args:
-            status (str): The status string from the qsub command.
-
-        Returns:
-            JobStatus: The corresponding JobStatus enum value.
-
-        Raises:
-            ValueError: If the status string is not recognized.
-        """
-        match status:
-            case "r":
-                return JobStatus.RUNNING
-            case "qw" | "h" | "t" | "s" | "S" | "T" | "Rq":
-                return JobStatus.WAITING
-            case "d" | "Rr":
-                return JobStatus.RUNNING
-            case "E":
-                return JobStatus.ERROR
-            case _:
-                raise ValueError(f"Unexpected status: {status}")
+from aiaccel.job.base_job import BaseJob
+from aiaccel.job.job_status import JobStatus
 
 
-class AbciJob:
+class AbciJob(BaseJob):
     """
     Represents a job to be submitted and managed on the ABCI system.
 
@@ -83,23 +34,9 @@ class AbciJob:
         update_status_batch: Updates the status of a batch of jobs.
     """
 
-    job_filename: Path
-    job_group: str
-
-    job_name: str
-
-    cwd: Path
-    stdout_filename: Path
-    stderr_filename: Path
-
-    tag: Any
-
-    status: JobStatus
-    job_number: int | None
-
     def __init__(
         self,
-        job_filename: Path | str,
+        job_filename: Path,
         job_group: str,
         job_name: str | None = None,
         cwd: Path | str | None = None,
@@ -113,7 +50,7 @@ class AbciJob:
         Initializes a new instance of the AbciJob class.
 
         Args:
-            job_filename (Path | str): The path to the job file.
+            job_filename (Path): The path to the job file.
             job_group (str): The job group.
             job_name (str | None, optional): The name of the job. If not provided, \
                 the name will be derived from the job filename.
@@ -127,18 +64,14 @@ class AbciJob:
             args (list[str] | None, optional): Additional arguments to pass to the job file. Defaults to None.
             tag (Any, optional): A tag associated with the job. Defaults to None.
         """
-        self.job_filename = Path(job_filename)
-        self.job_group = job_group
-        self.job_name = job_name if job_name is not None else self.job_filename.name
+        super().__init__(job_filename, job_name, cwd, tag)
 
-        self.cwd = Path(cwd) if cwd is not None else Path.cwd()
+        self.job_group = job_group
+
         self.stdout_filename = Path(stdout_filename) if stdout_filename is not None else self.cwd / f"{self.job_name}.o"
         self.stderr_filename = Path(stderr_filename) if stderr_filename is not None else self.cwd / f"{self.job_name}.o"
 
-        self.tag = tag
-
-        self.status = JobStatus.UNSUBMITTED
-        self.job_number = None
+        self.job_number: int | None = None
 
         # generate qsub command
         self.cmd = ["qsub", "-g", job_group, "-o", str(self.stdout_filename), "-e", str(self.stderr_filename)]
@@ -175,16 +108,6 @@ class AbciJob:
 
         return self
 
-    def update_status(self) -> JobStatus:
-        """
-        Updates the status of the job.
-
-        Returns:
-            JobStatus: The updated status of the job.
-        """
-        self.update_status_batch([self])
-        return self.status
-
     def wait(self, sleep_time: float = 10.0) -> AbciJob:
         """
         Waits for the job to finish.
@@ -219,4 +142,14 @@ class AbciJob:
             job_dict[job_number].status = JobStatus.FINISHED
 
         for job_number, status in status_dict.items():
-            job_dict[job_number].status = JobStatus.from_qsub(status)
+            match status:
+                case "r":
+                    job_dict[job_number].status = JobStatus.RUNNING
+                case "qw" | "h" | "t" | "s" | "S" | "T" | "Rq":
+                    job_dict[job_number].status = JobStatus.WAITING
+                case "d" | "Rr":
+                    job_dict[job_number].status = JobStatus.RUNNING
+                case "E":
+                    job_dict[job_number].status = JobStatus.ERROR
+                case _:
+                    raise ValueError(f"Unexpected status: {status}")

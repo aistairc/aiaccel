@@ -1,15 +1,17 @@
+from typing import Any
+
 import argparse
-import pickle as pkl
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
+
 from optuna.trial import Trial
 
-from aiaccel.hpo.optuna.wrapper import Const, Suggest, SuggestFloat, T
-from aiaccel.job import AbciJobExecutor
+from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
+from aiaccel.job import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 
 """
 Usage (if parameters are not defined in a config file):
@@ -70,11 +72,20 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", nargs="?", default=None)
+    parser.add_argument("--executor", nargs="?", default="local")
 
     args, unk_args = parser.parse_known_args()
     config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
 
-    jobs = AbciJobExecutor(args.job_filename, config.group, n_max_jobs=config.n_max_jobs)
+    jobs: BaseJobExecutor
+
+    if args.executor.lower() == "local":
+        jobs = LocalJobExecutor(args.job_filename, n_max_jobs=config.n_max_jobs)
+    elif args.executor.lower() == "abci":
+        jobs = AbciJobExecutor(args.job_filename, config.group, n_max_jobs=config.n_max_jobs)
+    else:
+        raise ValueError(f"Unknown executor: {args.executor}")
+
     study = instantiate(config.study)
     params = instantiate(config.params)
 
@@ -83,7 +94,8 @@ def main() -> None:
     finished_job_count = 0
 
     while finished_job_count < config.n_trials:
-        n_max_jobs = min(jobs.available_slots(), config.n_trials - finished_job_count)
+        n_running_jobs = len(jobs.get_running_jobs())
+        n_max_jobs = min(jobs.available_slots(), config.n_trials - finished_job_count - n_running_jobs)
         for _ in range(n_max_jobs):
             trial = study.ask()
 
