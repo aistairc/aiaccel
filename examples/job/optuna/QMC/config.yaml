@@ -1,0 +1,35 @@
+study:
+  _target_: optuna.create_study
+  direction: minimize
+
+  sampler:
+    _target_: optuna.samplers.QMCSampler
+    qmc_type: sobol
+    scramble: true
+    seed: 42
+    independent_sampler:
+      _target_: optuna.samplers.RandomSampler
+      seed: 43
+    warn_independent_sampling: true
+    warn_asynchronous_seeding: true
+
+params:
+  _convert_: partial
+  _target_: aiaccel.apps.optimize.HparamsManager
+  x1:
+    _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x1
+    low: -1.0
+    high: 1.0
+    log: false
+  x2:
+    _target_: aiaccel.apps.optimize.SuggestInt
+    name: x2
+    low: -1.0
+    high: 1.0
+    log: false
+
+n_trials: 128
+n_max_jobs: 4
+
+group: gaa50000

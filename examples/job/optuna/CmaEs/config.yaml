@@ -1,0 +1,46 @@
+# cmeas is required.
+# pip install cmaes
+
+study:
+  _target_: optuna.create_study
+  direction: minimize
+
+  sampler:
+    _target_: optuna.samplers.CmaEsSampler
+    x0: null
+    sigma0: null
+    n_startup_trials: 1
+    independent_sampler:
+      _target_: optuna.samplers.RandomSampler
+      seed: null
+    warn_independent_sampling: true
+    seed: null
+    consider_pruned_trials: false
+    restart_strategy: null
+    popsize: null
+    inc_popsize: 2
+    use_separable_cma: false
+    with_margin: false
+    lr_adapt: false
+    source_trials: null
+
+params:
+  _convert_: partial
+  _target_: aiaccel.apps.optimize.HparamsManager
+  x1:
+    _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x1
+    low: -1
+    high: 1
+    log: false
+  x2:
+    _target_: aiaccel.apps.optimize.SuggestInt
+    name: x2
+    low: -1
+    high: 1
+    log: false
+
+n_trials: 30
+n_max_jobs: 4
+
+group: gaa50000

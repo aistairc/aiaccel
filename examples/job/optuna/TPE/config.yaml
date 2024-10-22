@@ -1,0 +1,36 @@
+study:
+  _target_: optuna.create_study
+  direction: minimize
+
+  sampler:
+    _target_: optuna.samplers.TPESampler
+    consider_prior: true
+    prior_weight: 1.0
+    consider_magic_clip: true
+    consider_endpoints: false
+    n_startup_trials: 10
+    n_ei_candidates: 24
+    # gamma: ${default_gamma}
+    # weights: ${default_weights}
+    seed: null
+    multivariate: false
+    group: false
+    warn_independent_sampling: true
+    constant_liar: false
+    constraints_func: null
+    categorical_distance_func: null
+
+params:
+  _convert_: partial
+  _target_: aiaccel.apps.optimize.HparamsManager
+  x:
+    _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x
+    low: -10.0
+    high: 10.0
+    log: false
+
+n_trials: 30
+n_max_jobs: 4
+
+group: gaa50000

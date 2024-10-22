@@ -1,0 +1,24 @@
+study:
+  _target_: optuna.create_study
+  direction: minimize
+
+  sampler:
+    _target_: optuna.samplers.GridSampler
+    search_space:
+      x: [-0.5, 0.5]
+    seed: null
+
+params:
+  _convert_: partial
+  _target_: aiaccel.apps.optimize.HparamsManager
+  x:
+    _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x
+    low: -5
+    high: 5
+    step: 1
+
+n_trials: 5
+n_max_jobs: 5
+
+group: gaa50000

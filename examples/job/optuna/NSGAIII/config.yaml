@@ -1,0 +1,45 @@
+study:
+  _target_: optuna.create_study
+  direction: minimize
+
+  sampler:
+    _target_: optuna.samplers.NSGAIIISampler
+    population_size: 50
+    mutation_prob: null
+    crossover: null
+    crossover_prob: 0.9
+    swapping_prob: 0.5
+    seed: 42
+    constraints_func: null
+    reference_points: null
+    dividing_parameter: 3
+    elite_population_selection_strategy: null
+    child_generation_strategy: null
+    after_trial_strategy: null
+
+params:
+  _convert_: partial
+  _target_: aiaccel.apps.optimize.HparamsManager
+  x1:
+    _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x1
+    low: 0
+    high: 5
+    log: false
+  x2:
+    _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x2
+    low: 0
+    high: 5
+    log: false
+  x3:
+    _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x3
+    low: 0
+    high: 5
+    log: false
+
+n_trials: 30
+n_max_jobs: 4
+
+group: gaa50000
