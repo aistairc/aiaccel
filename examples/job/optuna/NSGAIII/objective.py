@@ -16,11 +16,12 @@ def main() -> None:
     x3 = args.x3
 
     f1 = x1**2 + x2**2 + x3**2  # 最小化
-    f2 = (x1-1)**2 + (x2-1)**2 + (x3-1)**2  # 最小化
+    f2 = (x1 - 1) ** 2 + (x2 - 1) ** 2 + (x3 - 1) ** 2  # 最小化
     f3 = x1 + x2 + x3  # 最大化
 
     with open(args.dst_filename, "wb") as f:
         pkl.dump((f1, f2, f3), f)
+
 
 if __name__ == "__main__":
     main()

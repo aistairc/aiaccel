@@ -18,5 +18,6 @@ def main() -> None:
     with open(args.dst_filename, "wb") as f:
         pkl.dump(y, f)
 
+
 if __name__ == "__main__":
     main()
