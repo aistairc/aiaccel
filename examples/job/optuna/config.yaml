@@ -18,5 +18,10 @@ params:
 
 n_trials: 30
 n_max_jobs: 4
-
 group: gaa50000
+
+additional_scenario:
+  - n_trials: 30
+    n_max_jobs: 4
+    fixed_params:
+      params: ["x1"]
