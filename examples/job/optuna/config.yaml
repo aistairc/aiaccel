@@ -12,6 +12,7 @@ params:
   x1: [0, 1]
   x2:
     _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x2
     low: 0.0
     high: 1.0
     log: false
@@ -19,9 +20,3 @@ params:
 n_trials: 30
 n_max_jobs: 4
 group: gaa50000
-
-additional_scenario:
-  - n_trials: 30
-    n_max_jobs: 4
-    fixed_params:
-      params: ["x1"]

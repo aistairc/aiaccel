@@ -1,0 +1,28 @@
+study:
+  _target_: optuna.create_study
+  direction: minimize
+
+  sampler:
+    _target_: optuna.samplers.TPESampler
+    seed: 0
+
+params:
+  _convert_: partial
+  _target_: aiaccel.apps.optimize.HparamsManager
+  x1: [-1, 1]
+  x2: [-1, 1]
+
+n_trials: 10
+n_max_jobs: 1
+group: gaa50000
+
+additional_scenario:
+  - n_trials: 10
+    n_max_jobs: 1
+    fixed_params:
+      params: ["x2"]
+
+  # - n_trials: 10
+  #   n_max_jobs: 1
+  #   fixed_params:
+  #     params: ["x1"]
