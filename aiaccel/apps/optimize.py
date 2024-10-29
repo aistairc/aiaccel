@@ -73,9 +73,11 @@ def main() -> None:
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", nargs="?", default=None)
     parser.add_argument("--executor", nargs="?", default="local")
+    parser.add_argument("--load_if_exists", action="store_true", help="Load the study if it exists.", default=False)
 
     args, unk_args = parser.parse_known_args()
     config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
+    config.study.load_if_exists = args.load_if_exists
 
     jobs: BaseJobExecutor
 
