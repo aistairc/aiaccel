@@ -483,6 +483,37 @@ class TestNelderMeadAckleyInteger(BaseTestNelderMead):
         return self.objective(params)
 
 
+class TestNelderMeadAckleyStep(BaseTestNelderMead):
+    def setup_method(self) -> None:
+        search_space: dict[str, SearchSpace] = {
+            "x": {"low": -30, "high": 30},
+            "y": {"low": -30.0, "high": 30.0},
+        }
+        sampler = NelderMeadSampler(search_space=search_space, seed=42)
+
+        self.common_setup(
+            search_space=search_space,
+            objective=ackley,
+            result_file_name="results_ackley_step.csv",
+            study=optuna.create_study(sampler=sampler),
+        )
+
+    def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
+        for trial, result in zip(self.study.trials, results, strict=False):
+            assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+            assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+            assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
+
+    def func(self, trial: optuna.trial.Trial) -> float:
+        params: list[int | float] = []
+        params.append(
+            trial.suggest_int("x", int(self.search_space["x"]["low"]), int(self.search_space["x"]["high"]), step=2)
+        )
+        params.append(trial.suggest_float("y", self.search_space["y"]["low"], self.search_space["y"]["high"], step=0.5))
+
+        return self.objective(params)
+
+
 class TestNelderMeadAckleyLogScale(BaseTestNelderMead):
     def setup_method(self) -> None:
         search_space: dict[str, SearchSpace] = {
