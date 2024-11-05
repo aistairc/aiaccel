@@ -85,7 +85,7 @@ def main() -> None:
         }
 
     if "study_name" not in config.study:
-        config.study.study_name = "aiacel_study"
+        config.study.study_name = "aiaccel_study"
 
     if args.resume:
         config.study.load_if_exists = True
