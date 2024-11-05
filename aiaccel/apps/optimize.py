@@ -7,7 +7,6 @@ import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
-
 from optuna.trial import Trial
 
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
@@ -73,9 +72,23 @@ def main() -> None:
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", nargs="?", default=None)
     parser.add_argument("--executor", nargs="?", default="local")
+    parser.add_argument("--resume", action="store_true", default=False)
 
     args, unk_args = parser.parse_known_args()
     config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
+
+    if "storage" not in config.study:
+        config.study.storage = {
+            "_target_": "optuna.storages.RDBStorage",
+            "url": "sqlite:///optuna.db",
+            "engine_kwargs": {"connect_args": {"timeout": 30}},
+        }
+
+    if "study_name" not in config.study:
+        config.study.study_name = "aiaccel_study"
+
+    if args.resume:
+        config.study.load_if_exists = True
 
     jobs: BaseJobExecutor
 
