@@ -7,7 +7,6 @@ import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
-from omegaconf import open_dict
 from optuna.trial import Trial
 
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
@@ -79,20 +78,17 @@ def main() -> None:
     config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
 
     if "storage" not in config.study:
-        with open_dict(config):
-            config.study.storage = {
-                "_target_": "optuna.storages.RDBStorage",
-                "url": "sqlite:///optuna.db",
-                "engine_kwargs": {"connect_args": {"timeout": 30}},
-            }
+        config.study.storage = {
+            "_target_": "optuna.storages.RDBStorage",
+            "url": "sqlite:///optuna.db",
+            "engine_kwargs": {"connect_args": {"timeout": 30}},
+        }
 
     if "study_name" not in config.study:
-        with open_dict(config):
-            config.study.study_name = "optuna_study"
+        config.study.study_name = "optuna_study"
 
     if args.resume:
-        with open_dict(config):
-            config.study.load_if_exists = args.resume
+        config.study.load_if_exists = True
 
     jobs: BaseJobExecutor
 
