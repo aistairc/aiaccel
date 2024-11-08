@@ -34,6 +34,12 @@ aiaccelドキュメント
    tips/qrsh-inherit.md
    tips/rsync-localdir.md
 
+.. toctree::
+   :maxdepth: 2
+   :caption: コードリファレンス
+
+   api_reference/modules
+
 
 索引と検索
 ==========
