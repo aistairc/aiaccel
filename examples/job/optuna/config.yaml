@@ -1,7 +1,16 @@
+storage:
+  _target_: optuna.storages.RDBStorage
+  url: sqlite:///example.db
+  engine_kwargs:
+    connect_args:
+      timeout: 30
+
 study:
   _target_: optuna.create_study
   direction: minimize
-
+  storage: ${storage}
+  study_name: my_study
+  load_if_exists: false
   sampler:
     _target_: optuna.samplers.TPESampler
     seed: 0
@@ -12,6 +21,7 @@ params:
   x1: [0, 1]
   x2:
     _target_: aiaccel.apps.optimize.SuggestFloat
+    name: x2
     low: 0.0
     high: 1.0
     log: false
