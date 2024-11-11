@@ -7,7 +7,6 @@ import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
-from omegaconf import DictConfig, ListConfig
 
 from optuna.trial import Trial
 
@@ -69,26 +68,6 @@ class HparamsManager:
         return {name: param_fn(trial) for name, param_fn in self.params.items()}
 
 
-def setup_fixed_params(args: argparse.Namespace, config: ListConfig | DictConfig) -> dict[str, float | int | str]:
-    if not args.fix:
-        return {}
-
-    prev_study = instantiate(
-        {
-            "_target_": "optuna.load_study",
-            "storage": config.study.storage,
-            "study_name": config.study.study_name,
-        }
-    )
-    fixed_params = {}
-    for param_name in args.fix:
-        if param_name in prev_study.best_params:
-            fixed_params[param_name] = prev_study.best_params[param_name]
-        else:
-            raise ValueError(f"Parameter {param_name} not found in previous study's best_params")
-    return fixed_params
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
@@ -114,13 +93,27 @@ def main() -> None:
     if args.resume or args.fix:
         config.study.load_if_exists = True
 
-    fixed_params = setup_fixed_params(args, config)
-    if fixed_params and "sampler" in config.study:
-        config.study.sampler = {
-            "_target_": "optuna.samplers.PartialFixedSampler",
-            "fixed_params": fixed_params,
-            "base_sampler": config.study.sampler,
-        }
+        prev_study = instantiate(
+            {
+                "_target_": "optuna.load_study",
+                "storage": config.study.storage,
+                "study_name": config.study.study_name,
+            }
+        )
+
+        fixed_params = {}
+        for param_name in args.fix:
+            if param_name in prev_study.best_params:
+                fixed_params[param_name] = prev_study.best_params[param_name]
+            else:
+                raise ValueError(f"Parameter {param_name} not found in previous study's best_params")
+
+        if fixed_params and "sampler" in config.study:
+            config.study.sampler = {
+                "_target_": "optuna.samplers.PartialFixedSampler",
+                "fixed_params": fixed_params,
+                "base_sampler": config.study.sampler,
+            }
 
     jobs: BaseJobExecutor
 
