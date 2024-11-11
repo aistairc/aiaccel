@@ -7,6 +7,8 @@ import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
+from omegaconf import DictConfig, ListConfig
+
 from optuna.trial import Trial
 
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
@@ -67,28 +69,58 @@ class HparamsManager:
         return {name: param_fn(trial) for name, param_fn in self.params.items()}
 
 
+def setup_fixed_params(args: argparse.Namespace, config: ListConfig | DictConfig) -> dict[str, float | int | str]:
+    if not args.fix:
+        return {}
+
+    prev_study = instantiate(
+        {
+            "_target_": "optuna.load_study",
+            "storage": config.study.storage,
+            "study_name": config.study.study_name,
+        }
+    )
+    fixed_params = {}
+    for param_name in args.fix:
+        if param_name in prev_study.best_params:
+            fixed_params[param_name] = prev_study.best_params[param_name]
+        else:
+            raise ValueError(f"Parameter {param_name} not found in previous study's best_params")
+    return fixed_params
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", nargs="?", default=None)
     parser.add_argument("--executor", nargs="?", default="local")
     parser.add_argument("--resume", action="store_true", default=False)
-
+    parser.add_argument(
+        "--fix", nargs="*", default=[], help="Parameter names to fix with best values from previous study"
+    )
     args, unk_args = parser.parse_known_args()
-    config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
 
-    if "storage" not in config.study:
-        config.study.storage = {
+    config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
+    config.study.setdefault(
+        "storage",
+        {
             "_target_": "optuna.storages.RDBStorage",
             "url": "sqlite:///optuna.db",
             "engine_kwargs": {"connect_args": {"timeout": 30}},
-        }
+        },
+    )
+    config.study.setdefault("study_name", "aiaccel_study")
 
-    if "study_name" not in config.study:
-        config.study.study_name = "aiaccel_study"
-
-    if args.resume:
+    if args.resume or args.fix:
         config.study.load_if_exists = True
+
+    fixed_params = setup_fixed_params(args, config)
+    if fixed_params and "sampler" in config.study:
+        config.study.sampler = {
+            "_target_": "optuna.samplers.PartialFixedSampler",
+            "fixed_params": fixed_params,
+            "base_sampler": config.study.sampler,
+        }
 
     jobs: BaseJobExecutor
 
@@ -109,6 +141,7 @@ def main() -> None:
     while finished_job_count < config.n_trials:
         n_running_jobs = len(jobs.get_running_jobs())
         n_max_jobs = min(jobs.available_slots(), config.n_trials - finished_job_count - n_running_jobs)
+
         for _ in range(n_max_jobs):
             trial = study.ask()
 
@@ -117,7 +150,7 @@ def main() -> None:
             jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
             job = jobs.submit(
-                args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
+                args=[result_filename_template] + sum([[f"--{k}", f"{v}"] for k, v in hparams.items()], []),
                 tag=trial,
             )
 
@@ -126,8 +159,9 @@ def main() -> None:
 
             with open(result_filename_template.format(job=job), "rb") as f:
                 y = pkl.load(f)
-
             study.tell(trial, y)
+
+            print(f"Trial #{trial.number}: Value = {y:.8f}, Parameters = {trial.params}")
 
             finished_job_count += 1
 
