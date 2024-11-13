@@ -33,48 +33,31 @@ class NelderMeadAlgorism:
     Uses a queue to receive results and advance the NelderMead algorithm.
     Return parameters within the normalization range by referring only to the number of dimensions.
 
-    NelderMead アルゴリズムを管理するクラス
-
-    queue を用いて結果を受け取り、NelderMead のアルゴリズムを進める
-    次元数のみを参照して、正規化範囲でパラメータを返す
-
     Args:
         dimensions: int | None = None
             The number of dimensions in the search space.
-            探索範囲の次元数
         coeff: NelderMeadCoefficient | None = None
             Parameters used in NelderMead.
-            NelderMead で用いられるパラメータ
         rng: np.random.RandomState | None = None
             RandomState used for calculating initial points.
-            初期点計算に用いられる RandomState
         block: bool = False
             Sets whether to block the queue used internally.
-            内部で用いられる queue を block するかどうかを設定する
         timeout: int | None = None
             Time to block the queue.
-            queue を block する時間
     Attributes:
         vertices: list[npt.NDArray[np.float64]]
             List of simplex parameters.
-            simplex のパラメータのリスト
         values: list[float]
             List of simplex calculation results.
-            simplex の計算結果のリスト
         generator: iterator
             Generator for NelderMead parameters.
-            neldermead のパラメータのジェネレータ
         lock: threading.Lock
             threading.Lock variable used for thread-safe processing.
-             スレッドセーフ処理に用いる threading.Lock 変数
         results: queue.Queue[tuple[npt.NDArray[np.float64], float, bool]]
             Queue to receive tuples of parameters, calculation results,
             and a boolean indicating whether the parameters were output by NelderMead.
-            外部からパラメータ・計算結果・nelder mead から出力されたパラメータか否かを示す bool 変数
-            のタプルを受け取る queue
         simplex_size: int
             Number of vertices in the simplex.
-            simplex の頂点の個数
     """
 
     vertices: list[npt.NDArray[np.float64]]
@@ -107,14 +90,9 @@ class NelderMeadAlgorism:
 
         Thread-safe due to parallel processing requirements.
 
-        nelder mead の次のパラメータを返すメソッド
-
-        並列処理の都合でスレッドセーフとなっている
-
         Returns:
             npt.NDArray[np.float64]:
                 The next parameters for NelderMead.
-                nelder mead の次のパラメータ
         """
 
         if dimensions is not None:
@@ -151,14 +129,11 @@ class NelderMeadAlgorism:
     ) -> None:
         """Method to pass a pair of parameters and results to NelderMead
 
-        nelder mead にパラメータと結果の組を渡すメソッド
-
         Args:
             vertex: npt.NDArray[np.float64]: Parameters パラメータ
             value: float: Calculation result 計算結果
             enqueue: bool = False:
                 Boolean indicating whether the parameters were output by NelderMead.
-                nelder mead から出力されたパラメータか否かを示す bool 変数
         """
 
         if self.dimensions is None:
