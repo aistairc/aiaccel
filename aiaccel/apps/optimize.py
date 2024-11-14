@@ -8,8 +8,9 @@ import pickle as pkl
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
-from optuna.trial import Trial
 import optuna
+from optuna.trial import Trial
+
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 from aiaccel.job import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 
@@ -68,7 +69,7 @@ class HparamsManager:
         return {name: param_fn(trial) for name, param_fn in self.params.items()}
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", nargs="?", default=None)
