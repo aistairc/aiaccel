@@ -104,10 +104,11 @@ def main() -> None:  # noqa: C901
                 raise ValueError(f"Parameter {param_name} not found in previous study's best_params")
 
         if fixed_params and "sampler" in config.study:
+            base_sampler = config.study.sampler
             config.study.sampler = {
                 "_target_": "optuna.samplers.PartialFixedSampler",
                 "fixed_params": fixed_params,
-                "base_sampler": config.study.sampler,
+                "base_sampler": base_sampler,
             }
 
     jobs: BaseJobExecutor
