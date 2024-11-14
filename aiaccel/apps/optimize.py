@@ -9,7 +9,7 @@ from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
-
+import optuna
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 from aiaccel.job import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 
@@ -83,23 +83,17 @@ def main() -> None:
     config.study.setdefault(
         "storage",
         {
-            "_target_": "optuna.storages.RDBStorage",
-            "url": "sqlite:///optuna.db",
-            "engine_kwargs": {"connect_args": {"timeout": 30}},
+            "_target_": "optuna.storages.InMemoryStorage",
         },
     )
-    config.study.setdefault("study_name", "aiaccel_study")
+
+    if "study_name" not in config.study:
+        config.study.study_name = "aiaccel_study"
 
     if args.resume or args.fix:
         config.study.load_if_exists = True
-
-        prev_study = instantiate(
-            {
-                "_target_": "optuna.load_study",
-                "storage": config.study.storage,
-                "study_name": config.study.study_name,
-            }
-        )
+        storage = instantiate(config.study.storage)
+        prev_study = optuna.study.load_study(storage=storage, study_name=config.study.study_name)
 
         fixed_params = {}
         for param_name in args.fix:
@@ -153,8 +147,6 @@ def main() -> None:
             with open(result_filename_template.format(job=job), "rb") as f:
                 y = pkl.load(f)
             study.tell(trial, y)
-
-            print(f"Trial #{trial.number}: Value = {y:.8f}, Parameters = {trial.params}")
 
             finished_job_count += 1
 
