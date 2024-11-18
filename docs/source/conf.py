@@ -40,6 +40,7 @@ extensions = [
     "sphinx_fontawesome",
     "sphinx_rtd_theme",
     "myst_parser",
+    "pydata_sphinx_theme",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -68,7 +69,7 @@ exclude_patterns = [
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = False
 html_show_sphinx = False
 # (commentout) html_static_path = ["_static"]
