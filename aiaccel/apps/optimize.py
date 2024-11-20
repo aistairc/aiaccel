@@ -9,7 +9,7 @@ from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import optuna
-from optuna.trial import Trial
+from optuna.trial import Trial, TrialState
 
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 from aiaccel.job import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
@@ -69,7 +69,7 @@ class HparamsManager:
         return {name: param_fn(trial) for name, param_fn in self.params.items()}
 
 
-def main() -> None:  # noqa: C901
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", nargs="?", default=None)
@@ -148,7 +148,15 @@ def main() -> None:  # noqa: C901
 
             with open(result_filename_template.format(job=job), "rb") as f:
                 y = pkl.load(f)
-            study.tell(trial, y)
+
+            frozen_trial = optuna.study._tell._tell_with_warning(
+                study=study,
+                trial=trial,
+                value_or_values=y,
+                state=TrialState.COMPLETE,
+                suppress_warning=True,
+            )
+            study._log_completed_trial(frozen_trial)
 
             finished_job_count += 1
 
