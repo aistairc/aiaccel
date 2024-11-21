@@ -69,24 +69,28 @@ class HparamsManager:
         return {name: param_fn(trial) for name, param_fn in self.params.items()}
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
-    parser.add_argument("--config", nargs="?", default=None)
-    parser.add_argument("--executor", nargs="?", default="local")
-    parser.add_argument("--resume", action="store_true", default=False)
-    parser.add_argument(
-        "--fix", nargs="*", default=[], help="Parameter names to fix with best values from previous study"
-    )
-    args, unk_args = parser.parse_known_args()
+# NOTE: This function is extracted to reduce cyclomatic complexity of the main function
+# while maintaining logical cohesion of the study configuration setup process.
+def setup_study_config(config: dict, args: argparse.Namespace) -> None:
+    """Set up study configuration based on command line arguments.
 
-    config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
-    config.study.setdefault(
-        "storage",
-        {
-            "_target_": "optuna.storages.InMemoryStorage",
-        },
-    )
+    Args:
+        config: Configuration object
+        args: Command line arguments
+    """
+    default_storage = {
+        "_target_": "optuna.storages.RDBStorage",
+        "url": "sqlite:///study.db",
+    }
+
+    if (
+        ("study" not in config and (args.resumable or args.resume or args.fix)) or
+        (args.resumable and "storage" not in config.study)
+    ):
+        if "study" not in config:
+            config.study = {"storage": default_storage}
+        else:
+            config.study.storage = default_storage
 
     if "study_name" not in config.study:
         config.study.study_name = "aiaccel_study"
@@ -96,20 +100,36 @@ def main() -> None:
         storage = instantiate(config.study.storage)
         prev_study = optuna.study.load_study(storage=storage, study_name=config.study.study_name)
 
-        fixed_params = {}
-        for param_name in args.fix:
-            if param_name in prev_study.best_params:
-                fixed_params[param_name] = prev_study.best_params[param_name]
-            else:
-                raise ValueError(f"Parameter {param_name} not found in previous study's best_params")
+        if args.fix:
+            fixed_params = {}
+            for param_name in args.fix:
+                if param_name in prev_study.best_params:
+                    fixed_params[param_name] = prev_study.best_params[param_name]
+                else:
+                    raise ValueError(f"Parameter {param_name} not found in previous study's best_params")
 
-        if fixed_params and "sampler" in config.study:
-            base_sampler = config.study.sampler
-            config.study.sampler = {
-                "_target_": "optuna.samplers.PartialFixedSampler",
-                "fixed_params": fixed_params,
-                "base_sampler": base_sampler,
-            }
+            if fixed_params and "sampler" in config.study:
+                base_sampler = config.study.sampler
+                config.study.sampler = {
+                    "_target_": "optuna.samplers.PartialFixedSampler",
+                    "fixed_params": fixed_params,
+                    "base_sampler": base_sampler,
+                }
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
+    parser.add_argument("--config", nargs="?", default=None)
+    parser.add_argument("--executor", nargs="?", default="local")
+    parser.add_argument("--resumable", action="store_true", default=False)
+    parser.add_argument("--resume", action="store_true", default=False)
+    parser.add_argument(
+        "--fix", nargs="*", default=[], help="Parameter names to fix with best values from previous study"
+    )
+    args, unk_args = parser.parse_known_args()
+
+    config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
+    setup_study_config(config, args)
 
     jobs: BaseJobExecutor
 
