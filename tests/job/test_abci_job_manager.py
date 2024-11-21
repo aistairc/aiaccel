@@ -1,6 +1,6 @@
-import shutil
 from collections.abc import Generator
 from pathlib import Path
+import shutil
 from unittest.mock import MagicMock, patch
 
 import pytest

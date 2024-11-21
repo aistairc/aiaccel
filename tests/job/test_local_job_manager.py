@@ -1,7 +1,7 @@
-import shutil
 from collections.abc import Generator
 from concurrent.futures import Future
 from pathlib import Path
+import shutil
 from unittest.mock import MagicMock
 
 import pytest

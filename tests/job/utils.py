@@ -1,5 +1,6 @@
-import subprocess
 from typing import Any
+
+import subprocess
 
 
 def qstat_xml(txt_data_path: str = "tests/job/qstat_dat.txt") -> Any:

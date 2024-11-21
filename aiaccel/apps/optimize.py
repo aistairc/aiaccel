@@ -6,6 +6,7 @@ from pathlib import Path
 import pickle as pkl
 
 from hydra.utils import instantiate
+from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import optuna
@@ -71,7 +72,7 @@ class HparamsManager:
 
 # NOTE: This function is extracted to reduce cyclomatic complexity of the main function
 # while maintaining logical cohesion of the study configuration setup process.
-def setup_study_config(config: dict, args: argparse.Namespace) -> None:
+def setup_study_config(config: DictConfig | ListConfig, args: argparse.Namespace) -> None:
     """Set up study configuration based on command line arguments.
 
     Args:
@@ -83,9 +84,8 @@ def setup_study_config(config: dict, args: argparse.Namespace) -> None:
         "url": "sqlite:///study.db",
     }
 
-    if (
-        ("study" not in config and (args.resumable or args.resume or args.fix)) or
-        (args.resumable and "storage" not in config.study)
+    if ("study" not in config and (args.resumable or args.resume or args.fix)) or (
+        args.resumable and "storage" not in config.study
     ):
         if "study" not in config:
             config.study = {"storage": default_storage}
@@ -115,6 +115,7 @@ def setup_study_config(config: dict, args: argparse.Namespace) -> None:
                     "fixed_params": fixed_params,
                     "base_sampler": base_sampler,
                 }
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
