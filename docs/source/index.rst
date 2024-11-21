@@ -4,11 +4,11 @@
    contain the root `toctree` directive.
 
 
-aiaccelドキュメント
+aiaccel Documentation
 ===================
-本ソフトウェアは、AI Bridging Cloud Infrastructure (ABCI)`_ のためのハイパーパラメータ最適化ライブラリです。
-ディープラーニングやマルチエージェントシミュレーションなどのAI技術に関連するハイパーパラメータ最適化を解決します。
-現在、ランダムサーチ、グリッドサーチ、ソボルシーケンス、ネルダーミード法、TPEの5つの最適化アルゴリズムに対応しています。
+This software is a hyperparameter optimization library designed for the AI Bridging Cloud Infrastructure (ABCI).
+It addresses hyperparameter optimization challenges in AI technologies such as deep learning and multi-agent simulations.
+Currently, it supports five optimization algorithms: Random Search, Grid Search, Sobol Sequence, Nelder-Mead Method, and TPE.
 
 
 .. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
@@ -16,39 +16,26 @@ aiaccelドキュメント
 
 .. toctree::
    :maxdepth: 2
-   :caption: インストール:
+   :caption: Installation:
 
    installation/installation.md
 
 
 .. toctree::
    :maxdepth: 2
-   :caption: コントリビューションガイド:
-
-   contribution_guide/auto_formatting_guide.md
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Tips:
-
-   tips/qrsh-inherit.md
-   tips/rsync-localdir.md
-
-.. toctree::
-   :maxdepth: 2
-   :caption: コードリファレンス
+   :caption: Code Reference
 
    api_reference/modules
 
 
-索引と検索
+Index and Search
 ==========
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
 
-謝辞
+Acknowledgments
 ====
-* この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。
-* TPEアルゴリズムは Optuna を利用しました。
+* Part of this work was developed under a commissioned project of the New Energy and Industrial Technology Development Organization (NEDO).
+* The TPE algorithm implementation uses Optuna.

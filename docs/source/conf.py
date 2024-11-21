@@ -75,23 +75,14 @@ html_show_sphinx = False
 # (commentout) html_static_path = ["_static"]
 html_sidebars = {"**": ["search-field", "sidebar-nav-bs", "sidebar-ethical-ads"]}
 source_suffix = {".rst": "restructuredtext", ".txt": "markdown", ".md": "markdown"}
-html_context = {
-    "support_languages": {
-        "ja": "Japanese",
-        "en": "English",
-    }
-}
-
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # (commentout) html_static_path = ['_static']
 
-gettext_compact = False
-locale_dirs = ["locale/"]
-language = "ja"
+language = "en"
 
 # -- Extension configuration -------------------------------------------------
-todo_include_todos = True
+# todo_include_todos = True
 # (commentout) autoclass_content = "both"

@@ -22,17 +22,6 @@
 <div role="navigation" aria-label="{{ _('Page navigation') }}">
   <ul class="wy-breadcrumbs">
     {%- block breadcrumbs %}
-      <div>
-        <select name="lang" onchange="location.href=value;">
-          {%- for code, display in support_languages.items() %}
-            <option value="{{ pathto('../' + code + '/', 1) }}{{ pathto(pagename, 0, '.') }}"
-              {%- if code == language %}
-                selected
-              {%- endif %}
-            >{{ display }}</option>
-          {%- endfor %}
-        </select>
-      </div>
       <li><a href="{{ pathto(master_doc) }}" class="icon icon-home" aria-label="Home"></a></li>
         {%- for doc in parents %}
           <li class="breadcrumb-item"><a href="{{ doc.link|e }}">{{ doc.title }}</a></li>
