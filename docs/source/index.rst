@@ -14,6 +14,10 @@ Currently, it supports five optimization algorithms: Random Search, Grid Search,
 .. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
 
 
+API Reference
+===================
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Installation:
@@ -22,10 +26,38 @@ Currently, it supports five optimization algorithms: Random Search, Grid Search,
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Code Reference
+   :maxdepth: 1
+   :caption: hpo
 
-   api_reference/modules
+   api_reference/hpo.md
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: job
+
+   api_reference/job.md
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: app
+
+   api_reference/app.md
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: torch
+
+   api_reference/torch.md
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: util
+
+   api_reference/util.md
 
 
 Index and Search
