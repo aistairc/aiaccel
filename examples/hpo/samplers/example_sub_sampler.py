@@ -4,11 +4,11 @@ import numpy as np
 
 import optuna
 
-from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadSampler, SearchSpace
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadSampler
 
-search_space: dict[str, SearchSpace] = {
-    "x": {"low": -10.0, "high": 10.0},
-    "y": {"low": -10.0, "high": 10.0},
+search_space = {
+    "x": (-10.0, 10.0),
+    "y": (-10.0, 10.0),
 }
 
 
@@ -17,7 +17,7 @@ def sphere(trial: optuna.trial.Trial) -> float:
     time.sleep(0.01)
 
     for name, distribution in search_space.items():
-        params.append(trial.suggest_float(name, distribution["low"], distribution["high"]))
+        params.append(trial.suggest_float(name, *distribution))
 
     return float(np.sum(np.asarray(params) ** 2))
 
