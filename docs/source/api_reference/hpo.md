@@ -1,4 +1,4 @@
-# NelderMeadSampler
+# HPO
 
 ## class NelderMeadSampler(search_space, seed = None, rng=None, coeff=None, block=False, sub_sampler=None)
 
