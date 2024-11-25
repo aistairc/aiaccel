@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import numpy.typing as npt
-from typing import Any, TypedDict
+from typing import Any
 
 from collections.abc import Sequence
 import math
@@ -17,23 +17,6 @@ from optuna.trial import FrozenTrial, TrialState
 from aiaccel.hpo.algorithms import NelderMeadAlgorism, NelderMeadCoefficient, NelderMeadEmptyError
 
 __all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
-
-
-class SearchSpaceRequired(TypedDict):
-    """
-    Required keys
-    """
-
-    low: int | float
-    high: int | float
-
-
-class SearchSpace(SearchSpaceRequired, total=False):
-    """
-    Optional keys
-    """
-
-    log: bool
 
 
 class NelderMeadSampler(optuna.samplers.BaseSampler):
@@ -80,24 +63,14 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def __init__(
         self,
-        search_space: dict[str, SearchSpace],
+        search_space: dict[str, tuple[int | float, int | float]],
         seed: int | None = None,
         rng: np.random.RandomState | None = None,
         coeff: NelderMeadCoefficient | None = None,
         block: bool = False,
         sub_sampler: optuna.samplers.BaseSampler | None = None,
     ) -> None:
-        self._search_space = {}
-        for key, value in search_space.items():
-            if "log" in value and value["log"]:
-                self._search_space[key] = {
-                    "low": math.log(value["low"]),
-                    "high": math.log(value["high"]),
-                    "log": value["log"],
-                }
-            else:
-                self._search_space[key] = value | {"log": False}  # type: ignore[assignment]
-
+        self._search_space = search_space
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
         self.nm = NelderMeadAlgorism(
@@ -122,8 +95,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
     def _get_params(self, study: Study, trial: FrozenTrial) -> npt.NDArray[np.float64] | None:
         try:
-            it = zip(self.nm.get_vertex(), self._search_space.values(), strict=False)
-            params = np.array([(space["high"] - space["low"]) * value + space["low"] for value, space in it])
+            params = self.nm.get_vertex()
         except NelderMeadEmptyError as e:
             if self.sub_sampler is None:
                 raise e
@@ -135,11 +107,11 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     def _put_params(self, study: Study, trial: FrozenTrial, state: TrialState, values: Sequence[float] | None) -> None:
         if isinstance(values, list):
             system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
-            raw_params = system_attr["params"] if "params" in system_attr else trial.params.values()
-            search_space = [(space["low"], space["high"]) for space in self._search_space.values()]
-            params = np.array(
-                [(value - low) / (high - low) for value, (low, high) in zip(raw_params, search_space, strict=False)]
-            )
+            if "params" in system_attr and "fixed_params" not in system_attr:
+                params = np.array(system_attr["params"])
+            else:  # sub_sampler or enqueued
+                it = zip(trial.params.values(), self._search_space.values(), strict=False)
+                params = np.array([(value - low) / (high - low) for value, (low, high) in it])
 
             self.nm.put_value(
                 params,
@@ -236,21 +208,10 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
                 A parameter value.
 
         """
-        if (
-            isinstance(
-                param_distribution, optuna.distributions.IntDistribution | optuna.distributions.FloatDistribution
-            )
-            and param_distribution.log != self._search_space[param_name]["log"]
-        ):
-            raise ValueError(
-                f"Parameter {param_name} is set with log={self._search_space[param_name]['log']} "
-                f"but optuna.distributions.param_distribution.log={param_distribution.log}"
-            )
         system_attr = study._storage.get_trial_system_attrs(trial._trial_id)
         if "sub_trial" in system_attr and self.sub_sampler is not None:
             param_value = self.sub_sampler.sample_independent(study, trial, param_name, param_distribution)
-            value = math.log(param_value) if self._search_space[param_name]["log"] else param_value
-            if self._search_space[param_name]["low"] <= value <= self._search_space[param_name]["high"]:
+            if self._search_space[param_name][0] <= param_value <= self._search_space[param_name][1]:
                 return param_value
             else:
                 raise ValueError(
@@ -263,13 +224,20 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         param_index = list(self._search_space.keys()).index(param_name)
         param_value = system_attr["params"][param_index]
 
-        if self._search_space[param_name]["log"]:
-            param_value = math.exp(param_value)
+        # reverse normalization
+        assert hasattr(param_distribution, "high")
+        assert hasattr(param_distribution, "low")
+        assert hasattr(param_distribution, "log")
+        if param_distribution.log:  # log scale
+            high = math.log(param_distribution.high)
+            low = math.log(param_distribution.low)
+            param_value = math.exp((high - low) * param_value + low)
+        else:
+            param_value = (param_distribution.high - param_distribution.low) * param_value + param_distribution.low
 
         if isinstance(param_distribution, optuna.distributions.IntDistribution):
             param_value = int(param_value)
         if hasattr(param_distribution, "step") and param_distribution.step is not None:
-            assert hasattr(param_distribution, "low")
             param_value -= (param_value - param_distribution.low) % param_distribution.step
 
         contains = param_distribution._contains(param_distribution.to_internal_repr(param_value))
