@@ -4,11 +4,11 @@ import numpy as np
 
 import optuna
 
-from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler, SearchSpace
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadEmptyError, NelderMeadSampler
 
-search_space: dict[str, SearchSpace] = {
-    "x": {"low": -10.0, "high": 10.0},
-    "y": {"low": -10.0, "high": 10.0},
+search_space = {
+    "x": (-10.0, 10.0),
+    "y": (-10.0, 10.0),
 }
 
 
@@ -31,14 +31,14 @@ if __name__ == "__main__":
                 except NelderMeadEmptyError:  # random sampling
                     study.enqueue_trial(
                         {
-                            "x": _rng.uniform(search_space["x"]["low"], search_space["x"]["high"]),
-                            "y": _rng.uniform(search_space["y"]["low"], search_space["y"]["high"]),
+                            "x": _rng.uniform(*search_space["x"]),
+                            "y": _rng.uniform(*search_space["y"]),
                         }
                     )
                     trial = study.ask()
 
-                x = trial.suggest_float("x", search_space["x"]["low"], search_space["x"]["high"])
-                y = trial.suggest_float("y", search_space["y"]["low"], search_space["y"]["high"])
+                x = trial.suggest_float("x", *search_space["x"])
+                y = trial.suggest_float("y", *search_space["y"])
 
                 trials.append(trial)
                 params.append([x, y])
