@@ -10,8 +10,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import sys
 from pathlib import Path
+import sys
 
 root_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(root_path.absolute()))
@@ -24,7 +24,6 @@ author = "AIST"
 
 # The full version, including alpha/beta/rc tags
 release = "2.0.0"
-html_log = None
 html_logo = f"{root_path}/docs/image/logo_aiaccel.png"
 
 # -- General configuration ---------------------------------------------------
@@ -85,5 +84,5 @@ source_suffix = {".rst": "restructuredtext", ".txt": "markdown", ".md": "markdow
 language = "en"
 
 # -- Extension configuration -------------------------------------------------
-# todo_include_todos = True
+# (commentout) todo_include_todos = True
 # (commentout) autoclass_content = "both"
