@@ -38,7 +38,6 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
     "sphinx_fontawesome",
-    "sphinx_rtd_theme",
     "myst_parser",
     "pydata_sphinx_theme",
 ]
