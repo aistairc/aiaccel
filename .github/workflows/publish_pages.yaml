@@ -18,7 +18,7 @@ jobs:
           python -m pip install .[dev,github-actions,test]
       - name: Sphinx build
         run: |
-          sphinx-apidoc -f -o ./docs/source/api_reference/ ./aiaccel/
+          sphinx-apidoc --maxdepth 2 -f -o ./docs/source/api_reference/ ./aiaccel/
           cd docs
           make html
           cp index.html build/html/
