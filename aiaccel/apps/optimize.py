@@ -82,9 +82,7 @@ def setup_study_config(config: DictConfig | ListConfig, args: argparse.Namespace
         "url": "sqlite:///study.db",
     }
 
-    default_sampler = {
-        "_target_": "optuna.samplers.TPESampler"
-    }
+    default_sampler = {"_target_": "optuna.samplers.TPESampler"}
 
     if "study" not in config:
         if args.resumable or args.resume or args.fix:
@@ -171,11 +169,7 @@ def main() -> None:
             with open(result_filename_template.format(job=job), "rb") as f:
                 y = pkl.load(f)
 
-            frozen_trial = study.tell(
-                trial=trial,
-                values=y,
-                state=TrialState.COMPLETE
-            )
+            frozen_trial = study.tell(trial=trial, values=y, state=TrialState.COMPLETE)
             study._log_completed_trial(frozen_trial)
 
             finished_job_count += 1
