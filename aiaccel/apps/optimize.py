@@ -70,8 +70,6 @@ class HparamsManager:
         return {name: param_fn(trial) for name, param_fn in self.params.items()}
 
 
-# NOTE: This function is extracted to reduce cyclomatic complexity of the main function
-# while maintaining logical cohesion of the study configuration setup process.
 def setup_study_config(config: DictConfig | ListConfig, args: argparse.Namespace) -> None:
     """Set up study configuration based on command line arguments.
 
@@ -84,12 +82,15 @@ def setup_study_config(config: DictConfig | ListConfig, args: argparse.Namespace
         "url": "sqlite:///study.db",
     }
 
-    if ("study" not in config and (args.resumable or args.resume or args.fix)) or (
-        args.resumable and "storage" not in config.study
-    ):
-        if "study" not in config:
+    default_sampler = {
+        "_target_": "optuna.samplers.TPESampler"
+    }
+
+    if "study" not in config:
+        if args.resumable or args.resume or args.fix:
             config.study = {"storage": default_storage}
-        else:
+    else:
+        if args.resumable and "storage" not in config.study:
             config.study.storage = default_storage
 
     if "study_name" not in config.study:
@@ -108,8 +109,8 @@ def setup_study_config(config: DictConfig | ListConfig, args: argparse.Namespace
                 else:
                     raise ValueError(f"Parameter {param_name} not found in previous study's best_params")
 
-            if fixed_params and "sampler" in config.study:
-                base_sampler = config.study.sampler
+            if fixed_params:
+                base_sampler = config.study.sampler if "sampler" in config.study else default_sampler
                 config.study.sampler = {
                     "_target_": "optuna.samplers.PartialFixedSampler",
                     "fixed_params": fixed_params,
@@ -170,12 +171,10 @@ def main() -> None:
             with open(result_filename_template.format(job=job), "rb") as f:
                 y = pkl.load(f)
 
-            frozen_trial = optuna.study._tell._tell_with_warning(
-                study=study,
+            frozen_trial = study.tell(
                 trial=trial,
-                value_or_values=y,
-                state=TrialState.COMPLETE,
-                suppress_warning=True,
+                values=y,
+                state=TrialState.COMPLETE
             )
             study._log_completed_trial(frozen_trial)
 
