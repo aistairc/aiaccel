@@ -27,35 +27,35 @@ API Reference
 
 .. toctree::
    :maxdepth: 1
-   :caption: hpo
+   :caption: HPO
 
    api_reference/hpo.md
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: job
+   :caption: Job
 
    api_reference/job.md
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: app
+   :caption: App
 
    api_reference/app.md
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: torch
+   :caption: Torch
 
    api_reference/torch.md
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: util
+   :caption: Util
 
    api_reference/util.md
 
