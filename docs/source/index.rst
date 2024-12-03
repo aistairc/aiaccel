@@ -26,6 +26,15 @@ Installation
    installation/installation.md
 
 
+User Guide
+--------
+
+.. toctree::
+   :maxdepth: 2
+
+   user_guide/user_guide.md
+
+
 API Reference
 --------
 
