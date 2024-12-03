@@ -114,6 +114,7 @@ work_aiaccel/
 # document
 docs/build/html
 docs/source/api_reference/*.rst
+!docs/source/api_reference/index.rst
 
 # IntelliJ
 .idea
