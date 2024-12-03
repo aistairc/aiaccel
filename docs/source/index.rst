@@ -6,6 +6,10 @@
 
 aiaccel Documentation
 ===================
+
+Overview
+--------
+
 This software is a hyperparameter optimization library designed for the AI Bridging Cloud Infrastructure (ABCI).
 It addresses hyperparameter optimization challenges in AI technologies such as deep learning and multi-agent simulations.
 Currently, it supports five optimization algorithms: Random Search, Grid Search, Sobol Sequence, Nelder-Mead Method, and TPE.
@@ -13,61 +17,43 @@ Currently, it supports five optimization algorithms: Random Search, Grid Search,
 
 .. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
 
+Installation
+--------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Installation:
 
    installation/installation.md
 
 
 API Reference
-===================
+--------
 
 
 .. toctree::
-   :maxdepth: 1
-   :caption: HPO
+   :maxdepth: 2
 
-   api_reference/hpo.md
+   api_reference/index
 
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Job
-
-   api_reference/job.md
+Contribution Guide
+--------
 
 
 .. toctree::
-   :maxdepth: 1
-   :caption: App
+   :maxdepth: 2
 
-   api_reference/app.md
-
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Torch
-
-   api_reference/torch.md
-
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Util
-
-   api_reference/util.md
+   contribution_guide/index.rst
 
 
 Index and Search
-==========
+--------
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
 
 Acknowledgments
-====
+--------
 * Part of this work was developed under a commissioned project of the New Energy and Industrial Technology Development Organization (NEDO).
 * The TPE algorithm implementation uses Optuna.
