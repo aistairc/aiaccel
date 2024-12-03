@@ -17,14 +17,9 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "optuna",
-    "optuna>=3.4.0",
     "omegaconf",
     "hydra-core",
     "colorama",
-    "lightning>=2.2.1",
-    "torch>=2.2.0",
-    "h5py"
 ]
 
 [project.scripts]
@@ -55,6 +50,31 @@ dev = [
     "pandas-stubs",
     "matplotlib"
 ]
+
+job = [
+    "numpy",
+    "omegaconf",
+    "hydra-core",
+    "colorama",
+]
+
+hpo = [
+    "optuna>=3.4.0"
+]
+
+torch = [
+    "torch>=2.2.0",
+    "lightning>=2.2.1",
+    "h5py",
+]
+
+all = [
+    "optuna>=3.4.0",
+    "torch>=2.2.0",
+    "lightning>=2.2.1",
+    "h5py"
+]
+
 github-actions = [
     "pytest-github-actions-annotate-failures",
 ]
