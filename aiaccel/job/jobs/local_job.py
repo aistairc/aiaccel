@@ -5,8 +5,8 @@ from typing import Any
 from concurrent.futures import Future
 from pathlib import Path
 
-from aiaccel.job.base_job import BaseJob
-from aiaccel.job.job_status import JobStatus
+from aiaccel.job.jobs.base_job import BaseJob
+from aiaccel.job.jobs.job_status import JobStatus
 
 
 class LocalJob(BaseJob):

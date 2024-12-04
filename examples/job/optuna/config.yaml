@@ -17,10 +17,10 @@ study:
 
 params:
   _convert_: partial
-  _target_: aiaccel.apps.optimize.HparamsManager
+  _target_: aiaccel.hpo.optuna.HparamsManager
   x1: [0, 1]
   x2:
-    _target_: aiaccel.apps.optimize.SuggestFloat
+    _target_: aiaccel.hpo.optuna.SuggestFloat
     name: x2
     low: 0.0
     high: 1.0

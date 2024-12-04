@@ -8,8 +8,8 @@ import subprocess
 import time
 import traceback
 
-from aiaccel.job.base_job_executor import BaseJobExecutor
-from aiaccel.job.local_job import LocalJob
+from aiaccel.job.executors.base_job_executor import BaseJobExecutor
+from aiaccel.job.jobs.local_job import LocalJob
 
 
 class LocalJobExecutor(BaseJobExecutor):

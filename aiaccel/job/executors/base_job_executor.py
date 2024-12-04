@@ -3,10 +3,10 @@ from typing import Any
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from aiaccel.job.abci_job import AbciJob
-from aiaccel.job.base_job import BaseJob
-from aiaccel.job.job_status import JobStatus
-from aiaccel.job.local_job import LocalJob
+from aiaccel.job.jobs.abci_job import AbciJob
+from aiaccel.job.jobs.base_job import BaseJob
+from aiaccel.job.jobs.job_status import JobStatus
+from aiaccel.job.jobs.local_job import LocalJob
 
 
 class BaseJobExecutor(ABC):

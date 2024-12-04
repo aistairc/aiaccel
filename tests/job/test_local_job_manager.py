@@ -1,14 +1,14 @@
-import shutil
 from collections.abc import Generator
 from concurrent.futures import Future
 from pathlib import Path
+import shutil
 from unittest.mock import MagicMock
 
 import pytest
 
 from aiaccel.job import LocalJobExecutor
-from aiaccel.job.job_status import JobStatus
-from aiaccel.job.local_job import LocalJob
+from aiaccel.job.jobs.job_status import JobStatus
+from aiaccel.job.jobs.local_job import LocalJob
 
 
 @pytest.fixture

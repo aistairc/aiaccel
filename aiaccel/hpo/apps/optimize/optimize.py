@@ -1,73 +1,65 @@
-from typing import Any
-
 import argparse
-from collections.abc import Callable
 from pathlib import Path
 import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
-from optuna.trial import Trial
 
-from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 from aiaccel.job import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
-
-"""
-Usage (if parameters are not defined in a config file):
-    python -m aiaccel.apps.optimize objective.sh params.x1="[0, 10]" params.x2="[0, 10]" --config config.yaml
-
-Usage (if parameters are defined in a config file):
-    python -m aiaccel.apps.optimize objective.sh --config config.yaml
-"""
-
-"""
-config file (yaml) example:
-
-study:
-  _target_: optuna.create_study
-  direction: minimize
-
-  sampler:
-    _target_: optuna.samplers.TPESampler
-    seed: 0
-
-params:
-  _convert_: partial
-  _target_: aiaccel.apps.optimize.HparamsManager
-  x1: [0, 1]
-  x2:
-    _target_: aiaccel.apps.optimize.SuggestFloat
-    name: x2
-    low: 0.0
-    high: 1.0
-    log: false
-
-n_trials: 30
-n_max_jobs: 4
-
-group: gaa50000
-
-"""
-
-
-class HparamsManager:
-    def __init__(self, **params_def: dict[str, int | float | str | list[int | float] | Suggest[T]]) -> None:
-        self.params: dict[str, Callable[[Trial], Any]] = {}
-        for name, param in params_def.items():
-            if callable(param):
-                self.params[name] = param
-            else:
-                if isinstance(param, list):
-                    low, high = param
-                    self.params[name] = SuggestFloat(name=name, low=low, high=high)
-                else:
-                    self.params[name] = Const(name=name, value=param)
-
-    def suggest_hparams(self, trial: Trial) -> dict[str, float | int | str | list[float | int | str]]:
-        return {name: param_fn(trial) for name, param_fn in self.params.items()}
 
 
 def main() -> None:
+    """
+    Main function to execute the hyperparameter optimization process.
+    This function parses command-line arguments, loads the configuration,
+    sets up the job executor, and runs the optimization trials.
+
+    Command-line arguments:
+        - job_filename (Path): The shell script to execute.
+        - --config (str, optional): Path to the configuration file.
+        - --executor (str, optional): Type of job executor to use ("local" or "abci").
+        - --resume (bool, optional): Flag to resume from the previous study.
+
+    The function performs the following steps:
+        1. Parses command-line arguments.
+        2. Loads and merges the configuration from the file and command-line arguments.
+        3. Sets default storage and study name if not provided in the configuration.
+        4. Initializes the job executor based on the specified executor type.
+        5. Instantiates the study and parameter suggestion objects.
+        6. Submits jobs for hyperparameter optimization trials.
+        7. Collects and processes finished jobs, updating the study with results.
+
+    Usage:
+        python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml
+
+    Config file (yaml) example:
+        ~~~ yaml
+        study:
+        _target_: optuna.create_study
+        direction: minimize
+
+        sampler:
+            _target_: optuna.samplers.TPESampler
+            seed: 0
+
+        params:
+        _convert_: partial
+        _target_: aiaccel.apps.optimize.HparamsManager
+        x1: [0, 1]
+        x2:
+            _target_: aiaccel.apps.optimize.SuggestFloat
+            name: x2
+            low: 0.0
+            high: 1.0
+            log: false
+
+        n_trials: 30
+        n_max_jobs: 4
+
+        group: gaa50000
+        ~~~
+    """
+
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", nargs="?", default=None)
