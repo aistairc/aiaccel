@@ -48,7 +48,11 @@ dev = [
     "undecorated",
     "pandas",
     "pandas-stubs",
-    "matplotlib"
+    "matplotlib",
+    "optuna>=3.4.0",
+    "torch>=2.2.0",
+    "lightning>=2.2.1",
+    "h5py",
 ]
 
 job = [
@@ -66,13 +70,19 @@ torch = [
     "torch>=2.2.0",
     "lightning>=2.2.1",
     "h5py",
+    "pandas",
+    "pandas-stubs",
+    "matplotlib",
 ]
 
 all = [
     "optuna>=3.4.0",
     "torch>=2.2.0",
     "lightning>=2.2.1",
-    "h5py"
+    "h5py",
+    "pandas",
+    "pandas-stubs",
+    "matplotlib",
 ]
 
 github-actions = [
