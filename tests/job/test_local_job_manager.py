@@ -6,9 +6,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from aiaccel.job import LocalJobExecutor
-from aiaccel.job.jobs.job_status import JobStatus
-from aiaccel.job.jobs.local_job import LocalJob
+from aiaccel.hpo.job import LocalJobExecutor
+from aiaccel.hpo.job.jobs.job_status import JobStatus
+from aiaccel.hpo.job.jobs.local_job import LocalJob
 
 
 @pytest.fixture

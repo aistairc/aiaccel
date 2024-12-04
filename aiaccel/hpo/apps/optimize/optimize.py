@@ -5,7 +5,7 @@ import pickle as pkl
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
-from aiaccel.job import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
+from aiaccel.hpo.job import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 
 
 def main() -> None:
