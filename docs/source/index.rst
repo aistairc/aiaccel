@@ -52,7 +52,7 @@ Contribution Guide
 .. toctree::
    :maxdepth: 2
 
-   contribution_guide/index.rst
+   contribution_guide/contribution_guide.md
 
 
 Index and Search
