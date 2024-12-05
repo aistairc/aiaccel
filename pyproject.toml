@@ -55,28 +55,11 @@ dev = [
     "h5py",
 ]
 
-job = [
-    "numpy",
-    "omegaconf",
-    "hydra-core",
-    "colorama",
-]
-
 hpo = [
     "optuna>=3.4.0"
 ]
 
 torch = [
-    "torch>=2.2.0",
-    "lightning>=2.2.1",
-    "h5py",
-    "pandas",
-    "pandas-stubs",
-    "matplotlib",
-]
-
-all = [
-    "optuna>=3.4.0",
     "torch>=2.2.0",
     "lightning>=2.2.1",
     "h5py",

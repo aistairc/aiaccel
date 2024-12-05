@@ -6,8 +6,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from utils import qstat_xml
 
-from aiaccel.hpo.job import AbciJob, AbciJobExecutor
-from aiaccel.hpo.job.jobs.job_status import JobStatus
+from aiaccel.hpo.job_executors import AbciJobExecutor
+from aiaccel.hpo.jobs import AbciJob
+from aiaccel.hpo.jobs.job_status import JobStatus
 
 
 @pytest.fixture

@@ -8,8 +8,8 @@ import subprocess
 import time
 from xml.etree import ElementTree
 
-from aiaccel.hpo.job.jobs.base_job import BaseJob
-from aiaccel.hpo.job.jobs.job_status import JobStatus
+from aiaccel.hpo.jobs.base_job import BaseJob
+from aiaccel.hpo.jobs.job_status import JobStatus
 
 
 class AbciJob(BaseJob):

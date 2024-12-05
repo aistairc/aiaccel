@@ -7,8 +7,7 @@ from unittest.mock import patch
 import pytest
 from utils import qstat_xml
 
-from aiaccel.hpo.job import AbciJob
-from aiaccel.hpo.job.jobs.job_status import JobStatus
+from aiaccel.hpo.jobs import AbciJob, JobStatus
 
 #
 

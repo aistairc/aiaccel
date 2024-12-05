@@ -3,8 +3,8 @@ from typing import Any
 from pathlib import Path
 import time
 
-from aiaccel.hpo.job.executors.base_job_executor import BaseJobExecutor
-from aiaccel.hpo.job.jobs.abci_job import AbciJob
+from aiaccel.hpo.job_executors.base_job_executor import BaseJobExecutor
+from aiaccel.hpo.jobs.abci_job import AbciJob
 
 
 class AbciJobExecutor(BaseJobExecutor):

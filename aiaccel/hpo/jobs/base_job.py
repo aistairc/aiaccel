@@ -5,7 +5,7 @@ from typing import Any
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from aiaccel.hpo.job.jobs.job_status import JobStatus
+from aiaccel.hpo.jobs.job_status import JobStatus
 
 
 class BaseJob(ABC):

@@ -1,4 +1,3 @@
-from aiaccel.hpo.optuna.hparams_manager import HparamsManager
 from aiaccel.hpo.optuna.suggest_wrapper import (
     Const,
     SuggestCategorical,
@@ -17,5 +16,4 @@ __all__ = [
     "SuggestLogUniform",
     "SuggestUniform",
     "Const",
-    "HparamsManager",
 ]
