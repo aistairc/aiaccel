@@ -32,7 +32,7 @@ User Guide
 .. toctree::
    :maxdepth: 2
 
-   user_guide/user_guide.md
+   user_guide/index.rst
 
 
 API Reference
