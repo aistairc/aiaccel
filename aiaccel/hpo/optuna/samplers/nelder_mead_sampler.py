@@ -35,6 +35,25 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
     The enqueued parameters are calculated in parallel
     with the parameters determined by NelderMead if parallelisation is enabled.
 
+    Example:
+
+        An example of a single-objective optimization is as follows:
+
+        .. testcode::
+
+            import optuna
+            from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadSampler
+
+
+            def objective(trial):
+                x = trial.suggest_float("x", -10, 10)
+                return x**2
+
+
+            search_space = {"x": {"low": -10, "high": 10}}
+            sampler = NelderMeadSampler(search_space=search_space, seed=42)
+            study.optimize(objective, n_trials=10)
+
     Args:
         search_space: dict[str, tuple[float, float]]
             Parameter names and corresponding lower and upper limits.
