@@ -40,6 +40,7 @@ extensions = [
     "sphinx_fontawesome",
     "myst_parser",
     "pydata_sphinx_theme",
+    "sphinx.ext.doctest",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
