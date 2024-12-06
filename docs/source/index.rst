@@ -17,13 +17,14 @@ Currently, it supports five optimization algorithms: Random Search, Grid Search,
 
 .. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
 
-Installation
+
+Getting Started
 --------
 
 .. toctree::
    :maxdepth: 2
 
-   installation/installation.md
+   getting_started.md
 
 
 User Guide
@@ -65,4 +66,3 @@ Index and Search
 Acknowledgments
 --------
 * Part of this work was developed under a commissioned project of the New Energy and Industrial Technology Development Organization (NEDO).
-* The TPE algorithm implementation uses Optuna.
