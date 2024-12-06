@@ -130,8 +130,8 @@ class NelderMeadAlgorism:
         """Method to pass a pair of parameters and results to NelderMead
 
         Args:
-            vertex: npt.NDArray[np.float64]: Parameters パラメータ
-            value: float: Calculation result 計算結果
+            vertex: npt.NDArray[np.float64]: Parameters
+            value: float: Calculation result
             enqueue: bool = False:
                 Boolean indicating whether the parameters were output by NelderMead.
         """
