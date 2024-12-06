@@ -24,7 +24,7 @@ author = "AIST"
 
 # The full version, including alpha/beta/rc tags
 release = "2.0.0"
-html_logo = f"{root_path}/docs/image/logo_aiaccel_re_edit.png"
+html_logo = f"{root_path}/docs/image/logo_aiaccel_padding.png"
 
 # -- General configuration ---------------------------------------------------
 
