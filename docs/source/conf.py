@@ -86,3 +86,10 @@ language = "en"
 # -- Extension configuration -------------------------------------------------
 # (commentout) todo_include_todos = True
 # (commentout) autoclass_content = "both"
+
+html_static_path = ["_static"]
+html_css_files = ["custom_color.css"]
+html_theme_options = {
+    "navbar_end": ["navbar-icon-links"],
+    "default_mode": "light",
+}

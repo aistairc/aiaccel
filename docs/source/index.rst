@@ -53,7 +53,7 @@ Contribution Guide
 .. toctree::
    :maxdepth: 2
 
-   contribution_guide/contribution_guide.md
+   contribution_guide.md
 
 
 Index and Search
