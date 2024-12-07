@@ -12,8 +12,6 @@ API Reference
 .. toctree::
    :maxdepth: 2
 
-   aiaccel.app
-   aiaccel.hpo
-   aiaccel.job
-   aiaccel.torch
-   aiaccel.utils
+   torch
+   hpo
+   .. utils
