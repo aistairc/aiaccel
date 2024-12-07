@@ -25,6 +25,7 @@ author = "AIST"
 # The full version, including alpha/beta/rc tags
 release = "2.0.0"
 html_logo = f"{root_path}/docs/image/logo_aiaccel_padding.png"
+html_favicon = f"{root_path}/docs/image/favicon.ico"
 
 # -- General configuration ---------------------------------------------------
 
@@ -32,6 +33,7 @@ html_logo = f"{root_path}/docs/image/logo_aiaccel_padding.png"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
@@ -92,4 +94,12 @@ html_css_files = ["custom_color.css"]
 html_theme_options = {
     "navbar_end": ["navbar-icon-links"],
     "default_mode": "light",
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/aistairc/aiaccel",  # required
+            "icon": "fa-brands fa-square-github",
+            "type": "fontawesome",
+        }
+    ],
 }
