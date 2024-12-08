@@ -20,6 +20,13 @@ dependencies = [
     "omegaconf",
     "hydra-core",
     "colorama",
+    "optuna>=3.4.0",
+    "torch>=2.2.0",
+    "lightning>=2.2.1",
+    "h5py",
+    "pandas",
+    "pandas-stubs",
+    "matplotlib",
 ]
 
 [project.scripts]
@@ -46,26 +53,6 @@ dev = [
     "sphinx-rtd-theme",
     "types-colorama",
     "undecorated",
-    "pandas",
-    "pandas-stubs",
-    "matplotlib",
-    "optuna>=3.4.0",
-    "torch>=2.2.0",
-    "lightning>=2.2.1",
-    "h5py",
-]
-
-hpo = [
-    "optuna>=3.4.0"
-]
-
-torch = [
-    "torch>=2.2.0",
-    "lightning>=2.2.1",
-    "h5py",
-    "pandas",
-    "pandas-stubs",
-    "matplotlib",
 ]
 
 github-actions = [
