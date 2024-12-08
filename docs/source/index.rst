@@ -22,10 +22,10 @@ AIST toolkit for accelerating machine learning research.
 
 .. grid::
 
-   .. grid-item-card:: PyTorch/Lightning Utilities
+   .. grid-item-card:: PyTorch/Lightning Toolkit
       :link: api_reference/torch.html
    
-      Training utilities for HPC clusters.
+      Training toolkit for HPC clusters.
 
    .. grid-item-card:: Hyperparameter Optimization (HPO)
       :link: api_reference/hpo.html
