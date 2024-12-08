@@ -23,7 +23,7 @@ dependencies = [
     "colorama",
     "torch>=2.2.0",
     "lightning>=2.2.1",
-    "h5py",
+    "h5py"
 ]
 
 [project.scripts]
@@ -52,7 +52,7 @@ dev = [
     "undecorated",
     "pandas",
     "pandas-stubs",
-    "matplotlib",
+    "matplotlib"
 ]
 
 github-actions = [
