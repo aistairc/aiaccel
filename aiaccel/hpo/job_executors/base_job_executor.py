@@ -3,14 +3,12 @@ from typing import Any
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from aiaccel.hpo.jobs.abci_job import AbciJob
 from aiaccel.hpo.jobs.base_job import BaseJob
 from aiaccel.hpo.jobs.job_status import JobStatus
-from aiaccel.hpo.jobs.local_job import LocalJob
 
 
 class BaseJobExecutor(ABC):
-    JobClass: type[BaseJob | AbciJob | LocalJob]
+    JobClass: type[BaseJob]
 
     """
     Abstract base class for job executors.
