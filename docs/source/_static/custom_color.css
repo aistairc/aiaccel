@@ -1,0 +1,8 @@
+html[data-theme="light"] {
+    --pst-color-primary: #e80011;
+    --pst-color-secondary: #ef7d06;
+    --pst-color-table-row-hover-bg: #C5C3C4;
+    --pst-color-target: #fff3d9;
+    --pst-color-inline-code-links: var(--pst-color-primary);
+    --pst-color-inline-code: var(--pst-color-secondary);
+}
