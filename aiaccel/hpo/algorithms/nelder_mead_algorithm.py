@@ -216,7 +216,9 @@ class NelderMeadAlgorism:
             try:
                 num_random_points = self.dimensions + 1 - len(self.vertices)
 
-                random_vertices: list[npt.NDArray[np.float64]] = list(self._rng.uniform(0, 1, (num_random_points, self.dimensions)))
+                random_vertices: list[npt.NDArray[np.float64]] = list(
+                    self._rng.uniform(0, 1, (num_random_points, self.dimensions))
+                )
                 yield from random_vertices
 
                 random_vertices, random_values = yield from self._wait_for_results(num_random_points)
