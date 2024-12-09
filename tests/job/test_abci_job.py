@@ -1,15 +1,13 @@
-import re
-import shutil
 from collections.abc import Generator
 from pathlib import Path
+import re
+import shutil
 from unittest.mock import patch
 
 import pytest
 from utils import qstat_xml
 
-from aiaccel.job import AbciJob
-from aiaccel.job.job_status import JobStatus
-
+from aiaccel.hpo.jobs import AbciJob, JobStatus
 
 #
 
