@@ -43,6 +43,7 @@ extensions = [
     "myst_parser",
     "pydata_sphinx_theme",
     "sphinx.ext.doctest",
+    "sphinx_design",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
