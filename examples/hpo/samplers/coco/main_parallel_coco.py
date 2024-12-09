@@ -1,7 +1,7 @@
 from itertools import product
 from pathlib import Path
 
-from aiaccel.job.abci_job import AbciJob
+from aiaccel.job.jobs.abci_job import AbciJob
 
 
 def main() -> None:
