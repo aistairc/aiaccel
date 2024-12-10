@@ -19,12 +19,12 @@ sys.path.insert(0, str(root_path.absolute()))
 # -- Project information -----------------------------------------------------
 
 project = "aiaccel"
-project_copyright = "2024, AIST"
-author = "AIST"
+project_copyright = "2024, National Institute of Advanced Industrial Science And Technology (AIST)"
+author = "National Institute of Advanced Industrial Science And Technology (AIST)"
 
 # The full version, including alpha/beta/rc tags
 release = "2.0.0"
-html_logo = f"{root_path}/docs/image/logo_aiaccel_padding.png"
+html_logo = f"{root_path}/docs/image/logo_aiaccel.png"
 html_favicon = f"{root_path}/docs/image/favicon.ico"
 
 # -- General configuration ---------------------------------------------------
@@ -93,8 +93,6 @@ language = "en"
 html_static_path = ["_static"]
 html_css_files = ["custom_color.css"]
 html_theme_options = {
-    "navbar_end": ["navbar-icon-links"],
-    "default_mode": "light",
     "icon_links": [
         {
             "name": "GitHub",
