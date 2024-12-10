@@ -76,9 +76,7 @@ html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = False
 html_show_sphinx = False
 # (commentout) html_static_path = ["_static"]
-html_sidebars = {
-    "api_reference/**": ["search-field", "sidebar-nav-bs", "sourcelink.html"]
-}
+html_sidebars = {"**": ["search-field", "sidebar-nav-bs", "sourcelink.html"]}
 source_suffix = {".rst": "restructuredtext", ".txt": "markdown", ".md": "markdown"}
 
 # Add any paths that contain custom static files (such as style sheets) here,
