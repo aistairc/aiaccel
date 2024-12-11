@@ -1,6 +1,6 @@
 # Pull Requests
 
-When you want to the modified code to be reflected in the repository, please execute pull request.
+When you want to the modified code to be reflected in the repository, please execute a pull request.
 
 ### Procedures
 
@@ -11,7 +11,7 @@ When you want to the modified code to be reflected in the repository, please exe
 git clone https://github.com/[YOUR USERNAME]/aiaccel.git
 ~~~
 
-### Development
+### Developments
 - Update a local repository to the latest version.
 
 ~~~bash
@@ -33,7 +33,7 @@ git checkout -b feature/add-new-feature
 
 ### Submitting
 
-Before submit *Pull request*, confirm the following:
+Before submitting a pull request, confirm the following:
 - Did you discuss it with other developer on issues in advance?
 - Can it be distributed under the MIT licence?
 - Is there appropriate [unit tests](#test)?
@@ -67,7 +67,7 @@ git push origin feature/add-new-feature
 
 ## Review processes
 
-- Other developers can contribute comments to improve implementations, documentations, and coding styles in the pull request.
+- Other developers can contribute comments to improve implementations, documents, and coding styles in the pull request.
 - When updating codes in the pull request, please commit the changes in the local repository and push the changes to the fork only if they have been successfully tested in the local environment.
 - If the pull request has been reviewed and approved by at least one member of the aiaccel development team, it will be merged into the main branch.
 
@@ -77,13 +77,13 @@ git push origin feature/add-new-feature
 
 - Write a basic description of the implemented functions, the types and meanings of parameters and return values, and examples of their usage.
 - Write in accordance with the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings).
-- See also Coding Conventions(#Coding style).
+- See also [Coding Conventions](#coding-style).
 
 ## Documentation
 
 - Create source files for documentation in a directory under docs.
 - The recommended document file format is markdown format.
-- Create documentation for any major feature addtions.
+- Create documentation for any major feature additions.
 
 ## Confirming rendering
 
@@ -110,7 +110,7 @@ make gettext
 sphinx-intl update -p build/gettext -l en -l ja
 ~~~
 
-# Test
+# Tests
 
 ## Adding tests
 
@@ -151,7 +151,7 @@ No strict criteria for code coverage have been set, but this value should be ful
 - Abnormally low coverage of a class or module.
 - Test does not cover a specific branch of the if statement.
 
-### Measuerment coverages
+### Measurement coverages
 
 Run pytest with the option `--cov` to measure C0 coverage.
 
@@ -166,7 +166,7 @@ pytest --cov=aiaccel
 pytest --cov=aiaccel --cov-branch
 ~~~
 
-# Coding style
+# Coding styles
 
 ## Basic rules
 
