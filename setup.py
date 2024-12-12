@@ -4,12 +4,7 @@ hpo = [
     "numpy",
     "optuna>=3.4.0",
 ]
-torch = [
-    "hydra-core",
-    "lightning>=2.2.1",
-    "torch>=2.2.0",
-    "h5py"
-]
+torch = ["hydra-core", "lightning>=2.2.1", "torch>=2.2.0", "h5py"]
 dev = [
     "mypy",
     "myst-parser",
@@ -30,16 +25,16 @@ dev = [
     "undecorated",
     "pandas",
     "pandas-stubs",
-    "matplotlib"
+    "matplotlib",
 ]
 github_actions = [
     "pytest-github-actions-annotate-failures",
 ]
-all = hpo + torch + dev + github_actions
+all_dependencies = hpo + torch + dev + github_actions
 
 setup(
-    extras_require = {
-        "all": all,
+    extras_require={
+        "all": all_dependencies,
         "hpo": hpo,
         "torch": torch,
         "dev": dev,
