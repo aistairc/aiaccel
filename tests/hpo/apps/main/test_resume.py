@@ -97,7 +97,6 @@ def get_trial_values(db_path: Path, study_name: str) -> list[float]:
 
 
 def modify_config(config_path: Path, study_name: str, n_trials: int, db_name: str) -> Path:
-    """Modify config file with new study name and number of trials"""
     with open(config_path) as f:
         content = f.read()
 
@@ -105,7 +104,8 @@ def modify_config(config_path: Path, study_name: str, n_trials: int, db_name: st
     content = content.replace("n_trials: 30", f"n_trials: {n_trials}")
 
     if db_name:
-        content = content.replace("aiaccel_storage.db", db_name)
+        db_path = config_path.parent / db_name
+        content = content.replace("aiaccel_storage.db", str(db_path.absolute()))
 
     new_config_path = config_path.parent / f"config_{study_name}.yaml"
     with open(new_config_path, "w") as f:
