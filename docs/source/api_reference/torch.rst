@@ -1,5 +1,5 @@
-PyTorch Utilities
-=================
+PyTorch/Lightning Toolkit
+=========================
 
 
 Datasets

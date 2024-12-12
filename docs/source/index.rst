@@ -4,18 +4,34 @@
    contain the root `toctree` directive.
 
 
-aiaccel Documentation
-===================
+Aiaccel
+=======
 
-Overview
---------
-
-This software is a hyperparameter optimization library designed for the AI Bridging Cloud Infrastructure (ABCI).
-It addresses hyperparameter optimization challenges in AI technologies such as deep learning and multi-agent simulations.
-Currently, it supports five optimization algorithms: Random Search, Grid Search, Sobol Sequence, Nelder-Mead Method, and TPE.
+AIST toolkit for accelerating machine learning research.
 
 
-.. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
+:octicon:`cpu;1em;sd-text-primary` High-Performance Computing (HPC)
+   Intended to use in the HPC clusters including AI Bridging Cloud Infrastructure (ABCI).
+
+:octicon:`server;1em;sd-text-primary` Highly Modular Design
+   Designed to let you pick up any part of aiaccel with minimal dependencies as you prefer.
+
+:octicon:`zap;1em;sd-text-primary` High Compatibility
+   Compatible with the modern standard frameworks such as PyTorch Lightning and Optuna.
+
+
+.. grid::
+
+   .. grid-item-card:: PyTorch/Lightning Toolkit
+      :link: api_reference/torch.html
+   
+      Training toolkit for HPC clusters.
+
+   .. grid-item-card:: Hyperparameter Optimization (HPO)
+      :link: api_reference/hpo.html
+
+      Ready-to-use HPO algorithms/tools.
+
 
 
 Getting Started
@@ -49,19 +65,11 @@ API Reference
 Contribution Guide
 --------
 
-
 .. toctree::
    :maxdepth: 2
 
-   contribution_guide.md
+   contribution_guide/index.rst
 
-
-Index and Search
---------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 Acknowledgments
 --------

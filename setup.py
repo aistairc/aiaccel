@@ -25,6 +25,7 @@ dev = [
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
     "pydata-sphinx-theme",
+    "sphinx_design",
     "types-colorama",
     "undecorated",
     "pandas",
