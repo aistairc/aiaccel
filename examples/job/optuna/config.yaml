@@ -1,20 +1,3 @@
-storage:
-  _target_: optuna.storages.RDBStorage
-  url: sqlite:///example.db
-  engine_kwargs:
-    connect_args:
-      timeout: 30
-
-study:
-  _target_: optuna.create_study
-  direction: minimize
-  storage: ${storage}
-  study_name: my_study
-  load_if_exists: false
-  sampler:
-    _target_: optuna.samplers.TPESampler
-    seed: 0
-
 params:
   _convert_: partial
   _target_: aiaccel.hpo.apps.optimize.HparamsManager
@@ -28,5 +11,3 @@ params:
 
 n_trials: 30
 n_max_jobs: 4
-
-group: gaa50000

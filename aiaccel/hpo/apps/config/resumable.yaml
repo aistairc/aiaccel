@@ -1,0 +1,7 @@
+study:
+  storage:
+    _target_: optuna.storages.RDBStorage
+    url: sqlite:///aiaccel.db
+    engine_kwargs:
+      connect_args:
+        timeout: 30

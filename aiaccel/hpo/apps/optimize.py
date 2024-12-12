@@ -2,6 +2,7 @@ from typing import Any
 
 import argparse
 from collections.abc import Callable
+import importlib.resources
 from pathlib import Path
 import pickle as pkl
 
@@ -110,14 +111,8 @@ def main() -> None:
         ~~~
     """
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
-    parser.add_argument("--config", nargs="?", default=None)
-    parser.add_argument("--executor", nargs="?", default="local")
-    parser.add_argument("--resume", action="store_true", default=False)
-
-    args, unk_args = parser.parse_known_args()
-    config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
+    """
+    onfig = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
 
     if "storage" not in config.study:
         config.study.storage = {
@@ -128,6 +123,24 @@ def main() -> None:
 
     if "study_name" not in config.study:
         config.study.study_name = "aiaccel_study"
+
+    """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
+    parser.add_argument("--config", default="config.yaml", help="Configuration file path")
+    parser.add_argument("--executor", nargs="?", default="local")
+    parser.add_argument("--resume", action="store_true", default=False)
+    parser.add_argument("--resumable", action="store_true", default=False)
+
+    args, unk_args = parser.parse_known_args()
+
+    default_config = oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "default.yaml"))
+    config = oc.merge(default_config, oc.load(args.config))
+    config = oc.merge(config, oc.from_cli(unk_args))
+
+    if args.resumable or args.resume:
+        config = oc.merge(config, oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "resumable.yaml")))
 
     if args.resume:
         config.study.load_if_exists = True
