@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -21,8 +21,8 @@ dependencies = [
 ]
 dynamic = ["optional-dependencies"]
 
-[tool.setuptools]
-packages = ["aiaccel"]
+[tool.setuptools.packages.find]
+exclude = ["build", "typing"]
 
 [project.urls]
 homepage = "https://github.com/aistairc/aiaccel"
