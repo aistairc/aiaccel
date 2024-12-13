@@ -24,9 +24,9 @@ def temp_dir() -> Generator[Path]:
         for file_name in test_files:
             source_file = source_dir / file_name
             target_file = temp_path / file_name
-
             if source_file.exists():
                 shutil.copy2(source_file, target_file)
+                os.chmod(target_file, 0o755)
                 print(f"\n=== Content of {file_name} ===")
                 print((target_file).read_text())
                 print("=" * 40)
@@ -48,6 +48,8 @@ def get_trial_count(db_path: Path, study_name: str) -> int:
     Returns:
         int: Number of trials for the specified study
     """
+    if not db_path.exists():
+        raise AssertionError("Database file does not exist")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
@@ -74,7 +76,8 @@ def get_trial_values(db_path: Path, study_name: str) -> list[float]:
     Returns:
         list[float]: List of trial values in order of trial number
     """
-
+    if not db_path.exists():
+        raise AssertionError("Database file does not exist")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
@@ -97,20 +100,16 @@ def get_trial_values(db_path: Path, study_name: str) -> list[float]:
 
 
 def modify_config(config_path: Path, study_name: str, n_trials: int, db_name: str) -> Path:
+    """Modify config file with new study name and number of trials"""
     with open(config_path) as f:
         content = f.read()
-
     content = content.replace("study_name: my_study", f"study_name: {study_name}")
     content = content.replace("n_trials: 30", f"n_trials: {n_trials}")
-
     if db_name:
-        db_path = config_path.parent / db_name
-        content = content.replace("aiaccel_storage.db", str(db_path.absolute()))
-
+        content = content.replace("url: sqlite:///aiaccel_storage.db", f"url: sqlite:///{db_name}")
     new_config_path = config_path.parent / f"config_{study_name}.yaml"
     with open(new_config_path, "w") as f:
         f.write(content)
-
     return new_config_path
 
 
@@ -143,6 +142,9 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     assert len(normal_results) == 30, "Normal execution should have 30 trials"
     normal_best = min(normal_results)
 
+    trial_count = get_trial_count(temp_dir / normal_db, study_name_normal)
+    assert trial_count == 30
+
     # Split execution with 15 + 15 trials
     study_name_split = f"test_study_{uuid.uuid4().hex[:8]}"
     split_config = modify_config(temp_dir / "config.yaml", study_name_split, 15, split_db)
@@ -151,19 +153,19 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(split_config), "--resumable"]):
         main()
 
-    db_path = temp_dir / split_db
-    trial_count = get_trial_count(db_path, study_name_split)
+    trial_count = get_trial_count(temp_dir / split_db, study_name_split)
+
     assert trial_count == 15
 
     # Second 15 trials
     with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(split_config), "--resume"]):
         main()
 
-    trial_count = get_trial_count(db_path, study_name_split)
+    trial_count = get_trial_count(temp_dir / split_db, study_name_split)
     assert trial_count == 30
 
     # Compare results
-    split_results = get_trial_values(db_path, study_name_split)
+    split_results = get_trial_values(temp_dir / split_db, study_name_split)
     split_best = min(split_results)
     assert len(split_results) == 30, "Split execution should have 30 trials"
     assert abs(normal_best - split_best) < 1e-6, f"Best values differ: normal={normal_best}, split={split_best}"

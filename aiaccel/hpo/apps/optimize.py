@@ -139,7 +139,7 @@ def main() -> None:
     config = oc.merge(default_config, oc.load(args.config))
     config = oc.merge(config, oc.from_cli(unk_args))
 
-    if args.resumable or args.resume:
+    if (args.resumable or args.resume) and "storage" not in config.study:
         config = oc.merge(config, oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "resumable.yaml")))
 
     if args.resume:
