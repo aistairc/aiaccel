@@ -30,11 +30,13 @@ dev = [
 github_actions = [
     "pytest-github-actions-annotate-failures",
 ]
-all_dependencies = hpo + torch + dev + github_actions
+all_dependencies = hpo + torch
+all_dev_dependencies = hpo + torch + dev + github_actions
 
 setup(
     extras_require={
         "all": all_dependencies,
+        "all_dev": all_dev_dependencies,
         "hpo": hpo,
         "torch": torch,
         "dev": dev,
