@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install .[all]
+          pip install .[all_dev]
       - name: Perform ruff
         run: |
           ruff check
