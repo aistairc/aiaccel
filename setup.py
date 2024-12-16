@@ -36,7 +36,7 @@ all_dev_dependencies = hpo + torch + dev + github_actions
 setup(
     extras_require={
         "all": all_dependencies,
-        "all_dev": all_dev_dependencies,
+        "all-dev": all_dev_dependencies,
         "hpo": hpo,
         "torch": torch,
         "dev": dev,
