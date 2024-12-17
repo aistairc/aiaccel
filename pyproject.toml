@@ -1,6 +1,6 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "aiaccel"
@@ -16,50 +16,18 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "numpy",
-    "optuna>=3.4.0",
     "omegaconf",
-    "hydra-core",
     "colorama",
-    "torch>=2.2.0",
-    "lightning>=2.2.1",
-    "h5py"
 ]
+dynamic = ["optional-dependencies"]
 
-[project.scripts]
+[tool.setuptools.packages.find]
+exclude = ["build", "typing"]
 
 [project.urls]
 homepage = "https://github.com/aistairc/aiaccel"
 documentation = "https://aiaccel.readthedocs.io"
 repository = "https://github.com/aistairc/aiaccel"
-
-[project.optional-dependencies]
-dev = [
-    "mypy",
-    "myst-parser",
-    "pre-commit",
-    "pytest",
-    "pytest-cov",
-    "pytest-mock",
-    "pytest-subprocess",
-    "ruff",
-    "sphinx",
-    "sphinxcontrib-jquery",
-    "sphinx-intl",
-    "sphinx-fontawesome",
-    "sphinx-rtd-theme",
-    "pydata-sphinx-theme",
-    "sphinx_design",
-    "types-colorama",
-    "undecorated",
-    "pandas",
-    "pandas-stubs",
-    "matplotlib"
-]
-
-github-actions = [
-    "pytest-github-actions-annotate-failures",
-]
 
 [tool.ruff]
 line-length = 120
