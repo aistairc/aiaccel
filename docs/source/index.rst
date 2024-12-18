@@ -35,7 +35,7 @@ AIST toolkit for accelerating machine learning research.
 
 
 Getting Started
---------
+----------------
 
 .. toctree::
    :maxdepth: 2
@@ -44,7 +44,7 @@ Getting Started
 
 
 User Guide
---------
+-----------
 
 .. toctree::
    :maxdepth: 2
@@ -53,7 +53,7 @@ User Guide
 
 
 API Reference
---------
+--------------
 
 
 .. toctree::
@@ -63,7 +63,7 @@ API Reference
 
 
 Contribution Guide
---------
+-------------------
 
 .. toctree::
    :maxdepth: 2
@@ -72,5 +72,5 @@ Contribution Guide
 
 
 Acknowledgments
---------
+----------------
 * Part of this work was developed under a commissioned project of the New Energy and Industrial Technology Development Organization (NEDO).

@@ -39,7 +39,6 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
-    "sphinx_fontawesome",
     "myst_parser",
     "pydata_sphinx_theme",
     "sphinx.ext.doctest",
