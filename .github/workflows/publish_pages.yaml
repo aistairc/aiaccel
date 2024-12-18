@@ -15,7 +15,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install .[dev,github-actions,test]
+          python -m pip install .[all_dev]
       - name: Sphinx build
         run: |
           sphinx-apidoc --maxdepth 2 -f -o ./docs/source/api_reference/ -s inc ./aiaccel/
