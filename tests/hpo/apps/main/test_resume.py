@@ -6,7 +6,6 @@ from test_optimize import TestOptimize
 
 
 class TestResume(TestOptimize):
-
     def test_optimization_consistency(self, temp_dir: Path) -> None:
         """Test that split execution (resumable + resume) gives same results as normal execution.
 

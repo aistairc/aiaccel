@@ -11,7 +11,6 @@ import pytest
 
 
 class TestOptimize:
-
     @pytest.fixture
     def temp_dir(self) -> Generator[Path]:
         """Create a temporary directory with test files and clean up afterwards"""
@@ -113,7 +112,6 @@ class TestOptimize:
 
 
 class TestOptimizeNormalExecution(TestOptimize):
-
     def test_normal_execution(self, temp_dir: Path) -> None:
         """Test normal execution without resume functionality"""
         from aiaccel.hpo.apps.optimize import main
