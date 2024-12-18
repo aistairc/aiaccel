@@ -1,0 +1,13 @@
+study:
+  _target_: optuna.create_study
+  direction: minimize
+  storage:
+    _target_: optuna.storages.InMemoryStorage
+  study_name: aiaccel_study
+  load_if_exists: false
+
+params:
+  _convert_: partial
+  _target_: aiaccel.hpo.apps.optimize.HparamsManager
+
+n_max_jobs: 1

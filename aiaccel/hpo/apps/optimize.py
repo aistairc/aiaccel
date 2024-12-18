@@ -2,6 +2,7 @@ from typing import Any
 
 import argparse
 from collections.abc import Callable
+import importlib.resources
 from pathlib import Path
 import pickle as pkl
 
@@ -12,6 +13,7 @@ from optuna.trial import Trial
 
 from aiaccel.hpo.job_executors import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
+from aiaccel.utils import print_config
 
 
 class HparamsManager:
@@ -112,25 +114,24 @@ def main() -> None:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
-    parser.add_argument("--config", nargs="?", default=None)
+    parser.add_argument("--config", help="Configuration file path")
     parser.add_argument("--executor", nargs="?", default="local")
     parser.add_argument("--resume", action="store_true", default=False)
+    parser.add_argument("--resumable", action="store_true", default=False)
 
     args, unk_args = parser.parse_known_args()
-    config = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
 
-    if "storage" not in config.study:
-        config.study.storage = {
-            "_target_": "optuna.storages.RDBStorage",
-            "url": "sqlite:///optuna.db",
-            "engine_kwargs": {"connect_args": {"timeout": 30}},
-        }
+    default_config = oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "default.yaml"))
+    config = oc.merge(default_config, oc.load(args.config) if args.config is not None else {})
+    config = oc.merge(config, oc.from_cli(unk_args))
 
-    if "study_name" not in config.study:
-        config.study.study_name = "aiaccel_study"
+    if (args.resumable or args.resume) and ("storage" not in config.study or args.config is None):
+        config = oc.merge(config, oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "resumable.yaml")))
 
     if args.resume:
         config.study.load_if_exists = True
+
+    print_config(config)
 
     jobs: BaseJobExecutor
 
