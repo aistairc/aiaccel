@@ -1,13 +1,6 @@
-from collections.abc import Generator
-import os
 from pathlib import Path
-import shutil
-import sqlite3
-import tempfile
 from unittest.mock import patch
 import uuid
-
-import pytest
 
 from test_optimize import TestOptimize
 

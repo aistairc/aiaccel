@@ -112,7 +112,7 @@ class TestOptimize:
         return new_config_path
 
 
-class TestOptimize_normal_execution(TestOptimize):
+class TestOptimizeNormalExecution(TestOptimize):
 
     def test_normal_execution(self, temp_dir: Path) -> None:
         """Test normal execution without resume functionality"""
