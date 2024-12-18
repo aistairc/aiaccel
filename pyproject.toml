@@ -29,34 +29,6 @@ homepage = "https://github.com/aistairc/aiaccel"
 documentation = "https://aiaccel.readthedocs.io"
 repository = "https://github.com/aistairc/aiaccel"
 
-[project.optional-dependencies]
-dev = [
-    "mypy",
-    "myst-parser",
-    "pre-commit",
-    "pytest",
-    "pytest-cov",
-    "pytest-mock",
-    "pytest-subprocess",
-    "ruff",
-    "sphinx",
-    "sphinxcontrib-jquery",
-    "sphinx-intl",
-    "sphinx-fontawesome",
-    "sphinx-rtd-theme",
-    "pydata-sphinx-theme",
-    "sphinx_design",
-    "types-colorama",
-    "undecorated",
-    "pandas",
-    "pandas-stubs",
-    "matplotlib"
-]
-
-github-actions = [
-    "pytest-github-actions-annotate-failures",
-]
-
 [tool.ruff]
 line-length = 120
 target-version = "py310"
