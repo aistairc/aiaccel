@@ -1,12 +1,9 @@
-
-*************
 API Reference
-*************
-
+=============
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   torch
-   hpo
-   utils
+    torch
+    hpo
+    utils
