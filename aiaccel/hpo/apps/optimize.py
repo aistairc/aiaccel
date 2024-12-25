@@ -147,10 +147,11 @@ def main() -> None:
 
     result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
 
+    n_running_jobs = 0
     finished_job_count = 0
 
     while finished_job_count < config.n_trials:
-        n_running_jobs = len(jobs.get_running_jobs())
+        # n_running_jobs = len(jobs.get_running_jobs())
         n_max_jobs = min(jobs.available_slots(), config.n_trials - finished_job_count - n_running_jobs)
         for _ in range(n_max_jobs):
             trial = study.ask()
@@ -163,6 +164,7 @@ def main() -> None:
                 args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
                 tag=trial,
             )
+            n_running_jobs += 1
 
         for job in jobs.collect_finished():
             trial = job.tag
@@ -172,6 +174,7 @@ def main() -> None:
 
             study.tell(trial, y)
 
+            n_running_jobs -= 1
             finished_job_count += 1
 
 
