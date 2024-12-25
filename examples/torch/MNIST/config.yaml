@@ -1,0 +1,21 @@
+trainer:
+  max_epochs: 10
+  callbacks:
+    - _target_: lightning.pytorch.callbacks.ModelCheckpoint
+      filename: "{epoch:04d}"
+      save_last: True
+      save_top_k: -1
+
+task:
+  _target_: mnist_resnet50.MNISTResNet50
+
+datamodule:
+  _target_: aiaccel.torch.lightning.datamodules.single_datamodule.SingleDataModule
+  train_dataset_fn:
+    _partial_: true
+    _target_: mnist_dataset_function.train_dataset
+  val_dataset_fn:
+    _partial_: true
+    _target_: mnist_dataset_function.val_dataset
+  batch_size: 2
+  wrap_scatter_dataset: False
