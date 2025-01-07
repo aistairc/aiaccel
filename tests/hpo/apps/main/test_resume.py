@@ -1,119 +1,108 @@
+from typing import cast
+
 from pathlib import Path
 from unittest.mock import patch
 import uuid
 
-from test_optimize import TestOptimize
+from conftest import ConfigModFunc, DBUtils, TrialValuesFunc
 
 
-class TestResume(TestOptimize):
-    def test_optimization_consistency(self, temp_dir: Path) -> None:
-        """Test that split execution (resumable + resume) gives same results as normal execution.
+def test_optimization_consistency(
+    temp_dir: Path,
+    db_utils: DBUtils,
+    config_modifier: ConfigModFunc
+) -> None:
+    """Test that split execution (resumable + resume) gives same results as normal execution."""
+    from aiaccel.hpo.apps.optimize import main
 
-        Test steps:
-        1. Run 30 trials in normal mode:    python optimize.py objective.sh --config config.yaml
-        2. Run 15 trials in resumable mode: python optimize.py objective.sh --config config.yaml --resumable
-        3. Run 15 trials in resume mode:    python optimize.py objective.sh --config config.yaml --resume
+    # Use different database files for normal and split execution
+    normal_db = "normal_storage.db"
+    split_db = "split_storage.db"
 
-        Assertions:
-        - Both executions should complete 30 trials
-        - The best values from both executions should be nearly identical (within 1e-6)
-        """
-        from aiaccel.hpo.apps.optimize import main
+    # Normal execution
+    study_name_normal = f"test_study_{uuid.uuid4().hex[:8]}"
+    normal_config = config_modifier(temp_dir / "config.yaml", study_name_normal, 30, normal_db)
 
-        # Use different database files for normal and split execution
-        normal_db = "normal_storage.db"
-        split_db = "split_storage.db"
+    with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(normal_config)]):
+        main()
 
-        # Normal
-        study_name_normal = f"test_study_{uuid.uuid4().hex[:8]}"
-        normal_config = self.modify_config(temp_dir / "config.yaml", study_name_normal, 30, normal_db)
+    get_trial_values = cast(TrialValuesFunc, db_utils["get_trial_values"])
+    normal_results = get_trial_values(temp_dir / normal_db, study_name_normal)
+    assert len(normal_results) == 30, "Normal execution should have 30 trials"
+    normal_best = min(normal_results)
 
-        with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(normal_config)]):
-            main()
+    trial_count = db_utils["get_trial_count"](temp_dir / normal_db, study_name_normal)
+    assert trial_count == 30
 
-        normal_results = self.get_trial_values(temp_dir / normal_db, study_name_normal)
-        assert len(normal_results) == 30, "Normal execution should have 30 trials"
-        normal_best = min(normal_results)
+    # Split execution
+    study_name_split = f"test_study_{uuid.uuid4().hex[:8]}"
+    split_config = config_modifier(temp_dir / "config.yaml", study_name_split, 15, split_db)
 
-        trial_count = self.get_trial_count(temp_dir / normal_db, study_name_normal)
-        assert trial_count == 30
+    # First 15 trials
+    with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(split_config), "--resumable"]):
+        main()
 
-        # Split
-        study_name_split = f"test_study_{uuid.uuid4().hex[:8]}"
-        split_config = self.modify_config(temp_dir / "config.yaml", study_name_split, 15, split_db)
+    trial_count = db_utils["get_trial_count"](temp_dir / split_db, study_name_split)
+    assert trial_count == 15
 
-        # First 15 trials
-        with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(split_config), "--resumable"]):
-            main()
+    # Second 15 trials
+    with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(split_config), "--resume"]):
+        main()
 
-        trial_count = self.get_trial_count(temp_dir / split_db, study_name_split)
+    trial_count = db_utils["get_trial_count"](temp_dir / split_db, study_name_split)
+    assert trial_count == 30
 
-        assert trial_count == 15
+    # Compare results
+    split_results = get_trial_values(temp_dir / split_db, study_name_split)
+    split_best = min(split_results)
+    assert len(split_results) == 30, "Split execution should have 30 trials"
+    assert abs(normal_best - split_best) < 1e-6, f"Best values differ: normal={normal_best}, split={split_best}"
 
-        # Second 15 trials
-        with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(split_config), "--resume"]):
-            main()
 
-        trial_count = self.get_trial_count(temp_dir / split_db, study_name_split)
-        assert trial_count == 30
+def test_resumable_execution(
+    temp_dir: Path,
+    db_utils: DBUtils,
+    config_modifier: ConfigModFunc
+) -> None:
+    """Test execution with `--resumable`"""
+    from aiaccel.hpo.apps.optimize import main
 
-        # Compare results
-        split_results = self.get_trial_values(temp_dir / split_db, study_name_split)
-        split_best = min(split_results)
-        assert len(split_results) == 30, "Split execution should have 30 trials"
-        assert abs(normal_best - split_best) < 1e-6, f"Best values differ: normal={normal_best}, split={split_best}"
+    db_name = "resumable_test.db"
+    study_name = f"test_study_{uuid.uuid4().hex[:8]}"
+    config_path = config_modifier(temp_dir / "config.yaml", study_name, 15, db_name)
 
-    def test_resumable_execution(self, temp_dir: Path) -> None:
-        """Test execution with `--resumable`
-        This should run only the first half of the trials and save the state to a database file.
-        """
-        from aiaccel.hpo.apps.optimize import main
+    with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(config_path), "--resumable"]):
+        main()
 
-        db_name = "resumable_test.db"
-        study_name = f"test_study_{uuid.uuid4().hex[:8]}"
-        config_path = self.modify_config(temp_dir / "config.yaml", study_name, 15, db_name)
+    db_path = temp_dir / db_name
+    assert db_path.exists(), "Database file was not created"
+    trial_count = db_utils["get_trial_count"](db_path, study_name)
+    assert trial_count == 15
 
-        with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(config_path), "--resumable"]):
-            main()
 
-        db_path = temp_dir / db_name
-        assert db_path.exists(), "Database file was not created"
-        trial_count = self.get_trial_count(db_path, study_name)
-        assert trial_count == 15
+def test_resume_execution(
+    temp_dir: Path,
+    db_utils: DBUtils,
+    config_modifier: ConfigModFunc
+) -> None:
+    """Test the resume functionality of the optimization process."""
+    from aiaccel.hpo.apps.optimize import main
 
-    def test_resume_execution(self, temp_dir: Path) -> None:
-        """Test the resume functionality of the optimization process.
+    db_name = "resume_test.db"
+    study_name = f"test_study_{uuid.uuid4().hex[:8]}"
+    config_path = config_modifier(temp_dir / "config.yaml", study_name, 15, db_name)
 
-        This test verifies that the optimization process can be resumed correctly
-        from a saved state. It performs the following steps:
-        1. Runs the optimization process with the `--resumable` flag and checks
-           that the correct number of trials are completed.
-        2. Resumes the optimization process with the `--resume` flag and checks
-           that the remaining trials are completed correctly.
+    # First run with --resumable
+    with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(config_path), "--resumable"]):
+        main()
 
-        Args:
-            temp_dir (pathlib.Path): Temporary directory for test files.
+    db_path = temp_dir / db_name
+    trial_count = db_utils["get_trial_count"](db_path, study_name)
+    assert trial_count == 15
 
-        Raises:
-            AssertionError: If the number of trials after each run does not match
-                            the expected values.
-        """
+    # Second run with --resume
+    with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(config_path), "--resume"]):
+        main()
 
-        from aiaccel.hpo.apps.optimize import main
-
-        db_name = "resume_test.db"
-        study_name = f"test_study_{uuid.uuid4().hex[:8]}"
-        config_path = self.modify_config(temp_dir / "config.yaml", study_name, 15, db_name)
-
-        with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(config_path), "--resumable"]):
-            main()
-
-        db_path = temp_dir / db_name
-        trial_count = self.get_trial_count(db_path, study_name)
-        assert trial_count == 15
-
-        with patch("sys.argv", ["optimize.py", "objective.sh", "--config", str(config_path), "--resume"]):
-            main()
-
-        trial_count = self.get_trial_count(db_path, study_name)
-        assert trial_count == 30
+    trial_count = db_utils["get_trial_count"](db_path, study_name)
+    assert trial_count == 30
