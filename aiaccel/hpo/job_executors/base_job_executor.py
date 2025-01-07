@@ -41,6 +41,9 @@ class BaseJobExecutor(ABC):
 
         self.job_list: list[Any] = []
 
+        self.submitted_job_count = 0
+        self.finished_job_count = 0
+
     @abstractmethod
     def submit(
         self,
@@ -60,6 +63,15 @@ class BaseJobExecutor(ABC):
             Any: The submitted job.
         """
         pass
+
+    def submit_wrapper(
+        self,
+        args: list[str],
+        tag: Any = None,
+        sleep_time: float = 5.0,
+    ) -> Any:
+        self.submitted_job_count += 1
+        self.submit(args, tag, sleep_time)
 
     def update_status_batch(self) -> None:
         """
@@ -87,6 +99,7 @@ class BaseJobExecutor(ABC):
         finished_jobs = [job for job in self.job_list if job.status >= JobStatus.FINISHED]
         for job in finished_jobs:
             self.job_list.remove(job)
+            self.finished_job_count += 1
 
         return finished_jobs
 
@@ -98,3 +111,9 @@ class BaseJobExecutor(ABC):
             list[JobFuture]: A list of running jobs.
         """
         return [job for job in self.job_list if job.status == JobStatus.RUNNING]
+
+    def get_submitted_job_count(self) -> int:
+        return self.submitted_job_count
+
+    def get_finished_job_count(self) -> int:
+        return self.finished_job_count

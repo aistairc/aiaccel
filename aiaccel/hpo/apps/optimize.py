@@ -147,11 +147,8 @@ def main() -> None:
 
     result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
 
-    n_running_jobs = 0
-    finished_job_count = 0
-
-    while finished_job_count < config.n_trials:
-        n_max_jobs = min(jobs.available_slots(), config.n_trials - finished_job_count - n_running_jobs)
+    while jobs.get_finished_job_count() < config.n_trials:
+        n_max_jobs = min(jobs.available_slots(), config.n_trials - jobs.get_submitted_job_count())
         for _ in range(n_max_jobs):
             trial = study.ask()
 
@@ -159,11 +156,10 @@ def main() -> None:
 
             jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
-            job = jobs.submit(
+            job = jobs.submit_wrapper(
                 args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
                 tag=trial,
             )
-            n_running_jobs += 1
 
         for job in jobs.collect_finished():
             trial = job.tag
@@ -172,9 +168,6 @@ def main() -> None:
                 y = pkl.load(f)
 
             study.tell(trial, y)
-
-            n_running_jobs -= 1
-            finished_job_count += 1
 
 
 if __name__ == "__main__":
