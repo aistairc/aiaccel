@@ -12,8 +12,7 @@ import pytest
 # Define type aliases for the database utility functions
 TrialCountFunc: TypeAlias = Callable[[Path, str], int]
 TrialValuesFunc: TypeAlias = Callable[[Path, str], list[float]]
-DBUtils: TypeAlias = dict[Literal["get_trial_count", "get_trial_values"],
-                         TrialCountFunc | TrialValuesFunc]
+DBUtils: TypeAlias = dict[Literal["get_trial_count", "get_trial_values"], TrialCountFunc | TrialValuesFunc]
 ConfigModFunc: TypeAlias = Callable[[Path, str, int, str], Path]
 
 
@@ -48,6 +47,7 @@ def temp_dir() -> Generator[Path, None, None]:
 @pytest.fixture
 def db_utils() -> DBUtils:
     """Fixture providing database utility functions"""
+
     def get_trial_count(db_path: Path, study_name: str) -> int:
         """Get the number of trials from the SQLite database for a specific study"""
         if not db_path.exists():
@@ -87,15 +87,13 @@ def db_utils() -> DBUtils:
         conn.close()
         return values
 
-    return {
-        "get_trial_count": get_trial_count,
-        "get_trial_values": get_trial_values
-    }
+    return {"get_trial_count": get_trial_count, "get_trial_values": get_trial_values}
 
 
 @pytest.fixture
 def config_modifier() -> ConfigModFunc:
     """Fixture providing configuration file modification functionality"""
+
     def modify_config(config_path: Path, study_name: str, n_trials: int, db_name: str) -> Path:
         """Modify config file with new study name and number of trials"""
         with open(config_path) as f:

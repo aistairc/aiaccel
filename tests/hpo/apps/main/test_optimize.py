@@ -5,11 +5,7 @@ import uuid
 from conftest import ConfigModFunc, DBUtils
 
 
-def test_normal_execution(
-    temp_dir: Path,
-    db_utils: DBUtils,
-    config_modifier: ConfigModFunc
-) -> None:
+def test_normal_execution(temp_dir: Path, db_utils: DBUtils, config_modifier: ConfigModFunc) -> None:
     """Test normal execution without resume functionality"""
     from aiaccel.hpo.apps.optimize import main
 

@@ -7,11 +7,7 @@ import uuid
 from conftest import ConfigModFunc, DBUtils, TrialValuesFunc
 
 
-def test_optimization_consistency(
-    temp_dir: Path,
-    db_utils: DBUtils,
-    config_modifier: ConfigModFunc
-) -> None:
+def test_optimization_consistency(temp_dir: Path, db_utils: DBUtils, config_modifier: ConfigModFunc) -> None:
     """Test that split execution (resumable + resume) gives same results as normal execution."""
     from aiaccel.hpo.apps.optimize import main
 
@@ -59,11 +55,7 @@ def test_optimization_consistency(
     assert abs(normal_best - split_best) < 1e-6, f"Best values differ: normal={normal_best}, split={split_best}"
 
 
-def test_resumable_execution(
-    temp_dir: Path,
-    db_utils: DBUtils,
-    config_modifier: ConfigModFunc
-) -> None:
+def test_resumable_execution(temp_dir: Path, db_utils: DBUtils, config_modifier: ConfigModFunc) -> None:
     """Test execution with `--resumable`"""
     from aiaccel.hpo.apps.optimize import main
 
@@ -80,11 +72,7 @@ def test_resumable_execution(
     assert trial_count == 15
 
 
-def test_resume_execution(
-    temp_dir: Path,
-    db_utils: DBUtils,
-    config_modifier: ConfigModFunc
-) -> None:
+def test_resume_execution(temp_dir: Path, db_utils: DBUtils, config_modifier: ConfigModFunc) -> None:
     """Test the resume functionality of the optimization process."""
     from aiaccel.hpo.apps.optimize import main
 
