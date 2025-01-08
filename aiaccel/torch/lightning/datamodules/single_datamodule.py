@@ -1,6 +1,8 @@
-from typing import Any, Callable
+from typing import Any
 
-from torch.utils.data import DataLoader, Dataset
+from collections.abc import Callable, Sized
+
+from torch.utils.data import DataLoader, Dataset, Subset
 
 import lightning as lt
 
@@ -30,7 +32,9 @@ class SingleDataModule(lt.LightningDataModule):
 
         self.wrap_scatter_dataset = wrap_scatter_dataset
 
-    def setup(self, stage: str | None):
+    def setup(self, stage: str | None) -> None:
+        self.train_dataset: Dataset[str] | Subset[str]
+        self.val_dataset: Dataset[str] | Subset[str]
         if stage == "fit":
             if self.wrap_scatter_dataset:
                 self.train_dataset = scatter_dataset(self.train_dataset_fn())
@@ -39,18 +43,19 @@ class SingleDataModule(lt.LightningDataModule):
                 self.train_dataset = self.train_dataset_fn()
                 self.val_dataset = self.val_dataset_fn()
 
-            print(f"Dataset size: {len(self.train_dataset)=},  {len(self.val_dataset)=}")
+            if isinstance(self.train_dataset, Sized) and isinstance(self.val_dataset, Sized):
+                print(f"Dataset size: {len(self.train_dataset)=},  {len(self.val_dataset)=}")
         else:
             raise ValueError("`stage` is not 'fit'.")
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader[Any]:
         return DataLoader(
             self.train_dataset,
             drop_last=True,
             **self.default_dataloader_kwargs,
         )
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader[Any]:
         return DataLoader(
             self.val_dataset,
             drop_last=False,
