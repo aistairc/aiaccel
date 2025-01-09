@@ -71,7 +71,7 @@ class BaseJobExecutor(ABC):
         sleep_time: float = 5.0,
     ) -> Any:
         self.submitted_job_count += 1
-        self.submit(args, tag, sleep_time)
+        return self.submit(args, tag, sleep_time)
 
     def update_status_batch(self) -> None:
         """
