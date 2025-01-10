@@ -112,6 +112,7 @@ def main() -> None:
         ~~~
     """
 
+<<<<<<< HEAD
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", help="Configuration file path")
@@ -120,12 +121,34 @@ def main() -> None:
     parser.add_argument("--resumable", action="store_true", default=False)
 
     args, unk_args = parser.parse_known_args()
+=======
+    """
+    onfig = oc.merge(oc.load(args.config), oc.from_cli(unk_args))
+>>>>>>> 1ebccbc (change resumable)
 
     default_config = oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "default.yaml"))
     config = oc.merge(default_config, oc.load(args.config) if args.config is not None else {})
     config = oc.merge(config, oc.from_cli(unk_args))
 
     if (args.resumable or args.resume) and ("storage" not in config.study or args.config is None):
+        config = oc.merge(config, oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "resumable.yaml")))
+
+    """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
+    parser.add_argument("--config", default="config.yaml", help="Configuration file path")
+    parser.add_argument("--executor", nargs="?", default="local")
+    parser.add_argument("--resume", action="store_true", default=False)
+    parser.add_argument("--resumable", action="store_true", default=False)
+
+    args, unk_args = parser.parse_known_args()
+
+    default_config = oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "default.yaml"))
+    config = oc.merge(default_config, oc.load(args.config))
+    config = oc.merge(config, oc.from_cli(unk_args))
+
+    if args.resumable or args.resume:
         config = oc.merge(config, oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "resumable.yaml")))
 
     if args.resume:

@@ -3,7 +3,6 @@ Optimizing Your Hyperparameters
 
 Hyperparameter optimization (HPO) is an indispensable step to make it work in real world.
 
-
 Usage
 --------
 
@@ -40,7 +39,7 @@ Create a file that defines the objective function to be optimized:
         main()
 
 Creating an Execution Script
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Create a script for environment setup and objective function execution:
 
@@ -58,6 +57,85 @@ Create a script for environment setup and objective function execution:
 
     python objective.py $@
 
+Basic Configuration
+~~~~~~~~~~~~~~~~~~
+
+The basic configuration is the same for both local and ABCI environments, except for the executor settings:
+
+.. code-block:: yaml
+
+    # Configuration for the optimization study
+    study:
+      _target_: optuna.create_study
+      direction: minimize
+
+    # Parameter configuration
+    params:
+      _convert_: partial
+      _target_: aiaccel.hpo.apps.optimize.HparamsManager
+      x1: [0, 1]
+      x2: [0, 1]
+
+    n_trials: 30
+
+    # Executor configuration - choose one based on your environment
+    # For local execution:
+    executor:
+      _target_: aiaccel.hpo.job_executors.LocalJobExecutor
+      n_max_jobs: 4
+
+    # For ABCI execution:
+    executor:
+      _target_: aiaccel.hpo.job_executors.AbciJobExecutor
+      n_max_jobs: 4
+      group: gaa50000  # Required for ABCI
+
+Key components of the configuration:
+
+1. **study**: Defines the optimization study
+   - `direction`: Whether to minimize or maximize the objective function
+
+2. **params**: Defines hyperparameters to optimize
+   - Simple range specification: `parameter: [min, max]`
+   - Detailed configuration using `SuggestFloat`, `SuggestInt`, etc.
+   - Supports various parameter types and distributions
+
+3. **executor**: Configures job execution environment
+   - Choose `LocalJobExecutor` for local machine or `AbciJobExecutor` for ABCI
+   - `n_max_jobs`: Maximum number of concurrent jobs
+   - `group`: Required for ABCI environment
+
+4. **n_trials**: Total number of optimization trials to perform
+
+For more advanced configurations, you can also specify:
+
+.. code-block:: yaml
+
+    # Storage configuration for study persistence
+    study:
+      _target_: optuna.create_study
+      direction: minimize
+      storage: sqlite:///study.db   # Database for storing results
+      study_name: my_study         # Name of the study
+      load_if_exists: true         # Resume existing study if present
+
+    # More complex parameter configuration
+    params:
+      _convert_: partial
+      _target_: aiaccel.hpo.apps.optimize.HparamsManager
+      x1: 
+        _target_: aiaccel.hpo.apps.optimize.SuggestFloat
+        name: x1
+        low: 0.0
+        high: 1.0
+        log: true     # Log scale sampling
+      x2:
+        _target_: aiaccel.hpo.apps.optimize.SuggestInt
+        name: x2
+        low: 1
+        high: 100
+        step: 2       # Step size for integer parameter
+
 Execution Methods
 ~~~~~~~~~~~~~~~~
 
@@ -68,43 +146,34 @@ You can execute optimization with the following command:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize objective.sh params.x1="[0,1]" params.x2="[0,1]" n_trials=30 n_max_jobs=4 group=gaa50000
+    python -m aiaccel.hpo.apps.optimize objective.sh --params x1="[0,1]" x2="[0,1]" n_trials=30 n_max_jobs=4
 
-Main parameters:
+For ABCI environment, add the group parameter:
 
-:params.x1, params.x2: Search range for each parameter
-:n_trials: Number of optimization trials
-:n_max_jobs: Maximum number of concurrent jobs
-:group: ABCI group identifier (required when running on ABCI)
+.. code-block:: bash
 
-Running with Configuration File Parameters
+    python -m aiaccel.hpo.apps.optimize objective.sh --params x1="[0,1]" x2="[0,1]" n_trials=30 n_max_jobs=4 group=gaa50000
+
+Running with Configuration File
 +++++++++++++++++++++++++++
 
 For more complex configurations, you can use a YAML configuration file:
-
-.. code-block:: yaml
-
-    # config.yaml
-    params:
-      x1: [0, 1]
-      x2: [0, 1]
-
-    n_trials: 30
-    n_max_jobs: 4
-    group: gaa50000
-
-To execute using the configuration file:
 
 .. code-block:: bash
 
     python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml
 
+Combining Configuration File and Command Line Parameters
++++++++++++++++++++++++++++
 
+You can override configuration file settings using command line parameters. Command line parameters take precedence over configuration file values:
 
-Combining Configuration File and Command Line Arguments
-+++++++++++++++
+.. code-block:: bash
 
-You can combine configuration file and command line arguments. When the same parameter is specified in both places, command line arguments take precedence.
+    # Override parameters from config file
+    python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml --params x1="[0,2]" x2="[0,2]"
 
+    # Override other settings
+    python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml n_trials=50
 
 (WIP)
