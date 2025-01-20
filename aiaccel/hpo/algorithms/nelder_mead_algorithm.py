@@ -102,8 +102,7 @@ class NelderMeadAlgorism:
                 assert self.dimensions == dimensions
         elif dimensions is None and self.dimensions is None:
             raise ValueError(
-                "dimensions is not set yet. "
-                "Please provide it on __init__ or get_vertex or call put_vertex in advance."
+                "dimensions is not set yet. Please provide it on __init__ or get_vertex or call put_vertex in advance."
             )
 
         with self.lock:
@@ -208,8 +207,7 @@ class NelderMeadAlgorism:
 
         if self.dimensions is None:
             raise ValueError(
-                "dimensions is not set yet. "
-                "Please provide it on __init__ or get_vertex or call put_vertex in advance."
+                "dimensions is not set yet. Please provide it on __init__ or get_vertex or call put_vertex in advance."
             )
 
         if self.dimensions + 1 > len(self.vertices):
