@@ -6,8 +6,13 @@ study:
   study_name: aiaccel_study
   load_if_exists: false
 
+executor:
+  _target_: aiaccel.hpo.job_executors.LocalJobExecutor
+
+result:
+  _target_: aiaccel.hpo.results.JsonResult
+  filename_template: "{job.cwd}/{job.job_name}_result.json"
+
 params:
   _convert_: partial
   _target_: aiaccel.hpo.apps.optimize.HparamsManager
-
-n_max_jobs: 1

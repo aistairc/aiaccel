@@ -69,7 +69,6 @@ def main() -> None:
     Command-line arguments:
         - job_filename (Path): The shell script to execute.
         - --config (str, optional): Path to the configuration file.
-        - --executor (str, optional): Type of job executor to use ("local" or "abci").
         - --resume (bool, optional): Flag to resume from the previous study.
 
     The function performs the following steps:
@@ -115,7 +114,6 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", help="Configuration file path")
-    parser.add_argument("--executor", nargs="?", default="local")
     parser.add_argument("--resume", action="store_true", default=False)
     parser.add_argument("--resumable", action="store_true", default=False)
 
@@ -135,13 +133,9 @@ def main() -> None:
 
     jobs: BaseJobExecutor
 
-    if args.executor.lower() == "local":
-        jobs = LocalJobExecutor(args.job_filename, n_max_jobs=config.n_max_jobs)
-    elif args.executor.lower() == "abci":
-        jobs = AbciJobExecutor(args.job_filename, config.group, n_max_jobs=config.n_max_jobs)
-    else:
-        raise ValueError(f"Unknown executor: {args.executor}")
+    config.executor.job_filename = args.job_filename
 
+    jobs = instantiate(config.executor)
     study = instantiate(config.study)
     params = instantiate(config.params)
 
@@ -171,7 +165,7 @@ def main() -> None:
                 y = pkl.load(f)
 
             study.tell(trial, y)
-
+            print(f"Trial {trial.number} finished with value {y}")
             finished_job_count += 1
 
 

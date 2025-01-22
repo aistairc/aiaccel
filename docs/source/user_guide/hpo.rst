@@ -122,7 +122,7 @@ JSON Format (Default):
 .. code-block:: yaml
 
  result:
-   _target_: aiaccel.results.JsonResult
+   _target_: aiaccel.hpo.results.JsonResult
    filename_template: "{job.cwd}/{job.job_name}_result.json"
 
 Example objective function for JSON:
@@ -142,7 +142,7 @@ Pickle Format:
 .. code-block:: yaml
 
  result:
-   _target_: aiaccel.results.PickleResult
+   _target_: aiaccel.hpo.results.PickleResult
    filename_template: "{job.cwd}/{job.job_name}_result.pkl"
 
 Example objective function for Pickle:
