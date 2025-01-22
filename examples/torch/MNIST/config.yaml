@@ -34,8 +34,8 @@ datamodule:
       transforms:
         - _target_: torchvision.transforms.Resize
           size:
-            - 224
-            - 224
+            - 256
+            - 256
         - _target_: torchvision.transforms.Grayscale
           num_output_channels: 3
         - _target_: torchvision.transforms.ToTensor
@@ -55,8 +55,8 @@ datamodule:
       transforms:
         - _target_: torchvision.transforms.Resize
           size:
-            - 224
-            - 224
+            - 256
+            - 256
         - _target_: torchvision.transforms.Grayscale
           num_output_channels: 3
         - _target_: torchvision.transforms.ToTensor
@@ -65,5 +65,5 @@ datamodule:
             - 0.5
           std:
             - 0.5
-  batch_size: 2
+  batch_size: 128
   wrap_scatter_dataset: False

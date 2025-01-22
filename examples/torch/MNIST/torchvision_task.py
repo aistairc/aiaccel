@@ -5,6 +5,7 @@ from torch.nn import functional as func
 from torch.utils.data import DataLoader
 
 from aiaccel.torch.lightning import OptimizerConfig, OptimizerLightningModule
+import torchmetrics
 
 
 class Resnet50Task(OptimizerLightningModule):
@@ -13,6 +14,10 @@ class Resnet50Task(OptimizerLightningModule):
         self.model = model
         self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
 
+        self.train_accuracy = torchmetrics.Accuracy(task='multiclass', num_classes=10)
+        self.val_accuracy = torchmetrics.Accuracy(task='multiclass', num_classes=10)
+        self.test_accuracy = torchmetrics.Accuracy(task='multiclass', num_classes=10)
+
     def forward(self, x: Any) -> Any:
         return self.model(x)
 
@@ -20,17 +25,17 @@ class Resnet50Task(OptimizerLightningModule):
         x, y = batch
         logits = self(x)
         loss = func.cross_entropy(logits, y)
-        self.log("train_loss", loss)
+
+        acc = self.train_accuracy(logits, y)
+        self.log('train_loss', loss, prog_bar=True)
+        self.log('train_acc', acc, prog_bar=True)
         return loss
 
     def validation_step(self, batch: DataLoader[Any], batch_idx: int) -> None:
         x, y = batch
         logits = self(x)
         loss = func.cross_entropy(logits, y)
-        self.log("val_loss", loss)
 
-    def test_step(self, batch: DataLoader[Any], batch_idx: int) -> None:
-        x, y = batch
-        logits = self(x)
-        loss = func.cross_entropy(logits, y)
-        self.log("test_loss", loss)
+        acc = self.val_accuracy(logits, y)
+        self.log('val_loss', loss, prog_bar=True)
+        self.log('val_acc', acc, prog_bar=True)
