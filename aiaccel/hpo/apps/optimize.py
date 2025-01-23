@@ -91,21 +91,26 @@ def main() -> None:
             _target_: optuna.samplers.TPESampler
             seed: 0
 
+        executor:
+            _target_: aiaccel.hpo.job_executors.LocalJobExecutor
+            n_max_jobs: 4
+
+        result:
+            _target_: aiaccel.hpo.results.JsonResult
+            filename_template: "{job.cwd}/{job.job_name}_result.json"
+
         params:
-        _convert_: partial
-        _target_: aiaccel.apps.optimize.HparamsManager
-        x1: [0, 1]
-        x2:
-            _target_: aiaccel.apps.optimize.SuggestFloat
-            name: x2
-            low: 0.0
-            high: 1.0
-            log: false
+            _convert_: partial
+            _target_: aiaccel.apps.optimize.HparamsManager
+            x1: [0, 1]
+            x2:
+                _target_: aiaccel.apps.optimize.SuggestFloat
+                name: x2
+                low: 0.0
+                high: 1.0
+                log: false
 
         n_trials: 30
-        n_max_jobs: 4
-
-        group: gaa50000
         ~~~
     """
 
@@ -128,8 +133,6 @@ def main() -> None:
         config.study.load_if_exists = True
 
     print_config(config)
-
-    # jobs: BaseJobExecutor
 
     config.executor.job_filename = args.job_filename
 
