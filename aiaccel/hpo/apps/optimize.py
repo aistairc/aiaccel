@@ -164,7 +164,7 @@ def main() -> None:
             y = result.load(job)
 
             study.tell(trial, y)
-            print(f"Trial {trial.number} finished with value {y}")
+
             finished_job_count += 1
 
 
