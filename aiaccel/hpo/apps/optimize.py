@@ -4,14 +4,12 @@ import argparse
 from collections.abc import Callable
 import importlib.resources
 from pathlib import Path
-import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.hpo.job_executors import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 from aiaccel.utils import print_config
 
@@ -131,7 +129,7 @@ def main() -> None:
 
     print_config(config)
 
-    jobs: BaseJobExecutor
+    # jobs: BaseJobExecutor
 
     config.executor.job_filename = args.job_filename
 
@@ -139,8 +137,6 @@ def main() -> None:
     study = instantiate(config.study)
     params = instantiate(config.params)
     result = instantiate(config.result)
-
-    # result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
 
     finished_job_count = 0
 

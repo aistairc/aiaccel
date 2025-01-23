@@ -1,6 +1,7 @@
-from aiaccel.hpo.results.base_result import BaseResult
-from typing import Any
+
 from aiaccel.hpo.job_executors import BaseJobExecutor
+from aiaccel.hpo.results.base_result import BaseResult
+
 
 class StdoutResult(BaseResult):
 
@@ -8,7 +9,7 @@ class StdoutResult(BaseResult):
         super().__init__(filename_template)
 
     def load(self, job: BaseJobExecutor) -> int | float | str:
-        with open(self.filename_template.format(job=job), "r") as f:
+        with open(self.filename_template.format(job=job)) as f:
             lines = f.readlines()
             if not lines:
                 raise ValueError("File is empty")

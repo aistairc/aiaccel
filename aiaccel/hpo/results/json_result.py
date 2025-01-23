@@ -1,7 +1,8 @@
-from aiaccel.hpo.results.base_result import BaseResult
-from typing import Any
+
 import json
+
 from aiaccel.hpo.job_executors import BaseJobExecutor
+from aiaccel.hpo.results.base_result import BaseResult
 
 
 class JsonResult(BaseResult):
@@ -10,6 +11,7 @@ class JsonResult(BaseResult):
         super().__init__(filename_template)
 
     def load(self, job: BaseJobExecutor) -> int | float | str:
-        with open(self.filename_template.format(job=job), "r") as f:
-            y = json.load(f)
-        return y["objective"]
+        with open(self.filename_template.format(job=job)) as f:
+            data = json.load(f)
+            y: int | float | str = data["objective"]
+        return y
