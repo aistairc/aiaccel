@@ -1,0 +1,25 @@
+study:
+  _target_: optuna.create_study
+  direction: minimize
+  study_name: my_study
+  load_if_exists: false
+  sampler:
+    _target_: optuna.samplers.TPESampler
+    seed: 0
+
+result:
+  _target_: aiaccel.hpo.results.PickleResult
+  filename_template: "{job.cwd}/{job.job_name}_result.pkl"
+
+params:
+  _convert_: partial
+  _target_: aiaccel.hpo.apps.optimize.HparamsManager
+  x1: [0, 1]
+  x2:
+    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+    name: x2
+    low: 0.0
+    high: 1.0
+    log: false
+
+n_trials: 30
