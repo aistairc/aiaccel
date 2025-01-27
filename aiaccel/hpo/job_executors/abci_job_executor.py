@@ -49,7 +49,7 @@ class AbciJobExecutor(BaseJobExecutor):
         self.job_group = job_group
         self.job_list: list[AbciJob] = []
 
-    def submit_inheritance(
+    def submit_impl(
         self,
         args: list[str],
         tag: Any = None,
