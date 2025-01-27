@@ -6,6 +6,8 @@ import shutil
 import tempfile
 from unittest.mock import patch
 
+from omegaconf import OmegaConf as oc  # noqa: N813
+
 import pytest
 
 from aiaccel.hpo.job_executors import LocalJobExecutor
@@ -15,12 +17,24 @@ from aiaccel.hpo.job_output_loaders.json_loader import JsonJobOutputLoader
 @pytest.fixture
 def temp_dir() -> Generator[Path]:
     """Create a temporary directory with test files and clean up afterwards"""
+
+    # generate a config file
+    config_path = os.path.join(os.path.dirname(__file__), "config_base.yaml")
+    base = oc.load(config_path)
+    output_loadeer = {
+        "result": {
+            "_target_": "aiaccel.hpo.job_output_loaders.JsonJobOutputLoader",
+            "filename_template": "{job.cwd}/{job.job_name}_result.json",
+        }
+    }
+    config = oc.merge(base, output_loadeer)
+
     with tempfile.TemporaryDirectory() as tmp_dir:
         temp_path = Path(tmp_dir)
         original_dir = os.getcwd()
         os.chdir(tmp_dir)
         source_dir = Path(__file__).parent
-        test_files = ["config_for_json_test.yaml", "objective_for_json_test.sh", "objective_for_json_test.py"]
+        test_files = ["objective_for_json_test.sh", "objective_for_json_test.py"]
 
         for file_name in test_files:
             source_file = source_dir / file_name
@@ -33,7 +47,7 @@ def temp_dir() -> Generator[Path]:
                 print("=" * 40)
             else:
                 pytest.skip(f"Required test file {file_name} not found in {source_dir}")
-
+        oc.save(config, temp_path / "config_for_json_test.yaml")
         yield temp_path
         os.chdir(original_dir)
 
