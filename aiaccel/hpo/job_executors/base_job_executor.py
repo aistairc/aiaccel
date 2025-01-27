@@ -45,7 +45,7 @@ class BaseJobExecutor(ABC):
         self.finished_job_count = 0
 
     @abstractmethod
-    def submit_inheritance(
+    def submit_impl(
         self,
         args: list[str],
         tag: Any = None,
@@ -71,7 +71,7 @@ class BaseJobExecutor(ABC):
         sleep_time: float = 5.0,
     ) -> Any:
         self.submitted_job_count += 1
-        return self.submit_inheritance(args, tag, sleep_time)
+        return self.submit_impl(args, tag, sleep_time)
 
     def update_status_batch(self) -> None:
         """
