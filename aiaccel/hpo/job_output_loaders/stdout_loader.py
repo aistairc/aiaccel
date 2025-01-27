@@ -1,3 +1,5 @@
+import ast
+
 from aiaccel.hpo.job_executors import BaseJobExecutor
 from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
 
@@ -42,14 +44,11 @@ class StdoutJobOutputLoader(BaseJobOutputLoader):
         with open(self.filename_template.format(job=job)) as f:
             text = f.read()
 
-
             if text is None:
                 raise ValueError("No non-empty lines found in file")
 
             try:
-                return int(text)
-            except ValueError:
-                try:
-                    return float(text)
-                except ValueError:
-                    return text
+                data: int | float | str = ast.literal_eval(text)
+                return data
+            except (ValueError, SyntaxError):
+                return text
