@@ -40,7 +40,7 @@ class LocalJobExecutor(BaseJobExecutor):
 
         self.job_list: list[LocalJob] = []
 
-    def submit_inheritance(
+    def submit_impl(
         self,
         args: list[str],
         tag: Any = None,
