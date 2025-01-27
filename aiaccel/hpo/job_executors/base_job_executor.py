@@ -111,21 +111,3 @@ class BaseJobExecutor(ABC):
             list[JobFuture]: A list of running jobs.
         """
         return [job for job in self.job_list if job.status == JobStatus.RUNNING]
-
-    def get_submitted_job_count(self) -> int:
-        """
-        Returns the number of submitted jobs.
-
-        Returns:
-            int: Number of submitted jobs.
-        """
-        return self.submitted_job_count
-
-    def get_finished_job_count(self) -> int:
-        """
-        Returns the number of finished jobs.
-
-        Returns:
-            int: Number of finished jobs.
-        """
-        return self.finished_job_count

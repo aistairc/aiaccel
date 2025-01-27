@@ -147,8 +147,8 @@ def main() -> None:
 
     result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
 
-    while jobs.get_finished_job_count() < config.n_trials:
-        n_max_jobs = min(jobs.available_slots(), config.n_trials - jobs.get_submitted_job_count())
+    while jobs.finished_job_count < config.n_trials:
+        n_max_jobs = min(jobs.available_slots(), config.n_trials - jobs.submitted_job_count)
         for _ in range(n_max_jobs):
             trial = study.ask()
 
