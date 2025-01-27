@@ -17,7 +17,7 @@ from aiaccel.hpo.job_output_loaders.stdout_loader import StdoutJobOutputLoader
 def temp_dir() -> Generator[Path]:
     """Create a temporary directory with test files and clean up afterwards"""
 
-    # generate a config file
+    # create a config file
     config_path = os.path.join(os.path.dirname(__file__), "config_base.yaml")
     base = oc.load(config_path)
     output_loadeer = {
@@ -28,25 +28,30 @@ def temp_dir() -> Generator[Path]:
     }
     config = oc.merge(base, output_loadeer)
 
+    # create objective script
+    src = """
+#!/bin/bash
+python objective.py "${@:2}" "--output_type" "stdout" > "$1"
+"""
+
     with tempfile.TemporaryDirectory() as tmp_dir:
         temp_path = Path(tmp_dir)
         original_dir = os.getcwd()
         os.chdir(tmp_dir)
         source_dir = Path(__file__).parent
-        test_files = ["objective_for_stdo_test.sh", "objective_for_stdo_test.py"]
 
-        for file_name in test_files:
-            source_file = source_dir / file_name
-            target_file = temp_path / file_name
-            if source_file.exists():
-                shutil.copy2(source_file, target_file)
-                os.chmod(target_file, 0o755)
-                print(f"\n=== Content of {file_name} ===")
-                print((target_file).read_text())
-                print("=" * 40)
-            else:
-                pytest.skip(f"Required test file {file_name} not found in {source_dir}")
+        source_file = source_dir / "objective.py"
+        target_file = temp_path / "objective.py"
+        shutil.copy2(source_file, target_file)
+        os.chmod(target_file, 0o755)
+
+        # generate config file
         oc.save(config, temp_path / "config_for_stdo_test.yaml")
+
+        # generate objective script
+        with open(temp_path / "objective_for_stdo_test.sh", "w") as f:
+            f.write(src)
+
         yield temp_path
         os.chdir(original_dir)
 
