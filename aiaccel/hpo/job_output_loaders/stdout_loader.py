@@ -1,8 +1,8 @@
 from aiaccel.hpo.job_executors import BaseJobExecutor
-from aiaccel.hpo.results.base_result import BaseResult
+from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
 
 
-class StdoutResult(BaseResult):
+class StdoutJobOutputLoader(BaseJobOutputLoader):
     """
     A class to handle the loading of results from a stdout file.
 
@@ -40,23 +40,16 @@ class StdoutResult(BaseResult):
             ValueError: If the file is empty or contains no non-empty lines.
         """
         with open(self.filename_template.format(job=job)) as f:
-            lines = f.readlines()
-            if not lines:
-                raise ValueError("File is empty")
+            text = f.read()
 
-            last_line = None
-            for line in reversed(lines):
-                if line.strip():
-                    last_line = line.strip()
-                    break
 
-            if last_line is None:
+            if text is None:
                 raise ValueError("No non-empty lines found in file")
 
             try:
-                return int(last_line)
+                return int(text)
             except ValueError:
                 try:
-                    return float(last_line)
+                    return float(text)
                 except ValueError:
-                    return last_line
+                    return text

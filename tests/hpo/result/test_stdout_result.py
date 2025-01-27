@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 from aiaccel.hpo.job_executors import LocalJobExecutor
-from aiaccel.hpo.results.stdout_result import StdoutResult
+from aiaccel.hpo.job_output_loaders.stdout_loader import StdoutJobOutputLoader
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def test_load_int(temp_dir: Path) -> None:
     with open(dst_filename, "w") as f:
         f.write("42")
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    stdout_result = StdoutResult("{job.cwd}/result.txt")
+    stdout_result = StdoutJobOutputLoader("{job.cwd}/result.txt")
     assert stdout_result.load(job) == 42
 
 
@@ -51,7 +51,7 @@ def test_load_float(temp_dir: Path) -> None:
     with open(dst_filename, "w") as f:
         f.write("3.14")
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    stdout_result = StdoutResult("{job.cwd}/result.txt")
+    stdout_result = StdoutJobOutputLoader("{job.cwd}/result.txt")
     assert stdout_result.load(job) == 3.14
 
 
@@ -60,7 +60,7 @@ def test_load_str(temp_dir: Path) -> None:
     with open(dst_filename, "w") as f:
         f.write("result")
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    stdout_result = StdoutResult("{job.cwd}/result.txt")
+    stdout_result = StdoutJobOutputLoader("{job.cwd}/result.txt")
     assert stdout_result.load(job) == "result"
 
 

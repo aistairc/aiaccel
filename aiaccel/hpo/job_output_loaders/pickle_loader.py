@@ -1,10 +1,10 @@
 import pickle as pkl
 
 from aiaccel.hpo.job_executors import BaseJobExecutor
-from aiaccel.hpo.results.base_result import BaseResult
+from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
 
 
-class PickleResult(BaseResult):
+class PickleJobOutputLoader(BaseJobOutputLoader):
     """
     A class to handle the loading of results from pickle files.
 
@@ -13,7 +13,7 @@ class PickleResult(BaseResult):
 
     Methods:
         __init__(filename_template: str) -> None:
-            Initializes the PickleResult with a filename template.
+            Initializes the PickleJobOutputLoader with a filename template.
 
         load(job: BaseJobExecutor) -> int | float | str:
             Loads the result from a pickle file corresponding to the given job.

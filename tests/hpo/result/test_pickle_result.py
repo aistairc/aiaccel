@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 
 from aiaccel.hpo.job_executors import LocalJobExecutor
-from aiaccel.hpo.results.pickle_result import PickleResult
+from aiaccel.hpo.job_output_loaders.pickle_loader import PickleJobOutputLoader
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def test_load_int(temp_dir: Path) -> None:
         pkl.dump(42, f)
 
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    pkl_result = PickleResult("{job.cwd}/result.pkl")
+    pkl_result = PickleJobOutputLoader("{job.cwd}/result.pkl")
     assert pkl_result.load(job) == 42
 
 
@@ -54,7 +54,7 @@ def test_load_float(temp_dir: Path) -> None:
         pkl.dump(3.14, f)
 
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    pkl_result = PickleResult("{job.cwd}/result.pkl")
+    pkl_result = PickleJobOutputLoader("{job.cwd}/result.pkl")
     assert pkl_result.load(job) == 3.14
 
 
@@ -64,7 +64,7 @@ def test_load_str(temp_dir: Path) -> None:
         pkl.dump("result", f)
 
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    pkl_result = PickleResult("{job.cwd}/result.pkl")
+    pkl_result = PickleJobOutputLoader("{job.cwd}/result.pkl")
     assert pkl_result.load(job) == "result"
 
 

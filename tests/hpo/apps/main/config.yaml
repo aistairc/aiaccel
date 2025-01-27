@@ -20,7 +20,7 @@ executor:
   n_max_jobs: 1
 
 result:
-  _target_: aiaccel.hpo.results.PickleResult
+  _target_: aiaccel.hpo.job_output_loaders.PickleJobOutputLoader
   filename_template: "{job.cwd}/{job.job_name}_result.pkl"
 
 params:

@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 
 from aiaccel.hpo.job_executors import LocalJobExecutor
-from aiaccel.hpo.results.json_result import JsonResult
+from aiaccel.hpo.job_output_loaders.json_loader import JsonJobOutputLoader
 
 
 @pytest.fixture
@@ -43,7 +43,7 @@ def test_load_int(temp_dir: Path) -> None:
     with open(dst_filename, "w") as f:
         f.write(json.dumps(42))
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    json_result = JsonResult("{job.cwd}/result.json")
+    json_result = JsonJobOutputLoader("{job.cwd}/result.json")
     assert json_result.load(job) == 42
 
 
@@ -52,7 +52,7 @@ def test_load_float(temp_dir: Path) -> None:
     with open(dst_filename, "w") as f:
         f.write(json.dumps(3.14))
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    json_result = JsonResult("{job.cwd}/result.json")
+    json_result = JsonJobOutputLoader("{job.cwd}/result.json")
     assert json_result.load(job) == 3.14
 
 
@@ -61,7 +61,7 @@ def test_load_str(temp_dir: Path) -> None:
     with open(dst_filename, "w") as f:
         f.write(json.dumps("result"))
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
-    json_result = JsonResult("{job.cwd}/result.json")
+    json_result = JsonJobOutputLoader("{job.cwd}/result.json")
     assert json_result.load(job) == "result"
 
 

@@ -96,7 +96,7 @@ def main() -> None:
             n_max_jobs: 4
 
         result:
-            _target_: aiaccel.hpo.results.JsonResult
+            _target_: aiaccel.hpo.job_output_loaders.JsonJobOutputLoader
             filename_template: "{job.cwd}/{job.job_name}_result.json"
 
         params:

@@ -1,10 +1,10 @@
 import json
 
 from aiaccel.hpo.job_executors import BaseJobExecutor
-from aiaccel.hpo.results.base_result import BaseResult
+from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
 
 
-class JsonResult(BaseResult):
+class JsonJobOutputLoader(BaseJobOutputLoader):
     """
     A class to handle loading results from JSON files.
 
@@ -13,7 +13,7 @@ class JsonResult(BaseResult):
 
     Methods:
         __init__(filename_template: str) -> None:
-            Initializes the JsonResult with a filename template.
+            Initializes the JsonJobOutputLoader with a filename template.
 
         load(job: BaseJobExecutor) -> int | float | str:
             Loads the result from a JSON file based on the job information.
