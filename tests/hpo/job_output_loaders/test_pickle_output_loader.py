@@ -32,7 +32,7 @@ def temp_dir() -> Generator[Path]:
     # create objective script
     src = """
 #!/bin/bash
-python objective.py $@ "--output_type" "pkl"
+python objective_for_output_loaders.py $@ "--output_type" "pkl"
 """
 
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -41,8 +41,8 @@ python objective.py $@ "--output_type" "pkl"
         os.chdir(tmp_dir)
         source_dir = Path(__file__).parent
 
-        source_file = source_dir / "objective.py"
-        target_file = temp_path / "objective.py"
+        source_file = source_dir / "objective_for_output_loaders.py"
+        target_file = temp_path / "objective_for_output_loaders.py"
         shutil.copy2(source_file, target_file)
         os.chmod(target_file, 0o755)
 
