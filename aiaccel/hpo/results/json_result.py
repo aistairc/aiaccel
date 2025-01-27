@@ -33,6 +33,5 @@ class JsonResult(BaseResult):
             int | float | str: The objective value extracted from the JSON file.
         """
         with open(self.filename_template.format(job=job)) as f:
-            data = json.load(f)
-            y: int | float | str = data["objective"]
+            y: int | float | str = json.load(f)
         return y

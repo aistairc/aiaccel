@@ -41,7 +41,7 @@ def temp_dir() -> Generator[Path]:
 def test_load_int(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.json"
     with open(dst_filename, "w") as f:
-        f.write(json.dumps({"objective": 42}))
+        f.write(json.dumps(42))
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
     json_result = JsonResult("{job.cwd}/result.json")
     assert json_result.load(job) == 42
@@ -50,7 +50,7 @@ def test_load_int(temp_dir: Path) -> None:
 def test_load_float(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.json"
     with open(dst_filename, "w") as f:
-        f.write(json.dumps({"objective": 3.14}))
+        f.write(json.dumps(3.14))
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
     json_result = JsonResult("{job.cwd}/result.json")
     assert json_result.load(job) == 3.14
@@ -59,7 +59,7 @@ def test_load_float(temp_dir: Path) -> None:
 def test_load_str(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.json"
     with open(dst_filename, "w") as f:
-        f.write(json.dumps({"objective": "result"}))
+        f.write(json.dumps("result"))
     job = LocalJobExecutor(Path(""), work_dir=temp_dir)
     json_result = JsonResult("{job.cwd}/result.json")
     assert json_result.load(job) == "result"

@@ -15,7 +15,7 @@ def main() -> None:
     y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
 
     with open(args.dst_filename, "w") as f:
-        json.dump({"objective": y}, f)
+        json.dump(y, f)
 
 
 if __name__ == "__main__":
