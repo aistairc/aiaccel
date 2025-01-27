@@ -27,5 +27,6 @@ def main() -> None:
     else:
         raise AssertionError(f"Invalid output type: {args.output_type}")
 
+
 if __name__ == "__main__":
     main()
