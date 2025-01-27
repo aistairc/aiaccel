@@ -26,6 +26,7 @@ dev_dependencies = [
     "pandas",
     "pandas-stubs",
     "matplotlib",
+    "docstrfmt",
 ]
 github_actions_dependencies = [
     "pytest-github-actions-annotate-failures",

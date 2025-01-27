@@ -29,3 +29,6 @@ jobs:
       - name: Perform mypy
         run: |
           mypy --config-file mypy.ini .
+      - name: Perform docstrfmt
+        run: |
+          docstrfmt --check docs/source/
