@@ -156,7 +156,7 @@ def main() -> None:
 
             jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
-            job = jobs.submit_wrapper(
+            job = jobs.submit(
                 args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
                 tag=trial,
             )
