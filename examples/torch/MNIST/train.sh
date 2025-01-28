@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#PBS -q rt_HF
+#PBS -q rt_HG
 #PBS -l select=1
 #PBS -l walltime=1:00:00
 #PBS -P grpname
