@@ -2,6 +2,7 @@ trainer:
   accelerator: "gpu"
   devices: 8
   strategy: "ddp"
+  logger: True
   max_epochs: 10
   callbacks:
     - _target_: lightning.pytorch.callbacks.ModelCheckpoint
