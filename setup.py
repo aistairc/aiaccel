@@ -4,7 +4,7 @@ hpo_dependencies = [
     "numpy",
     "optuna>=3.4.0",
 ]
-torch_dependencies = ["hydra-core", "lightning>=2.2.1", "torch>=2.2.0", "h5py"]
+torch_dependencies = ["hydra-core", "lightning>=2.2.1", "torch>=2.2.0", "h5py", "tensorboard"]
 dev_dependencies = [
     "mypy",
     "myst-parser",
