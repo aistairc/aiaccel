@@ -1,1 +1,2 @@
 include aiaccel/hpo/apps/config/*.yaml
+include aiaccel/torch/apps/config/*.yaml
