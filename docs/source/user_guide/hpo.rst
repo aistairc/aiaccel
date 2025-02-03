@@ -74,7 +74,7 @@ Basic configuration example:
       n_max_jobs: 4
 
     result:
-      _target_: aiaccel.results.JsonResult
+      _target_: aiaccel.hpo.job_output_loaders.JsonResult
       filename_template: "{job.cwd}/{job.job_name}_result.json"
 
     params:
@@ -125,7 +125,7 @@ JSON Format (Default):
 .. code-block:: yaml
 
     result:
-      _target_: aiaccel.results.JsonResult
+      _target_: aiaccel.hpo.job_output_loaders.JsonResult
       filename_template: "{job.cwd}/{job.job_name}_result.json"
 
 Example objective function for JSON:
@@ -148,7 +148,7 @@ Pickle Format:
 .. code-block:: yaml
 
     result:
-      _target_: aiaccel.results.PickleResult
+      _target_: aiaccel.hpo.job_output_loaders.PickleResult
       filename_template: "{job.cwd}/{job.job_name}_result.pkl"
 
 Example objective function for Pickle:
@@ -171,7 +171,7 @@ Stdout Format:
 .. code-block:: yaml
 
     result:
-      _target_: aiaccel.results.StdoutResult
+      _target_: aiaccel.hpo.job_output_loaders.StdoutResult
       filename_template: "{job.cwd}/{job.job_name}_result.txt"
 
 Example objective function for Stdout:

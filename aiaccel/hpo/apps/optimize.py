@@ -4,14 +4,12 @@ import argparse
 from collections.abc import Callable
 import importlib.resources
 from pathlib import Path
-import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.hpo.job_executors import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 from aiaccel.utils import print_config
 
@@ -69,7 +67,6 @@ def main() -> None:
     Command-line arguments:
         - job_filename (Path): The shell script to execute.
         - --config (str, optional): Path to the configuration file.
-        - --executor (str, optional): Type of job executor to use ("local" or "abci").
         - --resume (bool, optional): Flag to resume from the previous study.
 
     The function performs the following steps:
@@ -94,28 +91,32 @@ def main() -> None:
             _target_: optuna.samplers.TPESampler
             seed: 0
 
+        executor:
+            _target_: aiaccel.hpo.job_executors.LocalJobExecutor
+            n_max_jobs: 4
+
+        result:
+            _target_: aiaccel.hpo.job_output_loaders.JsonJobOutputLoader
+            filename_template: "{job.cwd}/{job.job_name}_result.json"
+
         params:
-        _convert_: partial
-        _target_: aiaccel.apps.optimize.HparamsManager
-        x1: [0, 1]
-        x2:
-            _target_: aiaccel.apps.optimize.SuggestFloat
-            name: x2
-            low: 0.0
-            high: 1.0
-            log: false
+            _convert_: partial
+            _target_: aiaccel.apps.optimize.HparamsManager
+            x1: [0, 1]
+            x2:
+                _target_: aiaccel.apps.optimize.SuggestFloat
+                name: x2
+                low: 0.0
+                high: 1.0
+                log: false
 
         n_trials: 30
-        n_max_jobs: 4
-
-        group: gaa50000
         ~~~
     """
 
     parser = argparse.ArgumentParser()
     parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", help="Configuration file path")
-    parser.add_argument("--executor", nargs="?", default="local")
     parser.add_argument("--resume", action="store_true", default=False)
     parser.add_argument("--resumable", action="store_true", default=False)
 
@@ -133,19 +134,12 @@ def main() -> None:
 
     print_config(config)
 
-    jobs: BaseJobExecutor
+    config.executor.job_filename = args.job_filename
 
-    if args.executor.lower() == "local":
-        jobs = LocalJobExecutor(args.job_filename, n_max_jobs=config.n_max_jobs)
-    elif args.executor.lower() == "abci":
-        jobs = AbciJobExecutor(args.job_filename, config.group, n_max_jobs=config.n_max_jobs)
-    else:
-        raise ValueError(f"Unknown executor: {args.executor}")
-
+    jobs = instantiate(config.executor)
     study = instantiate(config.study)
     params = instantiate(config.params)
-
-    result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
+    result = instantiate(config.result)
 
     finished_job_count = 0
 
@@ -160,15 +154,14 @@ def main() -> None:
             jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
             job = jobs.submit(
-                args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
+                args=[result.filename_template] + sum([[f"--{k}", f"{v}"] for k, v in hparams.items()], []),
                 tag=trial,
             )
 
         for job in jobs.collect_finished():
             trial = job.tag
 
-            with open(result_filename_template.format(job=job), "rb") as f:
-                y = pkl.load(f)
+            y = result.load(job)
 
             study.tell(trial, y)
 

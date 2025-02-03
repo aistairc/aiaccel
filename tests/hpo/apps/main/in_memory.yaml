@@ -7,6 +7,14 @@ study:
     _target_: optuna.samplers.TPESampler
     seed: 0
 
+executor:
+  _target_: aiaccel.hpo.job_executors.LocalJobExecutor
+  n_max_jobs: 1
+
+result:
+  _target_: aiaccel.hpo.job_output_loaders.PickleJobOutputLoader
+  filename_template: "{job.cwd}/{job.job_name}_result.pkl"
+
 params:
   _convert_: partial
   _target_: aiaccel.hpo.apps.optimize.HparamsManager
@@ -19,6 +27,3 @@ params:
     log: false
 
 n_trials: 30
-n_max_jobs: 1
-
-group: gaa50000

@@ -1,14 +1,11 @@
 study:
   _target_: optuna.create_study
   direction: minimize
-  storage:
-    _target_: optuna.storages.InMemoryStorage
-  study_name: aiaccel_study
+  study_name: my_study
   load_if_exists: false
-
-executor:
-  _target_: aiaccel.hpo.job_executors.LocalJobExecutor
-  n_max_jobs: 1
+  sampler:
+    _target_: optuna.samplers.TPESampler
+    seed: 0
 
 result:
   _target_: aiaccel.hpo.job_output_loaders.JsonJobOutputLoader
@@ -17,3 +14,12 @@ result:
 params:
   _convert_: partial
   _target_: aiaccel.hpo.apps.optimize.HparamsManager
+  x1: [0, 1]
+  x2:
+    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+    name: x2
+    low: 0.0
+    high: 1.0
+    log: false
+
+n_trials: 30
