@@ -147,11 +147,8 @@ def main() -> None:
 
     result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
 
-    finished_job_count = 0
-
-    while finished_job_count < config.n_trials:
-        n_running_jobs = len(jobs.get_running_jobs())
-        n_max_jobs = min(jobs.available_slots(), config.n_trials - finished_job_count - n_running_jobs)
+    while jobs.finished_job_count < config.n_trials:
+        n_max_jobs = min(jobs.available_slots(), config.n_trials - jobs.submitted_job_count)
         for _ in range(n_max_jobs):
             trial = study.ask()
 
@@ -171,8 +168,6 @@ def main() -> None:
                 y = pkl.load(f)
 
             study.tell(trial, y)
-
-            finished_job_count += 1
 
 
 if __name__ == "__main__":
