@@ -13,11 +13,11 @@ class Resnet50Task(OptimizerLightningModule):
     def __init__(self, model: nn.Module, optimizer_config: OptimizerConfig, num_classes: int = 10):
         super().__init__(optimizer_config)
         self.model = model
-        self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
+        if hasattr(self.model.fc, "in_features") and isinstance(self.model.fc.in_features, int):
+            self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
 
         self.train_accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=10)
         self.val_accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=10)
-        self.test_accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=10)
 
     def forward(self, x: Any) -> Any:
         return self.model(x)
