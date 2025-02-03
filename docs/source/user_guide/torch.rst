@@ -7,8 +7,8 @@ Writing a simple training script
 Running inference
 -----------------
 
-To run aiaccel on ABCI3.0, you need an environment with Python 3.10.
-This guide explains how to set up the environment using Singularity.
+To run aiaccel on ABCI3.0, you need an environment with Python 3.10. This guide explains
+how to set up the environment using Singularity.
 
 .. note::
 
@@ -34,7 +34,6 @@ Create the following Singularity definition file:
         # torch/MNIST example env
         pip install torchvision
 
-
 Use the Singularity definition file to build a Singularity image file:
 
 .. code-block:: bash
@@ -46,7 +45,6 @@ Use the Singularity image file to execute aiaccel:
 .. code-block:: bash
 
     singularity exec --nv aiaccel.sif python -m aiaccel.torch.apps.train $wd/config.yaml --working_directory $wd
-
 
 Writing a DDP training script
 -----------------------------
