@@ -12,21 +12,27 @@ from aiaccel.utils import load_config, print_config
 
 def main() -> None:
     """
-    Main function to execute the training process.
-    This function parses command-line arguments to get the configuration file
-    and working directory, loads and merges configuration settings from various
-    sources, prints the configuration if the process is the main one, saves the
-    configuration to a file, and then initiates the training process using the
-    specified trainer, model, and datamodule.
-    Command-line Arguments:
-        config (Path): Path to the configuration file in YAML format.
-        --working_directory (Path): Path to the working directory (default is the current working directory).
-    Raises:
-        FileNotFoundError: If the configuration file does not exist.
-        Exception: If there is an error during the training process.
+    Execute the training process using a configuration file.
 
-    Usage:
+    This function:
+    1. Parses command-line arguments to get the configuration file and working directory.
+    2. Loads and merges configurations from the YAML file, command-line arguments, and default settings.
+    3. Prints the final configuration.
+    4. Saves the merged configuration to a file (`${working_directory}/config_merged.yaml`).
+    5. Instantiates and runs the training process using the specified trainer, model, and datamodule.
+
+    Command-line Arguments:
+        config (Path): Path to the YAML configuration file.
+        --working_directory (Path, optional): Path to the working directory (default: current working directory).
+
+    Usage Example:
+        ```bash
         python -m aiaccel.torch.apps.train config.yaml --working_directory /path/to/working/directory
+        ```
+        You can also update some configurations from CLI as follows:
+        ```bash
+        python -m aiaccel.torch.apps.train config.yaml task.hparam1=1.0 task.hparam2=2.0 ...
+        ```
     """
 
     parser = ArgumentParser()
