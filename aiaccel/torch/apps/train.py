@@ -7,7 +7,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 import lightning as lt
 
-from aiaccel.utils import load_config, print_config
+from aiaccel.utils import load_config, pathlib2str_config, print_config
 
 
 def main() -> None:
@@ -41,14 +41,14 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
 
     # load config
-    config = load_config(args.config, vars(args) | {"base_config_path": str(Path(__file__).parent / "config")})
+    config = load_config(args.config, {"base_config_path": str(Path(__file__).parent / "config")} | vars(args))
     config = oc.merge(config, oc.from_cli(unk_args))
 
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
 
         with open(config.working_directory / "config_merged.yaml", "w") as f:
-            oc.save(config, f)
+            oc.save(pathlib2str_config(config), f)
 
     # train
     trainer: lt.Trainer = instantiate(config.trainer)

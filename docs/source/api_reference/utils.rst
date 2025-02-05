@@ -9,6 +9,6 @@ Config Utilities
 .. autosummary::
     :toctree: generated/
 
+    load_config
     print_config
     pathlib2str_config
-    load_config

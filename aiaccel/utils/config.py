@@ -9,32 +9,6 @@ from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as oc  # noqa:N813
 
 
-def print_config(config: ListConfig | DictConfig, line_length: int = 80) -> None:
-    config = pathlib2str_config(config)  # https://github.com/omry/omegaconf/issues/82
-
-    print("=" * line_length)
-    for line in oc.to_yaml(config).splitlines():
-        print(re.sub(r"(\s*)(\w+):", rf"\1{Fore.YELLOW}\2{Fore.RESET}:", line, count=1))
-    print("=" * line_length)
-
-
-def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConfig:
-    def _inner_fn(config: ListConfig | DictConfig) -> ListConfig | DictConfig:
-        if isinstance(config, ListConfig):
-            for ii in range(len(config)):
-                config[ii] = _inner_fn(config[ii])
-        elif isinstance(config, DictConfig):
-            for k, v in config.items():
-                if isinstance(v, ListConfig | DictConfig):
-                    config[k] = _inner_fn(v)
-                elif isinstance(v, Path):
-                    config[k] = str(v)
-
-        return config
-
-    return _inner_fn(deepcopy(config))
-
-
 def load_config(
     config_filename: Path, bootstrap_config: dict[str, Any] | DictConfig | ListConfig | None = None
 ) -> DictConfig | ListConfig:
@@ -50,8 +24,8 @@ def load_config(
     Args:
         config (Path): Path to the configuration
         bootstrap_config (dict[str, Any] | DictConfig | ListConfig | None):
-            A configuration that is merged only when the loaded configuration does not contain ``_base_``.
-            This can be used to define default config paths (e.g., working_directory) dynamically.
+            A configuration that is always merged to the loaded configuration.
+            This is intended to define default config paths (e.g., working_directory) dynamically.
 
     Returns:
         merge_user_config (DictConfig): The merged configuration of the base config and the original config
@@ -59,13 +33,71 @@ def load_config(
 
     """
 
-    config = oc.load(config_filename)
+    if bootstrap_config is None:
+        bootstrap_config = {}
+
+    config = oc.merge(bootstrap_config, oc.load(config_filename))
 
     if isinstance(config, DictConfig):
         if "_base_" in config:
-            base_config = load_config(Path(config["_base_"]))
-            config = oc.merge(base_config, config)
+            base_path = Path(config["_base_"])
+            config.pop("_base_")
+            config = oc.merge(load_config(base_path, bootstrap_config), config)
         elif bootstrap_config is not None:
             config = oc.merge(bootstrap_config, config)
 
     return config
+
+
+def print_config(config: ListConfig | DictConfig, line_length: int = 80) -> None:
+    """
+    Print the given configuration with syntax highlighting.
+
+    This function converts `pathlib.Path` objects to strings before printing,
+    ensuring that the output YAML format remains valid. It also highlights
+    configuration keys in yellow for better readability.
+
+    Args:
+        config (ListConfig | DictConfig): The configuration to print.
+        line_length (int, optional): The width of the separator line (default: 80).
+
+    """
+
+    config = pathlib2str_config(config)  # https://github.com/omry/omegaconf/issues/82
+
+    print("=" * line_length)
+    for line in oc.to_yaml(config).splitlines():
+        print(re.sub(r"(\s*)(\w+):", rf"\1{Fore.YELLOW}\2{Fore.RESET}:", line, count=1))
+    print("=" * line_length)
+
+
+def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConfig:
+    """
+    Convert `pathlib.Path` objects in the configuration to strings.
+
+    This function recursively traverses the configuration and replaces all `pathlib.Path`
+    objects with their string representations. This is useful for saving the configuration
+    in a YAML file, as YAML does not support `Path` objects.
+
+    Args:
+        config (ListConfig | DictConfig): The configuration to convert.
+
+    Returns:
+        ListConfig | DictConfig: The modified configuration with `Path` objects replaced by strings.
+
+    """
+
+    def _inner_fn(config: ListConfig | DictConfig) -> ListConfig | DictConfig:
+        if isinstance(config, ListConfig):
+            for ii in range(len(config)):
+                config[ii] = _inner_fn(config[ii])
+        elif isinstance(config, DictConfig):
+            for k, v in config.items():
+                if isinstance(v, ListConfig | DictConfig):
+                    config[k] = _inner_fn(v)
+                elif isinstance(v, Path):
+                    config[k] = str(v)
+
+        return config
+
+    return _inner_fn(deepcopy(config))
