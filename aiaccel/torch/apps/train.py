@@ -4,22 +4,11 @@ from pathlib import Path
 import pickle as pkl
 
 from hydra.utils import instantiate
-from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import lightning as lt
 
-from aiaccel.utils import print_config
-
-
-def load_user_config(config: Path) -> DictConfig | ListConfig:
-    user_config = oc.load(config)
-    if isinstance(user_config, DictConfig) and "_base_" in user_config:
-        base_config = load_user_config(Path(user_config["_base_"]))
-        merge_user_config = oc.merge(base_config, user_config)
-        return merge_user_config
-    else:
-        return user_config
+from aiaccel.utils import load_user_config, print_config
 
 
 def main() -> None:
