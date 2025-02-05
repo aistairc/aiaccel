@@ -1,14 +1,13 @@
 from argparse import ArgumentParser
 import os
 from pathlib import Path
-import pickle as pkl
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import lightning as lt
 
-from aiaccel.utils import load_user_config, print_config
+from aiaccel.utils import load_config, print_config
 
 
 def main() -> None:
@@ -27,7 +26,7 @@ def main() -> None:
         Exception: If there is an error during the training process.
 
     Usage:
-        python -m aiaccel.torch.apps.train train.yaml --working_directory /path/to/working/directory
+        python -m aiaccel.torch.apps.train config.yaml --working_directory /path/to/working/directory
     """
 
     parser = ArgumentParser()
@@ -39,10 +38,9 @@ def main() -> None:
     config = oc.merge(
         {
             "base_config_path": str(Path(__file__).parent / "config"),
-            "base_config": "${base_config_path}/train_base.yaml",
         },
         vars(args),
-        load_user_config(args.config),
+        load_config(args.config),
         oc.from_cli(unk_args),
     )
 
@@ -51,11 +49,11 @@ def main() -> None:
         config,
     )
 
-    if "OMPI_COMM_WORLD_RANK" not in os.environ or int(os.environ["OMPI_COMM_WORLD_RANK"]) == 0:
+    if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
 
-        with open(config.working_directory / "config.pkl", "wb") as f:
-            pkl.dump(config, f)
+        with open(config.working_directory / "config_merged.yaml", "w") as f:
+            oc.save(config, f)
 
     # train
     trainer: lt.Trainer = instantiate(config.trainer)

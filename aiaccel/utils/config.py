@@ -35,11 +35,11 @@ def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConf
     return _inner_fn(deepcopy(config))
 
 
-def load_user_config(config: Path) -> DictConfig | ListConfig:
-    """Load User Configuration
+def load_config(config_filename: Path) -> DictConfig | ListConfig:
+    """Load YAML configuration
 
-    When the user specifies ``_base_``, the specified configuration is loaded as the base,
-    and the original configuration is merged with base config.
+    When the user specifies ``_base_``, the specified YAML file is loaded as the base,
+    and the original configuration is merged with the base config.
     If the configuration specified in ``_base_`` also contains ``_base_``, the process is handled recursively.
 
     Args:
@@ -50,10 +50,11 @@ def load_user_config(config: Path) -> DictConfig | ListConfig:
         user_config(DictConfig | ListConfig) : The configuration without ``_base_``
 
     """
-    user_config = oc.load(config)
-    if isinstance(user_config, DictConfig) and "_base_" in user_config:
-        base_config = load_user_config(Path(user_config["_base_"]))
-        merge_user_config = oc.merge(base_config, user_config)
-        return merge_user_config
-    else:
-        return user_config
+
+    config = oc.load(config_filename)
+
+    if isinstance(config, DictConfig) and "_base_" in config:
+        base_config = load_config(Path(config["_base_"]))
+        config = oc.merge(base_config, config)
+
+    return config
