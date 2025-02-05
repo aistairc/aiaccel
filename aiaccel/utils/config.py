@@ -44,8 +44,14 @@ def load_config(
     and the original configuration is merged with the base config.
     If the configuration specified in ``_base_`` also contains ``_base_``, the process is handled recursively.
 
+    Additionally, if `bootstrap_config` is provided, it is merged with the final
+    configuration to ensure any default values or overrides are applied.
+
     Args:
         config (Path): Path to the configuration
+        bootstrap_config (dict[str, Any] | DictConfig | ListConfig | None):
+            A configuration that is merged only when the loaded configuration does not contain ``_base_``.
+            This can be used to define default config paths (e.g., working_directory) dynamically.
 
     Returns:
         merge_user_config (DictConfig): The merged configuration of the base config and the original config
