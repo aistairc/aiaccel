@@ -38,16 +38,16 @@ def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConf
 def load_user_config(config: Path) -> DictConfig | ListConfig:
     """Load User Configuration
 
-    When the user specifies _base_, the specified configuration is loaded as the base,
+    When the user specifies ``_base_``, the specified configuration is loaded as the base,
     and the original configuration is merged with base config.
-    If the configuration specified in _base_ also contains _base_, the process is handled recursively.
+    If the configuration specified in ``_base_`` also contains ``_base_``, the process is handled recursively.
 
     Args:
         config (Path): Path to the configuration
 
     Returns:
         merge_user_config (DictConfig): The merged configuration of the base config and the original config
-        user_config(DictConfig | ListConfig) : The configuration without _base_
+        user_config(DictConfig | ListConfig) : The configuration without ``_base_``
 
     """
     user_config = oc.load(config)
