@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import pickle as pkl
 
+from hydra import compose, initialize_config_dir
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
@@ -35,6 +36,9 @@ def main() -> None:
     parser.add_argument("--working_directory", type=Path, default=Path.cwd(), help="Working directory")
     args, unk_args = parser.parse_known_args()
 
+    with initialize_config_dir(version_base=None, config_dir=str(Path(args.config).parent.resolve())):
+        user_config = compose(config_name=Path(args.config).stem)
+
     # load config
     config = oc.merge(
         {
@@ -42,7 +46,7 @@ def main() -> None:
             "base_config": "${base_config_path}/train_base.yaml",
         },
         vars(args),
-        oc.load(args.config),
+        user_config,
         oc.from_cli(unk_args),
     )
 
