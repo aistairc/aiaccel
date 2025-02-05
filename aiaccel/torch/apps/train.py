@@ -37,7 +37,7 @@ def main() -> None:
     # load config
     config = oc.merge(
         {
-            "aiaccel_config_path": str(Path(__file__).parent / "config"),
+            "base_config_path": str(Path(__file__).parent / "config"),
         },
         vars(args),
         load_config(args.config),
