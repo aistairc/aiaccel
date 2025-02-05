@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Any
 
 from copy import deepcopy
 from pathlib import Path
@@ -35,7 +35,9 @@ def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConf
     return _inner_fn(deepcopy(config))
 
 
-def load_config(config_filename: Path) -> DictConfig | ListConfig:
+def load_config(
+    config_filename: Path, bootstrap_config: dict[str, Any] | DictConfig | ListConfig | None = None
+) -> DictConfig | ListConfig:
     """Load YAML configuration
 
     When the user specifies ``_base_``, the specified YAML file is loaded as the base,
@@ -53,8 +55,11 @@ def load_config(config_filename: Path) -> DictConfig | ListConfig:
 
     config = oc.load(config_filename)
 
-    if isinstance(config, DictConfig) and "_base_" in config:
-        base_config = load_config(Path(config["_base_"]))
-        config = oc.merge(base_config, config)
+    if isinstance(config, DictConfig):
+        if "_base_" in config:
+            base_config = load_config(Path(config["_base_"]))
+            config = oc.merge(base_config, config)
+        elif bootstrap_config is not None:
+            config = oc.merge(bootstrap_config, config)
 
     return config
