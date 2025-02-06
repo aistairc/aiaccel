@@ -40,10 +40,11 @@ def load_config(
 
     if isinstance(config, DictConfig):
         if "_base_" in config:
-            base_path = Path(config["_base_"])
+            base_paths = config["_base_"]
 
             config.pop("_base_")
-            config = oc.merge(load_config(base_path, bootstrap_config), config)
+            for base_path in base_paths:
+                config = oc.merge(load_config(Path(base_path), bootstrap_config), config)
         elif bootstrap_config is not None:
             config = oc.merge(bootstrap_config, config)
 
