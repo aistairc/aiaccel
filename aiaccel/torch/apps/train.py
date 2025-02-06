@@ -41,8 +41,20 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
 
     # load config
-    config = load_config(args.config, {"base_config_path": str(Path(__file__).parent / "config")} | vars(args))
+    config = load_config(
+        args.config,
+        {
+            "base_config_path": str(Path(__file__).parent / "config"),
+            "base_config": "${base_config_path}/train_base.yaml",
+        }
+        | vars(args),
+    )
     config = oc.merge(config, oc.from_cli(unk_args))
+
+    config = oc.merge(
+        oc.load(config.base_config),
+        config,
+    )
 
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
