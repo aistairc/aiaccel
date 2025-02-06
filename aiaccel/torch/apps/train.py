@@ -36,8 +36,8 @@ def main() -> None:
     """
 
     parser = ArgumentParser()
-    parser.add_argument("config", type=Path, help="Config file in YAML format")
-    parser.add_argument("--working_directory", type=Path, default=Path.cwd(), help="Working directory")
+    parser.add_argument("config", type=str, help="Config file in YAML format")
+    parser.add_argument("--working_directory", type=str, default=str(Path.cwd()), help="Working directory")
     args, unk_args = parser.parse_known_args()
 
     # load config
@@ -47,11 +47,20 @@ def main() -> None:
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
 
-        with open(config.working_directory / "config_merged.yaml", "w") as f:
+    # build trainer
+    trainer: lt.Trainer = instantiate(config.trainer)
+
+    # save config
+    if trainer.is_global_zero:
+        if "merged_config_path" in config:
+            merged_config_path = config.merged_config_path
+        else:
+            merged_config_path = Path(config.working_directory) / "config_merged.yaml"
+
+        with open(merged_config_path, "w") as f:
             oc.save(pathlib2str_config(config), f)
 
-    # train
-    trainer: lt.Trainer = instantiate(config.trainer)
+    # start training
     trainer.fit(
         model=instantiate(config.task),
         datamodule=instantiate(config.datamodule),

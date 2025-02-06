@@ -10,7 +10,8 @@ from omegaconf import OmegaConf as oc  # noqa:N813
 
 
 def load_config(
-    config_filename: Path, bootstrap_config: dict[str, Any] | DictConfig | ListConfig | None = None
+    config_filename: str | Path,
+    parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
     """Load YAML configuration
 
@@ -23,8 +24,8 @@ def load_config(
 
     Args:
         config (Path): Path to the configuration
-        bootstrap_config (dict[str, Any] | DictConfig | ListConfig | None):
-            A configuration that is always merged to the loaded configuration.
+        parent_config (dict[str, Any] | DictConfig | ListConfig | None):
+            A configuration that is merged to the loaded configuration.
             This is intended to define default config paths (e.g., working_directory) dynamically.
 
     Returns:
@@ -33,22 +34,19 @@ def load_config(
 
     """
 
-    if bootstrap_config is None:
-        bootstrap_config = {}
+    if parent_config is None:
+        parent_config = {}
 
-    config = oc.merge(bootstrap_config, oc.load(config_filename))
+    config = oc.merge(oc.load(config_filename), parent_config)
 
-    if isinstance(config, DictConfig):
-        if "_base_" in config:
-            base_paths = config["_base_"]
-            if not isinstance(base_paths, list):
-                base_paths = [base_paths]
+    if isinstance(config, DictConfig) and "_base_" in config:
+        base_paths = config["_base_"]
+        if not isinstance(base_paths, ListConfig):
+            base_paths = [base_paths]
 
-            config.pop("_base_")
-            for base_path in base_paths:
-                config = oc.merge(load_config(Path(base_path), bootstrap_config), config)
-        elif bootstrap_config is not None:
-            config = oc.merge(bootstrap_config, config)
+        config.pop("_base_")
+        for base_path in base_paths:
+            config = load_config(base_path, config)
 
     return config
 
