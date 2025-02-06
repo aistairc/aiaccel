@@ -41,6 +41,8 @@ def load_config(
     if isinstance(config, DictConfig):
         if "_base_" in config:
             base_paths = config["_base_"]
+            if not isinstance(base_paths, list):
+                base_paths = [base_paths]
 
             config.pop("_base_")
             for base_path in base_paths:
