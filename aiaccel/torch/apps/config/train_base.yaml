@@ -6,3 +6,4 @@ trainer:
     _target_: lightning.pytorch.loggers.TensorBoardLogger
     save_dir: ${working_directory}
     name: ''
+    version: ''
