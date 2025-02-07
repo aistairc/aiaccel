@@ -139,7 +139,6 @@ def main() -> None:
     jobs = instantiate(config.executor)
     study = instantiate(config.study)
     params = instantiate(config.params)
-    result = instantiate(config.result)
 
     finished_job_count = 0
 
@@ -154,14 +153,14 @@ def main() -> None:
             jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
 
             job = jobs.submit(
-                args=[result.filename_template] + sum([[f"--{k}", f"{v}"] for k, v in hparams.items()], []),
+                args=[jobs.loader.filename_template] + sum([[f"--{k}", f"{v}"] for k, v in hparams.items()], []),
                 tag=trial,
             )
 
         for job in jobs.collect_finished():
             trial = job.tag
 
-            y = result.load(job)
+            y = job.load()
 
             study.tell(trial, y)
 

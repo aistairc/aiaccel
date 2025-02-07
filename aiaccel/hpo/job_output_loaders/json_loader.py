@@ -1,7 +1,6 @@
 import json
 
-from aiaccel.hpo.job_executors import BaseJobExecutor
-from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
+from aiaccel.hpo.job_output_loaders.base_loader import BaseJob, BaseJobOutputLoader
 
 
 class JsonJobOutputLoader(BaseJobOutputLoader):
@@ -22,12 +21,12 @@ class JsonJobOutputLoader(BaseJobOutputLoader):
     def __init__(self, filename_template: str) -> None:
         super().__init__(filename_template)
 
-    def load(self, job: BaseJobExecutor) -> int | float | str:
+    def load(self, job: BaseJob) -> int | float | str:
         """
         Loads the objective value from a JSON file for the given job.
 
         Args:
-            job (BaseJobExecutor): The job executor instance containing job-specific information.
+            job (BaseJob): The job instance containing job-specific information.
 
         Returns:
             int | float | str: The objective value extracted from the JSON file.

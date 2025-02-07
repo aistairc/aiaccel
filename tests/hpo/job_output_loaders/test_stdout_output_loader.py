@@ -21,9 +21,11 @@ def temp_dir() -> Generator[Path]:
     config_path = os.path.join(os.path.dirname(__file__), "config_base.yaml")
     base = oc.load(config_path)
     output_loadeer = {
-        "result": {
-            "_target_": "aiaccel.hpo.job_output_loaders.StdoutJobOutputLoader",
-            "filename_template": "{job.cwd}/{job.job_name}_result.txt",
+        "executor": {
+            "loader": {
+                "_target_": "aiaccel.hpo.job_output_loaders.StdoutJobOutputLoader",
+                "filename_template": "{job.cwd}/{job.job_name}_result.txt",
+            }
         }
     }
     config = oc.merge(base, output_loadeer)
@@ -60,7 +62,9 @@ def test_load_int(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.txt"
     with open(dst_filename, "w") as f:
         f.write("42")
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+    loader = StdoutJobOutputLoader("{job.cwd}/result.txt")
+    job_executor = LocalJobExecutor(Path(""), loader=loader, work_dir=temp_dir)
+    job = job_executor.submit(args=[])
     stdout_result = StdoutJobOutputLoader("{job.cwd}/result.txt")
     assert stdout_result.load(job) == 42
 
@@ -69,7 +73,9 @@ def test_load_float(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.txt"
     with open(dst_filename, "w") as f:
         f.write("3.14")
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+    loader = StdoutJobOutputLoader("{job.cwd}/result.txt")
+    job_executor = LocalJobExecutor(Path(""), loader=loader, work_dir=temp_dir)
+    job = job_executor.submit(args=[])
     stdout_result = StdoutJobOutputLoader("{job.cwd}/result.txt")
     assert stdout_result.load(job) == 3.14
 
@@ -78,7 +84,9 @@ def test_load_str(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.txt"
     with open(dst_filename, "w") as f:
         f.write("result")
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+    loader = StdoutJobOutputLoader("{job.cwd}/result.txt")
+    job_executor = LocalJobExecutor(Path(""), loader=loader, work_dir=temp_dir)
+    job = job_executor.submit(args=[])
     stdout_result = StdoutJobOutputLoader("{job.cwd}/result.txt")
     assert stdout_result.load(job) == "result"
 

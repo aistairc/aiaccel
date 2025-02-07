@@ -1,7 +1,6 @@
 import pickle as pkl
 
-from aiaccel.hpo.job_executors import BaseJobExecutor
-from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
+from aiaccel.hpo.job_output_loaders.base_loader import BaseJob, BaseJobOutputLoader
 
 
 class PickleJobOutputLoader(BaseJobOutputLoader):
@@ -22,7 +21,7 @@ class PickleJobOutputLoader(BaseJobOutputLoader):
     def __init__(self, filename_template: str) -> None:
         super().__init__(filename_template)
 
-    def load(self, job: BaseJobExecutor) -> int | float | str:
+    def load(self, job: BaseJob) -> int | float | str:
         """
         Loads the result of a job from a pickle file.
 

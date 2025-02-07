@@ -9,6 +9,7 @@ import time
 import traceback
 
 from aiaccel.hpo.job_executors.base_job_executor import BaseJobExecutor
+from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
 from aiaccel.hpo.jobs.local_job import LocalJob
 
 
@@ -21,6 +22,7 @@ class LocalJobExecutor(BaseJobExecutor):
         job_name: str | None = None,
         work_dir: Path | str | None = None,
         n_max_jobs: int = 1,
+        loader: BaseJobOutputLoader | None = None,
     ):
         """
         Initialize the AbciJobManager object.
@@ -32,7 +34,7 @@ class LocalJobExecutor(BaseJobExecutor):
             work_dir (Path | str | None, optional): The working directory for the job. Defaults to None.
             n_max_jobs (int, optional): The maximum number of jobs. Defaults to 100.
         """
-        super().__init__(job_filename, job_name, work_dir, n_max_jobs)
+        super().__init__(job_filename, job_name, work_dir, n_max_jobs, loader)
         self.executor = ProcessPoolExecutor(max_workers=n_max_jobs)
 
         self.cwd = Path(work_dir) if work_dir is not None else Path.cwd()
@@ -66,7 +68,12 @@ class LocalJobExecutor(BaseJobExecutor):
 
         future = self.executor.submit(self.run, cmd, self.cwd)
         job_future = LocalJob(
-            future, job_filename=self.job_filename, job_name=self.job_name, cwd=self.work_dir, tag=tag
+            future,
+            job_filename=self.job_filename,
+            job_name=self.job_name,
+            cwd=self.work_dir,
+            tag=tag,
+            loader=self.loader,
         )
 
         self.job_list.append(job_future)

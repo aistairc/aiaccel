@@ -22,9 +22,11 @@ def temp_dir() -> Generator[Path]:
     config_path = os.path.join(os.path.dirname(__file__), "config_base.yaml")
     base = oc.load(config_path)
     output_loadeer = {
-        "result": {
-            "_target_": "aiaccel.hpo.job_output_loaders.PickleJobOutputLoader",
-            "filename_template": "{job.cwd}/{job.job_name}_result.pkl",
+        "executor": {
+            "loader": {
+                "_target_": "aiaccel.hpo.job_output_loaders.PickleJobOutputLoader",
+                "filename_template": "{job.cwd}/{job.job_name}_result.pkl",
+            }
         }
     }
     config = oc.merge(base, output_loadeer)
@@ -62,7 +64,9 @@ def test_load_int(temp_dir: Path) -> None:
     with open(dst_filename, "wb") as f:
         pkl.dump(42, f)
 
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+    loader = PickleJobOutputLoader("{job.cwd}/result.pkl")
+    job_executor = LocalJobExecutor(Path(""), loader=loader, work_dir=temp_dir)
+    job = job_executor.submit(args=[])
     pkl_result = PickleJobOutputLoader("{job.cwd}/result.pkl")
     assert pkl_result.load(job) == 42
 
@@ -72,7 +76,9 @@ def test_load_float(temp_dir: Path) -> None:
     with open(dst_filename, "wb") as f:
         pkl.dump(3.14, f)
 
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+    laoder = PickleJobOutputLoader("{job.cwd}/result.pkl")
+    job_executor = LocalJobExecutor(Path(""), loader=laoder, work_dir=temp_dir)
+    job = job_executor.submit(args=[])
     pkl_result = PickleJobOutputLoader("{job.cwd}/result.pkl")
     assert pkl_result.load(job) == 3.14
 
@@ -82,7 +88,9 @@ def test_load_str(temp_dir: Path) -> None:
     with open(dst_filename, "wb") as f:
         pkl.dump("result", f)
 
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+    loader = PickleJobOutputLoader("{job.cwd}/result.pkl")
+    job_executor = LocalJobExecutor(Path(""), loader=loader, work_dir=temp_dir)
+    job = job_executor.submit(args=[])
     pkl_result = PickleJobOutputLoader("{job.cwd}/result.pkl")
     assert pkl_result.load(job) == "result"
 

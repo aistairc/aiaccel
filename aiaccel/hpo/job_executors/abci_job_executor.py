@@ -4,6 +4,7 @@ from pathlib import Path
 import time
 
 from aiaccel.hpo.job_executors.base_job_executor import BaseJobExecutor
+from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
 from aiaccel.hpo.jobs.abci_job import AbciJob
 
 
@@ -34,6 +35,7 @@ class AbciJobExecutor(BaseJobExecutor):
         job_name: str | None = None,
         work_dir: Path | str | None = None,
         n_max_jobs: int = 100,
+        loader: BaseJobOutputLoader | None = None,
     ):
         """
         Initialize the AbciJobManager object.
@@ -45,7 +47,7 @@ class AbciJobExecutor(BaseJobExecutor):
             work_dir (Path | str | None, optional): The working directory for the job. Defaults to None.
             n_max_jobs (int, optional): The maximum number of jobs. Defaults to 100.
         """
-        super().__init__(job_filename, job_name, work_dir, n_max_jobs)
+        super().__init__(job_filename, job_name, work_dir, n_max_jobs, loader)
         self.job_group = job_group
         self.job_list: list[AbciJob] = []
 

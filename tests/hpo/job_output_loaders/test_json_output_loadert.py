@@ -61,7 +61,9 @@ def test_load_int(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.json"
     with open(dst_filename, "w") as f:
         f.write(json.dumps(42))
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+    loader = JsonJobOutputLoader("{job.cwd}/result.json")
+    job_executor = LocalJobExecutor(Path(""), loader=loader, work_dir=temp_dir)
+    job = job_executor.submit([])
     json_result = JsonJobOutputLoader("{job.cwd}/result.json")
     assert json_result.load(job) == 42
 
@@ -70,7 +72,10 @@ def test_load_float(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.json"
     with open(dst_filename, "w") as f:
         f.write(json.dumps(3.14))
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+
+    laoder = JsonJobOutputLoader("{job.cwd}/result.json")
+    job_executor = LocalJobExecutor(Path(""), loader=laoder, work_dir=temp_dir)
+    job = job_executor.submit([])
     json_result = JsonJobOutputLoader("{job.cwd}/result.json")
     assert json_result.load(job) == 3.14
 
@@ -79,7 +84,9 @@ def test_load_str(temp_dir: Path) -> None:
     dst_filename = temp_dir / "result.json"
     with open(dst_filename, "w") as f:
         f.write(json.dumps("result"))
-    job = LocalJobExecutor(Path(""), work_dir=temp_dir)
+    loader = JsonJobOutputLoader("{job.cwd}/result.json")
+    executor = LocalJobExecutor(Path(""), loader=loader, work_dir=temp_dir)
+    job = executor.submit([])
     json_result = JsonJobOutputLoader("{job.cwd}/result.json")
     assert json_result.load(job) == "result"
 
