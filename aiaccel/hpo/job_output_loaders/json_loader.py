@@ -14,7 +14,7 @@ class JsonJobOutputLoader(BaseJobOutputLoader):
         __init__(filename_template: str) -> None:
             Initializes the JsonJobOutputLoader with a filename template.
 
-        load(job: BaseJobExecutor) -> int | float | str:
+        load(job: BaseJob) -> int | float | str:
             Loads the result from a JSON file based on the job information.
     """
 

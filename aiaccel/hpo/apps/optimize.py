@@ -94,10 +94,9 @@ def main() -> None:
         executor:
             _target_: aiaccel.hpo.job_executors.LocalJobExecutor
             n_max_jobs: 4
-
-        result:
-            _target_: aiaccel.hpo.job_output_loaders.JsonJobOutputLoader
-            filename_template: "{job.cwd}/{job.job_name}_result.json"
+            loader:
+                _target_: aiaccel.hpo.job_output_loaders.JsonJobOutputLoader
+                filename_template: "{job.cwd}/{job.job_name}_result.json"
 
         params:
             _convert_: partial

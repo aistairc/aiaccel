@@ -14,7 +14,7 @@ class PickleJobOutputLoader(BaseJobOutputLoader):
         __init__(filename_template: str) -> None:
             Initializes the PickleJobOutputLoader with a filename template.
 
-        load(job: BaseJobExecutor) -> int | float | str:
+        load(job: BaseJob) -> int | float | str:
             Loads the result from a pickle file corresponding to the given job.
     """
 

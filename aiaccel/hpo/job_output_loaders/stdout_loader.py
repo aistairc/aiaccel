@@ -11,7 +11,7 @@ class StdoutJobOutputLoader(BaseJobOutputLoader):
         filename_template (str): A template for the filename where the results are stored.
 
     Methods:
-        load(job: BaseJobExecutor) -> int | float | str:
+        load(job: BaseJob) -> int | float | str:
             Loads the result from the file corresponding to the given job.
             The result is expected to be on the last non-empty line of the file.
             Returns the result as an integer, float, or string, depending on the content.
