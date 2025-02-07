@@ -8,7 +8,7 @@ import subprocess
 import time
 from xml.etree import ElementTree
 
-from aiaccel.hpo.jobs.base_job import BaseJob
+from aiaccel.hpo.jobs.base_job import BaseJob, JobOutputLoaderProtocol
 from aiaccel.hpo.jobs.job_status import JobStatus
 
 
@@ -45,6 +45,7 @@ class AbciJob(BaseJob):
         qsub_args: list[str] | None = None,
         args: list[str] | None = None,
         tag: Any = None,
+        loader: JobOutputLoaderProtocol | None = None,
     ):
         """
         Initializes a new instance of the AbciJob class.
@@ -64,7 +65,7 @@ class AbciJob(BaseJob):
             args (list[str] | None, optional): Additional arguments to pass to the job file. Defaults to None.
             tag (Any, optional): A tag associated with the job. Defaults to None.
         """
-        super().__init__(job_filename, job_name, cwd, tag)
+        super().__init__(job_filename, job_name, cwd, tag, loader)
 
         self.job_group = job_group
 

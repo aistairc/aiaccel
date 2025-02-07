@@ -5,7 +5,7 @@ from typing import Any
 from concurrent.futures import Future
 from pathlib import Path
 
-from aiaccel.hpo.jobs.base_job import BaseJob
+from aiaccel.hpo.jobs.base_job import BaseJob, JobOutputLoaderProtocol
 from aiaccel.hpo.jobs.job_status import JobStatus
 
 
@@ -17,8 +17,9 @@ class LocalJob(BaseJob):
         job_name: str | None = None,
         cwd: Path | None = None,
         tag: Any = None,
+        loader: JobOutputLoaderProtocol | None = None,
     ):
-        super().__init__(job_filename, job_name, cwd, tag)
+        super().__init__(job_filename, job_name, cwd, tag, loader)
         self.future = future
 
     @classmethod

@@ -3,6 +3,7 @@ from typing import Any
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from aiaccel.hpo.job_output_loaders.base_loader import BaseJobOutputLoader
 from aiaccel.hpo.jobs.base_job import BaseJob
 from aiaccel.hpo.jobs.job_status import JobStatus
 
@@ -31,14 +32,14 @@ class BaseJobExecutor(ABC):
         job_name: str | None = None,
         work_dir: Path | str | None = None,
         n_max_jobs: int = 100,
+        loader: BaseJobOutputLoader | None = None,
     ):
         self.job_filename = job_filename if isinstance(job_filename, Path) else Path(job_filename)
         self.job_name = job_name
         self.work_dir = Path(work_dir) if work_dir is not None else Path.cwd()
         self.work_dir.mkdir(parents=True, exist_ok=True)
-
         self.n_max_jobs = n_max_jobs
-
+        self.loader = loader
         self.job_list: list[Any] = []
 
         self.submitted_job_count = 0
