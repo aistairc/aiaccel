@@ -9,7 +9,7 @@ import torchmetrics
 from aiaccel.torch.lightning import OptimizerConfig, OptimizerLightningModule
 
 
-class Resnet50Task(OptimizerLightningModule):
+class ImageClassificationTask(OptimizerLightningModule):
     def __init__(self, model: nn.Module, optimizer_config: OptimizerConfig, num_classes: int = 10):
         super().__init__(optimizer_config)
         self.model = model
