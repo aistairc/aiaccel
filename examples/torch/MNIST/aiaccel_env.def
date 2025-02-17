@@ -1,0 +1,17 @@
+
+BootStrap: docker
+
+From: python:3.10
+
+%files
+
+	/home/aac12958eq/hpopt/example_lightning/aiaccel /opt/aiaccel 
+
+%post
+
+	pip install --upgrade pip
+
+	pip install opt/aiaccel[torch]
+
+	pip install torchvision
+
