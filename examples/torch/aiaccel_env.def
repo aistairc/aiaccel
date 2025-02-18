@@ -3,15 +3,13 @@ BootStrap: docker
 
 From: python:3.10
 
-%files
-
-	/home/aac12958eq/hpopt/example_lightning/aiaccel /opt/aiaccel 
-
 %post
 
 	pip install --upgrade pip
 
-	pip install opt/aiaccel[torch]
+	# aiaccel env
+	pip install aiaccel[torch]@git+https://github.com/aistairc/aiaccel.git@develop/v2
 
+	# torch/MNIST example env
 	pip install torchvision
 
