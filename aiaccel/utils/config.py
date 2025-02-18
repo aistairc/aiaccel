@@ -1,8 +1,11 @@
 from typing import Any
 
 from copy import deepcopy
+import json
+import os
 from pathlib import Path
 import re
+import subprocess
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig
@@ -103,3 +106,54 @@ def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConf
         return config
 
     return _inner_fn(deepcopy(config))
+
+
+def check_commit(package_name: str) -> bool | None:
+    # get package location
+    pip_show_result = subprocess.run(["pip", "show", package_name], capture_output=True, text=True)
+    version, location = None, None
+    for line in pip_show_result.stdout.splitlines():
+        if line.startswith("Version:"):
+            version = line.split(": ", 1)[1]
+        if line.startswith("Location:"):
+            location = line.split(": ", 1)[1]
+    if version is not None and location is not None:
+        file_name = f"{location}/{package_name}-{version}.dist-info/direct_url.json"
+        if os.path.isfile(file_name):
+            # read direct_url.json
+            with open(file_name) as f:
+                dist_info = json.load(f)
+                install_commit_id = dist_info["vcs_info"]["commit_id"]
+                git_url = dist_info["url"]
+
+            # get commit id in git
+            git_ls_result = subprocess.run(["git", "ls-remote", "--heads", git_url], capture_output=True, text=True)
+
+            # check commit id
+            return install_commit_id in git_ls_result.stdout
+        else:
+            return None
+    else:
+        return None
+
+
+def get_target_module(config: ListConfig | DictConfig) -> list[str]:
+    target_module = []
+    if isinstance(config, DictConfig):
+        for key, value in config.items():
+            if key == "_target_":
+                target_module.append(value)
+            target_module += get_target_module(value)
+    elif isinstance(config, ListConfig):
+        for item in config:
+            target_module += get_target_module(item)
+    return target_module
+
+
+def check_commit_target_modules(config: DictConfig | ListConfig) -> dict[str, bool | None]:
+    check_commit_dict = {}
+    for target in get_target_module(config):
+        package_name = target.split(".")[0]
+        if package_name not in check_commit_dict:
+            check_commit_dict[package_name] = check_commit(package_name)
+    return check_commit_dict
