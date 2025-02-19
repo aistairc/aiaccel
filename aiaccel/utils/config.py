@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+from urllib.parse import unquote, urlparse
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig
@@ -112,33 +113,54 @@ def check_commit(package_name: str) -> bool | None:
     # get package location
     pip_show_result = subprocess.run(["pip", "show", package_name], capture_output=True, text=True)
     version, location = None, None
+
     for line in pip_show_result.stdout.splitlines():
         if line.startswith("Version:"):
             version = line.split(": ", 1)[1]
         if line.startswith("Location:"):
             location = line.split(": ", 1)[1]
+
     if version is not None and location is not None:
         file_name = f"{location}/{package_name}-{version}.dist-info/direct_url.json"
         if os.path.isfile(file_name):
             # read direct_url.json
             with open(file_name) as f:
                 dist_info = json.load(f)
+
+            git_url, install_commit_id = None, None
+            if "https" in dist_info["url"]:
+                # pip install git+https
                 install_commit_id = dist_info["vcs_info"]["commit_id"]
                 git_url = dist_info["url"]
 
-            # get commit id in git
-            git_ls_result = subprocess.run(["git", "ls-remote", "--heads", git_url], capture_output=True, text=True)
+            elif "file://" in dist_info["url"]:
+                # pip install .
+                parsed = urlparse(dist_info["url"])
+                file_path = Path(unquote(parsed.path))
 
-            # check commit id
-            return install_commit_id in git_ls_result.stdout
-        else:
-            return None
-    else:
-        return None
+                result_git_status = subprocess.run(
+                    ["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=file_path
+                )
+                install_commit_id = result_git_status.stdout.rstrip("\n")
+
+                result_git_config = subprocess.run(
+                    ["git", "config", "--get", "remote.origin.url"], capture_output=True, text=True, cwd=file_path
+                )
+                git_url = result_git_config.stdout.rstrip("\n")
+
+            if git_url is not None and install_commit_id is not None:
+                # get commit id in git
+                git_ls_result = subprocess.run(["git", "ls-remote", "--heads", git_url], capture_output=True, text=True)
+
+                # check commit id
+                return install_commit_id in git_ls_result.stdout
+
+    return None
 
 
 def get_target_module(config: ListConfig | DictConfig) -> list[str]:
     target_module = []
+
     if isinstance(config, DictConfig):
         for key, value in config.items():
             if key == "_target_":
@@ -147,13 +169,16 @@ def get_target_module(config: ListConfig | DictConfig) -> list[str]:
     elif isinstance(config, ListConfig):
         for item in config:
             target_module += get_target_module(item)
+
     return target_module
 
 
 def check_commit_target_modules(config: DictConfig | ListConfig) -> dict[str, bool | None]:
     check_commit_dict = {}
+
     for target in get_target_module(config):
         package_name = target.split(".")[0]
         if package_name not in check_commit_dict:
             check_commit_dict[package_name] = check_commit(package_name)
+
     return check_commit_dict
