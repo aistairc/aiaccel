@@ -126,13 +126,13 @@ def get_git_status(package_name: str) -> PackageGitStatus | None:
 
 def collect_target_packages(config: ListConfig | DictConfig) -> list[str]:
     """
-    Recursively gathers the names of target packages from the configuration.
+    Extracts the names of target packages from the given configuration.
 
     Args:
         config (ListConfig | DictConfig): The configuration to process.
 
     Returns:
-        set[str]: A set of package names extracted from the configuration.
+        list[str]: A list of package names extracted from the configuration.
     """
 
     target_packages = set()
