@@ -13,7 +13,6 @@ Config Utilities
     print_config
     pathlib2str_config
 
-
 Git Utilities
 -------------
 
