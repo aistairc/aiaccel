@@ -1,11 +1,8 @@
 from typing import Any
 
 from copy import deepcopy
-import importlib.util
-import os
 from pathlib import Path
 import re
-import subprocess
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig
@@ -106,59 +103,3 @@ def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConf
         return config
 
     return _inner_fn(deepcopy(config))
-
-
-def check_commit(package_name: str) -> bool | None:
-    # get package location
-    spec = importlib.util.find_spec(package_name)
-
-    if spec is None:
-        return None
-
-    if spec.origin is not None:
-        module_path = Path(spec.origin).parent
-    elif spec.submodule_search_locations is not None:
-        module_path = Path(os.path.abspath(spec.submodule_search_locations[0]))
-    else:
-        return None
-
-    # get repository path
-    result = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=module_path, capture_output=True, text=True)
-    try:
-        result.check_returncode()
-    except subprocess.CalledProcessError:
-        return None
-
-    repository_path = result.stdout.splitlines()[0]
-
-    # check git status
-    result = subprocess.run(["git", "status", "-s"], cwd=repository_path, capture_output=True, text=True)
-    status = result.stdout.splitlines()
-
-    return len(status) == 0
-
-
-def get_target_module(config: ListConfig | DictConfig) -> list[str]:
-    target_module = []
-
-    if isinstance(config, DictConfig):
-        for key, value in config.items():
-            if key == "_target_":
-                target_module.append(value)
-            target_module += get_target_module(value)
-    elif isinstance(config, ListConfig):
-        for item in config:
-            target_module += get_target_module(item)
-
-    return target_module
-
-
-def check_commit_target_modules(config: DictConfig | ListConfig) -> dict[str, bool | None]:
-    check_commit_dict = {}
-
-    for target in get_target_module(config):
-        package_name = target.split(".")[0]
-        if package_name not in check_commit_dict:
-            check_commit_dict[package_name] = check_commit(package_name)
-
-    return check_commit_dict

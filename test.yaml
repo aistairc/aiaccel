@@ -1,0 +1,44 @@
+_base_: ${base_config_path}/train_base.yaml
+
+sr: 16000
+n_fft: 512
+hop_length: 160
+
+n_mic: 8
+n_src: 8
+
+trainer:
+  max_epochs: 200
+  gradient_clip_val: 5.0
+  sync_batchnorm: True
+
+  precision: bf16-mixed
+  
+  benchmark: True
+  use_distributed_sampler: False
+
+  num_sanity_val_steps: 0
+  
+  logger:
+    default_hp_metric: False
+
+  callbacks:
+    - _target_: lightning.pytorch.callbacks.ModelCheckpoint
+      filename: "{epoch:04d}"
+      save_last: True
+    - _target_: lightning.pytorch.callbacks.RichProgressBar
+      refresh_rate: 5
+    - _target_: lightning.pytorch.callbacks.RichModelSummary
+      max_depth: 3
+
+test:
+  _target_: neural_fcasa
+  
+
+optimizer:
+  _target_: aiaccel.torch.lightning.OptimizerConfig
+  optimizer_generator:
+    _partial_: True
+    _target_: torch.optim.AdamW
+    lr: 1.e-4
+    weight_decay: 1.e-5
