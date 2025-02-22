@@ -12,3 +12,16 @@ Config Utilities
     load_config
     print_config
     pathlib2str_config
+
+
+Git Utilities
+-------------
+
+.. currentmodule:: aiaccel.utils
+
+.. autosummary::
+    :toctree: generated/
+
+    collect_git_status_from_config
+    print_git_status
+    PackageGitStatus
