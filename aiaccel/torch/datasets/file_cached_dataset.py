@@ -17,18 +17,11 @@ class FileCachedDataset(Dataset[T_co]):
     """
     A dataset wrapper that caches samples to disk to reduce memory usage.
 
-    This class wraps an existing PyTorch Dataset and caches samples as pickle
-    files in a specified directory. It is useful when working with large datasets
-    that do not fit in memory.
-
-    Attributes:
-        dataset (Dataset[T_co]): The original dataset to wrap.
-        cache_path (Path): Directory where cached samples are stored.
-        manager (Manager): A multiprocessing manager for shared state.
-        cache (dict): A dictionary mapping sample indices to cache file paths.
+    This class wraps an existing `torch.utils.data.Dataset` and caches samples
+    as pickle files in a specified directory.
 
     Args:
-        dataset (Dataset[T_co]): The dataset to wrap.
+        dataset (Dataset[T]): The dataset to wrap.
         cache_path (str | Path): Directory where cached samples will be stored.
 
     Methods:
