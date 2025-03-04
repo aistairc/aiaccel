@@ -8,3 +8,6 @@ Thank you for contributing to aiaccel! This document introduces how to contribut
 
     issues
     pull_requests
+    documentation
+    tests
+    coding_styles
