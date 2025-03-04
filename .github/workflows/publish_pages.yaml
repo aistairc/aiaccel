@@ -29,13 +29,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/build/html
           force_orphan: true
-      - name: Zip the documentation
-        run: |
-          cd docs/build/html
-          zip -r sphinx_docs.zip .
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: sphinx-docs
-          path: docs/build/html/sphinx_docs.zip
+          path: docs/build/html/
           retention-days: 7
