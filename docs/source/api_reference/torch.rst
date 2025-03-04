@@ -10,6 +10,7 @@ Datasets
     :toctree: generated/
 
     CachedDataset
+    FileCachedDataset
     HDF5Dataset
     RawHDF5Dataset
 
