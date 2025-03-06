@@ -4,7 +4,7 @@
 
 - Write a basic description of the implemented functions, the types and meanings of parameters and return values, and examples of their usage.
 - Write in accordance with the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings).
-- See also [Coding Conventions](#coding-style).
+- See also [Coding Conventions](coding_styles).
 
 ## Documentation
 
