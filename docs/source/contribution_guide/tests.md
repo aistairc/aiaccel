@@ -4,7 +4,7 @@
 
 - aiaccel uses pytest for testing.
 - Create a directory for unit test under tests directory.
-  - The directory structure under aiaccel/tests/unit corresponds to that under aiaccel/aiaccel, except for a few modeules such as config.py. For example, the test for aiaccel/aiaccel/optimizer/abstract_optimizer.py is aiaccel/tests/unit/optimzier_test/test_abstract_optimizer.py.
+  - The directory structure under `aiaccel/tests` corresponds to that under `aiaccel/aiaccel`, except for a few modeules such as config.py. For example, the test for `aiaccel/aiaccel/hpo/optuna/suggest_wrapper.py` is `aiaccel/tests/hpo/optuna/test_suggest_wrapper.py`.
 - If you have added a new feature or bug fix, please create codes for testing.
 
 
@@ -20,14 +20,16 @@ pytest
 - Specify a file name as an argument to run only specific code.
 
 ~~~bash
-pytest tests/unit/optimizer_test/test_abstract_optimizer.py
+pytest aiaccel/tests/hpo/optuna/test_suggest_wrapper.py
 ~~~
 
 - In addition, execute the following command to check coding styles.
 
 ~~~bash
-pycodestyle aiaccel examples
-flake8 aiaccel examples
+ruff check
+ruff format --check
+mypy --config-file mypy.ini .
+docstrfmt --check docs/source/
 ~~~
 
 

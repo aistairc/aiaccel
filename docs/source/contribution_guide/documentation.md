@@ -19,7 +19,7 @@ Move to the aiaccel directory and execute the following command to generate an A
 
 ~~~bash
 cd aiaccel
-sphinx-apidoc -f -o docs/source/api_reference aiaccel
+sphinx-apidoc --maxdepth 2 -f -o ./docs/source/api_reference/ ./aiaccel/
 ~~~
 
 Move to aiaccel/docs and build html files to see how the document is rendered.
