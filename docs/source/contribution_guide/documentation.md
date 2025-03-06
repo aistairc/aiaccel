@@ -28,11 +28,3 @@ Move to aiaccel/docs and build html files to see how the document is rendered.
 cd docs
 make html
 ~~~
-
-The built HTML format files are generated under docs/build/html.
-Execute the following command in aiaccel/docs to generate multilingual documents.
-
-~~~bash
-make gettext
-sphinx-intl update -p build/gettext -l en -l ja
-~~~
