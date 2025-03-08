@@ -20,8 +20,8 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-  - repo: https://github.com/LilSpazJoekp/docstrfmt
-    rev: v1.10.0
-    hooks:
-      - id: docstrfmt
-        args: [docs/source/]
+  # - repo: https://github.com/LilSpazJoekp/docstrfmt
+  #   rev: v1.10.0
+  #   hooks:
+  #     - id: docstrfmt
+  #       args: [docs/source/]
