@@ -19,25 +19,28 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    """Execute the training process using a configuration file.
+    """
+    Execute the training process using a configuration file.
 
-    This function: 1. Parses command-line arguments to get the configuration file and
-    working directory. 2. Loads and merges configurations from the YAML file,
-    command-line arguments, and default settings. 3. Prints the final configuration. 4.
-    Saves the merged configuration to a file
-    (`${working_directory}/config_merged.yaml`). 5. Instantiates and runs the training
-    process using the specified trainer, model, and datamodule.
+    This function:
+    1. Parses command-line arguments to get the configuration file and working directory.
+    2. Loads and merges configurations from the YAML file, command-line arguments, and default settings.
+    3. Prints the final configuration.
+    4. Saves the merged configuration to a file (`${working_directory}/config_merged.yaml`).
+    5. Instantiates and runs the training process using the specified trainer, model, and datamodule.
 
     Command-line Arguments:
-        config (Path): Path to the YAML configuration file. --working_directory (Path,
-        optional): Path to the working directory (default: current working directory).
+        config (Path): Path to the YAML configuration file.
+        --working_directory (Path, optional): Path to the working directory (default: current working directory).
 
     Usage Example:
-        ```bash python -m aiaccel.torch.apps.train config.yaml --working_directory
-        /path/to/working/directory ``` You can also update some configurations from CLI
-        as follows: ```bash python -m aiaccel.torch.apps.train config.yaml
-        task.hparam1=1.0 task.hparam2=2.0 ... ```
-
+        ```bash
+        python -m aiaccel.torch.apps.train config.yaml --working_directory /path/to/working/directory
+        ```
+        You can also update some configurations from CLI as follows:
+        ```bash
+        python -m aiaccel.torch.apps.train config.yaml task.hparam1=1.0 task.hparam2=2.0 ...
+        ```
     """
 
     overwrite_omegaconf_dumper()
