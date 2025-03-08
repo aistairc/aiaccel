@@ -49,6 +49,7 @@ dev = [
     "pydata-sphinx-theme",
     "sphinx_design",
     "types-colorama",
+    "types-PyYAML",
     "undecorated",
     "pandas",
     "pandas-stubs",
@@ -59,6 +60,10 @@ github-actions = [
     "pytest-github-actions-annotate-failures",
 ]
 
+[project.scripts]
+aiaccel-train = "aiaccel.torch.apps.train:main"
+aiaccel-optimize = "aiaccel.hpo.apps.optimize:main"
+
 [tool.ruff]
 line-length = 120
 target-version = "py310"
@@ -67,7 +72,7 @@ fix = true
 [tool.ruff.lint]
 select = ["F", "E", "W", "UP", "B", "SIM", "I", "C", "A", "ERA", "N", "C90"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
 [tool.ruff.lint.isort]

@@ -7,6 +7,21 @@ import re
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as oc  # noqa:N813
+from omegaconf._utils import OmegaConfDumper
+
+from yaml import Node
+from yaml.resolver import BaseResolver
+
+
+def overwrite_omegaconf_dumper(mode: str = "|") -> None:
+    def str_representer(dumper: OmegaConfDumper, data: str) -> Node:
+        if len(data.splitlines()) > 1:  # check for multiline string
+            return dumper.represent_scalar(BaseResolver.DEFAULT_SCALAR_TAG, data, style=mode)
+        else:
+            return dumper.represent_scalar(BaseResolver.DEFAULT_SCALAR_TAG, data)
+
+    OmegaConfDumper.add_representer(str, str_representer)
+    OmegaConfDumper.str_representer_added = True
 
 
 def load_config(
