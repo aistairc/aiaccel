@@ -14,11 +14,22 @@ from yaml.resolver import BaseResolver
 
 
 def overwrite_omegaconf_dumper(mode: str = "|") -> None:
+    """
+    Overwrites the default string representation in OmegaConf's YAML dumper.
+
+    This function modifies the `OmegaConfDumper` to represent multi-line strings
+    using the specified style (`mode`). By default, it uses the `|` block style
+    for multi-line strings. Single-line strings remain unchanged.
+
+    Args:
+        mode (str, optional): The YAML style character for multi-line strings.
+                              Defaults to "|".
+    """
+
     def str_representer(dumper: OmegaConfDumper, data: str) -> Node:
-        if len(data.splitlines()) > 1:  # check for multiline string
-            return dumper.represent_scalar(BaseResolver.DEFAULT_SCALAR_TAG, data, style=mode)
-        else:
-            return dumper.represent_scalar(BaseResolver.DEFAULT_SCALAR_TAG, data)
+        return dumper.represent_scalar(
+            BaseResolver.DEFAULT_SCALAR_TAG, data, style=mode if len(data.splitlines()) > 1 else None
+        )
 
     OmegaConfDumper.add_representer(str, str_representer)
     OmegaConfDumper.str_representer_added = True
@@ -49,6 +60,12 @@ def load_config(
 
     """
 
+    if not isinstance(config_filename, Path):
+        config_filename = Path(config_filename)
+
+    if not config_filename.is_absolute():
+        config_filename = Path.cwd() / config_filename
+
     if parent_config is None:
         parent_config = {}
 
@@ -60,7 +77,10 @@ def load_config(
             base_paths = [base_paths]
 
         config.pop("_base_")
-        for base_path in base_paths:
+        for base_path in map(Path, base_paths):
+            if not base_path.is_absolute():
+                base_path = config_filename.parent / base_path
+
             config = load_config(base_path, config)
 
     return config
