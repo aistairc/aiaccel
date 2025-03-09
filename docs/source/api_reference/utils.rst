@@ -12,6 +12,7 @@ Config Utilities
     load_config
     print_config
     pathlib2str_config
+    overwrite_omegaconf_dumper
 
 Git Utilities
 -------------
