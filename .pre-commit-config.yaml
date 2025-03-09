@@ -25,3 +25,4 @@ repos:
   #   hooks:
   #     - id: docstrfmt
   #       args: [docs/source/]
+  #       exclude: docs/source/api_reference/generated

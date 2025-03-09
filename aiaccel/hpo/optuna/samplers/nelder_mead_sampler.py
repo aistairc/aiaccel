@@ -51,7 +51,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
 
 
             search_space = {"x": {"low": -10, "high": 10}}
-            sampler = NelderMeadSampler(search_space=search_space, seed=42)
+            study = optuna.create_study(sampler=NelderMeadSampler(search_space=search_space, seed=42))
             study.optimize(objective, n_trials=10)
 
     Args:
