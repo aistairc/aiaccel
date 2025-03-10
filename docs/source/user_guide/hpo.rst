@@ -69,13 +69,10 @@ Basic configuration example:
       _target_: optuna.create_study
       direction: minimize
 
-    executor:
-      _target_: aiaccel.hpo.job_executors.LocalJobExecutor
-      n_max_jobs: 4
-
-    result:
-      _target_: aiaccel.results.JsonResult
-      filename_template: "{job.cwd}/{job.job_name}_result.json"
+    cluster:
+      _target_: distributed.Client
+      n_workers: 4
+      threads_per_worker: 1
 
     params:
       x1: [0, 1]

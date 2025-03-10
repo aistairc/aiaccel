@@ -79,41 +79,38 @@ def run_job(script_path: str, args: list[str], work_dir: str) -> dict[str, Any]:
 
 def main() -> None:
     """
-    Main function to execute the hyperparameter optimization process.
+    Main function to execute the hyperparameter optimization process using a Dask cluster.
     This function parses command-line arguments, loads the configuration,
-    sets up the job executor, and runs the optimization trials.
+    sets up the Dask client, and runs the optimization trials in a distributed manner.
 
     Command-line arguments:
         - job_filename (Path): The shell script to execute.
         - --config (str, optional): Path to the configuration file.
-        - --executor (str, optional): Type of job executor to use ("local", "abci", or "dask").
         - --resume (bool, optional): Flag to resume from the previous study.
-
-    The function performs the following steps:
-        1. Parses command-line arguments.
-        2. Loads and merges the configuration from the file and command-line arguments.
-        3. Sets default storage and study name if not provided in the configuration.
-        4. Initializes the job executor based on the specified executor type.
-        5. Instantiates the study and parameter suggestion objects.
-        6. Submits jobs for hyperparameter optimization trials.
-        7. Collects and processes finished jobs, updating the study with results.
+        - --resumable (bool, optional): Flag to make the study resumable by setting appropriate storage.
 
     Usage:
-        python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml --executor dask
+        - Start a new study:
+            python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml
+        - Resume from the previous study:
+            python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml --resume
+        - Make the study resumable:
+            python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml --resumable
 
     Config file (yaml) example:
         ~~~ yaml
         study:
           _target_: optuna.create_study
           direction: minimize
+          storage:
+            _target_: optuna.storages.InMemoryStorage
+          study_name: aiaccel_study
+          load_if_exists: false
 
         cluster:
-          _target_: dask_jobqueue.PBSCluster
+          _target_: distributed.Client
           n_workers: 4
-          processes: 1
-          queue: "rt_HF"
-          memory: "8GB"
-          walltime: "02:00:00"
+          threads_per_worker: 1
 
         sampler:
           _target_: optuna.samplers.TPESampler
@@ -132,8 +129,6 @@ def main() -> None:
 
         n_trials: 30
         n_max_jobs: 4
-
-        group: gaa50000
         ~~~
     """
 
