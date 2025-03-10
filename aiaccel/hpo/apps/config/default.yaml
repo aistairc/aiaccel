@@ -6,6 +6,11 @@ study:
   study_name: aiaccel_study
   load_if_exists: false
 
+cluster:
+  _target_: distributed.Client
+  n_workers: 4
+  threads_per_worker: 1
+
 params:
   _convert_: partial
   _target_: aiaccel.hpo.apps.optimize.HparamsManager
