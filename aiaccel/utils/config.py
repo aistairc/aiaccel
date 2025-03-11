@@ -1,5 +1,6 @@
 from typing import Any
 
+import copy
 from copy import deepcopy
 from pathlib import Path
 import re
@@ -35,9 +36,19 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
     OmegaConfDumper.str_representer_added = True
 
 
+def _load_child_config(config_filename: Path, config: DictConfig) -> DictConfig:
+    # load child DictConfig to process child _base_
+    temp_config = copy.deepcopy(config)
+    for key, value in config.items():
+        if isinstance(value, DictConfig):
+            temp_config[key] = load_config(config_filename, value, False)
+    return temp_config
+
+
 def load_config(
     config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
+    is_load_file: bool = True,
 ) -> DictConfig | ListConfig:
     """Load YAML configuration
 
@@ -69,9 +80,10 @@ def load_config(
     if parent_config is None:
         parent_config = {}
 
-    config = oc.merge(oc.load(config_filename), parent_config)
+    config = oc.merge(oc.load(config_filename), parent_config) if is_load_file else oc.create(parent_config)
 
     if isinstance(config, DictConfig) and "_base_" in config:
+        # process _base_
         base_paths = config["_base_"]
         if not isinstance(base_paths, ListConfig):
             base_paths = [base_paths]
@@ -82,6 +94,9 @@ def load_config(
                 base_path = config_filename.parent / base_path
 
             config = load_config(base_path, config)
+
+    if isinstance(config, DictConfig):
+        config = _load_child_config(config_filename, config)
 
     return config
 
