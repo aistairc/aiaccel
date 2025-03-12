@@ -41,14 +41,48 @@ def _load_child_config(config_filename: Path, config: DictConfig) -> DictConfig:
     temp_config = copy.deepcopy(config)
     for key, value in config.items():
         if isinstance(value, DictConfig):
-            temp_config[key] = load_config(config_filename, value, False)
+            temp_config[key] = resolve_inherit(config_filename, value)
     return temp_config
+
+
+def resolve_inherit(
+    config_filename: str | Path,
+    parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
+    is_load_file: bool = False,
+) -> DictConfig | ListConfig:
+    if not isinstance(config_filename, Path):
+        config_filename = Path(config_filename)
+
+    if not config_filename.is_absolute():
+        config_filename = Path.cwd() / config_filename
+
+    if parent_config is None:
+        parent_config = {}
+
+    config = oc.merge(oc.load(config_filename), parent_config) if is_load_file else oc.create(parent_config)
+
+    if isinstance(config, DictConfig) and "_inherit_" in config:
+        # process _inherit_
+        base_paths = config["_inherit_"]
+        if not isinstance(base_paths, ListConfig):
+            base_paths = [base_paths]
+
+        config.pop("_inherit_")
+        for base_path in map(Path, base_paths):
+            if not base_path.is_absolute():
+                base_path = config_filename.parent / base_path
+
+            config = resolve_inherit(base_path, config, True)
+
+    if isinstance(config, DictConfig):
+        config = _load_child_config(config_filename, config)
+
+    return config
 
 
 def load_config(
     config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
-    is_load_file: bool = True,
 ) -> DictConfig | ListConfig:
     """Load YAML configuration
 
@@ -80,7 +114,7 @@ def load_config(
     if parent_config is None:
         parent_config = {}
 
-    config = oc.merge(oc.load(config_filename), parent_config) if is_load_file else oc.create(parent_config)
+    config = oc.merge(oc.load(config_filename), parent_config)
 
     if isinstance(config, DictConfig) and "_base_" in config:
         # process _base_
@@ -94,9 +128,6 @@ def load_config(
                 base_path = config_filename.parent / base_path
 
             config = load_config(base_path, config)
-
-    if isinstance(config, DictConfig):
-        config = _load_child_config(config_filename, config)
 
     return config
 
