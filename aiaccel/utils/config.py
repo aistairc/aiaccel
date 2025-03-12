@@ -36,13 +36,20 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
     OmegaConfDumper.str_representer_added = True
 
 
-def _load_child_config(config_filename: Path, config: DictConfig) -> DictConfig:
+def _load_child_config(config_filename: Path, config: DictConfig | ListConfig) -> DictConfig | ListConfig:
     # load child DictConfig to process child _base_
-    temp_config = copy.deepcopy(config)
-    for key, value in config.items():
-        if isinstance(value, DictConfig):
-            temp_config[key] = resolve_inherit(config_filename, value)
-    return temp_config
+    if isinstance(config, DictConfig):
+        temp_dict_config = copy.deepcopy(config)
+        for key, value in config.items():
+            if isinstance(value, DictConfig | ListConfig):
+                temp_dict_config[key] = resolve_inherit(config_filename, value)
+        return temp_dict_config
+    elif isinstance(config, ListConfig):
+        temp_list_config = copy.deepcopy(config)
+        for i, value in enumerate(config):
+            if isinstance(value, DictConfig | ListConfig):
+                temp_list_config[i] = resolve_inherit(config_filename, value)
+        return temp_list_config
 
 
 def resolve_inherit(
@@ -74,7 +81,7 @@ def resolve_inherit(
 
             config = resolve_inherit(base_path, config, True)
 
-    if isinstance(config, DictConfig):
+    if isinstance(config, DictConfig | ListConfig):
         config = _load_child_config(config_filename, config)
 
     return config
