@@ -56,18 +56,18 @@ def _load_child_config(
 
 
 def find_key(target_key: str, config: DictConfig | ListConfig) -> Any:
-    child_configs: list[Any] = []
+    config_values: list[Any] = []
 
     if isinstance(config, DictConfig):
         if target_key in config:
             return config[target_key]
-        child_configs = [config.values()]
+        config_values = [config.values()]
     elif isinstance(config, ListConfig):
-        child_configs = [config]
+        config_values = [config]
 
-    for child_config in child_configs:
-        if isinstance(child_config, DictConfig | ListConfig):
-            result = find_key(target_key, child_config)
+    for config_value in config_values:
+        if isinstance(config_value, DictConfig | ListConfig):
+            result = find_key(target_key, config_value)
             if result is not None:
                 return result
 
