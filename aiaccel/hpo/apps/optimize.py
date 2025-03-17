@@ -1,5 +1,3 @@
-# optimize.py
-
 from typing import Any
 
 import argparse
@@ -9,7 +7,6 @@ from pathlib import Path
 import pickle as pkl
 import subprocess
 import time
-
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
@@ -63,20 +60,6 @@ class HparamsManager:
         return {name: param_fn(trial) for name, param_fn in self.params.items()}
 
 
-def run_job(script_path: str, args: list[str], work_dir: str) -> dict[str, Any]:
-    cmd = ["bash", script_path] + args
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=False, cwd=work_dir)
-        return {
-            "success": result.returncode == 0,
-            "returncode": result.returncode,
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-        }
-    except Exception as e:
-        return {"success": False, "error": str(e), "returncode": -1}
-
-
 def main() -> None:
     """
     Main function to execute the hyperparameter optimization process using a Dask cluster.
@@ -84,7 +67,6 @@ def main() -> None:
     sets up the Dask client, and runs the optimization trials in a distributed manner.
 
     Command-line arguments:
-        - job_filename (Path): The shell script to execute.
         - --config (str, optional): Path to the configuration file.
         - --resume (bool, optional): Flag to resume from the previous study.
         - --resumable (bool, optional): Flag to make the study resumable by setting appropriate storage.
@@ -133,7 +115,6 @@ def main() -> None:
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", help="Configuration file path")
     parser.add_argument("--resume", action="store_true", default=False)
     parser.add_argument("--resumable", action="store_true", default=False)
@@ -160,48 +141,35 @@ def main() -> None:
 
     study = instantiate(config.study)
     params = instantiate(config.params)
+    objective_func = instantiate(config.objective,  _partial_=True)
 
     future_to_trial: dict[Any, dict[str, Any]] = {}
     submitted_job_count = 0
     finished_job_count = 0
-    result_filename_template = "{job_dir}/{job_name}_result.pkl"
 
     try:
         while finished_job_count < config.n_trials:
-            active_jobs = len([f for f in future_to_trial if not f.done()])
+            active_jobs = len(list(future_to_trial.keys()))
             available_slots = max(0, config.n_max_jobs - active_jobs)
             n_to_submit = min(available_slots, config.n_trials - submitted_job_count)
 
             for _ in range(n_to_submit):
                 trial = study.ask()
                 hparams = params.suggest_hparams(trial)
-                job_name = f"{args.job_filename.stem}_{trial.number}"
-                result_filename = result_filename_template.format(job_dir=work_dir, job_name=job_name)
-
-                cmd_args = [result_filename] + sum([[f"--{k}", f"{v}"] for k, v in hparams.items()], [])
-
-                future = client.submit(run_job, str(args.job_filename), cmd_args, str(work_dir))
-
-                future_to_trial[future] = {"trial": trial, "result_file": result_filename, "job_name": job_name}
-
+                future = client.submit(objective_func, **hparams)
+                future_to_trial[future] = {"trial": trial}
                 submitted_job_count += 1
 
             for future in list(future_to_trial.keys()):
                 if future.done():
                     trial_info = future_to_trial.pop(future)
                     trial = trial_info["trial"]
-                    result_file = trial_info["result_file"]
-
-                    result = future.result()
-
-                    if result["success"]:
-                        with open(result_file, "rb") as f:
-                            y = pkl.load(f)
-                        study._log_completed_trial(study.tell(trial, y))
-                    else:
-                        study.tell(trial, float("inf"))
-
+                    y = future.result()
+                    study._log_completed_trial(study.tell(trial, y))
                     finished_job_count += 1
+                    continue
+                else:
+                    time.sleep(0.5)
 
             if n_to_submit == 0 and active_jobs == len([f for f in future_to_trial if not f.done()]):
                 time.sleep(0.5)
