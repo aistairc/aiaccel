@@ -36,53 +36,71 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
     OmegaConfDumper.str_representer_added = True
 
 
-def _load_child_config(config_filename: Path, config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+def _load_child_config(
+    config: DictConfig | ListConfig,
+    org_config: DictConfig | ListConfig | None = None,
+) -> DictConfig | ListConfig:
     # load child DictConfig to process child _base_
     if isinstance(config, DictConfig):
         temp_dict_config = copy.deepcopy(config)
         for key, value in config.items():
             if isinstance(value, DictConfig | ListConfig):
-                temp_dict_config[key] = resolve_inherit(config_filename, value)
+                temp_dict_config[key] = resolve_inherit(value, org_config)
         return temp_dict_config
     elif isinstance(config, ListConfig):
         temp_list_config = copy.deepcopy(config)
         for i, value in enumerate(config):
             if isinstance(value, DictConfig | ListConfig):
-                temp_list_config[i] = resolve_inherit(config_filename, value)
+                temp_list_config[i] = resolve_inherit(value, org_config)
         return temp_list_config
 
 
+def find_key(target_key: str, config: DictConfig | ListConfig) -> Any:
+    child_configs: list[Any] = []
+
+    if isinstance(config, DictConfig):
+        if target_key in config:
+            return config[target_key]
+        child_configs = [config.values()]
+    elif isinstance(config, ListConfig):
+        child_configs = [config]
+
+    for child_config in child_configs:
+        if isinstance(child_config, DictConfig | ListConfig):
+            result = find_key(target_key, child_config)
+            if result is not None:
+                return result
+
+    return None
+
+
 def resolve_inherit(
-    config_filename: str | Path,
-    parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
-    is_load_file: bool = False,
+    config: DictConfig | ListConfig,
+    org_config: DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
-    if not isinstance(config_filename, Path):
-        config_filename = Path(config_filename)
-
-    if not config_filename.is_absolute():
-        config_filename = Path.cwd() / config_filename
-
-    if parent_config is None:
-        parent_config = {}
-
-    config = oc.merge(oc.load(config_filename), parent_config) if is_load_file else oc.create(parent_config)
+    retry_flag = False
+    if org_config is None:
+        org_config = copy.deepcopy(config)
 
     if isinstance(config, DictConfig) and "_inherit_" in config:
         # process _inherit_
-        base_paths = config["_inherit_"]
-        if not isinstance(base_paths, ListConfig):
-            base_paths = [base_paths]
+        inherit_keys = config["_inherit_"]
+        if not isinstance(inherit_keys, ListConfig):
+            inherit_keys = [inherit_keys]
 
         config.pop("_inherit_")
-        for base_path in map(Path, base_paths):
-            if not base_path.is_absolute():
-                base_path = config_filename.parent / base_path
+        retry_flag = True
 
-            config = resolve_inherit(base_path, config, True)
+        for inherit_key in inherit_keys:
+            inherit_config = find_key(inherit_key, org_config)
+            if inherit_config is not None:
+                config = oc.merge(inherit_config, config)
 
     if isinstance(config, DictConfig | ListConfig):
-        config = _load_child_config(config_filename, config)
+        config = _load_child_config(config, org_config)
+
+    if retry_flag:
+        config = resolve_inherit(config, org_config)
 
     return config
 
