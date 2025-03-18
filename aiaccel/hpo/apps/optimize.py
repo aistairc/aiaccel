@@ -73,11 +73,11 @@ def main() -> None:
 
     Usage:
         - Start a new study:
-            python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml
+            python -m aiaccel.hpo.apps.optimize --config config.yaml
         - Resume from the previous study:
-            python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml --resume
+            python -m aiaccel.hpo.apps.optimize --config config.yaml --resume
         - Make the study resumable:
-            python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml --resumable
+            python -m aiaccel.hpo.apps.optimize --config config.yaml --resumable
 
     Config file (yaml) example:
         ~~~ yaml
