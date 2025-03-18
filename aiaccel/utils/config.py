@@ -78,18 +78,16 @@ def resolve_inherit(
     config: DictConfig | ListConfig,
     org_config: DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
-    retry_flag = False
     if org_config is None:
         org_config = copy.deepcopy(config)
 
-    if isinstance(config, DictConfig) and "_inherit_" in config:
+    while isinstance(config, DictConfig) and "_inherit_" in config:
         # process _inherit_
         inherit_keys = config["_inherit_"]
         if not isinstance(inherit_keys, ListConfig):
             inherit_keys = [inherit_keys]
 
         config.pop("_inherit_")
-        retry_flag = True
 
         for inherit_key in inherit_keys:
             inherit_config = find_key(inherit_key, org_config)
@@ -98,9 +96,6 @@ def resolve_inherit(
 
     if isinstance(config, DictConfig | ListConfig):
         config = _load_child_config(config, org_config)
-
-    if retry_flag:
-        config = resolve_inherit(config, org_config)
 
     return config
 
