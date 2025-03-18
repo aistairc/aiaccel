@@ -81,6 +81,7 @@ def resolve_inherit(
     if org_config is None:
         org_config = copy.deepcopy(config)
 
+    used_keys = []
     while isinstance(config, DictConfig) and "_inherit_" in config:
         # process _inherit_
         inherit_keys = config["_inherit_"]
@@ -90,6 +91,9 @@ def resolve_inherit(
         config.pop("_inherit_")
 
         for inherit_key in inherit_keys:
+            if inherit_key in used_keys:
+                raise RecursionError("Circular reference in _inherit_.")
+            used_keys.append(inherit_key)
             inherit_config = find_key(inherit_key, org_config)
             if inherit_config is not None:
                 config = oc.merge(inherit_config, config)
