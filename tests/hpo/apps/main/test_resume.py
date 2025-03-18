@@ -3,13 +3,13 @@ import os
 from pathlib import Path
 import shutil
 import sqlite3
+import subprocess
 import tempfile
 from unittest.mock import patch
 import uuid
 
 import pytest
-import subprocess
-import pickle as pkl
+
 
 @pytest.fixture
 def temp_dir() -> Generator[Path]:
@@ -128,8 +128,6 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     study_name_normal = f"test_study_{uuid.uuid4().hex[:8]}"
     normal_config = modify_config(temp_dir / "config.yaml", study_name_normal, 30, normal_db)
 
-    # with patch("sys.argv", ["--config", str(normal_config)]):
-    #     main()
     with patch("sys.argv", ["optimize.py", "--config", str(normal_config)]):
         main()
 
@@ -172,9 +170,11 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     resume_best = min(resume_results)
     assert len(resume_results) == 30, "Split execution should have 30 trials"
     ## optuna's best value VS aiaccel's best value (normal execution)
-    assert abs(normal_expected_best - normal_best) < 1e-6, f"Best values differ: normal={normal_best}, optuna={normal_expected_best}"
+    assert abs(normal_expected_best - normal_best) < 1e-6, \
+        f"Best values differ: normal={normal_best}, optuna={normal_expected_best}"
     ## optuna's best value VS aiaccel's best value (resume execution)
-    assert abs(resume_expected_best - resume_best) < 1e-6, f"Best values differ: resume={resume_best}, optuna={resume_expected_best}"
+    assert abs(resume_expected_best - resume_best) < 1e-6, \
+        f"Best values differ: resume={resume_best}, optuna={resume_expected_best}"
 
 
 

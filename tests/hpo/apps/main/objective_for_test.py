@@ -1,12 +1,15 @@
-import optuna
 from pathlib import Path
 import pickle as pkl
+
+import optuna
+from optuna.trial import Trial
+
 
 def main(x1: float, x2: float) -> float:
     y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
     return y
 
-def objective(trial):
+def objective(trial: Trial) -> float:
     x1 = trial.suggest_float("x1", 0.0, 1.0)
     x2 = trial.suggest_float("x2", 0.0, 1.0)
     return main(x1, x2)
@@ -24,8 +27,14 @@ if __name__ == "__main__":
         db_path.unlink()
 
     storage = optuna.storages.RDBStorage(url=url)
-    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=0), storage=storage, study_name=study_name)
-    for i in range(30):
+    study = optuna.create_study(
+        direction="minimize",
+        sampler=optuna.samplers.TPESampler(seed=0),
+        storage=storage,
+        study_name=study_name
+    )
+
+    for _ in range(30):
         trial = study.ask()
         y = main(x1 = trial.suggest_float("x1", 0.0, 1.0), x2 = trial.suggest_float("x2", 0.0, 1.0))
         study._log_completed_trial(study.tell(trial, y))
@@ -44,20 +53,27 @@ if __name__ == "__main__":
         db_path.unlink()
 
     storage = optuna.storages.RDBStorage(url=url)
-    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=0), storage=storage, study_name=study_name)
+    study = optuna.create_study(
+        direction="minimize",
+        sampler=optuna.samplers.TPESampler(seed=0),
+        storage=storage,
+        study_name=study_name
+    )
 
-    # study.optimize(objective, n_trials=1)
-
-    for i in range(15):
+    for _ in range(15):
         trial = study.ask()
         y = main(x1 = trial.suggest_float("x1", 0.0, 1.0), x2 = trial.suggest_float("x2", 0.0, 1.0))
         study._log_completed_trial(study.tell(trial, y))
 
     # resume
     print("resume after 14 trials")
-    study = optuna.load_study(study_name=study_name, sampler=optuna.samplers.TPESampler(seed=0), storage=url)
+    study = optuna.load_study(
+        study_name=study_name,
+        sampler=optuna.samplers.TPESampler(seed=0),
+        storage=url
+    )
 
-    for i in range(15):
+    for _ in range(15):
         trial = study.ask()
         y = main(x1 = trial.suggest_float("x1", 0.0, 1.0), x2 = trial.suggest_float("x2", 0.0, 1.0))
         study._log_completed_trial(study.tell(trial, y))
@@ -69,12 +85,13 @@ if __name__ == "__main__":
 
     # ==========================================================
     # compare
-    try:
-        with open("./test_resume.pkl", "rb") as f:
-            study_resume = pkl.load(f)
-        with open("./test_notmal.pkl", "rb") as f:
-            study_normal = pkl.load(f)
-        assert study_resume.best_value == study_normal.best_value, f"resume: {study_resume.best_value}, normal: {study_normal.best_value}"
-    except Exception as e:
-        print(e)
+    with open("./test_resume.pkl", "rb") as f:
+        study_resume = pkl.load(f)
+    with open("./test_notmal.pkl", "rb") as f:
+        study_normal = pkl.load(f)
 
+    try:
+        assert study_resume.best_value == study_normal.best_value, \
+            f"resume: {study_resume.best_value}, normal: {study_normal.best_value}"
+    except AssertionError as e:
+        print(e)
