@@ -38,20 +38,20 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
 
 def _load_child_config(
     config: DictConfig | ListConfig,
-    org_config: DictConfig | ListConfig | None = None,
+    original_config: DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
     # load child DictConfig to process child _base_
     if isinstance(config, DictConfig):
         temp_dict_config = copy.deepcopy(config)
         for key, value in config.items():
             if isinstance(value, DictConfig | ListConfig):
-                temp_dict_config[key] = resolve_inherit(value, org_config)
+                temp_dict_config[key] = resolve_inherit(value, original_config)
         return temp_dict_config
     elif isinstance(config, ListConfig):
         temp_list_config = copy.deepcopy(config)
         for i, value in enumerate(config):
             if isinstance(value, DictConfig | ListConfig):
-                temp_list_config[i] = resolve_inherit(value, org_config)
+                temp_list_config[i] = resolve_inherit(value, original_config)
         return temp_list_config
 
 
@@ -76,10 +76,10 @@ def find_key(target_key: str, config: DictConfig | ListConfig) -> Any:
 
 def resolve_inherit(
     config: DictConfig | ListConfig,
-    org_config: DictConfig | ListConfig | None = None,
+    original_config: DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
-    if org_config is None:
-        org_config = copy.deepcopy(config)
+    if original_config is None:
+        original_config = copy.deepcopy(config)
 
     used_keys = []
     while isinstance(config, DictConfig) and "_inherit_" in config:
@@ -94,12 +94,12 @@ def resolve_inherit(
             if inherit_key in used_keys:
                 raise RecursionError("Circular reference in _inherit_.")
             used_keys.append(inherit_key)
-            inherit_config = find_key(inherit_key, org_config)
+            inherit_config = find_key(inherit_key, original_config)
             if inherit_config is not None:
                 config = oc.merge(inherit_config, config)
 
     if isinstance(config, DictConfig | ListConfig):
-        config = _load_child_config(config, org_config)
+        config = _load_child_config(config, original_config)
 
     return config
 
