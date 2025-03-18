@@ -116,8 +116,7 @@ def modify_config(config_path: Path, study_name: str, n_trials: int, db_name: st
 
 
 def test_optimization_consistency(temp_dir: Path) -> None:
-    """Test that split execution (resumable + resume) gives same results as normal execution.
-    """
+    """Test that split execution (resumable + resume) gives same results as normal execution."""
     from aiaccel.hpo.apps.optimize import main
 
     # Use different database files for normal and split execution
@@ -162,7 +161,7 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     # get best value
     normal_result = get_trial_values(temp_dir / "test_normal.db", "test_study_normal")
     normal_expected_best = min(normal_result)
-    resume_result = get_trial_values(temp_dir/ "test_resume.db", "test_study_resume")
+    resume_result = get_trial_values(temp_dir / "test_resume.db", "test_study_resume")
     resume_expected_best = min(resume_result)
 
     # Compare results
@@ -170,12 +169,13 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     resume_best = min(resume_results)
     assert len(resume_results) == 30, "Split execution should have 30 trials"
     ## optuna's best value VS aiaccel's best value (normal execution)
-    assert abs(normal_expected_best - normal_best) < 1e-6, \
+    assert abs(normal_expected_best - normal_best) < 1e-6, (
         f"Best values differ: normal={normal_best}, optuna={normal_expected_best}"
+    )
     ## optuna's best value VS aiaccel's best value (resume execution)
-    assert abs(resume_expected_best - resume_best) < 1e-6, \
+    assert abs(resume_expected_best - resume_best) < 1e-6, (
         f"Best values differ: resume={resume_best}, optuna={resume_expected_best}"
-
+    )
 
 
 def test_normal_execution(temp_dir: Path) -> None:
