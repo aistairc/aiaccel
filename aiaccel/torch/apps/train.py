@@ -77,7 +77,7 @@ def main() -> None:
     if args.print_script:
         print(config.train_script)
     elif args.submit_job:
-        import subprocess
+        from aiaccel.utils import submit_job
 
         status_list = collect_git_status_from_config(config)
         print_git_status(status_list)
@@ -85,10 +85,12 @@ def main() -> None:
         if not all(st.ready() for st in status_list):
             logging.error("There are remaining uncommited file(s).")
         else:
-            with open(Path(config.working_directory) / "train.sh", "w") as f:
-                f.write(config.train_script)
-
-            subprocess.run(config.job_submission_script.format(job_filename=f.name), shell=True)
+            submit_job(
+                config.train_script,
+                config.job_submission_script,
+                config.working_directory,
+                script_name="train.sh",
+            )
     else:
         import lightning as lt
 
