@@ -79,8 +79,14 @@ def main() -> None:
     elif args.submit_job:
         from aiaccel.utils import submit_job
 
+        oc.register_new_resolver("oc.env", lambda *args: None, replace=True)
+
         status_list = collect_git_status_from_config(config)
         print_git_status(status_list)
+
+        from omegaconf.resolvers.oc import env
+
+        oc.register_new_resolver("oc.env", env, replace=True)
 
         if not all(st.ready() for st in status_list):
             logging.error("There are remaining uncommited file(s).")
