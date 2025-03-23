@@ -36,24 +36,6 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
     OmegaConfDumper.str_representer_added = True
 
 
-def _load_child_config(
-    config: DictConfig | ListConfig,
-    original_config: DictConfig | ListConfig | None = None,
-) -> DictConfig | ListConfig:
-    # load child DictConfig to process child _base_
-    if isinstance(config, DictConfig):
-        temp_dict_config = copy.deepcopy(config)
-        for key, value in config.items():
-            if isinstance(value, DictConfig | ListConfig):
-                temp_dict_config[key] = resolve_inherit(value, original_config)
-        return temp_dict_config
-    elif isinstance(config, ListConfig):
-        temp_list_config = copy.deepcopy(config)
-        for i, value in enumerate(config):
-            if isinstance(value, DictConfig | ListConfig):
-                temp_list_config[i] = resolve_inherit(value, original_config)
-        return temp_list_config
-
 
 def find_key(target_key: str, config: DictConfig | ListConfig) -> Any:
     config_values: list[Any] = []
@@ -98,8 +80,14 @@ def resolve_inherit(
             if inherit_config is not None:
                 config = oc.merge(inherit_config, config)
 
-    if isinstance(config, DictConfig | ListConfig):
-        config = _load_child_config(config, original_config)
+    # load child DictConfig to process child _base_
+    if isinstance(config, (DictConfig, ListConfig)):
+        dst_config = copy.deepcopy(config)
+
+        for key in config.keys() if isinstance(config, DictConfig) else range(len(config)):
+            dst_config[key] = resolve_inherit(config[key], original_config)
+
+        config = dst_config
 
     return config
 
