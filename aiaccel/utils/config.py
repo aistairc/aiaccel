@@ -81,7 +81,7 @@ def resolve_inherit(
                 config = oc.merge(inherit_config, config)
 
     # load child DictConfig to process child _base_
-    if isinstance(config, (DictConfig, ListConfig)):
+    if isinstance(config, DictConfig | ListConfig):
         dst_config = copy.deepcopy(config)
 
         for key in config.keys() if isinstance(config, DictConfig) else range(len(config)):
