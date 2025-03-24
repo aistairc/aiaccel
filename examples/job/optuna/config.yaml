@@ -15,7 +15,7 @@ params:
     log: false
 
 objective:
-  _target_: objective_for_test.main
+  _target_: objective.main
 
 n_trials: 30
 n_max_jobs: 4

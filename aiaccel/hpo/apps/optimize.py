@@ -133,7 +133,6 @@ def main() -> None:
     print_config(config)
 
     client = instantiate(config.cluster)
-    client.cluster.scale(config.n_max_jobs)
 
     work_dir = Path.cwd()
     work_dir.mkdir(parents=True, exist_ok=True)
