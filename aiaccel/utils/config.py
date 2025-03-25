@@ -55,13 +55,7 @@ def find_key(target_key: str, config: DictConfig | ListConfig) -> Any:
     return None
 
 
-def resolve_inherit(
-    config: DictConfig | ListConfig,
-    original_config: DictConfig | ListConfig | None = None,
-) -> DictConfig | ListConfig:
-    if original_config is None:
-        original_config = copy.deepcopy(config)
-
+def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
     while isinstance(config, DictConfig) and "_inherit_" in config:
         # process _inherit_
         inherit_configs = config["_inherit_"]
@@ -78,12 +72,12 @@ def resolve_inherit(
     if isinstance(config, DictConfig):
         dst_config_dict = copy.deepcopy(config)
         for key in config:
-            dst_config_dict[key] = resolve_inherit(config[key], original_config)
+            dst_config_dict[key] = resolve_inherit(config[key])
         config = dst_config_dict
     elif isinstance(config, ListConfig):
         dst_config_list = copy.deepcopy(config)
         for key in range(len(config)):
-            dst_config_list[key] = resolve_inherit(config[key], original_config)
+            dst_config_list[key] = resolve_inherit(config[key])
         config = dst_config_list
 
     return config
