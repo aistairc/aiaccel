@@ -36,25 +36,6 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
     OmegaConfDumper.str_representer_added = True
 
 
-def find_key(target_key: str, config: DictConfig | ListConfig) -> Any:
-    config_values: list[Any] = []
-
-    if isinstance(config, DictConfig):
-        if target_key in config:
-            return config[target_key]
-        config_values = [config.values()]
-    elif isinstance(config, ListConfig):
-        config_values = [config]
-
-    for config_value in config_values:
-        if isinstance(config_value, DictConfig | ListConfig):
-            result = find_key(target_key, config_value)
-            if result is not None:
-                return result
-
-    return None
-
-
 def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
     while isinstance(config, DictConfig) and "_inherit_" in config:
         # process _inherit_
