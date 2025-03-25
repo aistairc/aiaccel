@@ -36,7 +36,6 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
     OmegaConfDumper.str_representer_added = True
 
 
-
 def find_key(target_key: str, config: DictConfig | ListConfig) -> Any:
     config_values: list[Any] = []
 
@@ -63,31 +62,29 @@ def resolve_inherit(
     if original_config is None:
         original_config = copy.deepcopy(config)
 
-    inherited_keys = []
     while isinstance(config, DictConfig) and "_inherit_" in config:
         # process _inherit_
-        inherit_keys = config["_inherit_"]
-        if not isinstance(inherit_keys, ListConfig):
-            inherit_keys = [inherit_keys]
+        inherit_configs = config["_inherit_"]
+        if not isinstance(inherit_configs, ListConfig):
+            inherit_configs = [inherit_configs]
 
         config.pop("_inherit_")
 
-        for inherit_key in inherit_keys:
-            if inherit_key in inherited_keys:
-                raise RecursionError(f"Circular reference by {inherit_key} in _inherit_.")
-            inherited_keys.append(inherit_key)
-            inherit_config = find_key(inherit_key, original_config)
-            if inherit_config is not None:
+        for inherit_config in inherit_configs:
+            if isinstance(inherit_config, DictConfig):
                 config = oc.merge(inherit_config, config)
 
-    # load child DictConfig to process child _base_
-    if isinstance(config, DictConfig | ListConfig):
-        dst_config = copy.deepcopy(config)
-
-        for key in config.keys() if isinstance(config, DictConfig) else range(len(config)):
-            dst_config[key] = resolve_inherit(config[key], original_config)
-
-        config = dst_config
+    # load child DictConfig to process child _inherit_
+    if isinstance(config, DictConfig):
+        dst_config_dict = copy.deepcopy(config)
+        for key in config:
+            dst_config_dict[key] = resolve_inherit(config[key], original_config)
+        config = dst_config_dict
+    elif isinstance(config, ListConfig):
+        dst_config_list = copy.deepcopy(config)
+        for key in range(len(config)):
+            dst_config_list[key] = resolve_inherit(config[key], original_config)
+        config = dst_config_list
 
     return config
 
