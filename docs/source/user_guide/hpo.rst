@@ -286,7 +286,9 @@ Example using optuna.study.enqueue_trial:
     study = optuna.create_study(
         sampler=NelderMeadSampler(search_space=search_space, seed=42)
     )
+    study.enqueue_trial({"x": 1.0, "y": 1.0})
     study.enqueue_trial({"x": 1.0, "y": 2.0})
+    study.enqueue_trial({"x": 2.0, "y": 1.0})
     study.optimize(func=sphere, n_trials=100)
 
 Sub Sampler
