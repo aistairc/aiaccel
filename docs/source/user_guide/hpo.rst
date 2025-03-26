@@ -213,3 +213,89 @@ parameters take precedence over configuration file values:
 
     # Override parameters from config file
     python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml --params x1="[0,2]" x2="[0,2]"
+
+
+Optimizing NelderMeadSampler
+============================
+
+Basic Usage
+-----------
+
+Basic optimization example using NelderMeadSampler:
+
+Search Space
+~~~~~~~~~~~~
+
+NelderMeadSampler requires a search space as an argument.
+
+.. code-block:: python
+
+  search_space = {
+      "x": (-10.0, 10.0),
+      "y": (-10.0, 10.0),
+  }
+
+
+Objective Function
+~~~~~~~~~~~~~~~
+
+Set the Objective Function in the same way as in regular Optuna.
+The optimization target is the benchmark function Sphere.
+
+.. code-block:: python
+
+  def sphere(trial: optuna.trial.Trial) -> float:
+      params = []
+      for name, distribution in search_space.items():
+          params.append(trial.suggest_float(name, *distribution))
+
+      return float(np.sum(np.asarray(params) ** 2))
+
+
+Execute Optimization
+~~~~~~~~~~~~~~~~~~~~
+
+Specify NelderMeadSampler as the sampler and execute the optimization.
+
+.. code-block:: python
+
+    study = optuna.create_study(sampler=NelderMeadSampler(search_space=search_space, seed=42))
+    study.optimize(func=sphere, n_trials=100)
+
+
+Pallarel Optimization
+---------------------
+
+Example pallarel optimization:
+
+.. code-block:: python
+
+    study = optuna.create_study(sampler=NelderMeadSampler(search_space=search_space, seed=42, block=True))
+    study.optimize(func=sphere, n_trials=100, n_jobs=3)
+
+Parallel execution is enabled by setting the NelderMeadSampler argument block=True and the study.optimize argument n_jobs>2.
+
+
+Usage of optuna.study.enqueue_trial
+-----------------------------------
+
+Example using optuna.study.enqueue_trial:
+
+.. code-block:: python
+
+    study = optuna.create_study(sampler=NelderMeadSampler(search_space=search_space, seed=42))
+    study.enqueue_trial({"x": 1.0, "y": 2.0})
+    study.optimize(func=sphere, n_trials=100)
+
+
+Sub Sampler
+-----------
+
+Example using sub_sampler as optuna.samplers.TPESampler:
+
+.. code-block:: python
+
+    study = optuna.create_study(
+        sampler=NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=optuna.samplers.TPESampler(seed=42))
+    )
+    study.optimize(func=sphere, n_trials=100, n_jobs=3)
