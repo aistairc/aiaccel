@@ -232,25 +232,31 @@ Other Configuration Options
 - n_max_jobs: Maximum number of parallel jobs
 
 
-Execution Methods
-~~~~~~~~~~~~~~~~~
+Usage Examples
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Basic Usage
-+++++++++++
+Here are some common usage patterns:
 
-For more complex configurations, you can use a YAML configuration file:
+Start a new study:
 
 .. code-block:: bash
 
     python -m aiaccel.hpo.apps.optimize --config config.yaml
 
-Combining Configuration File and Command Line Parameters
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-You can override configuration file settings using command line parameters. Command line
-parameters take precedence over configuration file values:
+Resume from the previous study:
 
 .. code-block:: bash
 
-    # Override parameters from config file
-    python -m aiaccel.hpo.apps.optimize --config config.yaml --params x1="[0,2]" x2="[0,2]"
+    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume
+
+Make the study resumable (sets appropriate storage configuration):
+
+.. code-block:: bash
+
+    python -m aiaccel.hpo.apps.optimize --config config.yaml --resumable
+
+Resume a study and override parameters:
+
+.. code-block:: bash
+
+    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume --params x1="[0,2]"
