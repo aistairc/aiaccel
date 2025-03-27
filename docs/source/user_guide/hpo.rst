@@ -28,7 +28,6 @@ Basic configuration example:
 
 .. code-block:: yaml
 
-
     study:
         _target_: optuna.create_study
         direction: minimize
@@ -64,6 +63,7 @@ Study Configuration
 The study configuration controls the overall behavior of the optimization process:
 
 .. code-block:: yaml
+
     study:
         _target_: optuna.create_study
         direction: minimize     # 'minimize' or 'maximize' depending on your objective
@@ -86,12 +86,13 @@ Sampler Configuration
 The sampler determines the algorithm used to search the hyperparameter space:
 
 .. code-block:: yaml
+
     study:
         _target_: optuna.create_study
     direction: minimize
     sampler:
         _target_: optuna.samplers.TPESampler  # Tree-structured Parzen Estimator (default)
-        # TPE-specific parameters
+        # TPE-specific parameter
         seed: 42                           # For reproducibility
         n_startup_trials: 10               # Number of random trials before using TPE
 
@@ -113,6 +114,7 @@ Cluster Configuration
 The cluster section configures the distributed computing environment using Dask.distributed library for parallel execution of hyperparameter optimization tasks:
 
 .. code-block:: yaml
+
     cluster:
         _target_: distributed.Client
         n_workers: 4
@@ -127,6 +129,7 @@ Parameters Configuration
 The parameters section defines the hyperparameter search space using Optuna's suggestion methods wrapped by aiaccel:
 
 .. code-block:: yaml
+
     params:
         _convert_: partial
         _target_: aiaccel.hpo.apps.optimize.HparamsManager
@@ -217,6 +220,7 @@ Objective Function
 The objective function is the main function to be optimized:
 
 .. code-block:: yaml
+
     objective:
         _target_: objective.main
 
