@@ -13,7 +13,6 @@ Creating an Objective File
 Create a file that defines the objective function to be optimized:
 
 .. code-block:: python
-
     # objective.py
 
     def main(x1, x2) -> float:
@@ -27,7 +26,6 @@ Configuration
 Basic configuration example:
 
 .. code-block:: yaml
-
     study:
         _target_: optuna.create_study
         direction: minimize
@@ -63,7 +61,6 @@ Study Configuration
 The study configuration controls the overall behavior of the optimization process:
 
 .. code-block:: yaml
-
     study:
         _target_: optuna.create_study
         direction: minimize     # 'minimize' or 'maximize' depending on your objective
@@ -86,7 +83,6 @@ Sampler Configuration
 The sampler determines the algorithm used to search the hyperparameter space:
 
 .. code-block:: yaml
-
     study:
         _target_: optuna.create_study
     direction: minimize
@@ -114,7 +110,6 @@ Cluster Configuration
 The cluster section configures the distributed computing environment using Dask.distributed library for parallel execution of hyperparameter optimization tasks:
 
 .. code-block:: yaml
-
     cluster:
         _target_: distributed.Client
         n_workers: 4
@@ -129,7 +124,6 @@ Parameters Configuration
 The parameters section defines the hyperparameter search space using Optuna's suggestion methods wrapped by aiaccel:
 
 .. code-block:: yaml
-
     params:
         _convert_: partial
         _target_: aiaccel.hpo.apps.optimize.HparamsManager
@@ -160,7 +154,6 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 
 - SuggestFloat: For continuous parameters
 .. code-block:: yaml
-
     learning_rate:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
         name: learning_rate
@@ -170,7 +163,6 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 
 - SuggestInt: For integer parameters
 .. code-block:: yaml
-
     num_layers:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestInt
         name: num_layers
@@ -179,7 +171,6 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 
 - SuggestCategorical: For categorical parameters
 .. code-block:: yaml
-
     optimizer:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestCategorical
         name: optimizer
@@ -187,7 +178,6 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 
 - SuggestDiscreteUniform: For discrete uniform parameters
 .. code-block:: yaml
-
     batch_size:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestDiscreteUniform
         name: batch_size
@@ -197,7 +187,6 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 
 - SuggestLogUniform: For log-uniform parameters
 .. code-block:: yaml
-
     learning_rate:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogUniform
         name: learning_rate
@@ -206,7 +195,6 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 
 - SuggestLogInt: For log-int parameters
 .. code-block:: yaml
-
     num_layers:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogInt
         name: num_layers
@@ -220,7 +208,6 @@ Objective Function
 The objective function is the main function to be optimized:
 
 .. code-block:: yaml
-
     objective:
         _target_: objective.main
 
@@ -239,23 +226,19 @@ Here are some common usage patterns:
 Start a new study:
 
 .. code-block:: bash
-
     python -m aiaccel.hpo.apps.optimize --config config.yaml
 
 Resume from the previous study:
 
 .. code-block:: bash
-
     python -m aiaccel.hpo.apps.optimize --config config.yaml --resume
 
 Make the study resumable (sets appropriate storage configuration):
 
 .. code-block:: bash
-
     python -m aiaccel.hpo.apps.optimize --config config.yaml --resumable
 
 Resume a study and override parameters:
 
 .. code-block:: bash
-
     python -m aiaccel.hpo.apps.optimize --config config.yaml --resume --params x1="[0,2]"
