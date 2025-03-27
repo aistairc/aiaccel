@@ -261,6 +261,8 @@ Specify NelderMeadSampler as the sampler and execute the optimization.
     )
     study.optimize(func=sphere, n_trials=100)
 
+Full code is examples/hpo/samplers/example.py
+
 Pallarel Optimization
 ---------------------
 
@@ -275,6 +277,9 @@ Example pallarel optimization:
 
 Parallel execution is enabled by setting the NelderMeadSampler argument block=True and
 the study.optimize argument n_jobs>2.
+By enabling parallel execution, the initial point calculation and the computation during shrinking can be parallelized, leading to faster execution compared to serial execution.
+
+Full code is examples/hpo/samplers/example_parallel.py
 
 Usage of optuna.study.enqueue_trial
 -----------------------------------
@@ -291,6 +296,10 @@ Example using optuna.study.enqueue_trial:
     study.enqueue_trial({"x": 2.0, "y": 1.0})
     study.optimize(func=sphere, n_trials=100)
 
+Utilizing the ask-tell interface, random parameters are explored using enqueue_trial when NelderMeadSampler fails to output parameters.
+
+Full code is examples/hpo/samplers/example_parallel.py
+
 Sub Sampler
 -----------
 
@@ -306,3 +315,8 @@ Example using sub_sampler as optuna.samplers.TPESampler:
         )
     )
     study.optimize(func=sphere, n_trials=100, n_jobs=3)
+
+When sub_sampler=optuna.samplers.TPESampler is set as an argument for NelderMeadSampler, TPESampler is used for exploration when NelderMeadSampler fails to output parameters.
+When using the sub_sampler function, the argument block=False must be set even if it is parallel. (Parallel execution is possible even with block=False.)
+
+Full code is examples/hpo/samplers/example_sub_sampler.py
