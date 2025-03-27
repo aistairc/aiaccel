@@ -79,7 +79,6 @@ The study configuration controls the overall behavior of the optimization proces
         _target_: optuna.samplers.TPESampler
         seed: 42
 
-
 Sampler Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
