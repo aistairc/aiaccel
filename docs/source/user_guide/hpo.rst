@@ -85,12 +85,12 @@ The sampler determines the algorithm used to search the hyperparameter space:
 .. code-block:: yaml
     study:
         _target_: optuna.create_study
-    direction: minimize
-    sampler:
-        _target_: optuna.samplers.TPESampler  # Tree-structured Parzen Estimator (default)
-        # TPE-specific parameter
-        seed: 42                           # For reproducibility
-        n_startup_trials: 10               # Number of random trials before using TPE
+        direction: minimize
+        sampler:
+            _target_: optuna.samplers.TPESampler  # Tree-structured Parzen Estimator (default)
+            # TPE-specific parameter
+            seed: 42                           # For reproducibility
+            n_startup_trials: 10               # Number of random trials before using TPE
 
 Available samplers include:
 
