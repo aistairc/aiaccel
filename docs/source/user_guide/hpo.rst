@@ -67,22 +67,18 @@ The study configuration controls the overall behavior of the optimization proces
     study:
         _target_: optuna.create_study
         direction: minimize     # 'minimize' or 'maximize' depending on your objective
-        study_name: my_study    # Optional: name for the study
+        study_name: my_study    # Name of the study (optional)
         storage:  # This item is not required. This item is not required if there is no need to record it in the file.
             _target_: optuna.storages.RDBStorage
             url: sqlite:///example.db
             engine_kwargs:
                 connect_args:
                     timeout: 30
-    load_if_exists: true    # Optional: continue from existing study
-    sampler:                # Optional: configure custom sampler
+    load_if_exists: true    # Load existing study if it exists
+    sampler:
         _target_: optuna.samplers.TPESampler
         seed: 42
-    pruner:                 # Optional: configure pruning algorithm
-        _target_: optuna.pruners.MedianPruner
-        n_startup_trials: 5
-        n_warmup_steps: 0
-        interval_steps: 1
+
 
 Sampler Configuration
 ~~~~~~~~~~~~~~~~~~~~~
