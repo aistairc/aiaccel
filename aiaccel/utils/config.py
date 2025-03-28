@@ -37,8 +37,19 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
 
 
 def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    """Resolve _inherit_ in config
+
+    Merge the dict in ``_inherit_`` into a dict of the same hierarchy.
+    ``_inherit_`` is specified by omegaconf interpolation
+
+    Args:
+        config (DictConfig | ListConfig): The configuration loaded by load_config
+
+    Returns:
+        DictConfig | ListConfig: The configuration without ``_inherit_``
+    """
     while isinstance(config, DictConfig) and "_inherit_" in config:
-        # process _inherit_
+        # resolve _inherit_
         inherit_configs = config["_inherit_"]
         if not isinstance(inherit_configs, ListConfig):
             inherit_configs = [inherit_configs]
@@ -49,7 +60,7 @@ def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
             if isinstance(inherit_config, DictConfig):
                 config = oc.merge(inherit_config, config)
 
-    # load child DictConfig to process child _inherit_
+    # load child DictConfig to resolve child _inherit_
     if isinstance(config, DictConfig):
         dst_config_dict = copy.deepcopy(config)
         for key in config:
