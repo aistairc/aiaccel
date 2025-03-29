@@ -4,6 +4,7 @@ from typing import Any
 
 from pathlib import Path
 import pickle as pkl
+import json
 
 import torch
 from torch.utils.data import Dataset
@@ -43,8 +44,13 @@ class RawHDF5Dataset(Dataset[dict[str, Any]]):
             with h5.File(self.dataset_path, "r") as f:
                 self.grp_list = list(f.keys())
         elif isinstance(grp_list, (str | Path)):
-            with open(grp_list, "rb") as f:
-                self.grp_list = pkl.load(f)
+            grp_list = Path(grp_list)
+            if grp_list.suffix == ".pkl":
+                with open(grp_list, "rb") as f:
+                    self.grp_list = pkl.load(f)
+            elif grp_list.suffix == ".json":
+                with open(grp_list, "r") as f:
+                    self.grp_list = json.load(f)
         elif isinstance(grp_list, list):
             self.grp_list = grp_list
         else:

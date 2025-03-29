@@ -15,6 +15,8 @@ from aiaccel.utils import (
     print_git_status,
 )
 
+import lightning as lt
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,18 +49,6 @@ def main() -> None:
 
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
-    parser.add_argument(
-        "-s",
-        "--submit_job",
-        action="store_true",
-        help="Submit a training job using the command specified in the config file",
-    )
-    parser.add_argument(
-        "-p",
-        "--print_script",
-        action="store_true",
-        help="Generate the training command from the config file and print it",
-    )
     args, unk_args = parser.parse_known_args()
 
     # load config
@@ -74,53 +64,27 @@ def main() -> None:
         oc.from_cli(unk_args),
     )
 
-    if args.print_script:
-        print(config.train_script)
-    elif args.submit_job:
-        from aiaccel.utils import submit_job
+    if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
+        print_config(config)
 
-        oc.register_new_resolver("oc.env", lambda *args: None, replace=True)
+    # build trainer
+    trainer: lt.Trainer = instantiate(config.trainer)
 
-        status_list = collect_git_status_from_config(config)
-        print_git_status(status_list)
-
-        from omegaconf.resolvers.oc import env
-
-        oc.register_new_resolver("oc.env", env, replace=True)
-
-        if not all(st.ready() for st in status_list):
-            logging.error("There are remaining uncommited file(s).")
+    # save config
+    if trainer.is_global_zero:
+        if "merged_config_path" in config:
+            merged_config_path = config.merged_config_path
         else:
-            submit_job(
-                config.train_script,
-                config.job_submission_script,
-                config.working_directory,
-                script_name="train.sh",
-            )
-    else:
-        import lightning as lt
+            merged_config_path = Path(config.working_directory) / "config_merged.yaml"
 
-        if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
-            print_config(config)
+        with open(merged_config_path, "w") as f:
+            oc.save(pathlib2str_config(config), f)
 
-        # build trainer
-        trainer: lt.Trainer = instantiate(config.trainer)
-
-        # save config
-        if trainer.is_global_zero:
-            if "merged_config_path" in config:
-                merged_config_path = config.merged_config_path
-            else:
-                merged_config_path = Path(config.working_directory) / "config_merged.yaml"
-
-            with open(merged_config_path, "w") as f:
-                oc.save(pathlib2str_config(config), f)
-
-        # start training
-        trainer.fit(
-            model=instantiate(config.task),
-            datamodule=instantiate(config.datamodule),
-        )
+    # start training
+    trainer.fit(
+        model=instantiate(config.task),
+        datamodule=instantiate(config.datamodule),
+    )
 
 
 if __name__ == "__main__":
