@@ -13,8 +13,8 @@ Creating an Objective File
 Create a file that defines the objective function to be optimized:
 
 .. code-block:: python
-    # objective.py
 
+    # objective.py
     def main(x1, x2) -> float:
         y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
         return y
@@ -26,6 +26,7 @@ Configuration
 Basic configuration example:
 
 .. code-block:: yaml
+
     study:
         _target_: optuna.create_study
         direction: minimize
@@ -61,6 +62,7 @@ Study Configuration
 The study configuration controls the overall behavior of the optimization process:
 
 .. code-block:: yaml
+
     study:
         _target_: optuna.create_study
         direction: minimize     # 'minimize' or 'maximize' depending on your objective
@@ -83,6 +85,7 @@ Sampler Configuration
 The sampler determines the algorithm used to search the hyperparameter space:
 
 .. code-block:: yaml
+
     study:
         _target_: optuna.create_study
         direction: minimize
@@ -110,6 +113,7 @@ Cluster Configuration
 The cluster section configures the distributed computing environment using Dask.distributed library for parallel execution of hyperparameter optimization tasks:
 
 .. code-block:: yaml
+
     cluster:
         _target_: distributed.Client
         n_workers: 4
@@ -124,6 +128,7 @@ Parameters Configuration
 The parameters section defines the hyperparameter search space using Optuna's suggestion methods wrapped by aiaccel:
 
 .. code-block:: yaml
+
     params:
         _convert_: partial
         _target_: aiaccel.hpo.apps.optimize.HparamsManager
@@ -153,7 +158,9 @@ Parameter Types
 aiaccel supports multiple parameter types through different suggestion wrappers:
 
 - SuggestFloat: For continuous parameters
+
 .. code-block:: yaml
+
     learning_rate:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
         name: learning_rate
@@ -162,7 +169,9 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         log: true  # Use logarithmic scale for learning rates
 
 - SuggestInt: For integer parameters
+
 .. code-block:: yaml
+
     num_layers:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestInt
         name: num_layers
@@ -170,14 +179,18 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         high: 10
 
 - SuggestCategorical: For categorical parameters
+
 .. code-block:: yaml
+
     optimizer:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestCategorical
         name: optimizer
         choices: ['adam', 'sgd', 'rmsprop']
 
 - SuggestDiscreteUniform: For discrete uniform parameters
+
 .. code-block:: yaml
+
     batch_size:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestDiscreteUniform
         name: batch_size
@@ -186,7 +199,9 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         q: 32
 
 - SuggestLogUniform: For log-uniform parameters
+
 .. code-block:: yaml
+
     learning_rate:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogUniform
         name: learning_rate
@@ -194,7 +209,9 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         high: 0.1
 
 - SuggestLogInt: For log-int parameters
+
 .. code-block:: yaml
+
     num_layers:
         _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogInt
         name: num_layers
@@ -208,6 +225,7 @@ Objective Function
 The objective function is the main function to be optimized:
 
 .. code-block:: yaml
+
     objective:
         _target_: objective.main
 
@@ -226,19 +244,134 @@ Here are some common usage patterns:
 Start a new study:
 
 .. code-block:: bash
+
     python -m aiaccel.hpo.apps.optimize --config config.yaml
 
 Resume from the previous study:
 
 .. code-block:: bash
+
     python -m aiaccel.hpo.apps.optimize --config config.yaml --resume
 
 Make the study resumable (sets appropriate storage configuration):
 
 .. code-block:: bash
+
     python -m aiaccel.hpo.apps.optimize --config config.yaml --resumable
 
 Resume a study and override parameters:
 
 .. code-block:: bash
+
     python -m aiaccel.hpo.apps.optimize --config config.yaml --resume --params x1="[0,2]"
+
+Optimizing NelderMeadSampler
+============================
+
+Basic Usage
+-----------
+
+Basic optimization example using NelderMeadSampler:
+
+Search Space
+~~~~~~~~~~~~
+
+NelderMeadSampler requires a search space as an argument.
+
+.. code-block:: python
+
+    search_space = {
+        "x": (-10.0, 10.0),
+        "y": (-10.0, 10.0),
+    }
+
+Objective Function
+~~~~~~~~~~~~~~~~~~
+
+Set the Objective Function in the same way as in regular Optuna. The optimization target
+is the benchmark function Sphere.
+
+.. code-block:: python
+
+    def sphere(trial: optuna.trial.Trial) -> float:
+        params = []
+        for name, distribution in search_space.items():
+            params.append(trial.suggest_float(name, *distribution))
+
+        return float(np.sum(np.asarray(params) ** 2))
+
+Execute Optimization
+~~~~~~~~~~~~~~~~~~~~
+
+Specify NelderMeadSampler as the sampler and execute the optimization.
+
+.. code-block:: python
+
+    study = optuna.create_study(
+        sampler=NelderMeadSampler(search_space=search_space, seed=42)
+    )
+    study.optimize(func=sphere, n_trials=100)
+
+Full code is examples/hpo/samplers/example.py
+
+Pallarel Optimization
+---------------------
+
+Example pallarel optimization:
+
+.. code-block:: python
+
+    study = optuna.create_study(
+        sampler=NelderMeadSampler(search_space=search_space, seed=42, block=True)
+    )
+    study.optimize(func=sphere, n_trials=100, n_jobs=3)
+
+Parallel execution is enabled by setting the NelderMeadSampler argument block=True and
+the study.optimize argument n_jobs>2. By enabling parallel execution, the initial point
+calculation and the computation during shrinking can be parallelized, leading to faster
+execution compared to serial execution.
+
+Full code is examples/hpo/samplers/example_parallel.py
+
+Usage of optuna.study.enqueue_trial
+-----------------------------------
+
+Example using optuna.study.enqueue_trial:
+
+.. code-block:: python
+
+    study = optuna.create_study(
+        sampler=NelderMeadSampler(search_space=search_space, seed=42)
+    )
+    study.enqueue_trial({"x": 1.0, "y": 1.0})
+    study.enqueue_trial({"x": 1.0, "y": 2.0})
+    study.enqueue_trial({"x": 2.0, "y": 1.0})
+    study.optimize(func=sphere, n_trials=100)
+
+Utilizing the ask-tell interface, random parameters are explored using enqueue_trial
+when NelderMeadSampler fails to output parameters.
+
+Full code is examples/hpo/samplers/example_parallel.py
+
+Sub Sampler
+-----------
+
+Example using sub_sampler as optuna.samplers.TPESampler:
+
+.. code-block:: python
+
+    study = optuna.create_study(
+        sampler=NelderMeadSampler(
+            search_space=search_space,
+            seed=42,
+            sub_sampler=optuna.samplers.TPESampler(seed=42),
+        )
+    )
+    study.optimize(func=sphere, n_trials=100, n_jobs=3)
+
+When sub_sampler=optuna.samplers.TPESampler is set as an argument for NelderMeadSampler,
+TPESampler is used for exploration when NelderMeadSampler fails to output parameters.
+When using the sub_sampler function, the argument block=False must be set even if it is
+parallel. (Parallel execution is possible even with block=False.)
+
+Full code is examples/hpo/samplers/example_sub_sampler.py
