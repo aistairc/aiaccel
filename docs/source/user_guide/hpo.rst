@@ -19,7 +19,6 @@ Create a file that defines the objective function to be optimized:
         y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
         return y
 
-
 Configuration
 ~~~~~~~~~~~~~
 
@@ -53,7 +52,6 @@ Basic configuration example:
     n_trials: 30
     n_max_jobs: 1
 
-
 Study Configuration
 ~~~~~~~~~~~~~~~~~~~
 
@@ -81,8 +79,7 @@ The study configuration controls the overall behavior of the optimization proces
 Sampler Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
-(WIP)
-The sampler determines the algorithm used to search the hyperparameter space:
+(WIP) The sampler determines the algorithm used to search the hyperparameter space:
 
 .. code-block:: yaml
 
@@ -99,18 +96,19 @@ Available samplers include:
 
 - TPESampler: Efficient Bayesian optimization approach (recommended for most cases)
 - RandomSampler: Simple random search (useful as baseline)
-- CmaEsSampler: Covariance Matrix Adaptation Evolution Strategy (good for continuous parameters)
+- CmaEsSampler: Covariance Matrix Adaptation Evolution Strategy (good for continuous
+  parameters)
 - GridSampler: Exhaustive grid search (for small parameter spaces)
 - NSGAIISampler: For multi-objective optimization
 - NelderMeadSampler: Nelder-Mead optimization
-
 
 Cluster Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
 (WIP)
 
-The cluster section configures the distributed computing environment using Dask.distributed library for parallel execution of hyperparameter optimization tasks:
+The cluster section configures the distributed computing environment using
+Dask.distributed library for parallel execution of hyperparameter optimization tasks:
 
 .. code-block:: yaml
 
@@ -119,13 +117,13 @@ The cluster section configures the distributed computing environment using Dask.
         n_workers: 4
         threads_per_worker: 1
 
-
 Parameters Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 (WIP)
 
-The parameters section defines the hyperparameter search space using Optuna's suggestion methods wrapped by aiaccel:
+The parameters section defines the hyperparameter search space using Optuna's suggestion
+methods wrapped by aiaccel:
 
 .. code-block:: yaml
 
@@ -153,7 +151,7 @@ The parameters section defines the hyperparameter search space using Optuna's su
     x3: [0, 1]
 
 Parameter Types
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 aiaccel supports multiple parameter types through different suggestion wrappers:
 
@@ -218,7 +216,6 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         low: 1
         high: 10
 
-
 Objective Function
 ~~~~~~~~~~~~~~~~~~
 
@@ -235,9 +232,8 @@ Other Configuration Options
 - n_trials: Number of trials to run
 - n_max_jobs: Maximum number of parallel jobs
 
-
 Usage Examples
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 Here are some common usage patterns:
 
