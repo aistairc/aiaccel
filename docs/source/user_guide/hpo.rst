@@ -13,8 +13,8 @@ Creating an Objective File
 Create a file that defines the objective function to be optimized:
 
 .. code-block:: python
+    :caption: objective.py
 
-    # objective.py
     def main(x1, x2) -> float:
         y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
         return y
@@ -275,6 +275,7 @@ Search Space
 NelderMeadSampler requires a search space as an argument.
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example.py
 
     search_space = {
         "x": (-10.0, 10.0),
@@ -288,6 +289,7 @@ Set the Objective Function in the same way as in regular Optuna. The optimizatio
 is the benchmark function Sphere.
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example.py
 
     def sphere(trial: optuna.trial.Trial) -> float:
         params = []
@@ -302,6 +304,7 @@ Execute Optimization
 Specify NelderMeadSampler as the sampler and execute the optimization.
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example.py
 
     study = optuna.create_study(
         sampler=NelderMeadSampler(search_space=search_space, seed=42)
@@ -316,6 +319,7 @@ Pallarel Optimization
 Example pallarel optimization:
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example_parallel.py
 
     study = optuna.create_study(
         sampler=NelderMeadSampler(search_space=search_space, seed=42, block=True)
@@ -335,6 +339,7 @@ Usage of optuna.study.enqueue_trial
 Example using optuna.study.enqueue_trial:
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example_enqueue.py
 
     study = optuna.create_study(
         sampler=NelderMeadSampler(search_space=search_space, seed=42)
@@ -347,7 +352,7 @@ Example using optuna.study.enqueue_trial:
 Utilizing the ask-tell interface, random parameters are explored using enqueue_trial
 when NelderMeadSampler fails to output parameters.
 
-Full code is examples/hpo/samplers/example_parallel.py
+Full code is examples/hpo/samplers/example_enqueue.py
 
 Sub Sampler
 -----------
@@ -355,6 +360,7 @@ Sub Sampler
 Example using sub_sampler as optuna.samplers.TPESampler:
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example_sub_sampler.py
 
     study = optuna.create_study(
         sampler=NelderMeadSampler(
