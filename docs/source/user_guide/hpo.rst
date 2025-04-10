@@ -131,24 +131,24 @@ methods wrapped by aiaccel:
         _convert_: partial
         _target_: aiaccel.hpo.apps.optimize.HparamsManager
 
-    # Float parameter example
-    x1:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-        name: x1
-        low: 0.0
-        high: 1.0
-        log: false
+        # Float parameter example
+        x1:
+            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+            name: x1
+            low: 0.0
+            high: 1.0
+            log: false
 
-    # Another float parameter
-    x2:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-        name: x2
-        low: 0.0
-        high: 1.0
-        log: false
+        # Another float parameter
+        x2:
+            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+            name: x2
+            low: 0.0
+            high: 1.0
+            log: false
 
-    # Shorthand for float parameters
-    x3: [0, 1]
+        # Shorthand for float parameters
+        x3: [0, 1]
 
 Parameter Types
 ~~~~~~~~~~~~~~~
