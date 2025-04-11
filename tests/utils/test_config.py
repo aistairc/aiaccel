@@ -24,7 +24,7 @@ def test_resolve_inherit() -> None:
     loaded_config = oc.create(
         {
             "A": [{"_inherit_": ["${B}", "${C}"], "AA": "aa"}, {"AAA": "aaa"}],
-            "D": {"_inherit_": "E"},
+            "D": {"_inherit_": "${E}"},
             "E": {"EE": "ee"},
             "B": {"AA": "dummy", "BB": "bb"},
             "C": {"CC": "cc"},
@@ -33,7 +33,7 @@ def test_resolve_inherit() -> None:
     resolved_config = resolve_inherit(loaded_config)
     expected_config = {
         "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
-        "D": {},
+        "D": {"EE": "ee"},
         "E": {"EE": "ee"},
         "B": {"AA": "dummy", "BB": "bb"},
         "C": {"CC": "cc"},
