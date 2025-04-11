@@ -11,10 +11,10 @@ def test_load_config() -> None:
     loaded_config = load_config(Path(__file__).parent / "test_conf.yaml")
     expected_config = {
         "A": [{"_inherit_": ["${B}", "${C}"], "AA": "aa"}, {"AAA": "aaa"}],
-        "D": {"_inherit_": "E"},
-        "E": {"EE": "ee"},
         "B": {"AA": "dummy", "BB": "bb"},
         "C": {"CC": "cc"},
+        "D": {"_inherit_": "E"},
+        "E": {"EE": "ee"},
     }
 
     assert loaded_config == expected_config
@@ -24,19 +24,19 @@ def test_resolve_inherit() -> None:
     loaded_config = oc.create(
         {
             "A": [{"_inherit_": ["${B}", "${C}"], "AA": "aa"}, {"AAA": "aaa"}],
-            "D": {"_inherit_": "${E}"},
-            "E": {"EE": "ee"},
             "B": {"AA": "dummy", "BB": "bb"},
             "C": {"CC": "cc"},
+            "D": {"_inherit_": "${E}"},
+            "E": {"EE": "ee"},
         }
     )
     resolved_config = resolve_inherit(loaded_config)
     expected_config = {
         "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
-        "D": {"EE": "ee"},
-        "E": {"EE": "ee"},
         "B": {"AA": "dummy", "BB": "bb"},
         "C": {"CC": "cc"},
+        "D": {"EE": "ee"},
+        "E": {"EE": "ee"},
     }
 
     assert resolved_config == expected_config
