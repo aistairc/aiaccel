@@ -55,8 +55,6 @@ Basic configuration example:
 Study Configuration
 ~~~~~~~~~~~~~~~~~~~
 
-(WIP)
-
 The study configuration controls the overall behavior of the optimization process:
 
 .. code-block:: yaml
@@ -79,7 +77,7 @@ The study configuration controls the overall behavior of the optimization proces
 Sampler Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
-(WIP) The sampler determines the algorithm used to search the hyperparameter space:
+The sampler determines the algorithm used to search the hyperparameter space:
 
 .. code-block:: yaml
 
@@ -105,8 +103,6 @@ Available samplers include:
 Cluster Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
-(WIP)
-
 The cluster section configures the distributed computing environment using
 Dask.distributed library for parallel execution of hyperparameter optimization tasks:
 
@@ -114,13 +110,11 @@ Dask.distributed library for parallel execution of hyperparameter optimization t
 
     cluster:
         _target_: distributed.Client
-        n_workers: 4
-        threads_per_worker: 1
+        n_workers: 4  # Number of workers to start
+        threads_per_worker: 1  # Number of threads per each worker
 
 Parameters Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
-
-(WIP)
 
 The parameters section defines the hyperparameter search space using Optuna's suggestion
 methods wrapped by aiaccel:
