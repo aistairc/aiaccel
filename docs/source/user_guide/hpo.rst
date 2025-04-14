@@ -231,7 +231,6 @@ Other Configuration Options
     n_trials: 100
     n_max_jobs: 1  # default : 1
 
-
 Usage Examples
 ~~~~~~~~~~~~~~
 
