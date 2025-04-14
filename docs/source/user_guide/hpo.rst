@@ -60,7 +60,7 @@ The study configuration controls the overall behavior of the optimization proces
 .. code-block:: yaml
 
     study:
-        _target_: optuna.create_study
+        _target_: optuna.create_study  # default
         direction: minimize     # 'minimize' or 'maximize' depending on your objective
         study_name: my_study    # Name of the study (optional)
         storage:  # This item is not required. This item is not required if there is no need to record it in the file.
@@ -109,9 +109,9 @@ Dask.distributed library for parallel execution of hyperparameter optimization t
 .. code-block:: yaml
 
     cluster:
-        _target_: distributed.Client
-        n_workers: 4  # Number of workers to start
-        threads_per_worker: 1  # Number of threads per each worker
+        _target_: distributed.Client  # default
+        n_workers: 4  # Number of workers to start (default : 1)
+        threads_per_worker: 1  # Number of threads per each worker  (default : 1)
 
 Parameters Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -123,7 +123,7 @@ methods wrapped by aiaccel:
 
     params:
         _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager
+        _target_: aiaccel.hpo.apps.optimize.HparamsManager  # default
 
         # Float parameter example
         x1:
@@ -225,6 +225,12 @@ Other Configuration Options
 
 - n_trials: Number of trials to run
 - n_max_jobs: Maximum number of parallel jobs
+
+.. code-block:: yaml
+
+    n_trials: 100
+    n_max_jobs: 1  # default : 1
+
 
 Usage Examples
 ~~~~~~~~~~~~~~
