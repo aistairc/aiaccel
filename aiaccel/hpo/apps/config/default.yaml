@@ -3,8 +3,6 @@ study:
 
 cluster:
   _target_: distributed.Client
-  n_workers: 1
-  threads_per_worker: 1
 
 params:
   _convert_: partial
