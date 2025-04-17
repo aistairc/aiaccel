@@ -4,7 +4,42 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 import pytest
 
-from aiaccel.utils.config import pathlib2str_config, print_config
+from aiaccel.utils.config import load_config, pathlib2str_config, print_config, resolve_inherit
+
+
+def test_load_config() -> None:
+    loaded_config = load_config(Path(__file__).parent / "test_conf.yaml")
+    expected_config = {
+        "A": [{"_inherit_": ["${B}", "${C}"], "AA": "aa"}, {"AAA": "aaa"}],
+        "B": {"AA": "dummy", "BB": "bb"},
+        "C": {"CC": "cc"},
+        "D": {"_inherit_": "E"},
+        "E": {"EE": "ee"},
+    }
+
+    assert loaded_config == expected_config
+
+
+def test_resolve_inherit() -> None:
+    loaded_config = oc.create(
+        {
+            "A": [{"_inherit_": ["${B}", "${C}"], "AA": "aa"}, {"AAA": "aaa"}],
+            "B": {"AA": "dummy", "BB": "bb"},
+            "C": {"CC": "cc"},
+            "D": {"_inherit_": "${E}"},
+            "E": {"EE": "ee"},
+        }
+    )
+    resolved_config = resolve_inherit(loaded_config)
+    expected_config = {
+        "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
+        "B": {"AA": "dummy", "BB": "bb"},
+        "C": {"CC": "cc"},
+        "D": {"EE": "ee"},
+        "E": {"EE": "ee"},
+    }
+
+    assert resolved_config == expected_config
 
 
 def test_print_config(capfd: pytest.CaptureFixture[str]) -> None:
