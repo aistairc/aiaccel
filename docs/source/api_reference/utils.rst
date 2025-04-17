@@ -25,3 +25,13 @@ Git Utilities
     collect_git_status_from_config
     print_git_status
     PackageGitStatus
+
+Job Utilities
+-------------
+
+.. currentmodule:: aiaccel.utils
+
+.. autosummary::
+    :toctree: generated/
+
+    submit_job
