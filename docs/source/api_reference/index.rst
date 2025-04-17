@@ -6,4 +6,4 @@ API Reference
 
     torch
     hpo
-    utils
+    config
