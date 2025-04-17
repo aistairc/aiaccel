@@ -1,3 +1,5 @@
+_base_: config.yaml
+
 cluster:
     _target_: distributed.Client
     address:
@@ -13,25 +15,3 @@ cluster:
       walltime: "02:00:00"
       scheduler_options: {interface: "ibn2"}
       job_script_prologue: ["cd $PBS_O_WORKDIR"]
-
-params:
-  _convert_: partial
-  _target_: aiaccel.hpo.apps.optimize.HparamsManager
-  x1:
-    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-    name: x1
-    low: 0.0
-    high: 1.0
-    log: false
-  x2:
-    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-    name: x2
-    low: 0.0
-    high: 1.0
-    log: false
-
-objective:
-  _target_: objective.main
-
-n_trials: 30
-n_max_jobs: 4
