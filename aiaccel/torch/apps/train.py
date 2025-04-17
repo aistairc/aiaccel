@@ -6,45 +6,19 @@ from pathlib import Path
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
+import lightning as lt
+
 from aiaccel.utils import (
-    collect_git_status_from_config,
     load_config,
     overwrite_omegaconf_dumper,
     pathlib2str_config,
     print_config,
-    print_git_status,
 )
-
-import lightning as lt
 
 logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    """
-    Execute the training process using a configuration file.
-
-    This function:
-    1. Parses command-line arguments to get the configuration file and working directory.
-    2. Loads and merges configurations from the YAML file, command-line arguments, and default settings.
-    3. Prints the final configuration.
-    4. Saves the merged configuration to a file (`${working_directory}/config_merged.yaml`).
-    5. Instantiates and runs the training process using the specified trainer, model, and datamodule.
-
-    Command-line Arguments:
-        config (Path): Path to the YAML configuration file.
-        --working_directory (Path, optional): Path to the working directory (default: current working directory).
-
-    Usage Example:
-        ```bash
-        python -m aiaccel.torch.apps.train config.yaml --working_directory /path/to/working/directory
-        ```
-        You can also update some configurations from CLI as follows:
-        ```bash
-        python -m aiaccel.torch.apps.train config.yaml task.hparam1=1.0 task.hparam2=2.0 ...
-        ```
-    """
-
     overwrite_omegaconf_dumper()
 
     parser = ArgumentParser()
@@ -56,7 +30,7 @@ def main() -> None:
         load_config(
             args.config,
             {
-                "config_filename": args.config,
+                "config_path": args.config,
                 "working_directory": str(Path(args.config).parent.resolve()),
                 "base_config_path": str(Path(__file__).parent / "config"),
             },
@@ -75,7 +49,7 @@ def main() -> None:
         if "merged_config_path" in config:
             merged_config_path = config.merged_config_path
         else:
-            merged_config_path = Path(config.working_directory) / "config_merged.yaml"
+            merged_config_path = Path(config.working_directory) / "merged_config.yaml"
 
         with open(merged_config_path, "w") as f:
             oc.save(pathlib2str_config(config), f)
