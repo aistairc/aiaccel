@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
+import json
 from pathlib import Path
 import pickle as pkl
-import json
 
 import torch
 from torch.utils.data import Dataset
@@ -49,7 +49,7 @@ class RawHDF5Dataset(Dataset[dict[str, Any]]):
                 with open(grp_list, "rb") as f:
                     self.grp_list = pkl.load(f)
             elif grp_list.suffix == ".json":
-                with open(grp_list, "r") as f:
+                with open(grp_list) as f:
                     self.grp_list = json.load(f)
         elif isinstance(grp_list, list):
             self.grp_list = grp_list
@@ -66,7 +66,7 @@ class RawHDF5Dataset(Dataset[dict[str, Any]]):
         if self.f is None:
             self.f = h5.File(self.dataset_path, "r")
 
-        return {k: v[:] for k, v in self.f[self.grp_list[index]].items()}
+        return {k: v[:] for k, v in self.f[self.grp_list[index]].items()}  # type: ignore
 
     def __del__(self) -> None:
         if self.f is not None:
