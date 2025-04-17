@@ -4,7 +4,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 import pytest
 
-from aiaccel.utils.config import load_config, pathlib2str_config, print_config, resolve_inherit
+from aiaccel.config.config import load_config, pathlib2str_config, print_config, resolve_inherit
 
 
 def test_load_config() -> None:
