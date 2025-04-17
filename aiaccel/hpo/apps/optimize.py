@@ -12,7 +12,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 from optuna.trial import Trial
 
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
-from aiaccel.utils import print_config
+from aiaccel.utils import load_config, print_config
 
 
 class HparamsManager:
@@ -121,7 +121,7 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
 
     default_config = oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "default.yaml"))
-    config = oc.merge(default_config, oc.load(args.config) if args.config is not None else {})
+    config = oc.merge(default_config, load_config(args.config) if args.config is not None else {})
     config = oc.merge(config, oc.from_cli(unk_args))
 
     if (args.resumable or args.resume) and ("storage" not in config.study or args.config is None):
