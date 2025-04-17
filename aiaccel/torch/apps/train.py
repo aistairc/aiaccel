@@ -8,7 +8,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 import lightning as lt
 
-from aiaccel.utils import (
+from aiaccel.config import (
     load_config,
     overwrite_omegaconf_dumper,
     pathlib2str_config,

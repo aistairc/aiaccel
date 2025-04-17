@@ -11,9 +11,9 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
+from aiaccel.config import print_config
 from aiaccel.hpo.job_executors import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
-from aiaccel.utils import print_config
 
 
 class HparamsManager:
