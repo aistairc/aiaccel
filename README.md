@@ -8,9 +8,9 @@
 
 # AIST toolkit for accelerating machine learning research
 
-* Research-Oriented: designed to accelerate your research cycles written in Python
-* HPC Optimized: intended to use in the HPC clusters including [AI Bridging Cloud Infrastructure (ABCI)](https://abci.ai/).
-* Highly Modular: designed to let you pick up any part of aiaccel for your research project.
+* **Research-Oriented**: designed to accelerate your research cycles written in Python
+* **HPC Optimized**: intended to use in the HPC clusters including [AI Bridging Cloud Infrastructure (ABCI)](https://abci.ai/)
+* **Highly Modular**: designed to let you pick up any part of aiaccel for your research project
 
 # Key Features
 * [PyTorch/Lightning Toolkit](https://aistairc.github.io/aiaccel/api_reference/torch.html): training toolkit for HPC clusters.
