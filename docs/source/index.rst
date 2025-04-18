@@ -1,24 +1,17 @@
-..
-    aiaccel-dev documentation master file, created by
-    sphinx-quickstart on Mon Jan 18 15:46:13 2021.
-    You can adapt this file completely to your liking, but it should at least
-    contain the root `toctree` directive.
-
 Aiaccel
 =======
 
 AIST toolkit for accelerating machine learning research.
 
-:octicon:`cpu;1em;sd-text-primary` High-Performance Computing (HPC)
-    Intended to use in the HPC clusters including AI Bridging Cloud Infrastructure
+:octicon:`zap;1em;sd-text-primary` Research-Oriented Design
+    Designed to accelerate your research written in Python
+
+:octicon:`cpu;1em;sd-text-primary` HPC Optimized
+    Intended to use in the high-performance computing (HPC) clusters including AI Bridging Cloud Infrastructure
     (ABCI).
 
 :octicon:`server;1em;sd-text-primary` Highly Modular Design
-    Designed to let you pick up any part of aiaccel with minimal dependencies as you
-    prefer.
-
-:octicon:`zap;1em;sd-text-primary` High Compatibility
-    Compatible with the modern standard frameworks such as PyTorch Lightning and Optuna.
+    Designed to let you pick up any part of aiaccel for your research project.
 
 .. grid::
 
@@ -31,6 +24,11 @@ AIST toolkit for accelerating machine learning research.
        :link: api_reference/hpo.html
 
        Ready-to-use HPO algorithms/tools.
+
+    .. grid-item-card:: Config Utilities
+       :link: api_reference/config.html
+
+       OmegaConf-based config utilities.
 
 Getting Started
 ---------------
