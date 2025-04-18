@@ -18,7 +18,8 @@ params:
     high: 1.0
     log: false
 
+objective:
+  _target_: objective_for_test.main
+
 n_trials: 30
 n_max_jobs: 1
-
-group: gaa50000

@@ -13,50 +13,11 @@ Creating an Objective File
 Create a file that defines the objective function to be optimized:
 
 .. code-block:: python
+    :caption: objective.py
 
-    # objective.py
-    import json
-    from argparse import ArgumentParser
-    from pathlib import Path
-
-
-    def main() -> None:
-        parser = ArgumentParser()
-        parser.add_argument("dst_filename", type=Path)
-        parser.add_argument("--x1", type=float)
-        parser.add_argument("--x2", type=float)
-        args = parser.parse_args()
-
-        x1, x2 = args.x1, args.x2
-
-        # Objective function: (x1^2 - 4x1 + x2^2 - x2 - x1x2)
+    def main(x1, x2) -> float:
         y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-
-        with open(args.dst_filename, "w") as f:
-            json.dump(y, f)
-
-
-    if __name__ == "__main__":
-        main()
-
-Creating an Execution Script
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Create a script for environment setup and objective function execution:
-
-.. code-block:: bash
-
-    # objective.sh
-    #!/bin/bash
-
-    #$-l rt_C.small=1
-    #$-cwd
-
-    source /etc/profile.d/modules.sh
-    module load gcc/13.2.0
-    module load python/3.10/3.10.14
-
-    python objective.py $@
+        return y
 
 Configuration
 ~~~~~~~~~~~~~
@@ -66,153 +27,238 @@ Basic configuration example:
 .. code-block:: yaml
 
     study:
-      _target_: optuna.create_study
-      direction: minimize
+        _target_: optuna.create_study
+        direction: minimize
+        storage: # Set this item if results need to be stored in DB
+            _target_: optuna.storages.RDBStorage
+            url: sqlite:///aiaccel_storage.db
+            engine_kwargs:
+                connect_args:
+                timeout: 30
+        study_name: my_study  # Set this item if results need to be stored in DB
+        sampler:
+            _target_: optuna.samplers.TPESampler
+            seed: 0
 
-    executor:
-      _target_: aiaccel.hpo.job_executors.LocalJobExecutor
-      n_max_jobs: 4
-
-    result:
-      _target_: aiaccel.results.JsonResult
-      filename_template: "{job.cwd}/{job.job_name}_result.json"
+    cluster:
+        _target_: distributed.Client
+        n_workers: 4
+        threads_per_worker: 1
 
     params:
-      x1: [0, 1]
-      x2: [0, 1]
+        x1: [0, 1]
+        x2: [0, 1]
 
     n_trials: 30
+    n_max_jobs: 1
 
 Study Configuration
 ~~~~~~~~~~~~~~~~~~~
 
-(WIP)
+The study configuration controls the overall behavior of the optimization process:
+
+.. code-block:: yaml
+
+    study:
+        _target_: optuna.create_study  # default
+        direction: minimize     # 'minimize' or 'maximize' depending on your objective
+        study_name: my_study    # Name of the study (optional)
+        storage:  # This item is not required. This item is not required if there is no need to record it in the file.
+            _target_: optuna.storages.RDBStorage
+            url: sqlite:///example.db
+            engine_kwargs:
+                connect_args:
+                    timeout: 30
+    load_if_exists: true    # Load existing study if it exists
+    sampler:
+        _target_: optuna.samplers.TPESampler
+        seed: 42
 
 Sampler Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
-(WIP)
-
-Executor Configuration
-~~~~~~~~~~~~~~~~~~~~~~
-
-Two types of executors are available:
-
-Local Execution:
+The sampler determines the algorithm used to search the hyperparameter space:
 
 .. code-block:: yaml
 
-    executor:
-      _target_: aiaccel.hpo.job_executors.LocalJobExecutor
-      n_max_jobs: 4
+    study:
+        _target_: optuna.create_study
+        direction: minimize
+        sampler:
+            _target_: optuna.samplers.TPESampler  # Tree-structured Parzen Estimator (default)
+            # TPE-specific parameter
+            seed: 42                           # For reproducibility
+            n_startup_trials: 10               # Number of random trials before using TPE
 
-ABCI Execution:
+Available samplers include:
 
-.. code-block:: yaml
+- TPESampler: Efficient Bayesian optimization approach (recommended for most cases)
+- RandomSampler: Simple random search (useful as baseline)
+- CmaEsSampler: Covariance Matrix Adaptation Evolution Strategy (good for continuous
+  parameters)
+- GridSampler: Exhaustive grid search (for small parameter spaces)
+- NSGAIISampler: For multi-objective optimization
+- NelderMeadSampler: Nelder-Mead optimization
 
-    executor:
-      _target_: aiaccel.hpo.job_executors.AbciJobExecutor
-      n_max_jobs: 4
-      group: gaa50000
+Cluster Configuration
+~~~~~~~~~~~~~~~~~~~~~
 
-Result Configuration
-~~~~~~~~~~~~~~~~~~~~
-
-Three formats are supported for saving results:
-
-JSON Format (Default):
-
-.. code-block:: yaml
-
-    result:
-      _target_: aiaccel.results.JsonResult
-      filename_template: "{job.cwd}/{job.job_name}_result.json"
-
-Example objective function for JSON:
-
-.. code-block:: python
-
-    import json
-
-    ...
-
-
-    def main() -> None:
-        # ... argument parsing ...
-        y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-        with open(args.dst_filename, "w") as f:
-            json.dump(y, f)
-
-Pickle Format:
+The cluster section configures the distributed computing environment using
+Dask.distributed library for parallel execution of hyperparameter optimization tasks:
 
 .. code-block:: yaml
 
-    result:
-      _target_: aiaccel.results.PickleResult
-      filename_template: "{job.cwd}/{job.job_name}_result.pkl"
-
-Example objective function for Pickle:
-
-.. code-block:: python
-
-    import pickle
-
-    ...
-
-
-    def main() -> None:
-        # ... argument parsing ...
-        y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-        with open(args.dst_filename, "wb") as f:
-            pickle.dump(y, f)
-
-Stdout Format:
-
-.. code-block:: yaml
-
-    result:
-      _target_: aiaccel.results.StdoutResult
-      filename_template: "{job.cwd}/{job.job_name}_result.txt"
-
-Example objective function for Stdout:
-
-.. code-block:: python
-
-    ...
-
-
-    def main() -> None:
-        # ... argument parsing ...
-        y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-        print(y)
+    cluster:
+        _target_: distributed.Client  # default
+        n_workers: 4  # Number of workers to start (default : 1)
+        threads_per_worker: 1  # Number of threads per each worker  (default : 1)
 
 Parameters Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-(WIP)
+The parameters section defines the hyperparameter search space using Optuna's suggestion
+methods wrapped by aiaccel:
 
-Execution Methods
-~~~~~~~~~~~~~~~~~
+.. code-block:: yaml
 
-Basic Usage
-+++++++++++
+    params:
+        _convert_: partial
+        _target_: aiaccel.hpo.apps.optimize.HparamsManager  # default
 
-For more complex configurations, you can use a YAML configuration file:
+        # Float parameter example
+        x1:
+            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+            name: x1
+            low: 0.0
+            high: 1.0
+            log: false
+
+        # Another float parameter
+        x2:
+            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+            name: x2
+            low: 0.0
+            high: 1.0
+            log: false
+
+        # Shorthand for float parameters
+        x3: [0, 1]
+
+Parameter Types
+~~~~~~~~~~~~~~~
+
+aiaccel supports multiple parameter types through different suggestion wrappers:
+
+- SuggestFloat: For continuous parameters
+
+.. code-block:: yaml
+
+    learning_rate:
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+        name: learning_rate
+        low: 0.0001
+        high: 0.1
+        log: true  # Use logarithmic scale for learning rates
+
+- SuggestInt: For integer parameters
+
+.. code-block:: yaml
+
+    num_layers:
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestInt
+        name: num_layers
+        low: 1
+        high: 10
+
+- SuggestCategorical: For categorical parameters
+
+.. code-block:: yaml
+
+    optimizer:
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestCategorical
+        name: optimizer
+        choices: ['adam', 'sgd', 'rmsprop']
+
+- SuggestDiscreteUniform: For discrete uniform parameters
+
+.. code-block:: yaml
+
+    batch_size:
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestDiscreteUniform
+        name: batch_size
+        low: 32
+        high: 256
+        q: 32
+
+- SuggestLogUniform: For log-uniform parameters
+
+.. code-block:: yaml
+
+    learning_rate:
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogUniform
+        name: learning_rate
+        low: 0.0001
+        high: 0.1
+
+- SuggestLogInt: For log-int parameters
+
+.. code-block:: yaml
+
+    num_layers:
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogInt
+        name: num_layers
+        low: 1
+        high: 10
+
+Objective Function
+~~~~~~~~~~~~~~~~~~
+
+The objective function is the main function to be optimized:
+
+.. code-block:: yaml
+
+    objective:
+        _target_: objective.main
+
+Other Configuration Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- n_trials: Number of trials to run
+- n_max_jobs: Maximum number of parallel jobs
+
+.. code-block:: yaml
+
+    n_trials: 100
+    n_max_jobs: 1  # default : 1
+
+Usage Examples
+~~~~~~~~~~~~~~
+
+Here are some common usage patterns:
+
+Start a new study:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml
+    python -m aiaccel.hpo.apps.optimize --config config.yaml
 
-Combining Configuration File and Command Line Parameters
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-You can override configuration file settings using command line parameters. Command line
-parameters take precedence over configuration file values:
+Resume from the previous study:
 
 .. code-block:: bash
 
-    # Override parameters from config file
-    python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml --params x1="[0,2]" x2="[0,2]"
+    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume
+
+Make the study resumable (sets appropriate storage configuration):
+
+.. code-block:: bash
+
+    python -m aiaccel.hpo.apps.optimize --config config.yaml --resumable
+
+Resume a study and override parameters:
+
+.. code-block:: bash
+
+    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume --params x1="[0,2]"
 
 Optimizing NelderMeadSampler
 ============================
@@ -228,6 +274,7 @@ Search Space
 NelderMeadSampler requires a search space as an argument.
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example.py
 
     search_space = {
         "x": (-10.0, 10.0),
@@ -241,6 +288,7 @@ Set the Objective Function in the same way as in regular Optuna. The optimizatio
 is the benchmark function Sphere.
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example.py
 
     def sphere(trial: optuna.trial.Trial) -> float:
         params = []
@@ -255,6 +303,7 @@ Execute Optimization
 Specify NelderMeadSampler as the sampler and execute the optimization.
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example.py
 
     study = optuna.create_study(
         sampler=NelderMeadSampler(search_space=search_space, seed=42)
@@ -269,6 +318,7 @@ Pallarel Optimization
 Example pallarel optimization:
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example_parallel.py
 
     study = optuna.create_study(
         sampler=NelderMeadSampler(search_space=search_space, seed=42, block=True)
@@ -288,6 +338,7 @@ Usage of optuna.study.enqueue_trial
 Example using optuna.study.enqueue_trial:
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example_enqueue.py
 
     study = optuna.create_study(
         sampler=NelderMeadSampler(search_space=search_space, seed=42)
@@ -300,7 +351,7 @@ Example using optuna.study.enqueue_trial:
 Utilizing the ask-tell interface, random parameters are explored using enqueue_trial
 when NelderMeadSampler fails to output parameters.
 
-Full code is examples/hpo/samplers/example_parallel.py
+Full code is examples/hpo/samplers/example_enqueue.py
 
 Sub Sampler
 -----------
@@ -308,6 +359,7 @@ Sub Sampler
 Example using sub_sampler as optuna.samplers.TPESampler:
 
 .. code-block:: python
+    :caption: examples/hpo/samplers/example_sub_sampler.py
 
     study = optuna.create_study(
         sampler=NelderMeadSampler(

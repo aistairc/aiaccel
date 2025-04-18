@@ -4,15 +4,14 @@ import argparse
 from collections.abc import Callable
 import importlib.resources
 from pathlib import Path
-import pickle as pkl
+import time
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.config import print_config
-from aiaccel.hpo.job_executors import AbciJobExecutor, BaseJobExecutor, LocalJobExecutor
+from aiaccel.config import load_config, print_config
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 
 
@@ -62,43 +61,47 @@ class HparamsManager:
 
 def main() -> None:
     """
-    Main function to execute the hyperparameter optimization process.
+    Main function to execute the hyperparameter optimization process using a Dask cluster.
     This function parses command-line arguments, loads the configuration,
-    sets up the job executor, and runs the optimization trials.
+    sets up the Dask client, and runs the optimization trials in a distributed manner.
 
     Command-line arguments:
-        - job_filename (Path): The shell script to execute.
         - --config (str, optional): Path to the configuration file.
-        - --executor (str, optional): Type of job executor to use ("local" or "abci").
         - --resume (bool, optional): Flag to resume from the previous study.
-
-    The function performs the following steps:
-        1. Parses command-line arguments.
-        2. Loads and merges the configuration from the file and command-line arguments.
-        3. Sets default storage and study name if not provided in the configuration.
-        4. Initializes the job executor based on the specified executor type.
-        5. Instantiates the study and parameter suggestion objects.
-        6. Submits jobs for hyperparameter optimization trials.
-        7. Collects and processes finished jobs, updating the study with results.
+        - --resumable (bool, optional): Flag to make the study resumable by setting appropriate storage.
 
     Usage:
-        python -m aiaccel.hpo.apps.optimize objective.sh --config config.yaml
+        - Start a new study:
+            python -m aiaccel.hpo.apps.optimize --config config.yaml
+        - Resume from the previous study:
+            python -m aiaccel.hpo.apps.optimize --config config.yaml --resume
+        - Make the study resumable:
+            python -m aiaccel.hpo.apps.optimize --config config.yaml --resumable
 
     Config file (yaml) example:
         ~~~ yaml
         study:
-        _target_: optuna.create_study
-        direction: minimize
+          _target_: optuna.create_study
+          direction: minimize
+          storage:
+            _target_: optuna.storages.InMemoryStorage
+          study_name: aiaccel_study
+          load_if_exists: false
+
+        cluster:
+          _target_: distributed.Client
+          n_workers: 4
+          threads_per_worker: 1
 
         sampler:
-            _target_: optuna.samplers.TPESampler
-            seed: 0
+          _target_: optuna.samplers.TPESampler
+          seed: 0
 
         params:
-        _convert_: partial
-        _target_: aiaccel.apps.optimize.HparamsManager
-        x1: [0, 1]
-        x2:
+          _convert_: partial
+          _target_: aiaccel.apps.optimize.HparamsManager
+          x1: [0, 1]
+          x2:
             _target_: aiaccel.apps.optimize.SuggestFloat
             name: x2
             low: 0.0
@@ -107,22 +110,18 @@ def main() -> None:
 
         n_trials: 30
         n_max_jobs: 4
-
-        group: gaa50000
         ~~~
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("job_filename", type=Path, help="The shell script to execute.")
     parser.add_argument("--config", help="Configuration file path")
-    parser.add_argument("--executor", nargs="?", default="local")
     parser.add_argument("--resume", action="store_true", default=False)
     parser.add_argument("--resumable", action="store_true", default=False)
 
     args, unk_args = parser.parse_known_args()
 
     default_config = oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "default.yaml"))
-    config = oc.merge(default_config, oc.load(args.config) if args.config is not None else {})
+    config = oc.merge(default_config, load_config(args.config) if args.config is not None else {})
     config = oc.merge(config, oc.from_cli(unk_args))
 
     if (args.resumable or args.resume) and ("storage" not in config.study or args.config is None):
@@ -133,41 +132,48 @@ def main() -> None:
 
     print_config(config)
 
-    jobs: BaseJobExecutor
+    client = instantiate(config.cluster)
 
-    if args.executor.lower() == "local":
-        jobs = LocalJobExecutor(args.job_filename, n_max_jobs=config.n_max_jobs)
-    elif args.executor.lower() == "abci":
-        jobs = AbciJobExecutor(args.job_filename, config.group, n_max_jobs=config.n_max_jobs)
-    else:
-        raise ValueError(f"Unknown executor: {args.executor}")
+    work_dir = Path.cwd()
+    work_dir.mkdir(parents=True, exist_ok=True)
 
     study = instantiate(config.study)
     params = instantiate(config.params)
+    objective_func = instantiate(config.objective, _partial_=True)
 
-    result_filename_template = "{job.cwd}/{job.job_name}_result.pkl"
+    future_to_trial: dict[Any, dict[str, Any]] = {}
+    submitted_job_count = 0
+    finished_job_count = 0
 
-    while jobs.finished_job_count < config.n_trials:
-        n_max_jobs = min(jobs.available_slots(), config.n_trials - jobs.submitted_job_count)
-        for _ in range(n_max_jobs):
-            trial = study.ask()
+    try:
+        while finished_job_count < config.n_trials:
+            active_jobs = len(list(future_to_trial.keys()))
+            available_slots = max(0, config.n_max_jobs - active_jobs)
+            n_to_submit = min(available_slots, config.n_trials - submitted_job_count)
 
-            hparams = params.suggest_hparams(trial)
+            for _ in range(n_to_submit):
+                trial = study.ask()
+                hparams = params.suggest_hparams(trial)
+                future = client.submit(objective_func, **hparams)
+                future_to_trial[future] = {"trial": trial}
+                submitted_job_count += 1
 
-            jobs.job_name = str(jobs.job_filename) + f"_{trial.number}"
+            for future in list(future_to_trial.keys()):
+                if future.done():
+                    trial_info = future_to_trial.pop(future)
+                    trial = trial_info["trial"]
+                    y = future.result()
+                    study._log_completed_trial(study.tell(trial, y))
+                    finished_job_count += 1
+                    continue
+                else:
+                    time.sleep(0.5)
 
-            job = jobs.submit(
-                args=[result_filename_template] + sum([[f"--{k}", f"{v:.5f}"] for k, v in hparams.items()], []),
-                tag=trial,
-            )
+            if n_to_submit == 0 and active_jobs == len([f for f in future_to_trial if not f.done()]):
+                time.sleep(0.5)
 
-        for job in jobs.collect_finished():
-            trial = job.tag
-
-            with open(result_filename_template.format(job=job), "rb") as f:
-                y = pkl.load(f)
-
-            study.tell(trial, y)
+    finally:
+        client.close()
 
 
 if __name__ == "__main__":

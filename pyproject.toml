@@ -23,7 +23,8 @@ dependencies = [
     "colorama",
     "lightning>=2.2.1",
     "torch>=2.2.0",
-    "h5py"
+    "h5py",
+    "dask-jobqueue"
 ]
 
 [project.urls]
