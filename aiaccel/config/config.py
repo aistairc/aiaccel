@@ -1,5 +1,6 @@
 from typing import Any
 
+import copy
 from copy import deepcopy
 from pathlib import Path
 import re
@@ -33,6 +34,45 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
 
     OmegaConfDumper.add_representer(str, str_representer)
     OmegaConfDumper.str_representer_added = True
+
+
+def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    """Resolve _inherit_ in config
+
+    Merge the dict in ``_inherit_`` into a dict of the same hierarchy.
+    ``_inherit_`` is specified by omegaconf interpolation
+
+    Args:
+        config (DictConfig | ListConfig): The configuration loaded by load_config
+
+    Returns:
+        DictConfig | ListConfig: The configuration without ``_inherit_``
+    """
+    while isinstance(config, DictConfig) and "_inherit_" in config:
+        # resolve _inherit_
+        inherit_configs = config["_inherit_"]
+        if not isinstance(inherit_configs, ListConfig):
+            inherit_configs = [inherit_configs]
+
+        config.pop("_inherit_")
+
+        for inherit_config in inherit_configs:
+            if isinstance(inherit_config, DictConfig):
+                config = oc.merge(inherit_config, config)
+
+    # load child DictConfig to resolve child _inherit_
+    if isinstance(config, DictConfig):
+        dst_config_dict = copy.deepcopy(config)
+        for key in config:
+            dst_config_dict[key] = resolve_inherit(config[key])
+        config = dst_config_dict
+    elif isinstance(config, ListConfig):
+        dst_config_list = copy.deepcopy(config)
+        for key in range(len(config)):
+            dst_config_list[key] = resolve_inherit(config[key])
+        config = dst_config_list
+
+    return config
 
 
 def load_config(
@@ -72,6 +112,7 @@ def load_config(
     config = oc.merge(oc.load(config_filename), parent_config)
 
     if isinstance(config, DictConfig) and "_base_" in config:
+        # process _base_
         base_paths = config["_base_"]
         if not isinstance(base_paths, ListConfig):
             base_paths = [base_paths]

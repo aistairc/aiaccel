@@ -11,8 +11,8 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
+from aiaccel.config import load_config, print_config
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
-from aiaccel.utils import load_config, print_config
 
 
 class HparamsManager:
