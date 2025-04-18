@@ -3,7 +3,7 @@
 # Aiaccel: AIST Toolkit for accelerating machine learning research
 [![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
 [![Supported Python version](https://img.shields.io/badge/Python-3.8-blue)](https://github.com/aistairc/aiaccel)
-[![Publish on GitHub Pages](https://github.com/aistairc/aiaccel/actions/workflows/publish_pages.yaml/badge.svg)](https://github.com/aistairc/aiaccel/actions/workflows/publish_pages.yaml)
+[![Documentation Status](https://readthedocs.org/projects/aiaccel/badge/?version=latest)](https://aiaccel.readthedocs.io/en/latest/)
 ![CI status](https://github.com/aistairc/aiaccel/actions/workflows/actions.yaml/badge.svg)
 
 # Key Features
