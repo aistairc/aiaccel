@@ -7,8 +7,8 @@ AIST toolkit for accelerating machine learning research.
     Designed to accelerate your research cycles written in Python
 
 :octicon:`cpu;1em;sd-text-primary` HPC Optimized
-    Intended to use in high-performance computing (HPC) clusters, including AI
-    Bridging Cloud Infrastructure (ABCI).
+    Intended to use in high-performance computing (HPC) clusters, including AI Bridging
+    Cloud Infrastructure (ABCI).
 
 :octicon:`server;1em;sd-text-primary` Highly Modular
     Designed to let you pick up any part of aiaccel for your research project.
