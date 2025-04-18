@@ -3,14 +3,14 @@ Aiaccel
 
 AIST toolkit for accelerating machine learning research.
 
-:octicon:`zap;1em;sd-text-primary` Research-Oriented Design
-    Designed to accelerate your research written in Python
+:octicon:`zap;1em;sd-text-primary` Research-Oriented
+    Designed to accelerate your research cycles written in Python
 
 :octicon:`cpu;1em;sd-text-primary` HPC Optimized
-    Intended to use in the high-performance computing (HPC) clusters including AI
+    Intended to use in high-performance computing (HPC) clusters, including AI
     Bridging Cloud Infrastructure (ABCI).
 
-:octicon:`server;1em;sd-text-primary` Highly Modular Design
+:octicon:`server;1em;sd-text-primary` Highly Modular
     Designed to let you pick up any part of aiaccel for your research project.
 
 .. grid::
