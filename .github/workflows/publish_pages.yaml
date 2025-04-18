@@ -15,13 +15,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install .[dev,github-actions,test]
+          python -m pip install .[dev,github-actions]
       - name: Sphinx build
         run: |
-          sphinx-apidoc -f -o docs/source/ ./aiaccel
+          sphinx-apidoc --maxdepth 2 -f -o ./docs/source/api_reference/ ./aiaccel/
           cd docs
           make html
-          cp index.html build/html/
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/feature/main' }}
@@ -30,3 +29,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/build/html
           force_orphan: true
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sphinx-docs
+          path: docs/build/html/
+          retention-days: 7

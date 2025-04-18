@@ -1,90 +1,69 @@
-.. aiaccel-dev documentation master file, created by
-   sphinx-quickstart on Mon Jan 18 15:46:13 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Aiaccel
+=======
 
+AIST toolkit for accelerating machine learning research.
 
-aiaccelドキュメント
-===================
-本ソフトウェアは、AI Bridging Cloud Infrastructure (ABCI)`_ のためのハイパーパラメータ最適化ライブラリです。
-ディープラーニングやマルチエージェントシミュレーションなどのAI技術に関連するハイパーパラメータ最適化を解決します。
-現在、ランダムサーチ、グリッドサーチ、ソボルシーケンス、ネルダーミード法、TPEの5つの最適化アルゴリズムに対応しています。
+:octicon:`zap;1em;sd-text-primary` Research-Oriented Design
+    Designed to accelerate your research written in Python
 
+:octicon:`cpu;1em;sd-text-primary` HPC Optimized
+    Intended to use in the high-performance computing (HPC) clusters including AI
+    Bridging Cloud Infrastructure (ABCI).
 
-.. _`AI Bridging Cloud Infrastructure (ABCI)`: https://abci.ai/
+:octicon:`server;1em;sd-text-primary` Highly Modular Design
+    Designed to let you pick up any part of aiaccel for your research project.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: オーバービュー:
+.. grid::
 
-   overview/overview.md
+    .. grid-item-card:: PyTorch/Lightning Toolkit
+       :link: api_reference/torch.html
 
-.. toctree::
-   :maxdepth: 2
-   :caption: インストール:
+       Training toolkit for HPC clusters.
 
-   installation/installation.md
+    .. grid-item-card:: Hyperparameter Optimization (HPO)
+       :link: api_reference/hpo.html
 
-.. toctree::
-   :maxdepth: 2
-   :caption: 利用例:
+       Ready-to-use HPO algorithms/tools.
 
-   examples/prepare_files.md
-   examples/local_random.md
-   examples/local_budget_specified_grid_optimizer.md
-   examples/local_grid.md
-   examples/python_local_tpe.md
-   examples/abci_sobol.md
-   examples/abci_nelder_mead.md
-   examples/wrapper_sample.md
+    .. grid-item-card:: Config Utilities
+       :link: api_reference/config.html
+
+       OmegaConf-based config utilities.
+
+Getting Started
+---------------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: ユーザーガイド:
+    :maxdepth: 2
 
-   user_guide/basic_usage.md
-   user_guide/configuration_setting.md
+    getting_started.md
 
-.. toctree::
-   :maxdepth: 2
-   :caption: ディベロッパーガイド:
-
-   developer_guide/architecture.md
-   developer_guide/custom_optimizer.md
+User Guide
+----------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: コントリビューションガイド:
+    :maxdepth: 2
 
-   contribution_guide/contribution_guide.md
+    user_guide/index.rst
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Tips:
-
-   tips/qrsh-inherit.md
-   tips/rsync-localdir.md
+API Reference
+-------------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: リファレンス:
+    :maxdepth: 2
 
-   references/references.md
+    api_reference/index.rst
+
+Contribution Guide
+------------------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: コードリファレンス
+    :maxdepth: 2
 
-   api_reference/modules
+    contribution_guide/index.rst
 
-索引と検索
-==========
+Acknowledgments
+---------------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-謝辞
-====
-* この成果の一部は、国立研究開発法人新エネルギー・産業技術総合開発機構(NEDO)の委託業務として開発されたものです。
-* TPEアルゴリズムは Optuna を利用しました。
+- Part of this work was developed under a commissioned project of the New Energy and
+  Industrial Technology Development Organization (NEDO).

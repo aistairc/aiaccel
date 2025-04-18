@@ -113,6 +113,10 @@ work_aiaccel/
 
 # document
 docs/build/html
+docs/source/api_reference/
+!docs/source/api_reference/index.rst
+!docs/source/api_reference/torch.rst
+!docs/source/api_reference/hpo.rst
 
 # IntelliJ
 .idea
@@ -120,3 +124,11 @@ docs/build/html
 # Docker
 .devcontainer
 Dockerfile
+
+# ruff
+.ruff_cache
+
+# example
+examples/hpo/samplers/coco/exdata
+examples/hpo/samplers/coco/*/optuna_csv
+examples/hpo/samplers/coco/*/step_csv

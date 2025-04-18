@@ -10,8 +10,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import sys
 from pathlib import Path
+import sys
 
 root_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(root_path.absolute()))
@@ -19,12 +19,13 @@ sys.path.insert(0, str(root_path.absolute()))
 # -- Project information -----------------------------------------------------
 
 project = "aiaccel"
-copyright = "2024, AIST"
-author = "AIST"
+project_copyright = "2024, National Institute of Advanced Industrial Science And Technology (AIST)"
+author = "National Institute of Advanced Industrial Science And Technology (AIST)"
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.0"
-
+release = "2.0.0"
+html_logo = f"{root_path}/docs/image/logo_aiaccel.png"
+html_favicon = f"{root_path}/docs/image/favicon.ico"
 
 # -- General configuration ---------------------------------------------------
 
@@ -32,14 +33,16 @@ release = "1.0.0"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
-    "sphinx_fontawesome",
-    "sphinx_rtd_theme",
     "myst_parser",
+    "pydata_sphinx_theme",
+    "sphinx.ext.doctest",
+    "sphinx_design",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -61,36 +64,40 @@ exclude_patterns = [
 # [](path/to/file.md#header-anchor). To achieve this, use the
 # myst_heading_anchors = DEPTH configuration option, where DEPTH is the depth
 # of header levels for which you wish to generate links.
-# myst_heading_anchors = 3
+# (commentout) myst_heading_anchors = 3
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = False
 html_show_sphinx = False
-# html_static_path = ["_static"]
-html_sidebars = {"**": ["search-field", "sidebar-nav-bs", "sidebar-ethical-ads"]}
+# (commentout) html_static_path = ["_static"]
+html_sidebars = {"**": ["sidebar-nav-bs", "sourcelink.html"]}
 source_suffix = {".rst": "restructuredtext", ".txt": "markdown", ".md": "markdown"}
-html_context = {
-    "support_languages": {
-        "ja": "Japanese",
-        "en": "English",
-    }
-}
-
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+# (commentout) html_static_path = ['_static']
 
-gettext_compact = False
-locale_dirs = ["locale/"]
-language = "ja"
+language = "en"
 
 # -- Extension configuration -------------------------------------------------
-todo_include_todos = True
-# autoclass_content = "both"
+# (commentout) todo_include_todos = True
+# (commentout) autoclass_content = "both"
+
+html_static_path = ["_static"]
+html_css_files = ["custom_color.css"]
+html_theme_options = {
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/aistairc/aiaccel",  # required
+            "icon": "fa-brands fa-square-github",
+            "type": "fontawesome",
+        }
+    ],
+}

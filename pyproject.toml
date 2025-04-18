@@ -4,10 +4,10 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "aiaccel"
-version = "1.0.0"
-description = "A hyperparameter optimization library for AI Bridging Cloud Infrastructure (ABCI). This software solves hyperparameter optimizations related to AI technologies including deep learning and multi-agent simulation. The software currently supports five optimization algorithms: random search, grid search, sobol sequence, nelder-mead method, and TPE."
+version = "2025.04"
+description = "A library for accelerating research on AI Bridging Cloud Infrastructure (ABCI)."
 readme = "README.md"
-requires-python = ">=3.8.1,<3.12"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "AIST", email = "onishi-masaki@aist.go.jp"}
@@ -16,25 +16,16 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "asciichartpy>=1.5.25,<2.0.0",
-    "fasteners>=0.18,<1.0.0",
     "numpy",
+    "optuna>=3.4.0",
     "omegaconf",
-    "optuna>=3.4.0,<4.0.0",
-    "psutil",
-    "scipy>=1.10.1,<2.0.0",
-    "sqlalchemy>=2.0.7,<3.0.0",
-    "tensorboardx",
-    "transitions>=0.9.0,<1.0.0",
+    "hydra-core",
     "colorama",
+    "lightning>=2.2.1",
+    "torch>=2.2.0",
+    "h5py",
+    "dask-jobqueue"
 ]
-
-[project.scripts]
-aiaccel-plot= "aiaccel.cli.plot:main"
-aiaccel-report = "aiaccel.cli.report:main"
-aiaccel-start = "aiaccel.cli.start:main"
-aiaccel-view = "aiaccel.cli.view:main"
-aiaccel-set-result = "aiaccel.cli.set_result:main"
 
 [project.urls]
 homepage = "https://github.com/aistairc/aiaccel"
@@ -42,83 +33,70 @@ documentation = "https://aiaccel.readthedocs.io"
 repository = "https://github.com/aistairc/aiaccel"
 
 [project.optional-dependencies]
-test = [
-    "pytest",
-    "pytest-cov",
-    "pytest-subprocess",
-    "undecorated",
-]
-github-actions = [
-    "pytest-github-actions-annotate-failures",
-]
 dev = [
-    "black",
-    "flake8",
-    "flake8-bugbear",
-    "flake8-builtins",
-    "flake8-isort",
-    "flake8-pyproject",
-    "flake8-pytest-style",
-    "flake8-unused-arguments",
-    "isort",
     "mypy",
     "myst-parser",
-    "pep8-naming",
     "pre-commit",
-    "pycodestyle",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-subprocess",
+    "ruff",
     "sphinx",
     "sphinxcontrib-jquery",
     "sphinx-intl",
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
+    "pydata-sphinx-theme",
+    "sphinx_design",
+    "types-colorama",
+    "types-PyYAML",
+    "undecorated",
+    "pandas",
+    "pandas-stubs",
+    "matplotlib",
+    "docstrfmt",
+]
+github-actions = [
+    "pytest-github-actions-annotate-failures",
 ]
 
-[tool.setuptools]
-include-package-data = true
-packages = [
-    'aiaccel',
-    'aiaccel.abci',
-    'aiaccel.optimizer',
-    'aiaccel.manager',
-    'aiaccel.manager.job',
-    'aiaccel.manager.job.model',
-    'aiaccel.tensorboard',
-    'aiaccel.util',
-    'aiaccel.cli',
-    'aiaccel.storage'
-]
+[project.scripts]
+aiaccel-train = "aiaccel.torch.apps.train:main"
+aiaccel-optimize = "aiaccel.hpo.apps.optimize:main"
 
-[tool.setuptools.package-data]
-aiaccel = ["default_config.yaml"]
-
-[tool.black]
-target-version = ['py38']
+[tool.ruff]
 line-length = 120
+target-version = "py310"
+fix = true
 
-[tool.isort]
-profile = "black"
-py_version = 38
-line_length = 120
+[tool.ruff.lint]
+select = ["F", "E", "W", "UP", "B", "SIM", "I", "C", "A", "ERA", "N", "C90"]
 
-[tool.flake8]
-max-line-length = 120
-# E203: whitespace before ':'
-extend-ignore = "E203,"
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
 
-[tool.mypy]
-python_version="3.8"
-install_types = true
-non_interactive = true
-ignore_missing_imports = true
-warn_unused_configs = true
-disallow_any_generics = true
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-no_implicit_reexport = true
-strict_equality = true
-strict_concatenate = true
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+
+section-order = [
+    "future",
+    "typing",
+    "standard-library",
+    "utilities",
+    "datascience",
+    "torch",
+    "torch-third-party",
+    "third-party",
+    "audio",
+    "first-party",
+    "local-folder"
+]
+
+[tool.ruff.lint.isort.sections]
+"typing" = ["typing", "numpy.typing"]
+"utilities" = ["colorama", "hydra", "omegaconf", "progressbar", "rich"]
+"datascience" = ["numpy", "scipy", "pandas", "matplotlib", "opt_einsum", "einops"]
+"torch" = ["torch"]
+"torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
+"audio" = ["librosa", "pypesq", "pystoi", "soundfile"]

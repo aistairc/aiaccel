@@ -1,0 +1,26 @@
+import numpy as np
+
+import optuna
+
+from aiaccel.hpo.optuna.samplers.nelder_mead_sampler import NelderMeadSampler
+
+search_space = {
+    "x": (-10.0, 10.0),
+    "y": (-10.0, 10.0),
+}
+
+
+def sphere(trial: optuna.trial.Trial) -> float:
+    params = []
+    for name, distribution in search_space.items():
+        params.append(trial.suggest_float(name, *distribution))
+
+    return float(np.sum(np.asarray(params) ** 2))
+
+
+if __name__ == "__main__":
+    study = optuna.create_study(sampler=NelderMeadSampler(search_space=search_space, seed=42))
+    study.enqueue_trial({"x": 1.0, "y": 1.0})
+    study.enqueue_trial({"x": 1.0, "y": 2.0})
+    study.enqueue_trial({"x": 2.0, "y": 1.0})
+    study.optimize(func=sphere, n_trials=100)

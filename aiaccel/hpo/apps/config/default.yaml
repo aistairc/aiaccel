@@ -1,0 +1,11 @@
+study:
+  _target_: optuna.create_study
+
+cluster:
+  _target_: distributed.Client
+
+params:
+  _convert_: partial
+  _target_: aiaccel.hpo.apps.optimize.HparamsManager
+
+n_max_jobs: 1

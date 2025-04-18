@@ -1,0 +1,15 @@
+
+BootStrap: docker
+
+From: python:3.10
+
+%post
+
+	pip install --upgrade pip
+
+	# aiaccel env
+	pip install aiaccel[torch]@git+https://github.com/aistairc/aiaccel.git@develop/v2
+
+	# torch/MNIST example env
+	pip install torchvision
+
