@@ -1,4 +1,4 @@
-<div align="center"><img src="https://raw.githubusercontent.com/aistairc/aiaccel/master/docs/image/logo_aiaccel.png" width="600"/></div>
+<div align="center"><img src="https://raw.githubusercontent.com/aistairc/aiaccel/master/docs/image/logo_aiaccel.png" width="800"/></div>
 <br />
 
 [![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
