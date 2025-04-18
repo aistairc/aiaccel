@@ -1,15 +1,17 @@
 <div align="center"><img src="https://raw.githubusercontent.com/aistairc/aiaccel/master/docs/image/logo_aiaccel.png" width="600"/></div>
-<br />
-
-[![GitHub license](https://img.shields.io/github/license/aistairc/aiaccel.svg)](https://github.com/aistairc/aiaccel)
-![Supported Python version](https://img.shields.io/badge/Python-3.10-blue)
-[![Documentation Status](https://github.com/aistairc/aiaccel/actions/workflows/publish_pages.yaml/badge.svg)](https://aistairc.github.io/aiaccel)
-![CI status](https://github.com/aistairc/aiaccel/actions/workflows/ci.yaml/badge.svg)
+<div align="center">
+    <img src="https://img.shields.io/github/license/aistairc/aiaccel.svg" />
+    <img src="https://img.shields.io/badge/Python-3.10-blue" />
+    <a href="https://aistairc.github.io/aiaccel">
+        <img src="https://github.com/aistairc/aiaccel/actions/workflows/gh-pages.yaml/badge.svg" />
+    </a>
+    <img src="https://github.com/aistairc/aiaccel/actions/workflows/ci.yaml/badge.svg" />
+</div>
 
 # AIST toolkit for accelerating machine learning research
 
 * **Research-Oriented**: designed to accelerate your research cycles written in Python
-* **HPC Optimized**: intended to use in the HPC clusters including [AI Bridging Cloud Infrastructure (ABCI)](https://abci.ai/)
+* **HPC Optimized**: intended to use in HPC clusters, including [AI Bridging Cloud Infrastructure (ABCI)](https://abci.ai/)
 * **Highly Modular**: designed to let you pick up any part of aiaccel for your research project
 
 # Key Features
