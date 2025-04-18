@@ -13,7 +13,7 @@ AIST toolkit for accelerating machine learning research.
 :octicon:`server;1em;sd-text-primary` Highly Modular
     Designed to let you pick up any part of aiaccel for your research project.
 
-.. grid::
+.. grid:: 1
 
     .. grid-item-card:: PyTorch/Lightning Toolkit
        :link: api_reference/torch.html
@@ -25,7 +25,7 @@ AIST toolkit for accelerating machine learning research.
 
        Ready-to-use HPO algorithms/tools.
 
-    .. grid-item-card:: Config Utilities
+    .. grid-item-card:: OmegaConf Utilities
        :link: api_reference/config.html
 
        OmegaConf-based config utilities.

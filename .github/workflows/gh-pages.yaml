@@ -17,6 +17,7 @@ concurrency:
 
 jobs:
   build:
+    name: GitHub Pages (Build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +38,7 @@ jobs:
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: GitHub Pages (Deploy)
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

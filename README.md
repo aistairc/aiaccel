@@ -17,7 +17,7 @@
 # Key Features
 * [PyTorch/Lightning Toolkit](https://aistairc.github.io/aiaccel/api_reference/torch.html): training toolkit for HPC clusters.
 * [Hyperparameter Optimization (HPO)](https://aistairc.github.io/aiaccel/api_reference/hpo.html): ready-to-use HPO algorithms/tools.
-* [Config Utilities](https://aistairc.github.io/aiaccel/api_reference/config.html): OmegaConf-based config utilities.
+* [OmegaConf Utilities](https://aistairc.github.io/aiaccel/api_reference/config.html): OmegaConf-based config utilities.
 
 
 # Installation
