@@ -1,5 +1,7 @@
 _base_: config.yaml
 
+abci_group: "gxxNNNNN"
+
 cluster:
     _target_: distributed.Client
     address:
@@ -8,7 +10,7 @@ cluster:
       processes: 8
       queue: "rt_HF"
       resource_spec: "select=1"
-      job_extra_directives: ["-P gaa50073", "-j oe", "-k oed"]
+      job_extra_directives: ["-P ${abci_group}", "-j oe", "-k oed"]
       cores: 96
       memory: "1000GB"
       local_directory: "$TMPDIR"
