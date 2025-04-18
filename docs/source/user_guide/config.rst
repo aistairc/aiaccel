@@ -13,7 +13,7 @@ Typical usage is as follows:
         overwrite_omegaconf_dumper,
         pathlib2str_config,
         print_config,
-        resolve_inherit
+        resolve_inherit,
     )
 
     overwrite_omegaconf_dumper()
@@ -36,5 +36,3 @@ Typical usage is as follows:
     print_config(config)
 
     config = resolve_inherit(config)
-
-
