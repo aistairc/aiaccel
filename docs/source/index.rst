@@ -59,5 +59,7 @@ Acknowledgments
 
 - Part of this work was developed under a commissioned project of the New Energy and
   Industrial Technology Development Organization (NEDO).
-- Part of this software was developed by using ABCI 3.0 provided by AIST and AIST Solutions.
-- Part of this software was developed by using the TSUBAME4.0 supercomputer at Institute of Science Tokyo.
+- Part of this software was developed by using ABCI 3.0 provided by AIST and AIST
+  Solutions.
+- Part of this software was developed by using the TSUBAME4.0 supercomputer at Institute
+  of Science Tokyo.
