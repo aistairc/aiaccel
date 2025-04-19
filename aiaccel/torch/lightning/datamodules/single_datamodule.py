@@ -54,6 +54,7 @@ class SingleDataModule(lt.LightningDataModule):
             batch_size=batch_size,
             num_workers=num_workers,
             persistent_workers=True,
+            pin_memory=True,
             shuffle=True,
         )
 
