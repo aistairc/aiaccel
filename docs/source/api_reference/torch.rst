@@ -36,6 +36,16 @@ Lightning Utilities
     OptimizerLightningModule
     OptimizerConfig
 
+Lightning Datamodules
+---------------------
+
+.. currentmodule:: aiaccel.torch.lightning.datamodules
+
+.. autosummary::
+    :toctree: generated/
+
+    SingleDataModule
+
 H5py Utilities
 --------------
 
