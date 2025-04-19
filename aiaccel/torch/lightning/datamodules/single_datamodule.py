@@ -1,91 +1,95 @@
 from typing import Any
 
-from collections.abc import Callable, Sized
+from collections.abc import Callable
 
-from torch.utils.data import DataLoader, Dataset, Subset
+from torch.utils.data import DataLoader, Dataset
 
 import lightning as lt
 
-from aiaccel.torch.datasets import scatter_dataset
+from aiaccel.torch.datasets import CachedDataset, scatter_dataset
 
 
 class SingleDataModule(lt.LightningDataModule):
+    """
+    A PyTorch Lightning DataModule designed to handle training and validation datasets
+    with support for caching and dataset scattering.
+    Attributes:
+        train_dataset_fn (Callable[..., Dataset[str]]): A callable function to create the training dataset.
+        val_dataset_fn (Callable[..., Dataset[str]]): A callable function to create the validation dataset.
+        batch_size (int): The batch size for the DataLoader.
+        use_cache (bool): Whether to cache the datasets. Defaults to False.
+        use_scatter (bool): Whether to scatter the datasets. Defaults to True.
+        num_workers (int): Number of workers for the DataLoader. Defaults to 10.
+        common_args (dict[str, Any] | None): Common arguments to pass to the dataset functions. Defaults to None.
+    Methods:
+        setup(stage: str | None) -> None:
+            Prepares the datasets for training and validation. Only supports the "fit" stage.
+            Raises a ValueError if the stage is not "fit".
+        train_dataloader() -> DataLoader:
+            Returns the DataLoader for the training dataset.
+        val_dataloader() -> DataLoader:
+            Returns the DataLoader for the validation dataset.
+        _create_dataloader(dataset, **kwargs: Any) -> DataLoader:
+            Internal method to create a DataLoader for a given dataset with specified configurations.
+    """
+
     def __init__(
         self,
         train_dataset_fn: Callable[..., Dataset[str]],
         val_dataset_fn: Callable[..., Dataset[str]],
         batch_size: int,
+        use_cache: bool = False,
+        use_scatter: bool = True,
         num_workers: int = 10,
-        wrap_scatter_dataset: bool = True,
+        common_args: dict[str, Any] | None = None,
     ):
-        """
-        PyTorch Lightning DataModule for a single training/validation dataset pair.
-
-        This module initializes training and validation datasets using the provided
-        dataset functions and wraps them using `scatter_dataset` if specified.
-        It sets up corresponding dataloaders with configurable batch size, worker count,
-        and shuffling behavior.
-
-        Args:
-            train_dataset_fn (Callable[..., Dataset[str]]):
-                A function that returns the training dataset.
-            val_dataset_fn (Callable[..., Dataset[str]]):
-                A function that returns the validation dataset.
-            batch_size (int):
-                Batch size for the dataloaders.
-            num_workers (int, optional):
-                Number of workers for data loading. Defaults to 10.
-            wrap_scatter_dataset (bool, optional):
-                Whether to wrap datasets using `scatter_dataset`. Defaults to True.
-
-        Attributes:
-            train_dataset (Dataset[str] | Subset[str]):
-                Initialized training dataset after optional wrapping.
-            val_dataset (Dataset[str] | Subset[str]):
-                Initialized validation dataset after optional wrapping.
-        """
-
         super().__init__()
 
         self.train_dataset_fn = train_dataset_fn
         self.val_dataset_fn = val_dataset_fn
 
-        self._default_dataloader_kwargs = dict[str, Any](
-            batch_size=batch_size,
-            num_workers=num_workers,
-            persistent_workers=True,
-            pin_memory=True,
-            shuffle=True,
-        )
+        self.common_args = common_args if common_args is not None else {}
 
-        self.wrap_scatter_dataset = wrap_scatter_dataset
+        self.batch_size = batch_size
+
+        self.use_cache = use_cache
+        self.use_scatter = use_scatter
+
+        self.num_workers = num_workers
 
     def setup(self, stage: str | None) -> None:
-        self.train_dataset: Dataset[str] | Subset[str]
-        self.val_dataset: Dataset[str] | Subset[str]
         if stage == "fit":
-            if self.wrap_scatter_dataset:
-                self.train_dataset = scatter_dataset(self.train_dataset_fn())
-                self.val_dataset = scatter_dataset(self.val_dataset_fn())
-            else:
-                self.train_dataset = self.train_dataset_fn()
-                self.val_dataset = self.val_dataset_fn()
+            train_dataset = self.train_dataset_fn(**self.common_args)
+            val_dataset = self.val_dataset_fn(**self.common_args)
 
-            if isinstance(self.train_dataset, Sized) and isinstance(self.val_dataset, Sized):
-                print(f"Dataset size: {len(self.train_dataset)=},  {len(self.val_dataset)=}")
+            print(f"Dataset size: {len(train_dataset)=},  {len(val_dataset)=}")  # type: ignore
+
+            if self.use_cache:
+                train_dataset = CachedDataset(train_dataset)
+                val_dataset = CachedDataset(val_dataset)
+
+            if self.use_scatter:
+                train_dataset = scatter_dataset(train_dataset)
+                val_dataset = scatter_dataset(val_dataset)
+
+            self.train_dataset = train_dataset
+            self.val_dataset = val_dataset
         else:
             raise ValueError("`stage` is not 'fit'.")
 
-    def train_dataloader(self) -> DataLoader[Any]:
+    def _create_dataloader(self, dataset: Dataset[Any], **kwargs: Any) -> DataLoader[Any]:
         return DataLoader(
-            self.train_dataset,
-            drop_last=True,
-            **self._default_dataloader_kwargs,
+            dataset=dataset,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            persistent_workers=True,
+            shuffle=True,
+            pin_memory=True,
+            **kwargs,
         )
 
+    def train_dataloader(self) -> DataLoader[Any]:
+        return self._create_dataloader(self.train_dataset, drop_last=True)
+
     def val_dataloader(self) -> DataLoader[Any]:
-        return DataLoader(
-            self.val_dataset,
-            drop_last=False,
-            **self._default_dataloader_kwargs,
-        )
+        return self._create_dataloader(self.val_dataset, drop_last=False)
