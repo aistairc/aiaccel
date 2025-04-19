@@ -24,26 +24,27 @@ class HDF5Writer(Generic[T1, T2], metaclass=ABCMeta):
     `prepare_globals` and `prepare_group` to define how data is structured.
 
     Typical usage is supposed to be:
-    ```python
-    class FooHDF5Writer(HDF5Writer):
-        def prepare_globals(self):
-            item_list = list(range(100))
 
-            offset = 10
-            maximum = 50
+    .. code-block:: python
 
-            return item_list, (offset, maximum)
+        class FooHDF5Writer(HDF5Writer):
+            def prepare_globals(self):
+                item_list = list(range(100))
 
-        def prepare_group(self, item, context):
-            offset, maximum = context
+                offset = 10
+                maximum = 50
 
-            group_name = f"{item:04d}
+                return item_list, (offset, maximum)
 
-            return {group_name: {"data": np.full([10, 10], offset + item).clip(maximum)}}
+            def prepare_group(self, item, context):
+                offset, maximum = context
 
-    writer = FooHDF5Writer()
-    writer.write("test.hdf5", parallel=False)
-    ```
+                group_name = f"{item:04d}
+
+                return {group_name: {"data": np.full([10, 10], offset + item).clip(maximum)}}
+
+        writer = FooHDF5Writer()
+        writer.write("test.hdf5", parallel=False)
     """
 
     h5: h5py.File

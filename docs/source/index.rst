@@ -30,14 +30,6 @@ AIST toolkit for accelerating machine learning research.
 
        OmegaConf-based config utilities.
 
-Getting Started
----------------
-
-.. toctree::
-    :maxdepth: 2
-
-    getting_started.md
-
 User Guide
 ----------
 
@@ -67,3 +59,5 @@ Acknowledgments
 
 - Part of this work was developed under a commissioned project of the New Energy and
   Industrial Technology Development Organization (NEDO).
+- Part of this software was developed by using ABCI 3.0 provided by AIST and AIST Solutions.
+- Part of this software was developed by using the TSUBAME4.0 supercomputer at Institute of Science Tokyo.

@@ -8,7 +8,7 @@
     <img src="https://github.com/aistairc/aiaccel/actions/workflows/ci.yaml/badge.svg" />
 </div>
 
-# AIST toolkit for accelerating machine learning research
+# AIST Toolkit for Accelerating Machine Learning Research
 
 * **Research-Oriented**: designed to accelerate your research cycles written in Python
 * **HPC Optimized**: intended to use in HPC clusters, including [AI Bridging Cloud Infrastructure (ABCI)](https://abci.ai/)
