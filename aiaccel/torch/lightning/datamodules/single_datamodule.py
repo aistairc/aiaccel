@@ -43,33 +43,6 @@ class SingleDataModule(lt.LightningDataModule):
         num_workers: int = 10,
         common_args: dict[str, Any] | None = None,
     ):
-        """
-        PyTorch Lightning DataModule for a single training/validation dataset pair.
-
-        This module initializes training and validation datasets using the provided
-        dataset functions and wraps them using `scatter_dataset` if specified.
-        It sets up corresponding dataloaders with configurable batch size, worker count,
-        and shuffling behavior.
-
-        Args:
-            train_dataset_fn (Callable[..., Dataset[str]]):
-                A function that returns the training dataset.
-            val_dataset_fn (Callable[..., Dataset[str]]):
-                A function that returns the validation dataset.
-            batch_size (int):
-                Batch size for the dataloaders.
-            num_workers (int, optional):
-                Number of workers for data loading. Defaults to 10.
-            wrap_scatter_dataset (bool, optional):
-                Whether to wrap datasets using `scatter_dataset`. Defaults to True.
-
-        Attributes:
-            train_dataset (Dataset[str] | Subset[str]):
-                Initialized training dataset after optional wrapping.
-            val_dataset (Dataset[str] | Subset[str]):
-                Initialized validation dataset after optional wrapping.
-        """
-
         super().__init__()
 
         self.train_dataset_fn = train_dataset_fn
