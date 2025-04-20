@@ -1,53 +1,87 @@
-Writing a PyTorch Training Script (WIP)
-=======================================
+PyTorch Training
+================
 
-Writing a simple training script
---------------------------------
+Getting Started
+---------------
 
-Running inference
------------------
-
-To run aiaccel on ABCI3.0, you need an environment with Python 3.10. This guide explains
-how to set up the environment using Singularity.
-
-.. note::
-
-    For details on how to use Singularity, please refer to the following documentation:
-    https://docs.abci.ai/v3/en/containers/
-
-Create the following Singularity definition file:
-
-.. code-block:: bash
-    :caption: aiaccel_env.def
-
-    BootStrap: docker
-
-    From: python:3.10
-
-    %post
-
-        pip install --upgrade pip
-
-        # aiaccel env
-        pip install aiaccel[torch]@git+https://github.com/aistairc/aiaccel.git@develop/v2
-
-        # torch/MNIST example env
-        pip install torchvision
-
-Use the Singularity definition file to build a Singularity image file:
+Aiaccel-based training is a wrapper of PyTorch Lightning, which can be executed as follows:
 
 .. code-block:: bash
 
-    singularity build aiaccel.sif aiaccel_env.def
+  python -m aiaccel.torch.apps.train config.yaml
 
-Use the Singularity image file to execute aiaccel:
+The config file `config.yaml` typically consists of `trainer`, `datamodule`, and `task` as follows:
 
-.. code-block:: bash
+.. code-block:: yaml
+   :caption: config.yaml
+   :linenos:
 
-    singularity exec --nv aiaccel.sif python -m aiaccel.torch.apps.train $wd/config.yaml --working_directory $wd
+    _base_: ${base_config_path}/train_base.yaml
 
-Writing a DDP training script
------------------------------
+    trainer:
+      max_epochs: 10
 
-Accelerating your training
---------------------------
+      callbacks:
+        - _target_: lightning.pytorch.callbacks.ModelCheckpoint
+          filename: "{epoch:04d}"
+          save_last: True
+          save_top_k: -1
+
+    datamodule:
+      _target_: aiaccel.torch.lightning.datamodules.SingleDataModule
+
+      train_dataset_fn:
+        _partial_: True
+        _target_: torchvision.datasets.MNIST
+
+        root: "./dataset"
+        train: True
+        download: True
+
+        transform:
+          _target_: torchvision.transforms.Compose
+          transforms:
+            - _target_: torchvision.transforms.Resize
+              size: [[256, 256]]
+            - _target_: torchvision.transforms.Grayscale
+              num_output_channels: 3
+            - _target_: torchvision.transforms.ToTensor
+            - _target_: torchvision.transforms.Normalize
+              mean: [0.5]
+              std: [0.5]
+
+      val_dataset_fn:
+        _partial_: True
+        _inherit_: ${datamodule.train_dataset_fn}
+
+        train: False
+
+      batch_size: 128
+      wrap_scatter_dataset: False
+
+    task:
+      _target_: my_task.MyTask
+      num_classes: 10
+
+      model:
+        _target_: torchvision.models.resnet50
+        weights:
+          _target_: hydra.utils.get_object
+          path: torchvision.models.ResNet50_Weights.DEFAULT
+      
+      optimizer_config:
+        _target_: aiaccel.torch.lightning.OptimizerConfig
+        optimizer_generator:
+          _partial_: True
+          _target_: torch.optim.Adam
+          lr: 1.e-4
+
+Distributed Training
+--------------------
+WIP...
+
+
+Other Utilities
+---------------
+
+Other utilities are listed in :doc:`API Reference <../api_reference/torch>`.

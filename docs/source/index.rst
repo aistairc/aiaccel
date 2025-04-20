@@ -1,7 +1,10 @@
-Aiaccel
-=======
+.. figure:: _static/logo_aiaccel.png
+    :width: 600px
 
-AIST toolkit for accelerating machine learning research.
+Aiaccel Documantation
+=====================
+
+Aiaccel is a toolkit for accelerating machine learning research.
 
 :octicon:`zap;1em;sd-text-primary` Research-Oriented
     Designed to accelerate your research cycles written in Python
@@ -13,46 +16,23 @@ AIST toolkit for accelerating machine learning research.
 :octicon:`server;1em;sd-text-primary` Highly Modular
     Designed to let you pick up any part of aiaccel for your research project.
 
-.. grid:: 1
+.. grid::
+    :gutter: 2
 
     .. grid-item-card:: PyTorch/Lightning Toolkit
-       :link: api_reference/torch.html
+       :link: user_guide/torch.html
 
        Training toolkit for HPC clusters.
 
-    .. grid-item-card:: Hyperparameter Optimization (HPO)
-       :link: api_reference/hpo.html
+    .. grid-item-card:: Hyperparameter Optimization
+       :link: user_guide/hpo.html
 
-       Ready-to-use HPO algorithms/tools.
+       Ready-to-use algorithms/tools.
 
     .. grid-item-card:: OmegaConf Utilities
-       :link: api_reference/config.html
+       :link: user_guide/config.html
 
        OmegaConf-based config utilities.
-
-User Guide
-----------
-
-.. toctree::
-    :maxdepth: 2
-
-    user_guide/index.rst
-
-API Reference
--------------
-
-.. toctree::
-    :maxdepth: 2
-
-    api_reference/index.rst
-
-Contribution Guide
-------------------
-
-.. toctree::
-    :maxdepth: 2
-
-    contribution_guide/index.rst
 
 Acknowledgments
 ---------------
@@ -63,3 +43,20 @@ Acknowledgments
   Solutions.
 - Part of this software was developed by using the TSUBAME4.0 supercomputer at Institute
   of Science Tokyo.
+
+.. toctree::
+    :hidden:
+
+    user_guide/index.rst
+
+.. toctree::
+    :hidden:
+    :maxdepth: 2
+
+    api_reference/index.rst
+
+.. toctree::
+    :hidden:
+    :maxdepth: 2
+
+    contribution_guide/index.rst
