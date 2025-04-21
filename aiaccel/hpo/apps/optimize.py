@@ -127,12 +127,12 @@ def main() -> None:
     if (args.resumable or args.resume) and ("storage" not in config.study or args.config is None):
         config = oc.merge(config, oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "resumable.yaml")))
 
-    config = resolve_inherit(config)
-
     if args.resume:
         config.study.load_if_exists = True
 
     print_config(config)
+
+    config = resolve_inherit(config)
 
     client = instantiate(config.cluster)
 
