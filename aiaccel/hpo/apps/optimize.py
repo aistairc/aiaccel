@@ -11,7 +11,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.config import load_config, print_config
+from aiaccel.config import load_config, print_config, resolve_inherit
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 
 
@@ -131,6 +131,8 @@ def main() -> None:
         config.study.load_if_exists = True
 
     print_config(config)
+
+    config = resolve_inherit(config)
 
     client = instantiate(config.cluster)
 

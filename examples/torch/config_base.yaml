@@ -31,19 +31,7 @@ datamodule:
     train: True
     download: True
     transform:
-      _target_: torchvision.transforms.Compose
-      transforms:
-        - _target_: torchvision.transforms.Resize
-          size:
-            - [256, 256]
-        - _target_: torchvision.transforms.Grayscale
-          num_output_channels: 3
-        - _target_: torchvision.transforms.ToTensor
-        - _target_: torchvision.transforms.Normalize
-          mean:
-            - 0.5
-          std:
-            - 0.5
+      _inherit_: ${transform}
   val_dataset_fn:
     _partial_: true
     _target_: torchvision.datasets.MNIST
@@ -51,18 +39,21 @@ datamodule:
     train: False
     download: True
     transform:
-      _target_: torchvision.transforms.Compose
-      transforms:
-        - _target_: torchvision.transforms.Resize
-          size:
-            - [256, 256]
-        - _target_: torchvision.transforms.Grayscale
-          num_output_channels: 3
-        - _target_: torchvision.transforms.ToTensor
-        - _target_: torchvision.transforms.Normalize
-          mean:
-            - 0.5
-          std:
-            - 0.5
+      _inherit_: ${transform}
   batch_size: 128
   wrap_scatter_dataset: False
+
+transform:
+  _target_: torchvision.transforms.Compose
+  transforms:
+    - _target_: torchvision.transforms.Resize
+      size:
+        - [256, 256]
+    - _target_: torchvision.transforms.Grayscale
+      num_output_channels: 3
+    - _target_: torchvision.transforms.ToTensor
+    - _target_: torchvision.transforms.Normalize
+      mean:
+        - 0.5
+      std:
+        - 0.5

@@ -116,12 +116,24 @@ You can use _inherit_ to copy other elements:
     params:
         _convert_: partial
         _target_: aiaccel.hpo.apps.optimize.HparamsManager
-        x1: {$param}
-        x2: {$param}
+        x1:
+            _inherit_: "${param}"
+            name: x1
+        x2:
+            _inherit_: "${param}"
+            name: x2
+
+    objective:
+        _target_: objective.main
+
     n_trials: 30
     n_max_jobs: 4
 
-    param: [0, 1]
+    param:
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+        low: 0.0
+        high: 1.0
+        log: false
 
 When loading the config.yaml above, it will be expanded as follows:
 
@@ -130,9 +142,27 @@ When loading the config.yaml above, it will be expanded as follows:
     params:
         _convert_: partial
         _target_: aiaccel.hpo.apps.optimize.HparamsManager
-        x1: [0, 1]
-        x2: [0, 1]
+        x1:
+            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+            low: 0.0
+            high: 1.0
+            log: false
+            name: x1
+        x2:
+            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+            low: 0.0
+            high: 1.0
+            log: false
+            name: x2
+
+    objective:
+        _target_: objective.main
+
     n_trials: 30
     n_max_jobs: 4
 
-    param: [0, 1]
+    param:
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+        low: 0.0
+        high: 1.0
+        log: false
