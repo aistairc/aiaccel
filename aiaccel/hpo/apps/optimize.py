@@ -11,7 +11,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.config import load_config, print_config
+from aiaccel.config import load_config, print_config, resolve_inherit
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 
 
@@ -126,6 +126,8 @@ def main() -> None:
 
     if (args.resumable or args.resume) and ("storage" not in config.study or args.config is None):
         config = oc.merge(config, oc.load(importlib.resources.open_text("aiaccel.hpo.apps.config", "resumable.yaml")))
+
+    config = resolve_inherit(config)
 
     if args.resume:
         config.study.load_if_exists = True
