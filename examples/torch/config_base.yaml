@@ -8,7 +8,7 @@ trainer:
       save_top_k: -1
 
 task:
-  _target_: torchvision_task.Resnet50Task
+  _target_: torchvision_task.ImageClassificationTask
   model:
     _target_: torchvision.models.resnet50
     weights:
@@ -41,14 +41,13 @@ datamodule:
     transform:
       _inherit_: ${transform}
   batch_size: 128
-  wrap_scatter_dataset: False
+  use_scatter: False
 
 transform:
   _target_: torchvision.transforms.Compose
   transforms:
     - _target_: torchvision.transforms.Resize
-      size:
-        - [256, 256]
+      size: [256, 256]
     - _target_: torchvision.transforms.Grayscale
       num_output_channels: 3
     - _target_: torchvision.transforms.ToTensor
