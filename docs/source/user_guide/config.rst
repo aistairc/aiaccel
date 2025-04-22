@@ -37,6 +37,10 @@ Typical usage is as follows:
 
     config = resolve_inherit(config)
 
+We use OmegaConf and hydra.utils.instantiate. OmegaConf is mainly used for loading
+configuration files. hydra.utils.instantiate is used to handle functions defined within
+the configuration.
+
 Basic Config File
 -----------------
 
