@@ -7,6 +7,7 @@ Typical Usage
 Typical usage is as follows:
 
 .. code-block:: python
+    :caption: example_config.py
 
     from argparse import ArgumentParser
 
@@ -35,6 +36,13 @@ We use OmegaConf and hydra.utils.instantiate. OmegaConf is mainly used for loadi
 configuration files. hydra.utils.instantiate is used to handle functions defined within
 the configuration.
 
+When you run the sample code above, load_config handles configuration loading and
+processes the _base_ attribute, while resolve_inherit processes the _inherit_ attribute.
+
+.. code-block:: bash
+
+    python example_config.py --config config.yaml
+
 Basic Config File
 -----------------
 
@@ -60,8 +68,8 @@ This setup assumes the use of hydra.utils.instantiate. Functions are specified a
 loaded using the _target_ key. For more details, please refer to the documentation for
 hydra.utils.instantiate.
 
-Usage of _base_ element
------------------------
+Usage of _base_ attribute
+-------------------------
 
 You can specify a base configuration using _base_.
 
@@ -103,8 +111,8 @@ When loading the config.yaml above, it will be expanded as follows:
     n_trials: 100
     n_max_jobs: 4
 
-Usage of _inherit_ element
---------------------------
+Usage of _inherit_ attribute
+----------------------------
 
 You can use _inherit_ to copy other elements:
 
