@@ -1,17 +1,18 @@
 OmegaConf Utilities
 ===================
 
+Typical Usage
+-------------
+
 Typical usage is as follows:
 
 .. code-block:: python
 
     from argparse import ArgumentParser
 
-    from omegaconf import OmegaConf as oc  # noqa: N813
     from aiaccel.config import (
         load_config,
         overwrite_omegaconf_dumper,
-        pathlib2str_config,
         print_config,
         resolve_inherit,
     )
@@ -22,20 +23,13 @@ Typical usage is as follows:
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    config = oc.merge(
-        load_config(
-            args.config,
-            {
-                "config_path": args.config,
-                "working_directory": str(Path(args.config).parent.resolve()),
-            },
-        ),
-        oc.from_cli(unk_args),
-    )
+    config = load_config(args.config)
 
     print_config(config)
 
     config = resolve_inherit(config)
+
+    print_config(config)
 
 We use OmegaConf and hydra.utils.instantiate. OmegaConf is mainly used for loading
 configuration files. hydra.utils.instantiate is used to handle functions defined within
