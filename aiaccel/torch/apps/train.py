@@ -13,6 +13,7 @@ from aiaccel.config import (
     overwrite_omegaconf_dumper,
     pathlib2str_config,
     print_config,
+    resolve_inherit,
 )
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,8 @@ def main() -> None:
 
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
+
+    config = resolve_inherit(config)
 
     # build trainer
     trainer: lt.Trainer = instantiate(config.trainer)
