@@ -267,7 +267,7 @@ Resume a study and override parameters:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume --params x1="[0,2]"
+    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume params.x1="[0,2]"
 
 HPO Using NelderMeadSampler
 ---------------------------
