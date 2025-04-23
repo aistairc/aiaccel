@@ -1,47 +1,34 @@
 trainer:
-  logger: True
   max_epochs: 10
+
   callbacks:
     - _target_: lightning.pytorch.callbacks.ModelCheckpoint
       filename: "{epoch:04d}"
       save_last: True
       save_top_k: -1
 
-task:
-  _target_: torchvision_task.ImageClassificationTask
-  model:
-    _target_: torchvision.models.resnet50
-    weights:
-      _target_: hydra.utils.get_object
-      path: torchvision.models.ResNet50_Weights.DEFAULT
-  optimizer_config:
-    _target_: aiaccel.torch.lightning.OptimizerConfig
-    optimizer_generator:
-      _partial_: True
-      _target_: torch.optim.AdamW
-      lr: 1.e-4
-  num_classes: 10
 
 datamodule:
   _target_: aiaccel.torch.lightning.datamodules.single_datamodule.SingleDataModule
+
   train_dataset_fn:
     _partial_: true
     _target_: torchvision.datasets.MNIST
-    root: "./dataset"
     train: True
-    download: True
-    transform:
-      _inherit_: ${transform}
+
   val_dataset_fn:
     _partial_: true
     _target_: torchvision.datasets.MNIST
-    root: "./dataset"
     train: False
+
+  common_args:
+    root: "./dataset"
     download: True
-    transform:
-      _inherit_: ${transform}
+    transform: ${transform}
+
   batch_size: 128
   use_scatter: False
+
 
 transform:
   _target_: torchvision.transforms.Compose
@@ -52,7 +39,22 @@ transform:
       num_output_channels: 3
     - _target_: torchvision.transforms.ToTensor
     - _target_: torchvision.transforms.Normalize
-      mean:
-        - 0.5
-      std:
-        - 0.5
+      mean: [0.5]
+      std: [0.5]
+
+task:
+  _target_: torchvision_task.ImageClassificationTask
+  num_classes: 10
+
+  model:
+    _target_: torchvision.models.resnet50
+    weights:
+      _target_: hydra.utils.get_object
+      path: torchvision.models.ResNet50_Weights.DEFAULT
+
+  optimizer_config:
+    _target_: aiaccel.torch.lightning.OptimizerConfig
+    optimizer_generator:
+      _partial_: True
+      _target_: torch.optim.Adam
+      lr: 1.e-4
