@@ -114,7 +114,7 @@ def main() -> None:
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", help="Configuration file path")
+    parser.add_argument("--config", help="Configuration file path", default=None)
     parser.add_argument("--resume", action="store_true", default=False)
     parser.add_argument("--resumable", action="store_true", default=False)
 
@@ -141,7 +141,7 @@ def main() -> None:
 
     study = instantiate(config.study)
     params = instantiate(config.params)
-    objective_func = instantiate(config.objective, _partial_=True)
+    objective_func = instantiate(config.objective)
 
     future_to_trial: dict[Any, dict[str, Any]] = {}
     submitted_job_count = 0
