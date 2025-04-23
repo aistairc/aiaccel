@@ -9,3 +9,6 @@ params:
   _target_: aiaccel.hpo.apps.optimize.HparamsManager
 
 n_max_jobs: 1
+
+objective:
+  _partial_: True
