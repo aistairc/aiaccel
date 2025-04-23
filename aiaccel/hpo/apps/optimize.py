@@ -114,7 +114,7 @@ def main() -> None:
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", help="Configuration file path")
+    parser.add_argument("--config", help="Configuration file path", default=None)
     parser.add_argument("--resume", action="store_true", default=False)
     parser.add_argument("--resumable", action="store_true", default=False)
 
