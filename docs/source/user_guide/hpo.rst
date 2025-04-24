@@ -22,6 +22,10 @@ Run the following command:
 
     python -m aiaccel.hpo.apps.optimize params.x1="[0,2]" params.x2="[0,2]" objective._target_="objective.main" n_trials=30
 
+The parameters are set as params.x1="[0,2]" and params.x2="[0,2]", the target function
+is specified with objective._target_="objective.main", and the number of trials is set
+to n_trials=30.
+
 Basic Usage
 -----------
 
