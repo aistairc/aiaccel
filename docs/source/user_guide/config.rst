@@ -36,12 +36,14 @@ We use OmegaConf and hydra.utils.instantiate. OmegaConf is mainly used for loadi
 configuration files. hydra.utils.instantiate is used to handle functions defined within
 the configuration.
 
-When you run the sample code above, load_config handles configuration loading and
-processes the _base_ attribute, while resolve_inherit processes the _inherit_ attribute.
+example_config.py runs as follows:
 
 .. code-block:: bash
 
     python example_config.py --config config.yaml
+
+When you run example_config.py, load_config handles configuration loading and processes
+the _base_ attribute, while resolve_inherit processes the _inherit_ attribute.
 
 Basic Config File
 -----------------
