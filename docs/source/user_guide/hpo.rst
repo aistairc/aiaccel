@@ -4,20 +4,8 @@ Optimizing Your Hyperparameters
 Hyperparameter optimization (HPO) is an indispensable step to make it work in real
 world.
 
-Quick Start
------------
-
-To get started quickly, run the following command:
-
-.. code-block:: bash
-
-    python -m aiaccel.hpo.apps.optimize params.x1="[0,2]" params.x2="[0,2]" objective._target_="objective.main" n_trials=30
-
-Basic Usage
------------
-
-Creating an Objective File
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Getting Started
+---------------
 
 Create a file that defines the objective function to be optimized:
 
@@ -27,6 +15,15 @@ Create a file that defines the objective function to be optimized:
     def main(x1, x2) -> float:
         y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
         return y
+
+Run the following command:
+
+.. code-block:: bash
+
+    python -m aiaccel.hpo.apps.optimize params.x1="[0,2]" params.x2="[0,2]" objective._target_="objective.main" n_trials=30
+
+Basic Usage
+-----------
 
 Configuration
 ~~~~~~~~~~~~~
