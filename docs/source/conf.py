@@ -43,6 +43,7 @@ extensions = [
     "pydata_sphinx_theme",
     "sphinx.ext.doctest",
     "sphinx_design",
+    "sphinx_copybutton",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
