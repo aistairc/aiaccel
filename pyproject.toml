@@ -24,7 +24,8 @@ dependencies = [
     "lightning>=2.2.1",
     "torch>=2.2.0",
     "h5py",
-    "dask-jobqueue"
+    "dask-jobqueue",
+    "rich"
 ]
 
 [project.urls]
@@ -47,6 +48,7 @@ dev = [
     "sphinx-intl",
     "sphinx-fontawesome",
     "sphinx-rtd-theme",
+    "sphinx-copybutton",
     "pydata-sphinx-theme",
     "sphinx_design",
     "types-colorama",
