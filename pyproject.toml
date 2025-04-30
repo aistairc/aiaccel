@@ -30,7 +30,7 @@ dependencies = [
 
 [project.urls]
 homepage = "https://github.com/aistairc/aiaccel"
-documentation = "https://aiaccel.readthedocs.io"
+documentation = "https://github.com/aistairc/aiaccel"
 repository = "https://github.com/aistairc/aiaccel"
 
 [project.optional-dependencies]
