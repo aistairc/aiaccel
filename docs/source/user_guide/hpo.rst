@@ -1,14 +1,11 @@
-Optimizing Your Hyperparameters
-===============================
+Optimizing Hyperparameters
+==========================
 
 Hyperparameter optimization (HPO) is an indispensable step to make it work in real
 world.
 
-Basic Usage
------------
-
-Creating an Objective File
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Getting Started
+---------------
 
 Create a file that defines the objective function to be optimized:
 
@@ -18,6 +15,19 @@ Create a file that defines the objective function to be optimized:
     def main(x1, x2) -> float:
         y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
         return y
+
+Run the following command:
+
+.. code-block:: bash
+
+    python -m aiaccel.hpo.apps.optimize params.x1="[0,2]" params.x2="[0,2]" objective._target_="objective.main" n_trials=30
+
+The parameters are set as params.x1="[0,2]" and params.x2="[0,2]", the target function
+is specified with objective._target_="objective.main", and the number of trials is set
+to n_trials=30.
+
+Basic Usage
+-----------
 
 Configuration
 ~~~~~~~~~~~~~
@@ -53,7 +63,7 @@ Basic configuration example:
     n_max_jobs: 1
 
 Study Configuration
-~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++
 
 The study configuration controls the overall behavior of the optimization process:
 
@@ -75,7 +85,7 @@ The study configuration controls the overall behavior of the optimization proces
         seed: 42
 
 Sampler Configuration
-~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++
 
 The sampler determines the algorithm used to search the hyperparameter space:
 
@@ -101,7 +111,7 @@ Available samplers include:
 - NelderMeadSampler: Nelder-Mead optimization
 
 Cluster Configuration
-~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++
 
 The cluster section configures the distributed computing environment using
 Dask.distributed library for parallel execution of hyperparameter optimization tasks:
@@ -114,7 +124,7 @@ Dask.distributed library for parallel execution of hyperparameter optimization t
         threads_per_worker: 1  # Number of threads per each worker  (default : 1)
 
 Parameters Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++
 
 The parameters section defines the hyperparameter search space using Optuna's suggestion
 methods wrapped by aiaccel:
@@ -145,7 +155,7 @@ methods wrapped by aiaccel:
         x3: [0, 1]
 
 Parameter Types
-~~~~~~~~~~~~~~~
++++++++++++++++
 
 aiaccel supports multiple parameter types through different suggestion wrappers:
 
@@ -211,7 +221,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         high: 10
 
 Objective Function
-~~~~~~~~~~~~~~~~~~
+++++++++++++++++++
 
 The objective function is the main function to be optimized:
 
@@ -221,7 +231,7 @@ The objective function is the main function to be optimized:
         _target_: objective.main
 
 Other Configuration Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++++++++
 
 - n_trials: Number of trials to run
 - n_max_jobs: Maximum number of parallel jobs
@@ -258,7 +268,7 @@ Resume a study and override parameters:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume --params x1="[0,2]"
+    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume params.x1="[0,2]"
 
 HPO Using NelderMeadSampler
 ---------------------------
