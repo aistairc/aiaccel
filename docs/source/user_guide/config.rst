@@ -1,13 +1,36 @@
-OmegaConf Utilities
-===================
+Managing Configurations
+=======================
 
-Typical Usage
--------------
+This guide introduces how to manage configuration files using ``aiaccel.config`` and `Hydra's instantiation mechanism <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_.
+The key features of ``aiaccel.config`` are:
 
-Typical usage is as follows:
+- Modular programming through YAML meta-programming
+- Efficient management of multiple config files using _base_ and _inherit_ attributes
+- Easy version control integration with Git
+- Minimal dependency on Hydra (only uses ``hydra.utils.instantiate``)
+
+Getting Started
+---------------
+
+Aiaccel's configuration system is based on `OmegaConf <http://omegaconf.readthedocs.io/>`_.
+The following example demonstrates its typical usage:
+
+.. code-block:: yaml
+    :caption: config.yaml
+
+    model:
+        _target_: torchvision.models.resnet50
+        weights:
+            _target_: hydra.utils.get_object
+            path: torchvision.models.ResNet50_Weights.DEFAULT
+
+    optimizer_generator:
+        _partial_: True
+        _target_: torch.optim.Adam
+        lr: 1.e-4
 
 .. code-block:: python
-    :caption: example_config.py
+    :caption: example.py
 
     from argparse import ArgumentParser
 
@@ -17,6 +40,7 @@ Typical usage is as follows:
         print_config,
         resolve_inherit,
     )
+    from hydra.utils import instantiate
 
     overwrite_omegaconf_dumper()
 
@@ -30,50 +54,28 @@ Typical usage is as follows:
 
     config = resolve_inherit(config)
 
-    print_config(config)
+    model = instantiate(config.model)
 
-We use OmegaConf and hydra.utils.instantiate. OmegaConf is mainly used for loading
-configuration files. hydra.utils.instantiate is used to handle functions defined within
-the configuration.
+    optimizer_generator = instantiate(config.optimizer_generator)
+    optimizer = optimizer_generator(params=model.parameters())
 
-example_config.py runs as follows:
+    ...
+
+
+To run the script:
 
 .. code-block:: bash
 
-    python example_config.py --config config.yaml
+    python example.py config.yaml
 
-When you run example_config.py, load_config handles configuration loading and processes
-the _base_ attribute, while resolve_inherit processes the _inherit_ attribute.
+``load_config`` reads the configuration file and processes the ``_base_`` attribute, while ``resolve_inherit`` resolves ``_inherit_`` attributes.
 
-Basic Config File
------------------
+``_base_`` and ``_inherit_``
+----------------------------
 
-A typical config file for aiaccel is structured as follows:
+The ``_base_`` attribute allows you to inherit from another configuration file.
 
-.. code-block:: yaml
-    :caption: config.yaml
-
-    params:
-        _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager
-        x1: [0, 1]
-        x2:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-            name: x2
-            low: 0.0
-            high: 1.0
-            log: false
-    n_trials: 30
-    n_max_jobs: 4
-
-This setup assumes the use of hydra.utils.instantiate. Functions are specified and
-loaded using the _target_ key. For more details, please refer to the documentation for
-hydra.utils.instantiate.
-
-Usage of _base_ attribute
--------------------------
-
-You can specify a base configuration using _base_.
+Example base configuration:
 
 .. code-block:: yaml
     :caption: config_base.yaml
@@ -89,6 +91,8 @@ You can specify a base configuration using _base_.
             high: 1.0
             log: false
 
+Example configuration that uses a base:
+
 .. code-block:: yaml
     :caption: config.yaml
 
@@ -96,27 +100,10 @@ You can specify a base configuration using _base_.
     n_trials: 100
     n_max_jobs: 4
 
-When loading the config.yaml above, it will be expanded as follows:
+``config.yaml`` is automatically expanded to include the contents of ```config_base.yaml``.
 
-.. code-block:: yaml
-
-    params:
-        _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager
-        x1: [0, 1]
-        x2:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-            name: x2
-            low: 0.0
-            high: 1.0
-            log: false
-    n_trials: 100
-    n_max_jobs: 4
-
-Usage of _inherit_ attribute
-----------------------------
-
-You can use _inherit_ to copy other elements:
+The ``_inherit_`` attribute, on the other hand, allows you to duplicate and modify parts of the configuration.
+Example configuration:
 
 .. code-block:: yaml
     :caption: config.yaml
@@ -143,34 +130,12 @@ You can use _inherit_ to copy other elements:
         high: 1.0
         log: false
 
-When loading the config.yaml above, it will be expanded as follows:
+After processing, the configuration will be expanded so that ``x1`` and ``x2`` each include the contents of ``param`` along with their own ``name`` fields.
 
-.. code-block:: yaml
+Version Controlling
+-------------------
+WIP
 
-    params:
-        _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager
-        x1:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-            low: 0.0
-            high: 1.0
-            log: false
-            name: x1
-        x2:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-            low: 0.0
-            high: 1.0
-            log: false
-            name: x2
-
-    objective:
-        _target_: objective.main
-
-    n_trials: 30
-    n_max_jobs: 4
-
-    param:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-        low: 0.0
-        high: 1.0
-        log: false
+Additional Information
+----------------------
+Detailed information is available at :doc:`API Reference <../api_reference/config>`.
