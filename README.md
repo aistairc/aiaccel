@@ -22,7 +22,7 @@
 
 # Installation
 ```bash
-pip install git+https://github.com/aistairc/aiaccel.git
+pip install aiaccel
 ```
        
 # Acknowledgement
