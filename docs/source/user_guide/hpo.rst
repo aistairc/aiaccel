@@ -1,5 +1,5 @@
-Optimizing Your Hyperparameters
-===============================
+Optimizing Hyperparameters
+==========================
 
 Hyperparameter optimization (HPO) is an indispensable step to make it work in real
 world.
