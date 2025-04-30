@@ -1,8 +1,10 @@
 Managing Configurations
 =======================
 
-This guide introduces how to manage configuration files using ``aiaccel.config`` and `Hydra's instantiation mechanism <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_.
-The key features of ``aiaccel.config`` are:
+This guide introduces how to manage configuration files using ``aiaccel.config`` and
+`Hydra's instantiation mechanism
+<https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_. The key features of
+``aiaccel.config`` are:
 
 - Modular programming through YAML meta-programming
 - Efficient management of multiple config files using _base_ and _inherit_ attributes
@@ -12,8 +14,9 @@ The key features of ``aiaccel.config`` are:
 Getting Started
 ---------------
 
-Aiaccel's configuration system is based on `OmegaConf <http://omegaconf.readthedocs.io/>`_.
-The following example demonstrates its typical usage:
+Aiaccel's configuration system is based on `OmegaConf
+<http://omegaconf.readthedocs.io/>`_. The following example demonstrates its typical
+usage:
 
 .. code-block:: yaml
     :caption: config.yaml
@@ -61,14 +64,14 @@ The following example demonstrates its typical usage:
 
     ...
 
-
 To run the script:
 
 .. code-block:: bash
 
     python example.py config.yaml
 
-``load_config`` reads the configuration file and processes the ``_base_`` attribute, while ``resolve_inherit`` resolves ``_inherit_`` attributes.
+``load_config`` reads the configuration file and processes the ``_base_`` attribute,
+while ``resolve_inherit`` resolves ``_inherit_`` attributes.
 
 ``_base_`` and ``_inherit_``
 ----------------------------
@@ -100,10 +103,11 @@ Example configuration that uses a base:
     n_trials: 100
     n_max_jobs: 4
 
-``config.yaml`` is automatically expanded to include the contents of ```config_base.yaml``.
+``config.yaml`` is automatically expanded to include the contents of
+```config_base.yaml``.
 
-The ``_inherit_`` attribute, on the other hand, allows you to duplicate and modify parts of the configuration.
-Example configuration:
+The ``_inherit_`` attribute, on the other hand, allows you to duplicate and modify parts
+of the configuration. Example configuration:
 
 .. code-block:: yaml
     :caption: config.yaml
@@ -130,12 +134,15 @@ Example configuration:
         high: 1.0
         log: false
 
-After processing, the configuration will be expanded so that ``x1`` and ``x2`` each include the contents of ``param`` along with their own ``name`` fields.
+After processing, the configuration will be expanded so that ``x1`` and ``x2`` each
+include the contents of ``param`` along with their own ``name`` fields.
 
 Version Controlling
 -------------------
+
 WIP
 
 Additional Information
 ----------------------
+
 Detailed information is available at :doc:`API Reference <../api_reference/config>`.
