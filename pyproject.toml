@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "aiaccel"
 version = "2025.04"
-description = "A library for accelerating research on AI Bridging Cloud Infrastructure (ABCI)."
+description = "AIST Toolkit for Accelerating Machine Learning Research"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
