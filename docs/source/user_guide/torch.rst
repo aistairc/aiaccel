@@ -1,5 +1,5 @@
-PyTorch Training
-================
+Training a PyTorch Model
+========================
 
 Getting Started
 ---------------
