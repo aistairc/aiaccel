@@ -57,6 +57,7 @@ dev = [
     "pandas-stubs",
     "matplotlib",
     "docstrfmt",
+    "types-toml",
 ]
 github-actions = [
     "pytest-github-actions-annotate-failures",
