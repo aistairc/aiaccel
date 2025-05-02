@@ -58,6 +58,7 @@ dev = [
     "matplotlib",
     "docstrfmt",
     "types-toml",
+    "flit",
 ]
 github-actions = [
     "pytest-github-actions-annotate-failures",
