@@ -52,10 +52,10 @@ jobs:
           FLIT_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: flit publish
 
-      # オプション：バージョンをインクリメント
-      - name: Bump version
+      - name: Update pyproject.toml version
         if: steps.check_commits.outputs.has_changes == 'true'
-        run: python version_bump.py
+        run: |
+          sed -i "s/^version = \".*\"/version = \"${{ steps.get_version.outputs.version }}\"/" pyproject.toml
 
       - name: Create release branch, commit version bump and push tag
         if: steps.check_commits.outputs.has_changes == 'true'
