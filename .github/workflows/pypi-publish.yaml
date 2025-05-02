@@ -9,20 +9,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Get current year.month version
+        id: get_version
+        run: |
+          VERSION=$(date "+%Y.%m")
+          TAG="v$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Check for commits in the past month
         id: check_commits
-        # 先月30日から今日までに commit があるか？
+        # LAST_TAG 以降に commit があるか？
         run: |
-          if git log --since="1 month ago" --pretty=oneline | grep .; then
+          LAST_TAG=$(git describe --tags --abbrev=0)
+          echo "Last tag: $LAST_TAG"
+          if git log "${LAST_TAG}.." --pretty=oneline | grep .; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else
-            echo "No changes. Skipping publish."
+            echo "No changes since $LAST_TAG"
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -46,11 +55,12 @@ jobs:
         if: steps.check_commits.outputs.has_changes == 'true'
         run: python version_bump.py
 
-      - name: Commit and push new version
-        if: steps.check_commits.outputs.has_changes == 'true'
+      - name: Commit version bump and push tag
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add pyproject.toml
-          git commit -m "Bump version [skip ci]"
+          git commit -m "Release version ${{ steps.get_version.outputs.version }}"
+          git tag ${{ steps.get_version.outputs.tag }}
           git push
+          git push origin ${{ steps.get_version.outputs.tag }}
