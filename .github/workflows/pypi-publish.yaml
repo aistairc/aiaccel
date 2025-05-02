@@ -16,8 +16,10 @@ jobs:
         run: |
           VERSION=$(date "+%Y.%m")
           TAG="v$VERSION"
+          BRANCH="release/$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
       - name: Check for commits in the past month
         id: check_commits
@@ -55,12 +57,25 @@ jobs:
         if: steps.check_commits.outputs.has_changes == 'true'
         run: python version_bump.py
 
-      - name: Commit version bump and push tag
+      - name: Create release branch, commit version bump and push tag
+        if: steps.check_commits.outputs.has_changes == 'true'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          git checkout -b "${{ steps.get_version.outputs.branch }}"
           git add pyproject.toml
           git commit -m "Release version ${{ steps.get_version.outputs.version }}"
           git tag ${{ steps.get_version.outputs.tag }}
-          git push
+          git push origin "${{ steps.get_version.outputs.branch }}"
           git push origin ${{ steps.get_version.outputs.tag }}
+
+      - name: Create pull request
+        if: steps.check_commits.outputs.has_changes == 'true'
+        run: |
+          gh pr create \
+            --title "Release v${{ steps.get_version.outputs.version }}" \
+            --body "This PR updates the version to v${{ steps.get_version.outputs.version }} for monthly release." \
+            --base main \
+            --head "${{ steps.get_version.outputs.branch }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
