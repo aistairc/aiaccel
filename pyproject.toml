@@ -1,10 +1,9 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "aiaccel"
-version = "2025.04"
 description = "AIST Toolkit for Accelerating Machine Learning Research"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,6 +26,10 @@ dependencies = [
     "dask-jobqueue",
     "rich"
 ]
+dynamic = ["version"]
+
+[tool.hatch.version]
+source = "vcs"
 
 [project.urls]
 documentation = "https://aistairc.github.io/aiaccel/"
@@ -58,7 +61,7 @@ dev = [
     "matplotlib",
     "docstrfmt",
     "types-toml",
-    "flit",
+    "hatch",
 ]
 github-actions = [
     "pytest-github-actions-annotate-failures",
