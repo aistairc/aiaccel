@@ -120,21 +120,18 @@ def main() -> None:
 
     args, unk_args = parser.parse_known_args()
 
-    default_config = oc.load(
-        importlib.resources.files("aiaccel.hpo.apps.config").joinpath("default.yaml").read_text(encoding="utf-8")
-    )
+    with importlib.resources.as_file(
+        importlib.resources.files("aiaccel.hpo.apps.config").joinpath("default.yaml")
+    ) as path:
+        default_config = oc.load(path)
     config = oc.merge(default_config, load_config(args.config) if args.config is not None else {})
     config = oc.merge(config, oc.from_cli(unk_args))
 
     if (args.resumable or args.resume) and ("storage" not in config.study or args.config is None):
-        config = oc.merge(
-            config,
-            oc.load(
-                importlib.resources.files("aiaccel.hpo.apps.config")
-                .joinpath("resumable.yaml")
-                .read_text(encoding="utf-8")
-            ),
-        )
+        with importlib.resources.as_file(
+            importlib.resources.files("aiaccel.hpo.apps.config").joinpath("resumable.yaml")
+        ) as path:
+            config = oc.merge(config, path)
 
     if args.resume:
         config.study.load_if_exists = True
