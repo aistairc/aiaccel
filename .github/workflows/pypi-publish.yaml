@@ -64,7 +64,7 @@ jobs:
 
       - name: Update VERSION file
         run: |
-          echo __version__ = \"${{ needs.check_commits.outputs.version }}\" > VERSION.py
+          echo __version__ = \"${{ needs.check_commits.outputs.version }}\" > .github/workflows/version.py
 
       - name: Publish to PyPI
         env:
@@ -79,7 +79,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git checkout -b "${{ needs.check_commits.outputs.branch }}"
-          git add VERSION.py
+          git add .github/workflows/version.py
           git tag ${{ needs.check_commits.outputs.tag }}
           git push origin "${{ needs.check_commits.outputs.branch }}"
           git push origin ${{ needs.check_commits.outputs.tag }}

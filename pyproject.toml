@@ -29,7 +29,7 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.hatch.version]
-path = "VERSION.py"
+path = ".github/workflows/version.py"
 
 [project.urls]
 documentation = "https://aistairc.github.io/aiaccel/"
