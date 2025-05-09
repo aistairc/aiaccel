@@ -48,6 +48,11 @@ jobs:
           pip install --upgrade pip
           pip install -e .[dev,github-actions]
 
+      - name: Update VERSION file
+        if: steps.check_commits.outputs.has_changes == 'true'
+        run: |
+          echo __version__ = \"${VERSION}\" > VERSION.py
+
       - name: Publish to PyPI
         if: steps.check_commits.outputs.has_changes == 'true'
         env:
@@ -56,11 +61,6 @@ jobs:
         run: |
           hatch build
           hatch publish
-
-      - name: Update VERSION file
-        if: steps.check_commits.outputs.has_changes == 'true'
-        run: |
-          echo __version__ = \"${VERSION}\" > VERSION.py
 
       - name: Create release branch, commit version bump and push tag
         if: steps.check_commits.outputs.has_changes == 'true'
