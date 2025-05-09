@@ -65,7 +65,7 @@ class SuggestDiscreteUniform(Suggest[float]):
     q: float
 
     def __call__(self, trial: Trial) -> float:
-        return trial.suggest_discrete_uniform(self.name, self.low, self.high, self.q)
+        return trial.suggest_float(self.name, self.low, self.high, step=self.q)
 
 
 @dataclass
@@ -85,4 +85,4 @@ class SuggestUniform(Suggest[float]):
     high: float
 
     def __call__(self, trial: Trial) -> float:
-        return trial.suggest_uniform(self.name, self.low, self.high)
+        return trial.suggest_float(self.name, self.low, self.high)
