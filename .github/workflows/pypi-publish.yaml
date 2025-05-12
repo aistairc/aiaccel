@@ -81,6 +81,7 @@ jobs:
           git checkout -b "${{ needs.check_commits.outputs.branch }}"
           git add .github/workflows/version.py
           git tag ${{ needs.check_commits.outputs.tag }}
+          git commit -m "Update version to ${{ needs.check_commits.outputs.version }}"
           git push origin "${{ needs.check_commits.outputs.branch }}"
           git push origin ${{ needs.check_commits.outputs.tag }}
 
