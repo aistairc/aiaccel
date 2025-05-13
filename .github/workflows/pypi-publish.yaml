@@ -74,6 +74,6 @@ jobs:
         env:
           HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
           HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
-        # TODO: add hatch publish
         run: |
           hatch build
+        # hatch publish
