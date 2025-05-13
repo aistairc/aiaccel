@@ -77,3 +77,11 @@ jobs:
         run: |
           hatch build
         # hatch publish
+
+      - name: Create Release
+        run: |
+          gh release create ${{ needs.check_commits.outputs.tag }} \
+            --title ${{ needs.check_commits.outputs.tag }} \
+            --notes "Release created automatically by GitHub Actions"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
