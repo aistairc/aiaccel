@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -29,7 +29,7 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.hatch.version]
-path = "version.py"
+source = "vcs"
 
 [project.urls]
 documentation = "https://aistairc.github.io/aiaccel/"

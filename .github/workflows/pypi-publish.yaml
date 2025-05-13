@@ -62,9 +62,12 @@ jobs:
           pip install --upgrade pip
           pip install -e .[dev,github-actions]
 
-      - name: Update VERSION file
+      - name: Update and push tag
         run: |
-          echo __version__ = \"${{ needs.check_commits.outputs.version }}\" > version.py
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag ${{ needs.check_commits.outputs.tag }}
+          git push origin ${{ needs.check_commits.outputs.tag }}
 
       - name: Publish to PyPI
         env:
@@ -73,24 +76,3 @@ jobs:
         run: |
           hatch build
           hatch publish
-
-      - name: Create release branch, commit version bump and push tag
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git checkout -b "${{ needs.check_commits.outputs.branch }}"
-          git add version.py
-          git tag ${{ needs.check_commits.outputs.tag }}
-          git commit -m "Update version to ${{ needs.check_commits.outputs.version }}"
-          git push origin "${{ needs.check_commits.outputs.branch }}"
-          git push origin ${{ needs.check_commits.outputs.tag }}
-
-      - name: Create pull request
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr create \
-            --title "Release v${{ needs.check_commits.outputs.version }}" \
-            --body "This PR updates the version to v${{ needs.check_commits.outputs.version }} for monthly release." \
-            --base main \
-            --head "${{ needs.check_commits.outputs.branch }}"
