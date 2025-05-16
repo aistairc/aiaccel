@@ -70,13 +70,21 @@ jobs:
           git tag ${{ needs.check_commits.outputs.tag }}
           git push origin ${{ needs.check_commits.outputs.tag }}
 
-      - name: Publish to PyPI
+      - name: Publish to TestPyPI
         env:
           HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
           HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
         run: |
           hatch build
-        # hatch publish
+        # hatch publish -r test
+
+      # - name: Publish to PyPI
+      #   env:
+      #     HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
+      #     HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
+      #   run: |
+      #     hatch build
+      #     hatch publish
 
       - name: Create Release
         run: |
