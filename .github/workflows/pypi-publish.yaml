@@ -1,0 +1,95 @@
+name: Monthly Publish if Changes
+
+on:
+  schedule:
+  - cron: '0 0 20 * *'  # (test) 毎月20日 0:00 UTC（日本時間9:00）
+    # - cron: '0 0 25 * *'  # 毎月25日 0:00 UTC（日本時間9:00）
+
+permissions:
+  contents: read
+
+jobs:
+  check_commits:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check_commits.outputs.has_changes }}
+      version: ${{ steps.get_version.outputs.version }}
+      tag: ${{ steps.get_version.outputs.tag }}
+      branch: ${{ steps.get_version.outputs.branch }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current year.month version
+        id: get_version
+        run: |
+          VERSION=$(date "+%Y.%m")
+          TAG="v$VERSION"
+          BRANCH="release/$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Check for commits in the past month
+        id: check_commits
+        # LAST_TAG 以降に commit があるか？
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0)
+          echo "Last tag: $LAST_TAG"
+          if git log "${LAST_TAG}.." --pretty=oneline | grep .; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes since $LAST_TAG"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+  publish-if-needed:
+    needs: check_commits
+    if: needs.check_commits.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev,github-actions]
+
+      - name: Update and push tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag ${{ needs.check_commits.outputs.tag }}
+          git push origin ${{ needs.check_commits.outputs.tag }}
+
+      - name: Publish to TestPyPI
+        env:
+          HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
+          HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
+        run: |
+          hatch build
+        # hatch publish -r test
+
+      # - name: Publish to PyPI
+      #   env:
+      #     HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
+      #     HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
+      #   run: |
+      #     hatch build
+      #     hatch publish
+
+      - name: Create Release
+        run: |
+          gh release create ${{ needs.check_commits.outputs.tag }} \
+            --title ${{ needs.check_commits.outputs.tag }} \
+            --notes "Release created automatically by GitHub Actions"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
