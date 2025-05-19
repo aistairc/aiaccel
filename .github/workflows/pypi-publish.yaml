@@ -76,7 +76,7 @@ jobs:
           HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH_TEST }}
         run: |
           hatch build
-        # hatch publish -r test
+          hatch publish -r test
 
       # - name: Publish to PyPI
       #   env:
