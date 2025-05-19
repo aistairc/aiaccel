@@ -73,7 +73,7 @@ jobs:
       - name: Publish to TestPyPI
         env:
           HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
-          HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
+          HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH_TEST }}
         run: |
           hatch build
         # hatch publish -r test
