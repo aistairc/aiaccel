@@ -76,7 +76,7 @@ wait\
             if task_index >= args.n_tasks:
                 break
 
-            lock_filename_list.append(args.log_filename.with_suffix(f".{array_idx+1}.proc-{local_proc_idx+1}.lock"))
+            lock_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.proc-{local_proc_idx + 1}.lock"))
 
     return job, qsub_args, lock_filename_list
 
