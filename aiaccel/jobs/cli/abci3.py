@@ -204,8 +204,8 @@ export SINGULARITYENV_PYTHONUNBUFFERED=true
         for lock_filename in lock_filename_list:
             while lock_filename.exists():
                 time.sleep(1.0)
-        if status_filename.exists():
-            raise RuntimeError("Job failed")
+            if status_filename.exists():
+                raise RuntimeError("Job failed")
     else:
         subprocess.run(["bash", str(job_filename)], check=True)
 
