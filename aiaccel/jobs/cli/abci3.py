@@ -110,8 +110,8 @@ def main() -> None:  # noqa: C901
     parent_parser.add_argument("--local", action="store_true")
     parent_parser.add_argument("--use_singularity", action="store_true")
     parent_parser.add_argument("--walltime", type=str, default="0:40:0")
-    parent_parser.add_argument("log_filename", type=Path)
-    parent_parser.add_argument("command", nargs="+")
+    parent_parser.add_argument("--log_filename", type=Path)
+    parent_parser.add_argument("--command", nargs="+")
 
     parser = ArgumentParser()
     sub_parsers = parser.add_subparsers(dest="mode", required=True)
