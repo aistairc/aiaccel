@@ -105,7 +105,7 @@ rm {lock_filename}\
     return job, qsub_args, [lock_filename]
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901
     parent_parser = ArgumentParser(add_help=False)
     parent_parser.add_argument("--local", action="store_true")
     parent_parser.add_argument("--use_singularity", action="store_true")
@@ -162,6 +162,7 @@ def main() -> None:
         lock_filename.touch()
 
     job_filename: Path = args.log_filename.with_suffix(".sh")
+    status_filename: Path = args.log_filename.with_suffix(".out")
     with open(job_filename, "w") as f:
         f.write(
             f"""\
@@ -171,6 +172,8 @@ def main() -> None:
 #PBS -k oed
 
 set -e
+
+trap 'echo $? > {status_filename}' ERR
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR
@@ -201,6 +204,8 @@ export SINGULARITYENV_PYTHONUNBUFFERED=true
         for lock_filename in lock_filename_list:
             while lock_filename.exists():
                 time.sleep(1.0)
+        if status_filename.exists():
+            raise RuntimeError("Job failed")
     else:
         subprocess.run(["bash", str(job_filename)], check=True)
 
