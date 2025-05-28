@@ -90,7 +90,7 @@ mpirun -bind-to none -map-by slot \\
 def main() -> None:  # noqa: C901
     parent_parser = ArgumentParser(add_help=False)
     parent_parser.add_argument("--local", action="store_true")
-    parent_parser.add_argument("--use_singularity", action="store_true")
+    parent_parser.add_argument("--command_prefix", type=str)
     parent_parser.add_argument("--walltime", type=str, default="0:40:0")
     parent_parser.add_argument("--log_filename", type=Path)
     parent_parser.add_argument("--command", nargs="+")
@@ -119,14 +119,7 @@ def main() -> None:  # noqa: C901
 
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
 
-    if args.use_singularity:
-        # singularity
-        singularity_path = Path(__file__).resolve().parent.parent.parent / "singularity" / "singularity.sif"
-        command = f"singularity exec --nv {singularity_path} direnv exec . {shlex.join(args.command)}"
-    else:
-        # venv
-        venv_path = "./env"
-        command = f"source {venv_path}/bin/activate && {shlex.join(args.command)}"
+    command = f"{args.command_prefix} {shlex.join(args.command)}"
 
     if args.mode in ["cpu", "gpu"]:
         if args.n_tasks is None:
