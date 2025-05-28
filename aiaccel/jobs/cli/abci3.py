@@ -87,7 +87,7 @@ mpirun -bind-to none -map-by slot \\
     return job, qsub_args
 
 
-def main() -> None:  # noqa: C901
+def main() -> None:
     parent_parser = ArgumentParser(add_help=False)
     parent_parser.add_argument("--local", action="store_true")
     parent_parser.add_argument("--command_prefix", type=str)
