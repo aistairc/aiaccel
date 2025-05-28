@@ -8,9 +8,7 @@ import subprocess
 import time
 
 
-def prepare_mpi_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
-    lock_filename = args.log_filename.with_suffix(".lock")
-
+def prepare_mpi_job(args: Namespace, command: str) -> tuple[str, list[str]]:
     job = f"""\
 source /etc/profile.d/modules.sh
 module load hpcx
@@ -21,7 +19,6 @@ mpirun -bind-to none -map-by slot \\
     -x SINGULARITYENV_PMIX_INSTALL_PREFIX=/usr/local/ \\
     {command}
 
-rm {lock_filename}\
 """
 
     n_mpiprocs = args.n_procs // args.n_nodes
@@ -29,21 +26,19 @@ rm {lock_filename}\
     qsub_args = ["-l", f"select={args.n_nodes}:mpiprocs={n_mpiprocs}:ompthreads={n_ompthreads}"]
     qsub_args += ["-o", str(args.log_filename)]
 
-    return job, qsub_args, [lock_filename]
+    return job, qsub_args
 
 
-def prepare_single_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
-    lock_filename = args.log_filename.with_suffix(".lock")
-
-    job = f"{command} && rm {lock_filename}"
+def prepare_single_job(args: Namespace, command: str) -> tuple[str, list[str]]:
+    job = command
 
     qsub_args = ["-l", "select=1"]
     qsub_args += ["-o", str(args.log_filename)]
 
-    return job, qsub_args, [lock_filename]
+    return job, qsub_args
 
 
-def prepare_array_jobs(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
+def prepare_array_jobs(args: Namespace, command: str) -> tuple[str, list[str]]:
     assert args.n_tasks_per_proc % args.n_procs_per_job == 0
 
     n_tasks_per_proc = args.n_tasks_per_proc // args.n_procs_per_job
@@ -59,8 +54,7 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
     CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) \\
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={n_tasks_per_proc} \\
-        {command} > {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")} 2>&1 \\
-        && rm {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.lock")} &
+        {command} > {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")} 2>&1
 done
 wait\
 """
@@ -69,21 +63,10 @@ wait\
     qsub_args += ["-J", f"1-{args.n_tasks}:{args.n_tasks_per_proc}"]
     qsub_args += ["-o", str(args.log_filename.with_suffix(".^array_index^.log"))]
 
-    lock_filename_list = []
-    for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc):
-        for local_proc_idx in range(0, args.n_procs_per_job):
-            task_index = array_idx + n_tasks_per_proc * local_proc_idx + 1
-            if task_index >= args.n_tasks:
-                break
-
-            lock_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.proc-{local_proc_idx + 1}.lock"))
-
-    return job, qsub_args, lock_filename_list
+    return job, qsub_args
 
 
-def prepare_train_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
-    lock_filename = args.log_filename.with_suffix(".lock")
-
+def prepare_train_job(args: Namespace, command: str) -> tuple[str, list[str]]:
     job = f"""\
 source /etc/profile.d/modules.sh
 module load hpcx
@@ -94,15 +77,14 @@ mpirun -bind-to none -map-by slot \\
     -x MAIN_PORT=3000 \\
     -x COLUMNS=120 \\
     -x PYTHONUNBUFFERED=true \\
-    {command} && \\
-rm {lock_filename}\
+    {command} \
 """
 
     n_nodes = args.n_gpus // 8
     qsub_args = ["-l", f"select={n_nodes}:mpiprocs=8:ompthreads=12"]
     qsub_args += ["-o", str(args.log_filename)]
 
-    return job, qsub_args, [lock_filename]
+    return job, qsub_args
 
 
 def main() -> None:  # noqa: C901
@@ -148,18 +130,15 @@ def main() -> None:  # noqa: C901
 
     if args.mode in ["cpu", "gpu"]:
         if args.n_tasks is None:
-            job, qsub_args, lock_filename_list = prepare_single_job(args, command)
+            job, qsub_args = prepare_single_job(args, command)
         else:
-            job, qsub_args, lock_filename_list = prepare_array_jobs(args, command)
+            job, qsub_args = prepare_array_jobs(args, command)
     elif args.mode == "mpi":
-        job, qsub_args, lock_filename_list = prepare_mpi_job(args, command)
+        job, qsub_args = prepare_mpi_job(args, command)
     elif args.mode == "train":
-        job, qsub_args, lock_filename_list = prepare_train_job(args, command)
+        job, qsub_args = prepare_train_job(args, command)
     else:
         raise ValueError()
-
-    for lock_filename in lock_filename_list:
-        lock_filename.touch()
 
     job_filename: Path = args.log_filename.with_suffix(".sh")
     status_filename: Path = args.log_filename.with_suffix(".out")
@@ -173,7 +152,7 @@ def main() -> None:  # noqa: C901
 
 set -e
 
-trap 'echo $? > {status_filename}' ERR
+trap 'echo $? > {status_filename}' EXIT
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR
@@ -201,11 +180,11 @@ export SINGULARITYENV_PYTHONUNBUFFERED=true
 
         subprocess.run(qsub_command_str, shell=True, check=True)
 
-        for lock_filename in lock_filename_list:
-            while lock_filename.exists():
-                time.sleep(1.0)
-            if status_filename.exists():
-                raise RuntimeError("Job failed")
+        while not status_filename.exists():
+            time.sleep(1.0)
+
+        if int(status_filename.read_text()) != 0:
+            raise RuntimeError("Job failed")
     else:
         subprocess.run(["bash", str(job_filename)], check=True)
 
