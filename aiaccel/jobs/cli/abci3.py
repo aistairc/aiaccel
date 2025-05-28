@@ -178,6 +178,7 @@ export SINGULARITYENV_PYTHONUNBUFFERED=true
 
         if int(status_filename.read_text()) != 0:
             raise RuntimeError("Job failed")
+        status_filename.unlink()
     else:
         subprocess.run(["bash", str(job_filename)], check=True)
 
