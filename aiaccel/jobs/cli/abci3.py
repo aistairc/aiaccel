@@ -54,7 +54,7 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
     CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) \\
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={n_tasks_per_proc} \\
-        {command} > {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")} 2>&1
+        {command} > {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")} 2>&1 &
 done
 wait\
 """
