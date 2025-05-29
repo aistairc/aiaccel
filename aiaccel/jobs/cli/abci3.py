@@ -55,8 +55,11 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={n_tasks_per_proc} \\
         {command} > {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")} 2>&1 &
+        pids[$LOCAL_PROC_INDEX]=$!
 done
-wait\
+for i in "${{!pids[@]}}"; do
+    wait ${{pids[$i]}}
+done
 """
 
     qsub_args = ["-l", "select=1"]
