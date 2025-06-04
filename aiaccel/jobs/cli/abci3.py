@@ -74,7 +74,7 @@ done
 
     status_filename_list = [
         args.log_filename.with_suffix(f".{array_idx + 1}.out")
-        for array_idx in range(0, args.n_tasks, args.n_tasks_per_job)
+        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc)
     ]
 
     return job, qsub_args, status_filename_list
