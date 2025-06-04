@@ -8,8 +8,11 @@ import subprocess
 import time
 
 
-def prepare_mpi_job(args: Namespace, command: str) -> tuple[str, list[str]]:
+def prepare_mpi_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
+    status_filename: Path = args.log_filename.with_suffix(".out")
     job = f"""\
+trap 'echo $? > {status_filename}' EXIT
+
 source /etc/profile.d/modules.sh
 module load hpcx
 
@@ -26,24 +29,27 @@ mpirun -bind-to none -map-by slot \\
     qsub_args = ["-l", f"select={args.n_nodes}:mpiprocs={n_mpiprocs}:ompthreads={n_ompthreads}"]
     qsub_args += ["-o", str(args.log_filename)]
 
-    return job, qsub_args
+    return job, qsub_args, [status_filename]
 
 
-def prepare_single_job(args: Namespace, command: str) -> tuple[str, list[str]]:
-    job = command
+def prepare_single_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
+    status_filename: Path = args.log_filename.with_suffix(".out")
+    job = f"trap 'echo $? > {status_filename}' EXIT && {command}"
 
     qsub_args = ["-l", "select=1"]
     qsub_args += ["-o", str(args.log_filename)]
 
-    return job, qsub_args
+    return job, qsub_args, [status_filename]
 
 
-def prepare_array_jobs(args: Namespace, command: str) -> tuple[str, list[str]]:
+def prepare_array_jobs(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
     assert args.n_tasks_per_proc % args.n_procs_per_job == 0
 
     n_tasks_per_proc = args.n_tasks_per_proc // args.n_procs_per_job
 
     job = f"""\
+trap 'echo $? > {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")}' EXIT
+
 for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
     TASK_INDEX=$(( PBS_ARRAY_INDEX + {n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
 
@@ -66,11 +72,19 @@ done
     qsub_args += ["-J", f"1-{args.n_tasks}:{args.n_tasks_per_proc}"]
     qsub_args += ["-o", str(args.log_filename.with_suffix(".^array_index^.log"))]
 
-    return job, qsub_args
+    status_filename_list = [
+        args.log_filename.with_suffix(f".{array_idx + 1}.out")
+        for array_idx in range(0, args.n_tasks, args.n_tasks_per_job)
+    ]
+
+    return job, qsub_args, status_filename_list
 
 
-def prepare_train_job(args: Namespace, command: str) -> tuple[str, list[str]]:
+def prepare_train_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
+    status_filename: Path = args.log_filename.with_suffix(".out")
     job = f"""\
+trap 'echo $? > {status_filename}' EXIT
+
 source /etc/profile.d/modules.sh
 module load hpcx
 
@@ -87,7 +101,7 @@ mpirun -bind-to none -map-by slot \\
     qsub_args = ["-l", f"select={n_nodes}:mpiprocs=8:ompthreads=12"]
     qsub_args += ["-o", str(args.log_filename)]
 
-    return job, qsub_args
+    return job, qsub_args, [status_filename]
 
 
 def main() -> None:
@@ -126,18 +140,17 @@ def main() -> None:
 
     if args.mode in ["cpu", "gpu"]:
         if args.n_tasks is None:
-            job, qsub_args = prepare_single_job(args, command)
+            job, qsub_args, status_filename_list = prepare_single_job(args, command)
         else:
-            job, qsub_args = prepare_array_jobs(args, command)
+            job, qsub_args, status_filename_list = prepare_array_jobs(args, command)
     elif args.mode == "mpi":
-        job, qsub_args = prepare_mpi_job(args, command)
+        job, qsub_args, status_filename_list = prepare_mpi_job(args, command)
     elif args.mode == "train":
-        job, qsub_args = prepare_train_job(args, command)
+        job, qsub_args, status_filename_list = prepare_train_job(args, command)
     else:
         raise ValueError()
 
     job_filename: Path = args.log_filename.with_suffix(".sh")
-    status_filename: Path = args.log_filename.with_suffix(".out")
     with open(job_filename, "w") as f:
         f.write(
             f"""\
@@ -147,8 +160,6 @@ def main() -> None:
 #PBS -k oed
 
 set -e
-
-trap 'echo $? > {status_filename}' EXIT
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR
@@ -176,12 +187,13 @@ export SINGULARITYENV_PYTHONUNBUFFERED=true
 
         subprocess.run(qsub_command_str, shell=True, check=True)
 
-        while not status_filename.exists():
-            time.sleep(1.0)
+        for status_filename in status_filename_list:
+            while not status_filename.exists():
+                time.sleep(1.0)
 
-        if int(status_filename.read_text()) != 0:
-            raise RuntimeError("Job failed")
-        status_filename.unlink()
+            if int(status_filename.read_text()) != 0:
+                raise RuntimeError("Job failed")
+            status_filename.unlink()
     else:
         subprocess.run(["bash", str(job_filename)], check=True)
 
