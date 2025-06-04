@@ -178,6 +178,9 @@ export SINGULARITYENV_PYTHONUNBUFFERED=true
 """
         )
 
+    for status_filename in status_filename_list:
+        status_filename.unlink(missing_ok=True)
+
     if not args.local:
         qsub_command = ["qsub", "-P", os.environ["JOB_GROUP"], "-q", "rt_HF"]
         qsub_command += ["-l", f"walltime={args.walltime}", "-v", "USE_SSH=1"]
