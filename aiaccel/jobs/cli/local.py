@@ -41,6 +41,7 @@ mpirun -bind-to none -map-by slot \\
 
 def main() -> None:
     parent_parser = ArgumentParser(add_help=False)
+    parent_parser.add_argument("--local", action="store_true")
     parent_parser.add_argument("--command_prefix", type=str)
     parent_parser.add_argument("--walltime", type=str, default="0:40:0")
     parent_parser.add_argument("--log_filename", type=Path)
@@ -50,8 +51,14 @@ def main() -> None:
     sub_parsers = parser.add_subparsers(dest="mode", required=True)
 
     sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
+    sub_parser.add_argument("--n_tasks", type=int)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=2048)
+    sub_parser.add_argument("--n_procs_per_job", type=int, default=32)
 
     sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
+    sub_parser.add_argument("--n_tasks", type=int)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=1024)
+    sub_parser.add_argument("--n_procs_per_job", type=int, default=8)
 
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
