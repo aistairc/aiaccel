@@ -96,7 +96,6 @@ trap 'echo $? > {status_filename}' EXIT
 echo Hostname: $(hostname)
 
 export NVIDIA_VISIBLE_DEVICES=all
-export SINGULARITY_BINDPATH="$SINGULARITY_BINDPATH,/groups,/groups-2.0"
 
 export SINGULARITYENV_COLUMNS=120
 export SINGULARITYENV_PYTHONUNBUFFERED=true
