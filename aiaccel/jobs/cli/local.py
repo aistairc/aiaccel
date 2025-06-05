@@ -19,12 +19,6 @@ mpirun -bind-to none -map-by slot \\
     return job
 
 
-def prepare_single_job(args: Namespace, command: str) -> str:
-    job = command
-
-    return job
-
-
 def prepare_train_job(args: Namespace, command: str) -> str:
     job = f"""\
 mpirun -bind-to none -map-by slot \\
@@ -74,7 +68,7 @@ def main() -> None:
     command = f"{args.command_prefix} {shlex.join(args.command)}"
 
     if args.mode in ["cpu", "gpu"]:
-        job = prepare_single_job(args, command)
+        job = command
     elif args.mode == "mpi":
         job = prepare_mpi_job(args, command)
     elif args.mode == "train":
