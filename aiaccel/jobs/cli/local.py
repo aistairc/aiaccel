@@ -5,30 +5,26 @@ from pathlib import Path
 import shlex
 import subprocess
 
+from omegaconf import DictConfig, ListConfig
+
+from aiaccel.config.config import load_config
+
 
 def prepare_mpi_job(args: Namespace, command: str) -> str:
-    job = f"""\
-mpirun -bind-to none -map-by slot \\
-    -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-    -x SINGULARITYENV_OPAL_PREFIX=/usr/local/ \\
-    -x SINGULARITYENV_PMIX_INSTALL_PREFIX=/usr/local/ \\
-    {command}
+    mpi_args = []
+    if isinstance(args.mpi_args_path, str | Path):
+        mpi_args_dest = load_config(args.mpi_args_path)
+        if isinstance(mpi_args_dest, DictConfig):
+            for key, value in mpi_args_dest.items():
+                if isinstance(value, ListConfig):
+                    for v in value:
+                        mpi_args.append(f"{key!r} {v} \\")
+                else:
+                    mpi_args.append(f"{key!r} {value} \\")
+        else:
+            mpi_args.append(str(mpi_args_dest))
 
-"""
-
-    return job
-
-
-def prepare_train_job(args: Namespace, command: str) -> str:
-    job = f"""\
-mpirun -bind-to none -map-by slot \\
-    -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-    -x MAIN_ADDR=$(hostname -i) \\
-    -x MAIN_PORT=3000 \\
-    -x COLUMNS=120 \\
-    -x PYTHONUNBUFFERED=true \\
-    {command} \
-"""
+    job = f"mpirun {"\n".join(mpi_args)} \n {command}"
 
     return job
 
@@ -57,9 +53,11 @@ def main() -> None:
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
     sub_parser.add_argument("--n_nodes", type=int, default=1)
+    sub_parser.add_argument("--mpi_args_path", default=None)
 
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)
+    sub_parser.add_argument("--mpi_args_path", default=None)
 
     args = parser.parse_args()
 
@@ -69,10 +67,8 @@ def main() -> None:
 
     if args.mode in ["cpu", "gpu"]:
         job = command
-    elif args.mode == "mpi":
+    elif args.mode == "mpi" or args.mode == "train":
         job = prepare_mpi_job(args, command)
-    elif args.mode == "train":
-        job = prepare_train_job(args, command)
     else:
         raise ValueError()
 
