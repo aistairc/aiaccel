@@ -24,7 +24,11 @@ def prepare_mpi_job(args: Namespace, command: str) -> str:
         else:
             mpi_args.append(str(mpi_args_dest))
 
-    job = f"mpirun {'\n'.join(mpi_args)} \n {command}"
+    joined_mpi_args = "\n".join(mpi_args)
+    job = f"""
+    mpirun {joined_mpi_args}
+    {command}
+    """
 
     return job
 
