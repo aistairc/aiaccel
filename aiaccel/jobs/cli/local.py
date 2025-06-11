@@ -23,6 +23,8 @@ def prepare_mpi_job(args: Namespace, command: str) -> str:
                     mpi_args.append(f"{key!r} {value} \\")
         else:
             mpi_args.append(str(mpi_args_dest))
+    else:
+        mpi_args = ["\\"]
 
     joined_mpi_args = "\n".join(mpi_args)
     job = f"""
