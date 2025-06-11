@@ -12,8 +12,8 @@ from aiaccel.config.config import load_config
 
 def prepare_mpi_job(args: Namespace, command: str) -> str:
     mpi_args = []
-    if isinstance(args.mpi_args_path, str | Path):
-        mpi_args_dest = load_config(args.mpi_args_path)
+    if isinstance(args.mpi_args_conf, str | Path):
+        mpi_args_dest = load_config(args.mpi_args_conf)
         if isinstance(mpi_args_dest, DictConfig):
             for key, value in mpi_args_dest.items():
                 if isinstance(value, ListConfig):
@@ -57,11 +57,11 @@ def main() -> None:
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
     sub_parser.add_argument("--n_nodes", type=int, default=1)
-    sub_parser.add_argument("--mpi_args_path", default=None)
+    sub_parser.add_argument("--mpi_args_conf", default=None)
 
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)
-    sub_parser.add_argument("--mpi_args_path", default=None)
+    sub_parser.add_argument("--mpi_args_conf", default=None)
 
     args = parser.parse_args()
 
