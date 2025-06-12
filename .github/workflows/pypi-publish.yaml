@@ -48,6 +48,8 @@ jobs:
     needs: check_commits
     if: needs.check_commits.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -73,13 +75,14 @@ jobs:
           git tag ${{ needs.check_commits.outputs.tag }}
           git push origin ${{ needs.check_commits.outputs.tag }}
 
+       - name: Build package
+-        run: |
+-          hatch build
+
       - name: Publish to PyPI
-        env:
-          HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
-          HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
-        run: |
-          hatch build
-          hatch publish -r test
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         env:
