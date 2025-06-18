@@ -1,0 +1,3 @@
+_base_:
+  - ${base_config_path}/train_base.yaml
+  - ../common_config.yaml

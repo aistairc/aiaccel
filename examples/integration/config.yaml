@@ -1,0 +1,15 @@
+params:
+  _convert_: partial
+  _target_: aiaccel.hpo.apps.optimize.HparamsManager
+  lr:
+    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+    name: lr
+    low: 1.e-6
+    high: 1.e-2
+    log: true
+
+objective:
+  _target_: objective.main
+
+n_trials: 30
+n_max_jobs: 4
