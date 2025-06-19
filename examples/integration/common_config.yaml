@@ -43,7 +43,7 @@ transform:
       std: [0.5]
 
 task:
-  _target_: torchvision_task.ImageClassificationTask
+  _target_: torchvision_task_integration.ImageClassificationTask
   num_classes: 10
 
   model:

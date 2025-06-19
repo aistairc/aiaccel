@@ -9,7 +9,7 @@ params:
     log: true
 
 objective:
-  _target_: objective.main
+  _target_: objective_integration.main
 
 n_trials: 30
 n_max_jobs: 4
