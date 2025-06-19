@@ -57,4 +57,3 @@ task:
     optimizer_generator:
       _partial_: True
       _target_: torch.optim.Adam
-      lr: 1.e-4
