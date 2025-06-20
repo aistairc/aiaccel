@@ -4,7 +4,6 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 
 def main(lr: float) -> float:
-    # torch.app.train task.optimizer_config.optimizer_generator.lr=lr を実行
     subprocess.run(
         [
             "python",
@@ -16,12 +15,9 @@ def main(lr: float) -> float:
         ]
     )
 
-    # val loss を取得
-
-    # ログディレクトリのパス
+    # get validation loss
     log_dir = f"resnet50/lr_{lr}"
 
-    # EventAccumulator で .tfevents ファイルを読み込む
     event_acc = EventAccumulator(log_dir)
     event_acc.Reload()
 
