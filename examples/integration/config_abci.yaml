@@ -17,7 +17,7 @@ cluster:
       walltime: "02:00:00"
       scheduler_options: {interface: "ibn2"}
       job_script_prologue:
-        - "cd $PBS_O_WORKDIR",
-        - "module load cuda/12.6/12.6.1",
-        - "module load python/3.13/3.13.2",
+        - "cd $PBS_O_WORKDIR"
+        - "module load cuda/12.6/12.6.1"
+        - "module load python/3.13/3.13.2"
         - "source PATH_TO_ENV/bin/activate"
