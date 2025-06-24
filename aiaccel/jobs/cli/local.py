@@ -44,7 +44,6 @@ def main() -> None:
     if args.mode in ["cpu", "gpu"]:
         job = command
     elif args.mode == "mpi" or args.mode == "train":
-        job = prepare_mpi_job(args, command)
         job = f"""\
 mpirun {args.mpi_args} \\
     {command}
