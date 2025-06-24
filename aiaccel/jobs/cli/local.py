@@ -1,44 +1,16 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 import shlex
 import subprocess
 
-from omegaconf import DictConfig, ListConfig
-
-from aiaccel.config.config import load_config
-
-
-def prepare_mpi_job(args: Namespace, command: str) -> str:
-    mpi_args = []
-    if isinstance(args.mpi_args_conf, str | Path):
-        mpi_args_dest = load_config(args.mpi_args_conf)
-        if isinstance(mpi_args_dest, DictConfig):
-            for key, value in mpi_args_dest.items():
-                if isinstance(value, ListConfig):
-                    for v in value:
-                        mpi_args.append(f"{key!r} {v} \\")
-                else:
-                    mpi_args.append(f"{key!r} {value} \\")
-        else:
-            mpi_args.append(str(mpi_args_dest))
-    else:
-        mpi_args = ["\\"]
-
-    joined_mpi_args = "\n".join(mpi_args)
-    job = f"""
-    mpirun {joined_mpi_args}
-    {command}
-    """
-
-    return job
-
 
 def main() -> None:
     parent_parser = ArgumentParser(add_help=False)
     parent_parser.add_argument("--local", action="store_true")
     parent_parser.add_argument("--command_prefix", type=str)
+    parent_parser.add_argument("--mpi_args", type=str, default="")
     parent_parser.add_argument("--walltime", type=str, default="0:40:0")
     parent_parser.add_argument("--log_filename", type=Path)
     parent_parser.add_argument("--command", nargs="+")
@@ -59,11 +31,9 @@ def main() -> None:
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
     sub_parser.add_argument("--n_nodes", type=int, default=1)
-    sub_parser.add_argument("--mpi_args_conf", default=None)
 
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)
-    sub_parser.add_argument("--mpi_args_conf", default=None)
 
     args = parser.parse_args()
 
@@ -75,6 +45,10 @@ def main() -> None:
         job = command
     elif args.mode == "mpi" or args.mode == "train":
         job = prepare_mpi_job(args, command)
+        job = f"""\
+mpirun {args.mpi_args} \\
+    {command}
+"""
     else:
         raise ValueError()
 
