@@ -2,7 +2,7 @@ name: Monthly release
 
 on:
   schedule:
-  - cron: '0 0 20 * *'
+  - cron: '0 3 25 * *'
 
 permissions:
   contents: write
@@ -79,7 +79,7 @@ jobs:
           HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
         run: |
           hatch build
-          hatch publish -r test
+          hatch publish
 
       - name: Create GitHub Release
         env:
