@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import copy
 import logging
 import os
 from pathlib import Path
@@ -38,6 +39,7 @@ def main() -> None:
         ),
         oc.from_cli(unk_args),
     )
+    save_config = copy.deepcopy(config)
 
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
@@ -45,19 +47,20 @@ def main() -> None:
         status_list = collect_git_status_from_config(config)
         print_git_status(status_list)
 
-        # save config
+    config = resolve_inherit(config)
+
+    # build trainer
+    trainer: lt.Trainer = instantiate(config.trainer)
+
+    # save config
+    if trainer.is_global_zero:
         if "merged_config_path" in config:
             merged_config_path = config.merged_config_path
         else:
             merged_config_path = Path(config.working_directory) / "merged_config.yaml"
 
         with open(merged_config_path, "w") as f:
-            oc.save(config, f)
-
-    config = resolve_inherit(config)
-
-    # build trainer
-    trainer: lt.Trainer = instantiate(config.trainer)
+            oc.save(save_config, f)
 
     # start training
     trainer.fit(
