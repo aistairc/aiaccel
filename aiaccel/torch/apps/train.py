@@ -11,7 +11,6 @@ import lightning as lt
 from aiaccel.config import (
     load_config,
     overwrite_omegaconf_dumper,
-    pathlib2str_config,
     print_config,
     resolve_inherit,
 )
@@ -46,20 +45,19 @@ def main() -> None:
         status_list = collect_git_status_from_config(config)
         print_git_status(status_list)
 
-    config = resolve_inherit(config)
-
-    # build trainer
-    trainer: lt.Trainer = instantiate(config.trainer)
-
-    # save config
-    if trainer.is_global_zero:
+        # save config
         if "merged_config_path" in config:
             merged_config_path = config.merged_config_path
         else:
             merged_config_path = Path(config.working_directory) / "merged_config.yaml"
 
         with open(merged_config_path, "w") as f:
-            oc.save(pathlib2str_config(config), f)
+            oc.save(config, f)
+
+    config = resolve_inherit(config)
+
+    # build trainer
+    trainer: lt.Trainer = instantiate(config.trainer)
 
     # start training
     trainer.fit(
