@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-import copy
 import logging
 import os
 from pathlib import Path
@@ -12,6 +11,7 @@ import lightning as lt
 from aiaccel.config import (
     load_config,
     overwrite_omegaconf_dumper,
+    pathlib2str_config,
     print_config,
     resolve_inherit,
 )
@@ -39,7 +39,6 @@ def main() -> None:
         ),
         oc.from_cli(unk_args),
     )
-    save_config = copy.deepcopy(config)
 
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
@@ -60,7 +59,7 @@ def main() -> None:
             merged_config_path = Path(config.working_directory) / "merged_config.yaml"
 
         with open(merged_config_path, "w") as f:
-            oc.save(save_config, f)
+            oc.save(pathlib2str_config(config), f)
 
     # start training
     trainer.fit(
