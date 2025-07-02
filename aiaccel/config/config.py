@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 import copy
 from copy import deepcopy
@@ -7,11 +7,11 @@ import re
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig
-from omegaconf import Node as ocNode
+from omegaconf import Node
 from omegaconf import OmegaConf as oc  # noqa:N813
 from omegaconf._utils import OmegaConfDumper
 
-from yaml import Node
+import yaml
 from yaml.resolver import BaseResolver
 
 
@@ -28,63 +28,13 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
                               Defaults to "|".
     """
 
-    def str_representer(dumper: OmegaConfDumper, data: str) -> Node:
+    def str_representer(dumper: OmegaConfDumper, data: str) -> yaml.Node:
         return dumper.represent_scalar(
             BaseResolver.DEFAULT_SCALAR_TAG, data, style=mode if len(data.splitlines()) > 1 else None
         )
 
     OmegaConfDumper.add_representer(str, str_representer)
     OmegaConfDumper.str_representer_added = True
-
-
-def _resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
-    while isinstance(config, DictConfig) and "_inherit_" in config:
-        # resolve _inherit_
-        inherit_configs = config["_inherit_"]
-        if not isinstance(inherit_configs, ListConfig):
-            inherit_configs = [inherit_configs]
-
-        config.pop("_inherit_")
-
-        for inherit_config in inherit_configs:
-            if isinstance(inherit_config, DictConfig):
-                config = oc.merge(inherit_config, config)
-    return config
-
-
-def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
-    """Resolve _inherit_ in config
-
-    Merge the dict in ``_inherit_`` into a dict of the same hierarchy.
-    ``_inherit_`` is specified by omegaconf interpolation
-
-    Args:
-        config (DictConfig | ListConfig): The configuration loaded by load_config
-
-    Returns:
-        DictConfig | ListConfig: The configuration without ``_inherit_``
-    """
-
-    config = _resolve_inherit(config)
-
-    # load child DictConfig to resolve child _inherit_
-    if isinstance(config, DictConfig):
-        dst_config_dict = copy.deepcopy(config)
-        for key in config:
-            node_dict = dst_config_dict._get_node(key)
-            if isinstance(node_dict, ocNode) and node_dict is not None and not node_dict._is_interpolation():
-                dst_config_dict[key] = resolve_inherit(config[key])
-        config = dst_config_dict
-    elif isinstance(config, ListConfig):
-        dst_config_list = copy.deepcopy(config)
-        for key in range(len(config)):
-            node_list = dst_config_list._get_node(key)
-            if isinstance(node_list, ocNode) and node_list is not None and not node_list._is_interpolation():
-                dst_config_list[key] = resolve_inherit(config[key])
-        config = dst_config_list
-
-    return config
-
 
 def load_config(
     config_filename: str | Path,
@@ -160,7 +110,72 @@ def print_config(config: ListConfig | DictConfig, line_length: int = 80) -> None
     print("=" * line_length)
 
 
-def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConfig:
+
+def apply_recursively(func: Callable) -> DictConfig | ListConfig:
+    """
+    Recursively apply a function to all elements in a DictConfig or ListConfig.
+
+    This function traverses the configuration structure and applies the provided
+    function to each element, allowing for custom transformations or operations.
+
+    Args:
+        config (DictConfig | ListConfig): The configuration to traverse.
+        func (callable): The function to apply to each element.
+
+    Returns:
+        DictConfig | ListConfig: The modified configuration with the function applied.
+    """
+
+    def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+        config = func(config)
+        
+        if isinstance(config, DictConfig):
+            config = copy.deepcopy(config)
+
+            for key in config:
+                if isinstance(node := config._get_node(key), Node) and not node._is_interpolation():
+                    config[key] = _inner_fn(config[key])
+        elif isinstance(config, ListConfig):
+            config = copy.deepcopy(config)
+
+            for ii in range(len(config)):
+                if isinstance(node := config._get_node(ii), Node) and not node._is_interpolation():
+                    config[ii] = _inner_fn(config[ii])
+
+        return config
+
+    return _inner_fn
+
+
+@apply_recursively
+def resolve_inherit(config: Any) -> Any:
+    """Resolve _inherit_ in config
+
+    Merge the dict in ``_inherit_`` into a dict of the same hierarchy.
+    ``_inherit_`` is specified by omegaconf interpolation
+
+    Args:
+        config (DictConfig | ListConfig): The configuration loaded by load_config
+
+    Returns:
+        DictConfig | ListConfig: The configuration without ``_inherit_``
+    """
+    if isinstance(config, DictConfig) and "_inherit_" in config:
+        inherit_configs = config["_inherit_"]
+        if not isinstance(inherit_configs, ListConfig):
+            inherit_configs = [inherit_configs]
+
+        config.pop("_inherit_")
+
+        for inherit_config in inherit_configs:
+            if isinstance(inherit_config, DictConfig):
+                config = oc.merge(inherit_config, config)
+
+    return config
+
+
+@apply_recursively
+def pathlib2str_config(config: Any) -> Any:
     """
     Convert `pathlib.Path` objects in the configuration to strings.
 
@@ -176,21 +191,7 @@ def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConf
 
     """
 
-    def _inner_fn(config: ListConfig | DictConfig) -> ListConfig | DictConfig:
-        if isinstance(config, ListConfig):
-            for ii in range(len(config)):
-                node = config._get_node(ii)
-                if isinstance(node, ocNode) and node is not None and not node._is_interpolation():
-                    config[ii] = _inner_fn(config[ii])
-        elif isinstance(config, DictConfig):
-            for k, v in config.items():
-                node = config._get_node(k)
-                if isinstance(node, ocNode) and node is not None and not node._is_interpolation():
-                    if isinstance(v, ListConfig | DictConfig):
-                        config[k] = _inner_fn(v)
-                    elif isinstance(v, Path):
-                        config[k] = str(v)
-
-        return config
-
-    return _inner_fn(deepcopy(config))
+    if isinstance(config, Path):
+        config = str(config)
+    
+    return config
