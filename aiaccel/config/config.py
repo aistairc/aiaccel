@@ -1,13 +1,12 @@
-from typing import Any, Callable
+from typing import Any
 
+from collections.abc import Callable
 import copy
-from copy import deepcopy
 from pathlib import Path
 import re
 
 from colorama import Fore
-from omegaconf import DictConfig, ListConfig
-from omegaconf import Node
+from omegaconf import DictConfig, ListConfig, Node
 from omegaconf import OmegaConf as oc  # noqa:N813
 from omegaconf._utils import OmegaConfDumper
 
@@ -35,6 +34,7 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
 
     OmegaConfDumper.add_representer(str, str_representer)
     OmegaConfDumper.str_representer_added = True
+
 
 def load_config(
     config_filename: str | Path,
@@ -110,7 +110,6 @@ def print_config(config: ListConfig | DictConfig, line_length: int = 80) -> None
     print("=" * line_length)
 
 
-
 def apply_recursively(func: Callable) -> DictConfig | ListConfig:
     """
     Recursively apply a function to all elements in a DictConfig or ListConfig.
@@ -128,7 +127,7 @@ def apply_recursively(func: Callable) -> DictConfig | ListConfig:
 
     def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
         config = func(config)
-        
+
         if isinstance(config, DictConfig):
             config = copy.deepcopy(config)
 
@@ -193,5 +192,5 @@ def pathlib2str_config(config: Any) -> Any:
 
     if isinstance(config, Path):
         config = str(config)
-    
+
     return config
