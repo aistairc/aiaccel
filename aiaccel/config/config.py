@@ -72,14 +72,14 @@ def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
         dst_config_dict = copy.deepcopy(config)
         for key in config:
             node_dict = dst_config_dict._get_node(key)
-            if not (isinstance(node_dict, ocNode) and node_dict is not None and node_dict._is_interpolation()):
+            if isinstance(node_dict, ocNode) and node_dict is not None and not node_dict._is_interpolation():
                 dst_config_dict[key] = resolve_inherit(config[key])
         config = dst_config_dict
     elif isinstance(config, ListConfig):
         dst_config_list = copy.deepcopy(config)
         for key in range(len(config)):
             node_list = dst_config_list._get_node(key)
-            if not (isinstance(node_list, ocNode) and node_list is not None and node_list._is_interpolation()):
+            if isinstance(node_list, ocNode) and node_list is not None and not node_list._is_interpolation():
                 dst_config_list[key] = resolve_inherit(config[key])
         config = dst_config_list
 
@@ -180,12 +180,12 @@ def pathlib2str_config(config: ListConfig | DictConfig) -> ListConfig | DictConf
         if isinstance(config, ListConfig):
             for ii in range(len(config)):
                 node = config._get_node(ii)
-                if not (isinstance(node, ocNode) and node is not None and node._is_interpolation()):
+                if isinstance(node, ocNode) and node is not None and not node._is_interpolation():
                     config[ii] = _inner_fn(config[ii])
         elif isinstance(config, DictConfig):
             for k, v in config.items():
                 node = config._get_node(k)
-                if not (isinstance(node, ocNode) and node is not None and node._is_interpolation()):
+                if isinstance(node, ocNode) and node is not None and not node._is_interpolation():
                     if isinstance(v, ListConfig | DictConfig):
                         config[k] = _inner_fn(v)
                     elif isinstance(v, Path):
