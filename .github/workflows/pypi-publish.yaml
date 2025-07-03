@@ -75,9 +75,9 @@ jobs:
           git tag ${{ needs.check_commits.outputs.tag }}
           git push origin ${{ needs.check_commits.outputs.tag }}
 
-       - name: Build package
--        run: |
--          hatch build
+      - name: Build package
+        run: |
+          hatch build
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
