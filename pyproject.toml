@@ -70,6 +70,10 @@ github-actions = [
 [project.scripts]
 aiaccel-train = "aiaccel.torch.apps.train:main"
 aiaccel-optimize = "aiaccel.hpo.apps.optimize:main"
+aiaccel-config = "aiaccel.cli.config:main"
+aiaccel-torch = "aiaccel.cli.torch:main"
+aiaccel-hpo = "aiaccel.cli.hpo:main"
+aiaccel-jobs = "aiaccel.cli.jobs:main"
 
 [tool.ruff]
 line-length = 120
