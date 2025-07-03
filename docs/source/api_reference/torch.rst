@@ -55,3 +55,15 @@ H5py Utilities
     :toctree: generated/
 
     HDF5Writer
+
+
+Functional
+----------
+
+.. currentmodule:: aiaccel.torch.functional
+
+.. autosummary::
+    :toctree: generated/
+
+    linear_sum_assignment
+
