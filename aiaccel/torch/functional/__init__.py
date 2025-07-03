@@ -1,5 +1,5 @@
-from aiaccel.torch.functional.linear_sun_assignment import linear_sun_assignment
+from aiaccel.torch.functional.linear_sum_assignment import linear_sum_assignment
 
 __all__ = [
-    "linear_sun_assignment",
+    "linear_sum_assignment",
 ]
