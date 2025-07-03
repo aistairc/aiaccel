@@ -110,7 +110,9 @@ def print_config(config: ListConfig | DictConfig, line_length: int = 80) -> None
     print("=" * line_length)
 
 
-def apply_recursively(func: Callable) -> DictConfig | ListConfig:
+def apply_recursively(
+    func: Callable[[DictConfig | ListConfig], DictConfig | ListConfig],
+) -> Callable[[DictConfig | ListConfig], DictConfig | ListConfig]:
     """
     Recursively apply a function to all elements in a DictConfig or ListConfig.
 
@@ -132,13 +134,13 @@ def apply_recursively(func: Callable) -> DictConfig | ListConfig:
             config = copy.deepcopy(config)
 
             for key in config:
-                if isinstance(node := config._get_node(key), Node) and not node._is_interpolation():
+                if isinstance(node_dict := config._get_node(key), Node) and not node_dict._is_interpolation():
                     config[key] = _inner_fn(config[key])
         elif isinstance(config, ListConfig):
             config = copy.deepcopy(config)
 
             for ii in range(len(config)):
-                if isinstance(node := config._get_node(ii), Node) and not node._is_interpolation():
+                if isinstance(node_list := config._get_node(ii), Node) and not node_list._is_interpolation():
                     config[ii] = _inner_fn(config[ii])
 
         return config
@@ -147,7 +149,7 @@ def apply_recursively(func: Callable) -> DictConfig | ListConfig:
 
 
 @apply_recursively
-def resolve_inherit(config: Any) -> Any:
+def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
     """Resolve _inherit_ in config
 
     Merge the dict in ``_inherit_`` into a dict of the same hierarchy.
@@ -174,7 +176,7 @@ def resolve_inherit(config: Any) -> Any:
 
 
 @apply_recursively
-def pathlib2str_config(config: Any) -> Any:
+def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
     """
     Convert `pathlib.Path` objects in the configuration to strings.
 
@@ -190,7 +192,9 @@ def pathlib2str_config(config: Any) -> Any:
 
     """
 
-    if isinstance(config, Path):
-        config = str(config)
+    if isinstance(config, DictConfig):
+        for k, v in config.items():
+            if isinstance(v, Path):
+                config[k] = str(v)
 
     return config
