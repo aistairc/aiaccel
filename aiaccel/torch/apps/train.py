@@ -15,6 +15,7 @@ from aiaccel.config import (
     print_config,
     resolve_inherit,
 )
+from aiaccel.config.git import collect_git_status_from_config, print_git_status
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,9 @@ def main() -> None:
 
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
+
+        status_list = collect_git_status_from_config(config)
+        print_git_status(status_list)
 
     config = resolve_inherit(config)
 
