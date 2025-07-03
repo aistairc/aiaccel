@@ -20,11 +20,9 @@ def linear_sum_assignment(cost_matrix: torch.Tensor, maximize: bool = False) -> 
     assert cost_matrix.ndim >= 2, "cost_matrix must have at least 2 dimensions"
 
     *batch_shape, m, n = cost_matrix.shape
-    cost_matrix_reshaped = cost_matrix.reshape(-1, m, n)
-    cost_matrix_np = cost_matrix_reshaped.cpu().numpy()  # Convert the entire batch to NumPy
 
     row_ind_list, col_ind_list = [], []
-    for cm in cost_matrix_np:
+    for cm in cost_matrix.reshape(-1, m, n).cpu().numpy():
         row_ind, col_ind = scipy_linear_sum_assignment(cm, maximize=maximize)
 
         row_ind_list.append(row_ind)
