@@ -17,4 +17,8 @@ python -m aiaccel.hpo.apps.optimize --config config_abci.yaml
 ```
 
 ## Detailed Descriptions
-Detailed descriptions are available on the [aiaccel document(torch)](https://aistairc.github.io/aiaccel/user_guide/torch.html) [aiaccel document(optimize)](https://aistairc.github.io/aiaccel/user_guide/hpo.html)
+
+The target function for optimization using aiaccel.hpo.app.optimize is objective_integration.main.
+Within objective_integration.main, aiaccel.torch.app.train is called, and the learning rate is returned.
+
+Detailed descriptions of torch and optimize are available on the [aiaccel document(torch)](https://aistairc.github.io/aiaccel/user_guide/torch.html) [aiaccel document(optimize)](https://aistairc.github.io/aiaccel/user_guide/hpo.html)
