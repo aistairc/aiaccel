@@ -56,7 +56,6 @@ H5py Utilities
 
     HDF5Writer
 
-
 Functional
 ----------
 
@@ -66,4 +65,3 @@ Functional
     :toctree: generated/
 
     linear_sum_assignment
-

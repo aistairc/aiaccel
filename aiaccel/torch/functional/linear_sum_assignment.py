@@ -5,7 +5,9 @@ import torch
 
 
 def linear_sum_assignment(cost_matrix: torch.Tensor, maximize: bool = False) -> tuple[torch.Tensor, torch.Tensor]:
-    """Solve the linear sum assignment problem for a batch of cost matrices.
+    """
+    Solve the linear sum assignment problem for a batch of cost matrices.
+
     Args:
         cost_matrix (torch.Tensor): A tensor of shape (..., m, n)
             representing the cost matrix for each assignment problem.
