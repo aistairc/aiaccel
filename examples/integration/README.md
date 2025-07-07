@@ -7,7 +7,7 @@ This is an example of performing black-box optimization of the learning rate for
 In an environment where aiaccel is installed, additionally install TensorBoard and torchvision.
 
 ```bash
-pip install tensorboard torchvision
+pip install torchvision
 ```
 
 Run the following command to perform black-box optimization.
