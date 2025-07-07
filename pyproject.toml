@@ -25,7 +25,8 @@ dependencies = [
     "torch>=2.2.0",
     "h5py",
     "dask-jobqueue",
-    "rich"
+    "rich",
+    "tensorboard"
 ]
 dynamic = ["version"]
 
