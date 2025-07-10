@@ -3,6 +3,7 @@ from typing import Any
 import argparse
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
+import functools
 from importlib import resources
 from pathlib import Path
 import subprocess
@@ -163,7 +164,7 @@ def main() -> None:
                 trial = study.ask()
                 hparams = params.suggest_hparams(trial)
                 future = pool.submit(
-                    subprocess.run,
+                    functools.partial(subprocess.run, shell=True),
                     command_str.format(
                         job_name=f"job_{trial.number:0>6}",
                         out_filename=f"results/result_{trial.number:0>6}.out",
