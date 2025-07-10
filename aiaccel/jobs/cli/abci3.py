@@ -107,7 +107,7 @@ mpirun -bind-to none -map-by slot \\
 def main() -> None:
     parent_parser = ArgumentParser(add_help=False)
     parent_parser.add_argument("--local", action="store_true")
-    parent_parser.add_argument("--command_prefix", type=str)
+    parent_parser.add_argument("--command_prefix", type=str, default="")
     parent_parser.add_argument("--walltime", type=str, default="0:40:0")
     parent_parser.add_argument("log_filename", type=Path)
     parent_parser.add_argument("command", nargs="+")

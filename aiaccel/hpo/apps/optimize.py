@@ -2,8 +2,11 @@ from typing import Any
 
 import argparse
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+import functools
 from importlib import resources
 from pathlib import Path
+import subprocess
 import time
 
 from hydra.utils import instantiate
@@ -114,11 +117,15 @@ def main() -> None:
     """
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--command")
+
     parser.add_argument("--config", help="Configuration file path", default=None)
     parser.add_argument("--resume", action="store_true", default=False)
     parser.add_argument("--resumable", action="store_true", default=False)
 
     args, unk_args = parser.parse_known_args()
+
+    command_str = args.command
 
     with resources.as_file(resources.files("aiaccel.hpo.apps.config") / "default.yaml") as path:
         default_config = oc.load(path)
@@ -136,48 +143,48 @@ def main() -> None:
 
     config = resolve_inherit(config)
 
-    client = instantiate(config.cluster)
-
     work_dir = Path.cwd()
     work_dir.mkdir(parents=True, exist_ok=True)
 
     study = instantiate(config.study)
     params = instantiate(config.params)
-    objective_func = instantiate(config.objective)
 
     future_to_trial: dict[Any, dict[str, Any]] = {}
     submitted_job_count = 0
     finished_job_count = 0
 
-    try:
+    with ThreadPoolExecutor(config.n_max_jobs) as pool:
         while finished_job_count < config.n_trials:
             active_jobs = len(list(future_to_trial.keys()))
             available_slots = max(0, config.n_max_jobs - active_jobs)
             n_to_submit = min(available_slots, config.n_trials - submitted_job_count)
 
+            # Submit job in ThreadPoolExecutor
             for _ in range(n_to_submit):
                 trial = study.ask()
                 hparams = params.suggest_hparams(trial)
-                future = client.submit(objective_func, **hparams)
+                future = pool.submit(
+                    functools.partial(subprocess.run, shell=True),
+                    command_str.format(
+                        job_name=f"job_{trial.number:0>6}",
+                        out_filename=f"result_{trial.number:0>6}.out",
+                        **hparams,
+                    ),
+                )
                 future_to_trial[future] = {"trial": trial}
                 submitted_job_count += 1
 
+            # Get result from out_filename and tell
             for future in list(future_to_trial.keys()):
                 if future.done():
                     trial_info = future_to_trial.pop(future)
                     trial = trial_info["trial"]
-                    y = future.result()
+                    with open(f"result_{trial.number:0>6}.out") as f:
+                        y = float(f.read())
                     study._log_completed_trial(study.tell(trial, y))
                     finished_job_count += 1
-                    continue
                 else:
                     time.sleep(0.5)
-
-            if n_to_submit == 0 and active_jobs == len([f for f in future_to_trial if not f.done()]):
-                time.sleep(0.5)
-
-    finally:
-        client.close()
 
 
 if __name__ == "__main__":
