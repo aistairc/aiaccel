@@ -167,7 +167,7 @@ def main() -> None:
                     functools.partial(subprocess.run, shell=True),
                     command_str.format(
                         job_name=f"job_{trial.number:0>6}",
-                        out_filename=f"results/result_{trial.number:0>6}.out",
+                        out_filename=f"result_{trial.number:0>6}.out",
                         **hparams,
                     ),
                 )
@@ -179,7 +179,7 @@ def main() -> None:
                 if future.done():
                     trial_info = future_to_trial.pop(future)
                     trial = trial_info["trial"]
-                    with open(f"results/result_{trial.number:0>6}.out") as f:
+                    with open(f"result_{trial.number:0>6}.out") as f:
                         y = float(f.read())
                     study._log_completed_trial(study.tell(trial, y))
                     finished_job_count += 1
