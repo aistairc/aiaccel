@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from importlib import resources
 from pathlib import Path
 import subprocess
+import time
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
@@ -141,8 +142,6 @@ def main() -> None:
 
     config = resolve_inherit(config)
 
-    client = instantiate(config.cluster)
-
     work_dir = Path.cwd()
     work_dir.mkdir(parents=True, exist_ok=True)
 
@@ -153,41 +152,38 @@ def main() -> None:
     submitted_job_count = 0
     finished_job_count = 0
 
-    try:
+    with ThreadPoolExecutor(config.n_max_jobs) as pool:
         while finished_job_count < config.n_trials:
             active_jobs = len(list(future_to_trial.keys()))
             available_slots = max(0, config.n_max_jobs - active_jobs)
             n_to_submit = min(available_slots, config.n_trials - submitted_job_count)
 
-            # Set up paramaters for ThreadPoolExecutor
-            commands = []
+            # Submit job in ThreadPoolExecutor
             for _ in range(n_to_submit):
                 trial = study.ask()
                 hparams = params.suggest_hparams(trial)
-                future_to_trial[trial.number] = {"trial": trial}
-                submitted_job_count += 1
-                commands.append(
+                future = pool.submit(
+                    subprocess.run,
                     command_str.format(
                         job_name=f"job_{trial.number:0>6}",
                         out_filename=f"results/result_{trial.number:0>6}.out",
                         **hparams,
-                    )
+                    ),
                 )
-
-            with ThreadPoolExecutor() as executor:
-                executor.map(subprocess.run, commands)
+                future_to_trial[future] = {"trial": trial}
+                submitted_job_count += 1
 
             # Get result from out_filename and tell
             for future in list(future_to_trial.keys()):
-                trial_info = future_to_trial.pop(future)
-                trial = trial_info["trial"]
-                with open(f"results/result_{trial.number:0>6}.out") as f:
-                    y = float(f.read())
-                study._log_completed_trial(study.tell(trial, y))
-                finished_job_count += 1
-
-    finally:
-        client.close()
+                if future.done():
+                    trial_info = future_to_trial.pop(future)
+                    trial = trial_info["trial"]
+                    with open(f"results/result_{trial.number:0>6}.out") as f:
+                        y = float(f.read())
+                    study._log_completed_trial(study.tell(trial, y))
+                    finished_job_count += 1
+                else:
+                    time.sleep(0.5)
 
 
 if __name__ == "__main__":
