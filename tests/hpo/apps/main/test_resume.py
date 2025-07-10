@@ -20,7 +20,7 @@ def temp_dir() -> Generator[Path]:
         os.chdir(tmp_dir)
 
         source_dir = Path(__file__).parent
-        test_files = ["config.yaml", "objective_for_test.py"]
+        test_files = ["config.yaml", "objective_for_test.py", "execute_optuna_for_test.py"]
 
         for file_name in test_files:
             source_file = source_dir / file_name
@@ -127,7 +127,17 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     study_name_normal = f"test_study_{uuid.uuid4().hex[:8]}"
     normal_config = modify_config(temp_dir / "config.yaml", study_name_normal, 30, normal_db)
 
-    with patch("sys.argv", ["optimize.py", "--config", str(normal_config)]):
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(normal_config),
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
         main()
 
     normal_results = get_trial_values(temp_dir / normal_db, study_name_normal)
@@ -142,7 +152,18 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     split_config = modify_config(temp_dir / "config.yaml", study_name_split, 15, split_db)
 
     # First 15 trials
-    with patch("sys.argv", ["optimize.py", "--config", str(split_config), "--resumable"]):
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(split_config),
+            "--resumable",
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
         main()
 
     trial_count = get_trial_count(temp_dir / split_db, study_name_split)
@@ -150,14 +171,25 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     assert trial_count == 15
 
     # Second 15 trials
-    with patch("sys.argv", ["optimize.py", "--config", str(split_config), "--resume"]):
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(split_config),
+            "--resume",
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
         main()
 
     trial_count = get_trial_count(temp_dir / split_db, study_name_split)
     assert trial_count == 30
 
     # optuna resume
-    subprocess.run(["python", "objective_for_test.py"])
+    subprocess.run(["python", "execute_optuna_for_test.py"], check=True)
     # get best value
     normal_result = get_trial_values(temp_dir / "test_normal.db", "test_study_normal")
     normal_expected_best = min(normal_result)
@@ -169,13 +201,13 @@ def test_optimization_consistency(temp_dir: Path) -> None:
     resume_best = min(resume_results)
     assert len(resume_results) == 30, "Split execution should have 30 trials"
     ## optuna's best value VS aiaccel's best value (normal execution)
-    assert abs(normal_expected_best - normal_best) < 1e-6, (
-        f"Best values differ: normal={normal_best}, optuna={normal_expected_best}"
-    )
+    assert (
+        abs(normal_expected_best - normal_best) < 1e-6
+    ), f"Best values differ: normal={normal_best}, optuna={normal_expected_best}"
     ## optuna's best value VS aiaccel's best value (resume execution)
-    assert abs(resume_expected_best - resume_best) < 1e-6, (
-        f"Best values differ: resume={resume_best}, optuna={resume_expected_best}"
-    )
+    assert (
+        abs(resume_expected_best - resume_best) < 1e-6
+    ), f"Best values differ: resume={resume_best}, optuna={resume_expected_best}"
 
 
 def test_normal_execution(temp_dir: Path) -> None:
@@ -186,7 +218,17 @@ def test_normal_execution(temp_dir: Path) -> None:
     study_name = f"test_study_{uuid.uuid4().hex[:8]}"
     config_path = modify_config(temp_dir / "config.yaml", study_name, 30, db_name)
 
-    with patch("sys.argv", ["optimize.py", "--config", str(config_path)]):
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(config_path),
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
         main()
 
     trial_count = get_trial_count(temp_dir / db_name, study_name)
@@ -203,7 +245,18 @@ def test_resumable_execution(temp_dir: Path) -> None:
     study_name = f"test_study_{uuid.uuid4().hex[:8]}"
     config_path = modify_config(temp_dir / "config.yaml", study_name, 15, db_name)
 
-    with patch("sys.argv", ["optimize.py", "--config", str(config_path), "--resumable"]):
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(config_path),
+            "--resumable",
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
         main()
 
     db_path = temp_dir / db_name
@@ -236,14 +289,36 @@ def test_resume_execution(temp_dir: Path) -> None:
     study_name = f"test_study_{uuid.uuid4().hex[:8]}"
     config_path = modify_config(temp_dir / "config.yaml", study_name, 15, db_name)
 
-    with patch("sys.argv", ["optimize.py", "--config", str(config_path), "--resumable"]):
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(config_path),
+            "--resumable",
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
         main()
 
     db_path = temp_dir / db_name
     trial_count = get_trial_count(db_path, study_name)
     assert trial_count == 15
 
-    with patch("sys.argv", ["optimize.py", "--config", str(config_path), "--resume"]):
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(config_path),
+            "--resume",
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
         main()
 
     trial_count = get_trial_count(db_path, study_name)
