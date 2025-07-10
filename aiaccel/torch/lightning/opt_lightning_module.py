@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 class OptimizerConfig:
     """
     Configuration for the optimizer and scheduler in a LightningModule.
+
     Args:
         optimizer_generator (Callable[..., optim.optimizer.Optimizer]): A callable that generates the optimizer.
         params_transformer (Callable[..., Iterator[tuple[str, Any]]] | None): A callable that transforms the parameters
@@ -43,35 +44,34 @@ def build_param_groups(
 ) -> list[dict[str, Any]]:
     """
     Build parameter groups for the optimizer based on the provided patterns.
+
     Args:
         named_params (Iterator[tuple[str, nn.Parameter]]): An iterator of named parameters.
         groups (list[dict[str, Any]]): A list of dictionaries where each dictionary contains
-            a "pattern" key that specifies the parameter names to match (`fnmatch`), and other optional keys.
-
-    Returns:
-        list[dict[str, Any]]: A list of dictionaries representing parameter groups for the optimizer.
+            a "pattern" key that specifies the parameter names to match (``fnmatch``), and other optional keys.
 
     Example:
     In your config file, you might have:
-    ```yaml
-    optimizer_config:
-        _target_: aiaccel.torch.lightning.OptimizerConfig
-      optimizer_generator:
-        _partial_: True
-        _target_: torch.optim.AdamW
-        weight_decay: 0.01
-      param_transformer:
-        _partial_: True
-        _target_: aiaccel.torch.lightning.build_param_groups
-        groups:
-            - pattern: "*bias"
-              lr: 0.01
-            - pattern: "*weight"
-              lr: 0.001
-    ```
+
+    .. code-block:: yaml
+
+        optimizer_config:
+          _target_: aiaccel.torch.lightning.OptimizerConfig
+          optimizer_generator:
+            _partial_: True
+            _target_: torch.optim.AdamW
+            weight_decay: 0.01
+          param_transformer:
+              _partial_: True
+              _target_: aiaccel.torch.lightning.build_param_groups
+              groups:
+                - pattern: "*bias"
+                  lr: 0.01
+                - pattern: "*weight"
+                  lr: 0.001
+
     This will create two parameter groups: one for biases with a learning rate of 0.01 and another for weights with
-    a learning rate of 0.001. The `build_param_groups` function will match the parameters based on the provided
-    patterns and return them in the appropriate format for the optimizer.
+    a learning rate of 0.001.
     """
     remaining = dict(named_params)
 
@@ -80,6 +80,8 @@ def build_param_groups(
         matched_params = []
         for target in [spec["pattern"]] if isinstance(spec["pattern"], str) else spec["pattern"]:
             matched_params += [remaining.pop(name) for name in list(remaining.keys()) if fnmatch(name, target)]
+
+        assert len(matched_params) > 0
 
         param_groups.append({"params": matched_params} | {k: v for k, v in spec.items() if k != "pattern"})
 
