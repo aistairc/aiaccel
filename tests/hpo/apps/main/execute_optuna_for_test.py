@@ -74,8 +74,8 @@ if __name__ == "__main__":
         study_normal = pkl.load(f)
 
     try:
-        assert (
-            study_resume.best_value == study_normal.best_value
-        ), f"resume: {study_resume.best_value}, normal: {study_normal.best_value}"
+        assert study_resume.best_value == study_normal.best_value, (
+            f"resume: {study_resume.best_value}, normal: {study_normal.best_value}"
+        )
     except AssertionError as e:
         print(e)
