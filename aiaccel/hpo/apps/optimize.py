@@ -164,12 +164,13 @@ def main() -> None:
                 trial = study.ask()
                 hparams = params.suggest_hparams(trial)
                 future = pool.submit(
-                    functools.partial(subprocess.run, shell=True),
+                    subprocess.run,
                     command_str.format(
                         job_name=f"job_{trial.number:0>6}",
                         out_filename=f"result_{trial.number:0>6}.out",
                         **hparams,
                     ),
+                    shell=True,
                 )
                 future_to_trial[future] = {"trial": trial}
                 submitted_job_count += 1
