@@ -2,7 +2,7 @@ from typing import Any
 
 import argparse
 from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 import functools
 from importlib import resources
 from pathlib import Path
@@ -125,8 +125,6 @@ def main() -> None:
 
     args, unk_args = parser.parse_known_args()
 
-    command_str = args.command
-
     with resources.as_file(resources.files("aiaccel.hpo.apps.config") / "default.yaml") as path:
         default_config = oc.load(path)
     config = oc.merge(default_config, load_config(args.config) if args.config is not None else {})
@@ -149,7 +147,7 @@ def main() -> None:
     study = instantiate(config.study)
     params = instantiate(config.params)
 
-    future_to_trial: dict[Any, dict[str, Any]] = {}
+    future_to_trial: dict[Any, Trial] = {}
     submitted_job_count = 0
     finished_job_count = 0
 
@@ -157,35 +155,35 @@ def main() -> None:
         while finished_job_count < config.n_trials:
             active_jobs = len(list(future_to_trial.keys()))
             available_slots = max(0, config.n_max_jobs - active_jobs)
-            n_to_submit = min(available_slots, config.n_trials - submitted_job_count)
 
             # Submit job in ThreadPoolExecutor
-            for _ in range(n_to_submit):
+            for _ in range(min(available_slots, config.n_trials - submitted_job_count)):
                 trial = study.ask()
-                hparams = params.suggest_hparams(trial)
+
                 future = pool.submit(
                     subprocess.run,
-                    command_str.format(
+                    args.command.format(
                         job_name=f"job_{trial.number:0>6}",
                         out_filename=f"result_{trial.number:0>6}.out",
-                        **hparams,
+                        **params.suggest_hparams(trial),
                     ),
                     shell=True,
                 )
-                future_to_trial[future] = {"trial": trial}
+
+                future_to_trial[future] = trial
                 submitted_job_count += 1
 
             # Get result from out_filename and tell
-            for future in list(future_to_trial.keys()):
-                if future.done():
-                    trial_info = future_to_trial.pop(future)
-                    trial = trial_info["trial"]
-                    with open(f"result_{trial.number:0>6}.out") as f:
-                        y = float(f.read())
-                    study._log_completed_trial(study.tell(trial, y))
-                    finished_job_count += 1
-                else:
-                    time.sleep(0.5)
+            done_features, _ = wait(future_to_trial.keys(), return_when=FIRST_COMPLETED)
+            for future in done_features:
+                trial = future_to_trial.pop(future)
+
+                with open(f"result_{trial.number:0>6}.out") as f:
+                    y = float(f.read())
+
+                study._log_completed_trial(study.tell(trial, y))
+
+                finished_job_count += 1
 
 
 if __name__ == "__main__":
