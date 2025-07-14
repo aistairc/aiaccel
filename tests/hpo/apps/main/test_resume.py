@@ -20,7 +20,13 @@ def temp_dir() -> Generator[Path]:
         os.chdir(tmp_dir)
 
         source_dir = Path(__file__).parent
-        test_files = ["config.yaml", "objective_for_test.py", "execute_optuna_for_test.py"]
+        test_files = [
+            "config.yaml",
+            "objective_for_test.py",
+            "execute_optuna_for_test.py",
+            "config_multi.yaml",
+            "objective_multi_for_test.py",
+        ]
 
         for file_name in test_files:
             source_file = source_dir / file_name
@@ -317,6 +323,49 @@ def test_resume_execution(temp_dir: Path) -> None:
             "--command",
             "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
             + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
+        main()
+
+    trial_count = get_trial_count(db_path, study_name)
+    assert trial_count == 30
+
+
+def test_multi_execution(temp_dir: Path) -> None:
+    from aiaccel.hpo.apps.optimize import main
+
+    db_name = "multi_test.db"
+    study_name = f"test_study_{uuid.uuid4().hex[:8]}"
+    config_path = modify_config(temp_dir / "config_multi.yaml", study_name, 15, db_name)
+
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(config_path),
+            "--resumable",
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_multi_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+        ],
+    ):
+        main()
+
+    db_path = temp_dir / db_name
+    trial_count = get_trial_count(db_path, study_name)
+    assert trial_count == 15
+
+    with patch(
+        "sys.argv",
+        [
+            "optimize.py",
+            "--config",
+            str(config_path),
+            "--resume",
+            "--command",
+            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
+            + "-- bash -c 'python objective_multi_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
         ],
     ):
         main()
