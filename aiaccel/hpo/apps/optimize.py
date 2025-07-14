@@ -1,18 +1,18 @@
 from typing import Any
 
 import argparse
+import ast
 from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
-import functools
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from importlib import resources
 from pathlib import Path
 import subprocess
-import time
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
+import yaml
 
 from aiaccel.config import load_config, print_config, resolve_inherit
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
@@ -164,7 +164,7 @@ def main() -> None:
                     subprocess.run,
                     args.command.format(
                         job_name=f"job_{trial.number:0>6}",
-                        out_filename=f"result_{trial.number:0>6}.out",
+                        out_filename=f"result_{trial.number:0>6}.yaml",
                         **params.suggest_hparams(trial),
                     ),
                     shell=True,
@@ -178,8 +178,10 @@ def main() -> None:
             for future in done_features:
                 trial = future_to_trial.pop(future)
 
-                with open(f"result_{trial.number:0>6}.out") as f:
-                    y = float(f.read())
+                with open(f"result_{trial.number:0>6}.yaml") as f:
+                    y = yaml.safe_load(f)
+                    if isinstance(y, str):
+                        y = ast.literal_eval(y)
 
                 study._log_completed_trial(study.tell(trial, y))
 
