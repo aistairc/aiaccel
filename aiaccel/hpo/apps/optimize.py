@@ -147,44 +147,45 @@ def main() -> None:
     study = instantiate(config.study)
     params = instantiate(config.params)
 
-    future_to_trial: dict[Any, Trial] = {}
+    futures: dict[Any, tuple[Trial, str]] = {}
     submitted_job_count = 0
     finished_job_count = 0
 
     with ThreadPoolExecutor(config.n_max_jobs) as pool:
         while finished_job_count < config.n_trials:
-            active_jobs = len(list(future_to_trial.keys()))
+            active_jobs = len(futures.keys())
             available_slots = max(0, config.n_max_jobs - active_jobs)
 
             # Submit job in ThreadPoolExecutor
             for _ in range(min(available_slots, config.n_trials - submitted_job_count)):
                 trial = study.ask()
 
+                out_filename = f"result_{trial.number:0>6}.yaml"
+
                 future = pool.submit(
                     subprocess.run,
                     args.command.format(
                         job_name=f"job_{trial.number:0>6}",
-                        out_filename=f"result_{trial.number:0>6}.yaml",
+                        out_filename=out_filename,
                         **params.suggest_hparams(trial),
                     ),
                     shell=True,
                 )
 
-                future_to_trial[future] = trial
+                futures[future] = trial, out_filename
                 submitted_job_count += 1
 
             # Get result from out_filename and tell
-            done_features, _ = wait(future_to_trial.keys(), return_when=FIRST_COMPLETED)
+            done_features, _ = wait(futures.keys(), return_when=FIRST_COMPLETED)
             for future in done_features:
-                trial = future_to_trial.pop(future)
+                trial, out_filename = futures.pop(future)
 
-                with open(f"result_{trial.number:0>6}.yaml") as f:
+                with open(out_filename) as f:
                     y = yaml.safe_load(f)
                     if isinstance(y, str):
                         y = ast.literal_eval(y)
 
                 study._log_completed_trial(study.tell(trial, y))
-
                 finished_job_count += 1
 
 
