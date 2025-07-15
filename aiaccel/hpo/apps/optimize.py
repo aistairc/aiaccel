@@ -1,10 +1,10 @@
 from typing import Any
 
 import argparse
-import ast
 from collections.abc import Callable
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from importlib import resources
+import json
 from pathlib import Path
 import subprocess
 
@@ -12,7 +12,6 @@ from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
-import yaml
 
 from aiaccel.config import load_config, print_config, resolve_inherit
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
@@ -160,7 +159,7 @@ def main() -> None:
             for _ in range(min(available_slots, config.n_trials - submitted_job_count)):
                 trial = study.ask()
 
-                out_filename = f"result_{trial.number:0>6}.yaml"
+                out_filename = f"result_{trial.number:0>6}.json"
 
                 future = pool.submit(
                     subprocess.run,
@@ -181,9 +180,7 @@ def main() -> None:
                 trial, out_filename = futures.pop(future)
 
                 with open(out_filename) as f:
-                    y = yaml.safe_load(f)
-                    if isinstance(y, str):
-                        y = ast.literal_eval(y)
+                    y = json.load(f)
 
                 study._log_completed_trial(study.tell(trial, y))
                 finished_job_count += 1
