@@ -1,9 +1,11 @@
 import argparse
 
 
-def main(x1: float, x2: float) -> float:
-    y = (x1**2) + (x2**2)
-    return y
+def main(x1: float, x2: float) -> list[float]:
+    obj1 = (x1 - 2) ** 2 + (x2 - 1) ** 2
+    obj2 = x1 + x2
+
+    return [obj1, obj2]
 
 
 if __name__ == "__main__":
