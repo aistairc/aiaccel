@@ -2,7 +2,7 @@ name: Monthly release
 
 on:
   schedule:
-  - cron: '0 3 25 * *'
+  - cron: '0 3 20 * *'
 
 permissions:
   contents: write
@@ -25,7 +25,7 @@ jobs:
       - name: Get current [year].[month] version
         id: get_version
         run: |
-          VERSION=$(date "+%Y.%m")
+          VERSION=$(date "+%Y.%-m")
           TAG="v$VERSION"
           BRANCH="release/$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -81,8 +81,6 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         env:
