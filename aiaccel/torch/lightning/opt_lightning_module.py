@@ -117,9 +117,10 @@ class OptimizerLightningModule(lt.LightningModule):
             Union[optim.Optimizer, OptimizerLRSchedulerConfig]: The optimizer and scheduler configuration.
         """
 
-        params = self.named_parameters()
-        if self._optimizer_config.params_transformer is not None:
-            params = self._optimizer_config.params_transformer(params)
+        if self._optimizer_config.params_transformer is None:
+            params = self.parameters()  # just because backward compatibility
+        else:
+            params = self._optimizer_config.params_transformer(self.named_parameters())
 
         optimizer = self._optimizer_config.optimizer_generator(params=params)
 
