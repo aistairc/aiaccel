@@ -21,7 +21,7 @@ class OptimizerConfig:
     Configuration for the optimizer and scheduler in a LightningModule.
 
     Args:
-        optimizer_generator (Callable[..., optim.optimizer.Optimizer]): A callable that generates the optimizer.
+        optimizer_generator (Callable[..., optim.Optimizer]): A callable that generates the optimizer.
         params_transformer (Callable[..., Iterator[tuple[str, Any]]] | None): A callable that transforms the parameters
             into a format suitable for the optimizer. If None, the parameters are used as is. Defaults to None.
         scheduler_generator (Callable[..., optim.lr_scheduler.LRScheduler] | None):
@@ -30,7 +30,7 @@ class OptimizerConfig:
         scheduler_monitor (str | None): The metric to monitor for the scheduler. Defaults to "validation/loss".
     """
 
-    optimizer_generator: Callable[..., optim.optimizer.Optimizer]
+    optimizer_generator: Callable[..., optim.Optimizer]
     params_transformer: Callable[..., Iterator[tuple[str, Any]]] | None = None
 
     scheduler_generator: Callable[..., optim.lr_scheduler.LRScheduler] | None = None
@@ -61,7 +61,7 @@ def build_param_groups(
             _partial_: True
             _target_: torch.optim.AdamW
             weight_decay: 0.01
-          param_transformer:
+          params_transformer:
               _partial_: True
               _target_: aiaccel.torch.lightning.build_param_groups
               groups:
@@ -107,32 +107,32 @@ class OptimizerLightningModule(lt.LightningModule):
     def __init__(self, optimizer_config: OptimizerConfig):
         super().__init__()
 
-        self.optcfg = optimizer_config
+        self._optimizer_config = optimizer_config
 
-    def configure_optimizers(self) -> optim.optimizer.Optimizer | OptimizerLRSchedulerConfig:
+    def configure_optimizers(self) -> optim.Optimizer | OptimizerLRSchedulerConfig:
         """
         Configures the optimizer and scheduler for training.
 
         Returns:
-            Union[optim.optimizer.Optimizer, OptimizerLRSchedulerConfig]: The optimizer and scheduler configuration.
+            Union[optim.Optimizer, OptimizerLRSchedulerConfig]: The optimizer and scheduler configuration.
         """
 
         params = self.named_parameters()
-        if self.optcfg.params_transformer is not None:
-            params = self.optcfg.params_transformer(params)
+        if self._optimizer_config.params_transformer is not None:
+            params = self._optimizer_config.params_transformer(params)
 
-        optimizer = self.optcfg.optimizer_generator(params)
+        optimizer = self._optimizer_config.optimizer_generator(params=params)
 
-        if self.optcfg.scheduler_generator is None:
+        if self._optimizer_config.scheduler_generator is None:
             return optimizer
         else:
-            assert self.optcfg.scheduler_interval is not None
-            assert self.optcfg.scheduler_monitor is not None
+            assert self._optimizer_config.scheduler_interval is not None
+            assert self._optimizer_config.scheduler_monitor is not None
             return {
                 "optimizer": optimizer,
                 "lr_scheduler": {
-                    "scheduler": self.optcfg.scheduler_generator(optimizer=optimizer),
-                    "interval": self.optcfg.scheduler_interval,
-                    "monitor": self.optcfg.scheduler_monitor,
+                    "scheduler": self._optimizer_config.scheduler_generator(optimizer=optimizer),
+                    "interval": self._optimizer_config.scheduler_interval,
+                    "monitor": self._optimizer_config.scheduler_monitor,
                 },
             }
