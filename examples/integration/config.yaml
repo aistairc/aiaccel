@@ -8,8 +8,5 @@ params:
     high: 1.e-2
     log: true
 
-objective:
-  _target_: objective_integration.main
-
 n_trials: 30
 n_max_jobs: 4

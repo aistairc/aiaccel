@@ -1,6 +1,10 @@
+import json
+
 import torch
 from torch import nn
 from torch.nn import functional as func
+
+import lightning.pytorch as pl
 
 from torchmetrics.classification import MulticlassAccuracy
 
@@ -54,3 +58,18 @@ class ImageClassificationTask(OptimizerLightningModule):
             },
             prog_bar=True,
         )
+
+
+class SaveValLossCallback(pl.Callback):
+    def __init__(self, output_path: str) -> None:
+        super().__init__()
+        self.output_path = output_path
+
+    def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
+        val_loss = trainer.callback_metrics.get("validation/loss")
+        if val_loss is not None:
+            val_loss_value = val_loss.item()
+            with open(self.output_path, "w") as f:
+                json.dump(val_loss_value, f)
+        else:
+            print("Warning: 'validation/loss' not found in callback_metrics.")
