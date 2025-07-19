@@ -69,9 +69,10 @@ github-actions = [
 ]
 
 [project.scripts]
+aiaccel-jobs = "aiaccel.launcher:main"
+aiaccel-config = "aiaccel.launcher:main"
 aiaccel-torch = "aiaccel.launcher:main"
 aiaccel-hpo = "aiaccel.launcher:main"
-aiaccel-jobs = "aiaccel.launcher:main"
 
 [tool.hatch.build.targets.wheel.shared-scripts]
 "aiaccel/jobs/apps/pbs.py" = "aiaccel-jobs-pbs"
