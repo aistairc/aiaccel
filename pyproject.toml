@@ -69,8 +69,13 @@ github-actions = [
 ]
 
 [project.scripts]
-aiaccel-train = "aiaccel.torch.apps.train:main"
-aiaccel-optimize = "aiaccel.hpo.apps.optimize:main"
+aiaccel-torch = "aiaccel.launcher:main"
+aiaccel-hpo = "aiaccel.launcher:main"
+aiaccel-jobs = "aiaccel.launcher:main"
+
+[tool.hatch.build.targets.wheel.shared-scripts]
+"aiaccel/jobs/apps/pbs.py" = "aiaccel-jobs-pbs"
+"aiaccel/jobs/apps/local.py" = "aiaccel-jobs-local"
 
 [tool.ruff]
 line-length = 120
