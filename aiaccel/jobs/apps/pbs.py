@@ -117,6 +117,15 @@ def parse_args(config: Any) -> Namespace:
     return parser.parse_args()
 
 
+def prepare_single_job(job: str, args: Namespace) -> tuple[Path, Path, str, list[Path]]:
+    log_filename = args.log_filename
+    status_filename = args.log_filename.with_suffix(".out")
+
+    status_filename_list = [status_filename]
+
+    return status_filename, log_filename, job, status_filename_list
+
+
 def prepare_array_job(job: str, args: Namespace) -> tuple[Path, Path, str, list[Path]]:
     status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
     log_filename = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")
@@ -148,16 +157,8 @@ done
     return status_filename, log_filename, job, status_filename_list
 
 
-def prepare_job(job: str, args: Namespace) -> tuple[Path, Path, str, list[Path]]:
-    log_filename = args.log_filename
-    status_filename = args.log_filename.with_suffix(".out")
-
-    status_filename_list = [status_filename]
-
-    return status_filename, log_filename, job, status_filename_list
-
-
 def main() -> None:
+    # load config and parse arguments
     config = load_config()
     args = parse_args(config)
 
@@ -168,7 +169,7 @@ def main() -> None:
     if mode.endswith("-array"):
         status_filename, log_filename, job, status_filename_list = prepare_array_job(job, args)
     else:
-        status_filename, log_filename, job, status_filename_list = prepare_job(job, args)
+        status_filename, log_filename, job, status_filename_list = prepare_single_job(job, args)
 
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
 
