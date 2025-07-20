@@ -16,48 +16,42 @@ walltime: 1:0:0
 
 script_prologue: |
     export NVIDIA_VISIBLE_DEVICES=all
-    export SINGULARITY_BINDPATH="$SINGULARITY_BINDPATH,/groups,/groups-2.0"
 
-    export SINGULARITYENV_COLUMNS=120
-    export SINGULARITYENV_PYTHONUNBUFFERED=true
-
-qsub: qsub -P $JOB_GROUP -l walltime={args.walltime} -o {log_filename} -j oe -k oed -v USE_SSH=1
+qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -o {log_filename} -j oe -k oed -v USE_SSH=1"
 
 cpu:
-    qsub_args: -q rt_HF -l select=1
-    job: {command}
+    qsub_args: "-q rt_HF -l select=1"
+    job: "{command}"
 
 cpu-array:
     n_tasks_per_proc: 128
     n_procs_per_job: 48
-    qsub_args: -q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}
-    job: {command}
+    qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}"
+    job: "{command}"
 
 gpu:
     qsub_args: "-q rt_HF -l select=1"
-    job: {command}
+    job: "{command}"
 
 gpu-array:
     n_tasks_per_proc: 128
     n_procs_per_job: 48
-    qsub_args: -q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}
-    job: CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}
+    qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}"
+    job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}"
 
 mpi:
     n_nodes: 1
-    qsub_args: -q rt_HF -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / args.n_nodes )):ompthreads=$(( {args.n_procs} * 96 / args.n_nodes ))
+    qsub_args: "-q rt_HF -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / args.n_nodes )):ompthreads=$(( {args.n_procs} * 96 / args.n_nodes ))"
     job: |
         source /etc/profile.d/modules.sh
         module load hpcx
 
         mpirun -np {args.n_procs} -bind-to none -map-by slot \\
             -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-            -x SINGULARITYENV_OPAL_PREFIX=/usr/local/ \\
-            -x SINGULARITYENV_PMIX_INSTALL_PREFIX=/usr/local/ \\
             {command}
 
 train:
-    qsub_args: -q $( ((N==1)) && printf rt_HG || printf rt_HF ) -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=8:ompthreads=12
+    qsub_args: "-q $( ((N==1)) && printf rt_HG || printf rt_HF ) -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=8:ompthreads=12"
     job: |
         source /etc/profile.d/modules.sh
         module load hpcx
@@ -72,26 +66,45 @@ train:
 """  # noqa: E501
 
 
-def prepare_single_job(job: str, args: Namespace, config: dict[str, Any]) -> tuple[str, list[str], list[Path]]:
-    status_filename: Path = args.log_filename.with_suffix(".out")
+def prepare_single_job(job: str, args: Namespace, config: Any) -> tuple[Path, Path, str, list[Path]]:
+    log_filename = args.log_filename
+    status_filename = args.log_filename.with_suffix(".out")
 
-    return job, args.log_filename, [status_filename]
-
-
-def prepare_mpi_job(job: str, args: Namespace, config: dict[str, Any]) -> tuple[str, list[str], list[Path]]:
-    status_filename: Path = args.log_filename.with_suffix(".out")
-
-    return job, args.log_filename, [status_filename]
+    return log_filename, status_filename, job, [status_filename]
 
 
-def prepare_train_job(job: str, args: Namespace, config: dict[str, Any]) -> tuple[str, list[str], list[Path]]:
-    status_filename: Path = args.log_filename.with_suffix(".out")
+def prepare_array_job(job: str, args: Namespace, config: Any) -> tuple[Path, Path, str, list[Path]]:
+    status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
+    log_filename = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")
 
-    return job, args.log_filename, [status_filename]
+    job = f"""\
+for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
+    TASK_INDEX=$(( PBS_ARRAY_INDEX + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+
+    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
+        break
+    fi
+
+    TASK_INDEX=$TASK_INDEX \\
+    TASK_STEPSIZE={args.n_tasks_per_proc} \\
+        {job} > {log_filename} 2>&1 &
+
+    pids[$LOCAL_PROC_INDEX]=$!
+done
+
+for i in "${{!pids[@]}}"; do
+    wait ${{pids[$i]}}
+done
+"""
+
+    status_filename_list = []
+    for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc):
+        status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
+
+    return log_filename, status_filename, job, status_filename_list
 
 
-def main() -> None:
-    # Pre-parser to load configuration in advance.
+def load_config() -> Any:
     parser = ArgumentParser(add_help=False)
     parser.add_argument("--print_config", action="store_true")
     parser.add_argument("--config", type=Path)
@@ -103,11 +116,15 @@ def main() -> None:
 
     if args.config is not None:
         with open(args.config) as f:
-            config = yaml.safe_load(f)
+            return yaml.safe_load(f)
     else:
-        config = yaml.safe_load(default_config_yaml)
+        return yaml.safe_load(default_config_yaml)
 
-    # Main parser
+
+def main() -> None:
+    # Parse command line arguments
+    config = load_config()
+
     parser = ArgumentParser()
     parser.add_argument("--print_config", action="store_true")
     parser.add_argument("--config", type=Path)
@@ -138,51 +155,19 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    args.log_filename.parent.mkdir(exist_ok=True, parents=True)
-
-    mode = args.mode + "-array" if args.mode in ["cpu", "gpu"] and args.n_tasks is not None else args.mode
+    mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
 
     job = config[mode]["job"].format(command=shlex.join(args.command), args=args)
 
     if mode.endswith("-array"):
-        status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
-        log_filename = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")
-
-        job = f"""
-for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
-    TASK_INDEX=$(( PBS_ARRAY_INDEX + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
-
-    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
-        break
-    fi
-
-    TASK_INDEX=$TASK_INDEX \\
-    TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {log_filename} 2>&1 &
-
-    pids[$LOCAL_PROC_INDEX]=$!
-done
-
-for i in "${{!pids[@]}}"; do
-    wait ${{pids[$i]}}
-done
-"""
-
-        status_filename_list = []
-        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc):
-            status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
+        log_filename, status_filename, job, status_filename_list = prepare_array_job(job, args, config)
     else:
-        status_filename = args.log_filename.with_suffix(".out")
-        log_filename = args.log_filename
+        log_filename, status_filename, job, status_filename_list = prepare_single_job(job, args, config)
 
-        status_filename_list = [status_filename]
-
-    qsub_command = config["qsub"].format(log_filename=log_filename, args=args)
-    qsub_command += " " + config[args.mode]["qsub_args"].format(args=args)
+    args.log_filename.parent.mkdir(exist_ok=True, parents=True)
 
     job_filename: Path = args.log_filename.with_suffix(".sh")
     with open(job_filename, "w") as f:
-        # trap 'echo $? > {status_filename}' EXIT
         f.write(f"""\
 #! /bin/bash
 
@@ -207,6 +192,9 @@ echo Hostname: $(hostname)
 
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
+
+    qsub_command = config["qsub"].format(log_filename=log_filename, args=args)
+    qsub_command += " " + config[args.mode]["qsub_args"].format(args=args)
 
     if not args.local:
         subprocess.run(f"echo {log_filename} {job_filename}", shell=True, check=True)
