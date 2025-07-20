@@ -142,7 +142,7 @@ def main() -> None:
 
     mode = args.mode + "-array" if args.mode in ["cpu", "gpu"] and args.n_tasks is not None else args.mode
 
-    job = config["job"].format(command=shlex.join(args.command), args=args)
+    job = config[mode]["job"].format(command=shlex.join(args.command), args=args)
 
     if mode.endswith("-array"):
         status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
