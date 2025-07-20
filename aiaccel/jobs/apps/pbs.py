@@ -117,20 +117,20 @@ def parse_args(config: Any) -> Namespace:
     return parser.parse_args()
 
 
-def prepare_single_job(job: str, args: Namespace) -> tuple[Path, Path, str, list[Path]]:
-    log_filename = args.log_filename
-    status_filename = args.log_filename.with_suffix(".out")
+def main() -> None:
+    # load config and parse arguments
+    config = load_config()
+    args = parse_args(config)
 
-    status_filename_list = [status_filename]
+    mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
 
-    return status_filename, log_filename, job, status_filename_list
+    job = config[mode]["job"].format(command=shlex.join(args.command), args=args)
 
+    if mode.endswith("-array"):
+        status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
+        log_filename = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")
 
-def prepare_array_job(job: str, args: Namespace) -> tuple[Path, Path, str, list[Path]]:
-    status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
-    log_filename = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")
-
-    job = f"""\
+        job = f"""\
 for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
     TASK_INDEX=$(( PBS_ARRAY_INDEX + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
 
@@ -150,26 +150,14 @@ for i in "${{!pids[@]}}"; do
 done
 """
 
-    status_filename_list = []
-    for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc):
-        status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
-
-    return status_filename, log_filename, job, status_filename_list
-
-
-def main() -> None:
-    # load config and parse arguments
-    config = load_config()
-    args = parse_args(config)
-
-    mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
-
-    job = config[mode]["job"].format(command=shlex.join(args.command), args=args)
-
-    if mode.endswith("-array"):
-        status_filename, log_filename, job, status_filename_list = prepare_array_job(job, args)
+        status_filename_list = []
+        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc):
+            status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
     else:
-        status_filename, log_filename, job, status_filename_list = prepare_single_job(job, args)
+        log_filename = args.log_filename
+        status_filename = args.log_filename.with_suffix(".out")
+
+        status_filename_list = [status_filename]
 
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
 
