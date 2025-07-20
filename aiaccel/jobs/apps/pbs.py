@@ -1,133 +1,137 @@
 #! /usr/bin/env python
 
+from typing import Any
+
 from argparse import ArgumentParser, Namespace
-import os
 from pathlib import Path
 import shlex
 import subprocess
+import sys
 import time
 
+import yaml
 
-def prepare_mpi_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
+default_config_yaml = """\
+walltime: 1:0:0
+
+script_prologue: |
+    export NVIDIA_VISIBLE_DEVICES=all
+    export SINGULARITY_BINDPATH="$SINGULARITY_BINDPATH,/groups,/groups-2.0"
+
+    export SINGULARITYENV_COLUMNS=120
+    export SINGULARITYENV_PYTHONUNBUFFERED=true
+
+qsub: qsub -P $JOB_GROUP -l walltime={args.walltime} -o {log_filename} -j oe -k oed -v USE_SSH=1
+
+cpu:
+    qsub_args: -q rt_HF -l select=1
+    job: {command}
+
+cpu-array:
+    n_tasks_per_proc: 128
+    n_procs_per_job: 48
+    qsub_args: -q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}
+    job: {command}
+
+gpu:
+    qsub_args: "-q rt_HF -l select=1"
+    job: {command}
+
+gpu-array:
+    n_tasks_per_proc: 128
+    n_procs_per_job: 48
+    qsub_args: -q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}
+    job: CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}
+
+mpi:
+    n_nodes: 1
+    qsub_args: -q rt_HF -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / args.n_nodes )):ompthreads=$(( {args.n_procs} * 96 / args.n_nodes ))
+    job: |
+        source /etc/profile.d/modules.sh
+        module load hpcx
+
+        mpirun -np {args.n_procs} -bind-to none -map-by slot \\
+            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
+            -x SINGULARITYENV_OPAL_PREFIX=/usr/local/ \\
+            -x SINGULARITYENV_PMIX_INSTALL_PREFIX=/usr/local/ \\
+            {command}
+
+train:
+    qsub_args: -q $( ((N==1)) && printf rt_HG || printf rt_HF ) -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=8:ompthreads=12
+    job: |
+        source /etc/profile.d/modules.sh
+        module load hpcx
+
+        mpirun -np {args.n_gpus} -bind-to none -map-by slot \\
+            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
+            -x MAIN_ADDR=$(hostname -i) \\
+            -x MAIN_PORT=3000 \\
+            -x COLUMNS=120 \\
+            -x PYTHONUNBUFFERED=true \\
+            {command}
+"""  # noqa: E501
+
+
+def prepare_single_job(job: str, args: Namespace, config: dict[str, Any]) -> tuple[str, list[str], list[Path]]:
     status_filename: Path = args.log_filename.with_suffix(".out")
-    job = f"""\
-trap 'echo $? > {status_filename}' EXIT
 
-source /etc/profile.d/modules.sh
-module load hpcx
-
-mpirun -bind-to none -map-by slot \\
-    -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-    -x SINGULARITYENV_OPAL_PREFIX=/usr/local/ \\
-    -x SINGULARITYENV_PMIX_INSTALL_PREFIX=/usr/local/ \\
-    {command}
-
-"""
-
-    n_mpiprocs = args.n_procs // args.n_nodes
-    n_ompthreads = (args.n_nodes * 96) // args.n_procs
-    qsub_args = ["-l", f"select={args.n_nodes}:mpiprocs={n_mpiprocs}:ompthreads={n_ompthreads}"]
-    qsub_args += ["-o", str(args.log_filename)]
-
-    return job, qsub_args, [status_filename]
+    return job, args.log_filename, [status_filename]
 
 
-def prepare_single_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
+def prepare_mpi_job(job: str, args: Namespace, config: dict[str, Any]) -> tuple[str, list[str], list[Path]]:
     status_filename: Path = args.log_filename.with_suffix(".out")
-    job = f"trap 'echo $? > {status_filename}' EXIT && {command}"
 
-    qsub_args = ["-l", "select=1"]
-    qsub_args += ["-o", str(args.log_filename)]
-
-    return job, qsub_args, [status_filename]
+    return job, args.log_filename, [status_filename]
 
 
-def prepare_array_jobs(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
-    assert args.n_tasks_per_proc % args.n_procs_per_job == 0
-
-    n_tasks_per_proc = args.n_tasks_per_proc // args.n_procs_per_job
-
-    job = f"""\
-trap 'echo $? > {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")}' EXIT
-
-for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
-    TASK_INDEX=$(( PBS_ARRAY_INDEX + {n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
-
-    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
-        break
-    fi
-
-    CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) \\
-    TASK_INDEX=$TASK_INDEX \\
-    TASK_STEPSIZE={n_tasks_per_proc} \\
-        {command} > {args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")} 2>&1 &
-    pids[$LOCAL_PROC_INDEX]=$!
-done
-for i in "${{!pids[@]}}"; do
-    wait ${{pids[$i]}}
-done
-"""
-
-    qsub_args = ["-l", "select=1"]
-    qsub_args += ["-J", f"1-{args.n_tasks}:{args.n_tasks_per_proc}"]
-    qsub_args += ["-o", str(args.log_filename.with_suffix(".^array_index^.log"))]
-
-    status_filename_list = [
-        args.log_filename.with_suffix(f".{array_idx + 1}.out")
-        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc)
-    ]
-
-    return job, qsub_args, status_filename_list
-
-
-def prepare_train_job(args: Namespace, command: str) -> tuple[str, list[str], list[Path]]:
+def prepare_train_job(job: str, args: Namespace, config: dict[str, Any]) -> tuple[str, list[str], list[Path]]:
     status_filename: Path = args.log_filename.with_suffix(".out")
-    job = f"""\
-trap 'echo $? > {status_filename}' EXIT
 
-source /etc/profile.d/modules.sh
-module load hpcx
-
-mpirun -bind-to none -map-by slot \\
-    -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-    -x MAIN_ADDR=$(hostname -i) \\
-    -x MAIN_PORT=3000 \\
-    -x COLUMNS=120 \\
-    -x PYTHONUNBUFFERED=true \\
-    {command} \
-"""
-
-    n_nodes = args.n_gpus // 8
-    qsub_args = ["-l", f"select={n_nodes}:mpiprocs=8:ompthreads=12"]
-    qsub_args += ["-o", str(args.log_filename)]
-
-    return job, qsub_args, [status_filename]
+    return job, args.log_filename, [status_filename]
 
 
 def main() -> None:
+    # Pre-parser to load configuration in advance.
+    parser = ArgumentParser(add_help=False)
+    parser.add_argument("--print_config", action="store_true")
+    parser.add_argument("--config", type=Path)
+    args, _ = parser.parse_known_args()
+
+    if args.print_config:
+        print(default_config_yaml)
+        sys.exit(0)
+
+    if args.config is not None:
+        with open(args.config) as f:
+            config = yaml.safe_load(f)
+    else:
+        config = yaml.safe_load(default_config_yaml)
+
+    # Main parser
+    parser = ArgumentParser()
+    parser.add_argument("--print_config", action="store_true")
+    parser.add_argument("--config", type=Path)
+    sub_parsers = parser.add_subparsers(dest="mode", required=True)
+
     parent_parser = ArgumentParser(add_help=False)
     parent_parser.add_argument("--local", action="store_true")
-    parent_parser.add_argument("--command_prefix", type=str, default="")
-    parent_parser.add_argument("--walltime", type=str, default="0:40:0")
+    parent_parser.add_argument("--walltime", type=str, default=config["walltime"])
     parent_parser.add_argument("log_filename", type=Path)
     parent_parser.add_argument("command", nargs="+")
 
-    parser = ArgumentParser()
-    sub_parsers = parser.add_subparsers(dest="mode", required=True)
-
     sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=2048)
-    sub_parser.add_argument("--n_procs_per_job", type=int, default=32)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["cpu-array"]["n_tasks_per_proc"])
+    sub_parser.add_argument("--n_procs_per_job", type=int, default=config["cpu-array"]["n_procs_per_job"])
 
     sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=1024)
-    sub_parser.add_argument("--n_procs_per_job", type=int, default=8)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"]["n_tasks_per_proc"])
+    sub_parser.add_argument("--n_procs_per_job", type=int, default=config["gpu-array"]["n_procs_per_job"])
 
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
-    sub_parser.add_argument("--n_nodes", type=int, default=1)
+    sub_parser.add_argument("--n_nodes", type=int, default=config["mpi"]["n_nodes"])
 
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)
@@ -136,30 +140,58 @@ def main() -> None:
 
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
 
-    command = f"{args.command_prefix} {shlex.join(args.command)}"
+    mode = args.mode + "-array" if args.mode in ["cpu", "gpu"] and args.n_tasks is not None else args.mode
 
-    if args.mode in ["cpu", "gpu"]:
-        if args.n_tasks is None:
-            job, qsub_args, status_filename_list = prepare_single_job(args, command)
-        else:
-            job, qsub_args, status_filename_list = prepare_array_jobs(args, command)
-    elif args.mode == "mpi":
-        job, qsub_args, status_filename_list = prepare_mpi_job(args, command)
-    elif args.mode == "train":
-        job, qsub_args, status_filename_list = prepare_train_job(args, command)
+    job = config["job"].format(command=shlex.join(args.command), args=args)
+
+    if mode.endswith("-array"):
+        status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
+        log_filename = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")
+
+        job = f"""
+for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
+    TASK_INDEX=$(( PBS_ARRAY_INDEX + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+
+    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
+        break
+    fi
+
+    TASK_INDEX=$TASK_INDEX \\
+    TASK_STEPSIZE={args.n_tasks_per_proc} \\
+        {job} > {log_filename} 2>&1 &
+
+    pids[$LOCAL_PROC_INDEX]=$!
+done
+
+for i in "${{!pids[@]}}"; do
+    wait ${{pids[$i]}}
+done
+"""
+
+        status_filename_list = []
+        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc):
+            status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
     else:
-        raise ValueError()
+        status_filename = args.log_filename.with_suffix(".out")
+        log_filename = args.log_filename
+
+        status_filename_list = [status_filename]
+
+    qsub_command = config["qsub"].format(log_filename=log_filename, args=args)
+    qsub_command += " " + config[args.mode]["qsub_args"].format(args=args)
 
     job_filename: Path = args.log_filename.with_suffix(".sh")
     with open(job_filename, "w") as f:
-        f.write(
-            f"""\
+        # trap 'echo $? > {status_filename}' EXIT
+        f.write(f"""\
 #! /bin/bash
 
 #PBS -j oe
 #PBS -k oed
 
-set -e
+set -eE
+trap 'echo $? > {status_filename}' ERR EXIT  # at error and exit
+trap 'echo 143 > {status_filename}' TERM  # at termination (by job scheduler)
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR
@@ -168,37 +200,27 @@ fi
 echo Job ID: $PBS_JOBID
 echo Hostname: $(hostname)
 
-export NVIDIA_VISIBLE_DEVICES=all
-export SINGULARITY_BINDPATH="$SINGULARITY_BINDPATH,/groups,/groups-2.0"
-
-export SINGULARITYENV_COLUMNS=120
-export SINGULARITYENV_PYTHONUNBUFFERED=true
+{config["script_prologue"]}
 
 {job}
-"""
-        )
+""")
 
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
 
     if not args.local:
-        qsub_command = ["qsub", "-P", os.environ["JOB_GROUP"], "-q", "rt_HF"]
-        qsub_command += ["-l", f"walltime={args.walltime}", "-v", "USE_SSH=1"]
-        qsub_command += qsub_args + [str(job_filename)]
-
-        qsub_command_str = shlex.join(qsub_command)
-
-        subprocess.run(qsub_command_str, shell=True, check=True)
+        subprocess.run(f"echo {log_filename} {job_filename}", shell=True, check=True)
 
         for status_filename in status_filename_list:
             while not status_filename.exists():
                 time.sleep(1.0)
 
-            if int(status_filename.read_text()) != 0:
-                raise RuntimeError("Job failed")
+            status = status_filename.read_text()
+            if int(status) != 0:
+                raise RuntimeError(f"Job failed with {status} exit code.")
             status_filename.unlink()
     else:
-        subprocess.run(["bash", str(job_filename)], check=True)
+        subprocess.run(f"bash {job_filename}", shell=True, check=True)
 
 
 if __name__ == "__main__":
