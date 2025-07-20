@@ -2,10 +2,8 @@ name: Monthly release
 
 on:
   schedule:
-  - cron: '0 3 20 * *'
-
-permissions:
-  contents: write
+  - cron: '0 0 20 * *'
+  workflow_dispatch:
 
 jobs:
   check_commits:
@@ -14,7 +12,6 @@ jobs:
       has_changes: ${{ steps.check_commits.outputs.has_changes }}
       version: ${{ steps.get_version.outputs.version }}
       tag: ${{ steps.get_version.outputs.tag }}
-      branch: ${{ steps.get_version.outputs.branch }}
 
     steps:
       - uses: actions/checkout@v4
@@ -27,14 +24,11 @@ jobs:
         run: |
           VERSION=$(date "+%Y.%-m")
           TAG="v$VERSION"
-          BRANCH="release/$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
       - name: Check for commits since last tag
         id: check_commits
-        # LAST_TAG 以降に commit があるか？
         run: |
           LAST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
           echo "Last tag: ${LAST_TAG:-<none>}"
@@ -49,6 +43,7 @@ jobs:
     if: needs.check_commits.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     permissions:
+      contents: write
       id-token: write
 
     steps:
