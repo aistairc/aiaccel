@@ -139,8 +139,7 @@ def test_optimization_consistency(temp_dir: Path) -> None:
             "optimize.py",
             "--config",
             str(normal_config),
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
@@ -164,8 +163,7 @@ def test_optimization_consistency(temp_dir: Path) -> None:
             "--config",
             str(split_config),
             "--resumable",
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
@@ -182,8 +180,7 @@ def test_optimization_consistency(temp_dir: Path) -> None:
             "--config",
             str(split_config),
             "--resume",
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
@@ -227,8 +224,7 @@ def test_normal_execution(temp_dir: Path) -> None:
             "optimize.py",
             "--config",
             str(config_path),
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
@@ -254,8 +250,7 @@ def test_resumable_execution(temp_dir: Path) -> None:
             "--config",
             str(config_path),
             "--resumable",
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
@@ -297,8 +292,7 @@ def test_resume_execution(temp_dir: Path) -> None:
             "--config",
             str(config_path),
             "--resumable",
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
@@ -314,8 +308,7 @@ def test_resume_execution(temp_dir: Path) -> None:
             "--config",
             str(config_path),
             "--resume",
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
@@ -338,8 +331,7 @@ def test_multi_execution(temp_dir: Path) -> None:
             "--config",
             str(config_path),
             "--resumable",
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_multi_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "python objective_multi_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
@@ -355,8 +347,7 @@ def test_multi_execution(temp_dir: Path) -> None:
             "--config",
             str(config_path),
             "--resume",
-            "python -m aiaccel.jobs.cli.local gpu jobs/{job_name}.log "
-            + "-- bash -c 'python objective_multi_for_test.py --x1={x1} --x2={x2} > {out_filename}'",
+            "python objective_multi_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
