@@ -250,7 +250,7 @@ def test_resumable_execution(temp_dir: Path) -> None:
             "--config",
             str(config_path),
             "--resumable",
-            "bash -c 'python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
+            "python objective_for_test.py --x1={x1} --x2={x2} > {out_filename}",
         ],
     ):
         main()
