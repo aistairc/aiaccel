@@ -35,7 +35,6 @@ gpu-array:
     job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % {args.n_procs_per_job} )) {command}"
 
 mpi:
-    n_nodes: 1
     job: |
         mpirun -np {args.n_procs} \\
             {command}
@@ -137,7 +136,7 @@ def main() -> None:
 
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
-    sub_parser.add_argument("--n_nodes", type=int, default=config["mpi"]["n_nodes"])
+    sub_parser.add_argument("--n_nodes", type=int)  # defined for compatibility
 
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)
