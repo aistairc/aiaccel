@@ -1,66 +1,48 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 from typing import Any
 
 from argparse import ArgumentParser, Namespace
+from functools import partial
+from multiprocessing import Pool
 from pathlib import Path
 import shlex
 import subprocess
 import sys
-import time
 
 import yaml
 
 default_config_yaml = """\
-walltime: 1:0:0
-
 script_prologue: |
-    echo Job ID: $PBS_JOBID
     echo Hostname: $(hostname)
 
     export NVIDIA_VISIBLE_DEVICES=all
 
-qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1"
-
 cpu:
-    qsub_args: "-q rt_HF -l select=1"
     job: "{command}"
 
 cpu-array:
     n_tasks_per_proc: 128
     n_procs: 24
-    qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}"
     job: "{command}"
 
 gpu:
-    qsub_args: "-q rt_HF -l select=1"
     job: "{command}"
 
 gpu-array:
     n_tasks_per_proc: 128
     n_procs: 8
-    qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}"
-    job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}"
+    job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % {args.n_procs_per_job} )) {command}"
 
 mpi:
     n_nodes: 1
-    qsub_args: "-q rt_HF -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / {args.n_nodes} )):ompthreads=$(( {args.n_nodes} * 96 / {args.n_procs} ))"
     job: |
-        source /etc/profile.d/modules.sh
-        module load hpcx
-
-        mpirun -np {args.n_procs} -bind-to none -map-by slot \\
-            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
+        mpirun -np {args.n_procs} \\
             {command}
 
 train:
-    qsub_args: "-q $( ((N==1)) && printf rt_HG || printf rt_HF ) -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=8:ompthreads=12"
     job: |
-        source /etc/profile.d/modules.sh
-        module load hpcx
-
-        mpirun -np {args.n_gpus} -bind-to none -map-by slot \\
-            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
+        mpirun -np {args.n_gpus} \\
             -x MAIN_ADDR=$(hostname -i) \\
             -x MAIN_PORT=3000 \\
             -x COLUMNS=120 \\
@@ -74,60 +56,20 @@ def dispatch_job(mode: str, args: Namespace, config: Any) -> None:
     job = config[mode]["job"].format(command=shlex.join(args.command), args=args)
 
     if mode in ["cpu-array", "gpu-array"]:
-        job = f"""\
-for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
-    TASK_INDEX=$(( PBS_ARRAY_INDEX + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
-
-    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
-        break
-    fi
-
-    TASK_INDEX=$TASK_INDEX \\
-    TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {args.log_filename.with_suffix("")}.${{PBS_ARRAY_INDEX}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
-
-    pids[$LOCAL_PROC_INDEX]=$!
-done
-
-for i in "${{!pids[@]}}"; do
-    wait ${{pids[$i]}}
-done
-"""
-        job_log_filename = args.log_filename.with_suffix(".^array_index^.log")
-        job_status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
-
-        status_filename_list = []
-        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
-            status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
-    else:
-        job_log_filename = args.log_filename
-        job_status_filename = args.log_filename.with_suffix(".out")
-
-        status_filename_list = [job_status_filename]
+        job = f"TASK_STEPSIZE={args.n_tasks_per_proc} {job}"
 
     job_script = f"""\
 #! /bin/bash
 
-#PBS -j oe
-#PBS -k oed
-#PBS -o {job_log_filename}
-
 set -eE
-trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
-
-if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
-    cd $PBS_O_WORKDIR
-fi
+trap 'exit $?' ERR EXIT  # at error and exit
+trap 'echo 143' TERM  # at termination (by job scheduler)
 
 
 {config["script_prologue"]}
 
 {job}
 """
-
-    qsub = config["qsub"].format(args=args)
-    qsub_args = config[mode]["qsub_args"].format(args=args)
 
     # Create the job script file, remove old status files, and run the job
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
@@ -136,22 +78,21 @@ fi
     with open(job_filename, "w") as f:
         f.write(job_script)
 
-    for status_filename in status_filename_list:
-        status_filename.unlink(missing_ok=True)
+    if mode in ["cpu-array", "gpu-array"]:
+        worker = partial(subprocess.run, shell=True, check=True)
+        with Pool(processes=args.n_procs) as pool:
+            cmd_list = []
+            for ii in range(0, args.n_tasks, args.n_tasks_per_proc):
+                cmd = f"""\
+TASK_INDEX={ii + 1} bash {job_filename} \\
+    2>&1 | tee {args.log_filename.with_suffix("")}.{ii + 1}.log\
+"""
+                cmd_list.append(cmd)
 
-    if not args.local:
-        subprocess.run(f"{qsub} {qsub_args} {job_filename}", shell=True, check=True)
-
-        for status_filename in status_filename_list:
-            while not status_filename.exists():
-                time.sleep(1.0)
-
-            status = int(status_filename.read_text())
-            if status != 0:
-                raise RuntimeError(f"Job failed with {status} exit code.")
-            status_filename.unlink()
+            for _ in pool.imap_unordered(worker, cmd_list):
+                pass
     else:
-        subprocess.run(f"bash {job_filename}", shell=True, check=True)
+        subprocess.run(f"bash {job_filename} 2>&1 | tee {args.log_filename}", shell=True, check=True)
 
 
 def main() -> None:
@@ -180,8 +121,7 @@ def main() -> None:
     sub_parsers = parser.add_subparsers(dest="mode", required=True)
 
     parent_parser = ArgumentParser(add_help=False)
-    parent_parser.add_argument("--local", action="store_true")
-    parent_parser.add_argument("--walltime", type=str, default=config["walltime"])
+    parent_parser.add_argument("--walltime", type=str)  # defined for compatibility
     parent_parser.add_argument("log_filename", type=Path)
     parent_parser.add_argument("command", nargs="+")
 
