@@ -1,8 +1,7 @@
 #! /usr/bin/env python
 
-from typing import Any
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from pathlib import Path
 import shlex
 import subprocess
@@ -15,9 +14,12 @@ default_config_yaml = """\
 walltime: 1:0:0
 
 script_prologue: |
+    echo Job ID: $PBS_JOBID
+    echo Hostname: $(hostname)
+
     export NVIDIA_VISIBLE_DEVICES=all
 
-qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -o {log_filename} -j oe -k oed -v USE_SSH=1"
+qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1"
 
 cpu:
     qsub_args: "-q rt_HF -l select=1"
@@ -25,7 +27,7 @@ cpu:
 
 cpu-array:
     n_tasks_per_proc: 128
-    n_procs_per_job: 48
+    n_procs_per_job: 24
     qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}"
     job: "{command}"
 
@@ -35,13 +37,13 @@ gpu:
 
 gpu-array:
     n_tasks_per_proc: 128
-    n_procs_per_job: 48
+    n_procs_per_job: 8
     qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}"
     job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}"
 
 mpi:
     n_nodes: 1
-    qsub_args: "-q rt_HF -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / args.n_nodes )):ompthreads=$(( {args.n_procs} * 96 / args.n_nodes ))"
+    qsub_args: "-q rt_HF -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / {args.n_nodes} )):ompthreads=$(( {args.n_nodes} * 96 / {args.n_procs} ))"
     job: |
         source /etc/profile.d/modules.sh
         module load hpcx
@@ -66,7 +68,8 @@ train:
 """  # noqa: E501
 
 
-def load_config() -> Any:
+def main() -> None:
+    # Load configuration (from the default YAML string)
     parser = ArgumentParser(add_help=False)
     parser.add_argument("--print_config", action="store_true")
     parser.add_argument("--config", type=Path)
@@ -82,10 +85,9 @@ def load_config() -> Any:
         print(config_yaml)
         sys.exit(0)
 
-    return yaml.safe_load(config_yaml)
+    config = yaml.safe_load(config_yaml)
 
-
-def parse_args(config: Any) -> Namespace:
+    # Parse command-line arguments
     parser = ArgumentParser()
     parser.add_argument("--print_config", action="store_true")
     parser.add_argument("--config", type=Path)
@@ -114,22 +116,13 @@ def parse_args(config: Any) -> Namespace:
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)
 
-    return parser.parse_args()
-
-
-def main() -> None:
-    # load config and parse arguments
-    config = load_config()
-    args = parse_args(config)
-
+    args = parser.parse_args()
     mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
 
+    # Prepare the job script and arguments
     job = config[mode]["job"].format(command=shlex.join(args.command), args=args)
 
-    if mode.endswith("-array"):
-        status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
-        log_filename = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.proc-${LOCAL_PROC_INDEX}.log")
-
+    if mode in ["cpu-array", "gpu-array"]:
         job = f"""\
 for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
     TASK_INDEX=$(( PBS_ARRAY_INDEX + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -140,7 +133,7 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs_per_job}}}; do
 
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {log_filename} 2>&1 &
+        {job} > {args.log_filename.with_suffix("")}.${{PBS_ARRAY_INDEX}}.proc-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -149,50 +142,53 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
+        job_log_filename = args.log_filename.with_suffix(".^array_index^.log")
+        job_status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
 
         status_filename_list = []
         for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc):
             status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
     else:
-        log_filename = args.log_filename
-        status_filename = args.log_filename.with_suffix(".out")
+        job_log_filename = args.log_filename
+        job_status_filename = args.log_filename.with_suffix(".out")
 
-        status_filename_list = [status_filename]
+        status_filename_list = [job_status_filename]
 
-    args.log_filename.parent.mkdir(exist_ok=True, parents=True)
-
-    job_filename: Path = args.log_filename.with_suffix(".sh")
-    with open(job_filename, "w") as f:
-        f.write(f"""\
+    job_script = f"""\
 #! /bin/bash
 
 #PBS -j oe
 #PBS -k oed
+#PBS -o {job_log_filename}
 
 set -eE
-trap 'echo $? > {status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {status_filename}' TERM  # at termination (by job scheduler)
+trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
+trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR
 fi
 
-echo Job ID: $PBS_JOBID
-echo Hostname: $(hostname)
 
 {config["script_prologue"]}
 
 {job}
-""")
+"""
+
+    qsub_command = config["qsub"].format(args=args) + " " + config[mode]["qsub_args"].format(args=args)
+
+    # Create the job script file, remove old status files, and run the job
+    args.log_filename.parent.mkdir(exist_ok=True, parents=True)
+
+    job_filename: Path = args.log_filename.with_suffix(".sh")
+    with open(job_filename, "w") as f:
+        f.write(job_script)
 
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
 
-    qsub_command = config["qsub"].format(log_filename=log_filename, args=args)
-    qsub_command += " " + config[mode]["qsub_args"].format(args=args)
-
     if not args.local:
-        subprocess.run(f"echo {log_filename} {job_filename}", shell=True, check=True)
+        subprocess.run(f"echo {qsub_command} {job_filename}", shell=True, check=True)
 
         for status_filename in status_filename_list:
             while not status_filename.exists():
