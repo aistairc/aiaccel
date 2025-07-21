@@ -29,7 +29,7 @@ cpu:
 cpu-array:
     n_tasks_per_proc: 128
     n_procs: 24
-    qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}"
+    qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
     job: "{command}"
 
 gpu:
@@ -39,7 +39,7 @@ gpu:
 gpu-array:
     n_tasks_per_proc: 128
     n_procs: 8
-    qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:{args.n_tasks_per_proc}"
+    qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
     job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}"
 
 mpi:
