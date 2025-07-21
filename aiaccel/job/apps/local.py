@@ -58,7 +58,6 @@ def dispatch_job(mode: str, args: Namespace, config: Any) -> None:
         job = f"TASK_STEPSIZE={args.n_tasks_per_proc} {job}"
         log_filename = f"{args.log_filename.with_suffix('')}.${{TASK_INDEX}}.log"
     else:
-        job = f"{job} > {args.log_filename} 2>&1"
         log_filename = args.log_filename
 
     job_script = f"""\
