@@ -143,6 +143,10 @@ def main() -> None:
     args = parser.parse_args()
     mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
 
+    for key in ["walltime", "n_nodes"]:
+        if getattr(args, key, None) is not None:
+            print(f"Argument '{key}' is defined for compatibility and will not be used in aiaccel-job local.")
+
     dispatch_job(mode, args, config)
 
 

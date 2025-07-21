@@ -75,8 +75,9 @@ aiaccel-torch = "aiaccel.launcher:main"
 aiaccel-hpo = "aiaccel.launcher:main"
 
 [tool.hatch.build.targets.wheel.shared-scripts]
-"aiaccel/job/apps/pbs.py" = "aiaccel-job-pbs"
 "aiaccel/job/apps/local.py" = "aiaccel-job-local"
+"aiaccel/job/apps/pbs.py" = "aiaccel-job-pbs"
+"aiaccel/job/apps/sge.py" = "aiaccel-job-sge"
 
 [tool.ruff]
 line-length = 120

@@ -12,7 +12,7 @@ import time
 import yaml
 
 default_config_yaml = """\
-walltime: 1:0:0
+walltime: "1:0:0"
 
 script_prologue: |
     echo Job ID: $PBS_JOBID
