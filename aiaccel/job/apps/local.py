@@ -57,18 +57,22 @@ def dispatch_job(mode: str, args: Namespace, config: Any) -> None:
 
     if mode in ["cpu-array", "gpu-array"]:
         job = f"TASK_STEPSIZE={args.n_tasks_per_proc} {job}"
+        log_filename = f"{args.log_filename.with_suffix('')}.${{TASK_INDEX}}.log"
+    else:
+        job = f"{job} > {args.log_filename} 2>&1"
+        log_filename = args.log_filename
 
     job_script = f"""\
 #! /bin/bash
 
-set -eE
+set -eE -o pipefail
 trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
 
 
 {config["script_prologue"]}
 
-{job}
+{job} 2>&1 | tee {log_filename}
 """
 
     # Create the job script file, remove old status files, and run the job
@@ -83,16 +87,12 @@ trap 'echo 143' TERM  # at termination (by job scheduler)
         with Pool(processes=args.n_procs) as pool:
             cmd_list = []
             for ii in range(0, args.n_tasks, args.n_tasks_per_proc):
-                cmd = f"""\
-TASK_INDEX={ii + 1} bash {job_filename} \\
-    2>&1 | tee {args.log_filename.with_suffix("")}.{ii + 1}.log\
-"""
-                cmd_list.append(cmd)
+                cmd_list.append(f"TASK_INDEX={ii + 1} bash {job_filename}")
 
             for _ in pool.imap_unordered(worker, cmd_list):
                 pass
     else:
-        subprocess.run(f"bash {job_filename} 2>&1 | tee {args.log_filename}", shell=True, check=True)
+        subprocess.run(f"bash {job_filename}", shell=True, check=True)
 
 
 def main() -> None:

@@ -112,7 +112,7 @@ done
 #PBS -k oed
 #PBS -o {job_log_filename}
 
-set -eE
+set -eE -o pipefail
 trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
 trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
 
