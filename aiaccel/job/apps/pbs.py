@@ -139,19 +139,16 @@ fi
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
 
-    if not args.local:
-        subprocess.run(f"{qsub} {qsub_args} {job_filename}", shell=True, check=True)
+    subprocess.run(f"{qsub} {qsub_args} {job_filename}", shell=True, check=True)
 
-        for status_filename in status_filename_list:
-            while not status_filename.exists():
-                time.sleep(1.0)
+    for status_filename in status_filename_list:
+        while not status_filename.exists():
+            time.sleep(1.0)
 
-            status = int(status_filename.read_text())
-            if status != 0:
-                raise RuntimeError(f"Job failed with {status} exit code.")
-            status_filename.unlink()
-    else:
-        subprocess.run(f"bash {job_filename}", shell=True, check=True)
+        status = int(status_filename.read_text())
+        if status != 0:
+            raise RuntimeError(f"Job failed with {status} exit code.")
+        status_filename.unlink()
 
 
 def main() -> None:
@@ -180,7 +177,6 @@ def main() -> None:
     sub_parsers = parser.add_subparsers(dest="mode", required=True)
 
     parent_parser = ArgumentParser(add_help=False)
-    parent_parser.add_argument("--local", action="store_true")
     parent_parser.add_argument("--walltime", type=str, default=config["walltime"])
     parent_parser.add_argument("log_filename", type=Path)
     parent_parser.add_argument("command", nargs="+")
