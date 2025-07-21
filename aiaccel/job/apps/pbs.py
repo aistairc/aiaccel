@@ -44,7 +44,9 @@ gpu-array:
 
 mpi:
     n_nodes: 1
-    qsub_args: "-q rt_HF -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / {args.n_nodes} )):ompthreads=$(( {args.n_nodes} * 96 / {args.n_procs} ))"
+    qsub_args: >-
+        -q rt_HF
+        -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / {args.n_nodes} )):ompthreads=$(( {args.n_nodes} * 96 / {args.n_procs} ))
     job: |
         source /etc/profile.d/modules.sh
         module load hpcx
@@ -54,7 +56,9 @@ mpi:
             {command}
 
 train:
-    qsub_args: "-q $( ((N==1)) && printf rt_HG || printf rt_HF ) -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=8:ompthreads=12"
+    qsub_args: >-
+        -q $( (({args.n_gpus}==1)) && printf rt_HG || printf rt_HF )
+        -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=8:ompthreads=12
     job: |
         source /etc/profile.d/modules.sh
         module load hpcx
