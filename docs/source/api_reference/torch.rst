@@ -35,6 +35,7 @@ Lightning Utilities
     ABCIEnvironment
     OptimizerLightningModule
     OptimizerConfig
+    build_param_groups
 
 Lightning Datamodules
 ---------------------
