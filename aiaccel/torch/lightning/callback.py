@@ -4,6 +4,14 @@ import lightning.pytorch as pl
 
 
 class SaveParamCallback(pl.Callback):
+    """
+    Lightning Callback for save paramater in fit ends.
+
+    Args:
+        param_name (str): Parameter name to save
+        output_path (str): File name to save
+    """
+
     def __init__(self, param_name: str, output_path: str) -> None:
         super().__init__()
         self.param_name = param_name
