@@ -10,7 +10,6 @@ In an environment where aiaccel is installed, additionally install torchvision.
 pip install torchvision
 ```
 
-# TODO: PATH_TO_ENV
 
 Run the following command to perform black-box optimization.
 PATH_TO_ENV should be changed to the path of the environment prepared above.
