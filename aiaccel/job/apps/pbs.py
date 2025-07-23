@@ -58,7 +58,7 @@ mpi:
 train:
     qsub_args: >-
         -q $( (({args.n_gpus}==1)) && printf rt_HG || printf rt_HF )
-        -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=8:ompthreads=12
+        -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=$( (({args.n_gpus}==1)) && printf 1 || printf 8 ):ompthreads=$( (({args.n_gpus}==1)) && printf 8 || printf 12 )
     job: |
         source /etc/profile.d/modules.sh
         module load hpcx
