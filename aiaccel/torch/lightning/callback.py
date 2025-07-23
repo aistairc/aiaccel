@@ -18,10 +18,6 @@ class SaveMetricCallback(lightning.Callback):
         self.output_path = output_path
 
     def on_fit_end(self, trainer: lightning.Trainer, pl_module: lightning.LightningModule) -> None:
-        metric_value = trainer.callback_metrics.get(self.metric_name)
-        if metric_value is not None:
-            metric_value_item = metric_value.item()
-            with open(self.output_path, "w") as f:
-                json.dump(metric_value_item, f)
-        else:
-            print(f"Warning: '{self.metric_name}' not found in callback_metrics.")
+        metric_value = trainer.callback_metrics[self.metric_name].item()
+        with open(self.output_path, "w") as f:
+            json.dump(metric_value, f)
