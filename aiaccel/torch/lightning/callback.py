@@ -1,9 +1,9 @@
 import json
 
-import lightning.pytorch as pl
+import lightning
 
 
-class SaveParamCallback(pl.Callback):
+class SaveParamCallback(lightning.Callback):
     """
     Lightning Callback for save paramater in fit ends.
 
@@ -17,7 +17,7 @@ class SaveParamCallback(pl.Callback):
         self.param_name = param_name
         self.output_path = output_path
 
-    def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
+    def on_fit_end(self, trainer: lightning.Trainer, pl_module: lightning.LightningModule) -> None:
         param_value = trainer.callback_metrics.get(self.param_name)
         if param_value is not None:
             param_value_item = param_value.item()
