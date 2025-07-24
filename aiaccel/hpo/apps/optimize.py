@@ -6,6 +6,7 @@ from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from importlib import resources
 import json
 from pathlib import Path
+import shlex
 import subprocess
 
 from hydra.utils import instantiate
@@ -116,7 +117,7 @@ def main() -> None:
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("command")
+    parser.add_argument("command", nargs="+")
 
     parser.add_argument("--config", help="Configuration file path", default=None)
     parser.add_argument("--resume", action="store_true", default=False)
@@ -163,7 +164,7 @@ def main() -> None:
 
                 future = pool.submit(
                     subprocess.run,
-                    args.command.format(
+                    shlex.join(args.command).format(
                         job_name=f"job_{trial.number:0>6}",
                         out_filename=out_filename,
                         **params.suggest_hparams(trial),
