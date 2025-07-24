@@ -48,6 +48,7 @@ dev = [
     "ruff",
     "sphinx",
     "sphinxcontrib-jquery",
+    "sphinx-autobuild",
     "sphinx-intl",
     "sphinx-fontawesome",
     "sphinx-rtd-theme",

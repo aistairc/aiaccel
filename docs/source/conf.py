@@ -93,7 +93,7 @@ language = "en"
 # (commentout) autoclass_content = "both"
 
 html_static_path = ["_static"]
-html_css_files = ["custom_color.css"]
+# (commentout) html_css_files = ["custom_color.css"]
 html_theme_options = {
     "icon_links": [
         {
