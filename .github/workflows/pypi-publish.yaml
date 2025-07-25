@@ -1,9 +1,13 @@
-name: Monthly release
+name: Upload aiaccel package to PyPI
 
 on:
   schedule:
   - cron: '0 0 20 * *'
   workflow_dispatch:
+
+concurrency:
+  group: pypi-publish
+  cancel-in-progress: false
 
 jobs:
   check_commits:
@@ -19,14 +23,6 @@ jobs:
           fetch-depth: 0
           fetch-tags:  true
 
-      - name: Get current [year].[month] version
-        id: get_version
-        run: |
-          VERSION=$(date "+%Y.%-m")
-          TAG="v$VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
       - name: Check for commits since last tag
         id: check_commits
         run: |
@@ -37,6 +33,21 @@ jobs:
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Get current [year].[month](.[patch]) version
+        id: get_version
+        run: |
+          BASE=$(date '+%Y.%-m')
+          LAST=$(git tag -l "v${BASE}*" --sort=-v:refname | head -n1)
+
+          case "$LAST" in
+            "")         VERSION=$BASE ;;
+            v$BASE)     VERSION=$BASE.1 ;;
+            *)          VERSION=$BASE.$(( ${LAST##*.}+1 )) ;;
+          esac
+
+          echo "version=$VERSION" >>"$GITHUB_OUTPUT"
+          echo "tag=v$VERSION"   >>"$GITHUB_OUTPUT"
 
   publish-if-needed:
     needs: check_commits
