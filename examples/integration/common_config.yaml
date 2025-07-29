@@ -6,7 +6,8 @@ trainer:
       filename: "{epoch:04d}"
       save_last: True
       save_top_k: -1
-    - _target_: torchvision_task_integration.SaveValLossCallback
+    - _target_: aiaccel.torch.lightning.callback.SaveMetricCallback
+      metric_name: "validation/loss"
       output_path: ${out_filename}
 
 
