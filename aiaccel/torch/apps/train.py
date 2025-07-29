@@ -56,6 +56,8 @@ def main() -> None:
         if "merged_config_path" in config:
             merged_config_path = config.merged_config_path
         else:
+            if not os.path.isdir(config.working_directory):
+                os.makedirs(config.working_directory)
             merged_config_path = Path(config.working_directory) / "merged_config.yaml"
 
         with open(merged_config_path, "w") as f:
