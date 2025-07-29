@@ -8,5 +8,5 @@ params:
     high: 1.e-2
     log: true
 
-n_trials: 30
-n_max_jobs: 4
+n_trials: 1
+n_max_jobs: 1
