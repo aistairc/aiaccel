@@ -3,8 +3,6 @@ script_prologue: |
 
     export NVIDIA_VISIBLE_DEVICES=all
 
-    export PYTHONPATH="/home/member/hpopt/aiaccelv2/integration_example/aiaccel/examples/integration:$PYTHONPATH"
-
 
 cpu:
     job: "{command}"
