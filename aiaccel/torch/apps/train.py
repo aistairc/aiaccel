@@ -24,7 +24,7 @@ def main() -> None:
     overwrite_omegaconf_dumper()
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, help="Config file in YAML format")
+    parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
     # load config
