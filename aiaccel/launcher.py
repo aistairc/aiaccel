@@ -21,6 +21,7 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
 
     module = importlib.import_module(f"aiaccel.{target_module}.apps.{args.command}")
+
     sys.argv = [str(module.__file__)] + unk_args
     module.main()
 
