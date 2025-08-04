@@ -20,8 +20,10 @@ def main() -> None:
     parser.add_argument("command", choices=modules, help="The command to run.")
     args, unk_args = parser.parse_known_args()
 
-    sys.argv = [f"{sys.argv[0]} {args.command}"] + unk_args
-    importlib.import_module(f"aiaccel.{target_module}.apps.{args.command}").main()
+    module = importlib.import_module(f"aiaccel.{target_module}.apps.{args.command}")
+
+    sys.argv = [str(module.__file__)] + unk_args
+    module.main()
 
 
 if __name__ == "__main__":
