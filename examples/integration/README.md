@@ -4,18 +4,27 @@ This is an example of performing black-box optimization of the learning rate for
 
 ## Getting started
 
-In an environment where aiaccel is installed, additionally install torchvision.
+In an environment where aiaccel is installed, additionally install pyproject.toml.
 
 ```bash
-pip install torchvision
+pip install .
 ```
 
+PATH_TO_ENV in job_config.yaml should be changed to the path of the environment prepared above.
+
+```yaml
+    source PATH_TO_ENV
+```
 
 Run the following command to perform black-box optimization.
-PATH_TO_ENV should be changed to the path of the environment prepared above.
 
 ```bash
-python -m aiaccel.hpo.apps.optimize "python -m aiaccel.jobs.cli.abci3 gpu --command_prefix 'cd \$PBS_O_WORKDIR && module load cuda/12.6/12.6.1 && module load python/3.13/3.13.2 && source PATH_TO_ENV/bin/activate &&' jobs/{job_name}.log -- python -m aiaccel.torch.apps.train resnet50/config.yaml task.optimizer_config.optimizer_generator.lr={lr} trainer.logger.name=lr_{lr} out_filename={out_filename}" --config config.yaml
+aiaccel-hpo optimize --config hpo_config.yaml -- \
+    aiaccel-job pbs --config job_config.yaml train --n_gpus=1 jobs/{job_name}.log -- \
+        aiaccel-torch train resnet50/config.yaml \
+            working_directory=jobs/{job_name}/ \
+            task.optimizer_config.optimizer_generator.lr={lr} \
+            out_filename={out_filename}
 ```
 
 ## Detailed Descriptions
