@@ -5,11 +5,6 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "task"
 version = "0.1.0"
-description = "Package for integration example."
-authors = [
-    {name = "AIST", email = "onishi-masaki@aist.go.jp"}
-]
-readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "torchvision"
