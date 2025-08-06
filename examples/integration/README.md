@@ -20,7 +20,7 @@ Run the following command to perform black-box optimization.
 
 ```bash
 aiaccel-hpo optimize --config hpo_config.yaml -- \
-    aiaccel-job pbs --config job_config.yaml train --n_gpus=1 jobs/{job_name}.log -- \
+    aiaccel-job local --config job_config.yaml train --n_gpus=1 jobs/{job_name}.log -- \
         aiaccel-torch train resnet50/config.yaml \
             working_directory=jobs/{job_name}/ \
             task.optimizer_config.optimizer_generator.lr={lr} \
