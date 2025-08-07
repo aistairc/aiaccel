@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "task"
+name = "task_for_integration_example"
 version = "0.1.0"
 requires-python = ">=3.10"
 dependencies = [
@@ -11,4 +11,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-package-dir = {"" = "task"}
+package-dir = {"" = "task_for_integration_example"}
