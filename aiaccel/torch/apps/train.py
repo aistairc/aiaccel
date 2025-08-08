@@ -53,10 +53,8 @@ def main() -> None:
 
     # save config
     if trainer.is_global_zero:
-        if "merged_config_path" in config:
-            merged_config_path = config.merged_config_path
-        else:
-            merged_config_path = Path(config.working_directory) / "merged_config.yaml"
+        Path(config.working_directory).mkdir(parents=True, exist_ok=True)
+        merged_config_path = Path(config.working_directory) / "merged_config.yaml"
 
         with open(merged_config_path, "w") as f:
             oc.save(pathlib2str_config(config), f)
