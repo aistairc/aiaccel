@@ -8,10 +8,11 @@ trainer:
   devices: 1
   
   logger:
-    _target_: lightning.pytorch.loggers.TensorBoardLogger
+    _target_: lightning.pytorch.loggers.CSVLogger
     save_dir: ${working_directory}
-    name: ''
-    version: ''
+    name: ""
+    prefix: ""    
+
 
   callbacks:
     - _target_: lightning.pytorch.callbacks.ModelCheckpoint
@@ -39,8 +40,6 @@ datamodule:
     transform:
       _target_: torchvision.transforms.Compose
       transforms:
-        # - _target_: torchvision.transforms.RandomResizedCrop
-          # size: 224
         - _target_: torchvision.transforms.RandomCrop
           size: 32
           padding: 4
