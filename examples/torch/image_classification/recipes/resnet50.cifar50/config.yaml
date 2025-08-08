@@ -1,0 +1,91 @@
+trainer:
+  _target_: lightning.Trainer
+  default_root_dir: ${working_directory}
+
+  max_epochs: 200
+  precision: bf16-mixed
+
+  devices: 1
+  
+  logger:
+    _target_: lightning.pytorch.loggers.CSVLogger
+    save_dir: ${working_directory}
+    name: ""
+    prefix: ""    
+
+
+  callbacks:
+    - _target_: lightning.pytorch.callbacks.ModelCheckpoint
+      save_top_k: 1
+      monitor: "validation/accuracy"
+      mode: "max"
+      filename: "epoch={epoch:04d}_score={validation/accuracy:.2f}"
+      
+    - _target_: lightning.pytorch.callbacks.LearningRateMonitor
+      logging_interval: "step"
+
+    - _target_: lightning.pytorch.callbacks.RichProgressBar
+      refresh_rate: 5
+    - _target_: lightning.pytorch.callbacks.RichModelSummary
+      max_depth: 3
+
+
+datamodule:
+  _target_: aiaccel.torch.lightning.datamodules.SingleDataModule
+
+  train_dataset_fn:
+    _partial_: true
+    _target_: torchvision.datasets.CIFAR10
+    train: True
+    transform:
+      _target_: torchvision.transforms.Compose
+      transforms:
+        - _target_: torchvision.transforms.RandomCrop
+          size: 32
+          padding: 4
+        - _target_: torchvision.transforms.RandomHorizontalFlip
+        - _target_: torchvision.transforms.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.4914, 0.4822, 0.4465]
+          std: [0.2023, 0.1994, 0.2010]
+
+  val_dataset_fn:
+    _partial_: true
+    _target_: torchvision.datasets.CIFAR10
+    train: False
+    transform:
+      _target_: torchvision.transforms.Compose
+      transforms:
+        - _target_: torchvision.transforms.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.4914, 0.4822, 0.4465]
+          std: [0.2023, 0.1994, 0.2010]
+
+  common_args:
+    root: "./data"
+    download: True
+
+  use_scatter: False
+  batch_size: 128
+  num_workers: 24  
+
+task:
+  _target_: image_classification.task.ImageClassificationTask
+  num_classes: 10
+
+  model:
+    _target_: image_classification.small_resnet50.SmallResNet50
+    num_classes: 10
+
+  optimizer_config:
+    _target_: aiaccel.torch.lightning.OptimizerConfig
+    optimizer_generator:
+      _partial_: True
+      _target_: torch.optim.Adam
+      lr: 5.e-4
+    scheduler_generator:
+      _partial_: True
+      _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+      T_max: 200
+
+    scheduler_interval: epoch

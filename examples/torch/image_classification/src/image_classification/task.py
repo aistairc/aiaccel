@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from torch.nn import functional as func
+from torch.nn import functional as fn
 
 from torchmetrics.classification import MulticlassAccuracy
 
@@ -12,12 +12,11 @@ class ImageClassificationTask(OptimizerLightningModule):
         super().__init__(optimizer_config)
 
         self.model = model
-        if hasattr(self.model.fc, "in_features") and isinstance(self.model.fc.in_features, int):
-            self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
 
-        self.train_accuracy = MulticlassAccuracy(num_classes=num_classes)
-        self.val_accuracy = MulticlassAccuracy(num_classes=num_classes)
+        self.training_accuracy = MulticlassAccuracy(num_classes=num_classes)
+        self.validation_accuracy = MulticlassAccuracy(num_classes=num_classes)
 
+    @torch.compile
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)  # type: ignore
 
@@ -26,13 +25,12 @@ class ImageClassificationTask(OptimizerLightningModule):
 
         logits = self(x)
 
-        loss = func.cross_entropy(logits, y)
+        loss = fn.cross_entropy(logits, y)
 
-        acc = self.train_accuracy(logits, y)
         self.log_dict(
             {
                 "training/loss": loss,
-                "training/acc": acc,
+                "training/accuracy": self.training_accuracy(logits, y),
             },
             prog_bar=True,
         )
@@ -44,13 +42,12 @@ class ImageClassificationTask(OptimizerLightningModule):
 
         logits = self(x)
 
-        loss = func.cross_entropy(logits, y)
+        loss = fn.cross_entropy(logits, y)
 
-        acc = self.val_accuracy(logits, y)
         self.log_dict(
             {
                 "validation/loss": loss,
-                "validation/acc": acc,
+                "validation/accuracy": self.validation_accuracy(logits, y),
             },
             prog_bar=True,
         )
