@@ -66,7 +66,7 @@ datamodule:
     download: True
 
   use_scatter: False
-  batch_size: 128
+  batch_size: 256
   num_workers: 24  
 
 task:
@@ -82,7 +82,7 @@ task:
     optimizer_generator:
       _partial_: True
       _target_: torch.optim.Adam
-      lr: 5.e-4
+      lr: 1.e-3
     scheduler_generator:
       _partial_: True
       _target_: torch.optim.lr_scheduler.CosineAnnealingLR
