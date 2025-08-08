@@ -26,7 +26,5 @@ jobs:
           pip install --upgrade pip
           pip install -e .[dev,github-actions]
       - name: Run pytest
-        run: |
-          echo ${{ strategy.test_target }}
-          pytest -v --cov=aiaccel/${{ strategy.test_target }} --cov-branch --cov-report=term-missing tests/${{ strategy.test_target }}
+        run: pytest -v --cov=aiaccel/${{ matrix.test_target }} --cov-branch --cov-report=term-missing tests/${{ matrix.test_target }}
 
