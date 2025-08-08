@@ -1,4 +1,5 @@
 from torch import nn
+
 from torchvision import models
 
 
@@ -10,4 +11,3 @@ class SmallResNet50(nn.Sequential):
         self.base.conv1 = nn.Conv2d(3, 64, 3, 1, 1, bias=False)
         self.base.maxpool = nn.Identity()
         self.base.fc = nn.Linear(2048, 10)
-
