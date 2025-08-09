@@ -11,9 +11,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-22.04']
+        os: [ubuntu-22.04]
         python-version: ['3.10']
-        test_target: ['config', 'hpo', 'torch']
+        test_target: [config, hpo, torch]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,5 +26,5 @@ jobs:
           pip install --upgrade pip
           pip install -e .[dev,github-actions]
       - name: Run pytest
-        run: pytest -v --cov=aiaccel/${{ strategy.target }} --cov-branch --cov-report=term-missing tests/${{ strategy.target }}
+        run: pytest -v --cov=aiaccel/${{ matrix.test_target }} --cov-branch --cov-report=term-missing tests/${{ matrix.test_target }}
 
