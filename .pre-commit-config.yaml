@@ -10,7 +10,7 @@ repos:
     hooks:
       - id: mypy
         language: system
-        args: [--config-file, mypy.ini]
+        args: [--config-file, mypy.ini, --explicit-package-bases]
   - repo: local
     hooks:
       - id: pytest
