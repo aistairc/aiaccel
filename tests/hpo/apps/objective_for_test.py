@@ -1,9 +1,9 @@
 import argparse
 
 
-def main(x1: float, x2: float) -> float:
+def main(x1: float, x2: float) -> None:
     y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-    return y
+    print(y)
 
 
 if __name__ == "__main__":
@@ -14,4 +14,4 @@ if __name__ == "__main__":
 
     args, unk_args = parser.parse_known_args()
 
-    print(main(args.x1, args.x2))
+    main(args.x1, args.x2)
