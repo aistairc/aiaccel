@@ -7,7 +7,7 @@ This guide introduces how to manage configuration files using ``aiaccel.config``
 ``aiaccel.config`` are:
 
 - Modular programming through YAML meta-programming
-- Efficient management of multiple config files using _base_ and _inherit_ attributes
+- Efficient management of multiple config files using ``_base_`` and ``_inherit_`` attributes
 - Easy version control integration with Git
 - Minimal dependency on Hydra (only uses ``hydra.utils.instantiate``)
 
@@ -15,22 +15,14 @@ Getting Started
 ---------------
 
 Aiaccel's configuration system is based on `OmegaConf
-<http://omegaconf.readthedocs.io/>`_. The following example demonstrates its typical
-usage:
+<http://omegaconf.readthedocs.io/>`_. The typical usage is:
 
 .. code-block:: yaml
     :caption: config.yaml
 
     model:
-        _target_: torchvision.models.resnet50
-        weights:
-            _target_: hydra.utils.get_object
-            path: torchvision.models.ResNet50_Weights.DEFAULT
-
-    optimizer_generator:
-        _partial_: True
-        _target_: torch.optim.Adam
-        lr: 1.e-4
+      _target_: torchvision.models.resnet50
+      num_classes: 13
 
 .. code-block:: python
     :caption: example.py
@@ -45,6 +37,7 @@ usage:
     )
     from hydra.utils import instantiate
 
+
     overwrite_omegaconf_dumper()
 
     parser = ArgumentParser()
@@ -52,15 +45,12 @@ usage:
     args, unk_args = parser.parse_known_args()
 
     config = load_config(args.config)
-
     print_config(config)
-
     config = resolve_inherit(config)
 
     model = instantiate(config.model)
 
-    optimizer_generator = instantiate(config.optimizer_generator)
-    optimizer = optimizer_generator(params=model.parameters())
+    print(model)
 
     ...
 

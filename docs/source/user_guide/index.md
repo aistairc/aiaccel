@@ -1,15 +1,26 @@
 # User Guide
 
 ## Installation
-Aiaccel supports 3.10 and later. You can install aiaccel by:
+You can install aiaccel directly from PyPI:
 ```bash
 python -m pip install aiaccel
 ```
 
-## Contents
+Alternatively, we provide an example environment that includes all dependencies:
+```bash
+git clone https://github.com/aistairc/aiaccel/  # clone aiaccel repository
+cd aiaccel/
+
+pushd examples/python/
+bash setup.sh  # setup a miniforge-based Python environment
+source activate.sh  # activate the Python environment
+popd
+```
+
+## Tutorials
 ```{toctree}
 :maxdepth: 1
+config
 torch
 hpo
-config
 ```

@@ -2,6 +2,8 @@
 
 set -e
 
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 /bin/bash Miniforge3-Linux-x86_64.sh -b -p ./miniforge3
 
@@ -12,3 +14,5 @@ mamba install -y \
     numpy scipy scikit-learn jupyter pandas matplotlib
 
 pip3 install torch torchvision
+
+pip3 install -e ../../
