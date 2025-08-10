@@ -24,6 +24,5 @@ repos:
     rev: v1.10.0
     hooks:
       - id: docstrfmt
-        args: [--check, docs/source/]
+        args: [--check, docs/source/, --extend-exclude, docs/source/api_reference/generated]
         types_or: [rst]
-        exclude: docs/source/api_reference/generated
