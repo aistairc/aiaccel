@@ -7,7 +7,8 @@ This guide introduces how to manage configuration files using ``aiaccel.config``
 ``aiaccel.config`` are:
 
 - Modular programming through YAML meta-programming
-- Efficient management of multiple config files using ``_base_`` and ``_inherit_`` attributes
+- Efficient management of multiple config files using ``_base_`` and ``_inherit_``
+  attributes
 - Easy version control integration with Git
 - Minimal dependency on Hydra (only uses ``hydra.utils.instantiate``)
 

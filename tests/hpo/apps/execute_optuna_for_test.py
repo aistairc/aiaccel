@@ -1,15 +1,11 @@
 from pathlib import Path
 import pickle as pkl
 
-from objective_for_test import main
 import optuna
-from optuna.trial import Trial
 
 
-def objective(trial: Trial) -> float:
-    x1 = trial.suggest_float("x1", 0.0, 1.0)
-    x2 = trial.suggest_float("x2", 0.0, 1.0)
-    return main(x1, x2)
+def objective(x1: float, x2: float) -> float:
+    return (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
 
 
 if __name__ == "__main__":
@@ -29,7 +25,7 @@ if __name__ == "__main__":
 
     for _ in range(30):
         trial = study.ask()
-        y = main(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
+        y = objective(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
         study._log_completed_trial(study.tell(trial, y))
 
     with open("./test_notmal.pkl", "wb") as f:
@@ -51,7 +47,7 @@ if __name__ == "__main__":
 
     for _ in range(15):
         trial = study.ask()
-        y = main(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
+        y = objective(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
         study._log_completed_trial(study.tell(trial, y))
 
     # resume
@@ -60,7 +56,7 @@ if __name__ == "__main__":
 
     for _ in range(15):
         trial = study.ask()
-        y = main(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
+        y = objective(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
         study._log_completed_trial(study.tell(trial, y))
 
     with open("./test_resume.pkl", "wb") as f:

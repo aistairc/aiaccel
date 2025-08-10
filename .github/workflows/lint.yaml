@@ -30,7 +30,7 @@ jobs:
           ruff format --check
       - name: Perform mypy
         run: |
-          mypy --config-file mypy.ini .
+          mypy --config-file mypy.ini . --explicit-package-bases
       - name: Perform docstrfmt
         run: |
           docstrfmt --check docs/source/
