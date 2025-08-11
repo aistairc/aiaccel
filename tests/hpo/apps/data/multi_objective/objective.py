@@ -1,7 +1,7 @@
 import argparse
 
 
-def main() -> float:
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("out_filename", type=str)
     parser.add_argument("--x1", type=float)
