@@ -75,6 +75,8 @@ def main() -> None:
             if "=" in sys.argv[ii] and not sys.argv[ii].startswith("-"):
                 oc_args.append(sys.argv.pop(ii))
 
+        oc_args = list(reversed(oc_args))
+
     # parse arguments
     parser = argparse.ArgumentParser(
         description="""\
@@ -124,6 +126,7 @@ Typical usages:
         oc.save(pathlib2str_config(config), f)
 
     config = resolve_inherit(config)
+    config.working_directory = Path(config.working_directory)  # maybe bug
 
     # build study and hparams manager
     study = instantiate(config.study)
@@ -143,7 +146,7 @@ Typical usages:
             for _ in range(min(available_slots, config.n_trials - submitted_job_count)):
                 trial = study.ask()
 
-                out_filename = Path(f"trial_{trial.number:0>6}.json")
+                out_filename = config.working_directory / f"trial_{trial.number:0>6}.json"
 
                 future = pool.submit(
                     subprocess.run,
@@ -154,6 +157,7 @@ Typical usages:
                         **params.suggest_hparams(trial),
                     ),
                     shell=True,
+                    check=True,
                 )
 
                 futures[future] = trial, out_filename
