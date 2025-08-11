@@ -1,4 +1,5 @@
-from contextlib import contextmanager
+from collections.abc import Callable, Generator
+from contextlib import AbstractContextManager, contextmanager
 import os
 from pathlib import Path
 import shutil
@@ -12,9 +13,11 @@ from aiaccel.config import load_config
 
 
 @pytest.fixture()
-def workspace_factory(tmp_path_factory):
+def workspace_factory(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Callable[[str], AbstractContextManager[Path]]:
     @contextmanager
-    def _factory(data_name: str = "single_objective"):
+    def _factory(data_name: str = "single_objective") -> Generator[Path, None, None]:
         tmp_path = tmp_path_factory.mktemp("workspace")
 
         shutil.copytree(Path(__file__).parent / "data" / data_name, tmp_path, dirs_exist_ok=True)
@@ -30,7 +33,7 @@ def workspace_factory(tmp_path_factory):
     return _factory
 
 
-def test_from_config(workspace_factory) -> None:
+def test_from_config(workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
     with workspace_factory() as workspace:
         subprocess.run("aiaccel-hpo optimize --config=config.yaml", shell=True, check=True)
 
@@ -41,7 +44,7 @@ def test_from_config(workspace_factory) -> None:
         assert len(study.get_trials()) == 15
 
 
-def test_from_cli(workspace_factory) -> None:
+def test_from_cli(workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
     with workspace_factory() as workspace:
         cmd = (
             "aiaccel-hpo optimize"
@@ -71,7 +74,7 @@ def test_from_cli(workspace_factory) -> None:
     assert best_value == study.best_trial.value
 
 
-def test_resume(workspace_factory) -> None:
+def test_resume(workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
     with workspace_factory() as workspace:
         subprocess.run("aiaccel-hpo optimize --config=config.yaml", shell=True, check=True)
         subprocess.run("aiaccel-hpo optimize --config=config.yaml", shell=True, check=True)
@@ -81,7 +84,7 @@ def test_resume(workspace_factory) -> None:
         assert len(study.get_trials()) == 30
 
 
-def test_multi_objective(workspace_factory) -> None:
+def test_multi_objective(workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
     with workspace_factory("multi_objective") as workspace:
         subprocess.run("aiaccel-hpo optimize --config=config.yaml", shell=True, check=True)
 

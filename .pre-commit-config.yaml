@@ -23,7 +23,7 @@ repos:
       - id: pytest
         name: pytest
         entry: pytest -s -v -x --cov=aiaccel/ --cov-append -n auto tests/
-        stages: [pre-push]
+        stages: [push]
         language: system
         pass_filenames: false
         always_run: true
