@@ -11,18 +11,19 @@ repos:
       - id: mypy
         language: system
         args: [--config-file, mypy.ini, --explicit-package-bases]
-  - repo: local
-    hooks:
-      - id: pytest
-        name: pytest
-        entry: pytest -s -v -x --cov=aiaccel/ tests/
-        stages: [pre-push]
-        language: system
-        pass_filenames: false
-        always_run: true
   - repo: https://github.com/LilSpazJoekp/docstrfmt
     rev: v1.10.0
     hooks:
       - id: docstrfmt
         args: [--check, docs/source/, --extend-exclude, docs/source/api_reference/generated]
         types_or: [rst]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest -s -v -x --cov=aiaccel/ --cov-append -n auto tests/
+        stages: [pre-push]
+        language: system
+        pass_filenames: false
+        always_run: true
