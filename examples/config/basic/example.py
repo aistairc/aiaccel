@@ -1,5 +1,6 @@
-
 from argparse import ArgumentParser
+
+from hydra.utils import instantiate
 
 from aiaccel.config import (
     load_config,
@@ -7,8 +8,6 @@ from aiaccel.config import (
     print_config,
     resolve_inherit,
 )
-from hydra.utils import instantiate
-
 
 overwrite_omegaconf_dumper()
 
