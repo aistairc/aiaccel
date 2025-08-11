@@ -26,7 +26,7 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: pytest -s -v -x --cov=aiaccel/ --cov-append -n auto tests/
+        entry: pytest -v -x -n auto --cov=aiaccel/ --cov-append tests/
         stages: [pre-push]
         language: system
         pass_filenames: false
