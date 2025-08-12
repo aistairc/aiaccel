@@ -1,39 +1,25 @@
 # Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+# Full options: https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
 from pathlib import Path
 import sys
 
 import aiaccel
 
+# -- Path setup --------------------------------------------------------------
 root_path = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(root_path.absolute()))
 
 # -- Project information -----------------------------------------------------
-
 project = "aiaccel"
-project_copyright = "National Institute of Advanced Industrial Science And Technology (AIST)"
 author = "National Institute of Advanced Industrial Science And Technology (AIST)"
-
-# The full version, including alpha/beta/rc tags
+project_copyright = author
 release = aiaccel.__version__
+
 html_logo = f"{root_path}/docs/image/logo_aiaccel.png"
 html_favicon = f"{root_path}/docs/image/favicon.ico"
 
 # -- General configuration ---------------------------------------------------
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
 extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
@@ -41,66 +27,43 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
-    "myst_parser",
-    "pydata_sphinx_theme",
     "sphinx.ext.doctest",
     "sphinx_design",
     "sphinx_copybutton",
+    "myst_parser",
 ]
 
-# Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [
-    "_build",
-    "Thumbs.db",
-    ".DS_Store",
-]
-
-# Auto-generated header anchors
-# The MyST Parser can automatically generate label “slugs” for header anchors
-# so that you can reference them from markdown links. For example, you can use
-# header bookmark links, locally; [](#header-anchor), or cross-file
-# [](path/to/file.md#header-anchor). To achieve this, use the
-# myst_heading_anchors = DEPTH configuration option, where DEPTH is the depth
-# of header levels for which you wish to generate links.
-# (commentout) myst_heading_anchors = 3
-
-# -- Options for HTML output -------------------------------------------------
-
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = "pydata_sphinx_theme"
-html_show_sourcelink = False
-html_show_sphinx = False
-# (commentout) html_static_path = ["_static"]
-html_sidebars = {"**": ["sidebar-nav-bs", "sourcelink.html"]}
-source_suffix = {".rst": "restructuredtext", ".txt": "markdown", ".md": "markdown"}
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-# (commentout) html_static_path = ['_static']
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
 
 language = "en"
 
-# -- Extension configuration -------------------------------------------------
-# (commentout) todo_include_todos = True
-# (commentout) autoclass_content = "both"
+# -- HTML output -------------------------------------------------------------
+html_theme = "shibuya"
+html_show_sourcelink = False
+html_show_sphinx = False
 
 html_static_path = ["_static"]
-html_css_files = ["custom_color.css"]
 html_theme_options = {
-    "icon_links": [
+    "accent_color": "gold",
+    "globaltoc_expand_depth": 1,
+    "nav_links": [
+        {"title": "User Guide", "url": "user_guide/index"},
         {
-            "name": "GitHub",
-            "url": "https://github.com/aistairc/aiaccel",  # required
-            "icon": "fa-brands fa-square-github",
-            "type": "fontawesome",
-        }
+            "title": "API Reference",
+            "url": "api_reference/index",
+            "children": [
+                {"title": "aiaccel.config", "url": "api_reference/config"},
+                {"title": "aiaccel.torch", "url": "api_reference/torch"},
+                {"title": "aiaccel.hpo", "url": "api_reference/hpo"},
+            ],
+        },
+        {"title": "Contribution Guide", "url": "contribution_guide/index"},
     ],
 }
