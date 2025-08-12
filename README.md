@@ -1,4 +1,5 @@
 <div align="center"><img src="https://raw.githubusercontent.com/aistairc/aiaccel/master/docs/image/logo_aiaccel.png" width="600"/></div>
+<br><br>
 <div align="center">
     <img src="https://img.shields.io/github/license/aistairc/aiaccel.svg" />
     <img src="https://img.shields.io/badge/Python-3.10-blue" />
