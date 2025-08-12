@@ -19,10 +19,12 @@ PATH_TO_ENV in job_config.yaml should be changed to the path of the environment 
 Run the following command to perform black-box optimization.
 
 ```bash
-aiaccel-hpo optimize --config hpo_config.yaml -- \
-    aiaccel-job local --config job_config.yaml train --n_gpus=1 jobs/{job_name}.log -- \
-        aiaccel-torch train resnet50/config.yaml \
-            working_directory=jobs/{job_name}/ \
+cmd=aiaccel-job pbs --config config_job.yaml
+
+aiaccel-hpo optimize --config config_hpo.yaml -- \
+    $cmd train --n_gpus=1 {config.working_directory}/{job_name}.log -- \
+        aiaccel-torch train config_torch.yaml \
+            working_directory={config.working_directory}/{job_name}/ \
             task.optimizer_config.optimizer_generator.lr={lr} \
             out_filename={out_filename}
 ```

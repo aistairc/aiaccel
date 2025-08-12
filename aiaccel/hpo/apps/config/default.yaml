@@ -1,7 +1,7 @@
 db_filename: ${working_directory}/optuna.db
 
 n_trials: 100
-n_max_jobs: 10
+n_max_jobs: 1
 
 study:
   _target_: optuna.create_study
