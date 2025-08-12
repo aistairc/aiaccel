@@ -11,7 +11,6 @@ Aiaccel is a toolkit for accelerating machine learning research.
     :padding: 0
     :class-row: surface
 
-
     .. grid-item-card:: :octicon:`sliders;1.5em;sd-text-primary` Configuration management
        :link: user_guide/config.html
 
