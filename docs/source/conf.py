@@ -52,18 +52,31 @@ html_show_sphinx = False
 html_static_path = ["_static"]
 html_theme_options = {
     "accent_color": "gold",
-    "globaltoc_expand_depth": 1,
     "nav_links": [
         {"title": "User Guide", "url": "user_guide/index"},
         {
             "title": "API Reference",
             "url": "api_reference/index",
             "children": [
-                {"title": "aiaccel.config", "url": "api_reference/config"},
-                {"title": "aiaccel.torch", "url": "api_reference/torch"},
-                {"title": "aiaccel.hpo", "url": "api_reference/hpo"},
+                {
+                    "title": "OmegaConf Utilities",
+                    "url": "api_reference/config",
+                    "summary": "aiaccel.config",
+                },
+                {
+                    "title": "PyTorch/Lightning Toolkit",
+                    "url": "api_reference/torch",
+                    "summary": "aiaccel.torch",
+                },
+                {
+                    "title": "Hyperparameter Optimization",
+                    "url": "api_reference/hpo",
+                    "summary": "aiaccel.hpo",
+                },
             ],
         },
         {"title": "Contribution Guide", "url": "contribution_guide/index"},
     ],
+    "github_url": "https://github.com/aistairc/aiaccel",
+    "globaltoc_expand_depth": 1,
 }
