@@ -1,18 +1,18 @@
+_base_: ${base_config_path}/default.yaml
+
+command: ["./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
+
 params:
-  _convert_: partial
-  _target_: aiaccel.hpo.apps.optimize.HparamsManager
   x1:
     _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
     name: x1
     low: 0.0
     high: 1.0
-    log: false
   x2:
     _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
     name: x2
     low: 0.0
     high: 1.0
-    log: false
 
-n_trials: 30
-n_max_jobs: 4
+n_trials: 100
+n_max_jobs: 50

@@ -6,6 +6,8 @@ checkpoints/
 events*
 hparams.yaml
 merged_config.yaml
+trial*.json
+*.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

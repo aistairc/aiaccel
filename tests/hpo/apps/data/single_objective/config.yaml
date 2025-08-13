@@ -1,0 +1,15 @@
+_base_: ${base_config_path}/default.yaml
+
+study:
+  sampler:
+    _target_: optuna.samplers.TPESampler
+    seed: 0
+
+params:
+  x1: [0, 1]
+  x2: [0, 1]
+
+command: ["python", "${working_directory}/objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
+
+n_trials: 15
+n_max_jobs: 1

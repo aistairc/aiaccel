@@ -45,6 +45,7 @@ dev = [
     "pytest-cov",
     "pytest-mock",
     "pytest-subprocess",
+    "pytest-xdist",
     "ruff",
     "sphinx",
     "sphinxcontrib-jquery",
