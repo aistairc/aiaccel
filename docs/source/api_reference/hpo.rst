@@ -41,8 +41,6 @@ Suggest Wrappers
     SuggestLogUniform
     SuggestUniform
 
-..
-    lightning.OptimizerLightningModule
+.. lightning.OptimizerLightningModule
 
-..
-    lightning.OptimizerConfig
+.. lightning.OptimizerConfig
