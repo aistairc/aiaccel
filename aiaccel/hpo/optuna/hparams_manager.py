@@ -1,9 +1,11 @@
 from typing import Any
 
 from collections.abc import Callable
-from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 
 from optuna.trial import Trial
+
+from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
+
 
 class HparamsManager:
     """
@@ -46,4 +48,4 @@ class HparamsManager:
             these types.
         """
 
-        return {name: param_fn(trial, name) for name, param_fn in self.params.items()}
+        return {name: param_fn(trial) for name, param_fn in self.params.items()}
