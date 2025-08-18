@@ -133,7 +133,7 @@ methods wrapped by aiaccel:
 
     params:
         _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager  # default
+        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager  # default
 
         # Float parameter example
         x1:

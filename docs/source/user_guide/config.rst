@@ -76,7 +76,7 @@ Example base configuration:
 
     params:
         _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager
+        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
         x1: [0, 1]
         x2:
             _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
@@ -105,7 +105,7 @@ of the configuration. Example configuration:
 
     params:
         _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager
+        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
         x1:
             _inherit_: "${param}"
             name: x1

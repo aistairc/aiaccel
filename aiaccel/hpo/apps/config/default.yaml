@@ -6,7 +6,7 @@ cluster:
 
 params:
   _convert_: partial
-  _target_: aiaccel.hpo.apps.optimize.HparamsManager
+  _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
 
 n_max_jobs: 1
 
