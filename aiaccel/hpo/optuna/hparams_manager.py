@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from optuna.trial import Trial
 
-from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
+from aiaccel.hpo.optuna.suggest_wrapper import Const, Float, Hparam, T
 
 
 class HparamsManager:
@@ -16,13 +16,13 @@ class HparamsManager:
         params (dict): A dictionary where keys are hyperparameter names and values
                        are callables that take a Trial object and return a hyperparameter value.
     Methods:
-        __init__(**params_def: dict[str, int | float | str | list[int | float] | Suggest[T]]) -> None:
+        __init__(**params_def: dict[str, int | float | str | list[int | float] | Hparam[T]]) -> None:
             Initializes the HparamsManager with the given hyperparameter definitions.
         suggest_hparams(trial: Trial) -> dict[str, float | int | str | list[float | int | str]]:
             Suggests hyperparameters for the given trial.
     """
 
-    def __init__(self, **params_def: dict[str, int | float | str | list[int | float] | Suggest[T]]) -> None:
+    def __init__(self, **params_def: dict[str, int | float | str | list[int | float] | Hparam[T]]) -> None:
         self.params: list[Callable[[Trial], Any]] = []
         for name, param in params_def.items():
             if callable(param):
@@ -30,7 +30,7 @@ class HparamsManager:
             else:
                 if isinstance(param, list):
                     low, high = param
-                    self.params.append(SuggestFloat(name=name, low=low, high=high))
+                    self.params.append(Float(name=name, low=low, high=high))
                 else:
                     self.params.append(Const(name=name, value=param))
 

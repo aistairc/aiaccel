@@ -14,7 +14,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 from optuna.trial import Trial
 
 from aiaccel.config import load_config, print_config, resolve_inherit
-from aiaccel.hpo.optuna.hparams_manager import HparamsManager
+
 
 def main() -> None:
     """
@@ -59,7 +59,7 @@ def main() -> None:
           _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
           x1: [0, 1]
           x2:
-            _target_: aiaccel.apps.optimize.SuggestFloat
+            _target_: aiaccel.apps.optimize.Float
             name: x2
             low: 0.0
             high: 1.0

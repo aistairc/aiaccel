@@ -137,7 +137,7 @@ methods wrapped by aiaccel:
 
         # Float parameter example
         x1:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+            _target_: aiaccel.hpo.optuna.suggest_wrapper.Float
             name: x1
             low: 0.0
             high: 1.0
@@ -145,7 +145,7 @@ methods wrapped by aiaccel:
 
         # Another float parameter
         x2:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+            _target_: aiaccel.hpo.optuna.suggest_wrapper.Float
             name: x2
             low: 0.0
             high: 1.0
@@ -164,7 +164,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     learning_rate:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.Float
         name: learning_rate
         low: 0.0001
         high: 0.1
@@ -175,7 +175,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     num_layers:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestInt
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.Int
         name: num_layers
         low: 1
         high: 10
@@ -185,7 +185,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     optimizer:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestCategorical
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.Categorical
         name: optimizer
         choices: ['adam', 'sgd', 'rmsprop']
 
@@ -194,7 +194,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     batch_size:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestDiscreteUniform
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.DiscreteUniform
         name: batch_size
         low: 32
         high: 256
@@ -205,7 +205,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     learning_rate:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogUniform
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.LogUniform
         name: learning_rate
         low: 0.0001
         high: 0.1
@@ -215,7 +215,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     num_layers:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogInt
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.LogInt
         name: num_layers
         low: 1
         high: 10
