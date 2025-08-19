@@ -168,7 +168,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         name: learning_rate
         low: 0.0001
         high: 0.1
-        log: true  # Use logarithmic scale for learning rates
+        log: true
 
 - SuggestInt: For integer parameters
 
@@ -194,31 +194,33 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     batch_size:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.DiscreteUniform
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.Float
         name: batch_size
         low: 32
         high: 256
-        q: 32
+        step: 32
 
 - SuggestLogUniform: For log-uniform parameters
 
 .. code-block:: yaml
 
     learning_rate:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.LogUniform
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.Float
         name: learning_rate
         low: 0.0001
         high: 0.1
+        log: true
 
 - SuggestLogInt: For log-int parameters
 
 .. code-block:: yaml
 
     num_layers:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.LogInt
+        _target_: aiaccel.hpo.optuna.suggest_wrapper.Int
         name: num_layers
         low: 1
         high: 10
+        log: true
 
 Objective Function
 ++++++++++++++++++

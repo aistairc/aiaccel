@@ -55,34 +55,3 @@ class Categorical(Hparam[None | bool | int | float | str]):
 
     def __call__(self, trial: Trial) -> None | bool | int | float | str:
         return trial.suggest_categorical(self.name, self.choices)
-
-
-@dataclass
-class DiscreteUniform(Hparam[float]):
-    name: str
-    low: float
-    high: float
-    q: float
-
-    def __call__(self, trial: Trial) -> float:
-        return trial.suggest_float(self.name, self.low, self.high, step=self.q)
-
-
-@dataclass
-class LogUniform(Hparam[float]):
-    name: str
-    low: float
-    high: float
-
-    def __call__(self, trial: Trial) -> float:
-        return trial.suggest_loguniform(self.name, self.low, self.high)
-
-
-@dataclass
-class Uniform(Hparam[float]):
-    name: str
-    low: float
-    high: float
-
-    def __call__(self, trial: Trial) -> float:
-        return trial.suggest_float(self.name, self.low, self.high)

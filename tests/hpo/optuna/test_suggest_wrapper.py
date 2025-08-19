@@ -3,10 +3,8 @@ import optuna
 from aiaccel.hpo.optuna.suggest_wrapper import (
     Categorical,
     Const,
-    DiscreteUniform,
     Float,
     Int,
-    Uniform,
 )
 
 
@@ -37,21 +35,14 @@ def test_suggest_categorical() -> None:
 
 
 def test_suggest_discrete_uniform() -> None:
-    suggest_discrete_uniform = DiscreteUniform(name="x5", low=0.0, high=1.0, q=0.1)
+    suggest_discrete_uniform = Float(name="x5", low=0.0, high=1.0, step=0.1)
     trial = optuna.create_study().ask()
 
     assert isinstance(suggest_discrete_uniform(trial), float)
 
 
 def test_suggest_log_uniform() -> None:
-    suggest_log_uniform = DiscreteUniform(name="x6", low=0.0, high=1.0, q=0.1)
+    suggest_log_uniform = Float(name="x6", low=0.1, high=1.0, log=True)
     trial = optuna.create_study().ask()
 
     assert isinstance(suggest_log_uniform(trial), float)
-
-
-def test_suggest_uniform() -> None:
-    suggest_uniform = Uniform(name="x7", low=0.0, high=1.0)
-    trial = optuna.create_study().ask()
-
-    assert isinstance(suggest_uniform(trial), float)
