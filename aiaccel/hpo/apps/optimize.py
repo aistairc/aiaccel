@@ -113,13 +113,12 @@ def main() -> None:
             # Submit job in ThreadPoolExecutor
             for _ in range(min(available_slots, config.n_trials - submitted_job_count)):
                 trial = study.ask()
-
-                out_filename = f"result_{trial.number:0>6}.json"
+                out_filename = config.out_filename_template.format(**vars())
 
                 future = pool.submit(
                     subprocess.run,
                     shlex.join(args.command).format(
-                        job_name=f"job_{trial.number:0>6}",
+                        job_name=config.job_name_template.format(**vars()),
                         out_filename=out_filename,
                         **params.suggest_hparams(trial),
                     ),
