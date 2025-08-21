@@ -24,8 +24,8 @@ Samplers
 
     NelderMeadSampler
 
-Suggest Wrappers
-~~~~~~~~~~~~~~~~
+Hparam
+~~~~~~
 
 .. currentmodule:: aiaccel.hpo.optuna.hparams
 
