@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from optuna.trial import Trial
 
-from aiaccel.hpo.optuna.suggest_wrapper import Const, Float, Hparam, T
+from aiaccel.hpo.optuna.hparams import Const, Float, Hparam, T
 
 
 class HparamsManager:

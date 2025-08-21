@@ -79,7 +79,7 @@ Example base configuration:
         _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
         x1: [0, 1]
         x2:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.Float
+            _target_: aiaccel.hpo.optuna.hparams.Float
             name: x2
             low: 0.0
             high: 1.0
@@ -120,7 +120,7 @@ of the configuration. Example configuration:
     n_max_jobs: 4
 
     param:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.Float
+        _target_: aiaccel.hpo.optuna.hparams.Float
         low: 0.0
         high: 1.0
         log: false
