@@ -9,7 +9,7 @@ T = TypeVar("T")
 
 
 @dataclass
-class Suggest(Generic[T]):
+class Hparam(Generic[T]):
     name: str
 
     def __call__(self, _: Trial) -> T:
@@ -17,7 +17,7 @@ class Suggest(Generic[T]):
 
 
 @dataclass
-class Const(Suggest[T]):
+class Const(Hparam[T]):
     value: T
 
     def __call__(self, _: Trial | None) -> T:
@@ -25,7 +25,7 @@ class Const(Suggest[T]):
 
 
 @dataclass
-class SuggestFloat(Suggest[float]):
+class Float(Hparam[float]):
     name: str
     low: float
     high: float
@@ -37,7 +37,7 @@ class SuggestFloat(Suggest[float]):
 
 
 @dataclass
-class SuggestInt(Suggest[int]):
+class Int(Hparam[int]):
     name: str
     low: int
     high: int
@@ -49,40 +49,9 @@ class SuggestInt(Suggest[int]):
 
 
 @dataclass
-class SuggestCategorical(Suggest[None | bool | int | float | str]):
+class Categorical(Hparam[None | bool | int | float | str]):
     name: str
     choices: Sequence[None | bool | int | float | str]
 
     def __call__(self, trial: Trial) -> None | bool | int | float | str:
         return trial.suggest_categorical(self.name, self.choices)
-
-
-@dataclass
-class SuggestDiscreteUniform(Suggest[float]):
-    name: str
-    low: float
-    high: float
-    q: float
-
-    def __call__(self, trial: Trial) -> float:
-        return trial.suggest_float(self.name, self.low, self.high, step=self.q)
-
-
-@dataclass
-class SuggestLogUniform(Suggest[float]):
-    name: str
-    low: float
-    high: float
-
-    def __call__(self, trial: Trial) -> float:
-        return trial.suggest_loguniform(self.name, self.low, self.high)
-
-
-@dataclass
-class SuggestUniform(Suggest[float]):
-    name: str
-    low: float
-    high: float
-
-    def __call__(self, trial: Trial) -> float:
-        return trial.suggest_float(self.name, self.low, self.high)
