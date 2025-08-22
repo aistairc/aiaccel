@@ -31,7 +31,7 @@ def _optimize_sequential(
     time.sleep(0.1)
 
     frozentrial = study.tell(trial, result)
-    study._log_completed_trial(frozentrial)
+    study._log_completed_trial([result], frozentrial.number, frozentrial.params)
     return result
 
 

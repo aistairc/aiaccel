@@ -6,8 +6,10 @@ Aiaccel Documantation
 
 Aiaccel is a toolkit for accelerating machine learning research.
 
-.. grid:: 2
+.. grid:: 1 1 2 2
     :gutter: 2
+    :padding: 0
+    :class-row: surface
 
     .. grid-item-card:: :octicon:`sliders;1.5em;sd-text-primary` Configuration management
        :link: user_guide/config.html
