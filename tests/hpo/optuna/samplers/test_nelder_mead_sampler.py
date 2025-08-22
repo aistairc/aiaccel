@@ -400,8 +400,8 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
                     params.append([x, y, z])
 
                 for trial, value in zip(trials, p.imap(self.objective, params), strict=False):
-                    frozen_trial = self.study.tell(trial, value)
-                    self.study._log_completed_trial(frozen_trial)
+                    frozentrial = self.study.tell(trial, value)
+                    self.study._log_completed_trial([value], frozentrial.number, frozentrial.params)
 
     def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
         trials = [trial for trial in self.study.trials if len(trial.params) > 0]
@@ -444,8 +444,8 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
                     params.append([x, y])
 
                 for trial, value in zip(trials, p.imap(self.objective, params), strict=False):
-                    frozen_trial = self.study.tell(trial, value)
-                    self.study._log_completed_trial(frozen_trial)
+                    frozentrial = self.study.tell(trial, value)
+                    self.study._log_completed_trial([value], frozentrial.number, frozentrial.params)
 
     def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
         trials = [trial for trial in self.study.trials if len(trial.params) > 0]

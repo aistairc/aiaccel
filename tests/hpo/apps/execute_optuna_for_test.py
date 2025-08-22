@@ -26,7 +26,8 @@ if __name__ == "__main__":
     for _ in range(30):
         trial = study.ask()
         y = objective(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
-        study._log_completed_trial(study.tell(trial, y))
+        frozentrial = study.tell(trial, y)
+        study._log_completed_trial([y], frozentrial.number, frozentrial.params)
 
     with open("./test_notmal.pkl", "wb") as f:
         pkl.dump(study, f)
@@ -48,7 +49,8 @@ if __name__ == "__main__":
     for _ in range(15):
         trial = study.ask()
         y = objective(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
-        study._log_completed_trial(study.tell(trial, y))
+        frozentrial = study.tell(trial, y)
+        study._log_completed_trial([y], frozentrial.number, frozentrial.params)
 
     # resume
     print("resume after 14 trials")
@@ -57,7 +59,8 @@ if __name__ == "__main__":
     for _ in range(15):
         trial = study.ask()
         y = objective(x1=trial.suggest_float("x1", 0.0, 1.0), x2=trial.suggest_float("x2", 0.0, 1.0))
-        study._log_completed_trial(study.tell(trial, y))
+        frozentrial = study.tell(trial, y)
+        study._log_completed_trial([y], frozentrial.number, frozentrial.params)
 
     with open("./test_resume.pkl", "wb") as f:
         pkl.dump(study, f)

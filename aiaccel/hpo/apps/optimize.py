@@ -136,7 +136,8 @@ def main() -> None:
                 with open(out_filename) as f:
                     y = json.load(f)
 
-                study._log_completed_trial(study.tell(trial, y))
+                frozentrial = study.tell(trial, y)
+                study._log_completed_trial(y if isinstance(y, list) else [y], frozentrial.number, frozentrial.params)
                 finished_job_count += 1
 
 

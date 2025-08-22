@@ -1,28 +1,33 @@
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.2
+    rev: v0.12.8
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.9.0
+    rev: v1.17.1
     hooks:
       - id: mypy
         language: system
         args: [--config-file, mypy.ini, --explicit-package-bases]
-  - repo: local
-    hooks:
-      - id: pytest
-        name: pytest
-        entry: pytest -s -v -x --cov=aiaccel/ tests/
-        stages: [pre-push]
-        language: system
-        pass_filenames: false
-        always_run: true
   - repo: https://github.com/LilSpazJoekp/docstrfmt
     rev: v1.10.0
     hooks:
       - id: docstrfmt
         args: [--check, docs/source/, --extend-exclude, docs/source/api_reference/generated]
         types_or: [rst]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest -v -x -n auto --cov=aiaccel/ --cov-append tests/
+        stages: [pre-push]
+        language: system
+        pass_filenames: false
+        always_run: true
