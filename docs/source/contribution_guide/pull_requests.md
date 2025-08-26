@@ -2,7 +2,7 @@
 
 When you want to the modified code to be reflected in the repository, please execute a pull request.
 
-### Procedures
+## Procedures
 
 - Please fork aiaccel repository on GitHub.
 - After forking, run `git clone` command for aiaccel repository.
@@ -11,7 +11,7 @@ When you want to the modified code to be reflected in the repository, please exe
 git clone https://github.com/[YOUR USERNAME]/aiaccel.git
 ~~~
 
-### Developments
+## Developments
 - Update a local repository to the latest version.
 
 ~~~bash
@@ -31,7 +31,7 @@ git checkout -b feature/add-new-feature
   - The message should be written in such a way that their contents can be  understood without refering code.
 
 
-### Submitting
+## Submitting
 
 Before submitting a pull request, confirm the following:
 - Did you discuss it with other developer on issues in advance?
@@ -65,7 +65,7 @@ git push origin feature/add-new-feature
     - If work-in-progress, write the remaining tasks.
 - Submit the pull request.
 
-## Review processes
+# Review processes
 
 - Other developers can contribute comments to improve implementations, documents, and coding styles in the pull request.
 - When updating codes in the pull request, please commit the changes in the local repository and push the changes to the fork only if they have been successfully tested in the local environment.

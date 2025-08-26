@@ -1,3 +1,4 @@
+(coding-style)=
 # Coding styles
 
 ## Basic rules

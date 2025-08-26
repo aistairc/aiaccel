@@ -19,4 +19,4 @@ livehtml: apidoc
 	sphinx-autobuild -b html "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS)
 
 apidoc:
-	sphinx-apidoc --maxdepth 2 -f -o $(SOURCEDIR)/api_reference/ ../aiaccel/
+	sphinx-apidoc --maxdepth 2 -f -o $(SOURCEDIR)/api_reference/ -s autorst ../aiaccel/

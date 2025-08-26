@@ -1,3 +1,4 @@
+(documentation-wip)=
 # Documentation (WIP)
 
 ## Docstrings

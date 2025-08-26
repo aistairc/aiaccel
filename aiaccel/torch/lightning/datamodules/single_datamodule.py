@@ -13,6 +13,7 @@ class SingleDataModule(lt.LightningDataModule):
     """
     A PyTorch Lightning DataModule designed to handle training and validation datasets
     with support for caching and dataset scattering.
+
     Attributes:
         train_dataset_fn (Callable[..., Dataset[str]]): A callable function to create the training dataset.
         val_dataset_fn (Callable[..., Dataset[str]]): A callable function to create the validation dataset.
