@@ -37,7 +37,3 @@ Hparam
     Float
     Int
     Categorical
-
-.. lightning.OptimizerLightningModule
-
-.. lightning.OptimizerConfig
