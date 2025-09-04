@@ -1,13 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor
 from itertools import product
-from pathlib import Path
-
-from aiaccel.job.jobs.abci_job import AbciJob
+import subprocess
 
 
 def main() -> None:
-    job_filename = Path("objective.sh")
-    job_group = "xxx"
-
     sampler_names = ["nelder-mead", "nelder-mead-subTPE", "TPE"]
     func_ids = list(range(1, 25))
     dims = [2, 3, 5, 10, 20, 40]
@@ -19,30 +15,18 @@ def main() -> None:
         sampler_names, func_ids, zip(dims, execute_times, strict=False), zip(instances, optuna_seeds, strict=False)
     )
 
-    for sampler_name, func_id, (dim, execute_time), (instance, optuna_seed) in combinations:
-        execute_time = "0:05:00" if sampler_name == "nelder-mead" else execute_time
-        print(sampler_name, (func_id, execute_time), dim, (instance, optuna_seed))
-        job = AbciJob(
-            job_filename,
-            job_group,
-            qsub_args=[
-                "-l",
-                f"h_rt={execute_time}",
-            ],
-            args=[
-                "--func_id",
-                f"{func_id}",
-                "--dim",
-                f"{dim}",
-                "--instance",
-                f"{instance}",
-                "--optuna_seed",
-                f"{optuna_seed}",
-                "--sampler_name",
-                f"{sampler_name}",
-            ],
-        )
-        job.submit()
+    with ThreadPoolExecutor() as pool:
+        for sampler_name, func_id, (dim, execute_time), (instance, optuna_seed) in combinations:
+            execute_time = "0:05:00" if sampler_name == "nelder-mead" else execute_time
+            print(sampler_name, (func_id, execute_time), dim, (instance, optuna_seed))
+
+            aiaccel_job_command = f"""\
+aiaccel-job pbs --config job_config.yaml cpu --walltime {execute_time} log/job_{func_id}_{dim}_{instance}.log \
+-- python3.13 experiment_coco.py --func_id {func_id} --dim {dim} \
+--instance {instance} --optuna_seed {optuna_seed} --sampler_name {sampler_name}
+"""
+
+            pool.submit(subprocess.run, aiaccel_job_command, shell=True)
 
 
 if __name__ == "__main__":
