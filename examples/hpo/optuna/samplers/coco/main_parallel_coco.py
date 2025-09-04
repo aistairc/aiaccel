@@ -1,6 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
 from itertools import product
-
-from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 import subprocess
 
 
@@ -17,16 +16,18 @@ def main() -> None:
     )
 
     with ThreadPoolExecutor() as pool:
-
         for sampler_name, func_id, (dim, execute_time), (instance, optuna_seed) in combinations:
             execute_time = "0:05:00" if sampler_name == "nelder-mead" else execute_time
             print(sampler_name, (func_id, execute_time), dim, (instance, optuna_seed))
 
-            pool.submit(
-                    subprocess.run,
-                    f"aiaccel-job pbs --config job_config.yaml train --n_gpus=1 --walltime {execute_time} {{job_name}}.log -- python3.10 experiment_coco.py --func_id {func_id} --dim {dim} --instance {instance} --optuna_seed {optuna_seed} --sampler_name {sampler_name}",
-                    shell=True,
-                )
+            aiaccel_job_command = f"""\
+aiaccel-job pbs --config job_config.yaml train --walltime {execute_time} log/job_{func_id}_{dim}_{instance}.log
+-- python3.13 experiment_coco.py --func_id {func_id} --dim {dim}
+--instance {instance} --optuna_seed {optuna_seed} --sampler_name {sampler_name}
+"""
+
+            pool.submit(subprocess.run, aiaccel_job_command, shell=True)
+
 
 if __name__ == "__main__":
     main()

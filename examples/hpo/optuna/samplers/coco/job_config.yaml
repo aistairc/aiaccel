@@ -5,6 +5,9 @@ script_prologue: |
     echo Hostname: $(hostname)
 
     export NVIDIA_VISIBLE_DEVICES=all
+    export JOB_GROUP=job_group
+
+    # activate environment
 
 qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1"
 
