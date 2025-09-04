@@ -21,8 +21,8 @@ def main() -> None:
             print(sampler_name, (func_id, execute_time), dim, (instance, optuna_seed))
 
             aiaccel_job_command = f"""\
-aiaccel-job pbs --config job_config.yaml train --walltime {execute_time} log/job_{func_id}_{dim}_{instance}.log
--- python3.13 experiment_coco.py --func_id {func_id} --dim {dim}
+aiaccel-job pbs --config job_config.yaml cpu --walltime {execute_time} log/job_{func_id}_{dim}_{instance}.log \
+-- python3.13 experiment_coco.py --func_id {func_id} --dim {dim} \
 --instance {instance} --optuna_seed {optuna_seed} --sampler_name {sampler_name}
 """
 
