@@ -10,6 +10,7 @@ from omegaconf import DictConfig, ListConfig, Node
 from omegaconf import OmegaConf as oc  # noqa:N813
 from omegaconf._utils import OmegaConfDumper
 
+from simpleeval import simple_eval
 import yaml
 from yaml.resolver import BaseResolver
 
@@ -196,5 +197,13 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
         for k, v in config.items():
             if isinstance(v, Path):
                 config[k] = str(v)
+
+    return config
+
+
+@apply_recursively
+def safe_eval_config(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    if isinstance(config, str):
+        config = simple_eval(config)
 
     return config
