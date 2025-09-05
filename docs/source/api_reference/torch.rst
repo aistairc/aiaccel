@@ -32,10 +32,11 @@ Lightning Utilities
 .. autosummary::
     :toctree: generated/
 
-    ABCIEnvironment
     OptimizerLightningModule
     OptimizerConfig
     build_param_groups
+    from_pretrained
+    ABCIEnvironment
 
 Lightning Datamodules
 ---------------------
@@ -66,3 +67,14 @@ Functional
     :toctree: generated/
 
     linear_sum_assignment
+
+
+Learning Rate Schedulers
+------------------------
+
+.. currentmodule:: aiaccel.torch.lr_schedulers
+
+.. autosummary::
+    :toctree: generated/
+
+    SequentialLR

@@ -20,6 +20,7 @@ dependencies = [
     "optuna>=3.4.0",
     "omegaconf",
     "hydra-core",
+    "huggingface-hub",
     "colorama",
     "lightning>=2.2.1",
     "torch>=2.2.0",
