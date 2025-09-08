@@ -76,11 +76,10 @@ Example base configuration:
 
     params:
         _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager
+        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
         x1: [0, 1]
         x2:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-            name: x2
+            _target_: aiaccel.hpo.optuna.hparams.Float
             low: 0.0
             high: 1.0
             log: false
@@ -105,13 +104,11 @@ of the configuration. Example configuration:
 
     params:
         _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager
+        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
         x1:
             _inherit_: "${param}"
-            name: x1
         x2:
             _inherit_: "${param}"
-            name: x2
 
     objective:
         _target_: objective.main
@@ -120,7 +117,7 @@ of the configuration. Example configuration:
     n_max_jobs: 4
 
     param:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+        _target_: aiaccel.hpo.optuna.hparams.Float
         low: 0.0
         high: 1.0
         log: false

@@ -1,15 +1,13 @@
 params:
   _convert_: partial
-  _target_: aiaccel.hpo.apps.optimize.HparamsManager
+  _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
   x1:
-    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-    name: x1
+    _target_: aiaccel.hpo.optuna.hparams.Float
     low: 0.0
     high: 1.0
     log: false
   x2:
-    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-    name: x2
+    _target_: aiaccel.hpo.optuna.hparams.Float
     low: 0.0
     high: 1.0
     log: false

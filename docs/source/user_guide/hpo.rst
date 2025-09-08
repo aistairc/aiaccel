@@ -133,20 +133,18 @@ methods wrapped by aiaccel:
 
     params:
         _convert_: partial
-        _target_: aiaccel.hpo.apps.optimize.HparamsManager  # default
+        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager  # default
 
         # Float parameter example
         x1:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-            name: x1
+            _target_: aiaccel.hpo.optuna.hparams.Float
             low: 0.0
             high: 1.0
             log: false
 
         # Another float parameter
         x2:
-            _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-            name: x2
+            _target_: aiaccel.hpo.optuna.hparams.Float
             low: 0.0
             high: 1.0
             log: false
@@ -164,18 +162,18 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     learning_rate:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
+        _target_: aiaccel.hpo.optuna.hparams.Float
         name: learning_rate
         low: 0.0001
         high: 0.1
-        log: true  # Use logarithmic scale for learning rates
+        log: true
 
 - SuggestInt: For integer parameters
 
 .. code-block:: yaml
 
     num_layers:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestInt
+        _target_: aiaccel.hpo.optuna.hparams.Int
         name: num_layers
         low: 1
         high: 10
@@ -185,7 +183,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     optimizer:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestCategorical
+        _target_: aiaccel.hpo.optuna.hparams.Categorical
         name: optimizer
         choices: ['adam', 'sgd', 'rmsprop']
 
@@ -194,31 +192,33 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
 .. code-block:: yaml
 
     batch_size:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestDiscreteUniform
+        _target_: aiaccel.hpo.optuna.hparams.Float
         name: batch_size
         low: 32
         high: 256
-        q: 32
+        step: 32
 
 - SuggestLogUniform: For log-uniform parameters
 
 .. code-block:: yaml
 
     learning_rate:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogUniform
+        _target_: aiaccel.hpo.optuna.hparams.Float
         name: learning_rate
         low: 0.0001
         high: 0.1
+        log: true
 
 - SuggestLogInt: For log-int parameters
 
 .. code-block:: yaml
 
     num_layers:
-        _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestLogInt
+        _target_: aiaccel.hpo.optuna.hparams.Int
         name: num_layers
         low: 1
         high: 10
+        log: true
 
 Objective Function
 ++++++++++++++++++
