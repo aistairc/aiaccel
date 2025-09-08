@@ -23,16 +23,16 @@ class HparamsManager:
     """
 
     def __init__(self, **params_def: dict[str, int | float | str | list[int | float] | Hparam[T]]) -> None:
-        self.params: list[Callable[[Trial], Any]] = []
+        self.params: dict[str, Callable[[Trial, str], Any]] = {}
         for name, param in params_def.items():
             if callable(param):
-                self.params.append(param)
+                self.params[name] = param
             else:
                 if isinstance(param, list):
                     low, high = param
-                    self.params.append(Float(name=name, low=low, high=high))
+                    self.params[name] = Float(low=low, high=high)
                 else:
-                    self.params.append(Const(name=name, value=param))
+                    self.params[name] = Const(value=param)
 
     def suggest_hparams(self, trial: Trial) -> dict[str, float | int | str | list[float | int | str]]:
         """
@@ -48,9 +48,4 @@ class HparamsManager:
             these types.
         """
 
-        params_dict = {}
-        for param_fn in self.params:
-            if not hasattr(param_fn, "name"):
-                raise AttributeError(f"{param_fn} has no attribute 'name'")
-            params_dict[param_fn.name] = param_fn(trial)
-        return params_dict
+        return {name: param_fn(trial, name) for name, param_fn in self.params.items()}
