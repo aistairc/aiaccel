@@ -80,7 +80,6 @@ Example base configuration:
         x1: [0, 1]
         x2:
             _target_: aiaccel.hpo.optuna.hparams.Float
-            name: x2
             low: 0.0
             high: 1.0
             log: false
@@ -108,10 +107,8 @@ of the configuration. Example configuration:
         _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
         x1:
             _inherit_: "${param}"
-            name: x1
         x2:
             _inherit_: "${param}"
-            name: x2
 
     objective:
         _target_: objective.main

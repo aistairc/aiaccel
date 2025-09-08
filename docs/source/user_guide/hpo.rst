@@ -138,7 +138,6 @@ methods wrapped by aiaccel:
         # Float parameter example
         x1:
             _target_: aiaccel.hpo.optuna.hparams.Float
-            name: x1
             low: 0.0
             high: 1.0
             log: false
@@ -146,7 +145,6 @@ methods wrapped by aiaccel:
         # Another float parameter
         x2:
             _target_: aiaccel.hpo.optuna.hparams.Float
-            name: x2
             low: 0.0
             high: 1.0
             log: false

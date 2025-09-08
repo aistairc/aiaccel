@@ -60,7 +60,6 @@ def main() -> None:
           x1: [0, 1]
           x2:
             _target_: aiaccel.apps.optimize.Float
-            name: x2
             low: 0.0
             high: 1.0
             log: false
