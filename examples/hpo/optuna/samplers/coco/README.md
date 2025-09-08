@@ -41,10 +41,10 @@
     https://github.com/numbbo/coco
 
 - Please replace the # activate environment and the `job_group` in `job_config.py` with the appropriate commands and IDs.
-- When you run `main_parallel.py`, the validation for each sampler will be executed.
+- When you run above command on ABCI, the validation for each sampler will be executed.
 
 ```
-aiaccel-job pbs --config job_config.yaml gpu --walltime 4:00:00 main_parallel_coco.log -- python3.13 main_parallel_coco.py
+aiaccel-job pbs --config job_config.yaml cpu --walltime 4:00:00 main_parallel_coco.log -- python3.13 main_parallel_coco.py
 ```
 
 - The results are saved in `optuna_csv` and `step_csv` under each directory.
