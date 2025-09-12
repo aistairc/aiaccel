@@ -211,7 +211,9 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
 
 @apply_recursively
 def safe_eval_config(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
-    if isinstance(config, str):
-        config = simple_eval(config)
+    if isinstance(config, DictConfig):
+        for k, v in config.items():
+            if isinstance(v, str) and re.fullmatch(r"[0-9+\-*/().\s]+", v):
+                config[k] = simple_eval(v)
 
     return config
