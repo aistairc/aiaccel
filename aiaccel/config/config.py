@@ -10,6 +10,7 @@ from omegaconf import DictConfig, ListConfig, Node
 from omegaconf import OmegaConf as oc  # noqa:N813
 from omegaconf._utils import OmegaConfDumper
 
+from simpleeval import simple_eval
 import yaml
 from yaml.resolver import BaseResolver
 
@@ -134,13 +135,21 @@ def apply_recursively(
             config = copy.deepcopy(config)
 
             for key in config:
-                if isinstance(node_dict := config._get_node(key), Node) and not node_dict._is_interpolation():
+                if (
+                    isinstance(node_dict := config._get_node(key), Node)
+                    and not node_dict._is_interpolation()
+                    and isinstance(config[key], DictConfig | ListConfig)
+                ):
                     config[key] = _inner_fn(config[key])
         elif isinstance(config, ListConfig):
             config = copy.deepcopy(config)
 
             for ii in range(len(config)):
-                if isinstance(node_list := config._get_node(ii), Node) and not node_list._is_interpolation():
+                if (
+                    isinstance(node_list := config._get_node(ii), Node)
+                    and not node_list._is_interpolation()
+                    and isinstance(config[ii], DictConfig | ListConfig)
+                ):
                     config[ii] = _inner_fn(config[ii])
 
         return config
@@ -196,5 +205,15 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
         for k, v in config.items():
             if isinstance(v, Path):
                 config[k] = str(v)
+
+    return config
+
+
+@apply_recursively
+def safe_eval_config(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    if isinstance(config, DictConfig):
+        for k, v in config.items():
+            if isinstance(v, str) and re.fullmatch(r"[0-9+\-*/().%\s]+", v):
+                config[k] = simple_eval(v)
 
     return config
