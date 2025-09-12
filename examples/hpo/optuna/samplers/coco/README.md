@@ -40,17 +40,21 @@
   - For details, please refer to the following GitHub repository:
     https://github.com/numbbo/coco
 
-- Please replace the virtual environment path in `objective.sh` and the `job_group` in `main_parallel_coco.py` with the appropriate paths and IDs.
-- When you run `main_parallel.py`, the validation for each sampler will be executed.
-- The results are saved in `optuna_csv` and `step_csv` under each directory.
+- Please replace the # activate environment and the `job_group` in `job_config.py` with the appropriate commands and IDs.
+- When you run above command on ABCI, the validation for each sampler will be executed.
 
-cd nelder-mead
-python main_parallel.py
+```
+aiaccel-job pbs --config job_config.yaml cpu --walltime 4:00:00 main_parallel_coco.log -- python3.13 main_parallel_coco.py
+```
+
+- The results are saved in `optuna_csv` and `step_csv` under each directory.
 
 - To run `plot.py`, you need to install pandas and matplotlib.
 
+```
 pip install pandas matplotlib
 python plot.py
+```
 
 ## 3. Checking the Results
 
