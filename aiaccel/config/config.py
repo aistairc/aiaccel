@@ -135,13 +135,21 @@ def apply_recursively(
             config = copy.deepcopy(config)
 
             for key in config:
-                if isinstance(node_dict := config._get_node(key), Node) and not node_dict._is_interpolation():
+                if (
+                    isinstance(node_dict := config._get_node(key), Node)
+                    and not node_dict._is_interpolation()
+                    and isinstance(config[key], DictConfig | ListConfig)
+                ):
                     config[key] = _inner_fn(config[key])
         elif isinstance(config, ListConfig):
             config = copy.deepcopy(config)
 
             for ii in range(len(config)):
-                if isinstance(node_list := config._get_node(ii), Node) and not node_list._is_interpolation():
+                if (
+                    isinstance(node_list := config._get_node(ii), Node)
+                    and not node_list._is_interpolation()
+                    and isinstance(config[ii], DictConfig | ListConfig)
+                ):
                     config[ii] = _inner_fn(config[ii])
 
         return config
