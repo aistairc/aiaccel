@@ -211,6 +211,16 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
 
 @apply_recursively
 def safe_eval_config(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    """
+    Executes 'simpleeval' on the string of the formula in the configuration.
+
+    Args:
+        config (DictConfig | ListConfig): The configuration to convert.
+
+    Returns:
+        DictConfig | ListConfig:
+            The modified configuration with the string of the formula replaced by calculation results.
+    """
     if isinstance(config, DictConfig):
         for k, v in config.items():
             if isinstance(v, str) and re.fullmatch(r"[0-9+\-*/().%\s]+", v):
