@@ -25,7 +25,8 @@ dependencies = [
     "torch>=2.2.0",
     "h5py",
     "rich",
-    "tensorboard"
+    "tensorboard",
+    "simpleeval"
 ]
 dynamic = ["version"]
 
