@@ -212,7 +212,7 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
 @apply_recursively
 def safe_eval_config(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
     """
-    Executes 'simpleeval' on the string of the formula in the configuration.
+    Executes `simpleeval` on the string of the formula in the configuration.
 
     Args:
         config (DictConfig | ListConfig): The configuration to convert.
