@@ -14,6 +14,7 @@ from aiaccel.config import (
     pathlib2str_config,
     print_config,
     resolve_inherit,
+    safe_eval_config,
 )
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
 
@@ -47,6 +48,7 @@ def main() -> None:
         print_git_status(status_list)
 
     config = resolve_inherit(config)
+    config = safe_eval_config(config)
 
     # build trainer
     trainer: lt.Trainer = instantiate(config.trainer)
