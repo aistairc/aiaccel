@@ -14,12 +14,11 @@ from huggingface_hub import snapshot_download
 logger = logging.getLogger(__name__)
 
 
-def from_pretrained(
+def load_checkpoint(
     model_path: str | Path,
     config_name: str = "merged_config.yaml",
-    overwrite_config: DictConfig | ListConfig | dict[Any, Any] | list[Any] | None = None,
     device: str = "cuda",
-    eval_mode: bool = True,
+    overwrite_config: DictConfig | ListConfig | dict[Any, Any] | list[Any] | None = None,
 ) -> tuple[nn.Module, DictConfig | ListConfig]:
     """
     Load a PyTorch Lightning model from a pre-trained checkpoint.
@@ -65,9 +64,5 @@ def from_pretrained(
         checkpoint_path=checkpoint_path,
         map_location=device,
     )
-
-    if eval_mode:
-        logger.info("Setting model to evaluation mode...")
-        model.eval()
 
     return model, config

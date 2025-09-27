@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 
 import torch
 
@@ -12,7 +12,7 @@ class SequentialLR(torch.optim.lr_scheduler.SequentialLR):
         optimizer: Optimizer.
         schedulers_fn: List of functions to create schedulers.
         milestones: List of epoch indices. Must be increasing.
-    
+
     ... code-block:: yaml
 
         scheduler_generator:
@@ -30,6 +30,7 @@ class SequentialLR(torch.optim.lr_scheduler.SequentialLR):
             T_max: 95000
           milestones: [5000]
     """
+
     def __init__(
         self,
         optimizer: torch.optim.Optimizer,
