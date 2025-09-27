@@ -33,9 +33,8 @@ def load_checkpoint(
             For local paths, use the format "file://<absolute_path>" or just the path (str | Path).
             For Hugging Face, use the format "hf://<repo_id>".
         config_name (str): The name of the configuration file to load. Default is "merged_config.yaml".
-        overwrite_config (DictConfig | ListConfig | dict | list | None): Optional configuration overrides.
         device (str): The device to map the model to. Default is "cuda".
-        eval_mode (bool): If True, sets the model to evaluation mode. Default is True.
+        overwrite_config (DictConfig | ListConfig | dict | list | None): Optional configuration overrides.
     """
 
     if isinstance(model_path, str):
