@@ -11,8 +11,7 @@ from torch import nn
 import lightning as lt
 from lightning.pytorch.utilities.types import OptimizerLRSchedulerConfig
 
-if TYPE_CHECKING:
-    from torch import optim
+from torch import optim
 
 
 @dataclass
