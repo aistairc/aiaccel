@@ -24,19 +24,16 @@ Samplers
 
     NelderMeadSampler
 
-Suggest Wrappers
-~~~~~~~~~~~~~~~~
+Hparam
+~~~~~~
 
-.. currentmodule:: aiaccel.hpo.optuna.suggest_wrapper
+.. currentmodule:: aiaccel.hpo.optuna.hparams
 
 .. autosummary::
     :toctree: generated/
 
-    Suggest
+    Hparam
     Const
-    SuggestFloat
-    SuggestInt
-    SuggestCategorical
-    SuggestDiscreteUniform
-    SuggestLogUniform
-    SuggestUniform
+    Float
+    Int
+    Categorical
