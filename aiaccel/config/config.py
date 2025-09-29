@@ -62,7 +62,7 @@ def load_config(
 
     """
 
-    # Custom resolvers for safe_eval
+    # Custom resolver for safe_eval
     oc.register_new_resolver("eval", simple_eval, replace=True)
 
     if not isinstance(config_filename, Path):
