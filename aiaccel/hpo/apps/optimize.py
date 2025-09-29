@@ -14,7 +14,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.config import load_config, print_config, resolve_inherit, safe_eval_config
+from aiaccel.config import load_config, print_config, resolve_inherit
 from aiaccel.hpo.optuna.suggest_wrapper import Const, Suggest, SuggestFloat, T
 
 
@@ -140,7 +140,6 @@ def main() -> None:
     print_config(config)
 
     config = resolve_inherit(config)
-    config = safe_eval_config(config)
 
     work_dir = Path.cwd()
     work_dir.mkdir(parents=True, exist_ok=True)
