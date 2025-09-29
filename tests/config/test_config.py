@@ -4,7 +4,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 import pytest
 
-from aiaccel.config.config import load_config, pathlib2str_config, print_config, resolve_inherit, safe_eval_config
+from aiaccel.config.config import load_config, pathlib2str_config, print_config, resolve_inherit
 
 
 def test_load_config() -> None:
@@ -15,6 +15,7 @@ def test_load_config() -> None:
         "C": {"CC": "cc"},
         "D": {"_inherit_": "E"},
         "E": {"EE": "ee"},
+        "Eval": 1.5,
     }
 
     assert loaded_config == expected_config
@@ -62,11 +63,3 @@ def test_pathlib2str_config() -> None:
     dst_conf = pathlib2str_config(src_conf)
 
     assert isinstance(dst_conf.foo.bar, str)
-
-
-def test_safe_eval_config() -> None:
-    loaded_config = oc.create({"A": {"AA": "1", "AAA": "21 + 21"}, "B": "(21 + 9) / (4 + (8 % 3) ** 4)"})
-    resolved_config = safe_eval_config(loaded_config)
-    expected_config = {"A": {"AA": 1, "AAA": 42}, "B": 1.5}
-
-    assert resolved_config == expected_config
