@@ -62,6 +62,9 @@ def load_config(
 
     """
 
+    # Custom resolvers for safe_eval
+    oc.register_new_resolver("simple_eval", simple_eval, replace=True)
+
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
 
@@ -205,25 +208,5 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
         for k, v in config.items():
             if isinstance(v, Path):
                 config[k] = str(v)
-
-    return config
-
-
-@apply_recursively
-def safe_eval_config(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
-    """
-    Executes `simpleeval` on the string of the formula in the configuration.
-
-    Args:
-        config (DictConfig | ListConfig): The configuration to convert.
-
-    Returns:
-        DictConfig | ListConfig:
-            The modified configuration with the string of the formula replaced by calculation results.
-    """
-    if isinstance(config, DictConfig):
-        for k, v in config.items():
-            if isinstance(v, str) and re.fullmatch(r"[0-9+\-*/().%\s]+", v):
-                config[k] = simple_eval(v)
 
     return config

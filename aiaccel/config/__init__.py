@@ -4,7 +4,6 @@ from aiaccel.config.config import (
     pathlib2str_config,
     print_config,
     resolve_inherit,
-    safe_eval_config,
 )
 from aiaccel.config.git import PackageGitStatus, collect_git_status_from_config, print_git_status
 
@@ -17,5 +16,4 @@ __all__ = [
     "PackageGitStatus",
     "collect_git_status_from_config",
     "print_git_status",
-    "safe_eval_config",
 ]
