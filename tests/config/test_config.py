@@ -15,6 +15,7 @@ def test_load_config() -> None:
         "C": {"CC": "cc"},
         "D": {"_inherit_": "E"},
         "E": {"EE": "ee"},
+        "Eval": 1.5,
     }
 
     assert loaded_config == expected_config

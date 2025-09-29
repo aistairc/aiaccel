@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from fnmatch import fnmatch
 
-from torch import nn
+from torch import nn, optim
 
 import lightning as lt
 from lightning.pytorch.utilities.types import OptimizerLRSchedulerConfig
-
-from torch import optim
 
 
 @dataclass
