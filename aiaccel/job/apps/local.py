@@ -5,49 +5,15 @@ from typing import Any
 from argparse import ArgumentParser, Namespace
 from functools import partial
 from multiprocessing import Pool
+import os
 from pathlib import Path
 import shlex
 import subprocess
 import sys
 
-import yaml
+from aiaccel.config import load_config, print_config
 
-default_config_yaml = """\
-script_prologue: |
-    echo Hostname: $(hostname)
-
-    export NVIDIA_VISIBLE_DEVICES=all
-
-cpu:
-    job: "{command}"
-
-cpu-array:
-    n_tasks_per_proc: 128
-    n_procs: 24
-    job: "{command}"
-
-gpu:
-    job: "{command}"
-
-gpu-array:
-    n_tasks_per_proc: 128
-    n_procs: 8
-    job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % {args.n_procs_per_job} )) {command}"
-
-mpi:
-    job: |
-        mpirun -np {args.n_procs} \\
-            {command}
-
-train:
-    job: |
-        mpirun -np {args.n_gpus} \\
-            -x MAIN_ADDR=$(hostname -i) \\
-            -x MAIN_PORT=3000 \\
-            -x COLUMNS=120 \\
-            -x PYTHONUNBUFFERED=true \\
-            {command}
-"""  # noqa: E501
+default_config_path = Path(__file__).parent / "config" / "local.yaml"
 
 
 def dispatch_job(mode: str, args: Namespace, config: Any) -> None:
@@ -100,17 +66,14 @@ def main() -> None:
     parser.add_argument("--config", type=Path)
     args, _ = parser.parse_known_args()
 
-    if args.config is not None:
-        with open(args.config) as f:
-            config_yaml = f.read()
-    else:
-        config_yaml = default_config_yaml
+    if (config_path := os.environ.get("AIACCEL_JOB_CONFIG")) is None:
+        config_path = str(args.config) if args.config is not None else str(default_config_path)
+
+    config = load_config(config_path)
 
     if args.print_config:
-        print(config_yaml)
+        print_config(config)
         sys.exit(0)
-
-    config = yaml.safe_load(config_yaml)
 
     # Parse command-line arguments
     parser = ArgumentParser()
@@ -125,13 +88,13 @@ def main() -> None:
 
     sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["cpu-array"]["n_tasks_per_proc"])
-    sub_parser.add_argument("--n_procs", type=int, default=config["cpu-array"]["n_procs"])
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.cpu_array.n_tasks_per_proc)
+    sub_parser.add_argument("--n_procs", type=int, default=config.cpu_array.n_procs)
 
     sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"]["n_tasks_per_proc"])
-    sub_parser.add_argument("--n_procs", type=int, default=config["gpu-array"]["n_procs"])
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.gpu_array.n_tasks_per_proc)
+    sub_parser.add_argument("--n_procs", type=int, default=config.gpu_array.n_procs)
 
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
