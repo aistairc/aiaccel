@@ -17,9 +17,10 @@ classifiers = [
 dependencies = [
     "numpy",
     "scipy",
-    "optuna>=3.4.0",
+    "optuna>=4.5.0",
     "omegaconf",
     "hydra-core",
+    "huggingface-hub",
     "colorama",
     "lightning>=2.2.1",
     "torch>=2.2.0",
