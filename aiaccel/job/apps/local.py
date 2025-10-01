@@ -4,16 +4,18 @@ from typing import Any
 
 from argparse import ArgumentParser, Namespace
 from functools import partial
+from importlib import resources
+import logging
 from multiprocessing import Pool
 import os
 from pathlib import Path
 import shlex
 import subprocess
-import sys
 
-from aiaccel.config import load_config, print_config
+from aiaccel.config import load_config, overwrite_omegaconf_dumper, print_config, resolve_inherit
 
-default_config_path = Path(__file__).parent / "config" / "local.yaml"
+logger = logging.getLogger(__name__)
+overwrite_omegaconf_dumper()
 
 
 def dispatch_job(mode: str, args: Namespace, config: Any) -> None:
@@ -63,17 +65,24 @@ def main() -> None:
     # Load configuration (from the default YAML string)
     parser = ArgumentParser(add_help=False)
     parser.add_argument("--print_config", action="store_true")
-    parser.add_argument("--config", type=Path)
+    parser.add_argument("--config", type=Path, default=None)
     args, _ = parser.parse_known_args()
 
-    if (config_path := os.environ.get("AIACCEL_JOB_CONFIG")) is None:
-        config_path = str(args.config) if args.config is not None else str(default_config_path)
+    base_config_path = resources.files(f"{__package__}.config")
+    args.config = Path(args.config or os.environ.get("AIACCEL_JOB_CONFIG") or base_config_path / "local.yaml")  # type: ignore
 
-    config = load_config(config_path)
+    config = load_config(
+        args.config,
+        {
+            "config_path": args.config,
+            "base_config_path": str(base_config_path),
+        },
+    )
 
     if args.print_config:
         print_config(config)
-        sys.exit(0)
+
+    config = resolve_inherit(config)
 
     # Parse command-line arguments
     parser = ArgumentParser()
@@ -108,7 +117,7 @@ def main() -> None:
 
     for key in ["walltime", "n_nodes"]:
         if getattr(args, key, None) is not None:
-            print(f"Argument '{key}' is defined for compatibility and will not be used in aiaccel-job local.")
+            logger.warning(f"Argument '{key}' is defined for compatibility and will not be used in aiaccel-job local.")
 
     dispatch_job(mode, args, config)
 
