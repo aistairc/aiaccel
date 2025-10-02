@@ -3,72 +3,14 @@
 from typing import Any
 
 from argparse import ArgumentParser, Namespace
+from importlib import resources
+import os
 from pathlib import Path
 import shlex
 import subprocess
-import sys
 import time
 
-import yaml
-
-default_config_yaml = """\
-walltime: "1:0:0"
-
-script_prologue: |
-    echo Job ID: $JOB_ID
-    echo Hostname: $(hostname)
-
-    export NVIDIA_VISIBLE_DEVICES=all
-
-qsub: "qsub -g $JOB_GROUP -l h_rt={args.walltime}"
-
-cpu:
-    qsub_args: "-l cpu_40=1"
-    job: "{command}"
-
-cpu-array:
-    n_tasks_per_proc: 128
-    n_procs: 20
-    qsub_args: "-l cpu_40=1 -t 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
-    job: "{command}"
-
-gpu:
-    qsub_args: "-l gpu_1=1"
-    job: "{command}"
-
-gpu-array:
-    n_tasks_per_proc: 128
-    n_procs: 1
-    qsub_args: "-l gpu_1=1 -t 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
-    job: "{command}"
-
-mpi:
-    n_nodes: 1
-    qsub_args: "-l cpu_40={args.n_nodes}"
-    job: |
-        source /etc/profile.d/modules.sh
-        module load openmpi
-
-        mpirun -np {args.n_procs} --npernode $(( {args.n_procs} / {args.n_nodes} )) \\
-            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-            {command}
-
-train:
-    qsub_args: "-l $( (({args.n_gpus}==1)) && printf node_q || printf node_f )=$(( ({args.n_gpus} + 3) / 4 ))"
-    job: |
-        source /etc/profile.d/modules.sh
-        module load openmpi
-
-        n_gpus=$(nvidia-smi -L | wc -l)
-
-        mpirun -np {args.n_gpus} -map-by ppr:$n_gpus:node:PE=48 \\
-            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-            -x MAIN_ADDR=$(hostname -i) \\
-            -x MAIN_PORT=3000 \\
-            -x COLUMNS=120 \\
-            -x PYTHONUNBUFFERED=true \\
-            {command}
-"""  # noqa: E501
+from aiaccel.config import load_config, print_config, resolve_inherit
 
 
 def dispatch_job(mode: str, args: Namespace, config: Any) -> None:
@@ -157,20 +99,24 @@ def main() -> None:
     # Load configuration (from the default YAML string)
     parser = ArgumentParser(add_help=False)
     parser.add_argument("--print_config", action="store_true")
-    parser.add_argument("--config", type=Path)
+    parser.add_argument("--config", type=Path, default=None)
     args, _ = parser.parse_known_args()
 
-    if args.config is not None:
-        with open(args.config) as f:
-            config_yaml = f.read()
-    else:
-        config_yaml = default_config_yaml
+    base_config_path = resources.files(f"{__package__}.config")
+    args.config = Path(args.config or os.environ.get("AIACCEL_JOB_CONFIG") or base_config_path / "sge.yaml")  # type: ignore
+
+    config = load_config(
+        args.config,
+        {
+            "config_path": args.config,
+            "base_config_path": str(base_config_path),
+        },
+    )
 
     if args.print_config:
-        print(config_yaml)
-        sys.exit(0)
+        print_config(config)
 
-    config = yaml.safe_load(config_yaml)
+    config = resolve_inherit(config)
 
     # Parse command-line arguments
     parser = ArgumentParser()
@@ -179,23 +125,23 @@ def main() -> None:
     sub_parsers = parser.add_subparsers(dest="mode", required=True)
 
     parent_parser = ArgumentParser(add_help=False)
-    parent_parser.add_argument("--walltime", type=str, default=config["walltime"])
+    parent_parser.add_argument("--walltime", type=str, default=config.walltime)
     parent_parser.add_argument("log_filename", type=Path)
     parent_parser.add_argument("command", nargs="+")
 
     sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["cpu-array"]["n_tasks_per_proc"])
-    sub_parser.add_argument("--n_procs", type=int, default=config["cpu-array"]["n_procs"])
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.cpu_array.n_tasks_per_proc)
+    sub_parser.add_argument("--n_procs", type=int, default=config.cpu_array.n_procs)
 
     sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"]["n_tasks_per_proc"])
-    sub_parser.add_argument("--n_procs", type=int, default=config["gpu-array"]["n_procs"])
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.gpu_array.n_procs)
+    sub_parser.add_argument("--n_procs", type=int, default=config.gpu_array.n_procs)
 
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
-    sub_parser.add_argument("--n_nodes", type=int, default=config["mpi"]["n_nodes"])
+    sub_parser.add_argument("--n_nodes", type=int, default=config.mpi.n_nodes)
 
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)
