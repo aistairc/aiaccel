@@ -18,8 +18,8 @@ def prepare_argument_parser(
     parser.add_argument("--config", type=Path, default=None)
     args, _ = parser.parse_known_args()
 
-    base_config_path = resources.files(f"{__package__}.config")
-    args.config = Path(args.config or os.environ.get("AIACCEL_JOB_CONFIG") or base_config_path / default_config_name)  # type: ignore
+    base_config_path = Path(str(resources.files(__package__) / "config"))
+    args.config = Path(args.config or os.environ.get("AIACCEL_JOB_CONFIG") or (base_config_path / default_config_name))  # type: ignore
 
     config = load_config(
         args.config,
