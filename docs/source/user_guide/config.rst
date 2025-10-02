@@ -125,7 +125,7 @@ of the configuration. Example configuration:
 After processing, the configuration will be expanded so that ``x1`` and ``x2`` each
 include the contents of ``param`` along with their own ``name`` fields.
 
-``eval`` resolver
+``eval`` Resolver
 -----------------
 
 The ``eval`` resolver allows arithmetic operations within the config. It makes use of
