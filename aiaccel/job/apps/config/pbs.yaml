@@ -4,7 +4,7 @@ script_prologue: |
     echo Job ID: $PBS_JOBID
     echo Hostname: $(hostname)
 
-    export NVIDIA_VISIBLE_DEVICES=all
+    export CUDA_VISIBLE_DEVICES=all
 
 qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1"
 

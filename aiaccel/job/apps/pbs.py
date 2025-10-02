@@ -1,21 +1,23 @@
 #! /usr/bin/env python
 
-from typing import Any
 
-from argparse import ArgumentParser, Namespace
-from importlib import resources
-import os
 from pathlib import Path
 import shlex
 import subprocess
 import time
 
-from aiaccel.config import load_config, print_config, resolve_inherit
+from aiaccel.job.apps import prepare_argument_parser
 
 
-def dispatch_job(mode: str, args: Namespace, config: Any) -> None:
+def main() -> None:
+    # Load configuration (from the default YAML string)
+    config, parser, sub_parsers = prepare_argument_parser("pbs.yaml")
+
+    args = parser.parse_args()
+    mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
+
     # Prepare the job script and arguments
-    job = config[mode]["job"].format(command=shlex.join(args.command), args=args)
+    job = config[mode].job.format(command=shlex.join(args.command), args=args)
 
     if mode in ["cpu-array", "gpu-array"]:
         job = f"""\
@@ -65,13 +67,13 @@ if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
 fi
 
 
-{config["script_prologue"]}
+{config.script_prologue}
 
 {job}
 """
 
-    qsub = config["qsub"].format(args=args)
-    qsub_args = config[mode]["qsub_args"].format(args=args)
+    qsub = config.qsub.format(args=args)
+    qsub_args = config[mode].qsub_args.format(args=args)
 
     # Create the job script file, remove old status files, and run the job
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
@@ -93,63 +95,6 @@ fi
         if status != 0:
             raise RuntimeError(f"Job failed with {status} exit code.")
         status_filename.unlink()
-
-
-def main() -> None:
-    # Load configuration (from the default YAML string)
-    parser = ArgumentParser(add_help=False)
-    parser.add_argument("--print_config", action="store_true")
-    parser.add_argument("--config", type=Path, default=None)
-    args, _ = parser.parse_known_args()
-
-    base_config_path = resources.files(f"{__package__}.config")
-    args.config = Path(args.config or os.environ.get("AIACCEL_JOB_CONFIG") or base_config_path / "pbs.yaml")  # type: ignore
-
-    config = load_config(
-        args.config,
-        {
-            "config_path": args.config,
-            "base_config_path": str(base_config_path),
-        },
-    )
-
-    if args.print_config:
-        print_config(config)
-
-    config = resolve_inherit(config)
-
-    # Parse command-line arguments
-    parser = ArgumentParser()
-    parser.add_argument("--print_config", action="store_true")
-    parser.add_argument("--config", type=Path)
-    sub_parsers = parser.add_subparsers(dest="mode", required=True)
-
-    parent_parser = ArgumentParser(add_help=False)
-    parent_parser.add_argument("--walltime", type=str, default=config.walltime)
-    parent_parser.add_argument("log_filename", type=Path)
-    parent_parser.add_argument("command", nargs="+")
-
-    sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
-    sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.cpu_array.n_tasks_per_proc)
-    sub_parser.add_argument("--n_procs", type=int, default=config.cpu_array.n_procs)
-
-    sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
-    sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.gpu_array.n_procs)
-    sub_parser.add_argument("--n_procs", type=int, default=config.gpu_array.n_procs)
-
-    sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
-    sub_parser.add_argument("--n_procs", type=int, required=True)
-    sub_parser.add_argument("--n_nodes", type=int, default=config.mpi.n_nodes)
-
-    sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
-    sub_parser.add_argument("--n_gpus", type=int)
-
-    args = parser.parse_args()
-    mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
-
-    dispatch_job(mode, args, config)
 
 
 if __name__ == "__main__":

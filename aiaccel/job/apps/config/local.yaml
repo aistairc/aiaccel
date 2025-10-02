@@ -1,7 +1,9 @@
+walltime: null
+
 script_prologue: |
     echo Hostname: $(hostname)
 
-    export NVIDIA_VISIBLE_DEVICES=all
+    export CUDA_VISIBLE_DEVICES=all
 
 cpu:
     job: "{command}"
@@ -20,6 +22,7 @@ gpu_array:
     job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % {args.n_procs_per_job} )) {command}"
 
 mpi:
+    n_nodes: null
     job: |
         mpirun -np {args.n_procs} \\
             {command}
