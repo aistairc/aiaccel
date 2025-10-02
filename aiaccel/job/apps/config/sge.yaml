@@ -1,0 +1,56 @@
+walltime: "1:0:0"
+
+script_prologue: |
+    echo Job ID: $JOB_ID
+    echo Hostname: $(hostname)
+
+    export CUDA_VISIBLE_DEVICES=all
+
+qsub: "qsub -g $JOB_GROUP -l h_rt={args.walltime}"
+
+cpu:
+    qsub_args: "-l cpu_40=1"
+    job: "{command}"
+
+cpu_array:
+    n_tasks_per_proc: 128
+    n_procs: 20
+    qsub_args: "-l cpu_40=1 -t 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+    job: "{command}"
+
+gpu:
+    qsub_args: "-l gpu_1=1"
+    job: "{command}"
+
+gpu_array:
+    n_tasks_per_proc: 128
+    n_procs: 1
+    qsub_args: "-l gpu_1=1 -t 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+    job: "{command}"
+
+mpi:
+    n_nodes: 1
+    qsub_args: "-l cpu_40={args.n_nodes}"
+    job: |
+        source /etc/profile.d/modules.sh
+        module load openmpi
+
+        mpirun -np {args.n_procs} --npernode $(( {args.n_procs} / {args.n_nodes} )) \\
+            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
+            {command}
+
+train:
+    qsub_args: "-l $( (({args.n_gpus}==1)) && printf node_q || printf node_f )=$(( ({args.n_gpus} + 3) / 4 ))"
+    job: |
+        source /etc/profile.d/modules.sh
+        module load openmpi
+
+        n_gpus=$(nvidia-smi -L | wc -l)
+
+        mpirun -np {args.n_gpus} -map-by ppr:$n_gpus:node:PE=48 \\
+            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
+            -x MAIN_ADDR=$(hostname -i) \\
+            -x MAIN_PORT=3000 \\
+            -x COLUMNS=120 \\
+            -x PYTHONUNBUFFERED=true \\
+            {command}
