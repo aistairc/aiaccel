@@ -125,6 +125,20 @@ of the configuration. Example configuration:
 After processing, the configuration will be expanded so that ``x1`` and ``x2`` each
 include the contents of ``param`` along with their own ``name`` fields.
 
+``eval`` Resolver
+-----------------
+
+The ``eval`` resolver allows arithmetic operations within the config. It makes use of
+safe eval.
+
+Example configuration:
+
+.. code-block:: yaml
+    :caption: config.yaml
+
+    n_trials: ${eval:"${n_max_jobs} * 10"}
+    n_max_jobs: 4
+
 Version Controlling
 -------------------
 
