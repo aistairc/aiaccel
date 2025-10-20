@@ -76,11 +76,8 @@ aiaccel-config = "aiaccel.launcher:main"
 aiaccel-torch = "aiaccel.launcher:main"
 aiaccel-hpo = "aiaccel.launcher:main"
 
-[tool.hatch.build.targets.wheel.shared-scripts]
-"aiaccel/job/apps/local.py" = "aiaccel-job-local"
-"aiaccel/job/apps/pbs.py" = "aiaccel-job-pbs"
-"aiaccel/job/apps/sge.py" = "aiaccel-job-sge"
 
+# ruff configurations
 [tool.ruff]
 line-length = 120
 target-version = "py310"
@@ -116,3 +113,17 @@ section-order = [
 "torch" = ["torch"]
 "torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
 "audio" = ["librosa", "pypesq", "pystoi", "soundfile"]
+
+
+# pixi configurations
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.pypi-dependencies]
+aiaccel = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { features = ["dev"] }
+
+[tool.pixi.tasks]
