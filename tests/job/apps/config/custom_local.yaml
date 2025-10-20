@@ -2,6 +2,7 @@ _base_: ${base_config_path}/local.yaml
 
 script_prologue: |
     echo Hostname: $(hostname)
-    echo load job_config
 
     export CUDA_VISIBLE_DEVICES=all
+
+    echo ${config_path} | tee config_path.txt
