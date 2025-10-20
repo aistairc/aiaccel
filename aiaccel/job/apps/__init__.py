@@ -51,7 +51,7 @@ def prepare_argument_parser(
 
     sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"].n_procs)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"].n_tasks_per_proc)
     sub_parser.add_argument("--n_procs", type=int, default=config["gpu-array"].n_procs)
 
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
