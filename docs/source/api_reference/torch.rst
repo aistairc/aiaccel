@@ -68,7 +68,6 @@ Functional
 
     linear_sum_assignment
 
-
 Learning Rate Schedulers
 ------------------------
 
