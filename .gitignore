@@ -143,6 +143,8 @@ Dockerfile
 # example
 examples/hpo/samplers/coco/exdata
 examples/hpo/samplers/coco/*/optuna_csv
-examples/hpo/samplers/coco/*/step_csv# pixi environments
+examples/hpo/samplers/coco/*/step_csv
+
+# pixi environments
 .pixi/*
 !.pixi/config.toml
