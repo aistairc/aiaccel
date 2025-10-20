@@ -1,5 +1,6 @@
 from typing import Any
 
+from importlib import resources
 import logging
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 from torch import nn
 
 from huggingface_hub import snapshot_download
+
+from aiaccel.config import load_config
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +50,15 @@ def load_checkpoint(
         else:
             model_path = Path(model_path)
 
-    config = oc.load(model_path / config_name)
+    config_path = model_path / config_name
+    config = load_config(
+        config_path,
+        {
+            "config_path": str(config_path),
+            "working_directory": str(config_path.parent.resolve()),
+            "base_config_path": str(resources.files("aiaccel.torch.apps") / "config"),
+        },
+    )
 
     if overwrite_config is not None:
         config = oc.merge(config, overwrite_config)
