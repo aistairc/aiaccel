@@ -114,10 +114,8 @@ def get_git_status(package_name: str) -> PackageGitStatus | None:
     repository_path = result.stdout.splitlines()[0]
 
     # check git_ignore
-    result = subprocess.run(
-        ["git", "check-ignore", "-v", module_path], cwd=repository_path, capture_output=True, text=True
-    )
-    if len(result.stdout.splitlines()) > 0:
+    result = subprocess.run(["git", "check-ignore", module_path], cwd=repository_path, capture_output=True, text=True)
+    if result.returncode == 0:
         return None
 
     # get commit id
