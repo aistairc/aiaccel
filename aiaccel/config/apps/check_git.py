@@ -15,8 +15,10 @@ def main() -> None:
 
     if len((git_status := collect_git_status_from_config(config))) > 0:
         print_git_status(git_status)
-        exit(1)
 
+        exit(1)
+    else:
+        exit(0)
 
 if __name__ == "__main__":
     main()
