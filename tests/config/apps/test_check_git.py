@@ -14,7 +14,11 @@ def test_check_git() -> None:
         patch("aiaccel.config.apps.check_git.collect_git_status_from_config", return_value=[]),
         patch("argparse.ArgumentParser.parse_known_args", return_value=(mock_args, [])),
     ):
-        check_git.main()
+        try:
+            check_git.main()
+        except SystemExit as e:
+            if e.code != 0:
+                raise AssertionError() from e
 
     # Failed
     with (
@@ -26,7 +30,8 @@ def test_check_git() -> None:
     ):
         try:
             check_git.main()
-        except SystemExit:
-            pass
+        except SystemExit as e:
+            if e.code != 1:
+                raise AssertionError() from e
         else:
             raise AssertionError()
