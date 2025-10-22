@@ -100,9 +100,9 @@ def get_git_status(package_name: str) -> PackageGitStatus | None:
         return None
 
     if spec.origin is not None:
-        module_path = Path(spec.origin).parent
+        module_path = Path(spec.origin).parent.resolve()
     elif spec.submodule_search_locations is not None:
-        module_path = Path(os.path.abspath(spec.submodule_search_locations[0]))
+        module_path = Path(os.path.abspath(spec.submodule_search_locations[0])).resolve()
     else:
         return None
 
@@ -111,7 +111,12 @@ def get_git_status(package_name: str) -> PackageGitStatus | None:
     if result.returncode != 0:
         return None
 
-    repository_path = result.stdout.splitlines()[0]
+    repository_path = Path(result.stdout.splitlines()[0]).resolve()
+
+    # check git_ignore
+    result = subprocess.run(["git", "check-ignore", module_path], cwd=repository_path, capture_output=True, text=True)
+    if result.returncode == 0:
+        return None
 
     # get commit id
     result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repository_path, capture_output=True, text=True)
