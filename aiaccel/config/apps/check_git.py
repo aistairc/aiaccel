@@ -1,6 +1,7 @@
 import argparse
+
+from aiaccel.config.config import load_config, overwrite_omegaconf_dumper, resolve_inherit
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
-from aiaccel.config.config import load_config, resolve_inherit, overwrite_omegaconf_dumper
 
 
 def main() -> None:
@@ -13,12 +14,13 @@ def main() -> None:
     config = load_config(args.config)
     config = resolve_inherit(config)
 
-    if len((git_status := collect_git_status_from_config(config))) > 0:
+    if len(git_status := collect_git_status_from_config(config)) > 0:
         print_git_status(git_status)
 
         exit(1)
     else:
         exit(0)
+
 
 if __name__ == "__main__":
     main()
