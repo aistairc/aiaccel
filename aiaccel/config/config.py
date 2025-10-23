@@ -38,6 +38,14 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
     OmegaConfDumper.str_representer_added = True
 
 
+def resolve_path(module_name: str) -> str:
+    mpath = resources.files(module_name)
+
+    # Convert MultiplexedPath to str path
+    module_path = str(next(mpath.iterdir()))
+    return str(Path(module_path).parent)
+
+
 def load_config(
     config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
@@ -63,9 +71,9 @@ def load_config(
 
     """
 
-    # Custom resolver for safe_eval
+    # Custom resolver
     oc.register_new_resolver("eval", simple_eval, replace=True)
-    oc.register_new_resolver("resolve_path", resources.files, replace=True)
+    oc.register_new_resolver("resolve_path", resolve_path, replace=True)
 
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
