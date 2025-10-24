@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from omegaconf import DictConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import pytest
@@ -41,6 +42,12 @@ def test_resolve_inherit() -> None:
     }
 
     assert resolved_config == expected_config
+
+
+def test_resolve_path() -> None:
+    loaded_config = load_config(Path(__file__).parent / "test_resolve_path.yaml")
+
+    assert isinstance(loaded_config, DictConfig)
 
 
 def test_print_config(capfd: pytest.CaptureFixture[str]) -> None:
