@@ -41,7 +41,7 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
 def resolve_path(module_name: str) -> str:
     mpath = resources.files(module_name)
 
-    # Convert MultiplexedPath to str path
+    # Convert Traversable to str path
     module_path = str(next(mpath.iterdir()))
     return str(Path(module_path).parent)
 
