@@ -8,7 +8,7 @@ def main() -> None:
     overwrite_omegaconf_dumper()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", help="Configuration file path", default=None)
+    parser.add_argument("config", help="Configuration file path")
 
     args, _ = parser.parse_known_args()
     config = load_config(args.config)

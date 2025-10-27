@@ -12,7 +12,7 @@ def main() -> None:
 
     package = importlib.import_module(f"aiaccel.{target_module}.apps")
 
-    modules = [name for _, name, ispkg in pkgutil.iter_modules(package.__path__) if not ispkg]
+    modules = [name.replace("_", "-") for _, name, ispkg in pkgutil.iter_modules(package.__path__) if not ispkg]
     if not modules:
         raise RuntimeError(f"No apps found in aiaccel.{target_module}.apps")
 
@@ -20,7 +20,7 @@ def main() -> None:
     parser.add_argument("command", choices=modules, help="The command to run.")
     args, unk_args = parser.parse_known_args()
 
-    module = importlib.import_module(f"aiaccel.{target_module}.apps.{args.command}")
+    module = importlib.import_module(f"aiaccel.{target_module}.apps.{args.command.replace('-', '_')}")
 
     sys.argv = [str(module.__file__)] + unk_args
     module.main()
