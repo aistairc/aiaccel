@@ -65,7 +65,7 @@ def load_config(
 
     # Custom resolver
     oc.register_new_resolver("eval", simple_eval, replace=True)
-    oc.register_new_resolver("resolve_path", resources.files, replace=True)
+    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
