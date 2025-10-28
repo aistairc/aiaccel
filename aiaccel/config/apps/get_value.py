@@ -18,7 +18,7 @@ def main() -> None:
     for k in args.key:
         if value is not None:
             value = value.get(k)
-    
+
     print(value)
 
 
