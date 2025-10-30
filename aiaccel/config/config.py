@@ -63,7 +63,7 @@ def load_config(
 
     """
 
-    # Custom resolver
+    # Register custom resolvers
     oc.register_new_resolver("eval", simple_eval, replace=True)
     oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
