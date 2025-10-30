@@ -1,0 +1,2 @@
+_base_: ${resolve_pkg_path:aiaccel.hpo.apps.config}/default.yaml
+

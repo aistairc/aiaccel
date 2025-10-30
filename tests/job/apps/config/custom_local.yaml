@@ -1,4 +1,4 @@
-_base_: ${base_config_path}/local.yaml
+_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/local.yaml
 
 script_prologue: |
     echo Hostname: $(hostname)
