@@ -1,6 +1,6 @@
 import argparse
 
-from omegaconf import OmegaConf as oc
+from omegaconf import OmegaConf as oc  # noqa: N813
 
 from aiaccel.config.config import load_config, overwrite_omegaconf_dumper, resolve_inherit
 
@@ -16,7 +16,7 @@ def main() -> None:
     config = load_config(args.config)
     config = resolve_inherit(config)
 
-    print(oc.select(config, key))
+    print(oc.select(config, args.key))
 
 
 if __name__ == "__main__":
