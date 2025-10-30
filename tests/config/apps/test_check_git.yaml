@@ -1,0 +1,33 @@
+storage:
+  _target_: optuna.storages.RDBStorage
+  url: sqlite:///aiaccel_storage.db
+  engine_kwargs:
+    connect_args:
+      timeout: 30
+
+study:
+  _target_: optuna.create_study
+  direction: minimize
+  storage: ${storage}
+  study_name: my_study
+  load_if_exists: false
+  sampler:
+    _target_: optuna.samplers.TPESampler
+    seed: 0
+
+params:
+  _convert_: partial
+  _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
+  x1:
+    _target_: aiaccel.hpo.optuna.hparams.Float
+    low: 0.0
+    high: 1.0
+    log: false
+  x2:
+    _target_: aiaccel.hpo.optuna.hparams.Float
+    low: 0.0
+    high: 1.0
+    log: false
+
+n_trials: 30
+n_max_jobs: 1
