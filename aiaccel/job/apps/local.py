@@ -56,7 +56,7 @@ done
 set -eE -o pipefail
 trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
-trap 'kill 0' INT EXIT
+trap 'kill 0' INT
 
 
 {config.script_prologue}
