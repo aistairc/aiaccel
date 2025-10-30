@@ -3,6 +3,7 @@
 
 from functools import partial
 import logging
+from math import ceil
 from multiprocessing import Pool
 from pathlib import Path
 import shlex
@@ -20,7 +21,7 @@ def main() -> None:
     args = parser.parse_args()
     mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
 
-    for key in ["walltime", "n_nodes"]:
+    for key in ["walltime", "n_nodes", "n_tasks_per_procs"]:
         if getattr(args, key, None) is not None:
             logger.warning(f"Argument '{key}' is defined for compatibility and will not be used in aiaccel-job local.")
 
@@ -28,7 +29,26 @@ def main() -> None:
     job = config[mode].job.format(command=shlex.join(args.command), args=args)
 
     if mode in ["cpu-array", "gpu-array"]:
-        job = f"TASK_STEPSIZE={args.n_tasks_per_proc} {job}"
+        n_tasks_per_proc = ceil(args.n_tasks / args.n_procs)
+        job = f"""\
+for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
+    TASK_INDEX=$(( 1 + {n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+
+    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
+        break
+    fi
+
+    TASK_INDEX=$TASK_INDEX \\
+    TASK_STEPSIZE={n_tasks_per_proc} \\
+        {job} > {args.log_filename.with_suffix("")}.${{LOCAL_PROC_INDEX}}.log 2>&1 &
+
+    pids[$LOCAL_PROC_INDEX]=$!
+done
+
+for i in "${{!pids[@]}}"; do
+    wait ${{pids[$i]}}
+done
+"""
         log_filename = f"{args.log_filename.with_suffix('')}.${{TASK_INDEX}}.log"
     else:
         log_filename = args.log_filename
