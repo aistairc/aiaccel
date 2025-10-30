@@ -19,7 +19,7 @@ def main() -> None:
     args = parser.parse_args()
     mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
 
-    for key in ["walltime", "n_nodes", "n_tasks_per_procs"]:
+    for key in ["walltime", "n_nodes", "n_tasks_per_proc"]:
         if getattr(args, key, None) is not None:
             logger.warning(f"Argument '{key}' is defined for compatibility and will not be used in aiaccel-job local.")
 
