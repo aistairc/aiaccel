@@ -16,7 +16,7 @@ def main() -> None:
     config = load_config(args.config)
     config = resolve_inherit(config)
 
-    print(oc.select(config, key)
+    print(oc.select(config, key))
 
 
 if __name__ == "__main__":
