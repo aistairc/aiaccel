@@ -2,105 +2,92 @@ from typing import Any
 
 import argparse
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from datetime import datetime
 from importlib import resources
 import json
 from pathlib import Path
 import shlex
 import subprocess
+import sys
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.config import load_config, print_config, resolve_inherit
+from aiaccel.config import load_config, pathlib2str_config, print_config, resolve_inherit
 
 
 def main() -> None:
-    """
-    Main function to execute the hyperparameter optimization process using a Dask cluster.
-    This function parses command-line arguments, loads the configuration,
-    sets up the Dask client, and runs the optimization trials in a distributed manner.
+    # remove OmegaConf arguments from sys.argv
+    oc_args = []
+    if "--" in sys.argv:  # If there are additional arguments before '--', treat them as OmegaConf arguments
+        sep_idx = sys.argv.index("--")
+        sys.argv.pop(sep_idx)
 
-    Command-line arguments:
-        - --config (str, optional): Path to the configuration file.
-        - --resume (bool, optional): Flag to resume from the previous study.
-        - --resumable (bool, optional): Flag to make the study resumable by setting appropriate storage.
+        for ii in range(0, sep_idx)[::-1]:
+            if "=" in sys.argv[ii] and not sys.argv[ii].startswith("-"):
+                oc_args.append(sys.argv.pop(ii))
 
-    Usage:
-        - Start a new study:
-            python -m aiaccel.hpo.apps.optimize --config config.yaml
-        - Resume from the previous study:
-            python -m aiaccel.hpo.apps.optimize --config config.yaml --resume
-        - Make the study resumable:
-            python -m aiaccel.hpo.apps.optimize --config config.yaml --resumable
+        oc_args = list(reversed(oc_args))
 
-    Config file (yaml) example:
-        ~~~ yaml
-        study:
-          _target_: optuna.create_study
-          direction: minimize
-          storage:
-            _target_: optuna.storages.InMemoryStorage
-          study_name: aiaccel_study
-          load_if_exists: false
+    # parse arguments
+    parser = argparse.ArgumentParser(
+        description="""\
+A helper CLI to optimize hyperparameters using Optuna.
+See complete usage: https://aistairc.github.io/aiaccel/user_guide/hpo.html .
 
-        cluster:
-          _target_: distributed.Client
-          n_workers: 4
-          threads_per_worker: 1
+Typical usages:
+  aiaccel-hpo optimize params.x1=[0,1] params.x2=[0,1] -- ./objective.py --x1={x1} --x2={x2} {out_filename}
+  aiaccel-hpo optimize --config=config.yaml ./objective.py --x1={x1} --x2={x2} {out_filename}
+""",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument("--config", type=Path, default=None, help="Path to the configuration file.")
+    parser.add_argument("command", nargs=argparse.REMAINDER)
 
-        sampler:
-          _target_: optuna.samplers.TPESampler
-          seed: 0
+    args = parser.parse_args()
 
-        params:
-          _convert_: partial
-          _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
-          x1: [0, 1]
-          x2:
-            _target_: aiaccel.apps.optimize.Float
-            low: 0.0
-            high: 1.0
-            log: false
+    # load config
+    base_config_path = resources.files(f"{__package__}.config")
+    if args.config is None:
+        args.config = base_config_path / "default.yaml"
+        working_directory = Path.cwd().resolve() / f"aiaccel-hpo_{datetime.now():%Y-%m-%d-%H-%M-%S}"
+    else:
+        working_directory = args.config.parent.resolve()
 
-        n_trials: 30
-        n_max_jobs: 4
-        ~~~
-    """
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("command", nargs="+")
-
-    parser.add_argument("--config", help="Configuration file path", default=None)
-    parser.add_argument("--resume", action="store_true", default=False)
-    parser.add_argument("--resumable", action="store_true", default=False)
-
-    args, unk_args = parser.parse_known_args()
-
-    with resources.as_file(resources.files("aiaccel.hpo.apps.config") / "default.yaml") as path:
-        default_config = oc.load(path)
-    config = oc.merge(default_config, load_config(args.config) if args.config is not None else {})
-    config = oc.merge(config, oc.from_cli(unk_args))
-
-    if (args.resumable or args.resume) and ("storage" not in config.study or args.config is None):
-        with resources.as_file(resources.files("aiaccel.hpo.apps.config") / "resumable.yaml") as path:
-            config = oc.merge(config, path)
-
-    if args.resume:
-        config.study.load_if_exists = True
+    config = oc.merge(
+        load_config(
+            args.config,
+            {
+                "config_path": args.config,
+                "working_directory": working_directory,
+                "base_config_path": base_config_path,
+            },
+        ),
+        oc.from_cli(oc_args),
+    )
+    if len(args.command) > 0:
+        config.command = args.command
 
     print_config(config)
 
+    # save config
+    config.working_directory = Path(config.working_directory)
+    config.working_directory.mkdir(parents=True, exist_ok=True)
+
+    with open(config.working_directory / "merged_config.yaml", "w") as f:
+        oc.save(pathlib2str_config(config), f)
+
     config = resolve_inherit(config)
+    config.working_directory = Path(config.working_directory)  # maybe bug
 
-    work_dir = Path.cwd()
-    work_dir.mkdir(parents=True, exist_ok=True)
-
+    # build study and hparams manager
     study = instantiate(config.study)
     params = instantiate(config.params)
 
-    futures: dict[Any, tuple[Trial, str]] = {}
+    # main loop
+    futures: dict[Any, tuple[Trial, Path]] = {}
     submitted_job_count = 0
     finished_job_count = 0
 
@@ -112,16 +99,19 @@ def main() -> None:
             # Submit job in ThreadPoolExecutor
             for _ in range(min(available_slots, config.n_trials - submitted_job_count)):
                 trial = study.ask()
-                out_filename = config.out_filename_template.format(**vars())
+
+                out_filename = config.working_directory / f"trial_{trial.number:0>6}.json"
 
                 future = pool.submit(
                     subprocess.run,
-                    shlex.join(args.command).format(
-                        job_name=config.job_name_template.format(**vars()),
+                    shlex.join(config.command).format(
+                        config=config,
+                        job_name=f"trial_{trial.number:0>6}",
                         out_filename=out_filename,
                         **params.suggest_hparams(trial),
                     ),
                     shell=True,
+                    check=True,
                 )
 
                 futures[future] = trial, out_filename
@@ -134,6 +124,8 @@ def main() -> None:
 
                 with open(out_filename) as f:
                     y = json.load(f)
+
+                out_filename.unlink()
 
                 frozentrial = study.tell(trial, y)
                 study._log_completed_trial(y if isinstance(y, list) else [y], frozentrial.number, frozentrial.params)
