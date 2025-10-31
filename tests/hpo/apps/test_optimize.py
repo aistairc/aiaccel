@@ -100,7 +100,7 @@ def test_from_cli_and_config(workspace_factory: Callable[..., AbstractContextMan
     with workspace_factory() as workspace:
         cmd = (
             "aiaccel-hpo optimize"
-            " n_trials=15"
+            " n_trials=30"
             " n_max_jobs=1"
             " params.x1='[0,10]'"
             " params.x2='[0,10]'"
@@ -115,4 +115,4 @@ def test_from_cli_and_config(workspace_factory: Callable[..., AbstractContextMan
 
         config = load_config(workspace / "merged_config.yaml")
         study = instantiate(config.study)
-        assert len(study.get_trials()) == 15
+        assert len(study.get_trials()) == 30
