@@ -34,7 +34,6 @@ def main() -> None:
             {
                 "config_path": args.config,
                 "working_directory": str(Path(args.config).parent.resolve()),
-                "base_config_path": str(Path(__file__).parent / "config"),
             },
         ),
         oc.from_cli(unk_args),

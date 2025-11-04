@@ -1,4 +1,4 @@
-_base_: ${base_config_path}/default.yaml
+_base_: ${resolve_pkg_path:aiaccel.hpo.apps.config}/default.yaml
 
 study:
   sampler:
