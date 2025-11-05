@@ -49,9 +49,8 @@ Typical usages:
     args = parser.parse_args()
 
     # load config
-    base_config_path = resources.files(f"{__package__}.config")
     if args.config is None:
-        args.config = base_config_path / "default.yaml"
+        args.config = resources.files(f"{__package__}.config") / "default.yaml"
         working_directory = Path.cwd().resolve() / f"aiaccel-hpo_{datetime.now():%Y-%m-%d-%H-%M-%S}"
     else:
         working_directory = args.config.parent.resolve()
@@ -62,7 +61,6 @@ Typical usages:
             {
                 "config_path": args.config,
                 "working_directory": working_directory,
-                "base_config_path": base_config_path,
             },
         ),
         oc.from_cli(oc_args),
