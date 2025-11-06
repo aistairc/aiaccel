@@ -1,6 +1,5 @@
 from typing import Any
 
-from importlib import resources
 import logging
 from pathlib import Path
 
@@ -56,7 +55,6 @@ def load_checkpoint(
         {
             "config_path": str(config_path),
             "working_directory": str(config_path.parent.resolve()),
-            "base_config_path": str(resources.files("aiaccel.torch.apps") / "config"),
         },
     )
 
