@@ -9,28 +9,28 @@ script_prologue: |
 sbatch: "sbatch --export=USE_SSH=1"
 
 cpu:
-    sbatch_args: "-q min -N 1"
+    sbatch_args: "-p min -N 1"
     job: "{command}"
 
 cpu-array:
     n_tasks_per_proc: 128
     n_procs: 24
-    sbatch_args: "-q cpu1 -N 1 --array=1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+    sbatch_args: "-p cpu1 -N 1 --array=1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
 
 gpu:
-    sbatch_args: "-q gpu1 -N 1"
+    sbatch_args: "-p gpu1 -N 1"
     job: "{command}"
 
 gpu-array:
     n_tasks_per_proc: 128
     n_procs: 8
-    sbatch_args: "-q gpu1 -N 1 --array=1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+    sbatch_args: "-p gpu1 -N 1 --array=1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
     job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}"
 
 mpi:
     n_nodes: 1
     sbatch_args: >-
-        -q gpu1
+        -p gpu1
         -N {args.n_nodes} --ntasks-per-node=$(( {args.n_procs} / {args.n_nodes} )) --cpus-per-task=$(( {args.n_nodes} * 96 / {args.n_procs} ))
     job: |
         source /etc/profile.d/modules.sh
@@ -42,7 +42,7 @@ mpi:
 
 train:
     sbatch_args: >-
-        -q $( (({args.n_gpus}==1)) && printf gpu1 || printf gpu1 )
+        -p $( (({args.n_gpus}==1)) && printf gpu1 || printf gpu1 )
         -N $(( ({args.n_gpus} + 7) / 8 )) --ntasks-per-node=$( (({args.n_gpus}==1)) && printf 1 || printf 8 ) --cpus-per-task=$( (({args.n_gpus}==1)) && printf 8 || printf 12 )
     job: |
         source /etc/profile.d/modules.sh
