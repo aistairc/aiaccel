@@ -9,7 +9,7 @@ script_prologue: |
 sbatch: "sbatch --export=USE_SSH=1"
 
 cpu:
-    sbatch_args: "-q cpu1 -N 1"
+    sbatch_args: "-q min -N 1"
     job: "{command}"
 
 cpu-array:
