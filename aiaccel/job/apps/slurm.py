@@ -46,8 +46,8 @@ done
         for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
             status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
     else:
-        job_log_filename = args.log_filename
-        job_status_filename = args.log_filename.with_suffix(".out")
+        job_log_filename = args.log_filename.resolve()
+        job_status_filename = args.log_filename.with_suffix(".out").resolve()
 
         status_filename_list = [job_status_filename]
 
