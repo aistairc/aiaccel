@@ -27,6 +27,7 @@ dependencies = [
     "h5py",
     "rich",
     "tensorboard",
+    "typing_extensions",
     "simpleeval"
 ]
 dynamic = ["version"]
@@ -108,7 +109,7 @@ section-order = [
 ]
 
 [tool.ruff.lint.isort.sections]
-"typing" = ["typing", "numpy.typing"]
+"typing" = ["typing", "typing_extensions", "numpy.typing"]
 "utilities" = ["colorama", "hydra", "omegaconf", "progressbar", "rich"]
 "datascience" = ["numpy", "scipy", "pandas", "matplotlib", "opt_einsum", "einops"]
 "torch" = ["torch"]
@@ -120,6 +121,9 @@ section-order = [
 [tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
+
+[tool.pixi.dependencies]
+python = ">=3.10,<3.11"
 
 [tool.pixi.pypi-dependencies]
 aiaccel = { path = ".", editable = true }
