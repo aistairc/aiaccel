@@ -91,8 +91,8 @@ fi
     for status_filename in status_filename_list:
         while not status_filename.exists():
             time.sleep(1.0)
-            # Update the file system
-            if getattr(args, "use_scandir", False):
+
+            if getattr(args, "use_scandir", False):  # Reflesh the file system if needed
                 os.scandir()
 
         status = int(status_filename.read_text())
