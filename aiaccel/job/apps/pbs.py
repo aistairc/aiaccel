@@ -93,7 +93,7 @@ fi
             time.sleep(1.0)
 
             if getattr(args, "use_scandir", False):  # Reflesh the file system if needed
-                os.scandir()
+                os.scandir(status_filename.parent)
 
         status = int(status_filename.read_text())
         if status != 0:
