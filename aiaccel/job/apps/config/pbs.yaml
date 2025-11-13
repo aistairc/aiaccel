@@ -8,8 +8,6 @@ script_prologue: |
 
 qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1"
 
-use_scandir: False
-
 cpu:
     qsub_args: "-q rt_HF -l select=1"
     job: "{command}"
@@ -58,3 +56,5 @@ train:
             -x COLUMNS=120 \\
             -x PYTHONUNBUFFERED=true \\
             {command}
+
+use_scandir: False
