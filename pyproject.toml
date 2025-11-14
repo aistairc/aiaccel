@@ -27,7 +27,8 @@ dependencies = [
     "h5py",
     "rich",
     "tensorboard",
-    "simpleeval"
+    "simpleeval",
+    "scikit-learn"
 ]
 dynamic = ["version"]
 
