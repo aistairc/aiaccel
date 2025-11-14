@@ -92,7 +92,7 @@ fi
         while not status_filename.exists():
             time.sleep(1.0)
 
-            if getattr(config, "use_scandir", False):  # Reflesh the file system if needed
+            if config.get("use_scandir", False):  # Reflesh the file system if needed
                 os.scandir(status_filename.parent)
 
         status = int(status_filename.read_text())
