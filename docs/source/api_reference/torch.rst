@@ -44,7 +44,7 @@ Inference Pipeline Helpers
     :toctree: generated/
 
     BasePipeline
-    BaseConfig
+    reorder_fields
 
 
 Lightning Utilities

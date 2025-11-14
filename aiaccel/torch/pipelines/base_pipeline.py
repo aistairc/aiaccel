@@ -1,9 +1,7 @@
-from typing import Any, Generic, TypeVar
-from typing_extensions import Self
+from typing import Any, TypeVar
 
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
-from dataclasses import MISSING, dataclass, field, fields
 import logging
 import os
 from pathlib import Path
@@ -12,64 +10,121 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 from rich.logging import RichHandler
 from rich.progress import track
 
+import torch
+
+import attrs
+
 from aiaccel.config import overwrite_omegaconf_dumper, print_config
 
 overwrite_omegaconf_dumper()
 
-
-@dataclass
-class BaseConfig:
-    unk_args: list[str] = field(default_factory=list)
-
-    @classmethod
-    def from_namespace(cls, args: Namespace, unk_args: list[str] | None = None) -> Self:
-        return cls(**{field.name: getattr(args, field.name) for field in fields(cls)}, unk_args=unk_args or [])
-
-    @classmethod
-    def get_argument_parser(cls) -> ArgumentParser:
-        parser = ArgumentParser(add_help=False)
-        for fld in fields(cls):
-            if fld.name == "unk_args":
-                pass
-            elif fld.type is bool and fld.default is False:
-                parser.add_argument(f"--{fld.name}", action="store_true")
-            elif fld.default is MISSING:
-                parser.add_argument(fld.name, type=fld.type)
-            else:
-                parser.add_argument(f"--{fld.name}", type=fld.type, default=fld.default)
-
-        return parser
+logger = logging.getLogger(__name__)
 
 
-C = TypeVar("C", bound=BaseConfig)
+@attrs.define
+class BasePipeline(metaclass=ABCMeta):
+    """
+    Base class for inference pipelines.
+
+    .. note::
+        Note that this class is an experimental feature and may change in the future.
+
+    Basic usage:
+
+    .. code-block:: python
+        :caption: separate.py
+
+        from pathlib import Path
+
+        import attrs
+
+        import torch
+
+        from aiaccel.torch.pipelines import BasePipeline, reorder_fields
+        from aiaccel.torch.lightning import load_checkpoint
+
+        import soundfile as sf
 
 
-class BasePipeline(Generic[C], metaclass=ABCMeta):
-    default_src_ext: str
-    default_dst_ext: str
+        @attrs.define(field_transformer=reorder_fields)
+        class SeparationPipeline(BasePipeline):
+            checkpoint_path: str
 
-    allow_tf32: bool | None = False
+            device: str = "cuda"
 
-    Config: type[C]
+            src_ext: str = "wav"
+            dst_ext: str = "wav"
 
-    def __init__(self, *, config: C | None = None) -> None:
-        if config is None:
-            config = self.Config()
+            def __attrs_post_init__(self):
+                self.model, self.config = load_checkpoint(self.checkpoint_path)
+                self.model.eval()
+                self.model.to(self.device)
 
-        self.config = config
+            def __call__(self, wav: torch.Tensor) -> torch.Tensor:
+                return self.model(wav)
 
-        if self.allow_tf32 is not None:
-            import torch
+            @torch.inference_mode()
+            def inference_one(self, src_filename: Path, dst_filename: Path) -> None:
+                wav_mix, sr = sf.load(src_filename, dtype="float32")
+                assert sr == self.config.sr, f"Sample rate mismatch: {sr} != {self.config.sr}"
 
-            torch.backends.cuda.matmul.allow_tf32 = self.allow_tf32
+                wav_mix = torch.from_numpy(wav_mix).unsqueeze(0).to(self.device)
+                wav_sep = self(wav_mix).squeeze(0).cpu().numpy()
 
-    @abstractmethod
-    def inference_one(self, src_filename: Path, dst_filename: Path) -> Any:
-        dst_filename.parent.mkdir(exist_ok=True, parents=True)
+                sf.write(dst_filename, wav_sep, sr)
+
+
+        if __name__ == "__main__":
+            SeparationPipeline.main()
+
+    .. code-block:: bash
+
+        python separate.py one --help
+
+
+    .. code-block:: text
+
+        usage: test.py one [-h] [--device DEVICE] [--src_ext SRC_EXT] [--dst_ext DST_EXT] [--allow_tf32] [--unk_args UNK_ARGS] checkpoint_path src_filename dst_filename
+
+        positional arguments:
+        checkpoint_path
+        src_filename
+        dst_filename
+
+        options:
+        -h, --help           show this help message and exit
+        --device DEVICE
+        --src_ext SRC_EXT
+        --dst_ext DST_EXT
+        --allow_tf32
+        --unk_args UNK_ARGS
+
+    .. code-block:: bash
+
+        # run inference for one file
+        python separate.py one ./mixture.wav ./result.wav --checkpoint_path=./sepformer/
+
+        # run inference for all files in a directory
+        python separate.py batch ./mixtures/ ./results/ --checkpoint_path=./sepformer/
+
+    """  # noqa: E501
+
+    src_ext: str = attrs.field(init=False)
+    dst_ext: str = attrs.field(init=False)
+    allow_tf32: bool = False
+    unk_args: list[str] = attrs.field(factory=list)
+
+    def __post_init__(self) -> None:
+        torch.backends.cuda.matmul.allow_tf32 = self.allow_tf32
+        logger.info(f"Set torch.backends.cuda.matmul.allow_tf32 to {self.allow_tf32}")
 
     @abstractmethod
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         pass
+
+    @abstractmethod
+    def inference_one(self, src_filename: Path, dst_filename: Path) -> Any:
+        dst_filename.parent.mkdir(exist_ok=True, parents=True)
 
     @classmethod
     def main(cls) -> None:
@@ -81,8 +136,8 @@ class BasePipeline(Generic[C], metaclass=ABCMeta):
         print_config(oc.create(vars(args) | {"unk_args": unk_args}))
         print("=" * 32)
 
-        config = cls.Config.from_namespace(args, unk_args)
-        pipeline = cls(config=config)
+        kwargs = {field.name: getattr(args, field.name) for field in attrs.fields_dict(cls).values()}
+        pipeline = cls(**kwargs, unk_args=unk_args or [])
 
         match args.cmd:
             case "one":
@@ -102,7 +157,18 @@ class BasePipeline(Generic[C], metaclass=ABCMeta):
 
     @classmethod
     def _parse_arguments(cls) -> tuple[Namespace, list[str]]:
-        parent_parser = cls.Config.get_argument_parser()
+        parent_parser = ArgumentParser(add_help=False)
+        for fld in attrs.fields_dict(cls).values():
+            if fld.init is False:
+                pass
+            elif fld.type is bool and fld.default is False:
+                parent_parser.add_argument(f"--{fld.name}", action="store_true")
+            elif fld.default is attrs.NOTHING:
+                assert fld.type is not None
+                parent_parser.add_argument(fld.name, type=fld.type)
+            else:
+                assert fld.type is not None
+                parent_parser.add_argument(f"--{fld.name}", type=fld.type, default=fld.default)
 
         parser = ArgumentParser()
         sub_parsers = parser.add_subparsers(dest="cmd")
@@ -114,8 +180,6 @@ class BasePipeline(Generic[C], metaclass=ABCMeta):
         sub_parser = sub_parsers.add_parser("batch", parents=[parent_parser])
         sub_parser.add_argument("src_path", type=Path)
         sub_parser.add_argument("dst_path", type=Path)
-        sub_parser.add_argument("--src_ext", type=str, default=cls.default_src_ext)
-        sub_parser.add_argument("--dst_ext", type=str, default=cls.default_dst_ext)
 
         args, unk_args = parser.parse_known_args()
 
@@ -124,3 +188,22 @@ class BasePipeline(Generic[C], metaclass=ABCMeta):
             exit()
 
         return args, unk_args
+
+
+T = TypeVar("T")
+
+
+def reorder_fields(cls: Any, fields: list[attrs.Attribute[T]]) -> list[attrs.Attribute[T]]:
+    """
+    Reorder attrs fields such that fields without default values come first,
+    followed by fields with default values, and inherited fields are placed last.
+    """
+    original_order = {fld: idx for idx, fld in enumerate(fields)}
+
+    def sort_key(a: attrs.Attribute[T]) -> tuple[int, int, int]:
+        inherited = 1 if a.inherited else 0  # type: ignore[attr-defined]  # TODO
+        has_default = 1 if a.default is not attrs.NOTHING else 0
+
+        return (has_default, inherited, original_order[a])
+
+    return sorted(fields, key=sort_key)

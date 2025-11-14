@@ -1,3 +1,3 @@
-from aiaccel.torch.pipelines.base_pipeline import BaseConfig, BasePipeline
+from aiaccel.torch.pipelines.base_pipeline import BasePipeline, reorder_fields
 
-__all__ = ["BaseConfig", "BasePipeline"]
+__all__ = ["BasePipeline", "reorder_fields"]
