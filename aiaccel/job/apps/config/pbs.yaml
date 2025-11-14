@@ -56,3 +56,5 @@ train:
             -x COLUMNS=120 \\
             -x PYTHONUNBUFFERED=true \\
             {command}
+
+use_scandir: False
