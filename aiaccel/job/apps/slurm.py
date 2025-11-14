@@ -85,7 +85,7 @@ trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
         while not status_filename.exists():
             time.sleep(1.0)
 
-            if getattr(args, "use_scandir", False):  # Reflesh the file system if needed
+            if getattr(config, "use_scandir", False):  # Reflesh the file system if needed
                 os.scandir(status_filename.parent)
 
         status = int(status_filename.read_text())
