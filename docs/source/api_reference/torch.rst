@@ -13,50 +13,7 @@ Datasets
     FileCachedDataset
     HDF5Dataset
     RawHDF5Dataset
-
-Dataset Utilities
------------------
-
-.. currentmodule:: aiaccel.torch.datasets
-
-.. autosummary::
-    :toctree: generated/
-
     scatter_dataset
-
-Lightning Utilities
--------------------
-
-.. currentmodule:: aiaccel.torch.lightning
-
-.. autosummary::
-    :toctree: generated/
-
-    OptimizerLightningModule
-    OptimizerConfig
-    build_param_groups
-    from_pretrained
-    ABCIEnvironment
-
-Lightning Datamodules
----------------------
-
-.. currentmodule:: aiaccel.torch.lightning.datamodules
-
-.. autosummary::
-    :toctree: generated/
-
-    SingleDataModule
-
-H5py Utilities
---------------
-
-.. currentmodule:: aiaccel.torch.h5py
-
-.. autosummary::
-    :toctree: generated/
-
-    HDF5Writer
 
 Functional
 ----------
@@ -77,3 +34,49 @@ Learning Rate Schedulers
     :toctree: generated/
 
     SequentialLR
+
+Inference Pipeline Helpers
+--------------------------
+
+.. currentmodule:: aiaccel.torch.pipelines
+
+.. autosummary::
+    :toctree: generated/
+
+    BasePipeline
+    BaseConfig
+
+
+Lightning Utilities
+-------------------
+
+.. currentmodule:: aiaccel.torch.lightning
+
+.. autosummary::
+    :toctree: generated/
+
+    OptimizerLightningModule
+    OptimizerConfig
+    build_param_groups
+    load_checkpoint
+    ABCIEnvironment
+
+Lightning Datamodules
+^^^^^^^^^^^^^^^^^^^^^
+
+.. currentmodule:: aiaccel.torch.lightning.datamodules
+
+.. autosummary::
+    :toctree: generated/
+
+    SingleDataModule
+
+H5py Utilities
+--------------
+
+.. currentmodule:: aiaccel.torch.h5py
+
+.. autosummary::
+    :toctree: generated/
+
+    HDF5Writer

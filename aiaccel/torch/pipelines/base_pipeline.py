@@ -64,8 +64,12 @@ class BasePipeline(Generic[C], metaclass=ABCMeta):
             torch.backends.cuda.matmul.allow_tf32 = self.allow_tf32
 
     @abstractmethod
-    def process_one(self, src_filename: Path, dst_filename: Path) -> Any:
+    def inference_one(self, src_filename: Path, dst_filename: Path) -> Any:
         dst_filename.parent.mkdir(exist_ok=True, parents=True)
+
+    @abstractmethod
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        pass
 
     @classmethod
     def main(cls) -> None:
@@ -82,7 +86,7 @@ class BasePipeline(Generic[C], metaclass=ABCMeta):
 
         match args.cmd:
             case "one":
-                pipeline.process_one(args.src_filename, args.dst_filename)
+                pipeline.inference_one(args.src_filename, args.dst_filename)
             case "batch":
                 src_fname_list = list(args.src_path.glob(f"*.{args.src_ext}"))
                 src_fname_list.sort()
@@ -94,7 +98,7 @@ class BasePipeline(Generic[C], metaclass=ABCMeta):
                     src_fname_list = src_fname_list[start:end]
 
                 for src_filename in track(src_fname_list):
-                    pipeline.process_one(src_filename, args.dst_path / f"{src_filename.stem}.{args.dst_ext}")
+                    pipeline.inference_one(src_filename, args.dst_path / f"{src_filename.stem}.{args.dst_ext}")
 
     @classmethod
     def _parse_arguments(cls) -> tuple[Namespace, list[str]]:
