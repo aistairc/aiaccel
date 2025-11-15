@@ -4,19 +4,19 @@ default_install_hook_types:
 
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.8
+    rev: v0.14.5
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.1
+    rev: v1.18.2
     hooks:
       - id: mypy
         language: system
         args: [--config-file, mypy.ini, --explicit-package-bases]
   - repo: https://github.com/LilSpazJoekp/docstrfmt
-    rev: v1.10.0
+    rev: v1.11.1
     hooks:
       - id: docstrfmt
         args: [--check, docs/source/, --extend-exclude, docs/source/api_reference/generated]
