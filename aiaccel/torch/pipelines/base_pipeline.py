@@ -29,10 +29,10 @@ else:
 
 @attrs.define()
 class BasePipeline(metaclass=ABCMeta):
-    """
-    Base class for inference pipelines.
+    """Base class for inference pipelines.
 
     .. note::
+
         Note that this class is an experimental feature and may change in the future.
 
     Basic usage:
@@ -70,7 +70,9 @@ class BasePipeline(metaclass=ABCMeta):
 
             def setup(self) -> None:
                 self.model, self.config = load_checkpoint(
-                    self.checkpoint_path, device=self.device, overwrite_config=self.overwrite_config
+                    self.checkpoint_path,
+                    device=self.device,
+                    overwrite_config=self.overwrite_config,
                 )
                 self.model.eval()
 
@@ -89,10 +91,14 @@ class BasePipeline(metaclass=ABCMeta):
 
             @classmethod
             def _prepare_parser(cls, fields: list[attrs.Attribute]) -> ArgumentParser:
-                return super()._prepare_parser(list(filter(lambda f: f.name != "overwrite_config", fields)))
+                return super()._prepare_parser(
+                    list(filter(lambda f: f.name != "overwrite_config", fields))
+                )
 
             @classmethod
-            def _process_unk_args(cls, unk_args: list[str], kwargs: dict[str, Any], parser: ArgumentParser) -> dict[str, Any]:
+            def _process_unk_args(
+                cls, unk_args: list[str], kwargs: dict[str, Any], parser: ArgumentParser
+            ) -> dict[str, Any]:
                 return kwargs | {"overwrite_config": oc.from_cli(unk_args)}
 
 
@@ -102,7 +108,6 @@ class BasePipeline(metaclass=ABCMeta):
     .. code-block:: bash
 
         python separate.py one --help
-
 
     .. code-block:: text
 
@@ -241,15 +246,18 @@ def reorder_fields(cls: Any, fields: list[Attribute]) -> list[Attribute]:
     They are further ordered such that fields defined in the class come before inherited fields.
 
     Basic usage:
+
     .. code-block:: python
 
         import attrs
         from aiaccel.torch.pipelines import reorder_fields
 
+
         @attrs.define(field_transformer=reorder_fields)
         class MyPipeline(BasePipeline):
             required_field: int
             optional_field: str = "default"
+
     """
     original_order = {fld: idx for idx, fld in enumerate(fields)}
 
