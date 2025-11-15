@@ -46,7 +46,6 @@ Inference Pipeline Helpers
     BasePipeline
     reorder_fields
 
-
 Lightning Utilities
 -------------------
 
@@ -62,7 +61,7 @@ Lightning Utilities
     ABCIEnvironment
 
 Lightning Datamodules
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: aiaccel.torch.lightning.datamodules
 
