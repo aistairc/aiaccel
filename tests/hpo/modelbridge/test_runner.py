@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+from typing import Any
+
 import json
 from pathlib import Path
-from typing import Any, Dict
 
 from aiaccel.hpo.modelbridge.config import load_bridge_config
 from aiaccel.hpo.modelbridge.runner import run_pipeline
 
 
-def _config(tmp_path: Path) -> Dict[str, object]:
+def _config(tmp_path: Path) -> dict[str, object]:
     return {
         "hpo": {"optimizer": "optuna", "sampler": "tpe"},
         "bridge": {
@@ -40,7 +41,7 @@ def test_run_pipeline(tmp_path: Path) -> None:
     summary_path = tmp_path / "outputs" / "summary.json"
     assert summary_path.exists()
     with summary_path.open("r", encoding="utf-8") as handle:
-        summary_file: Dict[str, Any] = json.load(handle)
+        summary_file: dict[str, Any] = json.load(handle)
     assert summary_file == summary
 
     scenario_summary = summary["demo"]
@@ -58,3 +59,23 @@ def test_run_pipeline(tmp_path: Path) -> None:
     assert predictions_csv.exists()
     predictions_content = predictions_csv.read_text(encoding="utf-8")
     assert "actual_y" in predictions_content and "pred_y" in predictions_content
+
+
+def test_run_pipeline_partial_phases(tmp_path: Path) -> None:
+    bridge_config = load_bridge_config(_config(tmp_path))
+    scenario_dir = tmp_path / "outputs" / "scenarios" / "demo"
+
+    partial = run_pipeline(bridge_config, phases=("macro", "micro"))
+    assert partial["phases"] == ["macro", "micro"]
+    macro_csv = scenario_dir / "macro_trials.csv"
+    micro_csv = scenario_dir / "micro_trials.csv"
+    assert macro_csv.exists() and micro_csv.exists()
+    assert not (scenario_dir / "regression.json").exists()
+
+    run_pipeline(bridge_config, phases=("regress",))
+    regression_path = scenario_dir / "regression.json"
+    scenario_summary = scenario_dir / "scenario_summary.json"
+    assert regression_path.exists() and scenario_summary.exists()
+
+    summary = run_pipeline(bridge_config, phases=("summary",))
+    assert summary["demo"]["macro_trials"] == 3

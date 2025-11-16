@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from numpy.typing import NDArray
+
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 import json
 from pathlib import Path
 
 import numpy as np
-from numpy.typing import NDArray
 
 from aiaccel.hpo.modelbridge.config import (
     BridgeConfig,
@@ -30,7 +31,6 @@ class ScenarioSpec:
     macro: str
     regression: RegressionConfig
     trials: int
-
 
 
 Vector = NDArray[np.float64]

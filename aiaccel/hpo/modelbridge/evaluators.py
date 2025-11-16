@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
 from typing import Any, cast
+
+from collections.abc import Callable, Mapping
 from functools import partial
 import importlib
 import inspect
@@ -29,10 +30,10 @@ def build_evaluator(
         return cast(
             Callable[[TrialContext], EvaluationResult],
             partial(
-            command_objective,
-            command=config.command,
-            timeout=config.timeout,
-            base_env=base_env,
+                command_objective,
+                command=config.command,
+                timeout=config.timeout,
+                base_env=base_env,
             ),
         )
 

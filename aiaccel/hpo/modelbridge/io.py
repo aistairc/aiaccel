@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from collections.abc import Iterable, Mapping
 import json
 from pathlib import Path
@@ -36,4 +38,24 @@ def write_json(path: Path, payload: Mapping[str, object]) -> Path:
     return path
 
 
-__all__ = ["write_csv", "write_json"]
+def read_csv(path: Path) -> list[dict[str, str]]:
+    """Read ``path`` into a list of dict rows."""
+
+    import csv
+
+    with path.open("r", newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        return [dict(row) for row in reader]
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    """Load a JSON mapping from ``path``."""
+
+    with path.open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    if not isinstance(data, dict):
+        raise ValueError(f"JSON document at {path} must be a mapping")
+    return data
+
+
+__all__ = ["write_csv", "write_json", "read_csv", "read_json"]

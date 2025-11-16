@@ -1,0 +1,36 @@
+# Example configuration for the modelbridge pipeline.
+# Use it with: make modelbridge-run MODELBRIDGE_CONFIG=examples/config/modelbridge.yaml
+
+hpo:
+  optimizer: optuna
+  sampler: tpe
+
+bridge:
+  output_dir: ./work/modelbridge/simple
+  seed: 32
+  log_level: INFO
+  scenarios:
+    - name: simple
+      macro_trials: 12
+      micro_trials: 12
+      objective:
+        target: examples.hpo.modelbridge.simple_benchmark.objective
+      params:
+        macro:
+          macro_x:
+            low: -1.0
+            high: 1.0
+          macro_y:
+            low: -1.0
+            high: 1.0
+        micro:
+          micro_x:
+            low: -1.0
+            high: 1.0
+          micro_y:
+            low: -1.0
+            high: 1.0
+      regression:
+        type: linear
+        degree: 1
+      metrics: [mae, mse, r2]
