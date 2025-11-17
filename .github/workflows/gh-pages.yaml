@@ -32,7 +32,6 @@ jobs:
           python -m pip install .[dev,github-actions]
       - name: Sphinx build
         run: |
-          sphinx-apidoc --maxdepth 2 -f -o ./docs/source/api_reference/ -s rst.auto ./aiaccel/
           cd docs
           make html
       - name: Upload artifact
