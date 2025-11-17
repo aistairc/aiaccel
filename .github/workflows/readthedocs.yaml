@@ -3,8 +3,6 @@ on:
   pull_request_target:
     types:
       - opened
-    paths:
-      - "docs/**"
 
 permissions:
   pull-requests: write
@@ -15,4 +13,4 @@ jobs:
     steps:
       - uses: readthedocs/actions/preview@v1
         with:
-          project-slug: "readthedocs-preview"
+          project-slug: "aiaccel"
