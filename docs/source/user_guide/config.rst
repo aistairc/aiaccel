@@ -59,9 +59,9 @@ command-line overrides, then instantiate objects from ``_target_`` definitions v
     args, unk_args = parser.parse_known_args()
 
     config = load_config(args.config)
-    config = oc.merge(config, oc.from_cli(unk_args))
     print_config(config)
     config = resolve_inherit(config)
+    config = oc.merge(config, oc.from_cli(unk_args))
 
     model = instantiate(config.model)
     print(model)
@@ -86,8 +86,14 @@ parser captures ``unk_args`` separately, you can override any value from the com
 line by appending ``key=value`` pairs, and ``oc.merge`` combines them after every other
 transformation.
 
+Advanced Configuration Patterns
+-------------------------------
+
+The following subsections dive deeper into composing large configuration trees by mixing
+inheritance, inline reuse, resolvers, and Git integration.
+
 Using ``_base_`` to inherit files
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``_base_`` lets you inherit from one or more YAML files while overriding their values.
 When multiple files are provided, they are merged in the order given.
@@ -117,7 +123,7 @@ Here ``config_base.yaml`` is loaded first and ``config.yaml`` overwrites values 
 recursively, base files are free to declare further bases of their own.
 
 Reusing fragments with ``_inherit_``
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``_inherit_`` copies arbitrary DictConfig nodes inline. It is useful for sharing
 repeated parameter definitions in a single place.
@@ -150,7 +156,7 @@ fields declared under ``param`` and can further override them locally. Passing a
 references merges multiple templates in sequence.
 
 Resolvers registered by :func:`aiaccel.config.load_config`
-----------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Every call to :func:`aiaccel.config.load_config` registers the following resolvers in
 OmegaConf:
@@ -167,7 +173,7 @@ They are always registered with ``oc.register_new_resolver(..., replace=True)``,
 aiaccel's resolvers take precedence even if other code defined the same names.
 
 Git status checks
------------------
+~~~~~~~~~~~~~~~~~
 
 Whenever a config references a Python package via ``_target_``,
 :func:`aiaccel.config.collect_git_status_from_config` detects it and collects ``git
@@ -176,7 +182,7 @@ status`` / ``git rev-parse`` results for each repository. The associated
 uncommitted changes. Packages that are not Git repositories or that are ignored via
 ``.gitignore`` are skipped automatically.
 
-CLI utilities
+CLI Utilities
 -------------
 
 ``aiaccel/config/apps/`` ships small CLIs to streamline common config operations.
