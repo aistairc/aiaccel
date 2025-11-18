@@ -118,6 +118,13 @@ This approach keeps array jobs deterministic—the scheduler decides which chunk
 running, and your script only needs to honor ``TASK_INDEX`` / ``TASK_STEPSIZE`` to work
 both locally and on HPC backends.
 
+Cluster Configuration
+---------------------
+
+Configuring ``local``, ``pbs``, and ``sge`` targets follows the same structure but each
+introduces scheduler-specific extensions for submission commands, array behavior, and
+MPI launchers.
+
 Config essentials
 ~~~~~~~~~~~~~~~~~
 
@@ -136,9 +143,6 @@ Every invocation loads a YAML file composed of the following building blocks:
     * - Workload modes
       - ``cpu``, ``cpu-array``, ``gpu``, ``gpu-array``, ``mpi``, ``train``
       - Declare the ``job`` template plus optional queue arguments for each workload.
-    * - Scheduler hooks
-      - ``qsub``, ``qsub_args``, ``use_scandir``
-      - Describe how jobs are submitted and how completion is detected on HPC clusters.
     * - Template helpers
       - ``{command}``, ``{args.*}``, ``_base_``, ``_inherit_``
       - Compose configs with Hydra-style inheritance and inject CLI overrides at render
@@ -182,11 +186,17 @@ Key fields:
 - Each mode declares a ``job`` template. ``{command}`` is replaced with the CLI payload
   and ``{args.*}`` accesses runtime options (``n_gpus``, ``n_tasks`` etc.).
 
-Advanced Usage
---------------
+Local-specific settings
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Scheduler integrations extend the same config file with a few extra keys to control job
-submission commands, array behavior, and MPI launchers.
+`aiaccel/job/apps/config/local.yaml
+<https://github.com/aistairc/aiaccel/blob/main/aiaccel/job/apps/config/local.yaml>`_
+keeps the settings minimal: ``walltime`` is ignored, ``script_prologue`` runs before
+every job, and each mode simply renders the ``job`` template. Array jobs loop over the
+requested number of processes with ``TASK_INDEX``/``TASK_STEPSIZE`` exported into the
+environment, and logs are stored next to ``LOG_FILENAME``. Customize this file to export
+additional environment variables, wrap commands in container runtimes, or change how
+local array workers are fanned out.
 
 PBS-specific settings
 ~~~~~~~~~~~~~~~~~~~~~
@@ -272,16 +282,40 @@ The only CLI difference is choosing ``aiaccel-job sge ...``. Array jobs rely on
 load site-specific modules, so copy the template and adjust queue names, slots, GPU
 labels, or environment modules to match your cluster.
 
-Roadmap
--------
+Advanced Topics
+---------------
 
-Future releases will expand beyond the current local/PBS/SGE trio. Planned highlights
-include:
+Writing a custom dispatcher
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Secure SSH execution targets for forwarding jobs to remote clusters without exposing
-  schedulers directly.
-- Commercial cloud integrations so the same CLI can submit to managed services (for
-  example Kubernetes jobs or vendor-specific batch offerings).
+If none of the bundled backends match your infrastructure, you can create a new
+dispatcher while keeping the CLI compatible with existing workloads. The helper
+:func:`aiaccel.job.apps.prepare_argument_parser` loads the job config, wires the shared
+options (``--config``, ``--walltime``, etc.), and returns the parser plus sub-commands
+for ``cpu`` / ``gpu`` / ``mpi`` / ``train``. A minimal entry point looks like:
+
+.. code-block:: python
+    :caption: custom_backend.py
+
+    from aiaccel.job.apps import prepare_argument_parser
+
+    config, parser, sub_parsers = prepare_argument_parser("custom.yaml")
+
+    # Add backend-specific flags here if needed
+
+    def main() -> None:
+        args = parser.parse_args()
+        config = config  # optionally resolve template paths
+        # Submit or run jobs using args.mode, args.command, etc.
+
+    if __name__ == "__main__":
+        main()
+
+By relying on ``prepare_argument_parser`` and mirroring the ``aiaccel-job`` option
+names, existing scripts can switch to your dispatcher just by replacing the backend
+keyword while keeping their commands and configs intact. This keeps programs portable:
+as long as the CLI contract is preserved, researchers can run the same workload on any
+cluster without touching the training script.
 
 Further reading
 ---------------
