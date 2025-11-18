@@ -6,18 +6,16 @@ You can install aiaccel directly from PyPI:
 python -m pip install aiaccel
 ```
 
-Alternatively, we provide an example environment that includes all dependencies:
-```bash
-git clone https://github.com/aistairc/aiaccel/  # clone aiaccel repository
-cd aiaccel/
+## Tutorials
+When you want to try the tutorials, we recommend setting up the environment with `pixi`, which installs aiaccel together with every required dependency. You can first install `pixi` by following the instructions at https://pixi.sh/latest/#installation.
 
-pushd examples/python/
-bash setup.sh  # setup a miniforge-based Python environment
-source activate.sh  # activate the Python environment
-popd
+```bash
+git clone https://github.com/aistairc/aiaccel.git
+cd aiaccel
+pixi install
+pixi shell  # only if you want to enter the environment interactively
 ```
 
-## Tutorials
 ```{toctree}
 :maxdepth: 1
 config
