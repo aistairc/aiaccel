@@ -1,10 +1,10 @@
 Managing Job Workloads
 ======================
 
-``aiaccel-job`` launches training, evaluation, or batch jobs on laptops, shared
-servers, and PBS / SGE clusters through a single CLI. This guide explains the command
-workflow, the YAML templates behind it, and the scheduler-specific tweaks that keep the
-interface consistent across backends.
+``aiaccel-job`` launches training, evaluation, or batch jobs on laptops, shared servers,
+and PBS / SGE clusters through a single CLI. This guide explains the command workflow,
+the YAML templates behind it, and the scheduler-specific tweaks that keep the interface
+consistent across backends.
 
 Core Concepts
 -------------
@@ -17,8 +17,8 @@ configuration files together:
   keeps the configuration file at the center of every CPU / GPU batch run.
 - Provides six dedicated modes: ``cpu``, ``cpu-array``, ``gpu``, ``gpu-array``, ``mpi``,
   and ``train``. Individual jobs and array jobs share the same interface.
-- Targets both ``local`` execution and HPC schedulers such as ``pbs`` / ``sge``, letting you
-  reuse the exact same notation while switching backends.
+- Targets both ``local`` execution and HPC schedulers such as ``pbs`` / ``sge``, letting
+  you reuse the exact same notation while switching backends.
 
 Basic Usage
 -----------
@@ -134,16 +134,16 @@ Every invocation loads a YAML file composed of the following building blocks:
     :widths: 20 35 45
     :header-rows: 1
 
-    * - Scope
+    - - Scope
       - Key fields
       - How they are used
-    * - Global defaults
+    - - Global defaults
       - ``walltime``, ``script_prologue``, environment exports
       - Run before every job to log metadata, load modules, or set scheduler limits.
-    * - Workload modes
+    - - Workload modes
       - ``cpu``, ``cpu-array``, ``gpu``, ``gpu-array``, ``mpi``, ``train``
       - Declare the ``job`` template plus optional queue arguments for each workload.
-    * - Template helpers
+    - - Template helpers
       - ``{command}``, ``{args.*}``, ``_base_``, ``_inherit_``
       - Compose configs with Hydra-style inheritance and inject CLI overrides at render
         time.
@@ -282,40 +282,42 @@ The only CLI difference is choosing ``aiaccel-job sge ...``. Array jobs rely on
 load site-specific modules, so copy the template and adjust queue names, slots, GPU
 labels, or environment modules to match your cluster.
 
-Advanced Topics
----------------
+Writing Custom Backends
+-----------------------
 
-Writing a custom dispatcher
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If none of the bundled backends match your infrastructure, you can create a new
-dispatcher while keeping the CLI compatible with existing workloads. The helper
-:func:`aiaccel.job.apps.prepare_argument_parser` loads the job config, wires the shared
-options (``--config``, ``--walltime``, etc.), and returns the parser plus sub-commands
-for ``cpu`` / ``gpu`` / ``mpi`` / ``train``. A minimal entry point looks like:
+If none of the bundled backends match your infrastructure, you can build a new backend
+that mirrors ``aiaccel-job local/pbs/sge``. The helper
+:func:`aiaccel.job.apps.prepare_argument_parser` wires the shared CLI options and loads
+your YAML template, so your script only needs to render the ``job`` snippet, emit a
+shell script, and hand it off to the scheduler—exactly how ``local.py`` / ``pbs.py`` /
+``sge.py`` operate.
 
 .. code-block:: python
     :caption: custom_backend.py
 
+    import shlex
+
     from aiaccel.job.apps import prepare_argument_parser
 
-    config, parser, sub_parsers = prepare_argument_parser("custom.yaml")
-
-    # Add backend-specific flags here if needed
 
     def main() -> None:
+        config, parser, sub_parsers = prepare_argument_parser("custom.yaml")
         args = parser.parse_args()
-        config = config  # optionally resolve template paths
-        # Submit or run jobs using args.mode, args.command, etc.
+
+        mode = args.mode + "-array" if getattr(args, "n_tasks", None) else args.mode
+        job = config[mode].job.format(command=shlex.join(args.command), args=args)
+
+        # TODO: render a shell script (see local.py/pbs.py/sge.py) and submit it to
+        # your scheduler or execute it locally.
+
 
     if __name__ == "__main__":
         main()
 
-By relying on ``prepare_argument_parser`` and mirroring the ``aiaccel-job`` option
-names, existing scripts can switch to your dispatcher just by replacing the backend
-keyword while keeping their commands and configs intact. This keeps programs portable:
-as long as the CLI contract is preserved, researchers can run the same workload on any
-cluster without touching the training script.
+From here you can extend the skeleton just like the built-in backends: add scheduler
+commands, implement array loops, or poll status files before returning. Because the CLI
+flags and config semantics stay aligned with ``aiaccel-job``, users only need to switch
+the backend name to run the exact same training script across different environments.
 
 Further reading
 ---------------
