@@ -70,6 +70,16 @@ Lightning Datamodules
 
     SingleDataModule
 
+Lightning Callbacks
+~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: aiaccel.torch.lightning.callbacks
+
+.. autosummary::
+    :toctree: generated/
+
+    SaveMetricCallback
+
 H5py Utilities
 --------------
 
