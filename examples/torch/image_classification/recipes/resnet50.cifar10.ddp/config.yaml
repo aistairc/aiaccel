@@ -1,5 +1,5 @@
 _base_:
-  - ../resnet50.cifar50/config.yaml
+  - ../resnet50.cifar10/config.yaml
 
 trainer:
   devices: "auto"
