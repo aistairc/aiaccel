@@ -18,15 +18,15 @@ def prepare_argument_parser(
     parser.add_argument("--config", type=Path, default=None)
     args, _ = parser.parse_known_args()
 
-    base_config_path = Path(str(resources.files(__package__) / "config"))
-    args.config = Path(args.config or os.environ.get("AIACCEL_JOB_CONFIG") or (base_config_path / default_config_name))  # type: ignore
+    args.config = Path(
+        args.config
+        or os.environ.get("AIACCEL_JOB_CONFIG")
+        or (Path(str(resources.files(__package__) / "config")) / default_config_name)
+    )  # type: ignore
 
     config = load_config(
         args.config,
-        {
-            "config_path": args.config,
-            "base_config_path": str(base_config_path),
-        },
+        {"config_path": args.config},
     )
 
     if args.print_config:
@@ -46,17 +46,17 @@ def prepare_argument_parser(
 
     sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.cpu_array.n_tasks_per_proc)
-    sub_parser.add_argument("--n_procs", type=int, default=config.cpu_array.n_procs)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["cpu-array"].n_tasks_per_proc)
+    sub_parser.add_argument("--n_procs", type=int, default=config["cpu-array"].n_procs)
 
     sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.gpu_array.n_procs)
-    sub_parser.add_argument("--n_procs", type=int, default=config.gpu_array.n_procs)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"].n_tasks_per_proc)
+    sub_parser.add_argument("--n_procs", type=int, default=config["gpu-array"].n_procs)
 
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
-    sub_parser.add_argument("--n_nodes", type=int, default=config.mpi.n_nodes)
+    sub_parser.add_argument("--n_nodes", type=int, default=config["mpi"].n_nodes)
 
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)

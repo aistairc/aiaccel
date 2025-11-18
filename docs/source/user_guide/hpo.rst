@@ -12,19 +12,36 @@ Create a file that defines the objective function to be optimized:
 .. code-block:: python
     :caption: objective.py
 
-    def main(x1, x2) -> float:
-        y = (x1**2) - (4.0 * x1) + (x2**2) - x2 - (x1 * x2)
-        return y
+    import argparse
+
+
+    def main() -> None:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("out_filename", type=str)
+        parser.add_argument("--x1", type=float)
+        parser.add_argument("--x2", type=float)
+        args = parser.parse_args()
+
+        y = (args.x1**2) - (4.0 * args.x1) + (args.x2**2) - args.x2 - (args.x1 * args.x2)
+
+        with open(args.out_filename, "w") as f:
+            f.write(f"{y}")
+
+
+    if __name__ == "__main__":
+        main()
 
 Run the following command:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize params.x1="[0,2]" params.x2="[0,2]" objective._target_="objective.main" n_trials=30
+    python -m aiaccel.hpo.apps.optimize params.x1="[0,2]" params.x2="[0,2]" n_trials=30 -- python ./objective.py --x1={x1} --x2={x2} {out_filename}
 
-The parameters are set as params.x1="[0,2]" and params.x2="[0,2]", the target function
-is specified with objective._target_="objective.main", and the number of trials is set
-to n_trials=30.
+The parameters are set as params.x1="[0,2]" and params.x2="[0,2]" and the number of
+trials is set to n_trials=30. Specify the command to execute the objective function
+after '--'. In the arguments, include the parameters and '{out_filename}'. In
+objective.py, output the result of the objective function to '{out_filename}' in JSON
+format.
 
 Basic Usage
 -----------
@@ -50,10 +67,7 @@ Basic configuration example:
             _target_: optuna.samplers.TPESampler
             seed: 0
 
-    cluster:
-        _target_: distributed.Client
-        n_workers: 4
-        threads_per_worker: 1
+    command: ["python", "./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
 
     params:
         x1: [0, 1]
@@ -110,19 +124,6 @@ Available samplers include:
 - NSGAIISampler: For multi-objective optimization
 - NelderMeadSampler: Nelder-Mead optimization
 
-Cluster Configuration
-+++++++++++++++++++++
-
-The cluster section configures the distributed computing environment using
-Dask.distributed library for parallel execution of hyperparameter optimization tasks:
-
-.. code-block:: yaml
-
-    cluster:
-        _target_: distributed.Client  # default
-        n_workers: 4  # Number of workers to start (default : 1)
-        threads_per_worker: 1  # Number of threads per each worker  (default : 1)
-
 Parameters Configuration
 ++++++++++++++++++++++++
 
@@ -157,7 +158,7 @@ Parameter Types
 
 aiaccel supports multiple parameter types through different suggestion wrappers:
 
-- SuggestFloat: For continuous parameters
+- Float: For continuous parameters
 
 .. code-block:: yaml
 
@@ -168,7 +169,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         high: 0.1
         log: true
 
-- SuggestInt: For integer parameters
+- Int: For integer parameters
 
 .. code-block:: yaml
 
@@ -178,7 +179,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         low: 1
         high: 10
 
-- SuggestCategorical: For categorical parameters
+- Categorical: For categorical parameters
 
 .. code-block:: yaml
 
@@ -187,7 +188,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         name: optimizer
         choices: ['adam', 'sgd', 'rmsprop']
 
-- SuggestDiscreteUniform: For discrete uniform parameters
+- DiscreteUniform: For discrete uniform parameters
 
 .. code-block:: yaml
 
@@ -198,7 +199,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         high: 256
         step: 32
 
-- SuggestLogUniform: For log-uniform parameters
+- LogUniform: For log-uniform parameters
 
 .. code-block:: yaml
 
@@ -209,7 +210,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         high: 0.1
         log: true
 
-- SuggestLogInt: For log-int parameters
+- LogInt: For log-int parameters
 
 .. code-block:: yaml
 
@@ -220,15 +221,15 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         high: 10
         log: true
 
-Objective Function
-++++++++++++++++++
+Command
++++++++
 
-The objective function is the main function to be optimized:
+Command to run the objective function. The objective function is the main function to be
+optimized:
 
 .. code-block:: yaml
 
-    objective:
-        _target_: objective.main
+    command: ["python", "./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
 
 Other Configuration Options
 +++++++++++++++++++++++++++
@@ -246,29 +247,23 @@ Usage Examples
 
 Here are some common usage patterns:
 
-Start a new study:
+Start a new study with configuration file:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize --config config.yaml
+    aiaccel-hpo optimize --config=config.yaml
 
-Resume from the previous study:
-
-.. code-block:: bash
-
-    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume
-
-Make the study resumable (sets appropriate storage configuration):
+Start a new study with cli:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize --config config.yaml --resumable
+    python -m aiaccel.hpo.apps.optimize working_directory=./cli/ params.x1="[0,2]" params.x2="[0,2]" study.sampler._target_=optuna.samplers.TPESampler study.sampler.seed=0 n_trials=30 n_max_jobs=1 -- python ./objective.py --x1={x1} --x2={x2} {out_filename}
 
-Resume a study and override parameters:
+Start a new study with configuration file and cli:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize --config config.yaml --resume params.x1="[0,2]"
+    python -m aiaccel.hpo.apps.optimize --config config.yaml params.x1="[0,2]" params.x2="[0,2]" --
 
 HPO Using NelderMeadSampler
 ---------------------------

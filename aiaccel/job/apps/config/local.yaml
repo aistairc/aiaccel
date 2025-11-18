@@ -8,18 +8,18 @@ script_prologue: |
 cpu:
     job: "{command}"
 
-cpu_array:
-    n_tasks_per_proc: 128
+cpu-array:
+    n_tasks_per_proc: null
     n_procs: 24
     job: "{command}"
 
 gpu:
     job: "{command}"
 
-gpu_array:
-    n_tasks_per_proc: 128
+gpu-array:
+    n_tasks_per_proc: null
     n_procs: 8
-    job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % {args.n_procs_per_job} )) {command}"
+    job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % {args.n_procs} )) {command}"
 
 mpi:
     n_nodes: null

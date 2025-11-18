@@ -1,17 +1,17 @@
+db_filename: ${working_directory}/optuna.db
+
+n_trials: 100
+n_max_jobs: 10
+
 study:
   _target_: optuna.create_study
+  study_name: aiaccel-hpo
+  storage:
+    _target_: optuna.storages.RDBStorage
+    url: sqlite:///${db_filename}
 
-cluster:
-  _target_: distributed.Client
+  load_if_exists: True
 
 params:
   _convert_: partial
   _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
-
-n_max_jobs: 1
-
-objective:
-  _partial_: True
-
-job_name_template: "job_{trial.number:0>6}"
-out_filename_template: "result_{trial.number:0>6}.json"

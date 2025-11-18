@@ -2,6 +2,7 @@ from typing import Any
 
 from collections.abc import Callable
 import copy
+from importlib import resources
 from pathlib import Path
 import re
 
@@ -62,8 +63,9 @@ def load_config(
 
     """
 
-    # Custom resolver for safe_eval
+    # Register custom resolvers
     oc.register_new_resolver("eval", simple_eval, replace=True)
+    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)

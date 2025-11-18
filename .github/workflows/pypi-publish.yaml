@@ -2,7 +2,7 @@ name: Upload aiaccel package to PyPI
 
 on:
   schedule:
-  - cron: '0 0 20 * *'
+  - cron: '0 0 1 * *'
   workflow_dispatch:
 
 concurrency:
@@ -41,8 +41,7 @@ jobs:
           LAST=$(git tag -l "v${BASE}*" --sort=-v:refname | head -n1)
 
           case "$LAST" in
-            "")         VERSION=$BASE ;;
-            v$BASE)     VERSION=$BASE.1 ;;
+            "")         VERSION=$BASE.0 ;;
             *)          VERSION=$BASE.$(( ${LAST##*.}+1 )) ;;
           esac
 
@@ -71,7 +70,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
           pip install -e .[dev,github-actions]
 
       - name: Update and push tag
