@@ -3,14 +3,14 @@ _base_: ${base_config_path}/default.yaml
 command: ["./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
 
 params:
+  _convert_: partial
+  _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
   x1:
-    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-    name: x1
+    _target_: aiaccel.hpo.optuna.hparams.Float
     low: 0.0
     high: 1.0
   x2:
-    _target_: aiaccel.hpo.optuna.suggest_wrapper.SuggestFloat
-    name: x2
+    _target_: aiaccel.hpo.optuna.hparams.Float
     low: 0.0
     high: 1.0
 

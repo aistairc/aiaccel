@@ -2,8 +2,8 @@
 <div align="center">
     <img src="https://img.shields.io/github/license/aistairc/aiaccel.svg" />
     <img src="https://img.shields.io/badge/Python-3.10-blue" />
-    <a href="https://aistairc.github.io/aiaccel">
-        <img src="https://github.com/aistairc/aiaccel/actions/workflows/gh-pages.yaml/badge.svg" />
+    <a href="https://aiaccel.readthedocs.io/en/latest/index.html">
+        <img src="https://app.readthedocs.org/projects/aiaccel/badge/?version=latest" />
     </a>
     <img src="https://github.com/aistairc/aiaccel/actions/workflows/ci.yaml/badge.svg" />
 </div>

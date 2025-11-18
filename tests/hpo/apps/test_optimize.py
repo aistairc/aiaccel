@@ -94,3 +94,25 @@ def test_multi_objective(workspace_factory: Callable[..., AbstractContextManager
         assert len(study.get_trials()) == 15
 
         assert all(len(trial.values) == 2 for trial in study.get_trials())
+
+
+def test_from_cli_and_config(workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
+    with workspace_factory() as workspace:
+        cmd = (
+            "aiaccel-hpo optimize"
+            " n_trials=30"
+            " n_max_jobs=1"
+            " params.x1='[0,10]'"
+            " params.x2='[0,10]'"
+            " study.sampler._target_=optuna.samplers.TPESampler"
+            " study.sampler.seed=0"
+            " --config=config.yaml"
+            " --"
+        )
+        subprocess.run(cmd, shell=True, check=True)
+
+        assert (workspace / "optuna.db").exists()
+
+        config = load_config(workspace / "merged_config.yaml")
+        study = instantiate(config.study)
+        assert len(study.get_trials()) == 30

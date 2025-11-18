@@ -12,11 +12,8 @@ BUILDDIR      = build
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-html: apidoc
+html:
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-livehtml: apidoc
+livehtml:
 	sphinx-autobuild -b html "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS)
-
-apidoc:
-	sphinx-apidoc --maxdepth 2 -f -o $(SOURCEDIR)/api_reference/ ../aiaccel/

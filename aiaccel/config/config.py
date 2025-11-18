@@ -2,6 +2,7 @@ from typing import Any
 
 from collections.abc import Callable
 import copy
+from importlib import resources
 from pathlib import Path
 import re
 
@@ -10,6 +11,7 @@ from omegaconf import DictConfig, ListConfig, Node
 from omegaconf import OmegaConf as oc  # noqa:N813
 from omegaconf._utils import OmegaConfDumper
 
+from simpleeval import simple_eval
 import yaml
 from yaml.resolver import BaseResolver
 
@@ -60,6 +62,10 @@ def load_config(
         user_config(DictConfig | ListConfig) : The configuration without ``_base_``
 
     """
+
+    # Register custom resolvers
+    oc.register_new_resolver("eval", simple_eval, replace=True)
+    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
@@ -134,13 +140,21 @@ def apply_recursively(
             config = copy.deepcopy(config)
 
             for key in config:
-                if isinstance(node_dict := config._get_node(key), Node) and not node_dict._is_interpolation():
+                if (
+                    isinstance(node_dict := config._get_node(key), Node)
+                    and not node_dict._is_interpolation()
+                    and isinstance(config[key], DictConfig | ListConfig)
+                ):
                     config[key] = _inner_fn(config[key])
         elif isinstance(config, ListConfig):
             config = copy.deepcopy(config)
 
             for ii in range(len(config)):
-                if isinstance(node_list := config._get_node(ii), Node) and not node_list._is_interpolation():
+                if (
+                    isinstance(node_list := config._get_node(ii), Node)
+                    and not node_list._is_interpolation()
+                    and isinstance(config[ii], DictConfig | ListConfig)
+                ):
                     config[ii] = _inner_fn(config[ii])
 
         return config

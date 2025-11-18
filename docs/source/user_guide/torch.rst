@@ -18,7 +18,7 @@ as follows:
     :caption: config.yaml
     :linenos:
 
-     _base_: ${base_config_path}/train_base.yaml
+     _base_: ${resolve_pkg_path:aiaccel.torch.apps.config}/train_base.yaml
 
      trainer:
        max_epochs: 10
