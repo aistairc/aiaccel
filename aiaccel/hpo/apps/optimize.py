@@ -127,7 +127,6 @@ Typical usages:
 
                 frozentrial = study.tell(trial, y)
                 study._log_completed_trial(y if isinstance(y, list) else [y], frozentrial.number, frozentrial.params)
-
                 finished_job_count += 1
 
 
