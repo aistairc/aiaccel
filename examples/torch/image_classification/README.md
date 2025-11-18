@@ -1,12 +1,15 @@
 # Training a ResNet50 on CIFAR-10
 
 ## Setup
+We assume the Python-environment setup at `examples/python`.
 ```bash
-cd ../python/
+pushd ../../python/
 bash setup_python.sh
 . activate.sh
+popd
+```
 
-cd ./image_classification/
+```bash
 pip install -e .
 ```
 
