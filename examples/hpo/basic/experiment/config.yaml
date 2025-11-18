@@ -1,4 +1,4 @@
-_base_: ${base_config_path}/default.yaml
+_base_: ${resolve_pkg_path:aiaccel.hpo.apps.config}/default.yaml
 
 command: ["./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
 
