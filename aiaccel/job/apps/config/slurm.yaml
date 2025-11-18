@@ -33,21 +33,13 @@ mpi:
         -p gpu1
         -N {args.n_nodes} --ntasks-per-node=$(( {args.n_procs} / {args.n_nodes} )) --cpus-per-task=$(( {args.n_nodes} * 96 / {args.n_procs} ))
     job: |
-        source /etc/profile.d/modules.sh
-        module load hpcx
-
-        mpirun -np {args.n_procs} -bind-to none -map-by slot \\
-            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-            {command}
+        srun -n {args.n_procs} --cpu-bind=none --distribution=block:block {command}
 
 train:
     sbatch_args: >-
         -p $( (({args.n_gpus}==1)) && printf gpu1 || printf gpu1 )
         -N $(( ({args.n_gpus} + 7) / 8 )) --ntasks-per-node=$( (({args.n_gpus}==1)) && printf 1 || printf 8 ) --cpus-per-task=$( (({args.n_gpus}==1)) && printf 8 || printf 12 )
     job: |
-        source /etc/profile.d/modules.sh
-        module load hpcx
-
         mpirun -np {args.n_gpus} -bind-to none -map-by slot \\
             -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
             -x MAIN_ADDR=$(hostname -i) \\
