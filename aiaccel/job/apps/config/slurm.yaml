@@ -30,21 +30,18 @@ gpu-array:
 mpi:
     n_nodes: 1
     sbatch_args: >-
-        -p gpu1
+        -p gpu1 -N {args.n_nodes}
     job: |
         srun -n {args.n_procs} --cpu-bind=none --distribution=block:block {command}
 
 train:
     sbatch_args: >-
-        -p $( (({args.n_gpus}==1)) && printf gpu1 || printf gpu1 )
-        -N $(( ({args.n_gpus} + 7) / 8 )) --ntasks-per-node=$( (({args.n_gpus}==1)) && printf 1 || printf 8 ) --cpus-per-task=$( (({args.n_gpus}==1)) && printf 8 || printf 12 )
+        -p gpu1 -N {args.n_gpus}
     job: |
-        mpirun -np {args.n_gpus} -bind-to none -map-by slot \\
-            -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-            -x MAIN_ADDR=$(hostname -i) \\
-            -x MAIN_PORT=3000 \\
-            -x COLUMNS=120 \\
-            -x PYTHONUNBUFFERED=true \\
-            {command}
+        export MAIN_ADDR=$(hostname -i)
+        export MAIN_PORT=3000
+        export COLUMNS=120
+        export PYTHONUNBUFFERED=true
+        mpirun -np {args.n_gpus} --cpu-bind=none --distribution=block:block {command}
 
 use_scandir: False
