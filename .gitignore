@@ -125,11 +125,7 @@ work_aiaccel/
 
 # document
 docs/build/html
-docs/source/api_reference/
-!docs/source/api_reference/index.rst
-!docs/source/api_reference/torch.rst
-!docs/source/api_reference/hpo.rst
-!docs/source/api_reference/job.rst
+docs/source/api_reference/generated
 
 # IntelliJ
 .idea
