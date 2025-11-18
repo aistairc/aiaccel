@@ -1,22 +1,34 @@
 Managing Configurations
 =======================
 
-This guide introduces how to manage configuration files using ``aiaccel.config`` and
-`Hydra's instantiation mechanism
-<https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_. The key features of
-``aiaccel.config`` are:
+``aiaccel.config`` is a lightweight utility built on top of `Hydra's instantiation
+mechanism <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_ and
+`OmegaConf <http://omegaconf.readthedocs.io/>`_. It keeps machine learning experiment
+configurations compact, composable, and easy to reuse. This page walks through the core
+design ideas and explains each feature step by step.
 
-- Modular programming through YAML meta-programming
-- Efficient management of multiple config files using ``_base_`` and ``_inherit_``
-  attributes
-- Easy version control integration with Git
-- Minimal dependency on Hydra (only uses ``hydra.utils.instantiate``)
+Core Concepts
+-------------
 
-Getting Started
----------------
+The configuration system centers on the following principles:
 
-Aiaccel's configuration system is based on `OmegaConf
-<http://omegaconf.readthedocs.io/>`_. The typical usage is:
+- Compose configuration fragments through YAML meta-programming
+- Organize multiple files hierarchically via ``_base_`` / ``_inherit_``
+- Depend only on `hydra.utils.instantiate
+  <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_ to keep the runtime
+  coupling minimal
+- Integrate with ``git`` to inspect the state of referenced Python packages
+
+All of these utilities live under the ``aiaccel.config`` namespace.
+
+Basic Usage
+-----------
+
+The typical workflow is to combine :func:`aiaccel.config.load_config` and
+:func:`aiaccel.config.resolve_inherit` to construct the final config, optionally merge
+command-line overrides, then instantiate objects from ``_target_`` definitions via
+`hydra.utils.instantiate
+<https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_.
 
 .. code-block:: yaml
     :caption: config.yaml
@@ -37,6 +49,7 @@ Aiaccel's configuration system is based on `OmegaConf
         resolve_inherit,
     )
     from hydra.utils import instantiate
+    from omegaconf import OmegaConf as oc  # noqa: N813
 
 
     overwrite_omegaconf_dumper()
@@ -46,45 +59,51 @@ Aiaccel's configuration system is based on `OmegaConf
     args, unk_args = parser.parse_known_args()
 
     config = load_config(args.config)
+    config = oc.merge(config, oc.from_cli(unk_args))
     print_config(config)
     config = resolve_inherit(config)
 
     model = instantiate(config.model)
-
     print(model)
 
-    ...
-
-To run the script:
+Run the script with:
 
 .. code-block:: bash
 
     python example.py config.yaml
 
-``load_config`` reads the configuration file and processes the ``_base_`` attribute,
-while ``resolve_inherit`` resolves ``_inherit_`` attributes.
+``OmegaConf.from_cli`` `documented here
+<https://omegaconf.readthedocs.io/en/latest/usage.html#command-line-flags>`_ allows
+overrides such as
 
-``_base_`` and ``_inherit_``
-----------------------------
+.. code-block:: bash
 
-The ``_base_`` attribute allows you to inherit from another configuration file.
+    python example.py config.yaml model.num_classes=20
 
-Example base configuration:
+:func:`aiaccel.config.load_config` reads the file and resolves ``_base_`` entries, while
+:func:`aiaccel.config.resolve_inherit` expands all ``_inherit_`` references. Because the
+parser captures ``unk_args`` separately, you can override any value from the command
+line by appending ``key=value`` pairs, and ``oc.merge`` combines them after every other
+transformation.
+
+Using ``_base_`` to inherit files
+---------------------------------
+
+``_base_`` lets you inherit from one or more YAML files while overriding their values.
+When multiple files are provided, they are merged in the order given.
 
 .. code-block:: yaml
     :caption: config_base.yaml
 
     params:
-        _convert_: partial
-        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
-        x1: [0, 1]
-        x2:
-            _target_: aiaccel.hpo.optuna.hparams.Float
-            low: 0.0
-            high: 1.0
-            log: false
-
-Example configuration that uses a base:
+      _convert_: partial
+      _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
+      x1: [0, 1]
+      x2:
+        _target_: aiaccel.hpo.optuna.hparams.Float
+        low: 0.0
+        high: 1.0
+        log: false
 
 .. code-block:: yaml
     :caption: config.yaml
@@ -93,58 +112,96 @@ Example configuration that uses a base:
     n_trials: 100
     n_max_jobs: 4
 
-``config.yaml`` is automatically expanded to include the contents of
-```config_base.yaml``.
+Here ``config_base.yaml`` is loaded first and ``config.yaml`` overwrites values such as
+``n_trials``. Because :func:`aiaccel.config.load_config` resolves ``_base_``
+recursively, base files are free to declare further bases of their own.
 
-The ``_inherit_`` attribute, on the other hand, allows you to duplicate and modify parts
-of the configuration. Example configuration:
+Reusing fragments with ``_inherit_``
+------------------------------------
+
+``_inherit_`` copies arbitrary DictConfig nodes inline. It is useful for sharing
+repeated parameter definitions in a single place.
 
 .. code-block:: yaml
     :caption: config.yaml
 
     params:
-        _convert_: partial
-        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
-        x1:
-            _inherit_: "${param}"
-        x2:
-            _inherit_: "${param}"
+      _convert_: partial
+      _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
+      x1:
+        _inherit_: "${param}"
+      x2:
+        _inherit_: "${param}"
 
     objective:
-        _target_: objective.main
+      _target_: objective.main
 
     n_trials: 30
     n_max_jobs: 4
 
     param:
-        _target_: aiaccel.hpo.optuna.hparams.Float
-        low: 0.0
-        high: 1.0
-        log: false
+      _target_: aiaccel.hpo.optuna.hparams.Float
+      low: 0.0
+      high: 1.0
+      log: false
 
-After processing, the configuration will be expanded so that ``x1`` and ``x2`` each
-include the contents of ``param`` along with their own ``name`` fields.
+:func:`aiaccel.config.resolve_inherit` makes ``params.x1`` and ``params.x2`` contain the
+fields declared under ``param`` and can further override them locally. Passing a list of
+references merges multiple templates in sequence.
 
-``eval`` Resolver
+Resolvers registered by :func:`aiaccel.config.load_config`
+----------------------------------------------------------
+
+Every call to :func:`aiaccel.config.load_config` registers the following resolvers in
+OmegaConf:
+
+- ``eval``: safe arithmetic evaluation powered by `simpleeval
+  <https://github.com/danthedeckie/simpleeval>`_. Example: ``n_trials:
+  ${eval:"${n_max_jobs} * 10"}``
+- ``resolve_pkg_path``: proxies `importlib.resources.files
+  <https://docs.python.org/3/library/importlib.html#importlib.resources.files>`_ to
+  locate the on-disk path of a Python package. Example: ``dataset_root:
+  ${resolve_pkg_path:aiaccel}/examples/data``
+
+They are always registered with ``oc.register_new_resolver(..., replace=True)``, so
+aiaccel's resolvers take precedence even if other code defined the same names.
+
+Git status checks
 -----------------
 
-The ``eval`` resolver allows arithmetic operations within the config. It makes use of
-safe eval.
+Whenever a config references a Python package via ``_target_``,
+:func:`aiaccel.config.collect_git_status_from_config` detects it and collects ``git
+status`` / ``git rev-parse`` results for each repository. The associated
+:meth:`aiaccel.config.PackageGitStatus.ready` helper reports whether there are
+uncommitted changes. Packages that are not Git repositories or that are ignored via
+``.gitignore`` are skipped automatically.
 
-Example configuration:
+CLI utilities
+-------------
 
-.. code-block:: yaml
-    :caption: config.yaml
+``aiaccel/config/apps/`` ships small CLIs to streamline common config operations.
 
-    n_trials: ${eval:"${n_max_jobs} * 10"}
-    n_max_jobs: 4
+``check_git``
+    Inspect the Git status of every package referenced by ``_target_``.
 
-Version Controlling
--------------------
+    .. code-block:: bash
 
-WIP
+        python -m aiaccel.config.apps.check_git config.yaml
 
-Additional Information
-----------------------
+    When changes are detected, the tool prints the output of
+    :func:`aiaccel.config.print_git_status` and exits with status ``1``.
 
-Detailed information is available at :doc:`API Reference <../api_reference/config>`.
+``get_value``
+    Fetch a key using `OmegaConf's select
+    <https://omegaconf.readthedocs.io/en/latest/usage.html#access-and-traversal>`_
+    syntax, which is handy when you need the value after ``_inherit_`` has been fully
+    resolved.
+
+    .. code-block:: bash
+
+        python -m aiaccel.config.apps.get_value config.yaml params.x1.low
+
+Further reading
+---------------
+
+See :doc:`../api_reference/config` for the full API reference.
