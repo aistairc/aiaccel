@@ -98,6 +98,9 @@ example, :mod:`aiaccel.job.apps.local` renders a loop such as
             python tools/preprocess.py arg1 arg2 ...
     done
 
+where ``python tools/preprocess.py arg1 arg2 ...`` corresponds to the command provided
+after ``--`` when invoking ``aiaccel-job``.
+
 PBS / SGE versions follow the same pattern but seed ``TASK_INDEX`` with the scheduler's
 array ID (``PBS_ARRAY_INDEX`` / ``SGE_TASK_ID``) so each slice writes
 ``${LOG_FILENAME}.${array}.${LOCAL_PROC_INDEX}.log``. Inside the job, call
@@ -134,7 +137,7 @@ Every invocation loads a YAML file composed of the following building blocks:
       - ``cpu``, ``cpu-array``, ``gpu``, ``gpu-array``, ``mpi``, ``train``
       - Declare the ``job`` template plus optional queue arguments for each workload.
     * - Scheduler hooks
-      - ``qsub``, ``qsub_args``, ``use_scandir`` (PBS / SGE)
+      - ``qsub``, ``qsub_args``, ``use_scandir``
       - Describe how jobs are submitted and how completion is detected on HPC clusters.
     * - Template helpers
       - ``{command}``, ``{args.*}``, ``_base_``, ``_inherit_``
@@ -268,18 +271,6 @@ The only CLI difference is choosing ``aiaccel-job sge ...``. Array jobs rely on
 ``--n_tasks``/``--n_tasks_per_proc`` knobs apply. MPI and ``train`` sections typically
 load site-specific modules, so copy the template and adjust queue names, slots, GPU
 labels, or environment modules to match your cluster.
-
-Example submissions:
-
-.. code-block:: bash
-
-    aiaccel-job pbs --config job_config.yaml \
-        gpu logs/pbs-gpu.log -- \
-        python train.py
-
-    aiaccel-job sge --config job_config.yaml \
-        train logs/sge-train.log -- \
-        bash launch.sh
 
 Roadmap
 -------
