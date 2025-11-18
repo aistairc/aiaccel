@@ -32,7 +32,7 @@ mpi:
     sbatch_args: >-
         -p gpu1 -N {args.n_nodes}
     job: |
-        srun -n {args.n_procs} --cpu-bind=none --distribution=block:block {command}
+        srun --export=ALL -n {args.n_procs} --cpu-bind=none --distribution=block:block {command}
 
 train:
     sbatch_args: >-
