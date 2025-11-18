@@ -71,7 +71,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
           pip install -e .[dev,github-actions]
 
       - name: Update and push tag

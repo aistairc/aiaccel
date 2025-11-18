@@ -23,7 +23,6 @@ jobs:
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
           pip install -e .[dev,github-actions]
       - name: Run pytest
         run: |

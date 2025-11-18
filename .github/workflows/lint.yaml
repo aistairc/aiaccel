@@ -22,7 +22,6 @@ jobs:
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
           pip install .[dev,github-actions]
       - name: Perform ruff
         run: |
