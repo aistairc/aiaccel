@@ -7,3 +7,4 @@ API Reference
     config
     torch
     hpo
+    job

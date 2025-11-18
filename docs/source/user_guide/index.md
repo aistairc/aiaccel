@@ -21,7 +21,7 @@ popd
 ```{toctree}
 :maxdepth: 1
 config
+job
 torch
 hpo
-job
 ```
