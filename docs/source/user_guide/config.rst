@@ -192,7 +192,7 @@ CLI Utilities
 
     .. code-block:: bash
 
-        python -m aiaccel.config.apps.check_git config.yaml
+        aiaccel-config check_git config.yaml
 
     When changes are detected, the tool prints the output of
     :func:`aiaccel.config.print_git_status` and exits with status ``1``.
@@ -205,7 +205,7 @@ CLI Utilities
 
     .. code-block:: bash
 
-        python -m aiaccel.config.apps.get_value config.yaml params.x1.low
+        aiaccel-config get_value config.yaml params.x1.low
 
 Further reading
 ---------------
