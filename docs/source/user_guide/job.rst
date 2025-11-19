@@ -103,7 +103,7 @@ after ``--`` when invoking ``aiaccel-job``.
 PBS / SGE versions follow the same pattern but seed ``TASK_INDEX`` with the scheduler's
 array ID (``PBS_ARRAY_INDEX`` / ``SGE_TASK_ID``) so each slice writes
 ``${LOG_FILENAME}.${array}.${LOCAL_PROC_INDEX}.log``. Inside the job, call
-:func:`aiaccel.job.slice_tasks` to process only the shard assigned to the current worker
+:func:`~aiaccel.job.slice_tasks` to process only the shard assigned to the current worker
 (``aiaccel/torch/pipelines/base_pipeline.py`` already does this):
 
 .. code-block:: python
@@ -289,7 +289,7 @@ Writing Custom Backends
 
 If none of the bundled backends match your infrastructure, you can build a new backend
 that mirrors ``aiaccel-job local/pbs/sge``. The helper
-:func:`aiaccel.job.apps.prepare_argument_parser` wires the shared CLI options and loads
+:func:`~aiaccel.job.apps.prepare_argument_parser` wires the shared CLI options and loads
 your YAML template, so your script only needs to render the ``job`` snippet, emit a
 shell script, and hand it off to the scheduler—exactly how ``local.py`` / ``pbs.py`` /
 ``sge.py`` operate.

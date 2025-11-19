@@ -32,7 +32,7 @@ Start by invoking the CLI so the workflow feels concrete:
 
     aiaccel-torch train config.yaml trainer.max_epochs=30
 
-The command loads ``config.yaml`` through :func:`aiaccel.config.load_config`, merges any
+The command loads ``config.yaml`` through :func:`~aiaccel.config.load_config`, merges any
 ``key=value`` overrides, resolves ``_inherit_`` entries, and instantiates the trainer,
 task, and datamodule via `hydra.utils.instantiate
 <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_ before calling
@@ -94,7 +94,7 @@ Switching to DDP and launching jobs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``train_ddp.yaml`` extends ``train_base.yaml`` with synchronized BatchNorm, the
-:class:`aiaccel.torch.lightning.abci_environment.ABCIEnvironment` plugin, and automatic
+:class:`~aiaccel.torch.lightning.abci_environment.ABCIEnvironment` plugin, and automatic
 ``devices`` / ``num_nodes`` detection from MPI variables. Enable it by stacking bases so
 the remainder of the file stays intact:
 
@@ -111,8 +111,8 @@ wrap the command with ``aiaccel-job`` to request GPUs from a scheduler:
 
 .. code-block:: bash
 
-    aiaccel-job local train --n_gpus=8 logs/train.log -- \
-        aiaccel-torch train configs/config.yaml
+    aiaccel-job local train --n_gpus=8 my_model/train.log -- \
+        aiaccel-torch train my_model/config.yaml
 
 The job YAML (see :doc:`job`) handles queue-specific options, while the ``aiaccel.torch``
 config only toggles between single-node and DDP behavior through ``_base_``. Moving to
@@ -122,21 +122,103 @@ same.
 Advanced Topics
 ---------------
 
-Understanding the modules
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Using ``CachedDataset`` for HPC storage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The torch package exposes multiple namespaces that can be mixed and matched:
+:func:`~aiaccel.torch.datasets.CachedDataset` keeps samples in a multiprocessing shared
+memory manager so workers on the same node can reuse decoded tensors without hitting
+the underlying filesystem. Wrap the original dataset directly and the wrapper will
+handle caching automatically:
 
-- ``aiaccel.torch.lightning`` ships :class:`OptimizerConfig`, reusable LightningModule
-  scaffolds, pipeline helpers, and :class:`~aiaccel.torch.lightning.datamodules.SingleDataModule`
-  to keep trainer setups declarative.
-- ``aiaccel.torch.lr_schedulers`` provides schedulers such as
-  :class:`aiaccel.torch.lr_schedulers.SequentialLR` so complex learning-rate plans can
-  be authored in YAML.
-- ``aiaccel.torch.datasets`` adds caching wrappers, scatter helpers, and utilities for
-  slicing datasets when running through array jobs or MPI workers.
-- ``aiaccel.torch.h5py`` contains :class:`aiaccel.torch.h5py.HDF5Writer` for preparing
-  and exporting large intermediate results that other dataloaders can stream.
+.. code-block:: yaml
+    :caption: CachedDataset example
+
+    datamodule:
+      _target_: aiaccel.torch.lightning.datamodules.SingleDataModule
+      batch_size: 256
+      train_dataset_fn:
+        _partial_: true
+        _target_: aiaccel.torch.datasets.CachedDataset
+        dataset:
+          _target_: torchvision.datasets.ImageNet
+          root: /mnt/datasets
+          split: train
+
+The first time ``__getitem__`` runs for a given index, ``CachedDataset`` stores the
+sample inside a shared-memory dictionary. Subsequent workers (e.g., other DataLoader
+workers on the same node) pull from that cache, reducing redundant reads.
+
+.. note::
+
+    Set ``persistent_workers=True`` on your DataLoader so workers stay alive;
+    :class:`~aiaccel.torch.lightning.datamodules.SingleDataModule` enables this by
+    default. Without persistent workers the shared-memory cache is lost when workers
+    respawn.
+
+.. note::
+    On systems with small ``/dev/shm`` allocations, use
+    :class:`~aiaccel.torch.datasets.FileCachedDataset` instead so cached samples live
+    on disk (``cache_path``).
+
+Writing datasets with ``HDF5Writer``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Many HPC filesystems penalize workloads that touch thousands of small files (Lustre in
+particular struggles with lots of metadata operations), so packaging training samples into a
+single HDF5 file avoids pathological seeks. HDF5 also supports parallel I/O, allowing
+you to read or write shards concurrently. To dump an entire dataset or inference pass, subclass
+:class:`~aiaccel.torch.h5py.HDF5Writer` and define two hooks:
+
+- :meth:`~aiaccel.torch.h5py.HDF5Writer.prepare_globals` returns the list of items to
+  process (e.g., sample IDs) plus any context.
+- :meth:`~aiaccel.torch.h5py.HDF5Writer.prepare_group` receives one item and returns a
+  mapping ``{group_name: {dataset_name: np.ndarray}}`` describing how to populate the
+  HDF5 file.
+
+The writer takes care of serializing everything, and emits a ``.json`` index of created
+groups. Set ``parallel=True`` when calling :meth:`~aiaccel.torch.h5py.HDF5Writer.write`
+to leverage Parallel HDF5. A minimal writer that dumps embeddings might look like:
+
+.. code-block:: python
+    :caption: Custom HDF5Writer
+
+    import numpy as np
+    from aiaccel.torch.h5py import HDF5Writer
+
+    class EmbeddingWriter(HDF5Writer[int, None]):
+        def __init__(self, features):
+            self.features = features
+
+        def prepare_globals(self):
+            return list(range(len(self.features))), None
+
+        def prepare_group(self, idx, context):
+            vec = self.features[idx]
+            return {f"sample_{idx:06d}": {"embedding": vec}}
+
+    writer = EmbeddingWriter(np.load("embeddings.npy"))
+    writer.write(Path("artifacts/data.h5"))
+
+Once persisted, you can stream the data back with
+:class:`~aiaccel.torch.datasets.HDF5Dataset` or
+:class:`~aiaccel.torch.datasets.RawHDF5Dataset`, which read the ``.h5`` / ``.json`` pair
+and expose a PyTorch-compatible dataset. This pairing allows you to precompute heavy
+features once and reuse them across training or inference jobs without re-running the
+original pipeline.
+
+.. note::
+
+    Parallel HDF5 requires launching the script under MPI. The ``aiaccel-torch`` CLI can
+    handle this for you via the MPI job mode:
+
+    .. code-block:: bash
+
+        aiaccel-job local mpi --n_procs=32 generate_hdf5.log -- \
+            generate_hdf5.py
+
+    Replace ``local`` with ``pbs`` / ``sge`` for cluster use. Inside ``generate_hdf5.py``
+    call ``writer.write(..., parallel=True)`` so every MPI rank contributes to the same
+    HDF5 file.
 
 Further reading
 ---------------

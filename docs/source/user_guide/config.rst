@@ -24,8 +24,8 @@ All of these utilities live under the ``aiaccel.config`` namespace.
 Basic Usage
 -----------
 
-The typical workflow is to combine :func:`aiaccel.config.load_config` and
-:func:`aiaccel.config.resolve_inherit` to construct the final config, optionally merge
+The typical workflow is to combine :func:`~aiaccel.config.load_config` and
+:func:`~aiaccel.config.resolve_inherit` to construct the final config, optionally merge
 command-line overrides, then instantiate objects from ``_target_`` definitions via
 `hydra.utils.instantiate
 <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_.
@@ -80,8 +80,8 @@ overrides such as
 
     python example.py config.yaml model.num_classes=20
 
-:func:`aiaccel.config.load_config` reads the file and resolves ``_base_`` entries, while
-:func:`aiaccel.config.resolve_inherit` expands all ``_inherit_`` references. Because the
+:func:`~aiaccel.config.load_config` reads the file and resolves ``_base_`` entries, while
+:func:`~aiaccel.config.resolve_inherit` expands all ``_inherit_`` references. Because the
 parser captures ``unk_args`` separately, you can override any value from the command
 line by appending ``key=value`` pairs, and ``oc.merge`` combines them after every other
 transformation.
@@ -116,7 +116,7 @@ When multiple files are provided, they are merged in the order given.
     n_max_jobs: 4
 
 Here ``config_base.yaml`` is loaded first and ``config.yaml`` overwrites values such as
-``n_trials``. Because :func:`aiaccel.config.load_config` resolves ``_base_``
+``n_trials``. Because :func:`~aiaccel.config.load_config` resolves ``_base_``
 recursively, base files are free to declare further bases of their own.
 
 Reusing fragments with ``_inherit_``
@@ -148,14 +148,14 @@ repeated parameter definitions in a single place.
       high: 1.0
       log: false
 
-:func:`aiaccel.config.resolve_inherit` makes ``params.x1`` and ``params.x2`` contain the
+:func:`~aiaccel.config.resolve_inherit` makes ``params.x1`` and ``params.x2`` contain the
 fields declared under ``param`` and can further override them locally. Passing a list of
 references merges multiple templates in sequence.
 
-Resolvers registered by :func:`aiaccel.config.load_config`
+Resolvers registered by :func:`~aiaccel.config.load_config`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Every call to :func:`aiaccel.config.load_config` registers the following resolvers in
+Every call to :func:`~aiaccel.config.load_config` registers the following resolvers in
 OmegaConf:
 
 - ``eval``: safe arithmetic evaluation powered by `simpleeval
@@ -173,7 +173,7 @@ Git status checks
 ~~~~~~~~~~~~~~~~~
 
 Whenever a config references a Python package via ``_target_``,
-:func:`aiaccel.config.collect_git_status_from_config` detects it and collects ``git
+:func:`~aiaccel.config.collect_git_status_from_config` detects it and collects ``git
 status`` / ``git rev-parse`` results for each repository. The associated
 :meth:`aiaccel.config.PackageGitStatus.ready` helper reports whether there are
 uncommitted changes. Packages that are not Git repositories or that are ignored via
@@ -192,7 +192,7 @@ CLI Utilities
         aiaccel-config check_git config.yaml
 
     When changes are detected, the tool prints the output of
-    :func:`aiaccel.config.print_git_status` and exits with status ``1``.
+    :func:`~aiaccel.config.print_git_status` and exits with status ``1``.
 
 ``get_value``
     Fetch a key using `OmegaConf's select
