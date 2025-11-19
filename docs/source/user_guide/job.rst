@@ -9,8 +9,7 @@ consistent across backends.
 Core Concepts
 -------------
 
-The following ideas make it easier to understand how ``aiaccel-job`` ties the CLI and
-configuration files together:
+``aiaccel-job`` is designed to easily manage machine-learning jobs on the following principles:
 
 - Inspired by `Kaldi <https://kaldi-asr.org/>`_ / `ESPnet
   <https://espnet.github.io/espnet/>`_ job management, the CLI is template-driven and
@@ -282,8 +281,11 @@ The only CLI difference is choosing ``aiaccel-job sge ...``. Array jobs rely on
 load site-specific modules, so copy the template and adjust queue names, slots, GPU
 labels, or environment modules to match your cluster.
 
+Advanced Topics
+---------------
+
 Writing Custom Backends
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 If none of the bundled backends match your infrastructure, you can build a new backend
 that mirrors ``aiaccel-job local/pbs/sge``. The helper
@@ -322,7 +324,7 @@ the backend name to run the exact same training script across different environm
 Further reading
 ---------------
 
-- :doc:`config` for details on composing the YAML files that power ``aiaccel-job``
 - `aiaccel/job/apps/config/
   <https://github.com/aistairc/aiaccel/tree/main/aiaccel/job/apps/config>`_ for the full
   reference templates used in this guide
+- :doc:`config` for details on composing the YAML files that power ``aiaccel-job``

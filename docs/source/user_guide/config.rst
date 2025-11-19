@@ -86,11 +86,8 @@ parser captures ``unk_args`` separately, you can override any value from the com
 line by appending ``key=value`` pairs, and ``oc.merge`` combines them after every other
 transformation.
 
-Advanced Configuration Patterns
--------------------------------
-
-The following subsections dive deeper into composing large configuration trees by mixing
-inheritance, inline reuse, resolvers, and Git integration.
+Advanced Topics
+---------------
 
 Using ``_base_`` to inherit files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
