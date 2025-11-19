@@ -20,6 +20,7 @@ pixi shell  # enter the environment interactively
 ```{toctree}
 :maxdepth: 1
 config
+job
 torch
 hpo
 ```
