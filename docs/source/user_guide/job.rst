@@ -9,7 +9,8 @@ consistent across backends.
 Core Concepts
 -------------
 
-``aiaccel-job`` is designed to easily manage machine-learning jobs on the following principles:
+``aiaccel-job`` is designed to easily manage machine-learning jobs on the following
+principles:
 
 - Inspired by `Kaldi <https://kaldi-asr.org/>`_ / `ESPnet
   <https://espnet.github.io/espnet/>`_ job management, the CLI is template-driven and
@@ -103,8 +104,8 @@ after ``--`` when invoking ``aiaccel-job``.
 PBS / SGE versions follow the same pattern but seed ``TASK_INDEX`` with the scheduler's
 array ID (``PBS_ARRAY_INDEX`` / ``SGE_TASK_ID``) so each slice writes
 ``${LOG_FILENAME}.${array}.${LOCAL_PROC_INDEX}.log``. Inside the job, call
-:func:`~aiaccel.job.slice_tasks` to process only the shard assigned to the current worker
-(``aiaccel/torch/pipelines/base_pipeline.py`` already does this):
+:func:`~aiaccel.job.slice_tasks` to process only the shard assigned to the current
+worker (``aiaccel/torch/pipelines/base_pipeline.py`` already does this):
 
 .. code-block:: python
     :caption: Consuming array slices

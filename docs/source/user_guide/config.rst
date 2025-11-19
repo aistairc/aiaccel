@@ -80,11 +80,11 @@ overrides such as
 
     python example.py config.yaml model.num_classes=20
 
-:func:`~aiaccel.config.load_config` reads the file and resolves ``_base_`` entries, while
-:func:`~aiaccel.config.resolve_inherit` expands all ``_inherit_`` references. Because the
-parser captures ``unk_args`` separately, you can override any value from the command
-line by appending ``key=value`` pairs, and ``oc.merge`` combines them after every other
-transformation.
+:func:`~aiaccel.config.load_config` reads the file and resolves ``_base_`` entries,
+while :func:`~aiaccel.config.resolve_inherit` expands all ``_inherit_`` references.
+Because the parser captures ``unk_args`` separately, you can override any value from the
+command line by appending ``key=value`` pairs, and ``oc.merge`` combines them after
+every other transformation.
 
 Advanced Topics
 ---------------
@@ -148,12 +148,12 @@ repeated parameter definitions in a single place.
       high: 1.0
       log: false
 
-:func:`~aiaccel.config.resolve_inherit` makes ``params.x1`` and ``params.x2`` contain the
-fields declared under ``param`` and can further override them locally. Passing a list of
-references merges multiple templates in sequence.
+:func:`~aiaccel.config.resolve_inherit` makes ``params.x1`` and ``params.x2`` contain
+the fields declared under ``param`` and can further override them locally. Passing a
+list of references merges multiple templates in sequence.
 
 Resolvers registered by :func:`~aiaccel.config.load_config`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Every call to :func:`~aiaccel.config.load_config` registers the following resolvers in
 OmegaConf:

@@ -4,9 +4,9 @@ Training a PyTorch Model
 ``aiaccel.torch`` is built to make PyTorch training modular based on `PyTorch Lightning
 <https://lightning.ai/docs/pytorch/stable/>`_ and quick to iterate: you describe
 datasets, schedulers, and trainers in YAML, keep access to the underlying APIs, and can
-ship the exact same config from laptops to clusters. This page
-walks through the design, shows how to assemble configs, and highlights the features
-that accelerate multi-GPU runs or job submissions.
+ship the exact same config from laptops to clusters. This page walks through the design,
+shows how to assemble configs, and highlights the features that accelerate multi-GPU
+runs or job submissions.
 
 Core Concepts
 -------------
@@ -19,9 +19,10 @@ Core Concepts
 - Provide ``aiaccel-torch train`` to hide the repetitive parts of training scripts
   (config loading, accelerator selection, checkpointing) while still exposing the full
   Lightning + Hydra stack for customization.
-- Treat HPC scenarios as first-class by bundling helpers such as dataset caching
-  in :mod:`aiaccel.torch.datasets` and the HDF5 utilities in :mod:`aiaccel.torch.h5py`
-  so you can author fast training loops that fully utilize compute resources on shared clusters.
+- Treat HPC scenarios as first-class by bundling helpers such as dataset caching in
+  :mod:`aiaccel.torch.datasets` and the HDF5 utilities in :mod:`aiaccel.torch.h5py` so
+  you can author fast training loops that fully utilize compute resources on shared
+  clusters.
 
 Basic Usage
 -----------
@@ -32,18 +33,18 @@ Start by invoking the CLI so the workflow feels concrete:
 
     aiaccel-torch train config.yaml trainer.max_epochs=30
 
-The command loads ``config.yaml`` through :func:`~aiaccel.config.load_config`, merges any
-``key=value`` overrides, resolves ``_inherit_`` entries, and instantiates the trainer,
-task, and datamodule via `hydra.utils.instantiate
+The command loads ``config.yaml`` through :func:`~aiaccel.config.load_config`, merges
+any ``key=value`` overrides, resolves ``_inherit_`` entries, and instantiates the
+trainer, task, and datamodule via `hydra.utils.instantiate
 <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_ before calling
 `lightning.Trainer.fit()
-<https://lightning.ai/docs/pytorch/stable/common/trainer.html#basic-use>`_.
-Whenever ``trainer.is_global_zero`` is ``True`` the
-merged YAML is saved to ``working_directory/merged_config.yaml``. Because overrides are
-parsed by `OmegaConf.from_cli
+<https://lightning.ai/docs/pytorch/stable/common/trainer.html#basic-use>`_. Whenever
+``trainer.is_global_zero`` is ``True`` the merged YAML is saved to
+``working_directory/merged_config.yaml``. Because overrides are parsed by
+`OmegaConf.from_cli
 <https://omegaconf.readthedocs.io/en/latest/usage.html#command-line-flags>`_, changing
-values such as
-``datamodule.batch_size=256`` mirrors the workflow shown in :doc:`config`.
+values such as ``datamodule.batch_size=256`` mirrors the workflow shown in
+:doc:`config`.
 
 Composing the config
 ~~~~~~~~~~~~~~~~~~~~
@@ -91,7 +92,7 @@ dataset factory can be wired in-place.
           lr: 1e-4
 
 Switching to DDP and launching jobs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``train_ddp.yaml`` extends ``train_base.yaml`` with synchronized BatchNorm, the
 :class:`~aiaccel.torch.lightning.abci_environment.ABCIEnvironment` plugin, and automatic
@@ -114,10 +115,10 @@ wrap the command with ``aiaccel-job`` to request GPUs from a scheduler:
     aiaccel-job local train --n_gpus=8 my_model/train.log -- \
         aiaccel-torch train my_model/config.yaml
 
-The job YAML (see :doc:`job`) handles queue-specific options, while the ``aiaccel.torch``
-config only toggles between single-node and DDP behavior through ``_base_``. Moving to
-``pbs`` or ``sge`` swaps the backend name but keeps the command payload exactly the
-same.
+The job YAML (see :doc:`job`) handles queue-specific options, while the
+``aiaccel.torch`` config only toggles between single-node and DDP behavior through
+``_base_``. Moving to ``pbs`` or ``sge`` swaps the backend name but keeps the command
+payload exactly the same.
 
 Advanced Topics
 ---------------
@@ -126,9 +127,9 @@ Using ``CachedDataset`` for HPC storage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :func:`~aiaccel.torch.datasets.CachedDataset` keeps samples in a multiprocessing shared
-memory manager so workers on the same node can reuse decoded tensors without hitting
-the underlying filesystem. Wrap the original dataset directly and the wrapper will
-handle caching automatically:
+memory manager so workers on the same node can reuse decoded tensors without hitting the
+underlying filesystem. Wrap the original dataset directly and the wrapper will handle
+caching automatically:
 
 .. code-block:: yaml
     :caption: CachedDataset example
@@ -156,18 +157,19 @@ workers on the same node) pull from that cache, reducing redundant reads.
     respawn.
 
 .. note::
+
     On systems with small ``/dev/shm`` allocations, use
-    :class:`~aiaccel.torch.datasets.FileCachedDataset` instead so cached samples live
-    on disk (``cache_path``).
+    :class:`~aiaccel.torch.datasets.FileCachedDataset` instead so cached samples live on
+    disk (``cache_path``).
 
 Writing datasets with ``HDF5Writer``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Many HPC filesystems penalize workloads that touch thousands of small files (Lustre in
-particular struggles with lots of metadata operations), so packaging training samples into a
-single HDF5 file avoids pathological seeks. HDF5 also supports parallel I/O, allowing
-you to read or write shards concurrently. To dump an entire dataset or inference pass, subclass
-:class:`~aiaccel.torch.h5py.HDF5Writer` and define two hooks:
+particular struggles with lots of metadata operations), so packaging training samples
+into a single HDF5 file avoids pathological seeks. HDF5 also supports parallel I/O,
+allowing you to read or write shards concurrently. To dump an entire dataset or
+inference pass, subclass :class:`~aiaccel.torch.h5py.HDF5Writer` and define two hooks:
 
 - :meth:`~aiaccel.torch.h5py.HDF5Writer.prepare_globals` returns the list of items to
   process (e.g., sample IDs) plus any context.
@@ -185,6 +187,7 @@ to leverage Parallel HDF5. A minimal writer that dumps embeddings might look lik
     import numpy as np
     from aiaccel.torch.h5py import HDF5Writer
 
+
     class EmbeddingWriter(HDF5Writer[int, None]):
         def __init__(self, features):
             self.features = features
@@ -195,6 +198,7 @@ to leverage Parallel HDF5. A minimal writer that dumps embeddings might look lik
         def prepare_group(self, idx, context):
             vec = self.features[idx]
             return {f"sample_{idx:06d}": {"embedding": vec}}
+
 
     writer = EmbeddingWriter(np.load("embeddings.npy"))
     writer.write(Path("artifacts/data.h5"))
@@ -216,9 +220,9 @@ original pipeline.
         aiaccel-job local mpi --n_procs=32 generate_hdf5.log -- \
             generate_hdf5.py
 
-    Replace ``local`` with ``pbs`` / ``sge`` for cluster use. Inside ``generate_hdf5.py``
-    call ``writer.write(..., parallel=True)`` so every MPI rank contributes to the same
-    HDF5 file.
+    Replace ``local`` with ``pbs`` / ``sge`` for cluster use. Inside
+    ``generate_hdf5.py`` call ``writer.write(..., parallel=True)`` so every MPI rank
+    contributes to the same HDF5 file.
 
 Further reading
 ---------------
