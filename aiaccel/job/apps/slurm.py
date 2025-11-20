@@ -40,7 +40,7 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        job_log_filename = args.log_filename.with_suffix(".^array_index^.log")
+        job_log_filename = args.log_filename.with_suffix(".$TASK_ID.log")
         job_status_filename: Path = args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out")
 
         status_filename_list = []
