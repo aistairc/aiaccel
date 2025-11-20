@@ -23,7 +23,7 @@ def main() -> None:
     if mode in ["cpu-array", "gpu-array"]:
         job = f"""\
 for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
-    TASK_INDEX=$(( SLURM_ARRAY_INDEX + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+    TASK_INDEX=$(( SLURM_ARRAY_TASK_ID + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
 
     if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
         break
@@ -31,7 +31,7 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
 
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {args.log_filename.with_suffix("")}.${{SLURM_ARRAY_INDEX}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+        {job} > {args.log_filename.with_suffix("")}.${{SLURM_ARRAY_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -41,7 +41,7 @@ for i in "${{!pids[@]}}"; do
 done
 """
         job_log_filename = args.log_filename.with_suffix(".^array_index^.log")
-        job_status_filename: Path = args.log_filename.with_suffix(".${SLURM_ARRAY_INDEX}.out")
+        job_status_filename: Path = args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out")
 
         status_filename_list = []
         for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
