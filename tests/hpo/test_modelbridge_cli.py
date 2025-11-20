@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
-
+import pytest
 from aiaccel.hpo.apps.modelbridge import main as cli_main
 
 
@@ -40,6 +40,19 @@ def test_modelbridge_cli_dry_run(tmp_path: Path) -> None:
 
 def test_modelbridge_cli_macro_phase(tmp_path: Path) -> None:
     config_path = _write_config(tmp_path)
-    cli_main(["--config", str(config_path), "--phase", "macro"])
-    macro_csv = tmp_path / "outputs" / "scenarios" / "demo" / "macro_trials.csv"
-    assert macro_csv.exists()
+    cli_main(["--config", str(config_path), "--phase", "hpo", "--role", "train", "--target", "macro"])
+    db_path = tmp_path / "outputs" / "runs" / "demo" / "train" / "macro" / "000" / "optuna.db"
+    assert db_path.exists()
+
+
+def test_modelbridge_cli_hpo_filters_without_phase(tmp_path: Path) -> None:
+    config_path = _write_config(tmp_path)
+    cli_main(["--config", str(config_path), "--role", "train", "--target", "macro", "--run-id", "0"])
+    db_path = tmp_path / "outputs" / "runs" / "demo" / "train" / "macro" / "000" / "optuna.db"
+    assert db_path.exists()
+
+
+def test_modelbridge_cli_rejects_old_phase(tmp_path: Path) -> None:
+    config_path = _write_config(tmp_path)
+    with pytest.raises(SystemExit):
+        cli_main(["--config", str(config_path), "--phase", "train-macro"])

@@ -1,0 +1,87 @@
+SHELL := /bin/bash
+
+PYTHON ?= python3
+ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd)
+export PYTHONPATH ?= $(ROOT)
+MODELBRIDGE_CONFIG ?= ./modelbridge.yaml
+MODELBRIDGE_OUTPUT ?= ./work/modelbridge/simple
+MODELBRIDGE_SCENARIO ?= simple
+MODELBRIDGE_LOG_DIR ?= $(MODELBRIDGE_OUTPUT)/logs
+JOB_TEMPLATE ?= jobs/modelbridge/local.sh
+AIACCEL_CMD ?= bash $(JOB_TEMPLATE)
+JOB_OPTS ?=
+
+RUN_PAD_WIDTH ?= 3
+TRAIN_RUN_RANGE ?= 0..1
+EVAL_RUN_RANGE ?= 0..1
+
+SCENARIO_DIR := $(MODELBRIDGE_OUTPUT)/scenarios/$(MODELBRIDGE_SCENARIO)
+RUN_ROOT := $(MODELBRIDGE_OUTPUT)/runs/$(MODELBRIDGE_SCENARIO)
+
+define make_run_ids
+$(shell $(PYTHON) -c "import sys; exec(\"\"\"expr = sys.argv[1].strip()\npad = int(sys.argv[2])\nif not expr:\n    sys.exit(0)\nparts = expr.split('..')\nstart = int(parts[0])\nend = int(parts[1]) if len(parts) > 1 else start\nstep = int(parts[2]) if len(parts) > 2 and parts[2] else 1\nif step == 0:\n    raise SystemExit('RUN range step must be non-zero')\nforward = start <= end\nstep = abs(step) if forward else -abs(step)\nstop = end + (1 if forward else -1)\nprint(' '.join(f'{value:0{pad}d}' for value in range(start, stop, step)), end='')\n\"\"\")" "$(1)" "$(RUN_PAD_WIDTH)")
+endef
+
+define detect_run_ids
+$(strip $(shell find $(RUN_ROOT)/$(1)/macro -maxdepth 1 -mindepth 1 -type d -exec basename {} \; 2>/dev/null | sort))
+endef
+
+AUTO_TRAIN_RUN_IDS ?= $(call detect_run_ids,train)
+AUTO_EVAL_RUN_IDS ?= $(call detect_run_ids,eval)
+
+ifndef TRAIN_RUN_IDS
+TRAIN_RUN_IDS := $(if $(AUTO_TRAIN_RUN_IDS),$(AUTO_TRAIN_RUN_IDS),$(call make_run_ids,$(TRAIN_RUN_RANGE)))
+endif
+ifndef EVAL_RUN_IDS
+EVAL_RUN_IDS := $(if $(AUTO_EVAL_RUN_IDS),$(AUTO_EVAL_RUN_IDS),$(call make_run_ids,$(EVAL_RUN_RANGE)))
+endif
+
+define _hpo_targets
+$(foreach run,$(2),$(RUN_ROOT)/$(1)/$(3)/$(run)/optuna.db)
+endef
+
+TRAIN_MACRO_TARGETS := $(call _hpo_targets,train,$(TRAIN_RUN_IDS),macro)
+TRAIN_MICRO_TARGETS := $(call _hpo_targets,train,$(TRAIN_RUN_IDS),micro)
+EVAL_MACRO_TARGETS := $(call _hpo_targets,eval,$(EVAL_RUN_IDS),macro)
+EVAL_MICRO_TARGETS := $(call _hpo_targets,eval,$(EVAL_RUN_IDS),micro)
+
+.PHONY: pipeline print-config train-macro train-micro eval-macro eval-micro \ 
+	regress evaluate summary clean
+
+pipeline: train-macro train-micro regress eval-macro eval-micro evaluate summary
+
+print-config: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/config.log -- \
+		aiaccel-hpo modelbridge --config $(MODELBRIDGE_CONFIG) --dry-run --print-config
+
+train-macro: $(TRAIN_MACRO_TARGETS)
+train-micro: $(TRAIN_MICRO_TARGETS)
+eval-macro: $(EVAL_MACRO_TARGETS)
+eval-micro: $(EVAL_MICRO_TARGETS)
+
+regress: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/regress.log -- \
+		aiaccel-hpo modelbridge --config $(MODELBRIDGE_CONFIG) --phase regress
+
+evaluate: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/evaluate.log -- \
+		aiaccel-hpo modelbridge --config $(MODELBRIDGE_CONFIG) --phase evaluate
+
+summary: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/summary.log -- \
+		aiaccel-hpo modelbridge --config $(MODELBRIDGE_CONFIG) --phase summary
+
+$(MODELBRIDGE_LOG_DIR):
+	@mkdir -p $@
+
+define HPO_RULE
+$$(RUN_ROOT)/$(1)/$(2)/%/optuna.db: | $$(MODELBRIDGE_LOG_DIR)
+	@mkdir -p $$(@D)
+	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/$(1)-$(2)-$$*.log -- \
+		aiaccel-hpo modelbridge --config $(MODELBRIDGE_CONFIG) --phase hpo --role $(1) --target $(2) --run-id $$*
+endef
+
+$(foreach role,train eval,$(foreach target,macro micro,$(eval $(call HPO_RULE,$(role),$(target)))))
+
+clean:
+	@rm -rf $(SCENARIO_DIR) $(RUN_ROOT) $(MODELBRIDGE_LOG_DIR)

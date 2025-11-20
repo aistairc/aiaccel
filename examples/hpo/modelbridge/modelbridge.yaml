@@ -1,5 +1,8 @@
 # Example configuration for the modelbridge pipeline.
-# Use it with: make modelbridge-run MODELBRIDGE_CONFIG=examples/config/modelbridge.yaml
+# Run with:
+#   make -f examples/hpo/modelbridge/Makefile.template pipeline \
+#     MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml \
+#     MODELBRIDGE_SCENARIO=simple
 
 hpo:
   optimizer: optuna
@@ -8,11 +11,15 @@ hpo:
 bridge:
   output_dir: ./work/modelbridge/simple
   seed: 32
+  train_runs: 10    # 学習用の HPO 実行セット数
+  eval_runs: 10     # 検証用の HPO 実行セット数
   log_level: INFO
   scenarios:
     - name: simple
-      macro_trials: 12
-      micro_trials: 12
+      train_macro_trials: 12
+      train_micro_trials: 12
+      eval_macro_trials: 6
+      eval_micro_trials: 6
       objective:
         target: examples.hpo.modelbridge.simple_benchmark.objective
       params:
@@ -31,6 +38,12 @@ bridge:
             low: -1.0
             high: 1.0
       regression:
-        type: linear
+        kind: linear
         degree: 1
+      # 例: GPy を使う場合は以下をコメント解除
+      # regression:
+      #   kind: gpr
+      #   gpr:
+      #     kernel: RBF
+      #     noise: 1.0e-5
       metrics: [mae, mse, r2]

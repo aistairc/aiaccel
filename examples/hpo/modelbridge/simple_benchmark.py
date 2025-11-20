@@ -1,9 +1,9 @@
-"""Minimal end-to-end run of the lightweight modelbridge pipeline.
+"""Minimal end-to-end run of the lightweight modelbridge pipeline (train+eval).
 
-Run this script with ``python examples/hpo/modelbridge/simple_benchmark.py`` to
-launch paired macro/micro HPO, fit the bridge regression (macro→micro
-parameters), and inspect the generated predictions. Results are written under
-``./work/modelbridge/simple`` by default.
+Run with ``python examples/hpo/modelbridge/simple_benchmark.py`` to execute
+train/eval HPO pairs, fit the bridge regression (macro→micro parameters), and
+inspect predictions. Results are written under ``./work/modelbridge/simple``
+by default.
 """
 
 from __future__ import annotations
@@ -42,12 +42,14 @@ def objective(context: TrialContext, base_env: Mapping[str, str] | None = None) 
 
 
 def build_config(base_dir: Path) -> BridgeConfig:
-    """Return a :class:`BridgeConfig` matching the simple benchmark setup."""
+    """Return a :class:`BridgeConfig` matching the simple benchmark (train+eval) setup."""
 
     scenario = ScenarioConfig(
         name="simple",
-        macro_trials=12,
-        micro_trials=12,
+        train_macro_trials=12,
+        train_micro_trials=12,
+        eval_macro_trials=6,
+        eval_micro_trials=6,
         objective=ObjectiveConfig(target="examples.hpo.modelbridge.simple_benchmark.objective"),
         params=ParameterSpace(
             macro={
@@ -66,6 +68,8 @@ def build_config(base_dir: Path) -> BridgeConfig:
     settings = BridgeSettings(
         output_dir=base_dir / "work" / "modelbridge" / scenario.name,
         seed=32,
+        train_runs=1,
+        eval_runs=1,
         scenarios=[scenario],
     )
 

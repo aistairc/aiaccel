@@ -15,19 +15,21 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
+    "attrs",
     "numpy",
     "scipy",
-    "optuna>=3.4.0",
+    "optuna>=4.5.0",
     "omegaconf",
     "hydra-core",
+    "huggingface-hub",
     "colorama",
     "lightning>=2.2.1",
     "torch>=2.2.0",
     "h5py",
     "rich",
     "tensorboard",
-    "simpleeval",
-    "scikit-learn"
+    "typing_extensions",
+    "simpleeval"
 ]
 dynamic = ["version"]
 
@@ -71,17 +73,19 @@ github-actions = [
     "pytest-github-actions-annotate-failures",
 ]
 
+modelbridge = [
+    "scikit-learn",
+    "GPy",
+]
+
 [project.scripts]
 aiaccel-job = "aiaccel.launcher:main"
 aiaccel-config = "aiaccel.launcher:main"
 aiaccel-torch = "aiaccel.launcher:main"
 aiaccel-hpo = "aiaccel.launcher:main"
 
-[tool.hatch.build.targets.wheel.shared-scripts]
-"aiaccel/job/apps/local.py" = "aiaccel-job-local"
-"aiaccel/job/apps/pbs.py" = "aiaccel-job-pbs"
-"aiaccel/job/apps/sge.py" = "aiaccel-job-sge"
 
+# ruff configurations
 [tool.ruff]
 line-length = 120
 target-version = "py310"
@@ -111,9 +115,32 @@ section-order = [
 ]
 
 [tool.ruff.lint.isort.sections]
-"typing" = ["typing", "numpy.typing"]
+"typing" = ["typing", "typing_extensions", "numpy.typing"]
 "utilities" = ["colorama", "hydra", "omegaconf", "progressbar", "rich"]
 "datascience" = ["numpy", "scipy", "pandas", "matplotlib", "opt_einsum", "einops"]
 "torch" = ["torch"]
 "torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
 "audio" = ["librosa", "pypesq", "pystoi", "soundfile"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # Optional GPy/paramz emits deprecated assign output warnings; ignore for modelbridge tests.
+    "ignore::DeprecationWarning:paramz.*",
+]
+
+
+# pixi configurations
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.dependencies]
+python = ">=3.10,<3.11"
+
+[tool.pixi.pypi-dependencies]
+aiaccel = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { features = ["dev"] }
+
+[tool.pixi.tasks]

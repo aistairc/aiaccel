@@ -4,13 +4,17 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 import logging
+import os
 from pathlib import Path
+
+from rich.console import Console
+from rich.logging import RichHandler
 
 _LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 
 
-def configure_logging(log_level: str, output_dir: Path) -> Path:
-    """Configure root logging and return the log file path."""
+def configure_logging(log_level: str, output_dir: Path, *, reset_handlers: bool = True, console: bool = True) -> Path:
+    """Configure root logging with rich console and file handlers."""
 
     level = getattr(logging, log_level.upper(), logging.INFO)
     log_dir = output_dir / "logs"
@@ -18,16 +22,15 @@ def configure_logging(log_level: str, output_dir: Path) -> Path:
     log_path = log_dir / "pipeline.log"
 
     root = logging.getLogger()
-    _clear_handlers(root.handlers)
+    if reset_handlers:
+        _clear_handlers(root.handlers)
 
     formatter = logging.Formatter(_LOG_FORMAT)
-    file_handler = logging.FileHandler(log_path)
-    file_handler.setFormatter(formatter)
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
+    _ensure_file_handler(root, log_path, formatter)
 
-    root.addHandler(file_handler)
-    root.addHandler(console_handler)
+    if console and not os.environ.get("AIACCEL_LOG_SILENT"):
+        _ensure_console_handler(root)
+
     root.setLevel(level)
 
     logging.captureWarnings(True)
@@ -40,6 +43,28 @@ def _clear_handlers(handlers: Iterable[logging.Handler]) -> None:
     for handler in list(handlers):
         handler.close()
         logging.getLogger().removeHandler(handler)
+
+
+def _ensure_file_handler(logger: logging.Logger, path: Path, formatter: logging.Formatter) -> None:
+    for handler in logger.handlers:
+        if isinstance(handler, logging.FileHandler) and Path(getattr(handler, "baseFilename", "")) == path:
+            return
+    file_handler = logging.FileHandler(path)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+
+def _ensure_console_handler(logger: logging.Logger) -> None:
+    for handler in logger.handlers:
+        if isinstance(handler, RichHandler):
+            return
+    console_handler = RichHandler(
+        console=Console(),
+        rich_tracebacks=True,
+        omit_repeated_times=False,
+        show_time=False,
+    )
+    logger.addHandler(console_handler)
 
 
 def get_logger(name: str) -> logging.Logger:

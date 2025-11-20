@@ -12,7 +12,7 @@ cpu:
     qsub_args: "-q rt_HF -l select=1"
     job: "{command}"
 
-cpu_array:
+cpu-array:
     n_tasks_per_proc: 128
     n_procs: 24
     qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
@@ -22,7 +22,7 @@ gpu:
     qsub_args: "-q rt_HF -l select=1"
     job: "{command}"
 
-gpu_array:
+gpu-array:
     n_tasks_per_proc: 128
     n_procs: 8
     qsub_args: "-q rt_HF -l select=1 -J 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
@@ -56,3 +56,5 @@ train:
             -x COLUMNS=120 \\
             -x PYTHONUNBUFFERED=true \\
             {command}
+
+use_scandir: False

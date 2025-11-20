@@ -15,6 +15,8 @@ def _config(tmp_path: Path) -> dict[str, object]:
         "bridge": {
             "output_dir": str(tmp_path / "outputs"),
             "seed": 7,
+            "train_runs": 1,
+            "eval_runs": 1,
             "scenarios": [
                 {
                     "name": "demo",
@@ -45,37 +47,42 @@ def test_run_pipeline(tmp_path: Path) -> None:
     assert summary_file == summary
 
     scenario_summary = summary["demo"]
-    assert scenario_summary["macro_trials"] == 3
-    assert scenario_summary["micro_trials"] == 3
+    assert "train_pairs" in scenario_summary
     scenario_dir = tmp_path / "outputs" / "scenarios" / "demo"
-    macro_csv = scenario_dir / "macro_trials.csv"
-    micro_csv = scenario_dir / "micro_trials.csv"
-    predictions_csv = scenario_dir / "predictions.csv"
-    assert macro_csv.exists() and micro_csv.exists()
-    macro_contents = macro_csv.read_text(encoding="utf-8")
-    assert "objective" in macro_contents and "x" in macro_contents
-    micro_contents = micro_csv.read_text(encoding="utf-8")
-    assert "metric_mae" in micro_contents
-    assert predictions_csv.exists()
-    predictions_content = predictions_csv.read_text(encoding="utf-8")
-    assert "actual_y" in predictions_content and "pred_y" in predictions_content
+    regression_json = scenario_dir / "regression_train.json"
+    metrics_json = scenario_dir / "regression_test_metrics.json"
+    assert regression_json.exists()
+    assert metrics_json.exists()
+    metrics_payload = json.loads(metrics_json.read_text(encoding="utf-8"))
+    assert "mae" in metrics_payload
+    runs_root = tmp_path / "outputs" / "runs" / "demo"
+    assert (runs_root / "train" / "macro" / "000" / "optuna.db").exists()
+    assert (runs_root / "eval" / "micro" / "000" / "optuna.db").exists()
 
 
 def test_run_pipeline_partial_phases(tmp_path: Path) -> None:
     bridge_config = load_bridge_config(_config(tmp_path))
     scenario_dir = tmp_path / "outputs" / "scenarios" / "demo"
+    runs_root = tmp_path / "outputs" / "runs" / "demo"
 
-    partial = run_pipeline(bridge_config, phases=("macro", "micro"))
-    assert partial["phases"] == ["macro", "micro"]
-    macro_csv = scenario_dir / "macro_trials.csv"
-    micro_csv = scenario_dir / "micro_trials.csv"
-    assert macro_csv.exists() and micro_csv.exists()
-    assert not (scenario_dir / "regression.json").exists()
+    partial = run_pipeline(bridge_config, phases=("hpo",))
+    assert partial["phases"] == ["hpo"]
+    assert (runs_root / "train" / "macro" / "000" / "optuna.db").exists()
+    assert not (scenario_dir / "regression_train.json").exists()
 
     run_pipeline(bridge_config, phases=("regress",))
-    regression_path = scenario_dir / "regression.json"
-    scenario_summary = scenario_dir / "scenario_summary.json"
-    assert regression_path.exists() and scenario_summary.exists()
+    regression_path = scenario_dir / "regression_train.json"
+    assert regression_path.exists()
 
     summary = run_pipeline(bridge_config, phases=("summary",))
-    assert summary["demo"]["macro_trials"] == 3
+    assert "demo" in summary and "train_pairs" in summary["demo"]
+
+
+def test_run_pipeline_custom_metrics(tmp_path: Path) -> None:
+    data = _config(tmp_path)
+    data["bridge"]["scenarios"][0]["metrics"] = ["mae"]
+    bridge_config = load_bridge_config(data)
+    run_pipeline(bridge_config)
+    metrics_path = tmp_path / "outputs" / "scenarios" / "demo" / "regression_test_metrics.json"
+    payload = json.loads(metrics_path.read_text(encoding="utf-8"))
+    assert list(payload.keys()) == ["mae"]

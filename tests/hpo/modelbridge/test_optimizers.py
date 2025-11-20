@@ -18,6 +18,8 @@ def test_run_phase_collects_trials(tmp_path: Path) -> None:
         evaluator=evaluator,
         seed=0,
         output_dir=tmp_path,
+        write_csv=False,
+        study_name="demo-macro",
     )
 
     assert len(outcome.trials) == 2

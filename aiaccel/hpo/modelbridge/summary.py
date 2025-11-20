@@ -14,11 +14,14 @@ from .io import write_json
 class ScenarioSummary:
     """Aggregated results for a finished scenario."""
 
-    macro_trials: int
-    micro_trials: int
-    macro_best: dict[str, float]
-    micro_best: dict[str, float]
-    metrics: dict[str, float]
+    train_pairs: int
+    eval_pairs: int
+    train_macro_best: list[dict[str, float]]
+    train_micro_best: list[dict[str, float]]
+    eval_macro_best: list[dict[str, float]]
+    eval_micro_best: list[dict[str, float]]
+    train_metrics: dict[str, float]
+    eval_metrics: dict[str, float]
 
 
 @dataclass

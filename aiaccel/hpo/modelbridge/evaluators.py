@@ -13,7 +13,6 @@ import os
 import subprocess
 
 from .config import ObjectiveConfig
-from .exceptions import ExecutionError, ValidationError
 from .types import EvaluationResult, TrialContext
 
 
@@ -26,7 +25,7 @@ def build_evaluator(
     func = _import_callable(config.target)
     if func is command_objective:
         if not config.command:
-            raise ValidationError("command_objective requires a command list")
+            raise ValueError("command_objective requires a command list")
         return cast(
             Callable[[TrialContext], EvaluationResult],
             partial(
@@ -80,14 +79,14 @@ def command_objective(
             env=env,
         )
     except subprocess.CalledProcessError as exc:  # noqa: PERF203
-        raise ExecutionError(f"Command failed with exit status {exc.returncode}") from exc
+        raise RuntimeError(f"Command failed with exit status {exc.returncode}") from exc
     except subprocess.TimeoutExpired as exc:  # noqa: PERF203
-        raise ExecutionError("Command timed out") from exc
+        raise RuntimeError("Command timed out") from exc
 
     try:
         payload = json.loads(completed.stdout or "{}")
     except json.JSONDecodeError as exc:
-        raise ExecutionError("Command did not return valid JSON") from exc
+        raise RuntimeError("Command did not return valid JSON") from exc
 
     objective = float(payload.get("objective"))
     metrics = {str(k): float(v) for k, v in payload.get("metrics", {}).items()}
@@ -98,14 +97,14 @@ def command_objective(
 def _import_callable(path: str) -> Any:
     module_name, _, attr_name = path.rpartition(".")
     if not module_name:
-        raise ValidationError(f"Invalid target path '{path}'")
+        raise ValueError(f"Invalid target path '{path}'")
     module = importlib.import_module(module_name)
     try:
         func = getattr(module, attr_name)
     except AttributeError as exc:  # noqa: PERF203
-        raise ValidationError(f"Target '{path}' not found") from exc
+        raise ValueError(f"Target '{path}' not found") from exc
     if not callable(func):
-        raise ValidationError(f"Target '{path}' is not callable")
+        raise ValueError(f"Target '{path}' is not callable")
     return func
 
 
