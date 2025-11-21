@@ -40,6 +40,59 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
 
 def load_config(
     config_filename: str | Path,
+    working_directory: str | None = None,
+    overwrite_config: dict[str, Any] | DictConfig | ListConfig | None = None,
+    is_print_config: bool = False,
+) -> DictConfig | ListConfig:
+    """Load YAML configuration
+
+    Args:
+        config_filename (str | Path):
+            Path to the configuration
+        working_directory (str | None, optional):
+            Path to the working directory to store in merge_user_config.
+            If None, the parent directory of config_filename is used.
+            Defaults to None.
+        overwrite_config (dict[str, Any] | DictConfig | ListConfig | None, optional):
+            Configuration to add to merge_user_config.
+            Defaults to None.
+        is_print_config (bool, optional):
+            Flag variable to run print_config.
+            Defaults to False.
+
+    Returns:
+        DictConfig | ListConfig: The merged configuration of the base config and the original config
+    """
+    overwrite_omegaconf_dumper()
+
+    # Register custom resolvers
+    oc.register_new_resolver("eval", simple_eval, replace=True)
+    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
+
+    # Load config
+    config = oc.merge(
+        _load_config(
+            config_filename,
+            {
+                "config_path": str(config_filename),
+                "working_directory": str(working_directory)
+                if working_directory is not None
+                else str(Path(config_filename).parent.resolve()),
+            },
+        ),
+        overwrite_config if overwrite_config is not None else oc.create({}),  # Overwrite loaded config
+    )
+
+    if is_print_config:
+        print_config(config)
+
+    config = resolve_inherit(config)
+
+    return config
+
+
+def _load_config(
+    config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
     """Load YAML configuration
@@ -47,9 +100,6 @@ def load_config(
     When the user specifies ``_base_``, the specified YAML file is loaded as the base,
     and the original configuration is merged with the base config.
     If the configuration specified in ``_base_`` also contains ``_base_``, the process is handled recursively.
-
-    Additionally, if `bootstrap_config` is provided, it is merged with the final
-    configuration to ensure any default values or overrides are applied.
 
     Args:
         config (Path): Path to the configuration
@@ -62,10 +112,6 @@ def load_config(
         user_config(DictConfig | ListConfig) : The configuration without ``_base_``
 
     """
-
-    # Register custom resolvers
-    oc.register_new_resolver("eval", simple_eval, replace=True)
-    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
@@ -89,7 +135,7 @@ def load_config(
             if not base_path.is_absolute():
                 base_path = config_filename.parent / base_path
 
-            config = load_config(base_path, config)
+            config = _load_config(base_path, config)
 
     return config
 
