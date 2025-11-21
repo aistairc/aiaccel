@@ -13,8 +13,18 @@ from rich.logging import RichHandler
 _LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 
 
-def configure_logging(log_level: str, output_dir: Path, *, reset_handlers: bool = True, console: bool = True) -> Path:
+def configure_logging(
+    log_level: str,
+    output_dir: Path,
+    *,
+    reset_handlers: bool = True,
+    console: bool = True,
+    file: bool = True,
+) -> Path:
     """Configure root logging with rich console and file handlers."""
+
+    if not console and not file:
+        return output_dir / "logs" / "pipeline.log"
 
     level = getattr(logging, log_level.upper(), logging.INFO)
     log_dir = output_dir / "logs"
@@ -26,7 +36,8 @@ def configure_logging(log_level: str, output_dir: Path, *, reset_handlers: bool 
         _clear_handlers(root.handlers)
 
     formatter = logging.Formatter(_LOG_FORMAT)
-    _ensure_file_handler(root, log_path, formatter)
+    if file:
+        _ensure_file_handler(root, log_path, formatter)
 
     if console and not os.environ.get("AIACCEL_LOG_SILENT"):
         _ensure_console_handler(root)

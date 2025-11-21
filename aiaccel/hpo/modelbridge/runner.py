@@ -1,23 +1,23 @@
-"""High level orchestration for the modelbridge pipeline."""
+"""Planning and execution utilities for the modelbridge pipeline."""
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
-from collections.abc import Sequence
 from dataclasses import dataclass, field
+from collections.abc import Sequence
 import os
 from pathlib import Path
 import optuna
 
-from .config import BridgeConfig, BridgeSettings, ParameterBounds, ParameterSpace, ScenarioConfig
+from .config import BridgeConfig, BridgeSettings, ScenarioConfig
 from .evaluators import build_evaluator
 from .io import read_json, write_csv, write_json
 from .logging import configure_logging, get_logger
 from .optimizers import collect_trial_results, run_phase
 from .regression import RegressionModel, evaluate_regression, fit_regression
 from .summary import ScenarioSummary, SummaryBuilder
-from .types import RegressionSample, TrialResult
+from .types import EvaluatorFn, PhaseContext, RegressionSample, RunnerFn, TrialResult
 
 PhaseName = Literal["hpo", "regress", "evaluate", "summary"]
 PHASE_ORDER: tuple[PhaseName, ...] = ("hpo", "regress", "evaluate", "summary")
@@ -37,11 +37,8 @@ class RunLayout:
     def run_dir(self, role: str, target: str, run_idx: int) -> Path:
         return self.output_root / "runs" / self.scenario / role / target / f"{run_idx:03d}"
 
-    def storage_uri(self, role: str, target: str, run_idx: int, *, ensure_dir: bool = True) -> str:
-        run_dir = self.run_dir(role, target, run_idx)
-        if ensure_dir:
-            run_dir.mkdir(parents=True, exist_ok=True)
-        db_path = run_dir / "optuna.db"
+    def storage_uri(self, role: str, target: str, run_idx: int) -> str:
+        db_path = self.run_dir(role, target, run_idx) / "optuna.db"
         return f"sqlite:///{db_path.resolve()}"
 
     def seed(self, base: int, role: str, target: str, run_idx: int) -> int:
@@ -49,8 +46,25 @@ class RunLayout:
 
 
 @dataclass(slots=True)
-class PipelineState:
-    """Container for scenario execution."""
+class PipelinePlan:
+    """Executable plan containing ordered phase contexts."""
+
+    contexts: list[PhaseContext]
+    settings: BridgeSettings
+    scenarios: dict[str, ScenarioConfig]
+
+    def serializable(self) -> dict[str, object]:
+        return {
+            "contexts": [ctx.serializable() for ctx in self.contexts],
+            "output_dir": str(self.settings.output_dir),
+            "working_directory": str(self.settings.working_directory or self.settings.output_dir),
+            "log_level": self.settings.log_level,
+        }
+
+
+@dataclass(slots=True)
+class ScenarioState:
+    """Captured state during execution."""
 
     best: dict[str, dict[str, dict[int, TrialResult]]] = field(
         default_factory=lambda: {"train": {"macro": {}, "micro": {}}, "eval": {"macro": {}, "micro": {}}}
@@ -58,6 +72,138 @@ class PipelineState:
     model: RegressionModel | None = None
     train_metrics: dict[str, float] = field(default_factory=dict)
     eval_metrics: dict[str, float] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class PlanBuilder:
+    """Helper to construct PhaseContexts for a scenario."""
+
+    layout: RunLayout
+    settings: BridgeSettings
+    scenario: ScenarioConfig
+    base_seed: int
+    contexts: list[PhaseContext] = field(default_factory=list)
+
+    def add_hpo(self, role: str | None, target: str | None, run_id: int | None) -> None:
+        roles = [role] if role else ("train", "eval")
+        targets = [target] if target else ("macro", "micro")
+        for phase_role in roles:
+            runs = _resolve_runs(self.settings, phase_role, run_id)
+            for phase_target in targets:
+                for idx in runs:
+                    ctx = PhaseContext(
+                        scenario=self.scenario.name,
+                        phase="hpo",
+                        role=phase_role,
+                        target=phase_target,
+                        run_id=idx,
+                        seed=self.layout.seed(self.base_seed, phase_role, phase_target, idx),
+                        output_dir=self.layout.run_dir(phase_role, phase_target, idx),
+                        working_directory=self.settings.working_directory or self.settings.output_dir,
+                    )
+                    ctx.runner = _make_hpo_runner(
+                        layout=self.layout,
+                        scenario=self.scenario,
+                        settings=self.settings,
+                        role=phase_role,
+                        target=phase_target,
+                        run_idx=idx,
+                    )
+                    self.contexts.append(ctx)
+
+    def add_phase(self, phase: PhaseName, runner: Callable[..., Any]) -> None:
+        ctx = PhaseContext(
+            scenario=self.scenario.name,
+            phase=phase,
+            output_dir=self.layout.scenario_dir(),
+            working_directory=self.settings.working_directory or self.settings.output_dir,
+        )
+        ctx.runner = runner
+        self.contexts.append(ctx)
+
+
+def plan_pipeline(
+    config: BridgeConfig,
+    *,
+    phases: Sequence[str] | None = None,
+    scenarios: Sequence[str] | None = None,
+    role: str | None = None,
+    target: str | None = None,
+    run_id: int | None = None,
+) -> PipelinePlan:
+    """Create an executable plan without running it."""
+
+    requested_phases = _normalize_phases(phases)
+    scenario_filter = set(scenarios or [])
+    settings = config.bridge
+    contexts: list[PhaseContext] = []
+    scenario_map = {cfg.name: cfg for cfg in settings.scenarios}
+
+    for scenario_cfg in settings.scenarios:
+        if scenario_filter and scenario_cfg.name not in scenario_filter:
+            continue
+        layout = RunLayout(output_root=settings.output_dir, scenario=scenario_cfg.name)
+        builder = PlanBuilder(layout=layout, settings=settings, scenario=scenario_cfg, base_seed=settings.seed)
+        for phase in requested_phases:
+            if phase == "hpo":
+                builder.add_hpo(role, target, run_id)
+            elif phase == "regress":
+                builder.add_phase("regress", _make_regression_runner(layout, scenario_cfg, settings))
+            elif phase == "evaluate":
+                builder.add_phase("evaluate", _make_evaluation_runner(layout, scenario_cfg, settings))
+            elif phase == "summary":
+                builder.add_phase("summary", _make_summary_runner(layout, scenario_cfg, settings))
+        contexts.extend(builder.contexts)
+
+    if not contexts:
+        raise ValueError("No scenarios matched the requested filters")
+
+    return PipelinePlan(contexts=contexts, settings=settings, scenarios=scenario_map)
+
+
+def execute_pipeline(
+    plan: PipelinePlan,
+    *,
+    dry_run: bool = False,
+    quiet: bool = True,
+    log_to_file: bool = False,
+) -> dict[str, Any]:
+    """Execute the provided plan. When ``dry_run`` is True, only the plan payload is returned."""
+
+    if dry_run:
+        return plan.serializable()
+
+    output_root = plan.settings.output_dir
+    output_root.mkdir(parents=True, exist_ok=True)
+    silent_env = os.environ.get("AIACCEL_LOG_SILENT")
+    console_enabled = not quiet and silent_env not in {"1", "true", "True"}
+    if log_to_file or console_enabled:
+        configure_logging(
+            plan.settings.log_level,
+            output_root,
+            reset_handlers=True,
+            console=console_enabled,
+            file=log_to_file,
+        )
+    logger = get_logger(__name__)
+    logger.info("Executing modelbridge plan with %d contexts", len(plan.contexts))
+
+    summary_builder = SummaryBuilder(output_dir=output_root) if any(ctx.phase == "summary" for ctx in plan.contexts) else None
+    states: dict[str, ScenarioState] = {}
+
+    for ctx in plan.contexts:
+        scenario_state = states.setdefault(ctx.scenario, ScenarioState())
+        runner = ctx.runner
+        scenario_cfg = plan.scenarios[ctx.scenario]
+        if not callable(runner):
+            raise RuntimeError(f"No runner associated with context {ctx}")
+        result = runner(ctx, scenario_cfg, plan.settings, scenario_state)
+        if isinstance(result, ScenarioSummary) and summary_builder:
+            summary_builder.add(ctx.scenario, result)
+
+    if summary_builder:
+        return summary_builder.finalize()
+    return {"contexts": [c.serializable() for c in plan.contexts]}
 
 
 def run_pipeline(
@@ -68,280 +214,167 @@ def run_pipeline(
     role: str | None = None,
     target: str | None = None,
     run_id: int | None = None,
-    quiet: bool = False,
+    dry_run: bool = False,
+    quiet: bool = True,
+    log_to_file: bool = False,
 ) -> dict[str, Any]:
-    """Execute the modelbridge pipeline described by ``config``."""
+    """Convenience wrapper that plans then executes."""
 
-    requested_phases = _normalize_phases(phases)
-    scenario_filter = set(scenarios or [])
-
-    settings = config.bridge
-    output_root = settings.output_dir
-    output_root.mkdir(parents=True, exist_ok=True)
-
-    if not quiet:
-        silent_env = os.environ.get("AIACCEL_LOG_SILENT")
-        console_enabled = silent_env not in {"1", "true", "True"}
-        configure_logging(settings.log_level, output_root, console=console_enabled)
-    logger = get_logger(__name__)
-    logger.info("Starting modelbridge pipeline -> output_dir=%s", output_root)
-
-    summary_builder = SummaryBuilder(output_dir=output_root) if "summary" in requested_phases else None
-    base_env = {"AIACCEL_OUTPUT_DIR": str(output_root)}
-    if settings.working_directory:
-        base_env["AIACCEL_WORK_DIR"] = str(settings.working_directory)
-
-    processed: list[str] = []
-    for scenario_cfg in settings.scenarios:
-        if scenario_filter and scenario_cfg.name not in scenario_filter:
-            continue
-        processed.append(scenario_cfg.name)
-        logger.info("Running scenario %s (phases=%s)", scenario_cfg.name, ",".join(requested_phases))
-        layout = RunLayout(output_root=output_root, scenario=scenario_cfg.name)
-        state = PipelineState()
-        summary = _execute_scenario(
-            layout,
-            scenario_cfg,
-            settings,
-            requested_phases,
-            base_env,
-            settings.write_csv,
-            role,
-            target,
-            run_id,
-            state,
-        )
-        if summary_builder and summary:
-            summary_builder.add(scenario_cfg.name, summary)
-
-    if not processed:
-        raise ValueError("No scenarios matched the requested filters")
-
-    if summary_builder:
-        payload = summary_builder.finalize()
-        logger.info("Pipeline summary generated")
-        return payload
-
-    logger.info("Pipeline phases completed: %s", ",".join(requested_phases))
-    return {"phases": list(requested_phases), "scenarios": processed}
-
-
-def _execute_scenario(
-    layout: RunLayout,
-    config: ScenarioConfig,
-    settings: BridgeSettings,
-    phases: Sequence[PhaseName],
-    base_env: dict[str, str],
-    write_csv: bool,
-    role_filter: str | None,
-    target_filter: str | None,
-    run_id: int | None,
-    state: PipelineState,
-) -> ScenarioSummary | None:
-    scenario_dir = layout.scenario_dir()
-    scenario_dir.mkdir(parents=True, exist_ok=True)
-
-    train_evaluator = build_evaluator(config.train_objective or config.objective, base_env=base_env)
-    eval_evaluator = build_evaluator(config.eval_objective or config.objective, base_env=base_env)
-    train_params = config.train_params or config.params
-    eval_params = config.eval_params or config.params
-
-    if "hpo" in phases:
-        _run_hpo_phase(
-            layout,
-            config,
-            settings,
-            train_params,
-            eval_params,
-            train_evaluator,
-            eval_evaluator,
-            state,
-            role_filter,
-            target_filter,
-            run_id,
-            write_csv,
-        )
-
-    if "regress" in phases:
-        state.model, state.train_metrics = _run_regression_phase(
-            layout,
-            config,
-            settings,
-            train_params,
-            state,
-            write_csv,
-        )
-
-    if "evaluate" in phases:
-        state.eval_metrics = _run_evaluation_phase(
-            layout,
-            config,
-            settings,
-            eval_params,
-            state,
-            write_csv,
-            strict=True,
-        )
-
-    if "summary" in phases:
-        return _build_summary(
-            layout,
-            config,
-            settings,
-            state,
-        )
-
-    return None
-
-
-def _run_hpo_phase(
-    layout: RunLayout,
-    config: ScenarioConfig,
-    settings: BridgeSettings,
-    train_params: ParameterSpace,
-    eval_params: ParameterSpace,
-    train_evaluator,
-    eval_evaluator,
-    state: PipelineState,
-    role_filter: str | None,
-    target_filter: str | None,
-    run_id: int | None,
-    write_csv: bool,
-) -> None:
-    base_seed = getattr(settings, "seed", 0)
-    roles = [role_filter] if role_filter else ("train", "eval")
-    targets = [target_filter] if target_filter else ("macro", "micro")
-    for role in roles:
-        runs = _resolve_runs(settings, role, run_id)
-        if not runs:
-            continue
-        evaluator = train_evaluator if role == "train" else eval_evaluator
-        params = train_params if role == "train" else eval_params
-        for target in targets:
-            trials = _get_trials(config, role, target)
-            space = params.macro if target == "macro" else params.micro
-            results = _run_hpo_runs(
-                layout=layout,
-                role=role,
-                target=target,
-                runs=runs,
-                trials=trials,
-                space=space,
-                evaluator=evaluator,
-                base_seed=base_seed,
-                write_csv=write_csv,
-            )
-            state.best[role][target].update(results)
-
-
-def _run_regression_phase(
-    layout: RunLayout,
-    config: ScenarioConfig,
-    settings: BridgeSettings,
-    train_params: ParameterSpace,
-    state: PipelineState,
-    write_csv: bool,
-) -> tuple[RegressionModel | None, dict[str, float]]:
-    macro_best = _ensure_best(config, settings, layout, "train", "macro", state.best["train"]["macro"])
-    micro_best = _ensure_best(config, settings, layout, "train", "micro", state.best["train"]["micro"])
-    state.best["train"]["macro"] = macro_best
-    state.best["train"]["micro"] = micro_best
-    samples = _compose_samples(macro_best, micro_best)
-    regression_samples = [sample for _, sample in samples]
-    model = fit_regression(regression_samples, config.regression)
-    metrics = {
-        k: float(v)
-        for k, v in evaluate_regression(model, regression_samples, metrics=config.metrics).items()
-    }
-    write_json(layout.scenario_dir() / "regression_train.json", model.to_dict())
-    if write_csv:
-        _persist_best_pairs(layout.scenario_dir() / "train_pairs.csv", samples)
-    return model, metrics
-
-
-def _run_evaluation_phase(
-    layout: RunLayout,
-    config: ScenarioConfig,
-    settings: BridgeSettings,
-    eval_params: ParameterSpace,
-    state: PipelineState,
-    write_csv: bool,
-    *,
-    strict: bool = True,
-) -> dict[str, float]:
-    model = state.model
-    if model is None:
-        model = _load_regression_model(layout.scenario_dir() / "regression_train.json")
-    macro_best = _ensure_best(config, settings, layout, "eval", "macro", state.best["eval"]["macro"])
-    micro_best = _ensure_best(config, settings, layout, "eval", "micro", state.best["eval"]["micro"])
-    state.best["eval"]["macro"] = macro_best
-    state.best["eval"]["micro"] = micro_best
-    if not macro_best or not micro_best:
-        if strict:
-            raise RuntimeError(f"Scenario '{config.name}' requires eval macro/micro runs before evaluation")
-        return {}
-    pairs = _compose_samples(macro_best, micro_best)
-    samples = [sample for _, sample in pairs]
-    predictions = [model.predict(sample.features) for sample in samples]
-    metrics = {
-        k: float(v)
-        for k, v in evaluate_regression(model, samples, metrics=config.metrics).items()
-    }
-    if write_csv:
-        _persist_predictions(layout.scenario_dir() / "test_predictions.csv", pairs, predictions)
-    write_json(layout.scenario_dir() / "regression_test_metrics.json", metrics)
-    state.model = model
-    return metrics
-
-
-def _build_summary(
-    layout: RunLayout,
-    config: ScenarioConfig,
-    settings: BridgeSettings,
-    state: PipelineState,
-) -> ScenarioSummary:
-    scenario_dir = layout.scenario_dir()
-    scenario_dir.mkdir(parents=True, exist_ok=True)
-    train_macro_best = _ensure_best(config, settings, layout, "train", "macro", state.best["train"]["macro"])
-    train_micro_best = _ensure_best(config, settings, layout, "train", "micro", state.best["train"]["micro"])
-    eval_macro_best = _ensure_best(config, settings, layout, "eval", "macro", state.best["eval"]["macro"])
-    eval_micro_best = _ensure_best(config, settings, layout, "eval", "micro", state.best["eval"]["micro"])
-
-    train_pairs_samples = _compose_samples_optional(train_macro_best, train_micro_best)
-    eval_pairs_samples = _compose_samples_optional(eval_macro_best, eval_micro_best)
-
-    model = state.model
-    train_metrics = dict(state.train_metrics)
-    eval_metrics = dict(state.eval_metrics)
-
-    if model is None and train_pairs_samples:
-        regression_samples = [sample for _, sample in train_pairs_samples]
-        model = fit_regression(regression_samples, config.regression)
-        train_metrics = {
-            k: float(v)
-            for k, v in evaluate_regression(model, regression_samples, metrics=config.metrics).items()
-        }
-
-    if model is not None and not eval_metrics and eval_pairs_samples:
-        eval_metrics = {
-            k: float(v)
-            for k, v in evaluate_regression(
-                model, [sample for _, sample in eval_pairs_samples], metrics=config.metrics
-            ).items()
-        }
-
-    summary = ScenarioSummary(
-        train_pairs=len(train_pairs_samples),
-        eval_pairs=len(eval_pairs_samples),
-        train_macro_best=[train_macro_best[run].context.params for run in sorted(train_macro_best)],
-        train_micro_best=[train_micro_best[run].context.params for run in sorted(train_micro_best)],
-        eval_macro_best=[eval_macro_best[run].context.params for run in sorted(eval_macro_best)],
-        eval_micro_best=[eval_micro_best[run].context.params for run in sorted(eval_micro_best)],
-        train_metrics=train_metrics,
-        eval_metrics=eval_metrics,
+    plan = plan_pipeline(
+        config,
+        phases=phases,
+        scenarios=scenarios,
+        role=role,
+        target=target,
+        run_id=run_id,
     )
-    _persist_scenario_summary(scenario_dir, summary)
-    return summary
+    return execute_pipeline(plan, dry_run=dry_run, quiet=quiet, log_to_file=log_to_file)
+
+
+def _make_hpo_runner(
+    *,
+    layout: RunLayout,
+    scenario: ScenarioConfig,
+    settings: BridgeSettings,
+    role: str,
+    target: str,
+    run_idx: int,
+) -> RunnerFn:
+    evaluator = build_evaluator(scenario.train_objective if role == "train" else scenario.eval_objective, base_env=_base_env(settings))
+    params = scenario.train_params if role == "train" else scenario.eval_params
+    trials = _get_trials(scenario, role, target)
+
+    def _runner(
+        ctx: PhaseContext,
+        scenario_cfg: ScenarioConfig,
+        bridge_settings: BridgeSettings,
+        state: ScenarioState,
+    ) -> None:
+        output_dir = layout.run_dir(role, target, run_idx)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        storage_uri = layout.storage_uri(role, target, run_idx)
+        outcome = run_phase(
+            scenario=scenario_cfg.name,
+            phase=target,
+            trials=trials,
+            space=params.macro if target == "macro" else params.micro,
+            evaluator=evaluator,
+            seed=ctx.seed or bridge_settings.seed,
+            output_dir=output_dir,
+            storage=storage_uri,
+            study_name=f"{scenario_cfg.name}-{role}-{target}-{run_idx:03d}",
+            write_csv=False,
+        )
+        state.best[role][target][run_idx] = _best_trial(outcome.trials)
+        _write_best_csv(layout, role, target, state.best[role][target], bridge_settings.write_csv)
+
+    return _runner
+
+
+def _make_regression_runner(
+    layout: RunLayout,
+    scenario: ScenarioConfig,
+    settings: BridgeSettings,
+) -> RunnerFn:
+    def _runner(
+        ctx: PhaseContext,
+        scenario_cfg: ScenarioConfig,
+        bridge_settings: BridgeSettings,
+        state: ScenarioState,
+    ) -> RegressionModel | None:
+        macro_best = _ensure_best(scenario_cfg, bridge_settings, layout, "train", "macro", state.best["train"]["macro"])
+        micro_best = _ensure_best(scenario_cfg, bridge_settings, layout, "train", "micro", state.best["train"]["micro"])
+        state.best["train"]["macro"] = macro_best
+        state.best["train"]["micro"] = micro_best
+        samples = _compose_samples(macro_best, micro_best)
+        regression_samples = [sample for _, sample in samples]
+        model = _ensure_model(layout, state, scenario_cfg, samples_for_fit=regression_samples)
+        state.train_metrics = _evaluate_metrics(model, regression_samples, scenario_cfg.metrics)
+        layout.scenario_dir().mkdir(parents=True, exist_ok=True)
+        write_json(layout.scenario_dir() / "regression_train.json", model.to_dict())
+        if settings.write_csv:
+            _persist_best_pairs(layout.scenario_dir() / "train_pairs.csv", samples)
+        return model
+
+    return _runner
+
+
+def _make_evaluation_runner(
+    layout: RunLayout,
+    scenario: ScenarioConfig,
+    settings: BridgeSettings,
+) -> RunnerFn:
+    def _runner(
+        ctx: PhaseContext,
+        scenario_cfg: ScenarioConfig,
+        bridge_settings: BridgeSettings,
+        state: ScenarioState,
+    ) -> dict[str, float]:
+        model = _ensure_model(layout, state, scenario_cfg, samples_for_fit=None)
+        macro_best = _ensure_best(scenario_cfg, bridge_settings, layout, "eval", "macro", state.best["eval"]["macro"])
+        micro_best = _ensure_best(scenario_cfg, bridge_settings, layout, "eval", "micro", state.best["eval"]["micro"])
+        state.best["eval"]["macro"] = macro_best
+        state.best["eval"]["micro"] = micro_best
+        pairs = _compose_samples(macro_best, micro_best)
+        samples = [sample for _, sample in pairs]
+        predictions = [model.predict(sample.features) for sample in samples]
+        metrics = _evaluate_metrics(model, samples, scenario_cfg.metrics)
+        state.model = model
+        state.eval_metrics = metrics
+        layout.scenario_dir().mkdir(parents=True, exist_ok=True)
+        write_json(layout.scenario_dir() / "regression_test_metrics.json", metrics)
+        if settings.write_csv:
+            _persist_predictions(layout.scenario_dir() / "test_predictions.csv", pairs, predictions)
+        return metrics
+
+    return _runner
+
+
+def _make_summary_runner(
+    layout: RunLayout,
+    scenario: ScenarioConfig,
+    settings: BridgeSettings,
+) -> RunnerFn:
+    def _runner(
+        ctx: PhaseContext,
+        scenario_cfg: ScenarioConfig,
+        bridge_settings: BridgeSettings,
+        state: ScenarioState,
+    ) -> ScenarioSummary:
+        train_macro_best = _ensure_best(scenario_cfg, bridge_settings, layout, "train", "macro", state.best["train"]["macro"])
+        train_micro_best = _ensure_best(scenario_cfg, bridge_settings, layout, "train", "micro", state.best["train"]["micro"])
+        eval_macro_best = _ensure_best(scenario_cfg, bridge_settings, layout, "eval", "macro", state.best["eval"]["macro"])
+        eval_micro_best = _ensure_best(scenario_cfg, bridge_settings, layout, "eval", "micro", state.best["eval"]["micro"])
+        train_pairs_samples = _compose_samples_optional(train_macro_best, train_micro_best)
+        eval_pairs_samples = _compose_samples_optional(eval_macro_best, eval_micro_best)
+
+        model = state.model
+        train_metrics = dict(state.train_metrics)
+        eval_metrics = dict(state.eval_metrics)
+
+        if model is None and train_pairs_samples:
+            regression_samples = [sample for _, sample in train_pairs_samples]
+            model = _ensure_model(layout, state, scenario_cfg, samples_for_fit=regression_samples)
+            train_metrics = _evaluate_metrics(model, regression_samples, scenario_cfg.metrics)
+
+        if model is not None and not eval_metrics and eval_pairs_samples:
+            eval_metrics = _evaluate_metrics(model, [sample for _, sample in eval_pairs_samples], scenario_cfg.metrics)
+
+        layout.scenario_dir().mkdir(parents=True, exist_ok=True)
+        summary = ScenarioSummary(
+            train_pairs=len(train_pairs_samples),
+            eval_pairs=len(eval_pairs_samples),
+            train_macro_best=[train_macro_best[run].context.params for run in sorted(train_macro_best)],
+            train_micro_best=[train_micro_best[run].context.params for run in sorted(train_micro_best)],
+            eval_macro_best=[eval_macro_best[run].context.params for run in sorted(eval_macro_best)],
+            eval_micro_best=[eval_micro_best[run].context.params for run in sorted(eval_micro_best)],
+            train_metrics=train_metrics,
+            eval_metrics=eval_metrics,
+        )
+        _persist_scenario_summary(layout.scenario_dir(), summary)
+        return summary
+
+    return _runner
 
 
 def _normalize_phases(phases: Sequence[str] | None) -> tuple[PhaseName, ...]:
@@ -353,12 +386,11 @@ def _normalize_phases(phases: Sequence[str] | None) -> tuple[PhaseName, ...]:
             raise ValueError(f"Unknown phase '{phase}'")
         if phase not in normalized:
             normalized.append(phase)
-    normalized.sort(key=lambda name: PHASE_ORDER.index(name))
     return tuple(normalized)
 
 
-def _resolve_runs(settings, role: str, run_id: int | None) -> list[int]:
-    total = getattr(settings, "train_runs" if role == "train" else "eval_runs", 0)
+def _resolve_runs(settings: BridgeSettings, role: str, run_id: int | None) -> list[int]:
+    total = settings.train_runs if role == "train" else settings.eval_runs
     if total <= 0:
         return []
     if run_id is not None:
@@ -378,46 +410,6 @@ def _get_trials(config: ScenarioConfig, role: str, target: str) -> int:
     return config.eval_micro_trials
 
 
-def _run_hpo_runs(
-    *,
-    layout: RunLayout,
-    role: str,
-    target: str,
-    runs: Sequence[int],
-    trials: int,
-    space: dict[str, ParameterBounds],
-    evaluator,
-    base_seed: int,
-    write_csv: bool,
-) -> dict[int, TrialResult]:
-    best: dict[int, TrialResult] = {}
-    for run_idx in runs:
-        output_dir = layout.run_dir(role, target, run_idx)
-        output_dir.mkdir(parents=True, exist_ok=True)
-        storage_uri = layout.storage_uri(role, target, run_idx, ensure_dir=False)
-        outcome = run_phase(
-            scenario=layout.scenario,
-            phase=f"{role}-{target}-{run_idx:03d}",
-            trials=trials,
-            space=space,
-            evaluator=evaluator,
-            seed=layout.seed(base_seed, role, target, run_idx),
-            output_dir=output_dir,
-            storage=storage_uri,
-            study_name=f"{layout.scenario}-{role}-{target}-{run_idx:03d}",
-            write_csv=False,
-        )
-        best[run_idx] = _best_trial(outcome.trials)
-    if write_csv and best:
-        csv_path = layout.scenario_dir() / f"{role}_{target}_best.csv"
-        rows = []
-        for run_idx in sorted(best):
-            row = {"run_id": run_idx} | {f"param_{k}": v for k, v in best[run_idx].context.params.items()}
-            rows.append(row)
-        write_csv(csv_path, rows)
-    return best
-
-
 def _ensure_best(
     config: ScenarioConfig,
     settings: BridgeSettings,
@@ -429,26 +421,35 @@ def _ensure_best(
     if cache:
         return cache
     runs = _resolve_runs(settings, role, None)
-    return _load_best_trials_from_storage(layout, role, target, runs)
+    return _load_best_trials_from_storage(layout, config, role, target, runs)
 
 
 def _load_best_trials_from_storage(
     layout: RunLayout,
+    config: ScenarioConfig,
     role: str,
     target: str,
     runs: Sequence[int],
 ) -> dict[int, TrialResult]:
     best: dict[int, TrialResult] = {}
     for run_idx in runs:
-        storage_uri = layout.storage_uri(role, target, run_idx, ensure_dir=False)
-        db_path = storage_uri.removeprefix("sqlite:///")
-        if not Path(db_path).exists():
+        storage_uri = layout.storage_uri(role, target, run_idx)
+        db_path = Path(storage_uri.removeprefix("sqlite:///"))
+        if not db_path.exists():
             continue
         try:
-            study = optuna.load_study(study_name=f"{layout.scenario}-{role}-{target}-{run_idx:03d}", storage=storage_uri)
+            study = optuna.load_study(
+                study_name=f"{config.name}-{role}-{target}-{run_idx:03d}",
+                storage=storage_uri,
+            )
         except Exception:
             continue
-        trials = collect_trial_results(study=study, scenario=layout.scenario, phase=f"{role}-{target}", output_dir=Path(db_path).parent)
+        trials = collect_trial_results(
+            study=study,
+            scenario=config.name,
+            phase=target,
+            output_dir=db_path.parent,
+        )
         if trials:
             best[run_idx] = _best_trial(trials)
     return best
@@ -476,6 +477,16 @@ def _compose_samples(
     return samples
 
 
+def _compose_samples_optional(
+    macro: dict[int, TrialResult],
+    micro: dict[int, TrialResult],
+) -> list[tuple[int, RegressionSample]]:
+    try:
+        return _compose_samples(macro, micro)
+    except RuntimeError:
+        return []
+
+
 def _persist_best_pairs(path: Path, samples: list[tuple[int, RegressionSample]]) -> None:
     rows = []
     for run_idx, sample in samples:
@@ -501,27 +512,6 @@ def _persist_predictions(
     write_csv(path, rows)
 
 
-def _compose_samples_optional(
-    macro: dict[int, TrialResult],
-    micro: dict[int, TrialResult],
-) -> list[tuple[int, RegressionSample]]:
-    try:
-        return _compose_samples(macro, micro)
-    except RuntimeError:
-        return []
-
-
-def _load_regression_model(path: Path) -> RegressionModel:
-    if not path.exists():
-        raise RuntimeError(f"Regression model missing at {path}")
-    payload = read_json(path)
-    return RegressionModel.from_dict(payload)
-
-
-def _best_trial(trials: list[TrialResult]) -> TrialResult:
-    return min(trials, key=lambda t: t.evaluation.objective)
-
-
 def _persist_scenario_summary(path: Path, summary: ScenarioSummary) -> None:
     write_json(
         path / SCENARIO_SUMMARY_FILE,
@@ -538,6 +528,10 @@ def _persist_scenario_summary(path: Path, summary: ScenarioSummary) -> None:
     )
 
 
+def _best_trial(trials: list[TrialResult]) -> TrialResult:
+    return min(trials, key=lambda t: t.evaluation.objective)
+
+
 def _seed_offset(role: str, target: str) -> int:
     if role == "train" and target == "micro":
         return 1
@@ -548,4 +542,57 @@ def _seed_offset(role: str, target: str) -> int:
     return 0
 
 
-__all__ = ["run_pipeline", "PHASE_ORDER"]
+def _base_env(settings: BridgeSettings) -> dict[str, str]:
+    env = {
+        "AIACCEL_OUTPUT_DIR": str(settings.output_dir),
+        "AIACCEL_WORK_DIR": str(settings.working_directory or settings.output_dir),
+    }
+    return env
+
+
+def _write_best_csv(
+    layout: RunLayout,
+    role: str,
+    target: str,
+    best: dict[int, TrialResult],
+    enable_csv: bool,
+) -> None:
+    if not enable_csv or not best:
+        return
+    csv_path = layout.scenario_dir() / f"{role}_{target}_best.csv"
+    rows = []
+    for run_idx in sorted(best):
+        row = {"run_id": run_idx} | {f"param_{k}": v for k, v in best[run_idx].context.params.items()}
+        rows.append(row)
+    if rows:
+        write_csv(csv_path, rows)
+
+
+def _ensure_model(
+    layout: RunLayout,
+    state: ScenarioState,
+    scenario_cfg: ScenarioConfig,
+    samples_for_fit: list[RegressionSample] | None,
+) -> RegressionModel:
+    if state.model is not None:
+        return state.model
+    if samples_for_fit:
+        model = fit_regression(samples_for_fit, scenario_cfg.regression)
+        state.model = model
+        return model
+    model_path = layout.scenario_dir() / "regression_train.json"
+    payload = read_json(model_path)
+    model = RegressionModel.from_dict(payload)
+    state.model = model
+    return model
+
+
+def _evaluate_metrics(
+    model: RegressionModel,
+    samples: list[RegressionSample],
+    metrics: tuple[str, ...] | list[str],
+) -> dict[str, float]:
+    return {k: float(v) for k, v in evaluate_regression(model, samples, metrics=metrics).items()}
+
+
+__all__ = ["PHASE_ORDER", "PipelinePlan", "plan_pipeline", "execute_pipeline", "run_pipeline"]

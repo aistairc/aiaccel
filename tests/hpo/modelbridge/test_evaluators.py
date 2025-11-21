@@ -23,7 +23,10 @@ def test_build_evaluator_python_callable() -> None:
     evaluator = build_evaluator(config, base_env={"FROM": "TEST"})
     result = evaluator(_context())
     assert result.metrics["mae"] == 0.5
-    assert result.payload["base_env"] == {"FROM": "TEST"}
+    env_payload = result.payload["env"]
+    assert env_payload["FROM"] == "TEST"
+    assert env_payload["AIACCEL_SCENARIO"] == "demo"
+    assert env_payload["AIACCEL_PHASE"] == "macro"
 
 
 def test_command_objective_runs_subprocess() -> None:

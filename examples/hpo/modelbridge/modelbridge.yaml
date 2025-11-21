@@ -20,9 +20,26 @@ bridge:
       train_micro_trials: 12
       eval_macro_trials: 6
       eval_micro_trials: 6
-      objective:
+      train_objective:
         target: examples.hpo.modelbridge.simple_benchmark.objective
-      params:
+      eval_objective:
+        target: examples.hpo.modelbridge.simple_benchmark.objective
+      train_params:
+        macro:
+          macro_x:
+            low: -1.0
+            high: 1.0
+          macro_y:
+            low: -1.0
+            high: 1.0
+        micro:
+          micro_x:
+            low: -1.0
+            high: 1.0
+          micro_y:
+            low: -1.0
+            high: 1.0
+      eval_params:
         macro:
           macro_x:
             low: -1.0

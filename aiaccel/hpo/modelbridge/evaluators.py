@@ -7,7 +7,6 @@ from typing import Any, cast
 from collections.abc import Callable, Mapping
 from functools import partial
 import importlib
-import inspect
 import json
 import os
 import subprocess
@@ -22,6 +21,7 @@ def build_evaluator(
 ) -> Callable[[TrialContext], EvaluationResult]:
     """Build an evaluator callable based on ``ObjectiveConfig``."""
 
+    env_payload = dict(base_env or {})
     func = _import_callable(config.target)
     if func is command_objective:
         if not config.command:
@@ -32,17 +32,13 @@ def build_evaluator(
                 command_objective,
                 command=config.command,
                 timeout=config.timeout,
-                base_env=base_env,
+                base_env=env_payload,
             ),
         )
 
-    signature = inspect.signature(func)
-    accepts_base_env = "base_env" in signature.parameters
-
     def evaluator(context: TrialContext) -> Any:
-        if accepts_base_env:
-            return func(context, base_env=base_env)
-        return func(context)
+        env = _build_env(context, env_payload)
+        return func(context, env)
 
     return evaluator
 
@@ -56,18 +52,8 @@ def command_objective(
 ) -> EvaluationResult:
     """Execute an external command and parse its JSON output."""
 
-    env = os.environ.copy()
-    if base_env:
-        env.update(base_env)
-    env.update(
-        {
-            "AIACCEL_SCENARIO": context.scenario,
-            "AIACCEL_PHASE": context.phase,
-            "AIACCEL_TRIAL_INDEX": str(context.trial_index),
-        }
-    )
-    for key, value in context.params.items():
-        env[f"AIACCEL_PARAM_{key.upper()}"] = str(value)
+    env = _build_env(context, os.environ | dict(base_env or {}))
+    env["AIACCEL_TRIAL_INDEX"] = env["AIACCEL_TRIAL"]
 
     try:
         completed = subprocess.run(
@@ -106,6 +92,19 @@ def _import_callable(path: str) -> Any:
     if not callable(func):
         raise ValueError(f"Target '{path}' is not callable")
     return func
+
+
+def _build_env(context: TrialContext, base_env: Mapping[str, str]) -> dict[str, str]:
+    env = dict(base_env)
+    env.update(
+        {
+            "AIACCEL_SCENARIO": context.scenario,
+            "AIACCEL_PHASE": context.phase,
+            "AIACCEL_TRIAL": str(context.trial_index),
+        }
+    )
+    env.update({f"AIACCEL_PARAM_{key.upper()}": str(value) for key, value in context.params.items()})
+    return env
 
 
 __all__ = ["build_evaluator", "command_objective"]

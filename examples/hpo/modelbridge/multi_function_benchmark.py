@@ -30,7 +30,8 @@ class ScenarioSpec:
     micro: str
     macro: str
     regression: RegressionConfig
-    trials: int
+    train_trials: int
+    eval_trials: int
 
 
 Vector = NDArray[np.float64]
@@ -69,30 +70,32 @@ SCENARIOS = {
             micro="sphere",
             macro="rastrigin",
             regression=RegressionConfig(kind="linear", degree=2),
-            trials=80,
+            train_trials=80,
+            eval_trials=40,
         ),
         ScenarioSpec(
             name="rastrigin_to_sphere",
             micro="rastrigin",
             macro="sphere",
             regression=RegressionConfig(kind="linear", degree=1),
-            trials=100,
+            train_trials=100,
+            eval_trials=50,
         ),
         ScenarioSpec(
             name="griewank_to_sphere",
             micro="griewank",
             macro="sphere",
             regression=RegressionConfig(kind="linear", degree=2),
-            trials=120,
+            train_trials=120,
+            eval_trials=60,
         ),
     )
 }
 
 
-def benchmark_objective(context: TrialContext, base_env: Mapping[str, str] | None = None) -> EvaluationResult:
+def benchmark_objective(context: TrialContext, env: Mapping[str, str] | None = None) -> EvaluationResult:  # noqa: ARG001
     """Evaluate the configured benchmark for the given scenario/phase."""
 
-    del base_env
     spec = SCENARIOS[context.scenario]
     phase = "macro" if context.phase == "macro" else "micro"
     fn_name = spec.macro if phase == "macro" else spec.micro
@@ -112,12 +115,27 @@ def build_config(base_dir: Path) -> BridgeConfig:
         scenario_configs.append(
             ScenarioConfig(
                 name=spec.name,
-                macro_trials=spec.trials,
-                micro_trials=spec.trials,
-                objective=ObjectiveConfig(
+                train_macro_trials=spec.train_trials,
+                train_micro_trials=spec.train_trials,
+                eval_macro_trials=spec.eval_trials,
+                eval_micro_trials=spec.eval_trials,
+                train_objective=ObjectiveConfig(
                     target="examples.hpo.modelbridge.multi_function_benchmark.benchmark_objective"
                 ),
-                params=ParameterSpace(
+                eval_objective=ObjectiveConfig(
+                    target="examples.hpo.modelbridge.multi_function_benchmark.benchmark_objective"
+                ),
+                train_params=ParameterSpace(
+                    macro={
+                        "macro_x1": ParameterBounds(low=-5.0, high=5.0),
+                        "macro_x2": ParameterBounds(low=-5.0, high=5.0),
+                    },
+                    micro={
+                        "micro_x1": ParameterBounds(low=-5.0, high=5.0),
+                        "micro_x2": ParameterBounds(low=-5.0, high=5.0),
+                    },
+                ),
+                eval_params=ParameterSpace(
                     macro={
                         "macro_x1": ParameterBounds(low=-5.0, high=5.0),
                         "macro_x2": ParameterBounds(low=-5.0, high=5.0),
@@ -135,6 +153,8 @@ def build_config(base_dir: Path) -> BridgeConfig:
     settings = BridgeSettings(
         output_dir=base_dir / "work" / "modelbridge" / "multi_function",
         seed=123,
+        train_runs=1,
+        eval_runs=1,
         scenarios=scenario_configs,
     )
 

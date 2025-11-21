@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -46,9 +46,45 @@ class RegressionSample:
     target: dict[str, float]
 
 
+@dataclass(slots=True)
+class PhaseContext:
+    """Execution unit used by the modelbridge pipeline."""
+
+    scenario: str
+    phase: str
+    role: str | None = None
+    target: str | None = None
+    run_id: int | None = None
+    seed: int | None = None
+    output_dir: Path | None = None
+    working_directory: Path | None = None
+    runner: Any | None = field(default=None, repr=False, compare=False)
+
+    def serializable(self) -> dict[str, object]:
+        """Return a JSON-safe dict view without the runner callable."""
+
+        return {
+            "scenario": self.scenario,
+            "phase": self.phase,
+            "role": self.role,
+            "target": self.target,
+            "run_id": self.run_id,
+            "seed": self.seed,
+            "output_dir": str(self.output_dir) if self.output_dir else None,
+            "working_directory": str(self.working_directory) if self.working_directory else None,
+        }
+
+
+RunnerFn = Callable[[PhaseContext, Any, Any, Any], Any]
+EvaluatorFn = Callable[[TrialContext], EvaluationResult]
+
+
 __all__ = [
     "TrialContext",
     "EvaluationResult",
     "TrialResult",
     "RegressionSample",
+    "PhaseContext",
+    "RunnerFn",
+    "EvaluatorFn",
 ]

@@ -24,7 +24,4 @@ ROOT="${ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 export PYTHONPATH="${PYTHONPATH:-$ROOT}"
 export MODELBRIDGE_CONFIG MODELBRIDGE_OUTPUT MODELBRIDGE_SCENARIO TRAIN_RUN_IDS EVAL_RUN_IDS
 
-LOG_DIR="${MODELBRIDGE_OUTPUT:-./work/modelbridge}/logs"
-mkdir -p "$LOG_DIR"
-
 exec "${cmd[@]}" >"$LOG_PATH" 2>&1

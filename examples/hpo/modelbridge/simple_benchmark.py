@@ -25,10 +25,9 @@ from aiaccel.hpo.modelbridge.runner import run_pipeline
 from aiaccel.hpo.modelbridge.types import EvaluationResult, TrialContext
 
 
-def objective(context: TrialContext, base_env: Mapping[str, str] | None = None) -> EvaluationResult:
+def objective(context: TrialContext, env: Mapping[str, str] | None = None) -> EvaluationResult:  # noqa: ARG001
     """Synthetic macro/micro target that stays differentiable and bounded."""
 
-    del base_env  # The example keeps the signature but does not use the value.
     if context.phase == "macro":
         x = context.params.get("macro_x", 0.0)
         y = context.params.get("macro_y", 0.0)
@@ -50,8 +49,19 @@ def build_config(base_dir: Path) -> BridgeConfig:
         train_micro_trials=12,
         eval_macro_trials=6,
         eval_micro_trials=6,
-        objective=ObjectiveConfig(target="examples.hpo.modelbridge.simple_benchmark.objective"),
-        params=ParameterSpace(
+        train_objective=ObjectiveConfig(target="examples.hpo.modelbridge.simple_benchmark.objective"),
+        eval_objective=ObjectiveConfig(target="examples.hpo.modelbridge.simple_benchmark.objective"),
+        train_params=ParameterSpace(
+            macro={
+                "macro_x": ParameterBounds(low=-1.0, high=1.0),
+                "macro_y": ParameterBounds(low=-1.0, high=1.0),
+            },
+            micro={
+                "micro_x": ParameterBounds(low=-1.0, high=1.0),
+                "micro_y": ParameterBounds(low=-1.0, high=1.0),
+            },
+        ),
+        eval_params=ParameterSpace(
             macro={
                 "macro_x": ParameterBounds(low=-1.0, high=1.0),
                 "macro_y": ParameterBounds(low=-1.0, high=1.0),

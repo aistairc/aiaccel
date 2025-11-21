@@ -2,7 +2,12 @@
 
 ## Quick Start
 1. Copy `examples/hpo/modelbridge/Makefile.template` next to your configuration or call it directly with `make -f`.
-2. Execute the staged pipeline (ここでは run range で 0〜1 を指定):
+2. Plan the run if needed:
+   ```bash
+   make -f examples/hpo/modelbridge/Makefile.template plan \
+     MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml
+   ```
+3. Execute the staged pipeline (ここでは run range で 0〜1 を指定):
    ```bash
    make -f examples/hpo/modelbridge/Makefile.template \
      pipeline \
@@ -12,14 +17,14 @@
      TRAIN_RUN_RANGE=0..1 \
      EVAL_RUN_RANGE=0..1
    ```
-3. Inspect artifacts under `work/modelbridge/simple` (Optuna DBs in `runs/*/*/<run>/optuna.db`, regression model in `regression_train.json`, summaries in `summary.json`).
+4. Inspect artifacts under `work/modelbridge/simple` (Optuna DBs in `runs/*/*/<run>/optuna.db`, regression model in `regression_train.json`, summaries in `summary.json`).
 
 ## Makefile Template Highlights
-- Targets `train-macro`, `train-micro`, `eval-macro`, and `eval-micro` each materialize the Optuna databases for every run listed in `TRAIN_RUN_IDS` / `EVAL_RUN_IDS` by calling `aiaccel-hpo modelbridge --phase hpo --role <role> --target <target> --run-id <run>`.
+- Targets `train-macro`, `train-micro`, `eval-macro`, and `eval-micro` each materialize the Optuna databases for every run listed in `TRAIN_RUN_IDS` / `EVAL_RUN_IDS` by calling `aiaccel-hpo modelbridge run --phase hpo --role <role> --target <target> --run-id <run>`.
 - Artifacts are addressed directly (e.g. `work/modelbridge/simple/runs/<scenario>/train/macro/000/optuna.db`), so rerunning `make train-macro` only re-executes the missing run directories.
-- `regress`, `evaluate`, and `summary` wrap the corresponding phases, while `pipeline` chains all phases for a full run.
+- `regress`, `evaluate`, and `summary` wrap the corresponding phases, while `pipeline` chains all phases for a full run. A `plan` target prints the PhaseContext list without executing.
 - Tunable variables:
-  - `MODELBRIDGE_CONFIG`: path to the YAML configuration.
+  - `MODELBRIDGE_CONFIG`: path to the YAML configuration (uses strict train/eval objectives/params).
   - `MODELBRIDGE_OUTPUT`: destination for scenario results.
   - `MODELBRIDGE_SCENARIO`: scenario name under `bridge.scenarios`.
   - `TRAIN_RUN_RANGE` / `EVAL_RUN_RANGE`: `start..end[..step]` 形式で run ID を範囲指定（デフォルト 0..1）。
