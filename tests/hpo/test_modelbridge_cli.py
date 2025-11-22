@@ -40,3 +40,31 @@ def test_modelbridge_cli_validate(tmp_path: Path, capsys: pytest.CaptureFixture[
     config_path = _write_config(tmp_path, make_bridge_config)
     cli_main(["validate", "--config", str(config_path)])
     assert "outputs" not in capsys.readouterr().out
+
+
+def test_modelbridge_cli_overrides_output_dir(tmp_path: Path, make_bridge_config) -> None:
+    config_path = _write_config(tmp_path, make_bridge_config)
+    override_output = tmp_path / "custom_outputs"
+    cli_main(
+        [
+            "run",
+            "--config",
+            str(config_path),
+            "--phase",
+            "hpo",
+            "--role",
+            "train",
+            "--target",
+            "macro",
+            "--set",
+            f"bridge.output_dir={override_output}",
+        ]
+    )
+    db_path = override_output / "runs" / "demo" / "train" / "macro" / "000" / "optuna.db"
+    assert db_path.exists()
+
+
+def test_modelbridge_cli_schema(capsys: pytest.CaptureFixture[str]) -> None:
+    cli_main(["schema"])
+    output = capsys.readouterr().out
+    assert "properties" in output

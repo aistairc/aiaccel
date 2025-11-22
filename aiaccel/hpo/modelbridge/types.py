@@ -59,6 +59,7 @@ class PhaseContext:
     output_dir: Path | None = None
     working_directory: Path | None = None
     runner: Any | None = field(default=None, repr=False, compare=False)
+    depends_on: list[str] = field(default_factory=list)
 
     def serializable(self) -> dict[str, object]:
         """Return a JSON-safe dict view without the runner callable."""
@@ -72,10 +73,21 @@ class PhaseContext:
             "seed": self.seed,
             "output_dir": str(self.output_dir) if self.output_dir else None,
             "working_directory": str(self.working_directory) if self.working_directory else None,
+            "depends_on": list(self.depends_on),
         }
 
 
-RunnerFn = Callable[[PhaseContext, Any, Any, Any], Any]
+@dataclass(slots=True)
+class RunContext:
+    """Runtime context passed to runner callables."""
+
+    phase: PhaseContext
+    scenario: Any
+    settings: Any
+    state: Any
+
+
+RunnerFn = Callable[[RunContext], Any]
 EvaluatorFn = Callable[[TrialContext], EvaluationResult]
 
 

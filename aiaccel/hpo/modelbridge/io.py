@@ -6,6 +6,7 @@ from typing import Any
 
 from collections.abc import Iterable, Mapping
 import json
+import hashlib
 from pathlib import Path
 
 
@@ -58,4 +59,14 @@ def read_json(path: Path) -> dict[str, Any]:
     return data
 
 
-__all__ = ["write_csv", "write_json", "read_csv", "read_json"]
+def hash_file(path: Path, algorithm: str = "sha256") -> str:
+    """Return the hex digest of ``path`` using the requested algorithm."""
+
+    hasher = hashlib.new(algorithm)
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(8192), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
+__all__ = ["write_csv", "write_json", "read_csv", "read_json", "hash_file"]

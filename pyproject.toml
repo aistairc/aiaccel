@@ -20,6 +20,7 @@ dependencies = [
     "scipy",
     "optuna>=4.5.0",
     "omegaconf",
+    "pydantic>=2.8.0",
     "hydra-core",
     "huggingface-hub",
     "colorama",
@@ -76,6 +77,7 @@ github-actions = [
 modelbridge = [
     "scikit-learn",
     "GPy",
+    "pydantic>=2.8.0",
 ]
 
 [project.scripts]

@@ -10,6 +10,7 @@ import importlib
 import json
 import os
 import subprocess
+import urllib.request
 
 from .config import ObjectiveConfig
 from .types import EvaluationResult, TrialContext
@@ -22,6 +23,17 @@ def build_evaluator(
     """Build an evaluator callable based on ``ObjectiveConfig``."""
 
     env_payload = dict(base_env or {})
+    if config.target.startswith(("http://", "https://")):
+        return cast(
+            Callable[[TrialContext], EvaluationResult],
+            partial(
+                http_objective,
+                endpoint=config.target,
+                timeout=config.timeout,
+                base_env=env_payload,
+            ),
+        )
+
     func = _import_callable(config.target)
     if func is command_objective:
         if not config.command:
@@ -73,6 +85,42 @@ def command_objective(
         payload = json.loads(completed.stdout or "{}")
     except json.JSONDecodeError as exc:
         raise RuntimeError("Command did not return valid JSON") from exc
+
+    objective = float(payload.get("objective"))
+    metrics = {str(k): float(v) for k, v in payload.get("metrics", {}).items()}
+    extra = {str(k): v for k, v in payload.get("payload", {}).items()}
+    return EvaluationResult(objective=objective, metrics=metrics, payload=extra)
+
+
+def http_objective(
+    context: TrialContext,
+    *,
+    endpoint: str,
+    timeout: float | None,
+    base_env: Mapping[str, str] | None,
+) -> EvaluationResult:
+    """POST context/env as JSON to an HTTP endpoint and parse response."""
+
+    env = _build_env(context, base_env or {})
+    request_payload = {
+        "scenario": context.scenario,
+        "phase": context.phase,
+        "trial_index": context.trial_index,
+        "params": context.params,
+        "env": env,
+    }
+    data = json.dumps(request_payload).encode("utf-8")
+    req = urllib.request.Request(endpoint, data=data, headers={"Content-Type": "application/json"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            resp_body = resp.read().decode("utf-8")
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError(f"HTTP objective failed: {exc}") from exc
+
+    try:
+        payload = json.loads(resp_body or "{}")
+    except json.JSONDecodeError as exc:  # noqa: PERF203
+        raise RuntimeError("HTTP objective did not return valid JSON") from exc
 
     objective = float(payload.get("objective"))
     metrics = {str(k): float(v) for k, v in payload.get("metrics", {}).items()}

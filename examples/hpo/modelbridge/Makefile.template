@@ -7,6 +7,8 @@ MODELBRIDGE_CONFIG ?= ./modelbridge.yaml
 MODELBRIDGE_OUTPUT ?= ./work/modelbridge/simple
 MODELBRIDGE_SCENARIO ?= simple
 MODELBRIDGE_LOG_DIR ?= $(MODELBRIDGE_OUTPUT)/logs
+MODELBRIDGE_JSON_LOG ?=
+MODELBRIDGE_SET ?=
 JOB_TEMPLATE ?= jobs/modelbridge/local.sh
 AIACCEL_CMD ?= bash $(JOB_TEMPLATE)
 JOB_OPTS ?=
@@ -45,6 +47,10 @@ TRAIN_MICRO_TARGETS := $(call _hpo_targets,train,$(TRAIN_RUN_IDS),micro)
 EVAL_MACRO_TARGETS := $(call _hpo_targets,eval,$(EVAL_RUN_IDS),macro)
 EVAL_MICRO_TARGETS := $(call _hpo_targets,eval,$(EVAL_RUN_IDS),micro)
 
+JSON_LOG_FLAG := $(if $(filter 1 true TRUE yes YES,$(MODELBRIDGE_JSON_LOG)),--json-log,)
+SET_FLAGS := $(addprefix --set ,$(MODELBRIDGE_SET))
+COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --scenario $(MODELBRIDGE_SCENARIO) --set bridge.output_dir=$(MODELBRIDGE_OUTPUT) --set bridge.working_directory=$(MODELBRIDGE_OUTPUT) $(JSON_LOG_FLAG) $(SET_FLAGS)
+
 .PHONY: pipeline plan print-config train-macro train-micro eval-macro eval-micro \
 	regress evaluate summary clean
 
@@ -52,11 +58,11 @@ pipeline: train-macro train-micro regress eval-macro eval-micro evaluate summary
 
 plan: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/plan.log -- \
-		aiaccel-hpo modelbridge plan --config $(MODELBRIDGE_CONFIG)
+		aiaccel-hpo modelbridge plan $(COMMON_FLAGS)
 
 print-config: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/config.log -- \
-		aiaccel-hpo modelbridge validate --config $(MODELBRIDGE_CONFIG) --print-config
+		aiaccel-hpo modelbridge validate $(COMMON_FLAGS) --print-config
 
 train-macro: $(TRAIN_MACRO_TARGETS)
 train-micro: $(TRAIN_MICRO_TARGETS)
@@ -65,15 +71,15 @@ eval-micro: $(EVAL_MICRO_TARGETS)
 
 regress: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/regress.log -- \
-		aiaccel-hpo modelbridge run --config $(MODELBRIDGE_CONFIG) --phase regress
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --phase regress
 
 evaluate: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/evaluate.log -- \
-		aiaccel-hpo modelbridge run --config $(MODELBRIDGE_CONFIG) --phase evaluate
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --phase evaluate
 
 summary: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/summary.log -- \
-		aiaccel-hpo modelbridge run --config $(MODELBRIDGE_CONFIG) --phase summary
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --phase summary
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@
@@ -82,7 +88,7 @@ define HPO_RULE
 $$(RUN_ROOT)/$(1)/$(2)/%/optuna.db: | $$(MODELBRIDGE_LOG_DIR)
 	@mkdir -p $$(@D)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/$(1)-$(2)-$$*.log -- \
-		aiaccel-hpo modelbridge run --config $(MODELBRIDGE_CONFIG) --phase hpo --role $(1) --target $(2) --run-id $$*
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --phase hpo --role $(1) --target $(2) --run-id $$*
 endef
 
 $(foreach role,train eval,$(foreach target,macro micro,$(eval $(call HPO_RULE,$(role),$(target)))))

@@ -1,8 +1,8 @@
 """Lightweight modelbridge pipeline integration."""
 
-from .config import BridgeConfig, BridgeSettings, ObjectiveConfig, ParameterSpace, ScenarioConfig
+from .config import BridgeConfig, BridgeSettings, ObjectiveConfig, ParameterSpace, ScenarioConfig, generate_schema
 from .runner import PipelinePlan, execute_pipeline, plan_pipeline, run_pipeline
-from .types import EvaluationResult, EvaluatorFn, PhaseContext, RunnerFn, TrialContext, TrialResult
+from .types import EvaluationResult, EvaluatorFn, PhaseContext, RunContext, RunnerFn, TrialContext, TrialResult
 
 __all__ = [
     "BridgeConfig",
@@ -10,9 +10,11 @@ __all__ = [
     "ObjectiveConfig",
     "ParameterSpace",
     "ScenarioConfig",
+    "generate_schema",
     "EvaluationResult",
     "EvaluatorFn",
     "RunnerFn",
+    "RunContext",
     "PhaseContext",
     "TrialContext",
     "TrialResult",

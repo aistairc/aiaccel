@@ -1,56 +1,116 @@
-"""Configuration dataclasses and helpers for the redesigned modelbridge pipeline."""
+"""Configuration models and helpers for the redesigned modelbridge pipeline."""
 
 from __future__ import annotations
 
 from typing import Any
 
-from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from omegaconf import OmegaConf
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 
-@dataclass
-class ParameterBounds:
+class ParameterBounds(BaseModel):
     """Numeric parameter definition for Optuna suggestions."""
+
+    model_config = ConfigDict(extra="forbid")
 
     low: float
     high: float
     step: float | None = None
     log: bool = False
 
+    @field_validator("high")
+    @classmethod
+    def _ensure_range(cls, high: float, info) -> float:  # type: ignore[override]
+        low = info.data.get("low", high)
+        if high <= low:
+            raise ValueError("high must be greater than low")
+        return high
 
-@dataclass
-class ParameterSpace:
+
+class ParameterSpace(BaseModel):
     """Collection of macro/micro parameter bounds."""
 
-    macro: dict[str, ParameterBounds] = field(default_factory=dict)
-    micro: dict[str, ParameterBounds] = field(default_factory=dict)
+    model_config = ConfigDict(extra="forbid")
+
+    macro: dict[str, ParameterBounds] = Field(default_factory=dict)
+    micro: dict[str, ParameterBounds] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _require_params(self) -> "ParameterSpace":
+        if not self.macro or not self.micro:
+            raise ValueError("macro and micro parameter spaces must be provided")
+        return self
 
 
-@dataclass
-class ObjectiveConfig:
+class ObjectiveConfig(BaseModel):
     """Definition of the evaluation entry point."""
+
+    model_config = ConfigDict(extra="forbid")
 
     target: str
     command: list[str] | None = None
     timeout: float | None = None
 
+    @field_validator("command")
+    @classmethod
+    def _coerce_command(cls, command: list[Any] | None) -> list[str] | None:
+        if command is None:
+            return None
+        if not isinstance(command, list):
+            raise ValueError("command must be a list")
+        return [str(item) for item in command]
 
-@dataclass
-class RegressionConfig:
+
+class RegressionConfig(BaseModel):
     """Regression strategy configuration."""
+
+    model_config = ConfigDict(extra="forbid")
 
     kind: str = "linear"
     degree: int = 1
     kernel: str | None = None
     noise: float | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_aliases(cls, data: Any) -> Any:
+        if not isinstance(data, Mapping):
+            return data
+        payload = dict(data)
+        kind_alias = payload.pop("type", None)
+        if kind_alias:
+            payload["kind"] = kind_alias
+        poly = payload.pop("poly", None)
+        if isinstance(poly, Mapping) and "degree" in poly:
+            payload["degree"] = poly.get("degree")
+        gpr = payload.pop("gpr", None)
+        if isinstance(gpr, Mapping):
+            if "kernel" in gpr:
+                payload["kernel"] = gpr.get("kernel")
+            if "noise" in gpr:
+                payload["noise"] = gpr.get("noise")
+            if "alpha" in gpr:
+                payload["noise"] = gpr.get("alpha")
+        if "alpha" in payload and payload.get("noise") is None:
+            payload["noise"] = payload["alpha"]
+            payload.pop("alpha", None)
+        return payload
 
-@dataclass
-class ScenarioConfig:
+    @field_validator("degree")
+    @classmethod
+    def _validate_degree(cls, value: int) -> int:
+        if value < 1:
+            raise ValueError("degree must be >= 1")
+        return value
+
+
+class ScenarioConfig(BaseModel):
     """Configuration for a single bridging scenario."""
+
+    model_config = ConfigDict(extra="forbid")
 
     name: str
     train_macro_trials: int
@@ -61,13 +121,40 @@ class ScenarioConfig:
     eval_objective: ObjectiveConfig
     train_params: ParameterSpace
     eval_params: ParameterSpace
-    regression: RegressionConfig = field(default_factory=RegressionConfig)
-    metrics: Sequence[str] = field(default_factory=lambda: ("mae", "mse", "r2"))
+    regression: RegressionConfig = Field(default_factory=RegressionConfig)
+    metrics: Sequence[str] = Field(default_factory=lambda: ("mae", "mse", "r2"))
+
+    @field_validator("train_macro_trials", "train_micro_trials", "eval_macro_trials", "eval_micro_trials")
+    @classmethod
+    def _validate_trials(cls, value: int) -> int:
+        if value <= 0:
+            raise ValueError("trial counts must be > 0")
+        return value
+
+    @field_validator("metrics")
+    @classmethod
+    def _validate_metrics(cls, metrics: Sequence[str]) -> tuple[str, ...]:
+        allowed = {"mae", "mse", "r2"}
+        metrics_tuple = tuple(str(item) for item in metrics)
+        invalid = [metric for metric in metrics_tuple if metric not in allowed]
+        if invalid:
+            raise ValueError(f"metrics contains unsupported values: {', '.join(invalid)}")
+        return metrics_tuple
 
 
-@dataclass
-class BridgeSettings:
+class HpoSettings(BaseModel):
+    """HPO backend knobs."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    optimizer: str = "optuna"
+    sampler: str = "tpe"
+
+
+class BridgeSettings(BaseModel):
     """Common settings applied to every scenario run."""
+
+    model_config = ConfigDict(extra="forbid")
 
     output_dir: Path
     working_directory: Path | None = None
@@ -76,294 +163,68 @@ class BridgeSettings:
     train_runs: int = 1
     eval_runs: int = 0
     write_csv: bool = False
-    scenarios: list[ScenarioConfig] = field(default_factory=list)
+    scenarios: list[ScenarioConfig] = Field(default_factory=list)
 
-    def __post_init__(self) -> None:
+    @field_validator("train_runs", "eval_runs")
+    @classmethod
+    def _validate_runs(cls, value: int) -> int:
+        if value < 0:
+            raise ValueError("run counts must be >= 0")
+        return value
+
+    @model_validator(mode="after")
+    def _default_workdir(self) -> "BridgeSettings":
         if self.working_directory is None:
             self.working_directory = self.output_dir
+        return self
 
 
-@dataclass
-class HpoSettings:
-    """HPO backend knobs."""
-
-    optimizer: str = "optuna"
-    sampler: str = "tpe"
-
-
-@dataclass
-class BridgeConfig:
+class BridgeConfig(BaseModel):
     """Top level configuration consumed by ``run_pipeline``."""
 
-    hpo: HpoSettings = field(default_factory=HpoSettings)
-    bridge: BridgeSettings = field(default_factory=lambda: BridgeSettings(output_dir=Path("./work/modelbridge")))
+    model_config = ConfigDict(extra="ignore")
+
+    hpo: HpoSettings = Field(default_factory=HpoSettings)
+    bridge: BridgeSettings = Field(default_factory=lambda: BridgeSettings(output_dir=Path("./work/modelbridge")))
 
 
-def _to_parameter_bounds(mapping: Mapping[str, Any]) -> dict[str, ParameterBounds]:
-    """Convert ``mapping`` into a dictionary of :class:`ParameterBounds`."""
-
-    bounds: dict[str, ParameterBounds] = {}
-    for key, value in mapping.items():
-        value_map = _require_mapping(value, f"Parameter '{key}' definition must be a mapping")
-        low = _require_float(value_map, "low", f"Parameter '{key}' requires 'low' and 'high' floats")
-        high = _require_float(value_map, "high", f"Parameter '{key}' requires 'low' and 'high' floats")
-        step = value_map.get("step")
-        log = bool(value_map.get("log", False))
-        bounds[key] = ParameterBounds(low=low, high=high, step=step, log=log)
-    return bounds
 
 
-def _coerce_trials(name: str, data: Mapping[str, Any], prefix: str) -> tuple[int, int]:
-    macro_key = f"{prefix}_macro_trials"
-    micro_key = f"{prefix}_micro_trials"
-    macro_trials = _require_positive_int(data, macro_key, f"Scenario requires '{macro_key}'")
-    if macro_trials <= 0:
-        raise ValueError(f"Scenario '{name}' requires {macro_key} > 0")
-
-    micro_trials = _require_positive_int(data, micro_key, f"Scenario requires '{micro_key}'")
-    if micro_trials <= 0:
-        raise ValueError(f"Scenario '{name}' requires {micro_key} > 0")
-    return macro_trials, micro_trials
+def _deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
+    merged: dict[str, Any] = dict(base)
+    for key, value in override.items():
+        if isinstance(value, Mapping) and isinstance(base.get(key), Mapping):
+            merged[key] = _deep_merge(base[key], value)  # type: ignore[index]
+        else:
+            merged[key] = value
+    return merged
 
 
-def _coerce_objective(name: str, data: Mapping[str, Any], key: str) -> ObjectiveConfig:
-    raw = _require_mapping(data.get(key), f"Scenario '{name}' requires '{key}'")
-    parsed = _parse_objective_mapping(name, raw, key, require_target=True)
-    return ObjectiveConfig(**parsed)
+def load_bridge_config(payload: Mapping[str, Any], overrides: Mapping[str, Any] | None = None) -> BridgeConfig:
+    """Convert a mapping (or OmegaConf) into a :class:`BridgeConfig`.
 
-
-def _parse_objective_mapping(
-    name: str,
-    payload: Mapping[str, Any],
-    label: str,
-    *,
-    require_target: bool,
-) -> dict[str, Any]:
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"Scenario '{name}' {label} must be a mapping")
-
-    target = payload.get("target")
-    if require_target:
-        if target is None:
-            raise ValueError(f"Scenario '{name}' {label} requires 'target'")
-        target = str(target)
-    elif target is not None:
-        target = str(target)
-
-    command_raw = payload.get("command")
-    command = None
-    if command_raw is not None:
-        if not isinstance(command_raw, Sequence) or isinstance(command_raw, (str, bytes)):  # noqa: PERF203
-            raise ValueError(f"Scenario '{name}' {label} 'command' must be a sequence")
-        command = [str(item) for item in command_raw]
-
-    timeout_raw = payload.get("timeout")
-    timeout = float(timeout_raw) if timeout_raw is not None else None
-
-    result = {"target": target, "command": command, "timeout": timeout}
-    return result
-
-
-def _coerce_params(
-    name: str,
-    data: Mapping[str, Any],
-    key: str,
-) -> ParameterSpace:
-    params_raw = _require_mapping(data.get(key), f"Scenario '{name}' requires '{key}' section")
-
-    macro_raw = params_raw.get("macro")
-    micro_raw = params_raw.get("micro")
-    if not isinstance(macro_raw, Mapping) or not isinstance(micro_raw, Mapping):
-        raise ValueError(f"Scenario '{name}' {key}.macro/micro must be mappings")
-    if not macro_raw or not micro_raw:
-        raise ValueError(f"Scenario '{name}' requires both macro and micro parameters in {key}")
-    macro_bounds = _to_parameter_bounds(macro_raw) if isinstance(macro_raw, Mapping) else {}
-    micro_bounds = _to_parameter_bounds(micro_raw) if isinstance(micro_raw, Mapping) else {}
-
-    return ParameterSpace(macro=macro_bounds, micro=micro_bounds)
-
-
-def _coerce_regression(name: str, data: Mapping[str, Any]) -> RegressionConfig:
-    regression_raw = data.get("regression", {})
-    if not isinstance(regression_raw, Mapping):
-        raise ValueError(f"Scenario '{name}' regression must be a mapping")
-    if not regression_raw:
-        return RegressionConfig()
-
-    kind_value = regression_raw.get("kind", regression_raw.get("type", "linear"))
-    kind = str(kind_value)
-
-    degree_value = regression_raw.get("degree")
-    poly_raw = regression_raw.get("poly")
-    if isinstance(poly_raw, Mapping) and "degree" in poly_raw:
-        degree_value = poly_raw.get("degree")
-    degree = _coerce_int(degree_value, f"Scenario '{name}' regression.degree", default=1)
-
-    kernel_value = regression_raw.get("kernel")
-    gpr_raw = regression_raw.get("gpr")
-    if isinstance(gpr_raw, Mapping) and "kernel" in gpr_raw:
-        kernel_value = gpr_raw.get("kernel")
-    kernel = str(kernel_value) if kernel_value not in (None, "") else None
-
-    noise_value = regression_raw.get("noise")
-    alpha_value = regression_raw.get("alpha")
-    noise = _coerce_float(noise_value, f"Scenario '{name}' regression.noise")
-    alpha = _coerce_float(alpha_value, f"Scenario '{name}' regression.alpha")
-
-    if isinstance(gpr_raw, Mapping):
-        gpr_noise = _coerce_float(gpr_raw.get("noise"), f"Scenario '{name}' regression.gpr.noise")
-        gpr_alpha = _coerce_float(gpr_raw.get("alpha"), f"Scenario '{name}' regression.gpr.alpha")
-        if gpr_noise is not None:
-            noise = gpr_noise
-        if gpr_alpha is not None:
-            alpha = gpr_alpha
-
-    if alpha is not None:
-        noise = alpha
-
-    return RegressionConfig(kind=kind, degree=degree, kernel=kernel, noise=noise)
-
-
-def _coerce_metrics(name: str, data: Mapping[str, Any]) -> tuple[str, ...]:
-    metrics_raw = data.get("metrics", ("mae", "mse", "r2"))
-    if not isinstance(metrics_raw, (list, tuple)):
-        raise ValueError(f"Scenario '{name}' metrics must be a sequence")
-    allowed = {"mae", "mse", "r2"}
-    metrics = tuple(str(item) for item in metrics_raw)
-    invalid = [metric for metric in metrics if metric not in allowed]
-    if invalid:
-        raise ValueError(f"Scenario '{name}' metrics contains unsupported values: {', '.join(invalid)}")
-    return metrics
-
-
-def _coerce_scenario(data: Mapping[str, Any]) -> ScenarioConfig:
-    """Build a :class:`ScenarioConfig` from a raw mapping."""
-
-    try:
-        name = str(data["name"])
-    except KeyError as exc:
-        raise ValueError("Scenario requires 'name'") from exc
-
-    train_macro_trials, train_micro_trials = _coerce_trials(name, data, "train")
-    eval_macro_trials, eval_micro_trials = _coerce_trials(name, data, "eval")
-    train_objective = _coerce_objective(name, data, "train_objective")
-    eval_objective = _coerce_objective(name, data, "eval_objective")
-    train_params = _coerce_params(name, data, "train_params")
-    eval_params = _coerce_params(name, data, "eval_params")
-    regression = _coerce_regression(name, data)
-    metrics = _coerce_metrics(name, data)
-
-    return ScenarioConfig(
-        name=name,
-        train_macro_trials=train_macro_trials,
-        train_micro_trials=train_micro_trials,
-        eval_macro_trials=eval_macro_trials,
-        eval_micro_trials=eval_micro_trials,
-        train_objective=train_objective,
-        eval_objective=eval_objective,
-        train_params=train_params,
-        eval_params=eval_params,
-        regression=regression,
-        metrics=metrics,
-    )
-
-
-def _coerce_settings(data: Mapping[str, Any]) -> BridgeSettings:
-    """Convert bridge level settings into :class:`BridgeSettings`."""
-
-    output_raw = data.get("output_dir", "./work/modelbridge")
-    output_dir = Path(output_raw).expanduser()
-    working_directory = data.get("working_directory")
-    working_path = Path(working_directory).expanduser() if working_directory else output_dir
-    seed = int(data.get("seed", 0))
-    log_level = str(data.get("log_level", "INFO"))
-    train_runs = int(data.get("train_runs", 1))
-    eval_runs = int(data.get("eval_runs", 0))
-
-    write_csv = bool(data.get("write_csv", False))
-
-    scenarios_raw = data.get("scenarios", [])
-    if not isinstance(scenarios_raw, Iterable):
-        raise ValueError("bridge.scenarios must be iterable")
-    scenarios = [_coerce_scenario(item) for item in scenarios_raw]
-
-    return BridgeSettings(
-        output_dir=output_dir,
-        working_directory=working_path,
-        seed=seed,
-        log_level=log_level,
-        train_runs=train_runs,
-        eval_runs=eval_runs,
-        write_csv=write_csv,
-        scenarios=scenarios,
-    )
-
-
-def _coerce_hpo(data: Mapping[str, Any]) -> HpoSettings:
-    """Create :class:`HpoSettings` from ``data``."""
-
-    optimizer = str(data.get("optimizer", "optuna"))
-    sampler = str(data.get("sampler", "tpe"))
-    return HpoSettings(optimizer=optimizer, sampler=sampler)
-
-
-def _require_mapping(value: Any, message: str) -> Mapping[str, Any]:
-    if not isinstance(value, Mapping):
-        raise ValueError(message)
-    return value
-
-
-def _require_float(container: Mapping[str, Any], key: str, message: str) -> float:
-    try:
-        return float(container[key])
-    except (KeyError, TypeError, ValueError) as exc:  # noqa: PERF203
-        raise ValueError(message) from exc
-
-
-def _require_positive_int(container: Mapping[str, Any], key: str, message: str) -> int:
-    try:
-        value = int(container[key])
-    except (KeyError, TypeError, ValueError) as exc:  # noqa: PERF203
-        raise ValueError(message) from exc
-    return value
-
-
-def _coerce_int(value: Any, message: str, default: int = 0) -> int:
-    if value is None:
-        return default
-    try:
-        return int(value)
-    except (TypeError, ValueError) as exc:  # noqa: PERF203
-        raise ValueError(message) from exc
-
-
-def _coerce_float(value: Any, message: str) -> float | None:
-    if value is None:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError) as exc:  # noqa: PERF203
-        raise ValueError(message) from exc
-
-
-def load_bridge_config(payload: Mapping[str, Any]) -> BridgeConfig:
-    """Convert a mapping (or OmegaConf) into a :class:`BridgeConfig`."""
+    ``overrides`` (if provided) is merged over the payload (payload < overrides).
+    """
 
     if isinstance(payload, OmegaConf):
         payload = OmegaConf.to_container(payload, resolve=True)  # type: ignore[assignment]
     if not isinstance(payload, Mapping):
         raise ValueError("Configuration payload must be a mapping")
 
-    hpo_raw = payload.get("hpo", {})
-    if not isinstance(hpo_raw, Mapping):
-        raise ValueError("hpo section must be a mapping")
-    bridge_raw = payload.get("bridge")
-    if not isinstance(bridge_raw, Mapping):
-        raise ValueError("bridge section must be provided")
+    layered = dict(payload)
+    if overrides:
+        layered = _deep_merge(layered, overrides)
 
-    hpo = _coerce_hpo(hpo_raw)
-    bridge = _coerce_settings(bridge_raw)
-    return BridgeConfig(hpo=hpo, bridge=bridge)
+    try:
+        return BridgeConfig.model_validate(layered)
+    except ValidationError as exc:  # noqa: TRY003
+        raise ValueError(f"Invalid bridge configuration: {exc}") from exc
+
+
+def generate_schema() -> dict[str, Any]:
+    """Return JSON schema for the bridge configuration."""
+
+    return BridgeConfig.model_json_schema()
 
 
 __all__ = [
@@ -376,4 +237,5 @@ __all__ = [
     "RegressionConfig",
     "ScenarioConfig",
     "load_bridge_config",
+    "generate_schema",
 ]

@@ -53,6 +53,11 @@ def test_run_pipeline(tmp_path: Path, make_bridge_config) -> None:
     runs_root = tmp_path / "outputs" / "runs" / "demo"
     assert (runs_root / "train" / "macro" / "000" / "optuna.db").exists()
     assert (runs_root / "eval" / "micro" / "000" / "optuna.db").exists()
+    manifest_path = tmp_path / "outputs" / "manifest.json"
+    assert manifest_path.exists()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert any("sha256" in artifact for artifact in manifest.get("artifacts", []))
+    assert any("regression_train.json" in artifact["path"] for artifact in manifest.get("artifacts", []))
 
 
 def test_run_pipeline_partial_phases(tmp_path: Path, make_bridge_config) -> None:

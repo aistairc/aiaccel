@@ -11,8 +11,8 @@ hpo:
 bridge:
   output_dir: ./work/modelbridge/simple
   seed: 32
-  train_runs: 10    # 学習用の HPO 実行セット数
-  eval_runs: 10     # 検証用の HPO 実行セット数
+  train_runs: 10    # Number of HPO training runs
+  eval_runs: 10     # Number of HPO evaluation runs
   log_level: INFO
   scenarios:
     - name: simple
@@ -57,7 +57,7 @@ bridge:
       regression:
         kind: linear
         degree: 1
-      # 例: GPy を使う場合は以下をコメント解除
+      # Example: uncomment to use GPy-based Gaussian Process regression
       # regression:
       #   kind: gpr
       #   gpr:

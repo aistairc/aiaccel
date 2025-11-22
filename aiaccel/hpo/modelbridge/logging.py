@@ -20,6 +20,7 @@ def configure_logging(
     reset_handlers: bool = True,
     console: bool = True,
     file: bool = True,
+    json_logs: bool = False,
 ) -> Path:
     """Configure root logging with rich console and file handlers."""
 
@@ -35,12 +36,12 @@ def configure_logging(
     if reset_handlers:
         _clear_handlers(root.handlers)
 
-    formatter = logging.Formatter(_LOG_FORMAT)
+    formatter = logging.Formatter('{"time":"%(asctime)s","level":"%(levelname)s","name":"%(name)s","msg":"%(message)s"}' if json_logs else _LOG_FORMAT)
     if file:
         _ensure_file_handler(root, log_path, formatter)
 
     if console and not os.environ.get("AIACCEL_LOG_SILENT"):
-        _ensure_console_handler(root)
+        _ensure_console_handler(root, formatter)
 
     root.setLevel(level)
 
@@ -65,7 +66,7 @@ def _ensure_file_handler(logger: logging.Logger, path: Path, formatter: logging.
     logger.addHandler(file_handler)
 
 
-def _ensure_console_handler(logger: logging.Logger) -> None:
+def _ensure_console_handler(logger: logging.Logger, formatter: logging.Formatter) -> None:
     for handler in logger.handlers:
         if isinstance(handler, RichHandler):
             return
@@ -75,6 +76,7 @@ def _ensure_console_handler(logger: logging.Logger) -> None:
         omit_repeated_times=False,
         show_time=False,
     )
+    console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
 
