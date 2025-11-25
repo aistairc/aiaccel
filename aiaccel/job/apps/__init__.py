@@ -24,13 +24,7 @@ def prepare_argument_parser(
         or (Path(str(resources.files(__package__) / "config")) / default_config_name)
     )  # type: ignore
 
-    config = load_config(
-        args.config,
-        {"config_path": args.config},
-    )
-
-    if args.print_config:
-        print_config(config)
+    config = load_config(args.config, is_print_config=args.print_config)
 
     config: DictConfig = resolve_inherit(config)  # type: ignore
 

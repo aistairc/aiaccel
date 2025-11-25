@@ -40,8 +40,8 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
 
 def load_config(
     config_filename: str | Path,
-    working_directory: str | None = None,
-    overwrite_config: dict[str, Any] | DictConfig | ListConfig | None = None,
+    working_directory: str | Path | None = None,
+    overwrite_config: DictConfig | ListConfig | dict[Any, Any] | list[Any] | None = None,
     is_print_config: bool = False,
 ) -> DictConfig | ListConfig:
     """Load YAML configuration

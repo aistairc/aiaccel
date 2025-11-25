@@ -10,11 +10,14 @@ from aiaccel.config.config import load_config, pathlib2str_config, print_config,
 
 def test_load_config() -> None:
     loaded_config = load_config(Path(__file__).parent / "test_conf.yaml")
+    assert isinstance(loaded_config, DictConfig)
+    del loaded_config["config_path"]
+    del loaded_config["working_directory"]
     expected_config = {
-        "A": [{"_inherit_": ["${B}", "${C}"], "AA": "aa"}, {"AAA": "aaa"}],
+        "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
         "B": {"AA": "dummy", "BB": "bb"},
         "C": {"CC": "cc"},
-        "D": {"_inherit_": "E"},
+        "D": {"EE": "ee"},
         "E": {"EE": "ee"},
         "Eval": 1.5,
     }
