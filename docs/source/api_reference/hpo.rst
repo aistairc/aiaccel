@@ -1,8 +1,10 @@
-Hyperparameter Optimization
-===========================
+#############################
+ Hyperparameter Optimization
+#############################
 
-Algorithms
-----------
+************
+ Algorithms
+************
 
 .. currentmodule:: aiaccel.hpo.algorithms
 
@@ -11,11 +13,12 @@ Algorithms
 
     NelderMeadAlgorism
 
-Optuna Utilities
-----------------
+******************
+ Optuna Utilities
+******************
 
 Samplers
-~~~~~~~~
+========
 
 .. currentmodule:: aiaccel.hpo.optuna.samplers
 
@@ -25,7 +28,7 @@ Samplers
     NelderMeadSampler
 
 Hparam
-~~~~~~
+======
 
 .. currentmodule:: aiaccel.hpo.optuna.hparams
 

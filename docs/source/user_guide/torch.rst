@@ -1,8 +1,10 @@
-Training a PyTorch Model
-========================
+##########################
+ Training a PyTorch Model
+##########################
 
-Getting Started
----------------
+*****************
+ Getting Started
+*****************
 
 Aiaccel-based training is a wrapper of PyTorch Lightning, which can be executed as
 follows:
@@ -78,12 +80,14 @@ as follows:
            _target_: torch.optim.Adam
            lr: 1.e-4
 
-Distributed Training
---------------------
+**********************
+ Distributed Training
+**********************
 
 WIP...
 
-Other Utilities
----------------
+*****************
+ Other Utilities
+*****************
 
 Other utilities are listed in :doc:`API Reference <../api_reference/torch>`.

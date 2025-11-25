@@ -1,8 +1,10 @@
-OmegaConf Utilities
-===================
+#####################
+ OmegaConf Utilities
+#####################
 
-Config Utilities
-----------------
+******************
+ Config Utilities
+******************
 
 .. currentmodule:: aiaccel.config
 
@@ -15,8 +17,9 @@ Config Utilities
     overwrite_omegaconf_dumper
     resolve_inherit
 
-Git Utilities
--------------
+***************
+ Git Utilities
+***************
 
 .. currentmodule:: aiaccel.config
 

@@ -1,11 +1,13 @@
-Optimizing Hyperparameters
-==========================
+############################
+ Optimizing Hyperparameters
+############################
 
 Hyperparameter optimization (HPO) is an indispensable step to make it work in real
 world.
 
-Getting Started
----------------
+*****************
+ Getting Started
+*****************
 
 Create a file that defines the objective function to be optimized:
 
@@ -43,11 +45,12 @@ after '--'. In the arguments, include the parameters and '{out_filename}'. In
 objective.py, output the result of the objective function to '{out_filename}' in JSON
 format.
 
-Basic Usage
------------
+*************
+ Basic Usage
+*************
 
 Configuration
-~~~~~~~~~~~~~
+=============
 
 Basic configuration example:
 
@@ -77,7 +80,7 @@ Basic configuration example:
     n_max_jobs: 1
 
 Study Configuration
-+++++++++++++++++++
+-------------------
 
 The study configuration controls the overall behavior of the optimization process:
 
@@ -99,7 +102,7 @@ The study configuration controls the overall behavior of the optimization proces
         seed: 42
 
 Sampler Configuration
-+++++++++++++++++++++
+---------------------
 
 The sampler determines the algorithm used to search the hyperparameter space:
 
@@ -125,7 +128,7 @@ Available samplers include:
 - NelderMeadSampler: Nelder-Mead optimization
 
 Parameters Configuration
-++++++++++++++++++++++++
+------------------------
 
 The parameters section defines the hyperparameter search space using Optuna's suggestion
 methods wrapped by aiaccel:
@@ -154,7 +157,7 @@ methods wrapped by aiaccel:
         x3: [0, 1]
 
 Parameter Types
-+++++++++++++++
+---------------
 
 aiaccel supports multiple parameter types through different suggestion wrappers:
 
@@ -222,7 +225,7 @@ aiaccel supports multiple parameter types through different suggestion wrappers:
         log: true
 
 Command
-+++++++
+-------
 
 Command to run the objective function. The objective function is the main function to be
 optimized:
@@ -232,7 +235,7 @@ optimized:
     command: ["python", "./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
 
 Other Configuration Options
-+++++++++++++++++++++++++++
+---------------------------
 
 - n_trials: Number of trials to run
 - n_max_jobs: Maximum number of parallel jobs
@@ -243,7 +246,7 @@ Other Configuration Options
     n_max_jobs: 1  # default : 1
 
 Usage Examples
-~~~~~~~~~~~~~~
+==============
 
 Here are some common usage patterns:
 
@@ -265,16 +268,17 @@ Start a new study with configuration file and cli:
 
     python -m aiaccel.hpo.apps.optimize --config config.yaml params.x1="[0,2]" params.x2="[0,2]" --
 
-HPO Using NelderMeadSampler
----------------------------
+*****************************
+ HPO Using NelderMeadSampler
+*****************************
 
 Basic Usage
-~~~~~~~~~~~
+===========
 
 Basic optimization example using NelderMeadSampler:
 
 Search Space
-++++++++++++
+------------
 
 NelderMeadSampler requires a search space as an argument.
 
@@ -287,7 +291,7 @@ NelderMeadSampler requires a search space as an argument.
     }
 
 Objective Function
-++++++++++++++++++
+------------------
 
 Set the Objective Function in the same way as in regular Optuna. The optimization target
 is the benchmark function Sphere.
@@ -303,7 +307,7 @@ is the benchmark function Sphere.
         return float(np.sum(np.asarray(params) ** 2))
 
 Execute Optimization
-++++++++++++++++++++
+--------------------
 
 Specify NelderMeadSampler as the sampler and execute the optimization.
 
@@ -318,7 +322,7 @@ Specify NelderMeadSampler as the sampler and execute the optimization.
 Full code is examples/hpo/samplers/example.py
 
 Pallarel Optimization
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 Example pallarel optimization:
 
@@ -338,7 +342,7 @@ execution compared to serial execution.
 Full code is examples/hpo/samplers/example_parallel.py
 
 optuna.study.enqueue_trial
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 Example using optuna.study.enqueue_trial:
 
@@ -359,7 +363,7 @@ when NelderMeadSampler fails to output parameters.
 Full code is examples/hpo/samplers/example_enqueue.py
 
 Sub Sampler
-~~~~~~~~~~~
+===========
 
 Example using sub_sampler as optuna.samplers.TPESampler:
 
