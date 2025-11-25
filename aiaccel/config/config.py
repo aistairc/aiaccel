@@ -49,11 +49,11 @@ def load_config(
     Args:
         config_filename (str | Path):
             Path to the configuration
-        working_directory (str | None, optional):
+        working_directory (str | Path | None, optional):
             Path to the working directory to store in merge_user_config.
             If None, the parent directory of config_filename is used.
             Defaults to None.
-        overwrite_config (dict[str, Any] | DictConfig | ListConfig | None, optional):
+        overwrite_config (DictConfig | ListConfig | dict[Any, Any] | list[Any] | None, optional):
             Configuration to add to merge_user_config.
             Defaults to None.
         is_print_config (bool, optional):
