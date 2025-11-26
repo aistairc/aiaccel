@@ -42,6 +42,6 @@ train:
         export MAIN_PORT=3000
         export COLUMNS=120
         export PYTHONUNBUFFERED=true
-        srun --export=ALL -n {args.n_procs} --cpu-bind=none --distribution=block:block {command}
+        srun --export=ALL -n {args.n_gpus} --cpu-bind=none --distribution=block:block {command}
 
 use_scandir: False
