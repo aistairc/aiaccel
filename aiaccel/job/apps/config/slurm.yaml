@@ -16,6 +16,7 @@ cpu-array:
     n_tasks_per_proc: 64
     n_procs: 4
     sbatch_args: "-p cpu1 -N 1 --array=1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+    job: "{command}"
 
 gpu:
     sbatch_args: "-p gpu1 -N 1"
