@@ -24,9 +24,7 @@ def prepare_argument_parser(
         or (Path(str(resources.files(__package__) / "config")) / default_config_name)
     )  # type: ignore
 
-    config = load_config(args.config, is_print_config=args.print_config)
-
-    config: DictConfig = resolve_inherit(config)  # type: ignore
+    config: DictConfig = load_config(args.config, is_print_config=args.print_config)  # type: ignore
 
     parser = ArgumentParser()
     parser.add_argument("--print_config", action="store_true")
