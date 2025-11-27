@@ -16,9 +16,10 @@ import yaml
 from yaml.resolver import BaseResolver
 
 
-def overwrite_omegaconf_dumper(mode: str = "|") -> None:
+def setup_omegaconf(mode: str = "|") -> None:
     """
     Overwrites the default string representation in OmegaConf's YAML dumper.
+    And, register custom resolvers "eval" and "resolve_pkg_path"
 
     This function modifies the `OmegaConfDumper` to represent multi-line strings
     using the specified style (`mode`). By default, it uses the `|` block style
@@ -36,6 +37,10 @@ def overwrite_omegaconf_dumper(mode: str = "|") -> None:
 
     OmegaConfDumper.add_representer(str, str_representer)
     OmegaConfDumper.str_representer_added = True
+
+    # Register custom resolvers
+    oc.register_new_resolver("eval", simple_eval, replace=True)
+    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
 
 def load_config(
@@ -63,11 +68,7 @@ def load_config(
     Returns:
         DictConfig | ListConfig: The merged configuration of the base config and the original config
     """
-    overwrite_omegaconf_dumper()
-
-    # Register custom resolvers
-    oc.register_new_resolver("eval", simple_eval, replace=True)
-    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
+    setup_omegaconf()
 
     # Load config
     config = oc.merge(
