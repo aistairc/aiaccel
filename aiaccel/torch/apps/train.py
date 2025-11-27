@@ -10,10 +10,7 @@ import lightning as lt
 
 from aiaccel.config import (
     load_config,
-    overwrite_omegaconf_dumper,
     pathlib2str_config,
-    print_config,
-    resolve_inherit,
 )
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
 
@@ -21,31 +18,21 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    overwrite_omegaconf_dumper()
-
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    # load config
-    config = oc.merge(
-        load_config(
-            args.config,
-            {
-                "config_path": args.config,
-                "working_directory": str(Path(args.config).parent.resolve()),
-            },
-        ),
-        oc.from_cli(unk_args),
+    is_rank_zero = int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0
+
+    config = load_config(
+        config_filename=args.config,
+        overwrite_config=oc.from_cli(unk_args),
+        is_print_config=is_rank_zero,
     )
 
-    if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
-        print_config(config)
-
+    if is_rank_zero:
         status_list = collect_git_status_from_config(config)
         print_git_status(status_list)
-
-    config = resolve_inherit(config)
 
     # build trainer
     trainer: lt.Trainer = instantiate(config.trainer)

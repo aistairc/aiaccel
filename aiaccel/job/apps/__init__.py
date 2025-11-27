@@ -5,9 +5,9 @@ from pathlib import Path
 
 from omegaconf import DictConfig
 
-from aiaccel.config import load_config, overwrite_omegaconf_dumper, print_config, resolve_inherit
+from aiaccel.config import load_config, setup_omegaconf
 
-overwrite_omegaconf_dumper()
+setup_omegaconf()
 
 
 def prepare_argument_parser(
@@ -24,15 +24,7 @@ def prepare_argument_parser(
         or (Path(str(resources.files(__package__) / "config")) / default_config_name)
     )  # type: ignore
 
-    config = load_config(
-        args.config,
-        {"config_path": args.config},
-    )
-
-    if args.print_config:
-        print_config(config)
-
-    config: DictConfig = resolve_inherit(config)  # type: ignore
+    config: DictConfig = load_config(args.config, is_print_config=args.print_config)  # type: ignore
 
     parser = ArgumentParser()
     parser.add_argument("--print_config", action="store_true")
