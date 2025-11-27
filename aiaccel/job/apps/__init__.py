@@ -5,7 +5,7 @@ from pathlib import Path
 
 from omegaconf import DictConfig
 
-from aiaccel.config import load_config, resolve_inherit, setup_omegaconf
+from aiaccel.config import load_config, setup_omegaconf
 
 setup_omegaconf()
 
