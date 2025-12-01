@@ -15,7 +15,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.config import load_config, pathlib2str_config
+from aiaccel.config import load_config, pathlib2str_config, print_config
 
 
 def main() -> None:
@@ -55,49 +55,51 @@ Typical usages:
     else:
         working_directory = args.config.parent.resolve()
 
-    config = load_config(
+    config, raw_config = load_config(
         config_filename=args.config,
         working_directory=working_directory,
         overwrite_config=oc.from_cli(oc_args),
-        is_print_config=True,
     )
 
     if len(args.command) > 0:
         config.command = args.command
+        raw_config.command = args.command
+
+    print_config(config)
 
     # save config
-    config.working_directory = Path(config.working_directory)
-    config.working_directory.mkdir(parents=True, exist_ok=True)
+    raw_config.working_directory = Path(raw_config.working_directory)
+    raw_config.working_directory.mkdir(parents=True, exist_ok=True)
 
-    with open(config.working_directory / "merged_config.yaml", "w") as f:
-        oc.save(pathlib2str_config(config), f)
+    with open(raw_config.working_directory / "merged_config.yaml", "w") as f:
+        oc.save(pathlib2str_config(raw_config), f)
 
-    config.working_directory = Path(config.working_directory)  # maybe bug
+    raw_config.working_directory = Path(raw_config.working_directory)  # maybe bug
 
     # build study and hparams manager
-    study = instantiate(config.study)
-    params = instantiate(config.params)
+    study = instantiate(raw_config.study)
+    params = instantiate(raw_config.params)
 
     # main loop
     futures: dict[Any, tuple[Trial, Path]] = {}
     submitted_job_count = 0
     finished_job_count = 0
 
-    with ThreadPoolExecutor(config.n_max_jobs) as pool:
-        while finished_job_count < config.n_trials:
+    with ThreadPoolExecutor(raw_config.n_max_jobs) as pool:
+        while finished_job_count < raw_config.n_trials:
             active_jobs = len(futures.keys())
-            available_slots = max(0, config.n_max_jobs - active_jobs)
+            available_slots = max(0, raw_config.n_max_jobs - active_jobs)
 
             # Submit job in ThreadPoolExecutor
-            for _ in range(min(available_slots, config.n_trials - submitted_job_count)):
+            for _ in range(min(available_slots, raw_config.n_trials - submitted_job_count)):
                 trial = study.ask()
 
-                out_filename = config.working_directory / f"trial_{trial.number:0>6}.json"
+                out_filename = raw_config.working_directory / f"trial_{trial.number:0>6}.json"
 
                 future = pool.submit(
                     subprocess.run,
-                    shlex.join(config.command).format(
-                        config=config,
+                    shlex.join(raw_config.command).format(
+                        config=raw_config,
                         job_name=f"trial_{trial.number:0>6}",
                         out_filename=out_filename,
                         **params.suggest_hparams(trial),

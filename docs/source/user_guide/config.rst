@@ -30,7 +30,10 @@ Aiaccel's configuration system is based on `OmegaConf
 
     from argparse import ArgumentParser
 
-    from aiaccel.config import load_config
+    from aiaccel.config import (
+        load_config,
+        print_config,
+    )
     from hydra.utils import instantiate
 
 
@@ -38,9 +41,10 @@ Aiaccel's configuration system is based on `OmegaConf
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    config = load_config(args.config, is_print_config=True)
+    config, raw_config = load_config(args.config, is_print_config=True)
+    print_config(config)
 
-    model = instantiate(config.model)
+    model = instantiate(raw_config.model)
 
     print(model)
 

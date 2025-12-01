@@ -11,6 +11,7 @@ import lightning as lt
 from aiaccel.config import (
     load_config,
     pathlib2str_config,
+    print_config,
 )
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
 
@@ -22,33 +23,31 @@ def main() -> None:
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    is_rank_zero = int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0
-
-    config = load_config(
+    config, raw_config = load_config(
         config_filename=args.config,
         overwrite_config=oc.from_cli(unk_args),
-        is_print_config=is_rank_zero,
     )
 
-    if is_rank_zero:
-        status_list = collect_git_status_from_config(config)
+    if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
+        print_config(config)
+        status_list = collect_git_status_from_config(raw_config)
         print_git_status(status_list)
 
     # build trainer
-    trainer: lt.Trainer = instantiate(config.trainer)
+    trainer: lt.Trainer = instantiate(raw_config.trainer)
 
     # save config
     if trainer.is_global_zero:
-        Path(config.working_directory).mkdir(parents=True, exist_ok=True)
-        merged_config_path = Path(config.working_directory) / "merged_config.yaml"
+        Path(raw_config.working_directory).mkdir(parents=True, exist_ok=True)
+        merged_config_path = Path(raw_config.working_directory) / "merged_config.yaml"
 
         with open(merged_config_path, "w") as f:
-            oc.save(pathlib2str_config(config), f)
+            oc.save(pathlib2str_config(raw_config), f)
 
     # start training
     trainer.fit(
-        model=instantiate(config.task),
-        datamodule=instantiate(config.datamodule),
+        model=instantiate(raw_config.task),
+        datamodule=instantiate(raw_config.datamodule),
     )
 
 

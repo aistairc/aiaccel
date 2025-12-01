@@ -47,8 +47,7 @@ def load_config(
     config_filename: str | Path,
     working_directory: str | Path | None = None,
     overwrite_config: DictConfig | ListConfig | dict[Any, Any] | list[Any] | None = None,
-    is_print_config: bool = False,
-) -> DictConfig | ListConfig:
+) -> tuple[DictConfig | ListConfig, DictConfig | ListConfig]:
     """Load YAML configuration
 
     Args:
@@ -84,12 +83,9 @@ def load_config(
         overwrite_config if overwrite_config is not None else oc.create({}),  # Overwrite loaded config
     )
 
-    if is_print_config:
-        print_config(config)
+    raw_config = resolve_inherit(config)
 
-    config = resolve_inherit(config)
-
-    return config
+    return config, raw_config
 
 
 def _load_config(
