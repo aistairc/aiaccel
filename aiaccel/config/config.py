@@ -2,45 +2,12 @@ from typing import Any
 
 from collections.abc import Callable
 import copy
-from importlib import resources
 from pathlib import Path
 import re
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig, Node
 from omegaconf import OmegaConf as oc  # noqa:N813
-from omegaconf._utils import OmegaConfDumper
-
-from simpleeval import simple_eval
-import yaml
-from yaml.resolver import BaseResolver
-
-
-def setup_omegaconf(mode: str = "|") -> None:
-    """
-    Overwrites the default string representation in OmegaConf's YAML dumper.
-    And, register custom resolvers "eval" and "resolve_pkg_path"
-
-    This function modifies the `OmegaConfDumper` to represent multi-line strings
-    using the specified style (`mode`). By default, it uses the `|` block style
-    for multi-line strings. Single-line strings remain unchanged.
-
-    Args:
-        mode (str, optional): The YAML style character for multi-line strings.
-                              Defaults to "|".
-    """
-
-    def str_representer(dumper: OmegaConfDumper, data: str) -> yaml.Node:
-        return dumper.represent_scalar(
-            BaseResolver.DEFAULT_SCALAR_TAG, data, style=mode if len(data.splitlines()) > 1 else None
-        )
-
-    OmegaConfDumper.add_representer(str, str_representer)
-    OmegaConfDumper.str_representer_added = True
-
-    # Register custom resolvers
-    oc.register_new_resolver("eval", simple_eval, replace=True)
-    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
 
 def load_config(
@@ -67,7 +34,10 @@ def load_config(
     Returns:
         DictConfig | ListConfig: The merged configuration of the base config and the original config
     """
-    setup_omegaconf()
+    from aiaccel.config import IS_NOT_INIT, setup_omegaconf
+
+    if IS_NOT_INIT:
+        setup_omegaconf()
 
     # Load config
     config = oc.merge(
