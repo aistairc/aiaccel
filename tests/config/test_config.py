@@ -9,7 +9,7 @@ from aiaccel.config.config import load_config, pathlib2str_config, print_config,
 
 
 def test_load_config() -> None:
-    loaded_config = load_config(Path(__file__).parent / "test_conf.yaml")
+    _, loaded_config = load_config(Path(__file__).parent / "test_conf.yaml")
     assert isinstance(loaded_config, DictConfig)
     del loaded_config["config_path"]
     del loaded_config["working_directory"]
@@ -48,7 +48,7 @@ def test_resolve_inherit() -> None:
 
 
 def test_resolve_path() -> None:
-    loaded_config = load_config(Path(__file__).parent / "test_resolve_path.yaml")
+    _, loaded_config = load_config(Path(__file__).parent / "test_resolve_path.yaml")
 
     assert isinstance(loaded_config, DictConfig)
 
