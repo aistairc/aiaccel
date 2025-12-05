@@ -1,8 +1,10 @@
-PyTorch/Lightning Toolkit
-=========================
+###########################
+ PyTorch/Lightning Toolkit
+###########################
 
-Datasets
---------
+**********
+ Datasets
+**********
 
 .. currentmodule:: aiaccel.torch.datasets
 
@@ -15,8 +17,9 @@ Datasets
     RawHDF5Dataset
     scatter_dataset
 
-Functional
-----------
+************
+ Functional
+************
 
 .. currentmodule:: aiaccel.torch.functional
 
@@ -25,8 +28,9 @@ Functional
 
     linear_sum_assignment
 
-Learning Rate Schedulers
-------------------------
+**************************
+ Learning Rate Schedulers
+**************************
 
 .. currentmodule:: aiaccel.torch.lr_schedulers
 
@@ -35,8 +39,9 @@ Learning Rate Schedulers
 
     SequentialLR
 
-Inference Pipeline Helpers
---------------------------
+****************************
+ Inference Pipeline Helpers
+****************************
 
 .. currentmodule:: aiaccel.torch.pipelines
 
@@ -46,8 +51,9 @@ Inference Pipeline Helpers
     BasePipeline
     reorder_fields
 
-Lightning Utilities
--------------------
+*********************
+ Lightning Utilities
+*********************
 
 .. currentmodule:: aiaccel.torch.lightning
 
@@ -61,7 +67,7 @@ Lightning Utilities
     ABCIEnvironment
 
 Lightning Datamodules
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 .. currentmodule:: aiaccel.torch.lightning.datamodules
 
@@ -71,7 +77,7 @@ Lightning Datamodules
     SingleDataModule
 
 Lightning Callbacks
-~~~~~~~~~~~~~~~~~~~
+===================
 
 .. currentmodule:: aiaccel.torch.lightning.callbacks
 
@@ -80,8 +86,9 @@ Lightning Callbacks
 
     SaveMetricCallback
 
-H5py Utilities
---------------
+****************
+ H5py Utilities
+****************
 
 .. currentmodule:: aiaccel.torch.h5py
 
