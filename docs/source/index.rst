@@ -1,8 +1,9 @@
 .. figure:: _static/logo_aiaccel.png
     :width: 600px
 
-Aiaccel Documantation
-=====================
+#######################
+ Aiaccel Documantation
+#######################
 
 Aiaccel is a toolkit for accelerating machine learning research.
 
@@ -32,8 +33,9 @@ Aiaccel is a toolkit for accelerating machine learning research.
 
        Ready-to-use algorithms/tools.
 
-Key Features
-------------
+**************
+ Key Features
+**************
 
 :octicon:`zap;1em` Research-Oriented
     Designed to accelerate your research cycles written in Python
@@ -45,14 +47,16 @@ Key Features
 :octicon:`server;1em` Highly Modular
     Designed to let you pick up any part of aiaccel for your research project.
 
-Aiaccel is used in ...
-----------------------
+************************
+ Aiaccel is used in ...
+************************
 
 - M3L: Multimodal machine listening toolkit (https://github.com/b-sigpro/m3l)
 - SBSS: Scalable blind source separation toolkit (https://github.com/b-sigpro/sbss)
 
-Acknowledgments
----------------
+*****************
+ Acknowledgments
+*****************
 
 - Part of this work was developed under a commissioned project of the New Energy and
   Industrial Technology Development Organization (NEDO).
