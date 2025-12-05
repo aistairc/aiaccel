@@ -2,43 +2,63 @@ from typing import Any
 
 from collections.abc import Callable
 import copy
-from importlib import resources
 from pathlib import Path
 import re
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig, Node
 from omegaconf import OmegaConf as oc  # noqa:N813
-from omegaconf._utils import OmegaConfDumper
-
-from simpleeval import simple_eval
-import yaml
-from yaml.resolver import BaseResolver
-
-
-def overwrite_omegaconf_dumper(mode: str = "|") -> None:
-    """
-    Overwrites the default string representation in OmegaConf's YAML dumper.
-
-    This function modifies the `OmegaConfDumper` to represent multi-line strings
-    using the specified style (`mode`). By default, it uses the `|` block style
-    for multi-line strings. Single-line strings remain unchanged.
-
-    Args:
-        mode (str, optional): The YAML style character for multi-line strings.
-                              Defaults to "|".
-    """
-
-    def str_representer(dumper: OmegaConfDumper, data: str) -> yaml.Node:
-        return dumper.represent_scalar(
-            BaseResolver.DEFAULT_SCALAR_TAG, data, style=mode if len(data.splitlines()) > 1 else None
-        )
-
-    OmegaConfDumper.add_representer(str, str_representer)
-    OmegaConfDumper.str_representer_added = True
 
 
 def load_config(
+    config_filename: str | Path,
+    working_directory: str | Path | None = None,
+    overwrite_config: DictConfig | ListConfig | dict[Any, Any] | list[Any] | None = None,
+) -> tuple[DictConfig | ListConfig, DictConfig | ListConfig]:
+    """Load YAML configuration
+
+    Args:
+        config_filename (str | Path):
+            Path to the configuration
+        working_directory (str | Path | None, optional):
+            Path to the working directory to store in merge_user_config.
+            If None, the parent directory of config_filename is used.
+            Defaults to None.
+        overwrite_config (DictConfig | ListConfig | dict[Any, Any] | list[Any] | None, optional):
+            Configuration to add to merge_user_config.
+            Defaults to None.
+        is_print_config (bool, optional):
+            Flag variable to run print_config.
+            Defaults to False.
+
+    Returns:
+        DictConfig | ListConfig: The merged configuration of the base config and the original config
+    """
+    from aiaccel.config import IS_NOT_INIT, setup_omegaconf
+
+    if IS_NOT_INIT:
+        setup_omegaconf()
+
+    # Load config
+    config = oc.merge(
+        _load_config(
+            config_filename,
+            {
+                "config_path": str(config_filename),
+                "working_directory": str(working_directory)
+                if working_directory is not None
+                else str(Path(config_filename).parent.resolve()),
+            },
+        ),
+        overwrite_config if overwrite_config is not None else oc.create({}),  # Overwrite loaded config
+    )
+
+    raw_config = resolve_inherit(config)
+
+    return config, raw_config
+
+
+def _load_config(
     config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
@@ -47,9 +67,6 @@ def load_config(
     When the user specifies ``_base_``, the specified YAML file is loaded as the base,
     and the original configuration is merged with the base config.
     If the configuration specified in ``_base_`` also contains ``_base_``, the process is handled recursively.
-
-    Additionally, if `bootstrap_config` is provided, it is merged with the final
-    configuration to ensure any default values or overrides are applied.
 
     Args:
         config (Path): Path to the configuration
@@ -62,10 +79,6 @@ def load_config(
         user_config(DictConfig | ListConfig) : The configuration without ``_base_``
 
     """
-
-    # Register custom resolvers
-    oc.register_new_resolver("eval", simple_eval, replace=True)
-    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
@@ -89,7 +102,7 @@ def load_config(
             if not base_path.is_absolute():
                 base_path = config_filename.parent / base_path
 
-            config = load_config(base_path, config)
+            config = _load_config(base_path, config)
 
     return config
 

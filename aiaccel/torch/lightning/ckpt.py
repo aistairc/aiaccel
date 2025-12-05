@@ -5,7 +5,6 @@ from pathlib import Path
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig, ListConfig
-from omegaconf import OmegaConf as oc  # noqa: N813
 
 from torch import nn
 
@@ -50,16 +49,7 @@ def load_checkpoint(
             model_path = Path(model_path)
 
     config_path = model_path / config_name
-    config = load_config(
-        config_path,
-        {
-            "config_path": str(config_path),
-            "working_directory": str(config_path.parent.resolve()),
-        },
-    )
-
-    if overwrite_config is not None:
-        config = oc.merge(config, overwrite_config)
+    config = load_config(config_path, overwrite_config=overwrite_config)
 
     checkpoint_filename = config.checkpoint_filename if "checkpoint_filename" in config else "last.ckpt"
     checkpoint_path = model_path / "checkpoints" / checkpoint_filename

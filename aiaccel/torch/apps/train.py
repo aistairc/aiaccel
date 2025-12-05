@@ -10,10 +10,8 @@ import lightning as lt
 
 from aiaccel.config import (
     load_config,
-    overwrite_omegaconf_dumper,
     pathlib2str_config,
     print_config,
-    resolve_inherit,
 )
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
 
@@ -21,47 +19,35 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    overwrite_omegaconf_dumper()
-
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    # load config
-    config = oc.merge(
-        load_config(
-            args.config,
-            {
-                "config_path": args.config,
-                "working_directory": str(Path(args.config).parent.resolve()),
-            },
-        ),
-        oc.from_cli(unk_args),
+    config, raw_config = load_config(
+        config_filename=args.config,
+        overwrite_config=oc.from_cli(unk_args),
     )
 
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
-
-        status_list = collect_git_status_from_config(config)
+        status_list = collect_git_status_from_config(raw_config)
         print_git_status(status_list)
 
-    config = resolve_inherit(config)
-
     # build trainer
-    trainer: lt.Trainer = instantiate(config.trainer)
+    trainer: lt.Trainer = instantiate(raw_config.trainer)
 
     # save config
     if trainer.is_global_zero:
-        Path(config.working_directory).mkdir(parents=True, exist_ok=True)
-        merged_config_path = Path(config.working_directory) / "merged_config.yaml"
+        Path(raw_config.working_directory).mkdir(parents=True, exist_ok=True)
+        merged_config_path = Path(raw_config.working_directory) / "merged_config.yaml"
 
         with open(merged_config_path, "w") as f:
-            oc.save(pathlib2str_config(config), f)
+            oc.save(pathlib2str_config(raw_config), f)
 
     # start training
     trainer.fit(
-        model=instantiate(config.task),
-        datamodule=instantiate(config.datamodule),
+        model=instantiate(raw_config.task),
+        datamodule=instantiate(raw_config.datamodule),
     )
 
 
