@@ -1,12 +1,11 @@
 Training a PyTorch Model
 ========================
 
-``aiaccel.torch`` is built to make PyTorch training modular based on `PyTorch Lightning
-<https://lightning.ai/docs/pytorch/stable/>`_ and quick to iterate: you describe
-datasets, schedulers, and trainers in YAML, keep access to the underlying APIs, and can
-ship the exact same config from laptops to clusters. This page walks through the design,
-shows how to assemble configs, and highlights the features that accelerate multi-GPU
-runs or job submissions.
+``aiaccel.torch`` builds on `PyTorch Lightning
+<https://lightning.ai/docs/pytorch/stable/>`_ to keep training modular and fast: define
+trainers, datamodules, and models in YAML and reuse the same config locally or on
+clusters. This page outlines the design, config layout, and tools for multi-node
+multi-GPU trainings.
 
 Core Concepts
 -------------

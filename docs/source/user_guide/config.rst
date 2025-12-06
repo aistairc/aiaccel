@@ -86,9 +86,6 @@ Because the parser captures ``unk_args`` separately, you can override any value 
 command line by appending ``key=value`` pairs, and ``oc.merge`` combines them after
 every other transformation.
 
-Advanced Topics
----------------
-
 Using ``_base_`` to inherit files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -168,6 +165,10 @@ OmegaConf:
 
 They are always registered with ``oc.register_new_resolver(..., replace=True)``, so
 aiaccel's resolvers take precedence even if other code defined the same names.
+
+
+Advanced Topics
+---------------
 
 Git status checks
 ~~~~~~~~~~~~~~~~~

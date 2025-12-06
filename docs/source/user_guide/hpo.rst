@@ -1,18 +1,37 @@
 Optimizing Hyperparameters
 ==========================
 
-Hyperparameter optimization (HPO) is an indispensable step to make it work in real
-world.
+``aiaccel-hpo`` wraps Optuna so you can launch reproducible hyperparameter optimization
+jobs with the same configuration system used by ``aiaccel-job`` and ``aiaccel-torch``.
+This page summarizes the workflow implemented in :mod:`aiaccel.hpo.apps.optimize` and
+shows how to describe the search space using :mod:`aiaccel.config`.
 
-Getting Started
----------------
+Core Concepts
+-------------
 
-Create a file that defines the objective function to be optimized:
+- ``aiaccel-hpo optimize`` builds an Optuna :class:`~optuna.study.Study`, manages
+  multiple workers with :class:`concurrent.futures.ThreadPoolExecutor`, and streams
+  objective results via JSON files (:mod:`aiaccel.hpo.apps.optimize`).
+- Configuration files follow the exact same Hydra-inspired syntax explained in
+  :doc:`config`; overrides passed before ``--`` are merged through
+  :func:`omegaconf.OmegaConf.from_cli`.
+- Parameters are declared via :class:`aiaccel.hpo.optuna.hparams_manager.HparamsManager`
+  so the search space is instantiated and validated before the first trial begins.
+- Every run writes the fully merged config to ``{working_directory}/merged_config.yaml``
+  and stores Optuna state in ``optuna.db`` by default
+  (:mod:`aiaccel.hpo.apps.config.default`).
+
+Basic Usage
+-----------
+
+Create an objective script that consumes hyperparameters and writes a JSON-compatible
+scalar or list to ``out_filename``:
 
 .. code-block:: python
     :caption: objective.py
 
     import argparse
+    import json
 
 
     def main() -> None:
@@ -25,359 +44,146 @@ Create a file that defines the objective function to be optimized:
         y = (args.x1**2) - (4.0 * args.x1) + (args.x2**2) - args.x2 - (args.x1 * args.x2)
 
         with open(args.out_filename, "w") as f:
-            f.write(f"{y}")
+            json.dump(y, f)
 
 
     if __name__ == "__main__":
         main()
 
-Run the following command:
+Launch optimization directly from the command line by supplying parameter overrides
+before ``--`` and the objective command after it:
 
 .. code-block:: bash
 
-    python -m aiaccel.hpo.apps.optimize params.x1="[0,2]" params.x2="[0,2]" n_trials=30 -- python ./objective.py --x1={x1} --x2={x2} {out_filename}
+    python -m aiaccel.hpo.apps.optimize \
+        params.x1="[0,2]" params.x2="[0,2]" n_trials=30 n_max_jobs=2 \
+        -- python ./objective.py --x1={x1} --x2={x2} {out_filename}
 
-The parameters are set as params.x1="[0,2]" and params.x2="[0,2]" and the number of
-trials is set to n_trials=30. Specify the command to execute the objective function
-after '--'. In the arguments, include the parameters and '{out_filename}'. In
-objective.py, output the result of the objective function to '{out_filename}' in JSON
-format.
+``aiaccel-hpo`` expands ``{x1}``, ``{x2}``, ``{out_filename}``, and ``{job_name}``
+placeholders when launching each worker. The script reads the JSON file, feeds the value
+back to :meth:`optuna.study.Study.tell`, deletes the file, and continues submitting
+trials until ``n_trials`` is reached.
 
-Basic Usage
------------
-
-Configuration
-~~~~~~~~~~~~~
-
-Basic configuration example:
-
-.. code-block:: yaml
-
-    study:
-        _target_: optuna.create_study
-        direction: minimize
-        storage: # Set this item if results need to be stored in DB
-            _target_: optuna.storages.RDBStorage
-            url: sqlite:///aiaccel_storage.db
-            engine_kwargs:
-                connect_args:
-                timeout: 30
-        study_name: my_study  # Set this item if results need to be stored in DB
-        sampler:
-            _target_: optuna.samplers.TPESampler
-            seed: 0
-
-    command: ["python", "./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
-
-    params:
-        x1: [0, 1]
-        x2: [0, 1]
-
-    n_trials: 30
-    n_max_jobs: 1
-
-Study Configuration
-+++++++++++++++++++
-
-The study configuration controls the overall behavior of the optimization process:
-
-.. code-block:: yaml
-
-    study:
-        _target_: optuna.create_study  # default
-        direction: minimize     # 'minimize' or 'maximize' depending on your objective
-        study_name: my_study    # Name of the study (optional)
-        storage:  # This item is not required. This item is not required if there is no need to record it in the file.
-            _target_: optuna.storages.RDBStorage
-            url: sqlite:///example.db
-            engine_kwargs:
-                connect_args:
-                    timeout: 30
-    load_if_exists: true    # Load existing study if it exists
-    sampler:
-        _target_: optuna.samplers.TPESampler
-        seed: 42
-
-Sampler Configuration
-+++++++++++++++++++++
-
-The sampler determines the algorithm used to search the hyperparameter space:
-
-.. code-block:: yaml
-
-    study:
-        _target_: optuna.create_study
-        direction: minimize
-        sampler:
-            _target_: optuna.samplers.TPESampler  # Tree-structured Parzen Estimator (default)
-            # TPE-specific parameter
-            seed: 42                           # For reproducibility
-            n_startup_trials: 10               # Number of random trials before using TPE
-
-Available samplers include:
-
-- TPESampler: Efficient Bayesian optimization approach (recommended for most cases)
-- RandomSampler: Simple random search (useful as baseline)
-- CmaEsSampler: Covariance Matrix Adaptation Evolution Strategy (good for continuous
-  parameters)
-- GridSampler: Exhaustive grid search (for small parameter spaces)
-- NSGAIISampler: For multi-objective optimization
-- NelderMeadSampler: Nelder-Mead optimization
-
-Parameters Configuration
-++++++++++++++++++++++++
-
-The parameters section defines the hyperparameter search space using Optuna's suggestion
-methods wrapped by aiaccel:
-
-.. code-block:: yaml
-
-    params:
-        _convert_: partial
-        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager  # default
-
-        # Float parameter example
-        x1:
-            _target_: aiaccel.hpo.optuna.hparams.Float
-            low: 0.0
-            high: 1.0
-            log: false
-
-        # Another float parameter
-        x2:
-            _target_: aiaccel.hpo.optuna.hparams.Float
-            low: 0.0
-            high: 1.0
-            log: false
-
-        # Shorthand for float parameters
-        x3: [0, 1]
-
-Parameter Types
-+++++++++++++++
-
-aiaccel supports multiple parameter types through different suggestion wrappers:
-
-- Float: For continuous parameters
-
-.. code-block:: yaml
-
-    learning_rate:
-        _target_: aiaccel.hpo.optuna.hparams.Float
-        name: learning_rate
-        low: 0.0001
-        high: 0.1
-        log: true
-
-- Int: For integer parameters
-
-.. code-block:: yaml
-
-    num_layers:
-        _target_: aiaccel.hpo.optuna.hparams.Int
-        name: num_layers
-        low: 1
-        high: 10
-
-- Categorical: For categorical parameters
-
-.. code-block:: yaml
-
-    optimizer:
-        _target_: aiaccel.hpo.optuna.hparams.Categorical
-        name: optimizer
-        choices: ['adam', 'sgd', 'rmsprop']
-
-- DiscreteUniform: For discrete uniform parameters
-
-.. code-block:: yaml
-
-    batch_size:
-        _target_: aiaccel.hpo.optuna.hparams.Float
-        name: batch_size
-        low: 32
-        high: 256
-        step: 32
-
-- LogUniform: For log-uniform parameters
-
-.. code-block:: yaml
-
-    learning_rate:
-        _target_: aiaccel.hpo.optuna.hparams.Float
-        name: learning_rate
-        low: 0.0001
-        high: 0.1
-        log: true
-
-- LogInt: For log-int parameters
-
-.. code-block:: yaml
-
-    num_layers:
-        _target_: aiaccel.hpo.optuna.hparams.Int
-        name: num_layers
-        low: 1
-        high: 10
-        log: true
-
-Command
-+++++++
-
-Command to run the objective function. The objective function is the main function to be
-optimized:
-
-.. code-block:: yaml
-
-    command: ["python", "./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
-
-Other Configuration Options
-+++++++++++++++++++++++++++
-
-- n_trials: Number of trials to run
-- n_max_jobs: Maximum number of parallel jobs
-
-.. code-block:: yaml
-
-    n_trials: 100
-    n_max_jobs: 1  # default : 1
-
-Usage Examples
+Under the hood
 ~~~~~~~~~~~~~~
 
-Here are some common usage patterns:
+The CLI is intentionally thin: :mod:`aiaccel.hpo.apps.optimize` loads the YAML through
+:func:`aiaccel.config.load_config`, merges ``key=value`` overrides with
+:func:`omegaconf.OmegaConf.from_cli`, resolves ``_inherit_`` entries, and merely
+instantiates two objects—``config.study`` and ``config.params``—via
+:func:`hydra.utils.instantiate`. The study is a vanilla Optuna object (any sampler or
+storage backend works), while ``config.params`` becomes an
+:class:`aiaccel.hpo.optuna.hparams_manager.HparamsManager` that generates the
+``{param}`` placeholders. After that, the module just loops over ``study.ask`` /
+``study.tell`` while running your command in a thread pool. No additional abstractions
+are introduced, so whatever Optuna supports can be expressed directly in YAML.
 
-Start a new study with configuration file:
+Configuring optimizer behavior
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: bash
+You can configure the behavior of ``aiaccel-hpo`` in detail by authoring a
+``config.yaml``. Using `aiaccel/hpo/apps/config/default.yaml
+<https://github.com/aistairc/aiaccel/blob/main/aiaccel/hpo/apps/config/default.yaml>`_
+as a base keeps the layout familiar while you fine-tune studies without stuffing the CLI
+with overrides:
 
-    aiaccel-hpo optimize --config=config.yaml
+.. code-block:: yaml
 
-Start a new study with cli:
+    db_filename: ${working_directory}/optuna.db
 
-.. code-block:: bash
+    n_trials: 100
+    n_max_jobs: 10
 
-    python -m aiaccel.hpo.apps.optimize working_directory=./cli/ params.x1="[0,2]" params.x2="[0,2]" study.sampler._target_=optuna.samplers.TPESampler study.sampler.seed=0 n_trials=30 n_max_jobs=1 -- python ./objective.py --x1={x1} --x2={x2} {out_filename}
+    study:
+      _target_: optuna.create_study
+      study_name: aiaccel-hpo
+      storage:
+        _target_: optuna.storages.RDBStorage
+        url: sqlite:///${db_filename}
+      load_if_exists: True
 
-Start a new study with configuration file and cli:
+    params:
+      _convert_: partial
+      _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
 
-.. code-block:: bash
+Extend this file or inherit from it via ``_base_`` to describe your objective.
 
-    python -m aiaccel.hpo.apps.optimize --config config.yaml params.x1="[0,2]" params.x2="[0,2]" --
+.. list-table::
+   :widths: 20 35 45
+   :header-rows: 1
 
-HPO Using NelderMeadSampler
----------------------------
+   - - Scope
+     - Key fields
+     - Notes
+   - - ``study``
+     - ``direction``, ``sampler``, ``storage``, ``study_name``, ``load_if_exists``
+     - Passed directly to :func:`optuna.create_study`, so you can swap samplers or
+       storage backends without touching the Python code.
+   - - ``params``
+     - Literal ``[low, high]`` pairs, constants, or ``_target_`` entries
+     - Instantiates :class:`aiaccel.hpo.optuna.hparams_manager.HparamsManager`; each
+       child becomes a :class:`aiaccel.hpo.optuna.hparams.Hparam`` feeding values to
+       the command template.
+   - - ``command``
+     - Token list such as ``["python", "train.py", "--lr={lr}", "{out_filename}"]``
+     - ``aiaccel-hpo`` joins the list, interpolates ``{param}``, ``{out_filename}``,
+       ``{working_directory}``, ``{job_name}``, and runs it via :func:`subprocess.run`.
+   - - Run control
+     - ``n_trials``, ``n_max_jobs``, ``working_directory``, ``db_filename``
+     - Limit total evaluations, cap concurrent workers, choose the artifact root, and
+       point Optuna to the database used for resuming studies.
 
-Basic Usage
-~~~~~~~~~~~
+Search spaces rely on the helpers in :mod:`aiaccel.hpo.optuna.hparams`
+(:class:`Float`, :class:`Int`, :class:`Categorical`, :class:`Const`). Because they are
+dataclasses, you can define reusable fragments in the same YAML and pull them in with
+``_inherit_`` when multiple parameters share the same range or log-scale behavior.
 
-Basic optimization example using NelderMeadSampler:
+Writing a ``config.yaml`` lets you capture these choices once, reuse them across runs,
+and keep the CLI invocation short—only pass overrides for the few values that change
+per experiment (e.g. ``n_trials=200`` or ``params.lr.low=1e-5``). The CLI prints the
+merged config path and working directory so you can revisit or resume later.
 
-Search Space
-++++++++++++
+Practical reminders for day-to-day runs:
 
-NelderMeadSampler requires a search space as an argument.
+- Treat ``{out_filename}`` as write-only; it is removed immediately after the JSON is
+  read.
+- Store datasets or checkpoints beneath ``working_directory`` when possible so each run
+  stays self-contained.
+- Point Optuna's visualization or dashboard tools at ``{working_directory}/optuna.db``
+  to inspect intermediate results and resume safely.
 
-.. code-block:: python
-    :caption: examples/hpo/samplers/example.py
+Advanced Topics
+---------------
 
-    search_space = {
-        "x": (-10.0, 10.0),
-        "y": (-10.0, 10.0),
-    }
-
-Objective Function
-++++++++++++++++++
-
-Set the Objective Function in the same way as in regular Optuna. The optimization target
-is the benchmark function Sphere.
-
-.. code-block:: python
-    :caption: examples/hpo/samplers/example.py
-
-    def sphere(trial: optuna.trial.Trial) -> float:
-        params = []
-        for name, distribution in search_space.items():
-            params.append(trial.suggest_float(name, *distribution))
-
-        return float(np.sum(np.asarray(params) ** 2))
-
-Execute Optimization
-++++++++++++++++++++
-
-Specify NelderMeadSampler as the sampler and execute the optimization.
-
-.. code-block:: python
-    :caption: examples/hpo/samplers/example.py
-
-    study = optuna.create_study(
-        sampler=NelderMeadSampler(search_space=search_space, seed=42)
-    )
-    study.optimize(func=sphere, n_trials=100)
-
-Full code is examples/hpo/samplers/example.py
-
-Pallarel Optimization
-~~~~~~~~~~~~~~~~~~~~~
-
-Example pallarel optimization:
-
-.. code-block:: python
-    :caption: examples/hpo/samplers/example_parallel.py
-
-    study = optuna.create_study(
-        sampler=NelderMeadSampler(search_space=search_space, seed=42, block=True)
-    )
-    study.optimize(func=sphere, n_trials=100, n_jobs=3)
-
-Parallel execution is enabled by setting the NelderMeadSampler argument block=True and
-the study.optimize argument n_jobs>2. By enabling parallel execution, the initial point
-calculation and the computation during shrinking can be parallelized, leading to faster
-execution compared to serial execution.
-
-Full code is examples/hpo/samplers/example_parallel.py
-
-optuna.study.enqueue_trial
+Using Nelder-Mead samplers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example using optuna.study.enqueue_trial:
+The Nelder-Mead sampler exposed in :class:`~aiaccel.hpo.optuna.samplers.NelderMeadSampler`
+targets scenarios where gradients are unavailable, evaluation cost is high, and the
+search space is moderate in dimensionality. By evolving a simplex rather than relying
+on probabilistic surrogates it:
 
-.. code-block:: python
-    :caption: examples/hpo/samplers/example_enqueue.py
+- excels on smooth, low-dimensional objectives where each evaluation is expensive and
+  noisy gradients would derail deterministic optimizers;
+- explores parameter combinations deterministically, making resume/replay runs easier
+  to reason about than adaptive stochastic samplers;
+- integrates naturally with enqueue-based warm starts, letting you seed the simplex with
+  domain knowledge or previously discovered points;
+- provides a queue-aware implementation so the expensive initial simplex evaluation and
+  shrink steps can run in parallel when ``n_max_jobs`` > 1.
 
-    study = optuna.create_study(
-        sampler=NelderMeadSampler(search_space=search_space, seed=42)
-    )
-    study.enqueue_trial({"x": 1.0, "y": 1.0})
-    study.enqueue_trial({"x": 1.0, "y": 2.0})
-    study.enqueue_trial({"x": 2.0, "y": 1.0})
-    study.optimize(func=sphere, n_trials=100)
+These traits make Nelder-Mead a strong fit for simulation-heavy or hardware-in-the-loop
+use cases where the number of tunable knobs is small but each trial is costly. Refer to
+the dedicated documentation for usage details and configuration options.
 
-Utilizing the ask-tell interface, random parameters are explored using enqueue_trial
-when NelderMeadSampler fails to output parameters.
+Further Reading
+---------------
 
-Full code is examples/hpo/samplers/example_enqueue.py
-
-Sub Sampler
-~~~~~~~~~~~
-
-Example using sub_sampler as optuna.samplers.TPESampler:
-
-.. code-block:: python
-    :caption: examples/hpo/samplers/example_sub_sampler.py
-
-    study = optuna.create_study(
-        sampler=NelderMeadSampler(
-            search_space=search_space,
-            seed=42,
-            sub_sampler=optuna.samplers.TPESampler(seed=42),
-        )
-    )
-    study.optimize(func=sphere, n_trials=100, n_jobs=3)
-
-When sub_sampler=optuna.samplers.TPESampler is set as an argument for NelderMeadSampler,
-TPESampler is used for exploration when NelderMeadSampler fails to output parameters.
-When using the sub_sampler function, the argument block=False must be set even if it is
-parallel. (Parallel execution is possible even with block=False.)
-
-Full code is examples/hpo/samplers/example_sub_sampler.py
+- :doc:`user_guide/config` – complete reference for Hydra-style YAML composition used
+  by ``aiaccel-hpo``.
+- :doc:`user_guide/job` – explains how payload commands are embedded in templates, which
+  mirrors the ``command`` handling in the optimizer.
+- ``examples/hpo`` – runnable Optuna examples, including Nelder-Mead flows and COCO
+  benchmarks.
+- Optuna documentation – visualization utilities, sampler details, and storage backends
+  that extend what ``aiaccel-hpo`` instantiates for you.
