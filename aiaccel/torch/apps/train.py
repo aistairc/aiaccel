@@ -47,6 +47,9 @@ def main() -> None:
 
     config = resolve_inherit(config)
 
+    if "seed" in config:
+        lt.seed_everything(config.seed, workers=True)
+
     # build trainer
     trainer: lt.Trainer = instantiate(config.trainer)
 
