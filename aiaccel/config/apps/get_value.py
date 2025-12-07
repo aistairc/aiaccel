@@ -5,7 +5,7 @@ import argparse
 
 from omegaconf import OmegaConf as oc  # noqa: N813
 
-from aiaccel.config.config import load_config
+from aiaccel.config.config import prepare_config
 
 
 def main() -> None:
@@ -14,7 +14,7 @@ def main() -> None:
     parser.add_argument("key", help="Target key in the configration file")
 
     args, _ = parser.parse_known_args()
-    config = load_config(args.config)
+    config = prepare_config(args.config)
 
     print(oc.select(config, args.key))
 

@@ -4,7 +4,6 @@
 from argparse import ArgumentParser
 import logging
 import os
-from pathlib import Path
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
@@ -12,13 +11,30 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 import lightning as lt
 
 from aiaccel.config import (
-    load_config,
-    pathlib2str_config,
-    print_config,
+    prepare_config,
 )
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
 
 logger = logging.getLogger(__name__)
+
+
+def get_rank(default: int = 0) -> int:
+    for key in [
+        "GLOBAL_RANK",  # PyTorch Lightning
+        "RANK",  # torchrun / deepspeed / pytorch launcher
+        "OMPI_COMM_WORLD_RANK",  # OpenMPI
+        "PMI_RANK",  # MPICH / Intel MPI
+        "MV2_COMM_WORLD_RANK",  # MVAPICH2
+        "SLURM_PROCID",  # Slurm
+    ]:
+        rank = os.environ.get(key)
+        if rank is not None:
+            try:
+                return int(rank)
+            except ValueError:
+                pass
+
+    return default
 
 
 def main() -> None:
@@ -26,35 +42,29 @@ def main() -> None:
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    config, raw_config = load_config(
+    is_rank_zero = get_rank() == 0
+    config = prepare_config(
         config_filename=args.config,
         overwrite_config=oc.from_cli(unk_args),
+        print_config=is_rank_zero,
+        save_config=is_rank_zero,
+        save_filename="merged_config.yaml",
     )
 
-    if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
-        print_config(config)
-
-        status_list = collect_git_status_from_config(raw_config)
+    if is_rank_zero:
+        status_list = collect_git_status_from_config(config)
         print_git_status(status_list)
 
     if "seed" in config:
         lt.seed_everything(config.seed, workers=True)
 
     # build trainer
-    trainer: lt.Trainer = instantiate(raw_config.trainer)
-
-    # save config
-    if trainer.is_global_zero:
-        Path(raw_config.working_directory).mkdir(parents=True, exist_ok=True)
-        merged_config_path = Path(raw_config.working_directory) / "merged_config.yaml"
-
-        with open(merged_config_path, "w") as f:
-            oc.save(pathlib2str_config(raw_config), f)
+    trainer: lt.Trainer = instantiate(config.trainer)
 
     # start training
     trainer.fit(
-        model=instantiate(raw_config.task),
-        datamodule=instantiate(raw_config.datamodule),
+        model=instantiate(config.task),
+        datamodule=instantiate(config.datamodule),
     )
 
 

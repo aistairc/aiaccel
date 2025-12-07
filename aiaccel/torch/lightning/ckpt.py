@@ -13,7 +13,7 @@ from torch import nn
 
 from huggingface_hub import snapshot_download
 
-from aiaccel.config import load_config
+from aiaccel.config import prepare_config
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ def load_checkpoint(
             model_path = Path(model_path)
 
     config_path = model_path / config_name
-    config = load_config(config_path, overwrite_config=overwrite_config)
+    config = prepare_config(config_path, overwrite_config=overwrite_config)
 
     checkpoint_filename = config.checkpoint_filename if "checkpoint_filename" in config else "last.ckpt"
     checkpoint_path = model_path / "checkpoints" / checkpoint_filename
