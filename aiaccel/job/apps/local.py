@@ -1,6 +1,9 @@
 #! /usr/bin/env python3
 
 
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 import logging
 from math import ceil
 from pathlib import Path

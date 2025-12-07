@@ -9,12 +9,17 @@ jobs:
   lint:
     name: Lint
     runs-on: ${{ matrix.os }}
+    env:
+      PIP_INDEX_URL: https://download.pytorch.org/whl/cpu
+      PIP_EXTRA_INDEX_URL: https://pypi.org/simple
     strategy:
       matrix:
         os: ['ubuntu-22.04']
         python-version: ['3.10']
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -22,7 +27,6 @@ jobs:
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
           pip install .[dev,github-actions]
       - name: Perform ruff
         run: |

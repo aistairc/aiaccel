@@ -1,5 +1,6 @@
-Managing Configurations
-=======================
+#########################
+ Managing Configurations
+#########################
 
 This guide introduces how to manage configuration files using ``aiaccel.config`` and
 `Hydra's instantiation mechanism
@@ -12,8 +13,9 @@ This guide introduces how to manage configuration files using ``aiaccel.config``
 - Easy version control integration with Git
 - Minimal dependency on Hydra (only uses ``hydra.utils.instantiate``)
 
-Getting Started
----------------
+*****************
+ Getting Started
+*****************
 
 Aiaccel's configuration system is based on `OmegaConf
 <http://omegaconf.readthedocs.io/>`_. The typical usage is:
@@ -31,23 +33,18 @@ Aiaccel's configuration system is based on `OmegaConf
     from argparse import ArgumentParser
 
     from aiaccel.config import (
-        load_config,
-        overwrite_omegaconf_dumper,
+        prepare_config,
         print_config,
-        resolve_inherit,
     )
     from hydra.utils import instantiate
 
-
-    overwrite_omegaconf_dumper()
 
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    config = load_config(args.config)
+    config = prepare_config(args.config)
     print_config(config)
-    config = resolve_inherit(config)
 
     model = instantiate(config.model)
 
@@ -61,11 +58,14 @@ To run the script:
 
     python example.py config.yaml
 
-``load_config`` reads the configuration file and processes the ``_base_`` attribute,
-while ``resolve_inherit`` resolves ``_inherit_`` attributes.
+``prepare_config`` wraps :func:`aiaccel.config.load_config`, processes the ``_base_``
+attribute, resolves ``_inherit_`` entries, and returns the ready-to-use configuration
+while also allowing you to forward options to :func:`load_config` via
+``load_config_kwargs``.
 
-``_base_`` and ``_inherit_``
-----------------------------
+******************************
+ ``_base_`` and ``_inherit_``
+******************************
 
 The ``_base_`` attribute allows you to inherit from another configuration file.
 
@@ -125,8 +125,9 @@ of the configuration. Example configuration:
 After processing, the configuration will be expanded so that ``x1`` and ``x2`` each
 include the contents of ``param`` along with their own ``name`` fields.
 
-``eval`` Resolver
------------------
+*******************
+ ``eval`` Resolver
+*******************
 
 The ``eval`` resolver allows arithmetic operations within the config. It makes use of
 safe eval.
@@ -139,12 +140,14 @@ Example configuration:
     n_trials: ${eval:"${n_max_jobs} * 10"}
     n_max_jobs: 4
 
-Version Controlling
--------------------
+*********************
+ Version Controlling
+*********************
 
 WIP
 
-Additional Information
-----------------------
+************************
+ Additional Information
+************************
 
 Detailed information is available at :doc:`API Reference <../api_reference/config>`.

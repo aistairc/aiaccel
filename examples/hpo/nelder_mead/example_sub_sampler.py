@@ -1,3 +1,8 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
+import time
+
 import numpy as np
 
 import optuna
@@ -12,6 +17,8 @@ search_space = {
 
 def sphere(trial: optuna.trial.Trial) -> float:
     params = []
+    time.sleep(0.01)
+
     for name, distribution in search_space.items():
         params.append(trial.suggest_float(name, *distribution))
 
@@ -19,5 +26,7 @@ def sphere(trial: optuna.trial.Trial) -> float:
 
 
 if __name__ == "__main__":
-    study = optuna.create_study(sampler=NelderMeadSampler(search_space=search_space, seed=42))
-    study.optimize(func=sphere, n_trials=100)
+    study = optuna.create_study(
+        sampler=NelderMeadSampler(search_space=search_space, seed=42, sub_sampler=optuna.samplers.TPESampler(seed=42))
+    )
+    study.optimize(func=sphere, n_trials=100, n_jobs=3)
