@@ -4,7 +4,6 @@
 from argparse import ArgumentParser
 import logging
 import os
-from pathlib import Path
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
@@ -12,57 +11,55 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 import lightning as lt
 
 from aiaccel.config import (
-    load_config,
-    overwrite_omegaconf_dumper,
-    pathlib2str_config,
-    print_config,
-    resolve_inherit,
+    prepare_config,
 )
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
 
 logger = logging.getLogger(__name__)
 
 
-def main() -> None:
-    overwrite_omegaconf_dumper()
+def get_rank(default: int = 0) -> int:
+    for key in [
+        "GLOBAL_RANK",  # PyTorch Lightning
+        "RANK",  # torchrun / deepspeed / pytorch launcher
+        "OMPI_COMM_WORLD_RANK",  # OpenMPI
+        "PMI_RANK",  # MPICH / Intel MPI
+        "MV2_COMM_WORLD_RANK",  # MVAPICH2
+        "SLURM_PROCID",  # Slurm
+    ]:
+        rank = os.environ.get(key)
+        if rank is not None:
+            try:
+                return int(rank)
+            except ValueError:
+                pass
 
+    return default
+
+
+def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    # load config
-    config = oc.merge(
-        load_config(
-            args.config,
-            {
-                "config_path": args.config,
-                "working_directory": str(Path(args.config).parent.resolve()),
-            },
-        ),
-        oc.from_cli(unk_args),
+    is_rank_zero = get_rank() == 0
+    config = prepare_config(
+        config_filename=args.config,
+        overwrite_config=oc.from_cli(unk_args),
+        print_config=is_rank_zero,
+        save_config=is_rank_zero,
+        save_filename="merged_config.yaml",
     )
 
-    if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
-        print_config(config)
-
+    if is_rank_zero:
         status_list = collect_git_status_from_config(config)
         print_git_status(status_list)
-
-    config = resolve_inherit(config)
 
     if "seed" in config:
         lt.seed_everything(config.seed, workers=True)
 
     # build trainer
     trainer: lt.Trainer = instantiate(config.trainer)
-
-    # save config
-    if trainer.is_global_zero:
-        Path(config.working_directory).mkdir(parents=True, exist_ok=True)
-        merged_config_path = Path(config.working_directory) / "merged_config.yaml"
-
-        with open(merged_config_path, "w") as f:
-            oc.save(pathlib2str_config(config), f)
 
     # start training
     trainer.fit(

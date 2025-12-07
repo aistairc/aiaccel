@@ -18,7 +18,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 from optuna.trial import Trial
 
-from aiaccel.config import load_config, pathlib2str_config, print_config, resolve_inherit
+from aiaccel.config import pathlib2str_config, prepare_config, print_config
 
 
 def main() -> None:
@@ -58,16 +58,12 @@ Typical usages:
     else:
         working_directory = args.config.parent.resolve()
 
-    config = oc.merge(
-        load_config(
-            args.config,
-            {
-                "config_path": args.config,
-                "working_directory": working_directory,
-            },
-        ),
-        oc.from_cli(oc_args),
+    config = prepare_config(
+        config_filename=args.config,
+        working_directory=working_directory,
+        overwrite_config=oc.from_cli(oc_args),
     )
+
     if len(args.command) > 0:
         config.command = args.command
 
@@ -79,9 +75,6 @@ Typical usages:
 
     with open(config.working_directory / "merged_config.yaml", "w") as f:
         oc.save(pathlib2str_config(config), f)
-
-    config = resolve_inherit(config)
-    config.working_directory = Path(config.working_directory)  # maybe bug
 
     # build study and hparams manager
     study = instantiate(config.study)
