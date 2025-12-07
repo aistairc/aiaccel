@@ -58,9 +58,10 @@ To run the script:
 
     python example.py config.yaml
 
-``prepare_config`` wraps :func:`aiaccel.config.load_config`, processes the ``_base_`` attribute,
-resolves ``_inherit_`` entries, and returns the ready-to-use configuration while also allowing you
-to forward options to :func:`load_config` via ``load_config_kwargs``.
+``prepare_config`` wraps :func:`aiaccel.config.load_config`, processes the ``_base_``
+attribute, resolves ``_inherit_`` entries, and returns the ready-to-use configuration
+while also allowing you to forward options to :func:`load_config` via
+``load_config_kwargs``.
 
 ******************************
  ``_base_`` and ``_inherit_``
