@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 from typing import TYPE_CHECKING, Any
 
 from abc import ABCMeta, abstractmethod
