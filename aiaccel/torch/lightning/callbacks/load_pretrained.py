@@ -14,8 +14,8 @@ from aiaccel.torch.lightning import load_checkpoint
 logger = logging.getLogger(__name__)
 
 
-class FinetuneCallback(lt.Callback):
-    """A Lightning callback that initializes a finetuning model from a pretrained checkpoint.
+class LoadPretrainedCallback(lt.Callback):
+    """Initialize a model from a pretrained checkpoint before training or validation.
 
     The callback loads weights from ``model_path`` once fitting or validation begins,
     matches finetune parameters to pretrained ones using glob-like patterns, and copies
@@ -23,23 +23,24 @@ class FinetuneCallback(lt.Callback):
 
     Args:
         model_path: Directory containing checkpoints saved by :func:`load_checkpoint`.
-        target: List of target parameter patterns
-            whose names should be matched verbatim against the pretrained model.
-        remap: Mapping from finetune patterns to pretrained patterns. Wildcards
-            ``"*"`` are allowed and must appear the same number of times on each side.
-        src_blacklist: Optional target-side glob patterns that should never be copied
-            even if they match one of the inclusion rules.
-        dst_blacklist: Optional pretrained-side glob patterns that should never be used
-            as a source for weight initialization.
+        target_patterns: Glob expressions that describe finetune parameters which
+            should be initialized from pretrained weights.
+        pattern_map: Optional mapping from finetune patterns to pretrained ones.
+            Wildcards (``"*"``) are allowed and must appear the same number of times
+            on both sides of the mapping.
+        source_excludes: Optional pretrained-side glob patterns that should never be
+            copied even when referenced by ``pattern_map``.
+        target_excludes: Optional finetune-side glob patterns that should never be
+            overwritten.
         config_name: Name of the checkpoint configuration to load.
 
     Example::
 
-        callback = FinetuneCallback(
-            model_path=Path("pretrai"),
-            target=["detr_module.*"],
-            remap={"backbone.*": "visual_backbone.*"},
-            src_blacklist=["detr_module.heads.cls_head.*"],
+        callback = LoadPretrainedCallback(
+            model_path=Path("pretrain_ckpt"),
+            target_patterns=["detr_module.*"],
+            pattern_map={"backbone.*": "visual_backbone.*"},
+            source_excludes=["detr_module.heads.cls_head.*"],
             config_name="merged_config.yaml",
         )
         trainer = lt.Trainer(callbacks=[callback])
@@ -49,10 +50,10 @@ class FinetuneCallback(lt.Callback):
     def __init__(
         self,
         model_path: Path,
-        target: list[str],
-        remap: dict[str, str] | None = None,
-        src_blacklist: list[str] | None = None,
-        dst_blacklist: list[str] | None = None,
+        target_patterns: list[str],
+        pattern_map: dict[str, str] | None = None,
+        source_excludes: list[str] | None = None,
+        target_excludes: list[str] | None = None,
         config_name: str = "merged_config.yaml",
     ) -> None:
         super().__init__()
@@ -61,17 +62,16 @@ class FinetuneCallback(lt.Callback):
         self.model_path = Path(model_path)
         self.config_name = config_name
 
-        remap = remap or {}
-
-        assert set(remap.keys()) <= set(target)
+        pattern_map = pattern_map or {}
+        assert set(pattern_map) <= set(target_patterns)
 
         # build pattern dictionary used to match finetune parameters to pretrained ones
-        pattern_dict = {ptn: ptn for ptn in target}
-        pattern_dict.update(remap)
+        pattern_dict = {ptn: ptn for ptn in target_patterns}
+        pattern_dict.update(pattern_map)
 
         # remember exclusion filters for finetune and pretrained parameters
-        self.src_blacklist = src_blacklist or []
-        self.dst_blacklist = dst_blacklist or []
+        self.source_excludes = source_excludes or []
+        self.target_excludes = target_excludes or []
 
         # cache the derived mappings and bookkeeping flags
         self._ptn_dict = pattern_dict
@@ -79,6 +79,7 @@ class FinetuneCallback(lt.Callback):
 
     @torch.no_grad()
     def on_fit_start(self, trainer: lt.Trainer, pl_module: lt.LightningModule) -> None:  # type: ignore[override]
+        """Load pretrained weights and copy them into matching finetune parameters."""
         if self._loaded:
             return
 
@@ -98,14 +99,14 @@ class FinetuneCallback(lt.Callback):
                 match_ptn = rgx_ptn.fullmatch(dst_name)
                 if not match_ptn:
                     continue
-                if any(fnmatch(dst_name, ptn) for ptn in self.dst_blacklist):
+                if any(fnmatch(dst_name, ptn) for ptn in self.target_excludes):
                     continue
 
                 groups = iter(match_ptn.groups())
                 src_name = "".join(next(groups) if ch == "*" else ch for ch in src_ptn)
 
                 # ensure we only pull parameters that are not excluded
-                if any(fnmatch(src_name, ptn) for ptn in self.src_blacklist):
+                if any(fnmatch(src_name, ptn) for ptn in self.source_excludes):
                     continue
 
                 # fetch pretrained tensor and check compatibility before scheduling update
@@ -130,4 +131,5 @@ class FinetuneCallback(lt.Callback):
         self._loaded = True
 
     def on_validation_start(self, trainer: lt.Trainer, pl_module: lt.LightningModule) -> None:  # type: ignore[override]
+        """Ensure pretrained weights are loaded before running validation."""
         self.on_fit_start(trainer, pl_module)
