@@ -85,6 +85,8 @@ Lightning Callbacks
     :toctree: generated/
 
     SaveMetricCallback
+    LoadPretrainedCallback
+    PrintUnusedParam
 
 ****************
  H5py Utilities

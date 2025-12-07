@@ -11,11 +11,12 @@
 .. autosummary::
     :toctree: generated/
 
+    setup_omegaconf
+    prepare_config
     load_config
     print_config
-    pathlib2str_config
-    overwrite_omegaconf_dumper
     resolve_inherit
+    pathlib2str_config
 
 ***************
  Git Utilities
