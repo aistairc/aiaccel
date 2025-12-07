@@ -9,6 +9,9 @@ jobs:
   lint:
     name: Lint
     runs-on: ${{ matrix.os }}
+    env:
+      PIP_INDEX_URL: https://download.pytorch.org/whl/cpu
+      PIP_EXTRA_INDEX_URL: https://pypi.org/simple
     strategy:
       matrix:
         os: ['ubuntu-22.04']
