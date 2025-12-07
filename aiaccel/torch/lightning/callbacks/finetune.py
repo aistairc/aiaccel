@@ -67,7 +67,7 @@ class FinetuneCallback(lt.Callback):
 
         # build pattern dictionary used to match finetune parameters to pretrained ones
         pattern_dict = {ptn: ptn for ptn in target}
-        pattern_dict.update({dst_ptn: src_ptn for dst_ptn, src_ptn in remap.items()})
+        pattern_dict.update(remap)
 
         # remember exclusion filters for finetune and pretrained parameters
         self.src_blacklist = src_blacklist or []
