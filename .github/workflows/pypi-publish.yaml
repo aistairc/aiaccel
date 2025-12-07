@@ -52,6 +52,9 @@ jobs:
     needs: check_commits
     if: needs.check_commits.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    env:
+      PIP_INDEX_URL: https://download.pytorch.org/whl/cpu
+      PIP_EXTRA_INDEX_URL: https://pypi.org/simple
     permissions:
       contents: write
       id-token: write
