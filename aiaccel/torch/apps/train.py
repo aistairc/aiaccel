@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 from argparse import ArgumentParser
 import logging
 import os
@@ -30,8 +33,12 @@ def main() -> None:
 
     if int(os.environ.get("OMPI_COMM_WORLD_RANK", 0)) == 0 and int(os.environ.get("RANK", 0)) == 0:
         print_config(config)
+
         status_list = collect_git_status_from_config(raw_config)
         print_git_status(status_list)
+
+    if "seed" in config:
+        lt.seed_everything(config.seed, workers=True)
 
     # build trainer
     trainer: lt.Trainer = instantiate(raw_config.trainer)

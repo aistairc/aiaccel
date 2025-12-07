@@ -21,6 +21,15 @@ repos:
       - id: docstrfmt
         args: [--check, docs/source/, --extend-exclude, docs/source/api_reference/generated]
         types_or: [rst]
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        name: "Insert license header"
+        args:
+          - --license-filepath=LICENSE_HEADER
+          - --detect-license-in-X-top-lines=16
+        types_or: [python, makefile]
 
   - repo: local
     hooks:
