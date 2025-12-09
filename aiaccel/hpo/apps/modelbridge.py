@@ -11,6 +11,7 @@ from omegaconf import OmegaConf
 
 from aiaccel.config import load_config, overwrite_omegaconf_dumper, resolve_inherit
 from aiaccel.hpo.modelbridge.config import BridgeConfig, generate_schema, load_bridge_config
+from aiaccel.hpo.modelbridge.data_assimilation import run_data_assimilation
 from aiaccel.hpo.modelbridge.logging import get_logger
 from aiaccel.hpo.modelbridge.runner import PHASE_ORDER, execute_pipeline, plan_pipeline, run_pipeline
 
@@ -62,6 +63,13 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     validate_parser.add_argument("--print-config", action="store_true", help="Print the resolved configuration")
 
     subparsers.add_parser("schema", help="Print the modelbridge configuration JSON schema")
+
+    da_parser = subparsers.add_parser("data-assimilation", help="Run MAS-Bench data assimilation workflow")
+    da_parser.add_argument("--config", "-c", required=True, help="Path to the bridge configuration YAML")
+    da_parser.add_argument("--dry-run", action="store_true", help="Print planned phases without executing")
+    da_parser.add_argument("--quiet", action="store_true", help="Suppress console logs")
+    da_parser.add_argument("--no-log", action="store_true", help="Disable file logging")
+    da_parser.add_argument("--json-log", action="store_true", help="Emit JSON structured logs")
 
     return parser.parse_args(argv)
 
@@ -155,6 +163,19 @@ def main(argv: Sequence[str] | None = None) -> None:
     command = args.command
     if command == "schema":
         print(json.dumps(generate_schema(), indent=2, default=str))
+        return
+    if command == "data-assimilation":
+        config_path = Path(args.config).expanduser().resolve()
+        bridge_config = _load_bridge_config(config_path, _parse_override_pairs(getattr(args, "overrides", None)))
+        if bridge_config.data_assimilation is None:
+            raise SystemExit("data_assimilation section is required for this command")
+        run_data_assimilation(
+            bridge_config.data_assimilation,
+            dry_run=bool(getattr(args, "dry_run", False)),
+            quiet=bool(getattr(args, "quiet", False)),
+            log_to_file=not bool(getattr(args, "no_log", False)),
+            json_logs=bool(getattr(args, "json_log", False)),
+        )
         return
 
     config_path = Path(args.config).expanduser().resolve()

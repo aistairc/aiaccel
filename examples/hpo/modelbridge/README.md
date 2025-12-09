@@ -64,6 +64,10 @@ The default configuration uses `examples.hpo.modelbridge.simple_benchmark.object
 - Command adapter: set `target` to `aiaccel.hpo.modelbridge.evaluators.command_objective` and supply `command: ["python", "path/to/script.py"]`; the command must emit JSON with `objective`, optional `metrics`, and `payload`.
 - HTTP adapter: set `target` to an `http(s)://...` endpoint; the runner POSTs `{scenario, phase, trial_index, params, env}` where `env` includes `AIACCEL_PARAM_*`. The endpoint should respond with JSON containing `objective`, optional `metrics`, and `payload`.
 
+## Data Assimilation Example
+- A MAS-Bench-inspired data assimilation workflow lives under `examples/hpo/modelbridge/data_assimilation/` with its own `Makefile.template` and `data_assimilation.yaml`.
+- Run with `aiaccel-hpo modelbridge data-assimilation --config <path>` (Makefile wraps this). `allow_mock: true` in the sample YAML avoids needing MAS-Bench.jar; set `mas_bench_jar`/`dataset_root` for real runs.
+
 ## Schema & Validation
 - Print the JSON Schema for the Pydantic v2 configuration:
   ```bash

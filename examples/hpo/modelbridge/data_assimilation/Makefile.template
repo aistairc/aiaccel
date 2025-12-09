@@ -1,0 +1,24 @@
+SHELL := /bin/bash
+
+PYTHON ?= python3
+ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd)
+export PYTHONPATH ?= $(ROOT)
+
+MODELBRIDGE_CONFIG ?= ./data_assimilation.yaml
+MODELBRIDGE_JSON_LOG ?=
+MODELBRIDGE_SET ?=
+
+JSON_LOG_FLAG := $(if $(filter 1 true TRUE yes YES,$(MODELBRIDGE_JSON_LOG)),--json-log,)
+SET_FLAGS := $(addprefix --set ,$(MODELBRIDGE_SET))
+COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) $(JSON_LOG_FLAG) $(SET_FLAGS)
+
+.PHONY: data-assimilation plan clean
+
+data-assimilation:
+	aiaccel-hpo modelbridge data-assimilation $(COMMON_FLAGS)
+
+plan:
+	aiaccel-hpo modelbridge data-assimilation $(COMMON_FLAGS) --dry-run
+
+clean:
+	rm -rf ./work/modelbridge/data_assimilation
