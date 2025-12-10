@@ -9,11 +9,11 @@ from pathlib import Path
 
 from omegaconf import OmegaConf
 
-from aiaccel.config import load_config, overwrite_omegaconf_dumper, resolve_inherit
+from aiaccel.config import load_config, resolve_inherit, setup_omegaconf
 from aiaccel.hpo.modelbridge.config import BridgeConfig, generate_schema, load_bridge_config
 from aiaccel.hpo.modelbridge.data_assimilation import run_data_assimilation
 from aiaccel.hpo.modelbridge.logging import get_logger
-from aiaccel.hpo.modelbridge.runner import PHASE_ORDER, execute_pipeline, plan_pipeline, run_pipeline
+from aiaccel.hpo.modelbridge.runner import PHASE_ORDER, execute_pipeline, plan_pipeline
 
 PHASE_CHOICES = tuple(PHASE_ORDER) + ("full",)
 
@@ -77,7 +77,7 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def _load_bridge_config(path: Path, cli_overrides: Mapping[str, object] | None = None) -> BridgeConfig:
     """Load and validate a configuration file located at ``path``."""
 
-    overwrite_omegaconf_dumper()
+    setup_omegaconf()
     parent_ctx = {"config_path": str(path), "config_dir": str(path.parent)}
     conf = load_config(path, parent_ctx)
     conf = resolve_inherit(conf)

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from pathlib import Path
-import json
-import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
+from pathlib import Path
+import threading
 
 from aiaccel.hpo.modelbridge.config import ObjectiveConfig
 from aiaccel.hpo.modelbridge.evaluators import build_evaluator, command_objective

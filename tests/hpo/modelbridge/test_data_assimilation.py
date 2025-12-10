@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import yaml
@@ -7,9 +8,21 @@ import yaml
 from aiaccel.hpo.apps.modelbridge import main as cli_main
 
 
-def test_data_assimilation_mock(tmp_path: Path) -> None:
+def test_data_assimilation_generic_command(tmp_path: Path) -> None:
+    # Create a dummy script that writes a summary file
+    output_root = tmp_path / "da_outputs"
+    output_root.mkdir()
+    summary_file = output_root / "data_assimilation_summary.json"
+
+    # We use a simple python one-liner as the command
+    cmd = [
+        "python",
+        "-c",
+        f"import json; print('Running DA'); open('{summary_file}', 'w').write(json.dumps({{'status': 'ok'}}))"
+    ]
+
     cfg = {
-        "hpo": {"optimizer": "optuna", "sampler": "tpe"},
+        "hpo": {},
         "bridge": {
             "output_dir": str(tmp_path / "outputs"),
             "train_runs": 0,
@@ -17,14 +30,10 @@ def test_data_assimilation_mock(tmp_path: Path) -> None:
             "scenarios": [],
         },
         "data_assimilation": {
-            "output_root": str(tmp_path / "da_outputs"),
-            "micro_model": "microDemo",
-            "macro_model": "macroDemo",
-            "scenarios": 2,
-            "allow_mock": True,
-            "agent_sizes": {"naive": 1, "rational": 0, "ruby": 0},
-            "trials": {"micro": 2, "macro_train": 2, "macro_test": 2},
-            "seeds": {"micro": 0, "macro_train": 0, "macro_test": 0},
+            "enabled": True,
+            "command": cmd,
+            "cwd": str(tmp_path),
+            "output_root": str(output_root),
         },
     }
     cfg_path = tmp_path / "config.yaml"
@@ -40,7 +49,31 @@ def test_data_assimilation_mock(tmp_path: Path) -> None:
         ]
     )
 
-    summary_path = tmp_path / "da_outputs" / "data_assimilation_summary.json"
-    manifest_path = tmp_path / "da_outputs" / "data_assimilation_manifest.json"
-    assert summary_path.exists()
+    assert summary_file.exists()
+    manifest_path = output_root / "data_assimilation_manifest.json"
     assert manifest_path.exists()
+
+    with summary_file.open() as f:
+        data = json.load(f)
+    assert data["status"] == "ok"
+
+
+def test_data_assimilation_disabled(tmp_path: Path, capsys) -> None:
+    cfg = {
+        "hpo": {},
+        "bridge": {
+            "output_dir": str(tmp_path / "outputs"),
+            "scenarios": [],
+        },
+        "data_assimilation": {
+            "enabled": False,
+            "command": "echo 'should not run'",
+            "output_root": str(tmp_path / "da_outputs"),
+        },
+    }
+    cfg_path = tmp_path / "config.yaml"
+    cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+
+    cli_main(["data-assimilation", "--config", str(cfg_path)])
+
+    assert not (tmp_path / "da_outputs").exists()

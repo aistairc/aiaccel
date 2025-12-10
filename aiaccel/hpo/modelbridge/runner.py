@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from dataclasses import dataclass, field
 from collections.abc import Sequence
@@ -10,18 +10,18 @@ import os
 from pathlib import Path
 import optuna
 
-from .config import BridgeConfig, BridgeSettings, ParameterSpace, ScenarioConfig
+from .config import BridgeConfig, BridgeSettings, DataAssimilationConfig, HpoSettings, ParameterSpace, ScenarioConfig
 from .dag import DagNode, PipelineDag
-from .evaluators import build_evaluator
+from .data_assimilation import run_data_assimilation
 from .io import hash_file, read_json, write_csv, write_json
 from .logging import configure_logging, get_logger
-from .optimizers import collect_trial_results, run_phase
+from .optimizers import collect_trial_results, run_hpo
 from .regression import RegressionModel, evaluate_regression, fit_regression
 from .summary import ScenarioSummary, SummaryBuilder
 from .types import EvaluatorFn, PhaseContext, RegressionSample, RunContext, RunnerFn, TrialResult
 
-PhaseName = Literal["hpo", "regress", "evaluate", "summary"]
-PHASE_ORDER: tuple[PhaseName, ...] = ("hpo", "regress", "evaluate", "summary")
+PhaseName = Literal["hpo", "regress", "evaluate", "summary", "data_assimilation"]
+PHASE_ORDER: tuple[PhaseName, ...] = ("hpo", "regress", "evaluate", "summary", "data_assimilation")
 SCENARIO_SUMMARY_FILE = "scenario_summary.json"
 
 
@@ -52,6 +52,8 @@ class PipelinePlan:
 
     contexts: list[PhaseContext]
     settings: BridgeSettings
+    hpo_settings: HpoSettings
+    da_settings: DataAssimilationConfig | None
     scenarios: dict[str, ScenarioConfig]
 
     def serializable(self) -> dict[str, object]:
@@ -83,29 +85,36 @@ class HpoRunner:
     role: str
     target: str
     run_idx: int
-    evaluator: EvaluatorFn
     params: ParameterSpace
     trials: int
+    hpo_settings: HpoSettings
 
     def __call__(self, ctx: RunContext) -> None:
         scenario_cfg: ScenarioConfig = ctx.scenario
         output_dir = self.layout.run_dir(self.role, self.target, self.run_idx)
         output_dir.mkdir(parents=True, exist_ok=True)
         storage_uri = self.layout.storage_uri(self.role, self.target, self.run_idx)
-        outcome = run_phase(
+        objective_cfg = scenario_cfg.train_objective if self.role == "train" else scenario_cfg.eval_objective
+        outcome = run_hpo(
+            hpo_settings=self.hpo_settings,
             scenario=scenario_cfg.name,
             phase=self.target,
             trials=self.trials,
             space=self.params.macro if self.target == "macro" else self.params.micro,
-            evaluator=self.evaluator,
             seed=ctx.phase.seed or ctx.settings.seed,
             output_dir=output_dir,
             storage=storage_uri,
             study_name=f"{scenario_cfg.name}-{self.role}-{self.target}-{self.run_idx:03d}",
-            write_csv=False,
+            command=objective_cfg.command,
         )
         ctx.state.best[self.role][self.target][self.run_idx] = _best_trial(outcome.trials)
-        _write_best_csv(self.layout, self.role, self.target, ctx.state.best[self.role][self.target], ctx.settings.write_csv)
+        _write_best_csv(
+            self.layout,
+            self.role,
+            self.target,
+            ctx.state.best[self.role][self.target],
+            ctx.settings.write_csv,
+        )
 
 
 @dataclass(slots=True)
@@ -118,11 +127,15 @@ class RegressionRunner:
         scenario_cfg: ScenarioConfig = ctx.scenario
         settings: BridgeSettings = ctx.settings
         state: ScenarioState = ctx.state
-        macro_best = _ensure_best(scenario_cfg, settings, self.layout, "train", "macro", state.best["train"]["macro"])
-        micro_best = _ensure_best(scenario_cfg, settings, self.layout, "train", "micro", state.best["train"]["micro"])
-        state.best["train"]["macro"] = macro_best
-        state.best["train"]["micro"] = micro_best
-        samples = _compose_samples(macro_best, micro_best)
+        train_macro_best = _ensure_best(
+            scenario_cfg, settings, self.layout, "train", "macro", state.best["train"]["macro"]
+        )
+        train_micro_best = _ensure_best(
+            scenario_cfg, settings, self.layout, "train", "micro", state.best["train"]["micro"]
+        )
+        state.best["train"]["macro"] = train_macro_best
+        state.best["train"]["micro"] = train_micro_best
+        samples = _compose_samples(train_macro_best, train_micro_best)
         regression_samples = [sample for _, sample in samples]
         model = _ensure_model(self.layout, state, scenario_cfg, samples_for_fit=regression_samples)
         state.train_metrics = _evaluate_metrics(model, regression_samples, scenario_cfg.metrics)
@@ -171,10 +184,18 @@ class SummaryRunner:
         scenario_cfg: ScenarioConfig = ctx.scenario
         settings: BridgeSettings = ctx.settings
         state: ScenarioState = ctx.state
-        train_macro_best = _ensure_best(scenario_cfg, settings, self.layout, "train", "macro", state.best["train"]["macro"])
-        train_micro_best = _ensure_best(scenario_cfg, settings, self.layout, "train", "micro", state.best["train"]["micro"])
-        eval_macro_best = _ensure_best(scenario_cfg, settings, self.layout, "eval", "macro", state.best["eval"]["macro"])
-        eval_micro_best = _ensure_best(scenario_cfg, settings, self.layout, "eval", "micro", state.best["eval"]["micro"])
+        train_macro_best = _ensure_best(
+            scenario_cfg, settings, self.layout, "train", "macro", state.best["train"]["macro"]
+        )
+        train_micro_best = _ensure_best(
+            scenario_cfg, settings, self.layout, "train", "micro", state.best["train"]["micro"]
+        )
+        eval_macro_best = _ensure_best(
+            scenario_cfg, settings, self.layout, "eval", "macro", state.best["eval"]["macro"]
+        )
+        eval_micro_best = _ensure_best(
+            scenario_cfg, settings, self.layout, "eval", "micro", state.best["eval"]["micro"]
+        )
         train_pairs_samples = _compose_samples_optional(train_macro_best, train_micro_best)
         eval_pairs_samples = _compose_samples_optional(eval_macro_best, eval_micro_best)
 
@@ -206,11 +227,32 @@ class SummaryRunner:
 
 
 @dataclass(slots=True)
+class DataAssimilationRunner:
+    """Phase runner for external data assimilation command."""
+
+    config: DataAssimilationConfig | None
+
+    def __call__(self, ctx: RunContext) -> dict[str, Any] | None:
+        if not self.config or not self.config.enabled:
+            return None
+        # We invoke the generic run_data_assimilation
+        return run_data_assimilation(
+            self.config,
+            dry_run=False,
+            quiet=False,
+            log_to_file=True,
+            json_logs=False,
+        )
+
+
+@dataclass(slots=True)
 class PlanBuilder:
     """Helper to construct PhaseContexts for a scenario."""
 
     layout: RunLayout
     settings: BridgeSettings
+    hpo_settings: HpoSettings
+    da_settings: DataAssimilationConfig | None
     scenario: ScenarioConfig
     base_seed: int
     contexts: list[PhaseContext] = field(default_factory=list)
@@ -221,10 +263,7 @@ class PlanBuilder:
         for phase_role in roles:
             runs = _resolve_runs(self.settings, phase_role, run_id)
             for phase_target in targets:
-                evaluator = build_evaluator(
-                    self.scenario.train_objective if phase_role == "train" else self.scenario.eval_objective,
-                    base_env=_base_env(self.settings),
-                )
+                # Removed build_evaluator call
                 params = self.scenario.train_params if phase_role == "train" else self.scenario.eval_params
                 trials = _get_trials(self.scenario, phase_role, phase_target)
                 for idx in runs:
@@ -243,9 +282,9 @@ class PlanBuilder:
                         role=phase_role,
                         target=phase_target,
                         run_idx=idx,
-                        evaluator=evaluator,
                         params=params,
                         trials=trials,
+                        hpo_settings=self.hpo_settings,
                     )
                     self.contexts.append(ctx)
 
@@ -289,11 +328,20 @@ def plan_pipeline(
     dag_nodes: dict[str, DagNode] = {}
     scenario_map = {cfg.name: cfg for cfg in settings.scenarios}
 
+    first_scenario_processed = False
+
     for scenario_cfg in settings.scenarios:
         if scenario_filter and scenario_cfg.name not in scenario_filter:
             continue
         layout = RunLayout(output_root=settings.output_dir, scenario=scenario_cfg.name)
-        builder = PlanBuilder(layout=layout, settings=settings, scenario=scenario_cfg, base_seed=settings.seed)
+        builder = PlanBuilder(
+            layout=layout,
+            settings=settings,
+            hpo_settings=config.hpo,
+            da_settings=config.data_assimilation,
+            scenario=scenario_cfg,
+            base_seed=settings.seed,
+        )
         for phase in requested_phases:
             if phase == "hpo":
                 builder.add_hpo(role, target, run_id)
@@ -303,15 +351,33 @@ def plan_pipeline(
                 builder.add_phase("evaluate", EvaluationRunner(layout), depends_on=["regress"])
             elif phase == "summary":
                 builder.add_phase("summary", SummaryRunner(layout), depends_on=["regress", "evaluate"])
+            elif phase == "data_assimilation":
+                if not first_scenario_processed:
+                    builder.add_phase(
+                        "data_assimilation",
+                        DataAssimilationRunner(config.data_assimilation),
+                        depends_on=["summary"] if "summary" in requested_phases else None,
+                    )
+
         for ctx in builder.contexts:
             key = _context_key(ctx)
-            dag_nodes[key] = DagNode(context=ctx, run=ctx.runner, depends_on=list(ctx.depends_on))
+            dag_nodes[key] = DagNode(
+                context=ctx, run=cast(Any, ctx.runner), depends_on=list(ctx.depends_on)
+            )
+        
+        first_scenario_processed = True
 
     if not dag_nodes:
         raise ValueError("No scenarios matched the requested filters")
 
     ordered_contexts = [node.context for node in PipelineDag(dag_nodes).topological()]
-    return PipelinePlan(contexts=ordered_contexts, settings=settings, scenarios=scenario_map)
+    return PipelinePlan(
+        contexts=ordered_contexts,
+        settings=settings,
+        hpo_settings=config.hpo,
+        da_settings=config.data_assimilation,
+        scenarios=scenario_map,
+    )
 
 
 def execute_pipeline(
@@ -343,12 +409,19 @@ def execute_pipeline(
     logger = get_logger(__name__)
     logger.info("Executing modelbridge plan with %d contexts", len(plan.contexts))
 
-    summary_builder = SummaryBuilder(output_dir=output_root) if any(ctx.phase == "summary" for ctx in plan.contexts) else None
+    summary_builder = (
+        SummaryBuilder(output_dir=output_root) if any(ctx.phase == "summary" for ctx in plan.contexts) else None
+    )
     states: dict[str, ScenarioState] = {}
     completed: list[dict[str, object]] = []
 
     dag_nodes = PipelineDag(
-        {_context_key(ctx): DagNode(context=ctx, run=ctx.runner, depends_on=list(ctx.depends_on)) for ctx in plan.contexts}
+        {
+            _context_key(ctx): DagNode(
+                context=ctx, run=cast(Any, ctx.runner), depends_on=list(ctx.depends_on)
+            )
+            for ctx in plan.contexts
+        }
     )
     for node in dag_nodes.topological():
         ctx = node.context
@@ -404,7 +477,7 @@ def _normalize_phases(phases: Sequence[str] | None) -> tuple[PhaseName, ...]:
         if phase not in PHASE_ORDER:
             raise ValueError(f"Unknown phase '{phase}'")
         if phase not in normalized:
-            normalized.append(phase)
+            normalized.append(cast(PhaseName, phase))
     return tuple(normalized)
 
 
@@ -507,9 +580,9 @@ def _compose_samples_optional(
 
 
 def _persist_best_pairs(path: Path, samples: list[tuple[int, RegressionSample]]) -> None:
-    rows = []
+    rows: list[dict[str, Any]] = []
     for run_idx, sample in samples:
-        row = {"run_id": run_idx}
+        row: dict[str, Any] = {"run_id": run_idx}
         row |= {f"macro_{k}": v for k, v in sample.features.items()}
         row |= {f"micro_{k}": v for k, v in sample.target.items()}
         rows.append(row)
@@ -521,9 +594,9 @@ def _persist_predictions(
     samples: list[tuple[int, RegressionSample]],
     predictions: list[dict[str, float]],
 ) -> None:
-    rows = []
+    rows: list[dict[str, Any]] = []
     for (run_idx, sample), pred in zip(samples, predictions, strict=True):
-        row = {"run_id": run_idx}
+        row: dict[str, Any] = {"run_id": run_idx}
         row |= {f"macro_{k}": v for k, v in sample.features.items()}
         row |= {f"actual_{k}": v for k, v in sample.target.items()}
         row |= {f"pred_{k}": v for k, v in pred.items()}
@@ -609,7 +682,7 @@ def _ensure_model(
 def _evaluate_metrics(
     model: RegressionModel,
     samples: list[RegressionSample],
-    metrics: tuple[str, ...] | list[str],
+    metrics: Sequence[str],
 ) -> dict[str, float]:
     return {k: float(v) for k, v in evaluate_regression(model, samples, metrics=metrics).items()}
 
@@ -666,6 +739,12 @@ def _collect_artifacts(output_root: Path, states: dict[str, ScenarioState]) -> l
         for path in candidates:
             if path.exists():
                 artifacts.append(_artifact_record(path, scenario=scenario_name))
+    
+    # Also collect data assimilation artifacts if present
+    da_manifest = output_root / "data_assimilation_manifest.json"
+    if da_manifest.exists():
+        artifacts.append(_artifact_record(da_manifest, scenario=None))
+        
     return artifacts
 
 

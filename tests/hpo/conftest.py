@@ -36,7 +36,9 @@ def demo_scenario_dict() -> dict[str, object]:
 def make_bridge_config(demo_scenario_dict: dict[str, object]) -> Callable[[Path | str, int, int], dict[str, object]]:
     def _factory(output_dir: Path | str, train_runs: int = 1, eval_runs: int = 1) -> dict[str, object]:
         return {
-            "hpo": {"optimizer": "optuna", "sampler": "tpe"},
+            "hpo": {
+                "base_config": "dummy_base_config.yaml",
+            },
             "bridge": {
                 "output_dir": str(output_dir),
                 "seed": 5,

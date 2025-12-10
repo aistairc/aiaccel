@@ -8,7 +8,8 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from omegaconf import OmegaConf
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, ValidationInfo, field_validator, model_validator
 
 
 class ParameterBounds(BaseModel):
@@ -23,7 +24,7 @@ class ParameterBounds(BaseModel):
 
     @field_validator("high")
     @classmethod
-    def _ensure_range(cls, high: float, info) -> float:  # type: ignore[override]
+    def _ensure_range(cls, high: float, info: ValidationInfo) -> float:  # type: ignore[override]
         low = info.data.get("low", high)
         if high <= low:
             raise ValueError("high must be greater than low")
@@ -39,7 +40,7 @@ class ParameterSpace(BaseModel):
     micro: dict[str, ParameterBounds] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def _require_params(self) -> "ParameterSpace":
+    def _require_params(self) -> ParameterSpace:
         if not self.macro or not self.micro:
             raise ValueError("macro and micro parameter spaces must be provided")
         return self
@@ -50,7 +51,7 @@ class ObjectiveConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    target: str
+    target: str | None = None
     command: list[str] | None = None
     timeout: float | None = None
 
@@ -143,12 +144,14 @@ class ScenarioConfig(BaseModel):
 
 
 class HpoSettings(BaseModel):
-    """HPO backend knobs."""
+    """HPO backend configuration (Strictly external execution)."""
 
     model_config = ConfigDict(extra="forbid")
 
-    optimizer: str = "optuna"
-    sampler: str = "tpe"
+    base_config: Path | None = None
+    optimize_command: str | list[str] = "aiaccel-hpo optimize"
+    macro_overrides: dict[str, Any] = Field(default_factory=dict)
+    micro_overrides: dict[str, Any] = Field(default_factory=dict)
 
 
 class BridgeSettings(BaseModel):
@@ -173,98 +176,22 @@ class BridgeSettings(BaseModel):
         return value
 
     @model_validator(mode="after")
-    def _default_workdir(self) -> "BridgeSettings":
+    def _default_workdir(self) -> BridgeSettings:
         if self.working_directory is None:
             self.working_directory = self.output_dir
         return self
 
 
-class DataAssimilationScaling(BaseModel):
-    """Scaling rules for MAS-Bench parameters."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    sigma_scale: tuple[float, float] = (97.0, 3.0)  # (multiplier, offset)
-    mu_scale: float = 300.0
-    pi_complement: bool = True  # fill last pi as 1 - sum(previous)
-
-
-class DataAssimilationSamplers(BaseModel):
-    """Sampler choices for micro/macro optimisation."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    micro: str = "random"
-    macro_train: str = "cmaes"
-    macro_test: str = "cmaes"
-
-
-class DataAssimilationTrials(BaseModel):
-    """Trial counts for each optimisation stage."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    micro: int = 4
-    macro_train: int = 5
-    macro_test: int = 5
-
-    @field_validator("micro", "macro_train", "macro_test")
-    @classmethod
-    def _positive(cls, value: int) -> int:
-        if value <= 0:
-            raise ValueError("trial counts must be > 0")
-        return value
-
-
-class DataAssimilationSeeds(BaseModel):
-    """Seeds for reproducible optimisation."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    micro: int = 1
-    macro_train: int = 1
-    macro_test: int = 1
-
-    @field_validator("micro", "macro_train", "macro_test")
-    @classmethod
-    def _non_negative(cls, value: int) -> int:
-        if value < 0:
-            raise ValueError("seed must be >= 0")
-        return value
-
-
 class DataAssimilationConfig(BaseModel):
-    """Configuration for MAS-Bench data assimilation workflow."""
+    """Generic configuration for external data assimilation workflow."""
 
     model_config = ConfigDict(extra="forbid")
 
+    enabled: bool = False
+    command: str | list[str]
+    cwd: Path | None = None
+    env: dict[str, str] = Field(default_factory=dict)
     output_root: Path = Path("./work/modelbridge/data_assimilation")
-    mas_bench_jar: Path | None = None
-    dataset_root: Path | None = None
-    micro_model: str
-    macro_model: str
-    scenarios: int = 4
-    regression_degree: int = 1
-    allow_mock: bool = False  # allow skipping jar execution (tests/CI)
-    agent_sizes: dict[str, int] | None = None  # optional override {"naive":..,"rational":..,"ruby":..}
-    samplers: DataAssimilationSamplers = Field(default_factory=DataAssimilationSamplers)
-    trials: DataAssimilationTrials = Field(default_factory=DataAssimilationTrials)
-    seeds: DataAssimilationSeeds = Field(default_factory=DataAssimilationSeeds)
-    scaling: DataAssimilationScaling = Field(default_factory=DataAssimilationScaling)
-
-    @field_validator("scenarios")
-    @classmethod
-    def _scenarios_positive(cls, value: int) -> int:
-        if value <= 0:
-            raise ValueError("scenarios must be > 0")
-        return value
-
-    @field_validator("regression_degree")
-    @classmethod
-    def _degree_positive(cls, value: int) -> int:
-        if value < 1:
-            raise ValueError("regression_degree must be >= 1")
-        return value
 
 
 class BridgeConfig(BaseModel):
@@ -275,8 +202,6 @@ class BridgeConfig(BaseModel):
     hpo: HpoSettings = Field(default_factory=HpoSettings)
     bridge: BridgeSettings = Field(default_factory=lambda: BridgeSettings(output_dir=Path("./work/modelbridge")))
     data_assimilation: DataAssimilationConfig | None = None
-
-
 
 
 def _deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
@@ -321,10 +246,6 @@ __all__ = [
     "BridgeConfig",
     "BridgeSettings",
     "DataAssimilationConfig",
-    "DataAssimilationScaling",
-    "DataAssimilationSamplers",
-    "DataAssimilationTrials",
-    "DataAssimilationSeeds",
     "HpoSettings",
     "ObjectiveConfig",
     "ParameterBounds",

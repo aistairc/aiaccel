@@ -1,15 +1,18 @@
-"""Optuna integration helpers."""
+"""External HPO execution via aiaccel-hpo optimize."""
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import contextlib
+import shlex
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 import optuna
+from omegaconf import OmegaConf
 
-from .config import ParameterBounds
-from .types import EvaluationResult, TrialContext, TrialResult
+from .config import HpoSettings, ParameterBounds
+from .types import TrialResult, TrialContext, EvaluationResult
 
 
 @dataclass(slots=True)
@@ -32,65 +35,95 @@ class PhaseOutcome:
         return float(self.study.best_value)
 
 
-def run_phase(
+def run_hpo(
     *,
+    hpo_settings: HpoSettings,
     scenario: str,
-    phase: str,
+    phase: str,  # "macro" or "micro"
     trials: int,
     space: dict[str, ParameterBounds],
-    evaluator: Callable[[TrialContext], EvaluationResult],
     seed: int,
     output_dir: Path,
     storage: str | None = None,
     study_name: str | None = None,
-    write_csv: bool = False,
+    command: list[str] | None = None,
 ) -> PhaseOutcome:
-    """Execute an optimisation phase and return the collected trials."""
+    """Execute aiaccel-hpo optimize as a subprocess."""
+
+    if hpo_settings.base_config is None:
+        raise ValueError("base_config is required for external execution")
 
     output_dir.mkdir(parents=True, exist_ok=True)
     resolved_study_name = study_name or f"{scenario}-{phase}"
     resolved_storage = storage
     if resolved_storage is None:
-        db_path = output_dir / f"{phase}_optuna.db"
+        db_path = output_dir / "optuna.db"
         resolved_storage = f"sqlite:///{db_path.resolve()}"
 
-    sampler = optuna.samplers.TPESampler(seed=seed)
+    base_conf = OmegaConf.load(hpo_settings.base_config)
+
+    # Merge overrides
+    overrides = hpo_settings.macro_overrides if phase == "macro" else hpo_settings.micro_overrides
+    if overrides:
+        base_conf = OmegaConf.merge(base_conf, OmegaConf.create(overrides))
+
+    # Force critical settings for aiaccel-hpo optimize
+    OmegaConf.update(base_conf, "n_trials", trials)
+    OmegaConf.update(base_conf, "n_max_jobs", 1)  # Sequential execution per run_id
+    OmegaConf.update(base_conf, "working_directory", str(output_dir))
+    
+    # Inject params (HparamsManager style)
+    _inject_params(base_conf, space)
+
+    # Inject study config
+    # aiaccel-hpo optimize requires 'study' key with hydra instantiation config
+    goal = base_conf.get("optimize", {}).get("goal", "minimize")
+    direction = "minimize" if goal == "minimize" else "maximize"
+    
+    study_conf = {
+        "_target_": "optuna.create_study",
+        "study_name": resolved_study_name,
+        "storage": resolved_storage,
+        "direction": direction,
+        "load_if_exists": True,
+        "sampler": {
+            "_target_": "optuna.samplers.TPESampler",
+            "seed": seed,
+        }
+    }
+    OmegaConf.update(base_conf, "study", study_conf)
+
+    # Write temp config
+    temp_config_path = output_dir / "optimize_config.yaml"
+    OmegaConf.save(base_conf, temp_config_path)
+
+    cmd = hpo_settings.optimize_command
+    cmd_args = shlex.split(cmd) if isinstance(cmd, str) else list(cmd)
+    # Use absolute path for config
+    cmd_args.extend(["--config", str(temp_config_path.resolve())])
+    
+    # Pass objective command as positional arguments if provided
+    if command:
+        cmd_args.append("--")
+        cmd_args.extend(command)
+
+    # Run the process
+    # We execute from current directory (project root) to preserve relative paths
     try:
-        study = optuna.create_study(
-            direction="minimize",
-            sampler=sampler,
-            study_name=resolved_study_name,
-            storage=resolved_storage,
-            load_if_exists=True,
-        )
-    except Exception as exc:  # noqa: BLE001
-        raise RuntimeError(f"Failed to create or load study '{resolved_study_name}'") from exc
+        subprocess.run(cmd_args, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"Optimization process failed: {exc.stderr}") from exc
 
-    collected: list[TrialResult] = []
+    # Load results
+    # Try to load from the passed storage first
+    with contextlib.suppress(Exception):
+        study = optuna.load_study(study_name=resolved_study_name, storage=resolved_storage)
 
-    def objective(trial: optuna.Trial) -> float:
-        params = _suggest_params(trial, space)
-        context = TrialContext(
-            scenario=scenario,
-            phase=phase,
-            trial_index=trial.number,
-            params=params,
-            seed=seed,
-            output_dir=output_dir,
-        )
-        evaluation = evaluator(context)
-        trial.set_user_attr("metrics", evaluation.metrics)
-        trial.set_user_attr("payload", evaluation.payload)
-        trial.set_user_attr("seed", context.seed)
-        collected.append(TrialResult(context=context, evaluation=evaluation, state="COMPLETE"))
-        return evaluation.objective
-
-    remaining = max(0, trials - len([t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]))
-    if remaining > 0:
-        try:
-            study.optimize(objective, n_trials=remaining, show_progress_bar=False)
-        except Exception as exc:  # noqa: BLE001
-            raise RuntimeError(f"Phase '{scenario}:{phase}' terminated unexpectedly") from exc
+    # Re-loading study from the storage URI provided
+    try:
+        study = optuna.load_study(study_name=resolved_study_name, storage=resolved_storage)
+    except Exception as exc:
+        raise RuntimeError(f"Could not load study '{resolved_study_name}' from '{resolved_storage}' after optimization") from exc
 
     trials_payload = collect_trial_results(
         study=study,
@@ -99,24 +132,20 @@ def run_phase(
         output_dir=output_dir,
     )
 
-    if write_csv:
-        _persist_trials(output_dir / f"{phase}_trials.csv", trials_payload)
-
     return PhaseOutcome(study=study, trials=trials_payload)
 
 
-def _suggest_params(trial: optuna.Trial, space: dict[str, ParameterBounds]) -> dict[str, float]:
-    """Sample parameters from ``space`` using Optuna's suggestion API."""
-
-    params: dict[str, float] = {}
+def _inject_params(conf: Any, space: dict[str, ParameterBounds]) -> None:
+    params_def = {"_target_": "aiaccel.hpo.optuna.hparams_manager.HparamsManager"}
     for name, bounds in space.items():
-        if bounds.step is not None:
-            params[name] = trial.suggest_float(name, bounds.low, bounds.high, step=float(bounds.step))
-        elif bounds.log:
-            params[name] = trial.suggest_float(name, bounds.low, bounds.high, log=True)
-        else:
-            params[name] = trial.suggest_float(name, bounds.low, bounds.high)
-    return params
+        params_def[name] = {
+            "_target_": "aiaccel.hpo.optuna.hparams.Float",
+            "low": bounds.low,
+            "high": bounds.high,
+            "log": bounds.log,
+            "step": bounds.step,
+        }
+    OmegaConf.update(conf, "params", params_def)
 
 
 def collect_trial_results(
@@ -140,6 +169,8 @@ def collect_trial_results(
         )
         metrics = {str(k): float(v) for k, v in trial.user_attrs.get("metrics", {}).items()}
         payload = trial.user_attrs.get("payload", {})
+        if trial.value is None:
+            continue
         evaluation = EvaluationResult(objective=float(trial.value), metrics=metrics, payload=payload)
         results.append(TrialResult(context=context, evaluation=evaluation, state=str(trial.state)))
 
@@ -147,18 +178,4 @@ def collect_trial_results(
     return results
 
 
-def _persist_trials(path: Path, trials: list[TrialResult]) -> None:
-    rows = []
-    for result in trials:
-        row = {"trial_index": result.context.trial_index, **result.context.params}
-        row["objective"] = result.evaluation.objective
-        for metric_name, metric_value in result.evaluation.metrics.items():
-            row[f"metric_{metric_name}"] = metric_value
-        rows.append(row)
-    if rows:
-        from .io import write_csv
-
-        write_csv(path, rows)
-
-
-__all__ = ["PhaseOutcome", "collect_trial_results", "run_phase"]
+__all__ = ["PhaseOutcome", "collect_trial_results", "run_hpo"]

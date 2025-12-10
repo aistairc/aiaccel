@@ -5,14 +5,13 @@
 #     MODELBRIDGE_SCENARIO=simple
 
 hpo:
-  optimizer: optuna
-  sampler: tpe
+  base_config: examples/hpo/modelbridge/optimize_config.yaml
 
 bridge:
   output_dir: ./work/modelbridge/simple
   seed: 32
-  train_runs: 10    # Number of HPO training runs
-  eval_runs: 10     # Number of HPO evaluation runs
+  train_runs: 10
+  eval_runs: 10
   log_level: INFO
   scenarios:
     - name: simple
@@ -21,46 +20,40 @@ bridge:
       eval_macro_trials: 6
       eval_micro_trials: 6
       train_objective:
-        target: examples.hpo.modelbridge.simple_benchmark.objective
+        command: ["python", "examples/hpo/modelbridge/simple_objective.py", "{out_filename}", "--x={x}", "--y={y}"]
       eval_objective:
-        target: examples.hpo.modelbridge.simple_benchmark.objective
+        command: ["python", "examples/hpo/modelbridge/simple_objective.py", "{out_filename}", "--x={x}", "--y={y}"]
       train_params:
         macro:
-          macro_x:
+          x:
             low: -1.0
             high: 1.0
-          macro_y:
+          y:
             low: -1.0
             high: 1.0
         micro:
-          micro_x:
+          x:
             low: -1.0
             high: 1.0
-          micro_y:
+          y:
             low: -1.0
             high: 1.0
       eval_params:
         macro:
-          macro_x:
+          x:
             low: -1.0
             high: 1.0
-          macro_y:
+          y:
             low: -1.0
             high: 1.0
         micro:
-          micro_x:
+          x:
             low: -1.0
             high: 1.0
-          micro_y:
+          y:
             low: -1.0
             high: 1.0
       regression:
         kind: linear
         degree: 1
-      # Example: uncomment to use GPy-based Gaussian Process regression
-      # regression:
-      #   kind: gpr
-      #   gpr:
-      #     kernel: RBF
-      #     noise: 1.0e-5
       metrics: [mae, mse, r2]

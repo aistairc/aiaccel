@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
+import base64
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
-import base64
-import itertools
 import pickle
 
 import numpy as np
+
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
@@ -166,7 +166,7 @@ def evaluate_regression(
     metric_funcs = {
         "mae": lambda: float(np.mean(np.abs(errors))),
         "mse": lambda: float(np.mean(np.square(errors))),
-        "r2": lambda: float(1.0)
+        "r2": lambda: 1.0
         if float(np.var(y_true_arr)) == 0
         else float(1.0 - float(np.mean(np.square(errors))) / float(np.var(y_true_arr))),
     }
@@ -281,7 +281,7 @@ def _fit_gpr(
     return regression_model
 
 
-def _build_kernel(feature_names: Sequence[str], config: RegressionConfig):  # pragma: no cover - requires GPy
+def _build_kernel(feature_names: Sequence[str], config: RegressionConfig) -> Any:  # pragma: no cover - requires GPy
     if GPy is None:
         raise RuntimeError("GPy is not installed")
     input_dim = len(feature_names)

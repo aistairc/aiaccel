@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+
 from aiaccel.hpo.apps.modelbridge import main as cli_main
 
 

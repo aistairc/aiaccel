@@ -1,0 +1,8 @@
+optimize:
+  search_algorithm: aiaccel.optimizer.TpeOptimizer
+  goal: minimize
+  trial_number: 10
+  rand_seed: 42
+resource:
+  type: local
+  num_node: 1

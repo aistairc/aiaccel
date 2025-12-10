@@ -11,7 +11,7 @@ MODELBRIDGE_JSON_LOG ?=
 MODELBRIDGE_SET ?=
 JOB_TEMPLATE ?= jobs/modelbridge/local.sh
 AIACCEL_CMD ?= bash $(JOB_TEMPLATE)
-JOB_OPTS ?=
+JOB_OPTS ?= 
 
 RUN_PAD_WIDTH ?= 3
 TRAIN_RUN_RANGE ?= 0..1
@@ -20,8 +20,11 @@ EVAL_RUN_RANGE ?= 0..1
 SCENARIO_DIR := $(MODELBRIDGE_OUTPUT)/scenarios/$(MODELBRIDGE_SCENARIO)
 RUN_ROOT := $(MODELBRIDGE_OUTPUT)/runs/$(MODELBRIDGE_SCENARIO)
 
+# Helper script for range expansion
+EXPAND_RANGE_SCRIPT := $(ROOT)/examples/hpo/modelbridge/expand_range.py
+
 define make_run_ids
-$(shell $(PYTHON) -c "import sys; exec(\"\"\"expr = sys.argv[1].strip()\npad = int(sys.argv[2])\nif not expr:\n    sys.exit(0)\nparts = expr.split('..')\nstart = int(parts[0])\nend = int(parts[1]) if len(parts) > 1 else start\nstep = int(parts[2]) if len(parts) > 2 and parts[2] else 1\nif step == 0:\n    raise SystemExit('RUN range step must be non-zero')\nforward = start <= end\nstep = abs(step) if forward else -abs(step)\nstop = end + (1 if forward else -1)\nprint(' '.join(f'{value:0{pad}d}' for value in range(start, stop, step)), end='')\n\"\"\")" "$(1)" "$(RUN_PAD_WIDTH)")
+$(shell $(PYTHON) $(EXPAND_RANGE_SCRIPT) "$(1)" "$(RUN_PAD_WIDTH)")
 endef
 
 define detect_run_ids
@@ -51,10 +54,9 @@ JSON_LOG_FLAG := $(if $(filter 1 true TRUE yes YES,$(MODELBRIDGE_JSON_LOG)),--js
 SET_FLAGS := $(addprefix --set ,$(MODELBRIDGE_SET))
 COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --scenario $(MODELBRIDGE_SCENARIO) --set bridge.output_dir=$(MODELBRIDGE_OUTPUT) --set bridge.working_directory=$(MODELBRIDGE_OUTPUT) $(JSON_LOG_FLAG) $(SET_FLAGS)
 
-.PHONY: pipeline plan print-config train-macro train-micro eval-macro eval-micro \
-	regress evaluate summary clean
+.PHONY: pipeline plan print-config macro micro regress evaluate summary clean debug
 
-pipeline: train-macro train-micro regress eval-macro eval-micro evaluate summary
+pipeline: summary
 
 plan: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/plan.log -- \
@@ -64,22 +66,25 @@ print-config: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/config.log -- \
 		aiaccel-hpo modelbridge validate $(COMMON_FLAGS) --print-config
 
-train-macro: $(TRAIN_MACRO_TARGETS)
-train-micro: $(TRAIN_MICRO_TARGETS)
-eval-macro: $(EVAL_MACRO_TARGETS)
-eval-micro: $(EVAL_MICRO_TARGETS)
+macro: $(TRAIN_MACRO_TARGETS) $(EVAL_MACRO_TARGETS)
+micro: $(TRAIN_MICRO_TARGETS) $(EVAL_MICRO_TARGETS)
 
-regress: | $(MODELBRIDGE_LOG_DIR)
+regress: macro micro | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/regress.log -- \
 		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --phase regress
 
-evaluate: | $(MODELBRIDGE_LOG_DIR)
+evaluate: regress | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/evaluate.log -- \
 		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --phase evaluate
 
-summary: | $(MODELBRIDGE_LOG_DIR)
+summary: evaluate | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) $(MODELBRIDGE_LOG_DIR)/summary.log -- \
 		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --phase summary
+
+debug:
+	@echo "TRAIN_RUN_IDS: $(TRAIN_RUN_IDS)"
+	@echo "EVAL_RUN_IDS: $(EVAL_RUN_IDS)"
+	@echo "TRAIN_MACRO_TARGETS: $(TRAIN_MACRO_TARGETS)"
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@

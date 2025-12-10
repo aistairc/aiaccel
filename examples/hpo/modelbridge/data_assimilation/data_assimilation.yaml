@@ -1,6 +1,4 @@
-hpo:
-  optimizer: optuna
-  sampler: tpe
+hpo: {}
 
 bridge:
   output_dir: ./work/modelbridge/data_assimilation/bridge_outputs
@@ -9,32 +7,8 @@ bridge:
   scenarios: []
 
 data_assimilation:
+  enabled: true
+  command: >
+    python examples/hpo/modelbridge/data_assimilation/mas_bench_wrapper.py
+    --config examples/hpo/modelbridge/data_assimilation/mas_bench_config.yaml
   output_root: ./work/modelbridge/data_assimilation
-  # Adjust these to match the resource directory names under dataset_root.
-  # The provided sample assets under work/modelbridge/data_assimilation/res use FL1-1/FS1-1.
-  micro_model: FL1-1
-  macro_model: FS1-1
-  scenarios: 2
-  agent_sizes:
-    naive: 1
-    rational: 0
-    ruby: 0
-  trials:
-    micro: 2
-    macro_train: 2
-    macro_test: 2
-  seeds:
-    micro: 0
-    macro_train: 0
-    macro_test: 0
-  samplers:
-    micro: random
-    macro_train: cmaes
-    macro_test: cmaes
-  scaling:
-    sigma_scale: [97.0, 3.0]
-    mu_scale: 300.0
-    pi_complement: true
-  mas_bench_jar: ./work/modelbridge/data_assimilation/res/MAS-Bench.jar
-  dataset_root: ./work/modelbridge/data_assimilation/res/masbench-resources/Dataset
-  allow_mock: false

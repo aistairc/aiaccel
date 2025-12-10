@@ -63,7 +63,7 @@ def test_regression_mismatched_targets_raises() -> None:
 
 
 def test_gpr_regression(monkeypatch) -> None:
-    gpy = pytest.importorskip("GPy")
+    pytest.importorskip("GPy")
     samples = [
         RegressionSample(features={"x": float(x)}, target={"y": float(np.sin(x))})
         for x in np.linspace(0, 1, 5)
