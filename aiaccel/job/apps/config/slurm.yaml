@@ -29,7 +29,7 @@ gpu-array:
 mpi:
     n_nodes: 1
     sbatch_args: >-
-        -p gpu1 -N {args.n_nodes}
+        -p gpu1 -N {args.n_nodes} -n {args.n_procs}
     job: srun -n {args.n_procs} --cpu-bind=none --distribution=block:block {command}
 
 train:
