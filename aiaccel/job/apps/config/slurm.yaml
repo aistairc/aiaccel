@@ -4,8 +4,6 @@ script_prologue: |
     echo Job ID: $SLURM_JOBID
     echo Hostname: $(hostname)
 
-    export CUDA_VISIBLE_DEVICES=all
-
 sbatch: "sbatch --export=USE_SSH=1 --export=ALL"
 
 cpu:
