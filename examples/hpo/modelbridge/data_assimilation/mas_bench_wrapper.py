@@ -19,7 +19,7 @@ from sklearn.preprocessing import PolynomialFeatures
 
 from mas_bench_utils import MASBenchExecutor, get_logger, scale_params, write_input_csv, write_json
 
-# Add aiaccel package path to find config resources if needed, 
+# Add aiaccel package path to find config resources if needed,
 # but we are generating full config here.
 
 
@@ -45,13 +45,13 @@ def _generate_params_config(
     """Generates the params section for aiaccel config and the list of param names."""
     naive, rational, ruby = agent_sizes
     total_agents = naive + rational + ruby
-    
+
     params_def = {
         "_target_": "aiaccel.hpo.optuna.hparams_manager.HparamsManager",
     }
-    
+
     param_names = []
-    
+
     cnt = 0
     for prefix, count in [("naive", naive), ("rational", rational), ("ruby", ruby)]:
         for i in range(count):
@@ -63,7 +63,7 @@ def _generate_params_config(
                     "high": 1.0,
                 }
                 param_names.append(name)
-            
+
             if cnt + 1 < total_agents:
                 name = f"pi_{prefix}{i}"
                 params_def[name] = {
@@ -73,7 +73,7 @@ def _generate_params_config(
                 }
                 param_names.append(name)
             cnt += 1
-            
+
     return params_def, param_names
 
 
@@ -89,18 +89,18 @@ def _run_aiaccel_optimization(
     agent_sizes: tuple[int, int, int],
     logger: logging.Logger,
 ) -> optuna.Study:
-    
+
     work_dir = output_dir / study_name
     work_dir.mkdir(parents=True, exist_ok=True)
-    
+
     db_path = work_dir / "optuna.db"
     storage_url = f"sqlite:///{db_path.resolve()}"
-    
+
     params_conf, param_names = _generate_params_config(agent_sizes)
-    
+
     # Construct command args
     # python mas_bench_objective.py --config ... --model ... --out_dir ... --trial_id ... --mock ... --param={param}
-    
+
     objective_script = Path(__file__).parent / "mas_bench_objective.py"
     cmd = [
         sys.executable,
@@ -113,12 +113,17 @@ def _run_aiaccel_optimization(
     ]
     if mock:
         cmd.append("--mock")
-    
+
     # Append dynamic params
     for p in param_names:
         cmd.append(f"--{p}={{{p}}}")
 
     aiaccel_config = {
+        "resource": {
+            "type": "local",
+            "num_node": 1,
+            "walltime": "24:00:00",
+        },
         "study": {
             "_target_": "optuna.create_study",
             "study_name": study_name,
@@ -137,15 +142,19 @@ def _run_aiaccel_optimization(
     aiaccel_config_path = work_dir / "aiaccel_config.yaml"
     with aiaccel_config_path.open("w") as f:
         yaml.dump(aiaccel_config, f)
-        
+
     logger.info(f"Running optimization '{study_name}' with config {aiaccel_config_path}")
     logger.info(f"Config content:\n{yaml.dump(aiaccel_config)}")
-    
+
+    # Use aiaccel-job as the execution wrapper
+    # Syntax: aiaccel-job <profile> <mode> <log_file> <command>...
+    log_file = work_dir / "aiaccel_job_sub.log"
+    cmd = ["aiaccel-job", "local", "cpu", str(log_file), "--", "aiaccel-hpo", "optimize", "--config", str(aiaccel_config_path)]
     subprocess.run(
-        ["aiaccel-hpo", "optimize", "--config", str(aiaccel_config_path)],
+        cmd,
         check=True,
     )
-    
+
     # Load results
     study = optuna.load_study(study_name=study_name, storage=storage_url)
     return study
@@ -157,22 +166,27 @@ def _run_micro_optimization(
     samplers_cfg = config.get("samplers", {})
     seeds_cfg = config.get("seeds", {})
     trials_cfg = config.get("trials", {})
-    
+
     sampler_name = samplers_cfg.get("micro", "random")
     seed = int(seeds_cfg.get("micro", 0))
     n_trials = int(trials_cfg.get("micro", 1))
     model = config["micro_model"]
-    
-    study_name = f"{model}-micro-{n_trials}-{seed}"
+
+    results: list[dict[str, float]] = []
     output_dir = output_root / "micro"
-    
     logger = get_logger(__name__)
-    study = _run_aiaccel_optimization(
-        study_name, output_dir, sampler_name, seed, n_trials, model, config_path, mock, executor.agent_sizes(), logger
-    )
-    
-    best_trials = [trial for trial in study.trials if trial.state == optuna.trial.TrialState.COMPLETE]
-    return [trial.params for trial in best_trials]
+
+    for idx in range(int(config.get("scenarios", 1))):
+        study_name = f"{model}-micro-{idx}-{sampler_name}-{n_trials}-{seed}"
+
+        study = _run_aiaccel_optimization(
+            study_name, output_dir, sampler_name, seed, n_trials, model, config_path, mock, executor.agent_sizes(), logger
+        )
+
+        if study.best_trial:
+            results.append(study.best_trial.params)
+
+    return results
 
 
 def _run_macro_train(
@@ -181,26 +195,26 @@ def _run_macro_train(
     samplers_cfg = config.get("samplers", {})
     seeds_cfg = config.get("seeds", {})
     trials_cfg = config.get("trials", {})
-    
+
     sampler_name = samplers_cfg.get("macro_train", "cmaes")
     seed = int(seeds_cfg.get("macro_train", 0))
     n_trials = int(trials_cfg.get("macro_train", 1))
     model = config["macro_model"]
-    
+
     results: list[dict[str, float]] = []
     output_dir = output_root / "macro_train"
     logger = get_logger(__name__)
 
     for idx in range(int(config.get("scenarios", 1))):
         study_name = f"{model}-train-{idx}-{sampler_name}-{n_trials}-{seed}"
-        
+
         study = _run_aiaccel_optimization(
             study_name, output_dir, sampler_name, seed, n_trials, model, config_path, mock, executor.agent_sizes(), logger
         )
-        
+
         if study.best_trial:
             results.append(study.best_trial.params)
-            
+
     return results
 
 
@@ -210,16 +224,16 @@ def _run_macro_test(
     samplers_cfg = config.get("samplers", {})
     seeds_cfg = config.get("seeds", {})
     trials_cfg = config.get("trials", {})
-    
+
     sampler_name = samplers_cfg.get("macro_test", "cmaes")
     seed = int(seeds_cfg.get("macro_test", 0))
     n_trials = int(trials_cfg.get("macro_test", 1))
     model = config["macro_model"]
-    
+
     study_name = f"{model}-test-{sampler_name}-{n_trials}-{seed}"
     output_dir = output_root / "macro_test"
     logger = get_logger(__name__)
-    
+
     study = _run_aiaccel_optimization(
         study_name, output_dir, sampler_name, seed, n_trials, model, config_path, mock, executor.agent_sizes(), logger
     )
@@ -249,7 +263,7 @@ def _run_regression(
     y_pred_train = model.predict(macro_train_df.to_numpy())
     mae = mean_absolute_error(micro_df.to_numpy(), y_pred_train)
     r2 = r2_score(micro_df.to_numpy(), y_pred_train) if len(micro_df) > 1 else None
-    
+
     # Predict for test
     if not macro_test_df.empty and not macro_test_df.isna().all().all():
         predicted_micro = model.predict(macro_test_df.to_numpy())[0].tolist()

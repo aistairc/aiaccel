@@ -6,3 +6,4 @@ optimize:
 resource:
   type: local
   num_node: 1
+  walltime: "24:00:00"

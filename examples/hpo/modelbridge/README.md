@@ -1,83 +1,88 @@
 # Modelbridge Examples
 
+## Overview
+This directory contains examples for the Modelbridge workflow in aiaccel-hpo.
+
+### File Structure
+- **Makefile.template**: Template for running the pipeline using `aiaccel-job`.
+- **modelbridge.yaml**: Main configuration file for the example scenario.
+- **optimize_config.yaml**: Base optimization configuration (algorithm, resource).
+- **objectives/**: Directory containing Python objective functions.
+  - `simple_objective.py`: A simple quadratic function used in the example.
+- **data_assimilation/**: Example for data assimilation workflow.
+  - `Makefile.template`: Makefile for the data assimilation example.
+  - `data_assimilation.yaml`: Configuration for data assimilation.
+  - `mas_bench_*.py`: Source codes for the benchmark.
+
 ## Quick Start
 1. Copy `examples/hpo/modelbridge/Makefile.template` next to your configuration or call it directly with `make -f`.
-2. Plan the run if needed (uses CLI `--set` overrides to place outputs under `MODELBRIDGE_OUTPUT` and filter `MODELBRIDGE_SCENARIO`):
-   ```bash
-   make -f examples/hpo/modelbridge/Makefile.template plan \
-     MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml \
-     MODELBRIDGE_OUTPUT=./work/modelbridge/simple \
-     MODELBRIDGE_SCENARIO=simple
-   ```
-3. Execute the staged pipeline (run range set to 0–1 here):
+2. Execute the pipeline:
    ```bash
    make -f examples/hpo/modelbridge/Makefile.template \
      pipeline \
      MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml \
      MODELBRIDGE_OUTPUT=./work/modelbridge/simple \
-     MODELBRIDGE_SCENARIO=simple \
-     TRAIN_RUN_RANGE=0..1 \
-     EVAL_RUN_RANGE=0..1
+     MODELBRIDGE_SCENARIO=simple
    ```
-4. Inspect artifacts under `work/modelbridge/simple` (Optuna DBs in `runs/*/*/<run>/optuna.db`, regression model in `regression_train.json`, summaries in `summary.json`).
-   - `manifest.json` now lists generated artifacts with sizes and sha256 hashes.
+3. Inspect artifacts under `work/modelbridge/simple`.
+   - `manifest.json` lists generated artifacts with sizes and sha256 hashes.
    - Set `MODELBRIDGE_JSON_LOG=1` to emit JSON-formatted pipeline logs.
 
+## Resuming / Skipping HPO
+The pipeline skips HPO execution for a specific run if its `optuna.db` already exists in the expected location.
+To skip computation (e.g., if HPO was run on a cluster):
+1. Place the `optuna.db` file in `work/modelbridge/simple/runs/<role>/<run_id>/<target>/` (adjust output path as needed).
+   - Example: `work/modelbridge/simple/runs/train/000/macro/optuna.db`
+2. **Constraint**: The Optuna Study Name stored *inside* the DB file MUST match the naming convention:
+   - `{scenario}-{role}-{target}-{run_id}` (run_id is zero-padded 3 digits)
+   - Example: `simple-train-macro-000`
+   If the study name mismatches, the pipeline will typically create a new study (ignoring existing data) or fail depending on Optuna behavior.
+
 ## Makefile Template Highlights
-- Targets `train-macro`, `train-micro`, `eval-macro`, and `eval-micro` each materialize the Optuna databases for every run listed in `TRAIN_RUN_IDS` / `EVAL_RUN_IDS` by calling `aiaccel-hpo modelbridge run --phase hpo --role <role> --target <target> --run-id <run>`.
-- Artifacts are addressed directly (e.g. `work/modelbridge/simple/runs/<scenario>/train/macro/000/optuna.db`), so rerunning `make train-macro` only re-executes the missing run directories.
-- `regress`, `evaluate`, and `summary` wrap the corresponding phases, while `pipeline` chains all phases for a full run. A `plan` target prints the PhaseContext list without executing.
+- The `pipeline` target chains all phases for a full run by calling `aiaccel-hpo modelbridge run`.
 - Tunable variables:
-  - `MODELBRIDGE_CONFIG`: path to the YAML configuration (uses strict train/eval objectives/params).
-  - `MODELBRIDGE_OUTPUT`: destination for scenario results (passed via CLI `--set bridge.output_dir=...`).
-  - `MODELBRIDGE_SCENARIO`: scenario name under `bridge.scenarios` (passed to CLI `--scenario`).
-  - `MODELBRIDGE_SET`: additional CLI overrides (space-separated `--set key=value` entries, e.g. `MODELBRIDGE_SET="bridge.log_level=DEBUG bridge.seed=7"`).
-  - `MODELBRIDGE_JSON_LOG`: set to `1`/`true` to enable `--json-log` structured logs.
-  - `TRAIN_RUN_RANGE` / `EVAL_RUN_RANGE`: range for run IDs in `start..end[..step]` form (default 0..1).
-  - `TRAIN_RUN_IDS` / `EVAL_RUN_IDS`: enumerate run IDs explicitly (preferred over `RUN_RANGE`). If unset and outputs exist, detected run IDs are reused.
-  - `RUN_PAD_WIDTH`: zero-padding width for run IDs (default 3).
-  - `JOB_TEMPLATE`: job template path. Defaults to `jobs/modelbridge/local.sh` executed via `bash`.
-  - `AIACCEL_CMD` / `JOB_OPTS`: job execution command (default: `bash $(JOB_TEMPLATE)`). For PBS/SGE use `jobs/modelbridge/pbs.sh` / `sge.sh`.
-  - `MODELBRIDGE_LOG_DIR`: location for per-phase logs.
+  - `MODELBRIDGE_CONFIG`: path to the YAML configuration.
+  - `MODELBRIDGE_OUTPUT`: destination for scenario results.
+  - `MODELBRIDGE_LOG_DIR`: directory for logs (defaults to `$(MODELBRIDGE_OUTPUT)/logs`).
+  - `MODELBRIDGE_SET`: additional CLI overrides (space-separated `--set key=value` entries).
+  - `MODELBRIDGE_JSON_LOG`: set to `1`/`true` to enable structured logs.
+  - `AIACCEL_CMD`: command wrapper (defaults to `aiaccel-job` logging to `$(MODELBRIDGE_LOG_DIR)/aiaccel_job.log`).
 
 ## PYTHONPATH
-- The Makefile.template prepends the repository root to `PYTHONPATH` before invoking the CLI so local `examples.*` can be imported.
-- When calling `aiaccel-hpo modelbridge` directly, set `PYTHONPATH=$(pwd)` (or your repo path) likewise.
+- The Makefile.template prepends the repository root to `PYTHONPATH` before invoking the CLI.
 
 ## Optional Gaussian Process Regression (GPy)
-- Install the optional dependency with `python -m pip install .[gpy]` (or `pip install aiaccel[gpy]`).
-- Update the scenario’s `regression` block to select the backend:
+- Install the optional dependency with `python -m pip install .[gpy]`.
+- Update the scenario’s `regression` block:
   ```yaml
   regression:
     kind: gpr
-    gpr:
-      kernel: RBF      # or MATERN32 / MATERN52
-      noise: 1.0e-5    # alias: alpha
+    kernel: RBF
+    noise: 1.0e-5
   ```
-- The CLI raises a friendly error when `kind: gpr` is requested without the dependency.
 
-## Example Objective
-The default configuration uses `examples.hpo.modelbridge.simple_benchmark.objective` to generate synthetic macro/micro search spaces, executes 12 Optuna trials per run, trains the regression model, and summarizes the accuracy metrics inside `work/modelbridge/simple`.
-
-## Objective Options
-- Python callable: set `train_objective.target` / `eval_objective.target` to an import path (e.g., `examples.hpo.modelbridge.simple_benchmark.objective`).
-- Command adapter: set `target` to `aiaccel.hpo.modelbridge.evaluators.command_objective` and supply `command: ["python", "path/to/script.py"]`; the command must emit JSON with `objective`, optional `metrics`, and `payload`.
-- HTTP adapter: set `target` to an `http(s)://...` endpoint; the runner POSTs `{scenario, phase, trial_index, params, env}` where `env` includes `AIACCEL_PARAM_*`. The endpoint should respond with JSON containing `objective`, optional `metrics`, and `payload`.
+## Objective Configuration
+- The objective must be an executable command string or list of strings.
+- Placeholders like `{out_filename}` are supported (passed by `aiaccel-hpo`).
+- Example:
+  ```yaml
+  train_objective:
+    command: ["python", "examples/hpo/modelbridge/objectives/simple_objective.py", "{out_filename}"]
+  ```
 
 ## Data Assimilation Example
-- A MAS-Bench-inspired data assimilation workflow lives under `examples/hpo/modelbridge/data_assimilation/` with its own `Makefile.template` and `data_assimilation.yaml`.
-- Run with `aiaccel-hpo modelbridge data-assimilation --config <path>` (Makefile wraps this). `allow_mock: true` in the sample YAML avoids needing MAS-Bench.jar; set `mas_bench_jar`/`dataset_root` for real runs.
+- A MAS-Bench-inspired data assimilation workflow lives under `examples/hpo/modelbridge/data_assimilation/`.
+- Run with:
+  ```bash
+  make -f examples/hpo/modelbridge/data_assimilation/Makefile.template data-assimilation
+  ```
 
 ## Schema & Validation
 - Print the JSON Schema for the Pydantic v2 configuration:
   ```bash
   aiaccel-hpo modelbridge schema
   ```
-- Validate + view the resolved configuration after CLI overrides:
+- Validate the configuration:
   ```bash
-  aiaccel-hpo modelbridge validate --config ./modelbridge.yaml --set bridge.output_dir=./work/modelbridge/simple --print-config
+  aiaccel-hpo modelbridge validate --config ./modelbridge.yaml
   ```
-
-## Outputs & Logs
-- `manifest.json` and per-scenario `checkpoint.json` include sha256 hashes for produced artifacts.
-- Use `--json-log` (or `MODELBRIDGE_JSON_LOG=1` in the Makefile) for structured logging; disable console output with `AIACCEL_LOG_SILENT=1` if running in batch environments.

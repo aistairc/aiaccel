@@ -20,9 +20,9 @@ bridge:
       eval_macro_trials: 6
       eval_micro_trials: 6
       train_objective:
-        command: ["python", "examples/hpo/modelbridge/simple_objective.py", "{out_filename}", "--x={x}", "--y={y}"]
+        command: ["bash", "examples/hpo/modelbridge/objective.sh", "{out_filename}", "--x={x}", "--y={y}"]
       eval_objective:
-        command: ["python", "examples/hpo/modelbridge/simple_objective.py", "{out_filename}", "--x={x}", "--y={y}"]
+        command: ["bash", "examples/hpo/modelbridge/objective.sh", "{out_filename}", "--x={x}", "--y={y}"]
       train_params:
         macro:
           x:

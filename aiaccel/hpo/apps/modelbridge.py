@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 import json
 from pathlib import Path
 
@@ -11,11 +11,8 @@ from omegaconf import OmegaConf
 
 from aiaccel.config import load_config, resolve_inherit, setup_omegaconf
 from aiaccel.hpo.modelbridge.config import BridgeConfig, generate_schema, load_bridge_config
-from aiaccel.hpo.modelbridge.data_assimilation import run_data_assimilation
-from aiaccel.hpo.modelbridge.logging import get_logger
-from aiaccel.hpo.modelbridge.runner import PHASE_ORDER, execute_pipeline, plan_pipeline
-
-PHASE_CHOICES = tuple(PHASE_ORDER) + ("full",)
+from aiaccel.hpo.modelbridge.utils import get_logger
+from aiaccel.hpo.modelbridge.pipeline import run_pipeline
 
 
 def _build_common_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -27,25 +24,13 @@ def _build_common_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentPa
         default=[],
         help="Override configuration values (dot paths), e.g. --set bridge.seed=42",
     )
-    parser.add_argument(
-        "--phase",
-        action="append",
-        choices=PHASE_CHOICES,
-        dest="phases",
-        help="phase(s): hpo/regress/evaluate/summary/full (order preserved). Repeatable.",
-    )
-    parser.add_argument("--scenario", action="append", dest="scenarios", help="Limit execution to scenario(s).")
-    parser.add_argument("--role", choices=("train", "eval"), help="Only valid with --phase hpo.")
-    parser.add_argument("--target", choices=("macro", "micro"), help="Only valid with --phase hpo.")
-    parser.add_argument("--run-id", type=int, help="Zero-based run index for HPO.")
     return parser
 
 
 def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Plan or run the aiaccel modelbridge pipeline")
+    parser = argparse.ArgumentParser(description="Run the aiaccel modelbridge pipeline")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    _build_common_parser(subparsers.add_parser("plan", help="Print the planned contexts and exit"))
     run_parser = _build_common_parser(subparsers.add_parser("run", help="Execute the pipeline"))
     run_parser.add_argument("--quiet", action="store_true", help="Suppress console logs")
     run_parser.add_argument("--no-log", action="store_true", help="Disable file logging")
@@ -64,18 +49,19 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
     subparsers.add_parser("schema", help="Print the modelbridge configuration JSON schema")
 
-    da_parser = subparsers.add_parser("data-assimilation", help="Run MAS-Bench data assimilation workflow")
-    da_parser.add_argument("--config", "-c", required=True, help="Path to the bridge configuration YAML")
-    da_parser.add_argument("--dry-run", action="store_true", help="Print planned phases without executing")
-    da_parser.add_argument("--quiet", action="store_true", help="Suppress console logs")
-    da_parser.add_argument("--no-log", action="store_true", help="Disable file logging")
-    da_parser.add_argument("--json-log", action="store_true", help="Emit JSON structured logs")
-
     return parser.parse_args(argv)
 
 
 def _load_bridge_config(path: Path, cli_overrides: Mapping[str, object] | None = None) -> BridgeConfig:
-    """Load and validate a configuration file located at ``path``."""
+    """Load and validate a configuration file located at ``path``.
+
+    Args:
+        path (Path): Path to the configuration file.
+        cli_overrides (Mapping[str, object] | None): CLI overrides to apply.
+
+    Returns:
+        BridgeConfig: The loaded configuration object.
+    """
 
     setup_omegaconf()
     parent_ctx = {"config_path": str(path), "config_dir": str(path.parent)}
@@ -92,7 +78,7 @@ def _merge_overrides(base: Mapping[str, object], override: Mapping[str, object])
     merged: dict[str, object] = dict(base)
     for key, value in override.items():
         if isinstance(value, Mapping) and isinstance(merged.get(key), Mapping):
-            merged[key] = _merge_overrides(merged[key], value)  # type: ignore[arg-type,index]
+            merged[key] = _merge_overrides(merged[key], value)  # type: ignore
         else:
             merged[key] = value
     return merged
@@ -117,7 +103,7 @@ def _assign_override(payload: dict[str, object], path: list[str], value: object)
         existing = cursor.get(segment)
         if existing is None:
             cursor[segment] = {}
-            cursor = cursor[segment]  # type: ignore[assignment]
+            cursor = cursor[segment]  # type: ignore
             continue
         if not isinstance(existing, dict):
             raise SystemExit(f"Override path '{'.'.join(path)}' conflicts with a scalar value")
@@ -134,52 +120,29 @@ def _coerce_value(raw: str) -> object:
         return raw
 
 
-def _normalize_phases(phases: Iterable[str] | None) -> Sequence[str] | None:
-    if not phases:
-        return None
-    unique: list[str] = []
-    for item in phases:
-        if item == "full":
-            return None
-        if item not in unique:
-            unique.append(item)
-    return tuple(unique)
-
-
-def _normalize_scenarios(values: Iterable[str] | None) -> Sequence[str] | None:
-    if not values:
-        return None
-    unique: list[str] = []
-    for value in values:
-        if value not in unique:
-            unique.append(value)
-    return tuple(unique)
-
-
 def main(argv: Sequence[str] | None = None) -> None:
-    """Entrypoint for ``aiaccel-hpo modelbridge``."""
+    """Entrypoint for ``aiaccel-hpo modelbridge``.
+
+    Args:
+        argv (Sequence[str] | None): Command line arguments. If None, uses sys.argv.
+    """
 
     args = _parse_args(argv)
     command = args.command
+
     if command == "schema":
         print(json.dumps(generate_schema(), indent=2, default=str))
-        return
-    if command == "data-assimilation":
-        config_path = Path(args.config).expanduser().resolve()
-        bridge_config = _load_bridge_config(config_path, _parse_override_pairs(getattr(args, "overrides", None)))
-        if bridge_config.data_assimilation is None:
-            raise SystemExit("data_assimilation section is required for this command")
-        run_data_assimilation(
-            bridge_config.data_assimilation,
-            dry_run=bool(getattr(args, "dry_run", False)),
-            quiet=bool(getattr(args, "quiet", False)),
-            log_to_file=not bool(getattr(args, "no_log", False)),
-            json_logs=bool(getattr(args, "json_log", False)),
-        )
         return
 
     config_path = Path(args.config).expanduser().resolve()
     cli_overrides = _parse_override_pairs(getattr(args, "overrides", None))
+
+    # Handle json-log flag by injecting into overrides
+    if getattr(args, "json_log", False):
+        if "bridge" not in cli_overrides or not isinstance(cli_overrides["bridge"], dict):
+            cli_overrides["bridge"] = cli_overrides.get("bridge", {})
+        cli_overrides["bridge"]["json_log"] = True  # type: ignore
+
     bridge_config = _load_bridge_config(config_path, cli_overrides)
 
     if getattr(args, "print_config", False):
@@ -187,57 +150,27 @@ def main(argv: Sequence[str] | None = None) -> None:
         if command == "validate":
             return
 
-    selected_phases = _normalize_phases(getattr(args, "phases", None))
-    selected_scenarios = _normalize_scenarios(getattr(args, "scenarios", None))
-    hpo_filter_requested = getattr(args, "role", None) is not None or getattr(args, "target", None) is not None or getattr(args, "run_id", None) is not None
-    if hpo_filter_requested:
-        selected_phases = selected_phases or ("hpo",)
-        if selected_phases and "hpo" not in selected_phases:
-            raise SystemExit("--role/--target/--run-id are only applicable when --phase hpo is set")
-        if args.role is None or args.target is None:
-            raise SystemExit("--phase hpo requires --role and --target to be specified")
-
     logger = get_logger(__name__)
 
     try:
-        if command == "plan":
-            plan = plan_pipeline(
-                bridge_config,
-                phases=selected_phases,
-                scenarios=selected_scenarios,
-                role=getattr(args, "role", None),
-                target=getattr(args, "target", None),
-                run_id=getattr(args, "run_id", None),
-            )
-            print(json.dumps(plan.serializable(), indent=2, default=str))
-            return
-
         if command == "validate":
             logger.info("Configuration validated successfully")
             return
 
-        plan = plan_pipeline(
-            bridge_config,
-            phases=selected_phases,
-            scenarios=selected_scenarios,
-            role=getattr(args, "role", None),
-            target=getattr(args, "target", None),
-            run_id=getattr(args, "run_id", None),
-        )
-        summary = execute_pipeline(
-            plan,
-            quiet=bool(getattr(args, "quiet", False)),
-            log_to_file=not bool(getattr(args, "no_log", False)),
-            json_logs=bool(getattr(args, "json_log", False)),
-        )
-    except Exception as exc:  # pragma: no cover - exercised via CLI tests
+        if command == "run":
+            if getattr(args, "quiet", False):
+                import os
+                os.environ["AIACCEL_LOG_SILENT"] = "1"
+
+            summary = run_pipeline(bridge_config)
+            logger.info("Pipeline completed successfully.")
+
+    except Exception as exc:
         logger.error("Pipeline failed: %s", exc)
         raise SystemExit(1) from exc
 
-    logger.info("Result:\n%s", json.dumps(summary, indent=2, default=str))
 
-
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     main()
 
 

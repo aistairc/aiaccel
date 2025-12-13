@@ -40,23 +40,23 @@ def prepare_argument_parser(
     sub_parsers = parser.add_subparsers(dest="mode", required=True)
 
     parent_parser = ArgumentParser(add_help=False)
-    parent_parser.add_argument("--walltime", type=str, default=config.walltime)
+    parent_parser.add_argument("--walltime", type=str, default=config.get("walltime"))
     parent_parser.add_argument("log_filename", type=Path)
     parent_parser.add_argument("command", nargs="+")
 
     sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["cpu-array"].n_tasks_per_proc)
-    sub_parser.add_argument("--n_procs", type=int, default=config["cpu-array"].n_procs)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.get("cpu-array", {}).get("n_tasks_per_proc"))
+    sub_parser.add_argument("--n_procs", type=int, default=config.get("cpu-array", {}).get("n_procs"))
 
     sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
     sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"].n_tasks_per_proc)
-    sub_parser.add_argument("--n_procs", type=int, default=config["gpu-array"].n_procs)
+    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config.get("gpu-array", {}).get("n_tasks_per_proc"))
+    sub_parser.add_argument("--n_procs", type=int, default=config.get("gpu-array", {}).get("n_procs"))
 
     sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
     sub_parser.add_argument("--n_procs", type=int, required=True)
-    sub_parser.add_argument("--n_nodes", type=int, default=config["mpi"].n_nodes)
+    sub_parser.add_argument("--n_nodes", type=int, default=config.get("mpi", {}).get("n_nodes"))
 
     sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
     sub_parser.add_argument("--n_gpus", type=int)

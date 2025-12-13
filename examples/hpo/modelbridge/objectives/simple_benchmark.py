@@ -68,7 +68,7 @@ def build_config(base_dir: Path) -> BridgeConfig:
         eval_runs=1,
         scenarios=[scenario],
     )
-    
+
     base_config_path = base_dir / "examples" / "hpo" / "modelbridge" / "optimize_config.yaml"
     hpo_settings = HpoSettings(base_config=base_config_path)
 

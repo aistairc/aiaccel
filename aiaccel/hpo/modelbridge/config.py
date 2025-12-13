@@ -1,4 +1,4 @@
-"""Configuration models and helpers for the redesigned modelbridge pipeline."""
+"""Configuration models for modelbridge."""
 
 from __future__ import annotations
 
@@ -13,7 +13,14 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, ValidationIn
 
 
 class ParameterBounds(BaseModel):
-    """Numeric parameter definition for Optuna suggestions."""
+    """Numeric parameter definition.
+
+    Attributes:
+        low (float): Lower bound.
+        high (float): Upper bound.
+        step (float | None): Step size for discretization.
+        log (bool): Whether to use logarithmic scale.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -24,7 +31,7 @@ class ParameterBounds(BaseModel):
 
     @field_validator("high")
     @classmethod
-    def _ensure_range(cls, high: float, info: ValidationInfo) -> float:  # type: ignore[override]
+    def _ensure_range(cls, high: float, info: ValidationInfo) -> float:
         low = info.data.get("low", high)
         if high <= low:
             raise ValueError("high must be greater than low")
@@ -32,7 +39,12 @@ class ParameterBounds(BaseModel):
 
 
 class ParameterSpace(BaseModel):
-    """Collection of macro/micro parameter bounds."""
+    """Collection of macro/micro parameter bounds.
+
+    Attributes:
+        macro (dict[str, ParameterBounds]): Macro parameter definitions.
+        micro (dict[str, ParameterBounds]): Micro parameter definitions.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -47,26 +59,38 @@ class ParameterSpace(BaseModel):
 
 
 class ObjectiveConfig(BaseModel):
-    """Definition of the evaluation entry point."""
+    """Definition of the evaluation entry point.
+
+    Attributes:
+        command (list[str]): Command line to execute.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
-    target: str | None = None
-    command: list[str] | None = None
-    timeout: float | None = None
+    command: list[str]
 
-    @field_validator("command")
+    @field_validator("command", mode="before")
     @classmethod
-    def _coerce_command(cls, command: list[Any] | None) -> list[str] | None:
-        if command is None:
-            return None
+    def _coerce_command(cls, command: Any) -> list[str]:
+        if not command:
+            raise ValueError("command must be provided")
+        if isinstance(command, str):
+            import shlex
+            return shlex.split(command)
         if not isinstance(command, list):
-            raise ValueError("command must be a list")
+            raise ValueError("command must be a list or string")
         return [str(item) for item in command]
 
 
 class RegressionConfig(BaseModel):
-    """Regression strategy configuration."""
+    """Regression strategy configuration.
+
+    Attributes:
+        kind (str): Regression algorithm ('linear', 'polynomial', 'gpr').
+        degree (int): Polynomial degree (default: 1).
+        kernel (str | None): GPR kernel name ('RBF', 'MATERN32', 'MATERN52').
+        noise (float | None): GPR noise variance.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -81,23 +105,14 @@ class RegressionConfig(BaseModel):
         if not isinstance(data, Mapping):
             return data
         payload = dict(data)
-        kind_alias = payload.pop("type", None)
-        if kind_alias:
-            payload["kind"] = kind_alias
-        poly = payload.pop("poly", None)
-        if isinstance(poly, Mapping) and "degree" in poly:
-            payload["degree"] = poly.get("degree")
-        gpr = payload.pop("gpr", None)
-        if isinstance(gpr, Mapping):
-            if "kernel" in gpr:
-                payload["kernel"] = gpr.get("kernel")
-            if "noise" in gpr:
-                payload["noise"] = gpr.get("noise")
-            if "alpha" in gpr:
-                payload["noise"] = gpr.get("alpha")
-        if "alpha" in payload and payload.get("noise") is None:
-            payload["noise"] = payload["alpha"]
-            payload.pop("alpha", None)
+        # Normalize aliases for compatibility or ease of use
+        if "type" in payload:
+            payload["kind"] = payload.pop("type")
+
+        # Flatten structure if nested configs were provided in old spec (poly, gpr)
+        # Spec v13 defines flat structure but we support loading old style if needed?
+        # Spec v13 says strict validation. Let's stick to flat.
+        # But user YAML might use aliases.
         return payload
 
     @field_validator("degree")
@@ -109,7 +124,21 @@ class RegressionConfig(BaseModel):
 
 
 class ScenarioConfig(BaseModel):
-    """Configuration for a single bridging scenario."""
+    """Configuration for a single bridging scenario.
+
+    Attributes:
+        name (str): Scenario identifier.
+        train_macro_trials (int): Number of trials for training macro HPO.
+        train_micro_trials (int): Number of trials for training micro HPO.
+        eval_macro_trials (int): Number of trials for evaluation macro HPO.
+        eval_micro_trials (int): Number of trials for evaluation micro HPO.
+        train_objective (ObjectiveConfig): Objective function for training.
+        eval_objective (ObjectiveConfig): Objective function for evaluation.
+        train_params (ParameterSpace): Parameter search space for training.
+        eval_params (ParameterSpace): Parameter search space for evaluation.
+        regression (RegressionConfig): Regression model settings.
+        metrics (Sequence[str]): Evaluation metrics ('mae', 'mse', 'r2').
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -123,7 +152,7 @@ class ScenarioConfig(BaseModel):
     train_params: ParameterSpace
     eval_params: ParameterSpace
     regression: RegressionConfig = Field(default_factory=RegressionConfig)
-    metrics: Sequence[str] = Field(default_factory=lambda: ("mae", "mse", "r2"))
+    metrics: Sequence[str] = Field(default_factory=lambda: ["mae", "mse", "r2"])
 
     @field_validator("train_macro_trials", "train_micro_trials", "eval_macro_trials", "eval_micro_trials")
     @classmethod
@@ -134,38 +163,67 @@ class ScenarioConfig(BaseModel):
 
     @field_validator("metrics")
     @classmethod
-    def _validate_metrics(cls, metrics: Sequence[str]) -> tuple[str, ...]:
+    def _validate_metrics(cls, metrics: Sequence[str]) -> list[str]:
         allowed = {"mae", "mse", "r2"}
-        metrics_tuple = tuple(str(item) for item in metrics)
-        invalid = [metric for metric in metrics_tuple if metric not in allowed]
+        metrics_list = [str(item) for item in metrics]
+        invalid = [metric for metric in metrics_list if metric not in allowed]
         if invalid:
             raise ValueError(f"metrics contains unsupported values: {', '.join(invalid)}")
-        return metrics_tuple
+        return metrics_list
 
 
 class HpoSettings(BaseModel):
-    """HPO backend configuration (Strictly external execution)."""
+    """HPO backend configuration.
+
+    Attributes:
+        base_config (Path | None): Path to the base aiaccel configuration file.
+        optimize_command (list[str]): Command prefix for running optimization (default: ["aiaccel-hpo", "optimize"]).
+        job_runner_command (list[str]): Command prefix for running jobs via aiaccel-job (default:
+            ["aiaccel-job", "run", "--profile", "local"]).
+        macro_overrides (dict[str, Any]): OmegaConf overrides for macro HPO.
+        micro_overrides (dict[str, Any]): OmegaConf overrides for micro HPO.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     base_config: Path | None = None
-    optimize_command: str | list[str] = "aiaccel-hpo optimize"
+    optimize_command: list[str] = Field(default_factory=lambda: ["aiaccel-hpo", "optimize"])
+    job_runner_command: list[str] = Field(default_factory=lambda: ["aiaccel-job", "local", "cpu"])
     macro_overrides: dict[str, Any] = Field(default_factory=dict)
     micro_overrides: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("optimize_command", "job_runner_command", mode="before")
+    @classmethod
+    def _coerce_command(cls, command: Any) -> list[str]:
+        if isinstance(command, str):
+            import shlex
+            return shlex.split(command)
+        if isinstance(command, list):
+            return [str(c) for c in command]
+        raise ValueError("command must be a list or string")
+
 
 class BridgeSettings(BaseModel):
-    """Common settings applied to every scenario run."""
+    """Common settings applied to every scenario run.
+
+    Attributes:
+        output_dir (Path): Root directory for outputs.
+        seed (int): Random seed base.
+        log_level (str): Logging level (INFO, DEBUG, etc.).
+        json_log (bool): Enable JSON structured logging.
+        train_runs (int): Number of training runs per scenario.
+        eval_runs (int): Number of evaluation runs per scenario.
+        scenarios (list[ScenarioConfig]): List of scenarios to execute.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     output_dir: Path
-    working_directory: Path | None = None
     seed: int = 0
     log_level: str = "INFO"
+    json_log: bool = False
     train_runs: int = 1
     eval_runs: int = 0
-    write_csv: bool = False
     scenarios: list[ScenarioConfig] = Field(default_factory=list)
 
     @field_validator("train_runs", "eval_runs")
@@ -175,83 +233,122 @@ class BridgeSettings(BaseModel):
             raise ValueError("run counts must be >= 0")
         return value
 
-    @model_validator(mode="after")
-    def _default_workdir(self) -> BridgeSettings:
-        if self.working_directory is None:
-            self.working_directory = self.output_dir
-        return self
-
 
 class DataAssimilationConfig(BaseModel):
-    """Generic configuration for external data assimilation workflow."""
+    """Configuration for external data assimilation workflow.
+
+    Attributes:
+        enabled (bool): Whether to run data assimilation phase.
+        command (list[str]): Command to execute.
+        job_runner_command (list[str]): Command prefix for running jobs via aiaccel-job (default:
+            ["aiaccel-job", "run", "--profile", "local"]).
+        cwd (Path | None): Working directory for the command.
+        env (dict[str, str]): Environment variables to add/override.
+        output_root (Path): Output directory for data assimilation artifacts.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     enabled: bool = False
-    command: str | list[str]
+    command: list[str]
+    job_runner_command: list[str] = Field(default_factory=lambda: ["aiaccel-job", "local", "cpu"])
     cwd: Path | None = None
     env: dict[str, str] = Field(default_factory=dict)
     output_root: Path = Path("./work/modelbridge/data_assimilation")
 
+    @field_validator("command", "job_runner_command", mode="before")
+    @classmethod
+    def _coerce_command(cls, command: Any) -> list[str]:
+        if isinstance(command, str):
+            import shlex
+            return shlex.split(command)
+        if isinstance(command, list):
+            return [str(c) for c in command]
+        raise ValueError("command must be a list or string")
+
 
 class BridgeConfig(BaseModel):
-    """Top level configuration consumed by ``run_pipeline``."""
+    """Top level configuration.
 
-    model_config = ConfigDict(extra="ignore")
+    Attributes:
+        bridge (BridgeSettings): General bridge settings.
+        hpo (HpoSettings): HPO backend settings.
+        data_assimilation (DataAssimilationConfig | None): Data assimilation settings.
+    """
 
+    model_config = ConfigDict(extra="ignore")  # Allow extra top-level keys but ignore them
+
+    bridge: BridgeSettings
     hpo: HpoSettings = Field(default_factory=HpoSettings)
-    bridge: BridgeSettings = Field(default_factory=lambda: BridgeSettings(output_dir=Path("./work/modelbridge")))
     data_assimilation: DataAssimilationConfig | None = None
 
 
-def _deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
-    merged: dict[str, Any] = dict(base)
-    for key, value in override.items():
-        if isinstance(value, Mapping) and isinstance(base.get(key), Mapping):
-            merged[key] = _deep_merge(base[key], value)  # type: ignore[index]
-        else:
-            merged[key] = value
-    return merged
+# --- Internal Data Structures (Pydantic Models) ---
+
+class TrialResult(BaseModel):
+    """Captured Optuna trial output."""
+    model_config = ConfigDict(frozen=True)
+    params: dict[str, float]
+    objective: float
+
+class RegressionSample(BaseModel):
+    """Sample collected for regression training."""
+    model_config = ConfigDict(frozen=True)
+    features: dict[str, float]
+    target: dict[str, float]
+
+class ScenarioSummary(BaseModel):
+    """Final aggregated metrics."""
+    model_config = ConfigDict(frozen=True)
+    train_pairs: int
+    eval_pairs: int
+    train_macro_best: list[dict[str, float]]
+    train_micro_best: list[dict[str, float]]
+    eval_macro_best: list[dict[str, float]]
+    eval_micro_best: list[dict[str, float]]
+    train_metrics: dict[str, float]
+    eval_metrics: dict[str, float]
 
 
 def load_bridge_config(payload: Mapping[str, Any], overrides: Mapping[str, Any] | None = None) -> BridgeConfig:
-    """Convert a mapping (or OmegaConf) into a :class:`BridgeConfig`.
+    """Convert a mapping into a BridgeConfig.
 
-    ``overrides`` (if provided) is merged over the payload (payload < overrides).
+    Args:
+        payload (Mapping[str, Any]): The configuration dictionary (or OmegaConf object).
+        overrides (Mapping[str, Any] | None): Optional overrides to merge.
+
+    Returns:
+        BridgeConfig: The validated configuration object.
+
+    Raises:
+        ValueError: If validation fails.
     """
-
     if isinstance(payload, OmegaConf):
-        payload = OmegaConf.to_container(payload, resolve=True)  # type: ignore[assignment]
-    if not isinstance(payload, Mapping):
-        raise ValueError("Configuration payload must be a mapping")
+        payload = OmegaConf.to_container(payload, resolve=True)  # type: ignore
 
-    layered = dict(payload)
     if overrides:
-        layered = _deep_merge(layered, overrides)
+        payload = _deep_merge(dict(payload), overrides)
 
     try:
-        bridge = BridgeConfig.model_validate(layered)
-        return bridge
-    except ValidationError as exc:  # noqa: TRY003
+        return BridgeConfig.model_validate(payload)
+    except ValidationError as exc:
         raise ValueError(f"Invalid bridge configuration: {exc}") from exc
 
 
 def generate_schema() -> dict[str, Any]:
-    """Return JSON schema for the bridge configuration."""
+    """Return JSON schema for the bridge configuration.
 
+    Returns:
+        dict[str, Any]: The JSON schema.
+    """
     return BridgeConfig.model_json_schema()
 
 
-__all__ = [
-    "BridgeConfig",
-    "BridgeSettings",
-    "DataAssimilationConfig",
-    "HpoSettings",
-    "ObjectiveConfig",
-    "ParameterBounds",
-    "ParameterSpace",
-    "RegressionConfig",
-    "ScenarioConfig",
-    "load_bridge_config",
-    "generate_schema",
-]
+def _deep_merge(base: dict[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
+    merged = dict(base)
+    for key, value in override.items():
+        if key in base and isinstance(base[key], dict) and isinstance(value, Mapping):
+            merged[key] = _deep_merge(base[key], value)
+        else:
+            merged[key] = value
+    return merged

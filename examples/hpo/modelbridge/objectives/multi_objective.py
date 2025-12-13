@@ -27,14 +27,14 @@ if __name__ == "__main__":
     parser.add_argument("--function", type=str, required=True)
     parser.add_argument("--x1", type=float, default=0.0)
     parser.add_argument("--x2", type=float, default=0.0)
-    
+
     args = parser.parse_args()
-    
+
     if args.function not in FUNCTIONS:
         raise ValueError(f"Unknown function: {args.function}")
-        
+
     vec = np.array([args.x1, args.x2])
     score = FUNCTIONS[args.function](vec)
-    
+
     with open(args.out_filename, "w") as f:
         json.dump(score, f)

@@ -1,36 +1,6 @@
-"""Lightweight modelbridge pipeline integration."""
+"""Modelbridge: Bridge between macro and micro parameters using regression."""
 
-from .config import (
-    BridgeConfig,
-    BridgeSettings,
-    DataAssimilationConfig,
-    ObjectiveConfig,
-    ParameterSpace,
-    ScenarioConfig,
-    generate_schema,
-)
-from .data_assimilation import run_data_assimilation
-from .runner import PipelinePlan, execute_pipeline, plan_pipeline, run_pipeline
-from .types import EvaluationResult, EvaluatorFn, PhaseContext, RunContext, RunnerFn, TrialContext, TrialResult
+from .config import BridgeConfig, load_bridge_config
+from .pipeline import run_pipeline
 
-__all__ = [
-    "BridgeConfig",
-    "BridgeSettings",
-    "DataAssimilationConfig",
-    "ObjectiveConfig",
-    "ParameterSpace",
-    "ScenarioConfig",
-    "generate_schema",
-    "run_data_assimilation",
-    "EvaluationResult",
-    "EvaluatorFn",
-    "RunnerFn",
-    "RunContext",
-    "PhaseContext",
-    "TrialContext",
-    "TrialResult",
-    "PipelinePlan",
-    "plan_pipeline",
-    "execute_pipeline",
-    "run_pipeline",
-]
+__all__ = ["BridgeConfig", "load_bridge_config", "run_pipeline"]

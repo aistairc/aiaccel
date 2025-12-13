@@ -15,10 +15,10 @@ def main():
     parser.add_argument("--out_file", required=True)
     parser.add_argument("--trial_id", required=True)
     parser.add_argument("--mock", action="store_true")
-    
+
     # Capture all other arguments as hyperparameters
     args, unknown = parser.parse_known_args()
-    
+
     # Parse unknown args as key=value pairs
     params = {}
     for arg in unknown:
@@ -49,10 +49,10 @@ def main():
             # In wrapper:
             # if cnt + 1 < total_agents: append pi
             # So the last agent overall does not have a pi param.
-            
+
             # We need to know global index to decide if we look for pi
             current_idx = len(sigma) - 1 # 0-based index of current agent
-            
+
             if current_idx < total_agents - 1:
                 pi.append(params.get(f"pi_{prefix}{i}", 0.0))
                 header.extend([f"sigma_{prefix}{i}", f"mu_{prefix}{i}", f"pi_{prefix}{i}"])
@@ -72,21 +72,21 @@ def main():
         pi = [1.0]
 
     sigma_scaled, mu_scaled = scale_params(sigma, mu, config)
-    
+
     run_dir = Path(args.out_dir)
-    
+
     trial_id_str = args.trial_id
     if trial_id_str.startswith("trial_"):
         trial_id_str = trial_id_str[6:]
     trial_id = int(trial_id_str)
-    
+
     input_csv = write_input_csv(run_dir, trial_id, sigma_scaled, mu_scaled, pi, header)
-    
+
     # Mock error calculation matches wrapper
     mock_error = sum(sigma_scaled) + sum(mu_scaled) + sum(pi)
-    
+
     result = executor.run_simulation(args.model, run_dir, input_csv, args.mock, mock_error)
-    
+
     with open(args.out_file, "w") as f:
         # aiaccel expects a JSON value (float or list of floats)
         import json

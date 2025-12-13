@@ -5,20 +5,26 @@ ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd)
 export PYTHONPATH ?= $(ROOT)
 
 MODELBRIDGE_CONFIG ?= ./data_assimilation.yaml
+MODELBRIDGE_OUTPUT ?= ./work/modelbridge/data_assimilation
+MODELBRIDGE_LOG_DIR ?= $(MODELBRIDGE_OUTPUT)/logs
 MODELBRIDGE_JSON_LOG ?=
 MODELBRIDGE_SET ?=
 
+# Use aiaccel-job
+# Syntax: aiaccel-job <profile> <mode> <log_file> <command>...
+AIACCEL_CMD ?= aiaccel-job local cpu $(MODELBRIDGE_LOG_DIR)/aiaccel_job_da.log
+
 JSON_LOG_FLAG := $(if $(filter 1 true TRUE yes YES,$(MODELBRIDGE_JSON_LOG)),--json-log,)
 SET_FLAGS := $(addprefix --set ,$(MODELBRIDGE_SET))
-COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) $(JSON_LOG_FLAG) $(SET_FLAGS)
+COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --set bridge.output_dir=$(MODELBRIDGE_OUTPUT) $(JSON_LOG_FLAG) $(SET_FLAGS)
 
-.PHONY: data-assimilation plan clean
+.PHONY: data-assimilation clean
 
-data-assimilation:
-	aiaccel-hpo modelbridge data-assimilation $(COMMON_FLAGS)
+data-assimilation: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS)
 
-plan:
-	aiaccel-hpo modelbridge data-assimilation $(COMMON_FLAGS) --dry-run
+$(MODELBRIDGE_LOG_DIR):
+	@mkdir -p $@
 
 clean:
-	rm -rf ./work/modelbridge/data_assimilation
+	rm -rf $(MODELBRIDGE_OUTPUT)

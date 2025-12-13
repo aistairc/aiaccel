@@ -94,19 +94,19 @@ class MASBenchExecutor:
         if mock:
             self._write_mock_fitness(run_dir, error_value)
             return error_value
-        
+
         jar = Path(self.config["mas_bench_jar"]).resolve()
         if not jar.exists():
             raise FileNotFoundError(f"MAS-Bench.jar is missing at {jar}")
-            
+
         run_dir_abs = run_dir.resolve()
         run_dir_abs.mkdir(parents=True, exist_ok=True)
         input_csv_abs = input_csv.resolve()
-        
+
         # Determine working directory for Java execution.
         dataset_root = Path(self.config["dataset_root"]).resolve()
         cwd = dataset_root
-        
+
         try:
             result = subprocess.run(
                 ["java", "-jar", str(jar), model, str(run_dir_abs), str(input_csv_abs)],
