@@ -1,0 +1,31 @@
+SHELL := /bin/bash
+
+PYTHON ?= python3
+ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd)
+export PYTHONPATH ?= $(ROOT)
+MODELBRIDGE_CONFIG ?= ./modelbridge.yaml
+MODELBRIDGE_OUTPUT ?= ./work/modelbridge/simple
+MODELBRIDGE_SCENARIO ?= simple
+MODELBRIDGE_LOG_DIR ?= $(MODELBRIDGE_OUTPUT)/logs
+MODELBRIDGE_JSON_LOG ?= 
+MODELBRIDGE_SET ?= 
+
+# Use aiaccel-job as the execution wrapper
+# Syntax: aiaccel-job <profile> <mode> <log_file> <command>...
+AIACCEL_CMD ?= aiaccel-job local cpu $(MODELBRIDGE_LOG_DIR)/aiaccel_job.log
+JOB_OPTS ?= 
+
+COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --set bridge.output_dir=$(MODELBRIDGE_OUTPUT) $(if $(MODELBRIDGE_JSON_LOG),--json-log,) $(if $(MODELBRIDGE_SET),--set $(MODELBRIDGE_SET),)
+
+.PHONY: pipeline clean debug
+
+pipeline: | $(MODELBRIDGE_LOG_DIR)
+	# Redirecting output to log file via shell, as aiaccel-job might stream output
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) > $(MODELBRIDGE_LOG_DIR)/pipeline.log 2>&1
+
+$(MODELBRIDGE_LOG_DIR):
+	@mkdir -p $@
+
+clean:
+	@rm -rf $(MODELBRIDGE_OUTPUT)
