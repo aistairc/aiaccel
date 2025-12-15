@@ -18,7 +18,7 @@ def test_data_assimilation_generic_command(tmp_path: Path) -> None:
     cmd = [
         "python",
         "-c",
-        f"import json; print('Running DA'); open('{summary_file}', 'w').write(json.dumps({{'status': 'ok'}}))"
+        f"import json; print('Running DA'); open('{summary_file}', 'w').write(json.dumps({{'status': 'ok'}}))",
     ]
 
     cfg = {
@@ -41,7 +41,7 @@ def test_data_assimilation_generic_command(tmp_path: Path) -> None:
 
     cli_main(
         [
-            "data-assimilation",
+            "run",
             "--config",
             str(cfg_path),
             "--quiet",
@@ -58,7 +58,7 @@ def test_data_assimilation_generic_command(tmp_path: Path) -> None:
     assert data["status"] == "ok"
 
 
-def test_data_assimilation_disabled(tmp_path: Path, capsys) -> None:
+def test_data_assimilation_disabled(tmp_path: Path, capsys: object) -> None:
     cfg = {
         "hpo": {},
         "bridge": {
@@ -74,6 +74,6 @@ def test_data_assimilation_disabled(tmp_path: Path, capsys) -> None:
     cfg_path = tmp_path / "config.yaml"
     cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
 
-    cli_main(["data-assimilation", "--config", str(cfg_path)])
+    cli_main(["run", "--config", str(cfg_path), "--quiet", "--no-log"])
 
     assert not (tmp_path / "da_outputs").exists()

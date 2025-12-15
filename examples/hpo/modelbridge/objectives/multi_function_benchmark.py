@@ -8,10 +8,12 @@ from pathlib import Path
 from aiaccel.hpo.modelbridge.config import (
     BridgeConfig,
     BridgeSettings,
+    ObjectiveConfig,
+    ParameterBounds,
+    ParameterSpace,
     RegressionConfig,
     ScenarioConfig,
 )
-from aiaccel.hpo.modelbridge.runner import run_pipeline
 
 
 @dataclass(frozen=True)
@@ -61,11 +63,46 @@ def build_config(base_dir: Path) -> BridgeConfig:
     scenario_configs: list[ScenarioConfig] = []
     for spec in SCENARIOS.values():
         train_cmd = [
-            "python", "examples/hpo/modelbridge/multi_objective.py",
+            "python",
+            "examples/hpo/modelbridge/objectives/multi_objective.py",
             "{out_filename}",
-            f"--function={spec.macro}", # macro function
-            "--x1={x1}", "--x2={x2}"
+            f"--function={spec.macro}",  # macro function
+            "--x1={x1}",
+            "--x2={x2}",
         ]
-        pass
+        eval_cmd = [
+            "python",
+            "examples/hpo/modelbridge/objectives/multi_objective.py",
+            "{out_filename}",
+            f"--function={spec.micro}",  # micro function
+            "--x1={x1}",
+            "--x2={x2}",
+        ]
 
-    return BridgeConfig(bridge=BridgeSettings(output_dir=base_dir, scenarios=[])) # Dummy
+        params = ParameterSpace(
+            macro={
+                "x1": ParameterBounds(low=-5.0, high=5.0),
+                "x2": ParameterBounds(low=-5.0, high=5.0),
+            },
+            micro={
+                "x1": ParameterBounds(low=-5.0, high=5.0),
+                "x2": ParameterBounds(low=-5.0, high=5.0),
+            },
+        )
+
+        scenario_configs.append(
+            ScenarioConfig(
+                name=spec.name,
+                train_macro_trials=spec.train_trials,
+                train_micro_trials=spec.train_trials,
+                eval_macro_trials=spec.eval_trials,
+                eval_micro_trials=spec.eval_trials,
+                train_objective=ObjectiveConfig(command=train_cmd),
+                eval_objective=ObjectiveConfig(command=eval_cmd),
+                train_params=params,
+                eval_params=params,
+                regression=spec.regression,
+            )
+        )
+
+    return BridgeConfig(bridge=BridgeSettings(output_dir=base_dir, scenarios=scenario_configs))

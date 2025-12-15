@@ -2,28 +2,28 @@
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 import argparse
+
+# Add aiaccel package path to find config resources if needed,
+# but we are generating full config here.
+import importlib.util
 import logging
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
-from typing import Any
 
-import optuna
 import pandas as pd
-import yaml
+
+from mas_bench_utils import MASBenchExecutor, get_logger, scale_params, write_input_csv, write_json
+import optuna
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
+import yaml
 
-from mas_bench_utils import MASBenchExecutor, get_logger, scale_params, write_input_csv, write_json
-
-# Add aiaccel package path to find config resources if needed,
-# but we are generating full config here.
-
-
-import importlib.util
 
 def _get_sampler_config(name: str, seed: int) -> dict[str, Any]:
     name = name.lower()
@@ -46,7 +46,7 @@ def _generate_params_config(
     naive, rational, ruby = agent_sizes
     total_agents = naive + rational + ruby
 
-    params_def = {
+    params_def: dict[str, Any] = {
         "_target_": "aiaccel.hpo.optuna.hparams_manager.HparamsManager",
     }
 
@@ -89,7 +89,6 @@ def _run_aiaccel_optimization(
     agent_sizes: tuple[int, int, int],
     logger: logging.Logger,
 ) -> optuna.Study:
-
     work_dir = output_dir / study_name
     work_dir.mkdir(parents=True, exist_ok=True)
 
@@ -105,11 +104,16 @@ def _run_aiaccel_optimization(
     cmd = [
         sys.executable,
         str(objective_script.resolve()),
-        "--config", str(config_path.resolve()),
-        "--model", model_name,
-        "--out_dir", "{out_filename}_dir", # aiaccel uses out_filename as json path, we append _dir
-        "--out_file", "{out_filename}",
-        "--trial_id", "{job_name}",
+        "--config",
+        str(config_path.resolve()),
+        "--model",
+        model_name,
+        "--out_dir",
+        "{out_filename}_dir",  # aiaccel uses out_filename as json path, we append _dir
+        "--out_file",
+        "{out_filename}",
+        "--trial_id",
+        "{job_name}",
     ]
     if mock:
         cmd.append("--mock")
@@ -134,8 +138,7 @@ def _run_aiaccel_optimization(
         },
         "params": params_conf,
         "n_trials": n_trials,
-        "n_max_jobs": 1, # Sequential execution as per original logic? Or parallel? Original was sequential implicitly via Optuna default? Optuna is seq unless n_jobs != 1.
-        # Original wrapper ran loop sequentially? No, study.optimize is sequential by default.
+        "n_max_jobs": 1,
         "command": cmd,
     }
 
@@ -149,7 +152,17 @@ def _run_aiaccel_optimization(
     # Use aiaccel-job as the execution wrapper
     # Syntax: aiaccel-job <profile> <mode> <log_file> <command>...
     log_file = work_dir / "aiaccel_job_sub.log"
-    cmd = ["aiaccel-job", "local", "cpu", str(log_file), "--", "aiaccel-hpo", "optimize", "--config", str(aiaccel_config_path)]
+    cmd = [
+        "aiaccel-job",
+        "local",
+        "cpu",
+        str(log_file),
+        "--",
+        "aiaccel-hpo",
+        "optimize",
+        "--config",
+        str(aiaccel_config_path),
+    ]
     subprocess.run(
         cmd,
         check=True,
@@ -161,16 +174,20 @@ def _run_aiaccel_optimization(
 
 
 def _run_micro_optimization(
-    config: dict[str, Any], executor: MASBenchExecutor, mock: bool, output_root: Path, config_path: Path
-) -> list[dict[str, float]]:
+    config: dict[str, Any],
+    executor: Any,
+    mock: bool,
+    output_root: Path,
+    config_path: Path,  # type: ignore[no-any-unimported]
+) -> list[Any]:
     samplers_cfg = config.get("samplers", {})
     seeds_cfg = config.get("seeds", {})
     trials_cfg = config.get("trials", {})
 
-    sampler_name = samplers_cfg.get("micro", "random")
+    sampler_name = str(samplers_cfg.get("micro", "random"))
     seed = int(seeds_cfg.get("micro", 0))
     n_trials = int(trials_cfg.get("micro", 1))
-    model = config["micro_model"]
+    model = str(config["micro_model"])
 
     results: list[dict[str, float]] = []
     output_dir = output_root / "micro"
@@ -180,7 +197,16 @@ def _run_micro_optimization(
         study_name = f"{model}-micro-{idx}-{sampler_name}-{n_trials}-{seed}"
 
         study = _run_aiaccel_optimization(
-            study_name, output_dir, sampler_name, seed, n_trials, model, config_path, mock, executor.agent_sizes(), logger
+            study_name,
+            output_dir,
+            sampler_name,
+            seed,
+            n_trials,
+            model,
+            config_path,
+            mock,
+            cast(Any, executor).agent_sizes(),  # type: ignore[no-any-unimported]
+            logger,
         )
 
         if study.best_trial:
@@ -190,16 +216,20 @@ def _run_micro_optimization(
 
 
 def _run_macro_train(
-    config: dict[str, Any], executor: MASBenchExecutor, mock: bool, output_root: Path, config_path: Path
-) -> list[dict[str, float]]:
+    config: dict[str, Any],
+    executor: Any,
+    mock: bool,
+    output_root: Path,
+    config_path: Path,  # type: ignore[no-any-unimported]
+) -> list[Any]:
     samplers_cfg = config.get("samplers", {})
     seeds_cfg = config.get("seeds", {})
     trials_cfg = config.get("trials", {})
 
-    sampler_name = samplers_cfg.get("macro_train", "cmaes")
+    sampler_name = str(samplers_cfg.get("macro_train", "cmaes"))
     seed = int(seeds_cfg.get("macro_train", 0))
     n_trials = int(trials_cfg.get("macro_train", 1))
-    model = config["macro_model"]
+    model = str(config["macro_model"])
 
     results: list[dict[str, float]] = []
     output_dir = output_root / "macro_train"
@@ -209,7 +239,16 @@ def _run_macro_train(
         study_name = f"{model}-train-{idx}-{sampler_name}-{n_trials}-{seed}"
 
         study = _run_aiaccel_optimization(
-            study_name, output_dir, sampler_name, seed, n_trials, model, config_path, mock, executor.agent_sizes(), logger
+            study_name,
+            output_dir,
+            sampler_name,
+            seed,
+            n_trials,
+            model,
+            config_path,
+            mock,
+            cast(Any, executor).agent_sizes(),
+            logger,  # type: ignore[no-any-unimported]
         )
 
         if study.best_trial:
@@ -219,23 +258,36 @@ def _run_macro_train(
 
 
 def _run_macro_test(
-    config: dict[str, Any], executor: MASBenchExecutor, mock: bool, output_root: Path, config_path: Path
-) -> dict[str, float]:
+    config: dict[str, Any],
+    executor: Any,
+    mock: bool,
+    output_root: Path,
+    config_path: Path,  # type: ignore[no-any-unimported]
+) -> dict[str, Any]:
     samplers_cfg = config.get("samplers", {})
     seeds_cfg = config.get("seeds", {})
     trials_cfg = config.get("trials", {})
 
-    sampler_name = samplers_cfg.get("macro_test", "cmaes")
+    sampler_name = str(samplers_cfg.get("macro_test", "cmaes"))
     seed = int(seeds_cfg.get("macro_test", 0))
     n_trials = int(trials_cfg.get("macro_test", 1))
-    model = config["macro_model"]
+    model = str(config["macro_model"])
 
     study_name = f"{model}-test-{sampler_name}-{n_trials}-{seed}"
     output_dir = output_root / "macro_test"
     logger = get_logger(__name__)
 
     study = _run_aiaccel_optimization(
-        study_name, output_dir, sampler_name, seed, n_trials, model, config_path, mock, executor.agent_sizes(), logger
+        study_name,
+        output_dir,
+        sampler_name,
+        seed,
+        n_trials,
+        model,
+        config_path,
+        mock,
+        cast(Any, executor).agent_sizes(),
+        logger,  # type: ignore[no-any-unimported]
     )
 
     if study.best_trial:
@@ -245,8 +297,8 @@ def _run_macro_test(
 
 def _run_regression(
     config: dict[str, Any],
-    micro_params: list[dict[str, float]],
-    macro_train_params: list[dict[str, float]],
+    micro_params: list[Any],
+    macro_train_params: list[Any],
     macro_test_best: dict[str, float],
     output_root: Path,
 ) -> dict[str, Any]:
@@ -285,11 +337,11 @@ def _run_regression(
 
 def _run_predicted_micro(
     config: dict[str, Any],
-    executor: MASBenchExecutor,
+    executor: Any,
     predicted_micro: dict[str, float],
     mock: bool,
-    output_root: Path,
-) -> float:
+    output_root: Path,  # type: ignore[no-any-unimported]
+) -> Any:
     # This uses direct executor logic, not aiaccel, as it's a single validation run
     naive, rational, ruby = executor.agent_sizes()
     sigma: list[float] = []
@@ -324,7 +376,7 @@ def _run_predicted_micro(
     run_dir = output_root / "bridge_predict" / "run_0"
     input_csv = write_input_csv(run_dir, 0, sigma_scaled, mu_scaled, pi, header)
     error = sum(sigma_scaled) + sum(mu_scaled) + sum(pi)
-    return executor.run_simulation(config["micro_model"], run_dir, input_csv, mock, error)
+    return executor.run_simulation(str(config["micro_model"]), run_dir, input_csv, mock, error)
 
 
 def main() -> None:
@@ -346,15 +398,15 @@ def main() -> None:
     logger.info("Starting MAS-Bench data assimilation")
 
     # Phase 1: micro scenarios
-    micro_results = _run_micro_optimization(config, executor, mock, output_root, config_path)
+    micro_results = _run_micro_optimization(config, executor, mock, output_root, config_path)  # type: ignore[no-any-unimported]
     logger.info("Completed micro scenarios: %d trials", len(micro_results))
 
     # Phase 2: macro train assimilation across scenarios
-    macro_train_results = _run_macro_train(config, executor, mock, output_root, config_path)
+    macro_train_results = _run_macro_train(config, executor, mock, output_root, config_path)  # type: ignore[no-any-unimported]
     logger.info("Completed macro train assimilation: %d scenarios", len(macro_train_results))
 
     # Phase 3: macro test assimilation
-    macro_test_result = _run_macro_test(config, executor, mock, output_root, config_path)
+    macro_test_result = _run_macro_test(config, executor, mock, output_root, config_path)  # type: ignore[no-any-unimported]
     logger.info("Completed macro test assimilation")
 
     # Phase 4: regression macro->micro
@@ -362,7 +414,7 @@ def main() -> None:
     logger.info("Completed regression; predicted micro params: %s", regression_payload["predicted_micro"])
 
     # Phase 5: run predicted micro
-    bridged_error = _run_predicted_micro(config, executor, regression_payload["predicted_micro"], mock, output_root)
+    bridged_error = _run_predicted_micro(config, executor, regression_payload["predicted_micro"], mock, output_root)  # type: ignore[no-any-unimported]
     logger.info("Completed bridged simulation with error %.4f", bridged_error)
 
     summary = {

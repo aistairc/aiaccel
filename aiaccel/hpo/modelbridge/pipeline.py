@@ -31,11 +31,7 @@ def run_pipeline(config: BridgeConfig) -> dict[str, Any]:
     """
 
     # Setup logging
-    setup_logging(
-        config.bridge.log_level,
-        config.bridge.output_dir,
-        json_logs=config.bridge.json_log
-    )
+    setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
 
     manifest: dict[str, Any] = {
         "config": config.model_dump(mode="json"),
@@ -76,10 +72,7 @@ def run_pipeline(config: BridgeConfig) -> dict[str, Any]:
         run_evaluation(scenario, scenario_dir)
 
         # Manifest update per scenario
-        manifest["scenarios"][scenario.name] = {
-            "status": "completed",
-            "dir": str(scenario_dir)
-        }
+        manifest["scenarios"][scenario.name] = {"status": "completed", "dir": str(scenario_dir)}
 
     # Step 5: Summary
     run_summary(config.bridge.scenarios, config.bridge.output_dir)
@@ -102,11 +95,7 @@ def _collect_artifacts(output_dir: Path) -> list[dict[str, Any]]:
     for name in ["summary.json", "manifest.json", "aiaccel_modelbridge.log"]:
         p = output_dir / name
         if p.exists():
-            artifacts.append({
-                "path": str(p),
-                "sha256": hash_file(p),
-                "size": p.stat().st_size
-            })
+            artifacts.append({"path": str(p), "sha256": hash_file(p), "size": p.stat().st_size})
 
     # Scan scenarios
     for s_dir in output_dir.iterdir():
@@ -119,19 +108,13 @@ def _collect_artifacts(output_dir: Path) -> list[dict[str, Any]]:
             if d.exists():
                 for f in d.iterdir():
                     if f.is_file():
-                        artifacts.append({
-                            "path": str(f),
-                            "sha256": hash_file(f),
-                            "size": f.stat().st_size
-                        })
+                        artifacts.append({"path": str(f), "sha256": hash_file(f), "size": f.stat().st_size})
 
     # Data assimilation
     da_manifest = output_dir / "data_assimilation_manifest.json"
     if da_manifest.exists():
-        artifacts.append({
-            "path": str(da_manifest),
-            "sha256": hash_file(da_manifest),
-            "size": da_manifest.stat().st_size
-        })
+        artifacts.append(
+            {"path": str(da_manifest), "sha256": hash_file(da_manifest), "size": da_manifest.stat().st_size}
+        )
 
     return artifacts

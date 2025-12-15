@@ -76,6 +76,7 @@ class ObjectiveConfig(BaseModel):
             raise ValueError("command must be provided")
         if isinstance(command, str):
             import shlex
+
             return shlex.split(command)
         if not isinstance(command, list):
             raise ValueError("command must be a list or string")
@@ -197,6 +198,7 @@ class HpoSettings(BaseModel):
     def _coerce_command(cls, command: Any) -> list[str]:
         if isinstance(command, str):
             import shlex
+
             return shlex.split(command)
         if isinstance(command, list):
             return [str(c) for c in command]
@@ -261,6 +263,7 @@ class DataAssimilationConfig(BaseModel):
     def _coerce_command(cls, command: Any) -> list[str]:
         if isinstance(command, str):
             import shlex
+
             return shlex.split(command)
         if isinstance(command, list):
             return [str(c) for c in command]
@@ -285,20 +288,26 @@ class BridgeConfig(BaseModel):
 
 # --- Internal Data Structures (Pydantic Models) ---
 
+
 class TrialResult(BaseModel):
     """Captured Optuna trial output."""
+
     model_config = ConfigDict(frozen=True)
     params: dict[str, float]
     objective: float
 
+
 class RegressionSample(BaseModel):
     """Sample collected for regression training."""
+
     model_config = ConfigDict(frozen=True)
     features: dict[str, float]
     target: dict[str, float]
 
+
 class ScenarioSummary(BaseModel):
     """Final aggregated metrics."""
+
     model_config = ConfigDict(frozen=True)
     train_pairs: int
     eval_pairs: int

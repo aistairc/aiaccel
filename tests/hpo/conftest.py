@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Callable
-
+from collections.abc import Callable
 import copy
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
@@ -16,10 +16,10 @@ def demo_scenario_dict() -> dict[str, object]:
         "eval_macro_trials": 2,
         "eval_micro_trials": 2,
         "train_objective": {
-            "target": "tests.hpo.modelbridge.sample_objective.objective",
+            "command": ["python", "-c", "print('hello')"],
         },
         "eval_objective": {
-            "target": "tests.hpo.modelbridge.sample_objective.objective",
+            "command": ["python", "-c", "print('hello')"],
         },
         "train_params": {
             "macro": {"x": {"low": 0, "high": 1}},

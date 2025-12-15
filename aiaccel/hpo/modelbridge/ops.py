@@ -170,7 +170,7 @@ def _run_single_hpo(
         "sampler": {
             "_target_": "optuna.samplers.TPESampler",
             "seed": seed,
-        }
+        },
     }
     OmegaConf.update(base_conf, "study", study_conf)
 
@@ -296,6 +296,7 @@ def run_evaluation(scenario: ScenarioConfig, scenario_dir: Path) -> None:
         return
 
     import json
+
     with model_path.open("r") as f:
         model_dict = json.load(f)
 
@@ -381,6 +382,7 @@ def run_summary(scenarios: list[ScenarioConfig], output_dir: Path) -> None:
         tm_file = s_dir / "metrics" / "train_metrics.json"
         if tm_file.exists():
             import json
+
             with tm_file.open() as f:
                 train_metrics = json.load(f)
 
@@ -388,6 +390,7 @@ def run_summary(scenarios: list[ScenarioConfig], output_dir: Path) -> None:
         em_file = s_dir / "metrics" / "eval_metrics.json"
         if em_file.exists():
             import json
+
             with em_file.open() as f:
                 eval_metrics = json.load(f)
 
@@ -424,15 +427,10 @@ def run_external_command(config: DataAssimilationConfig) -> None:
         # Insert log file and -- separator for aiaccel-job
         log_file = output_root / "aiaccel_job_da.log"
         full_cmd = list(config.job_runner_command) + [str(log_file.resolve()), "--"] + config.command
-        
+
         _logger.info(f"Executing external command: {shlex.join(full_cmd)}")
         proc = subprocess.run(
-            full_cmd,
-            cwd=cwd,
-            env=os.environ | config.env,
-            capture_output=True,
-            text=True,
-            check=True
+            full_cmd, cwd=cwd, env=os.environ | config.env, capture_output=True, text=True, check=True
         )
         _logger.info(f"DA stdout:\n{proc.stdout}")
         if proc.stderr:
@@ -445,11 +443,9 @@ def run_external_command(config: DataAssimilationConfig) -> None:
     summary_path = output_root / "data_assimilation_summary.json"
     artifacts = []
     if summary_path.exists():
-        artifacts.append({
-            "path": str(summary_path),
-            "sha256": hash_file(summary_path),
-            "size": summary_path.stat().st_size
-        })
+        artifacts.append(
+            {"path": str(summary_path), "sha256": hash_file(summary_path), "size": summary_path.stat().st_size}
+        )
 
     write_json(output_root / "data_assimilation_manifest.json", {"artifacts": artifacts})
 
@@ -481,8 +477,7 @@ def _fit_regression(
         model = LinearRegression().fit(x_poly, y_data)
 
         feature_order = [
-            label.replace(" ", "*").replace("^", "*")
-            for label in poly.get_feature_names_out(feature_names)
+            label.replace(" ", "*").replace("^", "*") for label in poly.get_feature_names_out(feature_names)
         ]
 
         return {
@@ -508,12 +503,7 @@ def _fit_regression(
             models.append(m)
 
         blob = base64.b64encode(pickle.dumps(models)).decode("utf-8")
-        return {
-            "kind": "gpr",
-            "feature_names": feature_names,
-            "target_names": target_names,
-            "model_blob": blob
-        }
+        return {"kind": "gpr", "feature_names": feature_names, "target_names": target_names, "model_blob": blob}
 
     raise ValueError(f"Unknown regression kind: {kind}")
 
@@ -583,12 +573,12 @@ def _evaluate_metrics_from_preds(
     if "mae" in metrics:
         result["mae"] = float(np.mean(np.abs(errors)))
     if "mse" in metrics:
-        result["mse"] = float(np.mean(errors ** 2))
+        result["mse"] = float(np.mean(errors**2))
     if "r2" in metrics:
         var = np.var(y_true)
         if var == 0:
             result["r2"] = 1.0
         else:
-            result["r2"] = 1.0 - float(np.mean(errors ** 2) / var)
+            result["r2"] = 1.0 - float(np.mean(errors**2) / var)
 
     return result

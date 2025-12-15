@@ -11,8 +11,8 @@ from omegaconf import OmegaConf
 
 from aiaccel.config import load_config, resolve_inherit, setup_omegaconf
 from aiaccel.hpo.modelbridge.config import BridgeConfig, generate_schema, load_bridge_config
-from aiaccel.hpo.modelbridge.utils import get_logger
 from aiaccel.hpo.modelbridge.pipeline import run_pipeline
+from aiaccel.hpo.modelbridge.utils import get_logger
 
 
 def _build_common_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -71,7 +71,11 @@ def _load_bridge_config(path: Path, cli_overrides: Mapping[str, object] | None =
     if not isinstance(container, Mapping):
         raise ValueError("Bridge configuration must be a mapping")
     merged_overrides = parent_ctx if not cli_overrides else _merge_overrides(parent_ctx, cli_overrides)
-    return load_bridge_config(container, overrides=merged_overrides)
+    # The merged_overrides dict comes from strings, so keys are str.
+    # We cast to satisfy the Mapping[str, Any] requirement.
+    from typing import Any, cast
+
+    return load_bridge_config(cast(Mapping[str, Any], container), overrides=cast(Mapping[str, Any], merged_overrides))
 
 
 def _merge_overrides(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:
@@ -160,9 +164,10 @@ def main(argv: Sequence[str] | None = None) -> None:
         if command == "run":
             if getattr(args, "quiet", False):
                 import os
+
                 os.environ["AIACCEL_LOG_SILENT"] = "1"
 
-            summary = run_pipeline(bridge_config)
+            _ = run_pipeline(bridge_config)
             logger.info("Pipeline completed successfully.")
 
     except Exception as exc:

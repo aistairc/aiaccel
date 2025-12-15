@@ -11,6 +11,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from aiaccel.hpo.modelbridge.runner import run_pipeline
+
 from aiaccel.hpo.modelbridge.config import (
     BridgeConfig,
     BridgeSettings,
@@ -21,7 +23,6 @@ from aiaccel.hpo.modelbridge.config import (
     RegressionConfig,
     ScenarioConfig,
 )
-from aiaccel.hpo.modelbridge.runner import run_pipeline
 
 
 def build_config(base_dir: Path) -> BridgeConfig:

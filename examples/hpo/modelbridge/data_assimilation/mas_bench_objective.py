@@ -1,13 +1,13 @@
 """Objective script for MAS-Bench data assimilation executed by aiaccel-hpo."""
 
 import argparse
-import sys
 from pathlib import Path
-import yaml
 
 from mas_bench_utils import MASBenchExecutor, scale_params, write_input_csv
+import yaml
 
-def main():
+
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--model", required=True)
@@ -35,12 +35,12 @@ def main():
     total_agents = naive + rational + ruby
 
     # Reconstruct sigma, mu, pi lists
-    sigma = []
-    mu = []
-    pi = []
-    header = []
+    sigma: list[float] = []
+    mu: list[float] = []
+    pi: list[float] = []
+    header: list[str] = []
 
-    def _collect(prefix, count):
+    def _collect(prefix: str, count: int) -> None:
         for i in range(count):
             sigma.append(params.get(f"sigma_{prefix}{i}", 0.0))
             mu.append(params.get(f"mu_{prefix}{i}", 0.0))
@@ -51,7 +51,7 @@ def main():
             # So the last agent overall does not have a pi param.
 
             # We need to know global index to decide if we look for pi
-            current_idx = len(sigma) - 1 # 0-based index of current agent
+            current_idx = len(sigma) - 1  # 0-based index of current agent
 
             if current_idx < total_agents - 1:
                 pi.append(params.get(f"pi_{prefix}{i}", 0.0))
@@ -90,7 +90,9 @@ def main():
     with open(args.out_file, "w") as f:
         # aiaccel expects a JSON value (float or list of floats)
         import json
+
         json.dump(result, f)
+
 
 if __name__ == "__main__":
     main()

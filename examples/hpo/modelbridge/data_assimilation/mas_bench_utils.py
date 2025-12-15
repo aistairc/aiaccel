@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import csv
+from dataclasses import dataclass, field
 import hashlib
 import json
 import logging
+from pathlib import Path
 import subprocess
 import sys
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any
 
 
 def hash_file(path: Path) -> str:
@@ -113,12 +114,12 @@ class MASBenchExecutor:
                 check=True,
                 cwd=cwd,
                 capture_output=True,
-                text=True
+                text=True,
             )
             # MAS-Bench sometimes returns 0 even on error, so check stderr
             if "ITK_Error" in result.stderr or "Exception" in result.stderr:
-                 self.logger.error(f"MAS-Bench execution error detected in stderr: {result.stderr}")
-                 raise RuntimeError(f"MAS-Bench execution failed with errors in stderr: {result.stderr[:500]}...")
+                self.logger.error(f"MAS-Bench execution error detected in stderr: {result.stderr}")
+                raise RuntimeError(f"MAS-Bench execution failed with errors in stderr: {result.stderr[:500]}...")
 
         except subprocess.CalledProcessError as e:
             self.logger.error(f"MAS-Bench execution failed: {e.stderr}")
