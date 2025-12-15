@@ -172,7 +172,8 @@ def load_config(
     if parent_config is None:
         parent_config = {}
 
-    config = oc.merge(oc.load(config_filename), parent_config)
+    raw_config = oc.load(config_filename)
+    config = oc.merge(raw_config, parent_config)
 
     if isinstance(config, DictConfig) and "_base_" in config:
         # process _base_
@@ -187,7 +188,27 @@ def load_config(
 
             config = load_config(base_path, config)
 
+    config = replace_config(raw_config, config)
+
     return config
+
+
+def replace_config(config: DictConfig | ListConfig, merged_config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    if isinstance(config, DictConfig) and isinstance(merged_config, DictConfig):
+        # process _replace
+        if "_replace_" in config and config["_replace_"]:
+            merged_config = config
+            merged_config.pop("_replace_")
+        # check child DictConfig
+        for key in config:
+            if (
+                isinstance(node_dict := config._get_node(key), Node)
+                and not node_dict._is_interpolation()
+                and isinstance(config[key], DictConfig)
+            ):
+                merged_config[key] = replace_config(config[key], merged_config[key])
+
+    return merged_config
 
 
 def print_config(
