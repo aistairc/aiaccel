@@ -1,4 +1,4 @@
-walltime: "24:00:00"
+walltime: null
 
 script_prologue: |
     echo Hostname: $(hostname)
