@@ -193,20 +193,22 @@ def load_config(
     return config
 
 
-def replace_config(config: DictConfig | ListConfig, merged_config: DictConfig | ListConfig) -> DictConfig | ListConfig:
-    if isinstance(config, DictConfig) and isinstance(merged_config, DictConfig):
+def replace_config(
+    raw_config: DictConfig | ListConfig, merged_config: DictConfig | ListConfig
+) -> DictConfig | ListConfig:
+    if isinstance(raw_config, DictConfig) and isinstance(merged_config, DictConfig):
         # process _replace
-        if "_replace_" in config and config["_replace_"]:
-            merged_config = config
+        if "_replace_" in raw_config and raw_config["_replace_"]:
+            merged_config = raw_config
             merged_config.pop("_replace_")
         # check child DictConfig
-        for key in config:
+        for key in raw_config:
             if (
-                isinstance(node_dict := config._get_node(key), Node)
+                isinstance(node_dict := raw_config._get_node(key), Node)
                 and not node_dict._is_interpolation()
-                and isinstance(config[key], DictConfig)
+                and isinstance(raw_config[key], DictConfig)
             ):
-                merged_config[key] = replace_config(config[key], merged_config[key])
+                merged_config[key] = replace_config(raw_config[key], merged_config[key])
 
     return merged_config
 
