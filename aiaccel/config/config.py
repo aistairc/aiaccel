@@ -196,6 +196,19 @@ def load_config(
 def replace_config(
     raw_config: DictConfig | ListConfig, merged_config: DictConfig | ListConfig
 ) -> DictConfig | ListConfig:
+    """
+    Replace parts of a merged OmegaConf configuration based on "_replace_" element in a raw configuration.
+
+    Args:
+        raw_config (DictConfig | ListConfig):
+            Configuration containing "_replace_" element.
+        merged_config (DictConfig | ListConfig):
+            Target configuration to be partially replaced.
+
+    Returns:
+        DictConfig | ListConfig:
+            The updated configuration with replacements applied.
+    """
     if isinstance(raw_config, DictConfig) and isinstance(merged_config, DictConfig):
         # process _replace
         if "_replace_" in raw_config and raw_config["_replace_"]:
