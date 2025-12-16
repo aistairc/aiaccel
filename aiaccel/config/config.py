@@ -197,11 +197,11 @@ def replace_config(
     raw_config: DictConfig | ListConfig, merged_config: DictConfig | ListConfig
 ) -> DictConfig | ListConfig:
     """
-    Replace parts of a merged OmegaConf configuration based on "_replace_" element in a raw configuration.
+    Replace parts of a merged OmegaConf configuration based on "_replace_" attribute in a raw configuration.
 
     Args:
         raw_config (DictConfig | ListConfig):
-            Configuration containing "_replace_" element.
+            Configuration containing "_replace_" attribute.
         merged_config (DictConfig | ListConfig):
             Target configuration to be partially replaced.
 
