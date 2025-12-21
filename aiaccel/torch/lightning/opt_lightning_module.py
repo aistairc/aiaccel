@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
 
@@ -100,21 +100,34 @@ class OptimizerConfig:
     schedulers: list[LRSchedulerConfig] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        schedulers: list[LRSchedulerConfig | Mapping[str, Any]] = list(self.schedulers)
+
         if self.scheduler_generator is not None:
-            if self.schedulers:
+            if schedulers:
                 raise ValueError(
                     "Use either scheduler_generator/scheduler_interval/scheduler_monitor or schedulers, not both."
                 )
             if self.scheduler_interval is None or self.scheduler_monitor is None:
                 raise ValueError("scheduler_interval and scheduler_monitor must be set when using scheduler_generator")
 
-            self.schedulers = [
+            schedulers = [
                 LRSchedulerConfig(
                     generator=self.scheduler_generator,
                     interval=self.scheduler_interval,
                     monitor=self.scheduler_monitor,
                 )
             ]
+
+        normalized: list[LRSchedulerConfig] = []
+        for cfg in schedulers:
+            if isinstance(cfg, LRSchedulerConfig):
+                normalized.append(cfg)
+            elif isinstance(cfg, Mapping):
+                normalized.append(LRSchedulerConfig(**cfg))
+            else:
+                raise TypeError(f"Unsupported scheduler config type: {type(cfg)!r}")
+
+        self.schedulers = normalized
 
 
 def build_param_groups(
