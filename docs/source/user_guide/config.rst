@@ -63,9 +63,9 @@ attribute, resolves ``_inherit_`` entries, and returns the ready-to-use configur
 while also allowing you to forward options to :func:`load_config` via
 ``load_config_kwargs``.
 
-******************************
- ``_base_`` and ``_inherit_``
-******************************
+*********************************************
+ ``_base_``, ``_replace_`` and ``_inherit_``
+*********************************************
 
 The ``_base_`` attribute allows you to inherit from another configuration file.
 
@@ -96,8 +96,37 @@ Example configuration that uses a base:
 ``config.yaml`` is automatically expanded to include the contents of
 ```config_base.yaml``.
 
-The ``_inherit_`` attribute, on the other hand, allows you to duplicate and modify parts
-of the configuration. Example configuration:
+The ``_replace_`` attribute can prevent overwriting by the ``_base_`` attribute.
+
+Example configuration:
+
+.. code-block:: yaml
+    :caption: config_base.yaml
+
+    params:
+        _replace_: True
+        _convert_: partial
+        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
+        x1: [0, 10]
+
+.. code-block:: yaml
+    :caption: config.yaml
+
+    _base_: config_base.yaml
+
+    params:
+        _convert_: partial
+        _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
+        x1: [0, 1]
+
+    n_trials: 100
+    n_max_jobs: 4
+
+The params attribute is not overwritten, and the params attribute from config.yaml is
+applied.
+
+The ``_inherit_`` attribute, allows you to duplicate and modify parts of the
+configuration. Example configuration:
 
 .. code-block:: yaml
     :caption: config.yaml
