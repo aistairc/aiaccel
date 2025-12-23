@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from collections.abc import Sequence
 from pathlib import Path
 
 from .config import BridgeConfig
@@ -17,7 +18,7 @@ from .ops import (
 from .utils import hash_file, setup_logging, write_json
 
 
-def run_pipeline(config: BridgeConfig) -> dict[str, Any]:
+def run_pipeline(config: BridgeConfig, steps: Sequence[str] | None = None) -> dict[str, Any]:
     """Execute the modelbridge pipeline.
 
     This function orchestrates the HPO, regression, evaluation, and summary phases
@@ -25,10 +26,17 @@ def run_pipeline(config: BridgeConfig) -> dict[str, Any]:
 
     Args:
         config (BridgeConfig): Validated configuration object.
+        steps (Sequence[str] | None): List of steps to execute.
+            If None, all steps are executed.
+            Choices: "train", "eval", "regression", "evaluation", "summary", "da".
 
     Returns:
         dict[str, Any]: Manifest dictionary containing execution status and artifact paths.
     """
+    target_steps = set(steps) if steps else None
+
+    def should_run(step_name: str) -> bool:
+        return target_steps is None or step_name in target_steps
 
     # Setup logging
     setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
@@ -45,17 +53,18 @@ def run_pipeline(config: BridgeConfig) -> dict[str, Any]:
         scenario_dir.mkdir(parents=True, exist_ok=True)
 
         # Step 1: HPO (Train)
-        run_hpo_phase(
-            settings=config.hpo,
-            scenario=scenario,
-            role="train",
-            runs=config.bridge.train_runs,
-            seed_base=config.bridge.seed,
-            scenario_dir=scenario_dir,
-        )
+        if should_run("train"):
+            run_hpo_phase(
+                settings=config.hpo,
+                scenario=scenario,
+                role="train",
+                runs=config.bridge.train_runs,
+                seed_base=config.bridge.seed,
+                scenario_dir=scenario_dir,
+            )
 
         # Step 2: HPO (Eval)
-        if config.bridge.eval_runs > 0:
+        if should_run("eval") and config.bridge.eval_runs > 0:
             run_hpo_phase(
                 settings=config.hpo,
                 scenario=scenario,
@@ -66,19 +75,22 @@ def run_pipeline(config: BridgeConfig) -> dict[str, Any]:
             )
 
         # Step 3: Regression
-        run_regression(scenario, scenario_dir)
+        if should_run("regression"):
+            run_regression(scenario, scenario_dir)
 
         # Step 4: Evaluation
-        run_evaluation(scenario, scenario_dir)
+        if should_run("evaluation"):
+            run_evaluation(scenario, scenario_dir)
 
         # Manifest update per scenario
         manifest["scenarios"][scenario.name] = {"status": "completed", "dir": str(scenario_dir)}
 
     # Step 5: Summary
-    run_summary(config.bridge.scenarios, config.bridge.output_dir)
+    if should_run("summary"):
+        run_summary(config.bridge.scenarios, config.bridge.output_dir)
 
     # Step 6: Data Assimilation
-    if config.data_assimilation and config.data_assimilation.enabled:
+    if should_run("da") and config.data_assimilation and config.data_assimilation.enabled:
         run_external_command(config.data_assimilation)
 
     # Finalize Manifest

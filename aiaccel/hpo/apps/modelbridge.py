@@ -35,6 +35,10 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     run_parser.add_argument("--quiet", action="store_true", help="Suppress console logs")
     run_parser.add_argument("--no-log", action="store_true", help="Disable file logging")
     run_parser.add_argument("--json-log", action="store_true", help="Emit JSON structured logs")
+    run_parser.add_argument(
+        "--steps",
+        help="Comma-separated list of steps to execute (train,eval,regression,evaluation,summary,da)",
+    )
 
     validate_parser = subparsers.add_parser("validate", help="Validate configuration")
     validate_parser.add_argument("--config", "-c", required=True, help="Path to the bridge configuration YAML")
@@ -167,7 +171,8 @@ def main(argv: Sequence[str] | None = None) -> None:
 
                 os.environ["AIACCEL_LOG_SILENT"] = "1"
 
-            _ = run_pipeline(bridge_config)
+            steps = [s.strip() for s in args.steps.split(",")] if args.steps else None
+            _ = run_pipeline(bridge_config, steps=steps)
             logger.info("Pipeline completed successfully.")
 
     except Exception as exc:

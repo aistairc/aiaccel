@@ -17,12 +17,36 @@ JOB_OPTS ?=
 
 COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --set bridge.output_dir=$(MODELBRIDGE_OUTPUT) $(if $(MODELBRIDGE_JSON_LOG),--json-log,) $(if $(MODELBRIDGE_SET),--set $(MODELBRIDGE_SET),)
 
-.PHONY: pipeline clean debug
+.PHONY: pipeline clean debug train eval regression evaluation summary da
 
 pipeline: | $(MODELBRIDGE_LOG_DIR)
 	# Redirecting output to log file via shell, as aiaccel-job might stream output
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
 		aiaccel-hpo modelbridge run $(COMMON_FLAGS) > $(MODELBRIDGE_LOG_DIR)/pipeline.log 2>&1
+
+train: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps train > $(MODELBRIDGE_LOG_DIR)/train.log 2>&1
+
+eval: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps eval > $(MODELBRIDGE_LOG_DIR)/eval.log 2>&1
+
+regression: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps regression > $(MODELBRIDGE_LOG_DIR)/regression.log 2>&1
+
+evaluation: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps evaluation > $(MODELBRIDGE_LOG_DIR)/evaluation.log 2>&1
+
+summary: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps summary > $(MODELBRIDGE_LOG_DIR)/summary.log 2>&1
+
+da: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps da > $(MODELBRIDGE_LOG_DIR)/da.log 2>&1
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@

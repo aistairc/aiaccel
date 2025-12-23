@@ -18,10 +18,28 @@ JSON_LOG_FLAG := $(if $(filter 1 true TRUE yes YES,$(MODELBRIDGE_JSON_LOG)),--js
 SET_FLAGS := $(addprefix --set ,$(MODELBRIDGE_SET))
 COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --set bridge.output_dir=$(MODELBRIDGE_OUTPUT) $(JSON_LOG_FLAG) $(SET_FLAGS)
 
-.PHONY: data-assimilation clean
+.PHONY: data-assimilation clean train eval regression evaluation summary da
 
 data-assimilation: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS)
+
+train: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps train > $(MODELBRIDGE_LOG_DIR)/train.log 2>&1
+
+eval: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps eval > $(MODELBRIDGE_LOG_DIR)/eval.log 2>&1
+
+regression: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps regression > $(MODELBRIDGE_LOG_DIR)/regression.log 2>&1
+
+evaluation: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps evaluation > $(MODELBRIDGE_LOG_DIR)/evaluation.log 2>&1
+
+summary: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps summary > $(MODELBRIDGE_LOG_DIR)/summary.log 2>&1
+
+da: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps da > $(MODELBRIDGE_LOG_DIR)/da.log 2>&1
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@
