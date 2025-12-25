@@ -117,7 +117,7 @@ Example configuration:
     params:
         _convert_: partial
         _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
-        x1: [0, 1]
+        x1: [0, 1]  # Not overwritten
 
     n_trials: 100
     n_max_jobs: 4
