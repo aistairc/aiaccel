@@ -104,7 +104,6 @@ Example configuration:
     :caption: config_base.yaml
 
     params:
-        _replace_: True
         _convert_: partial
         _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
         x1: [0, 10]
@@ -115,6 +114,7 @@ Example configuration:
     _base_: config_base.yaml
 
     params:
+        _replace_: True
         _convert_: partial
         _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
         x1: [0, 1]  # Not overwritten
