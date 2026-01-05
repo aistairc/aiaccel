@@ -30,7 +30,7 @@ class UnexpectedVerticesUpdateError(Exception):
     updated_values: list[float]
 
 
-class NelderMeadAlgorism:
+class NelderMeadAlgorithm:
     """Class to manage the NelderMead algorithm
 
     Uses a queue to receive results and advance the NelderMead algorithm.
