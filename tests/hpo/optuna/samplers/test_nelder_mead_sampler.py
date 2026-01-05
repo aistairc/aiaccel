@@ -100,7 +100,7 @@ def test_before_trial(
     trial = create_trial(state, param_distribution)
 
     study.add_trial(trial)
-    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorithm.get_vertex") as mock_iter:
         mock_iter.side_effect = [np.array([0.4, 0.5])]
 
         sampler.before_trial(study, trial)
@@ -137,7 +137,7 @@ def test_before_trial_sub_sampler(
     study = create_study(sampler)
     trial = create_trial(state, param_distribution)
     study.add_trial(trial)
-    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism.get_vertex") as mock_iter:
+    with patch("aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorithm.get_vertex") as mock_iter:
         mock_iter.side_effect = NelderMeadEmptyError()
 
         sampler.before_trial(study, trial)
