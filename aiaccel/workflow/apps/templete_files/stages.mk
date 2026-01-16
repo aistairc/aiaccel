@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 # general rules
-STAGES = stage0 stage1 stage2 stage3 stage4 stage5
+STAGES = $(foreach num_of_stage,$(shell seq $(min_stage) $(max_stage)),stage$(num_of_stage))
 
 .NOTPARALLEL: check_train_artifacts 
 .PHONY: all clean status scores check_train_artifacts $(STAGES) $(STAGES:%=skip-%) 
@@ -21,8 +21,9 @@ status:
 	@$(foreach var,$(PRINT_VARIABLES),echo $(var): $($(var));)
 	@echo ================================================================
 
-stage1: status .WAIT | $(stage1_dependencies)
-	@echo -e "\033[1;34mStage1 finished\033[0m"
+$(STAGES):status .WAIT | $($@_dependencies)
+	@echo -e "\033[1;34m$@ finished\033[0m"
 
-skip-stage1:
-	touch $(stage1_dependencies)
+$(STAGES:%=skip-%):
+	echo $(patsubst skip-%,%,$@)_dependencies
+	touch $($(patsubst skip-%,%,$@)_dependencies)
