@@ -22,7 +22,7 @@ status:
 	@echo ================================================================
 
 $(STAGES):status .WAIT | $($@_dependencies)
-	@echo -e "\033[1;34m$@ finished\033[0m"
+	@echo "\033[1;34m$@ finished\033[0m"
 
 $(STAGES:%=skip-%):
 	echo $(patsubst skip-%,%,$@)_dependencies
