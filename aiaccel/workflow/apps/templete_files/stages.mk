@@ -25,5 +25,4 @@ $(STAGES):status .WAIT | $($@_dependencies)
 	@echo "\033[1;34m$@ finished\033[0m"
 
 $(STAGES:%=skip-%):
-	echo $(patsubst skip-%,%,$@)_dependencies
 	touch $($(patsubst skip-%,%,$@)_dependencies)
