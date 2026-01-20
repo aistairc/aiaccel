@@ -38,7 +38,6 @@ Aiaccel's configuration system is based on `OmegaConf
     )
     from hydra.utils import instantiate
 
-
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
