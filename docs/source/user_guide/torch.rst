@@ -84,8 +84,9 @@ as follows:
  Multiple LR Schedulers
 ************************
 
-``OptimizerConfig`` now accepts multiple schedulers so you can mix intervals, for example a step-wise warmup together
-with an epoch-wise schedule like ``ReduceLROnPlateau``.
+``OptimizerConfig`` now accepts multiple schedulers so you can mix intervals, for
+example a step-wise warmup together with an epoch-wise schedule like
+``ReduceLROnPlateau``.
 
 .. code-block:: yaml
     :caption: Mixing warmup (step) and plateau (epoch)
