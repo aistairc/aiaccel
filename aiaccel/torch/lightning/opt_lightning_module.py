@@ -13,7 +13,7 @@ from torch import nn, optim
 
 import lightning as lt
 from lightning.pytorch.utilities.types import LRSchedulerConfig as LtLRSchedulerConfig
-from lightning.pytorch.utilities.types import OptimizerLRScheduler, OptimizerLRSchedulerConfig
+from lightning.pytorch.utilities.types import OptimizerLRScheduler
 
 
 @dataclass
@@ -208,7 +208,4 @@ class OptimizerLightningModule(lt.LightningModule):
 
         lr_schedulers = [scheduler_cfg.build(optimizer) for scheduler_cfg in self._optimizer_config.schedulers]
 
-        if len(lr_schedulers) == 1:
-            return OptimizerLRSchedulerConfig(optimizer=optimizer, lr_scheduler=lr_schedulers[0])
-        else:
-            return [optimizer], lr_schedulers
+        return [optimizer], lr_schedulers
