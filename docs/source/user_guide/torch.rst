@@ -100,7 +100,7 @@ with an epoch-wise schedule like ``ReduceLROnPlateau``.
 
        schedulers:
          - _target_: aiaccel.torch.lightning.LRSchedulerConfig
-           generator:
+           scheduler_generator:
              _partial_: True
              _target_: torch.optim.lr_scheduler.LinearLR
              start_factor: 0.1
@@ -109,9 +109,10 @@ with an epoch-wise schedule like ``ReduceLROnPlateau``.
            interval: step
 
          - _target_: aiaccel.torch.lightning.LRSchedulerConfig
-           generator:
+           scheduler_generator:
              _partial_: True
              _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+             reduce_on_plateau: True
              factor: 0.5
              patience: 2
            interval: epoch

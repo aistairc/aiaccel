@@ -13,7 +13,7 @@ from torch import nn, optim
 
 import lightning as lt
 from lightning.pytorch.utilities.types import LRSchedulerConfig as LtLRSchedulerConfig
-from lightning.pytorch.utilities.types import OptimizerLRScheduler
+from lightning.pytorch.utilities.types import OptimizerLRScheduler, OptimizerLRSchedulerConfig
 
 
 @dataclass
@@ -23,7 +23,7 @@ class LRSchedulerConfig:
 
     Args:
         scheduler_generator (Callable[..., optim.lr_scheduler.LRScheduler]): A callable that generates the scheduler.
-        name (str | None): Optional name for logging.
+        name (str | None): Optional name for logging. Defaults to ``None``.
         interval (str): Timing to call ``scheduler.step`` (``"step"`` or ``"epoch"``). Defaults to ``"step"``.
         frequency (int): How often to call the scheduler. Defaults to ``1``.
         reduce_on_plateau (bool): Whether the scheduler is ``ReduceLROnPlateau``. Defaults to ``False``.
@@ -98,7 +98,7 @@ class OptimizerConfig:
 
             schedulers = [
                 LRSchedulerConfig(
-                    generator=self.scheduler_generator,
+                    scheduler_generator=self.scheduler_generator,
                     interval=self.scheduler_interval,
                     monitor=self.scheduler_monitor,
                 )
@@ -192,7 +192,7 @@ class OptimizerLightningModule(lt.LightningModule):
         Configures the optimizer and scheduler for training.
 
         Returns:
-            Union[optim.Optimizer, OptimizerLRSchedulerConfig]: The optimizer and scheduler configuration.
+            OptimizerLRScheduler: The optimizer and scheduler configuration.
         """
 
         params: Iterator[tuple[str, Any]] | Iterator[nn.Parameter]
@@ -209,6 +209,6 @@ class OptimizerLightningModule(lt.LightningModule):
         lr_schedulers = [scheduler_cfg.build(optimizer) for scheduler_cfg in self._optimizer_config.schedulers]
 
         if len(lr_schedulers) == 1:
-            return {"optimizer": optimizer, "lr_scheduler": lr_schedulers[0]}
-
-        return [optimizer], lr_schedulers
+            return OptimizerLRSchedulerConfig(optimizer=optimizer, lr_scheduler=lr_schedulers[0])
+        else:
+            return [optimizer], lr_schedulers
