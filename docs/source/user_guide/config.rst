@@ -33,23 +33,17 @@ Aiaccel's configuration system is based on `OmegaConf
     from argparse import ArgumentParser
 
     from aiaccel.config import (
-        load_config,
-        overwrite_omegaconf_dumper,
+        prepare_config,
         print_config,
-        resolve_inherit,
     )
     from hydra.utils import instantiate
-
-
-    overwrite_omegaconf_dumper()
 
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    config = load_config(args.config)
+    config = prepare_config(args.config)
     print_config(config)
-    config = resolve_inherit(config)
 
     model = instantiate(config.model)
 
@@ -63,8 +57,10 @@ To run the script:
 
     python example.py config.yaml
 
-``load_config`` reads the configuration file and processes the ``_base_`` attribute,
-while ``resolve_inherit`` resolves ``_inherit_`` attributes.
+``prepare_config`` wraps :func:`aiaccel.config.load_config`, processes the ``_base_``
+attribute, resolves ``_inherit_`` entries, and returns the ready-to-use configuration
+while also allowing you to forward options to :func:`load_config` via
+``load_config_kwargs``.
 
 ******************************
  ``_base_`` and ``_inherit_``
