@@ -12,7 +12,8 @@ from fnmatch import fnmatch
 from torch import nn, optim
 
 import lightning as lt
-from lightning.pytorch.utilities.types import OptimizerLRSchedulerConfig
+from lightning.pytorch.utilities.types import LRSchedulerConfig as LtLRSchedulerConfig
+from lightning.pytorch.utilities.types import OptimizerLRScheduler
 
 
 @dataclass
@@ -21,54 +22,39 @@ class LRSchedulerConfig:
     Configuration for a learning rate scheduler in Lightning.
 
     Args:
-        generator (Callable[..., optim.lr_scheduler.LRScheduler]): A callable that generates the scheduler.
-        interval (str | None): Timing to call ``scheduler.step`` (``"step"`` or ``"epoch"``). Defaults to ``"step"``.
-        monitor (str | None): Metric to monitor (required for ``ReduceLROnPlateau``). Defaults to ``"validation/loss"``.
-        frequency (int | None): How often to call the scheduler. Defaults to None (Lightning default of 1).
-        reduce_on_plateau (bool | None): Whether the scheduler is ``ReduceLROnPlateau``. If None, Lightning infers
-            it from the scheduler type.
-        strict (bool | None): Whether to raise if ``monitor`` is missing. Mirrors Lightning's ``strict`` flag.
+        scheduler_generator (Callable[..., optim.lr_scheduler.LRScheduler]): A callable that generates the scheduler.
         name (str | None): Optional name for logging.
+        interval (str): Timing to call ``scheduler.step`` (``"step"`` or ``"epoch"``). Defaults to ``"step"``.
+        frequency (int): How often to call the scheduler. Defaults to ``1``.
+        reduce_on_plateau (bool): Whether the scheduler is ``ReduceLROnPlateau``. Defaults to ``False``.
+        monitor (str | None): Metric to monitor (required for ``ReduceLROnPlateau``). Defaults to ``"validation/loss"``.
+        strict (bool | None): Whether to raise if ``monitor`` is missing. Mirrors Lightning's ``strict`` flag.
     """
 
-    generator: Callable[..., optim.lr_scheduler.LRScheduler]
-    interval: str | None = "step"
-    monitor: str | None = "validation/loss"
-    frequency: int | None = None
-    reduce_on_plateau: bool | None = None
-    strict: bool | None = None
+    scheduler_generator: Callable[..., optim.lr_scheduler.LRScheduler]
+
     name: str | None = None
+    interval: str = "step"
+    frequency: int = 1
+    reduce_on_plateau: bool = False
+    monitor: str | None = "validation/loss"
+    strict: bool = True
 
-    def build(self, optimizer: optim.Optimizer) -> dict[str, Any]:
-        """Create a Lightning-compatible scheduler config."""
-
+    def build(self, optimizer: optim.Optimizer) -> LtLRSchedulerConfig:
         if self.interval is not None and self.interval not in {"step", "epoch"}:
             raise ValueError(f"interval must be 'step' or 'epoch', got {self.interval!r}")
 
-        scheduler = self.generator(optimizer=optimizer)
+        scheduler = self.scheduler_generator(optimizer=optimizer)
 
-        if self.monitor is None and isinstance(scheduler, optim.lr_scheduler.ReduceLROnPlateau):
-            raise ValueError("monitor must be set when using ReduceLROnPlateau")
-        reduce_on_plateau = self.reduce_on_plateau
-        if reduce_on_plateau is None and isinstance(scheduler, optim.lr_scheduler.ReduceLROnPlateau):
-            reduce_on_plateau = True
-
-        config: dict[str, Any] = {"scheduler": scheduler}
-
-        if self.interval is not None:
-            config["interval"] = self.interval
-        if self.frequency is not None:
-            config["frequency"] = self.frequency
-        if reduce_on_plateau is not None:
-            config["reduce_on_plateau"] = reduce_on_plateau
-        if self.monitor is not None:
-            config["monitor"] = self.monitor
-        if self.strict is not None:
-            config["strict"] = self.strict
-        if self.name is not None:
-            config["name"] = self.name
-
-        return config
+        return LtLRSchedulerConfig(
+            scheduler=scheduler,
+            name=self.name,
+            interval=self.interval,
+            frequency=self.frequency,
+            reduce_on_plateau=self.reduce_on_plateau,
+            monitor=self.monitor,
+            strict=self.strict,
+        )
 
 
 @dataclass
@@ -201,7 +187,7 @@ class OptimizerLightningModule(lt.LightningModule):
 
         self._optimizer_config = optimizer_config
 
-    def configure_optimizers(self) -> optim.Optimizer | OptimizerLRSchedulerConfig:
+    def configure_optimizers(self) -> OptimizerLRScheduler:
         """
         Configures the optimizer and scheduler for training.
 
