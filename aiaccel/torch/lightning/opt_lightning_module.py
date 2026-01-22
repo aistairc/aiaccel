@@ -5,15 +5,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
 
 from torch import nn, optim
+from torch.optim import Optimizer
 
 import lightning as lt
-from lightning.pytorch.utilities.types import LRSchedulerConfig as LtLRSchedulerConfig
-from lightning.pytorch.utilities.types import OptimizerLRScheduler
+from lightning.pytorch.utilities.types import LRSchedulerConfigType, OptimizerLRScheduler
 
 
 @dataclass
@@ -38,20 +38,20 @@ class LRSchedulerConfig:
     strict: bool = True
     name: str | None = None
 
-    def build(self, optimizer: optim.Optimizer) -> dict[str, Any]:
+    def build(self, optimizer: optim.Optimizer) -> LRSchedulerConfigType:
         if self.interval is not None and self.interval not in {"step", "epoch"}:
             raise ValueError(f"interval must be 'step' or 'epoch', got {self.interval!r}")
 
         scheduler = self.scheduler_generator(optimizer=optimizer)
 
-        return dict(
-            scheduler=scheduler,
-            interval=self.interval,
-            frequency=self.frequency,
-            monitor=self.monitor,
-            strict=self.strict,
-            name=self.name,
-        )
+        return {
+            "scheduler": scheduler,
+            "interval": self.interval,
+            "frequency": self.frequency,
+            "monitor": self.monitor,
+            "strict": self.strict,
+            "name": self.name,
+        }
 
 
 @dataclass
@@ -184,12 +184,11 @@ class OptimizerLightningModule(lt.LightningModule):
 
         self._optimizer_config = optimizer_config
 
-    def configure_optimizers(self) -> OptimizerLRScheduler:
+    def configure_optimizers(  # type: ignore[override]
+        self,
+    ) -> OptimizerLRScheduler | tuple[Sequence[Optimizer], Sequence[LRSchedulerConfigType]]:
         """
         Configures the optimizer and scheduler for training.
-
-        Returns:
-            OptimizerLRScheduler: The optimizer and scheduler configuration.
         """
 
         params: Iterator[tuple[str, Any]] | Iterator[nn.Parameter]
