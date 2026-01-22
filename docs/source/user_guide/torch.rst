@@ -113,7 +113,6 @@ example a step-wise warmup together with an epoch-wise schedule like
            scheduler_generator:
              _partial_: True
              _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
-             reduce_on_plateau: True
              factor: 0.5
              patience: 2
            interval: epoch
