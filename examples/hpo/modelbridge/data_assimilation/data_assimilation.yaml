@@ -1,0 +1,14 @@
+hpo: {}
+
+bridge:
+  output_dir: ./work/modelbridge/data_assimilation/bridge_outputs
+  train_runs: 0
+  eval_runs: 0
+  scenarios: []
+
+data_assimilation:
+  enabled: true
+  command: >
+    python examples/hpo/modelbridge/data_assimilation/mas_bench_wrapper.py
+    --config examples/hpo/modelbridge/data_assimilation/mas_bench_config.yaml
+  output_root: ./work/modelbridge/data_assimilation
