@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 import numpy.typing as npt
 
 from collections.abc import Generator
@@ -27,7 +30,7 @@ class UnexpectedVerticesUpdateError(Exception):
     updated_values: list[float]
 
 
-class NelderMeadAlgorism:
+class NelderMeadAlgorithm:
     """Class to manage the NelderMead algorithm
 
     Uses a queue to receive results and advance the NelderMead algorithm.

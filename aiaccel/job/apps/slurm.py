@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
@@ -15,7 +14,7 @@ from aiaccel.job.apps import prepare_argument_parser
 
 def main() -> None:
     # Load configuration (from the default YAML string)
-    config, parser, sub_parsers = prepare_argument_parser("sge.yaml")
+    config, parser, sub_parsers = prepare_argument_parser("slurm.yaml")
 
     args = parser.parse_args()
     mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
@@ -26,7 +25,7 @@ def main() -> None:
     if mode in ["cpu-array", "gpu-array"]:
         job = f"""\
 for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
-    TASK_INDEX=$(( SGE_TASK_ID + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+    TASK_INDEX=$(( SLURM_ARRAY_TASK_ID + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
 
     if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
         break
@@ -34,7 +33,7 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
 
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {args.log_filename.with_suffix("")}.${{SGE_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+        {job} > {args.log_filename.with_suffix("")}.${{SLURM_ARRAY_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -43,32 +42,25 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        job_log_filename = args.log_filename.with_suffix(".$TASK_ID.log")
-        job_status_filename: Path = args.log_filename.with_suffix(".${SGE_TASK_ID}.out")
+        job_log_filename = args.log_filename.with_suffix(".%a.log")
+        job_status_filename: Path = args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out")
 
         status_filename_list = []
         for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
             status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
     else:
-        job_log_filename = args.log_filename
-        job_status_filename = args.log_filename.with_suffix(".out")
+        job_log_filename = args.log_filename.resolve()
+        job_status_filename = args.log_filename.with_suffix(".out").resolve()
 
         status_filename_list = [job_status_filename]
 
     job_script = f"""\
 #! /bin/bash
-
-#$-j y
-#$-cwd
-#$-o {job_log_filename}
+#SBATCH -o {job_log_filename}
+#SBATCH -t {args.walltime}
 
 set -eE -o pipefail
 trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
-
-if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
-    cd $PBS_O_WORKDIR
-fi
 
 
 {config.script_prologue}
@@ -76,8 +68,8 @@ fi
 {job}
 """
 
-    qsub = config.qsub.format(args=args)
-    qsub_args = config[mode].qsub_args.format(args=args)
+    sbatch = config.sbatch.format(args=args)
+    sbatch_args = config[mode].sbatch_args.format(args=args)
 
     # Create the job script file, remove old status files, and run the job
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
@@ -89,11 +81,12 @@ fi
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
 
-    subprocess.run(f"{qsub} {qsub_args} {job_filename}", shell=True, check=True)
+    subprocess.run(f"{sbatch} {sbatch_args} {job_filename}", shell=True, check=True)
 
     for status_filename in status_filename_list:
         while not status_filename.exists():
             time.sleep(1.0)
+
             if config.get("use_scandir", False):  # Reflesh the file system if needed
                 os.scandir(status_filename.parent)
 

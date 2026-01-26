@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 from typing import TYPE_CHECKING, Any
 
 from abc import ABCMeta, abstractmethod
@@ -15,9 +18,9 @@ import torch
 
 import attrs
 
-from aiaccel.config import overwrite_omegaconf_dumper, print_config
+from aiaccel.config import print_config, setup_omegaconf
 
-overwrite_omegaconf_dumper()
+setup_omegaconf()
 
 logger = logging.getLogger(__name__)
 
