@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from aiaccel.hpo.algorithms.nelder_mead_algorithm import (
-    NelderMeadAlgorism,
+    NelderMeadAlgorithm,
     NelderMeadEmptyError,
     UnexpectedVerticesUpdateError,
 )
@@ -22,8 +22,8 @@ def search_space() -> dict[str, tuple[float, float]]:
 
 
 @pytest.fixture
-def nm(search_space: dict[str, tuple[float, float]]) -> NelderMeadAlgorism:
-    return NelderMeadAlgorism(dimensions=len(search_space), block=False)
+def nm(search_space: dict[str, tuple[float, float]]) -> NelderMeadAlgorithm:
+    return NelderMeadAlgorithm(dimensions=len(search_space), block=False)
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def values() -> list[float]:
     return [5.0, 3.0, 7.0]
 
 
-def test_waiting_for_result_empty(nm: NelderMeadAlgorism) -> None:
+def test_waiting_for_result_empty(nm: NelderMeadAlgorithm) -> None:
     nm.vertices, nm.values = [], []
 
     # queue is Empty
@@ -44,7 +44,7 @@ def test_waiting_for_result_empty(nm: NelderMeadAlgorism) -> None:
     assert result_value is None
 
 
-def test_waiting_for_results_empty(nm: NelderMeadAlgorism) -> None:
+def test_waiting_for_results_empty(nm: NelderMeadAlgorithm) -> None:
     nm.vertices, nm.values = [], []
 
     # queue is Empty
@@ -52,7 +52,7 @@ def test_waiting_for_results_empty(nm: NelderMeadAlgorism) -> None:
     assert result_value is None
 
 
-def test_waiting_for_result(nm: NelderMeadAlgorism) -> None:
+def test_waiting_for_result(nm: NelderMeadAlgorithm) -> None:
     nm.vertices, nm.values = [], []
 
     # queue is not Empty
@@ -63,7 +63,7 @@ def test_waiting_for_result(nm: NelderMeadAlgorism) -> None:
     assert e.value.value == expected_value
 
 
-def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
+def test_waiting_for_results(nm: NelderMeadAlgorithm) -> None:
     nm.vertices, nm.values = [], []
 
     # queue is not Empty
@@ -77,9 +77,9 @@ def test_waiting_for_results(nm: NelderMeadAlgorism) -> None:
     assert result_values == [expected_value1, expected_value2]
 
 
-def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorism) -> None:
+def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorithm) -> None:
     with patch(
-        "aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorism._collect_enqueued_results"
+        "aiaccel.hpo.optuna.samplers.nelder_mead_sampler.NelderMeadAlgorithm._collect_enqueued_results"
     ) as mock_iter:
         mock_iter.side_effect = [([np.array([-1.0, 0.0])], [0.5])]
 
@@ -94,14 +94,14 @@ def test_waiting_for_results_enqueue_update(nm: NelderMeadAlgorism) -> None:
             next(nm._wait_for_results(2))
 
 
-def test_collect_enqueued_results_empty(nm: NelderMeadAlgorism) -> None:
+def test_collect_enqueued_results_empty(nm: NelderMeadAlgorithm) -> None:
     # queue is Empty
     result_vertices, result_values = nm._collect_enqueued_results()
     assert result_vertices == []
     assert result_values == []
 
 
-def test_collect_enqueued_results(nm: NelderMeadAlgorism) -> None:
+def test_collect_enqueued_results(nm: NelderMeadAlgorithm) -> None:
     # queue is not Empty
     expected_vertex1 = np.array([1.0, 2.0])
     expected_value1 = 1.0
@@ -115,7 +115,7 @@ def test_collect_enqueued_results(nm: NelderMeadAlgorism) -> None:
     assert result_values == [expected_value1, expected_value2]
 
 
-def test_initialize(search_space: dict[str, tuple[float, float]], nm: NelderMeadAlgorism) -> None:
+def test_initialize(search_space: dict[str, tuple[float, float]], nm: NelderMeadAlgorithm) -> None:
     for _ in range(len(search_space) + 1):
         random_xs = nm.get_vertex()
         for random_x, distribution in zip(random_xs, search_space.values(), strict=False):
@@ -125,7 +125,7 @@ def test_initialize(search_space: dict[str, tuple[float, float]], nm: NelderMead
         nm.get_vertex()
 
 
-def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: NelderMeadAlgorism) -> None:
+def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: NelderMeadAlgorithm) -> None:
     # enqueued
     enqueued_vertex = np.array([0.6, 0.7])
     enqueued_value = 1.0
@@ -143,7 +143,7 @@ def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: 
         nm.get_vertex()
 
 
-def test_initialize_enqueued2(nm: NelderMeadAlgorism) -> None:
+def test_initialize_enqueued2(nm: NelderMeadAlgorithm) -> None:
     # enqueued
     enqueud_vertices = [np.array([0.6, 0.7]), np.array([0.7, 0.8]), np.array([0.9, 1.0]), np.array([0.8, 0.9])]
     enqueud_values = [1.0, 4.0, 2.0, 3.0]
@@ -232,7 +232,7 @@ def test_initialize_enqueued2(nm: NelderMeadAlgorism) -> None:
 def test_compare_results(
     vertices: list[npt.NDArray[np.float64]],
     values: list[float],
-    nm: NelderMeadAlgorism,
+    nm: NelderMeadAlgorithm,
     expected_results: list[dict[str, list[float] | float | bool]],
 ) -> None:
     for vertex, value in zip(vertices, values, strict=False):

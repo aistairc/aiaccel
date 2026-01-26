@@ -80,6 +80,46 @@ as follows:
            _target_: torch.optim.Adam
            lr: 1.e-4
 
+************************
+ Multiple LR Schedulers
+************************
+
+``OptimizerConfig`` now accepts multiple schedulers so you can mix intervals, for
+example a step-wise warmup together with an epoch-wise schedule like
+``ReduceLROnPlateau``.
+
+.. code-block:: yaml
+    :caption: Mixing warmup (step) and plateau (epoch)
+    :linenos:
+
+     optimizer_config:
+       _target_: aiaccel.torch.lightning.OptimizerConfig
+       optimizer_generator:
+         _partial_: True
+         _target_: torch.optim.AdamW
+         lr: 3.e-4
+
+       schedulers:
+         - _target_: aiaccel.torch.lightning.LRSchedulerConfig
+           scheduler_generator:
+             _partial_: True
+             _target_: torch.optim.lr_scheduler.LinearLR
+             start_factor: 0.1
+             end_factor: 1.0
+             total_iters: 500
+           interval: step
+
+         - _target_: aiaccel.torch.lightning.LRSchedulerConfig
+           scheduler_generator:
+             _partial_: True
+             _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+             factor: 0.5
+             patience: 2
+           interval: epoch
+           monitor: validation/loss
+
+When using ``ReduceLROnPlateau`` remember to log the metric specified in ``monitor``.
+
 **********************
  Distributed Training
 **********************

@@ -61,6 +61,7 @@
     :toctree: generated/
 
     OptimizerLightningModule
+    LRSchedulerConfig
     OptimizerConfig
     build_param_groups
     load_checkpoint
