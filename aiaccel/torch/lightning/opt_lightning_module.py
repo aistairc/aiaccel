@@ -5,15 +5,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
 
 from torch import nn, optim
+from torch.optim import Optimizer
 
 import lightning as lt
-from lightning.pytorch.utilities.types import LRSchedulerConfig as LtLRSchedulerConfig
-from lightning.pytorch.utilities.types import OptimizerLRScheduler
+from lightning.pytorch.utilities.types import LRSchedulerConfigType, OptimizerLRScheduler
 
 
 @dataclass
@@ -23,38 +23,35 @@ class LRSchedulerConfig:
 
     Args:
         scheduler_generator (Callable[..., optim.lr_scheduler.LRScheduler]): A callable that generates the scheduler.
-        name (str | None): Optional name for logging. Defaults to ``None``.
         interval (str): Timing to call ``scheduler.step`` (``"step"`` or ``"epoch"``). Defaults to ``"step"``.
         frequency (int): How often to call the scheduler. Defaults to ``1``.
-        reduce_on_plateau (bool): Whether the scheduler is ``ReduceLROnPlateau``. Defaults to ``False``.
         monitor (str | None): Metric to monitor (required for ``ReduceLROnPlateau``). Defaults to ``"validation/loss"``.
         strict (bool | None): Whether to raise if ``monitor`` is missing. Mirrors Lightning's ``strict`` flag.
+        name (str | None): Optional name for logging. Defaults to ``None``.
     """
 
     scheduler_generator: Callable[..., optim.lr_scheduler.LRScheduler]
 
-    name: str | None = None
     interval: str = "step"
     frequency: int = 1
-    reduce_on_plateau: bool = False
     monitor: str | None = "validation/loss"
     strict: bool = True
+    name: str | None = None
 
-    def build(self, optimizer: optim.Optimizer) -> LtLRSchedulerConfig:
+    def build(self, optimizer: optim.Optimizer) -> LRSchedulerConfigType:
         if self.interval is not None and self.interval not in {"step", "epoch"}:
             raise ValueError(f"interval must be 'step' or 'epoch', got {self.interval!r}")
 
         scheduler = self.scheduler_generator(optimizer=optimizer)
 
-        return LtLRSchedulerConfig(
-            scheduler=scheduler,
-            name=self.name,
-            interval=self.interval,
-            frequency=self.frequency,
-            reduce_on_plateau=self.reduce_on_plateau,
-            monitor=self.monitor,
-            strict=self.strict,
-        )
+        return {
+            "scheduler": scheduler,
+            "interval": self.interval,
+            "frequency": self.frequency,
+            "monitor": self.monitor,
+            "strict": self.strict,
+            "name": self.name,
+        }
 
 
 @dataclass
@@ -187,12 +184,11 @@ class OptimizerLightningModule(lt.LightningModule):
 
         self._optimizer_config = optimizer_config
 
-    def configure_optimizers(self) -> OptimizerLRScheduler:
+    def configure_optimizers(  # type: ignore[override]
+        self,
+    ) -> OptimizerLRScheduler | tuple[Sequence[Optimizer], Sequence[LRSchedulerConfigType]]:
         """
         Configures the optimizer and scheduler for training.
-
-        Returns:
-            OptimizerLRScheduler: The optimizer and scheduler configuration.
         """
 
         params: Iterator[tuple[str, Any]] | Iterator[nn.Parameter]
@@ -206,6 +202,4 @@ class OptimizerLightningModule(lt.LightningModule):
         if len(self._optimizer_config.schedulers) == 0:
             return optimizer
 
-        lr_schedulers = [scheduler_cfg.build(optimizer) for scheduler_cfg in self._optimizer_config.schedulers]
-
-        return [optimizer], lr_schedulers
+        return [optimizer], [scheduler.build(optimizer) for scheduler in self._optimizer_config.schedulers]
