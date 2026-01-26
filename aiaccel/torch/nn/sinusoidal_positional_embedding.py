@@ -38,7 +38,7 @@ class SinusoidalPositionalEmbedding(nn.Module):
         self,
         x: torch.Tensor,
         mask: torch.Tensor | None = None,
-    ):
+    ) -> torch.Tensor:
         pos_list = []
         for dim in self.dims:
             if mask is not None:
