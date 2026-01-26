@@ -24,6 +24,7 @@ def test_load_config() -> None:
         "D": {"EE": "ee"},
         "E": {"EE": "ee"},
         "Eval": 1.5,
+        "Replace": {"AA": "aa"},
     }
 
     assert config == expected_config
