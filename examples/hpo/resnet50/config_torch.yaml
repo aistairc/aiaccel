@@ -1,11 +1,11 @@
 _base_:
-  - ${working_directory}/../../../../torch/image_classification/recipes/resnet50.cifar50/config.yaml
+  - ${working_directory}/../../torch/image_classification/recipes/resnet50.cifar10/config.yaml
 
 trainer:
   max_epochs: 10
 
   callbacks:
-    - _target_: aiaccel.torch.lightning.callback.SaveMetricCallback
+    - _target_: aiaccel.torch.lightning.callbacks.SaveMetricCallback
       metric_name: "validation/loss"
       output_path: ${out_filename}
 
