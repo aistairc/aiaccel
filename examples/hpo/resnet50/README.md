@@ -1,19 +1,21 @@
 # Example of Black Box Optimization on ABCI 3.0
 
-This is an example of performing black-box optimization of the learning rate for a ResNet50 model on the MNIST dataset.
+This is an example of performing black-box optimization of the learning rate for a ResNet50 model on the CIFAR10 dataset.
 
 ## Getting started
 
-In an environment where aiaccel is installed, additionally install pyproject.toml.
+In an environment where aiaccel is installed, additionally install pyproject.toml in examples/torch/image_classification.
 
 ```bash
+cd examples/torch/image_classification
 pip install .
 ```
 
-PATH_TO_ENV in job_config.yaml should be changed to the path of the environment prepared above.
+PATH_TO_ENV and JOB_GROUP in job_config.yaml should be changed to the path of the environment prepared above and the job group id.
 
 ```yaml
-    source PATH_TO_ENV
+path_to_env: PATH_TO_ENV
+job_group: JOB_GROUP
 ```
 
 Run the following command to perform black-box optimization.
