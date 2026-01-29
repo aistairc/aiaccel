@@ -1,3 +1,6 @@
+path_to_env: PATH_TO_ENV
+job_group: JOB_GROUP
+
 walltime: "1:0:0"
 
 script_prologue: |
@@ -5,8 +8,10 @@ script_prologue: |
     echo Hostname: $(hostname)
 
     export NVIDIA_VISIBLE_DEVICES=all
+    module load python/3.13/3.13.2
+    source ${path_to_env}
 
-qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1"
+qsub: "qsub -P ${job_group} -l walltime={args.walltime} -v USE_SSH=1"
 
 cpu:
     qsub_args: "-q rt_HF -l select=1"
