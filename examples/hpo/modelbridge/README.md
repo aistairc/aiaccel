@@ -83,6 +83,7 @@ python3 examples/hpo/modelbridge/visualization.py ./work/modelbridge/simple/simp
 ```
 
 This will generate plots in `./work/modelbridge/simple/simple/plots/`.
+If the intermediate CSV files (`train_pairs.csv`, `test_predictions.csv`) are missing (e.g. if regression step was skipped), the script attempts to read directly from the Optuna DBs and the regression model file.
 
 ## Resuming / Skipping HPO
 The pipeline skips HPO execution for a specific run if its `optuna.db` already exists in the expected location.
