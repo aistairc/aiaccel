@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        python-version: ['3.10']
+        python-version: ["3.10"]
         test_target: [config, hpo, torch]
     steps:
       - uses: actions/checkout@v4
@@ -24,11 +24,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
         run: |
-          pip install -e .[dev,github-actions]
+          pip install -e .[dev,github-actions,modelbridge]
       - name: Run pytest
         run: |
           pytest -v \

@@ -16,30 +16,50 @@ AIACCEL_CMD ?= aiaccel-job local cpu $(MODELBRIDGE_LOG_DIR)/aiaccel_job_da.log
 
 JSON_LOG_FLAG := $(if $(filter 1 true TRUE yes YES,$(MODELBRIDGE_JSON_LOG)),--json-log,)
 SET_FLAGS := $(addprefix --set ,$(MODELBRIDGE_SET))
-COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --set bridge.output_dir=$(MODELBRIDGE_OUTPUT) $(JSON_LOG_FLAG) $(SET_FLAGS)
+COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --output_dir $(MODELBRIDGE_OUTPUT) $(JSON_LOG_FLAG) $(SET_FLAGS)
 
-.PHONY: data-assimilation clean train eval regression evaluation summary da
+.PHONY: run setup train eval regression evaluate summary da clean
 
-data-assimilation: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS)
+# Default: Run all steps
+run: setup train eval regression evaluate summary da
 
-train: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps train > $(MODELBRIDGE_LOG_DIR)/train.log 2>&1
+setup: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps setup_train,setup_eval
 
-eval: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps eval > $(MODELBRIDGE_LOG_DIR)/eval.log 2>&1
+train:
+	@echo "Running Train Phase..."
+	@find $(MODELBRIDGE_OUTPUT)/runs/train -name "config.yaml" | sort | while read conf; do \
+		log_file=$$(dirname $$conf)/aiaccel_job.log; \
+		echo "Submitting job for $$conf"; \
+		aiaccel-job local cpu $$log_file -- \
+			aiaccel-hpo optimize --config $$conf; \
+	done
+
+
+eval:
+	@echo "Running Eval Phase..."
+	@if [ -d "$(MODELBRIDGE_OUTPUT)/runs/eval" ]; then \
+		find $(MODELBRIDGE_OUTPUT)/runs/eval -name "config.yaml" | sort | while read conf; do \
+			log_file=$$(dirname $$conf)/aiaccel_job.log; \
+			echo "Submitting job for $$conf"; \
+			aiaccel-job local cpu $$log_file -- \
+				aiaccel-hpo optimize --config $$conf; \
+		done; \
+	else \
+		echo "No eval runs configured or setup."; \
+	fi
 
 regression: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps regression > $(MODELBRIDGE_LOG_DIR)/regression.log 2>&1
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps regression
 
-evaluation: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps evaluation > $(MODELBRIDGE_LOG_DIR)/evaluation.log 2>&1
+evaluate: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps evaluate_model
 
 summary: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps summary > $(MODELBRIDGE_LOG_DIR)/summary.log 2>&1
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps summary
 
 da: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps da > $(MODELBRIDGE_LOG_DIR)/da.log 2>&1
+	$(AIACCEL_CMD) -- aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps da
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@

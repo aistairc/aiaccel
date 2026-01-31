@@ -11,7 +11,7 @@ This example demonstrates the data assimilation + model-bridge workflow inspired
 
 ## Quick Start (mock execution)
 ```bash
-make -f examples/hpo/modelbridge/data_assimilation/Makefile.template data-assimilation \
+make -f examples/hpo/modelbridge/data_assimilation/Makefile.template run \
   MODELBRIDGE_CONFIG=examples/hpo/modelbridge/data_assimilation/data_assimilation.yaml \
   MODELBRIDGE_JSON_LOG=1
 ```

@@ -36,11 +36,53 @@ from .utils import get_logger, hash_file, write_csv, write_json
 
 _logger = get_logger(__name__)
 
+# Stride to ensure unique seeds across different phases and targets.
+# Warning: If runs exceeds this value, seeds may collide.
+RUN_ID_OFFSET_STRIDE = 100000
 
-# --- HPO Phase ---------------------------------------------------------------
+
+# --- Setup Phase -------------------------------------------------------------
 
 
-def run_hpo_phase(
+def run_setup_train_step(
+    settings: HpoSettings,
+    scenario: ScenarioConfig,
+    runs: int,
+    seed_base: int,
+    scenario_dir: Path,
+) -> None:
+    """Generate HPO configs and directories for the train phase.
+
+    Args:
+        settings (HpoSettings): HPO configuration.
+        scenario (ScenarioConfig): Scenario configuration.
+        runs (int): Number of runs.
+        seed_base (int): Base seed for RNG.
+        scenario_dir (Path): Scenario output directory.
+    """
+    _run_setup_phase_common(settings, scenario, "train", runs, seed_base, scenario_dir)
+
+
+def run_setup_eval_step(
+    settings: HpoSettings,
+    scenario: ScenarioConfig,
+    runs: int,
+    seed_base: int,
+    scenario_dir: Path,
+) -> None:
+    """Generate HPO configs and directories for the eval phase.
+
+    Args:
+        settings (HpoSettings): HPO configuration.
+        scenario (ScenarioConfig): Scenario configuration.
+        runs (int): Number of runs.
+        seed_base (int): Base seed for RNG.
+        scenario_dir (Path): Scenario output directory.
+    """
+    _run_setup_phase_common(settings, scenario, "eval", runs, seed_base, scenario_dir)
+
+
+def _run_setup_phase_common(
     settings: HpoSettings,
     scenario: ScenarioConfig,
     role: str,
@@ -48,20 +90,10 @@ def run_hpo_phase(
     seed_base: int,
     scenario_dir: Path,
 ) -> None:
-    """Execute HPO trials for a specific role (train/eval).
-
-    Args:
-        settings (HpoSettings): HPO configuration.
-        scenario (ScenarioConfig): Scenario configuration.
-        role (str): "train" or "eval".
-        runs (int): Number of runs to execute.
-        seed_base (int): Base seed for RNG.
-        scenario_dir (Path): Scenario output directory.
-    """
     if runs <= 0:
         return
 
-    _logger.info(f"Starting HPO phase: scenario={scenario.name}, role={role}, runs={runs}")
+    _logger.info(f"Starting Setup step: scenario={scenario.name}, role={role}, runs={runs}")
 
     targets = ["macro", "micro"]
 
@@ -70,12 +102,14 @@ def run_hpo_phase(
             run_dir = scenario_dir / "runs" / role / f"{run_idx:03d}" / target
             run_dir.mkdir(parents=True, exist_ok=True)
 
-            offset = 0
-            if role == "train" and target == "micro":
-                offset = 1
-            elif role == "eval":
-                offset = 100 if target == "macro" else 101
+            # Calculate base offset for seed generation
+            base_group_idx = 0
+            if role == "eval":
+                base_group_idx += 2
+            if target == "micro":
+                base_group_idx += 1
 
+            offset = base_group_idx * RUN_ID_OFFSET_STRIDE
             current_seed = seed_base + offset + run_idx
 
             params = scenario.train_params if role == "train" else scenario.eval_params
@@ -86,9 +120,7 @@ def run_hpo_phase(
             else:
                 trials = scenario.eval_macro_trials if target == "macro" else scenario.eval_micro_trials
 
-            objective_cfg = scenario.train_objective if role == "train" else scenario.eval_objective
-
-            _run_single_hpo(
+            _generate_hpo_config(
                 settings=settings,
                 scenario_name=scenario.name,
                 role=role,
@@ -98,11 +130,11 @@ def run_hpo_phase(
                 trials=trials,
                 seed=current_seed,
                 output_dir=run_dir,
-                command=objective_cfg.command,
             )
+            _logger.info(f"Setup completed: {run_dir}")
 
 
-def _run_single_hpo(
+def _generate_hpo_config(
     settings: HpoSettings,
     scenario_name: str,
     role: str,
@@ -112,9 +144,8 @@ def _run_single_hpo(
     trials: int,
     seed: int,
     output_dir: Path,
-    command: list[str],
 ) -> None:
-    """Execute a single aiaccel-hpo optimize run using aiaccel-job.
+    """Generate and save config.yaml for a single HPO run.
 
     Args:
         settings (HpoSettings): HPO configuration.
@@ -126,7 +157,6 @@ def _run_single_hpo(
         trials (int): Number of trials.
         seed (int): Random seed.
         output_dir (Path): Output directory for this HPO run.
-        command (list[str]): Objective command for aiaccel-hpo.
     """
     if settings.base_config is None:
         raise ValueError("HpoSettings.base_config is required")
@@ -144,8 +174,13 @@ def _run_single_hpo(
         base_conf = cast(DictConfig, OmegaConf.merge(base_conf, OmegaConf.create(overrides)))
 
     OmegaConf.update(base_conf, "n_trials", trials)
-    OmegaConf.update(base_conf, "n_max_jobs", 1)
     OmegaConf.update(base_conf, "working_directory", str(output_dir))
+
+    # Clean up optimize/goal if needed, but usually kept from base config or overrides.
+    # We ensure study settings are correct.
+    optimize_conf = cast(dict[str, Any], base_conf.get("optimize", {}))
+    goal = optimize_conf.get("goal", "minimize")
+    direction = "minimize" if goal == "minimize" else "maximize"
 
     params_def: dict[str, Any] = {"_target_": "aiaccel.hpo.optuna.hparams_manager.HparamsManager"}
     for name, bounds in space.items():
@@ -158,9 +193,6 @@ def _run_single_hpo(
         }
     OmegaConf.update(base_conf, "params", params_def)
 
-    optimize_conf = cast(dict[str, Any], base_conf.get("optimize", {}))
-    goal = optimize_conf.get("goal", "minimize")
-    direction = "minimize" if goal == "minimize" else "maximize"
     study_conf = {
         "_target_": "optuna.create_study",
         "study_name": study_name,
@@ -177,40 +209,22 @@ def _run_single_hpo(
     config_path = output_dir / "config.yaml"
     OmegaConf.save(base_conf, config_path)
 
-    # Wrap aiaccel-hpo optimize command with aiaccel-job
-    aiaccel_hpo_cmd = list(settings.optimize_command)
-    aiaccel_hpo_cmd.extend(["--config", str(config_path.resolve())])
-    if command:
-        aiaccel_hpo_cmd.append("--")
-        aiaccel_hpo_cmd.extend(command)
-
-    # Insert log file and -- separator for aiaccel-job
-    log_file = output_dir / "aiaccel_job.log"
-    full_cmd = list(settings.job_runner_command) + [str(log_file.resolve()), "--"] + aiaccel_hpo_cmd
-
-    _logger.info(f"Running HPO: {study_name} with command: {shlex.join(full_cmd)}")
-    try:
-        subprocess.run(full_cmd, check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError as exc:
-        _logger.error(f"HPO failed: {exc.stderr}")
-        raise RuntimeError(f"HPO execution failed for {study_name}") from exc
-
 
 # --- Regression Phase --------------------------------------------------------
 
 
-def run_regression(scenario: ScenarioConfig, scenario_dir: Path) -> None:
+def run_regression_step(scenario: ScenarioConfig, scenario_dir: Path) -> None:
     """Train regression model from HPO results.
 
     Args:
         scenario (ScenarioConfig): Scenario configuration.
         scenario_dir (Path): Scenario output directory.
     """
-    _logger.info(f"Starting Regression phase: scenario={scenario.name}")
+    _logger.info(f"Starting Regression step: scenario={scenario.name}")
 
     train_dir = scenario_dir / "runs" / "train"
     if not train_dir.exists():
-        _logger.warning("No training data found.")
+        _logger.warning("No training data found (directory does not exist). Skipping regression.")
         return
 
     samples: list[tuple[int, dict[str, float], dict[str, float]]] = []
@@ -236,7 +250,8 @@ def run_regression(scenario: ScenarioConfig, scenario_dir: Path) -> None:
             samples.append((run_idx, macro_best, micro_best))
 
     if not samples:
-        raise RuntimeError("No valid training pairs found for regression.")
+        _logger.warning("No valid training pairs found for regression. HPO might not have finished.")
+        return
 
     pairs_data = []
     for rid, mac, mic in samples:
@@ -256,7 +271,6 @@ def run_regression(scenario: ScenarioConfig, scenario_dir: Path) -> None:
     metrics_dir = scenario_dir / "metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
     write_json(metrics_dir / "train_metrics.json", metrics)
-
 
 def _load_best_param(db_path: Path, study_name: str) -> dict[str, float] | None:
     """Load the best parameters from an Optuna study DB.
@@ -281,14 +295,14 @@ def _load_best_param(db_path: Path, study_name: str) -> dict[str, float] | None:
 # --- Evaluation Phase --------------------------------------------------------
 
 
-def run_evaluation(scenario: ScenarioConfig, scenario_dir: Path) -> None:
+def run_evaluate_model_step(scenario: ScenarioConfig, scenario_dir: Path) -> None:
     """Evaluate regression model on eval HPO results.
 
     Args:
         scenario (ScenarioConfig): Scenario configuration.
         scenario_dir (Path): Scenario output directory.
     """
-    _logger.info(f"Starting Evaluation phase: scenario={scenario.name}")
+    _logger.info(f"Starting Evaluate Model step: scenario={scenario.name}")
 
     model_path = scenario_dir / "models" / "regression_model.json"
     if not model_path.exists():
@@ -300,9 +314,10 @@ def run_evaluation(scenario: ScenarioConfig, scenario_dir: Path) -> None:
     with model_path.open("r") as f:
         model_dict = json.load(f)
 
+    # Using "eval" directory per specification / legacy
     eval_dir = scenario_dir / "runs" / "eval"
     if not eval_dir.exists():
-        _logger.warning("No eval data found.")
+        _logger.warning("No eval data found. Skipping evaluation.")
         return
 
     samples: list[tuple[int, dict[str, float], dict[str, float]]] = []
@@ -354,7 +369,7 @@ def run_evaluation(scenario: ScenarioConfig, scenario_dir: Path) -> None:
 # --- Summary Phase -----------------------------------------------------------
 
 
-def run_summary(scenarios: list[ScenarioConfig], output_dir: Path) -> None:
+def run_summary_step(scenarios: list[ScenarioConfig], output_dir: Path) -> None:
     """Aggregate results from all scenarios.
 
     Args:
@@ -407,7 +422,7 @@ def run_summary(scenarios: list[ScenarioConfig], output_dir: Path) -> None:
 # --- Data Assimilation Phase -------------------------------------------------
 
 
-def run_external_command(config: DataAssimilationConfig) -> None:
+def run_da_step(config: DataAssimilationConfig) -> None:
     """Execute external data assimilation command using aiaccel-job.
 
     Args:
@@ -507,7 +522,6 @@ def _fit_regression(
 
     raise ValueError(f"Unknown regression kind: {kind}")
 
-
 def _predict_regression(
     model_dict: dict[str, Any],
     features_list: list[dict[str, float]],
@@ -546,7 +560,6 @@ def _predict_regression(
         results.append({k: float(v) for k, v in zip(target_names, row, strict=True)})
     return results
 
-
 def _evaluate_metrics(
     model_dict: dict[str, Any],
     features_list: list[dict[str, float]],
@@ -555,7 +568,6 @@ def _evaluate_metrics(
 ) -> dict[str, float]:
     preds = _predict_regression(model_dict, features_list)
     return _evaluate_metrics_from_preds(targets_list, preds, metrics)
-
 
 def _evaluate_metrics_from_preds(
     targets_list: list[dict[str, float]],

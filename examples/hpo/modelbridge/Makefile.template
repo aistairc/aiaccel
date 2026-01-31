@@ -15,38 +15,57 @@ MODELBRIDGE_SET ?=
 AIACCEL_CMD ?= aiaccel-job local cpu $(MODELBRIDGE_LOG_DIR)/aiaccel_job.log
 JOB_OPTS ?= 
 
-COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --set bridge.output_dir=$(MODELBRIDGE_OUTPUT) $(if $(MODELBRIDGE_JSON_LOG),--json-log,) $(if $(MODELBRIDGE_SET),--set $(MODELBRIDGE_SET),)
+COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --output_dir $(MODELBRIDGE_OUTPUT) $(if $(MODELBRIDGE_JSON_LOG),--json-log,) $(if $(MODELBRIDGE_SET),--set $(MODELBRIDGE_SET),)
 
-.PHONY: pipeline clean debug train eval regression evaluation summary da
+.PHONY: run setup train eval regression evaluate summary da clean
 
-pipeline: | $(MODELBRIDGE_LOG_DIR)
-	# Redirecting output to log file via shell, as aiaccel-job might stream output
+# Default target: Run all steps
+run: setup train eval regression evaluate summary da
+
+# Setup step: Generates configs and directories
+setup: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) > $(MODELBRIDGE_LOG_DIR)/pipeline.log 2>&1
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps setup_train,setup_eval
 
-train: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps train > $(MODELBRIDGE_LOG_DIR)/train.log 2>&1
+# Execution steps: Run aiaccel-hpo optimize for generated configs
+train:
+	@echo "Running Train Phase..."
+	@find $(MODELBRIDGE_OUTPUT)/runs/train -name "config.yaml" | sort | while read conf; do \
+		log_file=$$(dirname $$conf)/aiaccel_job.log; \
+		echo "Submitting job for $$conf"; \
+		aiaccel-job local cpu $$log_file -- \
+			aiaccel-hpo optimize --config $$conf; \
+	done
 
-eval: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps eval > $(MODELBRIDGE_LOG_DIR)/eval.log 2>&1
+
+eval:
+	@echo "Running Eval Phase..."
+	@if [ -d "$(MODELBRIDGE_OUTPUT)/runs/eval" ]; then \
+		find $(MODELBRIDGE_OUTPUT)/runs/eval -name "config.yaml" | sort | while read conf; do \
+			log_file=$$(dirname $$conf)/aiaccel_job.log; \
+			echo "Submitting job for $$conf"; \
+			aiaccel-job local cpu $$log_file -- \
+				aiaccel-hpo optimize --config $$conf; \
+		done; \
+	else \
+		echo "No eval runs configured or setup."; \
+	fi
 
 regression: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps regression > $(MODELBRIDGE_LOG_DIR)/regression.log 2>&1
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps regression
 
-evaluation: | $(MODELBRIDGE_LOG_DIR)
+evaluate: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps evaluation > $(MODELBRIDGE_LOG_DIR)/evaluation.log 2>&1
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps evaluate_model
 
 summary: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps summary > $(MODELBRIDGE_LOG_DIR)/summary.log 2>&1
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps summary
 
 da: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps da > $(MODELBRIDGE_LOG_DIR)/da.log 2>&1
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps da
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@

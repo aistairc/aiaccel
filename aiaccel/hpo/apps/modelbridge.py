@@ -15,31 +15,36 @@ from aiaccel.hpo.modelbridge.pipeline import run_pipeline
 from aiaccel.hpo.modelbridge.utils import get_logger
 
 
-def _build_common_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
-    parser.add_argument("--config", "-c", required=True, help="Path to the bridge configuration YAML")
-    parser.add_argument(
+def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the aiaccel modelbridge pipeline")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # --- Run Command ---
+    run_parser = subparsers.add_parser("run", help="Execute the pipeline")
+
+    # Input/Output Group
+    io_group = run_parser.add_argument_group("Input/Output")
+    io_group.add_argument("--config", "-c", required=True, help="Path to the bridge configuration YAML")
+    io_group.add_argument("--output_dir", "-o", help="Output directory (overrides config if specified)")
+
+    # Options Group
+    opt_group = run_parser.add_argument_group("Options")
+    opt_group.add_argument(
+        "--steps",
+        help="Comma-separated list of steps to execute (setup_train, setup_eval, regression, evaluate_model, summary, da)",
+    )
+    opt_group.add_argument(
         "--set",
         action="append",
         dest="overrides",
         default=[],
         help="Override configuration values (dot paths), e.g. --set bridge.seed=42",
     )
-    return parser
+    opt_group.add_argument("--quiet", action="store_true", help="Suppress console logs")
+    opt_group.add_argument("--no-log", action="store_true", help="Disable file logging")
+    opt_group.add_argument("--json-log", action="store_true", help="Emit JSON structured logs")
 
-
-def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the aiaccel modelbridge pipeline")
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    run_parser = _build_common_parser(subparsers.add_parser("run", help="Execute the pipeline"))
-    run_parser.add_argument("--quiet", action="store_true", help="Suppress console logs")
-    run_parser.add_argument("--no-log", action="store_true", help="Disable file logging")
-    run_parser.add_argument("--json-log", action="store_true", help="Emit JSON structured logs")
-    run_parser.add_argument(
-        "--steps",
-        help="Comma-separated list of steps to execute (train,eval,regression,evaluation,summary,da)",
-    )
-
+    # --- Validate Command ---
     validate_parser = subparsers.add_parser("validate", help="Validate configuration")
     validate_parser.add_argument("--config", "-c", required=True, help="Path to the bridge configuration YAML")
     validate_parser.add_argument(
@@ -51,6 +56,7 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     validate_parser.add_argument("--print-config", action="store_true", help="Print the resolved configuration")
 
+    # --- Schema Command ---
     subparsers.add_parser("schema", help="Print the modelbridge configuration JSON schema")
 
     return parser.parse_args(argv)
@@ -144,6 +150,12 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     config_path = Path(args.config).expanduser().resolve()
     cli_overrides = _parse_override_pairs(getattr(args, "overrides", None))
+
+    # Handle output_dir arg
+    if getattr(args, "output_dir", None):
+        if "bridge" not in cli_overrides or not isinstance(cli_overrides["bridge"], dict):
+            cli_overrides["bridge"] = cli_overrides.get("bridge", {})
+        cli_overrides["bridge"]["output_dir"] = args.output_dir  # type: ignore
 
     # Handle json-log flag by injecting into overrides
     if getattr(args, "json_log", False):

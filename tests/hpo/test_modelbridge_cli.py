@@ -27,7 +27,7 @@ def test_modelbridge_cli_validate(
     assert "outputs" not in capsys.readouterr().out
 
 
-def test_modelbridge_cli_overrides_output_dir(
+def test_modelbridge_cli_overrides_set(
     tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]
 ) -> None:
     config_path = _write_config(tmp_path, make_bridge_config)
@@ -45,10 +45,54 @@ def test_modelbridge_cli_overrides_output_dir(
         )
 
         assert mock_run.called
-        # Check if the config passed to run_pipeline has the overridden output_dir
         call_args = mock_run.call_args
         bridge_config = call_args[0][0]
         assert bridge_config.bridge.output_dir == override_output
+
+
+def test_modelbridge_cli_output_dir_arg(
+    tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]
+) -> None:
+    config_path = _write_config(tmp_path, make_bridge_config)
+    override_output = tmp_path / "arg_output_dir"
+
+    with patch("aiaccel.hpo.apps.modelbridge.run_pipeline") as mock_run:
+        cli_main(
+            [
+                "run",
+                "--config",
+                str(config_path),
+                "--output_dir",
+                str(override_output),
+            ]
+        )
+
+        assert mock_run.called
+        call_args = mock_run.call_args
+        bridge_config = call_args[0][0]
+        assert bridge_config.bridge.output_dir == override_output
+
+
+def test_modelbridge_cli_steps(
+    tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]
+) -> None:
+    config_path = _write_config(tmp_path, make_bridge_config)
+
+    with patch("aiaccel.hpo.apps.modelbridge.run_pipeline") as mock_run:
+        cli_main(
+            [
+                "run",
+                "--config",
+                str(config_path),
+                "--steps",
+                "train, regression",
+            ]
+        )
+
+        assert mock_run.called
+        call_args = mock_run.call_args
+        steps = call_args[1].get("steps") or call_args[0][1]
+        assert steps == ["train", "regression"]
 
 
 def test_modelbridge_cli_schema(capsys: pytest.CaptureFixture[str]) -> None:

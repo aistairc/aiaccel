@@ -15,18 +15,65 @@ This directory contains examples for the Modelbridge workflow in aiaccel-hpo.
   - `mas_bench_*.py`: Source codes for the benchmark.
 
 ## Quick Start
-1. Copy `examples/hpo/modelbridge/Makefile.template` next to your configuration or call it directly with `make -f`.
-2. Execute the pipeline:
-   ```bash
-   make -f examples/hpo/modelbridge/Makefile.template \
-     pipeline \
-     MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml \
-     MODELBRIDGE_OUTPUT=./work/modelbridge/simple \
-     MODELBRIDGE_SCENARIO=simple
-   ```
-3. Inspect artifacts under `work/modelbridge/simple`.
-   - `manifest.json` lists generated artifacts with sizes and sha256 hashes.
-   - Set `MODELBRIDGE_JSON_LOG=1` to emit JSON-formatted pipeline logs.
+You can run the pipeline using the provided Makefile or directly via the CLI.
+
+### 1. Using Makefile (Recommended)
+Copy `examples/hpo/modelbridge/Makefile.template` next to your configuration or call it directly.
+
+**Run the full pipeline:**
+```bash
+make -f examples/hpo/modelbridge/Makefile.template \
+  run \
+  MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml \
+  MODELBRIDGE_OUTPUT=./work/modelbridge/simple
+```
+
+**Run individual steps:**
+```bash
+# Setup: Generate directories and config files for HPO
+make -f examples/hpo/modelbridge/Makefile.template setup ...
+
+# Train: Run HPO loop for training data (requires setup)
+make -f examples/hpo/modelbridge/Makefile.template train ...
+
+# Eval: Run HPO loop for evaluation data (requires setup)
+make -f examples/hpo/modelbridge/Makefile.template eval ...
+
+# Train regression model
+make -f examples/hpo/modelbridge/Makefile.template regression ...
+
+# Evaluate regression model
+make -f examples/hpo/modelbridge/Makefile.template evaluate_model ...
+
+# Create summary
+make -f examples/hpo/modelbridge/Makefile.template summary ...
+
+# Run Data Assimilation (if configured)
+make -f examples/hpo/modelbridge/Makefile.template da ...
+```
+
+### 2. Using CLI Directly
+You can invoke the modelbridge CLI directly.
+
+**Input/Output Arguments:**
+- `--config <path>`: Path to the bridge configuration YAML (Required).
+- `--output_dir <path>`: Output directory. Overrides config value if specified.
+
+**Options:**
+- `--steps <list>`: Comma-separated list of steps to execute.
+  - Choices: `setup_train`, `setup_eval`, `regression`, `evaluate_model`, `summary`, `da`.
+  - Default: All steps.
+- `--json-log`: Emit JSON structured logs.
+- `--quiet`: Suppress console logs.
+
+**Example:**
+```bash
+# Run only the setup_train step (generates configs)
+aiaccel-hpo modelbridge run \
+  --config examples/hpo/modelbridge/modelbridge.yaml \
+  --output_dir ./work/modelbridge/simple \
+  --steps setup_train
+```
 
 ## Resuming / Skipping HPO
 The pipeline skips HPO execution for a specific run if its `optuna.db` already exists in the expected location.
@@ -38,18 +85,17 @@ To skip computation (e.g., if HPO was run on a cluster):
    - Example: `simple-train-macro-000`
    If the study name mismatches, the pipeline will typically create a new study (ignoring existing data) or fail depending on Optuna behavior.
 
-## Makefile Template Highlights
-- The `pipeline` target chains all phases for a full run by calling `aiaccel-hpo modelbridge run`.
-- Tunable variables:
-  - `MODELBRIDGE_CONFIG`: path to the YAML configuration.
-  - `MODELBRIDGE_OUTPUT`: destination for scenario results.
-  - `MODELBRIDGE_LOG_DIR`: directory for logs (defaults to `$(MODELBRIDGE_OUTPUT)/logs`).
-  - `MODELBRIDGE_SET`: additional CLI overrides (space-separated `--set key=value` entries).
-  - `MODELBRIDGE_JSON_LOG`: set to `1`/`true` to enable structured logs.
-  - `AIACCEL_CMD`: command wrapper (defaults to `aiaccel-job` logging to `$(MODELBRIDGE_LOG_DIR)/aiaccel_job.log`).
+## Seed Generation and Limitations
+To ensure reproducibility, random seeds for HPO trials are generated deterministically using the following formula:
+`seed = seed_base + (group_offset * 100000) + run_idx`
 
-## PYTHONPATH
-- The Makefile.template prepends the repository root to `PYTHONPATH` before invoking the CLI.
+Where `group_offset` is determined by the phase and target:
+- `train` / `macro`: 0
+- `train` / `micro`: 1
+- `eval` / `macro`: 2 (previously `eval` role)
+- `eval` / `micro`: 3
+
+**Limitation**: The stride between groups is **100,000**. If the number of runs (`train_runs` or `eval_runs`) exceeds 100,000, the seed values will collide with the next group.
 
 ## Optional Gaussian Process Regression (GPy)
 - Install the optional dependency with `python -m pip install .[gpy]`.
@@ -61,20 +107,11 @@ To skip computation (e.g., if HPO was run on a cluster):
     noise: 1.0e-5
   ```
 
-## Objective Configuration
-- The objective must be an executable command string or list of strings.
-- Placeholders like `{out_filename}` are supported (passed by `aiaccel-hpo`).
-- Example:
-  ```yaml
-  train_objective:
-    command: ["python", "examples/hpo/modelbridge/objectives/simple_objective.py", "{out_filename}"]
-  ```
-
 ## Data Assimilation Example
 - A MAS-Bench-inspired data assimilation workflow lives under `examples/hpo/modelbridge/data_assimilation/`.
 - Run with:
   ```bash
-  make -f examples/hpo/modelbridge/data_assimilation/Makefile.template data-assimilation
+  make -f examples/hpo/modelbridge/data_assimilation/Makefile.template run
   ```
 
 ## Schema & Validation
