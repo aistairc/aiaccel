@@ -75,6 +75,15 @@ aiaccel-hpo modelbridge run \
   --steps setup_train
 ```
 
+## Visualization
+You can visualize the results (parameter relationships and prediction accuracy) using the provided script.
+
+```bash
+python3 examples/hpo/modelbridge/visualization.py ./work/modelbridge/simple/simple
+```
+
+This will generate plots in `./work/modelbridge/simple/simple/plots/`.
+
 ## Resuming / Skipping HPO
 The pipeline skips HPO execution for a specific run if its `optuna.db` already exists in the expected location.
 To skip computation (e.g., if HPO was run on a cluster):
