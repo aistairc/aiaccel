@@ -13,6 +13,8 @@ def test_data_assimilation_generic_command(tmp_path: Path) -> None:
     output_root = tmp_path / "da_outputs"
     output_root.mkdir()
     summary_file = output_root / "data_assimilation_summary.json"
+    base_config_path = tmp_path / "base_config.yaml"
+    base_config_path.write_text("optimize:\n  goal: minimize\n", encoding="utf-8")
 
     # We use a simple python one-liner as the command
     cmd = [
@@ -22,7 +24,7 @@ def test_data_assimilation_generic_command(tmp_path: Path) -> None:
     ]
 
     cfg = {
-        "hpo": {},
+        "hpo": {"base_config": str(base_config_path)},
         "bridge": {
             "output_dir": str(tmp_path / "outputs"),
             "train_runs": 0,
@@ -59,8 +61,10 @@ def test_data_assimilation_generic_command(tmp_path: Path) -> None:
 
 
 def test_data_assimilation_disabled(tmp_path: Path, capsys: object) -> None:
+    base_config_path = tmp_path / "base_config.yaml"
+    base_config_path.write_text("optimize:\n  goal: minimize\n", encoding="utf-8")
     cfg = {
-        "hpo": {},
+        "hpo": {"base_config": str(base_config_path)},
         "bridge": {
             "output_dir": str(tmp_path / "outputs"),
             "scenarios": [],

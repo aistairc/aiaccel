@@ -31,7 +31,7 @@ def test_run_pipeline(tmp_path: Path, make_bridge_config: Callable[[str], dict[s
         patch("aiaccel.hpo.modelbridge.pipeline.run_regression_step") as mock_reg,
         patch("aiaccel.hpo.modelbridge.pipeline.run_evaluate_model_step") as mock_eval_model,
         patch("aiaccel.hpo.modelbridge.pipeline.run_summary_step") as mock_sum,
-        patch("aiaccel.hpo.modelbridge.pipeline.run_da_step") as mock_da,
+        patch("aiaccel.hpo.modelbridge.pipeline.run_da_step") as _mock_da,
     ):
         manifest = run_pipeline(bridge_config)
 

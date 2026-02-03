@@ -117,8 +117,10 @@ def _run_setup_phase_common(
 
             if role == "train":
                 trials = scenario.train_macro_trials if target == "macro" else scenario.train_micro_trials
+                command = scenario.train_objective.command
             else:
                 trials = scenario.eval_macro_trials if target == "macro" else scenario.eval_micro_trials
+                command = scenario.eval_objective.command
 
             _generate_hpo_config(
                 settings=settings,
@@ -129,6 +131,7 @@ def _run_setup_phase_common(
                 space=space,
                 trials=trials,
                 seed=current_seed,
+                command=command,
                 output_dir=run_dir,
             )
             _logger.info(f"Setup completed: {run_dir}")
@@ -143,6 +146,7 @@ def _generate_hpo_config(
     space: dict[str, ParameterBounds],
     trials: int,
     seed: int,
+    command: list[str],
     output_dir: Path,
 ) -> None:
     """Generate and save config.yaml for a single HPO run.
@@ -156,11 +160,9 @@ def _generate_hpo_config(
         space (dict[str, ParameterBounds]): Parameter search space.
         trials (int): Number of trials.
         seed (int): Random seed.
+        command (list[str]): Objective function command.
         output_dir (Path): Output directory for this HPO run.
     """
-    if settings.base_config is None:
-        raise ValueError("HpoSettings.base_config is required")
-
     study_name = f"{scenario_name}-{role}-{target}-{run_idx:03d}"
     db_path = output_dir / "optuna.db"
     storage_uri = f"sqlite:///{db_path.resolve()}"
@@ -175,6 +177,7 @@ def _generate_hpo_config(
 
     OmegaConf.update(base_conf, "n_trials", trials)
     OmegaConf.update(base_conf, "working_directory", str(output_dir))
+    OmegaConf.update(base_conf, "command", command)
 
     # Clean up optimize/goal if needed, but usually kept from base config or overrides.
     # We ensure study settings are correct.
@@ -271,6 +274,7 @@ def run_regression_step(scenario: ScenarioConfig, scenario_dir: Path) -> None:
     metrics_dir = scenario_dir / "metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
     write_json(metrics_dir / "train_metrics.json", metrics)
+
 
 def _load_best_param(db_path: Path, study_name: str) -> dict[str, float] | None:
     """Load the best parameters from an Optuna study DB.
@@ -433,6 +437,8 @@ def run_da_step(config: DataAssimilationConfig) -> None:
 
     _logger.info(f"Starting Data Assimilation: {config.command}")
 
+    if config.output_root is None:
+        raise ValueError("DataAssimilationConfig.output_root must be set before running DA")
     output_root = config.output_root
     output_root.mkdir(parents=True, exist_ok=True)
 
@@ -522,6 +528,7 @@ def _fit_regression(
 
     raise ValueError(f"Unknown regression kind: {kind}")
 
+
 def _predict_regression(
     model_dict: dict[str, Any],
     features_list: list[dict[str, float]],
@@ -560,6 +567,7 @@ def _predict_regression(
         results.append({k: float(v) for k, v in zip(target_names, row, strict=True)})
     return results
 
+
 def _evaluate_metrics(
     model_dict: dict[str, Any],
     features_list: list[dict[str, float]],
@@ -568,6 +576,7 @@ def _evaluate_metrics(
 ) -> dict[str, float]:
     preds = _predict_regression(model_dict, features_list)
     return _evaluate_metrics_from_preds(targets_list, preds, metrics)
+
 
 def _evaluate_metrics_from_preds(
     targets_list: list[dict[str, float]],

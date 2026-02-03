@@ -1,4 +1,5 @@
-hpo: {}
+hpo:
+  base_config: examples/hpo/modelbridge/optimize_config.yaml
 
 bridge:
   output_dir: ./work/modelbridge/data_assimilation/bridge_outputs

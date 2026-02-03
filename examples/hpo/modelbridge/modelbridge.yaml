@@ -1,6 +1,6 @@
 # Example configuration for the modelbridge pipeline.
 # Run with:
-#   make -f examples/hpo/modelbridge/Makefile.template pipeline \
+#   make -f examples/hpo/modelbridge/Makefile.template run \
 #     MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml \
 #     MODELBRIDGE_SCENARIO=simple
 

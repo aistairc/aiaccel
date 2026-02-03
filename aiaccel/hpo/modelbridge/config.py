@@ -177,17 +177,17 @@ class HpoSettings(BaseModel):
     """HPO backend configuration.
 
     Attributes:
-        base_config (Path | None): Path to the base aiaccel configuration file.
+        base_config (Path): Path to the base aiaccel configuration file.
         optimize_command (list[str]): Command prefix for running optimization (default: ["aiaccel-hpo", "optimize"]).
         job_runner_command (list[str]): Command prefix for running jobs via aiaccel-job (default:
-            ["aiaccel-job", "run", "--profile", "local"]).
+            ["aiaccel-job", "local", "cpu"]).
         macro_overrides (dict[str, Any]): OmegaConf overrides for macro HPO.
         micro_overrides (dict[str, Any]): OmegaConf overrides for micro HPO.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    base_config: Path | None = None
+    base_config: Path
     optimize_command: list[str] = Field(default_factory=lambda: ["aiaccel-hpo", "optimize"])
     job_runner_command: list[str] = Field(default_factory=lambda: ["aiaccel-job", "local", "cpu"])
     macro_overrides: dict[str, Any] = Field(default_factory=dict)
@@ -243,10 +243,10 @@ class DataAssimilationConfig(BaseModel):
         enabled (bool): Whether to run data assimilation phase.
         command (list[str]): Command to execute.
         job_runner_command (list[str]): Command prefix for running jobs via aiaccel-job (default:
-            ["aiaccel-job", "run", "--profile", "local"]).
+            ["aiaccel-job", "local", "cpu"]).
         cwd (Path | None): Working directory for the command.
         env (dict[str, str]): Environment variables to add/override.
-        output_root (Path): Output directory for data assimilation artifacts.
+        output_root (Path | None): Output directory for data assimilation artifacts.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -256,7 +256,7 @@ class DataAssimilationConfig(BaseModel):
     job_runner_command: list[str] = Field(default_factory=lambda: ["aiaccel-job", "local", "cpu"])
     cwd: Path | None = None
     env: dict[str, str] = Field(default_factory=dict)
-    output_root: Path = Path("./work/modelbridge/data_assimilation")
+    output_root: Path | None = None
 
     @field_validator("command", "job_runner_command", mode="before")
     @classmethod
@@ -279,10 +279,10 @@ class BridgeConfig(BaseModel):
         data_assimilation (DataAssimilationConfig | None): Data assimilation settings.
     """
 
-    model_config = ConfigDict(extra="ignore")  # Allow extra top-level keys but ignore them
+    model_config = ConfigDict(extra="forbid")
 
     bridge: BridgeSettings
-    hpo: HpoSettings = Field(default_factory=HpoSettings)
+    hpo: HpoSettings
     data_assimilation: DataAssimilationConfig | None = None
 
 
@@ -339,9 +339,12 @@ def load_bridge_config(payload: Mapping[str, Any], overrides: Mapping[str, Any] 
         payload = _deep_merge(dict(payload), overrides)
 
     try:
-        return BridgeConfig.model_validate(payload)
+        config = BridgeConfig.model_validate(payload)
     except ValidationError as exc:
         raise ValueError(f"Invalid bridge configuration: {exc}") from exc
+    if config.data_assimilation and config.data_assimilation.output_root is None:
+        config.data_assimilation.output_root = config.bridge.output_dir / "data_assimilation"
+    return config
 
 
 def generate_schema() -> dict[str, Any]:

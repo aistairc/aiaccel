@@ -17,10 +17,10 @@ JOB_OPTS ?=
 
 COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --output_dir $(MODELBRIDGE_OUTPUT) $(if $(MODELBRIDGE_JSON_LOG),--json-log,) $(if $(MODELBRIDGE_SET),--set $(MODELBRIDGE_SET),)
 
-.PHONY: run setup train eval regression evaluate summary da clean
+.PHONY: run setup hpo_train hpo_eval regression evaluate_model summary da clean
 
 # Default target: Run all steps
-run: setup train eval regression evaluate summary da
+run: setup hpo_train hpo_eval regression evaluate_model summary da
 
 # Setup step: Generates configs and directories
 setup: | $(MODELBRIDGE_LOG_DIR)
@@ -28,20 +28,19 @@ setup: | $(MODELBRIDGE_LOG_DIR)
 		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps setup_train,setup_eval
 
 # Execution steps: Run aiaccel-hpo optimize for generated configs
-train:
+hpo_train:
 	@echo "Running Train Phase..."
-	@find $(MODELBRIDGE_OUTPUT)/runs/train -name "config.yaml" | sort | while read conf; do \
+	@find $(MODELBRIDGE_OUTPUT) -path "*/runs/train/*/config.yaml" | sort | while read conf; do \
 		log_file=$$(dirname $$conf)/aiaccel_job.log; \
 		echo "Submitting job for $$conf"; \
 		aiaccel-job local cpu $$log_file -- \
 			aiaccel-hpo optimize --config $$conf; \
 	done
 
-
-eval:
+hpo_eval:
 	@echo "Running Eval Phase..."
-	@if [ -d "$(MODELBRIDGE_OUTPUT)/runs/eval" ]; then \
-		find $(MODELBRIDGE_OUTPUT)/runs/eval -name "config.yaml" | sort | while read conf; do \
+	@if [ -n "$$(find $(MODELBRIDGE_OUTPUT) -path '*/runs/eval/*/config.yaml' 2>/dev/null | head -n 1)" ]; then \
+		find $(MODELBRIDGE_OUTPUT) -path "*/runs/eval/*/config.yaml" | sort | while read conf; do \
 			log_file=$$(dirname $$conf)/aiaccel_job.log; \
 			echo "Submitting job for $$conf"; \
 			aiaccel-job local cpu $$log_file -- \
@@ -55,7 +54,7 @@ regression: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
 		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps regression
 
-evaluate: | $(MODELBRIDGE_LOG_DIR)
+evaluate_model: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
 		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps evaluate_model
 

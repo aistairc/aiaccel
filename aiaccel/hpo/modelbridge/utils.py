@@ -43,6 +43,7 @@ def setup_logging(
     output_dir.mkdir(parents=True, exist_ok=True)
     log_path = output_dir / "aiaccel_modelbridge.log"
 
+    file = file and not os.environ.get("AIACCEL_LOG_NO_FILE")
     if not console and not file:
         return log_path
 

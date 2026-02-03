@@ -33,11 +33,11 @@ make -f examples/hpo/modelbridge/Makefile.template \
 # Setup: Generate directories and config files for HPO
 make -f examples/hpo/modelbridge/Makefile.template setup ...
 
-# Train: Run HPO loop for training data (requires setup)
-make -f examples/hpo/modelbridge/Makefile.template train ...
+# HPO Train: Run HPO loop for training data (requires setup)
+make -f examples/hpo/modelbridge/Makefile.template hpo_train ...
 
-# Eval: Run HPO loop for evaluation data (requires setup)
-make -f examples/hpo/modelbridge/Makefile.template eval ...
+# HPO Eval: Run HPO loop for evaluation data (requires setup)
+make -f examples/hpo/modelbridge/Makefile.template hpo_eval ...
 
 # Train regression model
 make -f examples/hpo/modelbridge/Makefile.template regression ...
@@ -86,14 +86,16 @@ This will generate plots in `./work/modelbridge/simple/simple/plots/`.
 If the intermediate CSV files (`train_pairs.csv`, `test_predictions.csv`) are missing (e.g. if regression step was skipped), the script attempts to read directly from the Optuna DBs and the regression model file.
 
 ## Resuming / Skipping HPO
-The pipeline skips HPO execution for a specific run if its `optuna.db` already exists in the expected location.
-To skip computation (e.g., if HPO was run on a cluster):
+Modelbridge no longer runs HPO itself. If you already have HPO results (e.g., from a cluster run), you can skip the
+`hpo_train` / `hpo_eval` Makefile targets and go directly to `regression` / `evaluate_model` / `summary`.
+
+To reuse existing HPO results:
 1. Place the `optuna.db` file in `work/modelbridge/simple/runs/<role>/<run_id>/<target>/` (adjust output path as needed).
    - Example: `work/modelbridge/simple/runs/train/000/macro/optuna.db`
 2. **Constraint**: The Optuna Study Name stored *inside* the DB file MUST match the naming convention:
    - `{scenario}-{role}-{target}-{run_id}` (run_id is zero-padded 3 digits)
    - Example: `simple-train-macro-000`
-   If the study name mismatches, the pipeline will typically create a new study (ignoring existing data) or fail depending on Optuna behavior.
+   If the study name mismatches, analysis steps may fail to find results or load the wrong study.
 
 ## Seed Generation and Limitations
 To ensure reproducibility, random seeds for HPO trials are generated deterministically using the following formula:

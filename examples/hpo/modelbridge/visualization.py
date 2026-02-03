@@ -1,12 +1,12 @@
 """Visualization utilities for model bridging results."""
 
+from numpy.typing import NDArray
+from typing import Any
+
 import argparse
-import base64
 import csv
 import json
-import pickle
 from pathlib import Path
-from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,19 +14,20 @@ import numpy as np
 try:
     import optuna
     from sklearn.preprocessing import PolynomialFeatures
+
     _HAS_OPTUNA_SKLEARN = True
 except ImportError:
     _HAS_OPTUNA_SKLEARN = False
 
 # Type aliases
 FilePath = str | Path
-NumPyArray = np.ndarray
+NumPyArray = NDArray[Any]
 
 
 class Visualizer:
     """Visualization utility for model bridging results."""
 
-    def __init__(self, figsize: tuple = (12, 8), dpi: int = 100):
+    def __init__(self, figsize: tuple[int, int] = (12, 8), dpi: int = 100):
         """Initialize visualizer.
 
         Args:
@@ -75,14 +76,10 @@ class Visualizer:
 
         for i in range(n_micro_params):
             ax = axes[i]
-            ax.scatter(
-                macro_params[:, macro_param_idx], micro_params[:, i], alpha=0.6, s=30
-            )
+            ax.scatter(macro_params[:, macro_param_idx], micro_params[:, i], alpha=0.6, s=30)
             ax.set_xlabel(f"{macro_param_names[macro_param_idx]}")
             ax.set_ylabel(f"{micro_param_names[i]}")
-            ax.set_title(
-                f"{macro_param_names[macro_param_idx]} vs {micro_param_names[i]}"
-            )
+            ax.set_title(f"{macro_param_names[macro_param_idx]} vs {micro_param_names[i]}")
             ax.grid(True, alpha=0.3)
 
         for i in range(n_micro_params, len(axes)):
@@ -159,11 +156,10 @@ class Visualizer:
             ax.legend()
 
             import warnings
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", RuntimeWarning)
-                correlation = np.corrcoef(true_values[:, i], predicted_values[:, i])[
-                    0, 1
-                ]
+                correlation = np.corrcoef(true_values[:, i], predicted_values[:, i])[0, 1]
                 r_squared = correlation**2 if not np.isnan(correlation) else 0.0
             ax.text(
                 0.05,
@@ -235,7 +231,7 @@ def scan_optuna_studies(runs_dir: Path) -> list[tuple[int, dict[str, float], dic
 
         if macro_best and micro_best:
             samples.append((run_idx, macro_best, micro_best))
-    
+
     return samples
 
 
@@ -256,10 +252,7 @@ def _load_best_param(db_path: Path) -> dict[str, float] | None:
     return None
 
 
-def predict_from_model(
-    model_path: Path,
-    features_list: list[dict[str, float]]
-) -> list[dict[str, float]] | None:
+def predict_from_model(model_path: Path, features_list: list[dict[str, float]]) -> list[dict[str, float]] | None:
     """Predict using the saved regression model."""
     if not model_path.exists() or not _HAS_OPTUNA_SKLEARN:
         return None
@@ -267,23 +260,23 @@ def predict_from_model(
     try:
         with model_path.open("r") as f:
             model_dict = json.load(f)
-        
+
         feature_names = model_dict["feature_names"]
         target_names = model_dict["target_names"]
         kind = model_dict["kind"]
-        
+
         x_data = np.asarray([[f[k] for k in feature_names] for f in features_list])
-        
+
         if kind in ["linear", "polynomial"]:
             degree = model_dict["degree"]
             poly = PolynomialFeatures(degree=degree, include_bias=False)
             x_poly = poly.fit_transform(x_data)
-            
+
             coef = np.asarray(model_dict["coefficients"])
             intercept = np.asarray(model_dict["intercept"])
-            
+
             y_pred = x_poly @ coef.T + intercept
-            
+
         elif kind == "gpr":
             # GPR loading requires GPy which might not be installed or complex to mock here.
             # We skip GPR fallback for now or need GPy.
@@ -294,7 +287,7 @@ def predict_from_model(
 
         results = []
         for row in y_pred:
-            results.append({k: float(v) for k, v in zip(target_names, row)})
+            results.append({k: float(v) for k, v in zip(target_names, row, strict=True)})
         return results
 
     except Exception as e:
@@ -322,9 +315,9 @@ def main() -> None:
     if train_file.exists():
         print(f"Loading {train_file}...")
         data = load_csv_data(train_file)
-        macro_keys = sorted([k for k in data.keys() if k.startswith("macro_")])
-        micro_keys = sorted([k for k in data.keys() if k.startswith("micro_")])
-        
+        macro_keys = sorted([k for k in data if k.startswith("macro_")])
+        micro_keys = sorted([k for k in data if k.startswith("micro_")])
+
         if macro_keys and micro_keys:
             macro_data = np.column_stack([data[k] for k in macro_keys])
             micro_data = np.column_stack([data[k] for k in micro_keys])
@@ -336,22 +329,22 @@ def main() -> None:
             # Assume keys from first sample
             first_macro = samples[0][1]
             first_micro = samples[0][2]
-            macro_keys = sorted([f"macro_{k}" for k in first_macro.keys()])
-            micro_keys = sorted([f"micro_{k}" for k in first_micro.keys()])
-            
+            macro_keys = sorted([f"macro_{k}" for k in first_macro])
+            micro_keys = sorted([f"micro_{k}" for k in first_micro])
+
             m_list = [[s[1][k.replace("macro_", "")] for k in macro_keys] for s in samples]
             u_list = [[s[2][k.replace("micro_", "")] for k in micro_keys] for s in samples]
-            
+
             macro_data = np.array(m_list)
             micro_data = np.array(u_list)
 
     if macro_data is not None and micro_data is not None:
         viz.plot_parameter_relationship(
-            macro_data, 
-            micro_data, 
+            macro_data,
+            micro_data,
             [k.replace("macro_", "") for k in macro_keys],
             [k.replace("micro_", "") for k in micro_keys],
-            output_dir=output_dir
+            output_dir=output_dir,
         )
     else:
         print("Could not load training data.")
@@ -364,9 +357,9 @@ def main() -> None:
     if test_file.exists():
         print(f"Loading {test_file}...")
         data = load_csv_data(test_file)
-        actual_keys = sorted([k for k in data.keys() if k.startswith("actual_")])
-        pred_keys = sorted([k for k in data.keys() if k.startswith("pred_")])
-        
+        actual_keys = sorted([k for k in data if k.startswith("actual_")])
+        pred_keys = sorted([k for k in data if k.startswith("pred_")])
+
         if actual_keys and pred_keys and len(actual_keys) == len(pred_keys):
             actual_data = np.column_stack([data[k] for k in actual_keys])
             pred_data = np.column_stack([data[k] for k in pred_keys])
@@ -376,31 +369,26 @@ def main() -> None:
         # Load Eval DBs
         eval_samples = scan_optuna_studies(scenario_dir / "runs" / "eval")
         model_path = scenario_dir / "models" / "regression_model.json"
-        
+
         if eval_samples and model_path.exists():
             features = [s[1] for s in eval_samples]
             targets = [s[2] for s in eval_samples]
-            
+
             preds = predict_from_model(model_path, features)
-            
+
             if preds:
                 # Prepare arrays
                 # Sort keys to match
                 t_keys = sorted(targets[0].keys())
-                p_keys = sorted(preds[0].keys()) # Should match t_keys
-                
+                p_keys = sorted(preds[0].keys())  # Should match t_keys
+
                 actual_data = np.array([[t[k] for k in t_keys] for t in targets])
                 pred_data = np.array([[p[k] for k in p_keys] for p in preds])
                 param_names = t_keys
                 print(f"Generated predictions for {len(eval_samples)} eval samples.")
 
     if actual_data is not None and pred_data is not None:
-        viz.plot_prediction_accuracy(
-            actual_data,
-            pred_data,
-            param_names,
-            output_dir=output_dir
-        )
+        viz.plot_prediction_accuracy(actual_data, pred_data, param_names, output_dir=output_dir)
     else:
         print("Could not load/generate prediction data.")
 

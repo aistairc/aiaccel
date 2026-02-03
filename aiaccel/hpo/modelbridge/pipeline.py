@@ -7,7 +7,7 @@ from typing import Any, cast
 from collections.abc import Sequence
 from pathlib import Path
 
-from .config import BridgeConfig
+from .config import BridgeConfig, DataAssimilationConfig
 from .ops import (
     run_da_step,
     run_evaluate_model_step,
@@ -109,6 +109,8 @@ class ModelBridgePipeline:
     def run_da(self) -> None:
         """Execute Data Assimilation step."""
         if self.config.data_assimilation and self.config.data_assimilation.enabled:
+            if self.config.data_assimilation.output_root is None:
+                self.config.data_assimilation.output_root = self.config.bridge.output_dir / "data_assimilation"
             run_da_step(self.config.data_assimilation)
 
     def _create_manifest(self) -> None:
@@ -116,7 +118,7 @@ class ModelBridgePipeline:
         manifest: dict[str, Any] = {
             "config": self.config.model_dump(mode="json"),
             "scenarios": {},
-            "artifacts": _collect_artifacts(self.config.bridge.output_dir),
+            "artifacts": _collect_artifacts(self.config.bridge.output_dir, self.config.data_assimilation),
         }
 
         for scenario in self.config.bridge.scenarios:
@@ -153,38 +155,53 @@ def run_pipeline(config: BridgeConfig, steps: Sequence[str] | None = None) -> di
     manifest_path = config.bridge.output_dir / "manifest.json"
     if manifest_path.exists():
         import json
+
         with manifest_path.open() as f:
             return cast(dict[str, Any], json.load(f))
     return {}
 
 
-def _collect_artifacts(output_dir: Path) -> list[dict[str, Any]]:
+def _collect_artifacts(
+    output_dir: Path, data_assimilation: DataAssimilationConfig | None = None
+) -> list[dict[str, Any]]:
     artifacts = []
+    artifacts.extend(_collect_common_artifacts(output_dir))
+    artifacts.extend(_collect_scenario_artifacts(output_dir))
+    artifacts.extend(_collect_da_artifacts(output_dir, data_assimilation))
+    return artifacts
 
-    # Common artifacts
+
+def _collect_common_artifacts(output_dir: Path) -> list[dict[str, Any]]:
+    artifacts = []
     for name in ["summary.json", "manifest.json", "aiaccel_modelbridge.log"]:
-        p = output_dir / name
-        if p.exists():
-            artifacts.append({"path": str(p), "sha256": hash_file(p), "size": p.stat().st_size})
+        path = output_dir / name
+        if path.exists():
+            artifacts.append({"path": str(path), "sha256": hash_file(path), "size": path.stat().st_size})
+    return artifacts
 
-    # Scan scenarios
+
+def _collect_scenario_artifacts(output_dir: Path) -> list[dict[str, Any]]:
+    artifacts = []
     for s_dir in output_dir.iterdir():
         if not s_dir.is_dir() or s_dir.name in ["logs", "data_assimilation"]:
             continue
-
-        # Models and metrics
         for cat in ["models", "metrics"]:
-            d = s_dir / cat
-            if d.exists():
-                for f in d.iterdir():
-                    if f.is_file():
-                        artifacts.append({"path": str(f), "sha256": hash_file(f), "size": f.stat().st_size})
-
-    # Data assimilation
-    da_manifest = output_dir / "data_assimilation_manifest.json"
-    if da_manifest.exists():
-        artifacts.append(
-            {"path": str(da_manifest), "sha256": hash_file(da_manifest), "size": da_manifest.stat().st_size}
-        )
-
+            cat_dir = s_dir / cat
+            if not cat_dir.exists():
+                continue
+            for file_path in cat_dir.iterdir():
+                if file_path.is_file():
+                    artifacts.append(
+                        {"path": str(file_path), "sha256": hash_file(file_path), "size": file_path.stat().st_size}
+                    )
     return artifacts
+
+
+def _collect_da_artifacts(output_dir: Path, data_assimilation: DataAssimilationConfig | None) -> list[dict[str, Any]]:
+    if data_assimilation is None:
+        return []
+    da_root = data_assimilation.output_root or (output_dir / "data_assimilation")
+    da_manifest = da_root / "data_assimilation_manifest.json"
+    if not da_manifest.exists():
+        return []
+    return [{"path": str(da_manifest), "sha256": hash_file(da_manifest), "size": da_manifest.stat().st_size}]

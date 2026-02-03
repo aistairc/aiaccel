@@ -31,7 +31,8 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     opt_group = run_parser.add_argument_group("Options")
     opt_group.add_argument(
         "--steps",
-        help="Comma-separated list of steps to execute (setup_train, setup_eval, regression, evaluate_model, summary, da)",
+        help="Comma-separated list of steps to execute (setup_train, setup_eval, regression, evaluate_model, "
+        "summary, da)",
     )
     opt_group.add_argument(
         "--set",
@@ -80,12 +81,15 @@ def _load_bridge_config(path: Path, cli_overrides: Mapping[str, object] | None =
     container = OmegaConf.to_container(conf, resolve=True)
     if not isinstance(container, Mapping):
         raise ValueError("Bridge configuration must be a mapping")
-    merged_overrides = parent_ctx if not cli_overrides else _merge_overrides(parent_ctx, cli_overrides)
-    # The merged_overrides dict comes from strings, so keys are str.
+    payload = dict(container)
+    payload.pop("config_path", None)
+    payload.pop("config_dir", None)
+    # The overrides dict comes from strings, so keys are str.
     # We cast to satisfy the Mapping[str, Any] requirement.
     from typing import Any, cast
 
-    return load_bridge_config(cast(Mapping[str, Any], container), overrides=cast(Mapping[str, Any], merged_overrides))
+    overrides = cast(Mapping[str, Any], cli_overrides) if cli_overrides else None
+    return load_bridge_config(cast(Mapping[str, Any], payload), overrides=overrides)
 
 
 def _merge_overrides(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:
@@ -134,6 +138,48 @@ def _coerce_value(raw: str) -> object:
         return raw
 
 
+def _ensure_bridge_overrides(overrides: dict[str, object]) -> dict[str, object]:
+    if "bridge" not in overrides or not isinstance(overrides["bridge"], dict):
+        overrides["bridge"] = overrides.get("bridge", {})
+    return overrides["bridge"]  # type: ignore[return-value]
+
+
+def _apply_cli_overrides(args: argparse.Namespace, overrides: dict[str, object]) -> dict[str, object]:
+    if getattr(args, "output_dir", None):
+        bridge_overrides = _ensure_bridge_overrides(overrides)
+        bridge_overrides["output_dir"] = args.output_dir
+    if getattr(args, "json_log", False):
+        bridge_overrides = _ensure_bridge_overrides(overrides)
+        bridge_overrides["json_log"] = True
+    return overrides
+
+
+def _parse_steps(raw_steps: str | None) -> list[str] | None:
+    if not raw_steps:
+        return None
+    return [step.strip() for step in raw_steps.split(",") if step.strip()]
+
+
+def _maybe_print_config(args: argparse.Namespace, config: BridgeConfig, command: str) -> bool:
+    if getattr(args, "print_config", False):
+        print(json.dumps(config.model_dump(mode="json"), indent=2, default=str))
+        return command == "validate"
+    return False
+
+
+def _run_pipeline_command(args: argparse.Namespace, config: BridgeConfig) -> None:
+    if getattr(args, "quiet", False):
+        import os
+
+        os.environ["AIACCEL_LOG_SILENT"] = "1"
+    if getattr(args, "no_log", False):
+        import os
+
+        os.environ["AIACCEL_LOG_NO_FILE"] = "1"
+    steps = _parse_steps(args.steps)
+    _ = run_pipeline(config, steps=steps)
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     """Entrypoint for ``aiaccel-hpo modelbridge``.
 
@@ -150,41 +196,20 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     config_path = Path(args.config).expanduser().resolve()
     cli_overrides = _parse_override_pairs(getattr(args, "overrides", None))
-
-    # Handle output_dir arg
-    if getattr(args, "output_dir", None):
-        if "bridge" not in cli_overrides or not isinstance(cli_overrides["bridge"], dict):
-            cli_overrides["bridge"] = cli_overrides.get("bridge", {})
-        cli_overrides["bridge"]["output_dir"] = args.output_dir  # type: ignore
-
-    # Handle json-log flag by injecting into overrides
-    if getattr(args, "json_log", False):
-        if "bridge" not in cli_overrides or not isinstance(cli_overrides["bridge"], dict):
-            cli_overrides["bridge"] = cli_overrides.get("bridge", {})
-        cli_overrides["bridge"]["json_log"] = True  # type: ignore
-
+    cli_overrides = _apply_cli_overrides(args, cli_overrides)
     bridge_config = _load_bridge_config(config_path, cli_overrides)
-
-    if getattr(args, "print_config", False):
-        print(json.dumps(bridge_config.model_dump(mode="json"), indent=2, default=str))
-        if command == "validate":
-            return
 
     logger = get_logger(__name__)
 
     try:
+        if _maybe_print_config(args, bridge_config, command):
+            return
         if command == "validate":
             logger.info("Configuration validated successfully")
             return
 
         if command == "run":
-            if getattr(args, "quiet", False):
-                import os
-
-                os.environ["AIACCEL_LOG_SILENT"] = "1"
-
-            steps = [s.strip() for s in args.steps.split(",")] if args.steps else None
-            _ = run_pipeline(bridge_config, steps=steps)
+            _run_pipeline_command(args, bridge_config)
             logger.info("Pipeline completed successfully.")
 
     except Exception as exc:

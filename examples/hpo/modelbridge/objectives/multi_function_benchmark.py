@@ -8,6 +8,7 @@ from pathlib import Path
 from aiaccel.hpo.modelbridge.config import (
     BridgeConfig,
     BridgeSettings,
+    HpoSettings,
     ObjectiveConfig,
     ParameterBounds,
     ParameterSpace,
@@ -105,4 +106,5 @@ def build_config(base_dir: Path) -> BridgeConfig:
             )
         )
 
-    return BridgeConfig(bridge=BridgeSettings(output_dir=base_dir, scenarios=scenario_configs))
+    hpo_settings = HpoSettings(base_config=Path("examples/hpo/modelbridge/optimize_config.yaml"))
+    return BridgeConfig(bridge=BridgeSettings(output_dir=base_dir, scenarios=scenario_configs), hpo=hpo_settings)
