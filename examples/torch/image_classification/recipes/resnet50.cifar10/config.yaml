@@ -20,6 +20,7 @@ trainer:
       monitor: "validation/accuracy"
       mode: "max"
       filename: "epoch={epoch:04d}_score={validation/accuracy:.2f}"
+      auto_insert_metric_name: False
       
     - _target_: lightning.pytorch.callbacks.LearningRateMonitor
       logging_interval: "step"
