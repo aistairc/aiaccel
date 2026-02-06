@@ -12,6 +12,14 @@ import torch
 
 
 def get_score(filename: Path) -> float:
+    """Extract the score from a filename.
+
+    Args:
+        filename (Path): A filename containing a score string.
+
+    Returns:
+        float: The extracted score. Returns math.inf if extraction fails.
+    """
     score = re.search(r"score=([0-9.]+)", filename.stem)
     if score:
         return float(score.group(1))

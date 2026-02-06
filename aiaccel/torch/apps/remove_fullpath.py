@@ -12,6 +12,14 @@ import torch
 
 
 def remove_fullpath(obj: dict[str, Any] | list[Any] | Any) -> Any:
+    """Recursively remove elements containing full paths from a dict.
+
+    Args:
+        obj (dict[str, Any] | list[Any] | Any): The object that contains a dict from which full paths should be removed.
+
+    Returns:
+        Any: The object with full paths removed.
+    """
     if isinstance(obj, dict):
         return {
             key: remove_fullpath(value)
