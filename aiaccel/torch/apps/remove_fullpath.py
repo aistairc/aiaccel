@@ -11,7 +11,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 import torch
 
 
-def remove_fullpath(obj: Any) -> Any:
+def remove_fullpath(obj: dict[str, Any] | list[Any] | Any) -> Any:
     if isinstance(obj, dict):
         return {
             key: remove_fullpath(value)
