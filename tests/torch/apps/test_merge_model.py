@@ -49,7 +49,7 @@ def test_merge_model(workspace_factory: Callable[..., AbstractContextManager[Pat
         merged_ckpt_name = "merged.ckpt"
         cmd = (
             f"aiaccel-torch merge-model {workspace} "
-            "--ckpt_name {merged_ckpt_name} "
+            f"--ckpt_name {merged_ckpt_name} "
             "--n_ckpt 2 "
             "--direction max "
             "--reqexp 'score=([0-9.]+)'"
