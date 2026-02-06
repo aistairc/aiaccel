@@ -43,7 +43,7 @@ def main() -> None:
 
     filename_list = list((args.train_path / "checkpoints").glob("*.ckpt"))
     filename_list = list(filter(lambda x: x.stem.startswith("epoch"), filename_list))
-    filename_list.sort(key=get_score, reverse=args.direction == "max")  # sort score in filename
+    filename_list.sort(key=get_score, reverse=args.direction == "max")
 
     print(args.train_path / "checkpoints")
 
