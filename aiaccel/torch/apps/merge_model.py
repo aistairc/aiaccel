@@ -4,6 +4,7 @@
 #! /usr/bin/env python3
 
 from argparse import ArgumentParser
+from collections.abc import Callable
 import math
 from pathlib import Path
 import re
@@ -11,20 +12,23 @@ import re
 import torch
 
 
-def get_score(filename: Path) -> float:
-    """Extract the score from a filename.
+def get_score(regexp: str) -> Callable[[Path], float]:
+    def _get_score(filename: Path) -> float:
+        """Extract the score from a filename.
 
-    Args:
-        filename (Path): A filename containing a score string.
+        Args:
+            filename (Path): A filename containing a score string.
 
-    Returns:
-        float: The extracted score. Returns math.inf if extraction fails.
-    """
-    score = re.search(r"score=([0-9.]+)", filename.stem)
-    if score:
-        return float(score.group(1))
-    else:
-        return math.inf
+        Returns:
+            float: The extracted score. Returns math.inf if extraction fails.
+        """
+        score = re.search(regexp, filename.stem)
+        if score:
+            return float(score.group(1))
+        else:
+            return math.inf
+
+    return _get_score
 
 
 def main() -> None:
@@ -33,6 +37,7 @@ def main() -> None:
     parser.add_argument("--ckpt_name", type=str, default="merged.ckpt")
     parser.add_argument("--n_ckpt", type=int, default=10)
     parser.add_argument("--direction", type=str.lower, choices=["min", "max"], default="max")
+    parser.add_argument("--reqexp", type=str, default="score=([0-9.]+)")
     args = parser.parse_args()
 
     print("=" * 32)
@@ -42,7 +47,7 @@ def main() -> None:
 
     filename_list = list((args.train_path / "checkpoints").glob("*.ckpt"))
     filename_list = list(filter(lambda x: x.stem.startswith("epoch"), filename_list))
-    filename_list.sort(key=get_score, reverse=args.direction == "max")
+    filename_list.sort(key=get_score(rf"{args.reqexp}"), reverse=args.direction == "max")
 
     print(args.train_path / "checkpoints")
 
