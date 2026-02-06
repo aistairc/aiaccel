@@ -32,7 +32,6 @@ def main() -> None:
     parser.add_argument("train_path", type=Path)
     parser.add_argument("--ckpt_name", type=str, default="merged.ckpt")
     parser.add_argument("--n_ckpt", type=int, default=10)
-    # TODO: min max option
     parser.add_argument("--direction", type=str.lower, choices=["min", "max"], default="max")
     args = parser.parse_args()
 
