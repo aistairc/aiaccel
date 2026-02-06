@@ -48,7 +48,7 @@ def test_merge_model(workspace_factory: Callable[..., AbstractContextManager[Pat
         with open(workspace / "config.yaml", "w") as f:
             oc.save(config, f)
 
-        # execute merge_model
+        # execute remove-fullpath
         cmd = (
             "aiaccel-torch remove-fullpath "
             f"--config_path {workspace}/config.yaml "
