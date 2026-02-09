@@ -1,73 +1,52 @@
 SHELL := /bin/bash
 
-PYTHON ?= python3
 ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd)
-export PYTHONPATH ?= $(ROOT)
 MODELBRIDGE_CONFIG ?= ./modelbridge.yaml
 MODELBRIDGE_OUTPUT ?= ./work/modelbridge/simple
-MODELBRIDGE_SCENARIO ?= simple
 MODELBRIDGE_LOG_DIR ?= $(MODELBRIDGE_OUTPUT)/logs
-MODELBRIDGE_JSON_LOG ?= 
-MODELBRIDGE_SET ?= 
+MODELBRIDGE_JSON_LOG ?=
+MODELBRIDGE_SET ?=
 
-# Use aiaccel-job as the execution wrapper
-# Syntax: aiaccel-job <profile> <mode> <log_file> <command>...
+# aiaccel-job wrapper:
+#   aiaccel-job <profile> <mode> <log_file> <command...>
 AIACCEL_CMD ?= aiaccel-job local cpu $(MODELBRIDGE_LOG_DIR)/aiaccel_job.log
-JOB_OPTS ?= 
+JOB_OPTS ?=
 
 COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --output_dir $(MODELBRIDGE_OUTPUT) $(if $(MODELBRIDGE_JSON_LOG),--json-log,) $(if $(MODELBRIDGE_SET),--set $(MODELBRIDGE_SET),)
 
-.PHONY: run setup hpo_train hpo_eval regression evaluate_model summary da clean
+.PHONY: run prepare emit_train hpo_train emit_eval hpo_eval analyze clean
 
-# Default target: Run all steps
-run: setup hpo_train hpo_eval regression evaluate_model summary da
+run: prepare hpo_train hpo_eval analyze
 
-# Setup step: Generates configs and directories
-setup: | $(MODELBRIDGE_LOG_DIR)
+prepare: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps setup_train,setup_eval
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --profile prepare
 
-# Execution steps: Run aiaccel-hpo optimize for generated configs
-hpo_train:
-	@echo "Running Train Phase..."
-	@find $(MODELBRIDGE_OUTPUT) -path "*/runs/train/*/config.yaml" | sort | while read conf; do \
-		log_file=$$(dirname $$conf)/aiaccel_job.log; \
-		echo "Submitting job for $$conf"; \
-		aiaccel-job local cpu $$log_file -- \
-			aiaccel-hpo optimize --config $$conf; \
-	done
+emit_train: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge emit-commands $(COMMON_FLAGS) --role train --format shell
 
-hpo_eval:
-	@echo "Running Eval Phase..."
-	@if [ -n "$$(find $(MODELBRIDGE_OUTPUT) -path '*/runs/eval/*/config.yaml' 2>/dev/null | head -n 1)" ]; then \
-		find $(MODELBRIDGE_OUTPUT) -path "*/runs/eval/*/config.yaml" | sort | while read conf; do \
-			log_file=$$(dirname $$conf)/aiaccel_job.log; \
-			echo "Submitting job for $$conf"; \
-			aiaccel-job local cpu $$log_file -- \
-				aiaccel-hpo optimize --config $$conf; \
-		done; \
+hpo_train: emit_train
+	bash $(MODELBRIDGE_OUTPUT)/workspace/commands/train.sh
+
+emit_eval: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		aiaccel-hpo modelbridge emit-commands $(COMMON_FLAGS) --role eval --format shell
+
+hpo_eval: emit_eval
+	@if [ -s "$(MODELBRIDGE_OUTPUT)/workspace/commands/eval.sh" ]; then \
+		bash $(MODELBRIDGE_OUTPUT)/workspace/commands/eval.sh; \
 	else \
-		echo "No eval runs configured or setup."; \
+		echo "No eval commands emitted."; \
 	fi
 
-regression: | $(MODELBRIDGE_LOG_DIR)
+analyze: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps regression
-
-evaluate_model: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps evaluate_model
-
-summary: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps summary
-
-da: | $(MODELBRIDGE_LOG_DIR)
-	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --steps da
+		aiaccel-hpo modelbridge run $(COMMON_FLAGS) --profile analyze
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@
 
 clean:
 	@rm -rf $(MODELBRIDGE_OUTPUT)
+

@@ -1,26 +1,16 @@
 # Modelbridge Examples
 
 ## Overview
-This directory contains examples for the Modelbridge workflow in aiaccel-hpo.
+This directory contains a Plan-Collect-Analyze-Publish workflow example for `aiaccel-hpo modelbridge`.
 
-### File Structure
-- **Makefile.template**: Template for running the pipeline using `aiaccel-job`.
-- **modelbridge.yaml**: Main configuration file for the example scenario.
-- **optimize_config.yaml**: Base optimization configuration (algorithm, resource).
-- **objectives/**: Directory containing Python objective functions.
-  - `simple_objective.py`: A simple quadratic function used in the example.
-- **data_assimilation/**: Example for data assimilation workflow.
-  - `Makefile.template`: Makefile for the data assimilation example.
-  - `data_assimilation.yaml`: Configuration for data assimilation.
-  - `mas_bench_*.py`: Source codes for the benchmark.
+## Files
+- `Makefile.template`: External execution workflow (`prepare -> emit -> optimize -> analyze`).
+- `modelbridge.yaml`: Modelbridge scenario settings.
+- `optimize_config.yaml`: Base optimize configuration used by generated run configs.
+- `objectives/simple_objective.py`: Objective used by train/eval optimize loops.
+- `data_assimilation/`: External tool example (not core modelbridge steps).
 
-## Quick Start
-You can run the pipeline using the provided Makefile or directly via the CLI.
-
-### 1. Using Makefile (Recommended)
-Copy `examples/hpo/modelbridge/Makefile.template` next to your configuration or call it directly.
-
-**Run the full pipeline:**
+## 1. Using Makefile
 ```bash
 make -f examples/hpo/modelbridge/Makefile.template \
   run \
@@ -28,110 +18,90 @@ make -f examples/hpo/modelbridge/Makefile.template \
   MODELBRIDGE_OUTPUT=./work/modelbridge/simple
 ```
 
-**Run individual steps:**
+Targets:
+- `prepare`: Generate run configs and `workspace/{train,eval}_plan.json`.
+- `emit_train`: Emit `workspace/commands/train.sh`.
+- `hpo_train`: Execute `train.sh` (calls `aiaccel-hpo optimize`).
+- `emit_eval`: Emit `workspace/commands/eval.sh`.
+- `hpo_eval`: Execute `eval.sh`.
+- `analyze`: `collect -> fit -> evaluate -> publish`.
+
+## 2. Using CLI Directly
+Common options:
+- `--config <path>` required.
+- `--output_dir <path>` optional override.
+- `--set key=value` repeatable overrides.
+
+### 2.1 Commands used by `make ... run`
 ```bash
-# Setup: Generate directories and config files for HPO
-make -f examples/hpo/modelbridge/Makefile.template setup ...
+CONFIG=examples/hpo/modelbridge/modelbridge.yaml
+OUT=./work/modelbridge/simple
 
-# HPO Train: Run HPO loop for training data (requires setup)
-make -f examples/hpo/modelbridge/Makefile.template hpo_train ...
+# 1) prepare
+aiaccel-hpo modelbridge run --config "$CONFIG" --output_dir "$OUT" --profile prepare
 
-# HPO Eval: Run HPO loop for evaluation data (requires setup)
-make -f examples/hpo/modelbridge/Makefile.template hpo_eval ...
+# 2) emit train commands
+aiaccel-hpo modelbridge emit-commands --config "$CONFIG" --output_dir "$OUT" --role train --format shell
 
-# Train regression model
-make -f examples/hpo/modelbridge/Makefile.template regression ...
+# 3) external train execution
+bash "$OUT/workspace/commands/train.sh"
 
-# Evaluate regression model
-make -f examples/hpo/modelbridge/Makefile.template evaluate_model ...
+# 4) emit eval commands
+aiaccel-hpo modelbridge emit-commands --config "$CONFIG" --output_dir "$OUT" --role eval --format shell
 
-# Create summary
-make -f examples/hpo/modelbridge/Makefile.template summary ...
+# 5) external eval execution
+bash "$OUT/workspace/commands/eval.sh"
 
-# Run Data Assimilation (if configured)
-make -f examples/hpo/modelbridge/Makefile.template da ...
+# 6) analyze
+aiaccel-hpo modelbridge run --config "$CONFIG" --output_dir "$OUT" --profile analyze
 ```
 
-### 2. Using CLI Directly
-You can invoke the modelbridge CLI directly.
-
-**Input/Output Arguments:**
-- `--config <path>`: Path to the bridge configuration YAML (Required).
-- `--output_dir <path>`: Output directory. Overrides config value if specified.
-
-**Options:**
-- `--steps <list>`: Comma-separated list of steps to execute.
-  - Choices: `setup_train`, `setup_eval`, `regression`, `evaluate_model`, `summary`, `da`.
-  - Default: All steps.
-- `--json-log`: Emit JSON structured logs.
-- `--quiet`: Suppress console logs.
-
-**Example:**
+### 2.2 Step-by-step single command execution
 ```bash
-# Run only the setup_train step (generates configs)
-aiaccel-hpo modelbridge run \
-  --config examples/hpo/modelbridge/modelbridge.yaml \
-  --output_dir ./work/modelbridge/simple \
-  --steps setup_train
+CONFIG=examples/hpo/modelbridge/modelbridge.yaml
+OUT=./work/modelbridge/simple
+
+aiaccel-hpo modelbridge prepare-train --config "$CONFIG" --output_dir "$OUT"
+aiaccel-hpo modelbridge prepare-eval --config "$CONFIG" --output_dir "$OUT"
+
+aiaccel-hpo modelbridge collect-train --config "$CONFIG" --output_dir "$OUT"
+aiaccel-hpo modelbridge collect-eval --config "$CONFIG" --output_dir "$OUT"
+
+aiaccel-hpo modelbridge fit-regression --config "$CONFIG" --output_dir "$OUT"
+aiaccel-hpo modelbridge evaluate-model --config "$CONFIG" --output_dir "$OUT"
+aiaccel-hpo modelbridge publish-summary --config "$CONFIG" --output_dir "$OUT"
 ```
 
-## Visualization
-You can visualize the results (parameter relationships and prediction accuracy) using the provided script.
-
+Optional explicit DB input for collect:
 ```bash
-python3 examples/hpo/modelbridge/visualization.py ./work/modelbridge/simple/simple
+aiaccel-hpo modelbridge collect-train --config "$CONFIG" --output_dir "$OUT" \
+  --train-db-path /path/to/train_macro.db --train-db-path /path/to/train_micro.db
+
+aiaccel-hpo modelbridge collect-eval --config "$CONFIG" --output_dir "$OUT" \
+  --eval-db-path /path/to/eval_macro.db --eval-db-path /path/to/eval_micro.db
 ```
 
-This will generate plots in `./work/modelbridge/simple/simple/plots/`.
-If the intermediate CSV files (`train_pairs.csv`, `test_predictions.csv`) are missing (e.g. if regression step was skipped), the script attempts to read directly from the Optuna DBs and the regression model file.
+## 3. Outputs
+Generated under `<output_dir>`:
+- `workspace/train_plan.json`, `workspace/eval_plan.json`
+- `workspace/commands/{train,eval}.{sh,json}`
+- `workspace/state/*.json` (one per step)
+- `<scenario>/train_pairs.csv`, `<scenario>/test_pairs.csv`, `<scenario>/test_predictions.csv`
+- `<scenario>/models/regression_model.json`
+- `<scenario>/metrics/train_metrics.json`, `<scenario>/metrics/eval_metrics.json`
+- `summary.json`, `manifest.json`
 
-## Resuming / Skipping HPO
-Modelbridge no longer runs HPO itself. If you already have HPO results (e.g., from a cluster run), you can skip the
-`hpo_train` / `hpo_eval` Makefile targets and go directly to `regression` / `evaluate_model` / `summary`.
+## 4. Validation and Schema
+```bash
+aiaccel-hpo modelbridge validate --config examples/hpo/modelbridge/modelbridge.yaml
+aiaccel-hpo modelbridge schema
+```
 
-To reuse existing HPO results:
-1. Place the `optuna.db` file in `work/modelbridge/simple/runs/<role>/<run_id>/<target>/` (adjust output path as needed).
-   - Example: `work/modelbridge/simple/runs/train/000/macro/optuna.db`
-2. **Constraint**: The Optuna Study Name stored *inside* the DB file MUST match the naming convention:
-   - `{scenario}-{role}-{target}-{run_id}` (run_id is zero-padded 3 digits)
-   - Example: `simple-train-macro-000`
-   If the study name mismatches, analysis steps may fail to find results or load the wrong study.
-
-## Seed Generation and Limitations
-To ensure reproducibility, random seeds for HPO trials are generated deterministically using the following formula:
-`seed = seed_base + (group_offset * 100000) + run_idx`
-
-Where `group_offset` is determined by the phase and target:
-- `train` / `macro`: 0
-- `train` / `micro`: 1
-- `eval` / `macro`: 2 (previously `eval` role)
-- `eval` / `micro`: 3
-
-**Limitation**: The stride between groups is **100,000**. If the number of runs (`train_runs` or `eval_runs`) exceeds 100,000, the seed values will collide with the next group.
-
-## Optional Gaussian Process Regression (GPy)
-- Install the optional dependency with `python -m pip install .[gpy]`.
-- Update the scenario’s `regression` block:
-  ```yaml
-  regression:
-    kind: gpr
-    kernel: RBF
-    noise: 1.0e-5
-  ```
-
-## Data Assimilation Example
-- A MAS-Bench-inspired data assimilation workflow lives under `examples/hpo/modelbridge/data_assimilation/`.
-- Run with:
-  ```bash
-  make -f examples/hpo/modelbridge/data_assimilation/Makefile.template run
-  ```
-
-## Schema & Validation
-- Print the JSON Schema for the Pydantic v2 configuration:
-  ```bash
-  aiaccel-hpo modelbridge schema
-  ```
-- Validate the configuration:
-  ```bash
-  aiaccel-hpo modelbridge validate --config ./modelbridge.yaml
-  ```
+## 5. Optional GPR
+Install GPy and switch regression kind in YAML:
+```yaml
+regression:
+  kind: gpr
+  kernel: RBF
+  noise: 1.0e-5
+```

@@ -1,6 +1,6 @@
 # Data Assimilation Example (MAS-Bench)
 
-This example demonstrates the data assimilation + model-bridge workflow inspired by `RapidDataAssimilation.py`.
+This example demonstrates a data assimilation workflow inspired by `RapidDataAssimilation.py`.
 
 ## Requirements
 - `python -m pip install "[modelbridge]"` (scikit-learn, optuna included).
@@ -12,10 +12,9 @@ This example demonstrates the data assimilation + model-bridge workflow inspired
 ## Quick Start (mock execution)
 ```bash
 make -f examples/hpo/modelbridge/data_assimilation/Makefile.template run \
-  MODELBRIDGE_CONFIG=examples/hpo/modelbridge/data_assimilation/data_assimilation.yaml \
-  MODELBRIDGE_JSON_LOG=1
+  MAS_BENCH_CONFIG=examples/hpo/modelbridge/data_assimilation/mas_bench_config.yaml
 ```
-Outputs land in `./work/modelbridge/data_assimilation/` (`data_assimilation_summary.json`, `data_assimilation_manifest.json`, regression details, per-phase inputs/outputs).
+Outputs land in `./work/modelbridge/data_assimilation/` (`data_assimilation_summary.json`, regression details, per-phase inputs/outputs).
 
 ## Resuming / Skipping Steps
 You can skip optimization steps by placing existing `optuna.db` files in the expected directories.
@@ -45,7 +44,7 @@ The wrapper checks for existing studies (using `load_if_exists=True` behavior of
 - Ensure the dataset contains `agent_size.sh` for `micro_model`/`macro_model`. Execution will fail early if the JAR or dataset is missing.
 
 ## What the pipeline does
-1. The pipeline invokes `mas_bench_wrapper.py` as an external hook configured in `data_assimilation.yaml`.
+1. The tool invokes `mas_bench_wrapper.py` using the provided MAS-Bench config.
 2. The wrapper performs:
    - Generate micro scenarios (Optuna) and record input/output CSV (mock or MAS-Bench Fitness).
    - Assimilate macro train scenarios (CMA-ES by default).

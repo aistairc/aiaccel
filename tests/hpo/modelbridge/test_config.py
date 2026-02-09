@@ -14,6 +14,7 @@ def test_load_bridge_config_roundtrip(make_bridge_config: Callable[[str], dict[s
     config = load_bridge_config(data)
     assert isinstance(config, BridgeConfig)
     assert config.bridge.output_dir.as_posix().endswith("work/tmp")
+    assert config.bridge.strict_mode is False
     assert config.bridge.scenarios[0].metrics == ["mae", "mse", "r2"]
 
 

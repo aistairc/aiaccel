@@ -178,9 +178,6 @@ class HpoSettings(BaseModel):
 
     Attributes:
         base_config (Path): Path to the base aiaccel configuration file.
-        optimize_command (list[str]): Command prefix for running optimization (default: ["aiaccel-hpo", "optimize"]).
-        job_runner_command (list[str]): Command prefix for running jobs via aiaccel-job (default:
-            ["aiaccel-job", "local", "cpu"]).
         macro_overrides (dict[str, Any]): OmegaConf overrides for macro HPO.
         micro_overrides (dict[str, Any]): OmegaConf overrides for micro HPO.
     """
@@ -188,21 +185,8 @@ class HpoSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     base_config: Path
-    optimize_command: list[str] = Field(default_factory=lambda: ["aiaccel-hpo", "optimize"])
-    job_runner_command: list[str] = Field(default_factory=lambda: ["aiaccel-job", "local", "cpu"])
     macro_overrides: dict[str, Any] = Field(default_factory=dict)
     micro_overrides: dict[str, Any] = Field(default_factory=dict)
-
-    @field_validator("optimize_command", "job_runner_command", mode="before")
-    @classmethod
-    def _coerce_command(cls, command: Any) -> list[str]:
-        if isinstance(command, str):
-            import shlex
-
-            return shlex.split(command)
-        if isinstance(command, list):
-            return [str(c) for c in command]
-        raise ValueError("command must be a list or string")
 
 
 class BridgeSettings(BaseModel):
@@ -215,6 +199,7 @@ class BridgeSettings(BaseModel):
         json_log (bool): Enable JSON structured logging.
         train_runs (int): Number of training runs per scenario.
         eval_runs (int): Number of evaluation runs per scenario.
+        strict_mode (bool): Fail hard on missing/ambiguous required inputs.
         scenarios (list[ScenarioConfig]): List of scenarios to execute.
     """
 
@@ -226,6 +211,7 @@ class BridgeSettings(BaseModel):
     json_log: bool = False
     train_runs: int = 1
     eval_runs: int = 0
+    strict_mode: bool = False
     scenarios: list[ScenarioConfig] = Field(default_factory=list)
 
     @field_validator("train_runs", "eval_runs")
@@ -236,87 +222,18 @@ class BridgeSettings(BaseModel):
         return value
 
 
-class DataAssimilationConfig(BaseModel):
-    """Configuration for external data assimilation workflow.
-
-    Attributes:
-        enabled (bool): Whether to run data assimilation phase.
-        command (list[str]): Command to execute.
-        job_runner_command (list[str]): Command prefix for running jobs via aiaccel-job (default:
-            ["aiaccel-job", "local", "cpu"]).
-        cwd (Path | None): Working directory for the command.
-        env (dict[str, str]): Environment variables to add/override.
-        output_root (Path | None): Output directory for data assimilation artifacts.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    enabled: bool = False
-    command: list[str]
-    job_runner_command: list[str] = Field(default_factory=lambda: ["aiaccel-job", "local", "cpu"])
-    cwd: Path | None = None
-    env: dict[str, str] = Field(default_factory=dict)
-    output_root: Path | None = None
-
-    @field_validator("command", "job_runner_command", mode="before")
-    @classmethod
-    def _coerce_command(cls, command: Any) -> list[str]:
-        if isinstance(command, str):
-            import shlex
-
-            return shlex.split(command)
-        if isinstance(command, list):
-            return [str(c) for c in command]
-        raise ValueError("command must be a list or string")
-
-
 class BridgeConfig(BaseModel):
     """Top level configuration.
 
     Attributes:
         bridge (BridgeSettings): General bridge settings.
         hpo (HpoSettings): HPO backend settings.
-        data_assimilation (DataAssimilationConfig | None): Data assimilation settings.
     """
 
     model_config = ConfigDict(extra="forbid")
 
     bridge: BridgeSettings
     hpo: HpoSettings
-    data_assimilation: DataAssimilationConfig | None = None
-
-
-# --- Internal Data Structures (Pydantic Models) ---
-
-
-class TrialResult(BaseModel):
-    """Captured Optuna trial output."""
-
-    model_config = ConfigDict(frozen=True)
-    params: dict[str, float]
-    objective: float
-
-
-class RegressionSample(BaseModel):
-    """Sample collected for regression training."""
-
-    model_config = ConfigDict(frozen=True)
-    features: dict[str, float]
-    target: dict[str, float]
-
-
-class ScenarioSummary(BaseModel):
-    """Final aggregated metrics."""
-
-    model_config = ConfigDict(frozen=True)
-    train_pairs: int
-    eval_pairs: int
-    train_macro_best: list[dict[str, float]]
-    train_micro_best: list[dict[str, float]]
-    eval_macro_best: list[dict[str, float]]
-    eval_micro_best: list[dict[str, float]]
-    train_metrics: dict[str, float]
-    eval_metrics: dict[str, float]
 
 
 def load_bridge_config(payload: Mapping[str, Any], overrides: Mapping[str, Any] | None = None) -> BridgeConfig:
@@ -339,12 +256,9 @@ def load_bridge_config(payload: Mapping[str, Any], overrides: Mapping[str, Any] 
         payload = _deep_merge(dict(payload), overrides)
 
     try:
-        config = BridgeConfig.model_validate(payload)
+        return BridgeConfig.model_validate(payload)
     except ValidationError as exc:
         raise ValueError(f"Invalid bridge configuration: {exc}") from exc
-    if config.data_assimilation and config.data_assimilation.output_root is None:
-        config.data_assimilation.output_root = config.bridge.output_dir / "data_assimilation"
-    return config
 
 
 def generate_schema() -> dict[str, Any]:
