@@ -4,3 +4,6 @@ D:
   _inherit_: ${E}
 E:
   EE: ee
+
+Replace :
+  Dummy: dummy

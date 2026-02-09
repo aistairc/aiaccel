@@ -172,7 +172,8 @@ def load_config(
     if parent_config is None:
         parent_config = {}
 
-    config = oc.merge(oc.load(config_filename), parent_config)
+    raw_config = oc.load(config_filename)
+    config = oc.merge(raw_config, parent_config)
 
     if isinstance(config, DictConfig) and "_base_" in config:
         # process _base_
@@ -187,7 +188,42 @@ def load_config(
 
             config = load_config(base_path, config)
 
+    config = replace_config(raw_config, config)
+
     return config
+
+
+def replace_config(
+    raw_config: DictConfig | ListConfig, merged_config: DictConfig | ListConfig
+) -> DictConfig | ListConfig:
+    """
+    Replace parts of a merged OmegaConf configuration based on "_replace_" attribute in a raw configuration.
+
+    Args:
+        raw_config (DictConfig | ListConfig):
+            Configuration containing "_replace_" attribute.
+        merged_config (DictConfig | ListConfig):
+            Target configuration to be partially replaced.
+
+    Returns:
+        DictConfig | ListConfig:
+            The updated configuration with replacements applied.
+    """
+    if isinstance(raw_config, DictConfig) and isinstance(merged_config, DictConfig):
+        # process _replace
+        if "_replace_" in raw_config and raw_config["_replace_"]:
+            merged_config = raw_config
+            merged_config.pop("_replace_")
+        # check child DictConfig
+        for key in raw_config:
+            if (
+                isinstance(node_dict := raw_config._get_node(key), Node)
+                and not node_dict._is_interpolation()
+                and isinstance(raw_config[key], DictConfig)
+            ):
+                merged_config[key] = replace_config(raw_config[key], merged_config[key])
+
+    return merged_config
 
 
 def print_config(
