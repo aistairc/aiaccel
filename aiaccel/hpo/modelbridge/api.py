@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TypeVar
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from functools import partial
 from pathlib import Path
 
 from omegaconf import OmegaConf
@@ -14,7 +15,7 @@ from aiaccel.config import resolve_inherit, setup_omegaconf
 
 from .analyze import evaluate_model, fit_regression
 from .collect import collect_eval, collect_train
-from .config import BridgeConfig, load_bridge_config
+from .config import BridgeConfig, ExecutionTarget, load_bridge_config
 from .execution import CommandFormat, emit_commands
 from .layout import Role
 from .pipeline import PipelineProfile, run_pipeline
@@ -22,6 +23,8 @@ from .prepare import prepare_eval, prepare_train
 from .publish import publish_summary
 from .toolkit.logging import setup_logging
 from .toolkit.results import PipelineResult, StepResult
+
+_ResultT = TypeVar("_ResultT")
 
 
 def load_config(path: Path, overrides: Mapping[str, Any] | None = None) -> BridgeConfig:
@@ -77,20 +80,19 @@ def run(
     Returns:
         PipelineResult: Aggregated pipeline execution result.
     """
-    if enable_logging:
-        setup_logging(
-            config.bridge.log_level,
-            config.bridge.output_dir,
-            json_logs=config.bridge.json_log,
-        )
-    return run_pipeline(
+    return _run_with_optional_logging(
         config,
-        steps=steps,
-        profile=profile,
-        train_db_paths=train_db_paths,
-        eval_db_paths=eval_db_paths,
-        train_db_pairs=train_db_pairs,
-        eval_db_pairs=eval_db_pairs,
+        enable_logging=enable_logging,
+        action=partial(
+            run_pipeline,
+            config,
+            steps=steps,
+            profile=profile,
+            train_db_paths=train_db_paths,
+            eval_db_paths=eval_db_paths,
+            train_db_pairs=train_db_pairs,
+            eval_db_pairs=eval_db_pairs,
+        ),
     )
 
 
@@ -104,9 +106,11 @@ def prepare_train_step(config: BridgeConfig, *, enable_logging: bool = True) -> 
     Returns:
         StepResult: Step execution result.
     """
-    if enable_logging:
-        setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
-    return prepare_train(config)
+    return _run_with_optional_logging(
+        config,
+        enable_logging=enable_logging,
+        action=partial(prepare_train, config),
+    )
 
 
 def prepare_eval_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
@@ -119,9 +123,11 @@ def prepare_eval_step(config: BridgeConfig, *, enable_logging: bool = True) -> S
     Returns:
         StepResult: Step execution result.
     """
-    if enable_logging:
-        setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
-    return prepare_eval(config)
+    return _run_with_optional_logging(
+        config,
+        enable_logging=enable_logging,
+        action=partial(prepare_eval, config),
+    )
 
 
 def collect_train_step(
@@ -142,9 +148,11 @@ def collect_train_step(
     Returns:
         StepResult: Step execution result.
     """
-    if enable_logging:
-        setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
-    return collect_train(config, db_paths=db_paths, db_pairs=db_pairs)
+    return _run_with_optional_logging(
+        config,
+        enable_logging=enable_logging,
+        action=partial(collect_train, config, db_paths=db_paths, db_pairs=db_pairs),
+    )
 
 
 def collect_eval_step(
@@ -165,9 +173,11 @@ def collect_eval_step(
     Returns:
         StepResult: Step execution result.
     """
-    if enable_logging:
-        setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
-    return collect_eval(config, db_paths=db_paths, db_pairs=db_pairs)
+    return _run_with_optional_logging(
+        config,
+        enable_logging=enable_logging,
+        action=partial(collect_eval, config, db_paths=db_paths, db_pairs=db_pairs),
+    )
 
 
 def fit_regression_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
@@ -180,9 +190,11 @@ def fit_regression_step(config: BridgeConfig, *, enable_logging: bool = True) ->
     Returns:
         StepResult: Step execution result.
     """
-    if enable_logging:
-        setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
-    return fit_regression(config)
+    return _run_with_optional_logging(
+        config,
+        enable_logging=enable_logging,
+        action=partial(fit_regression, config),
+    )
 
 
 def evaluate_model_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
@@ -195,9 +207,11 @@ def evaluate_model_step(config: BridgeConfig, *, enable_logging: bool = True) ->
     Returns:
         StepResult: Step execution result.
     """
-    if enable_logging:
-        setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
-    return evaluate_model(config)
+    return _run_with_optional_logging(
+        config,
+        enable_logging=enable_logging,
+        action=partial(evaluate_model, config),
+    )
 
 
 def publish_summary_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
@@ -210,9 +224,11 @@ def publish_summary_step(config: BridgeConfig, *, enable_logging: bool = True) -
     Returns:
         StepResult: Step execution result.
     """
-    if enable_logging:
-        setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
-    return publish_summary(config)
+    return _run_with_optional_logging(
+        config,
+        enable_logging=enable_logging,
+        action=partial(publish_summary, config),
+    )
 
 
 def emit_commands_step(
@@ -220,6 +236,7 @@ def emit_commands_step(
     *,
     role: Role,
     fmt: CommandFormat,
+    execution_target: ExecutionTarget | None = None,
     enable_logging: bool = True,
 ) -> Path:
     """Run the `emit_commands` step directly.
@@ -228,11 +245,32 @@ def emit_commands_step(
         config: Parsed modelbridge configuration.
         role: Target role (`train` or `eval`).
         fmt: Output command format (`shell` or `json`).
+        execution_target: Optional execution target override (`local` or `abci`).
         enable_logging: Whether to configure logging before running.
 
     Returns:
         Path: Path to emitted command artifact.
     """
+    return _run_with_optional_logging(
+        config,
+        enable_logging=enable_logging,
+        action=partial(
+            emit_commands,
+            config,
+            role=role,
+            fmt=fmt,
+            execution_target=execution_target,
+        ),
+    )
+
+
+def _run_with_optional_logging(
+    config: BridgeConfig,
+    *,
+    enable_logging: bool,
+    action: Callable[[], _ResultT],
+) -> _ResultT:
+    """Run one action with optional modelbridge logging setup."""
     if enable_logging:
         setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
-    return emit_commands(config, role=role, fmt=fmt)
+    return action()

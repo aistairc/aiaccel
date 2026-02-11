@@ -11,11 +11,11 @@ from pathlib import Path
 from omegaconf import DictConfig, OmegaConf
 
 from .config import BridgeConfig, HpoSettings, ParameterBounds, ScenarioConfig
-from .layout import Role, Target, plan_path, run_dir, scenario_dir
+from .execution import emit_commands
+from .layout import Role, Target, eval_run_dir, plan_path, scenario_dir, train_run_dir
 from .toolkit.io import write_json
 from .toolkit.results import StepResult, StepStatus, write_step_state
-
-RUN_ID_OFFSET_STRIDE = 100000
+from .toolkit.seeding import resolve_seed
 
 
 def prepare_train(config: BridgeConfig) -> StepResult:
@@ -50,6 +50,7 @@ def _prepare_role(config: BridgeConfig, role: Role) -> StepResult:
     runs = config.bridge.train_runs if role == "train" else config.bridge.eval_runs
     entries: list[dict[str, Any]] = []
     config_paths: list[str] = []
+    emitted_command_path: str | None = None
 
     for scenario in config.bridge.scenarios:
         scenario_path = scenario_dir(output_dir, scenario.name)
@@ -61,7 +62,7 @@ def _prepare_role(config: BridgeConfig, role: Role) -> StepResult:
                 scenario_path=scenario_path,
                 role=role,
                 runs=runs,
-                seed_base=config.bridge.seed,
+                config=config,
                 config_paths=config_paths,
             )
         )
@@ -76,6 +77,14 @@ def _prepare_role(config: BridgeConfig, role: Role) -> StepResult:
     if entries:
         status: StepStatus = "success"
         reason = None
+        if config.bridge.execution.emit_on_prepare:
+            emitted = emit_commands(
+                config,
+                role=role,
+                fmt="shell",
+                execution_target=config.bridge.execution.target,
+            )
+            emitted_command_path = str(emitted)
     else:
         status = "skipped"
         reason = f"No {role} runs configured."
@@ -83,11 +92,12 @@ def _prepare_role(config: BridgeConfig, role: Role) -> StepResult:
     result = StepResult(
         step=f"prepare_{role}",
         status=status,
-        inputs={"role": role, "runs": runs},
+        inputs={"role": role, "runs": runs, "execution_target": config.bridge.execution.target},
         outputs={
             "plan_path": str(plan_file),
             "num_entries": len(entries),
             "config_paths": config_paths,
+            "command_path": emitted_command_path,
         },
         reason=reason,
     )
@@ -101,7 +111,7 @@ def _prepare_scenario_role(
     scenario_path: Path,
     role: Role,
     runs: int,
-    seed_base: int,
+    config: BridgeConfig,
     config_paths: list[str],
 ) -> list[dict[str, Any]]:
     """Prepare all run/target entries for a scenario and role."""
@@ -113,24 +123,44 @@ def _prepare_scenario_role(
 
     for run_idx in range(runs):
         for target in targets:
-            current_dir = run_dir(scenario_path, role, run_idx, target)
+            current_dir = (
+                train_run_dir(scenario_path, run_idx, target)
+                if role == "train"
+                else eval_run_dir(scenario_path, run_idx, target)
+            )
             current_dir.mkdir(parents=True, exist_ok=True)
 
             trials = _select_trials(scenario, role, target)
             command = _select_objective_command(scenario, role)
             params = _select_param_space(scenario, role, target)
             overrides = settings.macro_overrides if target == "macro" else settings.micro_overrides
-            seed = _compute_seed(seed_base, role, target, run_idx)
+            sampler_seed = resolve_seed(
+                config.bridge.seed_policy.sampler,
+                role=role,
+                target=target,
+                run_id=run_idx,
+                fallback_base=config.bridge.seed,
+            )
+            optimizer_seed = resolve_seed(
+                config.bridge.seed_policy.optimizer,
+                role=role,
+                target=target,
+                run_id=run_idx,
+                fallback_base=config.bridge.seed,
+            )
+            seed_mode = _resolve_seed_mode(config)
             study_name = f"{scenario.name}-{role}-{target}-{run_idx:03d}"
 
             config_file = _generate_hpo_config(
                 settings=settings,
                 space=params,
                 trials=trials,
-                seed=seed,
+                sampler_seed=sampler_seed,
+                optimizer_seed=optimizer_seed,
                 output_dir=current_dir,
                 study_name=study_name,
                 command=command,
+                execution_target=config.bridge.execution.target,
                 overrides=overrides,
             )
             config_paths.append(str(config_file))
@@ -144,7 +174,13 @@ def _prepare_scenario_role(
                     "config_path": str(config_file),
                     "expected_db_path": str(current_dir / "optuna.db"),
                     "study_name": study_name,
-                    "seed": seed,
+                    "seed": sampler_seed,
+                    "sampler_seed": sampler_seed,
+                    "optimizer_seed": optimizer_seed,
+                    "seed_mode": seed_mode,
+                    "sampler_seed_mode": config.bridge.seed_policy.sampler.mode,
+                    "optimizer_seed_mode": config.bridge.seed_policy.optimizer.mode,
+                    "execution_target": config.bridge.execution.target,
                     "objective_command": list(command),
                 }
             )
@@ -152,14 +188,14 @@ def _prepare_scenario_role(
     return entries
 
 
-def _compute_seed(seed_base: int, role: Role, target: Target, run_idx: int) -> int:
-    """Compute deterministic seed offset by role, target, and run index."""
-    group_idx = 0
-    if role == "eval":
-        group_idx += 2
-    if target == "micro":
-        group_idx += 1
-    return seed_base + group_idx * RUN_ID_OFFSET_STRIDE + run_idx
+def _resolve_seed_mode(config: BridgeConfig) -> str:
+    """Resolve summary seed mode from sampler/optimizer policies."""
+    if (
+        config.bridge.seed_policy.sampler.mode == "user_defined"
+        or config.bridge.seed_policy.optimizer.mode == "user_defined"
+    ):
+        return "user_defined"
+    return "auto_increment"
 
 
 def _select_trials(scenario: ScenarioConfig, role: Role, target: Target) -> int:
@@ -186,11 +222,13 @@ def _generate_hpo_config(
     settings: HpoSettings,
     space: dict[str, ParameterBounds],
     trials: int,
-    seed: int,
+    sampler_seed: int,
+    optimizer_seed: int,
     output_dir: Path,
     *,
     study_name: str,
     command: Sequence[str],
+    execution_target: str,
     overrides: dict[str, Any] | None = None,
 ) -> Path:
     """Generate one `aiaccel-hpo optimize` config file from the base config.
@@ -199,10 +237,12 @@ def _generate_hpo_config(
         settings: HPO setting block including base config path and overrides.
         space: Parameter space for the target.
         trials: Number of trials to run.
-        seed: Sampler seed.
+        sampler_seed: Sampler seed.
+        optimizer_seed: Optimizer seed.
         output_dir: Working directory for one run/target.
         study_name: Study name used in Optuna storage.
         command: Objective command template.
+        execution_target: Execution target (`local` or `abci`).
         overrides: Optional role/target specific OmegaConf overrides.
 
     Returns:
@@ -214,10 +254,13 @@ def _generate_hpo_config(
     base_conf = cast(DictConfig, OmegaConf.load(settings.base_config))
     if overrides:
         base_conf = cast(DictConfig, OmegaConf.merge(base_conf, OmegaConf.create(overrides)))
+    if execution_target == "abci" and settings.abci_overrides:
+        base_conf = cast(DictConfig, OmegaConf.merge(base_conf, OmegaConf.create(settings.abci_overrides)))
 
     OmegaConf.update(base_conf, "n_trials", trials)
     OmegaConf.update(base_conf, "working_directory", str(output_dir))
     OmegaConf.update(base_conf, "command", list(command))
+    OmegaConf.update(base_conf, "optimize.rand_seed", optimizer_seed, merge=True)
 
     optimize_conf = base_conf.get("optimize", {})
     goal = optimize_conf.get("goal", "minimize")
@@ -245,7 +288,7 @@ def _generate_hpo_config(
             "load_if_exists": True,
             "sampler": {
                 "_target_": "optuna.samplers.TPESampler",
-                "seed": seed,
+                "seed": sampler_seed,
             },
         },
     )

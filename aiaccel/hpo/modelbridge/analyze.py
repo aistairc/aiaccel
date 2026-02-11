@@ -8,9 +8,9 @@ from pathlib import Path
 
 from .config import BridgeConfig
 from .layout import metrics_dir, models_dir, scenario_dir
-from .modeling import _evaluate_metrics, _evaluate_metrics_from_preds, _fit_regression, _predict_regression
+from .modeling import _evaluate_metrics, _evaluate_metrics_from_preds, get_regressor_adapter
 from .toolkit.io import read_csv, read_json, write_csv, write_json
-from .toolkit.results import StepResult, StepStatus, write_step_state
+from .toolkit.results import StepResult, finalize_scenario_step
 
 
 def fit_regression(config: BridgeConfig) -> StepResult:
@@ -45,7 +45,8 @@ def fit_regression(config: BridgeConfig) -> StepResult:
 
         features = [item[1] for item in parsed]
         targets = [item[2] for item in parsed]
-        model = _fit_regression(features, targets, scenario.regression)
+        adapter = get_regressor_adapter(scenario.regression.kind)
+        model = adapter.fit(features, targets, scenario.regression)
         metrics = _evaluate_metrics(model, features, targets, list(scenario.metrics))
 
         model_file = write_json(models_dir(scenario_path) / "regression_model.json", model)
@@ -56,10 +57,11 @@ def fit_regression(config: BridgeConfig) -> StepResult:
             "metrics_path": str(metrics_file),
         }
 
-    return _finalize_analyze_step(
-        config=config,
-        step_name="fit_regression",
-        outputs={"scenarios": scenario_outputs},
+    return finalize_scenario_step(
+        output_dir=output_dir,
+        step="fit_regression",
+        strict_mode=config.bridge.strict_mode,
+        scenario_outputs=scenario_outputs,
         issues=issues,
     )
 
@@ -102,7 +104,8 @@ def evaluate_model(config: BridgeConfig) -> StepResult:
         model = read_json(model_path)
         features = [item[1] for item in pairs]
         targets = [item[2] for item in pairs]
-        predictions = _predict_regression(model, features)
+        adapter = get_regressor_adapter(scenario.regression.kind)
+        predictions = adapter.predict(model, features)
         metrics = _evaluate_metrics_from_preds(targets, predictions, list(scenario.metrics))
 
         metrics_file = write_json(metrics_dir(scenario_path) / "eval_metrics.json", metrics)
@@ -121,49 +124,13 @@ def evaluate_model(config: BridgeConfig) -> StepResult:
             "predictions_path": str(predictions_file),
         }
 
-    return _finalize_analyze_step(
-        config=config,
-        step_name="evaluate_model",
-        outputs={"scenarios": scenario_outputs},
+    return finalize_scenario_step(
+        output_dir=output_dir,
+        step="evaluate_model",
+        strict_mode=config.bridge.strict_mode,
+        scenario_outputs=scenario_outputs,
         issues=issues,
     )
-
-
-def _finalize_analyze_step(
-    *,
-    config: BridgeConfig,
-    step_name: str,
-    outputs: dict[str, Any],
-    issues: list[str],
-) -> StepResult:
-    """Finalize status and persist state for analyze-related steps."""
-    output_dir = config.bridge.output_dir
-    success_count = sum(
-        1 for scenario_output in outputs["scenarios"].values() if scenario_output.get("status") == "success"
-    )
-    total = len(config.bridge.scenarios)
-
-    if issues and config.bridge.strict_mode:
-        failure_reason = "; ".join(issues)
-        result = StepResult(step=step_name, status="failed", outputs=outputs, reason=failure_reason)
-        write_step_state(output_dir, result)
-        raise RuntimeError(failure_reason)
-
-    status: StepStatus
-    reason: str | None
-    if success_count == total:
-        status = "success"
-        reason = None
-    elif success_count == 0:
-        status = "skipped"
-        reason = "; ".join(issues) if issues else f"{step_name} skipped"
-    else:
-        status = "partial"
-        reason = "; ".join(issues)
-
-    result = StepResult(step=step_name, status=status, outputs=outputs, reason=reason)
-    write_step_state(output_dir, result)
-    return result
 
 
 def _parse_pairs_csv(path: Path) -> list[tuple[int, dict[str, float], dict[str, float]]]:

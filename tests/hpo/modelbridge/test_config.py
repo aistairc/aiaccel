@@ -69,3 +69,55 @@ def test_load_bridge_config_regression_aliases(make_bridge_config: Callable[[str
     regression = config.bridge.scenarios[0].regression
     assert regression.kind == "gpr"
     assert regression.noise == pytest.approx(9.9e-5)
+
+
+def test_load_bridge_config_seed_policy_user_defined(make_bridge_config: Callable[[str], dict[str, Any]]) -> None:
+    data = make_bridge_config("./work/tmp")
+    data["bridge"]["train_runs"] = 2
+    data["bridge"]["eval_runs"] = 1
+    data["bridge"]["seed_policy"] = {
+        "sampler": {
+            "mode": "user_defined",
+            "user_values": {
+                "train_macro": [101, 102],
+                "train_micro": [201, 202],
+                "eval_macro": [301],
+                "eval_micro": [401],
+            },
+        },
+        "optimizer": {
+            "mode": "auto_increment",
+            "base": 9000,
+        },
+    }
+    config = load_bridge_config(data)
+    assert config.bridge.seed_policy.sampler.mode == "user_defined"
+    assert config.bridge.seed_policy.optimizer.base == 9000
+
+
+def test_load_bridge_config_seed_policy_length_error(make_bridge_config: Callable[[str], dict[str, Any]]) -> None:
+    data = make_bridge_config("./work/tmp")
+    data["bridge"]["train_runs"] = 2
+    data["bridge"]["eval_runs"] = 1
+    data["bridge"]["seed_policy"] = {
+        "sampler": {
+            "mode": "user_defined",
+            "user_values": {
+                "train_macro": [101],
+                "train_micro": [201, 202],
+                "eval_macro": [301],
+                "eval_micro": [401],
+            },
+        },
+    }
+    with pytest.raises(ValueError):
+        load_bridge_config(data)
+
+
+def test_load_bridge_config_execution_defaults(make_bridge_config: Callable[[str], dict[str, Any]]) -> None:
+    data = make_bridge_config("./work/tmp")
+    data["bridge"]["execution"] = {"target": "abci"}
+    config = load_bridge_config(data)
+    assert config.bridge.execution.target == "abci"
+    assert config.bridge.execution.job_profile == "sge"
+    assert config.bridge.execution.emit_on_prepare is False

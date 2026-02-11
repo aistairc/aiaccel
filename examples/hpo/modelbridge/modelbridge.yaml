@@ -6,10 +6,19 @@
 
 hpo:
   base_config: examples/hpo/modelbridge/optimize_config.yaml
+  abci_overrides: {}
 
 bridge:
   output_dir: ./work/modelbridge/simple
   seed: 32
+  seed_policy:
+    sampler:
+      mode: auto_increment
+    optimizer:
+      mode: auto_increment
+  execution:
+    target: local
+    emit_on_prepare: false
   train_runs: 10
   eval_runs: 10
   log_level: INFO

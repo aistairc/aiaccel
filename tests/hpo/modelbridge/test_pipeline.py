@@ -48,6 +48,20 @@ def test_run_pipeline_steps_and_profile_are_exclusive(
         run_pipeline(config, steps=["prepare_train"], profile="prepare")
 
 
+def test_run_pipeline_full_requires_external_outputs(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    config = _load_config(tmp_path, make_bridge_config)
+    with pytest.raises(RuntimeError, match="Full profile requires external HPO outputs"):
+        run_pipeline(config, profile="full")
+
+    # prepare profile portion must have run before readiness validation fails.
+    assert (config.bridge.output_dir / "workspace" / "state" / "prepare_train.json").exists()
+    assert (config.bridge.output_dir / "workspace" / "state" / "prepare_eval.json").exists()
+    assert not (config.bridge.output_dir / "workspace" / "state" / "collect_train.json").exists()
+
+
 def test_run_pipeline_does_not_call_subprocess(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],
@@ -85,10 +99,89 @@ def test_prepare_generates_configs_and_plan_entries(
         "config_path",
         "expected_db_path",
         "study_name",
+        "sampler_seed",
+        "optimizer_seed",
+        "seed_mode",
+        "execution_target",
         "seed",
         "objective_command",
     }.issubset(entry.keys())
     assert Path(entry["config_path"]).exists()
+    assert isinstance(entry["sampler_seed"], int)
+    assert isinstance(entry["optimizer_seed"], int)
+
+
+def test_prepare_profile_uses_user_defined_seed_values_end_to_end(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    payload = _config_payload(tmp_path, make_bridge_config)
+    payload["bridge"]["train_runs"] = 2
+    payload["bridge"]["eval_runs"] = 1
+    payload["bridge"]["seed_policy"] = {
+        "sampler": {
+            "mode": "user_defined",
+            "user_values": {
+                "train_macro": [101, 102],
+                "train_micro": [201, 202],
+                "eval_macro": [301],
+                "eval_micro": [401],
+            },
+        },
+        "optimizer": {
+            "mode": "user_defined",
+            "user_values": {
+                "train_macro": [1001, 1002],
+                "train_micro": [2001, 2002],
+                "eval_macro": [3001],
+                "eval_micro": [4001],
+            },
+        },
+    }
+    config = load_bridge_config(payload)
+
+    run_pipeline(config, profile="prepare")
+    train_entries = read_json(config.bridge.output_dir / "workspace" / "train_plan.json")["entries"]
+    eval_entries = read_json(config.bridge.output_dir / "workspace" / "eval_plan.json")["entries"]
+
+    expected_train = {
+        (0, "macro"): (101, 1001),
+        (0, "micro"): (201, 2001),
+        (1, "macro"): (102, 1002),
+        (1, "micro"): (202, 2002),
+    }
+    expected_eval = {
+        (0, "macro"): (301, 3001),
+        (0, "micro"): (401, 4001),
+    }
+
+    observed_train = {
+        (item["run_id"], item["target"]): (item["sampler_seed"], item["optimizer_seed"]) for item in train_entries
+    }
+    observed_eval = {
+        (item["run_id"], item["target"]): (item["sampler_seed"], item["optimizer_seed"]) for item in eval_entries
+    }
+
+    assert observed_train == expected_train
+    assert observed_eval == expected_eval
+    assert all(item["seed_mode"] == "user_defined" for item in train_entries)
+    assert all(item["seed_mode"] == "user_defined" for item in eval_entries)
+
+
+def test_prepare_emits_commands_when_configured(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    payload = _config_payload(tmp_path, make_bridge_config)
+    payload["bridge"]["execution"] = {"emit_on_prepare": True, "target": "local"}
+    config = load_bridge_config(payload)
+
+    result = prepare_train(config)
+
+    assert result.status == "success"
+    command_path = config.bridge.output_dir / "workspace" / "commands" / "train.sh"
+    assert command_path.exists()
+    assert "aiaccel-hpo optimize --config" in command_path.read_text(encoding="utf-8")
 
 
 def test_collect_manifest_first(

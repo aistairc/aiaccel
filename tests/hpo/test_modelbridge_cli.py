@@ -118,6 +118,99 @@ def test_modelbridge_cli_emit_commands(
     assert str(command_file) in capsys.readouterr().out
 
 
+def test_modelbridge_cli_emit_commands_with_execution_target(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    config_path = _write_config(tmp_path, make_bridge_config)
+    command_file = tmp_path / "outputs" / "workspace" / "commands" / "train.sh"
+
+    with patch("aiaccel.hpo.apps.modelbridge.api.emit_commands_step", return_value=command_file) as mock_emit:
+        cli_main(
+            [
+                "emit-commands",
+                "--config",
+                str(config_path),
+                "--role",
+                "train",
+                "--format",
+                "shell",
+                "--execution-target",
+                "abci",
+            ]
+        )
+
+        assert mock_emit.call_args.kwargs["execution_target"] == "abci"
+    assert str(command_file) in capsys.readouterr().out
+
+
+def test_modelbridge_cli_run_prepare_emit_options(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    config_path = _write_config(tmp_path, make_bridge_config)
+
+    with patch("aiaccel.hpo.apps.modelbridge.api.run") as mock_run:
+        cli_main(
+            [
+                "run",
+                "--config",
+                str(config_path),
+                "--profile",
+                "prepare",
+                "--prepare-emit-commands",
+                "--prepare-execution-target",
+                "abci",
+            ]
+        )
+
+        bridge_config = mock_run.call_args[0][0]
+        assert bridge_config.bridge.execution.emit_on_prepare is True
+        assert bridge_config.bridge.execution.target == "abci"
+
+
+def test_modelbridge_cli_prepare_train_emit_options(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    config_path = _write_config(tmp_path, make_bridge_config)
+
+    with patch("aiaccel.hpo.apps.modelbridge.api.run") as mock_run:
+        cli_main(
+            [
+                "prepare-train",
+                "--config",
+                str(config_path),
+                "--emit-commands",
+                "--execution-target",
+                "abci",
+            ]
+        )
+
+        bridge_config = mock_run.call_args[0][0]
+        assert bridge_config.bridge.execution.emit_on_prepare is True
+        assert bridge_config.bridge.execution.target == "abci"
+
+
+def test_modelbridge_cli_prepare_emit_flags_require_prepare_profile(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    config_path = _write_config(tmp_path, make_bridge_config)
+    with pytest.raises(SystemExit):
+        cli_main(
+            [
+                "run",
+                "--config",
+                str(config_path),
+                "--profile",
+                "analyze",
+                "--prepare-emit-commands",
+            ]
+        )
+
+
 def test_api_cli_equivalence_prepare(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],

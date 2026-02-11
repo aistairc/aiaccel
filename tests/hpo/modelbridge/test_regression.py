@@ -1,3 +1,5 @@
+from numpy.typing import NDArray
+
 import numpy as np
 
 import pytest
@@ -133,8 +135,8 @@ def test_gpr_regression_kernel_and_noise_propagated(monkeypatch: pytest.MonkeyPa
     class _DummyModels:
         @staticmethod
         def gp_regression(
-            x_data: np.ndarray,
-            y_col: np.ndarray,
+            x_data: NDArray[np.float64],
+            y_col: NDArray[np.float64],
             kernel: _DummyKernel,
             **kwargs: float,
         ) -> _DummyModel:
@@ -150,7 +152,7 @@ def test_gpr_regression_kernel_and_noise_propagated(monkeypatch: pytest.MonkeyPa
         models = _DummyModels
 
     monkeypatch.setattr(modeling, "GPy", _DummyGPy)
-    monkeypatch.setattr(modeling.pickle, "dumps", lambda _models: b"dummy")
+    monkeypatch.setattr("aiaccel.hpo.modelbridge.modeling.pickle.dumps", lambda _models: b"dummy")
 
     model = _fit_regression(
         features,
@@ -160,4 +162,7 @@ def test_gpr_regression_kernel_and_noise_propagated(monkeypatch: pytest.MonkeyPa
 
     assert model["kernel"] == "MATERN52"
     assert model["noise"] == pytest.approx(2.5e-4)
-    assert calls == [("MATERN52", pytest.approx(2.5e-4))]
+    assert len(calls) == 1
+    kernel_name, noise_value = calls[0]
+    assert kernel_name == "MATERN52"
+    assert noise_value == pytest.approx(2.5e-4)

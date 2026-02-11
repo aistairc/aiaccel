@@ -12,7 +12,7 @@ from .layout import Role, plan_path, scenario_dir
 from .storage import load_pairs_from_db_pairs, scan_db_paths_for_pairs, scan_runs_for_pairs
 from .toolkit.io import read_json, write_csv
 from .toolkit.logging import get_logger
-from .toolkit.results import StepResult, StepStatus, write_step_state
+from .toolkit.results import StepResult, finalize_scenario_step
 
 _logger = get_logger(__name__)
 
@@ -103,40 +103,14 @@ def _collect_role(
         }
         issues.append(f"{scenario.name}:{role} has no valid macro/micro pairs")
 
-    success_count = sum(1 for value in scenario_outputs.values() if value["status"] == "success")
-    if issues and config.bridge.strict_mode:
-        failure_reason = "; ".join(issues)
-        result = StepResult(
-            step=f"collect_{role}",
-            status="failed",
-            inputs=_collect_inputs(role, db_paths, db_pairs),
-            outputs={"scenarios": scenario_outputs},
-            reason=failure_reason,
-        )
-        write_step_state(output_dir, result)
-        raise RuntimeError(failure_reason)
-
-    status: StepStatus
-    reason: str | None
-    if success_count == len(config.bridge.scenarios):
-        status = "success"
-        reason = None
-    elif success_count == 0:
-        status = "skipped"
-        reason = "; ".join(issues) if issues else f"No {role} pairs collected."
-    else:
-        status = "partial"
-        reason = "; ".join(issues)
-
-    result = StepResult(
+    return finalize_scenario_step(
+        output_dir=output_dir,
         step=f"collect_{role}",
-        status=status,
+        strict_mode=config.bridge.strict_mode,
+        scenario_outputs=scenario_outputs,
+        issues=issues,
         inputs=_collect_inputs(role, db_paths, db_pairs),
-        outputs={"scenarios": scenario_outputs},
-        reason=reason,
     )
-    write_step_state(output_dir, result)
-    return result
 
 
 def _collect_inputs(

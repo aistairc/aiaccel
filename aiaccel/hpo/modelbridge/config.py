@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -81,6 +81,108 @@ class ObjectiveConfig(BaseModel):
         if not isinstance(command, list):
             raise ValueError("command must be a list or string")
         return [str(item) for item in command]
+
+
+SeedMode = Literal["auto_increment", "user_defined"]
+ExecutionTarget = Literal["local", "abci"]
+JobMode = Literal["cpu", "gpu", "mpi", "train"]
+
+
+class SeedUserValues(BaseModel):
+    """User-defined seeds grouped by role/target.
+
+    Attributes:
+        train_macro (list[int]): Seeds for train/macro by run index.
+        train_micro (list[int]): Seeds for train/micro by run index.
+        eval_macro (list[int]): Seeds for eval/macro by run index.
+        eval_micro (list[int]): Seeds for eval/micro by run index.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    train_macro: list[int] = Field(default_factory=list)
+    train_micro: list[int] = Field(default_factory=list)
+    eval_macro: list[int] = Field(default_factory=list)
+    eval_micro: list[int] = Field(default_factory=list)
+
+
+class SeedPolicyConfig(BaseModel):
+    """Seed selection policy for one seed stream.
+
+    Attributes:
+        mode (SeedMode): Seed mode (`auto_increment` or `user_defined`).
+        base (int | None): Base value used by `auto_increment`.
+        user_values (SeedUserValues | None): User-provided values for `user_defined`.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    mode: SeedMode = "auto_increment"
+    base: int | None = None
+    user_values: SeedUserValues | None = None
+
+    @model_validator(mode="after")
+    def _validate_policy(self) -> SeedPolicyConfig:
+        if self.mode == "user_defined" and self.user_values is None:
+            raise ValueError("user_values must be provided when mode=user_defined")
+        return self
+
+
+class SeedPolicySet(BaseModel):
+    """Seed policy set for sampler and optimizer seeds.
+
+    Attributes:
+        sampler (SeedPolicyConfig): Policy for `study.sampler.seed`.
+        optimizer (SeedPolicyConfig): Policy for `optimize.rand_seed`.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    sampler: SeedPolicyConfig = Field(default_factory=SeedPolicyConfig)
+    optimizer: SeedPolicyConfig = Field(default_factory=SeedPolicyConfig)
+
+
+class ExecutionTargetConfig(BaseModel):
+    """Execution target settings for emitted optimize commands.
+
+    Attributes:
+        target (ExecutionTarget): Execution target (`local` or `abci`).
+        emit_on_prepare (bool): Emit commands during prepare steps.
+        job_profile (str | None): aiaccel-job profile (`local`, `sge`, etc.).
+        job_mode (JobMode): aiaccel-job mode (`cpu`, `gpu`, `mpi`, `train`).
+        job_walltime (str | None): Optional walltime passed to aiaccel-job.
+        job_log_dir (Path | None): Optional optimize log directory.
+        job_extra_args (list[str]): Additional aiaccel-job arguments.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    target: ExecutionTarget = "local"
+    emit_on_prepare: bool = False
+    job_profile: str | None = None
+    job_mode: JobMode = "cpu"
+    job_walltime: str | None = None
+    job_log_dir: Path | None = None
+    job_extra_args: list[str] = Field(default_factory=list)
+
+    @field_validator("job_extra_args", mode="before")
+    @classmethod
+    def _coerce_extra_args(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            import shlex
+
+            return shlex.split(value)
+        if isinstance(value, Sequence):
+            return [str(item) for item in value]
+        raise ValueError("job_extra_args must be a list or string")
+
+    @model_validator(mode="after")
+    def _normalize_defaults(self) -> ExecutionTargetConfig:
+        if self.job_profile is None:
+            self.job_profile = "sge" if self.target == "abci" else "local"
+        return self
 
 
 class RegressionConfig(BaseModel):
@@ -187,6 +289,7 @@ class HpoSettings(BaseModel):
     base_config: Path
     macro_overrides: dict[str, Any] = Field(default_factory=dict)
     micro_overrides: dict[str, Any] = Field(default_factory=dict)
+    abci_overrides: dict[str, Any] = Field(default_factory=dict)
 
 
 class BridgeSettings(BaseModel):
@@ -207,6 +310,8 @@ class BridgeSettings(BaseModel):
 
     output_dir: Path
     seed: int = 0
+    seed_policy: SeedPolicySet = Field(default_factory=SeedPolicySet)
+    execution: ExecutionTargetConfig = Field(default_factory=ExecutionTargetConfig)
     log_level: str = "INFO"
     json_log: bool = False
     train_runs: int = 1
@@ -220,6 +325,30 @@ class BridgeSettings(BaseModel):
         if value < 0:
             raise ValueError("run counts must be >= 0")
         return value
+
+    @model_validator(mode="after")
+    def _validate_seed_user_values_length(self) -> BridgeSettings:
+        expected_lengths = {
+            "train_macro": self.train_runs,
+            "train_micro": self.train_runs,
+            "eval_macro": self.eval_runs,
+            "eval_micro": self.eval_runs,
+        }
+        policies = {
+            "sampler": self.seed_policy.sampler,
+            "optimizer": self.seed_policy.optimizer,
+        }
+        for seed_name, policy in policies.items():
+            if policy.mode != "user_defined":
+                continue
+            if policy.user_values is None:
+                raise ValueError(f"{seed_name} seed policy requires user_values")
+            values = policy.user_values.model_dump()
+            for key, expected in expected_lengths.items():
+                actual = len(values[key])
+                if actual != expected:
+                    raise ValueError(f"{seed_name} seed user_values.{key} length must be {expected}, got {actual}")
+        return self
 
 
 class BridgeConfig(BaseModel):

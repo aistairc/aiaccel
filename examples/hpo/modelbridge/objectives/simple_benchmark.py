@@ -23,7 +23,13 @@ from aiaccel.hpo.modelbridge.toolkit.io import read_json
 
 def build_config(base_dir: Path) -> BridgeConfig:
     """Return a BridgeConfig matching the simple benchmark scenario."""
-    objective = ["python", "examples/hpo/modelbridge/simple_objective.py", "{out_filename}", "--x={x}", "--y={y}"]
+    objective = [
+        "python",
+        "examples/hpo/modelbridge/objectives/simple_objective.py",
+        "{out_filename}",
+        "--x={x}",
+        "--y={y}",
+    ]
     scenario = ScenarioConfig(
         name="simple",
         train_macro_trials=12,

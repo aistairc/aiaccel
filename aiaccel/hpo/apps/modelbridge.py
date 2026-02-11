@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import argparse
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 import json
 import os
 from pathlib import Path
@@ -43,6 +43,9 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     for command in STEP_COMMANDS:
         subparser = subparsers.add_parser(command, help=f"Execute {command}")
         _add_common_args(subparser, include_run_args=False)
+        if command in {"prepare-train", "prepare-eval"}:
+            subparser.add_argument("--emit-commands", action="store_true", help="Emit commands after prepare step")
+            subparser.add_argument("--execution-target", choices=["local", "abci"], help="Execution target")
         if command == "collect-train":
             subparser.add_argument("--train-db-path", action="append", default=[], help="Explicit train DB path")
         if command == "collect-eval":
@@ -52,6 +55,7 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     _add_common_args(emit_parser, include_run_args=False)
     emit_parser.add_argument("--role", choices=["train", "eval"], required=True, help="Target role")
     emit_parser.add_argument("--format", choices=["shell", "json"], required=True, help="Output format")
+    emit_parser.add_argument("--execution-target", choices=["local", "abci"], help="Execution target override")
 
     validate_parser = subparsers.add_parser("validate", help="Validate configuration")
     _add_common_args(validate_parser, include_run_args=False, include_logging=False)
@@ -84,6 +88,16 @@ def _add_common_args(
         options_group.add_argument("--profile", choices=["prepare", "analyze", "full"], help="Execution profile")
         options_group.add_argument("--train-db-path", action="append", default=[], help="Explicit train DB path")
         options_group.add_argument("--eval-db-path", action="append", default=[], help="Explicit eval DB path")
+        options_group.add_argument(
+            "--prepare-emit-commands",
+            action="store_true",
+            help="Emit commands during prepare profile execution",
+        )
+        options_group.add_argument(
+            "--prepare-execution-target",
+            choices=["local", "abci"],
+            help="Execution target for prepare profile command emission",
+        )
 
     options_group.add_argument(
         "--set",
@@ -96,17 +110,6 @@ def _add_common_args(
         options_group.add_argument("--json-log", action="store_true", help="Emit JSON logs")
         options_group.add_argument("--quiet", action="store_true", help="Disable console logs")
         options_group.add_argument("--no-log", action="store_true", help="Disable file logs")
-
-
-def _merge_overrides(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:
-    """Deep-merge two override mappings."""
-    merged: dict[str, object] = dict(base)
-    for key, value in override.items():
-        if isinstance(value, Mapping) and isinstance(merged.get(key), Mapping):
-            merged[key] = _merge_overrides(merged[key], value)  # type: ignore[arg-type]
-        else:
-            merged[key] = value
-    return merged
 
 
 def _parse_override_pairs(values: Sequence[str] | None) -> dict[str, object]:
@@ -155,7 +158,20 @@ def _ensure_bridge_overrides(overrides: dict[str, object]) -> dict[str, object]:
     return overrides["bridge"]  # type: ignore[return-value]
 
 
-def _apply_cli_overrides(args: argparse.Namespace, overrides: dict[str, object]) -> dict[str, object]:
+def _ensure_execution_overrides(overrides: dict[str, object]) -> dict[str, object]:
+    """Ensure bridge.execution override mapping exists and return it."""
+    bridge = _ensure_bridge_overrides(overrides)
+    if "execution" not in bridge or not isinstance(bridge["execution"], dict):
+        bridge["execution"] = {}
+    return bridge["execution"]  # type: ignore[return-value]
+
+
+def _apply_cli_overrides(
+    args: argparse.Namespace,
+    overrides: dict[str, object],
+    *,
+    command: str,
+) -> dict[str, object]:
     """Apply CLI options that map to configuration overrides."""
     if getattr(args, "output_dir", None):
         bridge = _ensure_bridge_overrides(overrides)
@@ -163,6 +179,23 @@ def _apply_cli_overrides(args: argparse.Namespace, overrides: dict[str, object])
     if getattr(args, "json_log", False):
         bridge = _ensure_bridge_overrides(overrides)
         bridge["json_log"] = True
+
+    if command == "run":
+        if getattr(args, "prepare_emit_commands", False):
+            execution = _ensure_execution_overrides(overrides)
+            execution["emit_on_prepare"] = True
+        if getattr(args, "prepare_execution_target", None):
+            execution = _ensure_execution_overrides(overrides)
+            execution["target"] = args.prepare_execution_target
+
+    if command in {"prepare-train", "prepare-eval"}:
+        if getattr(args, "emit_commands", False):
+            execution = _ensure_execution_overrides(overrides)
+            execution["emit_on_prepare"] = True
+        if getattr(args, "execution_target", None):
+            execution = _ensure_execution_overrides(overrides)
+            execution["target"] = args.execution_target
+
     return overrides
 
 
@@ -209,46 +242,69 @@ def _run_loaded_command(
         return
 
     if command == "run":
-        steps = _parse_steps(args.steps)
-        profile = args.profile
-        if steps is not None and profile is not None:
-            raise SystemExit("--steps and --profile are mutually exclusive")
-
-        api.run(
-            bridge_config,
-            steps=steps,
-            profile=profile,
-            train_db_paths=_parse_path_list(args.train_db_path),
-            eval_db_paths=_parse_path_list(args.eval_db_path),
-        )
+        _run_profile_command(args, bridge_config)
         logger.info("Modelbridge run completed.")
         return
 
     if command in STEP_COMMANDS:
-        step = STEP_COMMANDS[command]
-        train_paths: list[Path] | None = None
-        eval_paths: list[Path] | None = None
-        if command == "collect-train":
-            train_paths = _parse_path_list(getattr(args, "train_db_path", []))
-        if command == "collect-eval":
-            eval_paths = _parse_path_list(getattr(args, "eval_db_path", []))
-
-        api.run(
-            bridge_config,
-            steps=[step],
-            train_db_paths=train_paths,
-            eval_db_paths=eval_paths,
-        )
+        step = _run_step_command(args, command, bridge_config)
         logger.info("Step completed: %s", step)
         return
 
     if command == "emit-commands":
-        path = api.emit_commands_step(bridge_config, role=args.role, fmt=args.format)
+        path = _run_emit_commands_command(args, bridge_config)
         logger.info("Commands written: %s", path)
         print(path)
         return
 
     raise SystemExit(f"Unsupported command: {command}")
+
+
+def _run_profile_command(args: argparse.Namespace, bridge_config: BridgeConfig) -> None:
+    """Run `modelbridge run` command."""
+    steps = _parse_steps(args.steps)
+    profile = args.profile
+    if steps is not None and profile is not None:
+        raise SystemExit("--steps and --profile are mutually exclusive")
+    if getattr(args, "prepare_emit_commands", False) and profile != "prepare":
+        raise SystemExit("--prepare-emit-commands requires --profile prepare")
+    if getattr(args, "prepare_execution_target", None) and profile != "prepare":
+        raise SystemExit("--prepare-execution-target requires --profile prepare")
+    api.run(
+        bridge_config,
+        steps=steps,
+        profile=profile,
+        train_db_paths=_parse_path_list(args.train_db_path),
+        eval_db_paths=_parse_path_list(args.eval_db_path),
+    )
+
+
+def _run_step_command(args: argparse.Namespace, command: str, bridge_config: BridgeConfig) -> str:
+    """Run one step command and return executed step name."""
+    step = STEP_COMMANDS[command]
+    train_paths: list[Path] | None = None
+    eval_paths: list[Path] | None = None
+    if command == "collect-train":
+        train_paths = _parse_path_list(getattr(args, "train_db_path", []))
+    if command == "collect-eval":
+        eval_paths = _parse_path_list(getattr(args, "eval_db_path", []))
+    api.run(
+        bridge_config,
+        steps=[step],
+        train_db_paths=train_paths,
+        eval_db_paths=eval_paths,
+    )
+    return step
+
+
+def _run_emit_commands_command(args: argparse.Namespace, bridge_config: BridgeConfig) -> Path:
+    """Run emit-commands command and return output path."""
+    return api.emit_commands_step(
+        bridge_config,
+        role=args.role,
+        fmt=args.format,
+        execution_target=args.execution_target,
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -271,7 +327,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
         config_path = Path(args.config).expanduser().resolve()
         cli_overrides = _parse_override_pairs(getattr(args, "overrides", None))
-        cli_overrides = _apply_cli_overrides(args, cli_overrides)
+        cli_overrides = _apply_cli_overrides(args, cli_overrides, command=command)
         bridge_config = api.load_config(config_path, overrides=cli_overrides)
         _apply_logging_flags(args)
         _run_loaded_command(args, command, bridge_config, logger)

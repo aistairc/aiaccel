@@ -10,8 +10,10 @@ from pathlib import Path
 from .analyze import evaluate_model, fit_regression
 from .collect import collect_eval, collect_train
 from .config import BridgeConfig
+from .layout import plan_path
 from .prepare import prepare_eval, prepare_train
 from .publish import publish_summary
+from .toolkit.io import read_json
 from .toolkit.results import PipelineResult, StepResult
 
 PipelineProfile = Literal["prepare", "analyze", "full"]
@@ -127,9 +129,71 @@ class ModelBridgePipeline:
         if profile_name not in PROFILE_STEPS:
             raise ValueError(f"Unknown profile: {profile_name}")
         results: list[StepResult] = []
+        if profile_name == "full":
+            # `full` crosses an external execution boundary between prepare and analyze.
+            # Ensure the expected Optuna DB files already exist before continuing.
+            results.extend([self.run_step("prepare_train"), self.run_step("prepare_eval")])
+            self._ensure_external_hpo_ready()
+            for step in PROFILE_STEPS["analyze"]:
+                results.append(self.run_step(step))
+            return results
+
         for step in PROFILE_STEPS[profile_name]:
             results.append(self.run_step(step))
         return results
+
+    def _ensure_external_hpo_ready(self) -> None:
+        """Validate that required Optuna DB artifacts exist for full profile execution.
+
+        Raises:
+            RuntimeError: If the plan payload is malformed or expected DB files are missing.
+        """
+        missing_db_paths = self._collect_missing_expected_db_paths()
+
+        if missing_db_paths:
+            preview = ", ".join(str(path) for path in missing_db_paths[:5])
+            if len(missing_db_paths) > 5:
+                preview = f"{preview}, ... (+{len(missing_db_paths) - 5} more)"
+            raise RuntimeError(
+                f"Full profile requires external HPO outputs before collect/analyze; missing optuna DB files: {preview}"
+            )
+
+    def _collect_missing_expected_db_paths(self) -> list[Path]:
+        """Collect missing expected DB paths from role plans."""
+        missing_db_paths: list[Path] = []
+        for role in ("train", "eval"):
+            role_plan_path = plan_path(self.config.bridge.output_dir, role)
+            if not role_plan_path.exists():
+                continue
+            entries = self._load_plan_entries(role_plan_path)
+            missing_db_paths.extend(self._find_missing_db_paths(entries, role_plan_path))
+        return missing_db_paths
+
+    @staticmethod
+    def _load_plan_entries(role_plan_path: Path) -> list[object]:
+        """Load and validate plan entry list."""
+        payload = read_json(role_plan_path)
+        if not isinstance(payload, dict):
+            raise RuntimeError(f"Malformed plan payload: {role_plan_path}")
+        entries = payload.get("entries", [])
+        if not isinstance(entries, list):
+            raise RuntimeError(f"Malformed plan entries in: {role_plan_path}")
+        return entries
+
+    @staticmethod
+    def _find_missing_db_paths(entries: list[object], role_plan_path: Path) -> list[Path]:
+        """Resolve missing expected DB paths from plan entries."""
+        missing_db_paths: list[Path] = []
+        for index, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                raise RuntimeError(f"Malformed plan entry at {role_plan_path}#{index}")
+            expected_db_path = entry.get("expected_db_path")
+            if not isinstance(expected_db_path, str) or not expected_db_path:
+                raise RuntimeError(f"Plan entry missing expected_db_path at {role_plan_path}#{index}")
+            db_path = Path(expected_db_path)
+            if not db_path.exists():
+                missing_db_paths.append(db_path)
+        return missing_db_paths
 
 
 def run_pipeline(

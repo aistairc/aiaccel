@@ -139,6 +139,46 @@ def commands_dir(output_dir: Path) -> Path:
     return workspace_dir(output_dir) / "commands"
 
 
+def logs_dir(output_dir: Path) -> Path:
+    """Return workspace logs directory path.
+
+    Args:
+        output_dir: Root output directory.
+
+    Returns:
+        Path: Workspace logs directory path.
+    """
+    return workspace_dir(output_dir) / "logs"
+
+
+def optimize_logs_dir(output_dir: Path) -> Path:
+    """Return optimize log directory path.
+
+    Args:
+        output_dir: Root output directory.
+
+    Returns:
+        Path: Optimize log directory path.
+    """
+    return logs_dir(output_dir) / "optimize"
+
+
+def optimize_log_path(output_dir: Path, role: Role, scenario: str, run_id: int, target: Target) -> Path:
+    """Return optimize log path for one plan entry.
+
+    Args:
+        output_dir: Root output directory.
+        role: Role (`train` or `eval`).
+        scenario: Scenario name.
+        run_id: Run index.
+        target: Target (`macro` or `micro`).
+
+    Returns:
+        Path: Log file path for wrapped optimize execution.
+    """
+    return optimize_logs_dir(output_dir) / f"{role}-{scenario}-{run_id:03d}-{target}.log"
+
+
 def train_plan_path(output_dir: Path) -> Path:
     """Return train plan file path.
 
