@@ -20,7 +20,7 @@ status:
 
 $(eval stage$(min_stage): status .WAIT $(stage$(min_stage)_dependencies))
 $(foreach n,$(shell seq $$(($(min_stage)+1)) $(max_stage)), \
-  $(eval stage$(n): status .WAIT $(stage$(n)_dependencies) stage$(shell echo $$(( $(n) - 1 )))) \
+  $(eval stage$(n): status .WAIT $(stage$(n)_dependencies) stage$(shell echo $$(($(n)-1)))) \
 )
 
 $(STAGES):
