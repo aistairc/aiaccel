@@ -9,9 +9,8 @@ import pytest
 import yaml
 
 from aiaccel.hpo.modelbridge import api
+from aiaccel.hpo.modelbridge.common import PipelineResult
 from aiaccel.hpo.modelbridge.config import BridgeConfig, load_bridge_config
-from aiaccel.hpo.modelbridge.toolkit.io import read_json
-from aiaccel.hpo.modelbridge.toolkit.results import PipelineResult, StepResult
 
 
 def _write_config(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]) -> Path:
@@ -80,8 +79,13 @@ def test_api_run_invokes_pipeline(
     assert calls["train_db_paths"] == [tmp_path / "a.db"]
 
 
-def test_api_step_callables_exist() -> None:
-    expected_names = [
+def test_api_required_callables_exist() -> None:
+    for name in ["load_config", "run", "emit_commands_step"]:
+        assert callable(getattr(api, name))
+
+
+def test_api_removed_step_wrappers_are_not_exposed() -> None:
+    removed_names = [
         "prepare_train_step",
         "prepare_eval_step",
         "collect_train_step",
@@ -89,25 +93,9 @@ def test_api_step_callables_exist() -> None:
         "fit_regression_step",
         "evaluate_model_step",
         "publish_summary_step",
-        "emit_commands_step",
     ]
-    for name in expected_names:
-        assert callable(getattr(api, name))
-
-
-def test_api_prepare_train_step_executes(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-) -> None:
-    config_path = _write_config(tmp_path, make_bridge_config)
-    config = api.load_config(config_path)
-
-    result = api.prepare_train_step(config, enable_logging=False)
-    assert result.step == "prepare_train"
-    assert result.status == "success"
-
-    state = read_json(config.bridge.output_dir / "workspace" / "state" / "prepare_train.json")
-    assert state["status"] == "success"
+    for name in removed_names:
+        assert not hasattr(api, name)
 
 
 def test_api_emit_commands_step_accepts_execution_target(
@@ -143,7 +131,7 @@ def test_api_emit_commands_step_accepts_execution_target(
     assert path.name == "train.sh"
 
 
-def test_api_step_wrappers_use_common_logging_helper(
+def test_api_entrypoints_use_common_logging_helper(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],
     monkeypatch: pytest.MonkeyPatch,
@@ -156,18 +144,18 @@ def test_api_step_wrappers_use_common_logging_helper(
         _config: BridgeConfig,
         *,
         enable_logging: bool,
-        action: Callable[[], StepResult],
-    ) -> StepResult:
+        action: Callable[[], object],
+    ) -> object:
         calls.append(enable_logging)
         return action()
 
     monkeypatch.setattr(api, "_run_with_optional_logging", fake_run_with_logging)
-    monkeypatch.setattr(api, "prepare_train", lambda _config: StepResult(step="prepare_train", status="success"))
-    monkeypatch.setattr(api, "fit_regression", lambda _config: StepResult(step="fit_regression", status="success"))
+    monkeypatch.setattr(api, "run_pipeline", lambda *_args, **_kwargs: PipelineResult(results=[]))
+    monkeypatch.setattr(api, "emit_commands", lambda *_args, **_kwargs: tmp_path / "train.sh")
 
-    prepare_result = api.prepare_train_step(config, enable_logging=False)
-    fit_result = api.fit_regression_step(config, enable_logging=True)
+    pipeline_result = api.run(config, enable_logging=False)
+    command_path = api.emit_commands_step(config, role="train", fmt="shell", enable_logging=True)
 
-    assert prepare_result.step == "prepare_train"
-    assert fit_result.step == "fit_regression"
+    assert isinstance(pipeline_result, PipelineResult)
+    assert command_path.name == "train.sh"
     assert calls == [False, True]

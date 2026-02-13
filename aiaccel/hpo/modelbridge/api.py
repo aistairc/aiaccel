@@ -1,4 +1,4 @@
-"""High-level API helpers for modelbridge."""
+"""Facade API for modelbridge runtime entrypoints."""
 
 from __future__ import annotations
 
@@ -13,16 +13,10 @@ from omegaconf import OmegaConf
 from aiaccel.config import load_config as load_omegaconf_config
 from aiaccel.config import resolve_inherit, setup_omegaconf
 
-from .analyze import evaluate_model, fit_regression
-from .collect import collect_eval, collect_train
+from .common import CommandFormat, PipelineResult, Role, setup_logging
 from .config import BridgeConfig, ExecutionTarget, load_bridge_config
-from .execution import CommandFormat, emit_commands
-from .layout import Role
+from .execution import emit_commands
 from .pipeline import PipelineProfile, run_pipeline
-from .prepare import prepare_eval, prepare_train
-from .publish import publish_summary
-from .toolkit.logging import setup_logging
-from .toolkit.results import PipelineResult, StepResult
 
 _ResultT = TypeVar("_ResultT")
 
@@ -31,14 +25,14 @@ def load_config(path: Path, overrides: Mapping[str, Any] | None = None) -> Bridg
     """Load and validate a modelbridge configuration file.
 
     Args:
-        path: Path to the modelbridge configuration file.
-        overrides: Optional override mapping merged after loading.
+        path: Path to modelbridge config YAML.
+        overrides: Optional override mapping.
 
     Returns:
-        BridgeConfig: Validated modelbridge configuration.
+        BridgeConfig: Validated config object.
 
     Raises:
-        ValueError: If the loaded payload is not a mapping.
+        ValueError: If loaded payload is not a mapping.
     """
     setup_omegaconf()
     config_path = path.expanduser().resolve()
@@ -65,20 +59,20 @@ def run(
     eval_db_pairs: Sequence[tuple[Path, Path]] | None = None,
     enable_logging: bool = True,
 ) -> PipelineResult:
-    """Run modelbridge steps or profile via pipeline facade.
+    """Run modelbridge steps or one profile.
 
     Args:
-        config: Parsed modelbridge configuration.
+        config: Validated modelbridge config.
         steps: Optional explicit step list.
-        profile: Optional named profile.
-        train_db_paths: Optional explicit train DB paths for collect.
-        eval_db_paths: Optional explicit eval DB paths for collect.
-        train_db_pairs: Optional explicit train DB pairs for collect.
-        eval_db_pairs: Optional explicit eval DB pairs for collect.
-        enable_logging: Whether to configure logging before running.
+        profile: Optional profile name.
+        train_db_paths: Optional train DB path override.
+        eval_db_paths: Optional eval DB path override.
+        train_db_pairs: Optional train DB pair override.
+        eval_db_pairs: Optional eval DB pair override.
+        enable_logging: Whether to initialize logging.
 
     Returns:
-        PipelineResult: Aggregated pipeline execution result.
+        PipelineResult: Aggregated step results.
     """
     return _run_with_optional_logging(
         config,
@@ -96,141 +90,6 @@ def run(
     )
 
 
-def prepare_train_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
-    """Run the `prepare_train` step directly.
-
-    Args:
-        config: Parsed modelbridge configuration.
-        enable_logging: Whether to configure logging before running.
-
-    Returns:
-        StepResult: Step execution result.
-    """
-    return _run_with_optional_logging(
-        config,
-        enable_logging=enable_logging,
-        action=partial(prepare_train, config),
-    )
-
-
-def prepare_eval_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
-    """Run the `prepare_eval` step directly.
-
-    Args:
-        config: Parsed modelbridge configuration.
-        enable_logging: Whether to configure logging before running.
-
-    Returns:
-        StepResult: Step execution result.
-    """
-    return _run_with_optional_logging(
-        config,
-        enable_logging=enable_logging,
-        action=partial(prepare_eval, config),
-    )
-
-
-def collect_train_step(
-    config: BridgeConfig,
-    *,
-    db_paths: Sequence[Path] | None = None,
-    db_pairs: Sequence[tuple[Path, Path]] | None = None,
-    enable_logging: bool = True,
-) -> StepResult:
-    """Run the `collect_train` step directly.
-
-    Args:
-        config: Parsed modelbridge configuration.
-        db_paths: Optional explicit DB path list.
-        db_pairs: Optional explicit `(macro_db, micro_db)` pairs.
-        enable_logging: Whether to configure logging before running.
-
-    Returns:
-        StepResult: Step execution result.
-    """
-    return _run_with_optional_logging(
-        config,
-        enable_logging=enable_logging,
-        action=partial(collect_train, config, db_paths=db_paths, db_pairs=db_pairs),
-    )
-
-
-def collect_eval_step(
-    config: BridgeConfig,
-    *,
-    db_paths: Sequence[Path] | None = None,
-    db_pairs: Sequence[tuple[Path, Path]] | None = None,
-    enable_logging: bool = True,
-) -> StepResult:
-    """Run the `collect_eval` step directly.
-
-    Args:
-        config: Parsed modelbridge configuration.
-        db_paths: Optional explicit DB path list.
-        db_pairs: Optional explicit `(macro_db, micro_db)` pairs.
-        enable_logging: Whether to configure logging before running.
-
-    Returns:
-        StepResult: Step execution result.
-    """
-    return _run_with_optional_logging(
-        config,
-        enable_logging=enable_logging,
-        action=partial(collect_eval, config, db_paths=db_paths, db_pairs=db_pairs),
-    )
-
-
-def fit_regression_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
-    """Run the `fit_regression` step directly.
-
-    Args:
-        config: Parsed modelbridge configuration.
-        enable_logging: Whether to configure logging before running.
-
-    Returns:
-        StepResult: Step execution result.
-    """
-    return _run_with_optional_logging(
-        config,
-        enable_logging=enable_logging,
-        action=partial(fit_regression, config),
-    )
-
-
-def evaluate_model_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
-    """Run the `evaluate_model` step directly.
-
-    Args:
-        config: Parsed modelbridge configuration.
-        enable_logging: Whether to configure logging before running.
-
-    Returns:
-        StepResult: Step execution result.
-    """
-    return _run_with_optional_logging(
-        config,
-        enable_logging=enable_logging,
-        action=partial(evaluate_model, config),
-    )
-
-
-def publish_summary_step(config: BridgeConfig, *, enable_logging: bool = True) -> StepResult:
-    """Run the `publish_summary` step directly.
-
-    Args:
-        config: Parsed modelbridge configuration.
-        enable_logging: Whether to configure logging before running.
-
-    Returns:
-        StepResult: Step execution result.
-    """
-    return _run_with_optional_logging(
-        config,
-        enable_logging=enable_logging,
-        action=partial(publish_summary, config),
-    )
-
-
 def emit_commands_step(
     config: BridgeConfig,
     *,
@@ -239,28 +98,22 @@ def emit_commands_step(
     execution_target: ExecutionTarget | None = None,
     enable_logging: bool = True,
 ) -> Path:
-    """Run the `emit_commands` step directly.
+    """Emit commands for one role plan.
 
     Args:
-        config: Parsed modelbridge configuration.
-        role: Target role (`train` or `eval`).
-        fmt: Output command format (`shell` or `json`).
-        execution_target: Optional execution target override (`local` or `abci`).
-        enable_logging: Whether to configure logging before running.
+        config: Validated modelbridge config.
+        role: Target role.
+        fmt: Output format.
+        execution_target: Optional execution target override.
+        enable_logging: Whether to initialize logging.
 
     Returns:
-        Path: Path to emitted command artifact.
+        Path: Written command artifact path.
     """
     return _run_with_optional_logging(
         config,
         enable_logging=enable_logging,
-        action=partial(
-            emit_commands,
-            config,
-            role=role,
-            fmt=fmt,
-            execution_target=execution_target,
-        ),
+        action=partial(emit_commands, config, role=role, fmt=fmt, execution_target=execution_target),
     )
 
 
@@ -270,7 +123,7 @@ def _run_with_optional_logging(
     enable_logging: bool,
     action: Callable[[], _ResultT],
 ) -> _ResultT:
-    """Run one action with optional modelbridge logging setup."""
+    """Run an action with optional modelbridge logging initialization."""
     if enable_logging:
         setup_logging(config.bridge.log_level, config.bridge.output_dir, json_logs=config.bridge.json_log)
     return action()

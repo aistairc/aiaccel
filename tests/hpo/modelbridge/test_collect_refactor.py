@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 
 import aiaccel.hpo.modelbridge.collect as collect_module
+from aiaccel.hpo.modelbridge.common import StepResult
 from aiaccel.hpo.modelbridge.config import BridgeConfig, load_bridge_config
-from aiaccel.hpo.modelbridge.toolkit.results import StepResult
 
 
 def _config(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]) -> BridgeConfig:

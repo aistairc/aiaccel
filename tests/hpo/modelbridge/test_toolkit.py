@@ -1,22 +1,29 @@
 from __future__ import annotations
 
+import importlib
 from pathlib import Path
 
 import pytest
 
-from aiaccel.hpo.modelbridge.config import ExecutionTargetConfig, SeedPolicyConfig, SeedUserValues
-from aiaccel.hpo.modelbridge.toolkit.command_render import (
-    render_json_commands,
-    render_shell_commands,
-    sort_command_entries,
+from aiaccel.hpo.modelbridge.common import (
+    StepResult,
+    hash_file,
+    read_csv,
+    read_json,
+    resolve_seed,
+    write_csv,
+    write_json,
+    write_step_state,
 )
-from aiaccel.hpo.modelbridge.toolkit.io import hash_file, read_csv, read_json, write_csv, write_json
-from aiaccel.hpo.modelbridge.toolkit.job_command import wrap_with_aiaccel_job
-from aiaccel.hpo.modelbridge.toolkit.results import StepResult, write_step_state
-from aiaccel.hpo.modelbridge.toolkit.seeding import resolve_seed
+from aiaccel.hpo.modelbridge.config import SeedPolicyConfig, SeedUserValues
 
 
-def test_toolkit_io_roundtrip(tmp_path: Path) -> None:
+def test_toolkit_package_removed() -> None:
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("aiaccel.hpo.modelbridge.toolkit")
+
+
+def test_common_io_roundtrip(tmp_path: Path) -> None:
     json_path = write_json(tmp_path / "payload.json", {"value": 123})
     assert read_json(json_path) == {"value": 123}
     assert len(hash_file(json_path)) == 64
@@ -26,32 +33,7 @@ def test_toolkit_io_roundtrip(tmp_path: Path) -> None:
     assert rows == [{"macro_x": "1.0", "micro_y": "2.0", "run_id": "0"}]
 
 
-def test_toolkit_renderers() -> None:
-    commands = [{"scenario": "demo", "command": ["aiaccel-hpo", "optimize", "--config", "conf.yaml"]}]
-    payload = render_json_commands("train", commands)
-    assert payload["role"] == "train"
-    assert payload["commands"][0]["scenario"] == "demo"
-
-    shell = render_shell_commands([["echo", "hello world"]])
-    assert shell.startswith("#!/usr/bin/env bash")
-    assert "echo 'hello world'" in shell
-
-
-def test_toolkit_sort_command_entries() -> None:
-    entries = [
-        {"scenario": "demo", "run_id": 3, "target": "micro"},
-        {"scenario": "demo", "run_id": 1, "target": "micro"},
-        {"scenario": "alpha", "run_id": 2, "target": "macro"},
-    ]
-    sorted_entries = sort_command_entries(entries)
-    assert [(item["scenario"], item["run_id"], item["target"]) for item in sorted_entries] == [
-        ("alpha", 2, "macro"),
-        ("demo", 1, "micro"),
-        ("demo", 3, "micro"),
-    ]
-
-
-def test_toolkit_step_state_writer(tmp_path: Path) -> None:
+def test_step_state_writer(tmp_path: Path) -> None:
     output_dir = tmp_path / "outputs"
     result = StepResult(
         step="prepare_train",
@@ -63,6 +45,7 @@ def test_toolkit_step_state_writer(tmp_path: Path) -> None:
 
     assert state_path == output_dir / "workspace" / "state" / "prepare_train.json"
     payload = read_json(state_path)
+    assert payload["step"] == "prepare_train"
     assert payload["status"] == "success"
     assert payload["inputs"]["role"] == "train"
     assert payload["outputs"]["plan_path"] == "workspace/train_plan.json"
@@ -76,7 +59,7 @@ def test_step_result_requires_reason_for_failed_or_skipped() -> None:
     StepResult(step="collect_train", status="success")
 
 
-def test_toolkit_seed_resolution() -> None:
+def test_common_seed_resolution() -> None:
     auto_policy = SeedPolicyConfig(mode="auto_increment", base=10)
     assert resolve_seed(auto_policy, role="train", target="macro", run_id=0, fallback_base=5) == 10
     assert resolve_seed(auto_policy, role="eval", target="micro", run_id=2, fallback_base=5) == 300012
@@ -93,24 +76,3 @@ def test_toolkit_seed_resolution() -> None:
     assert resolve_seed(user_policy, role="eval", target="micro", run_id=0, fallback_base=0) == 401
     with pytest.raises(ValueError):
         resolve_seed(user_policy, role="eval", target="micro", run_id=2, fallback_base=0)
-
-
-def test_toolkit_wrap_with_aiaccel_job() -> None:
-    execution = ExecutionTargetConfig(
-        target="abci",
-        job_profile="sge",
-        job_mode="cpu",
-        job_walltime="1:00:00",
-        job_extra_args=["--n_tasks", "4"],
-    )
-    wrapped = wrap_with_aiaccel_job(
-        ["aiaccel-hpo", "optimize", "--config", "config.yaml"],
-        execution,
-        Path("logs/job.log"),
-    )
-    assert wrapped[:4] == ["aiaccel-job", "sge", "cpu", "--walltime"]
-    assert "--n_tasks" in wrapped
-    assert wrapped.index("--n_tasks") < wrapped.index("logs/job.log")
-    assert wrapped.index("logs/job.log") < wrapped.index("--")
-    assert "logs/job.log" in wrapped
-    assert wrapped[-4:] == ["aiaccel-hpo", "optimize", "--config", "config.yaml"]

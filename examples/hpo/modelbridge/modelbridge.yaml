@@ -2,10 +2,12 @@
 # Run with:
 #   make -f examples/hpo/modelbridge/Makefile.template run \
 #     MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml \
-#     MODELBRIDGE_SCENARIO=simple
+#     MODELBRIDGE_OUTPUT=./work/modelbridge/simple
 
 hpo:
   base_config: examples/hpo/modelbridge/optimize_config.yaml
+  macro_overrides: {}
+  micro_overrides: {}
   abci_overrides: {}
 
 bridge:
@@ -19,8 +21,10 @@ bridge:
   execution:
     target: local
     emit_on_prepare: false
+    job_mode: cpu
   train_runs: 10
   eval_runs: 10
+  strict_mode: false
   log_level: INFO
   scenarios:
     - name: simple

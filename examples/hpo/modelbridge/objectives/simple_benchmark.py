@@ -1,10 +1,15 @@
-"""Minimal modelbridge benchmark for prepare/external/analyze flow."""
+"""Minimal end-to-end benchmark for the rev04 modelbridge flow."""
 
 from __future__ import annotations
 
+from dataclasses import asdict
 import json
 from pathlib import Path
 import subprocess
+import sys
+
+if __package__ is None or __package__ == "":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from aiaccel.hpo.modelbridge.config import (
     BridgeConfig,
@@ -18,14 +23,20 @@ from aiaccel.hpo.modelbridge.config import (
 )
 from aiaccel.hpo.modelbridge.execution import emit_commands
 from aiaccel.hpo.modelbridge.pipeline import run_pipeline
-from aiaccel.hpo.modelbridge.toolkit.io import read_json
 
 
 def build_config(base_dir: Path) -> BridgeConfig:
-    """Return a BridgeConfig matching the simple benchmark scenario."""
+    """Build a small in-process benchmark config.
+
+    Args:
+        base_dir: Repository root directory.
+
+    Returns:
+        BridgeConfig: Ready-to-run benchmark configuration.
+    """
     objective = [
-        "python",
-        "examples/hpo/modelbridge/objectives/simple_objective.py",
+        "python3",
+        str(base_dir / "examples" / "hpo" / "modelbridge" / "objectives" / "simple_objective.py"),
         "{out_filename}",
         "--x={x}",
         "--y={y}",
@@ -77,8 +88,9 @@ def build_config(base_dir: Path) -> BridgeConfig:
 
 
 def main() -> None:
-    """Run prepare, external optimize commands, and analyze profile."""
-    config = build_config(Path.cwd())
+    """Run prepare, external execution, and analyze/publish."""
+    root_dir = Path(__file__).resolve().parents[4]
+    config = build_config(root_dir)
 
     run_pipeline(config, profile="prepare")
     train_cmd_json = emit_commands(config, role="train", fmt="json")
@@ -88,7 +100,7 @@ def main() -> None:
     _run_emitted_commands(eval_cmd_json)
 
     result = run_pipeline(config, profile="analyze")
-    print(json.dumps(result.to_dict(), indent=2, default=str))
+    print(json.dumps(_pipeline_result_to_dict(result), indent=2, default=str))
 
     scenario_dir = config.bridge.output_dir / config.bridge.scenarios[0].name
     predictions_path = scenario_dir / "test_predictions.csv"
@@ -101,13 +113,20 @@ def main() -> None:
 
 
 def _run_emitted_commands(path: Path) -> None:
-    payload = read_json(path)
+    with path.open(encoding="utf-8") as handle:
+        payload = json.load(handle)
     commands = payload.get("commands", []) if isinstance(payload, dict) else []
     for item in commands:
         command = item.get("command", [])
         if not isinstance(command, list):
             raise RuntimeError(f"Malformed command entry in {path}")
         subprocess.run([str(token) for token in command], check=True)
+
+
+def _pipeline_result_to_dict(result: object) -> dict[str, object]:
+    payload = asdict(result)
+    payload["results"] = [item["step"] for item in payload.get("results", [])]
+    return payload
 
 
 if __name__ == "__main__":

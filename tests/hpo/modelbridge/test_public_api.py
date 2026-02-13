@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import aiaccel.hpo.modelbridge as modelbridge
 from aiaccel.hpo.modelbridge.api import load_config, run
+from aiaccel.hpo.modelbridge.common import PipelineResult
 from aiaccel.hpo.modelbridge.config import BridgeConfig, load_bridge_config
 from aiaccel.hpo.modelbridge.pipeline import run_pipeline
-from aiaccel.hpo.modelbridge.toolkit.results import PipelineResult
 
 
 def test_package_root_exports_minimal_stable_api() -> None:

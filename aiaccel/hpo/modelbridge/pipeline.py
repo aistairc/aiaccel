@@ -1,45 +1,20 @@
-"""Modelbridge pipeline orchestration."""
+"""Pipeline orchestration and canonical step/profile registry."""
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, cast
 
-from collections.abc import Sequence
+from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 
 from .analyze import evaluate_model, fit_regression
 from .collect import collect_eval, collect_train
+from .common import PipelineResult, StepResult, plan_path, read_plan
 from .config import BridgeConfig
-from .layout import plan_path
 from .prepare import prepare_eval, prepare_train
 from .publish import publish_summary
-from .toolkit.io import read_json
-from .toolkit.results import PipelineResult, StepResult
 
-PipelineProfile = Literal["prepare", "analyze", "full"]
-
-
-PROFILE_STEPS: dict[PipelineProfile, list[str]] = {
-    "prepare": ["prepare_train", "prepare_eval"],
-    "analyze": [
-        "collect_train",
-        "collect_eval",
-        "fit_regression",
-        "evaluate_model",
-        "publish_summary",
-    ],
-    "full": [
-        "prepare_train",
-        "prepare_eval",
-        "collect_train",
-        "collect_eval",
-        "fit_regression",
-        "evaluate_model",
-        "publish_summary",
-    ],
-}
-
-VALID_STEPS = {
+StepName = Literal[
     "prepare_train",
     "prepare_eval",
     "collect_train",
@@ -47,213 +22,158 @@ VALID_STEPS = {
     "fit_regression",
     "evaluate_model",
     "publish_summary",
+]
+PipelineProfile = Literal["prepare", "analyze", "full"]
+PIPELINE_PROFILES: tuple[PipelineProfile, ...] = ("prepare", "analyze", "full")
+
+STEP_SPECS: tuple[tuple[StepName, str, tuple[PipelineProfile, ...]], ...] = (
+    ("prepare_train", "prepare-train", ("prepare", "full")),
+    ("prepare_eval", "prepare-eval", ("prepare", "full")),
+    ("collect_train", "collect-train", ("analyze", "full")),
+    ("collect_eval", "collect-eval", ("analyze", "full")),
+    ("fit_regression", "fit-regression", ("analyze", "full")),
+    ("evaluate_model", "evaluate-model", ("analyze", "full")),
+    ("publish_summary", "publish-summary", ("analyze", "full")),
+)
+STEP_NAME_BY_CLI_COMMAND: dict[str, StepName] = {cli: step for step, cli, _profiles in STEP_SPECS}
+
+STEP_ACTIONS: dict[StepName, Callable[..., StepResult]] = {
+    "prepare_train": lambda config, _tp, _ep, _tpp, _epp: prepare_train(config),
+    "prepare_eval": lambda config, _tp, _ep, _tpp, _epp: prepare_eval(config),
+    "collect_train": lambda config, train_paths, _ep, train_pairs, _epp: collect_train(
+        config,
+        db_paths=train_paths or None,
+        db_pairs=train_pairs or None,
+    ),
+    "collect_eval": lambda config, _tp, eval_paths, _tpp, eval_pairs: collect_eval(
+        config,
+        db_paths=eval_paths or None,
+        db_pairs=eval_pairs or None,
+    ),
+    "fit_regression": lambda config, _tp, _ep, _tpp, _epp: fit_regression(config),
+    "evaluate_model": lambda config, _tp, _ep, _tpp, _epp: evaluate_model(config),
+    "publish_summary": lambda config, _tp, _ep, _tpp, _epp: publish_summary(config),
 }
 
 
-class ModelBridgePipeline:
-    """Orchestrate modelbridge lifecycle steps.
+def steps_for_profile(profile: PipelineProfile) -> list[StepName]:
+    """Return ordered step names for one profile.
 
     Args:
-        config: Parsed modelbridge configuration.
-        train_db_paths: Optional explicit DB paths for train collection.
-        eval_db_paths: Optional explicit DB paths for eval collection.
-        train_db_pairs: Optional explicit train DB pairs.
-        eval_db_pairs: Optional explicit eval DB pairs.
+        profile: Pipeline profile name.
+
+    Returns:
+        list[StepName]: Ordered step names.
     """
-
-    def __init__(
-        self,
-        config: BridgeConfig,
-        *,
-        train_db_paths: Sequence[Path] | None = None,
-        eval_db_paths: Sequence[Path] | None = None,
-        train_db_pairs: Sequence[tuple[Path, Path]] | None = None,
-        eval_db_pairs: Sequence[tuple[Path, Path]] | None = None,
-    ) -> None:
-        self.config = config
-        self.train_db_paths = list(train_db_paths or [])
-        self.eval_db_paths = list(eval_db_paths or [])
-        self.train_db_pairs = list(train_db_pairs or [])
-        self.eval_db_pairs = list(eval_db_pairs or [])
-
-    def run_step(self, step_name: str) -> StepResult:
-        """Execute one lifecycle step.
-
-        Args:
-            step_name: Canonical step name.
-
-        Returns:
-            StepResult: Step execution result.
-
-        Raises:
-            ValueError: If the requested step name is unknown.
-        """
-        match step_name:
-            case "prepare_train":
-                return prepare_train(self.config)
-            case "prepare_eval":
-                return prepare_eval(self.config)
-            case "collect_train":
-                return collect_train(
-                    self.config,
-                    db_paths=self.train_db_paths or None,
-                    db_pairs=self.train_db_pairs or None,
-                )
-            case "collect_eval":
-                return collect_eval(
-                    self.config,
-                    db_paths=self.eval_db_paths or None,
-                    db_pairs=self.eval_db_pairs or None,
-                )
-            case "fit_regression":
-                return fit_regression(self.config)
-            case "evaluate_model":
-                return evaluate_model(self.config)
-            case "publish_summary":
-                return publish_summary(self.config)
-            case _:
-                raise ValueError(f"Unknown step: {step_name}")
-
-    def run_profile(self, profile_name: PipelineProfile) -> list[StepResult]:
-        """Execute a named profile.
-
-        Args:
-            profile_name: Profile key (`prepare`, `analyze`, `full`).
-
-        Returns:
-            list[StepResult]: Ordered step results for the profile.
-
-        Raises:
-            ValueError: If the profile is unknown.
-        """
-        if profile_name not in PROFILE_STEPS:
-            raise ValueError(f"Unknown profile: {profile_name}")
-        results: list[StepResult] = []
-        if profile_name == "full":
-            # `full` crosses an external execution boundary between prepare and analyze.
-            # Ensure the expected Optuna DB files already exist before continuing.
-            results.extend([self.run_step("prepare_train"), self.run_step("prepare_eval")])
-            self._ensure_external_hpo_ready()
-            for step in PROFILE_STEPS["analyze"]:
-                results.append(self.run_step(step))
-            return results
-
-        for step in PROFILE_STEPS[profile_name]:
-            results.append(self.run_step(step))
-        return results
-
-    def _ensure_external_hpo_ready(self) -> None:
-        """Validate that required Optuna DB artifacts exist for full profile execution.
-
-        Raises:
-            RuntimeError: If the plan payload is malformed or expected DB files are missing.
-        """
-        missing_db_paths = self._collect_missing_expected_db_paths()
-
-        if missing_db_paths:
-            preview = ", ".join(str(path) for path in missing_db_paths[:5])
-            if len(missing_db_paths) > 5:
-                preview = f"{preview}, ... (+{len(missing_db_paths) - 5} more)"
-            raise RuntimeError(
-                f"Full profile requires external HPO outputs before collect/analyze; missing optuna DB files: {preview}"
-            )
-
-    def _collect_missing_expected_db_paths(self) -> list[Path]:
-        """Collect missing expected DB paths from role plans."""
-        missing_db_paths: list[Path] = []
-        for role in ("train", "eval"):
-            role_plan_path = plan_path(self.config.bridge.output_dir, role)
-            if not role_plan_path.exists():
-                continue
-            entries = self._load_plan_entries(role_plan_path)
-            missing_db_paths.extend(self._find_missing_db_paths(entries, role_plan_path))
-        return missing_db_paths
-
-    @staticmethod
-    def _load_plan_entries(role_plan_path: Path) -> list[object]:
-        """Load and validate plan entry list."""
-        payload = read_json(role_plan_path)
-        if not isinstance(payload, dict):
-            raise RuntimeError(f"Malformed plan payload: {role_plan_path}")
-        entries = payload.get("entries", [])
-        if not isinstance(entries, list):
-            raise RuntimeError(f"Malformed plan entries in: {role_plan_path}")
-        return entries
-
-    @staticmethod
-    def _find_missing_db_paths(entries: list[object], role_plan_path: Path) -> list[Path]:
-        """Resolve missing expected DB paths from plan entries."""
-        missing_db_paths: list[Path] = []
-        for index, entry in enumerate(entries):
-            if not isinstance(entry, dict):
-                raise RuntimeError(f"Malformed plan entry at {role_plan_path}#{index}")
-            expected_db_path = entry.get("expected_db_path")
-            if not isinstance(expected_db_path, str) or not expected_db_path:
-                raise RuntimeError(f"Plan entry missing expected_db_path at {role_plan_path}#{index}")
-            db_path = Path(expected_db_path)
-            if not db_path.exists():
-                missing_db_paths.append(db_path)
-        return missing_db_paths
+    return [step for step, _cli, profiles in STEP_SPECS if profile in profiles]
 
 
-def run_pipeline(
+def normalize_steps(steps: Iterable[str]) -> list[StepName]:
+    """Normalize and validate explicit step names.
+
+    Args:
+        steps: Raw step names.
+
+    Returns:
+        list[StepName]: Validated step names preserving input order.
+
+    Raises:
+        ValueError: If any step name is unknown.
+    """
+    normalized: list[StepName] = []
+    valid = set(STEP_ACTIONS)
+    for step in steps:
+        if step not in valid:
+            raise ValueError(f"Unknown step: {step}")
+        normalized.append(cast(StepName, step))
+    return normalized
+
+
+def run_pipeline(  # noqa: C901
     config: BridgeConfig,
     steps: Sequence[str] | None = None,
     *,
-    profile: PipelineProfile | None = None,
+    profile: str | None = None,
     train_db_paths: Sequence[Path] | None = None,
     eval_db_paths: Sequence[Path] | None = None,
     train_db_pairs: Sequence[tuple[Path, Path]] | None = None,
     eval_db_pairs: Sequence[tuple[Path, Path]] | None = None,
 ) -> PipelineResult:
-    """Run selected steps or a profile and return the aggregated result.
+    """Run selected steps or profile.
 
     Args:
-        config: Parsed modelbridge configuration.
+        config: Validated modelbridge configuration.
         steps: Optional explicit step list.
-        profile: Optional named profile.
-        train_db_paths: Optional explicit DB paths for train collection.
-        eval_db_paths: Optional explicit DB paths for eval collection.
-        train_db_pairs: Optional explicit train DB pairs.
-        eval_db_pairs: Optional explicit eval DB pairs.
+        profile: Optional profile name.
+        train_db_paths: Optional train DB paths for collect override.
+        eval_db_paths: Optional eval DB paths for collect override.
+        train_db_pairs: Optional train DB pairs for collect override.
+        eval_db_pairs: Optional eval DB pairs for collect override.
 
     Returns:
-        PipelineResult: Aggregated pipeline result.
+        PipelineResult: Aggregated step results.
 
     Raises:
-        ValueError: If arguments are inconsistent or unknown step/profile is requested.
+        ValueError: If argument combinations are invalid.
+        RuntimeError: If full profile readiness check fails.
     """
     if steps is not None and profile is not None:
         raise ValueError("steps and profile are mutually exclusive")
+    if profile is not None and profile not in PIPELINE_PROFILES:
+        raise ValueError(f"Unknown profile: {profile}")
 
-    pipeline = ModelBridgePipeline(
-        config,
-        train_db_paths=train_db_paths,
-        eval_db_paths=eval_db_paths,
-        train_db_pairs=train_db_pairs,
-        eval_db_pairs=eval_db_pairs,
-    )
-
-    results: list[StepResult]
-    if steps is None and profile is None:
-        results = pipeline.run_profile("prepare")
-    elif profile is not None:
-        results = pipeline.run_profile(profile)
+    train_paths = tuple(train_db_paths or ())
+    eval_paths = tuple(eval_db_paths or ())
+    train_pairs = tuple(train_db_pairs or ())
+    eval_pairs = tuple(eval_db_pairs or ())
+    if steps is not None:
+        selected = normalize_steps(steps)
+    elif profile == "full" or profile is None:
+        selected = steps_for_profile("prepare")
     else:
-        unknown = [step for step in steps or [] if step not in VALID_STEPS]
-        if unknown:
-            raise ValueError(f"Unknown step(s): {', '.join(unknown)}")
-        results = [pipeline.run_step(step) for step in (steps or [])]
+        selected = steps_for_profile(cast(PipelineProfile, profile))
+
+    results = [STEP_ACTIONS[step](config, train_paths, eval_paths, train_pairs, eval_pairs) for step in selected]
+    if profile == "full":
+        _ensure_full_profile_ready(config)
+        results.extend(
+            STEP_ACTIONS[step](config, train_paths, eval_paths, train_pairs, eval_pairs)
+            for step in steps_for_profile("analyze")
+        )
 
     summary_path: Path | None = None
     manifest_path: Path | None = None
     for result in results:
-        if result.step == "publish_summary":
-            summary_str = result.outputs.get("summary_path")
-            manifest_str = result.outputs.get("manifest_path")
-            if isinstance(summary_str, str):
-                summary_path = Path(summary_str)
-            if isinstance(manifest_str, str):
-                manifest_path = Path(manifest_str)
-
+        if result.step != "publish_summary":
+            continue
+        summary = result.outputs.get("summary_path")
+        manifest = result.outputs.get("manifest_path")
+        if isinstance(summary, str):
+            summary_path = Path(summary)
+        if isinstance(manifest, str):
+            manifest_path = Path(manifest)
     return PipelineResult(results=results, summary_path=summary_path, manifest_path=manifest_path)
+
+
+def _ensure_full_profile_ready(config: BridgeConfig) -> None:
+    """Validate that external optimize outputs exist before analyze steps."""
+    missing: list[Path] = []
+    for role in ("train", "eval"):
+        path = plan_path(config.bridge.output_dir, role)
+        if not path.exists():
+            continue
+        plan_role, entries = read_plan(path)
+        if plan_role != role:
+            raise RuntimeError(f"Plan role mismatch: expected {role}, got {plan_role} ({path})")
+        missing.extend(
+            [expected for expected in (Path(entry["expected_db_path"]) for entry in entries) if not expected.exists()]
+        )
+
+    if not missing:
+        return
+    preview = ", ".join(str(path) for path in missing[:5])
+    if len(missing) > 5:
+        preview = f"{preview}, ... (+{len(missing) - 5} more)"
+    raise RuntimeError(
+        f"Full profile requires external HPO outputs before collect/analyze; missing optuna DB files: {preview}"
+    )

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from collections.abc import Callable
+import importlib
 from pathlib import Path
 import shutil
 from unittest.mock import patch
@@ -12,7 +13,10 @@ import yaml
 
 from aiaccel.hpo.apps.modelbridge import main as cli_main
 from aiaccel.hpo.modelbridge import api
-from aiaccel.hpo.modelbridge.toolkit.io import read_json
+from aiaccel.hpo.modelbridge.common import read_json
+from aiaccel.hpo.modelbridge.config import deep_merge_mappings
+
+cli_module = importlib.import_module("aiaccel.hpo.apps.modelbridge")
 
 
 def _write_config(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]) -> Path:
@@ -66,6 +70,63 @@ def test_modelbridge_cli_steps_profile_mutual_exclusive(
                 "prepare",
             ]
         )
+
+
+def test_cli_profile_choices_follow_step_registry(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(cli_module, "PIPELINE_PROFILES", ("prepare", "analyze", "full", "custom"))
+    args = cli_module._parse_args(["run", "--config", "config.yaml", "--profile", "custom"])
+    assert args.profile == "custom"
+
+
+def test_cli_override_patch_build_and_render() -> None:
+    args = cli_module._parse_args(
+        [
+            "run",
+            "--config",
+            "config.yaml",
+            "--output_dir",
+            "outdir",
+            "--profile",
+            "prepare",
+            "--json-log",
+            "--prepare-emit-commands",
+            "--prepare-execution-target",
+            "abci",
+        ]
+    )
+    patch = cli_module._build_cli_override_patch(args, command="run")
+    assert isinstance(patch, cli_module.CliOverridePatch)
+    assert patch.to_overrides() == {
+        "bridge": {
+            "output_dir": "outdir",
+            "json_log": True,
+            "execution": {"emit_on_prepare": True, "target": "abci"},
+        }
+    }
+
+
+def test_cli_override_patch_merges_with_set_overrides() -> None:
+    patch = cli_module.CliOverridePatch(json_log=True, execution_target="abci")
+    merged = cli_module._apply_cli_override_patch(
+        {"bridge": {"seed": 42, "execution": {"job_mode": "cpu"}}},
+        patch,
+    )
+    assert merged == {
+        "bridge": {
+            "seed": 42,
+            "json_log": True,
+            "execution": {"job_mode": "cpu", "target": "abci"},
+        }
+    }
+
+
+def test_cli_override_patch_uses_config_merge_policy() -> None:
+    base = {"bridge": {"execution": {"job_mode": "cpu"}, "seed": 1}}
+    patch = cli_module.CliOverridePatch(json_log=True, execution_target="abci")
+    merged = cli_module._apply_cli_override_patch(base, patch)
+
+    expected = deep_merge_mappings(base, patch.to_overrides())
+    assert merged == expected
 
 
 def test_modelbridge_cli_collect_train_db_paths(

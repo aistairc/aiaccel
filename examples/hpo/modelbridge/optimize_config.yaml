@@ -1,10 +1,10 @@
-optimize:
-  search_algorithm: aiaccel.optimizer.TpeOptimizer
-  goal: minimize
-  trial_number: 10
-  rand_seed: 42
-resource:
-  type: local
-  num_node: 1
-  walltime: "24:00:00"
+_base_: ${resolve_pkg_path:aiaccel.hpo.apps.config}/default.yaml
+
+# Modelbridge prepare step injects per-run values:
+# - command
+# - params
+# - n_trials
+# - working_directory
+# - optimize.rand_seed
+# - study.*
 n_max_jobs: 10

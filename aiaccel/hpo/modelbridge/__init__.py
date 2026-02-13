@@ -1,9 +1,9 @@
-"""Modelbridge package public API."""
+"""Public package exports for the modelbridge runtime."""
 
 from .api import load_config, run
+from .common import PipelineResult
 from .config import BridgeConfig, load_bridge_config
 from .pipeline import run_pipeline
-from .toolkit.results import PipelineResult
 
 __all__ = [
     "BridgeConfig",

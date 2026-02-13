@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
+from aiaccel.hpo.modelbridge.common import read_json, write_json
 from aiaccel.hpo.modelbridge.config import load_bridge_config
 from aiaccel.hpo.modelbridge.execution import emit_commands
 from aiaccel.hpo.modelbridge.prepare import prepare_train
-from aiaccel.hpo.modelbridge.toolkit.io import read_json, write_json
 
 
 def _config(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]) -> Any:
@@ -101,7 +101,7 @@ def test_emit_commands_target_override_local_to_abci_defaults(
     assert "aiaccel-job local" not in content
 
 
-def test_emit_commands_uses_toolkit_sort_helper(
+def test_emit_commands_uses_sort_helper(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],
     monkeypatch: pytest.MonkeyPatch,
@@ -110,11 +110,12 @@ def test_emit_commands_uses_toolkit_sort_helper(
     prepare_train(config)
     called = {"value": False}
 
-    def fake_sort(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def fake_sort(entries: list[Any]) -> list[Any]:
         called["value"] = True
+        assert entries
         return entries
 
-    monkeypatch.setattr("aiaccel.hpo.modelbridge.execution.sort_command_entries", fake_sort)
+    monkeypatch.setattr("aiaccel.hpo.modelbridge.execution._sort_command_entries", fake_sort)
     emit_commands(config, role="train", fmt="json")
     assert called["value"] is True
 
@@ -136,7 +137,7 @@ def test_emit_commands_rejects_plan_entry_without_role(
         emit_commands(config, role="train", fmt="json")
 
 
-def test_emit_commands_abci_uses_layout_optimize_log_path(
+def test_emit_commands_abci_uses_optimize_log_path_helper(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],
     monkeypatch: pytest.MonkeyPatch,
@@ -147,6 +148,7 @@ def test_emit_commands_abci_uses_layout_optimize_log_path(
     (tmp_path / "optimize.yaml").write_text("optimize:\n  goal: minimize\n", encoding="utf-8")
     config = load_bridge_config(payload)
     prepare_train(config)
+
     observed: dict[str, object] = {}
 
     def fake_optimize_log_path(output_dir: Path, role: str, scenario: str, run_id: int, target: str) -> Path:

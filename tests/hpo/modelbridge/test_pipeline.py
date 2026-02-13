@@ -3,15 +3,16 @@ from __future__ import annotations
 from typing import Any
 
 from collections.abc import Callable
+import inspect
 from pathlib import Path
 
 import pytest
 
+from aiaccel.hpo.modelbridge.common import StepResult, read_json
 from aiaccel.hpo.modelbridge.config import BridgeConfig, load_bridge_config
-from aiaccel.hpo.modelbridge.pipeline import run_pipeline
+import aiaccel.hpo.modelbridge.pipeline as pipeline_module
+from aiaccel.hpo.modelbridge.pipeline import run_pipeline, steps_for_profile
 from aiaccel.hpo.modelbridge.prepare import prepare_train
-from aiaccel.hpo.modelbridge.toolkit.io import read_json
-from aiaccel.hpo.modelbridge.toolkit.results import StepResult
 
 
 def _config_payload(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]) -> dict[str, Any]:
@@ -46,6 +47,20 @@ def test_run_pipeline_steps_and_profile_are_exclusive(
     config = _load_config(tmp_path, make_bridge_config)
     with pytest.raises(ValueError):
         run_pipeline(config, steps=["prepare_train"], profile="prepare")
+
+
+def test_run_pipeline_rejects_unknown_profile(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    config = _load_config(tmp_path, make_bridge_config)
+    with pytest.raises(ValueError, match="Unknown profile"):
+        run_pipeline(config, profile="invalid")
+
+
+def test_pipeline_step_dispatch_uses_explicit_registry_map() -> None:
+    assert tuple(pipeline_module.STEP_ACTIONS.keys()) == tuple(steps_for_profile("full"))
+    assert "globals().get" not in inspect.getsource(pipeline_module)
 
 
 def test_run_pipeline_full_requires_external_outputs(
@@ -208,7 +223,7 @@ def test_collect_manifest_first(
         observed["db_paths"] = [str(path) for path in db_paths]
         return [(0, {"x": 1.0}, {"y": 2.0})]
 
-    monkeypatch.setattr("aiaccel.hpo.modelbridge.collect.scan_db_paths_for_pairs", fake_scan)
+    monkeypatch.setattr("aiaccel.hpo.modelbridge.collect._pairs_from_paths", fake_scan)
     result = run_pipeline(config, steps=["collect_train"]).results[0]
     assert result.status == "success"
     assert observed["db_paths"]

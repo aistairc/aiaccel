@@ -1,67 +1,26 @@
-"""Command emission utilities for external HPO execution."""
+"""Command emission helpers for external optimize execution.
+
+This module renders deterministic command artifacts from prepared role plans.
+"""
 
 from __future__ import annotations
 
-from typing import Any, Literal, cast
+from typing import Any, cast
 
-from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
 from pathlib import Path
+import shlex
 
+from .common import (
+    CommandFormat,
+    Role,
+    Target,
+    command_path,
+    optimize_log_path,
+    plan_path,
+    read_plan,
+    write_json,
+)
 from .config import BridgeConfig, ExecutionTarget, ExecutionTargetConfig
-from .layout import Role, Target, command_path, commands_dir, optimize_log_path, optimize_logs_dir, plan_path
-from .toolkit.command_render import render_json_commands, render_shell_commands, sort_command_entries
-from .toolkit.io import read_json, write_json
-from .toolkit.job_command import wrap_with_aiaccel_job
-
-CommandFormat = Literal["shell", "json"]
-
-
-@dataclass(frozen=True)
-class PlanCommandEntry:
-    """Normalized command source parsed from plan payload."""
-
-    scenario: str
-    role: Role
-    run_id: int
-    target: Target
-    config_path: str
-
-    @classmethod
-    def from_payload(cls, payload: Mapping[str, Any]) -> PlanCommandEntry:
-        """Validate one plan entry payload."""
-        return cls(
-            scenario=_require_string(payload.get("scenario"), field_name="scenario"),
-            role=_require_role(payload.get("role")),
-            run_id=_require_run_id(payload.get("run_id")),
-            target=_require_target(payload.get("target")),
-            config_path=_require_string(payload.get("config_path"), field_name="config_path"),
-        )
-
-
-@dataclass(frozen=True)
-class CommandEntry:
-    """Typed command entry for rendered outputs."""
-
-    scenario: str
-    role: Role
-    run_id: int
-    target: Target
-    config_path: str
-    execution_target: ExecutionTarget
-    command: tuple[str, ...]
-
-    def to_payload(self) -> dict[str, Any]:
-        """Convert to JSON-serializable mapping."""
-        return {
-            "scenario": self.scenario,
-            "role": self.role,
-            "run_id": self.run_id,
-            "target": self.target,
-            "config_path": self.config_path,
-            "execution_target": self.execution_target,
-            "command": list(self.command),
-        }
 
 
 def emit_commands(
@@ -70,65 +29,50 @@ def emit_commands(
     fmt: CommandFormat,
     execution_target: ExecutionTarget | None = None,
 ) -> Path:
-    """Emit deterministic optimize commands from a role plan.
+    """Emit deterministic optimize commands from one role plan.
 
     Args:
-        config: Parsed modelbridge configuration.
-        role: Target role (`train` or `eval`).
-        fmt: Output format (`shell` or `json`).
-        execution_target: Optional execution target override (`local` or `abci`).
+        config: Validated modelbridge configuration.
+        role: Target role.
+        fmt: Command output format.
+        execution_target: Optional execution target override.
 
     Returns:
-        Path: Path to emitted command artifact.
+        Path: Written command artifact path.
 
     Raises:
-        FileNotFoundError: If the role plan file does not exist.
-        ValueError: If the plan payload is malformed.
+        FileNotFoundError: If role plan file does not exist.
+        ValueError: If plan payload is malformed.
     """
     output_dir = config.bridge.output_dir
     effective_execution = resolve_execution_config(config.bridge.execution, execution_target)
-    resolved_target = effective_execution.target
 
     source_plan = plan_path(output_dir, role)
     if not source_plan.exists():
         raise FileNotFoundError(f"Plan file not found: {source_plan}")
 
-    payload = read_json(source_plan)
-    entries_payload = payload.get("entries") if isinstance(payload, dict) else None
-    entries = _parse_plan_entries(entries_payload, role=role)
+    plan_role, entries = read_plan(source_plan)
+    if plan_role != role:
+        raise ValueError(f"Plan role mismatch: expected {role}, got {plan_role}")
     if not entries:
         raise ValueError(f"No plan entries in {source_plan}")
 
-    optimize_log_dir = effective_execution.job_log_dir
-    if optimize_log_dir is None:
-        optimize_log_dir = optimize_logs_dir(output_dir)
-    if resolved_target == "abci":
+    optimize_log_dir = effective_execution.job_log_dir or (output_dir / "workspace" / "logs" / "optimize")
+    if effective_execution.target == "abci":
         optimize_log_dir.mkdir(parents=True, exist_ok=True)
 
-    commands = _build_command_entries(
-        entries,
-        resolved_target=resolved_target,
-        execution=effective_execution,
-        output_dir=output_dir,
-        optimize_log_dir=optimize_log_dir,
-    )
+    commands = _build_command_entries(entries, effective_execution=effective_execution, output_dir=output_dir)
+    sorted_commands = _sort_command_entries(commands)
 
-    rendered_commands = sort_command_entries([item.to_payload() for item in commands])
     destination = command_path(output_dir, role, fmt)
-    commands_dir(output_dir).mkdir(parents=True, exist_ok=True)
+    destination.parent.mkdir(parents=True, exist_ok=True)
 
     if fmt == "json":
-        write_json(destination, render_json_commands(role, rendered_commands))
+        write_json(destination, {"role": role, "commands": sorted_commands})
         return destination
 
-    shell_commands: list[list[str]] = []
-    for item in rendered_commands:
-        command_tokens = item.get("command")
-        if not isinstance(command_tokens, list) or any(not isinstance(token, str) for token in command_tokens):
-            raise ValueError("Generated command payload is malformed.")
-        shell_commands.append(command_tokens)
-
-    script = render_shell_commands(shell_commands)
+    script_commands = [cast(list[str], entry["command"]) for entry in sorted_commands]
+    script = _render_shell_script(script_commands)
     destination.write_text(script, encoding="utf-8")
     destination.chmod(0o755)
     return destination
@@ -138,17 +82,17 @@ def resolve_execution_config(
     base_execution: ExecutionTargetConfig,
     execution_target: ExecutionTarget | None,
 ) -> ExecutionTargetConfig:
-    """Resolve effective execution settings for command emission.
+    """Resolve effective execution target settings.
 
     Args:
-        base_execution: Execution settings loaded from modelbridge config.
+        base_execution: Base execution settings from config.
         execution_target: Optional execution target override.
 
     Returns:
-        ExecutionTargetConfig: Effective settings for command rendering.
+        ExecutionTargetConfig: Effective execution settings.
 
     Raises:
-        ValueError: If the execution target is unsupported.
+        ValueError: If target value is unsupported.
     """
     resolved_target = execution_target or base_execution.target
     if resolved_target not in ("local", "abci"):
@@ -159,8 +103,6 @@ def resolve_execution_config(
     payload = base_execution.model_dump(mode="python")
     payload["target"] = resolved_target
 
-    # If the source target defaulted profile by target, reset it to allow
-    # target-specific defaults to be re-applied for the override target.
     if base_execution.target == "local" and base_execution.job_profile == "local" and resolved_target == "abci":
         payload["job_profile"] = None
     if base_execution.target == "abci" and base_execution.job_profile == "sge" and resolved_target == "local":
@@ -169,97 +111,90 @@ def resolve_execution_config(
     return ExecutionTargetConfig.model_validate(payload)
 
 
-def _parse_plan_entries(entries: object, *, role: Role) -> list[PlanCommandEntry]:
-    """Validate and normalize role plan entries."""
-    if entries is None:
-        return []
-    if not isinstance(entries, list):
-        raise ValueError("Plan payload has malformed entries.")
-
-    parsed_entries: list[PlanCommandEntry] = []
-    for entry in entries:
-        if not isinstance(entry, Mapping):
-            raise ValueError("Plan contains malformed entry.")
-        parsed = PlanCommandEntry.from_payload(entry)
-        if parsed.role != role:
-            raise ValueError(f"Plan entry role mismatch: expected {role}, got {parsed.role}")
-        parsed_entries.append(parsed)
-    return parsed_entries
-
-
 def _build_command_entries(
-    entries: Sequence[PlanCommandEntry],
+    entries: list[dict[str, Any]],
     *,
-    resolved_target: ExecutionTarget,
-    execution: ExecutionTargetConfig,
+    effective_execution: ExecutionTargetConfig,
     output_dir: Path,
-    optimize_log_dir: Path,
-) -> list[CommandEntry]:
-    """Build command entry payloads from plan entries."""
-    payloads: list[CommandEntry] = []
+) -> list[dict[str, Any]]:
+    """Build command entries from validated plan entries.
+
+    Args:
+        entries: Validated plan entry mappings.
+        effective_execution: Effective execution settings.
+        output_dir: Root modelbridge output directory.
+
+    Returns:
+        list[dict[str, object]]: Command entry payloads.
+    """
+    command_entries: list[dict[str, Any]] = []
+    optimize_log_dir = effective_execution.job_log_dir or (output_dir / "workspace" / "logs" / "optimize")
+
     for entry in entries:
-        payloads.append(
-            _build_command_entry(
-                entry,
-                resolved_target=resolved_target,
-                execution=execution,
-                output_dir=output_dir,
-                optimize_log_dir=optimize_log_dir,
+        role_value = cast(Role, entry["role"])
+        target_value = cast(Target, entry["target"])
+        run_id = cast(int, entry["run_id"])
+        command = ["aiaccel-hpo", "optimize", "--config", str(entry["config_path"])]
+        if effective_execution.target == "abci":
+            log_file = optimize_log_path(
+                output_dir,
+                role=role_value,
+                scenario=str(entry["scenario"]),
+                run_id=run_id,
+                target=target_value,
             )
+            wrapped_log_path = optimize_log_dir / log_file.name
+            command = _wrap_with_aiaccel_job(command, effective_execution, wrapped_log_path)
+
+        command_entries.append(
+            {
+                "scenario": str(entry["scenario"]),
+                "role": role_value,
+                "run_id": run_id,
+                "target": target_value,
+                "config_path": str(entry["config_path"]),
+                "execution_target": effective_execution.target,
+                "command": command,
+            }
         )
-    return payloads
+
+    return command_entries
 
 
-def _build_command_entry(
-    entry: PlanCommandEntry,
-    *,
-    resolved_target: ExecutionTarget,
-    execution: ExecutionTargetConfig,
-    output_dir: Path,
-    optimize_log_dir: Path,
-) -> CommandEntry:
-    """Build one command entry payload."""
-    command = ["aiaccel-hpo", "optimize", "--config", entry.config_path]
-    if resolved_target == "abci":
-        default_log_path = optimize_log_path(output_dir, entry.role, entry.scenario, entry.run_id, entry.target)
-        log_path = optimize_log_dir / default_log_path.name
-        command = wrap_with_aiaccel_job(command, execution, log_path)
-    return CommandEntry(
-        scenario=entry.scenario,
-        role=entry.role,
-        run_id=entry.run_id,
-        target=entry.target,
-        config_path=entry.config_path,
-        execution_target=resolved_target,
-        command=tuple(command),
+def _sort_command_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Sort command entries deterministically by scenario, role, run, and target."""
+
+    def _run_id(entry: dict[str, Any]) -> int:
+        value = entry.get("run_id")
+        return value if isinstance(value, int) else -1
+
+    return sorted(
+        [dict(entry) for entry in entries],
+        key=lambda item: (
+            str(item.get("scenario", "")),
+            str(item.get("role", "")),
+            _run_id(item),
+            str(item.get("target", "")),
+            str(item.get("config_path", "")),
+        ),
     )
 
 
-def _require_string(value: object, *, field_name: str) -> str:
-    """Validate non-empty string field from one plan entry."""
-    if not isinstance(value, str) or not value:
-        raise ValueError(f"Plan entry missing {field_name}.")
-    return value
+def _render_shell_script(commands: list[list[str]]) -> str:
+    """Render command list into an executable shell script text."""
+    lines = ["#!/usr/bin/env bash", "set -euo pipefail", ""]
+    lines.extend(" ".join(shlex.quote(token) for token in command) for command in commands)
+    return "\n".join(lines) + "\n"
 
 
-def _require_role(value: object) -> Role:
-    """Validate role value from one plan entry."""
-    if value not in ("train", "eval"):
-        raise ValueError("Plan entry missing role.")
-    return cast(Role, value)
-
-
-def _require_run_id(value: object) -> int:
-    """Validate run id value from one plan entry."""
-    if isinstance(value, bool):
-        raise ValueError("Plan entry has invalid run_id.")
-    if not isinstance(value, int):
-        raise ValueError("Plan entry missing run_id.")
-    return value
-
-
-def _require_target(value: object) -> Target:
-    """Validate target value from one plan entry."""
-    if value not in ("macro", "micro"):
-        raise ValueError("Plan entry missing target.")
-    return cast(Target, value)
+def _wrap_with_aiaccel_job(command: list[str], execution: ExecutionTargetConfig, log_path: Path) -> list[str]:
+    """Wrap an optimize command with ``aiaccel-job`` arguments."""
+    profile = execution.job_profile or ("sge" if execution.target == "abci" else "local")
+    wrapped = ["aiaccel-job", profile, execution.job_mode]
+    if execution.job_walltime:
+        wrapped.extend(["--walltime", execution.job_walltime])
+    wrapped.extend(list(execution.job_extra_args))
+    wrapped.append(str(log_path))
+    wrapped.append("--")
+    wrapped.extend(command)
+    return wrapped
