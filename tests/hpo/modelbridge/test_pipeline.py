@@ -219,9 +219,9 @@ def test_collect_manifest_first(
         _scenario: Any,
         _role: str,
         db_paths: list[Path],
-    ) -> list[tuple[int, dict[str, float], dict[str, float]]]:
+    ) -> tuple[list[tuple[int, dict[str, float], dict[str, float]]], list[dict[str, Any]]]:
         observed["db_paths"] = [str(path) for path in db_paths]
-        return [(0, {"x": 1.0}, {"y": 2.0})]
+        return [(0, {"x": 1.0}, {"y": 2.0})], []
 
     monkeypatch.setattr("aiaccel.hpo.modelbridge.collect._pairs_from_paths", fake_scan)
     result = run_pipeline(config, steps=["collect_train"]).results[0]

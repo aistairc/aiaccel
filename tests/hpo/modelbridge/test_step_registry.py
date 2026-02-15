@@ -8,7 +8,7 @@ import aiaccel.hpo.modelbridge.pipeline as pipeline_module
 from aiaccel.hpo.modelbridge.pipeline import (
     PIPELINE_PROFILES,
     STEP_ACTIONS,
-    STEP_NAME_BY_CLI_COMMAND,
+    STEP_DEFINITIONS,
     STEP_SPECS,
     normalize_steps,
     steps_for_profile,
@@ -43,9 +43,12 @@ def test_normalize_steps_rejects_unknown_step() -> None:
         normalize_steps(["unknown_step"])
 
 
-def test_cli_step_mapping_matches_registry_specs() -> None:
-    expected = {cli_command: step_name for step_name, cli_command, _profiles in STEP_SPECS}
-    assert expected == STEP_NAME_BY_CLI_COMMAND
+def test_step_specs_are_derived_from_definitions() -> None:
+    expected = tuple(
+        (step_name, cli_command, profiles)
+        for step_name, cli_command, profiles, _action in STEP_DEFINITIONS
+    )
+    assert expected == STEP_SPECS
 
 
 def test_pipeline_profile_choices_are_canonical() -> None:
@@ -65,3 +68,4 @@ def test_pipeline_module_has_no_legacy_registry_symbols() -> None:
     assert not hasattr(pipeline_module, "STEP_BY_NAME")
     assert not hasattr(pipeline_module, "STEP_BY_CLI_COMMAND")
     assert not hasattr(pipeline_module, "valid_steps")
+    assert not hasattr(pipeline_module, "STEP_NAME_BY_CLI_COMMAND")

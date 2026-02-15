@@ -6,7 +6,6 @@ from typing import Any, cast
 
 import argparse
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
 import json
 import logging
 import os
@@ -19,54 +18,8 @@ from aiaccel.hpo.modelbridge.pipeline import PIPELINE_PROFILES, STEP_SPECS
 Handler = Callable[[argparse.Namespace, Any, BridgeConfig | None], None]
 
 
-@dataclass(frozen=True)
-class CliOverridePatch:
-    """Typed CLI override patch mapped onto modelbridge config overrides.
-
-    Args:
-        output_dir: Optional output directory override.
-        json_log: Whether JSON logging is enabled.
-        emit_on_prepare: Whether prepare should emit command scripts.
-        execution_target: Optional execution target override.
-    """
-
-    output_dir: str | None = None
-    json_log: bool = False
-    emit_on_prepare: bool = False
-    execution_target: ExecutionTarget | None = None
-
-    def to_overrides(self) -> dict[str, object]:
-        """Render this patch into nested config override mapping.
-
-        Returns:
-            dict[str, object]: Nested override mapping payload.
-        """
-        bridge: dict[str, object] = {}
-        if self.output_dir is not None:
-            bridge["output_dir"] = self.output_dir
-        if self.json_log:
-            bridge["json_log"] = True
-
-        execution: dict[str, object] = {}
-        if self.emit_on_prepare:
-            execution["emit_on_prepare"] = True
-        if self.execution_target is not None:
-            execution["target"] = self.execution_target
-        if execution:
-            bridge["execution"] = execution
-
-        return {"bridge": bridge} if bridge else {}
-
-
 def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Parse CLI arguments.
-
-    Args:
-        argv: Optional CLI argument sequence.
-
-    Returns:
-        argparse.Namespace: Parsed CLI namespace.
-    """
+    """Parse CLI arguments."""
     parser = argparse.ArgumentParser(description="Run aiaccel modelbridge")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -109,13 +62,7 @@ def _add_common_args(
     include_run_args: bool,
     include_logging: bool = True,
 ) -> None:
-    """Add shared CLI argument groups to a parser.
-
-    Args:
-        parser: Target parser to extend.
-        include_run_args: Whether to include run-specific options.
-        include_logging: Whether to include logging options.
-    """
+    """Add shared argument groups."""
     io_group = parser.add_argument_group("Input/Output")
     io_group.add_argument("--config", "-c", required=True, help="Path to modelbridge config")
     io_group.add_argument("--output_dir", "-o", help="Override output directory")
@@ -157,43 +104,46 @@ def _parse_override_pairs(values: Sequence[str] | None) -> dict[str, object]:
         if "=" not in raw:
             raise SystemExit(f"Invalid override '{raw}'. Use key=value.")
         key, raw_value = raw.split("=", 1)
-        _assign_override(overrides, key.split("."), _coerce_value(raw_value))
+        _set_override(overrides, key.split("."), _coerce_value(raw_value))
     return overrides
 
 
-def _assign_override(payload: dict[str, object], path: list[str], value: object) -> None:
-    """Assign a value to nested mapping path."""
+def _set_override(payload: dict[str, object], path: list[str], value: object) -> None:
+    """Set one nested override value."""
     cursor: dict[str, object] = payload
-    for index, segment in enumerate(path):
-        if index == len(path) - 1:
-            cursor[segment] = value
-            return
-        existing = cursor.get(segment)
-        if existing is None:
-            cursor[segment] = {}
-            cursor = cursor[segment]  # type: ignore[assignment]
-            continue
-        if not isinstance(existing, dict):
+    for segment in path[:-1]:
+        current = cursor.get(segment)
+        if current is None:
+            current = {}
+            cursor[segment] = current
+        if not isinstance(current, dict):
             raise SystemExit(f"Override path '{'.'.join(path)}' conflicts with scalar value")
-        cursor = existing
+        cursor = cast(dict[str, object], current)
+    cursor[path[-1]] = value
 
 
 def _coerce_value(raw: str) -> object:
-    """Coerce CLI override string to JSON/bool/string value."""
+    """Coerce CLI override string to JSON value when possible."""
     try:
         return json.loads(raw)
-    except Exception:
-        lowered = raw.lower()
+    except json.JSONDecodeError:
+        lowered = raw.strip().lower()
         if lowered in {"true", "false"}:
             return lowered == "true"
         return raw
 
 
-def _build_cli_override_patch(args: argparse.Namespace, *, command: str) -> CliOverridePatch:
-    """Build typed override patch from CLI flags."""
-    emit_on_prepare = False
-    execution_target: ExecutionTarget | None = None
+def _build_cli_override_patch(args: argparse.Namespace, *, command: str) -> dict[str, object]:
+    """Build override mapping from CLI options."""
+    bridge: dict[str, object] = {}
+    output_dir = getattr(args, "output_dir", None)
+    if output_dir is not None:
+        bridge["output_dir"] = output_dir
+    if bool(getattr(args, "json_log", False)):
+        bridge["json_log"] = True
 
+    execution_target: ExecutionTarget | None = None
+    emit_on_prepare = False
     if command == "run":
         emit_on_prepare = bool(getattr(args, "prepare_emit_commands", False))
         execution_target = cast(ExecutionTarget | None, getattr(args, "prepare_execution_target", None))
@@ -201,23 +151,14 @@ def _build_cli_override_patch(args: argparse.Namespace, *, command: str) -> CliO
         emit_on_prepare = bool(getattr(args, "emit_commands", False))
         execution_target = cast(ExecutionTarget | None, getattr(args, "execution_target", None))
 
-    return CliOverridePatch(
-        output_dir=getattr(args, "output_dir", None),
-        json_log=bool(getattr(args, "json_log", False)),
-        emit_on_prepare=emit_on_prepare,
-        execution_target=execution_target,
-    )
-
-
-def _apply_cli_override_patch(
-    overrides: dict[str, object],
-    patch: CliOverridePatch,
-) -> dict[str, object]:
-    """Apply typed CLI override patch over parsed ``--set`` overrides."""
-    patch_mapping = patch.to_overrides()
-    if not patch_mapping:
-        return overrides
-    return deep_merge_mappings(overrides, patch_mapping)
+    execution: dict[str, object] = {}
+    if emit_on_prepare:
+        execution["emit_on_prepare"] = True
+    if execution_target is not None:
+        execution["target"] = execution_target
+    if execution:
+        bridge["execution"] = execution
+    return {"bridge": bridge} if bridge else {}
 
 
 def _parse_steps(raw_steps: str | None) -> list[str] | None:
@@ -247,8 +188,7 @@ def _handle_schema(_args: argparse.Namespace, _logger: Any, _config: BridgeConfi
 
 def _handle_validate(args: argparse.Namespace, logger: Any, config: BridgeConfig | None) -> None:
     """Handle validate command."""
-    if config is None:
-        raise SystemExit("validate requires loaded config")
+    config = _require_config(config, command="validate")
     if getattr(args, "print_config", False):
         print(json.dumps(config.model_dump(mode="json"), indent=2, default=str))
     logger.info("Configuration validated successfully.")
@@ -256,8 +196,7 @@ def _handle_validate(args: argparse.Namespace, logger: Any, config: BridgeConfig
 
 def _handle_run(args: argparse.Namespace, logger: Any, config: BridgeConfig | None) -> None:
     """Handle run command."""
-    if config is None:
-        raise SystemExit("run requires loaded config")
+    config = _require_config(config, command="run")
 
     steps = _parse_steps(args.steps)
     profile = args.profile
@@ -280,8 +219,7 @@ def _handle_run(args: argparse.Namespace, logger: Any, config: BridgeConfig | No
 
 def _handle_step(args: argparse.Namespace, logger: Any, config: BridgeConfig | None) -> None:
     """Handle one explicit step command."""
-    if config is None:
-        raise SystemExit(f"{args.command} requires loaded config")
+    config = _require_config(config, command=str(args.command))
 
     step_name = args.step_name
     train_paths: list[Path] | None = None
@@ -302,8 +240,7 @@ def _handle_step(args: argparse.Namespace, logger: Any, config: BridgeConfig | N
 
 def _handle_emit_commands(args: argparse.Namespace, logger: Any, config: BridgeConfig | None) -> None:
     """Handle emit-commands command."""
-    if config is None:
-        raise SystemExit("emit-commands requires loaded config")
+    config = _require_config(config, command="emit-commands")
 
     path = api.emit_commands_step(
         config,
@@ -316,13 +253,13 @@ def _handle_emit_commands(args: argparse.Namespace, logger: Any, config: BridgeC
 
 
 def main(argv: Sequence[str] | None = None) -> None:
-    """Run modelbridge CLI.
+    """Run modelbridge CLI entrypoint.
 
     Args:
         argv: Optional CLI argument sequence.
 
     Raises:
-        SystemExit: When command execution fails.
+        SystemExit: Raised with non-zero status when command handling fails.
     """
     args = _parse_args(argv)
     logger = logging.getLogger(__name__)
@@ -336,13 +273,19 @@ def main(argv: Sequence[str] | None = None) -> None:
 
         config_path = Path(args.config).expanduser().resolve()
         cli_overrides = _parse_override_pairs(getattr(args, "overrides", None))
-        override_patch = _build_cli_override_patch(args, command=args.command)
-        cli_overrides = _apply_cli_override_patch(cli_overrides, override_patch)
+        cli_overrides = deep_merge_mappings(cli_overrides, _build_cli_override_patch(args, command=args.command))
         bridge_config = api.load_config(config_path, overrides=cli_overrides)
         handler(args, logger, bridge_config)
     except Exception as exc:
         logger.error("modelbridge failed: %s", exc)
         raise SystemExit(1) from exc
+
+
+def _require_config(config: BridgeConfig | None, *, command: str) -> BridgeConfig:
+    """Return loaded config or raise a command-specific error."""
+    if config is None:
+        raise SystemExit(f"{command} requires loaded config")
+    return config
 
 
 if __name__ == "__main__":

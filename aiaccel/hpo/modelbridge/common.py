@@ -61,7 +61,7 @@ class StepResult:
         status: Step execution status.
         inputs: Input payload summary.
         outputs: Output payload summary.
-        reason: Optional reason for failed/skipped/partial cases.
+        reason: Optional reason for non-success statuses.
         timestamp: RFC3339 timestamp.
     """
 
@@ -73,19 +73,15 @@ class StepResult:
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def __post_init__(self) -> None:
-        """Validate required ``reason`` for failed/skipped statuses.
-
-        Raises:
-            ValueError: If ``reason`` is missing.
-        """
+        """Validate reason requirement for failed/skipped results."""
         if self.status in {"failed", "skipped"} and (self.reason is None or not self.reason.strip()):
             raise ValueError("reason is required when status is failed or skipped")
 
     def to_state(self) -> dict[str, Any]:
-        """Convert to JSON-serializable state payload.
+        """Return JSON-serializable state payload.
 
         Returns:
-            dict[str, Any]: State payload.
+            dict[str, Any]: Persistable state mapping.
         """
         payload: dict[str, Any] = {
             "step": self.step,
@@ -115,112 +111,43 @@ class PipelineResult:
 
 
 def workspace_path(output_dir: Path) -> Path:
-    """Return workspace directory path under output root.
-
-    Args:
-        output_dir: Root output directory.
-
-    Returns:
-        Path: ``<output_dir>/workspace`` path.
-    """
+    """Return `workspace` directory path under output root."""
     return output_dir / "workspace"
 
 
 def scenario_path(output_dir: Path, scenario: str) -> Path:
-    """Return one scenario output directory path.
-
-    Args:
-        output_dir: Root output directory.
-        scenario: Scenario name.
-
-    Returns:
-        Path: ``<output_dir>/<scenario>`` path.
-    """
+    """Return scenario output directory path."""
     return output_dir / scenario
 
 
 def run_path(scenario_dir: Path, role: Role, run_id: int, target: Target) -> Path:
-    """Return run-level output directory path.
-
-    Args:
-        scenario_dir: Scenario output directory.
-        role: Run role.
-        run_id: Zero-based run index.
-        target: Optimization target.
-
-    Returns:
-        Path: Run output directory path.
-    """
+    """Return per-run/target directory path for one scenario."""
     return scenario_dir / "runs" / role / f"{run_id:03d}" / target
 
 
 def plan_path(output_dir: Path, role: Role) -> Path:
-    """Return plan file path for one role.
-
-    Args:
-        output_dir: Root output directory.
-        role: Plan role.
-
-    Returns:
-        Path: Role plan path.
-    """
+    """Return role plan file path."""
     return workspace_path(output_dir) / f"{role}_plan.json"
 
 
 def state_path(output_dir: Path, step: str) -> Path:
-    """Return persisted step-state path.
-
-    Args:
-        output_dir: Root output directory.
-        step: Step name.
-
-    Returns:
-        Path: State JSON path.
-    """
+    """Return per-step state file path."""
     return workspace_path(output_dir) / "state" / f"{step}.json"
 
 
 def command_path(output_dir: Path, role: Role, fmt: CommandFormat) -> Path:
-    """Return emitted command artifact path.
-
-    Args:
-        output_dir: Root output directory.
-        role: Role for emitted commands.
-        fmt: Command output format.
-
-    Returns:
-        Path: Command artifact path.
-    """
-    return workspace_path(output_dir) / "commands" / f"{role}.{'sh' if fmt == 'shell' else 'json'}"
+    """Return command artifact path for one role and format."""
+    suffix = "sh" if fmt == "shell" else "json"
+    return workspace_path(output_dir) / "commands" / f"{role}.{suffix}"
 
 
 def optimize_log_path(output_dir: Path, role: Role, scenario: str, run_id: int, target: Target) -> Path:
-    """Return optimize log path for one run/target.
-
-    Args:
-        output_dir: Root output directory.
-        role: Run role.
-        scenario: Scenario name.
-        run_id: Zero-based run index.
-        target: Optimization target.
-
-    Returns:
-        Path: Optimize log file path.
-    """
+    """Return optimize log path for one role/scenario/run/target."""
     return workspace_path(output_dir) / "logs" / "optimize" / f"{role}-{scenario}-{run_id:03d}-{target}.log"
 
 
 def setup_logging(log_level: str, output_dir: Path, *, json_logs: bool = False) -> Path:
-    """Configure root logging handlers for modelbridge runtime.
-
-    Args:
-        log_level: Logging level name.
-        output_dir: Root output directory for log file emission.
-        json_logs: Whether to use JSON-formatted logs.
-
-    Returns:
-        Path: Path to file log destination.
-    """
+    """Configure root logging handlers for modelbridge runtime."""
     output_dir.mkdir(parents=True, exist_ok=True)
     log_path = output_dir / "aiaccel_modelbridge.log"
 
@@ -249,15 +176,7 @@ def setup_logging(log_level: str, output_dir: Path, *, json_logs: bool = False) 
 
 
 def write_json(path: Path, payload: Any) -> Path:
-    """Write JSON payload to path with UTF-8 encoding.
-
-    Args:
-        path: Destination JSON path.
-        payload: JSON-serializable payload.
-
-    Returns:
-        Path: Written path.
-    """
+    """Write JSON payload with UTF-8 encoding."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2, ensure_ascii=False)
@@ -265,28 +184,13 @@ def write_json(path: Path, payload: Any) -> Path:
 
 
 def read_json(path: Path) -> Any:
-    """Read JSON payload from path.
-
-    Args:
-        path: Source JSON path.
-
-    Returns:
-        Any: Decoded JSON payload.
-    """
+    """Read UTF-8 JSON file and return decoded payload."""
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
 
 
 def write_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> Path:
-    """Write row mappings to CSV file.
-
-    Args:
-        path: Destination CSV path.
-        rows: CSV rows keyed by column name.
-
-    Returns:
-        Path: Written path.
-    """
+    """Write row mappings as CSV with sorted header keys."""
     path.parent.mkdir(parents=True, exist_ok=True)
     if not rows:
         path.write_text("", encoding="utf-8")
@@ -301,28 +205,13 @@ def write_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> Path:
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
-    """Read CSV file into a list of dictionaries.
-
-    Args:
-        path: Source CSV path.
-
-    Returns:
-        list[dict[str, str]]: Parsed CSV rows.
-    """
+    """Read CSV file as list of row dictionaries."""
     with path.open("r", newline="", encoding="utf-8") as handle:
         return [dict(row) for row in csv.DictReader(handle)]
 
 
 def hash_file(path: Path, algorithm: str = "sha256") -> str:
-    """Compute file hash digest.
-
-    Args:
-        path: Input file path.
-        algorithm: Hash algorithm name accepted by ``hashlib.new``.
-
-    Returns:
-        str: Hex digest string.
-    """
+    """Return file hex digest."""
     hasher = hashlib.new(algorithm)
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(8192), b""):
@@ -331,21 +220,7 @@ def hash_file(path: Path, algorithm: str = "sha256") -> str:
 
 
 def resolve_seed(policy: SeedPolicyConfig, *, role: Role, target: Target, run_id: int, fallback_base: int) -> int:
-    """Resolve deterministic seed for one role/target/run.
-
-    Args:
-        policy: Seed policy definition.
-        role: Run role.
-        target: Optimization target.
-        run_id: Zero-based run index.
-        fallback_base: Default seed base for auto-increment mode.
-
-    Returns:
-        int: Resolved seed value.
-
-    Raises:
-        ValueError: If user-defined mode is configured with missing values.
-    """
+    """Resolve deterministic seed for one role/target/run."""
     if policy.mode == "auto_increment":
         base = fallback_base if policy.base is None else policy.base
         return base + _GROUP_INDEX[(role, target)] * _OFFSET + run_id
@@ -358,25 +233,15 @@ def resolve_seed(policy: SeedPolicyConfig, *, role: Role, target: Target, run_id
 
 
 def read_plan(path: Path) -> tuple[Role, list[dict[str, Any]]]:
-    """Read and validate one role plan file.
-
-    Args:
-        path: Plan file path.
-
-    Returns:
-        tuple[Role, list[dict[str, Any]]]: Plan role and normalized entries.
-
-    Raises:
-        ValueError: If plan payload is malformed.
-    """
+    """Read and validate one role plan file."""
     payload = read_json(path)
     if not isinstance(payload, Mapping):
         raise ValueError(f"Malformed plan payload: {path}")
 
-    role_raw = payload.get("role")
-    if role_raw not in {"train", "eval"}:
+    role_value = payload.get("role")
+    if role_value not in {"train", "eval"}:
         raise ValueError(f"Malformed plan role: {path}")
-    role = cast(Role, role_raw)
+    role = cast(Role, role_value)
 
     entries_raw = payload.get("entries")
     if not isinstance(entries_raw, list):
@@ -390,19 +255,13 @@ def read_plan(path: Path) -> tuple[Role, list[dict[str, Any]]]:
     return role, entries
 
 
-def _normalize_plan_entry(entry: Mapping[str, Any], *, source: str) -> dict[str, Any]:  # noqa: C901
-    """Validate one plan entry payload and normalize field values."""
+def _normalize_plan_entry(entry: Mapping[str, Any], *, source: str) -> dict[str, Any]:
+    """Normalize one raw plan entry mapping."""
     normalized: dict[str, Any] = {}
     for key in _PLAN_STRING_FIELDS:
-        value = entry.get(key)
-        if not isinstance(value, str) or not value:
-            raise ValueError(f"Malformed plan entry field '{key}': {source}")
-        normalized[key] = value
+        normalized[key] = _require_non_empty_str(entry, key, source)
     for key in _PLAN_INT_FIELDS:
-        value = entry.get(key)
-        if not isinstance(value, int) or isinstance(value, bool) or (key == "run_id" and value < 0):
-            raise ValueError(f"Malformed plan entry field '{key}': {source}")
-        normalized[key] = value
+        normalized[key] = _require_int(entry, key, source, non_negative=(key == "run_id"))
     for key in _PLAN_MODE_FIELDS:
         value = entry.get(key)
         if value not in _PLAN_MODES:
@@ -423,16 +282,26 @@ def _normalize_plan_entry(entry: Mapping[str, Any], *, source: str) -> dict[str,
     return normalized
 
 
+def _require_non_empty_str(entry: Mapping[str, Any], key: str, source: str) -> str:
+    """Validate and return one non-empty string field."""
+    value = entry.get(key)
+    if isinstance(value, str) and value:
+        return value
+    raise ValueError(f"Malformed plan entry field '{key}': {source}")
+
+
+def _require_int(entry: Mapping[str, Any], key: str, source: str, *, non_negative: bool) -> int:
+    """Validate and return one integer field."""
+    value = entry.get(key)
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise ValueError(f"Malformed plan entry field '{key}': {source}")
+    if non_negative and value < 0:
+        raise ValueError(f"Malformed plan entry field '{key}': {source}")
+    return value
+
+
 def write_step_state(output_dir: Path, result: StepResult) -> Path:
-    """Persist one step result as state JSON.
-
-    Args:
-        output_dir: Root output directory.
-        result: Step result payload.
-
-    Returns:
-        Path: Written state path.
-    """
+    """Persist one step result payload under workspace state."""
     return write_json(state_path(output_dir, result.step), result.to_state())
 
 
@@ -446,52 +315,29 @@ def finalize_scenario_step(
     inputs: Mapping[str, Any] | None = None,
     extra_outputs: Mapping[str, Any] | None = None,
 ) -> StepResult:
-    """Finalize per-scenario step status and persist state.
-
-    Args:
-        output_dir: Root output directory.
-        step: Step name.
-        strict_mode: Whether issues should fail immediately.
-        scenario_outputs: Scenario-level output payloads.
-        issues: Collected issue messages.
-        inputs: Optional step input summary.
-        extra_outputs: Optional extra output fields.
-
-    Returns:
-        StepResult: Finalized step result.
-
-    Raises:
-        RuntimeError: If ``strict_mode`` is enabled and issues exist.
-    """
-    normalized = {name: dict(payload) for name, payload in scenario_outputs.items()}
-    outputs: dict[str, Any] = {"scenarios": normalized}
+    """Finalize per-scenario status and persist step state."""
+    outputs: dict[str, Any] = {"scenarios": {name: dict(payload) for name, payload in scenario_outputs.items()}}
     if extra_outputs:
         outputs.update(dict(extra_outputs))
 
-    success_count = sum(1 for payload in normalized.values() if payload.get("status") == "success")
+    success_count = sum(1 for payload in outputs["scenarios"].values() if payload.get("status") == "success")
     issue_list = list(issues)
-    joined_issues = "; ".join(issue_list)
-    if issue_list and strict_mode:
-        failed = StepResult(
-            step=step,
-            status="failed",
-            inputs=dict(inputs or {}),
-            outputs=outputs,
-            reason=joined_issues,
-        )
-        write_step_state(output_dir, failed)
-        raise RuntimeError(joined_issues)
+    issue_text = "; ".join(issue_list)
 
-    reason: str | None
-    if success_count == len(normalized):
+    if issue_list and strict_mode:
+        failed = StepResult(step=step, status="failed", inputs=dict(inputs or {}), outputs=outputs, reason=issue_text)
+        write_step_state(output_dir, failed)
+        raise RuntimeError(issue_text)
+
+    reason: str | None = None
+    if success_count == len(outputs["scenarios"]):
         status: StepStatus = "success"
-        reason = None
     elif success_count == 0:
         status = "skipped"
-        reason = joined_issues if joined_issues else f"{step} skipped"
+        reason = issue_text or f"{step} skipped"
     else:
         status = "partial"
-        reason = joined_issues
+        reason = issue_text
 
     result = StepResult(step=step, status=status, inputs=dict(inputs or {}), outputs=outputs, reason=reason)
     write_step_state(output_dir, result)

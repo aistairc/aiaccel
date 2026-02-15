@@ -15,13 +15,13 @@ seeds:
   macro_test: 0
 samplers:
   micro: random
-  macro_train: cmaes
-  macro_test: cmaes
+  macro_train: random
+  macro_test: random
 scaling:
   sigma_scale: [97.0, 3.0]
   mu_scale: 300.0
   pi_complement: true
 mas_bench_jar: ./work/tmp/MAS-Bench.jar
 dataset_root: ./work/tmp/masbench-resources/Dataset
-allow_mock: false
+allow_mock: true
 output_root: ./work/modelbridge/data_assimilation

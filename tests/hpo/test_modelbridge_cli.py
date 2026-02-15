@@ -95,8 +95,7 @@ def test_cli_override_patch_build_and_render() -> None:
         ]
     )
     patch = cli_module._build_cli_override_patch(args, command="run")
-    assert isinstance(patch, cli_module.CliOverridePatch)
-    assert patch.to_overrides() == {
+    assert patch == {
         "bridge": {
             "output_dir": "outdir",
             "json_log": True,
@@ -106,10 +105,9 @@ def test_cli_override_patch_build_and_render() -> None:
 
 
 def test_cli_override_patch_merges_with_set_overrides() -> None:
-    patch = cli_module.CliOverridePatch(json_log=True, execution_target="abci")
-    merged = cli_module._apply_cli_override_patch(
+    merged = deep_merge_mappings(
         {"bridge": {"seed": 42, "execution": {"job_mode": "cpu"}}},
-        patch,
+        {"bridge": {"json_log": True, "execution": {"target": "abci"}}},
     )
     assert merged == {
         "bridge": {
@@ -122,11 +120,48 @@ def test_cli_override_patch_merges_with_set_overrides() -> None:
 
 def test_cli_override_patch_uses_config_merge_policy() -> None:
     base = {"bridge": {"execution": {"job_mode": "cpu"}, "seed": 1}}
-    patch = cli_module.CliOverridePatch(json_log=True, execution_target="abci")
-    merged = cli_module._apply_cli_override_patch(base, patch)
-
-    expected = deep_merge_mappings(base, patch.to_overrides())
+    patch = {"bridge": {"json_log": True, "execution": {"target": "abci"}}}
+    merged = deep_merge_mappings(base, patch)
+    expected = deep_merge_mappings(base, patch)
     assert merged == expected
+
+
+def test_cli_override_coerce_value_boolean_fallback() -> None:
+    overrides = cli_module._parse_override_pairs(
+        [
+            "hpo.macro_overrides.flag_upper=True",
+            "hpo.macro_overrides.flag_lower=false",
+            "hpo.micro_overrides.flag_mixed=FaLsE",
+        ]
+    )
+    assert overrides["hpo"]["macro_overrides"]["flag_upper"] is True
+    assert overrides["hpo"]["macro_overrides"]["flag_lower"] is False
+    assert overrides["hpo"]["micro_overrides"]["flag_mixed"] is False
+
+
+def test_modelbridge_cli_set_hpo_override_boolean_preserves_bool_type(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    config_path = _write_config(tmp_path, make_bridge_config)
+    with patch("aiaccel.hpo.apps.modelbridge.api.run") as mock_run:
+        cli_main(
+            [
+                "run",
+                "--config",
+                str(config_path),
+                "--profile",
+                "prepare",
+                "--set",
+                "hpo.macro_overrides.enable_feature=True",
+                "--set",
+                "hpo.micro_overrides.use_cache=FALSE",
+            ]
+        )
+
+        bridge_config = mock_run.call_args[0][0]
+        assert bridge_config.hpo.macro_overrides["enable_feature"] is True
+        assert bridge_config.hpo.micro_overrides["use_cache"] is False
 
 
 def test_modelbridge_cli_collect_train_db_paths(

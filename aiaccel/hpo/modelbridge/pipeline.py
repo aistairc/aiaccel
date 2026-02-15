@@ -26,60 +26,102 @@ StepName = Literal[
 PipelineProfile = Literal["prepare", "analyze", "full"]
 PIPELINE_PROFILES: tuple[PipelineProfile, ...] = ("prepare", "analyze", "full")
 
-STEP_SPECS: tuple[tuple[StepName, str, tuple[PipelineProfile, ...]], ...] = (
-    ("prepare_train", "prepare-train", ("prepare", "full")),
-    ("prepare_eval", "prepare-eval", ("prepare", "full")),
-    ("collect_train", "collect-train", ("analyze", "full")),
-    ("collect_eval", "collect-eval", ("analyze", "full")),
-    ("fit_regression", "fit-regression", ("analyze", "full")),
-    ("evaluate_model", "evaluate-model", ("analyze", "full")),
-    ("publish_summary", "publish-summary", ("analyze", "full")),
-)
-STEP_NAME_BY_CLI_COMMAND: dict[str, StepName] = {cli: step for step, cli, _profiles in STEP_SPECS}
+StepAction = Callable[
+    [
+        BridgeConfig,
+        tuple[Path, ...],
+        tuple[Path, ...],
+        tuple[tuple[Path, Path], ...],
+        tuple[tuple[Path, Path], ...],
+    ],
+    StepResult,
+]
+StepDefinition = tuple[StepName, str, tuple[PipelineProfile, ...], StepAction]
 
-STEP_ACTIONS: dict[StepName, Callable[..., StepResult]] = {
-    "prepare_train": lambda config, _tp, _ep, _tpp, _epp: prepare_train(config),
-    "prepare_eval": lambda config, _tp, _ep, _tpp, _epp: prepare_eval(config),
-    "collect_train": lambda config, train_paths, _ep, train_pairs, _epp: collect_train(
-        config,
-        db_paths=train_paths or None,
-        db_pairs=train_pairs or None,
+STEP_DEFINITIONS: tuple[StepDefinition, ...] = (
+    (
+        "prepare_train",
+        "prepare-train",
+        ("prepare", "full"),
+        lambda config, _tp, _ep, _tpp, _epp: prepare_train(config),
     ),
-    "collect_eval": lambda config, _tp, eval_paths, _tpp, eval_pairs: collect_eval(
-        config,
-        db_paths=eval_paths or None,
-        db_pairs=eval_pairs or None,
+    (
+        "prepare_eval",
+        "prepare-eval",
+        ("prepare", "full"),
+        lambda config, _tp, _ep, _tpp, _epp: prepare_eval(config),
     ),
-    "fit_regression": lambda config, _tp, _ep, _tpp, _epp: fit_regression(config),
-    "evaluate_model": lambda config, _tp, _ep, _tpp, _epp: evaluate_model(config),
-    "publish_summary": lambda config, _tp, _ep, _tpp, _epp: publish_summary(config),
+    (
+        "collect_train",
+        "collect-train",
+        ("analyze", "full"),
+        lambda config, train_paths, _ep, train_pairs, _epp: collect_train(
+            config,
+            db_paths=train_paths or None,
+            db_pairs=train_pairs or None,
+        ),
+    ),
+    (
+        "collect_eval",
+        "collect-eval",
+        ("analyze", "full"),
+        lambda config, _tp, eval_paths, _tpp, eval_pairs: collect_eval(
+            config,
+            db_paths=eval_paths or None,
+            db_pairs=eval_pairs or None,
+        ),
+    ),
+    (
+        "fit_regression",
+        "fit-regression",
+        ("analyze", "full"),
+        lambda config, _tp, _ep, _tpp, _epp: fit_regression(config),
+    ),
+    (
+        "evaluate_model",
+        "evaluate-model",
+        ("analyze", "full"),
+        lambda config, _tp, _ep, _tpp, _epp: evaluate_model(config),
+    ),
+    (
+        "publish_summary",
+        "publish-summary",
+        ("analyze", "full"),
+        lambda config, _tp, _ep, _tpp, _epp: publish_summary(config),
+    ),
+)
+
+STEP_SPECS: tuple[tuple[StepName, str, tuple[PipelineProfile, ...]], ...] = tuple(
+    (step_name, cli_command, profiles) for step_name, cli_command, profiles, _action in STEP_DEFINITIONS
+)
+STEP_DEFINITION_BY_NAME: dict[StepName, StepDefinition] = {definition[0]: definition for definition in STEP_DEFINITIONS}
+STEP_ACTIONS: dict[StepName, StepAction] = {
+    step_name: definition[3] for step_name, definition in STEP_DEFINITION_BY_NAME.items()
 }
 
 
+def _run_step(
+    step_name: StepName,
+    config: BridgeConfig,
+    train_paths: tuple[Path, ...],
+    eval_paths: tuple[Path, ...],
+    train_pairs: tuple[tuple[Path, Path], ...],
+    eval_pairs: tuple[tuple[Path, Path], ...],
+) -> StepResult:
+    """Execute one canonical step definition."""
+    definition = STEP_DEFINITION_BY_NAME.get(step_name)
+    if definition is None:
+        raise ValueError(f"Unknown step: {step_name}")
+    return definition[3](config, train_paths, eval_paths, train_pairs, eval_pairs)
+
+
 def steps_for_profile(profile: PipelineProfile) -> list[StepName]:
-    """Return ordered step names for one profile.
-
-    Args:
-        profile: Pipeline profile name.
-
-    Returns:
-        list[StepName]: Ordered step names.
-    """
+    """Return ordered step names for one profile."""
     return [step for step, _cli, profiles in STEP_SPECS if profile in profiles]
 
 
 def normalize_steps(steps: Iterable[str]) -> list[StepName]:
-    """Normalize and validate explicit step names.
-
-    Args:
-        steps: Raw step names.
-
-    Returns:
-        list[StepName]: Validated step names preserving input order.
-
-    Raises:
-        ValueError: If any step name is unknown.
-    """
+    """Normalize and validate explicit step names."""
     normalized: list[StepName] = []
     valid = set(STEP_ACTIONS)
     for step in steps:
@@ -89,7 +131,7 @@ def normalize_steps(steps: Iterable[str]) -> list[StepName]:
     return normalized
 
 
-def run_pipeline(  # noqa: C901
+def run_pipeline(
     config: BridgeConfig,
     steps: Sequence[str] | None = None,
     *,
@@ -99,24 +141,7 @@ def run_pipeline(  # noqa: C901
     train_db_pairs: Sequence[tuple[Path, Path]] | None = None,
     eval_db_pairs: Sequence[tuple[Path, Path]] | None = None,
 ) -> PipelineResult:
-    """Run selected steps or profile.
-
-    Args:
-        config: Validated modelbridge configuration.
-        steps: Optional explicit step list.
-        profile: Optional profile name.
-        train_db_paths: Optional train DB paths for collect override.
-        eval_db_paths: Optional eval DB paths for collect override.
-        train_db_pairs: Optional train DB pairs for collect override.
-        eval_db_pairs: Optional eval DB pairs for collect override.
-
-    Returns:
-        PipelineResult: Aggregated step results.
-
-    Raises:
-        ValueError: If argument combinations are invalid.
-        RuntimeError: If full profile readiness check fails.
-    """
+    """Run selected steps or profile."""
     if steps is not None and profile is not None:
         raise ValueError("steps and profile are mutually exclusive")
     if profile is not None and profile not in PIPELINE_PROFILES:
@@ -126,32 +151,17 @@ def run_pipeline(  # noqa: C901
     eval_paths = tuple(eval_db_paths or ())
     train_pairs = tuple(train_db_pairs or ())
     eval_pairs = tuple(eval_db_pairs or ())
-    if steps is not None:
-        selected = normalize_steps(steps)
-    elif profile == "full" or profile is None:
-        selected = steps_for_profile("prepare")
-    else:
-        selected = steps_for_profile(cast(PipelineProfile, profile))
+    selected = _select_steps(steps=steps, profile=profile)
 
-    results = [STEP_ACTIONS[step](config, train_paths, eval_paths, train_pairs, eval_pairs) for step in selected]
+    results = [_run_step(step, config, train_paths, eval_paths, train_pairs, eval_pairs) for step in selected]
     if profile == "full":
         _ensure_full_profile_ready(config)
         results.extend(
-            STEP_ACTIONS[step](config, train_paths, eval_paths, train_pairs, eval_pairs)
+            _run_step(step, config, train_paths, eval_paths, train_pairs, eval_pairs)
             for step in steps_for_profile("analyze")
         )
 
-    summary_path: Path | None = None
-    manifest_path: Path | None = None
-    for result in results:
-        if result.step != "publish_summary":
-            continue
-        summary = result.outputs.get("summary_path")
-        manifest = result.outputs.get("manifest_path")
-        if isinstance(summary, str):
-            summary_path = Path(summary)
-        if isinstance(manifest, str):
-            manifest_path = Path(manifest)
+    summary_path, manifest_path = _extract_publish_paths(results)
     return PipelineResult(results=results, summary_path=summary_path, manifest_path=manifest_path)
 
 
@@ -177,3 +187,28 @@ def _ensure_full_profile_ready(config: BridgeConfig) -> None:
     raise RuntimeError(
         f"Full profile requires external HPO outputs before collect/analyze; missing optuna DB files: {preview}"
     )
+
+
+def _select_steps(*, steps: Sequence[str] | None, profile: str | None) -> list[StepName]:
+    """Select canonical steps from explicit list or profile."""
+    if steps is not None:
+        return normalize_steps(steps)
+    if profile == "full" or profile is None:
+        return steps_for_profile("prepare")
+    return steps_for_profile(cast(PipelineProfile, profile))
+
+
+def _extract_publish_paths(results: Sequence[StepResult]) -> tuple[Path | None, Path | None]:
+    """Extract summary and manifest paths from publish step outputs."""
+    summary_path: Path | None = None
+    manifest_path: Path | None = None
+    for result in results:
+        if result.step != "publish_summary":
+            continue
+        summary = result.outputs.get("summary_path")
+        manifest = result.outputs.get("manifest_path")
+        if isinstance(summary, str):
+            summary_path = Path(summary)
+        if isinstance(manifest, str):
+            manifest_path = Path(manifest)
+    return summary_path, manifest_path

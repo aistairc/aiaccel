@@ -19,12 +19,12 @@ MetricName = Literal["mae", "mse", "r2"]
 
 
 def _default_metrics() -> list[MetricName]:
-    """Return default metric list for scenario settings."""
+    """Return default metric list for scenario evaluation."""
     return ["mae", "mse", "r2"]
 
 
 def _to_tokens(value: Any, *, field_name: str) -> list[str]:
-    """Normalize token input from string or sequence."""
+    """Normalize string/list values to token lists."""
     if value is None:
         return []
     if isinstance(value, str):
@@ -41,9 +41,8 @@ class ParameterBounds(BaseModel):
         low: Lower bound.
         high: Upper bound.
         step: Optional discretization step.
-        log: Whether to apply logarithmic sampling.
+        log: Whether to sample in log space.
     """
-
     model_config = ConfigDict(extra="forbid")
     low: float
     high: float
@@ -53,19 +52,19 @@ class ParameterBounds(BaseModel):
     @field_validator("high")
     @classmethod
     def _ensure_range(cls, high: float, info: ValidationInfo) -> float:
+        """Validate that upper bound is greater than lower bound."""
         if high <= info.data.get("low", high):
             raise ValueError("high must be greater than low")
         return high
 
 
 class ParameterSpace(BaseModel):
-    """Role parameter spaces.
+    """Role-specific parameter spaces.
 
     Args:
         macro: Macro-target parameter bounds.
         micro: Micro-target parameter bounds.
     """
-
     model_config = ConfigDict(extra="forbid")
     macro: dict[str, ParameterBounds] = Field(min_length=1)
     micro: dict[str, ParameterBounds] = Field(min_length=1)
@@ -84,6 +83,7 @@ class ObjectiveConfig(BaseModel):
     @field_validator("command", mode="before")
     @classmethod
     def _coerce_command(cls, value: Any) -> list[str]:
+        """Normalize and validate objective command tokens."""
         tokens = _to_tokens(value, field_name="command")
         if not tokens:
             raise ValueError("command must be provided")
@@ -94,12 +94,9 @@ class SeedUserValues(BaseModel):
     """User-defined seeds grouped by role and target.
 
     Args:
-        train_macro: Seeds for train/macro runs.
-        train_micro: Seeds for train/micro runs.
-        eval_macro: Seeds for eval/macro runs.
-        eval_micro: Seeds for eval/micro runs.
+        train_macro/train_micro: Seeds for train runs.
+        eval_macro/eval_micro: Seeds for eval runs.
     """
-
     model_config = ConfigDict(extra="forbid")
     train_macro: list[int] = Field(default_factory=list)
     train_micro: list[int] = Field(default_factory=list)
@@ -112,7 +109,7 @@ class SeedPolicyConfig(BaseModel):
 
     Args:
         mode: Seed mode.
-        base: Base seed for auto mode.
+        base: Base seed for auto-increment mode.
         user_values: Explicit seeds for user-defined mode.
     """
 
@@ -123,6 +120,7 @@ class SeedPolicyConfig(BaseModel):
 
     @model_validator(mode="after")
     def _validate_policy(self) -> SeedPolicyConfig:
+        """Validate required user values for user-defined mode."""
         if self.mode == "user_defined" and self.user_values is None:
             raise ValueError("user_values must be provided when mode=user_defined")
         return self
@@ -146,14 +144,9 @@ class ExecutionTargetConfig(BaseModel):
 
     Args:
         target: Execution target name.
-        emit_on_prepare: Whether prepare emits commands.
-        job_profile: Job launcher profile.
-        job_mode: Job launcher mode.
-        job_walltime: Optional walltime.
-        job_log_dir: Optional log directory override.
-        job_extra_args: Additional job arguments.
+        emit_on_prepare: Whether prepare should emit command artifacts.
+        job_profile/job_mode/job_walltime/job_log_dir/job_extra_args: Job launcher options.
     """
-
     model_config = ConfigDict(extra="forbid")
     target: ExecutionTarget = "local"
     emit_on_prepare: bool = False
@@ -166,10 +159,12 @@ class ExecutionTargetConfig(BaseModel):
     @field_validator("job_extra_args", mode="before")
     @classmethod
     def _coerce_extra_args(cls, value: Any) -> list[str]:
+        """Normalize extra job arguments."""
         return _to_tokens(value, field_name="job_extra_args")
 
     @model_validator(mode="after")
     def _normalize_defaults(self) -> ExecutionTargetConfig:
+        """Fill target-specific default job profile."""
         if self.job_profile is None:
             self.job_profile = "sge" if self.target == "abci" else "local"
         return self
@@ -194,6 +189,7 @@ class RegressionConfig(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def _normalize_aliases(cls, data: Any) -> Any:
+        """Map alias fields onto canonical schema keys."""
         if not isinstance(data, Mapping) or "type" not in data:
             return data
         payload = dict(data)
@@ -206,13 +202,13 @@ class ScenarioConfig(BaseModel):
 
     Args:
         name: Scenario name.
-        *_trials: Trial count per role/target.
-        train_objective: Train objective command.
-        eval_objective: Eval objective command.
+        *_trials: Trial counts for each role/target pair.
+        train_objective: Train objective command settings.
+        eval_objective: Eval objective command settings.
         train_params: Train parameter space.
         eval_params: Eval parameter space.
-        regression: Regression settings.
-        metrics: Metric names.
+        regression: Regression model settings.
+        metrics: Evaluation metric names.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -234,9 +230,9 @@ class HpoSettings(BaseModel):
 
     Args:
         base_config: Base optimize config YAML path.
-        macro_overrides: Overrides applied to macro target configs.
-        micro_overrides: Overrides applied to micro target configs.
-        abci_overrides: Additional overrides when execution target is ``abci``.
+        macro_overrides: Macro-target config overrides.
+        micro_overrides: Micro-target config overrides.
+        abci_overrides: Extra overrides for `abci` target.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -251,17 +247,13 @@ class BridgeSettings(BaseModel):
 
     Args:
         output_dir: Root output directory.
-        seed: Base seed fallback value.
-        seed_policy: Seed policies for sampler and optimizer.
-        execution: Execution target settings.
-        log_level: Root logging level name.
-        json_log: Whether to emit JSON-formatted logs.
-        train_runs: Number of train runs per scenario.
-        eval_runs: Number of eval runs per scenario.
-        strict_mode: Whether scenario issues should fail a step.
-        scenarios: Scenario configuration list.
+        seed: Fallback base seed for auto mode.
+        seed_policy/execution: Seed and execution settings.
+        log_level/json_log: Logging settings.
+        *runs: Train/eval run counts.
+        strict_mode: Whether issues fail steps.
+        scenarios: Scenario configurations.
     """
-
     model_config = ConfigDict(extra="forbid")
     output_dir: Path
     seed: int = 0
@@ -276,51 +268,41 @@ class BridgeSettings(BaseModel):
 
     @model_validator(mode="after")
     def _validate_seed_user_values_length(self) -> BridgeSettings:
-        expected = {
-            "train_macro": self.train_runs,
-            "train_micro": self.train_runs,
-            "eval_macro": self.eval_runs,
-            "eval_micro": self.eval_runs,
-        }
-        for name, policy in {
-            "sampler": self.seed_policy.sampler,
-            "optimizer": self.seed_policy.optimizer,
-        }.items():
-            if policy.mode != "user_defined":
-                continue
-            if policy.user_values is None:
-                raise ValueError(f"{name} seed policy requires user_values")
-            values = policy.user_values.model_dump()
-            for key, expected_len in expected.items():
-                actual_len = len(values[key])
-                if actual_len != expected_len:
-                    raise ValueError(f"{name} seed user_values.{key} length must be {expected_len}, got {actual_len}")
+        """Validate user-defined seed lengths against run counts."""
+        expected = {"train_macro": self.train_runs, "train_micro": self.train_runs}
+        expected.update({"eval_macro": self.eval_runs, "eval_micro": self.eval_runs})
+        _validate_seed_lengths("sampler", self.seed_policy.sampler, expected)
+        _validate_seed_lengths("optimizer", self.seed_policy.optimizer, expected)
         return self
 
 
 class BridgeConfig(BaseModel):
-    """Validated modelbridge config root.
+    """Validated modelbridge configuration root.
 
     Args:
-        bridge: Bridge runtime settings.
+        bridge: Runtime bridge settings.
         hpo: HPO generation settings.
     """
-
     model_config = ConfigDict(extra="forbid")
     bridge: BridgeSettings
     hpo: HpoSettings
 
 
+def _validate_seed_lengths(name: str, policy: SeedPolicyConfig, expected: Mapping[str, int]) -> None:
+    """Validate user-defined seed list lengths against expected run counts."""
+    if policy.mode != "user_defined":
+        return
+    if policy.user_values is None:
+        raise ValueError(f"{name} seed policy requires user_values")
+    values = policy.user_values.model_dump()
+    for key, expected_len in expected.items():
+        actual_len = len(values[key])
+        if actual_len != expected_len:
+            raise ValueError(f"{name} seed user_values.{key} length must be {expected_len}, got {actual_len}")
+
+
 def deep_merge_mappings(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
-    """Recursively merge nested mappings.
-
-    Args:
-        base: Base mapping.
-        override: Override mapping applied over ``base``.
-
-    Returns:
-        dict[str, Any]: Merged mapping payload.
-    """
+    """Recursively merge nested mappings."""
     merged: dict[str, Any] = dict(base)
     for key, value in override.items():
         current = merged.get(key)
@@ -335,14 +317,11 @@ def load_bridge_config(payload: Mapping[str, Any] | Any, overrides: Mapping[str,
     """Validate raw payload and return ``BridgeConfig``.
 
     Args:
-        payload: Raw mapping or OmegaConf payload.
-        overrides: Optional override mapping merged before validation.
+        payload: Raw payload mapping or OmegaConf object.
+        overrides: Optional override mapping.
 
     Returns:
         BridgeConfig: Validated configuration.
-
-    Raises:
-        ValueError: If payload is invalid or schema validation fails.
     """
     if OmegaConf.is_config(payload):
         payload = OmegaConf.to_container(payload, resolve=True)
@@ -357,9 +336,5 @@ def load_bridge_config(payload: Mapping[str, Any] | Any, overrides: Mapping[str,
 
 
 def generate_schema() -> dict[str, Any]:
-    """Return JSON schema for modelbridge config.
-
-    Returns:
-        dict[str, Any]: JSON schema payload.
-    """
+    """Return JSON schema for modelbridge config."""
     return BridgeConfig.model_json_schema()

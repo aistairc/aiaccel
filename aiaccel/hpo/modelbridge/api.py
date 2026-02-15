@@ -22,18 +22,7 @@ _ResultT = TypeVar("_ResultT")
 
 
 def load_config(path: Path, overrides: Mapping[str, Any] | None = None) -> BridgeConfig:
-    """Load and validate a modelbridge configuration file.
-
-    Args:
-        path: Path to modelbridge config YAML.
-        overrides: Optional override mapping.
-
-    Returns:
-        BridgeConfig: Validated config object.
-
-    Raises:
-        ValueError: If loaded payload is not a mapping.
-    """
+    """Load and validate a modelbridge configuration file."""
     setup_omegaconf()
     config_path = path.expanduser().resolve()
     parent_ctx = {"config_path": str(config_path), "config_dir": str(config_path.parent)}
@@ -59,21 +48,7 @@ def run(
     eval_db_pairs: Sequence[tuple[Path, Path]] | None = None,
     enable_logging: bool = True,
 ) -> PipelineResult:
-    """Run modelbridge steps or one profile.
-
-    Args:
-        config: Validated modelbridge config.
-        steps: Optional explicit step list.
-        profile: Optional profile name.
-        train_db_paths: Optional train DB path override.
-        eval_db_paths: Optional eval DB path override.
-        train_db_pairs: Optional train DB pair override.
-        eval_db_pairs: Optional eval DB pair override.
-        enable_logging: Whether to initialize logging.
-
-    Returns:
-        PipelineResult: Aggregated step results.
-    """
+    """Run modelbridge steps or one profile."""
     return _run_with_optional_logging(
         config,
         enable_logging=enable_logging,
@@ -98,18 +73,7 @@ def emit_commands_step(
     execution_target: ExecutionTarget | None = None,
     enable_logging: bool = True,
 ) -> Path:
-    """Emit commands for one role plan.
-
-    Args:
-        config: Validated modelbridge config.
-        role: Target role.
-        fmt: Output format.
-        execution_target: Optional execution target override.
-        enable_logging: Whether to initialize logging.
-
-    Returns:
-        Path: Written command artifact path.
-    """
+    """Emit commands for one role plan."""
     return _run_with_optional_logging(
         config,
         enable_logging=enable_logging,

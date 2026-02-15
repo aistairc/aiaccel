@@ -1,7 +1,4 @@
-"""Publish step for summary and manifest artifact generation.
-
-This module aggregates step states and scenario artifacts into final reports.
-"""
+"""Publish step for summary and manifest artifact generation."""
 
 from __future__ import annotations
 
@@ -14,14 +11,7 @@ from .config import BridgeConfig
 
 
 def publish_summary(config: BridgeConfig) -> StepResult:
-    """Aggregate scenario artifacts and emit summary/manifest JSON.
-
-    Args:
-        config: Validated modelbridge configuration.
-
-    Returns:
-        StepResult: Persisted step result for ``publish_summary``.
-    """
+    """Aggregate scenario artifacts and emit summary/manifest JSON."""
     output_dir = config.bridge.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -60,14 +50,7 @@ def publish_summary(config: BridgeConfig) -> StepResult:
 
 
 def _load_states(output_dir: Path) -> dict[str, Any]:
-    """Load previously written step state JSON files.
-
-    Args:
-        output_dir: Root modelbridge output directory.
-
-    Returns:
-        dict[str, Any]: Step state payloads keyed by step name.
-    """
+    """Load previously written step state JSON files."""
     state_dir = output_dir / "workspace" / "state"
     if not state_dir.exists():
         return {}
@@ -75,14 +58,7 @@ def _load_states(output_dir: Path) -> dict[str, Any]:
 
 
 def _count_csv_rows(path: Path) -> int:
-    """Count CSV data rows excluding header line.
-
-    Args:
-        path: CSV file path.
-
-    Returns:
-        int: Number of data rows.
-    """
+    """Count CSV data rows excluding header line."""
     if not path.exists():
         return 0
     with path.open("r", encoding="utf-8") as handle:
@@ -90,14 +66,7 @@ def _count_csv_rows(path: Path) -> int:
 
 
 def _collect_artifacts(output_dir: Path) -> list[dict[str, Any]]:
-    """Collect hash and size metadata for non-log output files.
-
-    Args:
-        output_dir: Root modelbridge output directory.
-
-    Returns:
-        list[dict[str, Any]]: Artifact metadata list.
-    """
+    """Collect hash and size metadata for non-log output files."""
     artifacts: list[dict[str, Any]] = []
     for path in sorted(output_dir.rglob("*")):
         if not path.is_file() or path.suffix == ".log":

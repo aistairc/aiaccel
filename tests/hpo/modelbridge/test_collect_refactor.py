@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 import aiaccel.hpo.modelbridge.collect as collect_module
-from aiaccel.hpo.modelbridge.common import StepResult
+from aiaccel.hpo.modelbridge.common import StepResult, read_json
 from aiaccel.hpo.modelbridge.config import BridgeConfig, load_bridge_config
 
 
@@ -30,7 +30,7 @@ def test_collect_train_uses_finalize_helper(
     monkeypatch.setattr(
         collect_module,
         "_collect_pairs_for_scenario",
-        lambda **_kwargs: ([], "stubbed"),
+        lambda **_kwargs: ([], "stubbed", []),
     )
 
     def fake_finalize(
@@ -64,3 +64,24 @@ def test_collect_train_uses_finalize_helper(
     assert observed["called"] is True
     assert observed["step"] == "collect_train"
     assert result.status == "skipped"
+
+
+def test_collect_train_strict_failure_includes_db_path_diagnostics(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    payload = make_bridge_config(str(tmp_path / "outputs"))
+    payload["bridge"]["strict_mode"] = True
+    payload["hpo"]["base_config"] = str(tmp_path / "optimize.yaml")
+    (tmp_path / "optimize.yaml").write_text("optimize:\n  goal: minimize\n", encoding="utf-8")
+    config = load_bridge_config(payload)
+
+    missing_db_path = tmp_path / "missing.db"
+    with pytest.raises(RuntimeError, match="db_path="):
+        collect_module.collect_train(config, db_paths=[missing_db_path])
+
+    state = read_json(config.bridge.output_dir / "workspace" / "state" / "collect_train.json")
+    scenario_name = config.bridge.scenarios[0].name
+    diagnostics = state["outputs"]["scenarios"][scenario_name]["diagnostics"]
+    assert diagnostics
+    assert diagnostics[0]["db_path"] == str(missing_db_path)

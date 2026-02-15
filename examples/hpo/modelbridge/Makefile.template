@@ -6,7 +6,8 @@ MODELBRIDGE_OUTPUT ?= ./work/modelbridge/simple
 MODELBRIDGE_LOG_DIR ?= $(MODELBRIDGE_OUTPUT)/logs
 MODELBRIDGE_JSON_LOG ?=
 MODELBRIDGE_SET ?=
-MODELBRIDGE_CMD ?= python -m aiaccel.hpo.apps.modelbridge
+MODELBRIDGE_CMD ?= aiaccel-hpo modelbridge
+export MPLCONFIGDIR ?= $(MODELBRIDGE_OUTPUT)/.mplconfig
 
 # aiaccel-job wrapper:
 #   aiaccel-job <profile> <mode> <log_file> <command...>
@@ -53,6 +54,7 @@ analyze: | $(MODELBRIDGE_LOG_DIR)
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@
+	@mkdir -p $(MPLCONFIGDIR)
 
 clean:
 	@rm -rf $(MODELBRIDGE_OUTPUT)

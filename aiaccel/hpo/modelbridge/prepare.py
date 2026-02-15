@@ -26,26 +26,12 @@ from .execution import emit_commands
 
 
 def prepare_train(config: BridgeConfig) -> StepResult:
-    """Prepare optimize configs and plan entries for train role.
-
-    Args:
-        config: Validated modelbridge configuration.
-
-    Returns:
-        StepResult: Persisted result for ``prepare_train``.
-    """
+    """Prepare optimize configs and plan entries for train role."""
     return _prepare_role(config, "train")
 
 
 def prepare_eval(config: BridgeConfig) -> StepResult:
-    """Prepare optimize configs and plan entries for eval role.
-
-    Args:
-        config: Validated modelbridge configuration.
-
-    Returns:
-        StepResult: Persisted result for ``prepare_eval``.
-    """
+    """Prepare optimize configs and plan entries for eval role."""
     return _prepare_role(config, "eval")
 
 
