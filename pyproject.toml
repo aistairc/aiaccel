@@ -20,6 +20,7 @@ dependencies = [
     "scipy",
     "optuna>=4.5.0",
     "omegaconf",
+    "pydantic>=2.8.0",
     "hydra-core",
     "huggingface-hub",
     "colorama",
@@ -73,6 +74,12 @@ github-actions = [
     "pytest-github-actions-annotate-failures",
 ]
 
+modelbridge = [
+    "scikit-learn",
+    "GPy",
+    "pydantic>=2.8.0",
+]
+
 [project.scripts]
 aiaccel-job = "aiaccel.launcher:main"
 aiaccel-config = "aiaccel.launcher:main"
@@ -116,6 +123,12 @@ section-order = [
 "torch" = ["torch"]
 "torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
 "audio" = ["librosa", "pypesq", "pystoi", "soundfile"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # Optional GPy/paramz emits deprecated assign output warnings; ignore for modelbridge tests.
+    "ignore::DeprecationWarning:paramz.*",
+]
 
 
 # pixi configurations

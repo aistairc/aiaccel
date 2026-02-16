@@ -1,0 +1,10 @@
+_base_: ${resolve_pkg_path:aiaccel.hpo.apps.config}/default.yaml
+
+# Modelbridge prepare step injects per-run values:
+# - command
+# - params
+# - n_trials
+# - working_directory
+# - optimize.rand_seed
+# - study.*
+n_max_jobs: 10

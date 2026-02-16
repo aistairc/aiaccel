@@ -1,0 +1,60 @@
+SHELL := /bin/bash
+
+ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd)
+MODELBRIDGE_CONFIG ?= ./modelbridge.yaml
+MODELBRIDGE_OUTPUT ?= ./work/modelbridge/simple
+MODELBRIDGE_LOG_DIR ?= $(MODELBRIDGE_OUTPUT)/logs
+MODELBRIDGE_JSON_LOG ?=
+MODELBRIDGE_SET ?=
+MODELBRIDGE_CMD ?= aiaccel-hpo modelbridge
+export MPLCONFIGDIR ?= $(MODELBRIDGE_OUTPUT)/.mplconfig
+
+# aiaccel-job wrapper:
+#   aiaccel-job <profile> <mode> <log_file> <command...>
+AIACCEL_CMD ?= aiaccel-job local cpu $(MODELBRIDGE_LOG_DIR)/aiaccel_job.log
+JOB_OPTS ?=
+
+COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --output_dir $(MODELBRIDGE_OUTPUT) $(if $(MODELBRIDGE_JSON_LOG),--json-log,) $(if $(MODELBRIDGE_SET),--set $(MODELBRIDGE_SET),)
+
+.PHONY: run validate schema prepare emit_train hpo_train emit_eval hpo_eval analyze clean
+
+validate:
+	$(MODELBRIDGE_CMD) validate --config $(MODELBRIDGE_CONFIG)
+
+schema:
+	$(MODELBRIDGE_CMD) schema
+
+run: prepare hpo_train hpo_eval analyze
+
+prepare: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) run $(COMMON_FLAGS) --profile prepare
+
+emit_train: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) emit-commands $(COMMON_FLAGS) --role train --format shell
+
+hpo_train: emit_train
+	bash $(MODELBRIDGE_OUTPUT)/workspace/commands/train.sh
+
+emit_eval: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) emit-commands $(COMMON_FLAGS) --role eval --format shell
+
+hpo_eval: emit_eval
+	@if [ -s "$(MODELBRIDGE_OUTPUT)/workspace/commands/eval.sh" ]; then \
+		bash $(MODELBRIDGE_OUTPUT)/workspace/commands/eval.sh; \
+	else \
+		echo "No eval commands emitted."; \
+	fi
+
+analyze: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) run $(COMMON_FLAGS) --profile analyze
+
+$(MODELBRIDGE_LOG_DIR):
+	@mkdir -p $@
+	@mkdir -p $(MPLCONFIGDIR)
+
+clean:
+	@rm -rf $(MODELBRIDGE_OUTPUT)

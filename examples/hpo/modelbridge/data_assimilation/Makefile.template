@@ -1,0 +1,28 @@
+SHELL := /bin/bash
+
+PYTHON ?= python3
+ROOT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd)
+export PYTHONPATH ?= $(ROOT)
+
+MAS_BENCH_CONFIG ?= ./mas_bench_config.yaml
+OUTPUT_ROOT ?= ./work/modelbridge/data_assimilation
+LOG_DIR ?= $(OUTPUT_ROOT)/logs
+export MPLCONFIGDIR ?= $(OUTPUT_ROOT)/.mplconfig
+
+# Use aiaccel-job
+# Syntax: aiaccel-job <profile> <mode> <log_file> <command>...
+AIACCEL_CMD ?= aiaccel-job local cpu $(LOG_DIR)/aiaccel_job_da.log
+
+.PHONY: run clean
+
+run: | $(LOG_DIR)
+	$(AIACCEL_CMD) -- \
+		$(PYTHON) examples/hpo/modelbridge/data_assimilation/mas_bench_wrapper.py \
+			--config $(MAS_BENCH_CONFIG)
+
+$(LOG_DIR):
+	@mkdir -p $@
+	@mkdir -p $(MPLCONFIGDIR)
+
+clean:
+	rm -rf $(OUTPUT_ROOT)

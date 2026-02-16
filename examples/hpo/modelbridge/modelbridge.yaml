@@ -1,0 +1,72 @@
+# Example configuration for the modelbridge pipeline.
+# Run with:
+#   make -f examples/hpo/modelbridge/Makefile.template run \
+#     MODELBRIDGE_CONFIG=examples/hpo/modelbridge/modelbridge.yaml \
+#     MODELBRIDGE_OUTPUT=./work/modelbridge/simple
+
+hpo:
+  base_config: examples/hpo/modelbridge/optimize_config.yaml
+  macro_overrides: {}
+  micro_overrides: {}
+  abci_overrides: {}
+
+bridge:
+  output_dir: ./work/modelbridge/simple
+  seed: 32
+  seed_policy:
+    sampler:
+      mode: auto_increment
+    optimizer:
+      mode: auto_increment
+  execution:
+    target: local
+    emit_on_prepare: false
+    job_mode: cpu
+  train_runs: 10
+  eval_runs: 10
+  strict_mode: false
+  log_level: INFO
+  scenarios:
+    - name: simple
+      train_macro_trials: 12
+      train_micro_trials: 12
+      eval_macro_trials: 6
+      eval_micro_trials: 6
+      train_objective:
+        command: ["bash", "examples/hpo/modelbridge/objective.sh", "{out_filename}", "--x={x}", "--y={y}"]
+      eval_objective:
+        command: ["bash", "examples/hpo/modelbridge/objective.sh", "{out_filename}", "--x={x}", "--y={y}"]
+      train_params:
+        macro:
+          x:
+            low: -1.0
+            high: 1.0
+          y:
+            low: -1.0
+            high: 1.0
+        micro:
+          x:
+            low: -1.0
+            high: 1.0
+          y:
+            low: -1.0
+            high: 1.0
+      eval_params:
+        macro:
+          x:
+            low: -1.0
+            high: 1.0
+          y:
+            low: -1.0
+            high: 1.0
+        micro:
+          x:
+            low: -1.0
+            high: 1.0
+          y:
+            low: -1.0
+            high: 1.0
+      regression:
+        kind: linear
+        degree: 1
+      metrics: [mae, mse, r2]
