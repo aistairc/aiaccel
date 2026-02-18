@@ -10,7 +10,9 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 import torch
 
-from huggingface_hub import login, upload_file
+from huggingface_hub import create_repo, login, repo_exists, upload_file
+
+from aiaccel.config import print_config
 
 
 def remove_fullpath(obj: dict[str, Any] | list[Any] | Any) -> Any:
@@ -32,6 +34,15 @@ def remove_fullpath(obj: dict[str, Any] | list[Any] | Any) -> Any:
         return [remove_fullpath(v) for v in obj if not (isinstance(v, str) and Path(v).is_absolute())]
     else:
         return obj
+
+
+def yes_no_input() -> bool:
+    while True:
+        choice = input("Please respond with 'yes' or 'no' [y/N]: ").lower()
+        if choice in ["y", "ye", "yes"]:
+            return True
+        elif choice in ["n", "no"]:
+            return False
 
 
 def main() -> None:
@@ -56,21 +67,32 @@ def main() -> None:
     torch.save(ckpt, args.ckpt_path.parent / args.save_ckpt_filename)
 
     if args.repo_id and args.repo_type:
-        # Upload config and ckpt in Hugging Face
-        login()
+        print_config(config)
+        print("The above configuration file and model checkpoint will be uploaded to Hugging Face. Is that OK?")
+        if yes_no_input():
+            # Upload config and ckpt in Hugging Face
+            login()
 
-        upload_file(
-            path_or_fileobj=args.config_path.parent / args.save_config_filename,
-            path_in_repo=args.save_config_filename,
-            repo_id=args.repo_id,
-            repo_type=args.repo_type,
-        )
-        upload_file(
-            path_or_fileobj=args.ckpt_path.parent / args.save_ckpt_filename,
-            path_in_repo=args.save_ckpt_filename,
-            repo_id=args.repo_id,
-            repo_type=args.repo_type,
-        )
+            if not repo_exists(repo_id=args.repo_id, repo_type=args.repo_type):
+                print(f"The repository {args.repo_id} was not found. Would you like to create a new one?")
+                if yes_no_input():
+                    # Create repository
+                    create_repo(repo_id=args.repo_id, repo_type=args.repo_type)
+                else:
+                    return
+
+            upload_file(
+                path_or_fileobj=args.config_path.parent / args.save_config_filename,
+                path_in_repo=args.save_config_filename,
+                repo_id=args.repo_id,
+                repo_type=args.repo_type,
+            )
+            upload_file(
+                path_or_fileobj=args.ckpt_path.parent / args.save_ckpt_filename,
+                path_in_repo="checkpoints/" + args.save_ckpt_filename,
+                repo_id=args.repo_id,
+                repo_type=args.repo_type,
+            )
 
 
 if __name__ == "__main__":
