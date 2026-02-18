@@ -58,6 +58,8 @@ def main() -> None:
 
     config = oc.to_container(oc.load(args.config_path))
     config = remove_fullpath(config)
+    config["checkpoint_filename"] = args.save_ckpt_filename
+
     with open(args.config_path.parent / args.save_config_filename, "w") as f:
         oc.save(config, f)
 
