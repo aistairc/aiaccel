@@ -15,7 +15,11 @@ all: $(STAGES)
 
 status:
 	@echo ================================================================
-	@$(foreach var,$(PRINT_VARIABLES),echo $(var): $($(var));)
+	@$(foreach var,$(PRINT_VARIABLES), \
+	$(if $(filter --,$(var)), \
+			echo "----------------------------------------------------------------";, \
+			echo -e "\033[33m$(var)\033[0m:" '$($(var))';) \
+	)
 	@echo ================================================================
 
 $(eval stage$(min_stage): status .WAIT $(stage$(min_stage)_dependencies))
