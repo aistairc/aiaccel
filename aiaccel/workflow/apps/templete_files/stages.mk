@@ -32,3 +32,22 @@ $(STAGES):
 
 $(STAGES:%=skip-%):
 	touch $($(patsubst skip-%,%,$@)_dependencies)
+
+# help
+help:
+	@echo "Usage: make [TARGET]"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  all                    Run all stages sequentially"
+	@echo "  status                 Print selected variables (from PRINT_VARIABLES)"
+	@echo "  stageN                 Run each processing stage (N=$(min_stage)-$(max_stage))"
+	@$(foreach stage,$(STAGES), \
+	$(if $($(stage)_description), \
+			echo "  $(stage)_description     $($(stage)_description)";, ) \
+	)
+	@echo "  skip-stageN            Skip stageN by touching dependencies (N=$(min_stage)-$(max_stage))"
+	@echo "  clean                  Clean generated .done files (if implemented)"
+	@echo "  help                   Show this help message"
+	@echo ""
+	@echo "Example:"
+	@echo "  make stage3 -j train_path=./models/dummy/"
