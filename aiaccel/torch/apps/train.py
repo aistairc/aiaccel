@@ -4,6 +4,7 @@
 from argparse import ArgumentParser
 import logging
 import os
+import warnings
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
@@ -40,9 +41,10 @@ def get_rank(default: int = 0) -> int:
 def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
+    parser.add_argument("--seed_distributed", action="store_true")
     args, unk_args = parser.parse_known_args()
 
-    is_rank_zero = get_rank() == 0
+    is_rank_zero = (rank := get_rank()) == 0
     config = prepare_config(
         config_filename=args.config,
         overwrite_config=oc.from_cli(unk_args),
@@ -56,7 +58,16 @@ def main() -> None:
         print_git_status(status_list)
 
     if "seed" in config:
-        lt.seed_everything(config.seed, workers=True)
+        if args.seed_distributed:
+            lt.seed_everything(config.seed + rank, workers=True)
+        else:
+            if rank != 0:
+                warnings.warn(
+                    "DDP may be running without '--seed_distributed' option being specified. "
+                    "This feature is planned to be integrated into seed in the future.",
+                    stacklevel=2,
+                )
+            lt.seed_everything(config.seed, workers=True)
 
     # build trainer
     trainer: lt.Trainer = instantiate(config.trainer)
