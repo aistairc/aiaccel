@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def get_rank(default: int = 0) -> int:
     for key in [
-        "GLOBAL_RANK",  # PyTorch Lightning
+        "LOCAL_RANK",  # PyTorch Lightning
         "RANK",  # torchrun / deepspeed / pytorch launcher
         "OMPI_COMM_WORLD_RANK",  # OpenMPI
         "PMI_RANK",  # MPICH / Intel MPI
