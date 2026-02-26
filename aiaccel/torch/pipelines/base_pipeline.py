@@ -18,7 +18,7 @@ import torch
 import attrs
 
 from aiaccel.config import print_config, setup_omegaconf
-from aiaccel.job.rank import get_task_list
+from aiaccel.job.job_env import get_task_list
 
 setup_omegaconf()
 
