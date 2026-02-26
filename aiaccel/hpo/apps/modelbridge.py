@@ -12,10 +12,40 @@ import os
 from pathlib import Path
 
 from aiaccel.hpo.modelbridge import api
-from aiaccel.hpo.modelbridge.config import BridgeConfig, ExecutionTarget, deep_merge_mappings, generate_schema
-from aiaccel.hpo.modelbridge.pipeline import PIPELINE_PROFILES, STEP_SPECS
+from aiaccel.hpo.modelbridge.config import BridgeConfig, deep_merge_mappings, generate_schema
 
 Handler = Callable[[argparse.Namespace, Any, BridgeConfig | None], None]
+StepHandler = Callable[..., object]
+
+STEP_COMMANDS: tuple[str, ...] = (
+    "prepare-train",
+    "prepare-eval",
+    "hpo-train",
+    "hpo-eval",
+    "collect-train",
+    "collect-eval",
+    "fit-regression",
+    "evaluate-model",
+    "publish-summary",
+)
+
+
+def _resolve_step_handler(command: str) -> StepHandler:
+    """Return step API callable for one CLI command."""
+    handlers: dict[str, StepHandler] = {
+        "prepare-train": api.prepare_train_step,
+        "prepare-eval": api.prepare_eval_step,
+        "hpo-train": api.hpo_train_step,
+        "hpo-eval": api.hpo_eval_step,
+        "collect-train": api.collect_train_step,
+        "collect-eval": api.collect_eval_step,
+        "fit-regression": api.fit_regression_step,
+        "evaluate-model": api.evaluate_model_step,
+        "publish-summary": api.publish_summary_step,
+    }
+    if command not in handlers:
+        raise SystemExit(f"Unsupported step command: {command}")
+    return handlers[command]
 
 
 def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -23,31 +53,17 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run aiaccel modelbridge")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    run_parser = subparsers.add_parser("run", help="Execute modelbridge steps/profile")
-    _add_common_args(run_parser, include_run_args=True)
-    run_parser.set_defaults(handler=_handle_run)
-
-    for step_name, cli_command, _profiles in STEP_SPECS:
-        subparser = subparsers.add_parser(cli_command, help=f"Execute {cli_command}")
-        _add_common_args(subparser, include_run_args=False)
-        subparser.set_defaults(handler=_handle_step, step_name=step_name)
-        if cli_command in {"prepare-train", "prepare-eval"}:
-            subparser.add_argument("--emit-commands", action="store_true", help="Emit commands after prepare step")
-            subparser.add_argument("--execution-target", choices=["local", "abci"], help="Execution target")
-        if cli_command == "collect-train":
+    for command in STEP_COMMANDS:
+        subparser = subparsers.add_parser(command, help=f"Execute {command}")
+        _add_common_args(subparser, include_logging=True)
+        if command == "collect-train":
             subparser.add_argument("--train-db-path", action="append", default=[], help="Explicit train DB path")
-        if cli_command == "collect-eval":
+        if command == "collect-eval":
             subparser.add_argument("--eval-db-path", action="append", default=[], help="Explicit eval DB path")
-
-    emit_parser = subparsers.add_parser("emit-commands", help="Emit optimize commands from plan")
-    _add_common_args(emit_parser, include_run_args=False)
-    emit_parser.add_argument("--role", choices=["train", "eval"], required=True, help="Target role")
-    emit_parser.add_argument("--format", choices=["shell", "json"], required=True, help="Output format")
-    emit_parser.add_argument("--execution-target", choices=["local", "abci"], help="Execution target override")
-    emit_parser.set_defaults(handler=_handle_emit_commands)
+        subparser.set_defaults(handler=_handle_step)
 
     validate_parser = subparsers.add_parser("validate", help="Validate configuration")
-    _add_common_args(validate_parser, include_run_args=False, include_logging=False)
+    _add_common_args(validate_parser, include_logging=False)
     validate_parser.add_argument("--print-config", action="store_true", help="Print resolved config JSON")
     validate_parser.set_defaults(handler=_handle_validate)
 
@@ -59,7 +75,6 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def _add_common_args(
     parser: argparse.ArgumentParser,
     *,
-    include_run_args: bool,
     include_logging: bool = True,
 ) -> None:
     """Add shared argument groups."""
@@ -68,22 +83,6 @@ def _add_common_args(
     io_group.add_argument("--output_dir", "-o", help="Override output directory")
 
     options_group = parser.add_argument_group("Options")
-    if include_run_args:
-        options_group.add_argument("--steps", help="Comma-separated steps")
-        options_group.add_argument("--profile", choices=list(PIPELINE_PROFILES), help="Execution profile")
-        options_group.add_argument("--train-db-path", action="append", default=[], help="Explicit train DB path")
-        options_group.add_argument("--eval-db-path", action="append", default=[], help="Explicit eval DB path")
-        options_group.add_argument(
-            "--prepare-emit-commands",
-            action="store_true",
-            help="Emit commands during prepare profile execution",
-        )
-        options_group.add_argument(
-            "--prepare-execution-target",
-            choices=["local", "abci"],
-            help="Execution target for prepare profile command emission",
-        )
-
     options_group.add_argument(
         "--set",
         action="append",
@@ -141,31 +140,8 @@ def _build_cli_override_patch(args: argparse.Namespace, *, command: str) -> dict
         bridge["output_dir"] = output_dir
     if bool(getattr(args, "json_log", False)):
         bridge["json_log"] = True
-
-    execution_target: ExecutionTarget | None = None
-    emit_on_prepare = False
-    if command == "run":
-        emit_on_prepare = bool(getattr(args, "prepare_emit_commands", False))
-        execution_target = cast(ExecutionTarget | None, getattr(args, "prepare_execution_target", None))
-    elif command in {"prepare-train", "prepare-eval"}:
-        emit_on_prepare = bool(getattr(args, "emit_commands", False))
-        execution_target = cast(ExecutionTarget | None, getattr(args, "execution_target", None))
-
-    execution: dict[str, object] = {}
-    if emit_on_prepare:
-        execution["emit_on_prepare"] = True
-    if execution_target is not None:
-        execution["target"] = execution_target
-    if execution:
-        bridge["execution"] = execution
+    _ = command
     return {"bridge": bridge} if bridge else {}
-
-
-def _parse_steps(raw_steps: str | None) -> list[str] | None:
-    """Split and normalize comma-separated step names."""
-    if not raw_steps:
-        return None
-    return [step.strip() for step in raw_steps.split(",") if step.strip()]
 
 
 def _apply_logging_flags(args: argparse.Namespace) -> None:
@@ -194,69 +170,31 @@ def _handle_validate(args: argparse.Namespace, logger: Any, config: BridgeConfig
     logger.info("Configuration validated successfully.")
 
 
-def _handle_run(args: argparse.Namespace, logger: Any, config: BridgeConfig | None) -> None:
-    """Handle run command."""
-    config = _require_config(config, command="run")
-
-    steps = _parse_steps(args.steps)
-    profile = args.profile
-    if steps is not None and profile is not None:
-        raise SystemExit("--steps and --profile are mutually exclusive")
-    if getattr(args, "prepare_emit_commands", False) and profile != "prepare":
-        raise SystemExit("--prepare-emit-commands requires --profile prepare")
-    if getattr(args, "prepare_execution_target", None) and profile != "prepare":
-        raise SystemExit("--prepare-execution-target requires --profile prepare")
-
-    api.run(
-        config,
-        steps=steps,
-        profile=profile,
-        train_db_paths=_parse_path_list(args.train_db_path),
-        eval_db_paths=_parse_path_list(args.eval_db_path),
-    )
-    logger.info("Modelbridge run completed.")
-
-
 def _handle_step(args: argparse.Namespace, logger: Any, config: BridgeConfig | None) -> None:
     """Handle one explicit step command."""
     config = _require_config(config, command=str(args.command))
-
-    step_name = args.step_name
-    train_paths: list[Path] | None = None
-    eval_paths: list[Path] | None = None
+    command = str(args.command)
+    handler = _resolve_step_handler(command)
     if args.command == "collect-train":
-        train_paths = _parse_path_list(getattr(args, "train_db_path", []))
-    if args.command == "collect-eval":
-        eval_paths = _parse_path_list(getattr(args, "eval_db_path", []))
-
-    api.run(
-        config,
-        steps=[step_name],
-        train_db_paths=train_paths,
-        eval_db_paths=eval_paths,
-    )
-    logger.info("Step completed: %s", step_name)
-
-
-def _handle_emit_commands(args: argparse.Namespace, logger: Any, config: BridgeConfig | None) -> None:
-    """Handle emit-commands command."""
-    config = _require_config(config, command="emit-commands")
-
-    path = api.emit_commands_step(
-        config,
-        role=args.role,
-        fmt=args.format,
-        execution_target=args.execution_target,
-    )
-    logger.info("Commands written: %s", path)
-    print(path)
+        handler(config, db_paths=_parse_path_list(getattr(args, "train_db_path", [])))
+    elif args.command == "collect-eval":
+        handler(config, db_paths=_parse_path_list(getattr(args, "eval_db_path", [])))
+    else:
+        handler(config)
+    logger.info("Step completed: %s", command)
 
 
 def main(argv: Sequence[str] | None = None) -> None:
     """Run modelbridge CLI entrypoint.
 
+    This function parses CLI arguments, resolves configuration overrides, and
+    dispatches the requested step command handler.
+
     Args:
         argv: Optional CLI argument sequence.
+
+    Returns:
+        None: This function exits after command handling.
 
     Raises:
         SystemExit: Raised with non-zero status when command handling fails.

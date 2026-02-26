@@ -3,16 +3,18 @@ from __future__ import annotations
 from typing import Any
 
 from collections.abc import Callable
-import inspect
 from pathlib import Path
+import subprocess
 
 import pytest
 
-from aiaccel.hpo.modelbridge.common import StepResult, read_json
+from aiaccel.hpo.modelbridge.analyze import evaluate_model, fit_regression
+from aiaccel.hpo.modelbridge.collect import collect_train
+from aiaccel.hpo.modelbridge.common import read_json
 from aiaccel.hpo.modelbridge.config import BridgeConfig, load_bridge_config
-import aiaccel.hpo.modelbridge.pipeline as pipeline_module
-from aiaccel.hpo.modelbridge.pipeline import run_pipeline, steps_for_profile
-from aiaccel.hpo.modelbridge.prepare import prepare_train
+from aiaccel.hpo.modelbridge.hpo_runner import hpo_eval, hpo_train
+from aiaccel.hpo.modelbridge.prepare import prepare_eval, prepare_train
+from aiaccel.hpo.modelbridge.publish import publish_summary
 
 
 def _config_payload(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]) -> dict[str, Any]:
@@ -26,207 +28,132 @@ def _load_config(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, A
     return load_bridge_config(_config_payload(tmp_path, make_bridge_config))
 
 
-def test_run_pipeline_default_profile_prepare(
+def test_prepare_steps_generate_configs_and_plan_entries(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],
 ) -> None:
     config = _load_config(tmp_path, make_bridge_config)
-    result = run_pipeline(config)
 
-    assert [item.step for item in result.results] == ["prepare_train", "prepare_eval"]
-    assert (config.bridge.output_dir / "workspace" / "train_plan.json").exists()
-    assert (config.bridge.output_dir / "workspace" / "eval_plan.json").exists()
+    train_result = prepare_train(config)
+    eval_result = prepare_eval(config)
+
+    assert train_result.status == "success"
+    assert eval_result.status == "success"
+    train_plan = read_json(config.bridge.output_dir / "workspace" / "train_plan.json")
+    eval_plan = read_json(config.bridge.output_dir / "workspace" / "eval_plan.json")
+    assert train_plan["entries"]
+    assert eval_plan["entries"]
     assert (config.bridge.output_dir / "workspace" / "state" / "prepare_train.json").exists()
     assert (config.bridge.output_dir / "workspace" / "state" / "prepare_eval.json").exists()
 
 
-def test_run_pipeline_steps_and_profile_are_exclusive(
+def test_hpo_step_skips_when_plan_is_missing(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],
 ) -> None:
     config = _load_config(tmp_path, make_bridge_config)
-    with pytest.raises(ValueError):
-        run_pipeline(config, steps=["prepare_train"], profile="prepare")
+    result = hpo_train(config)
+    assert result.status == "skipped"
+    assert "Plan file not found" in (result.reason or "")
+    state = read_json(config.bridge.output_dir / "workspace" / "state" / "hpo_train.json")
+    assert state["status"] == "skipped"
 
 
-def test_run_pipeline_rejects_unknown_profile(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-) -> None:
-    config = _load_config(tmp_path, make_bridge_config)
-    with pytest.raises(ValueError, match="Unknown profile"):
-        run_pipeline(config, profile="invalid")
-
-
-def test_pipeline_step_dispatch_uses_explicit_registry_map() -> None:
-    assert tuple(pipeline_module.STEP_ACTIONS.keys()) == tuple(steps_for_profile("full"))
-    assert "globals().get" not in inspect.getsource(pipeline_module)
-
-
-def test_run_pipeline_full_requires_external_outputs(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-) -> None:
-    config = _load_config(tmp_path, make_bridge_config)
-    with pytest.raises(RuntimeError, match="Full profile requires external HPO outputs"):
-        run_pipeline(config, profile="full")
-
-    # prepare profile portion must have run before readiness validation fails.
-    assert (config.bridge.output_dir / "workspace" / "state" / "prepare_train.json").exists()
-    assert (config.bridge.output_dir / "workspace" / "state" / "prepare_eval.json").exists()
-    assert not (config.bridge.output_dir / "workspace" / "state" / "collect_train.json").exists()
-
-
-def test_run_pipeline_does_not_call_subprocess(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    config = _load_config(tmp_path, make_bridge_config)
-    calls: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
-
-    def fail_subprocess(*args: Any, **kwargs: Any) -> None:
-        calls.append((args, kwargs))
-        raise AssertionError("pipeline.py must not call subprocess.run")
-
-    monkeypatch.setattr("subprocess.run", fail_subprocess)
-    run_pipeline(config, profile="prepare")
-    assert calls == []
-
-
-def test_prepare_generates_configs_and_plan_entries(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-) -> None:
-    config = _load_config(tmp_path, make_bridge_config)
-    result = prepare_train(config)
-
-    assert result.status == "success"
-    plan = read_json(config.bridge.output_dir / "workspace" / "train_plan.json")
-    entries = plan["entries"]
-    assert entries
-    entry = entries[0]
-    assert {
-        "scenario",
-        "role",
-        "run_id",
-        "target",
-        "config_path",
-        "expected_db_path",
-        "study_name",
-        "sampler_seed",
-        "optimizer_seed",
-        "seed_mode",
-        "execution_target",
-        "seed",
-        "objective_command",
-    }.issubset(entry.keys())
-    assert Path(entry["config_path"]).exists()
-    assert isinstance(entry["sampler_seed"], int)
-    assert isinstance(entry["optimizer_seed"], int)
-
-
-def test_prepare_profile_uses_user_defined_seed_values_end_to_end(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-) -> None:
-    payload = _config_payload(tmp_path, make_bridge_config)
-    payload["bridge"]["train_runs"] = 2
-    payload["bridge"]["eval_runs"] = 1
-    payload["bridge"]["seed_policy"] = {
-        "sampler": {
-            "mode": "user_defined",
-            "user_values": {
-                "train_macro": [101, 102],
-                "train_micro": [201, 202],
-                "eval_macro": [301],
-                "eval_micro": [401],
-            },
-        },
-        "optimizer": {
-            "mode": "user_defined",
-            "user_values": {
-                "train_macro": [1001, 1002],
-                "train_micro": [2001, 2002],
-                "eval_macro": [3001],
-                "eval_micro": [4001],
-            },
-        },
-    }
-    config = load_bridge_config(payload)
-
-    run_pipeline(config, profile="prepare")
-    train_entries = read_json(config.bridge.output_dir / "workspace" / "train_plan.json")["entries"]
-    eval_entries = read_json(config.bridge.output_dir / "workspace" / "eval_plan.json")["entries"]
-
-    expected_train = {
-        (0, "macro"): (101, 1001),
-        (0, "micro"): (201, 2001),
-        (1, "macro"): (102, 1002),
-        (1, "micro"): (202, 2002),
-    }
-    expected_eval = {
-        (0, "macro"): (301, 3001),
-        (0, "micro"): (401, 4001),
-    }
-
-    observed_train = {
-        (item["run_id"], item["target"]): (item["sampler_seed"], item["optimizer_seed"]) for item in train_entries
-    }
-    observed_eval = {
-        (item["run_id"], item["target"]): (item["sampler_seed"], item["optimizer_seed"]) for item in eval_entries
-    }
-
-    assert observed_train == expected_train
-    assert observed_eval == expected_eval
-    assert all(item["seed_mode"] == "user_defined" for item in train_entries)
-    assert all(item["seed_mode"] == "user_defined" for item in eval_entries)
-
-
-def test_prepare_emits_commands_when_configured(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-) -> None:
-    payload = _config_payload(tmp_path, make_bridge_config)
-    payload["bridge"]["execution"] = {"emit_on_prepare": True, "target": "local"}
-    config = load_bridge_config(payload)
-
-    result = prepare_train(config)
-
-    assert result.status == "success"
-    command_path = config.bridge.output_dir / "workspace" / "commands" / "train.sh"
-    assert command_path.exists()
-    assert "aiaccel-hpo optimize --config" in command_path.read_text(encoding="utf-8")
-
-
-def test_collect_manifest_first(
+def test_hpo_steps_generate_run_scripts_and_state(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     config = _load_config(tmp_path, make_bridge_config)
     prepare_train(config)
+    prepare_eval(config)
+
+    def fake_run(_command: list[str], check: bool) -> subprocess.CompletedProcess[str]:
+        assert check is True
+        for role in ("train", "eval"):
+            plan = config.bridge.output_dir / "workspace" / f"{role}_plan.json"
+            if not plan.exists():
+                continue
+            for entry in read_json(plan)["entries"]:
+                db = Path(entry["expected_db_path"])
+                db.parent.mkdir(parents=True, exist_ok=True)
+                db.write_text("", encoding="utf-8")
+        return subprocess.CompletedProcess(args=_command, returncode=0)
+
+    monkeypatch.setattr("aiaccel.hpo.modelbridge.hpo_runner.subprocess.run", fake_run)
+
+    train_result = hpo_train(config)
+    eval_result = hpo_eval(config)
+
+    assert train_result.status == "success"
+    assert eval_result.status == "success"
+    train_shell = config.bridge.output_dir / "workspace" / "commands" / "train.sh"
+    eval_shell = config.bridge.output_dir / "workspace" / "commands" / "eval.sh"
+    assert train_shell.exists()
+    assert eval_shell.exists()
+    assert "bash " in train_shell.read_text(encoding="utf-8")
+
     plan = read_json(config.bridge.output_dir / "workspace" / "train_plan.json")
-    entries = plan["entries"]
-    for entry in entries:
-        db_path = Path(entry["expected_db_path"])
-        db_path.parent.mkdir(parents=True, exist_ok=True)
-        db_path.write_text("", encoding="utf-8")
+    first_cfg = Path(plan["entries"][0]["config_path"])
+    assert (first_cfg.parent / "run.sh").exists()
+    assert (first_cfg.parent / "run.json").exists()
 
-    observed: dict[str, Any] = {}
+    assert (config.bridge.output_dir / "workspace" / "state" / "hpo_train.json").exists()
+    assert (config.bridge.output_dir / "workspace" / "state" / "hpo_eval.json").exists()
 
-    def fake_scan(
-        _scenario: Any,
-        _role: str,
-        db_paths: list[Path],
-    ) -> tuple[list[tuple[int, dict[str, float], dict[str, float]]], list[dict[str, Any]]]:
-        observed["db_paths"] = [str(path) for path in db_paths]
-        return [(0, {"x": 1.0}, {"y": 2.0})], []
 
-    monkeypatch.setattr("aiaccel.hpo.modelbridge.collect._pairs_from_paths", fake_scan)
-    result = run_pipeline(config, steps=["collect_train"]).results[0]
-    assert result.status == "success"
-    assert observed["db_paths"]
+def test_hpo_step_failure_persists_failed_state(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _load_config(tmp_path, make_bridge_config)
+    prepare_train(config)
+
+    def fail_run(_command: list[str], check: bool) -> None:
+        assert check is True
+        raise subprocess.CalledProcessError(returncode=2, cmd="bash")
+
+    monkeypatch.setattr("aiaccel.hpo.modelbridge.hpo_runner.subprocess.run", fail_run)
+
+    with pytest.raises(RuntimeError, match="hpo_train execution failed"):
+        hpo_train(config)
+
+    state = read_json(config.bridge.output_dir / "workspace" / "state" / "hpo_train.json")
+    assert state["status"] == "failed"
+
+
+def test_prepare_imports_external_hpo_results(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    payload = _config_payload(tmp_path, make_bridge_config)
+    source_config = tmp_path / "external" / "config.yaml"
+    source_db = tmp_path / "external" / "optuna.db"
+    source_config.parent.mkdir(parents=True, exist_ok=True)
+    source_config.write_text("optimize:\n  goal: minimize\n", encoding="utf-8")
+    source_db.write_text("db", encoding="utf-8")
+    payload["bridge"]["external_hpo_import"] = {
+        "enabled": True,
+        "entries": [
+            {
+                "scenario": payload["bridge"]["scenarios"][0]["name"],
+                "role": "train",
+                "run_id": 0,
+                "target": "macro",
+                "source_hpo_config": str(source_config),
+                "source_optuna_db": str(source_db),
+            }
+        ],
+    }
+    config = load_bridge_config(payload)
+
+    result = prepare_train(config)
+
+    run_dir = config.bridge.output_dir / payload["bridge"]["scenarios"][0]["name"] / "runs" / "train" / "000" / "macro"
+    assert result.outputs["num_imported_entries"] == 1
+    assert (run_dir / "config.yaml").exists()
+    assert (run_dir / "optuna.db").exists()
 
 
 def test_collect_strict_mode_fails(
@@ -238,7 +165,7 @@ def test_collect_strict_mode_fails(
     config = load_bridge_config(payload)
 
     with pytest.raises(RuntimeError):
-        run_pipeline(config, steps=["collect_train"])
+        collect_train(config)
 
     state = read_json(config.bridge.output_dir / "workspace" / "state" / "collect_train.json")
     assert state["status"] == "failed"
@@ -262,40 +189,14 @@ def test_fit_evaluate_publish_generate_artifacts(
         encoding="utf-8",
     )
 
-    result = run_pipeline(
-        config,
-        steps=["fit_regression", "evaluate_model", "publish_summary"],
-    )
-    assert [item.status for item in result.results] == ["success", "success", "success"]
+    fit_result = fit_regression(config)
+    eval_result = evaluate_model(config)
+    publish_result = publish_summary(config)
+
+    assert [fit_result.status, eval_result.status, publish_result.status] == ["success", "success", "success"]
     assert (scenario_path / "models" / "regression_model.json").exists()
     assert (scenario_path / "metrics" / "train_metrics.json").exists()
     assert (scenario_path / "metrics" / "eval_metrics.json").exists()
     assert (scenario_path / "test_predictions.csv").exists()
     assert (config.bridge.output_dir / "summary.json").exists()
     assert (config.bridge.output_dir / "manifest.json").exists()
-    for step in ["fit_regression", "evaluate_model", "publish_summary"]:
-        assert (config.bridge.output_dir / "workspace" / "state" / f"{step}.json").exists()
-
-
-def test_pipeline_delegates_analyze_steps(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    config = _load_config(tmp_path, make_bridge_config)
-    observed: list[str] = []
-
-    def fake_fit(_config: BridgeConfig) -> StepResult:
-        observed.append("fit")
-        return StepResult(step="fit_regression", status="success")
-
-    def fake_evaluate(_config: BridgeConfig) -> StepResult:
-        observed.append("evaluate")
-        return StepResult(step="evaluate_model", status="success")
-
-    monkeypatch.setattr("aiaccel.hpo.modelbridge.pipeline.fit_regression", fake_fit)
-    monkeypatch.setattr("aiaccel.hpo.modelbridge.pipeline.evaluate_model", fake_evaluate)
-
-    result = run_pipeline(config, steps=["fit_regression", "evaluate_model"])
-    assert [item.step for item in result.results] == ["fit_regression", "evaluate_model"]
-    assert observed == ["fit", "evaluate"]

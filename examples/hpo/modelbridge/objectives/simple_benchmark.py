@@ -5,12 +5,12 @@ from __future__ import annotations
 from dataclasses import asdict
 import json
 from pathlib import Path
-import subprocess
 import sys
 
 if __package__ is None or __package__ == "":
     sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
+from aiaccel.hpo.modelbridge import api
 from aiaccel.hpo.modelbridge.config import (
     BridgeConfig,
     BridgeSettings,
@@ -21,8 +21,6 @@ from aiaccel.hpo.modelbridge.config import (
     RegressionConfig,
     ScenarioConfig,
 )
-from aiaccel.hpo.modelbridge.execution import emit_commands
-from aiaccel.hpo.modelbridge.pipeline import run_pipeline
 
 
 def build_config(base_dir: Path) -> BridgeConfig:
@@ -88,19 +86,22 @@ def build_config(base_dir: Path) -> BridgeConfig:
 
 
 def main() -> None:
-    """Run prepare, external execution, and analyze/publish."""
+    """Run prepare, HPO, analyze, and publish steps."""
     root_dir = Path(__file__).resolve().parents[4]
     config = build_config(root_dir)
 
-    run_pipeline(config, profile="prepare")
-    train_cmd_json = emit_commands(config, role="train", fmt="json")
-    eval_cmd_json = emit_commands(config, role="eval", fmt="json")
-
-    _run_emitted_commands(train_cmd_json)
-    _run_emitted_commands(eval_cmd_json)
-
-    result = run_pipeline(config, profile="analyze")
-    print(json.dumps(_pipeline_result_to_dict(result), indent=2, default=str))
+    steps = [
+        api.prepare_train_step(config),
+        api.prepare_eval_step(config),
+        api.hpo_train_step(config),
+        api.hpo_eval_step(config),
+        api.collect_train_step(config),
+        api.collect_eval_step(config),
+        api.fit_regression_step(config),
+        api.evaluate_model_step(config),
+        api.publish_summary_step(config),
+    ]
+    print(json.dumps({"results": [asdict(step) for step in steps]}, indent=2, default=str))
 
     scenario_dir = config.bridge.output_dir / config.bridge.scenarios[0].name
     predictions_path = scenario_dir / "test_predictions.csv"
@@ -110,23 +111,6 @@ def main() -> None:
             print(line)
     else:
         print("\nNo test_predictions.csv found.")
-
-
-def _run_emitted_commands(path: Path) -> None:
-    with path.open(encoding="utf-8") as handle:
-        payload = json.load(handle)
-    commands = payload.get("commands", []) if isinstance(payload, dict) else []
-    for item in commands:
-        command = item.get("command", [])
-        if not isinstance(command, list):
-            raise RuntimeError(f"Malformed command entry in {path}")
-        subprocess.run([str(token) for token in command], check=True)
-
-
-def _pipeline_result_to_dict(result: object) -> dict[str, object]:
-    payload = asdict(result)
-    payload["results"] = [item["step"] for item in payload.get("results", [])]
-    return payload
 
 
 if __name__ == "__main__":

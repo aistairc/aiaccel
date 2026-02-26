@@ -7,6 +7,7 @@ from typing import Any, cast
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
+import shutil
 
 from omegaconf import DictConfig, OmegaConf
 
@@ -26,12 +27,40 @@ from .execution import emit_commands
 
 
 def prepare_train(config: BridgeConfig) -> StepResult:
-    """Prepare optimize configs and plan entries for train role."""
+    """Prepare optimize configs and plan entries for train role.
+
+    This step materializes train-role run directories, run-level optimize
+    config files, and the train plan manifest.
+
+    Args:
+        config: Validated modelbridge configuration.
+
+    Returns:
+        StepResult: Execution result for ``prepare_train``.
+
+    Raises:
+        FileNotFoundError: If referenced base config or import artifacts are missing.
+        ValueError: If resolved config payloads are malformed.
+    """
     return _prepare_role(config, "train")
 
 
 def prepare_eval(config: BridgeConfig) -> StepResult:
-    """Prepare optimize configs and plan entries for eval role."""
+    """Prepare optimize configs and plan entries for eval role.
+
+    This step materializes eval-role run directories, run-level optimize
+    config files, and the eval plan manifest.
+
+    Args:
+        config: Validated modelbridge configuration.
+
+    Returns:
+        StepResult: Execution result for ``prepare_eval``.
+
+    Raises:
+        FileNotFoundError: If referenced base config or import artifacts are missing.
+        ValueError: If resolved config payloads are malformed.
+    """
     return _prepare_role(config, "eval")
 
 
@@ -59,6 +88,7 @@ def _prepare_role(config: BridgeConfig, role: Role) -> StepResult:
 
     plan_file = plan_path(output_dir, role)
     write_json(plan_file, {"role": role, "created_at": datetime.now(timezone.utc).isoformat(), "entries": entries})
+    imported_entries = _import_external_hpo_results(config=config, role=role)
 
     emitted_command_path = (
         str(emit_commands(config, role=role, fmt="shell", execution_target=config.bridge.execution.target))
@@ -74,6 +104,8 @@ def _prepare_role(config: BridgeConfig, role: Role) -> StepResult:
             "num_entries": len(entries),
             "config_paths": config_paths,
             "command_path": emitted_command_path,
+            "num_imported_entries": len(imported_entries),
+            "imported_entries": imported_entries,
         },
         reason=None if entries else f"No {role} runs configured",
     )
@@ -211,3 +243,50 @@ def _generate_hpo_config(
     config_path = output_dir / "config.yaml"
     OmegaConf.save(conf, config_path)
     return config_path
+
+
+def _import_external_hpo_results(config: BridgeConfig, *, role: Role) -> list[dict[str, str | int]]:
+    """Import user-provided HPO artifacts into modelbridge run layout."""
+    import_cfg = config.bridge.external_hpo_import
+    if not import_cfg.enabled:
+        return []
+
+    scenario_names = {scenario.name for scenario in config.bridge.scenarios}
+    max_runs = config.bridge.train_runs if role == "train" else config.bridge.eval_runs
+    imported: list[dict[str, str | int]] = []
+
+    for entry in import_cfg.entries:
+        if entry.role != role:
+            continue
+        if entry.scenario not in scenario_names:
+            raise ValueError(f"external_hpo_import scenario not found: {entry.scenario}")
+        if entry.run_id >= max_runs:
+            raise ValueError(f"external_hpo_import run_id out of range for role={role}: {entry.run_id}")
+        if not entry.source_hpo_config.exists():
+            raise FileNotFoundError(f"external_hpo_import source_hpo_config not found: {entry.source_hpo_config}")
+        if not entry.source_optuna_db.exists():
+            raise FileNotFoundError(f"external_hpo_import source_optuna_db not found: {entry.source_optuna_db}")
+
+        run_dir = run_path(
+            scenario_path(config.bridge.output_dir, entry.scenario),
+            role=role,
+            run_id=entry.run_id,
+            target=entry.target,
+        )
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        config_dest = run_dir / "config.yaml"
+        db_dest = run_dir / "optuna.db"
+        shutil.copy2(entry.source_hpo_config, config_dest)
+        shutil.copy2(entry.source_optuna_db, db_dest)
+        imported.append(
+            {
+                "scenario": entry.scenario,
+                "role": entry.role,
+                "run_id": entry.run_id,
+                "target": entry.target,
+                "config_path": str(config_dest),
+                "db_path": str(db_dest),
+            }
+        )
+    return imported

@@ -15,7 +15,20 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def pairs_to_rows(pairs: Sequence[PairRecord]) -> list[dict[str, Any]]:
-    """Convert pair tuples into CSV row dictionaries."""
+    """Convert pair tuples into CSV row dictionaries.
+
+    This helper serializes pair records into ``run_id``/``macro_*``/``micro_*``
+    columns for CSV writing.
+
+    Args:
+        pairs: Parsed pair records.
+
+    Returns:
+        list[dict[str, Any]]: CSV-compatible row payloads.
+
+    Raises:
+        ValueError: If pair payload cannot be converted to row mappings.
+    """
     rows: list[dict[str, Any]] = []
     for run_id, macro, micro in pairs:
         row: dict[str, Any] = {"run_id": run_id}
@@ -26,7 +39,21 @@ def pairs_to_rows(pairs: Sequence[PairRecord]) -> list[dict[str, Any]]:
 
 
 def parse_pairs_csv(path: Path) -> list[PairRecord]:
-    """Parse pair CSV into run/macro/micro tuples."""
+    """Parse pair CSV into run/macro/micro tuples.
+
+    This helper reads pair CSV rows, validates ``run_id``, and returns rows that
+    include both macro and micro parameter payloads.
+
+    Args:
+        path: Source pair CSV path.
+
+    Returns:
+        list[PairRecord]: Parsed pair records.
+
+    Raises:
+        OSError: If the source CSV file cannot be read.
+        ValueError: If numeric field conversion fails.
+    """
     parsed: list[PairRecord] = []
     for row_index, row in enumerate(read_csv(path), start=1):
         try:

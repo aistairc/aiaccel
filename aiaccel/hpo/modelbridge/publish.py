@@ -11,7 +11,21 @@ from .config import BridgeConfig
 
 
 def publish_summary(config: BridgeConfig) -> StepResult:
-    """Aggregate scenario artifacts and emit summary/manifest JSON."""
+    """Aggregate scenario artifacts and emit summary/manifest JSON.
+
+    This step reads state and metrics artifacts from prior steps and writes
+    top-level ``summary.json`` and ``manifest.json`` files.
+
+    Args:
+        config: Validated modelbridge configuration.
+
+    Returns:
+        StepResult: Execution result for ``publish_summary``.
+
+    Raises:
+        OSError: If output files cannot be written.
+        ValueError: If loaded artifacts contain invalid payloads.
+    """
     output_dir = config.bridge.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 

@@ -1,1 +1,1 @@
-"""Tests for the lightweight modelbridge pipeline."""
+"""Tests for the lightweight modelbridge step runtime."""

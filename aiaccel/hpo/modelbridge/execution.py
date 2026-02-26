@@ -117,16 +117,7 @@ def _build_command_entries(
     effective_execution: ExecutionTargetConfig,
     output_dir: Path,
 ) -> list[dict[str, Any]]:
-    """Build command entries from validated plan entries.
-
-    Args:
-        entries: Validated plan entry mappings.
-        effective_execution: Effective execution settings.
-        output_dir: Root modelbridge output directory.
-
-    Returns:
-        list[dict[str, object]]: Command entry payloads.
-    """
+    """Build command entries from validated plan entries."""
     command_entries: list[dict[str, Any]] = []
     optimize_log_dir = effective_execution.job_log_dir or (output_dir / "workspace" / "logs" / "optimize")
 

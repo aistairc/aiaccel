@@ -25,7 +25,21 @@ from .pair_csv import parse_pairs_csv
 
 
 def fit_regression(config: BridgeConfig) -> StepResult:
-    """Fit per-scenario regression models from train pair CSV files."""
+    """Fit per-scenario regression models from train pair CSV files.
+
+    This step trains scenario-local regression models from ``train_pairs.csv``
+    and emits model plus train-metrics artifacts.
+
+    Args:
+        config: Validated modelbridge configuration.
+
+    Returns:
+        StepResult: Execution result for ``fit_regression``.
+
+    Raises:
+        ValueError: If input pair data is malformed.
+        RuntimeError: If strict mode escalates fitting issues.
+    """
     output_dir = config.bridge.output_dir
     scenario_outputs: dict[str, dict[str, Any]] = {}
     issues: list[str] = []
@@ -71,7 +85,21 @@ def fit_regression(config: BridgeConfig) -> StepResult:
 
 
 def evaluate_model(config: BridgeConfig) -> StepResult:
-    """Evaluate fitted models against test pair CSV files."""
+    """Evaluate fitted models against test pair CSV files.
+
+    This step loads regression models and computes scenario metrics against
+    ``test_pairs.csv`` while emitting prediction CSV artifacts.
+
+    Args:
+        config: Validated modelbridge configuration.
+
+    Returns:
+        StepResult: Execution result for ``evaluate_model``.
+
+    Raises:
+        ValueError: If model payload or pair data is malformed.
+        RuntimeError: If strict mode escalates evaluation issues.
+    """
     output_dir = config.bridge.output_dir
     scenario_outputs: dict[str, dict[str, Any]] = {}
     issues: list[str] = []
@@ -224,7 +252,24 @@ def evaluate_metrics(
     targets: list[dict[str, float]],
     metrics: Sequence[str],
 ) -> dict[str, float]:
-    """Evaluate selected metrics from model predictions on features."""
+    """Evaluate selected metrics from model predictions on features.
+
+    This helper runs model prediction first and then computes the requested
+    metric values against expected targets.
+
+    Args:
+        model_payload: Serialized regression model payload.
+        features: Input feature mappings.
+        targets: Ground-truth target mappings.
+        metrics: Metric names to calculate.
+
+    Returns:
+        dict[str, float]: Computed metric values keyed by metric name.
+
+    Raises:
+        ValueError: If targets or predictions are empty or malformed.
+        RuntimeError: If model prediction fails.
+    """
     return evaluate_metrics_from_predictions(targets, _predict_regression(model_payload, features), metrics)
 
 
@@ -233,7 +278,22 @@ def evaluate_metrics_from_predictions(
     predictions: list[dict[str, float]],
     metrics: Sequence[str],
 ) -> dict[str, float]:
-    """Compute sklearn-compatible metrics from target/prediction pairs."""
+    """Compute sklearn-compatible metrics from target/prediction pairs.
+
+    This helper maps dictionary payloads into numpy arrays and evaluates
+    supported regression metrics with ``sklearn.metrics``.
+
+    Args:
+        targets: Ground-truth target mappings.
+        predictions: Predicted target mappings.
+        metrics: Metric names to calculate.
+
+    Returns:
+        dict[str, float]: Computed metric values keyed by metric name.
+
+    Raises:
+        ValueError: If targets or predictions are empty.
+    """
     if not targets or not predictions:
         raise ValueError("targets and predictions must be non-empty")
 

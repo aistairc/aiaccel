@@ -22,7 +22,23 @@ def collect_train(
     db_paths: Sequence[Path] | None = None,
     db_pairs: Sequence[tuple[Path, Path]] | None = None,
 ) -> StepResult:
-    """Collect train-role macro/micro best-parameter pairs."""
+    """Collect train-role macro/micro best-parameter pairs.
+
+    This step resolves train DB inputs from explicit options, plan artifacts, or
+    directory scan fallback and writes ``train_pairs.csv`` per scenario.
+
+    Args:
+        config: Validated modelbridge configuration.
+        db_paths: Optional DB path candidates.
+        db_pairs: Optional explicit macro/micro DB path tuples.
+
+    Returns:
+        StepResult: Execution result for ``collect_train``.
+
+    Raises:
+        ValueError: If plan payload or DB metadata is malformed.
+        RuntimeError: If strict mode escalates collection issues.
+    """
     return _collect_role(config, role="train", db_paths=tuple(db_paths or ()), db_pairs=tuple(db_pairs or ()))
 
 
@@ -31,7 +47,23 @@ def collect_eval(
     db_paths: Sequence[Path] | None = None,
     db_pairs: Sequence[tuple[Path, Path]] | None = None,
 ) -> StepResult:
-    """Collect eval-role macro/micro best-parameter pairs."""
+    """Collect eval-role macro/micro best-parameter pairs.
+
+    This step resolves eval DB inputs from explicit options, plan artifacts, or
+    directory scan fallback and writes ``test_pairs.csv`` per scenario.
+
+    Args:
+        config: Validated modelbridge configuration.
+        db_paths: Optional DB path candidates.
+        db_pairs: Optional explicit macro/micro DB path tuples.
+
+    Returns:
+        StepResult: Execution result for ``collect_eval``.
+
+    Raises:
+        ValueError: If plan payload or DB metadata is malformed.
+        RuntimeError: If strict mode escalates collection issues.
+    """
     return _collect_role(config, role="eval", db_paths=tuple(db_paths or ()), db_pairs=tuple(db_pairs or ()))
 
 

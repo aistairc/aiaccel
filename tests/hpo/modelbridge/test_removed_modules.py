@@ -22,6 +22,12 @@ def test_makefile_module_is_removed() -> None:
         importlib.import_module("aiaccel.hpo.modelbridge.makefile")
 
 
+def test_pipeline_module_is_removed() -> None:
+    assert not (_repo_root() / "aiaccel" / "hpo" / "modelbridge" / "pipeline.py").exists()
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("aiaccel.hpo.modelbridge.pipeline")
+
+
 @pytest.mark.parametrize(
     "module_name",
     [

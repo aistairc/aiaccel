@@ -9,8 +9,8 @@ import pytest
 import yaml
 
 from aiaccel.hpo.modelbridge import api
-from aiaccel.hpo.modelbridge.common import PipelineResult
-from aiaccel.hpo.modelbridge.config import BridgeConfig, load_bridge_config
+from aiaccel.hpo.modelbridge.common import StepResult
+from aiaccel.hpo.modelbridge.config import BridgeConfig
 
 
 def _write_config(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]) -> Path:
@@ -20,6 +20,10 @@ def _write_config(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, 
     config_path = tmp_path / "config.yaml"
     config_path.write_text(yaml.safe_dump(payload), encoding="utf-8")
     return config_path
+
+
+def _load_config(tmp_path: Path, make_bridge_config: Callable[[str], dict[str, Any]]) -> BridgeConfig:
+    return api.load_config(_write_config(tmp_path, make_bridge_config))
 
 
 def test_api_load_config(
@@ -32,130 +36,88 @@ def test_api_load_config(
     assert config.bridge.seed == 123
 
 
-def test_api_run_invokes_pipeline(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    payload = make_bridge_config(str(tmp_path / "outputs"))
-    payload["hpo"]["base_config"] = str(tmp_path / "optimize.yaml")
-    (tmp_path / "optimize.yaml").write_text("optimize:\n  goal: minimize\n", encoding="utf-8")
-    config = load_bridge_config(payload)
-    calls: dict[str, object] = {}
-
-    def fake_setup_logging(*_args: object, **_kwargs: object) -> Path:
-        calls["logged"] = True
-        return tmp_path / "log.txt"
-
-    def fake_run_pipeline(
-        _config: BridgeConfig,
-        steps: list[str] | None = None,
-        *,
-        profile: str | None = None,
-        train_db_paths: list[Path] | None = None,
-        eval_db_paths: list[Path] | None = None,
-        train_db_pairs: list[tuple[Path, Path]] | None = None,
-        eval_db_pairs: list[tuple[Path, Path]] | None = None,
-    ) -> Any:
-        calls["steps"] = steps
-        calls["profile"] = profile
-        calls["train_db_paths"] = train_db_paths
-        _ = eval_db_paths
-        _ = train_db_pairs
-        _ = eval_db_pairs
-        return PipelineResult(results=[])
-
-    monkeypatch.setattr(api, "setup_logging", fake_setup_logging)
-    monkeypatch.setattr(api, "run_pipeline", fake_run_pipeline)
-
-    result = api.run(
-        config,
-        profile="prepare",
-        train_db_paths=[tmp_path / "a.db"],
-    )
-    assert isinstance(result, PipelineResult)
-    assert result.results == []
-    assert calls["profile"] == "prepare"
-    assert calls["train_db_paths"] == [tmp_path / "a.db"]
-
-
 def test_api_required_callables_exist() -> None:
-    for name in ["load_config", "run", "emit_commands_step"]:
-        assert callable(getattr(api, name))
-
-
-def test_api_removed_step_wrappers_are_not_exposed() -> None:
-    removed_names = [
+    for name in [
+        "load_config",
         "prepare_train_step",
         "prepare_eval_step",
+        "hpo_train_step",
+        "hpo_eval_step",
         "collect_train_step",
         "collect_eval_step",
         "fit_regression_step",
         "evaluate_model_step",
         "publish_summary_step",
-    ]
-    for name in removed_names:
+    ]:
+        assert callable(getattr(api, name))
+
+
+def test_api_removed_pipeline_entrypoints_are_not_exposed() -> None:
+    for name in ["run", "run_pipeline", "emit_commands_step"]:
         assert not hasattr(api, name)
 
 
-def test_api_emit_commands_step_accepts_execution_target(
+def test_api_prepare_step_invokes_runtime_and_logging(
     tmp_path: Path,
     make_bridge_config: Callable[[str], dict[str, Any]],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    config_path = _write_config(tmp_path, make_bridge_config)
-    config = api.load_config(config_path)
-    calls: dict[str, object] = {}
-
-    def fake_emit(
-        _config: BridgeConfig,
-        role: str,
-        fmt: str,
-        execution_target: str | None = None,
-    ) -> Path:
-        calls["role"] = role
-        calls["fmt"] = fmt
-        calls["target"] = execution_target
-        return config.bridge.output_dir / "workspace" / "commands" / "train.sh"
-
-    monkeypatch.setattr(api, "emit_commands", fake_emit)
-    path = api.emit_commands_step(
-        config,
-        role="train",
-        fmt="shell",
-        execution_target="abci",
-        enable_logging=False,
-    )
-
-    assert calls == {"role": "train", "fmt": "shell", "target": "abci"}
-    assert path.name == "train.sh"
-
-
-def test_api_entrypoints_use_common_logging_helper(
-    tmp_path: Path,
-    make_bridge_config: Callable[[str], dict[str, Any]],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    config_path = _write_config(tmp_path, make_bridge_config)
-    config = api.load_config(config_path)
+    config = _load_config(tmp_path, make_bridge_config)
     calls: list[bool] = []
 
-    def fake_run_with_logging(
+    def fake_setup_logging(*_args: object, **_kwargs: object) -> Path:
+        calls.append(True)
+        return tmp_path / "log.txt"
+
+    monkeypatch.setattr(api, "setup_logging", fake_setup_logging)
+    monkeypatch.setattr(
+        api,
+        "prepare_train",
+        lambda *_args, **_kwargs: StepResult(step="prepare_train", status="success"),
+    )
+    result = api.prepare_train_step(config, enable_logging=True)
+    assert result.step == "prepare_train"
+    assert calls == [True]
+
+
+def test_api_collect_step_forwards_db_paths(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _load_config(tmp_path, make_bridge_config)
+    observed: dict[str, object] = {}
+
+    def fake_collect(
         _config: BridgeConfig,
-        *,
-        enable_logging: bool,
-        action: Callable[[], object],
-    ) -> object:
-        calls.append(enable_logging)
-        return action()
+        db_paths: list[Path] | None = None,
+        db_pairs: list[tuple[Path, Path]] | None = None,
+    ) -> StepResult:
+        observed["paths"] = db_paths
+        observed["pairs"] = db_pairs
+        return StepResult(step="collect_train", status="success")
 
-    monkeypatch.setattr(api, "_run_with_optional_logging", fake_run_with_logging)
-    monkeypatch.setattr(api, "run_pipeline", lambda *_args, **_kwargs: PipelineResult(results=[]))
-    monkeypatch.setattr(api, "emit_commands", lambda *_args, **_kwargs: tmp_path / "train.sh")
+    monkeypatch.setattr(api, "collect_train", fake_collect)
+    path = tmp_path / "a.db"
+    result = api.collect_train_step(config, db_paths=[path], enable_logging=False)
+    assert result.step == "collect_train"
+    assert observed["paths"] == [path]
+    assert observed["pairs"] is None
 
-    pipeline_result = api.run(config, enable_logging=False)
-    command_path = api.emit_commands_step(config, role="train", fmt="shell", enable_logging=True)
 
-    assert isinstance(pipeline_result, PipelineResult)
-    assert command_path.name == "train.sh"
-    assert calls == [False, True]
+def test_api_hpo_eval_step_invokes_runner(
+    tmp_path: Path,
+    make_bridge_config: Callable[[str], dict[str, Any]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _load_config(tmp_path, make_bridge_config)
+    observed: dict[str, object] = {}
+
+    def fake_hpo_eval(_config: BridgeConfig) -> StepResult:
+        observed["called"] = True
+        return StepResult(step="hpo_eval", status="success")
+
+    monkeypatch.setattr(api, "hpo_eval", fake_hpo_eval)
+    result = api.hpo_eval_step(config, enable_logging=False)
+    assert result.step == "hpo_eval"
+    assert observed["called"] is True

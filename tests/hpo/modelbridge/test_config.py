@@ -121,3 +121,12 @@ def test_load_bridge_config_execution_defaults(make_bridge_config: Callable[[str
     assert config.bridge.execution.target == "abci"
     assert config.bridge.execution.job_profile == "sge"
     assert config.bridge.execution.emit_on_prepare is False
+
+
+def test_load_bridge_config_external_hpo_import_requires_entries(
+    make_bridge_config: Callable[[str], dict[str, Any]],
+) -> None:
+    data = make_bridge_config("./work/tmp")
+    data["bridge"]["external_hpo_import"] = {"enabled": True, "entries": []}
+    with pytest.raises(ValueError):
+        load_bridge_config(data)

@@ -16,7 +16,22 @@ JOB_OPTS ?=
 
 COMMON_FLAGS := --config $(MODELBRIDGE_CONFIG) --output_dir $(MODELBRIDGE_OUTPUT) $(if $(MODELBRIDGE_JSON_LOG),--json-log,) $(if $(MODELBRIDGE_SET),--set $(MODELBRIDGE_SET),)
 
-.PHONY: run validate schema prepare emit_train hpo_train emit_eval hpo_eval analyze clean
+STAGES := stage0 stage1 stage2 stage3 stage4 stage5 stage6
+DONE_FILES := \
+	.0_prepare_train.done \
+	.0_prepare_eval.done \
+	.1_hpo_train.done \
+	.2_hpo_eval.done \
+	.3_collect_train.done \
+	.3_collect_eval.done \
+	.4_fit_regression.done \
+	.5_evaluate_model.done \
+	.6_publish_summary.done
+
+.PHONY: all run validate schema clean $(STAGES) skip-stage0 skip-stage1 skip-stage2 skip-stage3 skip-stage4 skip-stage5 skip-stage6
+
+all: $(STAGES)
+run: all
 
 validate:
 	$(MODELBRIDGE_CMD) validate --config $(MODELBRIDGE_CONFIG)
@@ -24,33 +39,79 @@ validate:
 schema:
 	$(MODELBRIDGE_CMD) schema
 
-run: prepare hpo_train hpo_eval analyze
+stage0: .0_prepare_train.done .0_prepare_eval.done
+stage1: stage0 .1_hpo_train.done
+stage2: stage0 .2_hpo_eval.done
+stage3: stage1 stage2 .3_collect_train.done .3_collect_eval.done
+stage4: stage3 .4_fit_regression.done
+stage5: stage4 .5_evaluate_model.done
+stage6: stage5 .6_publish_summary.done
 
-prepare: | $(MODELBRIDGE_LOG_DIR)
+.0_prepare_train.done: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		$(MODELBRIDGE_CMD) run $(COMMON_FLAGS) --profile prepare
+		$(MODELBRIDGE_CMD) prepare-train $(COMMON_FLAGS)
+	@touch $@
 
-emit_train: | $(MODELBRIDGE_LOG_DIR)
+.0_prepare_eval.done: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		$(MODELBRIDGE_CMD) emit-commands $(COMMON_FLAGS) --role train --format shell
+		$(MODELBRIDGE_CMD) prepare-eval $(COMMON_FLAGS)
+	@touch $@
 
-hpo_train: emit_train
-	bash $(MODELBRIDGE_OUTPUT)/workspace/commands/train.sh
-
-emit_eval: | $(MODELBRIDGE_LOG_DIR)
+.1_hpo_train.done: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		$(MODELBRIDGE_CMD) emit-commands $(COMMON_FLAGS) --role eval --format shell
+		$(MODELBRIDGE_CMD) hpo-train $(COMMON_FLAGS)
+	@touch $@
 
-hpo_eval: emit_eval
-	@if [ -s "$(MODELBRIDGE_OUTPUT)/workspace/commands/eval.sh" ]; then \
-		bash $(MODELBRIDGE_OUTPUT)/workspace/commands/eval.sh; \
-	else \
-		echo "No eval commands emitted."; \
-	fi
-
-analyze: | $(MODELBRIDGE_LOG_DIR)
+.2_hpo_eval.done: | $(MODELBRIDGE_LOG_DIR)
 	$(AIACCEL_CMD) $(JOB_OPTS) -- \
-		$(MODELBRIDGE_CMD) run $(COMMON_FLAGS) --profile analyze
+		$(MODELBRIDGE_CMD) hpo-eval $(COMMON_FLAGS)
+	@touch $@
+
+.3_collect_train.done: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) collect-train $(COMMON_FLAGS)
+	@touch $@
+
+.3_collect_eval.done: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) collect-eval $(COMMON_FLAGS)
+	@touch $@
+
+.4_fit_regression.done: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) fit-regression $(COMMON_FLAGS)
+	@touch $@
+
+.5_evaluate_model.done: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) evaluate-model $(COMMON_FLAGS)
+	@touch $@
+
+.6_publish_summary.done: | $(MODELBRIDGE_LOG_DIR)
+	$(AIACCEL_CMD) $(JOB_OPTS) -- \
+		$(MODELBRIDGE_CMD) publish-summary $(COMMON_FLAGS)
+	@touch $@
+
+skip-stage0:
+	@touch .0_prepare_train.done .0_prepare_eval.done
+
+skip-stage1:
+	@touch .1_hpo_train.done
+
+skip-stage2:
+	@touch .2_hpo_eval.done
+
+skip-stage3:
+	@touch .3_collect_train.done .3_collect_eval.done
+
+skip-stage4:
+	@touch .4_fit_regression.done
+
+skip-stage5:
+	@touch .5_evaluate_model.done
+
+skip-stage6:
+	@touch .6_publish_summary.done
 
 $(MODELBRIDGE_LOG_DIR):
 	@mkdir -p $@
@@ -58,3 +119,4 @@ $(MODELBRIDGE_LOG_DIR):
 
 clean:
 	@rm -rf $(MODELBRIDGE_OUTPUT)
+	@rm -f $(DONE_FILES)

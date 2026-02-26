@@ -1,18 +1,22 @@
 # Modelbridge Examples
 
 ## Overview
-This directory contains rev04-compatible examples for `aiaccel-hpo modelbridge`.
-The canonical lifecycle is:
-- `prepare` (generate plans + per-run optimize config)
-- external execution (`aiaccel-hpo optimize`)
-- `collect -> fit-regression -> evaluate-model -> publish-summary`
+This directory contains v16-compatible examples for `aiaccel-hpo modelbridge`.
+The workflow is Makefile-first and stage-based:
+1. `stage0`: `prepare-train`, `prepare-eval`
+2. `stage1`: `hpo-train`
+3. `stage2`: `hpo-eval`
+4. `stage3`: `collect-train`, `collect-eval`
+5. `stage4`: `fit-regression`
+6. `stage5`: `evaluate-model`
+7. `stage6`: `publish-summary`
 
 ## Files
-- `Makefile.template`: External execution workflow (`prepare -> emit -> optimize -> analyze`).
+- `Makefile.template`: Stage pipeline with `.done` sentinels.
 - `modelbridge.yaml`: Modelbridge scenario settings.
 - `optimize_config.yaml`: Base optimize config (`_base_` from aiaccel default).
 - `objectives/simple_objective.py`: Objective used by train/eval optimize loops.
-- `objectives/simple_benchmark.py`: Small end-to-end script using modelbridge API.
+- `objectives/simple_benchmark.py`: Small end-to-end script using step APIs.
 - `data_assimilation/`: External tool example (not core modelbridge steps).
 
 ## 1. Using Makefile
@@ -23,63 +27,31 @@ make -f examples/hpo/modelbridge/Makefile.template \
   MODELBRIDGE_OUTPUT=./work/modelbridge/simple
 ```
 
-Targets:
-- `prepare`: Generate run configs and `workspace/{train,eval}_plan.json`.
-- `emit_train`: Emit `workspace/commands/train.sh`.
-- `hpo_train`: Execute `train.sh` (calls `aiaccel-hpo optimize`).
-- `emit_eval`: Emit `workspace/commands/eval.sh`.
-- `hpo_eval`: Execute `eval.sh`.
-- `analyze`: `collect -> fit -> evaluate -> publish`.
+Useful targets:
+- `stage0` ... `stage6`: Execute one stage.
+- `skip-stageN`: Mark one stage done without execution.
+- `validate`: Validate config.
+- `schema`: Print config schema.
+- `clean`: Remove output and `.done` files.
 
 ## 2. Using CLI Directly
 Common options:
 - `--config <path>` required.
 - `--output_dir <path>` optional override.
 - `--set key=value` repeatable overrides.
-- Examples below use `aiaccel-hpo modelbridge` (same CLI surface as the module entrypoint).
-- Run commands from the repository root because example objectives are referenced by relative path in YAML.
+- Run from repository root because objective paths in YAML are relative.
 
-### 2.1 Commands used by `make ... run`
-```bash
-CONFIG=examples/hpo/modelbridge/modelbridge.yaml
-OUT=./work/modelbridge/simple
-
-# 1) prepare
-aiaccel-hpo modelbridge run --config "$CONFIG" --output_dir "$OUT" --profile prepare
-
-# 2) emit train commands
-aiaccel-hpo modelbridge emit-commands --config "$CONFIG" --output_dir "$OUT" --role train --format shell
-
-# 3) external train execution
-bash "$OUT/workspace/commands/train.sh"
-
-# 4) emit eval commands
-aiaccel-hpo modelbridge emit-commands --config "$CONFIG" --output_dir "$OUT" --role eval --format shell
-
-# 5) external eval execution
-bash "$OUT/workspace/commands/eval.sh"
-
-# 6) analyze
-aiaccel-hpo modelbridge run --config "$CONFIG" --output_dir "$OUT" --profile analyze
-```
-
-Alternative: emit commands during prepare profile:
-```bash
-aiaccel-hpo modelbridge run --config "$CONFIG" --output_dir "$OUT" --profile prepare \
-  --prepare-emit-commands --prepare-execution-target local
-```
-
-### 2.2 Step-by-step single command execution
+Step commands:
 ```bash
 CONFIG=examples/hpo/modelbridge/modelbridge.yaml
 OUT=./work/modelbridge/simple
 
 aiaccel-hpo modelbridge prepare-train --config "$CONFIG" --output_dir "$OUT"
 aiaccel-hpo modelbridge prepare-eval --config "$CONFIG" --output_dir "$OUT"
-
+aiaccel-hpo modelbridge hpo-train --config "$CONFIG" --output_dir "$OUT"
+aiaccel-hpo modelbridge hpo-eval --config "$CONFIG" --output_dir "$OUT"
 aiaccel-hpo modelbridge collect-train --config "$CONFIG" --output_dir "$OUT"
 aiaccel-hpo modelbridge collect-eval --config "$CONFIG" --output_dir "$OUT"
-
 aiaccel-hpo modelbridge fit-regression --config "$CONFIG" --output_dir "$OUT"
 aiaccel-hpo modelbridge evaluate-model --config "$CONFIG" --output_dir "$OUT"
 aiaccel-hpo modelbridge publish-summary --config "$CONFIG" --output_dir "$OUT"
@@ -93,17 +65,13 @@ aiaccel-hpo modelbridge collect-train --config "$CONFIG" --output_dir "$OUT" \
 aiaccel-hpo modelbridge collect-eval --config "$CONFIG" --output_dir "$OUT" \
   --eval-db-path /path/to/eval_macro.db --eval-db-path /path/to/eval_micro.db
 ```
-Collect input priority is:
-1. explicit DB pairs (API)
-2. explicit DB paths (CLI/API)
-3. role plan (`workspace/{train,eval}_plan.json`)
-4. layout scan fallback
 
 ## 3. Outputs
 Generated under `<output_dir>`:
 - `workspace/train_plan.json`, `workspace/eval_plan.json`
 - `workspace/commands/{train,eval}.{sh,json}`
-- `workspace/state/*.json` (one per step)
+- `workspace/state/*.json` (one per executed step)
+- `<scenario>/runs/<role>/<run_id>/<target>/{config.yaml,run.sh,run.json}`
 - `<scenario>/train_pairs.csv`, `<scenario>/test_pairs.csv`, `<scenario>/test_predictions.csv`
 - `<scenario>/models/regression_model.json`
 - `<scenario>/metrics/train_metrics.json`, `<scenario>/metrics/eval_metrics.json`
@@ -121,7 +89,7 @@ python3 examples/hpo/modelbridge/objectives/simple_benchmark.py
 ```
 
 ## 6. Optional GPR
-Install GPy and switch regression kind in YAML:
+Install `GPy` and switch regression kind in YAML:
 ```yaml
 regression:
   kind: gpr

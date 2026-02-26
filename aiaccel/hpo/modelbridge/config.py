@@ -16,6 +16,8 @@ SeedMode = Literal["auto_increment", "user_defined"]
 ExecutionTarget = Literal["local", "abci"]
 JobMode = Literal["cpu", "gpu", "mpi", "train"]
 MetricName = Literal["mae", "mse", "r2"]
+BridgeRole = Literal["train", "eval"]
+BridgeTarget = Literal["macro", "micro"]
 
 
 def _default_metrics() -> list[MetricName]:
@@ -35,14 +37,24 @@ def _to_tokens(value: Any, *, field_name: str) -> list[str]:
 
 
 class ParameterBounds(BaseModel):
-    """Numeric parameter range.
+    """Define numeric parameter bounds.
+
+    This model describes one tunable numeric parameter range used in HPO space
+    generation.
 
     Args:
         low: Lower bound.
         high: Upper bound.
         step: Optional discretization step.
         log: Whether to sample in log space.
+
+    Returns:
+        ParameterBounds: Validated parameter bound model.
+
+    Raises:
+        ValueError: If ``high`` is not greater than ``low``.
     """
+
     model_config = ConfigDict(extra="forbid")
     low: float
     high: float
@@ -59,22 +71,39 @@ class ParameterBounds(BaseModel):
 
 
 class ParameterSpace(BaseModel):
-    """Role-specific parameter spaces.
+    """Define role-specific parameter spaces.
+
+    This model stores macro and micro parameter-bound mappings for one role.
 
     Args:
         macro: Macro-target parameter bounds.
         micro: Micro-target parameter bounds.
+
+    Returns:
+        ParameterSpace: Validated parameter-space model.
+
+    Raises:
+        ValueError: If either mapping is empty or invalid.
     """
+
     model_config = ConfigDict(extra="forbid")
     macro: dict[str, ParameterBounds] = Field(min_length=1)
     micro: dict[str, ParameterBounds] = Field(min_length=1)
 
 
 class ObjectiveConfig(BaseModel):
-    """Objective command configuration.
+    """Define objective command configuration.
+
+    This model normalizes objective command inputs into command-token lists.
 
     Args:
         command: Objective command tokens.
+
+    Returns:
+        ObjectiveConfig: Validated objective configuration.
+
+    Raises:
+        ValueError: If command cannot be tokenized or is empty.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -91,12 +120,21 @@ class ObjectiveConfig(BaseModel):
 
 
 class SeedUserValues(BaseModel):
-    """User-defined seeds grouped by role and target.
+    """Define user-provided seeds grouped by role and target.
+
+    This model holds explicit seed lists for all role/target combinations.
 
     Args:
         train_macro/train_micro: Seeds for train runs.
         eval_macro/eval_micro: Seeds for eval runs.
+
+    Returns:
+        SeedUserValues: Validated user seed payload.
+
+    Raises:
+        ValueError: If a seed list contains invalid values.
     """
+
     model_config = ConfigDict(extra="forbid")
     train_macro: list[int] = Field(default_factory=list)
     train_micro: list[int] = Field(default_factory=list)
@@ -105,12 +143,21 @@ class SeedUserValues(BaseModel):
 
 
 class SeedPolicyConfig(BaseModel):
-    """Seed policy for one stream.
+    """Define one seed-policy stream.
+
+    This model configures either auto-increment or user-defined seed behavior
+    for sampler or optimizer streams.
 
     Args:
         mode: Seed mode.
         base: Base seed for auto-increment mode.
         user_values: Explicit seeds for user-defined mode.
+
+    Returns:
+        SeedPolicyConfig: Validated seed-policy model.
+
+    Raises:
+        ValueError: If ``mode`` is ``user_defined`` without ``user_values``.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -127,11 +174,19 @@ class SeedPolicyConfig(BaseModel):
 
 
 class SeedPolicySet(BaseModel):
-    """Seed policies for sampler and optimizer streams.
+    """Define seed policies for sampler and optimizer streams.
+
+    This model groups both sampler and optimizer seed policy definitions.
 
     Args:
         sampler: Sampler seed policy.
         optimizer: Optimizer seed policy.
+
+    Returns:
+        SeedPolicySet: Validated seed-policy set model.
+
+    Raises:
+        ValueError: If any nested policy is invalid.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -140,13 +195,22 @@ class SeedPolicySet(BaseModel):
 
 
 class ExecutionTargetConfig(BaseModel):
-    """Execution target options.
+    """Define execution-target options.
+
+    This model configures local/ABCI execution behavior and job-wrapper options.
 
     Args:
         target: Execution target name.
         emit_on_prepare: Whether prepare should emit command artifacts.
         job_profile/job_mode/job_walltime/job_log_dir/job_extra_args: Job launcher options.
+
+    Returns:
+        ExecutionTargetConfig: Validated execution-target model.
+
+    Raises:
+        ValueError: If execution values are invalid.
     """
+
     model_config = ConfigDict(extra="forbid")
     target: ExecutionTarget = "local"
     emit_on_prepare: bool = False
@@ -171,13 +235,21 @@ class ExecutionTargetConfig(BaseModel):
 
 
 class RegressionConfig(BaseModel):
-    """Regression model options.
+    """Define regression model options.
+
+    This model controls regression backend and backend-specific options.
 
     Args:
         kind: Regression algorithm name.
         degree: Polynomial degree.
         kernel: Optional GPR kernel name.
         noise: Optional GPR noise value.
+
+    Returns:
+        RegressionConfig: Validated regression configuration.
+
+    Raises:
+        ValueError: If alias normalization or value validation fails.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -198,7 +270,10 @@ class RegressionConfig(BaseModel):
 
 
 class ScenarioConfig(BaseModel):
-    """One scenario configuration.
+    """Define one modelbridge scenario.
+
+    This model combines trial counts, objective commands, parameter spaces, and
+    regression/metric configuration for one scenario.
 
     Args:
         name: Scenario name.
@@ -209,6 +284,12 @@ class ScenarioConfig(BaseModel):
         eval_params: Eval parameter space.
         regression: Regression model settings.
         metrics: Evaluation metric names.
+
+    Returns:
+        ScenarioConfig: Validated scenario configuration.
+
+    Raises:
+        ValueError: If required fields are missing or invalid.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -226,13 +307,22 @@ class ScenarioConfig(BaseModel):
 
 
 class HpoSettings(BaseModel):
-    """HPO base config and override payloads.
+    """Define HPO base config and override payloads.
+
+    This model holds the base optimize config path and target-specific override
+    mappings.
 
     Args:
         base_config: Base optimize config YAML path.
         macro_overrides: Macro-target config overrides.
         micro_overrides: Micro-target config overrides.
         abci_overrides: Extra overrides for `abci` target.
+
+    Returns:
+        HpoSettings: Validated HPO settings model.
+
+    Raises:
+        ValueError: If settings payload is malformed.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -242,8 +332,70 @@ class HpoSettings(BaseModel):
     abci_overrides: dict[str, Any] = Field(default_factory=dict)
 
 
+class ExternalHpoImportEntry(BaseModel):
+    """Define one external HPO artifact mapping entry.
+
+    This model maps one user-generated HPO artifact pair into a modelbridge
+    run slot.
+
+    Args:
+        scenario: Scenario name in bridge config.
+        role: Train or eval role.
+        run_id: Run identifier.
+        target: Macro or micro target.
+        source_hpo_config: Source optimize config path.
+        source_optuna_db: Source Optuna DB path.
+
+    Returns:
+        ExternalHpoImportEntry: Validated import mapping entry.
+
+    Raises:
+        ValueError: If entry payload values are invalid.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    scenario: str
+    role: BridgeRole
+    run_id: int = Field(ge=0)
+    target: BridgeTarget
+    source_hpo_config: Path
+    source_optuna_db: Path
+
+
+class ExternalHpoImportConfig(BaseModel):
+    """Define external HPO import settings.
+
+    This model controls optional import of user-generated HPO artifacts into
+    modelbridge run layout.
+
+    Args:
+        enabled: Whether import behavior is active.
+        entries: External artifact mapping entries.
+
+    Returns:
+        ExternalHpoImportConfig: Validated import configuration.
+
+    Raises:
+        ValueError: If enabled import has no entries.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    enabled: bool = False
+    entries: list[ExternalHpoImportEntry] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _validate_entries(self) -> ExternalHpoImportConfig:
+        """Validate enabled import settings."""
+        if self.enabled and not self.entries:
+            raise ValueError("external_hpo_import.entries must be provided when enabled=true")
+        return self
+
+
 class BridgeSettings(BaseModel):
-    """Top-level runtime settings for modelbridge.
+    """Define top-level runtime settings for modelbridge.
+
+    This model stores output, seed, execution, scenario, and import settings
+    used by all modelbridge steps.
 
     Args:
         output_dir: Root output directory.
@@ -253,7 +405,14 @@ class BridgeSettings(BaseModel):
         *runs: Train/eval run counts.
         strict_mode: Whether issues fail steps.
         scenarios: Scenario configurations.
+
+    Returns:
+        BridgeSettings: Validated bridge runtime settings.
+
+    Raises:
+        ValueError: If nested seed settings do not match run counts.
     """
+
     model_config = ConfigDict(extra="forbid")
     output_dir: Path
     seed: int = 0
@@ -265,6 +424,7 @@ class BridgeSettings(BaseModel):
     eval_runs: int = Field(default=0, ge=0)
     strict_mode: bool = False
     scenarios: list[ScenarioConfig] = Field(default_factory=list)
+    external_hpo_import: ExternalHpoImportConfig = Field(default_factory=ExternalHpoImportConfig)
 
     @model_validator(mode="after")
     def _validate_seed_user_values_length(self) -> BridgeSettings:
@@ -277,12 +437,21 @@ class BridgeSettings(BaseModel):
 
 
 class BridgeConfig(BaseModel):
-    """Validated modelbridge configuration root.
+    """Define validated modelbridge configuration root.
+
+    This model is the root schema consumed by modelbridge runtime steps.
 
     Args:
         bridge: Runtime bridge settings.
         hpo: HPO generation settings.
+
+    Returns:
+        BridgeConfig: Validated root configuration.
+
+    Raises:
+        ValueError: If required sections are missing or invalid.
     """
+
     model_config = ConfigDict(extra="forbid")
     bridge: BridgeSettings
     hpo: HpoSettings
@@ -302,7 +471,18 @@ def _validate_seed_lengths(name: str, policy: SeedPolicyConfig, expected: Mappin
 
 
 def deep_merge_mappings(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
-    """Recursively merge nested mappings."""
+    """Recursively merge nested mappings.
+
+    Args:
+        base: Base mapping.
+        override: Override mapping.
+
+    Returns:
+        dict[str, Any]: Recursively merged mapping.
+
+    Raises:
+        ValueError: If mapping merge cannot be completed.
+    """
     merged: dict[str, Any] = dict(base)
     for key, value in override.items():
         current = merged.get(key)
@@ -322,6 +502,9 @@ def load_bridge_config(payload: Mapping[str, Any] | Any, overrides: Mapping[str,
 
     Returns:
         BridgeConfig: Validated configuration.
+
+    Raises:
+        ValueError: If payload is not a mapping or schema validation fails.
     """
     if OmegaConf.is_config(payload):
         payload = OmegaConf.to_container(payload, resolve=True)
@@ -336,5 +519,15 @@ def load_bridge_config(payload: Mapping[str, Any] | Any, overrides: Mapping[str,
 
 
 def generate_schema() -> dict[str, Any]:
-    """Return JSON schema for modelbridge config."""
+    """Return JSON schema for modelbridge config.
+
+    Args:
+        None.
+
+    Returns:
+        dict[str, Any]: JSON schema payload.
+
+    Raises:
+        ValueError: If schema generation fails.
+    """
     return BridgeConfig.model_json_schema()
