@@ -25,6 +25,57 @@ from sklearn.preprocessing import PolynomialFeatures
 import yaml
 
 
+def _resolve_config_path(path_value: Any, *, config_dir: Path, prefer_existing: bool = False) -> str:
+    """Resolve a config path value.
+
+    Relative paths are resolved from config directory by default.
+    When prefer_existing=True, also try current working directory and pick the
+    first existing candidate.
+    """
+    path_str = str(path_value)
+    path = Path(path_str).expanduser()
+    if path.is_absolute():
+        return str(path)
+
+    config_based = (config_dir / path).resolve()
+    if not prefer_existing:
+        return str(config_based)
+
+    cwd_based = path.resolve()
+    if config_based.exists():
+        return str(config_based)
+    if cwd_based.exists():
+        return str(cwd_based)
+    return str(config_based)
+
+
+def _normalize_runtime_config(
+    config: dict[str, Any],
+    *,
+    config_path: Path,
+    output_root_override: str | None,
+) -> tuple[dict[str, Any], Path]:
+    """Normalize path-like entries to absolute paths for stable subprocess execution."""
+    normalized = dict(config)
+    config_dir = config_path.parent.resolve()
+
+    if "dataset_root" in normalized:
+        normalized["dataset_root"] = _resolve_config_path(
+            normalized["dataset_root"], config_dir=config_dir, prefer_existing=True
+        )
+    if "mas_bench_jar" in normalized:
+        normalized["mas_bench_jar"] = _resolve_config_path(
+            normalized["mas_bench_jar"], config_dir=config_dir, prefer_existing=True
+        )
+
+    output_root_raw = output_root_override if output_root_override is not None else normalized.get("output_root")
+    if output_root_raw is None:
+        output_root_raw = "./work/modelbridge/data_assimilation"
+    output_root = Path(_resolve_config_path(output_root_raw, config_dir=config_dir))
+    normalized["output_root"] = str(output_root)
+    return normalized, output_root
+
+
 def _get_sampler_config(name: str, seed: int) -> dict[str, Any]:
     name = name.lower()
     if name == "random":
@@ -382,31 +433,44 @@ def _run_predicted_micro(
 def main() -> None:
     parser = argparse.ArgumentParser(description="MAS-Bench Wrapper")
     parser.add_argument("--config", required=True, help="Path to configuration YAML")
+    parser.add_argument(
+        "--output-root",
+        default=None,
+        help="Optional output directory override. If omitted, use output_root in config.",
+    )
     args = parser.parse_args()
 
     config_path = Path(args.config)
     with config_path.open("r") as f:
-        config = yaml.safe_load(f)
+        loaded = yaml.safe_load(f)
+    config = loaded if isinstance(loaded, dict) else {}
 
-    output_root = Path(config.get("output_root", "./work/modelbridge/data_assimilation"))
+    config, output_root = _normalize_runtime_config(
+        config,
+        config_path=config_path.resolve(),
+        output_root_override=args.output_root,
+    )
     output_root.mkdir(parents=True, exist_ok=True)
+    runtime_config_path = output_root / "resolved_mas_bench_config.yaml"
+    runtime_config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
 
     logger = get_logger(__name__)
     executor = MASBenchExecutor(config, logger=logger)
     mock = bool(config.get("allow_mock", False))
 
     logger.info("Starting MAS-Bench data assimilation")
+    logger.info("Using resolved config: %s", runtime_config_path)
 
     # Phase 1: micro scenarios
-    micro_results = _run_micro_optimization(config, executor, mock, output_root, config_path)  # type: ignore[no-any-unimported]
+    micro_results = _run_micro_optimization(config, executor, mock, output_root, runtime_config_path)  # type: ignore[no-any-unimported]
     logger.info("Completed micro scenarios: %d trials", len(micro_results))
 
     # Phase 2: macro train assimilation across scenarios
-    macro_train_results = _run_macro_train(config, executor, mock, output_root, config_path)  # type: ignore[no-any-unimported]
+    macro_train_results = _run_macro_train(config, executor, mock, output_root, runtime_config_path)  # type: ignore[no-any-unimported]
     logger.info("Completed macro train assimilation: %d scenarios", len(macro_train_results))
 
     # Phase 3: macro test assimilation
-    macro_test_result = _run_macro_test(config, executor, mock, output_root, config_path)  # type: ignore[no-any-unimported]
+    macro_test_result = _run_macro_test(config, executor, mock, output_root, runtime_config_path)  # type: ignore[no-any-unimported]
     logger.info("Completed macro test assimilation")
 
     # Phase 4: regression macro->micro

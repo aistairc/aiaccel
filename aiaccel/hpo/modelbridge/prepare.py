@@ -1,292 +1,189 @@
-"""Prepare steps: generate per-run optimize configs and role plans."""
+"""Prepare step: generate per-run optimize configs."""
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
+import argparse
 from collections.abc import Mapping, Sequence
-from datetime import datetime, timezone
 from pathlib import Path
-import shutil
 
-from omegaconf import DictConfig, OmegaConf
+import yaml
 
-from .common import (
-    Role,
-    StepResult,
-    Target,
-    plan_path,
-    resolve_seed,
-    run_path,
-    scenario_path,
-    write_json,
-    write_step_state,
-)
-from .config import BridgeConfig, ExecutionTarget, HpoSettings, ParameterBounds, ScenarioConfig
-from .execution import emit_commands
+DEFAULT_SEED_BASES: dict[str, int] = {
+    "train_macro": 42,
+    "train_micro": 142,
+    "test_macro": 1042,
+    "test_micro": 1142,
+}
 
 
-def prepare_train(config: BridgeConfig) -> StepResult:
-    """Prepare optimize configs and plan entries for train role.
-
-    This step materializes train-role run directories, run-level optimize
-    config files, and the train plan manifest.
-
-    Args:
-        config: Validated modelbridge configuration.
-
-    Returns:
-        StepResult: Execution result for ``prepare_train``.
-
-    Raises:
-        FileNotFoundError: If referenced base config or import artifacts are missing.
-        ValueError: If resolved config payloads are malformed.
-    """
-    return _prepare_role(config, "train")
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """Parse CLI arguments."""
+    parser = argparse.ArgumentParser(description="Modelbridge Prepare Step")
+    parser.add_argument("--config", type=str, required=True, help="Path to config.yaml")
+    parser.add_argument("--workspace", type=str, required=True, help="Path to workspace directory")
+    return parser.parse_args(argv)
 
 
-def prepare_eval(config: BridgeConfig) -> StepResult:
-    """Prepare optimize configs and plan entries for eval role.
+def _resolve_objective_command(command: Sequence[str], *, config_path: Path) -> list[str]:
+    """Resolve objective script path when a relative script is used."""
+    resolved = [str(token) for token in command]
+    if len(resolved) < 2:
+        return resolved
 
-    This step materializes eval-role run directories, run-level optimize
-    config files, and the eval plan manifest.
+    candidate = Path(resolved[1]).expanduser()
+    if candidate.is_absolute():
+        return resolved
 
-    Args:
-        config: Validated modelbridge configuration.
-
-    Returns:
-        StepResult: Execution result for ``prepare_eval``.
-
-    Raises:
-        FileNotFoundError: If referenced base config or import artifacts are missing.
-        ValueError: If resolved config payloads are malformed.
-    """
-    return _prepare_role(config, "eval")
-
-
-def _prepare_role(config: BridgeConfig, role: Role) -> StepResult:
-    """Prepare all runs for one role and write a role plan."""
-    output_dir = config.bridge.output_dir
-    runs = config.bridge.train_runs if role == "train" else config.bridge.eval_runs
-    config_paths: list[str] = []
-    entries: list[dict[str, Any]] = []
-
-    for scenario in config.bridge.scenarios:
-        entries.extend(
-            _prepare_run_target(
-                config=config,
-                scenario=scenario,
-                scenario_output=scenario_path(output_dir, scenario.name),
-                role=role,
-                run_id=run_id,
-                target=cast(Target, target),
-                config_paths=config_paths,
-            )
-            for run_id in range(runs)
-            for target in ("macro", "micro")
-        )
-
-    plan_file = plan_path(output_dir, role)
-    write_json(plan_file, {"role": role, "created_at": datetime.now(timezone.utc).isoformat(), "entries": entries})
-    imported_entries = _import_external_hpo_results(config=config, role=role)
-
-    emitted_command_path = (
-        str(emit_commands(config, role=role, fmt="shell", execution_target=config.bridge.execution.target))
-        if entries and config.bridge.execution.emit_on_prepare
-        else None
-    )
-    result = StepResult(
-        step=f"prepare_{role}",
-        status="success" if entries else "skipped",
-        inputs={"role": role, "runs": runs, "execution_target": config.bridge.execution.target},
-        outputs={
-            "plan_path": str(plan_file),
-            "num_entries": len(entries),
-            "config_paths": config_paths,
-            "command_path": emitted_command_path,
-            "num_imported_entries": len(imported_entries),
-            "imported_entries": imported_entries,
-        },
-        reason=None if entries else f"No {role} runs configured",
-    )
-    write_step_state(output_dir, result)
-    return result
+    # Prefer config dir and its parent so examples/config/config.yaml can reference
+    # objectives under examples/hpo/modelbridge/objectives.
+    search_roots = (config_path.parent, config_path.parent.parent)
+    for root in search_roots:
+        script_path = (root / candidate).resolve()
+        if script_path.exists():
+            resolved[1] = str(script_path)
+            return resolved
+    return resolved
 
 
-def _prepare_run_target(
-    *,
-    config: BridgeConfig,
-    scenario: ScenarioConfig,
-    scenario_output: Path,
-    role: Role,
-    run_id: int,
-    target: Target,
-    config_paths: list[str],
-) -> dict[str, Any]:
-    """Build one plan entry and per-run optimize config."""
-    current_dir = run_path(scenario_output, role, run_id, target)
-    current_dir.mkdir(parents=True, exist_ok=True)
-    objective_command = list(getattr(scenario, f"{role}_objective").command)
-
-    sampler_seed = resolve_seed(
-        config.bridge.seed_policy.sampler,
-        role=role,
-        target=target,
-        run_id=run_id,
-        fallback_base=config.bridge.seed,
-    )
-    optimizer_seed = resolve_seed(
-        config.bridge.seed_policy.optimizer,
-        role=role,
-        target=target,
-        run_id=run_id,
-        fallback_base=config.bridge.seed,
-    )
-    policy_modes = {config.bridge.seed_policy.sampler.mode, config.bridge.seed_policy.optimizer.mode}
-    seed_mode = "user_defined" if "user_defined" in policy_modes else "auto_increment"
-
-    config_path = _generate_hpo_config(
-        settings=config.hpo,
-        space=dict(getattr(getattr(scenario, f"{role}_params"), target)),
-        trials=int(getattr(scenario, f"{role}_{target}_trials")),
-        sampler_seed=sampler_seed,
-        optimizer_seed=optimizer_seed,
-        output_dir=current_dir,
-        study_name=f"{scenario.name}-{role}-{target}-{run_id:03d}",
-        command=objective_command,
-        execution_target=config.bridge.execution.target,
-        overrides=config.hpo.macro_overrides if target == "macro" else config.hpo.micro_overrides,
-    )
-    config_paths.append(str(config_path))
-
-    return {
-        "scenario": scenario.name,
-        "role": role,
-        "run_id": run_id,
-        "target": target,
-        "config_path": str(config_path),
-        "expected_db_path": str(current_dir / "optuna.db"),
-        "study_name": f"{scenario.name}-{role}-{target}-{run_id:03d}",
-        "seed": sampler_seed,
-        "sampler_seed": sampler_seed,
-        "optimizer_seed": optimizer_seed,
-        "seed_mode": seed_mode,
-        "sampler_seed_mode": config.bridge.seed_policy.sampler.mode,
-        "optimizer_seed_mode": config.bridge.seed_policy.optimizer.mode,
-        "execution_target": config.bridge.execution.target,
-        "objective_command": objective_command,
-    }
-
-
-def _generate_hpo_config(
-    *,
-    settings: HpoSettings,
-    space: dict[str, ParameterBounds],
-    trials: int,
-    sampler_seed: int,
-    optimizer_seed: int,
+def create_hpo_config(
     output_dir: Path,
-    study_name: str,
-    command: Sequence[str],
-    execution_target: ExecutionTarget,
-    overrides: Mapping[str, Any] | None = None,
+    *,
+    role: str,
+    target: str,
+    run_id: int,
+    sampler_seed_base: int,
+    n_trials: int,
+    target_params: Mapping[str, Mapping[str, Any]],
+    objective_command: Sequence[str],
 ) -> Path:
-    """Render one optimize configuration file for a run/target."""
+    """Generate one aiaccel-hpo optimize config for a specific run."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    command = list(objective_command)
+    for param_name in target_params:
+        command.append(f"--{param_name}={{{param_name}}}")
+    command.append("{out_filename}")
+
     db_path = output_dir / "optuna.db"
-    storage_uri = f"sqlite:///{db_path.resolve()}"
-
-    conf = OmegaConf.load(settings.base_config)
-    if not isinstance(conf, DictConfig):
-        raise ValueError(f"Base config must be a mapping: {settings.base_config}")
-    if overrides:
-        conf = OmegaConf.merge(conf, OmegaConf.create(dict(overrides)))
-    if execution_target == "abci" and settings.abci_overrides:
-        conf = OmegaConf.merge(conf, OmegaConf.create(settings.abci_overrides))
-
-    for key, value in {
-        "n_trials": trials,
-        "working_directory": str(output_dir),
-        "command": list(command),
-    }.items():
-        OmegaConf.update(conf, key, value)
-    OmegaConf.update(conf, "optimize.rand_seed", optimizer_seed, merge=True)
-
-    goal = OmegaConf.select(conf, "optimize.goal", default="minimize")
-    direction = "maximize" if goal == "maximize" else "minimize"
-    params_def: dict[str, Any] = {"_target_": "aiaccel.hpo.optuna.hparams_manager.HparamsManager"}
-    params_def.update(
-        {
-            name: {
-                "_target_": "aiaccel.hpo.optuna.hparams.Float",
-                "low": bounds.low,
-                "high": bounds.high,
-                "log": bounds.log,
-                "step": bounds.step,
-            }
-            for name, bounds in space.items()
-        }
-    )
-    OmegaConf.update(conf, "params", params_def)
-    OmegaConf.update(
-        conf,
-        "study",
-        {
+    hpo_config: dict[str, Any] = {
+        "n_max_jobs": 1,
+        "n_trials": n_trials,
+        "working_directory": str(output_dir.resolve()),
+        "command": command,
+        "study": {
             "_target_": "optuna.create_study",
-            "study_name": study_name,
-            "storage": storage_uri,
-            "direction": direction,
+            "study_name": f"{role}-{target}-{run_id:03d}",
+            "storage": f"sqlite:///{db_path.resolve()}",
+            "direction": "minimize",
             "load_if_exists": True,
-            "sampler": {"_target_": "optuna.samplers.TPESampler", "seed": sampler_seed},
+            "sampler": {
+                "_target_": "optuna.samplers.TPESampler",
+                "seed": sampler_seed_base + run_id,
+            },
         },
-    )
+        "params": {
+            "_target_": "aiaccel.hpo.optuna.hparams_manager.HparamsManager",
+        },
+    }
+    for param_name, bounds in target_params.items():
+        hpo_config["params"][param_name] = {
+            "_target_": "aiaccel.hpo.optuna.hparams.Float",
+            "low": bounds.get("low", 0.0),
+            "high": bounds.get("high", 1.0),
+            "log": bounds.get("log", False),
+        }
 
     config_path = output_dir / "config.yaml"
-    OmegaConf.save(conf, config_path)
+    config_path.write_text(yaml.safe_dump(hpo_config, default_flow_style=False, sort_keys=False), encoding="utf-8")
     return config_path
 
 
-def _import_external_hpo_results(config: BridgeConfig, *, role: Role) -> list[dict[str, str | int]]:
-    """Import user-provided HPO artifacts into modelbridge run layout."""
-    import_cfg = config.bridge.external_hpo_import
-    if not import_cfg.enabled:
-        return []
+def _as_int(value: Any, *, key: str) -> int:
+    parsed = int(value)
+    if parsed < 0:
+        raise ValueError(f"{key} must be >= 0")
+    return parsed
 
-    scenario_names = {scenario.name for scenario in config.bridge.scenarios}
-    max_runs = config.bridge.train_runs if role == "train" else config.bridge.eval_runs
-    imported: list[dict[str, str | int]] = []
 
-    for entry in import_cfg.entries:
-        if entry.role != role:
-            continue
-        if entry.scenario not in scenario_names:
-            raise ValueError(f"external_hpo_import scenario not found: {entry.scenario}")
-        if entry.run_id >= max_runs:
-            raise ValueError(f"external_hpo_import run_id out of range for role={role}: {entry.run_id}")
-        if not entry.source_hpo_config.exists():
-            raise FileNotFoundError(f"external_hpo_import source_hpo_config not found: {entry.source_hpo_config}")
-        if not entry.source_optuna_db.exists():
-            raise FileNotFoundError(f"external_hpo_import source_optuna_db not found: {entry.source_optuna_db}")
+def _load_seed_bases(config: Mapping[str, Any]) -> dict[str, int]:
+    """Load sampler seed base values from config."""
+    raw = config.get("seed_defaults", {})
+    if raw is None:
+        return dict(DEFAULT_SEED_BASES)
+    if not isinstance(raw, Mapping):
+        raise ValueError("seed_defaults must be a mapping")
 
-        run_dir = run_path(
-            scenario_path(config.bridge.output_dir, entry.scenario),
-            role=role,
-            run_id=entry.run_id,
-            target=entry.target,
-        )
-        run_dir.mkdir(parents=True, exist_ok=True)
+    seed_bases = dict(DEFAULT_SEED_BASES)
+    for key, value in raw.items():
+        if key in seed_bases:
+            seed_bases[key] = _as_int(value, key=f"seed_defaults.{key}")
+        elif key in {"train", "test"}:
+            phase = str(key)
+            phase_seed = _as_int(value, key=f"seed_defaults.{phase}")
+            seed_bases[f"{phase}_macro"] = phase_seed
+            seed_bases[f"{phase}_micro"] = phase_seed + 100
+        else:
+            raise ValueError(f"Unsupported seed_defaults key: {key}")
+    return seed_bases
 
-        config_dest = run_dir / "config.yaml"
-        db_dest = run_dir / "optuna.db"
-        shutil.copy2(entry.source_hpo_config, config_dest)
-        shutil.copy2(entry.source_optuna_db, db_dest)
-        imported.append(
-            {
-                "scenario": entry.scenario,
-                "role": entry.role,
-                "run_id": entry.run_id,
-                "target": entry.target,
-                "config_path": str(config_dest),
-                "db_path": str(db_dest),
-            }
-        )
-    return imported
+
+def run_prepare(config_path: Path, workspace: Path) -> tuple[int, int]:
+    """Generate train/test run configs under workspace/runs."""
+    loaded = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    config: dict[str, Any] = loaded if isinstance(loaded, dict) else {}
+
+    n_train = _as_int(config.get("n_train", 0), key="n_train")
+    n_test = _as_int(config.get("n_test", 0), key="n_test")
+    raw_command = config.get("objective_command", ["python", "objective.py"])
+    if not isinstance(raw_command, list) or any(not isinstance(token, str) for token in raw_command):
+        raise ValueError("objective_command must be a list[str]")
+    objective_command = _resolve_objective_command(raw_command, config_path=config_path)
+    seed_bases = _load_seed_bases(config)
+    runs_dir = workspace / "runs"
+
+    for run_id in range(n_train):
+        params = config.get("train_params", {})
+        for target in ("macro", "micro"):
+            target_params = params.get(target, {}) if isinstance(params, dict) else {}
+            n_trials = _as_int(config.get(f"train_{target}_trials", 10), key=f"train_{target}_trials")
+            create_hpo_config(
+                runs_dir / "train" / target / f"{run_id:03d}",
+                role="train",
+                target=target,
+                run_id=run_id,
+                sampler_seed_base=seed_bases[f"train_{target}"],
+                n_trials=n_trials,
+                target_params=target_params,
+                objective_command=objective_command,
+            )
+
+    for run_id in range(n_test):
+        params = config.get("test_params", {})
+        for target in ("macro", "micro"):
+            target_params = params.get(target, {}) if isinstance(params, dict) else {}
+            n_trials = _as_int(config.get(f"test_{target}_trials", 10), key=f"test_{target}_trials")
+            create_hpo_config(
+                runs_dir / "test" / target / f"{run_id:03d}",
+                role="test",
+                target=target,
+                run_id=run_id,
+                sampler_seed_base=seed_bases[f"test_{target}"],
+                n_trials=n_trials,
+                target_params=target_params,
+                objective_command=objective_command,
+            )
+    return n_train, n_test
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """CLI entrypoint for prepare step."""
+    args = parse_args(argv)
+    n_train, n_test = run_prepare(config_path=Path(args.config), workspace=Path(args.workspace))
+    print(f"[Prepare] Scattered configs for {n_train} train runs and {n_test} test runs.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

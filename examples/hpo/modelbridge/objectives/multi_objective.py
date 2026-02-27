@@ -28,20 +28,40 @@ FUNCTIONS = {
     "griewank": griewank,
 }
 
+FUNCTION_IDS = {
+    0: "sphere",
+    1: "rastrigin",
+    2: "griewank",
+}
+
+
+def resolve_function_name(function: str | None, function_id: float | None) -> str:
+    if function is not None:
+        return function
+    if function_id is None:
+        raise ValueError("Either --function or --function_id must be specified.")
+    resolved_id = int(round(function_id))
+    if resolved_id not in FUNCTION_IDS:
+        raise ValueError(f"Unknown function_id: {function_id}")
+    return FUNCTION_IDS[resolved_id]
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("out_filename", type=Path)
-    parser.add_argument("--function", type=str, required=True)
+    parser.add_argument("--function", type=str, default=None)
+    parser.add_argument("--function_id", type=float, default=None)
     parser.add_argument("--x1", type=float, default=0.0)
     parser.add_argument("--x2", type=float, default=0.0)
 
     args = parser.parse_args()
 
-    if args.function not in FUNCTIONS:
-        raise ValueError(f"Unknown function: {args.function}")
+    function_name = resolve_function_name(args.function, args.function_id)
+    if function_name not in FUNCTIONS:
+        raise ValueError(f"Unknown function: {function_name}")
 
     vec = np.array([args.x1, args.x2])
-    score = FUNCTIONS[args.function](vec)
+    score = FUNCTIONS[function_name](vec)
 
     with open(args.out_filename, "w") as f:
         json.dump(score, f)

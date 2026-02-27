@@ -22,6 +22,6 @@ scaling:
   mu_scale: 300.0
   pi_complement: true
 mas_bench_jar: ./work/tmp/MAS-Bench.jar
-dataset_root: ./work/tmp/masbench-resources/Dataset
-allow_mock: true
-output_root: ./work/modelbridge/data_assimilation
+dataset_root: ../../../../work/tmp/masbench-resources/Dataset
+allow_mock: false
+output_root: ../../../../work/modelbridge/data_assimilation
