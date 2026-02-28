@@ -1,4 +1,4 @@
-"""Public package exports for modelbridge Spec17 tools."""
+"""Expose the Spec17 modelbridge step modules."""
 
 from . import collect, evaluate, fit_model, prepare
 

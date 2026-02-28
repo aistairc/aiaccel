@@ -1,4 +1,4 @@
-"""Collect step: extract best parameters from Optuna DBs."""
+"""Collect best-parameter pairs from Optuna databases."""
 
 from __future__ import annotations
 
@@ -13,7 +13,14 @@ import optuna
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Parse CLI arguments."""
+    """Parse CLI arguments for the collect step.
+
+    Args:
+        argv: Optional command-line arguments. When omitted, uses ``sys.argv``.
+
+    Returns:
+        Parsed command-line namespace.
+    """
     parser = argparse.ArgumentParser(description="Modelbridge Collect Step")
     parser.add_argument("--workspace", type=str, required=True, help="Path to workspace directory")
     parser.add_argument("--phase", type=str, required=True, choices=["train", "test"], help="Phase (train or test)")
@@ -21,7 +28,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def extract_best_params(db_path: Path) -> dict[str, float] | None:
-    """Extract best parameters from a single Optuna DB."""
+    """Extract best-trial parameters from one Optuna SQLite database.
+
+    Args:
+        db_path: Path to an ``optuna.db`` file.
+
+    Returns:
+        Best-trial parameter mapping when available. Returns ``None`` when the DB is missing,
+        empty, unreadable, or contains non-float values.
+    """
     if not db_path.exists():
         return None
     storage_uri = f"sqlite:///{db_path.resolve()}"
@@ -40,7 +55,18 @@ def extract_best_params(db_path: Path) -> dict[str, float] | None:
 
 
 def run_collect(workspace: Path, phase: str) -> Path:
-    """Collect macro/micro best-parameter pairs and emit CSV."""
+    """Collect macro/micro best-parameter pairs and write a CSV file.
+
+    Args:
+        workspace: Workspace directory containing ``runs/<phase>``.
+        phase: Target phase name (``train`` or ``test``).
+
+    Returns:
+        Output CSV path under ``pairs/<phase>_pairs.csv``.
+
+    Raises:
+        FileNotFoundError: If ``runs/<phase>`` does not exist.
+    """
     runs_dir = workspace / "runs" / phase
     out_csv = workspace / "pairs" / f"{phase}_pairs.csv"
     if not runs_dir.exists():
@@ -85,7 +111,14 @@ def run_collect(workspace: Path, phase: str) -> Path:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entrypoint for collect step."""
+    """Run the collect step CLI.
+
+    Args:
+        argv: Optional command-line arguments. When omitted, uses ``sys.argv``.
+
+    Returns:
+        Process exit code. ``0`` on success, ``1`` on input/runtime errors.
+    """
     args = parse_args(argv)
     try:
         run_collect(Path(args.workspace), args.phase)

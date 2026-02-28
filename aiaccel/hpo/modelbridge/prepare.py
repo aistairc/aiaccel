@@ -1,4 +1,4 @@
-"""Prepare step: generate per-run optimize configs."""
+"""Generate per-run optimize configs for the modelbridge workflow."""
 
 from __future__ import annotations
 
@@ -19,7 +19,14 @@ DEFAULT_SEED_BASES: dict[str, int] = {
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Parse CLI arguments."""
+    """Parse CLI arguments for the prepare step.
+
+    Args:
+        argv: Optional command-line arguments. When omitted, uses ``sys.argv``.
+
+    Returns:
+        Parsed command-line namespace.
+    """
     parser = argparse.ArgumentParser(description="Modelbridge Prepare Step")
     parser.add_argument("--config", type=str, required=True, help="Path to config.yaml")
     parser.add_argument("--workspace", type=str, required=True, help="Path to workspace directory")
@@ -27,7 +34,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def _resolve_objective_command(command: Sequence[str], *, config_path: Path) -> list[str]:
-    """Resolve objective script path when a relative script is used."""
+    """Resolve relative objective script paths against config-neighbor directories.
+
+    Args:
+        command: Original objective command tokens.
+        config_path: Configuration file used to derive search roots.
+
+    Returns:
+        Resolved command tokens. The second token is rewritten when a matching script path exists.
+    """
     resolved = [str(token) for token in command]
     if len(resolved) < 2:
         return resolved
@@ -58,7 +73,21 @@ def create_hpo_config(
     target_params: Mapping[str, Mapping[str, Any]],
     objective_command: Sequence[str],
 ) -> Path:
-    """Generate one aiaccel-hpo optimize config for a specific run."""
+    """Generate one ``aiaccel-hpo optimize`` config file for a specific run.
+
+    Args:
+        output_dir: Run directory where ``config.yaml`` and artifacts are created.
+        role: Phase role name (for example ``train`` or ``test``).
+        target: Optimization target name (``macro`` or ``micro``).
+        run_id: Zero-based run identifier.
+        sampler_seed_base: Seed base offset for deterministic Optuna sampling.
+        n_trials: Number of optimization trials.
+        target_params: Parameter-space bounds for the selected target.
+        objective_command: Objective command template before parameter placeholders are appended.
+
+    Returns:
+        Generated config path.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
 
     command = list(objective_command)
@@ -101,6 +130,18 @@ def create_hpo_config(
 
 
 def _as_int(value: Any, *, key: str) -> int:
+    """Parse a non-negative integer from config input.
+
+    Args:
+        value: Raw configuration value.
+        key: Human-readable key name for error messages.
+
+    Returns:
+        Parsed non-negative integer value.
+
+    Raises:
+        ValueError: If the value is negative or cannot be converted to an integer.
+    """
     parsed = int(value)
     if parsed < 0:
         raise ValueError(f"{key} must be >= 0")
@@ -108,7 +149,17 @@ def _as_int(value: Any, *, key: str) -> int:
 
 
 def _load_seed_bases(config: Mapping[str, Any]) -> dict[str, int]:
-    """Load sampler seed base values from config."""
+    """Load sampler seed-base defaults and optional overrides from config.
+
+    Args:
+        config: Root prepare configuration mapping.
+
+    Returns:
+        Seed base mapping for all train/test and macro/micro combinations.
+
+    Raises:
+        ValueError: If ``seed_defaults`` is malformed or contains unsupported keys.
+    """
     raw = config.get("seed_defaults", {})
     if raw is None:
         return dict(DEFAULT_SEED_BASES)
@@ -130,7 +181,18 @@ def _load_seed_bases(config: Mapping[str, Any]) -> dict[str, int]:
 
 
 def run_prepare(config_path: Path, workspace: Path) -> tuple[int, int]:
-    """Generate train/test run configs under workspace/runs."""
+    """Generate train/test optimize configs under ``workspace/runs``.
+
+    Args:
+        config_path: Path to the modelbridge workflow config YAML.
+        workspace: Workspace root where run configs are generated.
+
+    Returns:
+        Tuple of ``(n_train, n_test)`` generated run counts.
+
+    Raises:
+        ValueError: If config values are malformed or unsupported.
+    """
     loaded = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     config: dict[str, Any] = loaded if isinstance(loaded, dict) else {}
 
@@ -178,7 +240,14 @@ def run_prepare(config_path: Path, workspace: Path) -> tuple[int, int]:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entrypoint for prepare step."""
+    """Run the prepare step CLI.
+
+    Args:
+        argv: Optional command-line arguments. When omitted, uses ``sys.argv``.
+
+    Returns:
+        Process exit code. ``0`` on success.
+    """
     args = parse_args(argv)
     n_train, n_test = run_prepare(config_path=Path(args.config), workspace=Path(args.workspace))
     print(f"[Prepare] Scattered configs for {n_train} train runs and {n_test} test runs.")

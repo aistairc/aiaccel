@@ -1,4 +1,4 @@
-"""Evaluate step."""
+"""Evaluate the fitted modelbridge regression model."""
 
 from __future__ import annotations
 
@@ -15,14 +15,31 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Parse CLI arguments."""
+    """Parse CLI arguments for the evaluate step.
+
+    Args:
+        argv: Optional command-line arguments. When omitted, uses ``sys.argv``.
+
+    Returns:
+        Parsed command-line namespace.
+    """
     parser = argparse.ArgumentParser(description="Modelbridge Evaluate Step")
     parser.add_argument("--workspace", type=str, required=True, help="Path to workspace directory")
     return parser.parse_args(argv)
 
 
 def run_evaluate(workspace: Path) -> Path | None:
-    """Evaluate regression model against test_pairs.csv."""
+    """Evaluate the regression model against test pairs and export artifacts.
+
+    Args:
+        workspace: Workspace directory containing model artifacts and test pair CSV.
+
+    Returns:
+        Path to the evaluation summary JSON on success, or ``None`` when the test CSV is empty.
+
+    Raises:
+        FileNotFoundError: If required test data or model artifacts are missing.
+    """
     test_csv = workspace / "pairs" / "test_pairs.csv"
     model_path = workspace / "models" / "regression_model.pkl"
     meta_path = workspace / "models" / "model_meta.json"
@@ -88,7 +105,14 @@ def run_evaluate(workspace: Path) -> Path | None:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entrypoint for evaluate step."""
+    """Run the evaluate step CLI.
+
+    Args:
+        argv: Optional command-line arguments. When omitted, uses ``sys.argv``.
+
+    Returns:
+        Process exit code. ``0`` on success, ``1`` on input/runtime errors.
+    """
     args = parse_args(argv)
     try:
         run_evaluate(Path(args.workspace))
