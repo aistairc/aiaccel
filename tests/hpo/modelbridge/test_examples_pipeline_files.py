@@ -13,7 +13,7 @@ def _data_assimilation_dir() -> Path:
     return _example_dir() / "data_assimilation"
 
 
-def test_makefile_is_spec17_orchestrator() -> None:
+def test_makefile_is_orchestrator() -> None:
     makefile_path = _example_dir() / "Makefile"
     content = makefile_path.read_text(encoding="utf-8")
     assert "all: evaluate" in content
@@ -35,7 +35,7 @@ def test_makefile_references_shell_wrappers_directly() -> None:
     assert "| $(STATE_DIR)" in content
 
 
-def test_scripts_call_spec17_python_tools() -> None:
+def test_scripts_call_python_tools() -> None:
     scripts_dir = _example_dir() / "scripts"
     assert "aiaccel/hpo/modelbridge/prepare.py" in (scripts_dir / "prepare.sh").read_text(encoding="utf-8")
     assert "aiaccel/hpo/modelbridge/collect.py" in (scripts_dir / "collect.sh").read_text(encoding="utf-8")
@@ -43,7 +43,7 @@ def test_scripts_call_spec17_python_tools() -> None:
     assert "aiaccel/hpo/modelbridge/evaluate.py" in (scripts_dir / "evaluate.sh").read_text(encoding="utf-8")
 
 
-def test_config_contains_required_spec17_keys() -> None:
+def test_config_contains_required_keys() -> None:
     config_path = _example_dir() / "config" / "config.yaml"
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     assert config["n_train"] >= 1

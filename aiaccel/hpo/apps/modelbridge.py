@@ -1,4 +1,4 @@
-"""CLI adapter for modelbridge Spec17 tools."""
+"""CLI adapter for modelbridge tools."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ def _resolve_step_handler(command: str) -> StepHandler:
 
 def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments."""
-    parser = argparse.ArgumentParser(description="Run aiaccel modelbridge Spec17 tools.")
+    parser = argparse.ArgumentParser(description="Run aiaccel modelbridge tools.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     prepare_parser = subparsers.add_parser("prepare", help="Generate per-run HPO configs.")

@@ -1,4 +1,4 @@
-"""Run a small end-to-end benchmark with the Spec17 modelbridge pipeline."""
+"""Run a small end-to-end benchmark with the modelbridge pipeline."""
 
 from __future__ import annotations
 
@@ -128,7 +128,7 @@ def run_benchmark(*, workspace: Path, n_train: int, n_test: int, n_trials: int, 
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run Spec17 simple benchmark pipeline.")
+    parser = argparse.ArgumentParser(description="Run simple benchmark pipeline.")
     parser.add_argument(
         "--workspace",
         type=Path,

@@ -8,7 +8,7 @@ import pytest
 cli_module = importlib.import_module("aiaccel.hpo.apps.modelbridge")
 
 
-def test_step_commands_are_spec17_set() -> None:
+def test_step_commands_are_set() -> None:
     assert cli_module.STEP_COMMANDS == (
         "prepare",
         "collect",

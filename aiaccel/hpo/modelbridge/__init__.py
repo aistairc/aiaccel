@@ -1,4 +1,4 @@
-"""Expose the Spec17 modelbridge step modules."""
+"""Expose the modelbridge step modules."""
 
 from . import collect, evaluate, fit_model, prepare
 

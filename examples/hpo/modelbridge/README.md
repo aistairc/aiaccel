@@ -1,7 +1,7 @@
-# Modelbridge Examples (Spec17)
+# Modelbridge Examples
 
 ## Overview
-Modelbridge Spec17 is Makefile-first and shell-first.
+Modelbridge is Makefile-first and shell-first.
 
 Orchestration lives in:
 - `Makefile`
@@ -89,11 +89,11 @@ Commands below assume current directory is `examples/hpo/modelbridge`.
   - Supports `--function` and `--function_id`.
   - For fixed-function optimization, include `function_id` as a parameter with identical `low`/`high` bounds.
 - `simple_benchmark.py`:
-  - Runs a small Spec17 end-to-end benchmark.
+  - Runs a small end-to-end benchmark.
   - Example:
     - `python objectives/simple_benchmark.py --n-train 2 --n-test 1 --trials 6`
 - `multi_function_benchmark.py`:
-  - Runs multiple function-pair scenarios with Spec17 tools.
+  - Runs multiple function-pair scenarios with tools.
   - Example:
     - `python objectives/multi_function_benchmark.py --scenario all --n-train 2 --n-test 1 --trials 8`
 

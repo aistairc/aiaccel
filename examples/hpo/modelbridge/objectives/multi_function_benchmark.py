@@ -1,4 +1,4 @@
-"""Run Spec17 modelbridge benchmarks across multiple function pair scenarios."""
+"""Run modelbridge benchmarks across multiple function pair scenarios."""
 
 from __future__ import annotations
 
@@ -172,7 +172,7 @@ def run_scenario(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run multi-function Spec17 modelbridge benchmarks.")
+    parser = argparse.ArgumentParser(description="Run multi-function modelbridge benchmarks.")
     parser.add_argument(
         "--workspace",
         type=Path,

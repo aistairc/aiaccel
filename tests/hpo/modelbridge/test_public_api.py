@@ -4,7 +4,7 @@ import aiaccel.hpo.modelbridge as modelbridge
 from aiaccel.hpo.modelbridge import collect, evaluate, fit_model, prepare
 
 
-def test_package_root_exports_spec17_modules() -> None:
+def test_package_root_exports_modules() -> None:
     assert modelbridge.__all__ == [
         "collect",
         "evaluate",
