@@ -13,7 +13,7 @@ from aiaccel.config import (
     prepare_config,
 )
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
-from aiaccel.job.job_env import get_rank
+from aiaccel.job.utils import get_rank
 
 logger = logging.getLogger(__name__)
 

@@ -18,7 +18,7 @@ import torch
 import attrs
 
 from aiaccel.config import print_config, setup_omegaconf
-from aiaccel.job.job_env import get_task_list
+from aiaccel.job.utils import split_tasks
 
 setup_omegaconf()
 
@@ -183,7 +183,7 @@ class BasePipeline(metaclass=ABCMeta):
                 src_fname_list = list(args.src_path.glob(f"*.{args.src_ext}"))
                 src_fname_list.sort()
 
-                src_fname_list = get_task_list(src_fname_list)
+                src_fname_list = split_tasks(src_fname_list)
 
                 args.dst_path.mkdir(exist_ok=True, parents=True)
                 for src_filename in track(src_fname_list):
