@@ -11,17 +11,22 @@ from pathlib import Path
 import sys
 from types import ModuleType
 
-import aiaccel
-
 # -- Path setup --------------------------------------------------------------
 root_path = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(root_path.absolute()))
+sys.path.insert(0, str(root_path.resolve()))
+
+
+def _get_release_version() -> str:
+    import aiaccel
+
+    return aiaccel.__version__
+
 
 # -- Project information -----------------------------------------------------
 project = "aiaccel"
 author = "National Institute of Advanced Industrial Science And Technology (AIST)"
 project_copyright = author
-release = aiaccel.__version__
+release = _get_release_version()
 
 html_logo = f"{root_path}/docs/image/logo_aiaccel.png"
 html_favicon = f"{root_path}/docs/image/favicon.ico"
