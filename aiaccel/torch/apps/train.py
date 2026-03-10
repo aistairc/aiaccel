@@ -3,7 +3,6 @@
 
 from argparse import ArgumentParser
 import logging
-import os
 
 from hydra.utils import instantiate
 from omegaconf import OmegaConf as oc  # noqa: N813
@@ -14,27 +13,9 @@ from aiaccel.config import (
     prepare_config,
 )
 from aiaccel.config.git import collect_git_status_from_config, print_git_status
+from aiaccel.job.utils import get_rank
 
 logger = logging.getLogger(__name__)
-
-
-def get_rank(default: int = 0) -> int:
-    for key in [
-        "GLOBAL_RANK",  # PyTorch Lightning
-        "RANK",  # torchrun / deepspeed / pytorch launcher
-        "OMPI_COMM_WORLD_RANK",  # OpenMPI
-        "PMI_RANK",  # MPICH / Intel MPI
-        "MV2_COMM_WORLD_RANK",  # MVAPICH2
-        "SLURM_PROCID",  # Slurm
-    ]:
-        rank = os.environ.get(key)
-        if rank is not None:
-            try:
-                return int(rank)
-            except ValueError:
-                pass
-
-    return default
 
 
 def main() -> None:
