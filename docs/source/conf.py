@@ -17,6 +17,8 @@ sys.path.insert(0, str(root_path.resolve()))
 
 
 def _get_release_version() -> str:
+    # Import aiaccel only after updating sys.path so inspect.getsourcefile
+    # resolves to local repository files instead of site-packages.
     import aiaccel
 
     return aiaccel.__version__
