@@ -5,6 +5,7 @@ from typing import Any
 
 from collections.abc import Callable
 import copy
+from functools import wraps
 from importlib import resources
 from pathlib import Path
 import re
@@ -235,6 +236,7 @@ def apply_recursively(
         DictConfig | ListConfig: The modified configuration with the function applied.
     """
 
+    @wraps(func)
     def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
         config = func(config)
 
