@@ -1,0 +1,39 @@
+# Modelbridge configuration for ABCI execution.
+#
+# This config uses objective.sh so each objective evaluation can run with
+# ABCI-ready environment setup (modules / venv) in the wrapper script.
+
+n_train: 3
+n_test: 2
+
+# Use the shell wrapper instead of calling objective python directly.
+# Path is resolved from this config directory by prepare.py.
+objective_command: ["bash", "../objective.sh"]
+
+# Optional sampler seed bases (seed + run_id is used per run)
+# seed_defaults:
+#   train_macro: 42
+#   train_micro: 142
+#   test_macro: 1042
+#   test_micro: 1142
+
+train_macro_trials: 5
+train_micro_trials: 5
+test_macro_trials: 5
+test_micro_trials: 5
+
+train_params:
+  macro:
+    x: {low: -1.0, high: 1.0}
+    y: {low: -1.0, high: 1.0}
+  micro:
+    x: {low: -1.0, high: 1.0}
+    y: {low: -1.0, high: 1.0}
+
+test_params:
+  macro:
+    x: {low: -1.0, high: 1.0}
+    y: {low: -1.0, high: 1.0}
+  micro:
+    x: {low: -1.0, high: 1.0}
+    y: {low: -1.0, high: 1.0}
