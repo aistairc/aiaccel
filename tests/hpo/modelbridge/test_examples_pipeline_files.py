@@ -18,29 +18,30 @@ def test_makefile_is_orchestrator() -> None:
     content = makefile_path.read_text(encoding="utf-8")
     assert "all: evaluate" in content
     assert "WORKSPACE_DIR ?= workspace" in content
+    assert "MODELBRIDGE_APP := $(PROJECT_ROOT)/aiaccel/hpo/apps/modelbridge.py" in content
 
 
-def test_makefile_references_shell_wrappers_directly() -> None:
+def test_makefile_calls_modelbridge_cli_directly() -> None:
     stage_map = {
-        "prepare": "bash $(SCRIPTS_DIR)/prepare.sh",
-        "hpo_train": "bash $(SCRIPTS_DIR)/run_hpo.sh train",
-        "hpo_test": "bash $(SCRIPTS_DIR)/run_hpo.sh test",
-        "collect": "bash $(SCRIPTS_DIR)/collect.sh",
-        "fit": "bash $(SCRIPTS_DIR)/fit.sh",
-        "evaluate": "bash $(SCRIPTS_DIR)/evaluate.sh",
+        "prepare": '$(PYTHON) $(MODELBRIDGE_APP) prepare --config "$(CONFIG_PATH)" --workspace "$(WORKSPACE_PATH)"',
+        "collect_train": '$(PYTHON) $(MODELBRIDGE_APP) collect --workspace "$(WORKSPACE_PATH)" --phase train',
+        "collect_test": '$(PYTHON) $(MODELBRIDGE_APP) collect --workspace "$(WORKSPACE_PATH)" --phase test',
+        "fit": '$(PYTHON) $(MODELBRIDGE_APP) fit-model --workspace "$(WORKSPACE_PATH)"',
+        "evaluate": '$(PYTHON) $(MODELBRIDGE_APP) evaluate --workspace "$(WORKSPACE_PATH)"',
     }
     content = (_example_dir() / "Makefile").read_text(encoding="utf-8")
     for _, command in stage_map.items():
         assert command in content
+    assert 'find "$$RUNS_DIR" -name "config.yaml" | LC_ALL=C sort | while IFS= read -r config_path; do \\' in content
+    assert 'aiaccel-hpo optimize --config "$$config_path"; \\' in content
     assert "| $(STATE_DIR)" in content
+    assert "SCRIPTS_DIR" not in content
 
 
-def test_scripts_call_python_tools() -> None:
+def test_example_shell_wrappers_are_removed() -> None:
     scripts_dir = _example_dir() / "scripts"
-    assert "aiaccel/hpo/modelbridge/prepare.py" in (scripts_dir / "prepare.sh").read_text(encoding="utf-8")
-    assert "aiaccel/hpo/modelbridge/collect.py" in (scripts_dir / "collect.sh").read_text(encoding="utf-8")
-    assert "aiaccel/hpo/modelbridge/fit_model.py" in (scripts_dir / "fit.sh").read_text(encoding="utf-8")
-    assert "aiaccel/hpo/modelbridge/evaluate.py" in (scripts_dir / "evaluate.sh").read_text(encoding="utf-8")
+    for name in ("prepare.sh", "run_hpo.sh", "collect.sh", "fit.sh", "evaluate.sh"):
+        assert not (scripts_dir / name).exists()
 
 
 def test_config_contains_required_keys() -> None:

@@ -1,11 +1,12 @@
 # Modelbridge Examples
 
 ## Overview
-Modelbridge is Makefile-first and shell-first.
+Modelbridge is Makefile-first.
 
 Orchestration lives in:
 - `Makefile`
-- `scripts/*.sh`
+- direct calls to `aiaccel/hpo/apps/modelbridge.py`
+- direct `aiaccel-hpo optimize` execution from Make recipes
 
 Python under `aiaccel/hpo/modelbridge/` is limited to stateless step tools:
 - `prepare.py`
@@ -17,7 +18,6 @@ Python under `aiaccel/hpo/modelbridge/` is limited to stateless step tools:
 - `config/config.yaml`: local run settings (direct `simple_objective.py` call).
 - `config/config_abci.yaml`: ABCI-oriented settings (`objective.sh` wrapper call).
 - `config/job_config_abci.yaml`: `aiaccel-job pbs` configuration template for ABCI.
-- `scripts/`: runtime wrappers called by Make.
 - `objective.sh`: ABCI-ready objective wrapper script (module/venv aware).
 - `objectives/`: objective and benchmark helper scripts.
 - `workspace/`: generated artifacts (configs, Optuna DBs, pairs, models, sentinels).
@@ -71,11 +71,11 @@ Alternative: submit only train/test HPO stages separately:
 ```bash
 aiaccel-job pbs --config config/job_config_abci.yaml cpu --walltime 1:00:00 \
   workspace/logs/hpo_train.log -- \
-  bash scripts/run_hpo.sh train
+  make hpo-train CONFIG_FILE=config/config_abci.yaml
 
 aiaccel-job pbs --config config/job_config_abci.yaml cpu --walltime 1:00:00 \
   workspace/logs/hpo_test.log -- \
-  bash scripts/run_hpo.sh test
+  make hpo-test CONFIG_FILE=config/config_abci.yaml
 ```
 
 ## Using Files in `objectives/`
