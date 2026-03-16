@@ -100,3 +100,6 @@ task:
           _target_: torch.optim.lr_scheduler.CosineAnnealingLR
           T_max: 200
         interval: epoch
+
+n_gpus: 1
+walltime: "1:0:0"
