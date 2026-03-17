@@ -16,7 +16,7 @@ $(train_path)/.train.done: | stage$(train_stage) $(train_path)/config.yaml
 		read -r -p "Delete these? [y/N]: " ans; \
 		case "$$ans" in y|Y) rm -r $$existing ;; *) echo "Aborted."; exit 1 ;; esac; \
 	fi
-	$(cmd) train $(job_ops) \
+	$(cmd) train \
 		--n_gpus=$(shell aiaccel-config get-value $(train_path)/config.yaml n_gpus) \
 		--walltime=$(shell aiaccel-config get-value $(train_path)/config.yaml walltime) \
 		$(job_ops) $(train_path)/train.log -- \
