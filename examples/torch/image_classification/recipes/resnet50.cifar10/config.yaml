@@ -1,3 +1,5 @@
+_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
+
 trainer:
   _target_: lightning.Trainer
   default_root_dir: ${working_directory}
@@ -101,3 +103,10 @@ task:
           T_max: 200
         interval: epoch
 
+script_prologue: |
+    echo Job ID: $PBS_JOBID
+    echo Hostname: $(hostname)
+
+    export CUDA_VISIBLE_DEVICES=all
+    module load python/3.13/3.13.2
+    source /path/to/env_aiaccel
