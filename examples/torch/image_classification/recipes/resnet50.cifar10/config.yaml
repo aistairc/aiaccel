@@ -1,5 +1,7 @@
 _base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
 
+# Config for aiaccel.torch.apps.train
+
 trainer:
   _target_: lightning.Trainer
   default_root_dir: ${working_directory}
@@ -103,10 +105,14 @@ task:
           T_max: 200
         interval: epoch
 
+# Config for aiaccel.job.apps.pbs
+
+env_activate_commamd: /path/to/env_aiaccel/bin/activate
+
 script_prologue: |
     echo Job ID: $PBS_JOBID
     echo Hostname: $(hostname)
 
     export CUDA_VISIBLE_DEVICES=all
     module load python/3.13/3.13.2
-    source /path/to/env_aiaccel
+    "${env_activate_commamd}"
