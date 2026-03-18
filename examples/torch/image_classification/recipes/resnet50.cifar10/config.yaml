@@ -115,4 +115,4 @@ script_prologue: |
 
     export CUDA_VISIBLE_DEVICES=all
     module load python/3.13/3.13.2
-    "${env_activate_command}"
+    ${env_activate_command}
