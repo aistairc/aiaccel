@@ -48,7 +48,7 @@ PRINT_VARIABLES := \
 	data_root \
 	n_gpus \
 	walltime \
-	env_activate_commamd \
+	env_activate_command \
 	PYTHON \
 	cmd \
 	job_ops
@@ -76,7 +76,7 @@ $(train_path)/config.yaml: $(recipe_path) | $(train_path)/.prepare.done
 		"_base_: $(abspath $(recipe_path))" \
 		"n_gpus: $(n_gpus)" \
 		"walltime: \"$(walltime)\"" \
-		"env_activate_commamd: '$(env_activate_commamd)'" > $@
+		"env_activate_command: '$(env_activate_command)'" > $@
 
 $(train_path)/.config.done: $(train_path)/config.yaml
 	touch $@

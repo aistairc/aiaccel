@@ -107,7 +107,7 @@ task:
 
 # Config for aiaccel.job.apps.pbs
 
-env_activate_commamd: /path/to/env_aiaccel/bin/activate
+env_activate_command: /path/to/env_aiaccel/bin/activate
 
 script_prologue: |
     echo Job ID: $PBS_JOBID
@@ -115,4 +115,4 @@ script_prologue: |
 
     export CUDA_VISIBLE_DEVICES=all
     module load python/3.13/3.13.2
-    "${env_activate_commamd}"
+    "${env_activate_command}"
