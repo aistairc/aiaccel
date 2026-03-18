@@ -30,7 +30,7 @@ job_ops ?=
 
 min_stage := 1
 max_stage := 3
-pre_train_stage := 2
+train_ready_stage := 2
 
 stage1_description := prepare the training directory and CIFAR-10
 stage2_description := generate config.yaml with workflow overrides
