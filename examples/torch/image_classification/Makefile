@@ -24,7 +24,7 @@ data_root ?= ./data
 walltime ?= 1:0:0
 PYTHON ?= python
 
-cmd ?= aiaccel-job pbs
+cmd ?= aiaccel-job pbs --config $(train_path)/config.yaml
 job_ops ?=
 
 min_stage := 1
