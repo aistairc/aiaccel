@@ -82,9 +82,7 @@ $(train_path)/.config.done: $(train_path)/config.yaml
 	touch $@
 
 clean:
-	rm -r \
-		$(train_path) \
-		$(data_root)
+	rm -r $(train_path)
 
 include $(STAGES_MK)
 include $(TRAIN_MK)
