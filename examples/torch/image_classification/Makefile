@@ -23,7 +23,6 @@ train_path ?= ./runs/$(subst /,_,$(experiment))
 data_root ?= ./data
 walltime ?= 1:0:0
 env_activate_command ?= $(if $(VIRTUAL_ENV),source $(VIRTUAL_ENV)/bin/activate,source /path/to/env_aiaccel/bin/activate)
-PYTHON ?= python
 
 cmd ?= aiaccel-job pbs --config $(train_path)/config.yaml
 job_ops ?=
@@ -67,7 +66,7 @@ train: stage3
 
 $(train_path)/.prepare.done:
 	mkdir -p $(train_path)
-	$(PYTHON) ./prepare_dataset.py $(abspath $(data_root))
+	python ./prepare_dataset.py $(abspath $(data_root))
 	touch $@
 
 $(train_path)/config.yaml: $(recipe_path) | $(train_path)/.prepare.done
