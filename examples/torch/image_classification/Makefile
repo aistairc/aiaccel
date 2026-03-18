@@ -48,7 +48,6 @@ PRINT_VARIABLES := \
 	n_gpus \
 	walltime \
 	env_activate_command \
-	PYTHON \
 	cmd \
 	job_ops
 
