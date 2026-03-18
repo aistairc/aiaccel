@@ -36,5 +36,34 @@ cd recipes
 aiaccel-torch train resnet50.cifar10.ddp/config.yaml
 ```
 
+## Training with the Makefile
+The example also provides a `Makefile` that prepares the CIFAR-10 dataset, generates a run config under `runs/`, and launches training via `aiaccel-job`.
+
+```bash
+make help
+```
+
+This Makefile assumes the ABCI environment and an already activated Python virtual environment.
+Please run it either with your virtual environment already activated, or by specifying env_activate_command.
+
+```bash
+source /path/to/env_aiaccel/bin/activate
+make single
+```
+
+```bash
+make single env_activate_command="source /path/to/env_aiaccel/bin/activate"
+```
+
+### Single GPU
+```bash
+make single
+```
+
+### Multiple GPUs (DDP)
+```bash
+make ddp
+```
+
 ## Detailed Descriptions [TDB]
 Detailed descriptions are available on the [aiaccel document](https://aistairc.github.io/aiaccel/user_guide/torch.html)
