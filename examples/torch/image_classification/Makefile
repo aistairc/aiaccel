@@ -22,7 +22,7 @@ recipe_path := $(recipe_root)/$(recipe)
 train_path ?= ./runs/$(subst /,_,$(experiment))
 data_root ?= ./data
 walltime ?= 1:0:0
-env_activate_command ?= $(if $(VIRTUAL_ENV),source $(VIRTUAL_ENV)/bin/activate,source /path/to/env_aiaccel/bin/activate)
+env_activate_command ?= $(if $(VIRTUAL_ENV),source $(VIRTUAL_ENV)/bin/activate,)
 
 cmd ?= aiaccel-job pbs --config $(train_path)/config.yaml
 job_ops ?=
