@@ -4,40 +4,15 @@
 from typing import Any
 
 import torch
-from torch.optim.swa_utils import get_ema_avg_fn
 
 from lightning.pytorch import LightningModule
-from lightning.pytorch.callbacks import WeightAveraging
+from lightning.pytorch.callbacks import EMAWeightAveraging, WeightAveraging
 
 
-class NoBufferWeightAveraging(WeightAveraging):
-    """Weight averaging callback that ignores buffers during averaging and swapping.
+class _NoBufferWeightAveragingMixin:
+    """Shared behavior for weight averaging callbacks that must ignore buffers."""
 
-    Checkpoints still store the current model buffers together with the averaged
-    parameters so loading preserves non-averaged buffer state.
-
-    Example:
-        >>> from lightning.pytorch import Trainer
-        >>> from torch.optim.swa_utils import get_ema_avg_fn
-        >>> ema = NoBufferWeightAveraging(avg_fn=get_ema_avg_fn(0.999))
-        >>> trainer = Trainer(callbacks=[ema])
-    """
-
-    def __init__(
-        self,
-        device: torch.device | str | int | None = None,
-        **kwargs: Any,
-    ):
-        """Initialize the callback.
-
-        Args:
-            device: Device that stores the averaged model. If ``None``, the
-                current model device is used.
-            **kwargs: Additional arguments forwarded to
-                ``lightning.pytorch.callbacks.WeightAveraging``. ``use_buffers``
-                is always fixed to ``False`` in this subclass.
-        """
-        super().__init__(device, use_buffers=False, **kwargs)
+    _average_model: Any | None
 
     def _swap_models(self, pl_module: LightningModule) -> None:
         assert self._average_model is not None
@@ -67,7 +42,7 @@ class NoBufferWeightAveraging(WeightAveraging):
         pl_module: LightningModule,
         checkpoint: dict[str, Any],
     ) -> None:
-        super().on_save_checkpoint(trainer, pl_module, checkpoint)
+        super().on_save_checkpoint(trainer, pl_module, checkpoint)  # type: ignore[misc]
 
         if self._average_model is None:
             return
@@ -84,26 +59,68 @@ class NoBufferWeightAveraging(WeightAveraging):
                 average_model_state[buffer_name] = current_model_state[buffer_name].clone()
 
 
-class NoBufferEMAWeightAveraging(NoBufferWeightAveraging):
-    """Exponential moving average (EMA) version of ``NoBufferWeightAveraging``."""
+class NoBufferWeightAveraging(_NoBufferWeightAveragingMixin, WeightAveraging):
+    """Weight averaging callback that ignores buffers during averaging and swapping.
+
+    Checkpoints still store the current model buffers together with the averaged
+    parameters so loading preserves non-averaged buffer state.
+
+    Example:
+        >>> from lightning.pytorch import Trainer
+        >>> from torch.optim.swa_utils import get_ema_avg_fn
+        >>> ema = NoBufferWeightAveraging(avg_fn=get_ema_avg_fn(0.999))
+        >>> trainer = Trainer(callbacks=[ema])
+    """
 
     def __init__(
         self,
         device: torch.device | str | int | None = None,
-        decay: float = 0.999,
         **kwargs: Any,
     ):
         """Initialize the callback.
 
         Args:
-                take two models as input and update the first model in-place.
             device: Device that stores the averaged model. If ``None``, the
                 current model device is used.
-            decay: Decay factor for the exponential moving average. Should be between
-                0 and 1. Default is 0.999.
             **kwargs: Additional arguments forwarded to
                 ``lightning.pytorch.callbacks.WeightAveraging``. ``use_buffers``
                 is always fixed to ``False`` in this subclass.
         """
+        super().__init__(device, use_buffers=False, **kwargs)
 
-        super().__init__(device, avg_fn=get_ema_avg_fn(decay), **kwargs)  # type: ignore[no-untyped-call]
+
+class NoBufferEMAWeightAveraging(_NoBufferWeightAveragingMixin, EMAWeightAveraging):
+    """Exponential moving average (EMA) callback that ignores buffers."""
+
+    def __init__(
+        self,
+        device: torch.device | str | int | None = None,
+        decay: float = 0.999,
+        update_every_n_steps: int = 1,
+        update_starting_at_step: int | None = None,
+        update_starting_at_epoch: int | None = None,
+        **kwargs: Any,
+    ):
+        """Initialize the callback.
+
+        Args:
+            device: Device that stores the averaged model. If ``None``, the
+                current model device is used.
+            decay: Decay factor for the exponential moving average. Should be between
+                0 and 1. Default is 0.999.
+            update_every_n_steps: Update EMA every N optimizer steps.
+            update_starting_at_step: Start EMA updates at or after this optimizer step.
+            update_starting_at_epoch: Start EMA updates at or after this epoch.
+            **kwargs: Additional arguments forwarded to
+                ``lightning.pytorch.callbacks.EMAWeightAveraging``. ``use_buffers``
+                is always fixed to ``False`` in this subclass.
+        """
+        super().__init__(
+            device=device,
+            use_buffers=False,
+            decay=decay,
+            update_every_n_steps=update_every_n_steps,
+            update_starting_at_step=update_starting_at_step,
+            update_starting_at_epoch=update_starting_at_epoch,
+            **kwargs,
+        )
