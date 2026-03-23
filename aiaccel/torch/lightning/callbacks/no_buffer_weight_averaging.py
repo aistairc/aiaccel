@@ -96,11 +96,10 @@ class NoBufferEMAWeightAveraging(NoBufferWeightAveraging):
         """Initialize the callback.
 
         Args:
-                take two models as input and update the first model in-place.
             device: Device that stores the averaged model. If ``None``, the
                 current model device is used.
-            decay: Decay factor for the exponential moving average. Should be between
-                0 and 1. Default is 0.999.
+            decay: Decay factor for the exponential moving average. Should be
+                between 0 and 1. Default is 0.999.
             **kwargs: Additional arguments forwarded to
                 ``lightning.pytorch.callbacks.WeightAveraging``. ``use_buffers``
                 is always fixed to ``False`` in this subclass.
