@@ -1,12 +1,14 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from typing import Any, cast
+
+from typing import cast
 
 from argparse import ArgumentParser
 import logging
 
 from hydra.utils import instantiate
+from omegaconf import DictConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import lightning as lt
@@ -26,12 +28,15 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
 
     is_rank_zero = get_rank() == 0
-    config = prepare_config(
-        config_filename=args.config,
-        overwrite_config=oc.from_cli(unk_args),
-        print_config=is_rank_zero,
-        save_config=is_rank_zero,
-        save_filename="merged_config.yaml",
+    config = cast(
+        DictConfig,
+        prepare_config(
+            config_filename=args.config,
+            overwrite_config=oc.from_cli(unk_args),
+            print_config=is_rank_zero,
+            save_config=is_rank_zero,
+            save_filename="merged_config.yaml",
+        ),
     )
 
     if is_rank_zero:
@@ -48,7 +53,7 @@ def main() -> None:
     trainer.fit(
         model=instantiate(config.task),
         datamodule=instantiate(config.datamodule),
-        **cast(dict[str, Any], config.get("fit_args", {})),
+        **config.get("fit_args", {}),
     )
 
 
