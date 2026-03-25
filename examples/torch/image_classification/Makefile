@@ -4,6 +4,8 @@
 available_modes := single ddp
 mode ?= single
 
+include ./recipes/$(mode).mk
+
 ifeq ($(filter $(mode),$(available_modes)),)
 $(error Unsupported mode '$(mode)'. Choose one of: $(available_modes))
 endif
