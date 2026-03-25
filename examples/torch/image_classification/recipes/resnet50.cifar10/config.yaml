@@ -107,7 +107,9 @@ task:
 
 # Config for aiaccel.job.apps.pbs
 
-env_activate_command: /path/to/env_aiaccel/bin/activate
+env_activate_command: source $VIRTUAL_ENV/bin/activate
+walltime: "1:0:0"
+n_gpus: 1
 
 script_prologue: |
     echo Job ID: $PBS_JOBID
