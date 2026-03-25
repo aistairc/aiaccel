@@ -46,6 +46,7 @@ def main() -> None:
     trainer.fit(
         model=instantiate(config.task),
         datamodule=instantiate(config.datamodule),
+        **config.get("fit_args", {}),
     )
 
 
