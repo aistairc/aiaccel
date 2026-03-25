@@ -10,21 +10,10 @@ ifeq ($(filter $(mode),$(available_modes)),)
 $(error Unsupported mode '$(mode)'. Choose one of: $(available_modes))
 endif
 
-include $(mode).mk
-
 .DEFAULT_GOAL := help
 
-workflow_template ?= aiaccel-workflow template
-STAGES_MK := $(shell $(workflow_template) stages.mk)
-TRAIN_MK := $(shell $(workflow_template) train.mk)
-
-recipe_root ?= ./recipes
-experiment := $(patsubst %/config.yaml,%,$(recipe))
-recipe_path := $(recipe_root)/$(recipe)
-train_path ?= ./runs/$(subst /,_,$(experiment))
-data_root ?= ./data
-walltime ?= 1:0:0
-env_activate_command ?= $(if $(VIRTUAL_ENV),source $(VIRTUAL_ENV)/bin/activate,)
+recipe_path := $(train_path)/config.yaml
+data_root ?= $(shell aiaccel-config get-value $(train_path)/config.yaml datamodule.common_args.root)
 
 cmd ?= aiaccel-job pbs --config $(train_path)/config.yaml
 job_ops ?=
@@ -43,13 +32,9 @@ stage3_dependencies := $(train_path)/.train.done
 
 PRINT_VARIABLES := \
 	mode \
-	recipe \
 	recipe_path \
 	train_path \
 	data_root \
-	n_gpus \
-	walltime \
-	env_activate_command \
 	cmd \
 	job_ops
 
@@ -82,7 +67,7 @@ $(train_path)/.config.done: $(train_path)/config.yaml
 	touch $@
 
 clean:
-	rm -r $(train_path)
+	rm $(train_path)/.*.done
 
-include $(STAGES_MK)
-include $(TRAIN_MK)
+include $(shell aiaccel-workflow template stages.mk)
+include $(shell aiaccel-workflow template train.mk)
