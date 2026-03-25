@@ -1,6 +1,8 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
+from typing import Any, cast
+
 from argparse import ArgumentParser
 import logging
 
@@ -46,7 +48,7 @@ def main() -> None:
     trainer.fit(
         model=instantiate(config.task),
         datamodule=instantiate(config.datamodule),
-        **config.get("fit_args", {}),
+        **cast(dict[str, Any], config.get("fit_args", {})),
     )
 
 
