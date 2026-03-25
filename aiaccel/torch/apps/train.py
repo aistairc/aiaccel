@@ -1,10 +1,12 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
+
 from argparse import ArgumentParser
 import logging
 
 from hydra.utils import instantiate
+from omegaconf import DictConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import lightning as lt
@@ -31,6 +33,7 @@ def main() -> None:
         save_config=is_rank_zero,
         save_filename="merged_config.yaml",
     )
+    assert isinstance(config, DictConfig)
 
     if is_rank_zero:
         status_list = collect_git_status_from_config(config)
@@ -46,6 +49,7 @@ def main() -> None:
     trainer.fit(
         model=instantiate(config.task),
         datamodule=instantiate(config.datamodule),
+        **config.get("fit_args", {}),
     )
 
 
