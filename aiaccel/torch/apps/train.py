@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: MIT
 
 
-from typing import cast
-
 from argparse import ArgumentParser
 import logging
 
@@ -28,16 +26,14 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
 
     is_rank_zero = get_rank() == 0
-    config = cast(
-        DictConfig,
-        prepare_config(
-            config_filename=args.config,
-            overwrite_config=oc.from_cli(unk_args),
-            print_config=is_rank_zero,
-            save_config=is_rank_zero,
-            save_filename="merged_config.yaml",
-        ),
+    config = prepare_config(
+        config_filename=args.config,
+        overwrite_config=oc.from_cli(unk_args),
+        print_config=is_rank_zero,
+        save_config=is_rank_zero,
+        save_filename="merged_config.yaml",
     )
+    assert isinstance(config, DictConfig)
 
     if is_rank_zero:
         status_list = collect_git_status_from_config(config)
