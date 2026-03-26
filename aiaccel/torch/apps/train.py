@@ -27,7 +27,8 @@ def main() -> None:
     parser.add_argument("--seed_distributed", action="store_true")
     args, unk_args = parser.parse_known_args()
 
-    is_rank_zero = (rank := get_rank()) == 0
+    rank = get_rank()
+    is_rank_zero = rank == 0
     config = prepare_config(
         config_filename=args.config,
         overwrite_config=oc.from_cli(unk_args),
