@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
-    parser.add_argument("--seed_distributed", action="store_true")
     args, unk_args = parser.parse_known_args()
 
     rank = get_rank()
@@ -52,9 +51,9 @@ def main() -> None:
                 warnings.warn(
                     "'seed' currently uses the same random seed on all DDP ranks. "
                     "This behavior is discouraged because it can lead to identical RNG streams across processes. "
-                    "For distributed runs, use 'seed_distributed' for now. "
+                    "For distributed runs, use 'seed_ddp_mode' for now. "
                     "In a future release, the behavior of 'seed' will change to match the current "
-                    "'seed_distributed' behavior.",
+                    "'seed_ddp_mode' behavior.",
                     FutureWarning,
                     stacklevel=2,
                 )
