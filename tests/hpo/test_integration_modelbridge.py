@@ -14,6 +14,8 @@ when upstream changes are made to other parts of aiaccel.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import csv
 import json
 from pathlib import Path
@@ -22,6 +24,10 @@ import sys
 
 import pytest
 import yaml
+
+if TYPE_CHECKING:
+    from typing import Any
+
 
 from aiaccel.hpo.modelbridge import collect, evaluate, fit_model, prepare
 
@@ -51,7 +57,7 @@ _N_TEST = 1
 _N_TRIALS = 2
 
 
-def _make_config(objective_script: Path) -> dict:
+def _make_config(objective_script: Path) -> dict[str, Any]:
     return {
         "n_train": _N_TRAIN,
         "n_test": _N_TEST,
