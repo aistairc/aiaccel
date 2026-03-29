@@ -77,7 +77,6 @@ github-actions = [
 modelbridge = [
     "scikit-learn",
     "GPy",
-    "pydantic>=2.8.0",
 ]
 
 [project.scripts]
