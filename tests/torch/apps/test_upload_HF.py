@@ -48,9 +48,9 @@ def test_merge_model(workspace_factory: Callable[..., AbstractContextManager[Pat
         with open(workspace / "config.yaml", "w") as f:
             oc.save(config, f)
 
-        # execute remove-fullpath
+        # execute upload-huggingface
         cmd = (
-            "aiaccel-torch remove-fullpath "
+            "aiaccel-torch upload-huggingface "
             f"--config_path {workspace}/config.yaml "
             "--save_config_filename pathremoved_config.yaml "
             f"--ckpt_path {workspace}/checkpoints/merged.ckpt "
