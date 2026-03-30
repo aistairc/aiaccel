@@ -36,6 +36,14 @@ def test_config_from_argparse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     with open(tmp_path / "config_path.txt") as f:
         assert Path(f.read().rstrip("\n")) == Path(config_path)
 
+    hostname = subprocess.check_output(["hostname"], text=True).strip()
+
+    log_output = f"""\
+Hostname: {hostname}
+{config_path}
+"""
+    assert log_path.read_text() == log_output
+
 
 def test_config_from_environ(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)

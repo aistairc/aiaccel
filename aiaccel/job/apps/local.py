@@ -51,7 +51,7 @@ for i in "${{!pids[@]}}"; do
 done
 """
     else:
-        job = f"{job} 2>&1 | tee {args.log_filename}"
+        job = f"{job}"
 
     job_script = f"""\
 #! /bin/bash
@@ -60,7 +60,7 @@ set -eE -o pipefail
 trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
-
+exec > >(tee -a {args.log_filename}) 2>&1
 
 {config.script_prologue}
 
