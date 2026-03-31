@@ -12,6 +12,10 @@ import time
 from aiaccel.job.apps import prepare_argument_parser
 
 
+def _is_success_status_file(status_filename: Path) -> bool:
+    return status_filename.exists() and status_filename.read_text().strip() == "0"
+
+
 def main() -> None:
     # Load configuration (from the default YAML string)
     config, parser, sub_parsers = prepare_argument_parser("slurm.yaml")
@@ -72,7 +76,9 @@ trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
     sbatch_args = config[mode].sbatch_args.format(args=args)
 
     job_filename: Path = args.log_filename.with_suffix(".sh")
-    if job_filename.exists() and any(status_filename.exists() for status_filename in status_filename_list):
+    if job_filename.exists() and all(
+        _is_success_status_file(status_filename) for status_filename in status_filename_list
+    ):
         return
 
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
