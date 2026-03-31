@@ -4,13 +4,10 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-import os
 from pathlib import Path
 import shlex
-import subprocess
-import time
 
-from aiaccel.job.apps import _is_skip_job_submission, prepare_argument_parser
+from aiaccel.job.apps import _submit_job_and_wait, prepare_argument_parser
 
 
 def main() -> None:
@@ -79,37 +76,14 @@ fi
     qsub = config.qsub.format(args=args)
     qsub_args = config[mode].qsub_args.format(args=args)
 
-    job_filename: Path = args.log_filename.with_suffix(".sh")
-    if _is_skip_job_submission(job_filename, job_script, status_filename_list):
-        print(
-            "A successfully completed .out file exists"
-            f"({[str(status_filename) for status_filename in status_filename_list]}), "
-            "so the job will not be submitted."
-        )
-        for status_filename in status_filename_list:
-            status_filename.unlink(missing_ok=True)
-        return
-    args.log_filename.parent.mkdir(exist_ok=True, parents=True)
-
-    # Create the job script file, remove old status files, and run the job
-    with open(job_filename, "w") as f:
-        f.write(job_script)
-
-    for status_filename in status_filename_list:
-        status_filename.unlink(missing_ok=True)
-
-    subprocess.run(f"{qsub} {qsub_args} {job_filename}", shell=True, check=True)
-
-    for status_filename in status_filename_list:
-        while not status_filename.exists():
-            time.sleep(1.0)
-            if config.get("use_scandir", False):  # Reflesh the file system if needed
-                os.scandir(status_filename.parent)
-
-        status = int(status_filename.read_text())
-        if status != 0:
-            raise RuntimeError(f"Job failed with {status} exit code.")
-        status_filename.unlink()
+    _submit_job_and_wait(
+        args.log_filename,
+        job_script,
+        qsub,
+        qsub_args,
+        status_filename_list,
+        bool(config.get("use_scandir", False)),
+    )
 
 
 if __name__ == "__main__":

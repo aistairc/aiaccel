@@ -7,6 +7,8 @@ from argparse import ArgumentParser, _SubParsersAction
 from importlib import resources
 import os
 from pathlib import Path
+import subprocess
+import time
 
 from omegaconf import DictConfig
 
@@ -71,3 +73,45 @@ def _is_skip_job_submission(job_filename: Path, job_script: str, status_filename
         for status_filename in status_filename_list
     )
     return has_same_job_script and has_success_status_files
+
+
+def _submit_job_and_wait(
+    log_filename: Path,
+    job_script: str,
+    submit_command: str,
+    submit_args: str,
+    status_filename_list: list[Path],
+    use_scandir: bool,
+) -> None:
+    job_filename = log_filename.with_suffix(".sh")
+    if _is_skip_job_submission(job_filename, job_script, status_filename_list):
+        print(
+            "A successfully completed .out file exists"
+            f"({[str(status_filename) for status_filename in status_filename_list]}), "
+            "so the job will not be submitted."
+        )
+        for status_filename in status_filename_list:
+            status_filename.unlink(missing_ok=True)
+        return
+
+    log_filename.parent.mkdir(exist_ok=True, parents=True)
+
+    with open(job_filename, "w") as f:
+        f.write(job_script)
+
+    for status_filename in status_filename_list:
+        status_filename.unlink(missing_ok=True)
+
+    subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
+
+    for status_filename in status_filename_list:
+        while not status_filename.exists():
+            time.sleep(1.0)
+
+            if use_scandir:  # Reflesh the file system if needed
+                os.scandir(status_filename.parent)
+
+        status = int(status_filename.read_text())
+        if status != 0:
+            raise RuntimeError(f"Job failed with {status} exit code.")
+        status_filename.unlink()
