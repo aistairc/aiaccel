@@ -64,5 +64,10 @@ def prepare_argument_parser(
     return config, parser, sub_parsers
 
 
-def _is_success_status_file(status_filename: Path) -> bool:
-    return status_filename.exists() and status_filename.read_text().strip() == "0"
+def _is_skip_job_submission(job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
+    has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
+    has_success_status_files = all(
+        status_filename.exists() and status_filename.read_text().strip() == "0"
+        for status_filename in status_filename_list
+    )
+    return has_same_job_script and has_success_status_files

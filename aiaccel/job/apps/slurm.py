@@ -9,7 +9,7 @@ import shlex
 import subprocess
 import time
 
-from aiaccel.job.apps import _is_success_status_file, prepare_argument_parser
+from aiaccel.job.apps import _is_skip_job_submission, prepare_argument_parser
 
 
 def main() -> None:
@@ -72,9 +72,7 @@ trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
     sbatch_args = config[mode].sbatch_args.format(args=args)
 
     job_filename: Path = args.log_filename.with_suffix(".sh")
-    if job_filename.exists() and all(
-        _is_success_status_file(status_filename) for status_filename in status_filename_list
-    ):
+    if _is_skip_job_submission(job_filename, job_script, status_filename_list):
         print(
             "A successfully completed .out file exists"
             f"({[str(status_filename) for status_filename in status_filename_list]}), "
