@@ -79,6 +79,9 @@ trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
     if job_filename.exists() and all(
         _is_success_status_file(status_filename) for status_filename in status_filename_list
     ):
+        print(f"A successfully completed .out file exists({status_filename_list}), so the job will not be submitted.")
+        for status_filename in status_filename_list:
+            status_filename.unlink(missing_ok=True)
         return
 
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
