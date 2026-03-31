@@ -71,10 +71,13 @@ trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
     sbatch = config.sbatch.format(args=args)
     sbatch_args = config[mode].sbatch_args.format(args=args)
 
-    # Create the job script file, remove old status files, and run the job
+    job_filename: Path = args.log_filename.with_suffix(".sh")
+    if job_filename.exists() and any(status_filename.exists() for status_filename in status_filename_list):
+        return
+
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
 
-    job_filename: Path = args.log_filename.with_suffix(".sh")
+    # Create the job script file, remove old status files, and run the job
     with open(job_filename, "w") as f:
         f.write(job_script)
 
