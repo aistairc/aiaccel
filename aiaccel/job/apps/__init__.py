@@ -62,3 +62,7 @@ def prepare_argument_parser(
     sub_parser.add_argument("--n_gpus", type=int)
 
     return config, parser, sub_parsers
+
+
+def _is_success_status_file(status_filename: Path) -> bool:
+    return status_filename.exists() and status_filename.read_text().strip() == "0"

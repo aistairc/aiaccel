@@ -9,11 +9,7 @@ import shlex
 import subprocess
 import time
 
-from aiaccel.job.apps import prepare_argument_parser
-
-
-def _is_success_status_file(status_filename: Path) -> bool:
-    return status_filename.exists() and status_filename.read_text().strip() == "0"
+from aiaccel.job.apps import _is_success_status_file, prepare_argument_parser
 
 
 def main() -> None:
