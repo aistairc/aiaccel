@@ -1,0 +1,53 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
+# constant values
+STAGES = $(foreach num_of_stage,$(shell seq $(min_stage) $(max_stage)),stage$(num_of_stage))
+
+.NOTPARALLEL: check_train_artifacts 
+.PHONY: all clean status scores check_train_artifacts $(STAGES) $(STAGES:%=skip-%)
+.WAIT:
+
+# general rules
+all: $(STAGES)
+
+%: status
+
+status:
+	@echo ================================================================
+	@$(foreach var,$(PRINT_VARIABLES), \
+	$(if $(filter --,$(var)), \
+			echo "----------------------------------------------------------------";, \
+			echo -e "\033[33m$(var)\033[0m:" '$($(var))';) \
+	)
+	@echo ================================================================
+
+$(eval stage$(min_stage): status .WAIT $(stage$(min_stage)_dependencies))
+$(foreach n,$(shell seq $$(($(min_stage)+1)) $(max_stage)), \
+  $(eval stage$(n): status .WAIT $(stage$(n)_dependencies) stage$(shell echo $$(($(n)-1)))) \
+)
+
+$(STAGES):
+	@echo "\033[1;34m$@ finished\033[0m"
+
+$(STAGES:%=skip-%):
+	touch $($(patsubst skip-%,%,$@)_dependencies)
+
+# help
+help:
+	@echo "Usage: make [TARGET]"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  all                    Run all stages sequentially"
+	@echo "  status                 Print selected variables (from PRINT_VARIABLES)"
+	@echo "  stageN                 Run each processing stage (N=$(min_stage)-$(max_stage))"
+	@$(foreach stage,$(STAGES), \
+	$(if $($(stage)_description), \
+			echo "  $(stage)_description     $($(stage)_description)";, ) \
+	)
+	@echo "  skip-stageN            Skip stageN by touching dependencies (N=$(min_stage)-$(max_stage))"
+	@echo "  clean                  Clean generated .done files (if implemented)"
+	@echo "  help                   Show this help message"
+	@echo ""
+	@echo "Example:"
+	@echo "  make stage3 -j train_path=./models/dummy/"
