@@ -4,10 +4,9 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from pathlib import Path
 import shlex
 
-from aiaccel.job.apps import _submit_job_and_wait, prepare_argument_parser
+from aiaccel.job.apps import prepare_argument_parser, prepare_job_context, submit_job_and_wait
 
 
 def main() -> None:
@@ -19,38 +18,9 @@ def main() -> None:
 
     # Prepare the job script and arguments
     job = config[mode].job.format(command=shlex.join(args.command), args=args)
-
-    if mode in ["cpu-array", "gpu-array"]:
-        job = f"""\
-for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
-    TASK_INDEX=$(( SGE_TASK_ID + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
-
-    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
-        break
-    fi
-
-    TASK_INDEX=$TASK_INDEX \\
-    TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {args.log_filename.with_suffix("")}.${{SGE_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
-
-    pids[$LOCAL_PROC_INDEX]=$!
-done
-
-for i in "${{!pids[@]}}"; do
-    wait ${{pids[$i]}}
-done
-"""
-        job_log_filename = args.log_filename.with_suffix(".$TASK_ID.log")
-        job_status_filename: Path = args.log_filename.with_suffix(".${SGE_TASK_ID}.out")
-
-        status_filename_list = []
-        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
-            status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
-    else:
-        job_log_filename = args.log_filename
-        job_status_filename = args.log_filename.with_suffix(".out")
-
-        status_filename_list = [job_status_filename]
+    job, job_log_filename, job_status_filename, status_filename_list = prepare_job_context(
+        args, mode, job, "SGE_TASK_ID", ".$TASK_ID.log", ".${SGE_TASK_ID}.out"
+    )
 
     job_script = f"""\
 #! /bin/bash
@@ -76,7 +46,7 @@ fi
     qsub = config.qsub.format(args=args)
     qsub_args = config[mode].qsub_args.format(args=args)
 
-    _submit_job_and_wait(
+    submit_job_and_wait(
         args.log_filename,
         job_script,
         qsub,

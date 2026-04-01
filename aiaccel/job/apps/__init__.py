@@ -3,7 +3,7 @@
 
 from typing import cast
 
-from argparse import ArgumentParser, _SubParsersAction
+from argparse import ArgumentParser, Namespace, _SubParsersAction
 from importlib import resources
 import os
 from pathlib import Path
@@ -75,7 +75,49 @@ def _is_skip_job_submission(job_filename: Path, job_script: str, status_filename
     return has_same_job_script and has_success_status_files
 
 
-def _submit_job_and_wait(
+def prepare_job_context(
+    args: Namespace,
+    mode: str,
+    job: str,
+    array_task_id_variable: str,
+    array_job_log_suffix: str,
+    array_job_status_suffix: str,
+) -> tuple[str, Path, Path, list[Path]]:
+    if mode in ["cpu-array", "gpu-array"]:
+        job = f"""\
+for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
+    TASK_INDEX=$(( {array_task_id_variable} + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+
+    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
+        break
+    fi
+
+    TASK_INDEX=$TASK_INDEX \\
+    TASK_STEPSIZE={args.n_tasks_per_proc} \\
+        {job} > {args.log_filename.with_suffix("")}.${{{array_task_id_variable}}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+
+    pids[$LOCAL_PROC_INDEX]=$!
+done
+
+for i in "${{!pids[@]}}"; do
+    wait ${{pids[$i]}}
+done
+"""
+        job_log_filename = args.log_filename.with_suffix(array_job_log_suffix).resolve()
+        job_status_filename = args.log_filename.with_suffix(array_job_status_suffix).resolve()
+        status_filename_list = [
+            args.log_filename.with_suffix(f".{array_idx + 1}.out").resolve()
+            for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs)
+        ]
+    else:
+        job_log_filename = args.log_filename.resolve()
+        job_status_filename = args.log_filename.with_suffix(".out").resolve()
+        status_filename_list = [job_status_filename]
+
+    return job, job_log_filename, job_status_filename, status_filename_list
+
+
+def submit_job_and_wait(
     log_filename: Path,
     job_script: str,
     submit_command: str,
