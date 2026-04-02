@@ -114,8 +114,6 @@ class SchedulerJobApp(JobApp):
     array_task_id_variable: str
     array_job_log_suffix: str
     array_job_status_suffix: str
-    submit_command_key: str
-    submit_args_key: str
 
     def _is_skip_job_submission(self, job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
         has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
@@ -206,14 +204,18 @@ done
             case _:
                 raise ValueError(f"Unsupported mode: {self.mode}")
 
+    @abstractmethod
+    def build_submit_command(self) -> tuple[str, str]:
+        """Build the scheduler submission command and its arguments."""
+        pass
+
     def submit_job_and_wait(self, job_script: str) -> None:
         """Submit the job script and wait for completion via status files.
 
         Args:
             job_script (str): Job script content to write and submit.
         """
-        submit_command = cast(str, self.config[self.submit_command_key].format(args=self.args))
-        submit_args = cast(str, self.config[self.mode][self.submit_args_key].format(args=self.args))
+        submit_command, submit_args = self.build_submit_command()
         log_filename = self.args.log_filename
         job_filename = log_filename.with_suffix(".sh")
 

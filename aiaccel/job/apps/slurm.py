@@ -10,11 +10,15 @@ class SlurmJobApp(SchedulerJobApp):
     array_task_id_variable = "SLURM_ARRAY_TASK_ID"
     array_job_log_suffix = ".%a.log"
     array_job_status_suffix = ".${SLURM_ARRAY_TASK_ID}.out"
-    submit_command_key = "sbatch"
-    submit_args_key = "sbatch_args"
 
     def __init__(self) -> None:
         super().__init__("slurm.yaml")
+
+    def build_submit_command(self) -> tuple[str, str]:
+        return (
+            self.config.sbatch.format(args=self.args),
+            self.config[self.mode].sbatch_args.format(args=self.args),
+        )
 
     def build_job_script(self) -> str:
         return f"""\

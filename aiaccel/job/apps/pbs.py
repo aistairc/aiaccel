@@ -11,11 +11,15 @@ class PbsJobApp(SchedulerJobApp):
     array_task_id_variable = "PBS_ARRAY_INDEX"
     array_job_log_suffix = ".^array_index^.log"
     array_job_status_suffix = ".${PBS_ARRAY_INDEX}.out"
-    submit_command_key = "qsub"
-    submit_args_key = "qsub_args"
 
     def __init__(self) -> None:
         super().__init__("pbs.yaml")
+
+    def build_submit_command(self) -> tuple[str, str]:
+        return (
+            self.config.qsub.format(args=self.args),
+            self.config[self.mode].qsub_args.format(args=self.args),
+        )
 
     def build_job_script(self) -> str:
         return f"""\
