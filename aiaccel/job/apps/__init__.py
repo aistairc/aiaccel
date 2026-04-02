@@ -26,15 +26,19 @@ class JobApp(ABC):
     arguments, and determines the execution mode including array variants.
     """
 
-    config_name: str
-
-    def __init__(self) -> None:
-        self.config, parser, _ = self._prepare_argument_parser()
+    def __init__(self, default_config_name: str) -> None:
+        self.config, parser, _ = self._prepare_argument_parser(default_config_name)
         self.args = parser.parse_args()
         self.mode = self.args.mode + "-array" if getattr(self.args, "n_tasks", None) is not None else self.args.mode
 
-    def _prepare_argument_parser(self) -> tuple[DictConfig, ArgumentParser, _SubParsersAction]:  # type: ignore
+    def _prepare_argument_parser(
+        self, default_config_name: str
+    ) -> tuple[DictConfig, ArgumentParser, _SubParsersAction]:  # type: ignore
         """Prepare a parser and load the job application configuration.
+
+        Args:
+            default_config_name (str): Default configuration filename used when no explicit
+                config path is provided.
 
         Returns:
             tuple[DictConfig, ArgumentParser, _SubParsersAction]: Loaded config, parser, and
@@ -48,7 +52,7 @@ class JobApp(ABC):
         args.config = Path(
             args.config
             or os.environ.get("AIACCEL_JOB_CONFIG")
-            or (Path(str(resources.files(__package__) / "config")) / self.config_name)
+            or (Path(str(resources.files(__package__) / "config")) / default_config_name)
         )  # type: ignore
 
         config = cast(DictConfig, prepare_config(args.config))

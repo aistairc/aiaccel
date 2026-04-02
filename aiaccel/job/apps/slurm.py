@@ -7,12 +7,14 @@ from aiaccel.job.apps import SchedulerJobApp
 
 
 class SlurmJobApp(SchedulerJobApp):
-    config_name = "slurm.yaml"
     array_task_id_variable = "SLURM_ARRAY_TASK_ID"
     array_job_log_suffix = ".%a.log"
     array_job_status_suffix = ".${SLURM_ARRAY_TASK_ID}.out"
     submit_command_key = "sbatch"
     submit_args_key = "sbatch_args"
+
+    def __init__(self) -> None:
+        super().__init__("slurm.yaml")
 
     def build_job_script(self) -> str:
         return f"""\

@@ -15,10 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class LocalJobApp(JobApp):
-    config_name = "local.yaml"
-
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__("local.yaml")
 
         for key in ["walltime", "n_nodes", "n_tasks_per_proc"]:
             if getattr(self.args, key, None) is not None:

@@ -8,12 +8,14 @@ from aiaccel.job.apps import SchedulerJobApp
 
 
 class SgeJobApp(SchedulerJobApp):
-    config_name = "sge.yaml"
     array_task_id_variable = "SGE_TASK_ID"
     array_job_log_suffix = ".$TASK_ID.log"
     array_job_status_suffix = ".${SGE_TASK_ID}.out"
     submit_command_key = "qsub"
     submit_args_key = "qsub_args"
+
+    def __init__(self) -> None:
+        super().__init__("sge.yaml")
 
     def build_job_script(self) -> str:
         return f"""\
