@@ -94,6 +94,11 @@ class JobApp(ABC):
         """Build the job script to execute."""
         pass
 
+    @abstractmethod
+    def run(self) -> None:
+        """Execute the job application workflow."""
+        pass
+
 
 class SchedulerJobApp(JobApp):
     """Base class for scheduler-backed job applications.
