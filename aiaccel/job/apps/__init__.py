@@ -78,6 +78,15 @@ def _prepare_argument_parser(
     return config, parser, sub_parsers
 
 
+def _is_skip_job_submission(job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
+    has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
+    has_success_status_files = all(
+        status_filename.exists() and status_filename.read_text().strip() == "0"
+        for status_filename in status_filename_list
+    )
+    return has_same_job_script and has_success_status_files
+
+
 class JobApp(ABC):
     """Base class for job application entry points.
 
@@ -114,14 +123,6 @@ class SchedulerJobApp(JobApp):
     array_job_status_suffix: str
     submit_command_key: str
     submit_args_key: str
-
-    def _is_skip_job_submission(self, job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
-        has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
-        has_success_status_files = all(
-            status_filename.exists() and status_filename.read_text().strip() == "0"
-            for status_filename in status_filename_list
-        )
-        return has_same_job_script and has_success_status_files
 
     def prepare_job_context(self) -> None:
         """Prepare scheduler-specific job and status file context."""
@@ -172,7 +173,7 @@ done
         log_filename = self.args.log_filename
         job_filename = log_filename.with_suffix(".sh")
 
-        if self._is_skip_job_submission(job_filename, job_script, self.status_filename_list):
+        if _is_skip_job_submission(job_filename, job_script, self.status_filename_list):
             print(
                 "A successfully completed .out file exists"
                 f"({[str(status_filename) for status_filename in self.status_filename_list]}), "
