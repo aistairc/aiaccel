@@ -27,14 +27,9 @@ class LocalJobApp(JobApp):
     def build_submit_command(self) -> tuple[str, str]:
         return ("bash", "")
 
-    def prepare_job_context(self) -> None:
-        self.job_log_filename = self.args.log_filename.resolve()
-        self.job_status_filename = self.args.log_filename.with_suffix(".out").resolve()
-        self.status_filename_list = [self.job_status_filename]
-
-        if self.mode in ["cpu-array", "gpu-array"]:
-            n_tasks_per_proc = ceil(self.args.n_tasks / self.args.n_procs)
-            self.job = f"""\
+    def prepare_array_job_context(self) -> None:
+        n_tasks_per_proc = ceil(self.args.n_tasks / self.args.n_procs)
+        self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$(( 1 + {n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
 
@@ -53,6 +48,9 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
+        self.job_log_filename = self.args.log_filename.resolve()
+        self.job_status_filename = self.args.log_filename.with_suffix(".out").resolve()
+        self.status_filename_list = [self.job_status_filename]
 
     def build_job_script(self) -> str:
         return f"""\
