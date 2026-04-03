@@ -30,6 +30,7 @@ class JobApp(ABC):
         self.config, parser, _ = self._prepare_argument_parser(default_config_name)
         self.args = parser.parse_args()
         self.mode = self.args.mode + "-array" if getattr(self.args, "n_tasks", None) is not None else self.args.mode
+        self.status_filename_list: list[Path] = []
 
     def _prepare_argument_parser(
         self, default_config_name: str
@@ -98,6 +99,61 @@ class JobApp(ABC):
         """Build the job script to execute."""
         pass
 
+    def _is_skip_job_submission(self, job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
+        has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
+        has_success_status_files = all(
+            status_filename.exists() and status_filename.read_text().strip() == "0"
+            for status_filename in status_filename_list
+        )
+        return has_same_job_script and has_success_status_files
+
+    @abstractmethod
+    def build_submit_command(self) -> tuple[str, str]:
+        """Build the scheduler submission command and its arguments."""
+        pass
+
+    def submit_job_and_wait(self, job_script: str) -> None:
+        """Submit the job script and wait for completion via status files.
+
+        Args:
+            job_script (str): Job script content to write and submit.
+        """
+        submit_command, submit_args = self.build_submit_command()
+        log_filename = self.args.log_filename
+        job_filename = log_filename.with_suffix(".sh")
+
+        if self._is_skip_job_submission(job_filename, job_script, self.status_filename_list):
+            print(
+                "A successfully completed .out file exists"
+                f"({[str(status_filename) for status_filename in self.status_filename_list]}), "
+                "so the job will not be submitted."
+            )
+            for status_filename in self.status_filename_list:
+                status_filename.unlink(missing_ok=True)
+            return
+
+        log_filename.parent.mkdir(exist_ok=True, parents=True)
+
+        with open(job_filename, "w") as f:
+            f.write(job_script)
+
+        for status_filename in self.status_filename_list:
+            status_filename.unlink(missing_ok=True)
+
+        subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
+
+        for status_filename in self.status_filename_list:
+            while not status_filename.exists():
+                time.sleep(1.0)
+
+                if self.config.get("use_scandir", False):  # Reflesh the file system if needed
+                    os.scandir(status_filename.parent)
+
+            status = int(status_filename.read_text())
+            if status != 0:
+                raise RuntimeError(f"Job failed with {status} exit code.")
+            status_filename.unlink()
+
     @abstractmethod
     def run(self) -> None:
         """Execute the job application workflow."""
@@ -114,14 +170,6 @@ class SchedulerJobApp(JobApp):
     array_task_id_variable: str
     array_job_log_suffix: str
     array_job_status_suffix: str
-
-    def _is_skip_job_submission(self, job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
-        has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
-        has_success_status_files = all(
-            status_filename.exists() and status_filename.read_text().strip() == "0"
-            for status_filename in status_filename_list
-        )
-        return has_same_job_script and has_success_status_files
 
     def prepare_array_job_context(self) -> None:
         """Prepare scheduler-specific context for array jobs."""
@@ -203,53 +251,6 @@ done
                 self.prepare_train_job_context()
             case _:
                 raise ValueError(f"Unsupported mode: {self.mode}")
-
-    @abstractmethod
-    def build_submit_command(self) -> tuple[str, str]:
-        """Build the scheduler submission command and its arguments."""
-        pass
-
-    def submit_job_and_wait(self, job_script: str) -> None:
-        """Submit the job script and wait for completion via status files.
-
-        Args:
-            job_script (str): Job script content to write and submit.
-        """
-        submit_command, submit_args = self.build_submit_command()
-        log_filename = self.args.log_filename
-        job_filename = log_filename.with_suffix(".sh")
-
-        if self._is_skip_job_submission(job_filename, job_script, self.status_filename_list):
-            print(
-                "A successfully completed .out file exists"
-                f"({[str(status_filename) for status_filename in self.status_filename_list]}), "
-                "so the job will not be submitted."
-            )
-            for status_filename in self.status_filename_list:
-                status_filename.unlink(missing_ok=True)
-            return
-
-        log_filename.parent.mkdir(exist_ok=True, parents=True)
-
-        with open(job_filename, "w") as f:
-            f.write(job_script)
-
-        for status_filename in self.status_filename_list:
-            status_filename.unlink(missing_ok=True)
-
-        subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
-
-        for status_filename in self.status_filename_list:
-            while not status_filename.exists():
-                time.sleep(1.0)
-
-                if self.config.get("use_scandir", False):  # Reflesh the file system if needed
-                    os.scandir(status_filename.parent)
-
-            status = int(status_filename.read_text())
-            if status != 0:
-                raise RuntimeError(f"Job failed with {status} exit code.")
-            status_filename.unlink()
 
     def run(self) -> None:
         """Execute the standard scheduler job workflow."""
