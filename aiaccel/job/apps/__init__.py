@@ -183,6 +183,7 @@ class JobApp(ABC):
             )
             for status_filename in self.status_filename_list:
                 status_filename.unlink(missing_ok=True)
+            return
 
         log_filename.parent.mkdir(exist_ok=True, parents=True)
 
