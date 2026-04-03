@@ -49,8 +49,6 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        else:
-            self.job = f"{self.job} 2>&1 | tee {self.args.log_filename}"
 
     def build_job_script(self) -> str:
         return f"""\
@@ -60,6 +58,7 @@ set -eE -o pipefail
 trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
+exec > >(tee -a {self.args.log_filename}) 2>&1
 
 
 {self.config.script_prologue}
