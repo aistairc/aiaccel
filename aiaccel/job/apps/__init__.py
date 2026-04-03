@@ -99,6 +99,58 @@ class JobApp(ABC):
         """Build the job script to execute."""
         pass
 
+    def prepare_array_job_context(self) -> None:
+        """Prepare job context for array jobs."""
+        raise NotImplementedError
+
+    def prepare_single_job_context(self) -> None:
+        """Prepare job context for non-array jobs."""
+        self.job_log_filename = self.args.log_filename.resolve()
+        self.job_status_filename = self.args.log_filename.with_suffix(".out").resolve()
+        self.status_filename_list = [self.job_status_filename]
+
+    def prepare_cpu_job_context(self) -> None:
+        """Prepare context for a CPU job."""
+        self.prepare_single_job_context()
+
+    def prepare_gpu_job_context(self) -> None:
+        """Prepare context for a GPU job."""
+        self.prepare_single_job_context()
+
+    def prepare_cpu_array_job_context(self) -> None:
+        """Prepare context for a CPU array job."""
+        self.prepare_array_job_context()
+
+    def prepare_gpu_array_job_context(self) -> None:
+        """Prepare context for a GPU array job."""
+        self.prepare_array_job_context()
+
+    def prepare_mpi_job_context(self) -> None:
+        """Prepare context for an MPI job."""
+        self.prepare_single_job_context()
+
+    def prepare_train_job_context(self) -> None:
+        """Prepare context for a training job."""
+        self.prepare_single_job_context()
+
+    def prepare_job_context(self) -> None:
+        """Prepare job and status file context."""
+        match self.mode:
+            case "cpu":
+                self.prepare_cpu_job_context()
+            case "gpu":
+                self.prepare_gpu_job_context()
+            case "cpu-array":
+                self.prepare_cpu_array_job_context()
+            case "gpu-array":
+                self.prepare_gpu_array_job_context()
+            case "mpi":
+                self.prepare_mpi_job_context()
+            case "train":
+                self.prepare_train_job_context()
+            case _:
+                raise ValueError(f"Unsupported mode: {self.mode}")
+
     def _is_skip_job_submission(self, job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
         has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
         has_success_status_files = all(
@@ -154,10 +206,12 @@ class JobApp(ABC):
                 raise RuntimeError(f"Job failed with {status} exit code.")
             status_filename.unlink()
 
-    @abstractmethod
     def run(self) -> None:
-        """Execute the job application workflow."""
-        pass
+        """Execute the standard job application workflow."""
+        self.build_job()
+        self.prepare_job_context()
+        job_script = self.build_job_script()
+        self.submit_job_and_wait(job_script)
 
 
 class SchedulerJobApp(JobApp):
@@ -167,94 +221,4 @@ class SchedulerJobApp(JobApp):
     array job expansion, status file management, and job submission.
     """
 
-    array_task_id_variable: str
-    array_job_log_suffix: str
-    array_job_status_suffix: str
-
-    def prepare_array_job_context(self) -> None:
-        """Prepare scheduler-specific context for array jobs."""
-        self.job = f"""\
-for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
-    TASK_INDEX=$(( {self.array_task_id_variable} + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
-
-    if [[ $TASK_INDEX -gt {self.args.n_tasks} ]]; then
-        break
-    fi
-
-    TASK_INDEX=$TASK_INDEX \\
-    TASK_STEPSIZE={self.args.n_tasks_per_proc} \\
-        {self.job} > \\
-        {self.args.log_filename.with_suffix("")}.${{{self.array_task_id_variable}}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
-
-    pids[$LOCAL_PROC_INDEX]=$!
-done
-
-for i in "${{!pids[@]}}"; do
-    wait ${{pids[$i]}}
-done
-"""
-        self.job_log_filename = self.args.log_filename.with_suffix(self.array_job_log_suffix).resolve()
-        self.job_status_filename = self.args.log_filename.with_suffix(self.array_job_status_suffix).resolve()
-        self.status_filename_list = [
-            self.args.log_filename.with_suffix(f".{array_idx + 1}.out").resolve()
-            for array_idx in range(
-                0,
-                cast(int, self.args.n_tasks),
-                cast(int, self.args.n_tasks_per_proc) * cast(int, self.args.n_procs),
-            )
-        ]
-
-    def prepare_single_job_context(self) -> None:
-        """Prepare scheduler-specific context for non-array jobs."""
-        self.job_log_filename = self.args.log_filename.resolve()
-        self.job_status_filename = self.args.log_filename.with_suffix(".out").resolve()
-        self.status_filename_list = [self.job_status_filename]
-
-    def prepare_cpu_job_context(self) -> None:
-        """Prepare context for a CPU job."""
-        self.prepare_single_job_context()
-
-    def prepare_gpu_job_context(self) -> None:
-        """Prepare context for a GPU job."""
-        self.prepare_single_job_context()
-
-    def prepare_cpu_array_job_context(self) -> None:
-        """Prepare context for a CPU array job."""
-        self.prepare_array_job_context()
-
-    def prepare_gpu_array_job_context(self) -> None:
-        """Prepare context for a GPU array job."""
-        self.prepare_array_job_context()
-
-    def prepare_mpi_job_context(self) -> None:
-        """Prepare context for an MPI job."""
-        self.prepare_single_job_context()
-
-    def prepare_train_job_context(self) -> None:
-        """Prepare context for a training job."""
-        self.prepare_single_job_context()
-
-    def prepare_job_context(self) -> None:
-        """Prepare scheduler-specific job and status file context."""
-        match self.mode:
-            case "cpu":
-                self.prepare_cpu_job_context()
-            case "gpu":
-                self.prepare_gpu_job_context()
-            case "cpu-array":
-                self.prepare_cpu_array_job_context()
-            case "gpu-array":
-                self.prepare_gpu_array_job_context()
-            case "mpi":
-                self.prepare_mpi_job_context()
-            case "train":
-                self.prepare_train_job_context()
-            case _:
-                raise ValueError(f"Unsupported mode: {self.mode}")
-
-    def run(self) -> None:
-        """Execute the standard scheduler job workflow."""
-        self.build_job()
-        self.prepare_job_context()
-        job_script = self.build_job_script()
-        self.submit_job_and_wait(job_script)
+    pass
