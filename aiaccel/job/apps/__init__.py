@@ -164,14 +164,12 @@ class JobApp(ABC):
         """Build the scheduler submission command and its arguments."""
         pass
 
-    def submit_job(self, job_script: str) -> bool:
+    def submit_job_and_wait(self, job_script: str) -> None:
         """Submit the job script.
 
         Args:
             job_script (str): Job script content to write and submit.
 
-        Returns:
-            bool: ``True`` if a job was submitted and waiting is required.
         """
         submit_command, submit_args = self.build_submit_command()
         log_filename = self.args.log_filename
@@ -185,7 +183,6 @@ class JobApp(ABC):
             )
             for status_filename in self.status_filename_list:
                 status_filename.unlink(missing_ok=True)
-            return False
 
         log_filename.parent.mkdir(exist_ok=True, parents=True)
 
@@ -196,10 +193,7 @@ class JobApp(ABC):
             status_filename.unlink(missing_ok=True)
 
         subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
-        return True
 
-    def wait_job(self) -> None:
-        """Wait for job completion via status files."""
         for status_filename in self.status_filename_list:
             while not status_filename.exists():
                 time.sleep(1.0)
@@ -217,8 +211,7 @@ class JobApp(ABC):
         self.build_job()
         self.prepare_job_context()
         job_script = self.build_job_script()
-        if self.submit_job(job_script):
-            self.wait_job()
+        self.submit_job_and_wait(job_script)
 
 
 class SchedulerJobApp(JobApp):
