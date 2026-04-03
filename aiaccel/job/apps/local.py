@@ -28,6 +28,10 @@ class LocalJobApp(JobApp):
         return ("bash", "")
 
     def prepare_job_context(self) -> None:
+        self.job_log_filename = self.args.log_filename.resolve()
+        self.job_status_filename = self.args.log_filename.with_suffix(".out").resolve()
+        self.status_filename_list = [self.job_status_filename]
+
         if self.mode in ["cpu-array", "gpu-array"]:
             n_tasks_per_proc = ceil(self.args.n_tasks / self.args.n_procs)
             self.job = f"""\
@@ -55,10 +59,10 @@ done
 #! /bin/bash
 
 set -eE -o pipefail
-trap 'exit $?' ERR EXIT  # at error and exit
-trap 'echo 143' TERM  # at termination (by job scheduler)
+trap 'echo $? > {self.job_status_filename}' ERR EXIT  # at error and exit
+trap 'echo 143 > {self.job_status_filename}' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
-exec > >(tee -a {self.args.log_filename}) 2>&1
+exec > >(tee -a {self.job_log_filename}) 2>&1
 
 
 {self.config.script_prologue}
