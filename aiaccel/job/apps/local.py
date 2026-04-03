@@ -6,8 +6,6 @@
 
 import logging
 from math import ceil
-from pathlib import Path
-import subprocess
 
 from aiaccel.job.apps import JobApp
 
@@ -67,19 +65,6 @@ exec > >(tee -a {self.job_log_filename}) 2>&1
 
 {self.job}
 """
-
-    def run(self) -> None:
-        self.build_job()
-        self.prepare_job_context()
-        job_script = self.build_job_script()
-
-        self.args.log_filename.parent.mkdir(exist_ok=True, parents=True)
-
-        job_filename: Path = self.args.log_filename.with_suffix(".sh")
-        with open(job_filename, "w") as f:
-            f.write(job_script)
-
-        subprocess.run(f"bash {job_filename}", shell=True, check=True)
 
 
 def main() -> None:
