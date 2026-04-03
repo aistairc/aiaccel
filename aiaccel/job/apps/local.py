@@ -24,6 +24,9 @@ class LocalJobApp(JobApp):
                     f"Argument '{key}' is defined for compatibility and will not be used in aiaccel-job local."
                 )
 
+    def build_submit_command(self) -> tuple[str, str]:
+        return ("bash", "")
+
     def prepare_job_context(self) -> None:
         if self.mode in ["cpu-array", "gpu-array"]:
             n_tasks_per_proc = ceil(self.args.n_tasks / self.args.n_procs)
