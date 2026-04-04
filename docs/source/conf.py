@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 # Configuration file for the Sphinx documentation builder.
 # Full options: https://www.sphinx-doc.org/en/master/usage/configuration.html
 

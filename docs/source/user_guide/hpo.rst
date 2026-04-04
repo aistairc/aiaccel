@@ -1,5 +1,6 @@
-Optimizing Hyperparameters
-==========================
+############################
+ Optimizing Hyperparameters
+############################
 
 ``aiaccel-hpo`` wraps Optuna so you can launch reproducible hyperparameter optimization
 jobs with the same configuration system used by ``aiaccel-job`` and ``aiaccel-torch``.
@@ -179,11 +180,11 @@ the dedicated documentation for usage details and configuration options.
 Further Reading
 ---------------
 
-- :doc:`user_guide/config` – complete reference for Hydra-style YAML composition used
+- :doc:`user_guide/config` - complete reference for Hydra-style YAML composition used
   by ``aiaccel-hpo``.
-- :doc:`user_guide/job` – explains how payload commands are embedded in templates, which
+- :doc:`user_guide/job` - explains how payload commands are embedded in templates, which
   mirrors the ``command`` handling in the optimizer.
-- ``examples/hpo`` – runnable Optuna examples, including Nelder-Mead flows and COCO
+- ``examples/hpo`` - runnable Optuna examples, including Nelder-Mead flows and COCO
   benchmarks.
-- Optuna documentation – visualization utilities, sampler details, and storage backends
+- Optuna documentation - visualization utilities, sampler details, and storage backends
   that extend what ``aiaccel-hpo`` instantiates for you.

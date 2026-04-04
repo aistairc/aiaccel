@@ -1,0 +1,45 @@
+walltime: "1:0:0"
+
+script_prologue: |
+    echo Job ID: $SLURM_JOBID
+    echo Hostname: $(hostname)
+
+sbatch: "sbatch --export=USE_SSH=1 --export=ALL"
+
+cpu:
+    sbatch_args: "-p cpu1 -N 1"
+    job: "{command}"
+
+cpu-array:
+    n_tasks_per_proc: 64
+    n_procs: 4
+    sbatch_args: "-p cpu1 -N 1 --array=1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+    job: "{command}"
+
+gpu:
+    sbatch_args: "-p gpu1 -N 1"
+    job: "{command}"
+
+gpu-array:
+    n_tasks_per_proc: 64
+    n_procs: 4
+    sbatch_args: "-p gpu1 -N 1 --array=1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+    job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}"
+
+mpi:
+    n_nodes: 1
+    sbatch_args: >-
+        -p gpu1 -N {args.n_nodes} -n {args.n_procs}
+    job: srun -n {args.n_procs} --cpu-bind=none --distribution=block:block {command}
+
+train:
+    sbatch_args: >-
+        -p gpu1 -N {args.n_gpus}
+    job: |
+        export MAIN_ADDR=$(hostname -i)
+        export MAIN_PORT=3000
+        export COLUMNS=120
+        export PYTHONUNBUFFERED=true
+        srun -n {args.n_gpus} --cpu-bind=none --distribution=block:block {command}
+
+use_scandir: False

@@ -1,5 +1,6 @@
-Managing Configurations
-=======================
+#########################
+ Managing Configurations
+#########################
 
 ``aiaccel.config`` is a lightweight utility built on top of `Hydra's instantiation
 mechanism <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_ and
@@ -43,25 +44,18 @@ command-line overrides, then instantiate objects from ``_target_`` definitions v
     from argparse import ArgumentParser
 
     from aiaccel.config import (
-        load_config,
-        overwrite_omegaconf_dumper,
+        prepare_config,
         print_config,
-        resolve_inherit,
     )
     from hydra.utils import instantiate
     from omegaconf import OmegaConf as oc  # noqa: N813
-
-
-    overwrite_omegaconf_dumper()
 
     parser = ArgumentParser()
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    config = load_config(args.config)
+    config = prepare_config(args.config)
     print_config(config)
-    config = resolve_inherit(config)
-    config = oc.merge(config, oc.from_cli(unk_args))
 
     model = instantiate(config.model)
     print(model)

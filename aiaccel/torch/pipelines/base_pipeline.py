@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 from typing import TYPE_CHECKING, Any
 
 from abc import ABCMeta, abstractmethod
@@ -14,10 +17,10 @@ import torch
 
 import attrs
 
-from aiaccel.config import overwrite_omegaconf_dumper, print_config
-from aiaccel.job.utils import slice_tasks
+from aiaccel.config import print_config, setup_omegaconf
+from aiaccel.job.utils import split_tasks
 
-overwrite_omegaconf_dumper()
+setup_omegaconf()
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +183,7 @@ class BasePipeline(metaclass=ABCMeta):
                 src_fname_list = list(args.src_path.glob(f"*.{args.src_ext}"))
                 src_fname_list.sort()
 
-                src_fname_list = slice_tasks(src_fname_list)
+                src_fname_list = split_tasks(src_fname_list)
 
                 args.dst_path.mkdir(exist_ok=True, parents=True)
                 for src_filename in track(src_fname_list):

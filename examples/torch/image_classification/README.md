@@ -21,7 +21,7 @@ cd $PBS_O_WORKDIR
 . ../../python/activate.sh
 
 cd recipes
-aiaccel-torch train resnet50.cifar50/config.yaml
+aiaccel-torch train resnet50.cifar10/config.yaml
 ```
 
 ## Training on on multiple GPUs
@@ -33,7 +33,7 @@ cd $PBS_O_WORKDIR
 . ../../python/activate.sh
 
 cd recipes
-aiaccel-torch train resnet50.cifar50.ddp/config.yaml
+aiaccel-torch train resnet50.cifar10.ddp/config.yaml
 ```
 
 ## Detailed Descriptions [TDB]

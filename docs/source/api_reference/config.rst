@@ -1,22 +1,26 @@
-OmegaConf Utilities
-===================
+#####################
+ OmegaConf Utilities
+#####################
 
-Config Utilities
-----------------
+******************
+ Config Utilities
+******************
 
 .. currentmodule:: aiaccel.config
 
 .. autosummary::
     :toctree: generated/
 
+    setup_omegaconf
+    prepare_config
     load_config
     print_config
-    pathlib2str_config
-    overwrite_omegaconf_dumper
     resolve_inherit
+    pathlib2str_config
 
-Git Utilities
--------------
+***************
+ Git Utilities
+***************
 
 .. currentmodule:: aiaccel.config
 

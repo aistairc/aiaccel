@@ -1,5 +1,6 @@
-Training a PyTorch Model
-========================
+##########################
+ Training a PyTorch Model
+##########################
 
 ``aiaccel.torch`` builds on `PyTorch Lightning
 <https://lightning.ai/docs/pytorch/stable/>`_ to keep training modular and fast: define

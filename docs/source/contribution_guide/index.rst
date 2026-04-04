@@ -1,5 +1,6 @@
-Contribution Guide
-==================
+####################
+ Contribution Guide
+####################
 
 Thank you for contributing to aiaccel! This document introduces how to contribute.
 

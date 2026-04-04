@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 from collections.abc import Callable, Generator
 from contextlib import AbstractContextManager, contextmanager
 import os
@@ -9,7 +12,7 @@ from hydra.utils import instantiate
 
 import pytest
 
-from aiaccel.config import load_config
+from aiaccel.config import prepare_config
 
 
 @pytest.fixture()
@@ -39,7 +42,7 @@ def test_from_config(workspace_factory: Callable[..., AbstractContextManager[Pat
 
         assert (workspace / "optuna.db").exists()
 
-        config = load_config(workspace / "merged_config.yaml")
+        config = prepare_config(workspace / "merged_config.yaml")
         study = instantiate(config.study)
         assert len(study.get_trials()) == 15
 
@@ -60,7 +63,7 @@ def test_from_cli(workspace_factory: Callable[..., AbstractContextManager[Path]]
         )
         subprocess.run(cmd, shell=True, check=True)
 
-        config = load_config(workspace / "cli" / "merged_config.yaml")
+        config = prepare_config(workspace / "cli" / "merged_config.yaml")
         study = instantiate(config.study)
         best_value = study.best_trial.value
 
@@ -68,7 +71,7 @@ def test_from_cli(workspace_factory: Callable[..., AbstractContextManager[Path]]
     with workspace_factory() as workspace:
         subprocess.run("aiaccel-hpo optimize --config=config.yaml", shell=True, check=True)
 
-        config = load_config(workspace / "merged_config.yaml")
+        config = prepare_config(workspace / "merged_config.yaml")
         study = instantiate(config.study)
 
     assert best_value == study.best_trial.value
@@ -79,7 +82,7 @@ def test_resume(workspace_factory: Callable[..., AbstractContextManager[Path]]) 
         subprocess.run("aiaccel-hpo optimize --config=config.yaml", shell=True, check=True)
         subprocess.run("aiaccel-hpo optimize --config=config.yaml", shell=True, check=True)
 
-        config = load_config(workspace / "merged_config.yaml")
+        config = prepare_config(workspace / "merged_config.yaml")
         study = instantiate(config.study)
         assert len(study.get_trials()) == 30
 
@@ -88,7 +91,7 @@ def test_multi_objective(workspace_factory: Callable[..., AbstractContextManager
     with workspace_factory("multi_objective") as workspace:
         subprocess.run("aiaccel-hpo optimize --config=config.yaml", shell=True, check=True)
 
-        config = load_config(workspace / "merged_config.yaml")
+        config = prepare_config(workspace / "merged_config.yaml")
         study = instantiate(config.study)
 
         assert len(study.get_trials()) == 15
@@ -113,6 +116,6 @@ def test_from_cli_and_config(workspace_factory: Callable[..., AbstractContextMan
 
         assert (workspace / "optuna.db").exists()
 
-        config = load_config(workspace / "merged_config.yaml")
+        config = prepare_config(workspace / "merged_config.yaml")
         study = instantiate(config.study)
         assert len(study.get_trials()) == 30

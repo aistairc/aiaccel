@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 from __future__ import annotations
 
 import numpy.typing as npt
@@ -14,7 +17,7 @@ from optuna.distributions import BaseDistribution
 from optuna.study import Study
 from optuna.trial import FrozenTrial, TrialState
 
-from aiaccel.hpo.algorithms import NelderMeadAlgorism, NelderMeadCoefficient, NelderMeadEmptyError
+from aiaccel.hpo.algorithms import NelderMeadAlgorithm, NelderMeadCoefficient, NelderMeadEmptyError
 
 __all__ = ["NelderMeadSampler", "NelderMeadEmptyError"]
 
@@ -75,7 +78,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             If the sub_sampler function is enabled, it must be set with block = False.
 
     Attributes:
-        nm: NelderMeadAlgorism
+        nm: NelderMeadAlgorithm
             Instance of a class that manages the NelderMead algorithm.
 
     """
@@ -92,7 +95,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         self._search_space = search_space
         _rng = rng if rng is not None else np.random.RandomState(seed) if seed is not None else None
 
-        self.nm = NelderMeadAlgorism(
+        self.nm = NelderMeadAlgorithm(
             dimensions=len(self._search_space),
             coeff=coeff,
             rng=_rng,
