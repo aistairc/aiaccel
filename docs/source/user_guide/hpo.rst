@@ -4,23 +4,18 @@
 
 ``aiaccel-hpo`` wraps Optuna so you can launch reproducible hyperparameter optimization
 jobs with the same configuration system used by ``aiaccel-job`` and ``aiaccel-torch``.
+Three design ideas matter most when reading the rest of this guide:
+
+- Keep the optimizer thin. ``aiaccel-hpo optimize`` mainly prepares the config,
+  instantiates ``config.study`` and ``config.params``, and then runs an ordinary Optuna
+  ``study.ask`` / ``study.tell`` loop.
+- Describe both the search space and the execution command in YAML, using the same
+  override mechanism described in :doc:`config`.
+- Exchange trial results through files so the objective can stay a plain command-line
+  program.
+
 This page summarizes the workflow implemented in :mod:`aiaccel.hpo.apps.optimize` and
 shows how to describe the search space using :mod:`aiaccel.config`.
-
-Core Concepts
--------------
-
-- ``aiaccel-hpo optimize`` builds an Optuna :class:`~optuna.study.Study`, manages
-  multiple workers with :class:`concurrent.futures.ThreadPoolExecutor`, and streams
-  objective results via JSON files (:mod:`aiaccel.hpo.apps.optimize`).
-- Configuration files follow the exact same Hydra-inspired syntax explained in
-  :doc:`config`; overrides passed before ``--`` are merged through
-  :func:`omegaconf.OmegaConf.from_cli`.
-- Parameters are declared via :class:`aiaccel.hpo.optuna.hparams_manager.HparamsManager`
-  so the search space is instantiated and validated before the first trial begins.
-- Every run writes the fully merged config to ``{working_directory}/merged_config.yaml``
-  and stores Optuna state in ``optuna.db`` by default
-  (:mod:`aiaccel.hpo.apps.config.default`).
 
 Basic Usage
 -----------
@@ -60,24 +55,58 @@ before ``--`` and the objective command after it:
         params.x1="[0,2]" params.x2="[0,2]" n_trials=30 n_max_jobs=2 \
         -- python ./objective.py --x1={x1} --x2={x2} {out_filename}
 
-``aiaccel-hpo`` expands ``{x1}``, ``{x2}``, ``{out_filename}``, and ``{job_name}``
-placeholders when launching each worker. The script reads the JSON file, feeds the value
-back to :meth:`optuna.study.Study.tell`, deletes the file, and continues submitting
-trials until ``n_trials`` is reached.
+Internally, ``aiaccel-hpo optimize`` is roughly equivalent to the following:
 
-Under the hood
-~~~~~~~~~~~~~~
+.. code-block:: python
+    :caption: Simplified optimization flow
 
-The CLI is intentionally thin: :mod:`aiaccel.hpo.apps.optimize` loads the YAML through
-:func:`aiaccel.config.load_config`, merges ``key=value`` overrides with
-:func:`omegaconf.OmegaConf.from_cli`, resolves ``_inherit_`` entries, and merely
-instantiates two objects—``config.study`` and ``config.params``—via
-:func:`hydra.utils.instantiate`. The study is a vanilla Optuna object (any sampler or
-storage backend works), while ``config.params`` becomes an
-:class:`aiaccel.hpo.optuna.hparams_manager.HparamsManager` that generates the
-``{param}`` placeholders. After that, the module just loops over ``study.ask`` /
-``study.tell`` while running your command in a thread pool. No additional abstractions
-are introduced, so whatever Optuna supports can be expressed directly in YAML.
+    if args.config is None:
+        config_filename = default_config_path
+        working_directory = generated_working_directory
+    else:
+        config_filename = args.config
+        working_directory = args.config.parent.resolve()
+
+    config = prepare_config(
+        config_filename=config_filename,
+        working_directory=working_directory,
+        overwrite_config=oc.from_cli(oc_args),
+    )
+
+    if len(args.command) > 0:
+        config.command = args.command
+
+    print_config(config)
+    with open(config.working_directory / "merged_config.yaml", "w") as f:
+        oc.save(pathlib2str_config(config), f)
+
+    study = instantiate(config.study)
+    params = instantiate(config.params)
+
+    with ThreadPoolExecutor(config.n_max_jobs) as pool:
+        while finished_job_count < config.n_trials:
+            trial = study.ask()
+            out_filename = config.working_directory / f"trial_{trial.number:0>6}.json"
+
+            pool.submit(
+                subprocess.run,
+                shlex.join(config.command).format(
+                    out_filename=out_filename,
+                    job_name=f"trial_{trial.number:0>6}",
+                    **params.suggest_hparams(trial),
+                ),
+                shell=True,
+                check=True,
+            )
+
+            y = json.load(open(out_filename))
+            out_filename.unlink()
+            study.tell(trial, y)
+
+``aiaccel-hpo`` expands placeholders such as ``{x1}``, ``{x2}``, ``{out_filename}``,
+``{job_name}``, and ``{working_directory}`` when launching each worker. The objective
+script writes its result to ``out_filename``, and the optimizer feeds that JSON value
+back to :meth:`optuna.study.Study.tell`.
 
 Configuring optimizer behavior
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,8 +170,8 @@ dataclasses, you can define reusable fragments in the same YAML and pull them in
 
 Writing a ``config.yaml`` lets you capture these choices once, reuse them across runs,
 and keep the CLI invocation short—only pass overrides for the few values that change
-per experiment (e.g. ``n_trials=200`` or ``params.lr.low=1e-5``). The CLI prints the
-merged config path and working directory so you can revisit or resume later.
+per experiment (e.g. ``n_trials=200`` or ``params.lr.low=1e-5``). The merged config is
+saved under ``working_directory``, so each run remains easy to inspect or resume later.
 
 Practical reminders for day-to-day runs:
 

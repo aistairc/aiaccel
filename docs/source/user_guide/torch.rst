@@ -5,46 +5,62 @@
 ``aiaccel.torch`` builds on `PyTorch Lightning
 <https://lightning.ai/docs/pytorch/stable/>`_ to keep training modular and fast: define
 trainers, datamodules, and models in YAML and reuse the same config locally or on
-clusters. This page outlines the design, config layout, and tools for multi-node
-multi-GPU trainings.
-
-Core Concepts
--------------
-
-``aiaccel-torch`` is designed around the following key concepts:
+clusters. ``aiaccel-torch`` is designed around the following ideas:
 
 - Keep the toolkit modular; datasets, pipelines, and Lightning helpers remain optional
   pieces, so you can import just :mod:`aiaccel.torch.h5py` or
   :mod:`aiaccel.torch.datasets` without pulling in Lightning at all.
 - Provide ``aiaccel-torch train`` to hide the repetitive parts of training scripts
-  (config loading, accelerator selection, checkpointing) while still exposing the full
-  Lightning + Hydra stack for customization.
+  (config preparation, rank-aware logging, checkpoint/config bookkeeping) while still
+  exposing the full Lightning + Hydra stack for customization.
 - Treat HPC scenarios as first-class by bundling helpers such as dataset caching in
   :mod:`aiaccel.torch.datasets` and the HDF5 utilities in :mod:`aiaccel.torch.h5py` so
   you can author fast training loops that fully utilize compute resources on shared
   clusters.
 
+This page outlines the config layout, training workflow, and utilities for single-node
+and multi-node GPU training.
+
 Basic Usage
 -----------
 
-Start by invoking the CLI so the workflow feels concrete:
+Start by invoking the CLI:
 
 .. code-block:: bash
 
     aiaccel-torch train config.yaml trainer.max_epochs=30
 
-The command loads ``config.yaml`` through :func:`~aiaccel.config.load_config`, merges
-any ``key=value`` overrides, resolves ``_inherit_`` entries, and instantiates the
-trainer, task, and datamodule via `hydra.utils.instantiate
-<https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_ before calling
-`lightning.Trainer.fit()
-<https://lightning.ai/docs/pytorch/stable/common/trainer.html#basic-use>`_. Whenever
-``trainer.is_global_zero`` is ``True`` the merged YAML is saved to
-``working_directory/merged_config.yaml``. Because overrides are parsed by
-`OmegaConf.from_cli
-<https://omegaconf.readthedocs.io/en/latest/usage.html#command-line-flags>`_, changing
-values such as ``datamodule.batch_size=256`` mirrors the workflow shown in
-:doc:`config`.
+Internally, ``aiaccel-torch train`` is roughly equivalent to the following:
+
+.. code-block:: python
+    :caption: Simplified training flow
+
+    parser = ArgumentParser()
+    parser.add_argument("config", type=str)
+    args, unk_args = parser.parse_known_args()
+
+    config = prepare_config(
+        config_filename=args.config,
+        overwrite_config=oc.from_cli(unk_args),
+        save_config=True,
+        save_filename="merged_config.yaml",
+    )
+    print_git_status(collect_git_status_from_config(config))
+
+    if "seed" in config:
+        lt.seed_everything(config.seed, workers=True)
+
+    trainer = instantiate(config.trainer)
+    trainer.fit(
+        model=instantiate(config.task),
+        datamodule=instantiate(config.datamodule),
+        **config.get("fit_args", {}),
+    )
+
+The actual CLI wraps argument parsing around this flow, but the important idea is that
+the resolved YAML is what the training run uses. CLI overrides such as
+``datamodule.batch_size=256`` are merged before objects are instantiated, matching the
+workflow shown in :doc:`config`.
 
 Composing the config
 ~~~~~~~~~~~~~~~~~~~~
@@ -108,7 +124,7 @@ the remainder of the file stays intact:
 
 Any values that follow the base list override the combined template, so callbacks,
 datasets, and optimizers continue to live in the same file. Once the config is ready,
-wrap the command with ``aiaccel-job`` to request GPUs from a scheduler:
+wrap the command with ``aiaccel-job`` to request GPUs from a backend:
 
 .. code-block:: bash
 
@@ -117,8 +133,8 @@ wrap the command with ``aiaccel-job`` to request GPUs from a scheduler:
 
 The job YAML (see :doc:`job`) handles queue-specific options, while the
 ``aiaccel.torch`` config only toggles between single-node and DDP behavior through
-``_base_``. Moving to ``pbs`` or ``sge`` swaps the backend name but keeps the command
-payload exactly the same.
+``_base_``. Moving to ``pbs``, ``sge``, or ``slurm`` swaps the backend name but keeps
+the payload command exactly the same.
 
 Advanced Topics
 ---------------
@@ -146,8 +162,8 @@ caching automatically:
           split: train
 
 The first time ``__getitem__`` runs for a given index, ``CachedDataset`` stores the
-sample inside a shared-memory dictionary. Subsequent workers (e.g., other DataLoader
-workers on the same node) pull from that cache, reducing redundant reads.
+sample inside a shared-memory dictionary. Subsequent workers on the same node can then
+reuse the cached sample, reducing redundant filesystem reads.
 
 .. note::
 
@@ -218,9 +234,9 @@ original pipeline.
     .. code-block:: bash
 
         aiaccel-job local mpi --n_procs=32 generate_hdf5.log -- \
-            generate_hdf5.py
+            python generate_hdf5.py
 
-    Replace ``local`` with ``pbs`` / ``sge`` for cluster use. Inside
+    Replace ``local`` with ``pbs``, ``sge``, or ``slurm`` for cluster use. Inside
     ``generate_hdf5.py`` call ``writer.write(..., parallel=True)`` so every MPI rank
     contributes to the same HDF5 file.
 

@@ -19,7 +19,7 @@ Aiaccel is a toolkit for accelerating machine learning research.
 
 
     .. grid-item-card:: :octicon:`server;1.5em;sd-text-primary` Job management
-       :link: user_guide/config.html
+       :link: user_guide/job.html
 
        HPC-oriented job abstraction.
 

@@ -1,38 +1,36 @@
 Managing Job Workloads
 ======================
 
-``aiaccel-job`` launches training, evaluation, or batch jobs on laptops, shared servers,
-and PBS / SGE clusters through a single CLI. This guide explains the command workflow,
-the YAML templates behind it, and the scheduler-specific tweaks that keep the interface
-consistent across backends.
+``aiaccel-job`` launches training, evaluation, and batch workloads through a single
+CLI. The same command structure works on a local machine or through scheduler-specific
+backends such as PBS, SGE, and Slurm. The job runner centers on three ideas:
 
-Core Concepts
--------------
+- Keep scheduler logic in YAML templates so queue options, launch commands, and module
+  setup can be reviewed and version-controlled.
+- Use one CLI across single jobs, array-style fan-out, MPI jobs, and distributed
+  training launches.
+- Switch environments by changing only the backend name and config file, while keeping
+  the payload command unchanged.
 
-``aiaccel-job`` is designed to easily manage machine-learning jobs on the following
-principles:
-
-- Inspired by `Kaldi <https://kaldi-asr.org/>`_ / `ESPnet
-  <https://espnet.github.io/espnet/>`_ job management, the CLI is template-driven and
-  keeps the configuration file at the center of every CPU / GPU batch run.
-- Provides six dedicated modes: ``cpu``, ``cpu-array``, ``gpu``, ``gpu-array``, ``mpi``,
-  and ``train``. Individual jobs and array jobs share the same interface.
-- Targets both ``local`` execution and HPC schedulers such as ``pbs`` / ``sge``, letting
-  you reuse the exact same notation while switching backends.
+Its design is inspired by the job-management style used in
+`Kaldi <https://kaldi-asr.org/>`_ and `ESPnet <https://espnet.github.io/espnet/>`_, 
+while adapting the workflow to aiaccel's configuration system. 
+This guide explains the command workflow, the YAML templates behind it, and the
+scheduler-specific tweaks that keep the interface consistent across backends.
 
 Basic Usage
 -----------
 
-``aiaccel-job`` works like any other CLI: select a backend (``local``, ``pbs``, or
-``sge``), pick the mode, point to a log file, and provide the command payload.
-Configuration files supply the templates, but the invocation style stays identical on
-every backend.
+``aiaccel-job`` works like any other CLI: select a backend (``local``, ``pbs``,
+``sge``, or ``slurm``), pick a mode, point to a log file, and provide the command
+payload. Configuration files supply the templates, but the invocation style stays nearly
+identical across backends.
 
 Running a job
 ~~~~~~~~~~~~~
 
-The basic invocation consists of the backend (``local``), the mode, ``LOG_FILENAME``,
-and the command to run:
+The basic invocation consists of the backend, the mode, ``LOG_FILENAME``, and the
+command to run:
 
 .. code-block:: bash
 
@@ -40,90 +38,87 @@ and the command to run:
         cpu logs/example.log -- \
         python train.py --epochs 10
 
-``aiaccel-job`` writes the rendered script next to the log file (``logs/example.sh``),
-streams stdout/stderr into ``logs/example.log``, and will spawn array-style workers
-automatically when ``--n_tasks`` is supplied (``cpu-array`` / ``gpu-array`` is selected
-in that case). Omit ``--config`` to fall back to the default ``local.yaml`` shipped with
-aiaccel, or set ``AIACCEL_JOB_CONFIG`` for a global default.
+``aiaccel-job`` writes the rendered script next to the log file (for example,
+``logs/example.sh``) and uses the selected backend to execute it. Omit ``--config`` to
+fall back to the default backend config shipped with aiaccel, or set
+``AIACCEL_JOB_CONFIG`` for a global default.
 
 Command-line interface
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Every backend accepts ``--config`` (YAML path), ``--print_config`` (dump and exit), and
-``--walltime`` (override scheduler defaults). The positional ``LOG_FILENAME`` selects
-where logs/scripts are stored and ``COMMAND`` captures the payload. Modes add the
-following options:
+Every backend accepts ``--config`` (YAML path), ``--print_config`` (print the resolved
+config before continuing), and ``--walltime`` (override scheduler defaults). The
+positional ``LOG_FILENAME`` selects where logs and generated scripts are stored, and
+``COMMAND`` captures the payload. Modes add the following options:
 
 ``aiaccel-job [backend] cpu [--n_tasks=N --n_tasks_per_proc=M --n_procs=K] LOG_FILENAME -- COMMAND``
-    With no extra flags the scheduler grants the entire node described in the ``cpu``
-    template. Specifying ``--n_tasks`` switches to ``cpu-array`` so each worker gets a
-    single CPU and receives ``TASK_INDEX`` / ``TASK_STEPSIZE``. ``--n_tasks_per_proc``
-    controls how many tasks each worker handles before advancing, while ``--n_procs``
-    defines how many workers run on the same node.
+    With no extra flags the command uses the ``cpu`` template. Specifying ``--n_tasks``
+    switches to ``cpu-array``, exports ``TASK_INDEX`` / ``TASK_STEPSIZE`` for each
+    worker, and fans the command out according to the backend template.
 
 ``aiaccel-job [backend] gpu [--n_tasks=N --n_tasks_per_proc=M --n_procs=K] LOG_FILENAME -- COMMAND``
-    Mirrors the CPU behavior: without ``--n_tasks`` the job occupies the full GPU node
-    described in the template, and providing ``--n_tasks`` activates ``gpu-array`` so
-    each worker uses a single GPU. Fan-out is controlled by the same
-    ``--n_tasks_per_proc`` / ``--n_procs`` knobs.
+    Mirrors the CPU flow with the ``gpu`` / ``gpu-array`` templates. Backend YAML
+    typically sets queue arguments or ``CUDA_VISIBLE_DEVICES`` here.
 
 ``aiaccel-job [backend] mpi --n_procs=N [--n_nodes=K] LOG_FILENAME -- COMMAND``
-    ``--n_procs`` is required and forwarded directly to ``mpirun``. ``--n_nodes`` is
-    optional and defaults to the config value if omitted.
+    ``--n_procs`` is required. The backend template decides whether the payload is
+    launched with ``mpirun``, ``srun``, or another MPI frontend. ``--n_nodes`` is
+    optional and defaults to the value defined in the config.
 
 ``aiaccel-job [backend] train [--n_gpus=N] LOG_FILENAME -- COMMAND``
-    Tailored for distributed training templates. ``--n_gpus`` specifies how many GPUs
-    the job should consume; the scheduler arguments in the config translate that count
-    into queue requests.
+    Tailored for distributed training templates. ``--n_gpus`` controls how many ranks or
+    GPUs the backend-specific training template requests.
 
-When ``aiaccel-job local`` is used, the script accepts ``--walltime``, ``--n_nodes`` and
-``--n_tasks_per_proc`` for compatibility but emits warnings because they are ignored by
-the local runner. PBS / SGE backends rely on the same interface to parameterize array
-jobs and MPI launches.
+When ``aiaccel-job local`` is used, the script still accepts ``--walltime``,
+``--n_nodes``, and ``--n_tasks_per_proc`` for interface compatibility, but the local
+runner warns that those options are ignored. In particular, local array execution splits
+work as ``ceil(n_tasks / n_procs)`` tasks per worker.
 
 Splitting array jobs
 ~~~~~~~~~~~~~~~~~~~~
 
 Passing ``--n_tasks`` to the ``cpu`` / ``gpu`` modes automatically switches to the
-``*-array`` configuration. Each backend handles the fan-out by iterating over the array
-index and setting ``TASK_INDEX`` / ``TASK_STEPSIZE`` before running your command. For
+corresponding ``*-array`` configuration. Each backend fans the command out by assigning
+each worker a start index (``TASK_INDEX``) and a chunk size (``TASK_STEPSIZE``). For
 example, :mod:`aiaccel.job.apps.local` renders a loop such as
 
 .. code-block:: bash
 
-    for LOCAL_PROC_INDEX in {1..${N_PROCS}}; do
-        TASK_INDEX=$(( 1 + N_TASKS_PER_PROC * (LOCAL_PROC_INDEX - 1) ))
+    for LOCAL_PROC_INDEX in {1..8}; do
+        TASK_INDEX=$(( 1 + 13 * (LOCAL_PROC_INDEX - 1) ))
+
+        if [[ $TASK_INDEX -gt 100 ]]; then
+            break
+        fi
+
         TASK_INDEX=$TASK_INDEX \
-        TASK_STEPSIZE=$N_TASKS_PER_PROC \
+        TASK_STEPSIZE=13 \
             python tools/preprocess.py arg1 arg2 ...
     done
 
 where ``python tools/preprocess.py arg1 arg2 ...`` corresponds to the command provided
 after ``--`` when invoking ``aiaccel-job``.
 
-PBS / SGE versions follow the same pattern but seed ``TASK_INDEX`` with the scheduler's
-array ID (``PBS_ARRAY_INDEX`` / ``SGE_TASK_ID``) so each slice writes
-``${LOG_FILENAME}.${array}.${LOCAL_PROC_INDEX}.log``. Inside the job, call
-:func:`~aiaccel.job.slice_tasks` to process only the shard assigned to the current
-worker (``aiaccel/torch/pipelines/base_pipeline.py`` already does this):
+PBS, SGE, and Slurm follow the same pattern but seed ``TASK_INDEX`` from the scheduler's
+array ID (``PBS_ARRAY_INDEX``, ``SGE_TASK_ID``, or ``SLURM_ARRAY_TASK_ID``). Inside the
+job, call :func:`~aiaccel.job.utils.split_tasks` to process only the shard assigned to
+the current worker:
 
 .. code-block:: python
     :caption: Consuming array slices
 
-    from aiaccel.job import slice_tasks
+    from aiaccel.job.utils import split_tasks
 
-    src_fname_list = slice_tasks(src_fname_list)
+    src_fname_list = split_tasks(src_fname_list)
 
-This approach keeps array jobs deterministic—the scheduler decides which chunk is
-running, and your script only needs to honor ``TASK_INDEX`` / ``TASK_STEPSIZE`` to work
-both locally and on HPC backends.
+This keeps array jobs deterministic: the backend decides which shard is running, and
+your script only needs to honor ``TASK_INDEX`` / ``TASK_STEPSIZE``.
 
 Cluster Configuration
 ---------------------
 
-Configuring ``local``, ``pbs``, and ``sge`` targets follows the same structure but each
-introduces scheduler-specific extensions for submission commands, array behavior, and
-MPI launchers.
+Configuring ``local``, ``pbs``, ``sge``, and ``slurm`` follows the same structure, with
+each backend adding its own submission command, array syntax, and MPI launcher.
 
 Config essentials
 ~~~~~~~~~~~~~~~~~
@@ -139,21 +134,23 @@ Every invocation loads a YAML file composed of the following building blocks:
       - How they are used
     - - Global defaults
       - ``walltime``, ``script_prologue``, environment exports
-      - Run before every job to log metadata, load modules, or set scheduler limits.
+      - Run before every job to log metadata, load modules, or set environment
+        variables.
     - - Workload modes
       - ``cpu``, ``cpu-array``, ``gpu``, ``gpu-array``, ``mpi``, ``train``
-      - Declare the ``job`` template plus optional queue arguments for each workload.
+      - Declare the ``job`` template plus optional scheduler arguments for each
+        workload.
     - - Template helpers
       - ``{command}``, ``{args.*}``, ``_base_``, ``_inherit_``
-      - Compose configs with Hydra-style inheritance and inject CLI overrides at render
-        time.
+      - Compose configs with Hydra-style inheritance and inject parsed CLI values into
+        shell snippets.
 
 The default files under `aiaccel/job/apps/config/
 <https://github.com/aistairc/aiaccel/tree/main/aiaccel/job/apps/config>`_ can be used
 as-is or copied and extended. They rely on :mod:`aiaccel.config`, so ``_base_`` /
 ``_inherit_`` work the same way described in :doc:`config`.
 
-At minimum you only need the shared metadata and the job snippet for the mode you plan
+At minimum you need the shared metadata plus a ``job`` template for each mode you plan
 to invoke:
 
 .. code-block:: yaml
@@ -183,8 +180,9 @@ Key fields:
 - ``walltime`` propagates to schedulers that require a time limit.
 - ``script_prologue`` runs before the job and is typically used for logging, ``module
   load`` commands, or environment variables.
-- Each mode declares a ``job`` template. ``{command}`` is replaced with the CLI payload
-  and ``{args.*}`` accesses runtime options (``n_gpus``, ``n_tasks`` etc.).
+- Each mode declares a ``job`` template. ``{command}`` is replaced with the shell-quoted
+  payload and ``{args.*}`` accesses parsed CLI arguments such as ``n_gpus``,
+  ``n_tasks``, or ``walltime``.
 
 Local-specific settings
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -193,10 +191,10 @@ Local-specific settings
 <https://github.com/aistairc/aiaccel/blob/main/aiaccel/job/apps/config/local.yaml>`_
 keeps the settings minimal: ``walltime`` is ignored, ``script_prologue`` runs before
 every job, and each mode simply renders the ``job`` template. Array jobs loop over the
-requested number of processes with ``TASK_INDEX``/``TASK_STEPSIZE`` exported into the
-environment, and logs are stored next to ``LOG_FILENAME``. Customize this file to export
-additional environment variables, wrap commands in container runtimes, or change how
-local array workers are fanned out.
+requested number of local worker processes with ``TASK_INDEX`` / ``TASK_STEPSIZE``
+exported into the environment, and logs are stored next to ``LOG_FILENAME``. Customize
+this file to export additional environment variables, wrap commands in container
+runtimes, or change the local launch command for MPI / training jobs.
 
 PBS-specific settings
 ~~~~~~~~~~~~~~~~~~~~~
@@ -213,7 +211,7 @@ be used as a template:
     script_prologue: |
         echo Job ID: $PBS_JOBID
         echo Hostname: $(hostname)
-        module load hpcx
+        export CUDA_VISIBLE_DEVICES=all
 
     qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1"
 
@@ -233,6 +231,9 @@ be used as a template:
             -q rt_HF
             -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / {args.n_nodes} )):ompthreads=$(( {args.n_nodes} * 96 / {args.n_procs} ))
         job: |
+            source /etc/profile.d/modules.sh
+            module load hpcx
+
             mpirun -np {args.n_procs} -bind-to none -map-by slot \
                 -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \
                 {command}
@@ -242,8 +243,9 @@ each mode contributes its own ``qsub_args``. Setting ``--n_tasks`` switches to t
 ``*-array`` configuration that iterates inside PBS array indices so you can launch
 higher fan-out than the scheduler allows per array entry. ``use_scandir`` can be set to
 ``true`` when the shared filesystem requires explicit cache invalidation during status
-polling. All other sections (``gpu``, ``train``) follow the same structure and can be
-trimmed if unused.
+polling. The bundled ``mpi`` and ``train`` templates also load ``hpcx`` and invoke
+``mpirun`` with cluster-specific network settings, so they are usually the first pieces
+to adapt to a new PBS environment.
 
 SGE-specific settings
 ~~~~~~~~~~~~~~~~~~~~~
@@ -270,17 +272,60 @@ mirrors the PBS template but adapts the syntax to SGE:
     train:
         qsub_args: "-l $( (({args.n_gpus}==1)) && printf node_q || printf node_f )=$(( ({args.n_gpus} + 3) / 4 ))"
         job: |
+            source /etc/profile.d/modules.sh
             module load openmpi
-            mpirun -np {args.n_gpus} -map-by ppr:$(nvidia-smi -L | wc -l):node:PE=48 \
+
+            n_gpus=$(nvidia-smi -L | wc -l)
+
+            mpirun -np {args.n_gpus} -map-by ppr:$n_gpus:node:PE=48 \
+                -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \
                 -x MAIN_ADDR=$(hostname -i) \
                 -x MAIN_PORT=3000 \
+                -x COLUMNS=120 \
+                -x PYTHONUNBUFFERED=true \
                 {command}
 
 The only CLI difference is choosing ``aiaccel-job sge ...``. Array jobs rely on
 ``SGE_TASK_ID`` and render a separate status file per chunk, so the same
-``--n_tasks``/``--n_tasks_per_proc`` knobs apply. MPI and ``train`` sections typically
-load site-specific modules, so copy the template and adjust queue names, slots, GPU
-labels, or environment modules to match your cluster.
+``--n_tasks`` / ``--n_tasks_per_proc`` knobs apply. MPI and ``train`` sections
+typically load site-specific modules, so copy the template and adjust queue names,
+slots, GPU labels, or environment modules to match your cluster.
+
+Slurm-specific settings
+~~~~~~~~~~~~~~~~~~~~~~~
+
+`aiaccel/job/apps/config/slurm.yaml
+<https://github.com/aistairc/aiaccel/blob/main/aiaccel/job/apps/config/slurm.yaml>`_
+uses ``sbatch`` / ``srun`` instead of ``qsub`` / ``mpirun``:
+
+.. code-block:: yaml
+    :caption: job_config.yaml (Slurm excerpt)
+
+    sbatch: "sbatch --export=USE_SSH=1 --export=ALL"
+
+    gpu:
+        sbatch_args: "-p gpu1 -N 1"
+        job: "{command}"
+
+    gpu-array:
+        n_tasks_per_proc: 64
+        n_procs: 4
+        sbatch_args: "-p gpu1 -N 1 --array=1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+        job: "CUDA_VISIBLE_DEVICES=$(( LOCAL_PROC_INDEX % 8 )) {command}"
+
+    train:
+        sbatch_args: "-p gpu1 -N {args.n_gpus}"
+        job: |
+            export MAIN_ADDR=$(hostname -i)
+            export MAIN_PORT=3000
+            export COLUMNS=120
+            export PYTHONUNBUFFERED=true
+            srun -n {args.n_gpus} --cpu-bind=none --distribution=block:block {command}
+
+Here ``sbatch`` provides the submission command, while each mode contributes its own
+``sbatch_args``. The bundled ``mpi`` and ``train`` templates use ``srun`` directly, so
+they are a good starting point if your Slurm cluster prefers native launches over
+OpenMPI wrappers.
 
 Advanced Topics
 ---------------
@@ -289,11 +334,10 @@ Writing Custom Backends
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 If none of the bundled backends match your infrastructure, you can build a new backend
-that mirrors ``aiaccel-job local/pbs/sge``. The helper
+that mirrors ``aiaccel-job local/pbs/sge/slurm``. The helper
 :func:`~aiaccel.job.apps.prepare_argument_parser` wires the shared CLI options and loads
 your YAML template, so your script only needs to render the ``job`` snippet, emit a
-shell script, and hand it off to the scheduler—exactly how ``local.py`` / ``pbs.py`` /
-``sge.py`` operate.
+shell script, and hand it off to the scheduler.
 
 .. code-block:: python
     :caption: custom_backend.py
@@ -310,17 +354,17 @@ shell script, and hand it off to the scheduler—exactly how ``local.py`` / ``pb
         mode = args.mode + "-array" if getattr(args, "n_tasks", None) else args.mode
         job = config[mode].job.format(command=shlex.join(args.command), args=args)
 
-        # TODO: render a shell script (see local.py/pbs.py/sge.py) and submit it to
-        # your scheduler or execute it locally.
+        # TODO: render a shell script and submit it to your scheduler or execute it
+        # locally.
 
 
     if __name__ == "__main__":
         main()
 
-From here you can extend the skeleton just like the built-in backends: add scheduler
+From there you can extend the skeleton just like the built-in backends: add scheduler
 commands, implement array loops, or poll status files before returning. Because the CLI
 flags and config semantics stay aligned with ``aiaccel-job``, users only need to switch
-the backend name to run the exact same training script across different environments.
+the backend name to run the same payload across different environments.
 
 Further reading
 ---------------
