@@ -5,8 +5,8 @@
 ``aiaccel.config`` is a lightweight utility built on top of `Hydra's instantiation
 mechanism <https://hydra.cc/docs/advanced/instantiate_objects/overview/>`_ and
 `OmegaConf <http://omegaconf.readthedocs.io/>`_. It keeps machine-learning experiment
-configurations compact, composable, and easy to reuse.
-The configuration system centers on the following principles:
+configurations compact, composable, and easy to reuse. The configuration system centers
+on the following principles:
 
 - Keep experiment setup in YAML so models, datasets, and runtime parameters can be
   reviewed and reproduced without editing Python code
@@ -19,8 +19,9 @@ The configuration system centers on the following principles:
 
 All of these utilities live under the ``aiaccel.config`` namespace.
 
-Basic Usage
------------
+*************
+ Basic Usage
+*************
 
 The typical workflow is to call :func:`~aiaccel.config.prepare_config`, optionally merge
 command-line overrides, and then instantiate objects from ``_target_`` definitions via
@@ -76,8 +77,8 @@ overrides such as
 :func:`~aiaccel.config.prepare_config` is the high-level entry point. Internally it:
 
 - calls :func:`~aiaccel.config.setup_omegaconf` to register aiaccel's custom resolvers;
-- calls :func:`~aiaccel.config.load_config` to read the YAML file and resolve
-  ``_base_`` recursively;
+- calls :func:`~aiaccel.config.load_config` to read the YAML file and resolve ``_base_``
+  recursively;
 - merges ``overwrite_config`` if provided;
 - calls :func:`~aiaccel.config.resolve_inherit` to expand ``_inherit_`` references;
 - optionally prints or saves the fully merged config.
@@ -86,7 +87,7 @@ Use :func:`~aiaccel.config.load_config` directly only when you need low-level co
 over the loading step before inheritance resolution.
 
 Using ``_base_`` to inherit files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=================================
 
 ``_base_`` lets you inherit from one or more YAML files while overriding their values.
 When multiple files are provided, they are merged in the order given.
@@ -116,7 +117,7 @@ values. Because :func:`~aiaccel.config.load_config` resolves ``_base_`` recursiv
 base files can themselves declare additional bases.
 
 Reusing fragments with ``_inherit_``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+====================================
 
 ``_inherit_`` copies arbitrary DictConfig nodes inline. It is useful for sharing
 repeated parameter definitions in a single place while overriding only the fields that
@@ -151,11 +152,11 @@ need to change.
 :func:`~aiaccel.config.resolve_inherit` makes ``params.x1`` and ``params.x2`` contain
 the fields declared under ``param``, then applies any local overrides. In this example,
 ``params.x1`` becomes a ``Float(low=0.0, high=1.0, log=False)``-style config, while
-``params.x2`` reuses the same template but overrides ``high`` to ``10.0`` and ``log``
-to ``true``. Passing a list of references merges multiple templates in sequence.
+``params.x2`` reuses the same template but overrides ``high`` to ``10.0`` and ``log`` to
+``true``. Passing a list of references merges multiple templates in sequence.
 
 Resolvers registered by :func:`~aiaccel.config.setup_omegaconf`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===============================================================
 
 :func:`~aiaccel.config.setup_omegaconf` registers the following resolvers in OmegaConf:
 
@@ -172,12 +173,12 @@ The setup is idempotent, so calling :func:`~aiaccel.config.prepare_config` or
 registered with ``oc.register_new_resolver(..., replace=True)``, so aiaccel's
 definitions take precedence even if the same names were registered elsewhere.
 
-
-Advanced Topics
----------------
+*****************
+ Advanced Topics
+*****************
 
 Git status checks
-~~~~~~~~~~~~~~~~~
+=================
 
 Whenever a config references a Python package via ``_target_``,
 :func:`~aiaccel.config.collect_git_status_from_config` detects it and collects ``git
@@ -186,8 +187,9 @@ status`` / ``git rev-parse`` results for each repository. The associated
 uncommitted changes. Packages that are not Git repositories, or that are ignored via
 ``.gitignore`` are skipped automatically.
 
-CLI Utilities
--------------
+***************
+ CLI Utilities
+***************
 
 ``aiaccel/config/apps/`` ships small CLIs to streamline common config operations.
 
@@ -211,7 +213,8 @@ CLI Utilities
 
         aiaccel-config get_value config.yaml params.x1.low
 
-Further reading
----------------
+*****************
+ Further reading
+*****************
 
 See :doc:`../api_reference/config` for the full API reference.

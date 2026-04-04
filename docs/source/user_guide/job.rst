@@ -1,8 +1,9 @@
-Managing Job Workloads
-======================
+########################
+ Managing Job Workloads
+########################
 
-``aiaccel-job`` launches training, evaluation, and batch workloads through a single
-CLI. The same command structure works on a local machine or through scheduler-specific
+``aiaccel-job`` launches training, evaluation, and batch workloads through a single CLI.
+The same command structure works on a local machine or through scheduler-specific
 backends such as PBS, SGE, and Slurm. The job runner centers on three ideas:
 
 - Keep scheduler logic in YAML templates so queue options, launch commands, and module
@@ -12,22 +13,23 @@ backends such as PBS, SGE, and Slurm. The job runner centers on three ideas:
 - Switch environments by changing only the backend name and config file, while keeping
   the payload command unchanged.
 
-Its design is inspired by the job-management style used in
-`Kaldi <https://kaldi-asr.org/>`_ and `ESPnet <https://espnet.github.io/espnet/>`_, 
-while adapting the workflow to aiaccel's configuration system. 
-This guide explains the command workflow, the YAML templates behind it, and the
-scheduler-specific tweaks that keep the interface consistent across backends.
+Its design is inspired by the job-management style used in `Kaldi
+<https://kaldi-asr.org/>`_ and `ESPnet <https://espnet.github.io/espnet/>`_, while
+adapting the workflow to aiaccel's configuration system. This guide explains the command
+workflow, the YAML templates behind it, and the scheduler-specific tweaks that keep the
+interface consistent across backends.
 
-Basic Usage
------------
+*************
+ Basic Usage
+*************
 
-``aiaccel-job`` works like any other CLI: select a backend (``local``, ``pbs``,
-``sge``, or ``slurm``), pick a mode, point to a log file, and provide the command
-payload. Configuration files supply the templates, but the invocation style stays nearly
+``aiaccel-job`` works like any other CLI: select a backend (``local``, ``pbs``, ``sge``,
+or ``slurm``), pick a mode, point to a log file, and provide the command payload.
+Configuration files supply the templates, but the invocation style stays nearly
 identical across backends.
 
 Running a job
-~~~~~~~~~~~~~
+=============
 
 The basic invocation consists of the backend, the mode, ``LOG_FILENAME``, and the
 command to run:
@@ -44,7 +46,7 @@ fall back to the default backend config shipped with aiaccel, or set
 ``AIACCEL_JOB_CONFIG`` for a global default.
 
 Command-line interface
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 Every backend accepts ``--config`` (YAML path), ``--print_config`` (print the resolved
 config before continuing), and ``--walltime`` (override scheduler defaults). The
@@ -75,7 +77,7 @@ runner warns that those options are ignored. In particular, local array executio
 work as ``ceil(n_tasks / n_procs)`` tasks per worker.
 
 Splitting array jobs
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 Passing ``--n_tasks`` to the ``cpu`` / ``gpu`` modes automatically switches to the
 corresponding ``*-array`` configuration. Each backend fans the command out by assigning
@@ -114,14 +116,15 @@ the current worker:
 This keeps array jobs deterministic: the backend decides which shard is running, and
 your script only needs to honor ``TASK_INDEX`` / ``TASK_STEPSIZE``.
 
-Cluster Configuration
----------------------
+***********************
+ Cluster Configuration
+***********************
 
 Configuring ``local``, ``pbs``, ``sge``, and ``slurm`` follows the same structure, with
 each backend adding its own submission command, array syntax, and MPI launcher.
 
 Config essentials
-~~~~~~~~~~~~~~~~~
+=================
 
 Every invocation loads a YAML file composed of the following building blocks:
 
@@ -185,7 +188,7 @@ Key fields:
   ``n_tasks``, or ``walltime``.
 
 Local-specific settings
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 `aiaccel/job/apps/config/local.yaml
 <https://github.com/aistairc/aiaccel/blob/main/aiaccel/job/apps/config/local.yaml>`_
@@ -197,7 +200,7 @@ this file to export additional environment variables, wrap commands in container
 runtimes, or change the local launch command for MPI / training jobs.
 
 PBS-specific settings
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 `aiaccel/job/apps/config/pbs.yaml
 <https://github.com/aistairc/aiaccel/blob/main/aiaccel/job/apps/config/pbs.yaml>`_ can
@@ -248,7 +251,7 @@ polling. The bundled ``mpi`` and ``train`` templates also load ``hpcx`` and invo
 to adapt to a new PBS environment.
 
 SGE-specific settings
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 `aiaccel/job/apps/config/sge.yaml
 <https://github.com/aistairc/aiaccel/blob/main/aiaccel/job/apps/config/sge.yaml>`_
@@ -286,13 +289,13 @@ mirrors the PBS template but adapts the syntax to SGE:
                 {command}
 
 The only CLI difference is choosing ``aiaccel-job sge ...``. Array jobs rely on
-``SGE_TASK_ID`` and render a separate status file per chunk, so the same
-``--n_tasks`` / ``--n_tasks_per_proc`` knobs apply. MPI and ``train`` sections
-typically load site-specific modules, so copy the template and adjust queue names,
-slots, GPU labels, or environment modules to match your cluster.
+``SGE_TASK_ID`` and render a separate status file per chunk, so the same ``--n_tasks`` /
+``--n_tasks_per_proc`` knobs apply. MPI and ``train`` sections typically load
+site-specific modules, so copy the template and adjust queue names, slots, GPU labels,
+or environment modules to match your cluster.
 
 Slurm-specific settings
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 `aiaccel/job/apps/config/slurm.yaml
 <https://github.com/aistairc/aiaccel/blob/main/aiaccel/job/apps/config/slurm.yaml>`_
@@ -327,11 +330,12 @@ Here ``sbatch`` provides the submission command, while each mode contributes its
 they are a good starting point if your Slurm cluster prefers native launches over
 OpenMPI wrappers.
 
-Advanced Topics
----------------
+*****************
+ Advanced Topics
+*****************
 
 Writing Custom Backends
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 If none of the bundled backends match your infrastructure, you can build a new backend
 that mirrors ``aiaccel-job local/pbs/sge/slurm``. The helper
@@ -366,8 +370,9 @@ commands, implement array loops, or poll status files before returning. Because 
 flags and config semantics stay aligned with ``aiaccel-job``, users only need to switch
 the backend name to run the same payload across different environments.
 
-Further reading
----------------
+*****************
+ Further reading
+*****************
 
 - `aiaccel/job/apps/config/
   <https://github.com/aistairc/aiaccel/tree/main/aiaccel/job/apps/config>`_ for the full

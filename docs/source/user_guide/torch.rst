@@ -21,8 +21,9 @@ clusters. ``aiaccel-torch`` is designed around the following ideas:
 This page outlines the config layout, training workflow, and utilities for single-node
 and multi-node GPU training.
 
-Basic Usage
------------
+*************
+ Basic Usage
+*************
 
 Start by invoking the CLI:
 
@@ -63,7 +64,7 @@ the resolved YAML is what the training run uses. CLI overrides such as
 workflow shown in :doc:`config`.
 
 Composing the config
-~~~~~~~~~~~~~~~~~~~~
+====================
 
 A minimal configuration extends ``train_base.yaml`` (under
 :mod:`aiaccel.torch.apps.config`) and defines ``trainer``, ``datamodule``, and ``task``.
@@ -108,7 +109,7 @@ dataset factory can be wired in-place.
           lr: 1e-4
 
 Switching to DDP and launching jobs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===================================
 
 ``train_ddp.yaml`` extends ``train_base.yaml`` with synchronized BatchNorm, the
 :class:`~aiaccel.torch.lightning.abci_environment.ABCIEnvironment` plugin, and automatic
@@ -136,11 +137,12 @@ The job YAML (see :doc:`job`) handles queue-specific options, while the
 ``_base_``. Moving to ``pbs``, ``sge``, or ``slurm`` swaps the backend name but keeps
 the payload command exactly the same.
 
-Advanced Topics
----------------
+*****************
+ Advanced Topics
+*****************
 
 Using ``CachedDataset`` for HPC storage
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=======================================
 
 :func:`~aiaccel.torch.datasets.CachedDataset` keeps samples in a multiprocessing shared
 memory manager so workers on the same node can reuse decoded tensors without hitting the
@@ -179,7 +181,7 @@ reuse the cached sample, reducing redundant filesystem reads.
     disk (``cache_path``).
 
 Writing datasets with ``HDF5Writer``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+====================================
 
 Many HPC filesystems penalize workloads that touch thousands of small files (Lustre in
 particular struggles with lots of metadata operations), so packaging training samples
@@ -240,8 +242,9 @@ original pipeline.
     ``generate_hdf5.py`` call ``writer.write(..., parallel=True)`` so every MPI rank
     contributes to the same HDF5 file.
 
-Further reading
----------------
+*****************
+ Further reading
+*****************
 
 - :doc:`../api_reference/torch` for the full API reference of datasets, pipelines,
   Lightning helpers, schedulers, and I/O utilities.

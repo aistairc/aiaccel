@@ -1,5 +1,6 @@
-Job Utilities
-=============
+###############
+ Job Utilities
+###############
 
 .. currentmodule:: aiaccel.job
 
