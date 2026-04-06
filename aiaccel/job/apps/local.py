@@ -50,9 +50,6 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        self.job_log_filename = self.args.log_filename.resolve()
-        self.job_status_filename = self.args.log_filename.with_suffix(".out").resolve()
-        self.status_filename_list = [self.job_status_filename]
 
     def build_job_script(self) -> str:
         return f"""\
@@ -84,9 +81,6 @@ trap 'kill 0' INT
 
         with open(job_filename, "w") as f:
             f.write(job_script)
-
-        for status_filename in self.status_filename_list:
-            status_filename.unlink(missing_ok=True)
 
         subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
 
