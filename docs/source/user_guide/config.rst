@@ -147,7 +147,7 @@ Example configuration:
 
 After loading, ``params`` contains only ``x1``. The ``x2`` entry from
 ``config_base.yaml`` is dropped because ``params`` is replaced as a whole instead of
-being merged key by key.
+being merged with the base mapping.
 
 Reusing fragments with ``_inherit_``
 ====================================
