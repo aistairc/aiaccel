@@ -2,7 +2,7 @@
  Job Utilities
 ###############
 
-.. currentmodule:: aiaccel.job
+.. currentmodule:: aiaccel.job.utils
 
 .. autosummary::
     :toctree: generated/
