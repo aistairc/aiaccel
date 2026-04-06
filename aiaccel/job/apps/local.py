@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class LocalJobApp(JobApp):
+    """Job application for running workloads directly on the local host."""
+
     def __init__(self) -> None:
         super().__init__("local.yaml")
 
@@ -24,12 +26,15 @@ class LocalJobApp(JobApp):
                 )
 
     def build_submit_command(self) -> tuple[str, str]:
+        """Build the command used to run a local job script."""
         return ("bash", "")
 
     def prepare_single_job_context(self) -> None:
+        """Prepare logging for a non-array local job."""
         self.job = f"{self.job} 2>&1 | tee {self.args.log_filename}"
 
     def prepare_array_job_context(self) -> None:
+        """Prepare process-splitting context for a local array-like job."""
         n_tasks_per_proc = ceil(self.args.n_tasks / self.args.n_procs)
         self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
@@ -52,6 +57,7 @@ done
 """
 
     def build_job_script(self) -> str:
+        """Build the shell script used for local execution."""
         return f"""\
 #! /bin/bash
 
@@ -67,11 +73,10 @@ trap 'kill 0' INT
 """
 
     def run_job(self, job_script: str) -> None:
-        """Run the job script.
+        """Run the generated local job script.
 
         Args:
             job_script (str): Job script content to write and run.
-
         """
         submit_command, submit_args = self.build_submit_command()
         log_filename = self.args.log_filename
@@ -85,10 +90,12 @@ trap 'kill 0' INT
         subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
 
     def launch_job(self, job_script: str) -> None:
+        """Launch the local job script."""
         self.run_job(job_script)
 
 
 def main() -> None:
+    """Run the local job application entry point."""
     LocalJobApp().run()
 
 

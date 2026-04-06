@@ -157,6 +157,7 @@ class JobApp(ABC):
         pass
 
     def launch_job(self, job_script: str) -> None:
+        """Launch the prepared job script."""
         raise NotImplementedError
 
     def run(self) -> None:
@@ -175,6 +176,7 @@ class SchedulerJobApp(JobApp):
     """
 
     def _is_skip_job_submission(self, job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
+        """Return whether the current job submission can be skipped."""
         has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
         has_success_status_files = all(
             status_filename.exists() and status_filename.read_text().strip() == "0"
@@ -183,11 +185,10 @@ class SchedulerJobApp(JobApp):
         return has_same_job_script and has_success_status_files
 
     def submit_job_and_wait(self, job_script: str) -> None:
-        """Submit the job script.
+        """Submit the job script and wait for completion via status files.
 
         Args:
             job_script (str): Job script content to write and submit.
-
         """
         submit_command, submit_args = self.build_submit_command()
         log_filename = self.args.log_filename
@@ -226,4 +227,5 @@ class SchedulerJobApp(JobApp):
             status_filename.unlink()
 
     def launch_job(self, job_script: str) -> None:
+        """Launch the job script through the scheduler workflow."""
         self.submit_job_and_wait(job_script)

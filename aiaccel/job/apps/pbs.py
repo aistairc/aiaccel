@@ -8,16 +8,20 @@ from aiaccel.job.apps import SchedulerJobApp
 
 
 class PbsJobApp(SchedulerJobApp):
+    """Job application for submitting scripts to a PBS scheduler."""
+
     def __init__(self) -> None:
         super().__init__("pbs.yaml")
 
     def build_submit_command(self) -> tuple[str, str]:
+        """Build the PBS submission command."""
         return (
             self.config.qsub.format(args=self.args),
             self.config[self.mode].qsub_args.format(args=self.args),
         )
 
     def prepare_array_job_context(self) -> None:
+        """Prepare PBS-specific context for array jobs."""
         self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$(( PBS_ARRAY_INDEX + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -50,6 +54,7 @@ done
         ]
 
     def build_job_script(self) -> str:
+        """Build the PBS job script."""
         return f"""\
 #! /bin/bash
 
@@ -73,6 +78,7 @@ fi
 
 
 def main() -> None:
+    """Run the PBS job application entry point."""
     PbsJobApp().run()
 
 

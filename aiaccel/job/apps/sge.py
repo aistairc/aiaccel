@@ -8,16 +8,20 @@ from aiaccel.job.apps import SchedulerJobApp
 
 
 class SgeJobApp(SchedulerJobApp):
+    """Job application for submitting scripts to an SGE scheduler."""
+
     def __init__(self) -> None:
         super().__init__("sge.yaml")
 
     def build_submit_command(self) -> tuple[str, str]:
+        """Build the SGE submission command."""
         return (
             self.config.qsub.format(args=self.args),
             self.config[self.mode].qsub_args.format(args=self.args),
         )
 
     def prepare_array_job_context(self) -> None:
+        """Prepare SGE-specific context for array jobs."""
         self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$(( SGE_TASK_ID + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -50,6 +54,7 @@ done
         ]
 
     def build_job_script(self) -> str:
+        """Build the SGE job script."""
         return f"""\
 #! /bin/bash
 
@@ -73,6 +78,7 @@ fi
 
 
 def main() -> None:
+    """Run the SGE job application entry point."""
     SgeJobApp().run()
 
 

@@ -7,16 +7,20 @@ from aiaccel.job.apps import SchedulerJobApp
 
 
 class SlurmJobApp(SchedulerJobApp):
+    """Job application for submitting scripts to a Slurm scheduler."""
+
     def __init__(self) -> None:
         super().__init__("slurm.yaml")
 
     def build_submit_command(self) -> tuple[str, str]:
+        """Build the Slurm submission command."""
         return (
             self.config.sbatch.format(args=self.args),
             self.config[self.mode].sbatch_args.format(args=self.args),
         )
 
     def prepare_array_job_context(self) -> None:
+        """Prepare Slurm-specific context for array jobs."""
         self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$(( SLURM_ARRAY_TASK_ID + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -49,6 +53,7 @@ done
         ]
 
     def build_job_script(self) -> str:
+        """Build the Slurm job script."""
         return f"""\
 #! /bin/bash
 #SBATCH -o {self.job_log_filename}
@@ -65,6 +70,7 @@ trap 'echo $? > {self.job_status_filename}' ERR EXIT  # at error and exit
 
 
 def main() -> None:
+    """Run the Slurm job application entry point."""
     SlurmJobApp().run()
 
 
