@@ -215,8 +215,8 @@ the dedicated documentation for usage details and configuration options.
 
 - :doc:`config` - complete reference for Hydra-style YAML composition used by
   ``aiaccel-hpo``.
-- :doc:`job` - explains how payload commands are embedded in templates, which
-  mirrors the ``command`` handling in the optimizer.
+- :doc:`job` - explains how payload commands are embedded in templates, which mirrors
+  the ``command`` handling in the optimizer.
 - ``examples/hpo`` - runnable Optuna examples, including Nelder-Mead flows and COCO
   benchmarks.
 - Optuna documentation - visualization utilities, sampler details, and storage backends
