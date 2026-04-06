@@ -6,6 +6,7 @@
 
 import logging
 from math import ceil
+import subprocess
 
 from aiaccel.job.apps import JobApp
 
@@ -24,6 +25,9 @@ class LocalJobApp(JobApp):
 
     def build_submit_command(self) -> tuple[str, str]:
         return ("bash", "")
+
+    def prepare_single_job_context(self) -> None:
+        self.job = f"{self.job} 2>&1 | tee {self.args.log_filename}"
 
     def prepare_array_job_context(self) -> None:
         n_tasks_per_proc = ceil(self.args.n_tasks / self.args.n_procs)
@@ -55,16 +59,39 @@ done
 #! /bin/bash
 
 set -eE -o pipefail
-trap 'echo $? > {self.job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {self.job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'exit $?' ERR EXIT  # at error and exit
+trap 'echo 143' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
-exec > >(tee -a {self.job_log_filename}) 2>&1
 
 
 {self.config.script_prologue}
 
 {self.job}
 """
+
+    def run_job(self, job_script: str) -> None:
+        """Run the job script.
+
+        Args:
+            job_script (str): Job script content to write and run.
+
+        """
+        submit_command, submit_args = self.build_submit_command()
+        log_filename = self.args.log_filename
+        job_filename = log_filename.with_suffix(".sh")
+
+        log_filename.parent.mkdir(exist_ok=True, parents=True)
+
+        with open(job_filename, "w") as f:
+            f.write(job_script)
+
+        for status_filename in self.status_filename_list:
+            status_filename.unlink(missing_ok=True)
+
+        subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
+
+    def launch_job(self, job_script: str) -> None:
+        self.run_job(job_script)
 
 
 def main() -> None:

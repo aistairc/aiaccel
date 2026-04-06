@@ -151,6 +151,29 @@ class JobApp(ABC):
             case _:
                 raise ValueError(f"Unsupported mode: {self.mode}")
 
+    @abstractmethod
+    def build_submit_command(self) -> tuple[str, str]:
+        """Build the scheduler submission command and its arguments."""
+        pass
+
+    def launch_job(self, job_script: str) -> None:
+        raise NotImplementedError
+
+    def run(self) -> None:
+        """Execute the standard job application workflow."""
+        self.build_job()
+        self.prepare_job_context()
+        job_script = self.build_job_script()
+        self.launch_job(job_script)
+
+
+class SchedulerJobApp(JobApp):
+    """Base class for scheduler-backed job applications.
+
+    This class extends :class:`JobApp` with scheduler-specific handling such as
+    array job expansion, status file management, and job submission.
+    """
+
     def _is_skip_job_submission(self, job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
         has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
         has_success_status_files = all(
@@ -158,11 +181,6 @@ class JobApp(ABC):
             for status_filename in status_filename_list
         )
         return has_same_job_script and has_success_status_files
-
-    @abstractmethod
-    def build_submit_command(self) -> tuple[str, str]:
-        """Build the scheduler submission command and its arguments."""
-        pass
 
     def submit_job_and_wait(self, job_script: str) -> None:
         """Submit the job script.
@@ -207,19 +225,5 @@ class JobApp(ABC):
                 raise RuntimeError(f"Job failed with {status} exit code.")
             status_filename.unlink()
 
-    def run(self) -> None:
-        """Execute the standard job application workflow."""
-        self.build_job()
-        self.prepare_job_context()
-        job_script = self.build_job_script()
+    def launch_job(self, job_script: str) -> None:
         self.submit_job_and_wait(job_script)
-
-
-class SchedulerJobApp(JobApp):
-    """Base class for scheduler-backed job applications.
-
-    This class extends :class:`JobApp` with scheduler-specific handling such as
-    array job expansion, status file management, and job submission.
-    """
-
-    pass
