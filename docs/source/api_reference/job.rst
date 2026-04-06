@@ -7,4 +7,4 @@
 .. autosummary::
     :toctree: generated/
 
-    slice_tasks
+    split_tasks
