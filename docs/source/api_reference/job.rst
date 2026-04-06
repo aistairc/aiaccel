@@ -2,9 +2,9 @@
  Job Utilities
 ###############
 
-.. currentmodule:: aiaccel.job
+.. currentmodule:: aiaccel.job.utils
 
 .. autosummary::
     :toctree: generated/
 
-    slice_tasks
+    split_tasks
