@@ -130,7 +130,12 @@ python = ">=3.10,<3.11"
 [tool.pixi.pypi-dependencies]
 aiaccel = { path = ".", editable = true }
 
+[tool.pixi.feature.image-classification.pypi-dependencies]
+image_classification = { path = "examples/torch/image_classification", editable = true }
+
 [tool.pixi.environments]
 default = { features = ["dev"] }
+aiaccel = { features = ["dev"] }
+image-classification = { features = ["image-classification"] }
 
 [tool.pixi.tasks]
