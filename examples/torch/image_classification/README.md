@@ -1,6 +1,11 @@
 # Training a ResNet50 on CIFAR-10
 
 ## Setup
+
+### Python Environment
+
+You can use the legacy Python-environment setup below.
+
 We assume the Python-environment setup at `examples/python`.
 ```bash
 pushd ../../python/
@@ -11,6 +16,31 @@ popd
 
 ```bash
 pip install -e .
+```
+
+### Pixi Environment
+
+You can use either the root `pyproject.toml` or
+`examples/torch/image_classification/pyproject.toml` with `pixi`.
+
+Using the root `pyproject.toml`, prepare an environment that includes both
+`aiaccel` and `image_classification`.
+
+From the repository root:
+
+```bash
+pixi install -e image-classification
+pixi shell -e image-classification
+```
+
+Using `examples/torch/image_classification/pyproject.toml`, prepare an
+environment from this example directory directly.
+
+From `examples/torch/image_classification`:
+
+```bash
+pixi install
+pixi shell
 ```
 
 ## Training on a single GPU
