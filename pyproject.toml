@@ -135,7 +135,6 @@ image_classification = { path = "examples/torch/image_classification", editable 
 
 [tool.pixi.environments]
 default = { features = ["dev"] }
-aiaccel = { features = ["dev"] }
 example = { features = ["example"] }
 
 [tool.pixi.tasks]
