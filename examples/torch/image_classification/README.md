@@ -29,8 +29,8 @@ Using the root `pyproject.toml`, prepare an environment that includes both
 From the repository root:
 
 ```bash
-pixi install -e image-classification
-pixi shell -e image-classification
+pixi install -e example
+pixi shell -e example
 ```
 
 Using `examples/torch/image_classification/pyproject.toml`, prepare an
