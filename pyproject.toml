@@ -128,7 +128,8 @@ platforms = ["linux-64"]
 python = ">=3.10,<3.11"
 
 [tool.pixi.pypi-options]
-extra-index-urls = ["https://download.pytorch.org/whl/cpu"]
+index-url = ["https://download.pytorch.org/whl/cpu"]
+extra-index-urls = ["https://pypi.org/simple"]
 
 [tool.pixi.pypi-dependencies]
 aiaccel = { path = ".", editable = true }
