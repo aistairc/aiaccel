@@ -23,7 +23,6 @@ jobs:
           manifest-path: pyproject.toml
           pixi-version: v0.66.0
           cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
           activate-environment: false
           environments: ci
       - name: Run pytest
