@@ -10,10 +10,10 @@ build:
       - asdf install pixi latest
       - asdf global pixi latest
     install:
-      - pixi install -e default
+      - pixi install -e workflows
     build:
       html:
-        - pixi run -e default sphinx-build -T -b html docs/source $READTHEDOCS_OUTPUT/html
+        - pixi run -e workflows sphinx-build -T -b html docs/source $READTHEDOCS_OUTPUT/html
 
 sphinx:
   configuration: docs/source/conf.py
