@@ -24,10 +24,10 @@ jobs:
           pixi-version: v0.66.0
           cache: true
           activate-environment: false
-          environments: ci
+          environments: workflows
       - name: Run pytest
         run: |
-          pixi run -e ci pytest -v \
+          pixi run -e workflows pytest -v \
             -n auto \
             --cov=aiaccel/${{ matrix.test_target }} \
             --cov-branch \
