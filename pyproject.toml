@@ -127,7 +127,7 @@ platforms = ["linux-64"]
 [tool.pixi.dependencies]
 python = ">=3.10,<3.11"
 
-[tool.pixi.pypi-options]
+[tool.pixi.feature.workflows_pypi.pypi-options]
 index-url = "https://download.pytorch.org/whl/cpu"
 extra-index-urls = ["https://pypi.org/simple"]
 
@@ -136,6 +136,6 @@ aiaccel = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = { features = ["dev"], solve-group = "default" }
-workflows = { features = ["dev", "github-actions"], solve-group = "default" }
+workflows = { features = ["dev", "github-actions", "workflows_pypi"], solve-group = "workflows" }
 
 [tool.pixi.tasks]
