@@ -136,6 +136,6 @@ aiaccel = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = { features = ["dev"], solve-group = "default" }
-ci = { features = ["dev", "github-actions"], solve-group = "default" }
+workflows = { features = ["dev", "github-actions"], solve-group = "default" }
 
 [tool.pixi.tasks]
