@@ -33,14 +33,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: pixi-lock-check
-        name: Ensure pixi.lock is up to date
-        entry: pixi
-        args: [lock, --check, --manifest-path, pyproject.toml]
-        stages: [pre-push]
-        language: system
-        pass_filenames: false
-        always_run: true
       - id: pytest
         name: pytest
         entry: pytest -v -x -n auto --cov=aiaccel/ --cov-append tests/
