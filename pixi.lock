@@ -4,7 +4,6 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     indexes:
-    - https://download.pytorch.org/whl/cpu
     - https://pypi.org/simple
     options:
       pypi-prerelease-mode: if-necessary-or-explicit
@@ -465,8 +464,8 @@ packages:
   requires_python: '>=3.10'
 - pypi: ./
   name: aiaccel
-  version: 2026.3.3.dev12+g957b14650.d20260409
-  sha256: e15d8bb88da045dd80b5c6c9d2b909b734692879ea8644e0f81c8a8899f294cd
+  version: 2026.3.3.dev15+g94d7d9595.d20260409
+  sha256: 3834b2d93398cc9ad67d4504764d4279d301edc2ecb26a198d53cd2a9ae65f35
   requires_dist:
   - attrs
   - colorama
