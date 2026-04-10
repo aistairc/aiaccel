@@ -1,7 +1,5 @@
 n_gpus: 1
 
-# Config for aiaccel.torch.apps.train
-
 trainer:
   _target_: lightning.Trainer
   default_root_dir: ${working_directory}
