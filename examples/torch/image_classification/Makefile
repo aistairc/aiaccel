@@ -20,10 +20,10 @@ cmd ?= aiaccel-job pbs --config $(job_config_path)
 job_ops ?=
 
 min_stage := 1
-max_stage := 3
-train_dependencies = stage2
+max_stage := 2
+train_dependencies = stage1
 
-.PHONY: config train clean
+.PHONY: train clean
 
 PRINT_VARIABLES := \
 	mode \
@@ -40,18 +40,10 @@ $(train_path)/.prepare.done:
 	python ./recipes/scripts/prepare_dataset.py $(abspath $(data_root))
 	touch $@
 
-stage2_description := ensure the selected training config is available
-stage2_dependencies := $(train_path)/.config.done
+stage2_description := launch aiaccel-job train with the selected config
+stage2_dependencies := $(train_path)/.train.done
 
-config: stage2
-
-$(train_path)/.config.done: $(recipe_path)
-	touch $@
-
-stage3_description := launch aiaccel-job train with the selected config
-stage3_dependencies := $(train_path)/.train.done
-
-train: stage3
+train: stage2
 
 clean:
 	rm $(train_path)/.*.done
