@@ -1,7 +1,6 @@
 _base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
 
 env_activate_command: source $VIRTUAL_ENV/bin/activate
-walltime: "1:0:0"
 
 script_prologue: |
     echo Job ID: $PBS_JOBID

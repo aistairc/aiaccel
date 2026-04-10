@@ -1,4 +1,5 @@
 n_gpus: 1
+walltime: "1:0:0"
 
 trainer:
   _target_: lightning.Trainer
