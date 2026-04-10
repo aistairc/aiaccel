@@ -444,8 +444,8 @@ packages:
   requires_python: '>=3.10'
 - pypi: ./
   name: aiaccel
-  version: 2026.3.3.dev22+gfe848b47a.d20260410
-  sha256: ed7b6944524b54cef656a0f0d28b8312e6074149edd2d97caa337b26db59c0fd
+  version: 2026.3.3.dev23+gb877dd457.d20260410
+  sha256: 7a80d8a3c1fc9daad03dd753a955aa0f7e81b9e0a4d3c53d22782f5c089b73c0
   requires_dist:
   - attrs
   - colorama
@@ -488,7 +488,7 @@ packages:
   - types-pyyaml ; extra == 'dev'
   - types-toml ; extra == 'dev'
   - undecorated ; extra == 'dev'
-  - pytest-github-actions-annotate-failures ; extra == 'github-actions'
+  - pytest-github-actions-annotate-failures ; extra == 'gh-actions'
   requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/0f/15/5bf3b99495fb160b63f95972b81750f18f7f4e02ad051373b669d17d44f2/aiohappyeyeballs-2.6.1-py3-none-any.whl
   name: aiohappyeyeballs
