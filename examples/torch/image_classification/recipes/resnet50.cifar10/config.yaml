@@ -106,8 +106,6 @@ task:
           T_max: 200
         interval: epoch
 
-# Config for aiaccel.job.apps.pbs
-
 env_activate_command: source $VIRTUAL_ENV/bin/activate
 walltime: "1:0:0"
 
