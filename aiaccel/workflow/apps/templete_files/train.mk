@@ -1,7 +1,7 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-$(train_path)/.train.done: | stage$(train_ready_stage) $(train_path)/config.yaml
+$(train_path)/.train.done: | $(train_dependencies) $(train_path)/config.yaml
 	@set -e; \
 	set -- \
 		$(train_path)/train.* \

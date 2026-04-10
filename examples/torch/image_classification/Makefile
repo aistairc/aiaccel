@@ -20,7 +20,7 @@ job_ops ?=
 
 min_stage := 1
 max_stage := 3
-train_ready_stage := 2
+train_dependencies = stage2
 
 .PHONY: single ddp config train clean
 
