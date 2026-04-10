@@ -1,5 +1,6 @@
 _base_:
   - ../resnet50.cifar10/config.yaml
+n_gpus: 8
 
 trainer:
   devices: "auto"
@@ -12,5 +13,3 @@ task:
   optimizer_config:
     optimizer_generator:
       lr: 8.e-3
-
-n_gpus: 8

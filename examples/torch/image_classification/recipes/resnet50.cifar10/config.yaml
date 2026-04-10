@@ -1,4 +1,5 @@
 _base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
+n_gpus: 1
 
 # Config for aiaccel.torch.apps.train
 
@@ -109,7 +110,6 @@ task:
 
 env_activate_command: source $VIRTUAL_ENV/bin/activate
 walltime: "1:0:0"
-n_gpus: 1
 
 script_prologue: |
     echo Job ID: $PBS_JOBID
