@@ -67,5 +67,5 @@ make all
 make all mode=ddp
 ```
 
-## Detailed Descriptions [TDB]
+## Detailed Descriptions
 Detailed descriptions are available on the [aiaccel document](https://aistairc.github.io/aiaccel/user_guide/torch.html)
