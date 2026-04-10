@@ -23,7 +23,7 @@ min_stage := 1
 max_stage := 3
 train_dependencies = stage2
 
-.PHONY: single ddp config train clean
+.PHONY: config train clean
 
 PRINT_VARIABLES := \
 	mode \
@@ -52,12 +52,6 @@ stage3_description := launch aiaccel-job train with the selected config
 stage3_dependencies := $(train_path)/.train.done
 
 train: stage3
-
-single:
-	$(MAKE) all mode=single
-
-ddp:
-	$(MAKE) all mode=ddp
 
 clean:
 	rm $(train_path)/.*.done
