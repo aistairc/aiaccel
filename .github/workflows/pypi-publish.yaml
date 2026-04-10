@@ -69,7 +69,7 @@ jobs:
           pixi-version: v0.66.0
           cache: true
           activate-environment: false
-          environments: workflows
+          environments: gh-actions
 
       - name: Update and push tag
         run: |
@@ -80,7 +80,7 @@ jobs:
 
       - name: Build package
         run: |
-          pixi run -e workflows hatch build
+          pixi run -e gh-actions hatch build
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

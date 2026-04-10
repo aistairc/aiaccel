@@ -23,14 +23,14 @@ jobs:
           pixi-version: v0.66.0
           cache: true
           activate-environment: false
-          environments: workflows
+          environments: gh-actions
       - name: Perform ruff
         run: |
-          pixi run -e workflows ruff check
-          pixi run -e workflows ruff format --check
+          pixi run -e gh-actions ruff check
+          pixi run -e gh-actions ruff format --check
       - name: Perform mypy
         run: |
-          pixi run -e workflows mypy --config-file mypy.ini . --explicit-package-bases
+          pixi run -e gh-actions mypy --config-file mypy.ini . --explicit-package-bases
       - name: Perform docstrfmt
         run: |
-          pixi run -e workflows docstrfmt --check docs/source/
+          pixi run -e gh-actions docstrfmt --check docs/source/

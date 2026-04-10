@@ -10,10 +10,10 @@ build:
       - asdf install pixi latest
       - asdf global pixi latest
     install:
-      - pixi install -e workflows
+      - pixi install -e gh-actions
     build:
       html:
-        - pixi run -e workflows sphinx-build -T -b html docs/source $READTHEDOCS_OUTPUT/html
+        - pixi run -e gh-actions sphinx-build -T -b html docs/source $READTHEDOCS_OUTPUT/html
 
 sphinx:
   configuration: docs/source/conf.py
