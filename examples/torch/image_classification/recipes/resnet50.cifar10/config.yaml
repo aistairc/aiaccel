@@ -1,4 +1,3 @@
-_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
 n_gpus: 1
 
 # Config for aiaccel.torch.apps.train
@@ -105,16 +104,3 @@ task:
           _target_: torch.optim.lr_scheduler.CosineAnnealingLR
           T_max: 200
         interval: epoch
-
-env_activate_command: source $VIRTUAL_ENV/bin/activate
-walltime: "1:0:0"
-
-script_prologue: |
-    echo Job ID: $PBS_JOBID
-    echo Hostname: $(hostname)
-
-    export CUDA_VISIBLE_DEVICES=all
-    module load python/3.13/3.13.2
-    ${env_activate_command}
-
-qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1,VIRTUAL_ENV=$VIRTUAL_ENV"

@@ -45,6 +45,7 @@ make help
 
 This Makefile assumes the ABCI environment and an already activated Python virtual environment.
 Please run it either with your virtual environment already activated, or by specifying env_activate_command.
+ABCI-specific job settings such as `walltime`, `qsub`, and `env_activate_command` are defined in `recipes/resnet50.cifar10/job_config.yaml`.
 
 ```bash
 source /path/to/env_aiaccel/bin/activate

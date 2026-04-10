@@ -12,10 +12,11 @@ endif
 
 .DEFAULT_GOAL := help
 
+job_config_path ?= ./recipes/job_config.yaml
 recipe_path := $(train_path)/config.yaml
 data_root ?= $(shell aiaccel-config get-value $(train_path)/config.yaml datamodule.common_args.root)
 
-cmd ?= aiaccel-job pbs --config $(recipe_path)
+cmd ?= aiaccel-job pbs --config $(job_config_path)
 job_ops ?=
 
 min_stage := 1
