@@ -127,7 +127,7 @@ platforms = ["linux-64"]
 [tool.pixi.dependencies]
 python = ">=3.10,<3.11"
 
-[tool.pixi.feature.gh-actions-pypi.pypi-dependencies]
+[tool.pixi.feature.gh-actions.pypi-dependencies]
 torch = { version = ">=2.2.0", index = "https://download.pytorch.org/whl/cpu" }
 
 [tool.pixi.pypi-dependencies]
@@ -135,6 +135,6 @@ aiaccel = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = { features = ["dev"], solve-group = "default" }
-gh-actions = { features = ["dev", "gh-actions", "gh-actions-pypi"], solve-group = "gh-actions" }
+gh-actions = { features = ["dev", "gh-actions"], solve-group = "gh-actions" }
 
 [tool.pixi.tasks]
