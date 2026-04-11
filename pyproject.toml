@@ -62,6 +62,8 @@ dev = [
     "types-colorama",
     "types-PyYAML",
     "undecorated",
+    "GPy",
+    "scikit-learn",
     "pandas",
     "pandas-stubs",
     "matplotlib",
@@ -71,11 +73,6 @@ dev = [
 ]
 gh-actions = [
     "pytest-github-actions-annotate-failures",
-]
-
-modelbridge = [
-    "scikit-learn",
-    "GPy",
 ]
 
 [project.scripts]
@@ -133,7 +130,7 @@ filterwarnings = [
 # pixi configurations
 [tool.pixi.workspace]
 channels = ["conda-forge"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "osx-64"]
 
 [tool.pixi.dependencies]
 python = ">=3.10,<3.11"
