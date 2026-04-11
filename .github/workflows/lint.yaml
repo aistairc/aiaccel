@@ -13,7 +13,6 @@ jobs:
       matrix:
         os: ["ubuntu-22.04"]
         python-version: ["3.10"]
-        cache: [true, false]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,9 +21,10 @@ jobs:
         with:
           manifest-path: pyproject.toml
           pixi-version: v0.66.0
-          cache: ${{ matrix.cache }}
+          cache: true
           activate-environment: false
           environments: gh-actions
+          locked: false
       - name: Perform ruff
         run: |
           pixi run -e gh-actions ruff check
