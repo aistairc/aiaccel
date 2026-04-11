@@ -20,7 +20,6 @@ dependencies = [
     "scipy",
     "optuna>=4.5.0",
     "omegaconf",
-    "pydantic>=2.8.0",
     "hydra-core",
     "huggingface-hub",
     "colorama",
@@ -70,7 +69,7 @@ dev = [
     "types-toml",
     "hatch",
 ]
-github-actions = [
+gh-actions = [
     "pytest-github-actions-annotate-failures",
 ]
 
@@ -139,10 +138,14 @@ platforms = ["linux-64"]
 [tool.pixi.dependencies]
 python = ">=3.10,<3.11"
 
+[tool.pixi.feature.gh-actions.pypi-dependencies]
+torch = { version = ">=2.2.0", index = "https://download.pytorch.org/whl/cpu" }
+
 [tool.pixi.pypi-dependencies]
 aiaccel = { path = ".", editable = true }
 
 [tool.pixi.environments]
-default = { features = ["dev"] }
+default = { features = ["dev"], solve-group = "default" }
+gh-actions = { features = ["dev", "gh-actions"], solve-group = "gh-actions" }
 
 [tool.pixi.tasks]
