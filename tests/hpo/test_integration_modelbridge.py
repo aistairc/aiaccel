@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 """Integration tests for the modelbridge pipeline.
 
 Runs the full 6-stage pipeline end-to-end with a minimal synthetic objective:
