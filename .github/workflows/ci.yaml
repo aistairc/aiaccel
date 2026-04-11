@@ -25,6 +25,7 @@ jobs:
           cache: true
           activate-environment: false
           environments: gh-actions
+          locked: false
       - name: Run pytest
         run: |
           pixi run -e gh-actions pytest -v \
