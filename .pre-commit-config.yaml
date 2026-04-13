@@ -25,6 +25,7 @@ repos:
     rev: v0.21.0
     hooks:
       - id: yamlfmt
+        args: [-formatter, retain_line_breaks=true, eof_newline=true]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
