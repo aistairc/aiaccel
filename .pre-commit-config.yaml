@@ -1,7 +1,6 @@
 default_install_hook_types:
   - pre-commit
   - pre-push
-
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.8
@@ -21,6 +20,10 @@ repos:
       - id: docstrfmt
         args: [--check, docs/source/, --extend-exclude, docs/source/api_reference/generated]
         types_or: [rst]
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.21.0
+    hooks:
+      - id: yamlfmt
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -30,7 +33,6 @@ repos:
           - --license-filepath=LICENSE_HEADER
           - --detect-license-in-X-top-lines=16
         types_or: [python, makefile]
-
   - repo: local
     hooks:
       - id: pixi-lock-check
