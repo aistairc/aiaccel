@@ -6,11 +6,11 @@ A:
   - AAA: aaa
 
 B:
- AA: dummy
- BB : bb
+  AA: dummy
+  BB: bb
 
 C:
- CC: cc
+  CC: cc
 
 Eval: ${eval:"(21 + 9) / (4 + (8 % 3) ** 4)"}
 
