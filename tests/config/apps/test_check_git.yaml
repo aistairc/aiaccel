@@ -4,6 +4,7 @@ storage:
   engine_kwargs:
     connect_args:
       timeout: 30
+
 study:
   _target_: optuna.create_study
   direction: minimize
@@ -13,6 +14,7 @@ study:
   sampler:
     _target_: optuna.samplers.TPESampler
     seed: 0
+
 params:
   _convert_: partial
   _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
@@ -26,5 +28,6 @@ params:
     low: 0.0
     high: 1.0
     log: false
+
 n_trials: 30
 n_max_jobs: 1

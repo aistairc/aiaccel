@@ -1,4 +1,5 @@
 version: "2"
+
 build:
   os: "ubuntu-22.04"
   tools:
@@ -13,5 +14,6 @@ build:
     build:
       html:
         - pixi run -e gh-actions sphinx-build -T -b html docs/source $READTHEDOCS_OUTPUT/html
+
 sphinx:
   configuration: docs/source/conf.py

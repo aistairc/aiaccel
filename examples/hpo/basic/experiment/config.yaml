@@ -1,5 +1,7 @@
 _base_: ${resolve_pkg_path:aiaccel.hpo.apps.config}/default.yaml
+
 command: ["./objective.py", "--x1={x1}", "--x2={x2}", "{out_filename}"]
+
 params:
   _convert_: partial
   _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
@@ -11,5 +13,6 @@ params:
     _target_: aiaccel.hpo.optuna.hparams.Float
     low: 0.0
     high: 1.0
+
 n_trials: 100
 n_max_jobs: 50
