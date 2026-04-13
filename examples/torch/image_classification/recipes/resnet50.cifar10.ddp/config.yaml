@@ -1,13 +1,10 @@
 _base_:
   - ../resnet50.cifar10/config.yaml
-
 trainer:
   devices: "auto"
   sync_batchnorm: true
-
 datamodule:
   batch_size: 256
-
 task:
   optimizer_config:
     optimizer_generator:

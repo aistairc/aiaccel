@@ -1,14 +1,11 @@
 name: Upload aiaccel package to PyPI
-
 on:
   schedule:
-  - cron: '0 0 1 * *'
+    - cron: '0 0 1 * *'
   workflow_dispatch:
-
 concurrency:
   group: pypi-publish
   cancel-in-progress: false
-
 jobs:
   check_commits:
     runs-on: ubuntu-latest
@@ -16,13 +13,11 @@ jobs:
       has_changes: ${{ steps.check_commits.outputs.has_changes }}
       version: ${{ steps.get_version.outputs.version }}
       tag: ${{ steps.get_version.outputs.tag }}
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags:  true
-
+          fetch-tags: true
       - name: Check for commits since last tag
         id: check_commits
         run: |
@@ -33,7 +28,6 @@ jobs:
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Get current [year].[month](.[patch]) version
         id: get_version
         run: |
@@ -47,7 +41,6 @@ jobs:
 
           echo "version=$VERSION" >>"$GITHUB_OUTPUT"
           echo "tag=v$VERSION"   >>"$GITHUB_OUTPUT"
-
   publish-if-needed:
     needs: check_commits
     if: needs.check_commits.outputs.has_changes == 'true'
@@ -55,13 +48,11 @@ jobs:
     permissions:
       contents: write
       id-token: write
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags:  true
-
+          fetch-tags: true
       - name: Set up Pixi
         uses: prefix-dev/setup-pixi@v0.9.5
         with:
@@ -70,21 +61,17 @@ jobs:
           cache: true
           activate-environment: false
           environments: gh-actions
-
       - name: Update and push tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag ${{ needs.check_commits.outputs.tag }}
           git push origin ${{ needs.check_commits.outputs.tag }}
-
       - name: Build package
         run: |
           pixi run -e gh-actions hatch build
-
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,8 +1,7 @@
 _base_: ${resolve_pkg_path:aiaccel.job.apps.config}/local.yaml
-
 script_prologue: |
-    echo Hostname: $(hostname)
+  echo Hostname: $(hostname)
 
-    export CUDA_VISIBLE_DEVICES=all
+  export CUDA_VISIBLE_DEVICES=all
 
-    echo ${config_path} | tee config_path.txt
+  echo ${config_path} | tee config_path.txt
