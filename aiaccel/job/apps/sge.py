@@ -6,11 +6,25 @@
 
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import time
 
 from aiaccel.job.apps import prepare_argument_parser
+
+
+def _append_job_name_option_if_needed(qsub: str, qsub_args: str, log_filename: Path) -> str:
+    """Append ``-N`` to qsub arguments when no explicit job name is configured."""
+    job_name_option_pattern = re.compile(r"(?<!\S)-N(?!\S)")
+    if job_name_option_pattern.search(qsub) or job_name_option_pattern.search(qsub_args):
+        return qsub_args
+
+    job_name = str(log_filename.with_suffix(""))
+    if job_name[:1].isdigit():
+        job_name = f"_{job_name}"
+
+    return " ".join(part for part in [qsub_args, "-N", job_name] if part)
 
 
 def main() -> None:
@@ -78,6 +92,7 @@ fi
 
     qsub = config.qsub.format(args=args)
     qsub_args = config[mode].qsub_args.format(args=args)
+    qsub_args = _append_job_name_option_if_needed(qsub, qsub_args, args.log_filename)
 
     # Create the job script file, remove old status files, and run the job
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
