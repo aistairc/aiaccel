@@ -6,12 +6,12 @@ trainer:
   precision: bf16-mixed
 
   devices: 1
-  
+
   logger:
     _target_: lightning.pytorch.loggers.CSVLogger
     save_dir: ${working_directory}
     name: ""
-    prefix: ""    
+    prefix: ""
 
 
   callbacks:
@@ -21,7 +21,7 @@ trainer:
       mode: "max"
       filename: "epoch={epoch:04d}_score={validation/accuracy:.2f}"
       auto_insert_metric_name: False
-      
+
     - _target_: lightning.pytorch.callbacks.LearningRateMonitor
       logging_interval: "step"
 
@@ -68,7 +68,7 @@ datamodule:
 
   use_scatter: False
   batch_size: 256
-  num_workers: 24  
+  num_workers: 24
 
 task:
   _target_: image_classification.task.ImageClassificationTask
