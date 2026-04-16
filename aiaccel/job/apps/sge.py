@@ -6,11 +6,22 @@
 
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import time
 
 from aiaccel.job.apps import prepare_argument_parser
+
+
+def _append_notify_option_if_needed(qsub: str, qsub_args: str) -> str:
+    notify_option_pattern = re.compile(r"(?<!\S)-notify(?=\s|$)")
+    has_notify_in_qsub = notify_option_pattern.search(qsub) is not None
+    has_notify_in_qsub_args = notify_option_pattern.search(qsub_args) is not None
+    if has_notify_in_qsub or has_notify_in_qsub_args:
+        return qsub_args
+
+    return f"-notify {qsub_args}" if qsub_args else "-notify"
 
 
 def main() -> None:
@@ -65,6 +76,7 @@ done
 set -eE -o pipefail
 trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
 trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'echo 140 > {job_status_filename}' USR2
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR
@@ -78,6 +90,7 @@ fi
 
     qsub = config.qsub.format(args=args)
     qsub_args = config[mode].qsub_args.format(args=args)
+    qsub_args = _append_notify_option_if_needed(qsub, qsub_args)
 
     # Create the job script file, remove old status files, and run the job
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
