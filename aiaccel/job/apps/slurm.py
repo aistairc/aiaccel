@@ -53,6 +53,11 @@ done
         job_status_filename = args.log_filename.with_suffix(".out").resolve()
 
         status_filename_list = [job_status_filename]
+        job = f"""\
+{job} &
+job_pid=$!
+wait "$job_pid"
+"""
 
     job_script = f"""\
 #! /bin/bash
