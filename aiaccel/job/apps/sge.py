@@ -109,7 +109,7 @@ fi
     for status_filename in status_filename_list:
         while not status_filename.exists():
             time.sleep(1.0)
-            if config.get("use_scandir", False):  # Reflesh the file system if needed
+            if config.get("use_scandir", False):  # Refresh the file system if needed
                 os.scandir(status_filename.parent)
 
         status = int(status_filename.read_text())
