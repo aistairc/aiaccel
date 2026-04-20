@@ -55,8 +55,7 @@ done
         status_filename_list = [job_status_filename]
         job = f"""\
 {job} &
-job_pid=$!
-wait "$job_pid"
+wait "$!"
 """
 
     job_script = f"""\
