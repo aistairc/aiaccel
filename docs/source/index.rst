@@ -2,7 +2,7 @@
     :width: 600px
 
 #######################
- Aiaccel Documantation
+ Aiaccel Documentation
 #######################
 
 Aiaccel is a toolkit for accelerating machine learning research.
