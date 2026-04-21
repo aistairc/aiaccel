@@ -68,7 +68,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
             RandomState used for initial point calculation.
             If specified with seed, rng takes precedence.
         coeff: NelderMeadCoefficient | None = None
-            Parameters used in NelderMead Algorism.
+            Parameters used in NelderMead Algorithm.
         block: bool = False
             Indicates whether the queue used internally is blocked or not.
             If parallelisation by optuna.optimize is enabled, it must be set with block = True
@@ -300,7 +300,7 @@ class NelderMeadSampler(optuna.samplers.BaseSampler):
         """
         if isinstance(values, Sequence) and len(values) != 1:  # trial was finished as multiobjective
             raise RuntimeError(
-                "Multidimentional trial values are obtained. "
+                "Multidimensional trial values are obtained. "
                 "NelderMeadSampler supports only single objective optimization."
             )
         self._put_params(study, trial, state, values)
