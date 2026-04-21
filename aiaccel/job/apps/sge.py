@@ -76,7 +76,11 @@ fi
 {job}
 """
 
-    qsub = config.qsub.format(args=args)
+    job_name = str(config.get("job_name", args.log_filename.with_suffix("")))
+    if job_name[:1].isdigit():
+        job_name = f"_{job_name}"
+
+    qsub = config.qsub.format(args=args, job_name=job_name)
     qsub_args = config[mode].qsub_args.format(args=args)
 
     # Create the job script file, remove old status files, and run the job
