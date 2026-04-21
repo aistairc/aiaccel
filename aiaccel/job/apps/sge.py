@@ -76,7 +76,7 @@ fi
 {job}
 """
 
-    job_name = config.job_name if "job_name" in config else str(args.log_filename.with_suffix(""))
+    job_name = str(config.job_name if "job_name" in config else args.log_filename.with_suffix(""))
     if job_name[:1].isdigit():
         job_name = f"_{job_name}"
 
