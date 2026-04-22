@@ -229,7 +229,7 @@ class NelderMeadAlgorithm:
                 self.vertices, self.values = e.updated_vertices, e.updated_values
 
         # main loop
-        shrink_requied = False
+        shrink_required = False
         while True:
             try:
                 # sort self.vertices by their self.values
@@ -261,7 +261,7 @@ class NelderMeadAlgorithm:
                     if foc <= fr:
                         self.vertices[-1], self.values[-1] = yoc, foc
                     else:
-                        shrink_requied = True
+                        shrink_required = True
 
                 elif self.values[-1] <= fr:  # inside contract
                     yield (yic := yc + self.coeff.ic * (yc - self.vertices[-1]))
@@ -271,15 +271,15 @@ class NelderMeadAlgorithm:
                     if fic < self.values[-1]:
                         self.vertices[-1], self.values[-1] = yic, fic
                     else:
-                        shrink_requied = True
+                        shrink_required = True
 
                 # shrink
-                if shrink_requied:
+                if shrink_required:
                     self.vertices = [(v0 := self.vertices[0]) + self.coeff.s * (v - v0) for v in self.vertices]
                     yield from self.vertices[1:]
 
                     self.vertices[1:], self.values[1:] = yield from self._wait_for_results(len(self.vertices[1:]))
-                    shrink_requied = False
+                    shrink_required = False
 
             except UnexpectedVerticesUpdateError as e:
                 self.vertices, self.values = e.updated_vertices, e.updated_values
