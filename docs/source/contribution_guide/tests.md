@@ -5,7 +5,7 @@
 
 - aiaccel uses pytest for testing.
 - Create a directory for unit test under tests directory.
-  - The directory structure under `aiaccel/tests` corresponds to that under `aiaccel/aiaccel`, except for a few modeules such as config.py. For example, the test for `aiaccel/aiaccel/hpo/optuna/hparams.py` is `aiaccel/tests/hpo/optuna/test_hparams.py`.
+  - The directory structure under `aiaccel/tests` corresponds to that under `aiaccel/aiaccel`, except for a few modules such as config.py. For example, the test for `aiaccel/aiaccel/hpo/optuna/hparams.py` is `aiaccel/tests/hpo/optuna/test_hparams.py`.
 - If you have added a new feature or bug fix, please create codes for testing.
 
 
@@ -36,7 +36,7 @@ docstrfmt --check docs/source/
 
 ## Coverages
 
-No strict criteria for code coverage have been set, but this value should be fully considered when designing test. Plase note the following cases.
+No strict criteria for code coverage have been set, but this value should be fully considered when designing test. Please note the following cases.
 
 - Significantly lower overall score.
 - Abnormally low coverage of a class or module.

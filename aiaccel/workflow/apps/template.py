@@ -10,7 +10,7 @@ def main() -> None:
     parser.add_argument("mkfilename", type=str, help="File name of makefile")
     args, unk_args = parser.parse_known_args()
 
-    filepath = Path(__file__).parent / "templete_files" / args.mkfilename
+    filepath = Path(__file__).parent / "template_files" / args.mkfilename
     print(filepath)
 
 
