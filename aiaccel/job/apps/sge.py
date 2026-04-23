@@ -15,8 +15,13 @@ class SgeJobApp(SchedulerJobApp):
 
     def build_submit_command(self) -> tuple[str, str]:
         """Build the SGE submission command."""
+
+        job_name = str(self.config.get("job_name", self.args.log_filename.with_suffix("")))
+        if job_name[:1].isdigit():
+            job_name = f"_{job_name}"
+
         return (
-            self.config.qsub.format(args=self.args),
+            self.config.qsub.format(args=self.args, job_name=job_name),
             self.config[self.mode].qsub_args.format(args=self.args),
         )
 
