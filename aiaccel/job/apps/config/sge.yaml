@@ -6,7 +6,7 @@ script_prologue: |
 
   export CUDA_VISIBLE_DEVICES=all
 
-qsub: "qsub -g $JOB_GROUP -l h_rt={args.walltime}"
+qsub: "qsub -g $JOB_GROUP -l h_rt={args.walltime} -N {job_name}"
 
 cpu:
   qsub_args: "-l cpu_40=1"
