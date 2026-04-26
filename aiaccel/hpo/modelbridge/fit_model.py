@@ -37,6 +37,9 @@ class _MissingOptionalDependency:
         self._raise()
 
 
+LinearRegression: Any
+make_pipeline: Any
+PolynomialFeatures: Any
 try:
     from sklearn.linear_model import LinearRegression
     from sklearn.pipeline import make_pipeline
