@@ -41,6 +41,10 @@ documentation = "https://aistairc.github.io/aiaccel/"
 repository = "https://github.com/aistairc/aiaccel"
 
 [project.optional-dependencies]
+modelbridge = [
+    "GPy",
+    "scikit-learn",
+]
 dev = [
     "mypy",
     "myst-parser",
