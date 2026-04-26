@@ -6,6 +6,7 @@ from typing import Any
 import argparse
 import csv
 import json
+import pickle
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -258,30 +259,51 @@ def predict_from_model(model_path: Path, features_list: list[dict[str, float]]) 
         return None
 
     try:
-        with model_path.open("r") as f:
-            model_dict = json.load(f)
+        artifact: Any
+        try:
+            with model_path.open("rb") as f:
+                artifact = pickle.load(f)
+        except Exception:
+            # Backward compatibility for older JSON-exported model artifacts.
+            with model_path.open("r") as f:
+                artifact = json.load(f)
 
-        feature_names = model_dict["feature_names"]
-        target_names = model_dict["target_names"]
-        kind = model_dict["kind"]
+        if isinstance(artifact, dict):
+            feature_names = artifact["feature_names"]
+            target_names = artifact["target_names"]
+            kind = artifact["kind"]
 
-        x_data = np.asarray([[f[k] for k in feature_names] for f in features_list])
+            x_data = np.asarray([[f[k] for k in feature_names] for f in features_list])
 
-        if kind in ["linear", "polynomial"]:
-            degree = model_dict["degree"]
-            poly = PolynomialFeatures(degree=degree, include_bias=False)
-            x_poly = poly.fit_transform(x_data)
+            if kind in ["linear", "polynomial"]:
+                degree = artifact["degree"]
+                poly = PolynomialFeatures(degree=degree, include_bias=False)
+                x_poly = poly.fit_transform(x_data)
 
-            coef = np.asarray(model_dict["coefficients"])
-            intercept = np.asarray(model_dict["intercept"])
+                coef = np.asarray(artifact["coefficients"])
+                intercept = np.asarray(artifact["intercept"])
 
-            y_pred = x_poly @ coef.T + intercept
+                y_pred = x_poly @ coef.T + intercept
 
-        elif kind == "gpr":
-            # GPR loading requires GPy which might not be installed or complex to mock here.
-            # We skip GPR fallback for now or need GPy.
-            print("GPR prediction fallback not fully supported in visualization script.")
-            return None
+            elif kind == "gpr":
+                # GPR loading requires GPy which might not be installed or complex to mock here.
+                # We skip GPR fallback for now or need GPy.
+                print("GPR prediction fallback not fully supported in visualization script.")
+                return None
+            else:
+                return None
+
+        elif hasattr(artifact, "predict"):
+            feature_names = list(getattr(artifact, "feature_names_in_", features_list[0].keys()))
+            x_data = np.asarray([[f[k] for k in feature_names] for f in features_list])
+            y_pred = np.asarray(artifact.predict(x_data))
+            if y_pred.ndim == 1:
+                y_pred = y_pred.reshape(-1, 1)
+
+            target_names = getattr(artifact, "target_names", None)
+            if target_names is None:
+                target_names = [f"target_{idx}" for idx in range(y_pred.shape[1])]
+
         else:
             return None
 
