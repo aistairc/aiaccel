@@ -44,6 +44,7 @@ repository = "https://github.com/aistairc/aiaccel"
 modelbridge = [
     "GPy",
     "scikit-learn",
+    "pandas",
 ]
 dev = [
     "mypy",
