@@ -474,9 +474,12 @@ def main() -> None:
             param_names = [k.replace("true_", "") for k in true_keys]
     else:
         print(f"Warning: {test_file} not found. Attempting to generate predictions...")
-        # Load Eval DBs
-        eval_samples = scan_optuna_studies(scenario_dir / "runs" / "eval")
-        model_path = scenario_dir / "models" / "regression_model.json"
+        # Load Test DBs
+        eval_samples = scan_optuna_studies(scenario_dir / "runs" / "test")
+        # Prefer the pkl artifact; fall back to json for backward compatibility.
+        model_path = scenario_dir / "models" / "regression_model.pkl"
+        if not model_path.exists():
+            model_path = scenario_dir / "models" / "regression_model.json"
 
         if eval_samples and model_path.exists():
             features = [s[1] for s in eval_samples]
