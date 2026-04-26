@@ -10,8 +10,6 @@ from collections.abc import Callable, Sequence
 import logging
 from pathlib import Path
 
-from aiaccel.hpo.modelbridge import collect, evaluate, fit_model, prepare
-
 StepHandler = Callable[[argparse.Namespace], int]
 
 STEP_COMMANDS: tuple[str, ...] = (
@@ -62,21 +60,29 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def _handle_prepare(args: argparse.Namespace) -> int:
+    from aiaccel.hpo.modelbridge import prepare
+
     prepare.run_prepare(config_path=Path(args.config), workspace=Path(args.workspace))
     return 0
 
 
 def _handle_collect(args: argparse.Namespace) -> int:
+    from aiaccel.hpo.modelbridge import collect
+
     collect.run_collect(workspace=Path(args.workspace), phase=str(args.phase))
     return 0
 
 
 def _handle_fit_model(args: argparse.Namespace) -> int:
+    from aiaccel.hpo.modelbridge import fit_model
+
     fit_model.run_fit_model(workspace=Path(args.workspace))
     return 0
 
 
 def _handle_evaluate(args: argparse.Namespace) -> int:
+    from aiaccel.hpo.modelbridge import evaluate
+
     evaluate.run_evaluate(workspace=Path(args.workspace))
     return 0
 
