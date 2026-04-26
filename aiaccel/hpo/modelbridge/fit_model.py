@@ -16,10 +16,40 @@ import pickle
 
 import numpy as np
 
-from sklearn.linear_model import LinearRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
-import yaml
+
+class _MissingOptionalDependency:
+    """Proxy that raises a clear error when an optional dependency is used."""
+
+    def __init__(self, package_name: str, feature_name: str) -> None:
+        self._package_name = package_name
+        self._feature_name = feature_name
+
+    def _raise(self) -> None:
+        raise ImportError(
+            f"{self._feature_name} requires optional dependency '{self._package_name}'. "
+            f"Please install '{self._package_name}' to use this functionality."
+        )
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        self._raise()
+
+    def __getattr__(self, name: str) -> Any:
+        self._raise()
+
+
+try:
+    from sklearn.linear_model import LinearRegression
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import PolynomialFeatures
+except ImportError:
+    LinearRegression = _MissingOptionalDependency("scikit-learn", "Regression model training")
+    make_pipeline = _MissingOptionalDependency("scikit-learn", "Regression model training")
+    PolynomialFeatures = _MissingOptionalDependency("scikit-learn", "Regression model training")
+
+try:
+    import yaml
+except ImportError:
+    yaml = _MissingOptionalDependency("PyYAML", "Regression settings loading")
 
 SUPPORTED_REGRESSION_KINDS = {"linear", "polynomial", "gpr"}
 DEFAULT_REGRESSION_KIND = "linear"
