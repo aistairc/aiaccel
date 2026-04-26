@@ -12,8 +12,6 @@ import json
 from pathlib import Path
 import pickle
 
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments for the evaluate step.
@@ -41,6 +39,14 @@ def run_evaluate(workspace: Path) -> Path | None:
     Raises:
         FileNotFoundError: If required test data or model artifacts are missing.
     """
+    try:
+        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+    except ImportError as exc:
+        raise ImportError(
+            "scikit-learn is required to run modelbridge evaluation. "
+            "Please install scikit-learn to use the evaluate step."
+        ) from exc
+
     test_csv = workspace / "pairs" / "test_pairs.csv"
     model_path = workspace / "models" / "regression_model.pkl"
     meta_path = workspace / "models" / "model_meta.json"
