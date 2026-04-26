@@ -4,7 +4,7 @@ This example provides an external data-assimilation workflow for current modelbr
 It does not use removed legacy commands such as `aiaccel-hpo modelbridge run`.
 
 ## Requirements
-- `python -m pip install ".[modelbridge]"`
+- `python -m pip install "."`
 - MAS-Bench assets (for real simulation):
   - `MAS-Bench.jar` (https://github.com/MAS-Bench/MAS-Bench)
   - `masbench-resources/Dataset/<model>/agent_size.sh`
