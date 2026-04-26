@@ -41,13 +41,17 @@ LinearRegression: Any
 make_pipeline: Any
 PolynomialFeatures: Any
 try:
-    from sklearn.linear_model import LinearRegression
-    from sklearn.pipeline import make_pipeline
-    from sklearn.preprocessing import PolynomialFeatures
+    from sklearn.linear_model import LinearRegression as _LinearRegression
+    from sklearn.pipeline import make_pipeline as _make_pipeline
+    from sklearn.preprocessing import PolynomialFeatures as _PolynomialFeatures
 except ImportError:
     LinearRegression = _MissingOptionalDependency("scikit-learn", "Regression model training")
     make_pipeline = _MissingOptionalDependency("scikit-learn", "Regression model training")
     PolynomialFeatures = _MissingOptionalDependency("scikit-learn", "Regression model training")
+else:
+    LinearRegression = _LinearRegression
+    make_pipeline = _make_pipeline
+    PolynomialFeatures = _PolynomialFeatures
 
 yaml: Any
 try:
