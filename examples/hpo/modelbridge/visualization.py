@@ -24,6 +24,8 @@ except ImportError:
 FilePath = str | Path
 NumPyArray = NDArray[Any]
 StudySample = tuple[int, dict[str, float], dict[str, float]]
+ParameterRelationshipData = tuple[NumPyArray | None, NumPyArray | None, list[str], list[str]]
+PredictionAccuracyData = tuple[NumPyArray | None, NumPyArray | None, list[str]]
 
 
 class Visualizer:
@@ -403,6 +405,97 @@ def _predict_with_estimator(
     return y_pred, list(target_names)
 
 
+def _load_parameter_relationship_data(scenario_dir: Path) -> ParameterRelationshipData:
+    train_file = scenario_dir / "train_pairs.csv"
+    if train_file.exists():
+        print(f"Loading {train_file}...")
+        return _load_parameter_relationship_csv(train_file)
+
+    print(f"Warning: {train_file} not found. Attempting to scan Optuna DBs...")
+    return _load_parameter_relationship_from_studies(scenario_dir / "runs")
+
+
+def _load_parameter_relationship_csv(train_file: Path) -> ParameterRelationshipData:
+    data = load_csv_data(train_file)
+    macro_keys = sorted([k for k in data if k.startswith("macro_")])
+    micro_keys = sorted([k for k in data if k.startswith("micro_")])
+
+    if not macro_keys or not micro_keys:
+        return None, None, macro_keys, micro_keys
+
+    macro_data = np.column_stack([data[k] for k in macro_keys])
+    micro_data = np.column_stack([data[k] for k in micro_keys])
+    return macro_data, micro_data, macro_keys, micro_keys
+
+
+def _load_parameter_relationship_from_studies(runs_dir: Path) -> ParameterRelationshipData:
+    samples = scan_optuna_studies(runs_dir)
+    if not samples:
+        return None, None, [], []
+
+    print(f"Found {len(samples)} samples from DB.")
+    first_macro = samples[0][1]
+    first_micro = samples[0][2]
+    macro_keys = sorted([f"macro_{k}" for k in first_macro])
+    micro_keys = sorted([f"micro_{k}" for k in first_micro])
+
+    macro_data = np.array([[sample[1][k.replace("macro_", "")] for k in macro_keys] for sample in samples])
+    micro_data = np.array([[sample[2][k.replace("micro_", "")] for k in micro_keys] for sample in samples])
+    return macro_data, micro_data, macro_keys, micro_keys
+
+
+def _load_prediction_accuracy_data(scenario_dir: Path) -> PredictionAccuracyData:
+    test_file = scenario_dir / "test_predictions.csv"
+    if test_file.exists():
+        print(f"Loading {test_file}...")
+        return _load_prediction_accuracy_csv(test_file)
+
+    print(f"Warning: {test_file} not found. Attempting to generate predictions...")
+    return _generate_prediction_accuracy_data(scenario_dir)
+
+
+def _load_prediction_accuracy_csv(test_file: Path) -> PredictionAccuracyData:
+    data = load_csv_data(test_file)
+    true_keys = sorted([k for k in data if k.startswith("true_")])
+    pred_keys = sorted([k for k in data if k.startswith("pred_")])
+
+    if not true_keys or not pred_keys or len(true_keys) != len(pred_keys):
+        return None, None, []
+
+    actual_data = np.column_stack([data[k] for k in true_keys])
+    pred_data = np.column_stack([data[k] for k in pred_keys])
+    param_names = [k.replace("true_", "") for k in true_keys]
+    return actual_data, pred_data, param_names
+
+
+def _generate_prediction_accuracy_data(scenario_dir: Path) -> PredictionAccuracyData:
+    eval_samples = scan_optuna_studies(scenario_dir / "runs" / "test")
+    model_path = _find_regression_model_path(scenario_dir)
+    if not eval_samples or model_path is None:
+        return None, None, []
+
+    features = [sample[1] for sample in eval_samples]
+    targets = [sample[2] for sample in eval_samples]
+    preds = predict_from_model(model_path, features)
+    if not preds:
+        return None, None, []
+
+    target_keys = sorted(targets[0].keys())
+    pred_keys = sorted(preds[0].keys())
+    actual_data = np.array([[target[k] for k in target_keys] for target in targets])
+    pred_data = np.array([[pred[k] for k in pred_keys] for pred in preds])
+    print(f"Generated predictions for {len(eval_samples)} eval samples.")
+    return actual_data, pred_data, target_keys
+
+
+def _find_regression_model_path(scenario_dir: Path) -> Path | None:
+    for filename in ["regression_model.pkl", "regression_model.json"]:
+        model_path = scenario_dir / "models" / filename
+        if model_path.exists():
+            return model_path
+    return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Visualize modelbridge results")
     parser.add_argument("scenario_dir", type=Path, help="Path to the scenario directory")
@@ -416,36 +509,7 @@ def main() -> None:
     viz = Visualizer()
 
     # --- 1. Parameter Relationships ---
-    macro_keys, micro_keys = [], []
-    macro_data, micro_data = None, None
-
-    train_file = scenario_dir / "train_pairs.csv"
-    if train_file.exists():
-        print(f"Loading {train_file}...")
-        data = load_csv_data(train_file)
-        macro_keys = sorted([k for k in data if k.startswith("macro_")])
-        micro_keys = sorted([k for k in data if k.startswith("micro_")])
-
-        if macro_keys and micro_keys:
-            macro_data = np.column_stack([data[k] for k in macro_keys])
-            micro_data = np.column_stack([data[k] for k in micro_keys])
-    else:
-        print(f"Warning: {train_file} not found. Attempting to scan Optuna DBs...")
-        samples = scan_optuna_studies(scenario_dir / "runs")
-        if samples:
-            print(f"Found {len(samples)} samples from DB.")
-            # Assume keys from first sample
-            first_macro = samples[0][1]
-            first_micro = samples[0][2]
-            macro_keys = sorted([f"macro_{k}" for k in first_macro])
-            micro_keys = sorted([f"micro_{k}" for k in first_micro])
-
-            m_list = [[s[1][k.replace("macro_", "")] for k in macro_keys] for s in samples]
-            u_list = [[s[2][k.replace("micro_", "")] for k in micro_keys] for s in samples]
-
-            macro_data = np.array(m_list)
-            micro_data = np.array(u_list)
-
+    macro_data, micro_data, macro_keys, micro_keys = _load_parameter_relationship_data(scenario_dir)
     if macro_data is not None and micro_data is not None:
         viz.plot_parameter_relationship(
             macro_data,
@@ -458,46 +522,7 @@ def main() -> None:
         print("Could not load training data.")
 
     # --- 2. Prediction Accuracy ---
-    test_file = scenario_dir / "test_predictions.csv"
-    actual_data, pred_data = None, None
-    param_names = []
-
-    if test_file.exists():
-        print(f"Loading {test_file}...")
-        data = load_csv_data(test_file)
-        true_keys = sorted([k for k in data if k.startswith("true_")])
-        pred_keys = sorted([k for k in data if k.startswith("pred_")])
-
-        if true_keys and pred_keys and len(true_keys) == len(pred_keys):
-            actual_data = np.column_stack([data[k] for k in true_keys])
-            pred_data = np.column_stack([data[k] for k in pred_keys])
-            param_names = [k.replace("true_", "") for k in true_keys]
-    else:
-        print(f"Warning: {test_file} not found. Attempting to generate predictions...")
-        # Load Test DBs
-        eval_samples = scan_optuna_studies(scenario_dir / "runs" / "test")
-        # Prefer the pkl artifact; fall back to json for backward compatibility.
-        model_path = scenario_dir / "models" / "regression_model.pkl"
-        if not model_path.exists():
-            model_path = scenario_dir / "models" / "regression_model.json"
-
-        if eval_samples and model_path.exists():
-            features = [s[1] for s in eval_samples]
-            targets = [s[2] for s in eval_samples]
-
-            preds = predict_from_model(model_path, features)
-
-            if preds:
-                # Prepare arrays
-                # Sort keys to match
-                t_keys = sorted(targets[0].keys())
-                p_keys = sorted(preds[0].keys())  # Should match t_keys
-
-                actual_data = np.array([[t[k] for k in t_keys] for t in targets])
-                pred_data = np.array([[p[k] for k in p_keys] for p in preds])
-                param_names = t_keys
-                print(f"Generated predictions for {len(eval_samples)} eval samples.")
-
+    actual_data, pred_data, param_names = _load_prediction_accuracy_data(scenario_dir)
     if actual_data is not None and pred_data is not None:
         viz.plot_prediction_accuracy(actual_data, pred_data, param_names, output_dir=output_dir)
     else:
