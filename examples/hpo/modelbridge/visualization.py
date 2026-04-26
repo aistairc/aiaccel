@@ -418,13 +418,13 @@ def main() -> None:
     if test_file.exists():
         print(f"Loading {test_file}...")
         data = load_csv_data(test_file)
-        actual_keys = sorted([k for k in data if k.startswith("actual_")])
+        true_keys = sorted([k for k in data if k.startswith("true_")])
         pred_keys = sorted([k for k in data if k.startswith("pred_")])
 
-        if actual_keys and pred_keys and len(actual_keys) == len(pred_keys):
-            actual_data = np.column_stack([data[k] for k in actual_keys])
+        if true_keys and pred_keys and len(true_keys) == len(pred_keys):
+            actual_data = np.column_stack([data[k] for k in true_keys])
             pred_data = np.column_stack([data[k] for k in pred_keys])
-            param_names = [k.replace("actual_", "") for k in actual_keys]
+            param_names = [k.replace("true_", "") for k in true_keys]
     else:
         print(f"Warning: {test_file} not found. Attempting to generate predictions...")
         # Load Eval DBs
