@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 from importlib import import_module
+from typing import Any
 
 __all__ = [
     "collect",
@@ -11,11 +12,11 @@ __all__ = [
 ]
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     if name in __all__:
         return import_module(f"{__name__}.{name}")
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-def __dir__():
+def __dir__() -> list[str]:
     return sorted(list(globals().keys()) + __all__)
