@@ -133,7 +133,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     try:
         run_evaluate(Path(args.workspace))
-    except FileNotFoundError as exc:
+    except (FileNotFoundError, ValueError, ImportError) as exc:
         print(f"Error: {exc}")
         return 1
     return 0
