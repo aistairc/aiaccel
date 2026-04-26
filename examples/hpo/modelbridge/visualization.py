@@ -431,7 +431,7 @@ def main() -> None:
             micro_data = np.column_stack([data[k] for k in micro_keys])
     else:
         print(f"Warning: {train_file} not found. Attempting to scan Optuna DBs...")
-        samples = scan_optuna_studies(scenario_dir / "runs" / "train")
+        samples = scan_optuna_studies(scenario_dir / "runs")
         if samples:
             print(f"Found {len(samples)} samples from DB.")
             # Assume keys from first sample
