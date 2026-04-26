@@ -71,6 +71,19 @@ def test_run_evaluate_requires_model_artifacts(tmp_path: Path) -> None:
         evaluate.run_evaluate(workspace)
 
 
+def test_run_evaluate_raises_on_missing_csv_columns(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    _write_train_pairs(workspace / "pairs" / "train_pairs.csv")
+    fit_model.run_fit_model(workspace)
+    test_path = workspace / "pairs" / "test_pairs.csv"
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    # Write CSV with only run_id and macro_lr — missing micro columns
+    test_path.write_text("run_id,macro_lr\n10,0.015\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="missing required columns"):
+        evaluate.run_evaluate(workspace)
+
+
 def test_run_evaluate_returns_none_for_empty_csv(tmp_path: Path) -> None:
     workspace = tmp_path / "workspace"
     _write_train_pairs(workspace / "pairs" / "train_pairs.csv")

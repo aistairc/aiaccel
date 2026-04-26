@@ -38,6 +38,7 @@ def run_evaluate(workspace: Path) -> Path | None:
 
     Raises:
         FileNotFoundError: If required test data or model artifacts are missing.
+        ValueError: If the test CSV is missing required macro or micro columns.
     """
     try:
         from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -69,13 +70,22 @@ def run_evaluate(workspace: Path) -> Path | None:
         print("Warning: Test CSV is empty. Evaluation skipped.")
         return None
 
+    csv_columns = set(records[0].keys())
+    missing_macro = [k for k in macro_keys if k not in csv_columns]
+    missing_micro = [k for k in micro_keys if k not in csv_columns]
+    if missing_macro or missing_micro:
+        raise ValueError(
+            f"Test CSV is missing required columns. "
+            f"Missing macro keys: {missing_macro}. Missing micro keys: {missing_micro}."
+        )
+
     features: list[list[float]] = []
     targets: list[list[float]] = []
     run_ids: list[str] = []
     for record in records:
         run_ids.append(record.get("run_id", "unknown"))
-        features.append([float(record.get(key, 0.0)) for key in macro_keys])
-        targets.append([float(record.get(key, 0.0)) for key in micro_keys])
+        features.append([float(record[key]) for key in macro_keys])
+        targets.append([float(record[key]) for key in micro_keys])
     predictions = model.predict(features)
 
     mse = float(mean_squared_error(targets, predictions))
