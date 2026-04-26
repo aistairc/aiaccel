@@ -1,8 +1,9 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from importlib import import_module
 from typing import Any
+
+from importlib import import_module
 
 __all__ = [
     "collect",

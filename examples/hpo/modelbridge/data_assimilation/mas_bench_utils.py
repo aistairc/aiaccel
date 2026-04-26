@@ -88,9 +88,7 @@ class MASBenchExecutor:
             raise FileNotFoundError(f"agent_size.sh not found at {script_path}")
         # shell out to source and echo variables
         quoted_script_path = shlex.quote(str(script_path))
-        shell_script = (
-            f"source {quoted_script_path} && echo $NAIVE_AGENT $RATIONAL_AGENT $RUBY_AGENT"
-        )
+        shell_script = f"source {quoted_script_path} && echo $NAIVE_AGENT $RATIONAL_AGENT $RUBY_AGENT"
         output = subprocess.check_output(["bash", "-c", shell_script], text=True).strip()
         naive, rational, ruby = map(int, output.split())
         return naive, rational, ruby

@@ -46,6 +46,7 @@ except ImportError:
     make_pipeline = _MissingOptionalDependency("scikit-learn", "Regression model training")
     PolynomialFeatures = _MissingOptionalDependency("scikit-learn", "Regression model training")
 
+yaml: Any
 try:
     import yaml
 except ImportError:
@@ -235,9 +236,7 @@ def _load_gpy_module() -> Any:
     try:
         import GPy  # type: ignore[import-not-found]
     except ImportError as exc:  # pragma: no cover - depends on optional dependency installation.
-        raise RuntimeError(
-            "GPy is required when regression.kind is 'gpr'. Install it with 'pip install GPy'."
-        ) from exc
+        raise RuntimeError("GPy is required when regression.kind is 'gpr'. Install it with 'pip install GPy'.") from exc
     return GPy
 
 
