@@ -4,7 +4,6 @@
 
 from argparse import ArgumentParser
 import logging
-import warnings
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -42,21 +41,7 @@ def main() -> None:
         print_git_status(status_list)
 
     if "seed" in config:
-        if config.get("seed_ddp_mode", False):
-            lt.seed_everything(config.seed + rank, workers=True)
-        else:
-            lt.seed_everything(config.seed, workers=True)
-
-            if rank != 0:
-                warnings.warn(
-                    "'seed' currently uses the same random seed on all DDP ranks. "
-                    "This behavior is discouraged because it can lead to identical RNG streams across processes. "
-                    "For distributed runs, use 'seed_ddp_mode' for now. "
-                    "In a future release, the behavior of 'seed' will change to match the current "
-                    "'seed_ddp_mode' behavior.",
-                    FutureWarning,
-                    stacklevel=2,
-                )
+        lt.seed_everything(config.seed + rank, workers=True)
 
     # build trainer
     trainer: lt.Trainer = instantiate(config.trainer)
