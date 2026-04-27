@@ -87,6 +87,8 @@ Lightning Callbacks
 
     SaveMetricCallback
     LoadPretrainedCallback
+    NoBufferWeightAveraging
+    NoBufferEMAWeightAveraging
     PrintUnusedParam
 
 ****************

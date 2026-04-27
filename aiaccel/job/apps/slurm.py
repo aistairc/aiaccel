@@ -53,6 +53,10 @@ done
         job_status_filename = args.log_filename.with_suffix(".out").resolve()
 
         status_filename_list = [job_status_filename]
+        job = f"""\
+{job} &
+wait "$!"
+"""
 
     job_script = f"""\
 #! /bin/bash
@@ -61,6 +65,7 @@ done
 
 set -eE -o pipefail
 trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
+trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
 
 
 {config.script_prologue}
@@ -87,7 +92,7 @@ trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
         while not status_filename.exists():
             time.sleep(1.0)
 
-            if config.get("use_scandir", False):  # Reflesh the file system if needed
+            if config.get("use_scandir", False):  # Refresh the file system if needed
                 os.scandir(status_filename.parent)
 
         status = int(status_filename.read_text())

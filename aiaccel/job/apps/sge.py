@@ -66,17 +66,16 @@ set -eE -o pipefail
 trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
 trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
 
-if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
-    cd $PBS_O_WORKDIR
-fi
-
-
 {config.script_prologue}
 
 {job}
 """
 
-    qsub = config.qsub.format(args=args)
+    job_name = str(config.get("job_name", args.log_filename.with_suffix("")))
+    if job_name[:1].isdigit():
+        job_name = f"_{job_name}"
+
+    qsub = config.qsub.format(args=args, job_name=job_name)
     qsub_args = config[mode].qsub_args.format(args=args)
 
     # Create the job script file, remove old status files, and run the job
@@ -94,7 +93,7 @@ fi
     for status_filename in status_filename_list:
         while not status_filename.exists():
             time.sleep(1.0)
-            if config.get("use_scandir", False):  # Reflesh the file system if needed
+            if config.get("use_scandir", False):  # Refresh the file system if needed
                 os.scandir(status_filename.parent)
 
         status = int(status_filename.read_text())

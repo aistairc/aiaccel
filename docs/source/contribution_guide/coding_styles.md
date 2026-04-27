@@ -47,7 +47,7 @@ class ExampleClass:
         self.param3 = generate_param3()
 
     def method(self, arg1: type_of_arg1) -> type_of_return:
-        """Recieves `type_of_arg1` object and returns return_of_method.
+        """Receives `type_of_arg1` object and returns return_of_method.
 
         Args:
             arg1 (type_of_arg1): Description of `arg1`.

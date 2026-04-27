@@ -28,10 +28,10 @@ def plot_dim_vs_min_value(ax: Axes, csv_names_for_dim: list[list[list[str]]], ti
 
     # dim
     min_values_for_dim = []
-    for csv_names_for_algorism in csv_names_for_dim:
+    for csv_names_for_algorithm in csv_names_for_dim:
         # nm, tpe, nm_subtpe
-        min_values_for_algorism = []
-        for csv_names in csv_names_for_algorism:
+        min_values_for_algorithm = []
+        for csv_names in csv_names_for_algorithm:
             min_values = []
             for csv_name in csv_names:
                 df = pd.read_csv(csv_name)
@@ -40,8 +40,8 @@ def plot_dim_vs_min_value(ax: Axes, csv_names_for_dim: list[list[list[str]]], ti
                 print(df_values)
                 print(min(df_values))
                 min_values.append(min(df_values))
-            min_values_for_algorism.append(min_values)
-        min_values_for_dim.append(min_values_for_algorism)
+            min_values_for_algorithm.append(min_values)
+        min_values_for_dim.append(min_values_for_algorithm)
 
     print(len(min_values_for_dim))
 
