@@ -19,6 +19,13 @@ class SlurmJobApp(SchedulerJobApp):
             self.config[self.mode].sbatch_args.format(args=self.args),
         )
 
+    def prepare_single_job_context(self) -> None:
+        super().prepare_single_job_context()
+        self.job = f"""\
+{self.job} &
+wait "$!"
+"""
+
     def prepare_array_job_context(self) -> None:
         """Prepare Slurm-specific context for array jobs."""
         self.job = f"""\
@@ -61,6 +68,7 @@ done
 
 set -eE -o pipefail
 trap 'echo $? > {self.job_status_filename}' ERR EXIT  # at error and exit
+trap 'echo 143 > {self.job_status_filename}' TERM  # at termination (by job scheduler)
 
 
 {self.config.script_prologue}

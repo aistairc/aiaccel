@@ -12,7 +12,7 @@ def split_tasks(task_list: list[Any]) -> list[Any]:
 
     This function uses ``TASK_INDEX`` and ``TASK_STEPSIZE`` from the environment to
     slice ``task_list``. The start position is computed as ``TASK_INDEX - 1``.
-    If ``TASK_INDEX`` is not defined, an empty list is returned.
+    If ``TASK_INDEX`` is not defined, the input is returned as is.
 
     Args:
         task_list (list[Any]): Full list of tasks to be split across array jobs.
@@ -26,4 +26,4 @@ def split_tasks(task_list: list[Any]) -> list[Any]:
 
         return task_list[start:end]
     else:
-        return []
+        return task_list
