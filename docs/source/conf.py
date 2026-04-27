@@ -4,12 +4,10 @@
 # Configuration file for the Sphinx documentation builder.
 # Full options: https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-from typing import Any
 
 import inspect
 from pathlib import Path
 import sys
-from types import ModuleType
 
 # -- Path setup --------------------------------------------------------------
 root_path = Path(__file__).parent.parent.parent
@@ -105,44 +103,6 @@ SOURCE_REPO_URL = f"https://github.com/{html_context['source_user']}/{html_conte
 SOURCE_VERSION = html_context["source_version"]
 
 
-def _resolve_object(module: ModuleType, fullname: str | None) -> Any | None:
-    if not fullname:
-        return module
-    # Remove source link of __init__
-    if fullname.split(".")[-1] == "__init__":
-        return None
-
-    obj: Any = module
-    for name in fullname.split("."):
-        obj = getattr(obj, name, None)
-        if obj is None:
-            return None
-    return obj
-
-
-def _get_source_file(obj: Any) -> str | None:
-    try:
-        return inspect.getsourcefile(obj) or inspect.getfile(obj)
-    except Exception:
-        return None
-
-
-def _get_relative_source_path(source_file: str) -> Path | None:
-    try:
-        return Path(source_file).resolve().relative_to(root_path.resolve())
-    except ValueError:
-        return None
-
-
-def _get_linespec(obj: Any) -> str:
-    try:
-        source_lines, start_line = inspect.getsourcelines(obj)
-    except Exception:
-        return ""
-    end_line = start_line + len(source_lines) - 1
-    return f"#L{start_line}-L{end_line}"
-
-
 def linkcode_resolve(domain: str, info: dict[str, str]) -> str | None:
     if domain != "py":
         return None
@@ -157,17 +117,29 @@ def linkcode_resolve(domain: str, info: dict[str, str]) -> str | None:
         return None
 
     fullname = info.get("fullname")
-    obj = _resolve_object(module, fullname)
-    if obj is None:
+    obj = module
+    if fullname:
+        # Remove source link of __init__
+        if fullname.split(".")[-1] == "__init__":
+            return None
+
+        for name in fullname.split("."):
+            try:
+                obj = getattr(obj, name)
+            except AttributeError:
+                return None
+
+    try:
+        source_file = inspect.getsourcefile(obj) or inspect.getfile(obj)
+        relative_path = Path(source_file).resolve().relative_to(root_path.resolve())
+    except Exception:
         return None
 
-    source_file = _get_source_file(obj)
-    if source_file is None:
-        return None
+    try:
+        source_lines, start_line = inspect.getsourcelines(obj)
+        end_line = start_line + len(source_lines) - 1
+        linespec = f"#L{start_line}-L{end_line}"
+    except Exception:
+        linespec = ""
 
-    relative_path = _get_relative_source_path(source_file)
-    if relative_path is None:
-        return None
-
-    linespec = _get_linespec(obj)
     return f"{SOURCE_REPO_URL}/blob/{SOURCE_VERSION}/{relative_path.as_posix()}{linespec}"
