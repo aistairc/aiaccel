@@ -175,15 +175,6 @@ class SchedulerJobApp(JobApp):
     array job expansion, status file management, and job submission.
     """
 
-    def _is_skip_job_submission(self, job_filename: Path, job_script: str, status_filename_list: list[Path]) -> bool:
-        """Return whether the current job submission can be skipped."""
-        has_same_job_script = job_filename.exists() and job_filename.read_text() == job_script
-        has_success_status_files = all(
-            status_filename.exists() and status_filename.read_text().strip() == "0"
-            for status_filename in status_filename_list
-        )
-        return has_same_job_script and has_success_status_files
-
     def submit_job_and_wait(self, job_script: str) -> None:
         """Submit the job script and wait for completion via status files.
 
@@ -191,21 +182,9 @@ class SchedulerJobApp(JobApp):
             job_script (str): Job script content to write and submit.
         """
         submit_command, submit_args = self.build_submit_command()
-        log_filename = self.args.log_filename
-        job_filename = log_filename.with_suffix(".sh")
+        self.args.log_filename.parent.mkdir(exist_ok=True, parents=True)
 
-        if self._is_skip_job_submission(job_filename, job_script, self.status_filename_list):
-            print(
-                "A successfully completed .out file exists"
-                f"({[str(status_filename) for status_filename in self.status_filename_list]}), "
-                "so the job will not be submitted."
-            )
-            for status_filename in self.status_filename_list:
-                status_filename.unlink(missing_ok=True)
-            return
-
-        log_filename.parent.mkdir(exist_ok=True, parents=True)
-
+        job_filename: Path = self.args.log_filename.with_suffix(".sh")
         with open(job_filename, "w") as f:
             f.write(job_script)
 
