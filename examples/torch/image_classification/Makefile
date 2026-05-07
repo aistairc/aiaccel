@@ -40,13 +40,13 @@ $(train_path)/.prepare.done:
 	python ./recipes/scripts/prepare_dataset.py $(abspath $(data_root))
 	touch $@
 
-include $(shell aiaccel-workflow template stages.mk)
-include $(shell aiaccel-workflow template train.mk)
-
 stage2_description := launch aiaccel-job train with the selected config
 stage2_dependencies := $(train_path)/.train.done
 
 train: stage2
+
+include $(shell aiaccel-workflow template stages.mk)
+include $(shell aiaccel-workflow template train.mk)
 
 clean:
 	rm $(train_path)/.*.done
