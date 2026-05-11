@@ -145,11 +145,11 @@ def test_initialize_enqueued1(search_space: dict[str, tuple[float, float]], nm: 
 
 def test_initialize_enqueued2(nm: NelderMeadAlgorithm) -> None:
     # enqueued
-    enqueud_vertices = [np.array([0.6, 0.7]), np.array([0.7, 0.8]), np.array([0.9, 1.0]), np.array([0.8, 0.9])]
-    enqueud_values = [1.0, 4.0, 2.0, 3.0]
+    enqueued_vertices = [np.array([0.6, 0.7]), np.array([0.7, 0.8]), np.array([0.9, 1.0]), np.array([0.8, 0.9])]
+    enqueued_values = [1.0, 4.0, 2.0, 3.0]
     expected_vertex = np.array([0.7, 0.8])
 
-    for enqueued_vertex, enqueued_value in zip(enqueud_vertices, enqueud_values, strict=False):
+    for enqueued_vertex, enqueued_value in zip(enqueued_vertices, enqueued_values, strict=False):
         nm.put_value(enqueued_vertex, enqueued_value, enqueue=True)
 
     x = nm.get_vertex()

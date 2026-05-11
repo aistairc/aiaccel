@@ -338,7 +338,7 @@ class TestNelderMeadSphereParallel(BaseTestNelderMead):
         self.common_setup(
             search_space=search_space,
             objective=sphere_sleep,
-            result_file_name="results_shpere_parallel.csv",
+            result_file_name="results_sphere_parallel.csv",
             study=optuna.create_study(sampler=sampler),
             n_jobs=4,
         )
@@ -372,7 +372,7 @@ class TestNelderMeadSphereEnqueue(BaseTestNelderMead):
         self.common_setup(
             search_space=search_space,
             objective=sphere_sleep,
-            result_file_name="results_shpere_enqueue.csv",
+            result_file_name="results_sphere_enqueue.csv",
             study=optuna.create_study(sampler=sampler),
         )
 

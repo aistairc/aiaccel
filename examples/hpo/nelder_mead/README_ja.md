@@ -5,7 +5,7 @@
 ### example.py
 
 - 一般的な NelderMeadSampler の使い方を示したコードです.
-- 最適化対象はベンチマーク関数 shpere になっています.(以下の example も記述が無い場合は同様)
+- 最適化対象はベンチマーク関数 sphere になっています.(以下の example も記述が無い場合は同様)
 
 ### example_parallel.py
 
