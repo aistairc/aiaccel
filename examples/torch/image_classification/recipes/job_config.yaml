@@ -3,11 +3,30 @@ _base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
 env_activate_command: source $VIRTUAL_ENV/bin/activate
 
 script_prologue: |
-    echo Job ID: $PBS_JOBID
-    echo Hostname: $(hostname)
+  echo Job ID: $PBS_JOBID
+  echo Hostname: $(hostname)
 
-    export CUDA_VISIBLE_DEVICES=all
-    module load python/3.13/3.13.2
-    ${env_activate_command}
+  NUM_GPUS=$(nvidia-smi -L | wc -l)
+  export CUDA_VISIBLE_DEVICES=$(seq -s, 0 $((NUM_GPUS - 1)))
+
+  echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
+
+  module load python/3.13/3.13.2
+  ${env_activate_command}
+
+train:
+  qsub_args: >-
+    -q $( (({args.n_gpus}==1)) && printf rt_HG || printf rt_HF ) -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=$( (({args.n_gpus}==1)) && printf 1 || printf 8 ):ompthreads=$( (({args.n_gpus}==1)) && printf 8 || printf 12 )
+  job: |
+    source /etc/profile.d/modules.sh
+    module load hpcx/2.20
+
+    mpirun -np {args.n_gpus} -bind-to none -map-by slot \
+        -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \
+        -x MAIN_ADDR=$(hostname -i) \
+        -x MAIN_PORT=3000 \
+        -x COLUMNS=120 \
+        -x PYTHONUNBUFFERED=true \
+        {command}
 
 qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1,VIRTUAL_ENV=$VIRTUAL_ENV"
