@@ -5,6 +5,9 @@ trainer:
   _target_: lightning.Trainer
   default_root_dir: ${working_directory}
 
+  devices: ${n_gpus}
+  num_nodes: 1
+
   max_epochs: 200
   precision: bf16-mixed
 
