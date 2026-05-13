@@ -8,9 +8,6 @@ trainer:
   max_epochs: 200
   precision: bf16-mixed
 
-  devices: ${n_gpus}
-  num_nodes: 1
-
   logger:
     _target_: lightning.pytorch.loggers.CSVLogger
     save_dir: ${working_directory}
