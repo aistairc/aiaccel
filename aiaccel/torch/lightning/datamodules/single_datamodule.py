@@ -87,13 +87,12 @@ class SingleDataModule(lt.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             persistent_workers=True,
-            shuffle=True,
             pin_memory=True,
             **kwargs,
         )
 
     def train_dataloader(self) -> DataLoader[Any]:
-        return self._create_dataloader(self.train_dataset, drop_last=True)
+        return self._create_dataloader(self.train_dataset, drop_last=True, shuffle=True)
 
     def val_dataloader(self) -> DataLoader[Any]:
-        return self._create_dataloader(self.val_dataset, drop_last=False)
+        return self._create_dataloader(self.val_dataset, drop_last=False, shuffle=False)
