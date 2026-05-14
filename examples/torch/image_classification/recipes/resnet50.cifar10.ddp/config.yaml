@@ -4,6 +4,11 @@ n_gpus: 8
 
 trainer:
   sync_batchnorm: true
+  strategy:
+    _target_: lightning.pytorch.strategies.DDPStrategy
+    process_group_backend: "nccl"
+    cluster_environment:
+      _target_: aiaccel.torch.lightning.abci_environment.ABCIEnvironment
 
 datamodule:
   batch_size: 256
