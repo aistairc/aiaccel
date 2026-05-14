@@ -46,6 +46,7 @@ class SingleDataModule(lt.LightningDataModule):
         use_scatter: bool = True,
         num_workers: int = 10,
         common_args: dict[str, Any] | None = None,
+        val_shuffle: bool = True,
     ):
         super().__init__()
 
@@ -60,6 +61,8 @@ class SingleDataModule(lt.LightningDataModule):
         self.use_scatter = use_scatter
 
         self.num_workers = num_workers
+
+        self.val_shuffle = val_shuffle
 
     def setup(self, stage: str | None) -> None:
         if stage == "fit":
@@ -95,4 +98,4 @@ class SingleDataModule(lt.LightningDataModule):
         return self._create_dataloader(self.train_dataset, drop_last=True, shuffle=True)
 
     def val_dataloader(self) -> DataLoader[Any]:
-        return self._create_dataloader(self.val_dataset, drop_last=False, shuffle=False)
+        return self._create_dataloader(self.val_dataset, drop_last=False, shuffle=self.val_shuffle)
