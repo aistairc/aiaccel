@@ -24,7 +24,7 @@ jobs:
           cache: true
           activate-environment: false
           environments: gh-actions
-          locked: false
+          locked: true
       - name: Perform ruff
         run: |
           pixi run -e gh-actions ruff check

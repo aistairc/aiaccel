@@ -1,57 +1,12 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import torch
 
 from lightning.pytorch import LightningModule
-from lightning.pytorch.callbacks import Callback
-
-
-def _missing_weight_averaging_api() -> ImportError:
-    return ImportError(
-        "NoBufferWeightAveraging requires lightning.pytorch.callbacks.WeightAveraging "
-        "and EMAWeightAveraging. Please install a Lightning version that provides "
-        "these callbacks."
-    )
-
-
-if TYPE_CHECKING:
-
-    class _WeightAveraging(Callback):
-        def __init__(
-            self,
-            device: torch.device | str | int | None = None,
-            use_buffers: bool = False,
-            **kwargs: Any,
-        ) -> None: ...
-
-    class _EMAWeightAveraging(Callback):
-        def __init__(
-            self,
-            device: torch.device | str | int | None = None,
-            use_buffers: bool = False,
-            decay: float = 0.999,
-            update_every_n_steps: int = 1,
-            update_starting_at_step: int | None = None,
-            update_starting_at_epoch: int | None = None,
-            **kwargs: Any,
-        ) -> None: ...
-
-else:
-    try:
-        from lightning.pytorch.callbacks import EMAWeightAveraging as _EMAWeightAveraging
-        from lightning.pytorch.callbacks import WeightAveraging as _WeightAveraging
-    except ImportError:
-
-        class _WeightAveraging(Callback):  # type: ignore[no-redef]
-            def __init__(self, *args: Any, **kwargs: Any) -> None:
-                raise _missing_weight_averaging_api()
-
-        class _EMAWeightAveraging(Callback):  # type: ignore[no-redef]
-            def __init__(self, *args: Any, **kwargs: Any) -> None:
-                raise _missing_weight_averaging_api()
+from lightning.pytorch.callbacks import EMAWeightAveraging, WeightAveraging
 
 
 class _NoBufferWeightAveragingMixin:
@@ -104,7 +59,7 @@ class _NoBufferWeightAveragingMixin:
                 average_model_state[buffer_name] = current_model_state[buffer_name].clone()
 
 
-class NoBufferWeightAveraging(_NoBufferWeightAveragingMixin, _WeightAveraging):
+class NoBufferWeightAveraging(_NoBufferWeightAveragingMixin, WeightAveraging):
     """Weight averaging callback that ignores buffers during averaging and swapping.
 
     Checkpoints still store the current model buffers together with the averaged
@@ -134,7 +89,7 @@ class NoBufferWeightAveraging(_NoBufferWeightAveragingMixin, _WeightAveraging):
         super().__init__(device, use_buffers=False, **kwargs)
 
 
-class NoBufferEMAWeightAveraging(_NoBufferWeightAveragingMixin, _EMAWeightAveraging):
+class NoBufferEMAWeightAveraging(_NoBufferWeightAveragingMixin, EMAWeightAveraging):
     """Exponential moving average (EMA) callback that ignores buffers."""
 
     def __init__(
