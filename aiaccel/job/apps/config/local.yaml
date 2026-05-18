@@ -24,14 +24,14 @@ gpu-array:
 mpi:
   n_nodes: null
   job: |
-    mpirun -np {args.n_procs} \\
+    mpirun -np {args.n_procs} \
         {command}
 
 train:
   job: |
-    mpirun -np {args.n_gpus} \\
-        -x MAIN_ADDR=$(hostname -i) \\
-        -x MAIN_PORT=3000 \\
-        -x COLUMNS=120 \\
-        -x PYTHONUNBUFFERED=true \\
+    mpirun -np {args.n_gpus} \
+        -x MAIN_ADDR=$(hostname -i) \
+        -x MAIN_PORT=3000 \
+        -x COLUMNS=120 \
+        -x PYTHONUNBUFFERED=true \
         {command}
