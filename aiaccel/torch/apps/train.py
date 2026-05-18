@@ -25,7 +25,8 @@ def main() -> None:
     parser.add_argument("config", type=str, help="Config file in YAML format")
     args, unk_args = parser.parse_known_args()
 
-    is_rank_zero = get_rank() == 0
+    rank = get_rank()
+    is_rank_zero = rank == 0
     config = prepare_config(
         config_filename=args.config,
         overwrite_config=oc.from_cli(unk_args),
@@ -40,7 +41,7 @@ def main() -> None:
         print_git_status(status_list)
 
     if "seed" in config:
-        lt.seed_everything(config.seed, workers=True)
+        lt.seed_everything(config.seed + rank, workers=True)
 
     # build trainer
     trainer: lt.Trainer = instantiate(config.trainer)
