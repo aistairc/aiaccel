@@ -1,11 +1,15 @@
+n_gpus: 1
+walltime: "1:0:0"
+
 trainer:
   _target_: lightning.Trainer
   default_root_dir: ${working_directory}
 
+  devices: ${n_gpus}
+  num_nodes: 1
+
   max_epochs: 200
   precision: bf16-mixed
-
-  devices: 1
 
   logger:
     _target_: lightning.pytorch.loggers.CSVLogger
