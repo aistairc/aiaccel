@@ -1,4 +1,4 @@
-version: 7
+version: 6
 platforms:
 - name: linux-64
 environments:
