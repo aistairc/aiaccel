@@ -314,12 +314,12 @@ def test_evaluate_summary_n_test_samples(pipeline_workspace: Path) -> None:
     assert summary["n_test_samples"] == _N_TEST
 
 
-# ─── CLI Adapter (modelbridge.py) ────────────────────────────────────────────
+# ─── CLI Adapter (aiaccel.hpo.apps.modelbridge) ──────────────────────────────
 
 
-def test_cli_prepare_dispatches_and_creates_configs(tmp_path: Path) -> None:
+def test_cli_prepare_dispatches_and_creates_configs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify the CLI adapter (aiaccel-hpo modelbridge prepare) runs end-to-end."""
-    from aiaccel.hpo.apps.modelbridge import main as cli_main
+    from aiaccel import launcher
 
     objective_script = tmp_path / "objective.py"
     objective_script.write_text(_OBJECTIVE_SCRIPT, encoding="utf-8")
@@ -328,15 +328,20 @@ def test_cli_prepare_dispatches_and_creates_configs(tmp_path: Path) -> None:
     config_path.write_text(yaml.safe_dump(_make_config(objective_script)), encoding="utf-8")
     workspace = tmp_path / "workspace"
 
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["aiaccel-hpo", "modelbridge", "prepare", "--config", str(config_path), "--workspace", str(workspace)],
+    )
     with pytest.raises(SystemExit) as exc_info:
-        cli_main(["prepare", "--config", str(config_path), "--workspace", str(workspace)])
+        launcher.main()
     assert exc_info.value.code == 0
     assert (workspace / "runs" / "train" / "macro" / "000" / "config.yaml").exists()
 
 
-def test_cli_collect_dispatches_and_writes_csv(tmp_path: Path) -> None:
+def test_cli_collect_dispatches_and_writes_csv(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify the CLI adapter (aiaccel-hpo modelbridge collect) runs end-to-end."""
-    from aiaccel.hpo.apps.modelbridge import main as cli_main
+    from aiaccel import launcher
 
     # Set up a workspace with pre-built Optuna DBs (use the Python API for prepare + HPO)
     workspace = tmp_path / "workspace"
@@ -356,7 +361,12 @@ def test_cli_collect_dispatches_and_writes_csv(tmp_path: Path) -> None:
             timeout=60,
         )
 
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["aiaccel-hpo", "modelbridge", "collect", "--workspace", str(workspace), "--phase", "train"],
+    )
     with pytest.raises(SystemExit) as exc_info:
-        cli_main(["collect", "--workspace", str(workspace), "--phase", "train"])
+        launcher.main()
     assert exc_info.value.code == 0
     assert (workspace / "pairs" / "train_pairs.csv").exists()

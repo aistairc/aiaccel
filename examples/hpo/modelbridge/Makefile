@@ -3,9 +3,23 @@ SHELL := /bin/bash
 
 EXAMPLE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 PROJECT_ROOT := $(abspath $(EXAMPLE_DIR)/../../..)
-MODELBRIDGE_APP := $(PROJECT_ROOT)/aiaccel/hpo/apps/modelbridge.py
+MODELBRIDGE_MODULE := aiaccel.hpo.apps.modelbridge
+MODELBRIDGE_CMD = $(PYTHON) -m $(MODELBRIDGE_MODULE)
+WORKFLOW_STAGES_MK := $(PROJECT_ROOT)/aiaccel/workflow/apps/template_files/stages.mk
 
 resolve_path = $(if $(filter /%,$(1)),$(1),$(EXAMPLE_DIR)/$(1))
+run_hpo_configs = RUNS_DIR="$(WORKSPACE_PATH)/runs/$(1)"; \
+	if [ ! -d "$$RUNS_DIR" ]; then \
+		echo "Error: directory not found: $$RUNS_DIR"; \
+		exit 1; \
+	fi; \
+	find "$$RUNS_DIR" -name "config.yaml" | LC_ALL=C sort | while IFS= read -r config_path; do \
+		work_dir="$$(dirname "$$config_path")"; \
+		echo "-----------------------------------------"; \
+		echo "  [HPO] Starting optimization in: $$work_dir"; \
+		echo "  [HPO] Config: $$config_path"; \
+		aiaccel-hpo optimize --config "$$config_path"; \
+	done
 
 # Directories
 WORKSPACE_DIR ?= workspace
@@ -31,19 +45,53 @@ export PYTHON
 export STATE_DIR
 export WORKSPACE_DIR := $(WORKSPACE_PATH)
 
-.PHONY: all clean prepare hpo-train hpo-test collect fit evaluate
+.DEFAULT_GOAL := all
+
+min_stage := 1
+max_stage := 6
+
+PRINT_VARIABLES := \
+	CONFIG_FILE \
+	CONFIG_PATH \
+	WORKSPACE_DIR \
+	WORKSPACE_PATH \
+	STATE_DIR \
+	LOGS_DIR \
+	MODELBRIDGE_MODULE \
+	MODELBRIDGE_CMD \
+	PYTHON
+
+stage1_description := prepare workspace and generated HPO configs
+stage1_dependencies := $(STATE_DIR)/01_prepare.done
+
+stage2_description := run train HPO studies
+stage2_dependencies := $(STATE_DIR)/02_hpo_train.done
+
+stage3_description := run test HPO studies
+stage3_dependencies := $(STATE_DIR)/03_hpo_test.done
+
+stage4_description := collect train and test HPO results
+stage4_dependencies := $(STATE_DIR)/04_collect.done
+
+stage5_description := fit the regression model
+stage5_dependencies := $(STATE_DIR)/05_fit.done
+
+stage6_description := evaluate the fitted model
+stage6_dependencies := $(STATE_DIR)/06_evaluate.done
+
+.PHONY: all prepare hpo-train hpo-test collect fit evaluate
 
 all: evaluate
 	@echo "========================================="
 	@echo "  Modelbridge Pipeline Completed Successfully"
 	@echo "========================================="
 
-prepare: $(STATE_DIR)/01_prepare.done
-hpo-train: $(STATE_DIR)/02_hpo_train.done
-hpo-test: $(STATE_DIR)/03_hpo_test.done
-collect: $(STATE_DIR)/04_collect.done
-fit: $(STATE_DIR)/05_fit.done
-evaluate: $(STATE_DIR)/06_evaluate.done
+prepare: stage1
+hpo-train: stage2
+hpo-test: stage3
+collect: stage4
+fit: stage5
+evaluate: stage6
 
 $(STATE_DIR):
 	@mkdir -p $@
@@ -60,63 +108,43 @@ $(STATE_DIR)/01_prepare.done: $(CONFIG_PATH) | $(STATE_DIR)
 	@echo "========================================="
 	mkdir -p "$(WORKSPACE_PATH)/commands" "$(WORKSPACE_PATH)/logs" "$(WORKSPACE_PATH)/models" \
 		"$(WORKSPACE_PATH)/pairs" "$(WORKSPACE_PATH)/runs" "$(WORKSPACE_PATH)/state"
-	$(PYTHON) $(MODELBRIDGE_APP) prepare --config "$(CONFIG_PATH)" --workspace "$(WORKSPACE_PATH)"
+	$(MODELBRIDGE_CMD) prepare --config "$(CONFIG_PATH)" --workspace "$(WORKSPACE_PATH)"
 	touch $@
 
 $(STATE_DIR)/02_hpo_train.done: $(STATE_DIR)/01_prepare.done | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Stage 02] HPO Train"
 	@echo "========================================="
-	RUNS_DIR="$(WORKSPACE_PATH)/runs/train"; \
-	if [ ! -d "$$RUNS_DIR" ]; then \
-		echo "Error: directory not found: $$RUNS_DIR"; \
-		exit 1; \
-	fi; \
-	find "$$RUNS_DIR" -name "config.yaml" | LC_ALL=C sort | while IFS= read -r config_path; do \
-		work_dir="$$(dirname "$$config_path")"; \
-		echo "-----------------------------------------"; \
-		echo "  [HPO] Starting optimization in: $$work_dir"; \
-		echo "  [HPO] Config: $$config_path"; \
-		aiaccel-hpo optimize --config "$$config_path"; \
-	done
+	$(call run_hpo_configs,train)
 	touch $@
 
 $(STATE_DIR)/03_hpo_test.done: $(STATE_DIR)/02_hpo_train.done | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Stage 03] HPO Test"
 	@echo "========================================="
-	RUNS_DIR="$(WORKSPACE_PATH)/runs/test"; \
-	if [ ! -d "$$RUNS_DIR" ]; then \
-		echo "Error: directory not found: $$RUNS_DIR"; \
-		exit 1; \
-	fi; \
-	find "$$RUNS_DIR" -name "config.yaml" | LC_ALL=C sort | while IFS= read -r config_path; do \
-		work_dir="$$(dirname "$$config_path")"; \
-		echo "-----------------------------------------"; \
-		echo "  [HPO] Starting optimization in: $$work_dir"; \
-		echo "  [HPO] Config: $$config_path"; \
-		aiaccel-hpo optimize --config "$$config_path"; \
-	done
+	$(call run_hpo_configs,test)
 	touch $@
 
 $(STATE_DIR)/04_collect.done: $(STATE_DIR)/03_hpo_test.done | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Stage 04] Collect Results"
 	@echo "========================================="
-	$(PYTHON) $(MODELBRIDGE_APP) collect --workspace "$(WORKSPACE_PATH)" --phase train
-	$(PYTHON) $(MODELBRIDGE_APP) collect --workspace "$(WORKSPACE_PATH)" --phase test
+	$(MODELBRIDGE_CMD) collect --workspace "$(WORKSPACE_PATH)" --phase train
+	$(MODELBRIDGE_CMD) collect --workspace "$(WORKSPACE_PATH)" --phase test
 	touch $@
 
 $(STATE_DIR)/05_fit.done: $(STATE_DIR)/04_collect.done | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Stage 05] Fit Regression Model"
 	@echo "========================================="
-	$(PYTHON) $(MODELBRIDGE_APP) fit-model --workspace "$(WORKSPACE_PATH)"
+	$(MODELBRIDGE_CMD) fit-model --workspace "$(WORKSPACE_PATH)"
 	touch $@
 
 $(STATE_DIR)/06_evaluate.done: $(STATE_DIR)/05_fit.done | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Stage 06] Evaluate Model"
 	@echo "========================================="
-	$(PYTHON) $(MODELBRIDGE_APP) evaluate --workspace "$(WORKSPACE_PATH)"
+	$(MODELBRIDGE_CMD) evaluate --workspace "$(WORKSPACE_PATH)"
 	touch $@
+
+include $(WORKFLOW_STAGES_MK)

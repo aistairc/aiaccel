@@ -5,7 +5,7 @@ Modelbridge is Makefile-first.
 
 Orchestration lives in:
 - `Makefile`
-- direct calls to `aiaccel/hpo/apps/modelbridge.py`
+- direct calls to `python -m aiaccel.hpo.apps.modelbridge`
 - direct `aiaccel-hpo optimize` execution from Make recipes
 
 Python under `aiaccel/hpo/modelbridge/` is limited to stateless step tools:

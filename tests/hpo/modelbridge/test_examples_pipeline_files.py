@@ -21,16 +21,25 @@ def test_makefile_is_orchestrator() -> None:
     content = makefile_path.read_text(encoding="utf-8")
     assert "all: evaluate" in content
     assert "WORKSPACE_DIR ?= workspace" in content
-    assert "MODELBRIDGE_APP := $(PROJECT_ROOT)/aiaccel/hpo/apps/modelbridge.py" in content
+    assert "MODELBRIDGE_MODULE := aiaccel.hpo.apps.modelbridge" in content
+    assert "MODELBRIDGE_CMD = $(PYTHON) -m $(MODELBRIDGE_MODULE)" in content
+    assert "WORKFLOW_STAGES_MK := $(PROJECT_ROOT)/aiaccel/workflow/apps/template_files/stages.mk" in content
+    assert "include $(WORKFLOW_STAGES_MK)" in content
+    assert "min_stage := 1" in content
+    assert "max_stage := 6" in content
+    assert "stage1_dependencies := $(STATE_DIR)/01_prepare.done" in content
+    assert "stage6_dependencies := $(STATE_DIR)/06_evaluate.done" in content
+    assert "prepare: stage1" in content
+    assert "evaluate: stage6" in content
 
 
 def test_makefile_calls_modelbridge_cli_directly() -> None:
     stage_map = {
-        "prepare": '$(PYTHON) $(MODELBRIDGE_APP) prepare --config "$(CONFIG_PATH)" --workspace "$(WORKSPACE_PATH)"',
-        "collect_train": '$(PYTHON) $(MODELBRIDGE_APP) collect --workspace "$(WORKSPACE_PATH)" --phase train',
-        "collect_test": '$(PYTHON) $(MODELBRIDGE_APP) collect --workspace "$(WORKSPACE_PATH)" --phase test',
-        "fit": '$(PYTHON) $(MODELBRIDGE_APP) fit-model --workspace "$(WORKSPACE_PATH)"',
-        "evaluate": '$(PYTHON) $(MODELBRIDGE_APP) evaluate --workspace "$(WORKSPACE_PATH)"',
+        "prepare": '$(MODELBRIDGE_CMD) prepare --config "$(CONFIG_PATH)" --workspace "$(WORKSPACE_PATH)"',
+        "collect_train": '$(MODELBRIDGE_CMD) collect --workspace "$(WORKSPACE_PATH)" --phase train',
+        "collect_test": '$(MODELBRIDGE_CMD) collect --workspace "$(WORKSPACE_PATH)" --phase test',
+        "fit": '$(MODELBRIDGE_CMD) fit-model --workspace "$(WORKSPACE_PATH)"',
+        "evaluate": '$(MODELBRIDGE_CMD) evaluate --workspace "$(WORKSPACE_PATH)"',
     }
     content = (_example_dir() / "Makefile").read_text(encoding="utf-8")
     for _, command in stage_map.items():
