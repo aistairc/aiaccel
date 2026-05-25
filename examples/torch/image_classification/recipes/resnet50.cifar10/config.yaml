@@ -73,6 +73,7 @@ datamodule:
   use_scatter: False
   batch_size: 256
   num_workers: 24
+  val_shuffle: False
 
 task:
   _target_: image_classification.task.ImageClassificationTask
