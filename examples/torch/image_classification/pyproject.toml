@@ -11,19 +11,3 @@ dependencies = [
     "torchmetrics",
     "aiaccel"
 ]
-
-# pixi configurations
-[tool.pixi.workspace]
-channels = ["conda-forge"]
-platforms = ["linux-64"]
-
-[tool.pixi.dependencies]
-python = ">=3.10,<3.11"
-
-[tool.pixi.pypi-dependencies]
-image_classification = { path = ".", editable = true }
-
-[tool.pixi.environments]
-default = {features = []}
-
-[tool.pixi.tasks]
