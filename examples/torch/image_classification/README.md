@@ -20,9 +20,6 @@ pip install -e .
 
 ### Pixi Environment
 
-You can use either the root `pyproject.toml` or
-`examples/torch/image_classification/pyproject.toml` with `pixi`.
-
 Using the root `pyproject.toml`, prepare an environment that includes both
 `aiaccel` and `image_classification`.
 
@@ -31,16 +28,6 @@ From the repository root:
 ```bash
 pixi install -e example
 pixi shell -e example
-```
-
-Using `examples/torch/image_classification/pyproject.toml`, prepare an
-environment from this example directory directly.
-
-From `examples/torch/image_classification`:
-
-```bash
-pixi install
-pixi shell
 ```
 
 ## Training on a single GPU
