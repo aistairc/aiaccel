@@ -17,11 +17,10 @@ def main() -> None:
     config = prepare_config(args.config, overwrite_config=oc.from_cli(unk_args))
 
     git_status = collect_git_status_from_config(config)
-    not_ready_status = [status for status in git_status if not status.ready()]
 
-    if len(not_ready_status) > 0:
-        print_git_status(git_status)
+    print_git_status(git_status)
 
+    if len([status for status in git_status if not status.ready()]) > 0:
         exit(1)
     else:
         exit(0)
