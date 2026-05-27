@@ -16,7 +16,10 @@ def main() -> None:
     args, unk_args = parser.parse_known_args()
     config = prepare_config(args.config, overwrite_config=oc.from_cli(unk_args))
 
-    if len(git_status := collect_git_status_from_config(config)) > 0:
+    git_status = collect_git_status_from_config(config)
+    not_ready_status = [status for status in git_status if not status.ready()]
+
+    if len(not_ready_status) > 0:
         print_git_status(git_status)
 
         exit(1)
