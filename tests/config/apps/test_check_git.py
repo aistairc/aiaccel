@@ -28,7 +28,7 @@ def test_check_git(mocker: MockerFixture) -> None:
 
     # Failed
     mock_func = mocker.patch("aiaccel.config.apps.check_git.collect_git_status_from_config")
-    mock_func.return_value = [PackageGitStatus("test_package", "test_id", [])]
+    mock_func.return_value = [PackageGitStatus("test_package", "test_id", ["aiaccel/test"])]
 
     try:
         check_git.main()
