@@ -14,7 +14,8 @@ import sys
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[5]
+EXAMPLE_ROOT = REPO_ROOT / "examples" / "hpo" / "modelbridge" / "basic"
 
 
 def _base_env(repo_root: Path) -> dict[str, str]:
@@ -76,7 +77,7 @@ def run_benchmark(*, workspace: Path, n_train: int, n_test: int, n_trials: int, 
         shutil.rmtree(workspace)
     workspace.mkdir(parents=True, exist_ok=True)
 
-    objective_script = (REPO_ROOT / "examples" / "hpo" / "modelbridge" / "objectives" / "simple_objective.py").resolve()
+    objective_script = (EXAMPLE_ROOT / "objectives" / "simple_objective.py").resolve()
     config = _build_config(
         objective_script=objective_script,
         n_train=n_train,
@@ -132,7 +133,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--workspace",
         type=Path,
-        default=REPO_ROOT / "examples" / "hpo" / "modelbridge" / "workspace" / "benchmark_simple",
+        default=EXAMPLE_ROOT / "workspace" / "benchmark_simple",
         help="Workspace directory for benchmark artifacts.",
     )
     parser.add_argument("--n-train", type=int, default=2, help="Number of train runs.")

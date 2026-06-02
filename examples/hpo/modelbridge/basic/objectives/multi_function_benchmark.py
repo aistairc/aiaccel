@@ -15,7 +15,8 @@ import sys
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[5]
+EXAMPLE_ROOT = REPO_ROOT / "examples" / "hpo" / "modelbridge" / "basic"
 
 
 @dataclass(frozen=True)
@@ -114,7 +115,7 @@ def run_scenario(
     scenario_workspace = workspace_root / scenario.name
     scenario_workspace.mkdir(parents=True, exist_ok=True)
 
-    objective_script = (REPO_ROOT / "examples" / "hpo" / "modelbridge" / "objectives" / "multi_objective.py").resolve()
+    objective_script = (EXAMPLE_ROOT / "objectives" / "multi_objective.py").resolve()
     config = _build_config(
         objective_script=objective_script,
         scenario=scenario,
@@ -176,7 +177,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--workspace",
         type=Path,
-        default=REPO_ROOT / "examples" / "hpo" / "modelbridge" / "workspace" / "benchmark_multi",
+        default=EXAMPLE_ROOT / "workspace" / "benchmark_multi",
         help="Workspace root for scenario artifacts.",
     )
     parser.add_argument("--scenario", type=str, default="all", help="Scenario name or 'all'.")

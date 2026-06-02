@@ -4,7 +4,7 @@ This example provides an external data-assimilation workflow for current modelbr
 It does not use removed legacy commands such as `aiaccel-hpo modelbridge run`.
 
 ## Requirements
-- `python -m pip install ".[modelbridge]"` (installs `scikit-learn`, `GPy`, and `pandas`)
+- `pixi install` from the repository root.
 - MAS-Bench assets (for real simulation):
   - `MAS-Bench.jar` (https://github.com/MAS-Bench/MAS-Bench)
   - `masbench-resources/Dataset/<model>/agent_size.sh`
@@ -13,7 +13,7 @@ It does not use removed legacy commands such as `aiaccel-hpo modelbridge run`.
 ## Quick Start (mock execution)
 ```bash
 cd examples/hpo/modelbridge/data_assimilation
-make all
+pixi run make all
 ```
 
 Main outputs are created under `work/modelbridge/data_assimilation/`:
@@ -24,7 +24,7 @@ Main outputs are created under `work/modelbridge/data_assimilation/`:
 
 Optional overrides:
 ```bash
-make all CONFIG_FILE=/path/to/mas_bench_config.yaml OUTPUT_ROOT=/path/to/output
+pixi run make all CONFIG_FILE=/path/to/mas_bench_config.yaml OUTPUT_ROOT=/path/to/output
 ```
 
 ## Resume with Existing Optuna DB

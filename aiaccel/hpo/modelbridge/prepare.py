@@ -52,8 +52,8 @@ def _resolve_objective_command(command: Sequence[str], *, config_path: Path) -> 
     if candidate.is_absolute():
         return resolved
 
-    # Prefer config dir and its parent so examples/config/config.yaml can reference
-    # objectives under examples/hpo/modelbridge/objectives.
+    # Prefer config dir and its parent so the basic example config can reference
+    # objectives under examples/hpo/modelbridge/basic/objectives.
     search_roots = (config_path.parent, config_path.parent.parent)
     for root in search_roots:
         script_path = (root / candidate).resolve()

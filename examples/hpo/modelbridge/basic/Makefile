@@ -2,7 +2,7 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
 EXAMPLE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-PROJECT_ROOT := $(abspath $(EXAMPLE_DIR)/../../..)
+PROJECT_ROOT := $(abspath $(EXAMPLE_DIR)/../../../..)
 MODELBRIDGE_MODULE := aiaccel.hpo.apps.modelbridge
 MODELBRIDGE_CMD = $(PYTHON) -m $(MODELBRIDGE_MODULE)
 WORKFLOW_STAGES_MK := $(PROJECT_ROOT)/aiaccel/workflow/apps/template_files/stages.mk

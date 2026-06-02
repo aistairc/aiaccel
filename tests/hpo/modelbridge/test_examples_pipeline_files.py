@@ -8,12 +8,23 @@ from pathlib import Path
 import yaml
 
 
-def _example_dir() -> Path:
+def _modelbridge_examples_dir() -> Path:
     return Path(__file__).resolve().parents[3] / "examples" / "hpo" / "modelbridge"
 
 
+def _example_dir() -> Path:
+    return _modelbridge_examples_dir() / "basic"
+
+
 def _data_assimilation_dir() -> Path:
-    return _example_dir() / "data_assimilation"
+    return _modelbridge_examples_dir() / "data_assimilation"
+
+
+def test_modelbridge_examples_are_split_by_workflow() -> None:
+    example_root = _modelbridge_examples_dir()
+    assert (example_root / "basic").is_dir()
+    assert (example_root / "data_assimilation").is_dir()
+    assert (example_root / "README.md").exists()
 
 
 def test_makefile_is_orchestrator() -> None:
@@ -64,6 +75,18 @@ def test_config_contains_required_keys() -> None:
     assert isinstance(config["objective_command"], list)
     assert "train_params" in config
     assert "test_params" in config
+
+
+def test_basic_abci_docs_and_config_use_pixi() -> None:
+    readme_content = (_example_dir() / "README.md").read_text(encoding="utf-8")
+    job_config_content = (_example_dir() / "config" / "job_config_abci.yaml").read_text(encoding="utf-8")
+
+    assert "pixi run" in readme_content
+    assert "pixi_project_root" in job_config_content
+    assert "MODELBRIDGE_PIXI_PROJECT_ROOT" in job_config_content
+    assert "path_to_env" not in job_config_content
+    assert "path_to_venv" not in job_config_content
+    assert "MODELBRIDGE_VENV" not in job_config_content
 
 
 def test_data_assimilation_makefiles_use_wrapper_entrypoint() -> None:
