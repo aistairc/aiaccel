@@ -5,5 +5,5 @@ trainer:
 
   plugins:
     _target_: aiaccel.torch.lightning.abci_environment.ABCIEnvironment
-  devices: ${oc.decode:${oc.env:OMPI_COMM_WORLD_LOCAL_SIZE}}
-  num_nodes: ${oc.decode:${oc.env:OMPI_MCA_orte_num_nodes}}
+  devices: ${oc.decode:${oc.env:OMPI_COMM_WORLD_LOCAL_SIZE,-1}}
+  num_nodes: ${oc.decode:${oc.env:OMPI_MCA_orte_num_nodes,-1}}
