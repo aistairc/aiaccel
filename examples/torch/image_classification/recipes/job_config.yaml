@@ -1,0 +1,17 @@
+_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
+
+env_activate_command: source $VIRTUAL_ENV/bin/activate
+
+script_prologue: |
+  echo Job ID: $PBS_JOBID
+  echo Hostname: $(hostname)
+
+  NUM_GPUS=$(nvidia-smi -L | wc -l)
+  export CUDA_VISIBLE_DEVICES=$(seq -s, 0 $((NUM_GPUS - 1)))
+
+  echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
+
+  module load python/3.13/3.13.2
+  ${env_activate_command}
+
+qsub: "qsub -P $JOB_GROUP -l walltime={args.walltime} -v USE_SSH=1,VIRTUAL_ENV=$VIRTUAL_ENV"
