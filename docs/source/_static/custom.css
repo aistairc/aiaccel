@@ -1,0 +1,4 @@
+dt a.reference.external:has(.viewcode-link)::before{
+    content: "\a ";
+    white-space: pre;
+}
