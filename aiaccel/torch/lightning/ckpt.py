@@ -54,6 +54,10 @@ def load_checkpoint(
     config_path = model_path / config_name
     config = prepare_config(config_path, overwrite_config=overwrite_config)
 
+    checkpoint_filename = config.checkpoint_filename
+    if not checkpoint_filename.endswith(".ckpt"):
+        checkpoint_filename += ".ckpt"
+
     checkpoint_path = model_path / "checkpoints" / config.checkpoint_filename
 
     logger.info(f"Loading model from {checkpoint_path}...")
