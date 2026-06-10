@@ -58,7 +58,7 @@ def load_checkpoint(
     if not checkpoint_filename.endswith(".ckpt"):
         checkpoint_filename += ".ckpt"
 
-    checkpoint_path = model_path / "checkpoints" / config.checkpoint_filename
+    checkpoint_path = model_path / "checkpoints" / checkpoint_filename
 
     logger.info(f"Loading model from {checkpoint_path}...")
 
