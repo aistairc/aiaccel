@@ -24,7 +24,6 @@ dependencies = [
     "huggingface-hub",
     "colorama",
     "lightning>=2.2.1",
-    "torch>=2.2.0",
     "h5py",
     "rich",
     "tensorboard",
@@ -71,6 +70,9 @@ dev = [
 ]
 gh-actions = [
     "pytest-github-actions-annotate-failures",
+]
+torch = [
+    "torch>=2.2.0",
 ]
 
 [project.scripts]
@@ -134,7 +136,7 @@ torch = { version = ">=2.2.0", index = "https://download.pytorch.org/whl/cpu" }
 aiaccel = { path = ".", editable = true }
 
 [tool.pixi.environments]
-default = { features = ["dev"], solve-group = "default" }
+default = { features = ["dev", "torch"], solve-group = "default" }
 gh-actions = { features = ["dev", "gh-actions"], solve-group = "gh-actions" }
 
 [tool.pixi.tasks]
