@@ -3,9 +3,10 @@ SHELL := /bin/bash
 
 EXAMPLE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 PROJECT_ROOT := $(abspath $(EXAMPLE_DIR)/../../../..)
-MODELBRIDGE_MODULE := aiaccel.hpo.apps.modelbridge
-MODELBRIDGE_CMD = $(PYTHON) -m $(MODELBRIDGE_MODULE)
-WORKFLOW_STAGES_MK := $(PROJECT_ROOT)/aiaccel/workflow/apps/template_files/stages.mk
+AIACCEL_HPO ?= aiaccel-hpo
+AIACCEL_WORKFLOW ?= aiaccel-workflow
+MODELBRIDGE_CMD ?= $(AIACCEL_HPO) modelbridge
+WORKFLOW_STAGES_MK := $(shell $(AIACCEL_WORKFLOW) template stages.mk)
 
 resolve_path = $(if $(filter /%,$(1)),$(1),$(EXAMPLE_DIR)/$(1))
 run_hpo_configs = RUNS_DIR="$(WORKSPACE_PATH)/runs/$(1)"; \
@@ -18,7 +19,7 @@ run_hpo_configs = RUNS_DIR="$(WORKSPACE_PATH)/runs/$(1)"; \
 		echo "-----------------------------------------"; \
 		echo "  [HPO] Starting optimization in: $$work_dir"; \
 		echo "  [HPO] Config: $$config_path"; \
-		aiaccel-hpo optimize --config "$$config_path"; \
+		$(AIACCEL_HPO) optimize --config "$$config_path"; \
 	done
 
 # Directories
@@ -57,7 +58,8 @@ PRINT_VARIABLES := \
 	WORKSPACE_PATH \
 	STATE_DIR \
 	LOGS_DIR \
-	MODELBRIDGE_MODULE \
+	AIACCEL_HPO \
+	AIACCEL_WORKFLOW \
 	MODELBRIDGE_CMD \
 	PYTHON
 

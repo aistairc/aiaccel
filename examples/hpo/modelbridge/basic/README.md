@@ -5,8 +5,9 @@ Modelbridge is Makefile-first.
 
 Orchestration lives in:
 - `Makefile`
-- direct calls to `python -m aiaccel.hpo.apps.modelbridge` inside the pixi environment
+- direct calls to the pip-installed `aiaccel-hpo modelbridge` CLI from Make recipes
 - direct `aiaccel-hpo optimize` execution from Make recipes
+- stage helpers resolved through the pip-installed `aiaccel-workflow template` CLI
 
 Python under `aiaccel/hpo/modelbridge/` is limited to stateless step tools:
 - `prepare.py`
@@ -18,67 +19,79 @@ Python under `aiaccel/hpo/modelbridge/` is limited to stateless step tools:
 - `config/config.yaml`: local run settings (direct `simple_objective.py` call).
 - `config/config_abci.yaml`: ABCI-oriented settings (`objective.sh` wrapper call).
 - `config/job_config_abci.yaml`: `aiaccel-job pbs` configuration template for ABCI.
-- `objective.sh`: ABCI-ready objective wrapper script (module/pixi aware).
+- `objective.sh`: ABCI-ready objective wrapper script (module/virtualenv aware).
 - `objectives/`: objective and benchmark helper scripts.
 - `workspace/`: generated artifacts (configs, Optuna DBs, pairs, models, sentinels).
+
+## Setup
+Install aiaccel and the modelbridge dependencies with pip from the repository root:
+```bash
+python -m pip install -e ".[dev,github-actions,modelbridge]"
+```
+
+The commands below assume the pip-installed console scripts are on `PATH`:
+- `aiaccel-hpo` for modelbridge steps and HPO optimization
+- `aiaccel-job` for local or PBS job wrapping
+- `aiaccel-workflow` for Make stage templates
+- `aiaccel-config` for inspecting YAML values, for example:
+  ```bash
+  aiaccel-config get-value examples/hpo/modelbridge/basic/config/config.yaml n_train
+  ```
 
 ## Local Run (Default)
 ```bash
 cd examples/hpo/modelbridge/basic
-pixi run make all
+make all
 ```
 
 Stage aliases:
-- `pixi run make prepare`
-- `pixi run make hpo-train`
-- `pixi run make hpo-test`
-- `pixi run make collect`
-- `pixi run make fit`
-- `pixi run make evaluate`
+- `make prepare`
+- `make hpo-train`
+- `make hpo-test`
+- `make collect`
+- `make fit`
+- `make evaluate`
 
 Reset:
 ```bash
-pixi run make clean
+make clean
 ```
 
 Local run with explicit config file:
 ```bash
-pixi run make clean
-pixi run make all CONFIG_FILE=config/config.yaml
+make clean
+make all CONFIG_FILE=config/config.yaml
 ```
 
 ## ABCI Run (Using `objective.sh`)
 1. Edit `config/job_config_abci.yaml`.
-- Set `pixi_project_root` to your aiaccel repository root.
-- Set `pixi_environment` to the pixi environment to use.
 - Set `job_group` to your ABCI group.
-- Adjust module names and the `pixi` command path if needed.
+- Set `modelbridge_venv` to the virtualenv that contains the pip-installed aiaccel, or leave it empty if the
+  selected modules already expose the correct `python` and `aiaccel-*` commands on `PATH`.
+- Adjust module names and `modelbridge_python` if needed.
 
 2. Prepare configs with ABCI objective wrapper:
 ```bash
 cd examples/hpo/modelbridge/basic
-pixi run make prepare CONFIG_FILE=config/config_abci.yaml
+make prepare CONFIG_FILE=config/config_abci.yaml
 ```
 
 3. Run the full pipeline in one PBS job:
 ```bash
 aiaccel-job pbs --config config/job_config_abci.yaml cpu --walltime 1:00:00 \
   workspace/logs/modelbridge_abci.log -- \
-  pixi run --manifest-path ../../../../pyproject.toml -e gh-actions \
-    make all CONFIG_FILE=config/config_abci.yaml
+  make all CONFIG_FILE=config/config_abci.yaml
 ```
 
 Alternative: submit only train/test HPO stages separately:
 ```bash
 aiaccel-job pbs --config config/job_config_abci.yaml cpu --walltime 1:00:00 \
   workspace/logs/hpo_train.log -- \
-  pixi run --manifest-path ../../../../pyproject.toml -e gh-actions \
-    make hpo-train CONFIG_FILE=config/config_abci.yaml
+  make hpo-train CONFIG_FILE=config/config_abci.yaml
 
 aiaccel-job pbs --config config/job_config_abci.yaml cpu --walltime 1:00:00 \
   workspace/logs/hpo_test.log -- \
-  pixi run --manifest-path ../../../../pyproject.toml -e gh-actions \
-    make hpo-test CONFIG_FILE=config/config_abci.yaml
+  make hpo-test CONFIG_FILE=config/config_abci.yaml
 ```
 
 ## Using Files in `objectives/`
@@ -94,18 +107,17 @@ Commands below assume current directory is `examples/hpo/modelbridge/basic`.
 - `simple_benchmark.py`:
   - Runs a small end-to-end benchmark.
   - Example:
-    - `pixi run python objectives/simple_benchmark.py --n-train 2 --n-test 1 --trials 6`
+    - `python objectives/simple_benchmark.py --n-train 2 --n-test 1 --trials 6`
 - `multi_function_benchmark.py`:
   - Runs multiple function-pair scenarios with tools.
   - Example:
-    - `pixi run python objectives/multi_function_benchmark.py --scenario all --n-train 2 --n-test 1 --trials 8`
+    - `python objectives/multi_function_benchmark.py --scenario all --n-train 2 --n-test 1 --trials 8`
 
 Run benchmark scripts on ABCI with `aiaccel-job pbs`:
 ```bash
 aiaccel-job pbs --config config/job_config_abci.yaml cpu --walltime 1:00:00 \
   workspace/logs/simple_benchmark.log -- \
-  pixi run --manifest-path ../../../../pyproject.toml -e gh-actions \
-    python objectives/simple_benchmark.py --workspace workspace/benchmark_simple
+  python objectives/simple_benchmark.py --workspace workspace/benchmark_simple
 ```
 
 ## Expected Outputs

@@ -1,7 +1,7 @@
 # Modelbridge configuration for ABCI execution.
 #
 # This config uses objective.sh so each objective evaluation can run with
-# ABCI-ready environment setup (modules / pixi) in the wrapper script.
+# ABCI-ready environment setup (modules / virtualenv) in the wrapper script.
 
 n_train: 3
 n_test: 2

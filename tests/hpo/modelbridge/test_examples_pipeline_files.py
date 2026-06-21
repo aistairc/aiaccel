@@ -32,9 +32,10 @@ def test_makefile_is_orchestrator() -> None:
     content = makefile_path.read_text(encoding="utf-8")
     assert "all: evaluate" in content
     assert "WORKSPACE_DIR ?= workspace" in content
-    assert "MODELBRIDGE_MODULE := aiaccel.hpo.apps.modelbridge" in content
-    assert "MODELBRIDGE_CMD = $(PYTHON) -m $(MODELBRIDGE_MODULE)" in content
-    assert "WORKFLOW_STAGES_MK := $(PROJECT_ROOT)/aiaccel/workflow/apps/template_files/stages.mk" in content
+    assert "AIACCEL_HPO ?= aiaccel-hpo" in content
+    assert "AIACCEL_WORKFLOW ?= aiaccel-workflow" in content
+    assert "MODELBRIDGE_CMD ?= $(AIACCEL_HPO) modelbridge" in content
+    assert "WORKFLOW_STAGES_MK := $(shell $(AIACCEL_WORKFLOW) template stages.mk)" in content
     assert "include $(WORKFLOW_STAGES_MK)" in content
     assert "min_stage := 1" in content
     assert "max_stage := 6" in content
@@ -56,7 +57,7 @@ def test_makefile_calls_modelbridge_cli_directly() -> None:
     for _, command in stage_map.items():
         assert command in content
     assert 'find "$$RUNS_DIR" -name "config.yaml" | LC_ALL=C sort | while IFS= read -r config_path; do \\' in content
-    assert 'aiaccel-hpo optimize --config "$$config_path"; \\' in content
+    assert '$(AIACCEL_HPO) optimize --config "$$config_path"; \\' in content
     assert "| $(STATE_DIR)" in content
     assert "SCRIPTS_DIR" not in content
 
@@ -77,16 +78,20 @@ def test_config_contains_required_keys() -> None:
     assert "test_params" in config
 
 
-def test_basic_abci_docs_and_config_use_pixi() -> None:
+def test_basic_abci_docs_and_config_use_pip_entrypoints() -> None:
     readme_content = (_example_dir() / "README.md").read_text(encoding="utf-8")
     job_config_content = (_example_dir() / "config" / "job_config_abci.yaml").read_text(encoding="utf-8")
 
-    assert "pixi run" in readme_content
-    assert "pixi_project_root" in job_config_content
-    assert "MODELBRIDGE_PIXI_PROJECT_ROOT" in job_config_content
+    assert 'python -m pip install -e ".[dev,github-actions,modelbridge]"' in readme_content
+    assert "aiaccel-hpo modelbridge" in readme_content
+    assert "aiaccel-workflow" in readme_content
+    assert "aiaccel-config" in readme_content
+    assert "modelbridge_venv" in job_config_content
+    assert "MODELBRIDGE_VENV" in job_config_content
+    assert "pixi" not in readme_content.lower()
+    assert "pixi" not in job_config_content.lower()
     assert "path_to_env" not in job_config_content
     assert "path_to_venv" not in job_config_content
-    assert "MODELBRIDGE_VENV" not in job_config_content
 
 
 def test_data_assimilation_makefiles_use_wrapper_entrypoint() -> None:

@@ -1,16 +1,14 @@
 # aiaccel-job PBS configuration for ABCI.
 #
 # Replace placeholders before use:
-# - pixi_project_root: path to your aiaccel repository root
 # - job_group: your ABCI group ID
 # - modelbridge_module_*: module versions on your ABCI environment
+# - modelbridge_venv: optional virtualenv containing the pip-installed aiaccel
 
-pixi_project_root: PATH_TO_AIACCEL_REPOSITORY
-pixi_environment: gh-actions
-pixi_command: pixi
 job_group: JOB_GROUP
 modelbridge_module_gcc: gcc/13.2.0
-modelbridge_module_python: python/3.10/3.10.14
+modelbridge_module_python: python/3.12/3.12.9
+modelbridge_venv: ""
 modelbridge_python: python
 
 walltime: "1:0:0"
@@ -23,12 +21,14 @@ script_prologue: |
     module load ${modelbridge_module_gcc}
     module load ${modelbridge_module_python}
 
+    if [ -n "${modelbridge_venv}" ]; then
+        source "${modelbridge_venv}/bin/activate"
+    fi
+
     # Environment variables consumed by examples/hpo/modelbridge/basic/objective.sh.
     export MODELBRIDGE_MODULE_GCC=${modelbridge_module_gcc}
     export MODELBRIDGE_MODULE_PYTHON=${modelbridge_module_python}
-    export MODELBRIDGE_PIXI_PROJECT_ROOT=${pixi_project_root}
-    export MODELBRIDGE_PIXI_ENVIRONMENT=${pixi_environment}
-    export MODELBRIDGE_PIXI_COMMAND=${pixi_command}
+    export MODELBRIDGE_VENV=${modelbridge_venv}
     export MODELBRIDGE_PYTHON=${modelbridge_python}
 
 qsub: "qsub -P ${job_group} -l walltime={args.walltime} -v USE_SSH=1"
