@@ -10,7 +10,15 @@ from collections.abc import Callable, Sequence
 import logging
 from pathlib import Path
 
-from aiaccel.hpo.modelbridge import collect, evaluate, fit_model, prepare
+from . import collect, evaluate, fit_model, prepare
+
+__all__ = [
+    "collect",
+    "evaluate",
+    "fit_model",
+    "main",
+    "prepare",
+]
 
 StepHandler = Callable[[argparse.Namespace], int]
 

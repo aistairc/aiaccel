@@ -3,8 +3,12 @@
 
 from __future__ import annotations
 
-import aiaccel.hpo.modelbridge as modelbridge
-from aiaccel.hpo.modelbridge import collect, evaluate, fit_model, prepare
+import importlib
+
+import pytest
+
+import aiaccel.hpo.apps.modelbridge as modelbridge
+from aiaccel.hpo.apps.modelbridge import collect, evaluate, fit_model, prepare
 
 
 def test_package_root_exports_modules() -> None:
@@ -12,9 +16,15 @@ def test_package_root_exports_modules() -> None:
         "collect",
         "evaluate",
         "fit_model",
+        "main",
         "prepare",
     ]
     assert modelbridge.collect is collect
     assert modelbridge.evaluate is evaluate
     assert modelbridge.fit_model is fit_model
     assert modelbridge.prepare is prepare
+
+
+def test_modelbridge_tools_are_not_importable_from_hpo_root() -> None:
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("aiaccel.hpo.modelbridge.prepare")

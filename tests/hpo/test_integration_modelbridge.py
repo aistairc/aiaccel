@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-from aiaccel.hpo.modelbridge import collect, evaluate, fit_model, prepare
+from aiaccel.hpo.apps.modelbridge import collect, evaluate, fit_model, prepare
 
 # ─── Shared Objective Script ─────────────────────────────────────────────────
 

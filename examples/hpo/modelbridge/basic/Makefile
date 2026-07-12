@@ -6,6 +6,8 @@ PROJECT_ROOT := $(abspath $(EXAMPLE_DIR)/../../../..)
 AIACCEL_HPO ?= aiaccel-hpo
 AIACCEL_WORKFLOW ?= aiaccel-workflow
 MODELBRIDGE_CMD ?= $(AIACCEL_HPO) modelbridge
+cmd ?= aiaccel-job local
+job_ops ?=
 WORKFLOW_STAGES_MK := $(shell $(AIACCEL_WORKFLOW) template stages.mk)
 
 resolve_path = $(if $(filter /%,$(1)),$(1),$(EXAMPLE_DIR)/$(1))
@@ -19,7 +21,8 @@ run_hpo_configs = RUNS_DIR="$(WORKSPACE_PATH)/runs/$(1)"; \
 		echo "-----------------------------------------"; \
 		echo "  [HPO] Starting optimization in: $$work_dir"; \
 		echo "  [HPO] Config: $$config_path"; \
-		$(AIACCEL_HPO) optimize --config "$$config_path"; \
+		$(cmd) cpu $(job_ops) "$$work_dir/optimize.log" -- \
+			$(AIACCEL_HPO) optimize --config "$$config_path"; \
 	done
 
 # Directories
@@ -61,6 +64,8 @@ PRINT_VARIABLES := \
 	AIACCEL_HPO \
 	AIACCEL_WORKFLOW \
 	MODELBRIDGE_CMD \
+	cmd \
+	job_ops \
 	PYTHON
 
 stage1_description := prepare workspace and generated HPO configs
@@ -110,7 +115,8 @@ $(STATE_DIR)/01_prepare.done: $(CONFIG_PATH) | $(STATE_DIR)
 	@echo "========================================="
 	mkdir -p "$(WORKSPACE_PATH)/commands" "$(WORKSPACE_PATH)/logs" "$(WORKSPACE_PATH)/models" \
 		"$(WORKSPACE_PATH)/pairs" "$(WORKSPACE_PATH)/runs" "$(WORKSPACE_PATH)/state"
-	$(MODELBRIDGE_CMD) prepare --config "$(CONFIG_PATH)" --workspace "$(WORKSPACE_PATH)"
+	$(cmd) cpu $(job_ops) "$(LOGS_DIR)/01_prepare.log" -- \
+		$(MODELBRIDGE_CMD) prepare --config "$(CONFIG_PATH)" --workspace "$(WORKSPACE_PATH)"
 	touch $@
 
 $(STATE_DIR)/02_hpo_train.done: $(STATE_DIR)/01_prepare.done | $(STATE_DIR)
@@ -131,22 +137,26 @@ $(STATE_DIR)/04_collect.done: $(STATE_DIR)/03_hpo_test.done | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Stage 04] Collect Results"
 	@echo "========================================="
-	$(MODELBRIDGE_CMD) collect --workspace "$(WORKSPACE_PATH)" --phase train
-	$(MODELBRIDGE_CMD) collect --workspace "$(WORKSPACE_PATH)" --phase test
+	$(cmd) cpu $(job_ops) "$(LOGS_DIR)/04_collect_train.log" -- \
+		$(MODELBRIDGE_CMD) collect --workspace "$(WORKSPACE_PATH)" --phase train
+	$(cmd) cpu $(job_ops) "$(LOGS_DIR)/04_collect_test.log" -- \
+		$(MODELBRIDGE_CMD) collect --workspace "$(WORKSPACE_PATH)" --phase test
 	touch $@
 
 $(STATE_DIR)/05_fit.done: $(STATE_DIR)/04_collect.done | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Stage 05] Fit Regression Model"
 	@echo "========================================="
-	$(MODELBRIDGE_CMD) fit-model --workspace "$(WORKSPACE_PATH)"
+	$(cmd) cpu $(job_ops) "$(LOGS_DIR)/05_fit.log" -- \
+		$(MODELBRIDGE_CMD) fit-model --workspace "$(WORKSPACE_PATH)"
 	touch $@
 
 $(STATE_DIR)/06_evaluate.done: $(STATE_DIR)/05_fit.done | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Stage 06] Evaluate Model"
 	@echo "========================================="
-	$(MODELBRIDGE_CMD) evaluate --workspace "$(WORKSPACE_PATH)"
+	$(cmd) cpu $(job_ops) "$(LOGS_DIR)/06_evaluate.log" -- \
+		$(MODELBRIDGE_CMD) evaluate --workspace "$(WORKSPACE_PATH)"
 	touch $@
 
 include $(WORKFLOW_STAGES_MK)

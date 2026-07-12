@@ -3,7 +3,7 @@
 # Replace placeholders before use:
 # - job_group: your ABCI group ID
 # - modelbridge_module_*: module versions on your ABCI environment
-# - modelbridge_venv: optional virtualenv containing the pip-installed aiaccel
+# - modelbridge_venv: optional Pixi environment containing aiaccel
 
 job_group: JOB_GROUP
 modelbridge_module_gcc: gcc/13.2.0

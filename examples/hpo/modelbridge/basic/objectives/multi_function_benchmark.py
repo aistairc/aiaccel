@@ -61,7 +61,7 @@ def _run_optimize(config_path: Path, *, repo_root: Path) -> None:
 
 def _run_modelbridge_tool(tool_name: str, *, repo_root: Path, args: list[str]) -> None:
     _run(
-        [sys.executable, str(repo_root / "aiaccel" / "hpo" / "modelbridge" / tool_name), *args],
+        [sys.executable, "-m", "aiaccel.hpo.apps.modelbridge", tool_name, *args],
         cwd=repo_root,
         env=_base_env(repo_root),
     )
@@ -127,7 +127,7 @@ def run_scenario(
     config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
 
     _run_modelbridge_tool(
-        "prepare.py",
+        "prepare",
         repo_root=REPO_ROOT,
         args=["--config", str(config_path), "--workspace", str(scenario_workspace)],
     )
@@ -137,22 +137,22 @@ def run_scenario(
             _run_optimize(run_config, repo_root=REPO_ROOT)
 
     _run_modelbridge_tool(
-        "collect.py",
+        "collect",
         repo_root=REPO_ROOT,
         args=["--workspace", str(scenario_workspace), "--phase", "train"],
     )
     _run_modelbridge_tool(
-        "collect.py",
+        "collect",
         repo_root=REPO_ROOT,
         args=["--workspace", str(scenario_workspace), "--phase", "test"],
     )
     _run_modelbridge_tool(
-        "fit_model.py",
+        "fit-model",
         repo_root=REPO_ROOT,
         args=["--workspace", str(scenario_workspace)],
     )
     _run_modelbridge_tool(
-        "evaluate.py",
+        "evaluate",
         repo_root=REPO_ROOT,
         args=["--workspace", str(scenario_workspace)],
     )

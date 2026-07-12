@@ -1,10 +1,18 @@
 # Data Assimilation Example (MAS-Bench)
 
+## Getting started
+
+From the repository root, run the mock workflow with Pixi:
+
+```bash
+pixi run make -C examples/hpo/modelbridge/data_assimilation all
+```
+
 This example provides an external data-assimilation workflow for current modelbridge environments.
 It does not use removed legacy commands such as `aiaccel-hpo modelbridge run`.
 
 ## Requirements
-- `python -m pip install -e ".[dev,github-actions,modelbridge]"` from the repository root.
+- Run `pixi install` from the repository root.
 - MAS-Bench assets (for real simulation):
   - `MAS-Bench.jar` (https://github.com/MAS-Bench/MAS-Bench)
   - `masbench-resources/Dataset/<model>/agent_size.sh`
@@ -12,8 +20,7 @@ It does not use removed legacy commands such as `aiaccel-hpo modelbridge run`.
 
 ## Quick Start (mock execution)
 ```bash
-cd examples/hpo/modelbridge/data_assimilation
-make all
+pixi run make -C examples/hpo/modelbridge/data_assimilation all
 ```
 
 Main outputs are created under `work/modelbridge/data_assimilation/`:
@@ -24,7 +31,15 @@ Main outputs are created under `work/modelbridge/data_assimilation/`:
 
 Optional overrides:
 ```bash
-make all CONFIG_FILE=/path/to/mas_bench_config.yaml OUTPUT_ROOT=/path/to/output
+pixi run make -C examples/hpo/modelbridge/data_assimilation all \
+  CONFIG_FILE=/path/to/mas_bench_config.yaml OUTPUT_ROOT=/path/to/output
+```
+
+To dispatch the workflow through PBS, change the Make dispatcher instead of wrapping Make:
+
+```bash
+pixi run make -C examples/hpo/modelbridge/data_assimilation all \
+  cmd="aiaccel-job pbs --config /path/to/job_config.yaml" job_ops="--walltime 1:00:00"
 ```
 
 ## Resume with Existing Optuna DB

@@ -12,7 +12,8 @@ STATE_DIR := $(OUTPUT_ROOT)/state
 LOG_DIR := $(OUTPUT_ROOT)/logs
 MPLCONFIGDIR ?= $(OUTPUT_ROOT)/.mplconfig
 
-AIACCEL_CMD ?= aiaccel-job local cpu $(LOG_DIR)/aiaccel_job_da.log
+cmd ?= aiaccel-job local
+job_ops ?=
 
 export MPLCONFIGDIR
 export PYTHONPATH ?= $(REPO_ROOT)
@@ -32,7 +33,7 @@ $(STATE_DIR)/01_data_assimilation.done: $(CONFIG_PATH) | $(STATE_DIR)
 	@echo "========================================="
 	@echo "  [Data Assimilation] Run MAS-Bench Wrapper"
 	@echo "========================================="
-	cd "$(REPO_ROOT)" && $(AIACCEL_CMD) -- \
+	cd "$(REPO_ROOT)" && $(cmd) cpu $(job_ops) "$(LOG_DIR)/aiaccel_job_da.log" -- \
 		"$(PYTHON)" "$(THIS_DIR)/mas_bench_wrapper.py" \
 			--config "$(CONFIG_PATH)" \
 			--output-root "$(OUTPUT_ROOT)"
