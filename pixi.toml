@@ -28,7 +28,6 @@ pandas-stubs = "*"
 matplotlib = "*"
 docstrfmt = "*"
 types-toml = "*"
-hatch = "*"
 
 [feature.dev.pypi-dependencies]
 sphinx-fontawesome = "*"
