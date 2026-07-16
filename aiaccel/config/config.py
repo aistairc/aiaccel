@@ -44,7 +44,11 @@ def setup_omegaconf(mode: str = "|") -> None:
 
     # TODO: Replace `register_resolver` after pypi omegaconf is updated
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
+        warnings.filterwarnings(
+            "ignore",
+            message=r"register_new_resolver\(\) is deprecated and will be removed in a future release.",
+            category=UserWarning,
+        )
         oc.register_new_resolver("eval", simple_eval, replace=True)
         oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
