@@ -32,7 +32,8 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-from aiaccel.hpo.apps.modelbridge import collect, evaluate, fit_model, prepare
+from aiaccel.modelbridge import collect, evaluate, fit_model, prepare
+from aiaccel.modelbridge import main as modelbridge_main
 
 # ─── Shared Objective Script ─────────────────────────────────────────────────
 
@@ -314,12 +315,11 @@ def test_evaluate_summary_n_test_samples(pipeline_workspace: Path) -> None:
     assert summary["n_test_samples"] == _N_TEST
 
 
-# ─── CLI Adapter (aiaccel.hpo.apps.modelbridge) ──────────────────────────────
+# ─── Dedicated CLI Adapter (aiaccel-modelbridge) ─────────────────────────────
 
 
-def test_cli_prepare_dispatches_and_creates_configs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify the CLI adapter (aiaccel-hpo modelbridge prepare) runs end-to-end."""
-    from aiaccel import launcher
+def test_cli_prepare_dispatches_and_creates_configs(tmp_path: Path) -> None:
+    """Verify the dedicated CLI adapter runs the prepare step end-to-end."""
 
     objective_script = tmp_path / "objective.py"
     objective_script.write_text(_OBJECTIVE_SCRIPT, encoding="utf-8")
@@ -328,20 +328,14 @@ def test_cli_prepare_dispatches_and_creates_configs(tmp_path: Path, monkeypatch:
     config_path.write_text(yaml.safe_dump(_make_config(objective_script)), encoding="utf-8")
     workspace = tmp_path / "workspace"
 
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        ["aiaccel-hpo", "modelbridge", "prepare", "--config", str(config_path), "--workspace", str(workspace)],
-    )
     with pytest.raises(SystemExit) as exc_info:
-        launcher.main()
+        modelbridge_main(["prepare", "--config", str(config_path), "--workspace", str(workspace)])
     assert exc_info.value.code == 0
     assert (workspace / "runs" / "train" / "macro" / "000" / "config.yaml").exists()
 
 
-def test_cli_collect_dispatches_and_writes_csv(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify the CLI adapter (aiaccel-hpo modelbridge collect) runs end-to-end."""
-    from aiaccel import launcher
+def test_cli_collect_dispatches_and_writes_csv(tmp_path: Path) -> None:
+    """Verify the dedicated CLI adapter runs the collect step end-to-end."""
 
     # Set up a workspace with pre-built Optuna DBs (use the Python API for prepare + HPO)
     workspace = tmp_path / "workspace"
@@ -361,12 +355,7 @@ def test_cli_collect_dispatches_and_writes_csv(tmp_path: Path, monkeypatch: pyte
             timeout=60,
         )
 
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        ["aiaccel-hpo", "modelbridge", "collect", "--workspace", str(workspace), "--phase", "train"],
-    )
     with pytest.raises(SystemExit) as exc_info:
-        launcher.main()
+        modelbridge_main(["collect", "--workspace", str(workspace), "--phase", "train"])
     assert exc_info.value.code == 0
     assert (workspace / "pairs" / "train_pairs.csv").exists()

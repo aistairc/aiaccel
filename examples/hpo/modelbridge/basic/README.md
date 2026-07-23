@@ -13,11 +13,11 @@ Modelbridge is Makefile-first.
 
 Orchestration lives in:
 - `Makefile`
-- direct calls to the Pixi-provided `aiaccel-hpo modelbridge` CLI from Make recipes
+- direct calls to the Pixi-provided `aiaccel-modelbridge` CLI from Make recipes
 - direct `aiaccel-hpo optimize` execution from Make recipes
 - stage helpers resolved through the Pixi-provided `aiaccel-workflow template` CLI
 
-Python under `aiaccel/hpo/apps/modelbridge/` contains the modelbridge CLI and its stateless step tools:
+Python under `aiaccel/modelbridge/` contains the modelbridge CLI and its stateless step tools:
 - `prepare.py`
 - `collect.py`
 - `fit_model.py`
@@ -39,7 +39,8 @@ pixi install
 ```
 
 The commands below run through Pixi and use its console scripts:
-- `aiaccel-hpo` for modelbridge steps and HPO optimization
+- `aiaccel-modelbridge` for modelbridge steps
+- `aiaccel-hpo` for HPO optimization
 - `aiaccel-job` for local or PBS job wrapping
 - `aiaccel-workflow` for Make stage templates
 - `aiaccel-config` for inspecting YAML values, for example:

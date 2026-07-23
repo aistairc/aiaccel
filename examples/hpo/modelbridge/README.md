@@ -14,6 +14,6 @@ This directory contains two modelbridge examples:
 - `data_assimilation/`: the MAS-Bench data-assimilation workflow.
 
 Pixi provides the console scripts on `PATH`, including `aiaccel-job`, `aiaccel-config`,
-`aiaccel-hpo`, and `aiaccel-workflow`.
+`aiaccel-hpo`, `aiaccel-modelbridge`, and `aiaccel-workflow`.
 
 See `data_assimilation/README.md` before running the MAS-Bench workflow because real execution requires MAS-Bench assets.

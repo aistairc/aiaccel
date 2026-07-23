@@ -9,7 +9,7 @@ pixi run make -C examples/hpo/modelbridge/data_assimilation all
 ```
 
 This example provides an external data-assimilation workflow for current modelbridge environments.
-It does not use removed legacy commands such as `aiaccel-hpo modelbridge run`.
+It does not use removed legacy commands such as `aiaccel-modelbridge run`.
 
 ## Requirements
 - Run `pixi install` from the repository root.

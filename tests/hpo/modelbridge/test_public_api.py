@@ -7,8 +7,8 @@ import importlib
 
 import pytest
 
-import aiaccel.hpo.apps.modelbridge as modelbridge
-from aiaccel.hpo.apps.modelbridge import collect, evaluate, fit_model, prepare
+import aiaccel.modelbridge as modelbridge
+from aiaccel.modelbridge import collect, evaluate, fit_model, prepare
 
 
 def test_package_root_exports_modules() -> None:
@@ -25,6 +25,6 @@ def test_package_root_exports_modules() -> None:
     assert modelbridge.prepare is prepare
 
 
-def test_modelbridge_tools_are_not_importable_from_hpo_root() -> None:
+def test_legacy_modelbridge_package_is_not_importable() -> None:
     with pytest.raises(ModuleNotFoundError):
-        importlib.import_module("aiaccel.hpo.modelbridge.prepare")
+        importlib.import_module("aiaccel.hpo.apps.modelbridge.prepare")

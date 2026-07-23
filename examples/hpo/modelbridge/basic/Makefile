@@ -5,7 +5,8 @@ EXAMPLE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 PROJECT_ROOT := $(abspath $(EXAMPLE_DIR)/../../../..)
 AIACCEL_HPO ?= aiaccel-hpo
 AIACCEL_WORKFLOW ?= aiaccel-workflow
-MODELBRIDGE_CMD ?= $(AIACCEL_HPO) modelbridge
+AIACCEL_MODELBRIDGE ?= aiaccel-modelbridge
+MODELBRIDGE_CMD ?= $(AIACCEL_MODELBRIDGE)
 cmd ?= aiaccel-job local
 job_ops ?=
 WORKFLOW_STAGES_MK := $(shell $(AIACCEL_WORKFLOW) template stages.mk)
@@ -62,6 +63,7 @@ PRINT_VARIABLES := \
 	STATE_DIR \
 	LOGS_DIR \
 	AIACCEL_HPO \
+	AIACCEL_MODELBRIDGE \
 	AIACCEL_WORKFLOW \
 	MODELBRIDGE_CMD \
 	cmd \

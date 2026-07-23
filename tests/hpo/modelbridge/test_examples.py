@@ -23,3 +23,9 @@ def test_makefiles_dispatch_work_through_configurable_job_command() -> None:
         assert "cmd ?= aiaccel-job local" in contents
         assert "job_ops ?=" in contents
         assert "$(cmd) cpu $(job_ops)" in contents
+
+
+def test_basic_makefile_uses_dedicated_modelbridge_console_script() -> None:
+    contents = (EXAMPLE_ROOT / "basic" / "Makefile").read_text(encoding="utf-8")
+    assert "AIACCEL_MODELBRIDGE ?= aiaccel-modelbridge" in contents
+    assert "$(AIACCEL_HPO) modelbridge" not in contents

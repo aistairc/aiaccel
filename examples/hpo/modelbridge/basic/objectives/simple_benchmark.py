@@ -40,7 +40,7 @@ def _run_optimize(config_path: Path, *, repo_root: Path) -> None:
 
 def _run_modelbridge_tool(tool_name: str, *, repo_root: Path, args: list[str]) -> None:
     _run(
-        [sys.executable, "-m", "aiaccel.hpo.apps.modelbridge", tool_name, *args],
+        ["aiaccel-modelbridge", tool_name, *args],
         cwd=repo_root,
         env=_base_env(repo_root),
     )

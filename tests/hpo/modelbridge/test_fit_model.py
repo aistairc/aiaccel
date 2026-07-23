@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from aiaccel.hpo.apps.modelbridge import fit_model
+from aiaccel.modelbridge import fit_model
 
 
 def _write_train_pairs(path: Path) -> None:
