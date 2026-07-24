@@ -9,6 +9,7 @@ from functools import wraps
 from importlib import resources
 from pathlib import Path
 import re
+import warnings
 
 from colorama import Fore
 from omegaconf import DictConfig, ListConfig, Node
@@ -41,8 +42,15 @@ def setup_omegaconf(mode: str = "|") -> None:
     OmegaConfDumper.add_representer(str, str_representer)
     OmegaConfDumper.str_representer_added = True
 
-    oc.register_new_resolver("eval", simple_eval, replace=True)
-    oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
+    # TODO: Replace `register_resolver` after pypi omegaconf is updated
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r"register_new_resolver\(\) is deprecated and will be removed in a future release.",
+            category=UserWarning,
+        )
+        oc.register_new_resolver("eval", simple_eval, replace=True)
+        oc.register_new_resolver("resolve_pkg_path", resources.files, replace=True)
 
     _OMEGACONF_INITIALIZED = True
 
