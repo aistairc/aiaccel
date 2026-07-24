@@ -7,7 +7,7 @@ from collections.abc import Callable
 
 from optuna.trial import Trial
 
-from aiaccel.hpo.optuna.hparams import Const, Float, Hparam, T
+from aiaccel.hpo.optuna.hparams import Const, Float, Hparam, T, Vector
 
 
 class HparamsManager:
@@ -34,6 +34,13 @@ class HparamsManager:
                 if isinstance(param, list):
                     low, high = param
                     self.params[name] = Float(low=low, high=high)
+                elif (
+                    isinstance(param, dict)
+                    and isinstance(low := param.get("low"), int | float)
+                    and isinstance(high := param.get("high"), int | float)
+                    and isinstance(dim := param.get("dim"), int)
+                ):
+                    self.params[name] = Vector(hparam=Float(low=low, high=high), dim=dim)
                 else:
                     self.params[name] = Const(value=param)
 

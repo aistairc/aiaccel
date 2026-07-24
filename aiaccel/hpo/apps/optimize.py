@@ -4,6 +4,7 @@
 from typing import Any
 
 import argparse
+from collections.abc import Mapping, Sequence
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from datetime import datetime
 from importlib import resources
@@ -19,6 +20,26 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 from optuna.trial import Trial
 
 from aiaccel.config import pathlib2str_config, prepare_config, print_config
+
+
+def format_command(
+    command: Sequence[str],
+    values: Mapping[str, Any],
+) -> list[str]:
+    formatted: list[str] = []
+
+    for token in command:
+        if token.startswith("{") and token.endswith("}"):
+            name = token[1:-1]
+            value = values.get(name)
+
+            if isinstance(value, list):
+                formatted.extend(str(item) for item in value)
+                continue
+
+        formatted.append(token.format(**values))
+
+    return formatted
 
 
 def main() -> None:
@@ -96,14 +117,18 @@ Typical usages:
 
                 out_filename = config.working_directory / f"trial_{trial.number:0>6}.json"
 
+                command = format_command(
+                    config.command,
+                    {
+                        "config": config,
+                        "job_name": f"trial_{trial.number:0>6}",
+                        "out_filename": out_filename,
+                        **params.suggest_hparams(trial),
+                    },
+                )
                 future = pool.submit(
                     subprocess.run,
-                    shlex.join(config.command).format(
-                        config=config,
-                        job_name=f"trial_{trial.number:0>6}",
-                        out_filename=out_filename,
-                        **params.suggest_hparams(trial),
-                    ),
+                    shlex.join(command),
                     shell=True,
                     check=True,
                 )
