@@ -25,7 +25,6 @@ types-colorama = "*"
 types-PyYAML = "*"
 pandas = "*"
 pandas-stubs = "*"
-matplotlib = "*"
 docstrfmt = "*"
 types-toml = "*"
 
@@ -33,6 +32,7 @@ types-toml = "*"
 sphinx-fontawesome = "*"
 sphinx_design = "*"
 undecorated = "*"
+matplotlib = "*"
 
 [feature.gh-actions.dependencies]
 pytest-github-actions-annotate-failures = "*"
