@@ -37,8 +37,8 @@ class HparamsManager:
                 elif (
                     isinstance(param, dict)
                     and isinstance(param_range := param.get("range"), list)
-                    and isinstance(low := param_range[0], float)
-                    and isinstance(high := param_range[1], float)
+                    and isinstance(low := param_range[0], int | float)
+                    and isinstance(high := param_range[1], int | float)
                     and isinstance(dim := param.get("dim"), int)
                 ):
                     self.params[name] = Vector(hparam=Float(low=low, high=high), dim=dim)
