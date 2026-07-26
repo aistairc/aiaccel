@@ -462,8 +462,8 @@ packages:
   requires_python: '>=3.10'
 - pypi: ./
   name: aiaccel
-  version: 2026.5.1.dev82+gf67042e7f
-  sha256: d061a22111752252bef5f00abfefc028d7e2c0b320317ff197fdd90a0e08af03
+  version: 2026.7.1.dev90+g4339d4c73
+  sha256: 57c997ead41b70ec312816749efa841c89abc7f123087869ff659b0b40836a6e
   requires_dist:
   - attrs
   - colorama
