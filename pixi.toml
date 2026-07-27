@@ -34,6 +34,8 @@ sphinx-fontawesome = "*"
 sphinx_design = "*"
 undecorated = "*"
 matplotlib = "*"
+GPy = "*"
+scikit-learn = "*"
 
 [feature.gh-actions.dependencies]
 pytest-github-actions-annotate-failures = "*"
