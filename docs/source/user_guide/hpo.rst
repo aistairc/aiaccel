@@ -153,8 +153,8 @@ Extend this file or inherit from it via ``_base_`` to describe your objective.
     - - ``params``
       - Literal ``[low, high]`` pairs, constants, or ``_target_`` entries
       - Instantiates :class:`aiaccel.hpo.optuna.hparams_manager.HparamsManager`; each
-        child becomes a :class:`aiaccel.hpo.optuna.hparams.Hparam\`` feeding values to
-        the command template.
+        child becomes a :class:`aiaccel.hpo.optuna.hparams.Hparam` feeding values to the
+        command template.
     - - ``command``
       - Token list such as ``["python", "train.py", "--lr={lr}", "{out_filename}"]``
       - ``aiaccel-hpo`` joins the list, interpolates ``{param}``, ``{out_filename}``,
