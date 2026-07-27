@@ -40,6 +40,7 @@ source = "vcs"
 documentation = "https://aistairc.github.io/aiaccel/"
 repository = "https://github.com/aistairc/aiaccel"
 
+<<<<<<< HEAD
 [project.optional-dependencies]
 modelbridge = [
     "GPy",
@@ -80,6 +81,8 @@ gh-actions = [
     "pytest-github-actions-annotate-failures",
 ]
 
+=======
+>>>>>>> origin/main
 [project.scripts]
 aiaccel-job = "aiaccel.launcher:main"
 aiaccel-config = "aiaccel.launcher:main"
@@ -125,6 +128,7 @@ section-order = [
 "torch" = ["torch"]
 "torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
 "audio" = ["librosa", "pypesq", "pystoi", "soundfile"]
+<<<<<<< HEAD
 
 [tool.pytest.ini_options]
 filterwarnings = [
@@ -152,3 +156,5 @@ default = { features = ["dev"], solve-group = "default" }
 gh-actions = { features = ["dev", "gh-actions"], solve-group = "gh-actions" }
 
 [tool.pixi.tasks]
+=======
+>>>>>>> origin/main
