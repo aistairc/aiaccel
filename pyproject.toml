@@ -40,39 +40,6 @@ source = "vcs"
 documentation = "https://aistairc.github.io/aiaccel/"
 repository = "https://github.com/aistairc/aiaccel"
 
-[project.optional-dependencies]
-dev = [
-    "mypy",
-    "myst-parser",
-    "pre-commit",
-    "pytest",
-    "pytest-cov",
-    "pytest-mock",
-    "pytest-subprocess",
-    "pytest-xdist",
-    "ruff",
-    "sphinx",
-    "sphinxcontrib-jquery",
-    "sphinx-autobuild",
-    "sphinx-intl",
-    "sphinx-fontawesome",
-    "sphinx-copybutton",
-    "shibuya",
-    "sphinx_design",
-    "types-colorama",
-    "types-PyYAML",
-    "undecorated",
-    "pandas",
-    "pandas-stubs",
-    "matplotlib",
-    "docstrfmt",
-    "types-toml",
-    "hatch",
-]
-gh-actions = [
-    "pytest-github-actions-annotate-failures",
-]
-
 [project.scripts]
 aiaccel-job = "aiaccel.launcher:main"
 aiaccel-config = "aiaccel.launcher:main"
@@ -117,24 +84,3 @@ section-order = [
 "torch" = ["torch"]
 "torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
 "audio" = ["librosa", "pypesq", "pystoi", "soundfile"]
-
-
-# pixi configurations
-[tool.pixi.workspace]
-channels = ["conda-forge"]
-platforms = ["linux-64"]
-
-[tool.pixi.dependencies]
-python = ">=3.10,<3.11"
-
-[tool.pixi.feature.gh-actions.pypi-dependencies]
-torch = { version = ">=2.2.0", index = "https://download.pytorch.org/whl/cpu" }
-
-[tool.pixi.pypi-dependencies]
-aiaccel = { path = ".", editable = true }
-
-[tool.pixi.environments]
-default = { features = ["dev"], solve-group = "default" }
-gh-actions = { features = ["dev", "gh-actions"], solve-group = "gh-actions" }
-
-[tool.pixi.tasks]
