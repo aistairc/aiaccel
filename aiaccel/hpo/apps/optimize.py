@@ -21,14 +21,6 @@ from optuna.trial import Trial
 from aiaccel.config import pathlib2str_config, prepare_config, print_config
 
 
-class ListWrapper:
-    def __init__(self, values: list[Any]) -> None:
-        self.values = values
-
-    def __str__(self) -> str:
-        return " ".join(map(str, self.values))
-
-
 def main() -> None:
     # remove OmegaConf arguments from sys.argv
     oc_args = []
@@ -104,11 +96,6 @@ Typical usages:
 
                 out_filename = config.working_directory / f"trial_{trial.number:0>6}.json"
 
-                suggest_hparams = {
-                    key: ListWrapper(value) if isinstance(value, list) else value
-                    for key, value in params.suggest_hparams(trial).items()
-                }
-
                 split_commnad = []
                 for token in config.command:
                     split_commnad.extend(
@@ -117,7 +104,7 @@ Typical usages:
                                 config=config,
                                 job_name=f"trial_{trial.number:0>6}",
                                 out_filename=out_filename,
-                                **suggest_hparams,
+                                **params.suggest_hparams(trial),
                             )
                         )
                     )

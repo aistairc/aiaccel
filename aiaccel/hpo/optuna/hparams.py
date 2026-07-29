@@ -1,7 +1,7 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -25,13 +25,21 @@ class Const(Hparam[T]):
         return self.value
 
 
+class ListWrapper:
+    def __init__(self, values: list[Any]) -> None:
+        self.values = values
+
+    def __str__(self) -> str:
+        return " ".join(map(str, self.values))
+
+
 @dataclass
-class Vector(Hparam[list[T]], Generic[T]):
+class Vector(Hparam[ListWrapper], Generic[T]):
     dim: int
     hparam: Hparam[T]
 
-    def __call__(self, trial: Trial, name: str) -> list[T]:
-        return [self.hparam(trial, f"{name}[{index}]") for index in range(self.dim)]
+    def __call__(self, trial: Trial, name: str) -> ListWrapper:
+        return ListWrapper([self.hparam(trial, f"{name}[{index}]") for index in range(self.dim)])
 
 
 @dataclass
