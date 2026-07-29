@@ -25,12 +25,9 @@ class Const(Hparam[T]):
         return self.value
 
 
-class ListWrapper:
-    def __init__(self, values: list[Any]) -> None:
-        self.values = values
-
+class ListWrapper(list[Any]):
     def __str__(self) -> str:
-        return " ".join(map(str, self.values))
+        return " ".join(map(str, self))
 
 
 @dataclass
