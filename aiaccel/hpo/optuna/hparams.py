@@ -25,18 +25,18 @@ class Const(Hparam[T]):
         return self.value
 
 
-class ListWrapper(list[Any]):
+class FormattedList(list[Any]):
     def __str__(self) -> str:
         return " ".join(map(str, self))
 
 
 @dataclass
-class Vector(Hparam[ListWrapper], Generic[T]):
+class Vector(Hparam[FormattedList], Generic[T]):
     dim: int
     hparam: Hparam[T]
 
-    def __call__(self, trial: Trial, name: str) -> ListWrapper:
-        return ListWrapper([self.hparam(trial, f"{name}[{index}]") for index in range(self.dim)])
+    def __call__(self, trial: Trial, name: str) -> FormattedList:
+        return FormattedList([self.hparam(trial, f"{name}[{index}]") for index in range(self.dim)])
 
 
 @dataclass

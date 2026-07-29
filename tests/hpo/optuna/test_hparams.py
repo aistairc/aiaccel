@@ -3,7 +3,7 @@
 
 import optuna
 
-from aiaccel.hpo.optuna.hparams import Categorical, Const, Float, Int, ListWrapper, Vector
+from aiaccel.hpo.optuna.hparams import Categorical, Const, Float, FormattedList, Int, Vector
 
 
 def test_const() -> None:
@@ -22,7 +22,7 @@ def test_float_vector() -> None:
     suggest_vector = Vector(hparam=Float(low=0.0, high=1.0, step=None, log=False), dim=10)
     trial = optuna.create_study().ask()
 
-    assert isinstance(suggest_vector(trial=trial, name="x"), ListWrapper)
+    assert isinstance(suggest_vector(trial=trial, name="x"), FormattedList)
     assert len(suggest_vector(trial=trial, name="x")) == 10
     assert isinstance(suggest_vector(trial=trial, name="x")[0], float)
 
