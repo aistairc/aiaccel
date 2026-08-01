@@ -40,46 +40,6 @@ source = "vcs"
 documentation = "https://aistairc.github.io/aiaccel/"
 repository = "https://github.com/aistairc/aiaccel"
 
-[project.optional-dependencies]
-modelbridge = [
-    "GPy",
-    "scikit-learn",
-    "pandas",
-]
-dev = [
-    "mypy",
-    "myst-parser",
-    "pre-commit",
-    "pytest",
-    "pytest-cov",
-    "pytest-mock",
-    "pytest-subprocess",
-    "pytest-xdist",
-    "ruff",
-    "sphinx",
-    "sphinxcontrib-jquery",
-    "sphinx-autobuild",
-    "sphinx-intl",
-    "sphinx-fontawesome",
-    "sphinx-copybutton",
-    "shibuya",
-    "sphinx_design",
-    "types-colorama",
-    "types-PyYAML",
-    "undecorated",
-    "GPy",
-    "scikit-learn",
-    "pandas",
-    "pandas-stubs",
-    "matplotlib",
-    "docstrfmt",
-    "types-toml",
-    "hatch",
-]
-gh-actions = [
-    "pytest-github-actions-annotate-failures",
-]
-
 [project.scripts]
 aiaccel-job = "aiaccel.launcher:main"
 aiaccel-config = "aiaccel.launcher:main"
