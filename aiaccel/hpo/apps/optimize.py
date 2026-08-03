@@ -96,9 +96,9 @@ Typical usages:
 
                 out_filename = config.working_directory / f"trial_{trial.number:0>6}.json"
 
-                split_commnad = []
+                split_command = []
                 for token in config.command:
-                    split_commnad.extend(
+                    split_command.extend(
                         shlex.split(
                             token.format(
                                 config=config,
@@ -111,7 +111,7 @@ Typical usages:
 
                 future = pool.submit(
                     subprocess.run,
-                    shlex.join(split_commnad),
+                    shlex.join(split_command),
                     shell=True,
                     check=True,
                 )
