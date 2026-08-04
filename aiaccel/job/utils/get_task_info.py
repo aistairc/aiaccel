@@ -6,6 +6,11 @@ from typing import Any
 import os
 
 
+def is_array_job() -> bool:
+    """Return whether the current process is running as an array job."""
+    return "TASK_INDEX" in os.environ and "TASK_STEPSIZE" in os.environ
+
+
 def get_task_index() -> int | None:
     """Return the task index specified by the ``TASK_INDEX`` environment variable.
 
