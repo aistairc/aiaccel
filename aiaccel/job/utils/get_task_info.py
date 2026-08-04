@@ -11,24 +11,22 @@ def is_array_job() -> bool:
     return "TASK_INDEX" in os.environ and "TASK_STEPSIZE" in os.environ
 
 
-def get_task_index() -> int | None:
+def get_task_index() -> int:
     """Return the task index specified by the ``TASK_INDEX`` environment variable.
 
     Returns:
         The value of ``TASK_INDEX``, or ``None`` if the variable is not set.
     """
-    index = os.environ.get("TASK_INDEX")
-    return int(index) if index is not None else index
+    return int(os.environ["TASK_INDEX"])
 
 
-def get_task_stepsize() -> int | None:
+def get_task_stepsize() -> int:
     """Return the task step size specified by the ``TASK_STEPSIZE`` environment variable.
 
     Returns:
         The value of ``TASK_STEPSIZE``, or ``None`` if the variable is not set.
     """
-    task_stepsize = os.environ.get("TASK_STEPSIZE")
-    return int(task_stepsize) if task_stepsize is not None else None
+    return int(os.environ["TASK_STEPSIZE"])
 
 
 def split_tasks(task_list: list[Any]) -> list[Any]:
@@ -45,9 +43,9 @@ def split_tasks(task_list: list[Any]) -> list[Any]:
     Returns:
         list[Any]: Tasks assigned to the current array job.
     """
-    if (task_index := get_task_index()) is not None and (task_stepsize := get_task_stepsize()) is not None:
-        start = task_index - 1
-        end = start + task_stepsize
+    if is_array_job():
+        start = get_task_index() - 1
+        end = start + get_task_stepsize()
 
         return task_list[start:end]
     else:
