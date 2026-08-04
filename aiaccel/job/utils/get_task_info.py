@@ -12,7 +12,15 @@ def is_array_job() -> bool:
 
 
 def get_task_index() -> int:
-    """Return ``TASK_INDEX`` as an integer."""
+    """Return the task index for the current array job.
+
+    Returns:
+        The integer value of the ``TASK_INDEX`` environment variable.
+
+    Raises:
+        RuntimeError: If ``TASK_INDEX`` is not set.
+        ValueError: If ``TASK_INDEX`` cannot be converted to an integer.
+    """
     try:
         value = os.environ["TASK_INDEX"]
     except KeyError as error:
@@ -25,7 +33,15 @@ def get_task_index() -> int:
 
 
 def get_task_stepsize() -> int:
-    """Return ``TASK_STEPSIZE`` as an integer."""
+    """Return the task step size for the current array job.
+
+    Returns:
+        The integer value of the ``TASK_STEPSIZE`` environment variable.
+
+    Raises:
+        RuntimeError: If ``TASK_STEPSIZE`` is not set.
+        ValueError: If ``TASK_STEPSIZE`` cannot be converted to an integer.
+    """
     try:
         value = os.environ["TASK_STEPSIZE"]
     except KeyError as error:
