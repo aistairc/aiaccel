@@ -18,7 +18,7 @@ dependencies = [
     "attrs",
     "numpy",
     "scipy",
-    "optuna>=4.9.0",
+    "optuna>=4.5.0",
     "omegaconf",
     "hydra-core",
     "huggingface-hub",
