@@ -12,20 +12,12 @@ def is_array_job() -> bool:
 
 
 def get_task_index() -> int:
-    """Return the task index specified by the ``TASK_INDEX`` environment variable.
-
-    Returns:
-        The value of ``TASK_INDEX``, or ``None`` if the variable is not set.
-    """
+    """Return ``TASK_INDEX`` as an integer."""
     return int(os.environ["TASK_INDEX"])
 
 
 def get_task_stepsize() -> int:
-    """Return the task step size specified by the ``TASK_STEPSIZE`` environment variable.
-
-    Returns:
-        The value of ``TASK_STEPSIZE``, or ``None`` if the variable is not set.
-    """
+    """Return ``TASK_STEPSIZE`` as an integer."""
     return int(os.environ["TASK_STEPSIZE"])
 
 
