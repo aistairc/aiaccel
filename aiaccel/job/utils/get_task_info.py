@@ -6,6 +6,24 @@ from typing import Any
 import os
 
 
+def get_task_index() -> str | None:
+    """Return the task index specified by the ``TASK_INDEX`` environment variable.
+
+    Returns:
+        The value of ``TASK_INDEX``, or ``None`` if the variable is not set.
+    """
+    return os.environ.get("TASK_INDEX")
+
+
+def get_task_stepsize() -> str | None:
+    """Return the task step size specified by the ``TASK_STEPSIZE`` environment variable.
+
+    Returns:
+        The value of ``TASK_STEPSIZE``, or ``None`` if the variable is not set.
+    """
+    return os.environ.get("TASK_STEPSIZE")
+
+
 def split_tasks(task_list: list[Any]) -> list[Any]:
     """
     Return the task shard assigned to the current array job.
@@ -20,9 +38,9 @@ def split_tasks(task_list: list[Any]) -> list[Any]:
     Returns:
         list[Any]: Tasks assigned to the current array job.
     """
-    if "TASK_INDEX" in os.environ:
-        start = int(os.environ["TASK_INDEX"]) - 1
-        end = start + int(os.environ["TASK_STEPSIZE"])
+    if (task_index := get_task_index()) is not None and (task_stepsize := get_task_stepsize()) is not None:
+        start = int(task_index) - 1
+        end = start + int(task_stepsize)
 
         return task_list[start:end]
     else:
