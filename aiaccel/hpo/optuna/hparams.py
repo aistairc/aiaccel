@@ -25,18 +25,13 @@ class Const(Hparam[T]):
         return self.value
 
 
-class FormattedList(list[Any]):
-    def __str__(self) -> str:
-        return " ".join(map(str, self))
-
-
 @dataclass
-class Vector(Hparam[FormattedList], Generic[T]):
+class Vector(Hparam[list[Any]], Generic[T]):
     dim: int
     hparam: Hparam[T]
 
-    def __call__(self, trial: Trial, name: str) -> FormattedList:
-        return FormattedList([self.hparam(trial, f"{name}[{index}]") for index in range(self.dim)])
+    def __call__(self, trial: Trial, name: str) -> list[Any]:
+        return [self.hparam(trial, f"{name}[{index}]") for index in range(self.dim)]
 
 
 @dataclass

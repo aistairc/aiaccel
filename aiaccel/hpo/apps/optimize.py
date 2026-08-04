@@ -96,22 +96,14 @@ Typical usages:
 
                 out_filename = config.working_directory / f"trial_{trial.number:0>6}.json"
 
-                split_command = []
-                for token in config.command:
-                    split_command.extend(
-                        shlex.split(
-                            token.format(
-                                config=config,
-                                job_name=f"trial_{trial.number:0>6}",
-                                out_filename=out_filename,
-                                **params.suggest_hparams(trial),
-                            )
-                        )
-                    )
-
                 future = pool.submit(
                     subprocess.run,
-                    shlex.join(split_command),
+                    shlex.join(config.command).format(
+                        config=config,
+                        job_name=f"trial_{trial.number:0>6}",
+                        out_filename=out_filename,
+                        **params.suggest_hparams(trial),
+                    ),
                     shell=True,
                     check=True,
                 )
