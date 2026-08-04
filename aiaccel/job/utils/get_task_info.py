@@ -13,12 +13,28 @@ def is_array_job() -> bool:
 
 def get_task_index() -> int:
     """Return ``TASK_INDEX`` as an integer."""
-    return int(os.environ["TASK_INDEX"])
+    try:
+        value = os.environ["TASK_INDEX"]
+    except KeyError as error:
+        raise RuntimeError("TASK_INDEX is not set. This process is not running as an array job.") from error
+
+    try:
+        return int(value)
+    except ValueError as error:
+        raise ValueError(f"TASK_INDEX must be an integer, but got {value!r}.") from error
 
 
 def get_task_stepsize() -> int:
     """Return ``TASK_STEPSIZE`` as an integer."""
-    return int(os.environ["TASK_STEPSIZE"])
+    try:
+        value = os.environ["TASK_STEPSIZE"]
+    except KeyError as error:
+        raise RuntimeError("TASK_STEPSIZE is not set. This process is not running as an array job.") from error
+
+    try:
+        return int(value)
+    except ValueError as error:
+        raise ValueError(f"TASK_STEPSIZE must be an integer, but got {value!r}.") from error
 
 
 def split_tasks(task_list: list[Any]) -> list[Any]:
