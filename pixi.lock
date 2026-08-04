@@ -2580,7 +2580,7 @@ packages:
   - lightning>=2.2.1
   - numpy
   - omegaconf
-  - optuna>=4.9.0
+  - optuna>=4.5.0
   - rich
   - scipy
   - simpleeval
