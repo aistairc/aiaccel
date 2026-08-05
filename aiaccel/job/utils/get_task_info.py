@@ -6,22 +6,51 @@ from typing import Any
 import os
 
 
-def get_task_index() -> str | None:
-    """Return the task index specified by the ``TASK_INDEX`` environment variable.
+def is_array_job() -> bool:
+    """Return whether the current process is running as an array job."""
+    return "TASK_INDEX" in os.environ and "TASK_STEPSIZE" in os.environ
+
+
+def get_task_index() -> int:
+    """Return the task index for the current array job.
 
     Returns:
-        The value of ``TASK_INDEX``, or ``None`` if the variable is not set.
+        The integer value of the ``TASK_INDEX`` environment variable.
+
+    Raises:
+        RuntimeError: If ``TASK_INDEX`` is not set.
+        ValueError: If ``TASK_INDEX`` cannot be converted to an integer.
     """
-    return os.environ.get("TASK_INDEX")
+    try:
+        value = os.environ["TASK_INDEX"]
+    except KeyError as error:
+        raise RuntimeError("TASK_INDEX is not set. This process is not running as an array job.") from error
+
+    try:
+        return int(value)
+    except ValueError as error:
+        raise ValueError(f"TASK_INDEX must be an integer, but got {value!r}.") from error
 
 
-def get_task_stepsize() -> str | None:
-    """Return the task step size specified by the ``TASK_STEPSIZE`` environment variable.
+def get_task_stepsize() -> int:
+    """Return the task step size for the current array job.
 
     Returns:
-        The value of ``TASK_STEPSIZE``, or ``None`` if the variable is not set.
+        The integer value of the ``TASK_STEPSIZE`` environment variable.
+
+    Raises:
+        RuntimeError: If ``TASK_STEPSIZE`` is not set.
+        ValueError: If ``TASK_STEPSIZE`` cannot be converted to an integer.
     """
-    return os.environ.get("TASK_STEPSIZE")
+    try:
+        value = os.environ["TASK_STEPSIZE"]
+    except KeyError as error:
+        raise RuntimeError("TASK_STEPSIZE is not set. This process is not running as an array job.") from error
+
+    try:
+        return int(value)
+    except ValueError as error:
+        raise ValueError(f"TASK_STEPSIZE must be an integer, but got {value!r}.") from error
 
 
 def split_tasks(task_list: list[Any]) -> list[Any]:
@@ -38,9 +67,9 @@ def split_tasks(task_list: list[Any]) -> list[Any]:
     Returns:
         list[Any]: Tasks assigned to the current array job.
     """
-    if (task_index := get_task_index()) is not None and (task_stepsize := get_task_stepsize()) is not None:
-        start = int(task_index) - 1
-        end = start + int(task_stepsize)
+    if is_array_job():
+        start = get_task_index() - 1
+        end = start + get_task_stepsize()
 
         return task_list[start:end]
     else:

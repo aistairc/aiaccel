@@ -101,3 +101,14 @@ Lightning Callbacks
     :toctree: generated/
 
     HDF5Writer
+
+************************
+ Neural Network Modules
+************************
+
+.. currentmodule:: aiaccel.torch.nn
+
+.. autosummary::
+    :toctree: generated/
+
+    SinusoidalPositionalEmbedding
