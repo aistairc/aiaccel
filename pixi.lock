@@ -181,7 +181,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/6e/5e/edb9c0ae051602c3ccaffe424256463636d639e27d7f302dde9975ef9e7a/nvidia_cudnn_cu13-9.20.0.48-py3-none-manylinux_2_27_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/7a/13/e503968fefabd4c6b2650af21e110aa8466fe21432cd7c43a84577a89438/tensorboard_data_server-0.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7f/12/cba81286cbaf0f0c3f0473846cfd992cb240bdcea816bf2ef7de8ed0f744/optuna-4.5.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8b/4d/5740c27110b83634d8491c3b5facf0111b3e554c3164f4fb953be9bddaf6/pytorch_lightning-2.6.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8e/6d/41991e503e51fc1134502694c5fa7a1671501a17ffa12716a4a9151af3df/scipy-1.15.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -192,6 +191,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/a5/9f/be0a41ca4a4917abf5cb9ae0daff1a6060cc5de950aec0396de9f3b52bc5/nvidia_curand-10.4.0.35-py3-none-manylinux_2_27_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/a8/1f/5ef51f5fbaa5d4d3201bb3d7555af028ec1aa4416275ccbf73c9e34e3d2d/cuda_bindings-13.3.1-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/a8/2f/7b57e29836ea8714f81e9898409196f47d772d5ddedddf1592eadb8ab743/nvidia_cufft-12.0.0.61-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/ab/f3/e5fcd5d9b15771ed6dc10e3a7eeddc672e418f4f4c4653d216cc1d857e2d/optuna-4.9.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ae/63/94c4786e13fe1ea5b5743ed9498777befe6a1a5adf30605c6406106463d2/undecorated-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/b9/54/dd730b32ea14ea797530a4479b2ed46a6fb250f682a9cfb997e968bf0261/networkx-3.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bc/b1/a0ec7a5a9db730a08daef1fdfb8090435b82465abbf758a596f0ea88727e/mako-1.3.12-py3-none-any.whl
@@ -387,7 +387,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/6d/c1/e419ef3723a074172b68aaa89c9f3de486ed4c2399e2dbd8113a4fdcaf9e/colorlog-6.10.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7a/13/e503968fefabd4c6b2650af21e110aa8466fe21432cd7c43a84577a89438/tensorboard_data_server-0.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7f/12/cba81286cbaf0f0c3f0473846cfd992cb240bdcea816bf2ef7de8ed0f744/optuna-4.5.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8b/4d/5740c27110b83634d8491c3b5facf0111b3e554c3164f4fb953be9bddaf6/pytorch_lightning-2.6.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8e/6d/41991e503e51fc1134502694c5fa7a1671501a17ffa12716a4a9151af3df/scipy-1.15.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -395,6 +394,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/96/78/5fe6dc3a3a5b2f5a2a4faef8bfe336d5fa049a38884ab3172e0098160c01/alembic-1.18.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/a4/0e/152509871bf30df6fc38569f52a2db9b55dd41aae957adae50a053ac7778/omegaconf-2.3.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ab/f3/e5fcd5d9b15771ed6dc10e3a7eeddc672e418f4f4c4653d216cc1d857e2d/optuna-4.9.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ae/63/94c4786e13fe1ea5b5743ed9498777befe6a1a5adf30605c6406106463d2/undecorated-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/b9/54/dd730b32ea14ea797530a4479b2ed46a6fb250f682a9cfb997e968bf0261/networkx-3.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bc/b1/a0ec7a5a9db730a08daef1fdfb8090435b82465abbf758a596f0ea88727e/mako-1.3.12-py3-none-any.whl
@@ -2925,73 +2925,6 @@ packages:
   - socksio==1.* ; extra == 'socks'
   - trio>=0.22.0,<1.0 ; extra == 'trio'
   requires_python: '>=3.8'
-- pypi: https://files.pythonhosted.org/packages/7f/12/cba81286cbaf0f0c3f0473846cfd992cb240bdcea816bf2ef7de8ed0f744/optuna-4.5.0-py3-none-any.whl
-  name: optuna
-  version: 4.5.0
-  sha256: 5b8a783e84e448b0742501bc27195344a28d2c77bd2feef5b558544d954851b0
-  requires_dist:
-  - alembic>=1.5.0
-  - colorlog
-  - numpy
-  - packaging>=20.0
-  - sqlalchemy>=1.4.2
-  - tqdm
-  - pyyaml
-  - asv>=0.5.0 ; extra == 'benchmark'
-  - cma ; extra == 'benchmark'
-  - virtualenv ; extra == 'benchmark'
-  - black ; extra == 'checking'
-  - blackdoc ; extra == 'checking'
-  - flake8 ; extra == 'checking'
-  - isort ; extra == 'checking'
-  - mypy ; extra == 'checking'
-  - mypy-boto3-s3 ; extra == 'checking'
-  - scipy-stubs ; python_full_version >= '3.10' and extra == 'checking'
-  - types-pyyaml ; extra == 'checking'
-  - types-redis ; extra == 'checking'
-  - types-setuptools ; extra == 'checking'
-  - types-tqdm ; extra == 'checking'
-  - typing-extensions>=3.10.0.0 ; extra == 'checking'
-  - ase ; extra == 'document'
-  - cmaes>=0.12.0 ; extra == 'document'
-  - fvcore ; extra == 'document'
-  - kaleido<0.4 ; extra == 'document'
-  - lightgbm ; extra == 'document'
-  - matplotlib!=3.6.0 ; extra == 'document'
-  - pandas ; extra == 'document'
-  - pillow ; extra == 'document'
-  - plotly>=4.9.0 ; extra == 'document'
-  - scikit-learn ; extra == 'document'
-  - sphinx ; extra == 'document'
-  - sphinx-copybutton ; extra == 'document'
-  - sphinx-gallery ; extra == 'document'
-  - sphinx-notfound-page ; extra == 'document'
-  - sphinx-rtd-theme>=1.2.0 ; extra == 'document'
-  - torch ; extra == 'document'
-  - torchvision ; extra == 'document'
-  - boto3 ; extra == 'optional'
-  - cmaes>=0.12.0 ; extra == 'optional'
-  - google-cloud-storage ; extra == 'optional'
-  - matplotlib!=3.6.0 ; extra == 'optional'
-  - pandas ; extra == 'optional'
-  - plotly>=4.9.0 ; extra == 'optional'
-  - redis ; extra == 'optional'
-  - scikit-learn>=0.24.2 ; extra == 'optional'
-  - scipy ; extra == 'optional'
-  - torch ; extra == 'optional'
-  - grpcio ; extra == 'optional'
-  - protobuf>=5.28.1 ; extra == 'optional'
-  - coverage ; extra == 'test'
-  - fakeredis[lua] ; extra == 'test'
-  - kaleido<0.4 ; extra == 'test'
-  - moto ; extra == 'test'
-  - pytest ; extra == 'test'
-  - pytest-xdist ; extra == 'test'
-  - scipy>=1.9.2 ; extra == 'test'
-  - torch ; extra == 'test'
-  - grpcio ; extra == 'test'
-  - protobuf>=5.28.1 ; extra == 'test'
-  requires_python: '>=3.8'
 - pypi: https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl
   name: rich
   version: 15.0.0
@@ -3200,6 +3133,49 @@ packages:
   requires_dist:
   - nvidia-nvjitlink
   requires_python: '>=3'
+- pypi: https://files.pythonhosted.org/packages/ab/f3/e5fcd5d9b15771ed6dc10e3a7eeddc672e418f4f4c4653d216cc1d857e2d/optuna-4.9.0-py3-none-any.whl
+  name: optuna
+  version: 4.9.0
+  sha256: f52f3be6148654850c92a5860d398fd88ec6b2c84ab68d9c3d07dcff02e7afee
+  requires_dist:
+  - alembic>=1.5.0
+  - colorlog
+  - numpy
+  - packaging>=20.0
+  - sqlalchemy>=1.4.2
+  - tqdm
+  - pyyaml
+  - ase ; extra == 'document'
+  - cmaes>=0.12.0 ; extra == 'document'
+  - fvcore ; extra == 'document'
+  - kaleido!=0.2.1.post1,<0.4 ; extra == 'document'
+  - lightgbm ; extra == 'document'
+  - matplotlib!=3.6.0 ; extra == 'document'
+  - pandas ; extra == 'document'
+  - pillow ; extra == 'document'
+  - plotly>=4.9.0 ; extra == 'document'
+  - scikit-learn ; extra == 'document'
+  - sphinx ; extra == 'document'
+  - sphinx-copybutton ; extra == 'document'
+  - sphinx-gallery ; extra == 'document'
+  - sphinx-notfound-page ; extra == 'document'
+  - sphinx-rtd-theme>=1.2.0 ; extra == 'document'
+  - torch ; extra == 'document'
+  - torchvision ; extra == 'document'
+  - boto3 ; extra == 'optional'
+  - cmaes>=0.12.0 ; extra == 'optional'
+  - google-cloud-storage ; extra == 'optional'
+  - matplotlib!=3.6.0 ; extra == 'optional'
+  - pandas ; extra == 'optional'
+  - plotly>=4.9.0 ; extra == 'optional'
+  - redis ; extra == 'optional'
+  - scikit-learn>=0.24.2 ; extra == 'optional'
+  - scipy ; extra == 'optional'
+  - torch ; extra == 'optional'
+  - greenlet ; extra == 'optional'
+  - grpcio ; extra == 'optional'
+  - protobuf>=5.28.1 ; extra == 'optional'
+  requires_python: '>=3.9'
 - pypi: https://files.pythonhosted.org/packages/ae/63/94c4786e13fe1ea5b5743ed9498777befe6a1a5adf30605c6406106463d2/undecorated-0.3.0-py3-none-any.whl
   name: undecorated
   version: 0.3.0
