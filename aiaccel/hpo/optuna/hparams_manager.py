@@ -35,7 +35,7 @@ class HparamsManager:
                     low, high = param
                     self.params[name] = Float(low=low, high=high)
                 elif isinstance(param, dict):
-                    assert isinstance(param_range := param.get("range"), list)
+                    assert isinstance(param_range := param.get("range"), list) and len(param_range) == 2
                     assert isinstance(low := param_range[0], int | float)
                     assert isinstance(high := param_range[1], int | float)
                     assert isinstance(dim := param.get("dim"), int) and dim > 0
