@@ -3,10 +3,14 @@
 
 from typing import cast
 
-from argparse import ArgumentParser, _SubParsersAction
+from abc import ABC, abstractmethod
+from argparse import ArgumentParser, Namespace, _SubParsersAction
 from importlib import resources
 import os
 from pathlib import Path
+import shlex
+import subprocess
+import time
 
 from omegaconf import DictConfig
 
@@ -15,50 +19,192 @@ from aiaccel.config import prepare_config, print_config, setup_omegaconf
 setup_omegaconf()
 
 
-def prepare_argument_parser(
-    default_config_name: str,
-) -> tuple[DictConfig, ArgumentParser, _SubParsersAction]:  # type: ignore
-    parser = ArgumentParser(add_help=False)
-    parser.add_argument("--print_config", action="store_true")
-    parser.add_argument("--config", type=Path, default=None)
-    args, _ = parser.parse_known_args()
+class JobApp(ABC):
+    """Base class for job application entry points.
 
-    args.config = Path(
-        args.config
-        or os.environ.get("AIACCEL_JOB_CONFIG")
-        or (Path(str(resources.files(__package__) / "config")) / default_config_name)
-    )  # type: ignore
+    On initialization, this class loads the configuration, parses command line
+    arguments, and determines the execution mode including array variants.
+    """
 
-    config = cast(DictConfig, prepare_config(args.config))
+    def __init__(self, default_config_name: str) -> None:
+        self.config, parser, _ = self._prepare_argument_parser(default_config_name)
+        self.args = parser.parse_args()
+        self.mode = self.args.mode + "-array" if getattr(self.args, "n_tasks", None) is not None else self.args.mode
+        self.status_filename_list: list[Path] = []
 
-    if args.print_config:
-        print_config(config)
+    def _prepare_argument_parser(
+        self, default_config_name: str
+    ) -> tuple[DictConfig, ArgumentParser, _SubParsersAction]:  # type: ignore
+        """Prepare a parser and load the job application configuration.
 
-    parser = ArgumentParser()
-    parser.add_argument("--print_config", action="store_true")
-    parser.add_argument("--config", type=Path)
-    sub_parsers = parser.add_subparsers(dest="mode", required=True)
+        Args:
+            default_config_name (str): Default configuration filename used when no explicit
+                config path is provided.
 
-    parent_parser = ArgumentParser(add_help=False)
-    parent_parser.add_argument("--walltime", type=str, default=config.walltime)
-    parent_parser.add_argument("log_filename", type=Path)
-    parent_parser.add_argument("command", nargs="+")
+        Returns:
+            tuple[DictConfig, ArgumentParser, _SubParsersAction]: Loaded config, parser, and
+            sub-parser container.
+        """
+        parser = ArgumentParser(add_help=False)
+        parser.add_argument("--print_config", action="store_true")
+        parser.add_argument("--config", type=Path, default=None)
+        args, _ = parser.parse_known_args()
 
-    sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
-    sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["cpu-array"].n_tasks_per_proc)
-    sub_parser.add_argument("--n_procs", type=int, default=config["cpu-array"].n_procs)
+        args.config = Path(
+            args.config
+            or os.environ.get("AIACCEL_JOB_CONFIG")
+            or (Path(str(resources.files(__package__) / "config")) / default_config_name)
+        )  # type: ignore
 
-    sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
-    sub_parser.add_argument("--n_tasks", type=int)
-    sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"].n_tasks_per_proc)
-    sub_parser.add_argument("--n_procs", type=int, default=config["gpu-array"].n_procs)
+        config = cast(DictConfig, prepare_config(args.config))
 
-    sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
-    sub_parser.add_argument("--n_procs", type=int, required=True)
-    sub_parser.add_argument("--n_nodes", type=int, default=config["mpi"].n_nodes)
+        if args.print_config:
+            print_config(config)
 
-    sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
-    sub_parser.add_argument("--n_gpus", type=int)
+        parser = ArgumentParser()
+        parser.add_argument("--print_config", action="store_true")
+        parser.add_argument("--config", type=Path)
+        sub_parsers = parser.add_subparsers(dest="mode", required=True)
 
-    return config, parser, sub_parsers
+        parent_parser = ArgumentParser(add_help=False)
+        parent_parser.add_argument("--walltime", type=str, default=config.walltime)
+        parent_parser.add_argument("log_filename", type=Path)
+        parent_parser.add_argument("command", nargs="+")
+
+        sub_parser = sub_parsers.add_parser("cpu", parents=[parent_parser])
+        sub_parser.add_argument("--n_tasks", type=int)
+        sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["cpu-array"].n_tasks_per_proc)
+        sub_parser.add_argument("--n_procs", type=int, default=config["cpu-array"].n_procs)
+
+        sub_parser = sub_parsers.add_parser("gpu", parents=[parent_parser])
+        sub_parser.add_argument("--n_tasks", type=int)
+        sub_parser.add_argument("--n_tasks_per_proc", type=int, default=config["gpu-array"].n_tasks_per_proc)
+        sub_parser.add_argument("--n_procs", type=int, default=config["gpu-array"].n_procs)
+
+        sub_parser = sub_parsers.add_parser("mpi", parents=[parent_parser])
+        sub_parser.add_argument("--n_procs", type=int, required=True)
+        sub_parser.add_argument("--n_nodes", type=int, default=config["mpi"].n_nodes)
+
+        sub_parser = sub_parsers.add_parser("train", parents=[parent_parser])
+        sub_parser.add_argument("--n_gpus", type=int)
+
+        return config, parser, sub_parsers
+
+    def build_job(self) -> None:
+        """Build the base job command from the current config and arguments."""
+        self.job = cast(str, self.config[self.mode].job.format(command=shlex.join(self.args.command), args=self.args))
+
+    @abstractmethod
+    def build_job_script(self) -> str:
+        """Build the job script to execute."""
+        pass
+
+    def prepare_array_job_context(self) -> None:
+        """Prepare job context for array jobs."""
+        raise NotImplementedError
+
+    def prepare_single_job_context(self) -> None:
+        """Prepare job context for non-array jobs."""
+        self.job_log_filename = self.args.log_filename.resolve()
+        self.job_status_filename = self.args.log_filename.with_suffix(".out").resolve()
+        self.status_filename_list = [self.job_status_filename]
+
+    def prepare_cpu_job_context(self) -> None:
+        """Prepare context for a CPU job."""
+        self.prepare_single_job_context()
+
+    def prepare_gpu_job_context(self) -> None:
+        """Prepare context for a GPU job."""
+        self.prepare_single_job_context()
+
+    def prepare_cpu_array_job_context(self) -> None:
+        """Prepare context for a CPU array job."""
+        self.prepare_array_job_context()
+
+    def prepare_gpu_array_job_context(self) -> None:
+        """Prepare context for a GPU array job."""
+        self.prepare_array_job_context()
+
+    def prepare_mpi_job_context(self) -> None:
+        """Prepare context for an MPI job."""
+        self.prepare_single_job_context()
+
+    def prepare_train_job_context(self) -> None:
+        """Prepare context for a training job."""
+        self.prepare_single_job_context()
+
+    def prepare_job_context(self) -> None:
+        """Prepare job and status file context."""
+        match self.mode:
+            case "cpu":
+                self.prepare_cpu_job_context()
+            case "gpu":
+                self.prepare_gpu_job_context()
+            case "cpu-array":
+                self.prepare_cpu_array_job_context()
+            case "gpu-array":
+                self.prepare_gpu_array_job_context()
+            case "mpi":
+                self.prepare_mpi_job_context()
+            case "train":
+                self.prepare_train_job_context()
+            case _:
+                raise ValueError(f"Unsupported mode: {self.mode}")
+
+    @abstractmethod
+    def build_submit_command(self) -> tuple[str, str]:
+        """Build the scheduler submission command and its arguments."""
+        pass
+
+    def launch_job(self, job_script: str) -> None:
+        """Launch the prepared job script."""
+        raise NotImplementedError
+
+    def run(self) -> None:
+        """Execute the standard job application workflow."""
+        self.build_job()
+        self.prepare_job_context()
+        job_script = self.build_job_script()
+        self.launch_job(job_script)
+
+
+class SchedulerJobApp(JobApp):
+    """Base class for scheduler-backed job applications.
+
+    This class extends :class:`JobApp` with scheduler-specific handling such as
+    array job expansion, status file management, and job submission.
+    """
+
+    def submit_job_and_wait(self, job_script: str) -> None:
+        """Submit the job script and wait for completion via status files.
+
+        Args:
+            job_script (str): Job script content to write and submit.
+        """
+        submit_command, submit_args = self.build_submit_command()
+        self.args.log_filename.parent.mkdir(exist_ok=True, parents=True)
+
+        job_filename: Path = self.args.log_filename.with_suffix(".sh")
+        with open(job_filename, "w") as f:
+            f.write(job_script)
+
+        for status_filename in self.status_filename_list:
+            status_filename.unlink(missing_ok=True)
+
+        subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
+
+        for status_filename in self.status_filename_list:
+            while not status_filename.exists():
+                time.sleep(1.0)
+
+                if self.config.get("use_scandir", False):  # Reflesh the file system if needed
+                    os.scandir(status_filename.parent)
+
+            status = int(status_filename.read_text())
+            if status != 0:
+                raise RuntimeError(f"Job failed with {status} exit code.")
+            status_filename.unlink()
+
+    def launch_job(self, job_script: str) -> None:
+        """Launch the job script through the scheduler workflow."""
+        self.submit_job_and_wait(job_script)
