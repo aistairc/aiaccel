@@ -35,10 +35,15 @@ class HparamsManager:
                     low, high = param
                     self.params[name] = Float(low=low, high=high)
                 elif isinstance(param, dict):
-                    assert isinstance(param_range := param.get("range"), list) and len(param_range) == 2
-                    assert isinstance(low := param_range[0], int | float)
-                    assert isinstance(high := param_range[1], int | float)
-                    assert isinstance(dim := param.get("dim"), int) and dim > 0
+                    param_range = param.get("range")
+                    dim = param.get("dim")
+                    assert isinstance(param_range, list) and len(param_range) == 2
+                    assert isinstance(dim, int) and dim > 0
+
+                    low, high = param_range
+                    assert isinstance(low, int | float)
+                    assert isinstance(high, int | float)
+
                     self.params[name] = Vector(hparam=Float(low=low, high=high), dim=dim)
                 else:
                     self.params[name] = Const(value=param)
