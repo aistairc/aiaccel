@@ -37,6 +37,7 @@ Hparam
 
     Hparam
     Const
+    Vector
     Float
     Int
     Categorical
