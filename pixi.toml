@@ -1,0 +1,51 @@
+[workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+exclude-newer = "14d"
+
+[dependencies]
+python = ">=3.10,<3.11"
+
+[feature.dev.dependencies]
+mypy = "*"
+myst-parser = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-subprocess = "*"
+pytest-xdist = "*"
+ruff = "*"
+sphinx = "*"
+sphinxcontrib-jquery = "*"
+sphinx-autobuild = "*"
+sphinx-intl = "*"
+sphinx-copybutton = "*"
+shibuya = "*"
+types-colorama = "*"
+types-PyYAML = "*"
+pandas = "*"
+pandas-stubs = "*"
+docstrfmt = "*"
+types-toml = "*"
+
+[feature.dev.pypi-dependencies]
+sphinx-fontawesome = "*"
+sphinx_design = "*"
+undecorated = "*"
+matplotlib = "*"
+
+[feature.gh-actions.dependencies]
+pytest-github-actions-annotate-failures = "*"
+
+[feature.gh-actions.pypi-dependencies]
+torch = { version = ">=2.2.0", index = "https://download.pytorch.org/whl/cpu" }
+
+[pypi-dependencies]
+aiaccel = { path = ".", editable = true }
+
+[environments]
+default = { features = ["dev"], solve-group = "default" }
+gh-actions = { features = ["dev", "gh-actions"], solve-group = "gh-actions" }
+
+[tasks]

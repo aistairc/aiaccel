@@ -41,10 +41,10 @@ repos:
       - id: pixi-lock-check
         name: Ensure pixi.lock is up to date
         entry: pixi
-        args: [lock, --check, --manifest-path, pyproject.toml]
+        args: [lock, --check, --manifest-path, pixi.toml]
         stages: [pre-push]
         language: system
-        files: ^pyproject\.toml$
+        files: ^(pyproject|pixi)\.toml$
         pass_filenames: false
       - id: pytest
         name: pytest
