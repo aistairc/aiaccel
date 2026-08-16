@@ -32,8 +32,8 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-from aiaccel.modelbridge import collect, evaluate, fit_model, prepare
-from aiaccel.modelbridge import main as modelbridge_main
+from aiaccel.modelbridge.apps import collect, evaluate, fit_model, prepare
+from aiaccel.modelbridge.apps import main as modelbridge_main
 
 # ─── Shared Objective Script ─────────────────────────────────────────────────
 

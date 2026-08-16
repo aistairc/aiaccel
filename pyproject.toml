@@ -45,7 +45,7 @@ aiaccel-job = "aiaccel.launcher:main"
 aiaccel-config = "aiaccel.launcher:main"
 aiaccel-torch = "aiaccel.launcher:main"
 aiaccel-hpo = "aiaccel.launcher:main"
-aiaccel-modelbridge = "aiaccel.modelbridge:main"
+aiaccel-modelbridge = "aiaccel.modelbridge.apps:main"
 aiaccel-workflow = "aiaccel.launcher:main"
 
 

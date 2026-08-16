@@ -17,7 +17,7 @@ Orchestration lives in:
 - direct `aiaccel-hpo optimize` execution from Make recipes
 - stage helpers resolved through the Pixi-provided `aiaccel-workflow template` CLI
 
-Python under `aiaccel/modelbridge/` contains the modelbridge CLI and its stateless step tools:
+Python under `aiaccel/modelbridge/apps/` contains the modelbridge CLI and its stateless step tools:
 - `prepare.py`
 - `collect.py`
 - `fit_model.py`

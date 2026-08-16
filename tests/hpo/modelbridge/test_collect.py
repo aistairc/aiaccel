@@ -9,7 +9,7 @@ from pathlib import Path
 import optuna
 import pytest
 
-from aiaccel.modelbridge import collect
+from aiaccel.modelbridge.apps import collect
 
 
 def _create_optuna_db(db_path: Path, *, study_name: str, param_names: tuple[str, ...]) -> None:

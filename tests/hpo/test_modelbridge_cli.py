@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-cli_module = importlib.import_module("aiaccel.modelbridge")
+cli_module = importlib.import_module("aiaccel.modelbridge.apps")
 
 
 def test_step_commands_are_set() -> None:

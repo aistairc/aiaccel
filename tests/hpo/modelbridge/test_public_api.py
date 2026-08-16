@@ -7,24 +7,29 @@ import importlib
 
 import pytest
 
-import aiaccel.modelbridge as modelbridge
-from aiaccel.modelbridge import collect, evaluate, fit_model, prepare
+import aiaccel.modelbridge.apps as modelbridge_apps
+from aiaccel.modelbridge.apps import collect, evaluate, fit_model, prepare
 
 
-def test_package_root_exports_modules() -> None:
-    assert modelbridge.__all__ == [
+def test_app_package_exports_modules() -> None:
+    assert modelbridge_apps.__all__ == [
         "collect",
         "evaluate",
         "fit_model",
         "main",
         "prepare",
     ]
-    assert modelbridge.collect is collect
-    assert modelbridge.evaluate is evaluate
-    assert modelbridge.fit_model is fit_model
-    assert modelbridge.prepare is prepare
+    assert modelbridge_apps.collect is collect
+    assert modelbridge_apps.evaluate is evaluate
+    assert modelbridge_apps.fit_model is fit_model
+    assert modelbridge_apps.prepare is prepare
 
 
-def test_legacy_modelbridge_package_is_not_importable() -> None:
+def test_tools_are_not_importable_from_the_legacy_root_package() -> None:
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("aiaccel.modelbridge.prepare")
+
+
+def test_legacy_hpo_modelbridge_package_is_not_importable() -> None:
     with pytest.raises(ModuleNotFoundError):
         importlib.import_module("aiaccel.hpo.apps.modelbridge.prepare")

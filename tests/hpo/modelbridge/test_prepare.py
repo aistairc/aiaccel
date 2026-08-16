@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from aiaccel.modelbridge import prepare
+from aiaccel.modelbridge.apps import prepare
 
 
 def _write_config(config_path: Path) -> None:
