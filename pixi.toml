@@ -40,7 +40,7 @@ GPy = "*"
 scikit-learn = "*"
 
 [feature.dev.pypi-options]
-no-build = ["gpy", "scipy"]
+no-build = ["gpy"]
 
 [feature.gh-actions.dependencies]
 pytest-github-actions-annotate-failures = "*"
