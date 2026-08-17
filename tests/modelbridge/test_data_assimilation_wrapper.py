@@ -13,7 +13,7 @@ import pytest
 
 def _load_wrapper_module() -> ModuleType:
     wrapper_path = (
-        Path(__file__).resolve().parents[3]
+        Path(__file__).resolve().parents[2]
         / "examples"
         / "hpo"
         / "modelbridge"
