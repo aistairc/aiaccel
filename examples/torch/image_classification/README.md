@@ -1,6 +1,11 @@
 # Training a ResNet50 on CIFAR-10
 
 ## Setup
+
+### Python Environment
+
+You can use the legacy Python-environment setup below.
+
 We assume the Python-environment setup at `examples/python`.
 ```bash
 pushd ../../python/
@@ -13,12 +18,24 @@ popd
 pip install -e .
 ```
 
+### Pixi Environment
+
+Using the root `pyproject.toml`, prepare an environment that includes both
+`aiaccel` and `image_classification`.
+
+From the repository root:
+
+```bash
+pixi install -e example
+pixi shell -e example
+```
+
 ## Training on a single GPU
 ```bash
 qsub -I -P [group_name] -q rt_HG -l select=1 -l walltime=1:0:0
 
 cd $PBS_O_WORKDIR
-. ../../python/activate.sh
+. ../../python/activate.sh  # For the Pixi environment, use: pixi shell -e example
 
 cd recipes
 aiaccel-torch train resnet50.cifar10/config.yaml
@@ -30,7 +47,7 @@ This script will automatically use all the GPUs in your computer. The hyperparam
 qsub -I -P [group_name] -q rt_HF -l select=1 -l walltime=1:0:0
 
 cd $PBS_O_WORKDIR
-. ../../python/activate.sh
+. ../../python/activate.sh  # For the Pixi environment, use: pixi shell -e example
 
 cd recipes
 aiaccel-torch train resnet50.cifar10.ddp/config.yaml
@@ -49,12 +66,7 @@ ABCI-specific job settings such as `walltime`, `qsub`, and `env_activate_command
 The default mode is `single`, so use `make all` for single-GPU training and `make all mode=ddp` for multi-GPU training.
 
 ```bash
-source /path/to/env_aiaccel/bin/activate
 make all
-```
-
-```bash
-make all env_activate_command="source /path/to/env_aiaccel/bin/activate"
 ```
 
 ### Single GPU

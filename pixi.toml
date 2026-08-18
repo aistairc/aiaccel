@@ -41,11 +41,15 @@ pytest-github-actions-annotate-failures = "*"
 [feature.gh-actions.pypi-dependencies]
 torch = { version = ">=2.2.0", index = "https://download.pytorch.org/whl/cpu" }
 
+[feature.image-classification.pypi-dependencies]
+image_classification = { path = "examples/torch/image_classification", editable = true }
+
 [pypi-dependencies]
 aiaccel = { path = ".", editable = true }
 
 [environments]
 default = { features = ["dev"], solve-group = "default" }
 gh-actions = { features = ["dev", "gh-actions"], solve-group = "gh-actions" }
+example = { features = ["image-classification"], solve-group = "example" }
 
 [tasks]
