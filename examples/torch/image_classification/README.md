@@ -35,7 +35,7 @@ pixi shell -e example
 qsub -I -P [group_name] -q rt_HG -l select=1 -l walltime=1:0:0
 
 cd $PBS_O_WORKDIR
-. ../../python/activate.sh
+. ../../python/activate.sh  # For the Pixi environment, use: pixi shell -e example
 
 cd recipes
 aiaccel-torch train resnet50.cifar10/config.yaml
@@ -47,7 +47,7 @@ This script will automatically use all the GPUs in your computer. The hyperparam
 qsub -I -P [group_name] -q rt_HF -l select=1 -l walltime=1:0:0
 
 cd $PBS_O_WORKDIR
-. ../../python/activate.sh
+. ../../python/activate.sh  # For the Pixi environment, use: pixi shell -e example
 
 cd recipes
 aiaccel-torch train resnet50.cifar10.ddp/config.yaml
