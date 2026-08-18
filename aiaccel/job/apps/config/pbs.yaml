@@ -34,10 +34,10 @@ mpi:
     -q rt_HF -l select={args.n_nodes}:mpiprocs=$(( {args.n_procs} / {args.n_nodes} )):ompthreads=$(( {args.n_nodes} * 96 / {args.n_procs} ))
   job: |
     source /etc/profile.d/modules.sh
-    module load hpcx
+    module load hpcx/2.20
 
-    mpirun -np {args.n_procs} -bind-to none -map-by slot \\
-        -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
+    mpirun -np {args.n_procs} -bind-to none -map-by slot \
+        -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \
         {command}
 
 train:
@@ -45,14 +45,14 @@ train:
     -q $( (({args.n_gpus}==1)) && printf rt_HG || printf rt_HF ) -l select=$(( ({args.n_gpus} + 7) / 8 )):mpiprocs=$( (({args.n_gpus}==1)) && printf 1 || printf 8 ):ompthreads=$( (({args.n_gpus}==1)) && printf 8 || printf 12 )
   job: |
     source /etc/profile.d/modules.sh
-    module load hpcx
+    module load hpcx/2.20
 
-    mpirun -np {args.n_gpus} -bind-to none -map-by slot \\
-        -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \\
-        -x MAIN_ADDR=$(hostname -i) \\
-        -x MAIN_PORT=3000 \\
-        -x COLUMNS=120 \\
-        -x PYTHONUNBUFFERED=true \\
+    mpirun -np {args.n_gpus} -bind-to none -map-by slot \
+        -mca pml ob1 -mca btl self,tcp -mca btl_tcp_if_include bond0 \
+        -x MAIN_ADDR=$(hostname -i) \
+        -x MAIN_PORT=3000 \
+        -x COLUMNS=120 \
+        -x PYTHONUNBUFFERED=true \
         {command}
 
 use_scandir: False
