@@ -190,7 +190,6 @@ class SchedulerJobApp(JobApp):
         Args:
             job_script (str): Job script content to write and submit.
         """
-        submit_command, submit_args = self.build_submit_command()
         log_filename = self.args.log_filename
         job_filename = log_filename.with_suffix(".sh")
 
@@ -212,6 +211,7 @@ class SchedulerJobApp(JobApp):
         for status_filename in self.status_filename_list:
             status_filename.unlink(missing_ok=True)
 
+        submit_command, submit_args = self.build_submit_command()
         subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
 
         for status_filename in self.status_filename_list:
