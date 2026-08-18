@@ -50,6 +50,6 @@ aiaccel = { path = ".", editable = true }
 [environments]
 default = { features = ["dev"], solve-group = "default" }
 gh-actions = { features = ["dev", "gh-actions"], solve-group = "gh-actions" }
-example = { features = ["image-classification"], solve-group = "default" }
+example = { features = ["image-classification"], solve-group = "example" }
 
 [tasks]
