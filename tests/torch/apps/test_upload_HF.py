@@ -5,13 +5,15 @@ from collections.abc import Callable, Generator
 from contextlib import AbstractContextManager, contextmanager
 import os
 from pathlib import Path
-import subprocess
 
 from omegaconf import OmegaConf as oc  # noqa: N813
 
 import torch
 
 import pytest
+from pytest_mock import MockerFixture
+
+from aiaccel.torch.apps import upload_huggingface
 
 
 @pytest.fixture()
@@ -34,7 +36,7 @@ def workspace_factory(
     return _factory
 
 
-def test_remove_fullpath(workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
+def test_remove_fullpath(mocker: MockerFixture, workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
     with workspace_factory() as workspace:
         # Setup ckpt and config for test
         ckpt = {}
@@ -49,20 +51,22 @@ def test_remove_fullpath(workspace_factory: Callable[..., AbstractContextManager
             oc.save(config, f)
 
         # execute upload-huggingface
-        cmd = [
-            "aiaccel-torch",
-            "upload-huggingface",
-            "--config_path",
-            str(workspace / "config.yaml"),
-            "--save_config_filename",
-            "pathremoved_config.yaml",
-            "--ckpt_path",
-            str(workspace / "checkpoints" / "merged.ckpt"),
-            "--save_ckpt_filename",
-            "pathremoved.ckpt",
-        ]
+        mocker.patch(
+            "sys.argv",
+            [
+                "upload-huggingface",
+                "--config_path",
+                str(workspace / "config.yaml"),
+                "--save_config_filename",
+                "pathremoved_config.yaml",
+                "--ckpt_path",
+                str(workspace / "checkpoints" / "merged.ckpt"),
+                "--save_ckpt_filename",
+                "pathremoved.ckpt",
+            ],
+        )
 
-        subprocess.run(cmd, check=True)
+        upload_huggingface.main()
 
         # test
         pathremoved_ckpt = torch.load(workspace / "checkpoints" / "pathremoved.ckpt", map_location="cpu")
