@@ -47,9 +47,9 @@ def yes_no_input() -> bool:
 
 def main() -> None:
     parser = ArgumentParser()
-    parser.add_argument("--config_path", type=Path)
+    parser.add_argument("--config_path", type=Path, required=True)
     parser.add_argument("--save_config_filename", type=str, default="pathremoved_config.yaml")
-    parser.add_argument("--ckpt_path", type=Path)
+    parser.add_argument("--ckpt_path", type=Path, required=True)
     parser.add_argument("--save_ckpt_filename", type=str, default="pathremoved.ckpt")
     parser.add_argument("--repo_id", type=str)
     parser.add_argument("--repo_type", type=str)
