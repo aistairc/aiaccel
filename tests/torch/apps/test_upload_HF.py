@@ -36,6 +36,19 @@ def workspace_factory(
     return _factory
 
 
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        ("/home/user/model.ckpt", True),
+        (r"C:\Users\user\model.ckpt", True),
+        (r"\\server\share\model.ckpt", True),
+        ("checkpoints/model.ckpt", False),
+    ],
+)
+def test_is_absolute_path(path: str, expected: bool) -> None:
+    assert upload_huggingface.is_absolute_path(path) is expected
+
+
 def test_remove_fullpath(mocker: MockerFixture, workspace_factory: Callable[[], AbstractContextManager[Path]]) -> None:
     with workspace_factory() as workspace:
         # Setup ckpt and config for test
