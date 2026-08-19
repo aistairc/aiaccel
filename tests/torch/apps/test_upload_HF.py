@@ -36,7 +36,7 @@ def workspace_factory(
     return _factory
 
 
-def test_remove_fullpath(mocker: MockerFixture, workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
+def test_remove_fullpath(mocker: MockerFixture, workspace_factory: Callable[[], AbstractContextManager[Path]]) -> None:
     with workspace_factory() as workspace:
         # Setup ckpt and config for test
         ckpt = {}
@@ -81,7 +81,7 @@ def test_remove_fullpath(mocker: MockerFixture, workspace_factory: Callable[...,
 
 
 def test_upload_huggingface(
-    mocker: MockerFixture, workspace_factory: Callable[..., AbstractContextManager[Path]]
+    mocker: MockerFixture, workspace_factory: Callable[[], AbstractContextManager[Path]]
 ) -> None:
     with workspace_factory() as workspace:
         # Setup
