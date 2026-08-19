@@ -45,7 +45,7 @@ def yes_no_input() -> bool:
         choice = input("Please respond with 'yes' or 'no' [y/N]: ").lower()
         if choice in ["y", "ye", "yes"]:
             return True
-        elif choice in ["n", "no"]:
+        elif choice in ["n", "no", ""]:
             return False
 
 
