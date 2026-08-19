@@ -34,7 +34,7 @@ def workspace_factory(
     return _factory
 
 
-def test_merge_model(workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
+def test_remove_fullpath(workspace_factory: Callable[..., AbstractContextManager[Path]]) -> None:
     with workspace_factory() as workspace:
         # Setup ckpt and config for test
         ckpt = {}
