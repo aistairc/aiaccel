@@ -70,7 +70,9 @@ def test_remove_fullpath(mocker: MockerFixture, workspace_factory: Callable[...,
 
         # test
         pathremoved_ckpt = torch.load(workspace / "checkpoints" / "pathremoved.ckpt", map_location="cpu")
-        assert "FullPath1" not in pathremoved_ckpt
+        assert "FullPath1" not in pathremoved_ckpt["state_dict"]
+        assert pathremoved_ckpt["state_dict"]["layer1"] == 0.1
+        assert pathremoved_ckpt["state_dict"]["layer2"] == 1.0
 
         pathremoved_config = oc.to_container(oc.load(workspace / "pathremoved_config.yaml"))
         assert isinstance(pathremoved_config, dict)
