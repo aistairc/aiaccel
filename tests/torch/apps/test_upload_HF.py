@@ -139,4 +139,17 @@ def test_upload_huggingface(
             repo_id="test/model",
             repo_type="model",
         )
-        assert mock_upload_file.call_count == 2
+
+        mock_upload_file.assert_any_call(
+            path_or_fileobj=workspace / "pathremoved_config.yaml",
+            path_in_repo="pathremoved_config.yaml",
+            repo_id="test/model",
+            repo_type="model",
+        )
+
+        mock_upload_file.assert_any_call(
+            path_or_fileobj=workspace / "checkpoints" / "pathremoved.ckpt",
+            path_in_repo="checkpoints/pathremoved.ckpt",
+            repo_id="test/model",
+            repo_type="model",
+        )
