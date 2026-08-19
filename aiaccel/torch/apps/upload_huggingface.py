@@ -72,7 +72,7 @@ def main() -> None:
 
     torch.save(ckpt, args.ckpt_path.parent / args.save_ckpt_filename)
 
-    if args.repo_id and args.repo_type:
+    if args.repo_id:
         print_config(config)
         print("The above configuration file and model checkpoint will be uploaded to Hugging Face. Is that OK?")
         if yes_no_input():
