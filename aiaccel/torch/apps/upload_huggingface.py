@@ -4,7 +4,7 @@
 from typing import Any
 
 from argparse import ArgumentParser
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from omegaconf import OmegaConf as oc  # noqa: N813
 
@@ -13,6 +13,10 @@ import torch
 from huggingface_hub import create_repo, login, repo_exists, upload_file
 
 from aiaccel.config import print_config
+
+
+def is_absolute_path(value: str) -> bool:
+    return PurePosixPath(value).is_absolute() or PureWindowsPath(value).is_absolute()
 
 
 def remove_fullpath(obj: dict[str, Any] | list[Any] | Any) -> Any:
@@ -28,7 +32,7 @@ def remove_fullpath(obj: dict[str, Any] | list[Any] | Any) -> Any:
         return {
             key: remove_fullpath(value)
             for key, value in obj.items()
-            if not (isinstance(value, str) and Path(value).is_absolute())
+            if not (isinstance(value, str) and is_absolute_path(value))
         }
     elif isinstance(obj, list):
         return [remove_fullpath(v) for v in obj if not (isinstance(v, str) and Path(v).is_absolute())]
