@@ -49,14 +49,20 @@ def test_remove_fullpath(workspace_factory: Callable[..., AbstractContextManager
             oc.save(config, f)
 
         # execute upload-huggingface
-        cmd = (
-            "aiaccel-torch upload-huggingface "
-            f"--config_path {workspace}/config.yaml "
-            "--save_config_filename pathremoved_config.yaml "
-            f"--ckpt_path {workspace}/checkpoints/merged.ckpt "
-            "--save_ckpt_filename pathremoved.ckpt "
-        )
-        subprocess.run(cmd, shell=True, check=True)
+        cmd = [
+            "aiaccel-torch",
+            "upload-huggingface",
+            "--config_path",
+            str(workspace / "config.yaml"),
+            "--save_config_filename",
+            "pathremoved_config.yaml",
+            "--ckpt_path",
+            str(workspace / "checkpoints" / "merged.ckpt"),
+            "--save_ckpt_filename",
+            "pathremoved.ckpt",
+        ]
+
+        subprocess.run(cmd, check=True)
 
         # test
         pathremoved_ckpt = torch.load(workspace / "checkpoints" / "pathremoved.ckpt", map_location="cpu")
