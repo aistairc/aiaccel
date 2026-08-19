@@ -52,7 +52,7 @@ def main() -> None:
     parser.add_argument("--ckpt_path", type=Path, required=True)
     parser.add_argument("--save_ckpt_filename", type=str, default="pathremoved.ckpt")
     parser.add_argument("--repo_id", type=str)
-    parser.add_argument("--repo_type", type=str)
+    parser.add_argument("--repo_type", type=str, choices=["model", "dataset", "space"], default="model")
 
     args = parser.parse_args()
 
