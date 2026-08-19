@@ -35,7 +35,7 @@ def remove_fullpath(obj: dict[str, Any] | list[Any] | Any) -> Any:
             if not (isinstance(value, str) and is_absolute_path(value))
         }
     elif isinstance(obj, list):
-        return [remove_fullpath(v) for v in obj if not (isinstance(v, str) and Path(v).is_absolute())]
+        return [remove_fullpath(v) for v in obj if not (isinstance(v, str) and is_absolute_path(v))]
     else:
         return obj
 
