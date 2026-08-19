@@ -11,7 +11,7 @@
 .. autosummary::
     :toctree: generated/
 
-    NelderMeadAlgorism
+    NelderMeadAlgorithm
 
 ******************
  Optuna Utilities

@@ -21,6 +21,11 @@ repos:
       - id: docstrfmt
         args: [--check, docs/source/, --extend-exclude, docs/source/api_reference/generated]
         types_or: [rst]
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.21.0
+    hooks:
+      - id: yamlfmt
+        args: [-formatter, retain_line_breaks=true, eof_newline=true]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -33,6 +38,14 @@ repos:
 
   - repo: local
     hooks:
+      - id: pixi-lock-check
+        name: Ensure pixi.lock is up to date
+        entry: pixi
+        args: [lock, --check, --manifest-path, pixi.toml]
+        stages: [pre-push]
+        language: system
+        files: ^(pyproject|pixi)\.toml$
+        pass_filenames: false
       - id: pytest
         name: pytest
         entry: pytest -v -x -n auto --cov=aiaccel/ --cov-append tests/

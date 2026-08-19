@@ -9,32 +9,24 @@ jobs:
   lint:
     name: Lint
     runs-on: ${{ matrix.os }}
-    env:
-      PIP_INDEX_URL: https://download.pytorch.org/whl/cpu
-      PIP_EXTRA_INDEX_URL: https://pypi.org/simple
     strategy:
       matrix:
-        os: ['ubuntu-22.04']
-        python-version: ['3.10']
+        os: ["ubuntu-22.04"]
+        python-version: ["3.10"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: prefix-dev/setup-pixi@v0.9.6
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: pyproject.toml
-      - name: Install dependencies
-        run: |
-          pip install .[dev,github-actions]
+          environments: gh-actions
       - name: Perform ruff
         run: |
-          ruff check
-          ruff format --check
+          pixi run -e gh-actions ruff check
+          pixi run -e gh-actions ruff format --check
       - name: Perform mypy
         run: |
-          mypy --config-file mypy.ini . --explicit-package-bases
+          pixi run -e gh-actions mypy --config-file mypy.ini . --explicit-package-bases
       - name: Perform docstrfmt
         run: |
-          docstrfmt --check docs/source/
+          pixi run -e gh-actions docstrfmt --check docs/source/

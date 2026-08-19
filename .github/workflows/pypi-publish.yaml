@@ -2,7 +2,7 @@ name: Upload aiaccel package to PyPI
 
 on:
   schedule:
-  - cron: '0 0 1 * *'
+    - cron: '0 0 1 * *'
   workflow_dispatch:
 
 concurrency:
@@ -18,10 +18,10 @@ jobs:
       tag: ${{ steps.get_version.outputs.tag }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          fetch-tags:  true
+          fetch-tags: true
 
       - name: Check for commits since last tag
         id: check_commits
@@ -52,28 +52,20 @@ jobs:
     needs: check_commits
     if: needs.check_commits.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
-    env:
-      PIP_INDEX_URL: https://download.pytorch.org/whl/cpu
-      PIP_EXTRA_INDEX_URL: https://pypi.org/simple
     permissions:
       contents: write
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          fetch-tags:  true
+          fetch-tags: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Pixi
+        uses: prefix-dev/setup-pixi@v0.9.6
         with:
-          cache: 'pip'
-          cache-dependency-path: pyproject.toml
-
-      - name: Install dependencies
-        run: |
-          pip install -e .[dev,github-actions]
+          environments: gh-actions
 
       - name: Update and push tag
         run: |
@@ -84,7 +76,7 @@ jobs:
 
       - name: Build package
         run: |
-          hatch build
+          pixi run -e gh-actions hatch build
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

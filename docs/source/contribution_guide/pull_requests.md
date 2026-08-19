@@ -28,7 +28,7 @@ git checkout -b feature/add-new-feature
 - Commit on local by using `git add` and `git commit` command as you progress.
 
   - The commit message describes the motivation for the change, the nature of the bug, or details the enhancement.
-  - The message should be written in such a way that their contents can be  understood without refering code.
+  - The message should be written in such a way that their contents can be  understood without referring code.
 
 
 ## Submitting
