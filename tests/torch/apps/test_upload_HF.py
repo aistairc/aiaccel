@@ -60,8 +60,9 @@ def test_remove_fullpath(workspace_factory: Callable[..., AbstractContextManager
 
         # test
         pathremoved_ckpt = torch.load(workspace / "checkpoints" / "pathremoved.ckpt", map_location="cpu")
-        assert "Fullpath" not in pathremoved_ckpt
+        assert "FullPath1" not in pathremoved_ckpt
 
         pathremoved_config = oc.to_container(oc.load(workspace / "pathremoved_config.yaml"))
         assert isinstance(pathremoved_config, dict)
-        assert "Fullpath" not in pathremoved_config
+        assert "FullPath" not in pathremoved_config
+        assert pathremoved_config["NotFullPath"] == "notfullpath"
