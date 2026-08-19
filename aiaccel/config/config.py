@@ -221,7 +221,7 @@ def replace_config(
     if isinstance(raw_config, DictConfig) and isinstance(merged_config, DictConfig):
         # process _replace
         if "_replace_" in raw_config and raw_config["_replace_"]:
-            merged_config = raw_config
+            merged_config = raw_config.copy()
             merged_config.pop("_replace_")
         # check child DictConfig
         for key in raw_config:
