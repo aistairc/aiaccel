@@ -76,3 +76,52 @@ def test_remove_fullpath(mocker: MockerFixture, workspace_factory: Callable[...,
         assert isinstance(pathremoved_config, dict)
         assert "FullPath" not in pathremoved_config
         assert pathremoved_config["NotFullPath"] == "notfullpath"
+
+
+def test_upload_huggingface(
+    mocker: MockerFixture, workspace_factory: Callable[..., AbstractContextManager[Path]]
+) -> None:
+    with workspace_factory() as workspace:
+        # Setup
+        ckpt = {"state_dict": {"layer1": 0.1}}
+        torch.save(ckpt, workspace / "checkpoints" / "merged.ckpt")
+
+        config = {"foo": "bar"}
+        with open(workspace / "config.yaml", "w") as f:
+            oc.save(config, f)
+
+        mocker.patch(
+            "sys.argv",
+            [
+                "upload_huggingface",
+                "--config_path",
+                str(workspace / "config.yaml"),
+                "--ckpt_path",
+                str(workspace / "checkpoints" / "merged.ckpt"),
+                "--repo_id",
+                "test/model",
+                "--repo_type",
+                "model",
+            ],
+        )
+
+        mock_yes_no = mocker.patch(
+            "aiaccel.torch.apps.upload_huggingface.yes_no_input",
+            return_value=True,
+        )
+        mock_login = mocker.patch("aiaccel.torch.apps.upload_huggingface.login")
+        mock_repo_exists = mocker.patch(
+            "aiaccel.torch.apps.upload_huggingface.repo_exists",
+            return_value=True,
+        )
+        mock_upload_file = mocker.patch("aiaccel.torch.apps.upload_huggingface.upload_file")
+
+        upload_huggingface.main()
+
+        mock_yes_no.assert_called_once()
+        mock_login.assert_called_once()
+        mock_repo_exists.assert_called_once_with(
+            repo_id="test/model",
+            repo_type="model",
+        )
+        assert mock_upload_file.call_count == 2
