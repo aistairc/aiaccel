@@ -25,9 +25,16 @@ def test_default(base_args: list[str], tmp_path: Path, monkeypatch: pytest.Monke
     subprocess.run(cmd + base_args + [log_path, "--", "sleep", "0"], check=True)
 
 
-def test_config_from_argparse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    "log_path",
+    [
+        "test.log",
+        "log dir/test log.log",
+    ],
+)
+def test_config_from_argparse(log_path: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
+    log_path = tmp_path / log_path
 
     config_path = Path(__file__).parent / "config" / "custom_local.yaml"
 
