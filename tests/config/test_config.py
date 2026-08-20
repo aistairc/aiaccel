@@ -179,6 +179,45 @@ model:
     assert config == expected_config
 
 
+def test_replace_config_with_multiple_bases(tmp_path: Path) -> None:
+    base1_path = tmp_path / "base1.yaml"
+    base1_path.write_text(
+        """
+x:
+  a: 1
+""".lstrip()
+    )
+
+    base2_path = tmp_path / "base2.yaml"
+    base2_path.write_text(
+        """
+x:
+  b: 2
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_:
+  - base1.yaml
+  - base2.yaml
+
+x:
+  _replace_: true
+  c: 3
+""".lstrip()
+    )
+
+    config = load_config(config_path)
+
+    assert config == {
+        "x": {
+            "c": 3,
+        }
+    }
+
+
 def test_replace_config_nested(tmp_path: Path) -> None:
     """Nested _replace_ replaces only the specified mapping."""
     base_path = tmp_path / "base.yaml"
