@@ -188,7 +188,7 @@ def load_config(
     if not isinstance(config, DictConfig):
         return config
 
-    base_config = oc.create({})
+    base_config = None
 
     if "_base_" in config:
         base_paths = config.pop("_base_")
@@ -200,8 +200,13 @@ def load_config(
             if not base_path.is_absolute():
                 base_path = config_filename.parent / base_path
 
-            base_config = merge_config(load_config(base_path), base_config)
-        config = merge_config(base_config, config)
+            base_config = (
+                merge_config(oc.create({}), load_config(base_path))
+                if base_config is None
+                else merge_config(load_config(base_path), base_config)
+            )
+        if base_config is not None:
+            config = merge_config(base_config, config)
 
     if parent_config is not None:
         config = merge_config(config, oc.create(parent_config))
