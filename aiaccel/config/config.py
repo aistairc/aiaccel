@@ -246,15 +246,16 @@ def merge_config(base: DictConfig | ListConfig, override: DictConfig | ListConfi
         for key in override:
             assert isinstance(key, str)
             if key == "_replace_":
+                # Remove _replace_
                 continue
 
-            if (
-                not oc.is_interpolation(override, key)
-                and key in result
-                and isinstance(result[key], DictConfig)
-                and isinstance(override[key], DictConfig)
-            ):
-                result[key] = merge_config(result[key], override[key])
+            if oc.is_interpolation(override, key):
+                result[key] = unresolved[key]
+
+            elif isinstance(override[key], DictConfig):
+                child_base = result[key] if key in result and isinstance(result[key], DictConfig) else DictConfig({})
+                result[key] = merge_config(child_base, override[key])
+
             else:
                 result[key] = unresolved[key]
 
