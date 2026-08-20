@@ -200,8 +200,8 @@ def load_config(
             if not base_path.is_absolute():
                 base_path = config_filename.parent / base_path
 
-            base_config = load_config(base_path)
-            config = merge_config(base_config, config)
+            base_config = merge_config(load_config(base_path), base_config)
+        config = merge_config(base_config, config)
 
     if parent_config is not None:
         config = merge_config(config, oc.create(parent_config))
