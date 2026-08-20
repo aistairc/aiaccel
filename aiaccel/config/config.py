@@ -248,11 +248,13 @@ def merge_config(base: DictConfig | ListConfig, override: DictConfig | ListConfi
             if key == "_replace_":
                 continue
 
-            if not oc.is_interpolation(override, key) and key in result:
-                if isinstance(result[key], DictConfig) and isinstance(override[key], DictConfig):
-                    result[key] = merge_config(result[key], override[key])
-                else:
-                    result[key] = unresolved[key]
+            if (
+                not oc.is_interpolation(override, key)
+                and key in result
+                and isinstance(result[key], DictConfig)
+                and isinstance(override[key], DictConfig)
+            ):
+                result[key] = merge_config(result[key], override[key])
             else:
                 result[key] = unresolved[key]
 
