@@ -200,7 +200,7 @@ def load_config(
     if parent_config is not None:
         config = merge_config(config, oc.create(parent_config))
 
-    _remove_replace(config)
+    _remove_replace(config)  # Remove the remaining _replace_
 
     return config
 
