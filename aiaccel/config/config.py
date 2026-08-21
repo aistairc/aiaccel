@@ -193,7 +193,19 @@ def load_config(
     Returns:
         The loaded and merged configuration with ``_base_`` resolved.
     """
+    config = load_config_resolve_base(config_filename)
 
+    if parent_config is not None:
+        config = merge_config(config, oc.create(parent_config))
+
+    remove_replace(config)
+
+    return config
+
+
+def load_config_resolve_base(
+    config_filename: str | Path,
+) -> DictConfig | ListConfig:
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
 
@@ -218,15 +230,12 @@ def load_config(
                 base_path = config_filename.parent / base_path
 
             base_config = (
-                load_config(base_path) if base_config is None else merge_config(load_config(base_path), base_config)
+                load_config_resolve_base(base_path)
+                if base_config is None
+                else merge_config(load_config_resolve_base(base_path), base_config)
             )
         if base_config is not None:
             config = merge_config(base_config, config)
-
-    if parent_config is not None:
-        config = merge_config(config, oc.create(parent_config))
-
-    remove_replace(config)
 
     return config
 
