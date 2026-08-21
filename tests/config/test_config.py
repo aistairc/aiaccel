@@ -258,6 +258,72 @@ outer:
     assert config == expected_config
 
 
+def test_replace_in_later_base_discards_earlier_base(tmp_path: Path) -> None:
+    base1_path = tmp_path / "base1.yaml"
+    base1_path.write_text(
+        """
+x:
+  a: 1
+""".lstrip()
+    )
+
+    base2_path = tmp_path / "base2.yaml"
+    base2_path.write_text(
+        """
+x:
+  _replace_: true
+  b: 2
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_:
+  - base1.yaml
+  - base2.yaml
+""".lstrip()
+    )
+
+    config = load_config(config_path)
+
+    assert config == {
+        "x": {
+            "b": 2,
+        }
+    }
+
+
+def test_replace_in_leaf_base_is_consumed(tmp_path: Path) -> None:
+    base_path = tmp_path / "base.yaml"
+    base_path.write_text(
+        """
+x:
+  _replace_: true
+  a: 1
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_: base.yaml
+
+x:
+  b: 2
+""".lstrip()
+    )
+
+    config = load_config(config_path)
+
+    assert config == {
+        "x": {
+            "a": 1,
+            "b": 2,
+        }
+    }
+
+
 def test_replace_config_with_recursive_base(tmp_path: Path) -> None:
     """_replace_ works when _base_ is recursively defined."""
     grand_base_path = tmp_path / "grand_base.yaml"
