@@ -116,6 +116,39 @@ Here ``config_base.yaml`` is loaded first and ``config.yaml`` overwrites any ove
 values. Because :func:`~aiaccel.config.load_config` resolves ``_base_`` recursively,
 base files can themselves declare additional bases.
 
+The ``_replace_`` attribute replaces the entire mapping at that node after ``_base_``
+has been resolved. Use it when you want to discard the inherited keys under a section
+and define that section from scratch.
+
+Example configuration:
+
+.. code-block:: yaml
+    :caption: config_base.yaml
+
+    params:
+      _convert_: partial
+      _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
+      x1: [0, 10]
+      x2: [10, 20]
+
+.. code-block:: yaml
+    :caption: config.yaml
+
+    _base_: config_base.yaml
+
+    params:
+      _replace_: true
+      _convert_: partial
+      _target_: aiaccel.hpo.optuna.hparams_manager.HparamsManager
+      x1: [0, 1]
+
+    n_trials: 100
+    n_max_jobs: 4
+
+After loading, ``params`` contains only ``x1``. The ``x2`` entry from
+``config_base.yaml`` is dropped because ``params`` is replaced as a whole instead of
+being merged with the base mapping.
+
 Reusing fragments with ``_inherit_``
 ====================================
 
