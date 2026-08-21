@@ -152,6 +152,7 @@ def prepare_config(
 
 
 def _remove_replace(config: DictConfig | ListConfig) -> None:
+    """Remove remaining ``_replace_`` directives recursively."""
     if isinstance(config, DictConfig):
         config.pop("_replace_", None)
 
@@ -208,6 +209,7 @@ def load_config(
 def _load_config_resolve_base(
     config_filename: str | Path,
 ) -> DictConfig | ListConfig:
+    """Load a configuration and resolve ``_base_`` without removing ``_replace_`` directives."""
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
 
