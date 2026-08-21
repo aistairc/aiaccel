@@ -151,6 +151,23 @@ def prepare_config(
     return config
 
 
+def remove_replace(config: DictConfig | ListConfig) -> None:
+    if isinstance(config, DictConfig):
+        config.pop("_replace_", None)
+
+        for key in config:
+            assert isinstance(key, str)
+            if not oc.is_interpolation(config, key):
+                value = config[key]
+                if isinstance(value, (DictConfig, ListConfig)):
+                    remove_replace(value)
+
+    elif isinstance(config, ListConfig):
+        for value in config:
+            if isinstance(value, (DictConfig, ListConfig)):
+                remove_replace(value)
+
+
 def load_config(
     config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
@@ -201,15 +218,15 @@ def load_config(
                 base_path = config_filename.parent / base_path
 
             base_config = (
-                merge_config(oc.create({}), load_config(base_path))
-                if base_config is None
-                else merge_config(load_config(base_path), base_config)
+                load_config(base_path) if base_config is None else merge_config(load_config(base_path), base_config)
             )
         if base_config is not None:
             config = merge_config(base_config, config)
 
     if parent_config is not None:
         config = merge_config(config, oc.create(parent_config))
+
+    remove_replace(config)
 
     return config
 
