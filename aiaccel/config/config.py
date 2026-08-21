@@ -245,23 +245,23 @@ def _load_config_resolve_base(
 def merge_config(base: DictConfig | ListConfig, override: DictConfig | ListConfig) -> DictConfig | ListConfig:
     """Merge an override configuration into a base configuration.
 
-    Values in ``override_config`` take precedence over values in
-    ``base_config``. Mapping values are merged recursively.
+    Values in ``override`` take precedence over values in ``base``.
+    ``DictConfig`` values are merged recursively, while ``ListConfig`` values
+    are replaced by the corresponding value in ``override``.
 
-    If a mapping in ``override_config`` contains ``_replace_: true``, the
-    corresponding mapping inherited from ``base_config`` is discarded and
-    replaced entirely by the override mapping. The ``_replace_`` key is used
-    only as a merge directive and is not included in the resulting
-    configuration.
+    If a mapping in ``override`` contains ``_replace_: true``, the
+    corresponding mapping in ``base`` is discarded and replaced entirely by
+    the override mapping. The ``_replace_`` key is treated as a merge
+    directive and is not included in the merged mapping.
 
-    OmegaConf interpolations in ``override_config`` are preserved without
-    being resolved during the merge.
+    OmegaConf interpolations in ``override`` are preserved without being
+    resolved during the merge.
 
     Args:
-        base_config:
+        base:
             The configuration providing inherited values.
-        override_config:
-            The configuration whose values override the base configuration.
+        override:
+            The configuration whose values take precedence over ``base``.
 
     Returns:
         A new configuration containing the merged result.
