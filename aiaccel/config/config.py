@@ -163,9 +163,11 @@ def remove_replace(config: DictConfig | ListConfig) -> None:
                     remove_replace(value)
 
     elif isinstance(config, ListConfig):
-        for value in config:
-            if isinstance(value, (DictConfig, ListConfig)):
-                remove_replace(value)
+        for index in range(len(config)):
+            if oc.is_interpolation(config, index):
+                value = config[index]
+                if isinstance(value, (DictConfig, ListConfig)):
+                    remove_replace(value)
 
 
 def load_config(
