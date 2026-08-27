@@ -1,0 +1,30 @@
+name: Slurm CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  slurm:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker info
+        run: |
+          docker info
+          docker info | grep -i cgroup || true
+
+      - name: Run Slurm smoke test
+        run: |
+          ci/slurm/test.sh
+
+      - name: Dump Slurm diagnostics
+        if: failure()
+        run: |
+          docker ps -a || true
+          docker logs slurm || true
+          docker exec slurm sinfo || true
+          docker exec slurm squeue -l || true
