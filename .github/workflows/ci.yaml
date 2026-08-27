@@ -31,7 +31,7 @@ jobs:
             --cov-report=term-missing \
             tests/${{ matrix.test_target }}
   ci-job-local:
-    name: CI
+    name: CI / job / local
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
