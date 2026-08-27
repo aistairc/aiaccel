@@ -18,8 +18,7 @@ jobs:
           docker info | grep -i cgroup || true
 
       - name: Run Slurm smoke test
-        run: |
-          ci/slurm/test.sh
+        run: bash ci/slurm/test.sh
 
       - name: Dump Slurm diagnostics
         if: failure()
