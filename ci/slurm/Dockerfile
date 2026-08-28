@@ -1,11 +1,16 @@
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/root/.pixi/bin:${PATH}"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
         munge \
         slurm-wlm \
+    && curl -fsSL https://pixi.sh/install.sh | bash \
     && rm -rf /var/lib/apt/lists/*
 
 COPY slurm.conf /etc/slurm/slurm.conf
