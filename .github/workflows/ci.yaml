@@ -54,7 +54,7 @@ jobs:
             --cov-report=term-missing \
             tests/job/apps/local.py
   ci-job-slurm:
-    name: CI (${{ matrix.os }}, ${{ matrix.python }}, job/local)
+    name: CI (${{ matrix.os }}, ${{ matrix.python }}, job/slurm)
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
