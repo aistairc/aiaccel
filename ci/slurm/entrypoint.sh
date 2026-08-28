@@ -13,10 +13,6 @@ mkdir -p /sys/fs/cgroup/daemons
 # Move PID 1 (this entrypoint) into a child cgroup.
 echo $$ > /sys/fs/cgroup/daemons/cgroup.procs
 
-# Enable controllers for child cgroups.
-# echo "+cpuset +cpu +memory" \
-#     > /sys/fs/cgroup/cgroup.subtree_control
-
 #
 # Prepare Munge.
 #
