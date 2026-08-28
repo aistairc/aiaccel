@@ -111,13 +111,6 @@ jobs:
             pixi run -e gh-actions pytest -v \
             tests/job/apps/slurm.py
 
-      - name: Slurm logs
-        if: always()
-        run: |
-          docker logs slurm || true
-          docker exec slurm sinfo || true
-          docker exec slurm squeue -l || true
-
       - name: Stop Slurm
         if: always()
         run: |
