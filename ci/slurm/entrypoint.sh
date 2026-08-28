@@ -3,17 +3,6 @@
 set -euo pipefail
 
 #
-# Prepare cgroup v2 hierarchy.
-#
-# Keep the container root cgroup empty so controllers can be
-# delegated to child cgroups.
-#
-mkdir -p /sys/fs/cgroup/daemons
-
-# Move PID 1 (this entrypoint) into a child cgroup.
-echo $$ > /sys/fs/cgroup/daemons/cgroup.procs
-
-#
 # Prepare Munge.
 #
 mkdir -p \
