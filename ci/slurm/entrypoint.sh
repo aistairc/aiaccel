@@ -14,8 +14,8 @@ mkdir -p /sys/fs/cgroup/daemons
 echo $$ > /sys/fs/cgroup/daemons/cgroup.procs
 
 # Enable controllers for child cgroups.
-echo "+cpuset +cpu +memory" \
-    > /sys/fs/cgroup/cgroup.subtree_control
+# echo "+cpuset +cpu +memory" \
+#     > /sys/fs/cgroup/cgroup.subtree_control
 
 #
 # Prepare Munge.
