@@ -53,3 +53,68 @@ jobs:
             --cov-append \
             --cov-report=term-missing \
             tests/job/apps/local.py
+ci-job-slurm:
+  name: CI / Job / Slurm
+  runs-on: ubuntu-24.04
+
+  steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - uses: docker/setup-buildx-action@v3
+
+    - name: Build Slurm image
+      uses: docker/build-push-action@v6
+      with:
+        context: ci/schedulers/slurm
+        tags: slurm-ci:latest
+        load: true
+
+    - name: Start Slurm
+      run: |
+        docker run \
+          --name slurm \
+          --hostname slurm \
+          --privileged \
+          --cgroupns=private \
+          -v "$GITHUB_WORKSPACE:/workspace" \
+          -w /workspace \
+          -d \
+          slurm-ci:latest
+
+    - name: Wait for Slurm
+      run: |
+        for i in $(seq 1 30); do
+          if docker exec slurm sinfo >/dev/null 2>&1; then
+            docker exec slurm sinfo
+            exit 0
+          fi
+          sleep 1
+        done
+
+        docker logs slurm
+        exit 1
+
+    - name: Install test environment
+      run: |
+        docker exec slurm \
+          pixi install -e gh-actions
+
+    - name: Run Slurm tests
+      run: |
+        docker exec slurm \
+          pixi run -e gh-actions pytest -v \
+          tests/job/apps/slurm.py
+
+    - name: Slurm logs
+      if: always()
+      run: |
+        docker logs slurm || true
+        docker exec slurm sinfo || true
+        docker exec slurm squeue -l || true
+
+    - name: Stop Slurm
+      if: always()
+      run: |
+        docker rm -f slurm || true
