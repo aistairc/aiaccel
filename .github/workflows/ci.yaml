@@ -67,7 +67,7 @@ jobs:
       - name: Build Slurm image
         uses: docker/build-push-action@v6
         with:
-          context: ci/schedulers/slurm
+          context: ci/slurm
           tags: slurm-ci:latest
           load: true
 
