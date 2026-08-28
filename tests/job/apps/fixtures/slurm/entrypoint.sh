@@ -49,12 +49,8 @@ slurmctld
 #
 mkdir -p /sys/fs/cgroup/system.slice
 
-#
-# IMPORTANT:
-# Do not use "exec slurmd -D".
-#
-# Keep entrypoint.sh as PID 1.
-#
+# Keep the entrypoint as PID 1 because slurmd expects the cgroup hierarchy
+# created above when running without systemd.
 slurmd -D &
 slurmd_pid=$!
 
