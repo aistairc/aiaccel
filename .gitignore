@@ -133,7 +133,6 @@ docs/source/api_reference/generated
 # Docker
 .devcontainer
 Dockerfile
-!tests/job/apps/fixtures/slurm/Dockerfile
 
 # ruff
 .ruff_cache
