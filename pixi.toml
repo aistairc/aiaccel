@@ -5,6 +5,8 @@ exclude-newer = "14d"
 
 [dependencies]
 python = ">=3.10,<3.11"
+numpy = ">=1.23"
+scipy = ">=1.3"
 
 [feature.dev.dependencies]
 mypy = "*"
@@ -34,6 +36,11 @@ sphinx-fontawesome = "*"
 sphinx_design = "*"
 undecorated = "*"
 matplotlib = "*"
+GPy = "*"
+scikit-learn = "*"
+
+[feature.dev.pypi-options]
+no-build = ["gpy"]
 
 [feature.gh-actions.dependencies]
 pytest-github-actions-annotate-failures = "*"

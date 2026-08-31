@@ -45,6 +45,7 @@ aiaccel-job = "aiaccel.launcher:main"
 aiaccel-config = "aiaccel.launcher:main"
 aiaccel-torch = "aiaccel.launcher:main"
 aiaccel-hpo = "aiaccel.launcher:main"
+aiaccel-modelbridge = "aiaccel.modelbridge.apps:main"
 aiaccel-workflow = "aiaccel.launcher:main"
 
 
@@ -84,3 +85,9 @@ section-order = [
 "torch" = ["torch"]
 "torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
 "audio" = ["librosa", "pypesq", "pystoi", "soundfile"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # Optional GPy/paramz emits deprecated assign output warnings; ignore for modelbridge tests.
+    "ignore::DeprecationWarning:paramz.*",
+]
