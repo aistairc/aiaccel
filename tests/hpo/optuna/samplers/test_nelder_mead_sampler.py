@@ -240,7 +240,7 @@ class BaseTestNelderMead:
         self,
         search_space: dict[str, tuple[int | float, int | float]],
         objective: Callable[[list[float]], float],
-        result_file_name: str | None,
+        result_file_name: str,
         study: optuna.Study,
         n_jobs: int = 1,
     ) -> None:
@@ -250,12 +250,11 @@ class BaseTestNelderMead:
         self.n_jobs = n_jobs
 
         cwd = Path(__file__).resolve().parent
-        self.results_csv_path = cwd.joinpath(result_file_name) if result_file_name is not None else None
+        self.results_csv_path = cwd.joinpath(result_file_name)
 
     def test_sampler(self) -> None:
         self.optimize()
 
-        assert self.results_csv_path is not None
         with open(self.results_csv_path) as f:
             results = list(csv.DictReader(f))
 
@@ -428,7 +427,7 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
         self.common_setup(
             search_space=search_space,
             objective=ackley_sleep,
-            result_file_name=None,
+            result_file_name="results_ackley_sub_sampler.csv",
             study=optuna.create_study(sampler=sampler),
         )
 
@@ -451,20 +450,12 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
                     frozentrial = self.study.tell(trial, value)
                     self.study._log_completed_trial([value], frozentrial.number, frozentrial.params)
 
-    def test_sampler(self) -> None:
-        self.optimize()
-
-        trials = self.study.trials
-        assert len(trials) == 150
-        assert any("params" in trial.system_attrs for trial in trials)
-        assert any(trial.system_attrs.get("sub_trial") for trial in trials)
-
-        for trial in trials:
-            assert set(trial.params) == set(self.search_space)
-            assert trial.values is not None
-            for name, (low, high) in self.search_space.items():
-                assert low <= trial.params[name] <= high
-            assert math.isclose(trial.values[0], ackley([trial.params["x"], trial.params["y"]]), rel_tol=0.000001)
+    def validation(self, results: list[dict[str | Any, str | Any]]) -> None:
+        trials = [trial for trial in self.study.trials if len(trial.params) > 0]
+        for trial, result in zip(trials, results, strict=False):
+            assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
+            assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
+            assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
 
 
 class TestNelderMeadAckleyInteger(BaseTestNelderMead):
