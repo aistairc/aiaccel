@@ -74,8 +74,17 @@ jobs:
 
       - name: Configure Slurm
         run: |
+          HOSTNAME="$(hostname -s)"
+          NODE_CONFIG="$(slurmd -C | head -n 1)"
+
           sudo cp \
             tests/job/apps/fixtures/slurm/slurm.conf \
+            /etc/slurm/slurm.conf
+
+          sudo sed -i \
+            -e "s/^SlurmctldHost=.*/SlurmctldHost=${HOSTNAME}/" \
+            -e "s/^NodeName=.*/${NODE_CONFIG}/" \
+            -e "s/Nodes=slurm/Nodes=${HOSTNAME}/" \
             /etc/slurm/slurm.conf
 
           sudo mkdir -p \
@@ -89,6 +98,9 @@ jobs:
 
           sudo chown root:root \
             /var/spool/slurmd
+
+          echo "=== /etc/slurm/slurm.conf ==="
+          cat /etc/slurm/slurm.conf
 
       - name: Start Slurm
         run: |
