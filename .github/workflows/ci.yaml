@@ -181,7 +181,7 @@ jobs:
           cd /tmp/openpbs
 
           ./autogen.sh
-          ./configure --prefix=/opt/pbs
+          PYTHON=/usr/bin/python3 ./configure --prefix=/opt/pbs
 
           make -j"$(nproc)"
           sudo make install
