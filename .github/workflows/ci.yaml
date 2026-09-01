@@ -144,39 +144,32 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            gcc \
-            g++ \
-            make \
+            git \
+            build-essential \
+            m4 \
+            autoconf \
+            automake \
             libtool \
             libhwloc-dev \
             libx11-dev \
             libxt-dev \
             libedit-dev \
             libical-dev \
-            ncurses-dev \
-            perl \
-            postgresql-server-dev-all \
-            postgresql-contrib \
+            libncurses-dev \
+            libpq-dev \
             python3-dev \
             tcl-dev \
             tk-dev \
             swig \
-            libexpat-dev \
+            libexpat1-dev \
             libssl-dev \
             libxext-dev \
             libxft-dev \
-            autoconf \
-            automake \
-            libcjson-dev \
+            pkg-config \
             expat \
-            libedit2 \
             postgresql \
-            python3 \
-            sendmail-bin \
-            sudo \
-            tcl \
-            tk \
-            libical3
+            perl \
+            sendmail-bin
 
       - name: Build OpenPBS
         run: |
