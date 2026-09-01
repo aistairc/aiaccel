@@ -1,4 +1,5 @@
 # tests/job/apps/config/custom_pbs.yaml
+_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
 
 walltime: "00:10:00"
 
