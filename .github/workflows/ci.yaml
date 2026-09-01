@@ -181,9 +181,13 @@ jobs:
           cd /tmp/openpbs
 
           ./autogen.sh
-          pixi run -m ~/pixi.toml -e gh-actions ./configure --prefix=/opt/pbs
-
-          make -j"$(nproc)"
+          pixi run \
+            -m "${{ github.workspace }}/pixi.toml" \
+            -e gh-actions \
+            bash -c '
+              ./configure --prefix=/opt/pbs
+              make -j"$(nproc)"
+            '
           sudo make install
 
           sudo /opt/pbs/libexec/pbs_postinstall
