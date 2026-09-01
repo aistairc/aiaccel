@@ -127,114 +127,114 @@ jobs:
         run: |
           pixi run -e gh-actions pytest -v \
             tests/job/apps/slurm.py
-ci-job-pbs:
-  name: CI (ubuntu-24.04, job/pbs)
-  runs-on: ubuntu-24.04
+  ci-job-pbs:
+    name: CI (ubuntu-24.04, job/pbs)
+    runs-on: ubuntu-24.04
 
-  steps:
-    - uses: actions/checkout@v5
-      with:
-        fetch-depth: 0
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
-    - uses: prefix-dev/setup-pixi@v0.9.6
-      with:
-        environments: gh-actions
+      - uses: prefix-dev/setup-pixi@v0.9.6
+        with:
+          environments: gh-actions
 
-    - name: Install OpenPBS dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          gcc \
-          g++ \
-          make \
-          libtool \
-          libhwloc-dev \
-          libx11-dev \
-          libxt-dev \
-          libedit-dev \
-          libical-dev \
-          ncurses-dev \
-          perl \
-          postgresql-server-dev-all \
-          postgresql-contrib \
-          python3-dev \
-          tcl-dev \
-          tk-dev \
-          swig \
-          libexpat-dev \
-          libssl-dev \
-          libxext-dev \
-          libxft-dev \
-          autoconf \
-          automake \
-          libcjson-dev \
-          expat \
-          libedit2 \
-          postgresql \
-          python3 \
-          sendmail-bin \
-          sudo \
-          tcl \
-          tk \
-          libical3
+      - name: Install OpenPBS dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            g++ \
+            make \
+            libtool \
+            libhwloc-dev \
+            libx11-dev \
+            libxt-dev \
+            libedit-dev \
+            libical-dev \
+            ncurses-dev \
+            perl \
+            postgresql-server-dev-all \
+            postgresql-contrib \
+            python3-dev \
+            tcl-dev \
+            tk-dev \
+            swig \
+            libexpat-dev \
+            libssl-dev \
+            libxext-dev \
+            libxft-dev \
+            autoconf \
+            automake \
+            libcjson-dev \
+            expat \
+            libedit2 \
+            postgresql \
+            python3 \
+            sendmail-bin \
+            sudo \
+            tcl \
+            tk \
+            libical3
 
-    - name: Build OpenPBS
-      run: |
-        git clone --depth 1 \
-          https://github.com/openpbs/openpbs.git \
-          /tmp/openpbs
+      - name: Build OpenPBS
+        run: |
+          git clone --depth 1 \
+            https://github.com/openpbs/openpbs.git \
+            /tmp/openpbs
 
-        cd /tmp/openpbs
+          cd /tmp/openpbs
 
-        ./autogen.sh
-        ./configure --prefix=/opt/pbs
+          ./autogen.sh
+          ./configure --prefix=/opt/pbs
 
-        make -j"$(nproc)"
-        sudo make install
+          make -j"$(nproc)"
+          sudo make install
 
-        sudo /opt/pbs/libexec/pbs_postinstall
+          sudo /opt/pbs/libexec/pbs_postinstall
 
-    - name: Configure PBS
-      run: |
-        HOSTNAME="$(hostname -s)"
+      - name: Configure PBS
+        run: |
+          HOSTNAME="$(hostname -s)"
 
-        sudo sed -i \
-          's/^PBS_START_MOM=.*/PBS_START_MOM=1/' \
-          /etc/pbs.conf
+          sudo sed -i \
+            's/^PBS_START_MOM=.*/PBS_START_MOM=1/' \
+            /etc/pbs.conf
 
-        sudo chmod 4755 \
-          /opt/pbs/sbin/pbs_iff \
-          /opt/pbs/sbin/pbs_rcp
+          sudo chmod 4755 \
+            /opt/pbs/sbin/pbs_iff \
+            /opt/pbs/sbin/pbs_rcp
 
-        echo "/opt/pbs/bin" >> "$GITHUB_PATH"
-        echo "/opt/pbs/sbin" >> "$GITHUB_PATH"
+          echo "/opt/pbs/bin" >> "$GITHUB_PATH"
+          echo "/opt/pbs/sbin" >> "$GITHUB_PATH"
 
-    - name: Start PBS
-      run: |
-        sudo /opt/pbs/libexec/pbs_init.d start
+      - name: Start PBS
+        run: |
+          sudo /opt/pbs/libexec/pbs_init.d start
 
-        HOSTNAME="$(hostname -s)"
+          HOSTNAME="$(hostname -s)"
 
-        sudo /opt/pbs/bin/qmgr \
-          -c "create node ${HOSTNAME}"
+          sudo /opt/pbs/bin/qmgr \
+            -c "create node ${HOSTNAME}"
 
-    - name: Wait for PBS
-      run: |
-        for i in $(seq 1 30); do
-          if /opt/pbs/bin/qstat -B >/dev/null 2>&1; then
-            /opt/pbs/bin/qstat -B
-            /opt/pbs/bin/pbsnodes -a
-            exit 0
-          fi
+      - name: Wait for PBS
+        run: |
+          for i in $(seq 1 30); do
+            if /opt/pbs/bin/qstat -B >/dev/null 2>&1; then
+              /opt/pbs/bin/qstat -B
+              /opt/pbs/bin/pbsnodes -a
+              exit 0
+            fi
 
-          sleep 1
-        done
+            sleep 1
+          done
 
-        sudo cat /var/spool/pbs/server_logs/* || true
-        sudo cat /var/spool/pbs/mom_logs/* || true
-        exit 1
+          sudo cat /var/spool/pbs/server_logs/* || true
+          sudo cat /var/spool/pbs/mom_logs/* || true
+          exit 1
 
-    - name: Run PBS tests
-      run: |
-        pixi run -e gh-actions pytest -v \
-          tests/job/apps/pbs.py
+      - name: Run PBS tests
+        run: |
+          pixi run -e gh-actions pytest -v \
+            tests/job/apps/pbs.py
