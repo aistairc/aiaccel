@@ -207,10 +207,11 @@ jobs:
         run: |
           sudo /opt/pbs/libexec/pbs_init.d start
 
-          HOSTNAME="$(hostname -s)"
+          echo "=== Existing PBS nodes ==="
+          sudo /opt/pbs/bin/qmgr -c "list node"
 
-          sudo /opt/pbs/bin/qmgr \
-            -c "create node ${HOSTNAME}"
+          HOSTNAME="$(hostname -s)"
+          sudo /opt/pbs/bin/qmgr -c "create node ${HOSTNAME}"
 
       - name: Wait for PBS
         run: |
