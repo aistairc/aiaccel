@@ -181,7 +181,7 @@ jobs:
           cd /tmp/openpbs
 
           ./autogen.sh
-          pixi run ./configure --prefix=/opt/pbs
+          pixi run -m ~/pixi.toml -e gh-actions ./configure --prefix=/opt/pbs
 
           make -j"$(nproc)"
           sudo make install
