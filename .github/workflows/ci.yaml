@@ -185,7 +185,7 @@ jobs:
             -m "${{ github.workspace }}/pixi.toml" \
             -e gh-actions \
             bash -c '
-              ./configure --prefix=/opt/pbs
+              PYTHON="$(which python)" ./configure --prefix=/opt/pbs
               make -j"$(nproc)"
             '
           sudo make install
