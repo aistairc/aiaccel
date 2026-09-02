@@ -279,7 +279,18 @@ jobs:
 
           cd /opt/sge
 
-          sudo sh -c 'yes "" | ./install_qmaster'
+          if ! sudo sh -c 'yes "" | ./install_qmaster'; then
+            echo "=== sgemaster status ==="
+            sudo systemctl status sgemaster.service --no-pager || true
+
+            echo "=== sgemaster journal ==="
+            sudo journalctl -u sgemaster.service --no-pager || true
+
+            echo "=== qmaster messages ==="
+            sudo cat /opt/sge/default/spool/qmaster/messages || true
+
+            exit 1
+          fi
           sudo sh -c 'yes "" | ./install_execd'
 
           source /opt/sge/default/common/settings.sh
