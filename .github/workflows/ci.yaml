@@ -53,8 +53,8 @@ jobs:
             --cov-report=term-missing \
             tests/job/apps/local.py
   ci-job-slurm:
-    name: CI (ubuntu-22.04, job/slurm)
-    runs-on: ubuntu-22.04
+    name: CI (ubuntu-24.04, job/slurm)
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v5
