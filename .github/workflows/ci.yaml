@@ -361,10 +361,17 @@ jobs:
           SUBMIT_HOST="$(hostname -f)"
 
           echo "Register submit host: ${SUBMIT_HOST}"
-          sudo /opt/sge/bin/lx-amd64/qconf -as "${SUBMIT_HOST}"
+
+          sudo env \
+            SGE_ROOT=/opt/sge \
+            SGE_CELL=default \
+            /opt/sge/bin/lx-amd64/qconf -as "${SUBMIT_HOST}"
 
           echo "=== submit hosts ==="
-          /opt/sge/bin/lx-amd64/qconf -ss
+          sudo env \
+            SGE_ROOT=/opt/sge \
+            SGE_CELL=default \
+            /opt/sge/bin/lx-amd64/qconf -ss
 
           echo "/opt/sge/bin/lx-amd64" >> "$GITHUB_PATH"
           echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
