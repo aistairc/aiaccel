@@ -399,6 +399,34 @@ jobs:
           echo "=== queues ==="
           qconf -sql
 
+      - name: Verify SGE job execution
+        run: |
+          source /opt/sge/default/common/settings.sh
+
+          echo 'echo hello > /tmp/sge-test.out' | qsub -cwd
+
+          for i in $(seq 1 30); do
+            if [ -f /tmp/sge-test.out ]; then
+              cat /tmp/sge-test.out
+              exit 0
+            fi
+
+            qstat || true
+            sleep 1
+          done
+
+          echo "=== qstat ==="
+          qstat -f || true
+
+          echo "=== execd messages ==="
+          sudo find /opt/sge/default/spool \
+            -type f \
+            -name messages \
+            -print \
+            -exec cat {} \; || true
+
+          exit 1
+
       - name: Run SGE tests
         run: |
           source /opt/sge/default/common/settings.sh
