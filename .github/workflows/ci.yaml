@@ -431,5 +431,21 @@ jobs:
         run: |
           source /opt/sge/default/common/settings.sh
 
-          pixi run -e gh-actions pytest -v \
-            tests/job/apps/sge.py
+          timeout 60 \
+            pixi run -e gh-actions pytest -v \
+              tests/job/apps/sge.py || {
+                echo "=== qstat ==="
+                qstat -f || true
+
+                echo "=== test files ==="
+                find /tmp/pytest-of-runner \
+                  -maxdepth 5 \
+                  -type f \
+                  -print \
+                  -exec sh -c '
+                    echo "===== $1 ====="
+                    cat "$1" || true
+                  ' _ {} \; || true
+
+                exit 1
+              }
