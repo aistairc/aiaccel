@@ -286,14 +286,6 @@ jobs:
           echo "${IP_ADDRESS} ${SGE_HOSTNAME}" \
             | sudo tee -a /etc/hosts
 
-          echo "=== hostname ==="
-          hostname
-          hostname -s
-          hostname -f
-
-          echo "=== resolution ==="
-          getent hosts "${SGE_HOSTNAME}"
-
           test "$(hostname -f)" = "${SGE_HOSTNAME}"
 
       - name: Configure SGE
@@ -301,151 +293,25 @@ jobs:
           sudo useradd -r -d /opt/sge sge || true
           sudo chown -R sge /opt/sge
 
-          sudo tee /etc/default/sgemaster >/dev/null <<'EOF'
-          SGE_QMASTER_PORT=6444
-          SGE_EXECD_PORT=6445
-          export SGE_QMASTER_PORT
-          export SGE_EXECD_PORT
-          EOF
-
           cd /opt/sge
 
-          if ! sudo sh -c 'yes "" | ./install_qmaster'; then
-            sudo systemctl stop sgemaster.service || true
-
-            echo "=== qmaster foreground debug ==="
-
-            sudo -u sge env \
-              SGE_ROOT=/opt/sge \
-              SGE_CELL=default \
-              SGE_QMASTER_PORT=6444 \
-              SGE_EXECD_PORT=6445 \
-              SGE_ND=1 \
-              SGE_COMMLIB_DEBUG=1 \
-              timeout 40 \
-              /opt/sge/bin/lx-amd64/sge_qmaster || true
-
-            exit 1
-          fi
-
-          echo "=== qmaster started ==="
-          sudo systemctl status sgemaster.service \
-            --no-pager -l
-
-          if ! sudo sh -c 'yes "" | ./install_execd'; then
-            echo "=== sgeexecd status ==="
-            sudo systemctl status sgeexecd.service \
-              --no-pager -l || true
-
-            echo "=== sgeexecd journal ==="
-            sudo journalctl \
-              -u sgeexecd.service \
-              --no-pager \
-              -n 200 || true
-
-            echo "=== SGE messages ==="
-            sudo find /opt/sge/default \
-              -type f \
-              -name messages \
-              -exec sh -c '
-                echo "===== $1 ====="
-                cat "$1"
-              ' _ {} \; || true
-
-            exit 1
-          fi
-
-          export PATH="/opt/sge/bin/lx-amd64:${PATH}"
-          source /opt/sge/default/common/settings.sh
+          sudo sh -c 'yes "" | ./install_qmaster'
+          sudo sh -c 'yes "" | ./install_execd'
 
           SUBMIT_HOST="$(hostname -f)"
-
-          echo "Register submit host: ${SUBMIT_HOST}"
 
           sudo env \
             SGE_ROOT=/opt/sge \
             SGE_CELL=default \
             /opt/sge/bin/lx-amd64/qconf -as "${SUBMIT_HOST}"
 
-          echo "=== submit hosts ==="
-          sudo env \
-            SGE_ROOT=/opt/sge \
-            SGE_CELL=default \
-            /opt/sge/bin/lx-amd64/qconf -ss
-
           echo "/opt/sge/bin/lx-amd64" >> "$GITHUB_PATH"
           echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
           echo "SGE_CELL=default" >> "$GITHUB_ENV"
-
-      - name: Check SGE
-        run: |
-          source /opt/sge/default/common/settings.sh
-
-          echo "=== qhost ==="
-          qhost
-
-          echo "=== qhost -q ==="
-          qhost -q
-
-          echo "=== qstat ==="
-          qstat -f
-
-          echo "=== execution hosts ==="
-          qconf -sel
-
-          echo "=== submit hosts ==="
-          qconf -ss
-
-          echo "=== queues ==="
-          qconf -sql
-
-      - name: Verify SGE job execution
-        run: |
-          source /opt/sge/default/common/settings.sh
-
-          echo 'echo hello > /tmp/sge-test.out' | qsub -cwd
-
-          for i in $(seq 1 30); do
-            if [ -f /tmp/sge-test.out ]; then
-              cat /tmp/sge-test.out
-              exit 0
-            fi
-
-            qstat || true
-            sleep 1
-          done
-
-          echo "=== qstat ==="
-          qstat -f || true
-
-          echo "=== execd messages ==="
-          sudo find /opt/sge/default/spool \
-            -type f \
-            -name messages \
-            -print \
-            -exec cat {} \; || true
-
-          exit 1
 
       - name: Run SGE tests
         run: |
           source /opt/sge/default/common/settings.sh
 
-          timeout 60 \
-            pixi run -e gh-actions pytest -v \
-              tests/job/apps/sge.py || {
-                echo "=== qstat ==="
-                qstat -f || true
-
-                echo "=== test files ==="
-                find /tmp/pytest-of-runner \
-                  -maxdepth 5 \
-                  -type f \
-                  -print \
-                  -exec sh -c '
-                    echo "===== $1 ====="
-                    cat "$1" || true
-                  ' _ {} \; || true
-
-                exit 1
-              }
+          pixi run -e gh-actions pytest -v \
+            tests/job/apps/sge.py
