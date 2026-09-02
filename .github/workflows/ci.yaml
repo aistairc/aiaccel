@@ -274,27 +274,27 @@ jobs:
 
       - name: Configure hostname
         run: |
-          SHORT_HOSTNAME="$(hostname -s)"
-          FQDN="$(hostname -f)"
+          SGE_HOSTNAME="sge"
           IP_ADDRESS="$(hostname -I | awk '{print $1}')"
 
-          echo "SHORT_HOSTNAME=${SHORT_HOSTNAME}"
-          echo "FQDN=${FQDN}"
-          echo "IP_ADDRESS=${IP_ADDRESS}"
+          sudo hostname "${SGE_HOSTNAME}"
 
-          echo "${IP_ADDRESS} ${FQDN} ${SHORT_HOSTNAME}" \
+          sudo sed -i \
+            "/${IP_ADDRESS}/d" \
+            /etc/hosts
+
+          echo "${IP_ADDRESS} ${SGE_HOSTNAME}" \
             | sudo tee -a /etc/hosts
 
-          echo "=== /etc/hosts ==="
-          cat /etc/hosts
+          echo "=== hostname ==="
+          hostname
+          hostname -s
+          hostname -f
 
-          echo "=== hostname resolution ==="
-          getent hosts "${SHORT_HOSTNAME}"
-          getent hosts "${FQDN}"
+          echo "=== resolution ==="
+          getent hosts "${SGE_HOSTNAME}"
 
-          echo "=== SGE services ==="
-          getent services sge-qmaster || true
-          getent services sge-execd || true
+          test "$(hostname -f)" = "${SGE_HOSTNAME}"
 
       - name: Configure SGE
         run: |
