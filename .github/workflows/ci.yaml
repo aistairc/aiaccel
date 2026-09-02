@@ -301,6 +301,13 @@ jobs:
           sudo useradd -r -d /opt/sge sge || true
           sudo chown -R sge /opt/sge
 
+          sudo tee /etc/default/sgemaster >/dev/null <<'EOF'
+          SGE_QMASTER_PORT=6444
+          SGE_EXECD_PORT=6445
+          export SGE_QMASTER_PORT
+          export SGE_EXECD_PORT
+          EOF
+
           cd /opt/sge
 
           if ! sudo sh -c 'yes "" | ./install_qmaster'; then
@@ -310,25 +317,17 @@ jobs:
             echo "=== act_qmaster ==="
             sudo cat /opt/sge/default/common/act_qmaster || true
 
-            echo "=== configuration ==="
-            sudo cat /opt/sge/default/common/configuration || true
+            echo "=== sgemaster environment ==="
+            sudo cat /etc/default/sgemaster || true
 
-            echo "=== hostname ==="
-            hostname
-            hostname -s
-            hostname -f
-            hostname -i || true
+            echo "=== listening ports ==="
+            sudo ss -lntup || true
 
-            echo "=== hosts ==="
-            getent hosts "$(hostname -s)" || true
-            getent hosts "$(hostname -f)" || true
-
-            echo "=== services ==="
-            getent services sge-qmaster || true
-            getent services sge-execd || true
-
-            echo "=== sgemaster ==="
-            sudo cat /opt/sge/default/common/sgemaster || true
+            echo "=== qmaster messages ==="
+            sudo find /opt/sge/default/spool \
+              -type f -name messages \
+              -print \
+              -exec cat {} \; || true
 
             echo "=== systemd status ==="
             sudo systemctl status sgemaster.service \
@@ -339,16 +338,6 @@ jobs:
               -u sgemaster.service \
               --no-pager \
               -n 200 || true
-
-            echo "=== qmaster debug run ==="
-            sudo -u sge \
-              env \
-                SGE_ROOT=/opt/sge \
-                SGE_CELL=default \
-                SGE_QMASTER_PORT=6444 \
-                SGE_EXECD_PORT=6445 \
-              /opt/sge/bin/lx-amd64/sge_qmaster \
-                -help || true
 
             exit 1
           fi
