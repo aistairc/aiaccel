@@ -311,33 +311,19 @@ jobs:
           cd /opt/sge
 
           if ! sudo sh -c 'yes "" | ./install_qmaster'; then
-            echo "=== bootstrap ==="
-            sudo cat /opt/sge/default/common/bootstrap || true
+            sudo systemctl stop sgemaster.service || true
 
-            echo "=== act_qmaster ==="
-            sudo cat /opt/sge/default/common/act_qmaster || true
+            echo "=== qmaster foreground debug ==="
 
-            echo "=== sgemaster environment ==="
-            sudo cat /etc/default/sgemaster || true
-
-            echo "=== listening ports ==="
-            sudo ss -lntup || true
-
-            echo "=== qmaster messages ==="
-            sudo find /opt/sge/default/spool \
-              -type f -name messages \
-              -print \
-              -exec cat {} \; || true
-
-            echo "=== systemd status ==="
-            sudo systemctl status sgemaster.service \
-              --no-pager -l || true
-
-            echo "=== journal ==="
-            sudo journalctl \
-              -u sgemaster.service \
-              --no-pager \
-              -n 200 || true
+            sudo -u sge env \
+              SGE_ROOT=/opt/sge \
+              SGE_CELL=default \
+              SGE_QMASTER_PORT=6444 \
+              SGE_EXECD_PORT=6445 \
+              SGE_ND=1 \
+              SGE_COMMLIB_DEBUG=1 \
+              timeout 40 \
+              /opt/sge/bin/lx-amd64/sge_qmaster || true
 
             exit 1
           fi
