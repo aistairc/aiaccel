@@ -369,9 +369,13 @@ jobs:
             exit 1
           fi
 
-          source /opt/sge/default/common/settings.sh
+          SUBMIT_HOST="$(hostname -f)"
 
-          qconf -as "$(hostname -s)"
+          echo "Register submit host: ${SUBMIT_HOST}"
+          qconf -as "${SUBMIT_HOST}"
+
+          echo "=== submit hosts ==="
+          qconf -ss
 
           echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
           echo "SGE_CELL=default" >> "$GITHUB_ENV"
