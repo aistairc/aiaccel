@@ -371,7 +371,7 @@ jobs:
 
           source /opt/sge/default/common/settings.sh
 
-          qconf -as "$(hostname -s)" || true
+          qconf -as "$(hostname -s)"
 
           echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
           echo "SGE_CELL=default" >> "$GITHUB_ENV"
