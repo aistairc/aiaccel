@@ -355,6 +355,9 @@ jobs:
             exit 1
           fi
 
+          export PATH="/opt/sge/bin/lx-amd64:${PATH}"
+          source /opt/sge/default/common/settings.sh
+
           SUBMIT_HOST="$(hostname -f)"
 
           echo "Register submit host: ${SUBMIT_HOST}"
@@ -363,9 +366,9 @@ jobs:
           echo "=== submit hosts ==="
           qconf -ss
 
+          echo "/opt/sge/bin/lx-amd64" >> "$GITHUB_PATH"
           echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
           echo "SGE_CELL=default" >> "$GITHUB_ENV"
-          echo "/opt/sge/bin/lx-amd64" >> "$GITHUB_PATH"
 
       - name: Check SGE
         run: |
