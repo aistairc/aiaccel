@@ -227,3 +227,79 @@ jobs:
         run: |
           pixi run -e gh-actions pytest -v \
             tests/job/apps/pbs.py
+  ci-job-sge:
+    name: CI (ubuntu-24.04, job/sge)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: prefix-dev/setup-pixi@v0.9.6
+        with:
+          environments: gh-actions
+
+      - name: Install SGE dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            git \
+            libdb5.3-dev \
+            libhwloc-dev \
+            libncurses-dev \
+            libpam0g-dev \
+            libssl-dev \
+            libsystemd-dev \
+            libtirpc-dev \
+            libxext-dev \
+            pkgconf
+
+      - name: Build SGE
+        run: |
+          git clone --depth 1 \
+            https://github.com/daimh/sge.git \
+            /tmp/sge
+
+          cd /tmp/sge
+
+          cmake -S . -B build \
+            -DCMAKE_INSTALL_PREFIX=/opt/sge
+
+          cmake --build build -j"$(nproc)"
+
+          sudo cmake --install build
+
+      - name: Configure SGE
+        run: |
+          sudo useradd -r -d /opt/sge sge || true
+          sudo chown -R sge /opt/sge
+
+          cd /opt/sge
+
+          sudo sh -c 'yes "" | ./install_qmaster'
+          sudo sh -c 'yes "" | ./install_execd'
+
+          source /opt/sge/default/common/settings.sh
+
+          qconf -as "$(hostname)"
+
+          echo "/opt/sge/bin/lx-amd64" >> "$GITHUB_PATH"
+          echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
+          echo "SGE_CELL=default" >> "$GITHUB_ENV"
+
+      - name: Check SGE
+        run: |
+          source /opt/sge/default/common/settings.sh
+
+          qhost -q
+          qstat -f
+
+      - name: Run SGE tests
+        run: |
+          source /opt/sge/default/common/settings.sh
+
+          pixi run -e gh-actions pytest -v \
+            tests/job/apps/sge.py
