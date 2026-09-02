@@ -240,73 +240,48 @@ jobs:
         with:
           environments: gh-actions
 
-      - name: Install SGE dependencies
+      - name: Configure Grid Engine
+        run: |
+          HOSTNAME="$(hostname -f)"
+
+          echo "gridengine-master shared/gridenginemaster string ${HOSTNAME}" \
+            | sudo debconf-set-selections
+          echo "gridengine-master shared/gridenginecell string default" \
+            | sudo debconf-set-selections
+          echo "gridengine-master shared/gridengineconfig boolean true" \
+            | sudo debconf-set-selections
+
+          echo "gridengine-common shared/gridenginemaster string ${HOSTNAME}" \
+            | sudo debconf-set-selections
+          echo "gridengine-common shared/gridenginecell string default" \
+            | sudo debconf-set-selections
+          echo "gridengine-common shared/gridengineconfig boolean true" \
+            | sudo debconf-set-selections
+
+          echo "gridengine-client shared/gridenginemaster string ${HOSTNAME}" \
+            | sudo debconf-set-selections
+          echo "gridengine-client shared/gridenginecell string default" \
+            | sudo debconf-set-selections
+          echo "gridengine-client shared/gridengineconfig boolean true" \
+            | sudo debconf-set-selections
+
+      - name: Install Grid Engine
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential \
-            cmake \
-            git \
-            libdb5.3-dev \
-            libhwloc-dev \
-            libncurses-dev \
-            libpam0g-dev \
-            libssl-dev \
-            libsystemd-dev \
-            libtirpc-dev \
-            libxext-dev \
-            pkgconf
+            gridengine-common \
+            gridengine-master \
+            gridengine-client \
+            gridengine-exec
 
-      - name: Build SGE
+      - name: Check Grid Engine
         run: |
-          git clone --depth 1 \
-            https://github.com/daimh/sge.git \
-            /tmp/sge
-
-          cd /tmp/sge
-
-          cmake -S . -B build \
-            -DCMAKE_INSTALL_PREFIX=/opt/sge
-
-          cmake --build build -j"$(nproc)"
-
-          sudo cmake --install build
-
-      - name: Configure SGE
-        run: |
-          HOSTNAME="$(hostname -s)"
-          FQDN="$(hostname -f)"
-          IP_ADDRESS="$(hostname -I | awk '{print $1}')"
-
-          echo "${IP_ADDRESS} ${FQDN} ${HOSTNAME}" \
-            | sudo tee -a /etc/hosts
-
-          sudo useradd -r -d /opt/sge sge || true
-          sudo chown -R sge /opt/sge
-
-          cd /opt/sge
-
-          sudo sh -c 'yes "" | ./install_qmaster'
-          sudo sh -c 'yes "" | ./install_execd'
-
-          source /opt/sge/default/common/settings.sh
-
-          qconf -as "$(hostname -s)"
-
-          echo "/opt/sge/bin/lx-amd64" >> "$GITHUB_PATH"
-          echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
-          echo "SGE_CELL=default" >> "$GITHUB_ENV"
-
-      - name: Check SGE
-        run: |
-          source /opt/sge/default/common/settings.sh
-
-          qhost -q
+          qhost
           qstat -f
 
       - name: Run SGE tests
         run: |
-          source /opt/sge/default/common/settings.sh
-
           pixi run -e gh-actions pytest -v \
             tests/job/apps/sge.py
