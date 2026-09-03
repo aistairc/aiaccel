@@ -61,15 +61,23 @@ sudo chmod 4755 \
 sudo /opt/pbs/libexec/pbs_init.d start
 
 # Wait
+ready=false
+
 for _ in $(seq 1 30); do
   if /opt/pbs/bin/qstat -B >/dev/null 2>&1; then
-    exit 0
+    ready=true
+    break
   fi
 
   sleep 1
 done
 
 # failure diagnostics
-sudo cat /var/spool/pbs/server_logs/* || true
-sudo cat /var/spool/pbs/mom_logs/* || true
-exit 1
+if [ "${ready}" != true ]; then
+  sudo cat /var/spool/pbs/server_logs/* || true
+  sudo cat /var/spool/pbs/mom_logs/* || true
+  exit 1
+fi
+
+echo "/opt/pbs/bin" >> "$GITHUB_PATH"
+echo "/opt/pbs/sbin" >> "$GITHUB_PATH"

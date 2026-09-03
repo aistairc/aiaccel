@@ -40,15 +40,20 @@ sudo systemctl restart slurmctld
 sudo systemctl restart slurmd
 
 # Wait
+ready=false
+
 for _ in $(seq 1 30); do
   if sinfo >/dev/null 2>&1; then
-    exit 0
+    ready=true
+    break
   fi
 
   sleep 1
 done
 
 # failure diagnostics
-sudo journalctl -u slurmctld
-sudo journalctl -u slurmd
-exit 1
+if [ "${ready}" != true ]; then
+    sudo journalctl -u slurmctld
+    sudo journalctl -u slurmd
+    exit 1
+fi
