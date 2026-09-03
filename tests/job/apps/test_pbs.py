@@ -65,59 +65,33 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "--",
             "bash",
             "-c",
-            "sleep 10; exit 0",
+            "sleep 5; exit 0",
         ],
+        stdout=subprocess.PIPE,
+        text=True,
     )
 
-    job_id = None
+    assert process.stdout is not None
 
-    for _ in range(30):
-        result = subprocess.run(
-            [
-                "qstat",
-                "-u",
-                subprocess.run(
-                    ["whoami"],
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                ).stdout.strip(),
-            ],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+    job_id = process.stdout.readline().strip()
+    assert job_id
 
-        lines = result.stdout.splitlines()
-        for line in lines:
-            fields = line.split()
-            if fields and fields[0][0].isdigit():
-                job_id = fields[0]
-                break
-
-        if job_id is not None:
-            break
-
-        time.sleep(1)
-
-    assert job_id is not None
-
-    # Give the job enough time to actually start.
     for _ in range(30):
         result = subprocess.run(
             ["qstat", "-f", job_id],
             capture_output=True,
             text=True,
-            check=True,
         )
-        if "job_state = R" in result.stdout:
+
+        if result.returncode == 0 and "job_state = R" in result.stdout:
             break
+
         time.sleep(1)
     else:
-        pytest.fail("PBS job did not enter the running state")
+        pytest.fail(f"PBS job {job_id} did not enter the running state")
 
     subprocess.run(["qdel", job_id], check=True)
 
-    process.wait(timeout=30)
+    returncode = process.wait(timeout=30)
 
-    assert process.returncode != 0
+    assert returncode != 0
