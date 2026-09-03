@@ -75,7 +75,7 @@ jobs:
 
       - name: Setup ${{ matrix.scheduler }}
         run: |
-          tests/job/apps/setup/${{ matrix.scheduler }}.sh
+          bash tests/job/apps/setup/${{ matrix.scheduler }}.sh
 
       - name: Run ${{ matrix.scheduler }} tests
         run: |
