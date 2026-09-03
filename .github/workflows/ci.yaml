@@ -78,7 +78,7 @@ jobs:
           NODE_CONFIG="$(slurmd -C | head -n 1)"
 
           sudo cp \
-            tests/job/apps/fixtures/slurm/slurm.conf \
+            tests/job/apps/fixtures/slurm.conf \
             /etc/slurm/slurm.conf
 
           sudo sed -i \
