@@ -46,11 +46,6 @@ jobs:
       - name: Run pytest
         run: |
           pixi run -e gh-actions pytest -v \
-            -n auto \
-            --cov=aiaccel/job/apps \
-            --cov-branch \
-            --cov-append \
-            --cov-report=term-missing \
             tests/job/apps/local.py
   ci-job-scheduler:
     name: CI (ubuntu-24.04, job/${{ matrix.scheduler }})
