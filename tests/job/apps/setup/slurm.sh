@@ -13,7 +13,7 @@ HOSTNAME="$(hostname -s)"
 NODE_CONFIG="$(slurmd -C | head -n 1)"
 
 sudo cp \
-  "$(dirname "$0")/slurm.conf" \
+  "$(dirname "$0")/../fixtures/slurm.conf" \
   /etc/slurm/slurm.conf
 
 sudo sed -i \
