@@ -46,7 +46,7 @@ jobs:
       - name: Run pytest
         run: |
           pixi run -e gh-actions pytest -v \
-            tests/job/apps/local.py
+            tests/job/apps/test_local.py
   ci-job-scheduler:
     name: CI (ubuntu-24.04, job/${{ matrix.scheduler }})
     runs-on: ubuntu-24.04
@@ -75,4 +75,4 @@ jobs:
       - name: Run ${{ matrix.scheduler }} tests
         run: |
           pixi run -e gh-actions pytest -v \
-            tests/job/apps/${{ matrix.scheduler }}.py
+            tests/job/apps/test_${{ matrix.scheduler }}.py
