@@ -21,3 +21,26 @@ def test_cpu(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert log_path.exists()
     assert "hello" in log_path.read_text()
+
+
+def test_cpu_sigterm(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    log_path = tmp_path / "test.log"
+    config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+
+    with pytest.raises(subprocess.CalledProcessError):
+        subprocess.run(
+            cmd
+            + [
+                "--config",
+                config_path,
+                "cpu",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                "kill -TERM $PPID; sleep 1; exit 0",
+            ],
+            check=True,
+        )
