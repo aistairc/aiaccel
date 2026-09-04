@@ -65,6 +65,8 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         if result.stdout.strip() == "RUNNING":
             break
 
+        print(result.stdout.strip())
+
         time.sleep(1)
     else:
         pytest.fail(f"Slurm job {job_id} did not enter RUNNING state")
