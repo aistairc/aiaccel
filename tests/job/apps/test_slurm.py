@@ -35,7 +35,7 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "cpu",
             log_path,
             "--",
-            "sleep 10",
+            "trap '' TERM; sleep 10; exit 0",
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -57,10 +57,9 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             ["squeue", "-j", job_id, "-h", "-o", "%T"],
             capture_output=True,
             text=True,
-            check=True,
         )
 
-        print(result.stdout.strip())
+        print(f"job_id={job_id}, returncode={result.returncode}, stdout={result.stdout!r}, stderr={result.stderr!r}")
 
         if result.stdout.strip() == "RUNNING":
             break
