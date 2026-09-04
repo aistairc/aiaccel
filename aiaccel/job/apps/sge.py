@@ -65,7 +65,7 @@ done
 
 set -eE -o pipefail
 trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'exit 143' TERM  # at termination (by job scheduler)
 
 {config.script_prologue}
 
