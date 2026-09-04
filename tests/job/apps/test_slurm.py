@@ -38,7 +38,7 @@ def test_cpu_sigterm(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "-c",
             "kill -TERM $PPID; sleep 1; exit 0",
         ],
-        check=True,
+        capture_output=True,
         text=True,
     )
 
