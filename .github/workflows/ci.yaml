@@ -74,5 +74,5 @@ jobs:
 
       - name: Run ${{ matrix.scheduler }} tests
         run: |
-          pixi run -e gh-actions pytest -v \
+          pixi run -e gh-actions pytest -s -v \
             tests/job/apps/test_${{ matrix.scheduler }}.py
