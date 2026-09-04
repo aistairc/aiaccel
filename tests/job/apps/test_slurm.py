@@ -35,8 +35,6 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "cpu",
             log_path,
             "--",
-            "bash",
-            "-c",
             "sleep 10",
         ],
         stdout=subprocess.PIPE,
@@ -62,10 +60,10 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             check=True,
         )
 
+        print(result.stdout.strip())
+
         if result.stdout.strip() == "RUNNING":
             break
-
-        print(result.stdout.strip())
 
         time.sleep(1)
     else:
