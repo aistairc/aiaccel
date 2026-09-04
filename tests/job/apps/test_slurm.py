@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import subprocess
+import time
 
 import pytest
 
@@ -49,3 +50,36 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     assert process.stdout is not None
+
+    line = process.stdout.readline().strip()
+
+    # sbatch output:
+    # Submitted batch job 123
+    fields = line.split()
+    assert len(fields) >= 4
+    job_id = fields[-1]
+
+    for _ in range(30):
+        result = subprocess.run(
+            ["squeue", "-j", job_id, "-h", "-o", "%T"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        if result.stdout.strip() == "RUNNING":
+            break
+
+        time.sleep(1)
+    else:
+        pytest.fail(f"Slurm job {job_id} did not enter RUNNING state")
+
+    subprocess.run(
+        ["scancel", job_id],
+        check=True,
+    )
+
+    stdout, stderr = process.communicate(timeout=30)
+
+    assert process.returncode == 1
+    assert "Job failed with 143 exit code." in stderr
