@@ -54,13 +54,12 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     for _ in range(30):
         result = subprocess.run(
-            ["squeue", "-j", job_id, "-h", "-o", "%T"],
+            ["squeue", "-j", job_id, "-h", "-o", "%T %R"],
             capture_output=True,
             text=True,
         )
 
         print(f"job_id={job_id}, returncode={result.returncode}, stdout={result.stdout!r}, stderr={result.stderr!r}")
-
         if result.stdout.strip() == "RUNNING":
             break
 
