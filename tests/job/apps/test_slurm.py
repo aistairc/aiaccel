@@ -61,14 +61,17 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     log_path = tmp_path / "test.log"
 
+    ready_path = tmp_path / "ready"
+
     process = subprocess.Popen(
         cmd
         + [
             "cpu",
             log_path,
             "--",
-            "sleep",
-            "30",
+            "bash",
+            "-c",
+            f"touch {ready_path}; trap '' TERM; sleep 30; exit 0",
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -77,33 +80,19 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert process.stdout is not None
 
-    line = process.stdout.readline().strip()
-    print(f"aiaccel-job stdout: {line!r}")
+    job_id = process.stdout.readline().split()[-1]
 
-    job_id = line.split()[-1]
-
-    for _ in range(30):
-        result = subprocess.run(
-            ["squeue", "-j", job_id, "-h", "-o", "%T %R"],
-            capture_output=True,
-            text=True,
-        )
-
-        print(f"{result.stdout=}")
-
-        if result.stdout.startswith("RUNNING"):
+    for _ in range(60):
+        if ready_path.exists():
             break
 
         time.sleep(1)
     else:
-        result = subprocess.run(
-            ["scontrol", "show", "job", job_id],
-            capture_output=True,
-            text=True,
-        )
-        print(result.stdout)
+        pytest.fail(f"Slurm job {job_id} did not start")
 
-        process.terminate()
-        process.wait(timeout=5)
+    subprocess.run(["scancel", job_id], check=True)
 
-        pytest.fail(f"Slurm job {job_id} did not enter RUNNING state")
+    _, stderr = process.communicate(timeout=30)
+
+    assert process.returncode == 1
+    assert "Job failed with 143 exit code." in stderr
