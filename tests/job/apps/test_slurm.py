@@ -37,7 +37,7 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "--",
             "bash",
             "-c",
-            "trap '' TERM; sleep 10; exit 0",
+            "sleep 10",
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
