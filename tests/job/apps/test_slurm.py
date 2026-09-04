@@ -60,7 +60,6 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
 
     log_path = tmp_path / "test.log"
-
     ready_path = tmp_path / "ready"
 
     process = subprocess.Popen(
