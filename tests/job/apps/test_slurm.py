@@ -24,6 +24,38 @@ def test_cpu(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert "hello" in log_path.read_text()
 
 
+def test_popen(tmp_path: Path) -> None:
+    script = tmp_path / "sleep.sh"
+    script.write_text(
+        """\
+#!/bin/bash
+#SBATCH -t 00:01:00
+
+sleep 30
+"""
+    )
+
+    result = subprocess.run(
+        ["sbatch", script],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    job_id = result.stdout.split()[-1]
+
+    time.sleep(2)
+
+    result = subprocess.run(
+        ["squeue", "-j", job_id, "-h", "-o", "%T %R"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    print(result.stdout)
+
+
 def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
 
