@@ -71,4 +71,4 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     _, stderr = process.communicate(timeout=30)
 
     assert process.returncode == 1
-    assert "Job failed with 1 exit code." in stderr
+    assert "Job failed with 143 exit code." in stderr
