@@ -58,20 +58,21 @@ done
     job_script = f"""\
 #! /bin/bash
 
+#$-S /bin/bash
 #$-j y
 #$-cwd
 #$-o {job_log_filename}
 
 set -eE -o pipefail
 trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'exit 143' TERM  # at termination (by job scheduler)
 
 {config.script_prologue}
 
 {job}
 """
 
-    job_name = str(config.get("job_name", args.log_filename.with_suffix("")))
+    job_name = str(config.get("job_name", args.log_filename.with_suffix(""))).replace("/", "_")
     if job_name[:1].isdigit():
         job_name = f"_{job_name}"
 

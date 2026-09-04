@@ -1,0 +1,14 @@
+# tests/job/apps/config/custom_pbs.yaml
+_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
+
+walltime: "00:10:00"
+
+script_prologue: ""
+
+qsub: "qsub -l walltime={args.walltime}"
+
+cpu:
+  qsub_args: ""
+  job: "{command}"
+
+use_scandir: false

@@ -1,0 +1,13 @@
+_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/sge.yaml
+
+walltime: "00:10:00"
+
+script_prologue: ""
+
+qsub: "qsub -l h_rt={args.walltime} -N {job_name}"
+
+cpu:
+  qsub_args: ""
+  job: "{command}"
+
+use_scandir: false
