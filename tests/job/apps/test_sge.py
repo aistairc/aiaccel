@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: MIT
 
 from pathlib import Path
+import re
 import subprocess
+import time
 
 import pytest
 
@@ -23,13 +25,14 @@ def test_cpu(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert log_path.read_text().strip().endswith("hello")
 
 
-def test_cpu_sigterm(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
 
     log_path = tmp_path / "test.log"
+    ready_path = tmp_path / "ready"
     config_path = Path(__file__).parent / "config" / "custom_sge.yaml"
 
-    result = subprocess.run(
+    process = subprocess.Popen(
         cmd
         + [
             "--config",
@@ -39,11 +42,36 @@ def test_cpu_sigterm(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "--",
             "bash",
             "-c",
-            "kill -TERM $PPID; sleep 1; exit 0",
+            f"touch {ready_path}; trap '' TERM; sleep 30; exit 0",
         ],
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
     )
 
-    assert result.returncode == 1
-    assert "Job failed with 1 exit code." in result.stderr
+    assert process.stdout is not None
+
+    # SGE qsub:
+    # Your job 3 ("test") has been submitted
+    line = process.stdout.readline().strip()
+
+    match = re.search(r"Your job (\d+)", line)
+    assert match is not None
+
+    job_id = match.group(1)
+
+    for _ in range(60):
+        if ready_path.exists():
+            break
+        time.sleep(1)
+    else:
+        subprocess.run(["qdel", job_id], check=False)
+        _, stderr = process.communicate(timeout=30)
+        pytest.fail(f"SGE job {job_id} did not start: {stderr}")
+
+    subprocess.run(["qdel", job_id], check=True)
+
+    _, stderr = process.communicate(timeout=30)
+
+    assert process.returncode == 1
+    assert "Job failed with 1 exit code." in stderr
