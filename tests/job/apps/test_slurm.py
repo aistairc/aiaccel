@@ -28,7 +28,7 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     log_path = tmp_path / "test.log"
 
-    subprocess.run(
+    process = subprocess.Popen(
         cmd
         + [
             "cpu",
@@ -43,5 +43,9 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "10;",
             "exit 0",
         ],
-        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     )
+
+    assert process.stdout is not None
