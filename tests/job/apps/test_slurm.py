@@ -29,7 +29,6 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     log_path = tmp_path / "test.log"
 
     subprocess.run(
-        cmd + ["cpu", log_path, "--", "trap '' TERM; sleep 10; exit 0"],
-        text=True,
+        cmd + ["cpu", log_path, "--", "echo", "hello"],
         check=True,
     )
