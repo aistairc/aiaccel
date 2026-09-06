@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: ["ubuntu-22.04"]
         python-version: ["3.10"]
-        test_target: ["config", "hpo", "torch"]
+        test_target: ["config", "hpo", "modelbridge", "torch"]
     steps:
       - uses: actions/checkout@v5
         with:
