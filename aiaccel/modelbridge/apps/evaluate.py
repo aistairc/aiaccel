@@ -128,14 +128,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         argv: Optional command-line arguments. When omitted, uses ``sys.argv``.
 
     Returns:
-        Process exit code. ``0`` on success, ``1`` on input/runtime errors.
+        Process exit code. ``0`` on success.
+
+    Raises:
+        SystemExit: Exit with status ``1`` on input/runtime errors.
     """
     args = parse_args(argv)
     try:
         run_evaluate(Path(args.workspace))
     except (FileNotFoundError, ValueError, ImportError) as exc:
         print(f"Error: {exc}")
-        return 1
+        raise SystemExit(1) from exc
     return 0
 
 

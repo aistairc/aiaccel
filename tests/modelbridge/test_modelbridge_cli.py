@@ -5,8 +5,11 @@ from __future__ import annotations
 
 import importlib
 from pathlib import Path
+import sys
 
 import pytest
+
+from aiaccel import launcher
 
 cli_module = importlib.import_module("aiaccel.modelbridge.apps")
 
@@ -78,5 +81,32 @@ def test_cli_exits_non_zero_when_handler_raises(monkeypatch: pytest.MonkeyPatch)
 
     with pytest.raises(SystemExit) as wrapped:
         cli_module.main(["fit-model", "--workspace", "workspace"])
+
+    assert wrapped.value.code == 1
+
+
+@pytest.mark.parametrize("command", ["prepare", "collect", "fit-model", "evaluate"])
+def test_shared_launcher_dispatches_step(command: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    module = importlib.import_module(f"aiaccel.modelbridge.apps.{command.replace('-', '_')}")
+    observed: list[str] = []
+    monkeypatch.setattr(module, "main", lambda: observed.extend(sys.argv))
+    monkeypatch.setattr(sys, "argv", ["aiaccel-modelbridge", command, "--workspace", "workspace"])
+
+    launcher.main()
+
+    assert observed == [str(module.__file__), "--workspace", "workspace"]
+
+
+@pytest.mark.parametrize("command", ["collect", "fit-model", "evaluate"])
+def test_shared_launcher_exits_nonzero_for_missing_workspace(
+    command: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    argv = ["aiaccel-modelbridge", command, "--workspace", str(tmp_path / "missing")]
+    if command == "collect":
+        argv.extend(["--phase", "train"])
+    monkeypatch.setattr(sys, "argv", argv)
+
+    with pytest.raises(SystemExit) as wrapped:
+        launcher.main()
 
     assert wrapped.value.code == 1
