@@ -65,5 +65,9 @@ echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
 echo "SGE_CELL=default" >> "$GITHUB_ENV"
 
 # debug
-source /opt/sge/default/common/settings.sh
-qconf -sq all.q | grep '^notify'
+# Show notification interval
+env \
+  SGE_ROOT=/opt/sge \
+  SGE_CELL=default \
+  /opt/sge/bin/lx-amd64/qconf -sq all.q \
+  | grep '^notify'
