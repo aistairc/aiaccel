@@ -65,4 +65,5 @@ echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
 echo "SGE_CELL=default" >> "$GITHUB_ENV"
 
 # debug
+source /opt/sge/default/common/settings.sh
 qconf -sq all.q | grep '^notify'
