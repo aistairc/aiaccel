@@ -63,3 +63,6 @@ sudo env \
 echo "/opt/sge/bin/lx-amd64" >> "$GITHUB_PATH"
 echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
 echo "SGE_CELL=default" >> "$GITHUB_ENV"
+
+# debug
+qconf -sq all.q | grep '^notify'
