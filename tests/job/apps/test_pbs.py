@@ -30,6 +30,7 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
 
     log_path = tmp_path / "test.log"
+    status_path = tmp_path / "test.out"
     ready_path = tmp_path / "ready"
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
 
@@ -72,3 +73,6 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert process.returncode == 1
     assert "Job failed with 143 exit code." in stderr
+
+    assert status_path.exists()
+    assert status_path.read_text().strip() == "143"
