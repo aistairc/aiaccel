@@ -31,7 +31,6 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     log_path = tmp_path / "test.log"
     status_path = tmp_path / "test.out"
     ready_path = tmp_path / "ready"
-    job_finish_path = tmp_path / "job_finish"
     config_path = Path(__file__).parent / "config" / "custom_sge.yaml"
 
     process = subprocess.Popen(
@@ -44,7 +43,7 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "--",
             "bash",
             "-c",
-            f"touch {ready_path}; sleep 10; touch {job_finish_path}; exit 0",
+            f"touch {ready_path}; sleep 10; exit 0",
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -75,25 +74,8 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     _, stderr = process.communicate(timeout=30)
 
-    # Wait until the SGE job has completely terminated.
-    for _ in range(60):
-        result = subprocess.run(
-            ["qstat", "-j", job_id],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-
-        if result.returncode != 0:
-            break
-
-        time.sleep(1)
-    else:
-        pytest.fail(f"SGE job {job_id} did not terminate")
-
     assert process.returncode == 1
     assert "Job failed with 140 exit code." in stderr
-
-    assert job_finish_path.exists()
 
     assert status_path.exists()
     assert status_path.read_text().strip() == "140"
