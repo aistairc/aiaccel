@@ -44,7 +44,7 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             "--",
             "bash",
             "-c",
-            f"touch {ready_path}; sleep 10; torch {job_finish_path}; exit 0",
+            f"touch {ready_path}; sleep 10; touch {job_finish_path}; exit 0",
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
