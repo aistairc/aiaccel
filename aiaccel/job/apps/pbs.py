@@ -45,7 +45,7 @@ for i in "${{!pids[@]}}"; do
 done
 """
         job_log_filename = shlex.quote(str(args.log_filename.with_suffix(".^array_index^.log")))
-        job_status_filename = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
+        job_status_filename: Path = args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
 
         status_filename_list = []
         for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
@@ -64,8 +64,8 @@ done
 #PBS -o {job_log_filename}
 
 set -eE -o pipefail
-trap 'echo $? > "{job_status_filename}"' ERR EXIT  # at error and exit
-trap 'echo 143 > "{job_status_filename}"' TERM  # at termination (by job scheduler)
+trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
+trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR
@@ -93,8 +93,6 @@ fi
 
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
-
-    print(job_filename.read_text())
 
     subprocess.run(f"{qsub} {qsub_args} {shlex.quote(str(job_filename))}", shell=True, check=True)
 
