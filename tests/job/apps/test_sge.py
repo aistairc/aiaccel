@@ -25,6 +25,39 @@ def test_cpu(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert log_path.read_text().strip().endswith("hello")
 
 
+def test_cpu_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    log_path = tmp_path / "test.log"
+    status_path = tmp_path / "test.out"
+    config_path = Path(__file__).parent / "config" / "custom_sge.yaml"
+
+    result = subprocess.run(
+        cmd
+        + [
+            "--config",
+            config_path,
+            "cpu",
+            log_path,
+            "--",
+            "bash",
+            "-c",
+            "exit 7",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "Job failed with 7 exit code." in result.stderr
+
+    assert status_path.exists()
+    assert status_path.read_text().strip() == "7"
+
+
 def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
 
