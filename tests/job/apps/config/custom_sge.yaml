@@ -10,4 +10,8 @@ cpu:
   qsub_args: ""
   job: "{command}"
 
+cpu-array:
+  qsub_args: "-t 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+  job: "{command}"
+
 use_scandir: false
