@@ -103,3 +103,40 @@ def test_cpu_log_filename_with_spaces(
 
     assert log_path.exists()
     assert log_path.read_text().strip().endswith("hello")
+
+
+def test_cpu_array(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    log_path = tmp_path / "test_log.log"
+    config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+
+    subprocess.run(
+        cmd
+        + [
+            "--config",
+            config_path,
+            "cpu",
+            "--n_tasks",
+            "2",
+            "--n_tasks_per_proc",
+            "1",
+            "--n_procs",
+            "1",
+            log_path,
+            "--",
+            "bash",
+            "-c",
+            'echo "TASK_INDEX=$TASK_INDEX"',
+        ],
+        check=True,
+    )
+
+    for task_index in [1, 2]:
+        log_file = tmp_path / f"test_log.{task_index}-1.log"
+
+        assert log_file.exists()
+        assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
