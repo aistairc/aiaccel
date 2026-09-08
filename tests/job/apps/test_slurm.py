@@ -99,3 +99,27 @@ def test_cpu_scancel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert status_path.exists()
     assert status_path.read_text().strip() == "143"
+
+
+def test_cpu_log_filename_with_spaces(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    log_path = tmp_path / "test log.log"
+
+    subprocess.run(
+        cmd
+        + [
+            "cpu",
+            log_path,
+            "--",
+            "echo",
+            "hello",
+        ],
+        check=True,
+    )
+
+    assert log_path.exists()
+    assert log_path.read_text().strip().endswith("hello")
