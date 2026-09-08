@@ -64,8 +64,8 @@ done
 #PBS -o {job_log_filename}
 
 set -eE -o pipefail
-trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'echo $? > "{job_status_filename}"' ERR EXIT  # at error and exit
+trap 'echo 143 > "{job_status_filename}"' TERM  # at termination (by job scheduler)
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR
