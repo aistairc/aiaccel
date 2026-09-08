@@ -90,6 +90,8 @@ fi
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
 
+    print(job_filename.read_text())
+
     subprocess.run(f"{qsub} {qsub_args} {shlex.quote(str(job_filename))}", shell=True, check=True)
 
     for status_filename in status_filename_list:
