@@ -110,6 +110,57 @@ class SchedulerTestBase(ABC):
         assert status_path.exists()
         assert status_path.read_text().strip() == "7"
 
+    def test_cpu_cancel_job(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        log_path = tmp_path / "test.log"
+        status_path = tmp_path / "test.out"
+        ready_path = tmp_path / "ready"
+
+        process = subprocess.Popen(
+            self.make_command()
+            + [
+                "cpu",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                f"touch {ready_path}; sleep 10; exit 0",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        assert process.stdout is not None
+
+        job_id = self.get_job_id(process.stdout.readline())
+
+        for _ in range(60):
+            if ready_path.exists():
+                break
+
+            time.sleep(1)
+        else:
+            self.cancel_job(job_id)
+            pytest.fail(f"Job {job_id} did not start")
+
+        self.cancel_job(job_id)
+
+        _, stderr = process.communicate(timeout=30)
+
+        assert process.returncode == 1
+        assert f"Job failed with {self.cancel_status} exit code." in stderr
+
+        self.wait_for_job_to_finish(job_id)
+
+        assert status_path.exists()
+        assert status_path.read_text().strip() == str(self.cancel_status)
+
     def test_cpu_log_filename_with_spaces(
         self,
         tmp_path: Path,
