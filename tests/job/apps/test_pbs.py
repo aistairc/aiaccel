@@ -35,12 +35,11 @@ def test_cpu_failure(
     log_path = tmp_path / "test.log"
     status_path = tmp_path / "test.out"
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
 
     process = subprocess.Popen(
         cmd
         + [
-            "--config",
-            config_path,
             "cpu",
             log_path,
             "--",
@@ -85,12 +84,11 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     status_path = tmp_path / "test.out"
     ready_path = tmp_path / "ready"
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
 
     process = subprocess.Popen(
         cmd
         + [
-            "--config",
-            config_path,
             "cpu",
             log_path,
             "--",
@@ -150,12 +148,11 @@ def test_cpu_log_filename_with_spaces(
 
     log_path = tmp_path / "test log.log"
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
 
     subprocess.run(
         cmd
         + [
-            "--config",
-            config_path,
             "cpu",
             log_path,
             "--",
@@ -177,12 +174,11 @@ def test_cpu_array(
 
     log_path = tmp_path / "test_log.log"
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
 
     subprocess.run(
         cmd
         + [
-            "--config",
-            config_path,
             "cpu",
             "--n_tasks",
             "2",
@@ -214,12 +210,11 @@ def test_cpu_array_log_filename_with_spaces(
 
     log_path = tmp_path / "test log.log"
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
 
     subprocess.run(
         cmd
         + [
-            "--config",
-            config_path,
             "cpu",
             "--n_tasks",
             "2",
