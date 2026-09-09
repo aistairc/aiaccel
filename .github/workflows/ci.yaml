@@ -30,3 +30,49 @@ jobs:
             --cov-append \
             --cov-report=term-missing \
             tests/${{ matrix.test_target }}
+  ci-job-local:
+    name: CI (${{ matrix.os }}, job/local)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ["ubuntu-22.04"]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: prefix-dev/setup-pixi@v0.9.6
+        with:
+          environments: gh-actions
+      - name: Run pytest
+        run: |
+          pixi run -e gh-actions pytest -v \
+            tests/job/apps/test_local.py
+  ci-job-scheduler:
+    name: CI (ubuntu-24.04, job/${{ matrix.scheduler }})
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        scheduler:
+          - slurm
+          - pbs
+          - sge
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: prefix-dev/setup-pixi@v0.9.6
+        with:
+          environments: gh-actions
+
+      - name: Setup ${{ matrix.scheduler }}
+        run: |
+          bash tests/job/apps/setup/${{ matrix.scheduler }}.sh
+
+      - name: Run ${{ matrix.scheduler }} tests
+        run: |
+          pixi run -e gh-actions pytest -s -v \
+            tests/job/apps/test_${{ matrix.scheduler }}.py
