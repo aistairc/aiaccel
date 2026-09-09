@@ -4,7 +4,7 @@ walltime: "00:10:00"
 
 script_prologue: ""
 
-qsub: "qsub -l h_rt={args.walltime} -N {job_name}"
+qsub: "qsub -l h_rt={args.walltime} -N {job_name} -S /bin/bash"
 
 cpu:
   qsub_args: ""
