@@ -35,7 +35,7 @@ def test_cpu_failure(
     status_path = tmp_path / "test.out"
     config_path = Path(__file__).parent / "config" / "custom_sge.yaml"
 
-    result = subprocess.run(
+    process = subprocess.Popen(
         cmd
         + [
             "--config",
@@ -45,14 +45,40 @@ def test_cpu_failure(
             "--",
             "bash",
             "-c",
-            "exit 7",
+            "sleep 1; exit 7",
         ],
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
     )
 
-    assert result.returncode == 1
-    assert "Job failed with 7 exit code." in result.stderr
+    assert process.stdout is not None
+
+    # SGE qsub:
+    # Your job 3 ("test") has been submitted
+    line = process.stdout.readline().strip()
+
+    match = re.search(r"Your job (\d+)", line)
+    assert match is not None
+
+    job_id = match.group(1)
+
+    _, stderr = process.communicate(timeout=30)
+
+    assert process.returncode == 1
+    assert "Job failed with 7 exit code." in stderr
+
+    for _ in range(30):
+        result = subprocess.run(
+            ["qstat", job_id],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        if result.returncode != 0:
+            break
+        time.sleep(1)
+    else:
+        pytest.fail(f"SGE job {job_id} did not terminate")
 
     assert status_path.exists()
     assert status_path.read_text().strip() == "7"
@@ -109,6 +135,18 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert process.returncode == 1
     assert "Job failed with 140 exit code." in stderr
+
+    for _ in range(30):
+        result = subprocess.run(
+            ["qstat", job_id],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        if result.returncode != 0:
+            break
+        time.sleep(1)
+    else:
+        pytest.fail(f"SGE job {job_id} did not terminate")
 
     assert status_path.exists()
     assert status_path.read_text().strip() == "140"
