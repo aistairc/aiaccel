@@ -70,7 +70,6 @@ done
     job_script = f"""\
 #! /bin/bash
 
-#$-S /bin/bash
 #$-j y
 #$-cwd
 #$-o {job_log_filename}
