@@ -3,236 +3,32 @@
 
 from pathlib import Path
 import subprocess
-import time
 
-import pytest
-
-cmd = ["aiaccel-job", "pbs"]
+from tests.job.apps.scheduler_test_base import SchedulerTestBase
 
 
-def test_cpu(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    log_path = tmp_path / "test.log"
+class TestPBS(SchedulerTestBase):
+    cmd = ["aiaccel-job", "pbs"]
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
-    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
+    cancel_status = 143
 
-    subprocess.run(
-        cmd + ["cpu", log_path, "--", "echo", "hello"],
-        check=True,
-    )
+    def get_job_id(self, stdout: str) -> str:
+        # PBS qsub:
+        # 1.hostname
+        job_id = stdout.strip()
+        assert job_id
+        return job_id
 
-    assert log_path.exists()
-    assert log_path.read_text() == "hello\n"
-
-
-def test_cpu_failure(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    log_path = tmp_path / "test.log"
-    status_path = tmp_path / "test.out"
-    config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
-    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
-
-    process = subprocess.Popen(
-        cmd
-        + [
-            "cpu",
-            log_path,
-            "--",
-            "bash",
-            "-c",
-            "sleep 1; exit 7",
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-
-    assert process.stdout is not None
-    job_id = process.stdout.readline().strip()
-    assert job_id
-
-    _, stderr = process.communicate(timeout=30)
-
-    assert process.returncode == 1
-    assert "Job failed with 7 exit code." in stderr
-
-    for _ in range(30):
+    def is_job_running(self, job_id: str) -> bool:
         result = subprocess.run(
             ["qstat", job_id],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        if result.returncode != 0:
-            break
-        time.sleep(1)
-    else:
-        pytest.fail(f"PBS job {job_id} did not terminate")
+        return result.returncode == 0
 
-    assert status_path.exists()
-    assert status_path.read_text().strip() == "7"
-
-
-def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    log_path = tmp_path / "test.log"
-    status_path = tmp_path / "test.out"
-    ready_path = tmp_path / "ready"
-    config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
-    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
-
-    process = subprocess.Popen(
-        cmd
-        + [
-            "cpu",
-            log_path,
-            "--",
-            "bash",
-            "-c",
-            f"touch {ready_path}; sleep 10; exit 0",
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-
-    assert process.stdout is not None
-
-    # PBS qsub:
-    # 1.hostname
-    job_id = process.stdout.readline().strip()
-    assert job_id
-
-    for _ in range(60):
-        if ready_path.exists():
-            break
-        time.sleep(1)
-    else:
-        subprocess.run(["qdel", job_id], check=False)
-        _, stderr = process.communicate(timeout=30)
-        pytest.fail(f"PBS job {job_id} did not start: {stderr}")
-
-    subprocess.run(["qdel", job_id], check=True)
-
-    _, stderr = process.communicate(timeout=30)
-
-    assert process.returncode == 1
-    assert "Job failed with 143 exit code." in stderr
-
-    for _ in range(30):
-        result = subprocess.run(
-            ["qstat", job_id],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+    def cancel_job(self, job_id: str) -> None:
+        subprocess.run(
+            ["qdel", job_id],
+            check=True,
         )
-        if result.returncode != 0:
-            break
-        time.sleep(1)
-    else:
-        pytest.fail(f"PBS job {job_id} did not terminate")
-
-    assert status_path.exists()
-    assert status_path.read_text().strip() == "143"
-
-
-def test_cpu_log_filename_with_spaces(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    log_path = tmp_path / "test log.log"
-    config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
-    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
-
-    subprocess.run(
-        cmd
-        + [
-            "cpu",
-            log_path,
-            "--",
-            "echo",
-            "hello",
-        ],
-        check=True,
-    )
-
-    assert log_path.exists()
-    assert log_path.read_text().strip().endswith("hello")
-
-
-def test_cpu_array(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    log_path = tmp_path / "test_log.log"
-    config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
-    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
-
-    subprocess.run(
-        cmd
-        + [
-            "cpu",
-            "--n_tasks",
-            "2",
-            "--n_tasks_per_proc",
-            "1",
-            "--n_procs",
-            "1",
-            log_path,
-            "--",
-            "bash",
-            "-c",
-            'echo "TASK_INDEX=$TASK_INDEX"',
-        ],
-        check=True,
-    )
-
-    for task_index in [1, 2]:
-        log_file = tmp_path / f"test_log.{task_index}-1.log"
-
-        assert log_file.exists()
-        assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
-
-
-def test_cpu_array_log_filename_with_spaces(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    log_path = tmp_path / "test log.log"
-    config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
-    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
-
-    subprocess.run(
-        cmd
-        + [
-            "cpu",
-            "--n_tasks",
-            "2",
-            "--n_tasks_per_proc",
-            "1",
-            "--n_procs",
-            "1",
-            log_path,
-            "--",
-            "bash",
-            "-c",
-            'echo "TASK_INDEX=$TASK_INDEX"',
-        ],
-        check=True,
-    )
-
-    for task_index in [1, 2]:
-        log_file = tmp_path / f"test log.{task_index}-1.log"
-
-        assert log_file.exists()
-        assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
