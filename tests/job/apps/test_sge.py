@@ -62,6 +62,7 @@ def test_cpu_failure(
     assert match is not None
 
     job_id = match.group(1)
+    assert job_id
 
     _, stderr = process.communicate(timeout=30)
 
@@ -119,6 +120,7 @@ def test_cpu_qdel(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert match is not None
 
     job_id = match.group(1)
+    assert job_id
 
     for _ in range(60):
         if ready_path.exists():
