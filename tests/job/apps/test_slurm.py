@@ -16,6 +16,7 @@ class TestSlurm(SchedulerTestBase):
     cancel_status = 143
 
     def get_job_id(self, stdout: str) -> str:
+        # Slurm sbatch:
         # Submitted batch job 3
         fields = stdout.split()
         assert fields
