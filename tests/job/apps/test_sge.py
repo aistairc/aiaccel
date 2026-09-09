@@ -23,7 +23,8 @@ def test_cpu(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         check=True,
     )
 
-    assert log_path.read_text().strip().endswith("hello")
+    assert log_path.exists()
+    assert log_path.read_text() == "hello\n"
 
 
 def test_cpu_failure(

@@ -14,8 +14,8 @@ def test_cpu(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
 
     log_path = tmp_path / "test.log"
-
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
 
     subprocess.run(
         cmd + ["--config", config_path, "cpu", log_path, "--", "echo", "hello"],
