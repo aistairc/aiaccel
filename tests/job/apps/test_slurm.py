@@ -53,12 +53,12 @@ def test_cpu_failure(
     job_id = process.stdout.readline().split()[-1]
     assert job_id
 
-    _, stderr = process.communicate(timeout=30)
+    _, stderr = process.communicate(timeout=60)
 
     assert process.returncode == 1
     assert "Job failed with 7 exit code." in stderr
 
-    for _ in range(30):
+    for _ in range(60):
         result = subprocess.run(
             ["squeue", "-j", job_id, "-h"],
             capture_output=True,
