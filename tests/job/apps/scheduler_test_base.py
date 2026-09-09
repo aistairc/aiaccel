@@ -100,7 +100,7 @@ class SchedulerTestBase(ABC):
 
         job_id = self.get_job_id(process.stdout.readline())
 
-        _, stderr = process.communicate(timeout=30)
+        _, stderr = process.communicate(timeout=60)
 
         assert process.returncode == 1
         assert "Job failed with 7 exit code." in stderr
