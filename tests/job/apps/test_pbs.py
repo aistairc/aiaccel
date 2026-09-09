@@ -18,7 +18,7 @@ def test_cpu(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
 
     subprocess.run(
-        cmd + ["--config", config_path, "cpu", log_path, "--", "echo", "hello"],
+        cmd + ["cpu", log_path, "--", "echo", "hello"],
         check=True,
     )
 
