@@ -1,0 +1,3 @@
+_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/slurm.yaml
+
+use_scandir: true
