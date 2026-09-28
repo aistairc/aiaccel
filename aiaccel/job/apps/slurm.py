@@ -3,37 +3,43 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-import os
-from pathlib import Path
-import shlex
-import subprocess
-import time
-
-from aiaccel.job.apps import prepare_argument_parser
+from aiaccel.job.apps import SchedulerJobApp
 
 
-def main() -> None:
-    # Load configuration (from the default YAML string)
-    config, parser, sub_parsers = prepare_argument_parser("slurm.yaml")
+class SlurmJobApp(SchedulerJobApp):
+    """Job application for submitting scripts to a Slurm scheduler."""
 
-    args = parser.parse_args()
-    mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
+    def __init__(self) -> None:
+        super().__init__("slurm.yaml")
 
-    # Prepare the job script and arguments
-    job = config[mode].job.format(command=shlex.join(args.command), args=args)
+    def build_submit_command(self) -> tuple[str, str]:
+        """Build the Slurm submission command."""
+        return (
+            self.config.sbatch.format(args=self.args),
+            self.config[self.mode].sbatch_args.format(args=self.args),
+        )
 
-    if mode in ["cpu-array", "gpu-array"]:
-        job = f"""\
-for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
-    TASK_INDEX=$(( SLURM_ARRAY_TASK_ID + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+    def prepare_single_job_context(self) -> None:
+        super().prepare_single_job_context()
+        self.job = f"""\
+{self.job} &
+wait "$!"
+"""
 
-    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
+    def prepare_array_job_context(self) -> None:
+        """Prepare Slurm-specific context for array jobs."""
+        self.job = f"""\
+for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
+    TASK_INDEX=$(( SLURM_ARRAY_TASK_ID + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+
+    if [[ $TASK_INDEX -gt {self.args.n_tasks} ]]; then
         break
     fi
 
     TASK_INDEX=$TASK_INDEX \\
-    TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {args.log_filename.with_suffix("")}.${{SLURM_ARRAY_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+    TASK_STEPSIZE={self.args.n_tasks_per_proc} \\
+        {self.job} > \\
+        {self.args.log_filename.with_suffix("")}.${{SLURM_ARRAY_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -42,63 +48,38 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        job_log_filename = args.log_filename.with_suffix(".%a.log")
-        job_status_filename: Path = args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out")
+        self.job_log_filename = self.args.log_filename.with_suffix(".%a.log").resolve()
+        self.job_status_filename = self.args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out").resolve()
+        self.status_filename_list = [
+            self.args.log_filename.with_suffix(f".{array_idx + 1}.out").resolve()
+            for array_idx in range(
+                0,
+                self.args.n_tasks,
+                self.args.n_tasks_per_proc * self.args.n_procs,
+            )
+        ]
 
-        status_filename_list = []
-        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
-            status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
-    else:
-        job_log_filename = args.log_filename.resolve()
-        job_status_filename = args.log_filename.with_suffix(".out").resolve()
-
-        status_filename_list = [job_status_filename]
-        job = f"""\
-{job} &
-wait "$!"
-"""
-
-    job_script = f"""\
+    def build_job_script(self) -> str:
+        """Build the Slurm job script."""
+        return f"""\
 #! /bin/bash
-#SBATCH -o {job_log_filename}
-#SBATCH -t {args.walltime}
+#SBATCH -o {self.job_log_filename}
+#SBATCH -t {self.args.walltime}
 
 set -eE -o pipefail
-trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'echo $? > {self.job_status_filename}' ERR EXIT  # at error and exit
+trap 'echo 143 > {self.job_status_filename}' TERM  # at termination (by job scheduler)
 
 
-{config.script_prologue}
+{self.config.script_prologue}
 
-{job}
+{self.job}
 """
 
-    sbatch = config.sbatch.format(args=args)
-    sbatch_args = config[mode].sbatch_args.format(args=args)
 
-    # Create the job script file, remove old status files, and run the job
-    args.log_filename.parent.mkdir(exist_ok=True, parents=True)
-
-    job_filename: Path = args.log_filename.with_suffix(".sh")
-    with open(job_filename, "w") as f:
-        f.write(job_script)
-
-    for status_filename in status_filename_list:
-        status_filename.unlink(missing_ok=True)
-
-    subprocess.run(f"{sbatch} {sbatch_args} {job_filename}", shell=True, check=True)
-
-    for status_filename in status_filename_list:
-        while not status_filename.exists():
-            time.sleep(1.0)
-
-            if config.get("use_scandir", False):  # Refresh the file system if needed
-                os.scandir(status_filename.parent)
-
-        status = int(status_filename.read_text())
-        if status != 0:
-            raise RuntimeError(f"Job failed with {status} exit code.")
-        status_filename.unlink()
+def main() -> None:
+    """Run the Slurm job application entry point."""
+    SlurmJobApp().run()
 
 
 if __name__ == "__main__":
