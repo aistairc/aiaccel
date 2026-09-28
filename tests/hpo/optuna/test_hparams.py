@@ -3,12 +3,7 @@
 
 import optuna
 
-from aiaccel.hpo.optuna.hparams import (
-    Categorical,
-    Const,
-    Float,
-    Int,
-)
+from aiaccel.hpo.optuna.hparams import Categorical, Const, Float, Int, Vector
 
 
 def test_const() -> None:
@@ -21,6 +16,15 @@ def test_float() -> None:
     trial = optuna.create_study().ask()
 
     assert isinstance(suggest_float(trial=trial, name="x2"), float)
+
+
+def test_float_vector() -> None:
+    suggest_vector = Vector(hparam=Float(low=0.0, high=1.0, step=None, log=False), dim=10)
+    trial = optuna.create_study().ask()
+
+    assert isinstance(suggest_vector(trial=trial, name="x"), list)
+    assert len(suggest_vector(trial=trial, name="x")) == 10
+    assert isinstance(suggest_vector(trial=trial, name="x")[0], float)
 
 
 def test_int() -> None:
