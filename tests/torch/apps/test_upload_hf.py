@@ -7,57 +7,31 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 import torch
 
-import pytest
 from pytest_mock import MockerFixture
 
 from aiaccel.torch.apps import upload_hf
-from aiaccel.torch.utils.remove_absolute_path import is_absolute_path, remove_absolute_path
 
 
-@pytest.mark.parametrize(
-    ("path", "expected"),
-    [
-        ("/home/user/model.ckpt", True),
-        (r"C:\Users\user\model.ckpt", True),
-        (r"\\server\share\model.ckpt", True),
-        ("checkpoints/model.ckpt", False),
-    ],
-)
-def test_is_absolute_path(path: str, expected: bool) -> None:
-    assert is_absolute_path(path) is expected
+def test_create_model_card(mocker: MockerFixture, tmp_path: Path) -> None:
+    mocker.patch(
+        "aiaccel.torch.apps.upload_hf.Prompt.ask",
+        side_effect=["test-model", "mit", "audio-classification", "en, ja", "Test model."],
+    )
+    path = tmp_path / "README.md"
 
+    upload_hf.create_model_card(path, "test/test-model")
 
-def test_remove_absolute_path() -> None:
-    obj = {
-        "relative": "checkpoints/model.ckpt",
-        "absolute": "/home/user/model.ckpt",
-        "nested": {"data_dir": "/data/dataset", "value": 1},
-        "items": ["keep", "/remove/me"],
-    }
-
-    cleaned, removed = remove_absolute_path(obj)
-
-    assert cleaned == {
-        "relative": "checkpoints/model.ckpt",
-        "nested": {"value": 1},
-        "items": ["keep"],
-    }
-    assert removed == ["absolute", "nested.data_dir", "items[1]"]
-
-
-def test_resolve_checkpoint(tmp_path: Path) -> None:
-    (tmp_path / "checkpoints").mkdir()
-    checkpoint_path = tmp_path / "checkpoints" / "merged.ckpt"
-    checkpoint_path.touch()
-    config = oc.create({"checkpoint_filename": "merged"})
-
-    assert upload_hf.resolve_checkpoint(tmp_path, config) == checkpoint_path
+    content = path.read_text(encoding="utf-8")
+    assert "license: mit" in content
+    assert "pipeline_tag: audio-classification" in content
+    assert "library_name: aiaccel" in content
+    assert "# test-model" in content
+    assert "Test model." in content
 
 
 def test_stage_config_cleaning(mocker: MockerFixture, tmp_path: Path) -> None:
     config_path = tmp_path / "merged_config.yaml"
-    upload_dir = tmp_path / "hf_upload"
-    upload_dir.mkdir()
+    target = tmp_path / "hf_upload" / "merged_config.yaml"
     oc.save(
         {
             "checkpoint_filename": "merged",
@@ -67,19 +41,23 @@ def test_stage_config_cleaning(mocker: MockerFixture, tmp_path: Path) -> None:
         config_path,
     )
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.yes_no_input", side_effect=[True, True])
-    mocker.patch("aiaccel.torch.apps.upload_hf.wait_for_review")
+    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.review_file", return_value=True)
 
-    assert upload_hf.stage_config(config_path, upload_dir) is True
+    assert upload_hf.stage_cleaned_file(
+        config_path,
+        target,
+        lambda path: oc.to_container(oc.load(path), resolve=False),
+        oc.save,
+    )
 
-    staged = oc.to_container(oc.load(upload_dir / "merged_config.yaml"))
+    staged = oc.to_container(oc.load(target))
     assert staged == {"checkpoint_filename": "merged", "relative_path": "data/train"}
 
 
 def test_stage_checkpoint_cleaning(mocker: MockerFixture, tmp_path: Path) -> None:
     checkpoint_path = tmp_path / "merged.ckpt"
-    upload_dir = tmp_path / "hf_upload"
-    upload_dir.mkdir()
+    target = tmp_path / "hf_upload" / "checkpoints" / "merged.ckpt"
     torch.save(
         {
             "state_dict": {"weight": torch.tensor([1.0])},
@@ -88,30 +66,36 @@ def test_stage_checkpoint_cleaning(mocker: MockerFixture, tmp_path: Path) -> Non
         checkpoint_path,
     )
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.yes_no_input", side_effect=[True, True])
-    mocker.patch("aiaccel.torch.apps.upload_hf.wait_for_review")
+    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.review_file", return_value=True)
 
-    assert upload_hf.stage_checkpoint(checkpoint_path, upload_dir) is True
+    assert upload_hf.stage_cleaned_file(
+        checkpoint_path,
+        target,
+        lambda path: torch.load(path, map_location="cpu", weights_only=False),
+        torch.save,
+    )
 
-    staged = torch.load(upload_dir / "checkpoints" / "merged.ckpt", map_location="cpu", weights_only=False)
+    staged = torch.load(target, map_location="cpu", weights_only=False)
     assert "dirpath" not in staged["callbacks"]
     assert torch.equal(staged["state_dict"]["weight"], torch.tensor([1.0]))
 
 
-def test_existing_staged_config_can_be_reused(mocker: MockerFixture, tmp_path: Path) -> None:
-    config_path = tmp_path / "merged_config.yaml"
-    upload_dir = tmp_path / "hf_upload"
-    upload_dir.mkdir()
-    oc.save({"checkpoint_filename": "merged"}, config_path)
-    staged_path = upload_dir / "merged_config.yaml"
-    oc.save({"checkpoint_filename": "hand-edited"}, staged_path)
+def test_existing_staged_file_can_be_reused(mocker: MockerFixture, tmp_path: Path) -> None:
+    source = tmp_path / "merged_config.yaml"
+    target = tmp_path / "hf_upload" / "merged_config.yaml"
+    target.parent.mkdir()
+    oc.save({"checkpoint_filename": "merged"}, source)
+    oc.save({"checkpoint_filename": "hand-edited"}, target)
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.yes_no_input", return_value=True)
-    mock_wait = mocker.patch("aiaccel.torch.apps.upload_hf.wait_for_review")
+    mocker.patch("aiaccel.torch.apps.upload_hf.review_file", return_value=True)
+    load = mocker.Mock()
+    save = mocker.Mock()
 
-    assert upload_hf.stage_config(config_path, upload_dir) is True
-    assert oc.load(staged_path).checkpoint_filename == "hand-edited"
-    mock_wait.assert_called_once_with(staged_path)
+    assert upload_hf.stage_cleaned_file(source, target, load, save)
+    assert oc.load(target).checkpoint_filename == "hand-edited"
+    load.assert_not_called()
+    save.assert_not_called()
 
 
 def test_upload_model(mocker: MockerFixture, tmp_path: Path) -> None:
@@ -121,7 +105,7 @@ def test_upload_model(mocker: MockerFixture, tmp_path: Path) -> None:
     (upload_dir / "merged_config.yaml").write_text("checkpoint_filename: merged\n", encoding="utf-8")
     (upload_dir / "checkpoints" / "merged.ckpt").touch()
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.yes_no_input", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
     mock_login = mocker.patch("aiaccel.torch.apps.upload_hf.login")
     api = mocker.Mock()
     api.repo_exists.return_value = True
