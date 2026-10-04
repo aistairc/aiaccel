@@ -128,9 +128,13 @@ def upload_model(upload_dir: Path, repo_id: str) -> None:
     api = HfApi()
 
     if not api.repo_exists(repo_id=repo_id, repo_type="model"):
-        if not Confirm.ask(f"Repository {repo_id} does not exist. Create it?", default=True):
+        if not Confirm.ask(f"Repository {repo_id} does not exist. Create it as private?", default=True):
             return
-        api.create_repo(repo_id=repo_id, repo_type="model")
+        api.create_repo(
+            repo_id=repo_id,
+            repo_type="model",
+            private=True,
+        )
 
     # Upload only the reviewed contents of hf_upload/.
     api.upload_folder(
