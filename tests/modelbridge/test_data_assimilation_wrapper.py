@@ -7,6 +7,7 @@ from typing import Any
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -127,6 +128,35 @@ def test_load_scenarios_applies_model_defaults_and_overrides() -> None:
     assert test.id == "t0"
 
 
+def test_load_scenarios_does_not_require_top_level_models_when_scenarios_declare_them() -> None:
+    module = _load_wrapper_module()
+    config = _scenario_config(
+        train_scenarios=[
+            {"id": "s0", "micro_model": "FL1-1", "macro_model": "FS1-1"},
+            {"id": "s1", "micro_model": "FL2-1", "macro_model": "FS2-1"},
+        ],
+        test_scenario={"id": "t0", "micro_model": "FL3-1", "macro_model": "FS3-1"},
+    )
+    del config["micro_model"], config["macro_model"]
+
+    train, test = module._load_scenarios(config, mock=False)
+
+    assert [(s.micro_model, s.macro_model) for s in [*train, test]] == [
+        ("FL1-1", "FS1-1"),
+        ("FL2-1", "FS2-1"),
+        ("FL3-1", "FS3-1"),
+    ]
+
+
+def test_load_scenarios_rejects_missing_model_without_top_level_default() -> None:
+    module = _load_wrapper_module()
+    config = _scenario_config(test_scenario={"id": "t0", "micro_model": "FL3-1"})
+    del config["macro_model"]
+
+    with pytest.raises(ValueError, match="'s0' has no 'macro_model' and no top-level 'macro_model' default"):
+        module._load_scenarios(config, mock=True)
+
+
 @pytest.mark.parametrize(
     ("overrides", "mock", "message"),
     [
@@ -211,6 +241,8 @@ def test_bundled_config_runs_in_mock_mode_without_mas_bench_assets(tmp_path: Pat
         capture_output=True,
         text=True,
         timeout=600,
+        # The wrapper runs `aiaccel-job` by name; expose the console scripts of this interpreter.
+        env={**os.environ, "PATH": os.pathsep.join([str(Path(sys.executable).parent), os.environ.get("PATH", "")])},
     )
 
     summary = json.loads((tmp_path / "out" / "data_assimilation_summary.json").read_text(encoding="utf-8"))

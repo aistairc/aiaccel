@@ -197,12 +197,14 @@ def _check_stale_runs(runs_dir: Path, run_counts: Mapping[str, int]) -> None:
     Raises:
         ValueError: If any run directory is outside the current run set.
     """
+    # Compare names exactly: aliases such as "00" or "0000" would otherwise be collected as run 0.
+    expected = {phase: {f"{run_id:03d}" for run_id in range(n_runs)} for phase, n_runs in run_counts.items()}
     stale = sorted(
         str(path.relative_to(runs_dir))
-        for phase, n_runs in run_counts.items()
+        for phase, names in expected.items()
         for target in TARGETS
         for path in (runs_dir / phase / target).glob("*")
-        if path.is_dir() and not (path.name.isdigit() and int(path.name) < n_runs)
+        if path.is_dir() and path.name not in names
     )
     if stale:
         raise ValueError(

@@ -153,6 +153,16 @@ def test_run_prepare_rejects_leftover_runs_after_shrinking(tmp_path: Path) -> No
         prepare.run_prepare(config_path=config_path, workspace=workspace)
 
 
+@pytest.mark.parametrize("alias", ["00", "0000"])
+def test_run_prepare_rejects_noncanonical_run_directory_aliases(tmp_path: Path, alias: str) -> None:
+    config_path, workspace = _prepare_with_counts(tmp_path, n_train=1, n_test=1)
+    prepare.run_prepare(config_path=config_path, workspace=workspace)
+    (workspace / "runs" / "train" / "macro" / alias).mkdir()
+
+    with pytest.raises(ValueError, match=rf"outside the current run set: \['train/macro/{alias}'\]"):
+        prepare.run_prepare(config_path=config_path, workspace=workspace)
+
+
 @pytest.mark.parametrize("value", [1.5, "2", True])
 def test_run_prepare_rejects_non_integer_run_counts(tmp_path: Path, value: object) -> None:
     config_path = tmp_path / "config.yaml"

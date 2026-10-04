@@ -97,13 +97,21 @@ class Scenario:
     mock_target: float
 
 
+def _scenario_model(raw: dict[str, Any], *, config: dict[str, Any], name: str, key: str) -> str:
+    """Return the scenario's model name, falling back to the top-level value only when it is absent."""
+    for source in (raw, config):
+        if name in source:
+            return str(source[name])
+    raise ValueError(f"{key} entry {raw['id']!r} has no '{name}' and no top-level '{name}' default")
+
+
 def _parse_scenario(raw: Any, *, config: dict[str, Any], key: str) -> Scenario:
     if not isinstance(raw, dict) or "id" not in raw:
         raise ValueError(f"{key} entries must be mappings with an 'id', got {raw!r}")
     return Scenario(
         id=str(raw["id"]),
-        micro_model=str(raw.get("micro_model", config["micro_model"])),
-        macro_model=str(raw.get("macro_model", config["macro_model"])),
+        micro_model=_scenario_model(raw, config=config, name="micro_model", key=key),
+        macro_model=_scenario_model(raw, config=config, name="macro_model", key=key),
         mock_target=float(raw.get("mock_target", 0.0)),
     )
 
