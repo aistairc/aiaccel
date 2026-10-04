@@ -50,6 +50,7 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             choices=["apache-2.0", "mit", "cc-by-4.0", "other", "skip"],
             default="apache-2.0",
         )
+        library_name = Prompt.ask("Library", default="aiaccel")
         pipeline_tag = Prompt.ask("Task / pipeline tag", default="")
         language = Prompt.ask("Language(s), comma-separated", default="")
         description = Prompt.ask("Short description", default="")
@@ -59,7 +60,7 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             license=None if license_name == "skip" else license_name,
             pipeline_tag=pipeline_tag or None,
             language=[value.strip() for value in language.split(",") if value.strip()] or None,
-            library_name="aiaccel",
+            library_name=library_name,
         )
         template_path = Path(__file__).parent / "templates" / "model_card.md"
 

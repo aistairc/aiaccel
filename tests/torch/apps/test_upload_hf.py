@@ -12,21 +12,29 @@ from pytest_mock import MockerFixture
 from aiaccel.torch.apps import upload_hf
 
 
-def test_create_model_card(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) -> None:
     mocker.patch(
         "aiaccel.torch.apps.upload_hf.Prompt.ask",
-        side_effect=["test-model", "mit", "audio-classification", "en, ja", "Test model."],
+        side_effect=["test-model", "mit", "test-library", "audio-classification", "en, ja", "Test model."],
     )
-    path = tmp_path / "README.md"
+    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf._review_file", return_value=True)
 
-    upload_hf.create_model_card(path, "test/test-model")
+    model_dir = tmp_path / "model"
+    upload_dir = model_dir / "hf_upload"
+    model_dir.mkdir()
+    upload_dir.mkdir()
 
+    assert upload_hf.stage_readme(model_dir, upload_dir, "test/test-model")
+
+    path = model_dir / "README.md"
     content = path.read_text(encoding="utf-8")
     assert "license: mit" in content
     assert "pipeline_tag: audio-classification" in content
-    assert "library_name: aiaccel" in content
+    assert "library_name: test-library" in content
     assert "# test-model" in content
     assert "Test model." in content
+    assert (upload_dir / "README.md").read_text(encoding="utf-8") == content
 
 
 def test_stage_config_cleaning(mocker: MockerFixture, tmp_path: Path) -> None:
@@ -42,7 +50,7 @@ def test_stage_config_cleaning(mocker: MockerFixture, tmp_path: Path) -> None:
     )
 
     mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
-    mocker.patch("aiaccel.torch.apps.upload_hf.review_file", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf._review_file", return_value=True)
 
     assert upload_hf.stage_cleaned_file(
         config_path,
@@ -67,7 +75,7 @@ def test_stage_checkpoint_cleaning(mocker: MockerFixture, tmp_path: Path) -> Non
     )
 
     mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
-    mocker.patch("aiaccel.torch.apps.upload_hf.review_file", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf._review_file", return_value=True)
 
     assert upload_hf.stage_cleaned_file(
         checkpoint_path,
@@ -88,7 +96,7 @@ def test_existing_staged_file_can_be_reused(mocker: MockerFixture, tmp_path: Pat
     oc.save({"checkpoint_filename": "merged"}, source)
     oc.save({"checkpoint_filename": "hand-edited"}, target)
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.review_file", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf._review_file", return_value=True)
     load = mocker.Mock()
     save = mocker.Mock()
 
