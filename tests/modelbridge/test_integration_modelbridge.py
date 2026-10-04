@@ -299,13 +299,20 @@ def test_evaluate_creates_summary_json(pipeline_workspace: Path) -> None:
     assert (pipeline_workspace / "models" / "summary.json").exists()
 
 
+def _reject_constant(value: str) -> None:
+    raise ValueError(f"Non-standard JSON constant: {value}")
+
+
 def test_evaluate_summary_has_valid_metrics(pipeline_workspace: Path) -> None:
-    summary = json.loads((pipeline_workspace / "models" / "summary.json").read_text(encoding="utf-8"))
+    summary_text = (pipeline_workspace / "models" / "summary.json").read_text(encoding="utf-8")
+    summary = json.loads(summary_text, parse_constant=_reject_constant)
     assert "metrics" in summary
     metrics = summary["metrics"]
-    for key in ("mse", "mae", "r2"):
+    for key in ("mse", "mae"):
         assert key in metrics, f"Missing metric: {key}"
         assert isinstance(metrics[key], float)
+    # R2 is undefined for a single test sample and is reported as null.
+    assert metrics["r2"] is None if _N_TEST < 2 else isinstance(metrics["r2"], float)
     assert metrics["mse"] >= 0.0
     assert metrics["mae"] >= 0.0
 

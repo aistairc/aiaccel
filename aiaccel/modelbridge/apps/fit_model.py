@@ -16,48 +16,7 @@ import pickle
 
 import numpy as np
 
-
-class _MissingOptionalDependency:
-    """Proxy that raises a clear error when an optional dependency is used."""
-
-    def __init__(self, package_name: str, feature_name: str) -> None:
-        self._package_name = package_name
-        self._feature_name = feature_name
-
-    def _raise(self) -> None:
-        raise ImportError(
-            f"{self._feature_name} requires optional dependency '{self._package_name}'. "
-            f"Please install '{self._package_name}' to use this functionality."
-        )
-
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        self._raise()
-
-    def __getattr__(self, name: str) -> Any:
-        self._raise()
-
-
-LinearRegression: Any
-make_pipeline: Any
-PolynomialFeatures: Any
-try:
-    from sklearn.linear_model import LinearRegression as _LinearRegression
-    from sklearn.pipeline import make_pipeline as _make_pipeline
-    from sklearn.preprocessing import PolynomialFeatures as _PolynomialFeatures
-except ImportError:
-    LinearRegression = _MissingOptionalDependency("scikit-learn", "Regression model training")
-    make_pipeline = _MissingOptionalDependency("scikit-learn", "Regression model training")
-    PolynomialFeatures = _MissingOptionalDependency("scikit-learn", "Regression model training")
-else:
-    LinearRegression = _LinearRegression
-    make_pipeline = _make_pipeline
-    PolynomialFeatures = _PolynomialFeatures
-
-yaml: Any
-try:
-    import yaml
-except ImportError:
-    yaml = _MissingOptionalDependency("PyYAML", "Regression settings loading")
+import yaml
 
 SUPPORTED_REGRESSION_KINDS = {"linear", "polynomial", "gpr"}
 DEFAULT_REGRESSION_KIND = "linear"
@@ -107,7 +66,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _as_int(value: Any, *, key: str, min_value: int) -> int:
+def _as_int(value: object, *, key: str, min_value: int) -> int:
     """Parse an integer and validate lower bound.
 
     Args:
@@ -119,12 +78,13 @@ def _as_int(value: Any, *, key: str, min_value: int) -> int:
         Parsed integer value.
 
     Raises:
-        ValueError: If the value is lower than ``min_value`` or not integer-like.
+        ValueError: If the value is not an integer or is lower than ``min_value``.
     """
-    parsed = int(value)
-    if parsed < min_value:
-        raise ValueError(f"{key} must be >= {min_value}")
-    return parsed
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{key} must be an integer, got {value!r}")
+    if value < min_value:
+        raise ValueError(f"{key} must be >= {min_value}, got {value}")
+    return value
 
 
 def _resolve_config_path(workspace: Path, *, config_path: Path | None = None) -> Path | None:
@@ -192,7 +152,11 @@ def _load_regression_settings(workspace: Path, *, config_path: Path | None = Non
         return settings
 
     loaded = yaml.safe_load(resolved_path.read_text(encoding="utf-8"))
-    root_config: Mapping[str, Any] = loaded if isinstance(loaded, Mapping) else {}
+    if loaded is None:
+        loaded = {}
+    if not isinstance(loaded, Mapping):
+        raise ValueError(f"Config root must be a mapping: {resolved_path}")
+    root_config: Mapping[str, Any] = loaded
     raw_regression = root_config.get("regression", {})
     if raw_regression is None:
         raw_regression = {}
@@ -279,6 +243,9 @@ def _train_regression_model(
 ) -> tuple[Any, str]:
     """Train selected regression model.
 
+    ``gpr`` builds one ``GPy.models.GPRegression`` per target with an RBF kernel and GPy's default
+    kernel hyperparameters; they are not optimized. ``regression.noise`` fixes the noise variance.
+
     Args:
         features: Feature matrix.
         targets: Target matrix.
@@ -288,20 +255,27 @@ def _train_regression_model(
         Tuple of trained model and model type label.
     """
     kind = str(regression_settings["kind"])
+    if kind == "gpr":
+        return _fit_gpr_model(features, targets, noise=regression_settings["noise"]), "GPyGaussianProcessRegression"
+
+    try:
+        from sklearn.linear_model import LinearRegression
+        from sklearn.pipeline import make_pipeline
+        from sklearn.preprocessing import PolynomialFeatures
+    except ImportError as exc:
+        raise RuntimeError(
+            f"scikit-learn is required when regression.kind is '{kind}'. Install scikit-learn to use this step."
+        ) from exc
+
     if kind == "linear":
         model = LinearRegression()
         model.fit(features, targets)
         return model, "LinearRegression"
 
-    if kind == "polynomial":
-        degree = int(regression_settings["degree"])
-        model = make_pipeline(PolynomialFeatures(degree=degree, include_bias=False), LinearRegression())
-        model.fit(features, targets)
-        return model, "PolynomialRegression"
-
-    noise = regression_settings["noise"]
-    model = _fit_gpr_model(features, targets, noise=noise)
-    return model, "GPyGaussianProcessRegression"
+    degree = int(regression_settings["degree"])
+    model = make_pipeline(PolynomialFeatures(degree=degree, include_bias=False), LinearRegression())
+    model.fit(features, targets)
+    return model, "PolynomialRegression"
 
 
 def run_fit_model(workspace: Path, *, config_path: Path | None = None) -> Path | None:

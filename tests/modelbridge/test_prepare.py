@@ -123,3 +123,46 @@ def test_run_prepare_rejects_unknown_seed_defaults_key(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="Unsupported seed_defaults key"):
         prepare.run_prepare(config_path=config_path, workspace=tmp_path / "workspace")
+
+
+def _prepare_with_counts(tmp_path: Path, *, n_train: int, n_test: int) -> tuple[Path, Path]:
+    config_path = tmp_path / "config" / "config.yaml"
+    if not config_path.exists():
+        _write_config(config_path)
+    payload = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    payload.update({"n_train": n_train, "n_test": n_test})
+    config_path.write_text(yaml.safe_dump(payload), encoding="utf-8")
+    return config_path, tmp_path / "workspace"
+
+
+def test_run_prepare_allows_growing_the_run_set(tmp_path: Path) -> None:
+    config_path, workspace = _prepare_with_counts(tmp_path, n_train=1, n_test=1)
+    prepare.run_prepare(config_path=config_path, workspace=workspace)
+    config_path, workspace = _prepare_with_counts(tmp_path, n_train=2, n_test=1)
+
+    assert prepare.run_prepare(config_path=config_path, workspace=workspace) == (2, 1)
+    assert len(list((workspace / "runs").rglob("config.yaml"))) == 6
+
+
+def test_run_prepare_rejects_leftover_runs_after_shrinking(tmp_path: Path) -> None:
+    config_path, workspace = _prepare_with_counts(tmp_path, n_train=2, n_test=1)
+    prepare.run_prepare(config_path=config_path, workspace=workspace)
+    config_path, workspace = _prepare_with_counts(tmp_path, n_train=1, n_test=1)
+
+    with pytest.raises(ValueError, match=r"outside the current run set: \['train/macro/001', 'train/micro/001'\]"):
+        prepare.run_prepare(config_path=config_path, workspace=workspace)
+
+
+@pytest.mark.parametrize("value", [1.5, "2", True])
+def test_run_prepare_rejects_non_integer_run_counts(tmp_path: Path, value: object) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(yaml.safe_dump({"n_train": value, "n_test": 0}), encoding="utf-8")
+    with pytest.raises(ValueError, match="n_train must be an integer"):
+        prepare.run_prepare(config_path=config_path, workspace=tmp_path / "workspace")
+
+
+def test_run_prepare_rejects_non_mapping_config_root(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("- n_train\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Config root must be a mapping"):
+        prepare.run_prepare(config_path=config_path, workspace=tmp_path / "workspace")

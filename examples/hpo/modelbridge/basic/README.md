@@ -72,6 +72,42 @@ pixi run make -C examples/hpo/modelbridge/basic clean
 pixi run make -C examples/hpo/modelbridge/basic all CONFIG_FILE=config/config.yaml
 ```
 
+## Re-running in an Existing Workspace
+Make re-runs `prepare` whenever the config file is newer than `workspace/state/01_prepare.done`.
+The HPO and collect stages process every run under `workspace/runs/<phase>`, and the generated
+studies use `load_if_exists: true`, so an existing workspace keeps and resumes its Optuna DBs.
+
+- Increasing `n_train`/`n_test` or the number of trials resumes the existing studies.
+- Decreasing `n_train`/`n_test` is rejected by `prepare`, because the old runs would otherwise be
+  optimized and collected again. Run `make clean` or pass a new `WORKSPACE_DIR`.
+- Changing the search space or objective is not detected; run `make clean` or use a new `WORKSPACE_DIR`
+  so old trials are not mixed into the new studies.
+
+## Data Contracts
+- `pairs/<phase>_pairs.csv` has a `run_id` column followed by sorted `macro_<param>` and `micro_<param>`
+  columns. Only runs with a completed best trial for both macro and micro are written.
+- When no run qualifies, `collect` rewrites the CSV as an empty file. `fit-model` and `evaluate` then
+  skip with a warning and leave the existing model and summary files untouched, so check the logs.
+- `models/model_meta.json` stores the feature and target column order used by `evaluate`.
+- `models/summary.json` is strict JSON. `metrics.r2` is `null` when there are fewer than two test samples,
+  because R2 is undefined for a single sample.
+- `models/regression_model.pkl` is a pickle; load only models produced in your own workspace.
+
+## Regression Settings
+`fit-model` reads the `regression` section from the first existing config in this order:
+`--config`, `MODELBRIDGE_CONFIG_FILE`, `CONFIG_FILE`, `<workspace>/config.yaml`, `<workspace>/../config/config.yaml`.
+The Makefile exports `MODELBRIDGE_CONFIG_FILE`, so `CONFIG_FILE=...` also selects the regression settings.
+
+```yaml
+regression:
+  kind: linear      # linear (default), polynomial, or gpr
+  degree: 2         # polynomial degree (integer >= 1)
+  noise: 1.0e-4     # gpr only: fixed noise variance (> 0)
+```
+
+`gpr` fits one GPy `GPRegression` per micro target with an RBF kernel. The kernel hyperparameters are
+GPy defaults and are not optimized, so scale the parameters to a comparable range or prefer `linear`/`polynomial`.
+
 ## ABCI Run (Using `objective.sh`)
 1. Edit `config/job_config_abci.yaml`.
 - Set `job_group` to your ABCI group.

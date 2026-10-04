@@ -11,6 +11,8 @@ from pathlib import Path
 
 import yaml
 
+PHASES: tuple[str, ...] = ("train", "test")
+TARGETS: tuple[str, ...] = ("macro", "micro")
 DEFAULT_SEED_BASES: dict[str, int] = {
     "train_macro": 42,
     "train_micro": 142,
@@ -130,7 +132,7 @@ def create_hpo_config(
     return config_path
 
 
-def _as_int(value: Any, *, key: str) -> int:
+def _as_int(value: object, *, key: str) -> int:
     """Parse a non-negative integer from config input.
 
     Args:
@@ -141,12 +143,13 @@ def _as_int(value: Any, *, key: str) -> int:
         Parsed non-negative integer value.
 
     Raises:
-        ValueError: If the value is negative or cannot be converted to an integer.
+        ValueError: If the value is not an integer or is negative.
     """
-    parsed = int(value)
-    if parsed < 0:
-        raise ValueError(f"{key} must be >= 0")
-    return parsed
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{key} must be an integer, got {value!r}")
+    if value < 0:
+        raise ValueError(f"{key} must be >= 0, got {value}")
+    return value
 
 
 def _load_seed_bases(config: Mapping[str, Any]) -> dict[str, int]:
@@ -181,8 +184,38 @@ def _load_seed_bases(config: Mapping[str, Any]) -> dict[str, int]:
     return seed_bases
 
 
+def _check_stale_runs(runs_dir: Path, run_counts: Mapping[str, int]) -> None:
+    """Reject run directories left over from a previous prepare with a different run set.
+
+    ``aiaccel-hpo optimize`` and ``collect`` process every run under ``runs/<phase>``, so leftover
+    runs would silently mix old results into the current pipeline.
+
+    Args:
+        runs_dir: ``workspace/runs`` directory.
+        run_counts: Number of runs per phase for the current config.
+
+    Raises:
+        ValueError: If any run directory is outside the current run set.
+    """
+    stale = sorted(
+        str(path.relative_to(runs_dir))
+        for phase, n_runs in run_counts.items()
+        for target in TARGETS
+        for path in (runs_dir / phase / target).glob("*")
+        if path.is_dir() and not (path.name.isdigit() and int(path.name) < n_runs)
+    )
+    if stale:
+        raise ValueError(
+            f"Workspace {runs_dir.parent} contains runs outside the current run set: {stale}. "
+            "Use a new workspace or clean the existing one (for example 'make clean') before preparing."
+        )
+
+
 def run_prepare(config_path: Path, workspace: Path) -> tuple[int, int]:
     """Generate train/test optimize configs under ``workspace/runs``.
+
+    Existing run configs are overwritten, while their Optuna DBs are kept and resumed by
+    ``load_if_exists=True``. Use a new workspace when the search space or objective changes.
 
     Args:
         config_path: Path to the modelbridge workflow config YAML.
@@ -192,52 +225,43 @@ def run_prepare(config_path: Path, workspace: Path) -> tuple[int, int]:
         Tuple of ``(n_train, n_test)`` generated run counts.
 
     Raises:
-        ValueError: If config values are malformed or unsupported.
+        ValueError: If config values are malformed or unsupported, or the workspace contains runs
+            outside the current run set.
     """
     loaded = yaml.safe_load(config_path.read_text(encoding="utf-8"))
-    config: dict[str, Any] = loaded if isinstance(loaded, dict) else {}
+    if loaded is None:
+        loaded = {}
+    if not isinstance(loaded, dict):
+        raise ValueError(f"Config root must be a mapping: {config_path}")
+    config: dict[str, Any] = loaded
 
-    n_train = _as_int(config.get("n_train", 0), key="n_train")
-    n_test = _as_int(config.get("n_test", 0), key="n_test")
+    run_counts = {phase: _as_int(config.get(f"n_{phase}", 0), key=f"n_{phase}") for phase in PHASES}
     raw_command = config.get("objective_command", ["python", "objective.py"])
     if not isinstance(raw_command, list) or any(not isinstance(token, str) for token in raw_command):
         raise ValueError("objective_command must be a list[str]")
     objective_command = _resolve_objective_command(raw_command, config_path=config_path)
     seed_bases = _load_seed_bases(config)
     runs_dir = workspace / "runs"
+    _check_stale_runs(runs_dir, run_counts)
 
-    for run_id in range(n_train):
-        params = config.get("train_params", {})
-        for target in ("macro", "micro"):
-            target_params = params.get(target, {}) if isinstance(params, dict) else {}
-            n_trials = _as_int(config.get(f"train_{target}_trials", 10), key=f"train_{target}_trials")
-            create_hpo_config(
-                runs_dir / "train" / target / f"{run_id:03d}",
-                role="train",
-                target=target,
-                run_id=run_id,
-                sampler_seed_base=seed_bases[f"train_{target}"],
-                n_trials=n_trials,
-                target_params=target_params,
-                objective_command=objective_command,
-            )
-
-    for run_id in range(n_test):
-        params = config.get("test_params", {})
-        for target in ("macro", "micro"):
-            target_params = params.get(target, {}) if isinstance(params, dict) else {}
-            n_trials = _as_int(config.get(f"test_{target}_trials", 10), key=f"test_{target}_trials")
-            create_hpo_config(
-                runs_dir / "test" / target / f"{run_id:03d}",
-                role="test",
-                target=target,
-                run_id=run_id,
-                sampler_seed_base=seed_bases[f"test_{target}"],
-                n_trials=n_trials,
-                target_params=target_params,
-                objective_command=objective_command,
-            )
-    return n_train, n_test
+    for phase, n_runs in run_counts.items():
+        params = config.get(f"{phase}_params", {})
+        if not isinstance(params, Mapping):
+            raise ValueError(f"{phase}_params must be a mapping")
+        for run_id in range(n_runs):
+            for target in TARGETS:
+                n_trials = _as_int(config.get(f"{phase}_{target}_trials", 10), key=f"{phase}_{target}_trials")
+                create_hpo_config(
+                    runs_dir / phase / target / f"{run_id:03d}",
+                    role=phase,
+                    target=target,
+                    run_id=run_id,
+                    sampler_seed_base=seed_bases[f"{phase}_{target}"],
+                    n_trials=n_trials,
+                    target_params=params.get(target, {}),
+                    objective_command=objective_command,
+                )
+    return run_counts["train"], run_counts["test"]
 
 
 def main(argv: Sequence[str] | None = None) -> int:

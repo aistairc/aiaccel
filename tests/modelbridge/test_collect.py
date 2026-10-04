@@ -54,7 +54,7 @@ def test_run_collect_writes_pairs_csv(tmp_path: Path) -> None:
     assert "micro_momentum" in rows[0]
 
 
-def test_run_collect_touches_empty_csv_when_pairs_missing(tmp_path: Path) -> None:
+def test_run_collect_writes_empty_csv_when_pairs_missing(tmp_path: Path) -> None:
     workspace = tmp_path / "workspace"
     _create_optuna_db(
         workspace / "runs" / "test" / "macro" / "001" / "optuna.db",
@@ -64,6 +64,19 @@ def test_run_collect_touches_empty_csv_when_pairs_missing(tmp_path: Path) -> Non
 
     csv_path = collect.run_collect(workspace=workspace, phase="test")
     assert csv_path.exists()
+    assert csv_path.read_text(encoding="utf-8") == ""
+
+
+def test_run_collect_truncates_previous_csv_when_no_pairs(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    (workspace / "runs" / "train").mkdir(parents=True)
+    stale_csv = workspace / "pairs" / "train_pairs.csv"
+    stale_csv.parent.mkdir(parents=True)
+    stale_csv.write_text("run_id,macro_x,micro_x\n0,0.1,0.2\n1,0.3,0.4\n", encoding="utf-8")
+
+    csv_path = collect.run_collect(workspace=workspace, phase="train")
+
+    assert csv_path == stale_csv
     assert csv_path.read_text(encoding="utf-8") == ""
 
 

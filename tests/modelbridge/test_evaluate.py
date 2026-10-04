@@ -93,3 +93,36 @@ def test_run_evaluate_returns_none_for_empty_csv(tmp_path: Path) -> None:
     test_path.write_text("run_id,macro_lr,micro_lr,micro_momentum\n", encoding="utf-8")
 
     assert evaluate.run_evaluate(workspace) is None
+
+
+def _reject_constant(value: str) -> None:
+    raise ValueError(f"Non-standard JSON constant: {value}")
+
+
+def test_run_evaluate_writes_null_r2_for_single_sample(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    _write_train_pairs(workspace / "pairs" / "train_pairs.csv")
+    fit_model.run_fit_model(workspace)
+    test_path = workspace / "pairs" / "test_pairs.csv"
+    test_path.write_text("run_id,macro_lr,micro_lr,micro_momentum\n10,0.015,0.025,0.72\n", encoding="utf-8")
+
+    summary_path = evaluate.run_evaluate(workspace)
+    assert summary_path is not None
+    summary = json.loads(summary_path.read_text(encoding="utf-8"), parse_constant=_reject_constant)
+
+    assert summary["metrics"]["r2"] is None
+    assert isinstance(summary["metrics"]["mse"], float)
+    assert summary["n_test_samples"] == 1
+
+
+def test_run_evaluate_writes_finite_r2_for_multiple_samples(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    _write_train_pairs(workspace / "pairs" / "train_pairs.csv")
+    _write_test_pairs(workspace / "pairs" / "test_pairs.csv")
+    fit_model.run_fit_model(workspace)
+
+    summary_path = evaluate.run_evaluate(workspace)
+    assert summary_path is not None
+    summary = json.loads(summary_path.read_text(encoding="utf-8"), parse_constant=_reject_constant)
+
+    assert isinstance(summary["metrics"]["r2"], float)

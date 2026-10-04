@@ -9,6 +9,7 @@ import argparse
 from collections.abc import Sequence
 import csv
 import json
+import math
 from pathlib import Path
 import pickle
 
@@ -30,6 +31,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def run_evaluate(workspace: Path) -> Path | None:
     """Evaluate the regression model against test pairs and export artifacts.
 
+    The summary is strict JSON. ``metrics.r2`` is ``null`` when R2 is undefined, i.e. with fewer
+    than two test samples.
+
     Args:
         workspace: Workspace directory containing model artifacts and test pair CSV.
 
@@ -38,14 +42,13 @@ def run_evaluate(workspace: Path) -> Path | None:
 
     Raises:
         FileNotFoundError: If required test data or model artifacts are missing.
-        ValueError: If the test CSV is missing required macro or micro columns.
+        ValueError: If the test CSV is missing required macro or micro columns, or metrics are not finite.
     """
     try:
         from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
     except ImportError as exc:
         raise ImportError(
-            "scikit-learn is required to run modelbridge evaluation. "
-            "Please install scikit-learn to use the evaluate step."
+            "scikit-learn is required to run modelbridge evaluation. Install scikit-learn to use this step."
         ) from exc
 
     test_csv = workspace / "pairs" / "test_pairs.csv"
@@ -90,8 +93,13 @@ def run_evaluate(workspace: Path) -> Path | None:
 
     mse = float(mean_squared_error(targets, predictions))
     mae = float(mean_absolute_error(targets, predictions))
-    r2 = float(r2_score(targets, predictions))
-    print(f"Evaluation Metrics - MSE: {mse:.4f}, MAE: {mae:.4f}, R2: {r2:.4f}")
+    # R2 is undefined for a single sample; report it as null instead of NaN.
+    r2 = float(r2_score(targets, predictions)) if len(records) >= 2 else None
+    checked_metrics = [mse, mae] if r2 is None else [mse, mae, r2]
+    if not all(math.isfinite(value) for value in checked_metrics):
+        raise ValueError(f"Evaluation metrics must be finite: mse={mse}, mae={mae}, r2={r2}")
+    r2_text = "undefined" if r2 is None else f"{r2:.4f}"
+    print(f"Evaluation Metrics - MSE: {mse:.4f}, MAE: {mae:.4f}, R2: {r2_text}")
 
     pred_csv = workspace / "pairs" / "test_predictions.csv"
     with pred_csv.open("w", encoding="utf-8", newline="") as handle:
@@ -114,6 +122,7 @@ def run_evaluate(workspace: Path) -> Path | None:
                 "model_type": meta["model_type"],
             },
             indent=2,
+            allow_nan=False,
         ),
         encoding="utf-8",
     )

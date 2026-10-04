@@ -63,7 +63,8 @@ def run_collect(workspace: Path, phase: str) -> Path:
         phase: Target phase name (``train`` or ``test``).
 
     Returns:
-        Output CSV path under ``pairs/<phase>_pairs.csv``.
+        Output CSV path under ``pairs/<phase>_pairs.csv``. The file is always rewritten; it is
+        empty (zero bytes) when no run has both macro and micro best trials.
 
     Raises:
         FileNotFoundError: If ``runs/<phase>`` does not exist.
@@ -96,7 +97,8 @@ def run_collect(workspace: Path, phase: str) -> Path:
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     if not records:
         print(f"Warning: No valid pairs found for phase={phase}")
-        out_csv.touch()
+        # Truncate explicitly so pairs from a previous run are never reused downstream.
+        out_csv.write_text("", encoding="utf-8")
         return out_csv
 
     fieldnames = {"run_id"}

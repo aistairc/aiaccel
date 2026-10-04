@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from collections.abc import Iterable
 import csv
 from dataclasses import dataclass, field
 import hashlib
@@ -40,6 +41,14 @@ def get_logger(name: str) -> logging.Logger:
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
     return logger
+
+
+def mock_error(raw_params: Iterable[float], target: float) -> float:
+    """Return the mock simulation error: squared distance of each raw parameter in [0, 1] from ``target``.
+
+    ``target`` stands in for the observation condition of a scenario, so each scenario has its own optimum.
+    """
+    return float(sum((value - target) ** 2 for value in raw_params))
 
 
 def scale_params(sigma: list[float], mu: list[float], config: dict[str, Any]) -> tuple[list[float], list[float]]:

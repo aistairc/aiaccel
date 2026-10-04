@@ -126,3 +126,24 @@ def test_run_fit_model_reads_regression_kind_from_config_file_env(
 
     assert meta["regression_kind"] == "polynomial"
     assert meta["regression_degree"] == 4
+
+
+def test_run_fit_model_rejects_non_integer_degree(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    _write_train_pairs(workspace / "pairs" / "train_pairs.csv")
+    config_path = tmp_path / "config" / "config.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(yaml.safe_dump({"regression": {"kind": "polynomial", "degree": 2.5}}), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="regression.degree must be an integer"):
+        fit_model.run_fit_model(workspace, config_path=config_path)
+
+
+def test_run_fit_model_rejects_non_mapping_config_root(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    _write_train_pairs(workspace / "pairs" / "train_pairs.csv")
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("- linear\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Config root must be a mapping"):
+        fit_model.run_fit_model(workspace, config_path=config_path)

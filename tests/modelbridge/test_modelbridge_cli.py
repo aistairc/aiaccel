@@ -24,13 +24,15 @@ def test_step_commands_are_set() -> None:
 
 
 @pytest.mark.parametrize("command", cli_module.STEP_COMMANDS)
-def test_each_step_command_has_handler(command: str) -> None:
-    assert callable(cli_module._resolve_step_handler(command))
+def test_each_step_command_uses_step_module_main(command: str) -> None:
+    module = importlib.import_module(f"aiaccel.modelbridge.apps.{command.replace('-', '_')}")
+    assert cli_module.STEP_MAINS[command] is module.main
 
 
 def test_removed_run_command_is_rejected() -> None:
-    with pytest.raises(SystemExit):
-        cli_module._parse_args(["run", "--config", "config.yaml"])
+    with pytest.raises(SystemExit) as wrapped:
+        cli_module.main(["run", "--config", "config.yaml"])
+    assert wrapped.value.code == 2
 
 
 def test_cli_prepare_dispatches_to_prepare_module(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -74,7 +76,7 @@ def test_cli_collect_dispatches_to_collect_module(tmp_path: Path, monkeypatch: p
 
 
 def test_cli_exits_non_zero_when_handler_raises(monkeypatch: pytest.MonkeyPatch) -> None:
-    def fail(_workspace: Path) -> Path | None:
+    def fail(_workspace: Path, *, config_path: Path | None = None) -> Path | None:
         raise RuntimeError("boom")
 
     monkeypatch.setattr(cli_module.fit_model, "run_fit_model", fail)
@@ -110,3 +112,61 @@ def test_shared_launcher_exits_nonzero_for_missing_workspace(
         launcher.main()
 
     assert wrapped.value.code == 1
+
+
+def test_cli_fit_model_accepts_config_like_step_parser(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run_fit_model(workspace: Path, *, config_path: Path | None = None) -> Path | None:
+        observed["workspace"] = workspace
+        observed["config_path"] = config_path
+        return None
+
+    monkeypatch.setattr(cli_module.fit_model, "run_fit_model", fake_run_fit_model)
+    argv = ["--workspace", "w", "--config", "c.yaml"]
+
+    assert vars(cli_module.fit_model.parse_args(argv)) == {"workspace": "w", "config": "c.yaml"}
+    with pytest.raises(SystemExit) as wrapped:
+        cli_module.main(["fit-model", *argv])
+
+    assert wrapped.value.code == 0
+    assert observed == {"workspace": Path("w"), "config_path": Path("c.yaml")}
+
+
+@pytest.mark.parametrize(
+    ("argv", "expected_code"),
+    [
+        (["fit-model", "--workspace", "w", "--unknown"], 2),
+        (["collect", "--workspace", "w", "--phase", "valid"], 2),
+        (["evaluate"], 2),
+    ],
+)
+def test_cli_adapter_and_shared_launcher_agree_on_invalid_arguments(
+    argv: list[str], expected_code: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with pytest.raises(SystemExit) as adapter_exit:
+        cli_module.main(argv)
+
+    monkeypatch.setattr(sys, "argv", ["aiaccel-modelbridge", *argv])
+    with pytest.raises(SystemExit) as launcher_exit:
+        launcher.main()
+
+    assert adapter_exit.value.code == launcher_exit.value.code == expected_code
+
+
+@pytest.mark.parametrize("command", ["collect", "fit-model", "evaluate"])
+def test_cli_adapter_and_shared_launcher_agree_on_missing_workspace(
+    command: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    argv = [command, "--workspace", str(tmp_path / "missing")]
+    if command == "collect":
+        argv.extend(["--phase", "train"])
+
+    with pytest.raises(SystemExit) as adapter_exit:
+        cli_module.main(argv)
+
+    monkeypatch.setattr(sys, "argv", ["aiaccel-modelbridge", *argv])
+    with pytest.raises(SystemExit) as launcher_exit:
+        launcher.main()
+
+    assert adapter_exit.value.code == launcher_exit.value.code == 1
