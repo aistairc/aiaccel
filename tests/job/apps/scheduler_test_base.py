@@ -134,6 +134,8 @@ class SchedulerTestBase(ABC):
         assert status_path.exists()
         assert status_path.read_text().strip() == str(self.cancel_status)
 
+    # TODO: Add tests for log filenames containing shell metacharacters
+    # and other characters that require escaping.
     def test_cpu_log_filename_with_spaces(
         self,
         tmp_path: Path,
