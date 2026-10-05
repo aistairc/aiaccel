@@ -12,9 +12,7 @@ sudo apt-get install -y \
 HOSTNAME="$(hostname -s)"
 NODE_CONFIG="$(slurmd -C | head -n 1)"
 
-sudo cp \
-  "$(dirname "$0")/../fixtures/slurm.conf" \
-  /etc/slurm/slurm.conf
+sudo cp "$(dirname "$0")/../fixtures/slurm.conf" /etc/slurm/slurm.conf
 
 sudo sed -i \
   -e "s/^SlurmctldHost=.*/SlurmctldHost=${HOSTNAME}/" \
@@ -31,8 +29,7 @@ sudo chown slurm:slurm \
   /var/spool/slurmctld \
   /var/log/slurm
 
-sudo chown root:root \
-  /var/spool/slurmd
+sudo chown root:root /var/spool/slurmd
 
 # Start
 sudo systemctl restart munge

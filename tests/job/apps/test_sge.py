@@ -29,7 +29,4 @@ class TestSGE(SchedulerTestBase):
         return result.returncode == 0
 
     def cancel_job(self, job_id: str) -> None:
-        subprocess.run(
-            ["qdel", job_id],
-            check=True,
-        )
+        subprocess.run(["qdel", job_id], check=True)

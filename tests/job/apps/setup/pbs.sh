@@ -34,9 +34,7 @@ sudo apt-get install -y \
   sendmail-bin
 
 # Build
-git clone --depth 1 \
-  https://github.com/openpbs/openpbs.git \
-  /tmp/openpbs
+git clone --depth 1 https://github.com/openpbs/openpbs.git /tmp/openpbs
 
 cd /tmp/openpbs
 
@@ -49,9 +47,7 @@ sudo make install
 sudo /opt/pbs/libexec/pbs_postinstall
 
 # Configure PBS
-sudo sed -i \
-  's/^PBS_START_MOM=.*/PBS_START_MOM=1/' \
-  /etc/pbs.conf
+sudo sed -i 's/^PBS_START_MOM=.*/PBS_START_MOM=1/' /etc/pbs.conf
 
 sudo chmod 4755 \
   /opt/pbs/sbin/pbs_iff \

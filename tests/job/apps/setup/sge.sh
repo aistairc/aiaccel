@@ -19,14 +19,11 @@ sudo apt-get install -y \
   pkgconf
 
 # Build
-git clone --depth 1 \
-  https://github.com/daimh/sge.git \
-  /tmp/sge
+git clone --depth 1 https://github.com/daimh/sge.git /tmp/sge
 
 cd /tmp/sge
 
-cmake -S . -B build \
-  -DCMAKE_INSTALL_PREFIX=/opt/sge
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/opt/sge
 
 cmake --build build -j"$(nproc)"
 sudo cmake --install build
@@ -37,12 +34,9 @@ IP_ADDRESS="$(hostname -I | awk '{print $1}')"
 
 sudo hostname "${SGE_HOSTNAME}"
 
-sudo sed -i \
-  "/${IP_ADDRESS}/d" \
-  /etc/hosts
+sudo sed -i "/${IP_ADDRESS}/d" /etc/hosts
 
-echo "${IP_ADDRESS} ${SGE_HOSTNAME}" \
-  | sudo tee -a /etc/hosts
+echo "${IP_ADDRESS} ${SGE_HOSTNAME}" | sudo tee -a /etc/hosts
 
 test "$(hostname -f)" = "${SGE_HOSTNAME}"
 

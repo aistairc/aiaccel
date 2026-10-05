@@ -34,11 +34,7 @@ class SchedulerTestBase(ABC):
     def cancel_job(self, job_id: str) -> None:
         """Cancel a scheduler job."""
 
-    def wait_for_job_to_finish(
-        self,
-        job_id: str,
-        timeout: int = 30,
-    ) -> None:
+    def wait_for_job_to_finish(self, job_id: str, timeout: int = 30) -> None:
         for _ in range(timeout):
             if not self.is_job_running(job_id):
                 return
@@ -47,50 +43,27 @@ class SchedulerTestBase(ABC):
 
         pytest.fail(f"Job {job_id} did not terminate")
 
-    def test_cpu(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
+    def test_cpu(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
 
         log_path = tmp_path / "test.log"
 
         subprocess.run(
-            self.make_command()
-            + [
-                "cpu",
-                log_path,
-                "--",
-                "echo",
-                "hello",
-            ],
+            self.make_command() + ["cpu", log_path, "--", "echo", "hello"],
             check=True,
         )
 
         assert log_path.exists()
         assert log_path.read_text().strip().endswith("hello")
 
-    def test_cpu_failure(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
+    def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
 
         log_path = tmp_path / "test.log"
         status_path = tmp_path / "test.out"
 
         process = subprocess.Popen(
-            self.make_command()
-            + [
-                "cpu",
-                log_path,
-                "--",
-                "bash",
-                "-c",
-                "exit 7",
-            ],
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "exit 7"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -171,25 +144,14 @@ class SchedulerTestBase(ABC):
         log_path = tmp_path / "test log.log"
 
         subprocess.run(
-            self.make_command()
-            + [
-                "cpu",
-                log_path,
-                "--",
-                "echo",
-                "hello",
-            ],
+            self.make_command() + ["cpu", log_path, "--", "echo", "hello"],
             check=True,
         )
 
         assert log_path.exists()
         assert log_path.read_text().strip().endswith("hello")
 
-    def test_cpu_array(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
+    def test_cpu_array(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
 
         log_path = tmp_path / "test_log.log"

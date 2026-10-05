@@ -29,7 +29,4 @@ class TestSlurm(SchedulerTestBase):
         return bool(result.stdout.strip())
 
     def cancel_job(self, job_id: str) -> None:
-        subprocess.run(
-            ["scancel", job_id],
-            check=True,
-        )
+        subprocess.run(["scancel", job_id], check=True)
