@@ -9,7 +9,7 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 
 import pytest
 
-from aiaccel.config.config import pathlib2str_config, prepare_config, print_config, resolve_inherit
+from aiaccel.config.config import load_config, pathlib2str_config, prepare_config, print_config, resolve_inherit
 
 
 def test_load_config() -> None:
@@ -117,3 +117,62 @@ def test_load_config_save_option(tmp_path: Path) -> None:
 
     reloaded_config = oc.load(save_path)
     assert "config_path" in reloaded_config
+
+
+def test_load_config_with_multiple_bases(tmp_path: Path) -> None:
+    """Multiple base configs are merged from left to right."""
+    base1_path = tmp_path / "base1.yaml"
+    base1_path.write_text(
+        """
+model:
+  name: resnet
+  epochs: 50
+  optimizer:
+    name: adam
+    lr: 0.001
+
+base1_only: value1
+""".lstrip()
+    )
+
+    base2_path = tmp_path / "base2.yaml"
+    base2_path.write_text(
+        """
+model:
+  epochs: 100
+  optimizer:
+    lr: 0.01
+
+base2_only: value2
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_:
+  - base1.yaml
+  - base2.yaml
+
+model:
+  optimizer:
+    name: sgd
+""".lstrip()
+    )
+
+    config = load_config(config_path)
+
+    expected_config = {
+        "model": {
+            "name": "resnet",
+            "epochs": 50,
+            "optimizer": {
+                "name": "sgd",
+                "lr": 0.001,
+            },
+        },
+        "base1_only": "value1",
+        "base2_only": "value2",
+    }
+
+    assert config == expected_config
