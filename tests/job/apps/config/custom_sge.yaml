@@ -1,0 +1,17 @@
+_base_: ${resolve_pkg_path:aiaccel.job.apps.config}/sge.yaml
+
+walltime: "00:10:00"
+
+script_prologue: ""
+
+qsub: "qsub -l h_rt={args.walltime} -N {job_name}"
+
+cpu:
+  qsub_args: ""
+  job: "{command}"
+
+cpu-array:
+  qsub_args: "-t 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+  job: "{command}"
+
+use_scandir: false
