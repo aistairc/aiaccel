@@ -12,8 +12,41 @@ import pytest
 from aiaccel.config.config import load_config, pathlib2str_config, prepare_config, print_config, resolve_inherit
 
 
-def test_load_config() -> None:
-    config = prepare_config(Path(__file__).parent / "test_conf.yaml")
+def test_load_config(tmp_path: Path) -> None:
+    base_path = tmp_path / "base.yaml"
+    base_path.write_text(
+        """
+A:
+  - AAA: base
+D:
+  _inherit_: ${E}
+E:
+  EE: ee
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_: base.yaml
+
+A:
+  - _inherit_: ["${B}", "${C}"]
+    AA: aa
+  - AAA: aaa
+
+B:
+  AA: dummy
+  BB: bb
+
+C:
+  CC: cc
+
+Eval: ${eval:"(21 + 9) / (4 + (8 % 3) ** 4)"}
+""".lstrip()
+    )
+
+    config = prepare_config(config_path)
     assert isinstance(config, DictConfig)
     del config["config_path"]
     del config["working_directory"]
@@ -29,15 +62,21 @@ def test_load_config() -> None:
     assert config == expected_config
 
 
-def test_resolve_path() -> None:
-    config = prepare_config(Path(__file__).parent / "test_resolve_path.yaml")
+def test_resolve_path(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("_base_: ${resolve_pkg_path:aiaccel.hpo.apps.config}/default.yaml\n")
+
+    config = prepare_config(config_path)
 
     assert isinstance(config, DictConfig)
 
 
-def test_load_config_print_option(capfd: pytest.CaptureFixture[str]) -> None:
+def test_load_config_print_option(tmp_path: Path, capfd: pytest.CaptureFixture[str]) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("foo: 1\n")
+
     prepare_config(
-        Path(__file__).parent / "test_conf.yaml",
+        config_path,
         print_config=True,
         print_config_kwargs={"line_length": 40},
     )
@@ -47,9 +86,12 @@ def test_load_config_print_option(capfd: pytest.CaptureFixture[str]) -> None:
 
 
 def test_load_config_save_option(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("foo: 1\n")
+
     save_dir = tmp_path / "saved"
     config = prepare_config(
-        Path(__file__).parent / "test_conf.yaml",
+        config_path,
         working_directory=tmp_path,
         save_config=True,
         save_directory=save_dir,
