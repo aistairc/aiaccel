@@ -397,6 +397,43 @@ def test_resolve_inherit() -> None:
     assert resolved_config == expected_config
 
 
+def test_resolve_inherit_chained() -> None:
+    config = oc.create(
+        {
+            "A": {
+                "a": 1,
+            },
+            "B": {
+                "_inherit_": "${A}",
+                "b": 2,
+            },
+            "C": {
+                "_inherit_": "${B}",
+                "c": 3,
+            },
+        }
+    )
+
+    resolved_config = resolve_inherit(config)
+
+    expected_config = {
+        "A": {
+            "a": 1,
+        },
+        "B": {
+            "a": 1,
+            "b": 2,
+        },
+        "C": {
+            "a": 1,
+            "b": 2,
+            "c": 3,
+        },
+    }
+
+    assert resolved_config == expected_config
+
+
 def test_print_config(capfd: pytest.CaptureFixture[str]) -> None:
     conf = oc.create({"foo": {"bar": [1, 2, 3]}})
     print_config(conf)
