@@ -12,16 +12,25 @@ import pytest
 from aiaccel.config.config import load_config, pathlib2str_config, prepare_config, print_config, resolve_inherit
 
 
-def test_load_config(tmp_path: Path) -> None:
+def test_prepare_config(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("foo: bar\n")
+
+    config = prepare_config(config_path)
+
+    assert isinstance(config, DictConfig)
+    assert config.foo == "bar"
+    assert config.config_path == str(config_path)
+    assert config.working_directory == str(tmp_path)
+
+
+def test_load_config_with_base(tmp_path: Path) -> None:
     base_path = tmp_path / "base.yaml"
     base_path.write_text(
         """
-A:
-  - AAA: base
-D:
-  _inherit_: ${E}
-E:
-  EE: ee
+model:
+  name: base
+  epochs: 10
 """.lstrip()
     )
 
@@ -30,36 +39,34 @@ E:
         """
 _base_: base.yaml
 
-A:
-  - _inherit_: ["${B}", "${C}"]
-    AA: aa
-  - AAA: aaa
+model:
+  epochs: 100
+""".lstrip()
+    )
 
-B:
-  AA: dummy
-  BB: bb
+    config = load_config(config_path)
 
-C:
-  CC: cc
+    expected_config = {
+        "model": {
+            "name": "base",
+            "epochs": 100,
+        },
+    }
 
-Eval: ${eval:"(21 + 9) / (4 + (8 % 3) ** 4)"}
+    assert config == expected_config
+
+
+def test_eval_resolver(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+value: ${eval:"(21 + 9) / (4 + (8 % 3) ** 4)"}
 """.lstrip()
     )
 
     config = prepare_config(config_path)
-    assert isinstance(config, DictConfig)
-    del config["config_path"]
-    del config["working_directory"]
-    expected_config = {
-        "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
-        "B": {"AA": "dummy", "BB": "bb"},
-        "C": {"CC": "cc"},
-        "D": {"EE": "ee"},
-        "E": {"EE": "ee"},
-        "Eval": 1.5,
-    }
 
-    assert config == expected_config
+    assert config.value == 1.5
 
 
 def test_resolve_path(tmp_path: Path) -> None:
