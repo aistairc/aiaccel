@@ -72,21 +72,46 @@ config_only: config
 
 def test_prepare_config_print_option(tmp_path: Path, capfd: pytest.CaptureFixture[str]) -> None:
     config_path = tmp_path / "config.yaml"
-    config_path.write_text("foo: 1\n")
+    config_path.write_text(
+        """
+base:
+  base_only: base
 
-    prepare_config(
+child:
+  _inherit_: ${base}
+  child_only: child
+""".lstrip()
+    )
+
+    config = prepare_config(
         config_path,
         print_config=True,
         print_config_kwargs={"line_length": 40},
     )
 
     stdout, _ = capfd.readouterr()
+    expected_child = {
+        "base_only": "base",
+        "child_only": "child",
+    }
+
     assert "=" * 40 in stdout
+    assert "_inherit_" in stdout
+    assert config.child == expected_child
 
 
 def test_prepare_config_save_option(tmp_path: Path) -> None:
     config_path = tmp_path / "config.yaml"
-    config_path.write_text("foo: 1\n")
+    config_path.write_text(
+        """
+base:
+  base_only: base
+
+child:
+  _inherit_: ${base}
+  child_only: child
+""".lstrip()
+    )
 
     save_dir = tmp_path / "saved"
     config = prepare_config(
@@ -100,10 +125,15 @@ def test_prepare_config_save_option(tmp_path: Path) -> None:
     save_path = save_dir / "custom.yaml"
 
     assert save_path.exists()
-    assert isinstance(config.working_directory, str)
 
     reloaded_config = oc.load(save_path)
-    assert "config_path" in reloaded_config
+    expected_child = {
+        "base_only": "base",
+        "child_only": "child",
+    }
+
+    assert config.child == expected_child
+    assert reloaded_config.child == expected_child
 
 
 def test_prepare_config_eval_resolver(tmp_path: Path) -> None:
