@@ -142,3 +142,29 @@ def test_prepare_config_resolve_pkg_path(tmp_path: Path) -> None:
     config = prepare_config(config_path)
 
     assert isinstance(config, DictConfig)
+
+
+def test_prepare_config_with_base_and_inherit(tmp_path: Path) -> None:
+    base_path = tmp_path / "base.yaml"
+    base_path.write_text(
+        """
+base:
+  base_only: base
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_: base.yaml
+
+child:
+  _inherit_: ${base}
+  child_only: child
+""".lstrip()
+    )
+
+    config = prepare_config(config_path)
+
+    assert config.base == {"base_only": "base"}
+    assert config.child == {"base_only": "base", "child_only": "child"}
