@@ -27,12 +27,7 @@ model:
 
     config = load_config(config_path)
 
-    expected_config = {
-        "model": {
-            "name": "base",
-            "epochs": 100,
-        },
-    }
+    expected_config = {"model": {"name": "base", "epochs": 100}}
 
     assert config == expected_config
 
@@ -226,11 +221,6 @@ model:
 
     config = load_config(config_path)
 
-    expected_config = {
-        "model": {
-            "value": "base",
-            "name": "config",
-        },
-    }
+    expected_config = {"model": {"value": "base", "name": "config"}}
 
     assert config == expected_config

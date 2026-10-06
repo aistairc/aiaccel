@@ -45,16 +45,8 @@ config_only: config
 
     config = prepare_config(
         config_path,
-        overwrite_config={
-            "value": "overwrite",
-            "overwrite_only": "overwrite",
-        },
-        load_config_kwargs={
-            "parent_config": {
-                "value": "parent",
-                "parent_only": "parent",
-            },
-        },
+        overwrite_config={"value": "overwrite", "overwrite_only": "overwrite"},
+        load_config_kwargs={"parent_config": {"value": "parent", "parent_only": "parent"}},
     )
 
     expected_config = {
@@ -90,10 +82,7 @@ child:
     )
 
     stdout, _ = capfd.readouterr()
-    expected_child = {
-        "base_only": "base",
-        "child_only": "child",
-    }
+    expected_child = {"base_only": "base", "child_only": "child"}
 
     assert "=" * 40 in stdout
     assert "_inherit_" in stdout
@@ -127,10 +116,7 @@ child:
     assert save_path.exists()
 
     reloaded_config = oc.load(save_path)
-    expected_child = {
-        "base_only": "base",
-        "child_only": "child",
-    }
+    expected_child = {"base_only": "base", "child_only": "child"}
 
     assert config.child == expected_child
     assert reloaded_config.child == expected_child

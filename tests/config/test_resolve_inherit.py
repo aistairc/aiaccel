@@ -35,31 +35,17 @@ def test_resolve_inherit() -> None:
 def test_resolve_inherit_multiple_conflicting_sources() -> None:
     config = oc.create(
         {
-            "base1": {
-                "value": "base1",
-                "base1_only": "base1",
-            },
-            "base2": {
-                "value": "base2",
-                "base2_only": "base2",
-            },
-            "child": {
-                "_inherit_": ["${base1}", "${base2}"],
-            },
+            "base1": {"value": "base1", "base1_only": "base1"},
+            "base2": {"value": "base2", "base2_only": "base2"},
+            "child": {"_inherit_": ["${base1}", "${base2}"]},
         }
     )
 
     resolved_config = resolve_inherit(config)
 
     expected_config = {
-        "base1": {
-            "value": "base1",
-            "base1_only": "base1",
-        },
-        "base2": {
-            "value": "base2",
-            "base2_only": "base2",
-        },
+        "base1": {"value": "base1", "base1_only": "base1"},
+        "base2": {"value": "base2", "base2_only": "base2"},
         "child": {
             "value": "base1",
             "base1_only": "base1",
@@ -111,9 +97,7 @@ def test_resolve_inherit_chained(
 def test_resolve_inherit_preserves_unrelated_interpolation() -> None:
     config = oc.create(
         {
-            "source": {
-                "value": "source",
-            },
+            "source": {"value": "source"},
             "alias": "${source}",
         }
     )
@@ -123,6 +107,4 @@ def test_resolve_inherit_preserves_unrelated_interpolation() -> None:
 
     assert isinstance(unresolved_config, dict)
     assert unresolved_config["alias"] == "${source}"
-    assert resolved_config.alias == {
-        "value": "source",
-    }
+    assert resolved_config.alias == {"value": "source"}
