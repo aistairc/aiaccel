@@ -362,11 +362,17 @@ config_only: config
         },
     )
 
-    assert config.value == "overwrite"
-    assert config.base_only == "base"
-    assert config.config_only == "config"
-    assert config.parent_only == "parent"
-    assert config.overwrite_only == "overwrite"
+    expected_config = {
+        "value": "overwrite",
+        "base_only": "base",
+        "config_only": "config",
+        "parent_only": "parent",
+        "overwrite_only": "overwrite",
+        "config_path": str(config_path),
+        "working_directory": str(tmp_path),
+    }
+
+    assert config == expected_config
 
 
 def test_resolve_inherit() -> None:
