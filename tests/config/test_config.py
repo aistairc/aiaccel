@@ -12,6 +12,59 @@ import pytest
 from aiaccel.config.config import load_config, pathlib2str_config, prepare_config, print_config, resolve_inherit
 
 
+def test_load_config() -> None:
+    config = prepare_config(Path(__file__).parent / "test_conf.yaml")
+    assert isinstance(config, DictConfig)
+    del config["config_path"]
+    del config["working_directory"]
+    expected_config = {
+        "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
+        "B": {"AA": "dummy", "BB": "bb"},
+        "C": {"CC": "cc"},
+        "D": {"EE": "ee"},
+        "E": {"EE": "ee"},
+        "Eval": 1.5,
+    }
+
+    assert config == expected_config
+
+
+def test_resolve_path() -> None:
+    config = prepare_config(Path(__file__).parent / "test_resolve_path.yaml")
+
+    assert isinstance(config, DictConfig)
+
+
+def test_load_config_print_option(capfd: pytest.CaptureFixture[str]) -> None:
+    prepare_config(
+        Path(__file__).parent / "test_conf.yaml",
+        print_config=True,
+        print_config_kwargs={"line_length": 40},
+    )
+
+    stdout, _ = capfd.readouterr()
+    assert "=" * 40 in stdout
+
+
+def test_load_config_save_option(tmp_path: Path) -> None:
+    save_dir = tmp_path / "saved"
+    config = prepare_config(
+        Path(__file__).parent / "test_conf.yaml",
+        working_directory=tmp_path,
+        save_config=True,
+        save_directory=save_dir,
+        save_filename="custom.yaml",
+    )
+
+    save_path = save_dir / "custom.yaml"
+
+    assert save_path.exists()
+    assert isinstance(config.working_directory, str)
+
+    reloaded_config = oc.load(save_path)
+    assert "config_path" in reloaded_config
+
+
 def test_load_config_with_nested_base(tmp_path: Path) -> None:
     """Nested base configs are merged recursively."""
     grand_base_path = tmp_path / "grand_base.yaml"
@@ -267,23 +320,6 @@ config_only: config
     assert config.overwrite_only == "overwrite"
 
 
-def test_load_config() -> None:
-    config = prepare_config(Path(__file__).parent / "test_conf.yaml")
-    assert isinstance(config, DictConfig)
-    del config["config_path"]
-    del config["working_directory"]
-    expected_config = {
-        "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
-        "B": {"AA": "dummy", "BB": "bb"},
-        "C": {"CC": "cc"},
-        "D": {"EE": "ee"},
-        "E": {"EE": "ee"},
-        "Eval": 1.5,
-    }
-
-    assert config == expected_config
-
-
 def test_resolve_inherit() -> None:
     loaded_config = oc.create(
         {
@@ -304,12 +340,6 @@ def test_resolve_inherit() -> None:
     }
 
     assert resolved_config == expected_config
-
-
-def test_resolve_path() -> None:
-    config = prepare_config(Path(__file__).parent / "test_resolve_path.yaml")
-
-    assert isinstance(config, DictConfig)
 
 
 def test_print_config(capfd: pytest.CaptureFixture[str]) -> None:
@@ -335,17 +365,6 @@ def test_pathlib2str_config() -> None:
     assert isinstance(src_conf.foo.bar, Path)
 
 
-def test_load_config_print_option(capfd: pytest.CaptureFixture[str]) -> None:
-    prepare_config(
-        Path(__file__).parent / "test_conf.yaml",
-        print_config=True,
-        print_config_kwargs={"line_length": 40},
-    )
-
-    stdout, _ = capfd.readouterr()
-    assert "=" * 40 in stdout
-
-
 def test_print_config_kwargs() -> None:
     buffer = io.StringIO()
     conf = oc.create({"foo": 1})
@@ -353,25 +372,6 @@ def test_print_config_kwargs() -> None:
 
     output = buffer.getvalue()
     assert "=" * 10 in output
-
-
-def test_load_config_save_option(tmp_path: Path) -> None:
-    save_dir = tmp_path / "saved"
-    config = prepare_config(
-        Path(__file__).parent / "test_conf.yaml",
-        working_directory=tmp_path,
-        save_config=True,
-        save_directory=save_dir,
-        save_filename="custom.yaml",
-    )
-
-    save_path = save_dir / "custom.yaml"
-
-    assert save_path.exists()
-    assert isinstance(config.working_directory, str)
-
-    reloaded_config = oc.load(save_path)
-    assert "config_path" in reloaded_config
 
 
 def test_load_config_with_multiple_bases(tmp_path: Path) -> None:
