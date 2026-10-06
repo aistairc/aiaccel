@@ -365,6 +365,43 @@ def test_resolve_inherit_chained() -> None:
     assert resolved_config == expected_config
 
 
+def test_resolve_inherit_chained_reversed_order() -> None:
+    config = oc.create(
+        {
+            "C": {
+                "_inherit_": "${B}",
+                "c": 3,
+            },
+            "B": {
+                "_inherit_": "${A}",
+                "b": 2,
+            },
+            "A": {
+                "a": 1,
+            },
+        }
+    )
+
+    resolved_config = resolve_inherit(config)
+
+    expected_config = {
+        "C": {
+            "a": 1,
+            "b": 2,
+            "c": 3,
+        },
+        "B": {
+            "a": 1,
+            "b": 2,
+        },
+        "A": {
+            "a": 1,
+        },
+    }
+
+    assert resolved_config == expected_config
+
+
 def test_resolve_inherit_preserves_unrelated_interpolation() -> None:
     """resolve_inherit does not resolve unrelated interpolations."""
     config = oc.create(
