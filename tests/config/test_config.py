@@ -166,10 +166,10 @@ model:
     expected_config = {
         "model": {
             "name": "resnet",
-            "epochs": 100,
+            "epochs": 50,
             "optimizer": {
                 "name": "sgd",
-                "lr": 0.01,
+                "lr": 0.001,
             },
         },
         "base1_only": "value1",

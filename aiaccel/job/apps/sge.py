@@ -6,11 +6,22 @@
 
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import time
 
 from aiaccel.job.apps import prepare_argument_parser
+
+
+def _append_notify_option_if_needed(qsub: str, qsub_args: str) -> str:
+    notify_option_pattern = re.compile(r"(?<!\S)-notify(?=\s|$)")
+    has_notify_in_qsub = notify_option_pattern.search(qsub) is not None
+    has_notify_in_qsub_args = notify_option_pattern.search(qsub_args) is not None
+    if has_notify_in_qsub or has_notify_in_qsub_args:
+        return qsub_args
+
+    return f"-notify {qsub_args}" if qsub_args else "-notify"
 
 
 def main() -> None:
@@ -24,6 +35,7 @@ def main() -> None:
     job = config[mode].job.format(command=shlex.join(args.command), args=args)
 
     if mode in ["cpu-array", "gpu-array"]:
+        log_filename_prefix = shlex.quote(str(args.log_filename.with_suffix("")))
         job = f"""\
 for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
     TASK_INDEX=$(( SGE_TASK_ID + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -34,7 +46,7 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
 
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {args.log_filename.with_suffix("")}.${{SGE_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+        {job} > {log_filename_prefix}.${{SGE_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -43,14 +55,14 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        job_log_filename = args.log_filename.with_suffix(".$TASK_ID.log")
+        job_log_filename = shlex.quote(str(args.log_filename.with_suffix(".$TASK_ID.log")))
         job_status_filename: Path = args.log_filename.with_suffix(".${SGE_TASK_ID}.out")
 
         status_filename_list = []
         for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
             status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
     else:
-        job_log_filename = args.log_filename
+        job_log_filename = shlex.quote(str(args.log_filename))
         job_status_filename = args.log_filename.with_suffix(".out")
 
         status_filename_list = [job_status_filename]
@@ -58,25 +70,28 @@ done
     job_script = f"""\
 #! /bin/bash
 
+#$-S /bin/bash
 #$-j y
 #$-cwd
 #$-o {job_log_filename}
 
 set -eE -o pipefail
-trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'echo $? > "{job_status_filename}"' ERR EXIT  # at error and exit
+trap 'echo 143 > "{job_status_filename}"' TERM  # at termination (by job scheduler)
+trap 'echo 140 > "{job_status_filename}"' USR2
 
 {config.script_prologue}
 
 {job}
 """
 
-    job_name = str(config.get("job_name", args.log_filename.with_suffix("")))
+    job_name = str(config.get("job_name", args.log_filename.with_suffix(""))).replace("/", "_").replace(" ", "_")
     if job_name[:1].isdigit():
         job_name = f"_{job_name}"
 
     qsub = config.qsub.format(args=args, job_name=job_name)
     qsub_args = config[mode].qsub_args.format(args=args)
+    qsub_args = _append_notify_option_if_needed(qsub, qsub_args)
 
     # Create the job script file, remove old status files, and run the job
     args.log_filename.parent.mkdir(exist_ok=True, parents=True)
@@ -88,7 +103,7 @@ trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
 
-    subprocess.run(f"{qsub} {qsub_args} {job_filename}", shell=True, check=True)
+    subprocess.run(f"{qsub} {qsub_args} {shlex.quote(str(job_filename))}", shell=True, check=True)
 
     for status_filename in status_filename_list:
         while not status_filename.exists():
