@@ -306,6 +306,65 @@ def test_resolve_inherit_with_multiple_conflicting_sources() -> None:
     assert resolved_config == expected_config
 
 
+def test_resolve_inherit() -> None:
+    loaded_config = oc.create(
+        {
+            "A": [{"_inherit_": ["${B}", "${C}"], "AA": "aa"}, {"AAA": "aaa"}],
+            "B": {"AA": "dummy", "BB": "bb"},
+            "C": {"CC": "cc"},
+            "D": {"_inherit_": "${E}"},
+            "E": {"EE": "ee"},
+        }
+    )
+    resolved_config = resolve_inherit(loaded_config)
+    expected_config = {
+        "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
+        "B": {"AA": "dummy", "BB": "bb"},
+        "C": {"CC": "cc"},
+        "D": {"EE": "ee"},
+        "E": {"EE": "ee"},
+    }
+
+    assert resolved_config == expected_config
+
+
+def test_resolve_inherit_chained() -> None:
+    config = oc.create(
+        {
+            "A": {
+                "a": 1,
+            },
+            "B": {
+                "_inherit_": "${A}",
+                "b": 2,
+            },
+            "C": {
+                "_inherit_": "${B}",
+                "c": 3,
+            },
+        }
+    )
+
+    resolved_config = resolve_inherit(config)
+
+    expected_config = {
+        "A": {
+            "a": 1,
+        },
+        "B": {
+            "a": 1,
+            "b": 2,
+        },
+        "C": {
+            "a": 1,
+            "b": 2,
+            "c": 3,
+        },
+    }
+
+    assert resolved_config == expected_config
+
+
 def test_resolve_inherit_preserves_unrelated_interpolation() -> None:
     """resolve_inherit does not resolve unrelated interpolations."""
     config = oc.create(
@@ -373,65 +432,6 @@ config_only: config
     }
 
     assert config == expected_config
-
-
-def test_resolve_inherit() -> None:
-    loaded_config = oc.create(
-        {
-            "A": [{"_inherit_": ["${B}", "${C}"], "AA": "aa"}, {"AAA": "aaa"}],
-            "B": {"AA": "dummy", "BB": "bb"},
-            "C": {"CC": "cc"},
-            "D": {"_inherit_": "${E}"},
-            "E": {"EE": "ee"},
-        }
-    )
-    resolved_config = resolve_inherit(loaded_config)
-    expected_config = {
-        "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
-        "B": {"AA": "dummy", "BB": "bb"},
-        "C": {"CC": "cc"},
-        "D": {"EE": "ee"},
-        "E": {"EE": "ee"},
-    }
-
-    assert resolved_config == expected_config
-
-
-def test_resolve_inherit_chained() -> None:
-    config = oc.create(
-        {
-            "A": {
-                "a": 1,
-            },
-            "B": {
-                "_inherit_": "${A}",
-                "b": 2,
-            },
-            "C": {
-                "_inherit_": "${B}",
-                "c": 3,
-            },
-        }
-    )
-
-    resolved_config = resolve_inherit(config)
-
-    expected_config = {
-        "A": {
-            "a": 1,
-        },
-        "B": {
-            "a": 1,
-            "b": 2,
-        },
-        "C": {
-            "a": 1,
-            "b": 2,
-            "c": 3,
-        },
-    }
-
-    assert resolved_config == expected_config
 
 
 def test_print_config(capfd: pytest.CaptureFixture[str]) -> None:
