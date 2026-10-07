@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 """Wrapper script to run MAS-Bench data assimilation logic using aiaccel-hpo optimize."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 """Run modelbridge benchmarks across multiple function pair scenarios."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 """Run a small end-to-end benchmark with the modelbridge pipeline."""
 
 from __future__ import annotations
