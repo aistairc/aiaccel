@@ -14,6 +14,6 @@ C:
 
 Eval: ${eval:"(21 + 9) / (4 + (8 % 3) ** 4)"}
 
-Replace :
+Replace:
   _replace_: True
   AA: aa
