@@ -364,20 +364,7 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
 
 @apply_recursively
 def remove_replace(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
-    """
-    Convert `pathlib.Path` objects in the configuration to strings.
-
-    This function recursively traverses the configuration and replaces all `pathlib.Path`
-    objects with their string representations. This is useful for saving the configuration
-    in a YAML file, as YAML does not support `Path` objects.
-
-    Args:
-        config (ListConfig | DictConfig): The configuration to convert.
-
-    Returns:
-        ListConfig | DictConfig: The modified configuration with `Path` objects replaced by strings.
-
-    """
+    """Remove ``_replace_`` directives from the configuration."""
 
     config = copy.deepcopy(config)
 
