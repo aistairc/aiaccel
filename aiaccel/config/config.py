@@ -155,6 +155,24 @@ def load_config(
     config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
+    """Load a YAML configuration and resolve ``_base_``.
+
+    When ``_base_`` is specified, the referenced configurations are loaded
+    recursively and merged while preserving the existing base precedence.
+    A mapping with ``_replace_: true`` replaces the corresponding inherited
+    mapping instead of being merged with it.
+
+    Args:
+        config_filename:
+            Path to the configuration file.
+        parent_config:
+            Configuration merged into the loaded configuration.
+
+    Returns:
+        The merged configuration with ``_base_`` and ``_replace_`` directives
+        resolved.
+    """
+
     config = _load_config(config_filename, parent_config)
     config = remove_replace(config)
     return config
