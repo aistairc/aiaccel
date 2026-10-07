@@ -1,3 +1,6 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
 SHELL := /bin/bash
 
 THIS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
