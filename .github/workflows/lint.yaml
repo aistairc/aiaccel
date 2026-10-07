@@ -30,3 +30,9 @@ jobs:
       - name: Perform docstrfmt
         run: |
           pixi run -e gh-actions docstrfmt --check docs/source/
+      - name: Perform yamlfmt
+        run: |
+          pixi run -e gh-actions pre-commit run yamlfmt --all-files
+      - name: Check license headers
+        run: |
+          pixi run -e gh-actions pre-commit run insert-license --all-files
