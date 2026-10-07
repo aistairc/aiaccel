@@ -151,26 +151,6 @@ def prepare_config(
     return config
 
 
-def _remove_replace(config: DictConfig | ListConfig) -> None:
-    """Remove remaining ``_replace_`` directives recursively."""
-    if isinstance(config, DictConfig):
-        config.pop("_replace_", None)
-
-        for key in config:
-            assert isinstance(key, str)
-            if not oc.is_interpolation(config, key):
-                value = config[key]
-                if isinstance(value, (DictConfig, ListConfig)):
-                    _remove_replace(value)
-
-    elif isinstance(config, ListConfig):
-        for index in range(len(config)):
-            if not oc.is_interpolation(config, index):
-                value = config[index]
-                if isinstance(value, (DictConfig, ListConfig)):
-                    _remove_replace(value)
-
-
 def load_config(
     config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
