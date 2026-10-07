@@ -233,7 +233,7 @@ def _merge_config(
         if key == "_replace_":
             continue
 
-        if oc.is_interpolation(override, str(key)):
+        if isinstance(key, (str, int)) and oc.is_interpolation(override, key):
             result[key] = override._get_node(key)
             continue
 
