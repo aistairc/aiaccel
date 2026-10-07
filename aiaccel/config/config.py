@@ -368,11 +368,7 @@ def remove_replace(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
 
     config = copy.deepcopy(config)
 
-    if not isinstance(config, DictConfig):
-        return config
-
-    if config.get("_replace_", False):
-        config = copy.deepcopy(config)
-        config.pop("_replace_")
+    if isinstance(config, DictConfig):
+        config.pop("_replace_", None)
 
     return config
