@@ -263,6 +263,7 @@ def test_replace_in_later_base_discards_earlier_base(tmp_path: Path) -> None:
     base1_path.write_text(
         """
 x:
+  _replace_: true
   a: 1
 """.lstrip()
     )
@@ -271,7 +272,6 @@ x:
     base2_path.write_text(
         """
 x:
-  _replace_: true
   b: 2
 """.lstrip()
     )
@@ -289,7 +289,7 @@ _base_:
 
     assert config == {
         "x": {
-            "b": 2,
+            "a": 1,
         }
     }
 
