@@ -175,128 +175,78 @@ def load_config(
     config_filename: str | Path,
     parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
-    """Load a YAML configuration and resolve its inheritance.
-
-    If the configuration contains ``_base_``, the referenced configuration
-    files are loaded recursively and merged in inheritance order. When
-    multiple base files are specified, they are merged from left to right,
-    and the current configuration is applied after all base configurations.
-
-    The merge behavior, including handling of ``_replace_``, is delegated to
-    :func:`merge_config`.
-
-    Args:
-        config_filename:
-            Path to the YAML configuration file.
-        parent_config:
-            An optional configuration applied after resolving ``_base_``.
-            This is intended for dynamically defined configuration values,
-            such as default paths.
-
-    Returns:
-        The loaded and merged configuration with ``_base_`` resolved.
-    """
-    config = _load_config_resolve_base(config_filename)
-
-    if parent_config is not None:
-        config = merge_config(config, oc.create(parent_config))
-
-    _remove_replace(config)  # Remove the remaining _replace_
-
+    config = _load_config(config_filename, parent_config)
+    config = remove_replace(config)
     return config
 
 
-def _load_config_resolve_base(
+def _load_config(
     config_filename: str | Path,
+    parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
 ) -> DictConfig | ListConfig:
-    """Load a configuration and resolve ``_base_`` without removing ``_replace_`` directives."""
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
 
     if not config_filename.is_absolute():
         config_filename = Path.cwd() / config_filename
 
-    config = oc.load(config_filename)
+    if parent_config is None:
+        parent_config = {}
 
-    if not isinstance(config, DictConfig):
-        return config
+    config = _merge_config(
+        oc.load(config_filename),
+        oc.create(parent_config),
+    )
 
-    base_config = None
-
-    if "_base_" in config:
-        base_paths = config.pop("_base_")
+    if isinstance(config, DictConfig) and "_base_" in config:
+        base_paths = config["_base_"]
 
         if not isinstance(base_paths, ListConfig):
             base_paths = [base_paths]
 
-        for base_path in map(Path, base_paths[::-1]):
+        config.pop("_base_")
+
+        for base_path in map(Path, base_paths):
             if not base_path.is_absolute():
                 base_path = config_filename.parent / base_path
 
-            base_config = (
-                _load_config_resolve_base(base_path)
-                if base_config is None
-                else merge_config(_load_config_resolve_base(base_path), base_config)
-            )
-        if base_config is not None:
-            config = merge_config(base_config, config)
+            config = _load_config(base_path, config)
 
     return config
 
 
-def merge_config(base: DictConfig | ListConfig, override: DictConfig | ListConfig) -> DictConfig | ListConfig:
-    """Merge an override configuration into a base configuration.
+def _merge_config(
+    base: DictConfig | ListConfig,
+    override: DictConfig | ListConfig,
+) -> DictConfig | ListConfig:
+    if not isinstance(override, DictConfig):
+        return copy.deepcopy(override)
 
-    Values in ``override`` take precedence over values in ``base``.
-    ``DictConfig`` values are merged recursively, while ``ListConfig`` values
-    are replaced by the corresponding value in ``override``.
-
-    If a mapping in ``override`` contains ``_replace_: true``, the
-    corresponding mapping in ``base`` is discarded and replaced entirely by
-    the override mapping. The ``_replace_`` key is treated as a merge
-    directive and is not included in the merged mapping.
-
-    OmegaConf interpolations in ``override`` are preserved without being
-    resolved during the merge.
-
-    Args:
-        base:
-            The configuration providing inherited values.
-        override:
-            The configuration whose values take precedence over ``base``.
-
-    Returns:
-        A new configuration containing the merged result.
-    """
-    if isinstance(override, DictConfig):
-        unresolved = oc.to_container(override, resolve=False)
-        assert isinstance(unresolved, dict)
-        if override.get("_replace_", False):
-            result = DictConfig(unresolved)
-            result.pop("_replace_")
-            return result
-
-        result = DictConfig(oc.to_container(base, resolve=False)) if isinstance(base, DictConfig) else oc.create({})
-
-        for key in override:
-            assert isinstance(key, str)
-            if key == "_replace_":
-                # Remove _replace_
-                continue
-
-            if oc.is_interpolation(override, key):
-                result[key] = unresolved[key]
-
-            elif isinstance(override[key], DictConfig):
-                child_base = result[key] if key in result and isinstance(result[key], DictConfig) else DictConfig({})
-                result[key] = merge_config(child_base, override[key])
-
-            else:
-                result[key] = unresolved[key]
-
+    if override.get("_replace_", False):
+        result = copy.deepcopy(override)
         return result
-    else:
-        return override
+
+    if not isinstance(base, DictConfig):
+        return copy.deepcopy(override)
+
+    result = copy.deepcopy(base)
+
+    for key in override:
+        if key == "_replace_":
+            continue
+
+        if oc.is_interpolation(override, str(key)):
+            result[key] = override._get_node(key)
+            continue
+
+        override_value = override[key]
+
+        if isinstance(override_value, DictConfig) and key in result and isinstance(result[key], DictConfig):
+            result[key] = _merge_config(result[key], override_value)
+        else:
+            result[key] = copy.deepcopy(override_value)
+
+    return result
 
 
 def print_config(
@@ -428,5 +378,34 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
         for ii, value in enumerate(config):
             if isinstance(value, Path):
                 config[ii] = str(value)
+
+    return config
+
+
+@apply_recursively
+def remove_replace(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    """
+    Convert `pathlib.Path` objects in the configuration to strings.
+
+    This function recursively traverses the configuration and replaces all `pathlib.Path`
+    objects with their string representations. This is useful for saving the configuration
+    in a YAML file, as YAML does not support `Path` objects.
+
+    Args:
+        config (ListConfig | DictConfig): The configuration to convert.
+
+    Returns:
+        ListConfig | DictConfig: The modified configuration with `Path` objects replaced by strings.
+
+    """
+
+    config = copy.deepcopy(config)
+
+    if not isinstance(config, DictConfig):
+        return config
+
+    if config.get("_replace_", False):
+        config = copy.deepcopy(config)
+        config.pop("_replace_")
 
     return config
