@@ -26,6 +26,15 @@ class Const(Hparam[T]):
 
 
 @dataclass
+class Vector(Hparam[list[T]], Generic[T]):
+    dim: int
+    hparam: Hparam[T]
+
+    def __call__(self, trial: Trial, name: str) -> list[T]:
+        return [self.hparam(trial, f"{name}[{index}]") for index in range(self.dim)]
+
+
+@dataclass
 class Float(Hparam[float]):
     low: float
     high: float
