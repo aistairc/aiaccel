@@ -40,11 +40,7 @@ x:
 
     config = load_config(config_path)
 
-    assert config == {
-        "x": {
-            "c": 3,
-        }
-    }
+    assert config == {"x": {"c": 3}}
 
 
 def test_replace_config_nested(tmp_path: Path) -> None:
@@ -116,11 +112,7 @@ _base_:
 
     config = load_config(config_path)
 
-    assert config == {
-        "x": {
-            "a": 1,
-        }
-    }
+    assert config == {"x": {"a": 1}}
 
 
 def test_replace_in_leaf_base_is_consumed(tmp_path: Path) -> None:
@@ -145,12 +137,7 @@ x:
 
     config = load_config(config_path)
 
-    assert config == {
-        "x": {
-            "a": 1,
-            "b": 2,
-        }
-    }
+    assert config == {"x": {"a": 1, "b": 2}}
 
 
 def test_replace_config_with_recursive_base(tmp_path: Path) -> None:
@@ -187,12 +174,7 @@ hogehoge:
 
     config = load_config(config_path)
 
-    expected_config = {
-        "hogehoge": {
-            "arg1": "xxx",
-            "arg2": "yyy",
-        }
-    }
+    expected_config = {"hogehoge": {"arg1": "xxx", "arg2": "yyy"}}
 
     assert config == expected_config
 
@@ -226,9 +208,7 @@ alias: ${source}
     config = load_config(config_path)
 
     # source itself should be replaced.
-    assert config.source == {
-        "arg1": "xxx",
-    }
+    assert config.source == {"arg1": "xxx"}
 
     # alias remains an interpolation internally.
     unresolved = oc.to_container(config, resolve=False)
@@ -236,9 +216,7 @@ alias: ${source}
     assert unresolved["alias"] == "${source}"
 
     # When resolved, alias refers to the replaced source.
-    assert config.alias == {
-        "arg1": "xxx",
-    }
+    assert config.alias == {"arg1": "xxx"}
 
 
 def test_replace_config_at_root(tmp_path: Path) -> None:
@@ -266,10 +244,7 @@ arg2: yyy
 
     config = load_config(config_path)
 
-    expected_config = {
-        "arg1": "xxx",
-        "arg2": "yyy",
-    }
+    expected_config = {"arg1": "xxx", "arg2": "yyy"}
 
     assert config == expected_config
 
@@ -306,12 +281,7 @@ x:
 
     config = load_config(config_path)
 
-    assert config == {
-        "x": {
-            "b": 2,
-            "c": 3,
-        }
-    }
+    assert config == {"x": {"b": 2, "c": 3}}
 
 
 def test_replace_in_lower_priority_base(tmp_path: Path) -> None:

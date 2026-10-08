@@ -191,10 +191,7 @@ def _load_config(
     if parent_config is None:
         parent_config = {}
 
-    config = _merge_config(
-        oc.load(config_filename),
-        oc.create(parent_config),
-    )
+    config = _merge_config(oc.load(config_filename), oc.create(parent_config))
 
     if isinstance(config, DictConfig) and "_base_" in config:
         base_paths = config["_base_"]
