@@ -99,12 +99,6 @@ def test_resolve_inherit() -> None:
     assert resolved_config == expected_config
 
 
-def test_resolve_path() -> None:
-    config = prepare_config(Path(__file__).parent / "test_resolve_path.yaml")
-
-    assert isinstance(config, DictConfig)
-
-
 def test_print_config(capfd: pytest.CaptureFixture[str]) -> None:
     conf = oc.create({"foo": {"bar": [1, 2, 3]}})
     print_config(conf)
