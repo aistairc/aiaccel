@@ -217,15 +217,12 @@ def _merge_config(
     base: DictConfig | ListConfig,
     override: DictConfig | ListConfig,
 ) -> DictConfig | ListConfig:
-    if not isinstance(override, DictConfig):
-        return copy.deepcopy(override)
+    if not isinstance(base, DictConfig) or not isinstance(override, DictConfig):
+        return oc.merge(base, override)
 
     if override.get("_replace_", False):
         result = copy.deepcopy(override)
         return result
-
-    if not isinstance(base, DictConfig):
-        return copy.deepcopy(override)
 
     result = copy.deepcopy(base)
 
