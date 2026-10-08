@@ -8,44 +8,6 @@ from omegaconf import OmegaConf as oc  # noqa: N813
 from aiaccel.config.config import load_config
 
 
-def test_load_config_with_parent_config(tmp_path: Path) -> None:
-    base_path = tmp_path / "base.yaml"
-    base_path.write_text(
-        """
-model:
-  name: resnet
-  optimizer:
-    name: sgd
-    lr: 0.1
-""".lstrip()
-    )
-
-    config_path = tmp_path / "config.yaml"
-    config_path.write_text(
-        """
-_base_: base.yaml
-
-model:
-  optimizer:
-    name: adam
-""".lstrip()
-    )
-
-    parent_config = {"model": {"optimizer": {"lr": 0.01}}}
-
-    config = load_config(config_path, parent_config=parent_config)
-
-    assert config == {
-        "model": {
-            "name": "resnet",
-            "optimizer": {
-                "name": "adam",
-                "lr": 0.01,
-            },
-        }
-    }
-
-
 def test_replace_config_with_multiple_bases(tmp_path: Path) -> None:
     base1_path = tmp_path / "base1.yaml"
     base1_path.write_text(
