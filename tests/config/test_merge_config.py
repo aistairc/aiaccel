@@ -36,27 +36,11 @@ def test_merge_config_matches_omegaconf_without_replace(
     [
         (oc.create({"a": 1}), oc.create([1, 2])),
         (oc.create([1, 2]), oc.create({"a": 1})),
-    ],
-)
-def test_merge_config_matches_omegaconf_error_without_replace(
-    base: DictConfig | ListConfig,
-    override: DictConfig | ListConfig,
-) -> None:
-    with pytest.raises(ConfigTypeError):
-        oc.merge(base, override)
-
-    with pytest.raises(ConfigTypeError):
-        _merge_config(base, override)
-
-
-@pytest.mark.parametrize(
-    ("base", "override"),
-    [
         (oc.create({"x": [1, 2]}), oc.create({"x": {"a": 1}})),
         (oc.create({"x": {"a": 1}}), oc.create({"x": [1, 2]})),
     ],
 )
-def test_merge_config_with_different_types(
+def test_merge_config_matches_omegaconf_error_without_replace(
     base: DictConfig | ListConfig,
     override: DictConfig | ListConfig,
 ) -> None:
