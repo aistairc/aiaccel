@@ -221,6 +221,44 @@ model:
     assert config == expected_config
 
 
+def test_load_config_with_parent_config(tmp_path: Path) -> None:
+    base_path = tmp_path / "base.yaml"
+    base_path.write_text(
+        """
+model:
+  name: resnet
+  optimizer:
+    name: sgd
+    lr: 0.1
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_: base.yaml
+
+model:
+  optimizer:
+    name: adam
+""".lstrip()
+    )
+
+    parent_config = {"model": {"optimizer": {"lr": 0.01}}}
+
+    config = load_config(config_path, parent_config=parent_config)
+
+    assert config == {
+        "model": {
+            "name": "resnet",
+            "optimizer": {
+                "name": "adam",
+                "lr": 0.01,
+            },
+        }
+    }
+
+
 def test_replace_config_with_multiple_bases(tmp_path: Path) -> None:
     base1_path = tmp_path / "base1.yaml"
     base1_path.write_text(
@@ -485,3 +523,109 @@ arg2: yyy
     }
 
     assert config == expected_config
+
+
+def test_replace_in_intermediate_base(tmp_path: Path) -> None:
+    grand_base_path = tmp_path / "grand_base.yaml"
+    grand_base_path.write_text(
+        """
+x:
+  a: 1
+""".lstrip()
+    )
+
+    base_path = tmp_path / "base.yaml"
+    base_path.write_text(
+        """
+_base_: grand_base.yaml
+
+x:
+  _replace_: true
+  b: 2
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_: base.yaml
+
+x:
+  c: 3
+""".lstrip()
+    )
+
+    config = load_config(config_path)
+
+    assert config == {
+        "x": {
+            "b": 2,
+            "c": 3,
+        }
+    }
+
+
+def test_replace_in_lower_priority_base(tmp_path: Path) -> None:
+    base1_path = tmp_path / "base1.yaml"
+    base1_path.write_text(
+        """
+x:
+  a: 1
+""".lstrip()
+    )
+
+    base2_path = tmp_path / "base2.yaml"
+    base2_path.write_text(
+        """
+x:
+  _replace_: true
+  b: 2
+""".lstrip()
+    )
+
+    base3_path = tmp_path / "base3.yaml"
+    base3_path.write_text(
+        """
+x:
+  c: 3
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_:
+  - base1.yaml
+  - base2.yaml
+  - base3.yaml
+""".lstrip()
+    )
+
+    config = load_config(config_path)
+
+    assert config == {"x": {"a": 1, "b": 2}}
+
+
+def test_replace_config_false(tmp_path: Path) -> None:
+    base_path = tmp_path / "base.yaml"
+    base_path.write_text(
+        """
+x:
+  a: 1
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_: base.yaml
+
+x:
+  _replace_: false
+  b: 2
+""".lstrip()
+    )
+
+    config = load_config(config_path)
+
+    assert config == {"x": {"a": 1, "b": 2}}
