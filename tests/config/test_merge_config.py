@@ -17,7 +17,10 @@ from aiaccel.config.config import _merge_config, remove_replace
         (oc.create({"x": {"a": 1}}), oc.create({"x": {"b": 2}})),
         (oc.create({"x": [1, 2]}), oc.create({"x": [3, 4]})),
         (oc.create([1, 2]), oc.create([3, 4])),
+        (oc.create({"x": 1}), oc.create({"x": {"a": 1}})),
+        (oc.create({"x": {"a": 1}}), oc.create({"x": 1})),
         (oc.create({"x": None}), oc.create({"x": {"a": 1}})),
+        (oc.create({"x": {"a": 1}}), oc.create({"x": None})),
         (
             oc.create({"source": {"a": 1}, "alias": {"b": 2}}),
             oc.create({"alias": "${source}"}),
