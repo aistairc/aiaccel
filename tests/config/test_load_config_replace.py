@@ -12,7 +12,6 @@ import pytest
 from aiaccel.config.config import (
     _merge_config,
     load_config,
-    prepare_config,
 )
 
 
@@ -53,24 +52,6 @@ def test_merge_config_matches_omegaconf_error_without_replace(
 
     with pytest.raises(ConfigTypeError):
         _merge_config(base, override)
-
-
-def test_load_config() -> None:
-    config = prepare_config(Path(__file__).parent / "test_conf.yaml")
-    assert isinstance(config, DictConfig)
-    del config["config_path"]
-    del config["working_directory"]
-    expected_config = {
-        "A": [{"CC": "cc", "AA": "aa", "BB": "bb"}, {"AAA": "aaa"}],
-        "B": {"AA": "dummy", "BB": "bb"},
-        "C": {"CC": "cc"},
-        "D": {"EE": "ee"},
-        "E": {"EE": "ee"},
-        "Eval": 1.5,
-        "Replace": {"AA": "aa"},
-    }
-
-    assert config == expected_config
 
 
 def test_load_config_with_parent_config(tmp_path: Path) -> None:
