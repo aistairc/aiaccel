@@ -340,6 +340,7 @@ def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
         config.pop("_inherit_")
 
         for inherit_config in inherit_configs:
+            inherit_config = resolve_inherit(copy.deepcopy(inherit_config))
             if isinstance(inherit_config, DictConfig):
                 config = oc.merge(inherit_config, config)
 
