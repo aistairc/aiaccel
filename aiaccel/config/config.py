@@ -194,6 +194,7 @@ def _load_config(
     config = _merge_config(oc.load(config_filename), oc.create(parent_config))
 
     if isinstance(config, DictConfig) and "_base_" in config:
+        # Resolve _base_
         base_paths = config["_base_"]
 
         if not isinstance(base_paths, ListConfig):
@@ -214,6 +215,7 @@ def _merge_config(
     base: DictConfig | ListConfig,
     override: DictConfig | ListConfig,
 ) -> DictConfig | ListConfig:
+    # Resolve _replace_
     if isinstance(override, DictConfig) and override.get("_replace_", False):
         return copy.deepcopy(override)
 
