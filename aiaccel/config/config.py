@@ -214,12 +214,11 @@ def _merge_config(
     base: DictConfig | ListConfig,
     override: DictConfig | ListConfig,
 ) -> DictConfig | ListConfig:
+    if isinstance(override, DictConfig) and override.get("_replace_", False):
+        return copy.deepcopy(override)
+
     if not isinstance(base, DictConfig) or not isinstance(override, DictConfig):
         return oc.merge(base, override)
-
-    if override.get("_replace_", False):
-        result = copy.deepcopy(override)
-        return result
 
     result = copy.deepcopy(base)
 
@@ -233,7 +232,11 @@ def _merge_config(
 
         override_value = override[key]
 
-        if isinstance(override_value, DictConfig) and key in result and isinstance(result[key], DictConfig):
+        if (
+            key in result
+            and isinstance(result[key], (DictConfig, ListConfig))
+            and isinstance(override_value, (DictConfig, ListConfig))
+        ):
             result[key] = _merge_config(result[key], override_value)
         else:
             result[key] = copy.deepcopy(override_value)
