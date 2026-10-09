@@ -23,6 +23,7 @@ def main() -> None:
     job = config[mode].job.format(command=shlex.join(args.command), args=args)
 
     if mode in ["cpu-array", "gpu-array"]:
+        log_filename_prefix = shlex.quote(str(args.log_filename.with_suffix("")))
         job = f"""\
 for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
     TASK_INDEX=$(( SLURM_ARRAY_TASK_ID + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -33,7 +34,7 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
 
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {args.log_filename.with_suffix("")}.${{SLURM_ARRAY_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+        {job} > {log_filename_prefix}.${{SLURM_ARRAY_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -42,14 +43,14 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        job_log_filename = args.log_filename.with_suffix(".%a.log")
+        job_log_filename = shlex.quote(str(args.log_filename.with_suffix(".%a.log")))
         job_status_filename: Path = args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out")
 
         status_filename_list = []
         for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
             status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
     else:
-        job_log_filename = args.log_filename.resolve()
+        job_log_filename = shlex.quote(str(args.log_filename.resolve()))
         job_status_filename = args.log_filename.with_suffix(".out").resolve()
 
         status_filename_list = [job_status_filename]
@@ -64,8 +65,8 @@ wait "$!"
 #SBATCH -t {args.walltime}
 
 set -eE -o pipefail
-trap 'echo $? > {job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'echo $? > "{job_status_filename}"' ERR EXIT  # at error and exit
+trap 'echo 143 > "{job_status_filename}"' TERM  # at termination (by job scheduler)
 
 
 {config.script_prologue}
@@ -86,7 +87,7 @@ trap 'echo 143 > {job_status_filename}' TERM  # at termination (by job scheduler
     for status_filename in status_filename_list:
         status_filename.unlink(missing_ok=True)
 
-    subprocess.run(f"{sbatch} {sbatch_args} {job_filename}", shell=True, check=True)
+    subprocess.run(f"{sbatch} {sbatch_args} {shlex.quote(str(job_filename))}", shell=True, check=True)
 
     for status_filename in status_filename_list:
         while not status_filename.exists():
