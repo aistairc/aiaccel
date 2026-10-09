@@ -22,6 +22,7 @@ dependencies = [
     "omegaconf",
     "hydra-core",
     "huggingface-hub",
+    "jinja2",
     "colorama",
     "lightning>=2.2.1",
     "torch>=2.2.0",

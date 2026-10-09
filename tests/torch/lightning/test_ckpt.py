@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from omegaconf import OmegaConf
 
-from aiaccel.torch.lightning.ckpt import load_checkpoint
+from aiaccel.torch.lightning.ckpt import get_checkpoint_path, load_checkpoint
 
 
 class DummyModel:
@@ -26,6 +26,11 @@ class DummyModel:
         cls.loaded_map_location = map_location
 
         return cls()
+
+
+def test_get_checkpoint_path() -> None:
+    assert get_checkpoint_path("model", "last") == Path("model/checkpoints/last.ckpt")
+    assert get_checkpoint_path("model", "last.ckpt") == Path("model/checkpoints/last.ckpt")
 
 
 def test_load_checkpoint_filename_has_no_extension(tmp_path: Path) -> None:

@@ -18,6 +18,13 @@ from aiaccel.config import prepare_config
 logger = logging.getLogger(__name__)
 
 
+def get_checkpoint_path(model_path: str | Path, checkpoint_filename: str) -> Path:
+    if not checkpoint_filename.endswith(".ckpt"):
+        checkpoint_filename += ".ckpt"
+
+    return Path(model_path) / "checkpoints" / checkpoint_filename
+
+
 def load_checkpoint(
     model_path: str | Path,
     config_name: str = "merged_config.yaml",
@@ -53,12 +60,7 @@ def load_checkpoint(
 
     config_path = model_path / config_name
     config = prepare_config(config_path, overwrite_config=overwrite_config)
-
-    checkpoint_filename = config.checkpoint_filename
-    if not checkpoint_filename.endswith(".ckpt"):
-        checkpoint_filename += ".ckpt"
-
-    checkpoint_path = model_path / "checkpoints" / checkpoint_filename
+    checkpoint_path = get_checkpoint_path(model_path, config.checkpoint_filename)
 
     logger.info(f"Loading model from {checkpoint_path}...")
 
