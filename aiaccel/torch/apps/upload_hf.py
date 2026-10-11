@@ -24,19 +24,23 @@ from aiaccel.torch.utils.remove_absolute_path import remove_absolute_path
 rprint = Console(highlight=False).print
 
 
-def _review_file(path: Path) -> bool:
-    """Pause for manual review and confirm whether the file should be uploaded."""
-    rprint(f"\nPlease review:\n  [bold]{path}[/bold]")
-    input("Press Enter when ready to continue...")
-    return Confirm.ask(f"Use {path.name} for upload?", default=True)
+def should_overwrite(target: Path) -> bool:
+    """Prompt only when a staged file already exists."""
+    return not target.exists() or Confirm.ask(f"Overwrite {target.name}?", default=False)
+
+
+def prepare_upload_dir(upload_dir: Path) -> None:
+    """Optionally clear the previous staging directory."""
+    if upload_dir.exists() and Confirm.ask("Delete existing hf_upload?", default=False):
+        shutil.rmtree(upload_dir)
+    upload_dir.mkdir(parents=True, exist_ok=True)
 
 
 def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
     """Prepare README.md for the upload directory."""
     target = upload_dir / "README.md"
 
-    # Prefer an existing staged README when available.
-    if target.is_file() and _review_file(target):
+    if not should_overwrite(target):
         return True
 
     source = model_dir / "README.md"
@@ -76,11 +80,8 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
 
         rprint(f"Created model card: [bold]{source}[/bold]")
 
-    # Review the source README before copying it into the upload directory.
-    if not _review_file(source):
-        return False
-
     shutil.copy2(source, target)
+
     return True
 
 
@@ -89,44 +90,49 @@ def stage_cleaned_file(
     target: Path,
     load: Callable[[Path], Any],
     save: Callable[[Any, Path], None],
-) -> bool:
-    """Prepare a config or checkpoint, optionally removing absolute paths."""
-    # Reuse an existing staged file if the user approves it.
-    if target.is_file() and _review_file(target):
-        return True
+) -> None:
+    """Prepare a config or checkpoint, removing absolute paths when written."""
+    if not should_overwrite(target):
+        return
 
     target.parent.mkdir(parents=True, exist_ok=True)
+    cleaned, removed = remove_absolute_path(load(source))
+    save(cleaned, target)
 
-    # Otherwise create a new staged file, optionally removing absolute paths.
-    if Confirm.ask(f"Clean absolute paths from {source.name}?", default=True):
-        cleaned, removed = remove_absolute_path(load(source))
-        save(cleaned, target)
+    if removed:
+        rprint(f"Removed entries from [bold]{source.name}[/bold]:")
+        for entry in removed:
+            rprint(f"  - {entry}")
 
-        if removed:
-            rprint(f"Removed entries from [bold]{source.name}[/bold]:")
-            for entry in removed:
-                rprint(f"  - {entry}")
-        else:
-            rprint(f"No absolute paths were removed from {source.name}.")
-    else:
-        shutil.copy2(source, target)
 
-    return _review_file(target)
+def get_file_manifest(upload_dir: Path) -> dict[str, tuple[int, int]]:
+    """Snapshot filenames, sizes, and modification times for upload review."""
+    manifest: dict[str, tuple[int, int]] = {}
+    for path in sorted(upload_dir.rglob("*")):
+        if path.is_file():
+            stat = path.stat()
+            manifest[path.relative_to(upload_dir).as_posix()] = (stat.st_size, stat.st_mtime_ns)
+    return manifest
+
+
+def show_upload_files(manifest: dict[str, tuple[int, int]]) -> None:
+    for path, (size, _) in manifest.items():
+        rprint(f"  {path} ({size:,} bytes)")
 
 
 def upload_model(upload_dir: Path, repo_id: str) -> None:
-    """Upload the staged model directory to Hugging Face Hub."""
-    # Show the exact set of files that will be uploaded.
-    rprint("\n[bold]Files to upload:[/bold]")
-    for path in sorted(upload_dir.rglob("*")):
-        if path.is_file():
-            rprint(f"  {path.relative_to(upload_dir).as_posix()}")
-
-    rprint(f"\nRepository:\n  [bold]{repo_id}[/bold]")
-    if not Confirm.ask("Upload these files?", default=True):
+    """Review and upload the staged model directory to Hugging Face Hub."""
+    manifest = get_file_manifest(upload_dir)
+    if not manifest:
+        rprint("No files to upload.")
         return
 
-    # Authenticate and create the model repository when necessary.
+    rprint(f"\nRepository: [bold]{repo_id}[/bold]")
+    rprint("\n[bold]Files to upload:[/bold]")
+    show_upload_files(manifest)
+    if not Confirm.ask("Upload all these files?", default=False):
+        return
+
     login()
     api = HfApi()
 
@@ -139,7 +145,14 @@ def upload_model(upload_dir: Path, repo_id: str) -> None:
             private=True,
         )
 
-    # Upload only the reviewed contents of hf_upload/.
+    # Review the current contents again if files changed during authentication.
+    updated_manifest = get_file_manifest(upload_dir)
+    if updated_manifest != manifest:
+        rprint("\n[bold]Files changed since confirmation:[/bold]")
+        show_upload_files(updated_manifest)
+        if not updated_manifest or not Confirm.ask("Upload these files instead?", default=False):
+            return
+
     api.upload_folder(
         folder_path=upload_dir,
         repo_id=repo_id,
@@ -157,19 +170,6 @@ def main() -> None:
 
     # Load the training config and determine the checkpoint to upload.
     model_dir = args.model_dir.resolve()
-    upload_dir = model_dir / "hf_upload"
-    if upload_dir.exists():
-        action = Prompt.ask(
-            "Delete existing hf_upload? (u: upload as is)",
-            choices=["y", "n", "u"],
-            default="n",
-        )
-        if action == "y":
-            shutil.rmtree(upload_dir)
-        elif action == "u":
-            upload_model(upload_dir, args.repo_id)
-            return
-
     config_path = model_dir / "merged_config.yaml"
     if not config_path.is_file():
         parser.error(f"Config not found: {config_path}")
@@ -189,31 +189,25 @@ def main() -> None:
     rprint(f"Config:\n  {config_path}")
     rprint(f"Checkpoint:\n  {checkpoint_path}")
 
-    # Prepare the directory that mirrors the files uploaded to Hugging Face.
-    upload_dir.mkdir(parents=True, exist_ok=True)
-
-    # Prepare and review each upload artifact.
+    # Prepare and stage the files before the single upload review.
+    upload_dir = model_dir / "hf_upload"
+    prepare_upload_dir(upload_dir)
     if not stage_readme(model_dir, upload_dir, args.repo_id):
         return
 
-    if not stage_cleaned_file(
+    stage_cleaned_file(
         config_path,
         upload_dir / "merged_config.yaml",
         lambda path: oc.to_container(oc.load(path), resolve=False),
         oc.save,
-    ):
-        return
-
-    if not stage_cleaned_file(
+    )
+    stage_cleaned_file(
         checkpoint_path,
         upload_dir / "checkpoints" / checkpoint_path.name,
         lambda path: torch.load(path, map_location="cpu", weights_only=False),
         torch.save,
-    ):
-        return
-
+    )
     upload_model(upload_dir, args.repo_id)
-
 
 if __name__ == "__main__":
     main()
