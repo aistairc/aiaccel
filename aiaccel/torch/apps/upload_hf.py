@@ -45,12 +45,16 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
 
     source = model_dir / "README.md"
 
-    # Create a model card in the original model directory when README.md is missing.
-    if not source.is_file():
+    # Recreate the source model card only when requested.
+    if source.is_file():
+        create_model_card = Confirm.ask("Regenerate model README.md?", default=False)
+    else:
         rprint("README.md was not found.")
-        if not Confirm.ask("Create a model card?", default=True):
+        create_model_card = Confirm.ask("Create a model card?", default=True)
+        if not create_model_card:
             return False
 
+    if create_model_card:
         model_name = Prompt.ask("Model name", default=repo_id.rsplit("/", 1)[-1])
         license_name = Prompt.ask(
             "License (e.g. apache-2.0, mit, cc-by-4.0; skip to omit)",
