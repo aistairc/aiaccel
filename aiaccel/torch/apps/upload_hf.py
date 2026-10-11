@@ -4,6 +4,7 @@
 from typing import Any
 
 from argparse import ArgumentParser
+from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 import shutil
@@ -109,6 +110,40 @@ def stage_cleaned_file(
             rprint(f"  - {entry}")
 
 
+def prepare_checkpoint(checkpoint: dict[str, Any]) -> dict[str, Any]:
+    """Optionally retain state_dict only and remove selected key prefixes."""
+    if not Confirm.ask("Keep only state_dict?", default=False):
+        return checkpoint
+
+    if not isinstance(checkpoint.get("state_dict"), dict):
+        raise ValueError("Checkpoint has no state_dict mapping.")
+
+    state_dict = checkpoint["state_dict"].copy()
+    while True:
+        prefixes = Counter(".".join(key.split(".")[:3]) for key in state_dict)
+        rprint("\n[bold]state_dict keys (up to 3 levels):[/bold]")
+        for prefix, count in sorted(prefixes.items()):
+            rprint(f"  {prefix} ({count} keys)")
+
+        if not state_dict:
+            break
+
+        prefix = Prompt.ask("Prefix to remove (Enter to finish)", default="").strip()
+        if not prefix:
+            break
+
+        matches = [key for key in state_dict if key == prefix or key.startswith(f"{prefix}.")]
+        if not matches:
+            rprint(f"No keys match: {prefix}")
+            continue
+
+        if Confirm.ask(f"Remove {len(matches)} keys matching '{prefix}'?", default=False):
+            for key in matches:
+                del state_dict[key]
+
+    return {"state_dict": state_dict}
+
+
 def get_file_manifest(upload_dir: Path) -> dict[str, tuple[int, int]]:
     """Snapshot filenames, sizes, and modification times for upload review."""
     manifest: dict[str, tuple[int, int]] = {}
@@ -208,7 +243,7 @@ def main() -> None:
     stage_cleaned_file(
         checkpoint_path,
         upload_dir / "checkpoints" / checkpoint_path.name,
-        lambda path: torch.load(path, map_location="cpu", weights_only=False),
+        lambda path: prepare_checkpoint(torch.load(path, map_location="cpu", weights_only=False)),
         torch.save,
     )
     upload_model(upload_dir, args.repo_id)
