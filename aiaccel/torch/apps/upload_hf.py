@@ -10,7 +10,7 @@ import shutil
 
 from omegaconf import DictConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
-from rich import print as rprint
+from rich.console import Console
 from rich.prompt import Confirm, Prompt
 
 import torch
@@ -19,6 +19,9 @@ from huggingface_hub import HfApi, ModelCard, ModelCardData, login
 
 from aiaccel.torch.lightning.ckpt import get_checkpoint_path
 from aiaccel.torch.utils.remove_absolute_path import remove_absolute_path
+
+
+rprint = Console(highlight=False).print
 
 
 def _review_file(path: Path) -> bool:
@@ -46,8 +49,7 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
 
         model_name = Prompt.ask("Model name", default=repo_id.rsplit("/", 1)[-1])
         license_name = Prompt.ask(
-            "License",
-            choices=["apache-2.0", "mit", "cc-by-4.0", "other", "skip"],
+            "License (e.g. apache-2.0, mit, cc-by-4.0; skip to omit)",
             default="apache-2.0",
         )
         library_name = Prompt.ask("Library", default="aiaccel")
@@ -155,6 +157,19 @@ def main() -> None:
 
     # Load the training config and determine the checkpoint to upload.
     model_dir = args.model_dir.resolve()
+    upload_dir = model_dir / "hf_upload"
+    if upload_dir.exists():
+        action = Prompt.ask(
+            "Delete existing hf_upload? (u: upload as is)",
+            choices=["y", "n", "u"],
+            default="n",
+        )
+        if action == "y":
+            shutil.rmtree(upload_dir)
+        elif action == "u":
+            upload_model(upload_dir, args.repo_id)
+            return
+
     config_path = model_dir / "merged_config.yaml"
     if not config_path.is_file():
         parser.error(f"Config not found: {config_path}")
@@ -175,7 +190,6 @@ def main() -> None:
     rprint(f"Checkpoint:\n  {checkpoint_path}")
 
     # Prepare the directory that mirrors the files uploaded to Hugging Face.
-    upload_dir = model_dir / "hf_upload"
     upload_dir.mkdir(parents=True, exist_ok=True)
 
     # Prepare and review each upload artifact.
