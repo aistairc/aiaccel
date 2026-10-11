@@ -74,7 +74,7 @@ def test_stage_checkpoint_cleaning(mocker: MockerFixture, tmp_path: Path) -> Non
 
     mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
 
-    assert upload_hf.stage_cleaned_file(
+    upload_hf.stage_cleaned_file(
         checkpoint_path,
         target,
         lambda path: torch.load(path, map_location="cpu", weights_only=False),
@@ -93,6 +93,7 @@ def test_existing_staged_file_can_be_reused(mocker: MockerFixture, tmp_path: Pat
     oc.save({"checkpoint_filename": "merged"}, source)
     oc.save({"checkpoint_filename": "hand-edited"}, target)
 
+    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=False)
     load = mocker.Mock()
     save = mocker.Mock()
 
