@@ -12,10 +12,10 @@ import shutil
 from omegaconf import DictConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
 from rich.console import Console
-from rich.prompt import Confirm, Prompt
 
 import torch
 
+import questionary
 from huggingface_hub import HfApi, ModelCard, ModelCardData, login
 
 from aiaccel.torch.lightning.ckpt import get_checkpoint_path
@@ -25,14 +25,22 @@ from aiaccel.torch.utils.remove_absolute_path import remove_absolute_path
 rprint = Console(highlight=False).print
 
 
+def ask_confirm(message: str, default: bool = False) -> bool:
+    return questionary.confirm(message, default=default).unsafe_ask()
+
+
+def ask_text(message: str, default: str = "") -> str:
+    return questionary.text(message, default=default).unsafe_ask()
+
+
 def should_overwrite(target: Path) -> bool:
     """Prompt only when a staged file already exists."""
-    return not target.exists() or Confirm.ask(f"Overwrite {target.name}?", default=False)
+    return not target.exists() or ask_confirm(f"Overwrite {target.name}?", default=False)
 
 
 def prepare_upload_dir(upload_dir: Path) -> None:
     """Optionally clear the previous staging directory."""
-    if upload_dir.exists() and Confirm.ask("Delete existing hf_upload?", default=False):
+    if upload_dir.exists() and ask_confirm("Delete existing hf_upload?", default=False):
         shutil.rmtree(upload_dir)
     upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -48,23 +56,23 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
 
     # Recreate the source model card only when requested.
     if source.is_file():
-        create_model_card = Confirm.ask("Regenerate model README.md?", default=False)
+        create_model_card = ask_confirm("Regenerate model README.md?", default=False)
     else:
         rprint("README.md was not found.")
-        create_model_card = Confirm.ask("Create a model card?", default=True)
+        create_model_card = ask_confirm("Create a model card?", default=True)
         if not create_model_card:
             return False
 
     if create_model_card:
-        model_name = Prompt.ask("Model name", default=repo_id.rsplit("/", 1)[-1])
-        license_name = Prompt.ask(
+        model_name = ask_text("Model name", default=repo_id.rsplit("/", 1)[-1])
+        license_name = ask_text(
             "License (e.g. apache-2.0, mit, cc-by-4.0; skip to omit)",
             default="apache-2.0",
         )
-        library_name = Prompt.ask("Library", default="aiaccel")
-        pipeline_tag = Prompt.ask("Task / pipeline tag", default="")
-        language = Prompt.ask("Language(s), comma-separated", default="")
-        description = Prompt.ask("Short description", default="")
+        library_name = ask_text("Library", default="aiaccel")
+        pipeline_tag = ask_text("Task / pipeline tag", default="")
+        language = ask_text("Language(s), comma-separated", default="")
+        description = ask_text("Short description", default="")
 
         card_data = ModelCardData(
             model_name=model_name,
@@ -110,34 +118,39 @@ def stage_cleaned_file(
             rprint(f"  - {entry}")
 
 
+def select_state_dict_prefixes(state_dict: dict[str, Any]) -> list[str]:
+    """Present up to three key segments as selectable prefixes."""
+    prefixes = Counter(".".join(key.split(".")[:3]) for key in state_dict)
+    choices = [
+        questionary.Choice(f"{prefix} ({count} keys)", value=prefix)
+        for prefix, count in sorted(prefixes.items())
+    ]
+    return questionary.checkbox(
+        "Select state_dict prefixes to remove (Space: select, Enter: finish)",
+        choices=choices,
+    ).unsafe_ask()
+
+
 def prepare_checkpoint(checkpoint: dict[str, Any]) -> dict[str, Any]:
-    """Optionally retain state_dict only and remove selected key prefixes."""
-    if not Confirm.ask("Keep only state_dict?", default=False):
+    """Optionally keep only state_dict and remove selected key prefixes."""
+    if not ask_confirm("Keep only state_dict?", default=False):
         return checkpoint
 
     if not isinstance(checkpoint.get("state_dict"), dict):
         raise ValueError("Checkpoint has no state_dict mapping.")
 
     state_dict = checkpoint["state_dict"].copy()
-    while True:
-        prefixes = Counter(".".join(key.split(".")[:3]) for key in state_dict)
-        rprint("\n[bold]state_dict keys (up to 3 levels):[/bold]")
-        for prefix, count in sorted(prefixes.items()):
-            rprint(f"  {prefix} ({count} keys)")
-
-        if not state_dict:
+    while state_dict:
+        selected = select_state_dict_prefixes(state_dict)
+        if not selected:
             break
 
-        prefix = Prompt.ask("Prefix to remove (Enter to finish)", default="").strip()
-        if not prefix:
-            break
-
-        matches = [key for key in state_dict if key == prefix or key.startswith(f"{prefix}.")]
-        if not matches:
-            rprint(f"No keys match: {prefix}")
-            continue
-
-        if Confirm.ask(f"Remove {len(matches)} keys matching '{prefix}'?", default=False):
+        matches = [
+            key
+            for key in state_dict
+            if any(key == prefix or key.startswith(f"{prefix}.") for prefix in selected)
+        ]
+        if ask_confirm(f"Remove {len(matches)} selected keys?", default=False):
             for key in matches:
                 del state_dict[key]
 
@@ -169,14 +182,14 @@ def upload_model(upload_dir: Path, repo_id: str) -> None:
     rprint(f"\nRepository: [bold]{repo_id}[/bold]")
     rprint("\n[bold]Files to upload:[/bold]")
     show_upload_files(manifest)
-    if not Confirm.ask("Upload all these files?", default=False):
+    if not ask_confirm("Upload all these files?", default=False):
         return
 
     login()
     api = HfApi()
 
     if not api.repo_exists(repo_id=repo_id, repo_type="model"):
-        if not Confirm.ask(f"Repository {repo_id} does not exist. Create it as private?", default=True):
+        if not ask_confirm(f"Repository {repo_id} does not exist. Create it as private?", default=True):
             return
         api.create_repo(
             repo_id=repo_id,
@@ -189,7 +202,7 @@ def upload_model(upload_dir: Path, repo_id: str) -> None:
     if updated_manifest != manifest:
         rprint("\n[bold]Files changed since confirmation:[/bold]")
         show_upload_files(updated_manifest)
-        if not updated_manifest or not Confirm.ask("Upload these files instead?", default=False):
+        if not updated_manifest or not ask_confirm("Upload these files instead?", default=False):
             return
 
     api.upload_folder(
@@ -249,4 +262,7 @@ def main() -> None:
     upload_model(upload_dir, args.repo_id)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        rprint("\nCancelled.")
