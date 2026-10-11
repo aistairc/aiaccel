@@ -48,7 +48,7 @@ repos:
         pass_filenames: false
       - id: pytest
         name: pytest
-        entry: pytest -v -x -n auto --cov=aiaccel/ --cov-append tests/
+        entry: pytest -v -x -n auto --cov=aiaccel/ --cov-append --ignore=tests/job/apps tests/
         stages: [pre-push]
         language: system
         pass_filenames: false

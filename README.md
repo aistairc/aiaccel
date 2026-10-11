@@ -15,9 +15,9 @@
 * **Highly Modular**: designed to let you pick up any part of aiaccel for your research project
 
 # Key Features
-* [PyTorch/Lightning Toolkit](https://aistairc.github.io/aiaccel/api_reference/torch.html): training toolkit for HPC clusters.
-* [Hyperparameter Optimization (HPO)](https://aistairc.github.io/aiaccel/api_reference/hpo.html): ready-to-use HPO algorithms/tools.
-* [OmegaConf Utilities](https://aistairc.github.io/aiaccel/api_reference/config.html): OmegaConf-based config utilities.
+* [PyTorch/Lightning Toolkit](https://aiaccel.readthedocs.io/en/latest/api_reference/torch.html): training toolkit for HPC clusters.
+* [Hyperparameter Optimization (HPO)](https://aiaccel.readthedocs.io/en/latest/api_reference/hpo.html): ready-to-use HPO algorithms/tools.
+* [OmegaConf Utilities](https://aiaccel.readthedocs.io/en/latest/api_reference/config.html): OmegaConf-based config utilities.
 
 
 # Installation
