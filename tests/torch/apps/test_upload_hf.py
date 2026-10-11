@@ -14,10 +14,10 @@ from aiaccel.torch.apps import upload_hf
 
 def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) -> None:
     mocker.patch(
-        "aiaccel.torch.apps.upload_hf.Prompt.ask",
+        "aiaccel.torch.apps.upload_hf.ask_text",
         side_effect=["test-model", "mit", "test-library", "audio-classification", "en, ja", "Test model."],
     )
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
 
     model_dir = tmp_path / "model"
     upload_dir = model_dir / "hf_upload"
@@ -42,8 +42,8 @@ def test_stage_readme_keeps_existing_model_readme(mocker: MockerFixture, tmp_pat
     upload_dir.mkdir(parents=True)
     source = model_dir / "README.md"
     source.write_text("# Original model card", encoding="utf-8")
-    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=False)
-    prompt = mocker.patch("aiaccel.torch.apps.upload_hf.Prompt.ask")
+    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=False)
+    prompt = mocker.patch("aiaccel.torch.apps.upload_hf.ask_text")
 
     assert upload_hf.stage_readme(model_dir, upload_dir, "test/model")
 
@@ -59,9 +59,9 @@ def test_stage_readme_regenerates_existing_model_readme(mocker: MockerFixture, t
     upload_dir.mkdir(parents=True)
     source = model_dir / "README.md"
     source.write_text("# Old model card", encoding="utf-8")
-    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
     mocker.patch(
-        "aiaccel.torch.apps.upload_hf.Prompt.ask",
+        "aiaccel.torch.apps.upload_hf.ask_text",
         side_effect=["new-model", "mit", "aiaccel", "", "", "New description."],
     )
 
@@ -86,7 +86,7 @@ def test_stage_config_cleaning(mocker: MockerFixture, tmp_path: Path) -> None:
         config_path,
     )
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
 
     upload_hf.stage_cleaned_file(
         config_path,
@@ -110,7 +110,7 @@ def test_stage_checkpoint_cleaning(mocker: MockerFixture, tmp_path: Path) -> Non
         checkpoint_path,
     )
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
 
     upload_hf.stage_cleaned_file(
         checkpoint_path,
@@ -131,7 +131,7 @@ def test_existing_staged_file_can_be_reused(mocker: MockerFixture, tmp_path: Pat
     oc.save({"checkpoint_filename": "merged"}, source)
     oc.save({"checkpoint_filename": "hand-edited"}, target)
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=False)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=False)
     load = mocker.Mock()
     save = mocker.Mock()
 
@@ -148,7 +148,7 @@ def test_upload_model(mocker: MockerFixture, tmp_path: Path) -> None:
     (upload_dir / "merged_config.yaml").write_text("checkpoint_filename: merged\n", encoding="utf-8")
     (upload_dir / "checkpoints" / "merged.ckpt").touch()
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
     mock_login = mocker.patch("aiaccel.torch.apps.upload_hf.login")
     api = mocker.Mock()
     api.repo_exists.return_value = True
@@ -167,7 +167,7 @@ def test_prepare_upload_dir_keeps_files_by_default(mocker: MockerFixture, tmp_pa
     upload_dir.mkdir()
     existing = upload_dir / "existing.ckpt"
     existing.write_bytes(b"checkpoint")
-    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=False)
+    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=False)
 
     upload_hf.prepare_upload_dir(upload_dir)
 
@@ -179,7 +179,7 @@ def test_prepare_upload_dir_deletes_when_approved(mocker: MockerFixture, tmp_pat
     upload_dir = tmp_path / "hf_upload"
     upload_dir.mkdir()
     (upload_dir / "old.ckpt").touch()
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
 
     upload_hf.prepare_upload_dir(upload_dir)
 
@@ -192,7 +192,7 @@ def test_stage_readme_reuses_existing_file(mocker: MockerFixture, tmp_path: Path
     upload_dir.mkdir()
     staged = upload_dir / "README.md"
     staged.write_text("# Custom README", encoding="utf-8")
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=False)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=False)
 
     assert upload_hf.stage_readme(tmp_path, upload_dir, "test/model")
     assert staged.read_text(encoding="utf-8") == "# Custom README"
@@ -200,7 +200,7 @@ def test_stage_readme_reuses_existing_file(mocker: MockerFixture, tmp_path: Path
 
 def test_upload_model_aborts_when_not_confirmed(mocker: MockerFixture, tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text("# model", encoding="utf-8")
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=False)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=False)
     login = mocker.patch("aiaccel.torch.apps.upload_hf.login")
     api = mocker.patch("aiaccel.torch.apps.upload_hf.HfApi")
 
@@ -212,7 +212,7 @@ def test_upload_model_aborts_when_not_confirmed(mocker: MockerFixture, tmp_path:
 
 def test_upload_model_reconfirms_changed_files(mocker: MockerFixture, tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text("# model", encoding="utf-8")
-    mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", side_effect=[True, False])
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, False])
     mocker.patch("aiaccel.torch.apps.upload_hf.login")
     api = mocker.Mock()
     api.repo_exists.return_value = True
@@ -226,3 +226,52 @@ def test_upload_model_reconfirms_changed_files(mocker: MockerFixture, tmp_path: 
     upload_hf.upload_model(tmp_path, "test/model")
 
     api.upload_folder.assert_not_called()
+
+
+def test_select_state_dict_prefixes(mocker: MockerFixture) -> None:
+    state_dict = {
+        "model.encoder.layers.0.weight": torch.tensor([1.0]),
+        "model.encoder.layers.1.weight": torch.tensor([2.0]),
+        "model.decoder.weight": torch.tensor([3.0]),
+    }
+    checkbox = mocker.patch("aiaccel.torch.apps.upload_hf.questionary.checkbox")
+    checkbox.return_value.unsafe_ask.return_value = ["model.encoder.layers"]
+
+    selected = upload_hf.select_state_dict_prefixes(state_dict)
+
+    assert selected == ["model.encoder.layers"]
+    choices = checkbox.call_args.kwargs["choices"]
+    assert [(choice.value, choice.title) for choice in choices] == [
+        ("model.decoder.weight", "model.decoder.weight (1 keys)"),
+        ("model.encoder.layers", "model.encoder.layers (2 keys)"),
+    ]
+
+
+def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> None:
+    checkpoint = {
+        "epoch": 1,
+        "state_dict": {
+            "model.encoder.layer.0": torch.tensor([1.0]),
+            "model.encoder.layer.1": torch.tensor([2.0]),
+            "model.encoder_extra.weight": torch.tensor([3.0]),
+            "loss.weight": torch.tensor([4.0]),
+        },
+    }
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, True, True])
+    select = mocker.patch(
+        "aiaccel.torch.apps.upload_hf.select_state_dict_prefixes",
+        side_effect=[["model.encoder"], ["loss"], []],
+    )
+
+    cleaned = upload_hf.prepare_checkpoint(checkpoint)
+
+    assert list(cleaned) == ["state_dict"]
+    assert list(cleaned["state_dict"]) == ["model.encoder_extra.weight"]
+    assert len(checkpoint["state_dict"]) == 4
+    assert select.call_count == 3
+
+
+def test_prepare_checkpoint_keeps_metadata_by_default(mocker: MockerFixture) -> None:
+    checkpoint = {"epoch": 1, "state_dict": {"weight": torch.tensor([1.0])}}
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=False)
+    assert upload_hf.prepare_checkpoint(checkpoint) is checkpoint
