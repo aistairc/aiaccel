@@ -36,6 +36,44 @@ def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) 
     assert (upload_dir / "README.md").read_text(encoding="utf-8") == content
 
 
+def test_stage_readme_keeps_existing_model_readme(mocker: MockerFixture, tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    upload_dir = model_dir / "hf_upload"
+    upload_dir.mkdir(parents=True)
+    source = model_dir / "README.md"
+    source.write_text("# Original model card", encoding="utf-8")
+    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=False)
+    prompt = mocker.patch("aiaccel.torch.apps.upload_hf.Prompt.ask")
+
+    assert upload_hf.stage_readme(model_dir, upload_dir, "test/model")
+
+    confirm.assert_called_once_with("Regenerate model README.md?", default=False)
+    prompt.assert_not_called()
+    assert source.read_text(encoding="utf-8") == "# Original model card"
+    assert (upload_dir / "README.md").read_text(encoding="utf-8") == "# Original model card"
+
+
+def test_stage_readme_regenerates_existing_model_readme(mocker: MockerFixture, tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    upload_dir = model_dir / "hf_upload"
+    upload_dir.mkdir(parents=True)
+    source = model_dir / "README.md"
+    source.write_text("# Old model card", encoding="utf-8")
+    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.Confirm.ask", return_value=True)
+    mocker.patch(
+        "aiaccel.torch.apps.upload_hf.Prompt.ask",
+        side_effect=["new-model", "mit", "aiaccel", "", "", "New description."],
+    )
+
+    assert upload_hf.stage_readme(model_dir, upload_dir, "test/model")
+
+    confirm.assert_called_once_with("Regenerate model README.md?", default=False)
+    content = source.read_text(encoding="utf-8")
+    assert "# new-model" in content
+    assert "New description." in content
+    assert (upload_dir / "README.md").read_text(encoding="utf-8") == content
+
+
 def test_stage_config_cleaning(mocker: MockerFixture, tmp_path: Path) -> None:
     config_path = tmp_path / "merged_config.yaml"
     target = tmp_path / "hf_upload" / "merged_config.yaml"
