@@ -12,27 +12,35 @@ def is_absolute_path(value: str | Path) -> bool:
 
 
 def _remove_absolute_path(obj: Any, prefix: str, removed: list[str]) -> Any:
+    cleaned: Any
+
     if isinstance(obj, dict):
-        cleaned_dict: dict[str, Any] = {}
+        cleaned_dict = {}
         for key, value in obj.items():
             path = f"{prefix}.{key}" if prefix else str(key)
             if isinstance(value, (str, Path)) and is_absolute_path(value):
                 removed.append(path)
-            else:
-                cleaned_dict[key] = _remove_absolute_path(value, path, removed)
-        return cleaned_dict
+                continue
 
-    if isinstance(obj, (list, tuple)):
+            cleaned_dict[key] = _remove_absolute_path(value, path, removed)
+        cleaned = type(obj)(cleaned_dict)
+
+    elif isinstance(obj, (list, tuple)):
         cleaned_list: list[Any] = []
         for index, value in enumerate(obj):
             path = f"{prefix}[{index}]"
             if isinstance(value, (str, Path)) and is_absolute_path(value):
                 removed.append(path)
-            else:
-                cleaned_list.append(_remove_absolute_path(value, path, removed))
-        return type(obj)(cleaned_list)
+                continue
 
-    return obj
+            cleaned_list.append(_remove_absolute_path(value, path, removed))
+
+        cleaned = type(obj)(cleaned_list)
+
+    else:
+        return obj
+
+    return cleaned
 
 
 def remove_absolute_path(obj: Any) -> tuple[Any, list[str]]:
