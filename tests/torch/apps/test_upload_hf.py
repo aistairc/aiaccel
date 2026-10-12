@@ -16,9 +16,21 @@ from aiaccel.torch.apps import upload_hf
 def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) -> None:
     mocker.patch(
         "aiaccel.torch.apps.upload_hf.ask_text",
-        side_effect=["test-model", "mit", "test-library", "en, ja", "example/base-model", "Test model."],
+        side_effect=[
+            "test-model",
+            "mit",
+            "test-library",
+            "en, ja",
+            "CLAP",
+            "https://huggingface.co/example/base-model",
+            "apache-2.0",
+            "External Encoder",
+            "https://github.com/example/encoder",
+            "mit",
+            "Test model.",
+        ],
     )
-    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, False])
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, True, False, False])
 
     mocker.patch(
         "aiaccel.torch.apps.upload_hf.questionary.select"
@@ -37,11 +49,69 @@ def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) 
     assert "pipeline_tag: audio-classification" in content
     assert "library_name: test-library" in content
     assert "base_model: example/base-model" in content
-    assert "Base model: [example/base-model](https://huggingface.co/example/base-model)." in content
     assert "This model is released under the **mit** license." in content
+    assert "[CLAP](https://huggingface.co/example/base-model) — apache-2.0" in content
+    assert "[External Encoder](https://github.com/example/encoder) — mit" in content
+    assert "## Citation" in content
+    assert "```bibtex" in content
     assert "# test-model" in content
     assert "Test model." in content
     assert (upload_dir / "README.md").read_text(encoding="utf-8") == content
+
+
+def test_get_hf_model_id() -> None:
+    assert upload_hf.get_hf_model_id("https://huggingface.co/example/model") == "example/model"
+    assert upload_hf.get_hf_model_id("https://www.huggingface.co/example/model/") == "example/model"
+    assert upload_hf.get_hf_model_id("https://github.com/example/model") is None
+    assert upload_hf.get_hf_model_id("https://huggingface.co/example/model/tree/main") is None
+    assert upload_hf.get_hf_model_id("") is None
+
+
+def test_ask_base_models(mocker: MockerFixture) -> None:
+    mocker.patch(
+        "aiaccel.torch.apps.upload_hf.ask_text",
+        side_effect=["CLAP", "https://huggingface.co/example/clap", "apache-2.0", "Encoder", "", "mit"],
+    )
+    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, False])
+
+    assert upload_hf.ask_base_models() == [
+        {"name": "CLAP", "url": "https://huggingface.co/example/clap", "license": "apache-2.0"},
+        {"name": "Encoder", "url": "", "license": "mit"},
+    ]
+    assert confirm.call_count == 2
+
+
+def test_stage_readme_multiple_hub_models(mocker: MockerFixture, tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    upload_dir = model_dir / "hf_upload"
+    upload_dir.mkdir(parents=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, True, False, False])
+    mocker.patch(
+        "aiaccel.torch.apps.upload_hf.ask_text",
+        side_effect=[
+            "model",
+            "apache-2.0",
+            "aiaccel",
+            "",
+            "Base A",
+            "https://huggingface.co/org/model-a",
+            "mit",
+            "Base B",
+            "https://huggingface.co/org/model-b",
+            "cc-by-4.0",
+            "Description.",
+        ],
+    )
+    mocker.patch("aiaccel.torch.apps.upload_hf.questionary.select").return_value.unsafe_ask.return_value = "skip"
+
+    assert upload_hf.stage_readme(model_dir, upload_dir, "org/model")
+
+    content = (model_dir / "README.md").read_text(encoding="utf-8")
+    assert "base_model:" in content
+    assert "- org/model-a" in content
+    assert "- org/model-b" in content
+    assert "[Base A](https://huggingface.co/org/model-a) — mit" in content
+    assert "[Base B](https://huggingface.co/org/model-b) — cc-by-4.0" in content
 
 
 def test_stage_readme_keeps_existing_model_readme(mocker: MockerFixture, tmp_path: Path) -> None:
