@@ -8,8 +8,8 @@ from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 import re
-from urllib.parse import urlsplit
 import shutil
+from urllib.parse import urlsplit
 
 from omegaconf import DictConfig
 from omegaconf import OmegaConf as oc  # noqa: N813
@@ -111,7 +111,10 @@ def get_hf_model_id(url: str) -> str | None:
 def ask_base_models() -> list[dict[str, str]]:
     """Collect any number of base models for license attribution."""
     models: list[dict[str, str]] = []
-    while name := ask_text("Base model name (blank to finish)").strip():
+    while True:
+        name = ask_text("Base model name (blank to finish)").strip()
+        if not name:
+            break
         url = ask_text("Base model URL (blank if unavailable)").strip()
         license_name = ask_text("Base model license (blank if unknown)").strip()
         models.append({"name": name, "url": url, "license": license_name})
@@ -178,9 +181,11 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
         ).unsafe_ask()
         languages = ask_languages()
         base_models = ask_base_models()
-        hub_model_ids = list(
-            dict.fromkeys(model_id for model in base_models if (model_id := get_hf_model_id(model["url"])))
-        )
+        hub_model_ids: list[str] = []
+        for model in base_models:
+            model_id = get_hf_model_id(model["url"])
+            if model_id and model_id not in hub_model_ids:
+                hub_model_ids.append(model_id)
         description = ask_text("Short description", default="")
 
         card_data = ModelCardData(
