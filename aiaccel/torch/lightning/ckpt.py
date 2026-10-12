@@ -5,9 +5,11 @@ from typing import Any
 
 import logging
 from pathlib import Path
+import warnings
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig, ListConfig
+from omegaconf import OmegaConf as oc  # noqa: N813
 
 from torch import nn
 
@@ -30,6 +32,8 @@ def load_checkpoint(
     config_name: str = "merged_config.yaml",
     device: str = "cuda",
     overwrite_config: DictConfig | ListConfig | dict[Any, Any] | list[Any] | None = None,
+    strict: bool | None = None,
+    weights_only: bool | None = None,
 ) -> tuple[nn.Module, DictConfig | ListConfig]:
     """
     Load a PyTorch Lightning model from a pre-trained checkpoint.
@@ -46,6 +50,8 @@ def load_checkpoint(
         config_name (str): The name of the configuration file to load. Default is "merged_config.yaml".
         device (str): The device to map the model to. Default is "cuda".
         overwrite_config (DictConfig | ListConfig | dict | list | None): Optional configuration overrides.
+        strict (bool | None): Override task.strict; None keeps the existing configuration or Lightning default.
+        weights_only (bool | None): Override task.weights_only; None keeps the existing configuration or Lightning default.
     """
 
     if isinstance(model_path, str):
@@ -59,16 +65,30 @@ def load_checkpoint(
             model_path = Path(model_path)
 
     config_path = model_path / config_name
+    task_options = {}
+    if strict is not None:
+        task_options["strict"] = strict
+    if weights_only is not None:
+        task_options["weights_only"] = weights_only
+    if task_options:
+        overwrite_config = oc.merge(overwrite_config if overwrite_config is not None else {}, {"task": task_options})
     config = prepare_config(config_path, overwrite_config=overwrite_config)
     checkpoint_path = get_checkpoint_path(model_path, config.checkpoint_filename)
 
     logger.info(f"Loading model from {checkpoint_path}...")
 
     config.task._target_ += ".load_from_checkpoint"
-    model = instantiate(
-        config.task,
-        checkpoint_path=checkpoint_path,
-        map_location=device,
-    )
+    effective_strict = config.task.get("strict")
+    if effective_strict is not None:
+        logger.warning("Checkpoint loading with strict=%s.", effective_strict)
+
+    with warnings.catch_warnings():
+        if effective_strict is False:
+            warnings.filterwarnings("ignore", message="Found keys that are", category=UserWarning)
+        model = instantiate(
+            config.task,
+            checkpoint_path=checkpoint_path,
+            map_location=device,
+        )
 
     return model, config
