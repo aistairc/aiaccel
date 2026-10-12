@@ -3,6 +3,7 @@
 
 from typing import Any
 
+from collections import OrderedDict
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
 
@@ -24,6 +25,8 @@ def _remove_absolute_path(obj: Any, prefix: str, removed: list[str]) -> Any:
 
             cleaned_dict[key] = _remove_absolute_path(value, path, removed)
         cleaned = type(obj)(cleaned_dict)
+        if isinstance(obj, OrderedDict) and hasattr(obj, "_metadata"):
+            cleaned._metadata = obj._metadata
 
     elif isinstance(obj, (list, tuple)):
         cleaned_list: list[Any] = []
