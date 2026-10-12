@@ -16,9 +16,9 @@ from aiaccel.torch.apps import upload_hf
 def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) -> None:
     mocker.patch(
         "aiaccel.torch.apps.upload_hf.ask_text",
-        side_effect=["test-model", "mit", "test-library", "en, ja", "Test model."],
+        side_effect=["test-model", "mit", "test-library", "en, ja", "example/base-model", "Test model."],
     )
-    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, False])
 
     mocker.patch(
         "aiaccel.torch.apps.upload_hf.questionary.select"
@@ -36,6 +36,9 @@ def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) 
     assert "license: mit" in content
     assert "pipeline_tag: audio-classification" in content
     assert "library_name: test-library" in content
+    assert "base_model: example/base-model" in content
+    assert "Base model: [example/base-model](https://huggingface.co/example/base-model)." in content
+    assert "This model is released under the **mit** license." in content
     assert "# test-model" in content
     assert "Test model." in content
     assert (upload_dir / "README.md").read_text(encoding="utf-8") == content
@@ -52,7 +55,9 @@ def test_stage_readme_keeps_existing_model_readme(mocker: MockerFixture, tmp_pat
 
     assert upload_hf.stage_readme(model_dir, upload_dir, "test/model")
 
-    confirm.assert_called_once_with("Regenerate model README.md?", default=False)
+    assert confirm.call_count == 2
+    confirm.assert_any_call("Regenerate model README.md?", default=False)
+    confirm.assert_any_call("Edit model README.md manually before upload?", default=False)
     prompt.assert_not_called()
     assert source.read_text(encoding="utf-8") == "# Original model card"
     assert (upload_dir / "README.md").read_text(encoding="utf-8") == "# Original model card"
@@ -64,20 +69,44 @@ def test_stage_readme_regenerates_existing_model_readme(mocker: MockerFixture, t
     upload_dir.mkdir(parents=True)
     source = model_dir / "README.md"
     source.write_text("# Old model card", encoding="utf-8")
-    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
+    confirm = mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, False])
     mocker.patch(
         "aiaccel.torch.apps.upload_hf.ask_text",
-        side_effect=["new-model", "mit", "aiaccel", "", "New description."],
+        side_effect=["new-model", "skip", "aiaccel", "", "", "New description."],
     )
 
     mocker.patch("aiaccel.torch.apps.upload_hf.questionary.select").return_value.unsafe_ask.return_value = "skip"
     assert upload_hf.stage_readme(model_dir, upload_dir, "test/model")
 
-    confirm.assert_called_once_with("Regenerate model README.md?", default=False)
+    assert confirm.call_count == 2
+    confirm.assert_any_call("Regenerate model README.md?", default=False)
     content = source.read_text(encoding="utf-8")
     assert "# new-model" in content
     assert "New description." in content
+    assert "TODO: Specify the model license." in content
+    assert "license:" not in content
     assert (upload_dir / "README.md").read_text(encoding="utf-8") == content
+
+
+def test_stage_readme_allows_manual_edit_before_staging(mocker: MockerFixture, tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    upload_dir = model_dir / "hf_upload"
+    upload_dir.mkdir(parents=True)
+    source = model_dir / "README.md"
+    source.write_text("# Before edit", encoding="utf-8")
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[False, True])
+
+    def finish_edit(message: str, default: str = "") -> str:
+        assert message == "Press Enter when finished editing"
+        source.write_text("# After edit", encoding="utf-8")
+        return ""
+
+    prompt = mocker.patch("aiaccel.torch.apps.upload_hf.ask_text", side_effect=finish_edit)
+
+    assert upload_hf.stage_readme(model_dir, upload_dir, "test/model")
+    prompt.assert_called_once_with("Press Enter when finished editing")
+    assert source.read_text(encoding="utf-8") == "# After edit"
+    assert (upload_dir / "README.md").read_text(encoding="utf-8") == "# After edit"
 
 
 def test_stage_config_cleaning(mocker: MockerFixture, tmp_path: Path) -> None:
