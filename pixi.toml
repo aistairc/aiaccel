@@ -50,6 +50,7 @@ torch = { version = ">=2.2.0", index = "https://download.pytorch.org/whl/cpu" }
 
 [pypi-dependencies]
 aiaccel = { path = ".", editable = true }
+questionary = ">=2.1.1"
 
 [environments]
 default = { features = ["dev"], solve-group = "default" }
