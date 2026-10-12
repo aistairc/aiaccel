@@ -115,6 +115,10 @@ def test_stage_readme_multiple_hub_models(mocker: MockerFixture, tmp_path: Path)
     assert "- org/model-b" in content
     assert "[Base A](https://huggingface.co/org/model-a) — mit" in content
     assert "[Base B](https://huggingface.co/org/model-b) — cc-by-4.0" in content
+    assert (
+        "- [Base A](https://huggingface.co/org/model-a) — mit\n"
+        "- [Base B](https://huggingface.co/org/model-b) — cc-by-4.0"
+    ) in content
 
 
 def test_stage_readme_keeps_existing_model_readme(mocker: MockerFixture, tmp_path: Path) -> None:
