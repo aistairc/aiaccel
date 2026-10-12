@@ -152,6 +152,7 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             choices=["skip", *PIPELINE_TAGS],
         ).unsafe_ask()
         languages = ask_languages()
+        base_model = ask_text("Base model (Hugging Face repo ID; blank if none)").strip()
         description = ask_text("Short description", default="")
 
         card_data = ModelCardData(
@@ -160,6 +161,7 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             pipeline_tag=None if pipeline_tag == "skip" else pipeline_tag,
             language=languages,
             library_name=library_name,
+            base_model=base_model or None,
         )
         template_path = Path(__file__).parent / "templates" / "model_card.md"
 
@@ -168,10 +170,16 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             template_path=str(template_path),
             model_name=model_name,
             description=description,
+            base_model=base_model,
+            license_name="" if license_name == "skip" else license_name,
         )
         card.save(source)
 
         rprint(f"Created model card: [bold]{source}[/bold]")
+
+    if ask_confirm("Edit model README.md manually before upload?", default=False):
+        rprint(f"Edit this file in your editor: [bold]{source}[/bold]")
+        ask_text("Press Enter when finished editing")
 
     shutil.copy2(source, target)
 
