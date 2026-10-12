@@ -8,6 +8,7 @@ from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 import re
+from urllib.parse import urlsplit
 import shutil
 
 from omegaconf import DictConfig
@@ -95,6 +96,30 @@ def ask_languages() -> list[str] | None:
         rprint("Use lowercase ISO language codes such as en or ja (not English or Japanese).")
 
 
+def get_hf_model_id(url: str) -> str | None:
+    """Get a Hub model ID from a model URL, excluding non-Hub links."""
+    parsed = urlsplit(url)
+    if parsed.scheme not in ("http", "https") or parsed.netloc.lower() not in (
+        "huggingface.co",
+        "www.huggingface.co",
+    ):
+        return None
+    parts = parsed.path.strip("/").split("/")
+    return "/".join(parts) if len(parts) == 2 and all(parts) else None
+
+
+def ask_base_models() -> list[dict[str, str]]:
+    """Collect any number of base models for license attribution."""
+    models: list[dict[str, str]] = []
+    while name := ask_text("Base model name (blank to finish)").strip():
+        url = ask_text("Base model URL (blank if unavailable)").strip()
+        license_name = ask_text("Base model license (blank if unknown)").strip()
+        models.append({"name": name, "url": url, "license": license_name})
+        if not ask_confirm("Add another base model?", default=False):
+            break
+    return models
+
+
 def validate_readme(upload_dir: Path) -> bool:
     """Validate staged model-card metadata before any Hugging Face upload."""
     path = upload_dir / "README.md"
@@ -152,7 +177,10 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             choices=["skip", *PIPELINE_TAGS],
         ).unsafe_ask()
         languages = ask_languages()
-        base_model = ask_text("Base model (Hugging Face repo ID; blank if none)").strip()
+        base_models = ask_base_models()
+        hub_model_ids = list(
+            dict.fromkeys(model_id for model in base_models if (model_id := get_hf_model_id(model["url"])))
+        )
         description = ask_text("Short description", default="")
 
         card_data = ModelCardData(
@@ -161,7 +189,7 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             pipeline_tag=None if pipeline_tag == "skip" else pipeline_tag,
             language=languages,
             library_name=library_name,
-            base_model=base_model or None,
+            base_model=hub_model_ids[0] if len(hub_model_ids) == 1 else hub_model_ids or None,
         )
         template_path = Path(__file__).parent / "templates" / "model_card.md"
 
@@ -170,7 +198,7 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             template_path=str(template_path),
             model_name=model_name,
             description=description,
-            base_model=base_model,
+            base_models=base_models,
             license_name="" if license_name == "skip" else license_name,
         )
         card.save(source)
