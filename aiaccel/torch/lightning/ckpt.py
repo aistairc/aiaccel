@@ -51,7 +51,7 @@ def load_checkpoint(
         device (str): The device to map the model to. Default is "cuda".
         overwrite_config (DictConfig | ListConfig | dict | list | None): Optional configuration overrides.
         strict (bool | None): Override task.strict; None keeps the existing configuration or Lightning default.
-        weights_only (bool | None): Override task.weights_only; None keeps the existing configuration or Lightning default.
+        weights_only (bool | None): Override task.weights_only; None preserves the existing setting.
     """
 
     if isinstance(model_path, str):
