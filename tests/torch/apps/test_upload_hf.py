@@ -293,7 +293,7 @@ def test_ask_languages_retries_invalid_code(mocker: MockerFixture) -> None:
 
 def test_upload_model_rejects_invalid_readme_before_login(mocker: MockerFixture, tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text(
-        "---\\nlanguage:\\n- English\\npipeline_tag: ov-sed\\n---\\n", encoding="utf-8"
+        "---\nlanguage:\n- English\npipeline_tag: ov-sed\n---\n", encoding="utf-8"
     )
     validate = mocker.patch("aiaccel.torch.apps.upload_hf.ModelCard.load")
     validate.return_value.validate.side_effect = ValueError("Invalid metadata")
