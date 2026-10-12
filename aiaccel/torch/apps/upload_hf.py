@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
+import re
 import shutil
 
 from omegaconf import DictConfig
@@ -31,6 +32,51 @@ def ask_confirm(message: str, default: bool = False) -> bool:
 
 def ask_text(message: str, default: str = "") -> str:
     return questionary.text(message, default=default).unsafe_ask()
+
+
+PIPELINE_TAGS = (
+    "audio-classification", "audio-to-audio", "automatic-speech-recognition",
+    "depth-estimation", "feature-extraction", "fill-mask", "image-classification",
+    "image-feature-extraction", "image-segmentation", "image-text-to-image",
+    "image-text-to-text", "image-text-to-video", "image-to-3d", "image-to-image",
+    "image-to-text", "image-to-video", "keypoint-detection", "mask-generation",
+    "object-detection", "other", "reinforcement-learning", "robotics",
+    "sentence-similarity", "summarization", "table-question-answering",
+    "tabular-classification", "tabular-regression", "text-classification",
+    "text-generation", "text-ranking", "text-retrieval", "text-to-audio",
+    "text-to-image", "text-to-speech", "text-to-video", "time-series-forecasting",
+    "token-classification", "translation", "video-classification",
+    "video-text-to-text", "video-to-video", "visual-question-answering",
+    "voice-activity-detection", "zero-shot-classification",
+    "zero-shot-image-classification", "zero-shot-object-detection",
+)
+
+
+def ask_languages() -> list[str] | None:
+    """Accept standard language codes, not display names such as English."""
+    while True:
+        raw = ask_text("Language code(s), comma-separated (e.g. en, ja; blank to skip)")
+        codes = [value.strip() for value in raw.split(",") if value.strip()]
+        if not codes:
+            return None
+        if all(re.fullmatch(r"[a-z]{2,3}|code|multilingual", code) for code in codes):
+            return codes
+        rprint("Use lowercase ISO language codes such as en or ja (not English or Japanese).")
+
+
+def validate_readme(upload_dir: Path) -> bool:
+    """Validate staged model-card metadata before any Hugging Face upload."""
+    path = upload_dir / "README.md"
+    if not path.is_file():
+        rprint(f"Model README.md not found: {path}")
+        return False
+    try:
+        ModelCard.load(str(path)).validate(repo_type="model")
+    except ValueError as exc:
+        rprint(f"[bold]Invalid README.md metadata in {path}:[/bold]\n{exc}")
+        rprint("Edit the staged README.md and run the command again.")
+        return False
+    return True
 
 
 def should_overwrite(target: Path) -> bool:
@@ -70,15 +116,18 @@ def stage_readme(model_dir: Path, upload_dir: Path, repo_id: str) -> bool:
             default="apache-2.0",
         )
         library_name = ask_text("Library", default="aiaccel")
-        pipeline_tag = ask_text("Task / pipeline tag", default="")
-        language = ask_text("Language(s), comma-separated", default="")
+        pipeline_tag = questionary.select(
+            "Task / pipeline tag (choose 'skip' to omit)",
+            choices=["skip", *PIPELINE_TAGS],
+        ).unsafe_ask()
+        languages = ask_languages()
         description = ask_text("Short description", default="")
 
         card_data = ModelCardData(
             model_name=model_name,
             license=None if license_name == "skip" else license_name,
-            pipeline_tag=pipeline_tag or None,
-            language=[value.strip() for value in language.split(",") if value.strip()] or None,
+            pipeline_tag=None if pipeline_tag == "skip" else pipeline_tag,
+            language=languages,
             library_name=library_name,
         )
         template_path = Path(__file__).parent / "templates" / "model_card.md"
@@ -177,6 +226,8 @@ def upload_model(upload_dir: Path, repo_id: str) -> None:
     manifest = get_file_manifest(upload_dir)
     if not manifest:
         rprint("No files to upload.")
+        return
+    if not validate_readme(upload_dir):
         return
 
     rprint(f"\nRepository: [bold]{repo_id}[/bold]")
