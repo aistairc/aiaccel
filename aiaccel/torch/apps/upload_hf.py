@@ -16,39 +16,70 @@ from rich.console import Console
 
 import torch
 
-import questionary
 from huggingface_hub import HfApi, ModelCard, ModelCardData, login
+import questionary
 
 from aiaccel.torch.lightning.ckpt import get_checkpoint_path
 from aiaccel.torch.utils.remove_absolute_path import remove_absolute_path
-
 
 rprint = Console(highlight=False).print
 
 
 def ask_confirm(message: str, default: bool = False) -> bool:
-    return questionary.confirm(message, default=default).unsafe_ask()
+    return questionary.confirm(message, default=default).unsafe_ask()  # type: ignore[no-any-return]
 
 
 def ask_text(message: str, default: str = "") -> str:
-    return questionary.text(message, default=default).unsafe_ask()
+    return questionary.text(message, default=default).unsafe_ask()  # type: ignore[no-any-return]
 
 
 PIPELINE_TAGS = (
-    "audio-classification", "audio-to-audio", "automatic-speech-recognition",
-    "depth-estimation", "feature-extraction", "fill-mask", "image-classification",
-    "image-feature-extraction", "image-segmentation", "image-text-to-image",
-    "image-text-to-text", "image-text-to-video", "image-to-3d", "image-to-image",
-    "image-to-text", "image-to-video", "keypoint-detection", "mask-generation",
-    "object-detection", "other", "reinforcement-learning", "robotics",
-    "sentence-similarity", "summarization", "table-question-answering",
-    "tabular-classification", "tabular-regression", "text-classification",
-    "text-generation", "text-ranking", "text-retrieval", "text-to-audio",
-    "text-to-image", "text-to-speech", "text-to-video", "time-series-forecasting",
-    "token-classification", "translation", "video-classification",
-    "video-text-to-text", "video-to-video", "visual-question-answering",
-    "voice-activity-detection", "zero-shot-classification",
-    "zero-shot-image-classification", "zero-shot-object-detection",
+    "audio-classification",
+    "audio-to-audio",
+    "automatic-speech-recognition",
+    "depth-estimation",
+    "feature-extraction",
+    "fill-mask",
+    "image-classification",
+    "image-feature-extraction",
+    "image-segmentation",
+    "image-text-to-image",
+    "image-text-to-text",
+    "image-text-to-video",
+    "image-to-3d",
+    "image-to-image",
+    "image-to-text",
+    "image-to-video",
+    "keypoint-detection",
+    "mask-generation",
+    "object-detection",
+    "other",
+    "reinforcement-learning",
+    "robotics",
+    "sentence-similarity",
+    "summarization",
+    "table-question-answering",
+    "tabular-classification",
+    "tabular-regression",
+    "text-classification",
+    "text-generation",
+    "text-ranking",
+    "text-retrieval",
+    "text-to-audio",
+    "text-to-image",
+    "text-to-speech",
+    "text-to-video",
+    "time-series-forecasting",
+    "token-classification",
+    "translation",
+    "video-classification",
+    "video-text-to-text",
+    "video-to-video",
+    "visual-question-answering",
+    "voice-activity-detection",
+    "zero-shot-classification",
+    "zero-shot-image-classification",
+    "zero-shot-object-detection",
 )
 
 
@@ -171,10 +202,9 @@ def select_state_dict_prefixes(state_dict: dict[str, Any]) -> list[str]:
     """Present up to three key segments as selectable prefixes."""
     prefixes = Counter(".".join(key.split(".")[:3]) for key in state_dict)
     choices = [
-        questionary.Choice(f"{prefix} ({count} keys)", value=prefix)
-        for prefix, count in sorted(prefixes.items())
+        questionary.Choice(f"{prefix} ({count} keys)", value=prefix) for prefix, count in sorted(prefixes.items())
     ]
-    return questionary.checkbox(
+    return questionary.checkbox(  # type: ignore[no-any-return]
         "Select state_dict prefixes to remove (Space: select, Enter: finish)",
         choices=choices,
     ).unsafe_ask()
@@ -195,9 +225,7 @@ def prepare_checkpoint(checkpoint: dict[str, Any]) -> dict[str, Any]:
             break
 
         matches = [
-            key
-            for key in state_dict
-            if any(key == prefix or key.startswith(f"{prefix}.") for prefix in selected)
+            key for key in state_dict if any(key == prefix or key.startswith(f"{prefix}.") for prefix in selected)
         ]
         if ask_confirm(f"Remove {len(matches)} selected keys?", default=False):
             for key in matches:
@@ -210,11 +238,7 @@ def prepare_checkpoint(checkpoint: dict[str, Any]) -> dict[str, Any]:
         "hparams_name",
         "hparams_type",
     }
-    return {
-        key: state_dict if key == "state_dict" else value
-        for key, value in checkpoint.items()
-        if key in keep_keys
-    }
+    return {key: state_dict if key == "state_dict" else value for key, value in checkpoint.items() if key in keep_keys}
 
 
 def get_file_manifest(upload_dir: Path) -> dict[str, tuple[int, int]]:
@@ -322,6 +346,7 @@ def main() -> None:
         torch.save,
     )
     upload_model(upload_dir, args.repo_id)
+
 
 if __name__ == "__main__":
     try:

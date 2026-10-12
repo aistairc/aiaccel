@@ -19,9 +19,9 @@ def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) 
     )
     mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
 
-    mocker.patch("aiaccel.torch.apps.upload_hf.questionary.select").return_value.unsafe_ask.return_value = (
-        "audio-classification"
-    )
+    mocker.patch(
+        "aiaccel.torch.apps.upload_hf.questionary.select"
+    ).return_value.unsafe_ask.return_value = "audio-classification"
 
     model_dir = tmp_path / "model"
     upload_dir = model_dir / "hf_upload"
@@ -290,7 +290,7 @@ def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> N
     assert cleaned["hparams_name"] == "kwargs"
     assert cleaned["hparams_type"] == "dict"
     assert list(cleaned["state_dict"]) == ["model.encoder_extra.weight"]
-    assert len(checkpoint["state_dict"]) == 4
+    assert len(checkpoint["state_dict"]) == 4  # type: ignore[arg-type]
     assert select.call_count == 3
 
 
@@ -317,9 +317,7 @@ def test_ask_languages_retries_invalid_code(mocker: MockerFixture) -> None:
 
 
 def test_upload_model_rejects_invalid_readme_before_login(mocker: MockerFixture, tmp_path: Path) -> None:
-    (tmp_path / "README.md").write_text(
-        "---\nlanguage:\n- English\npipeline_tag: ov-sed\n---\n", encoding="utf-8"
-    )
+    (tmp_path / "README.md").write_text("---\nlanguage:\n- English\npipeline_tag: ov-sed\n---\n", encoding="utf-8")
     validate = mocker.patch("aiaccel.torch.apps.upload_hf.ModelCard.load")
     validate.return_value.validate.side_effect = ValueError("Invalid metadata")
     login = mocker.patch("aiaccel.torch.apps.upload_hf.login")

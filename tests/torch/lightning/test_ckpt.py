@@ -84,9 +84,7 @@ def test_load_checkpoint_merges_loading_options(tmp_path: Path) -> None:
         )
 
     merged = prepare.call_args.kwargs["overwrite_config"]
-    assert OmegaConf.to_container(merged) == {
-        "task": {"custom_setting": "keep", "strict": False, "weights_only": True}
-    }
+    assert OmegaConf.to_container(merged) == {"task": {"custom_setting": "keep", "strict": False, "weights_only": True}}
     assert overwrite_config == {"task": {"custom_setting": "keep"}}
     assert instantiate.call_args.kwargs["map_location"] == "cpu"
     assert instantiate.call_args.args[0].strict is False
@@ -99,8 +97,17 @@ def test_load_checkpoint_suppresses_only_key_warnings(tmp_path: Path) -> None:
     )
 
     def instantiate_with_warnings(*args: object, **kwargs: object) -> DummyModel:
-        warnings.warn("Found keys that are in the model state dict but not in the checkpoint: ['weight']", UserWarning)
-        warnings.warn("A different warning", UserWarning)
+        warnings.warn(
+            "Found keys that are in the model state dict but not in the checkpoint: ['weight']",
+            UserWarning,
+            stacklevel=1,
+        )
+        warnings.warn(
+            "A different warning",
+            UserWarning,
+            stacklevel=1,
+        )
+
         return DummyModel()
 
     with (
