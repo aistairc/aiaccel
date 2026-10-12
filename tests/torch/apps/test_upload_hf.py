@@ -15,9 +15,13 @@ from aiaccel.torch.apps import upload_hf
 def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) -> None:
     mocker.patch(
         "aiaccel.torch.apps.upload_hf.ask_text",
-        side_effect=["test-model", "mit", "test-library", "audio-classification", "en, ja", "Test model."],
+        side_effect=["test-model", "mit", "test-library", "en, ja", "Test model."],
     )
     mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
+
+    mocker.patch("aiaccel.torch.apps.upload_hf.questionary.select").return_value.unsafe_ask.return_value = (
+        "audio-classification"
+    )
 
     model_dir = tmp_path / "model"
     upload_dir = model_dir / "hf_upload"
@@ -62,9 +66,10 @@ def test_stage_readme_regenerates_existing_model_readme(mocker: MockerFixture, t
     confirm = mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
     mocker.patch(
         "aiaccel.torch.apps.upload_hf.ask_text",
-        side_effect=["new-model", "mit", "aiaccel", "", "", "New description."],
+        side_effect=["new-model", "mit", "aiaccel", "", "New description."],
     )
 
+    mocker.patch("aiaccel.torch.apps.upload_hf.questionary.select").return_value.unsafe_ask.return_value = "skip"
     assert upload_hf.stage_readme(model_dir, upload_dir, "test/model")
 
     confirm.assert_called_once_with("Regenerate model README.md?", default=False)
@@ -149,6 +154,7 @@ def test_upload_model(mocker: MockerFixture, tmp_path: Path) -> None:
     (upload_dir / "checkpoints" / "merged.ckpt").touch()
 
     mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.validate_readme", return_value=True)
     mock_login = mocker.patch("aiaccel.torch.apps.upload_hf.login")
     api = mocker.Mock()
     api.repo_exists.return_value = True
@@ -201,6 +207,7 @@ def test_stage_readme_reuses_existing_file(mocker: MockerFixture, tmp_path: Path
 def test_upload_model_aborts_when_not_confirmed(mocker: MockerFixture, tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text("# model", encoding="utf-8")
     mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=False)
+    mocker.patch("aiaccel.torch.apps.upload_hf.validate_readme", return_value=True)
     login = mocker.patch("aiaccel.torch.apps.upload_hf.login")
     api = mocker.patch("aiaccel.torch.apps.upload_hf.HfApi")
 
@@ -214,6 +221,7 @@ def test_upload_model_reconfirms_changed_files(mocker: MockerFixture, tmp_path: 
     (tmp_path / "README.md").write_text("# model", encoding="utf-8")
     mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, False])
     mocker.patch("aiaccel.torch.apps.upload_hf.login")
+    mocker.patch("aiaccel.torch.apps.upload_hf.validate_readme", return_value=True)
     api = mocker.Mock()
     api.repo_exists.return_value = True
     mocker.patch("aiaccel.torch.apps.upload_hf.HfApi", return_value=api)
@@ -275,3 +283,23 @@ def test_prepare_checkpoint_keeps_metadata_by_default(mocker: MockerFixture) -> 
     checkpoint = {"epoch": 1, "state_dict": {"weight": torch.tensor([1.0])}}
     mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=False)
     assert upload_hf.prepare_checkpoint(checkpoint) is checkpoint
+
+
+def test_ask_languages_retries_invalid_code(mocker: MockerFixture) -> None:
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_text", side_effect=["English", "en, ja"])
+
+    assert upload_hf.ask_languages() == ["en", "ja"]
+
+
+def test_upload_model_rejects_invalid_readme_before_login(mocker: MockerFixture, tmp_path: Path) -> None:
+    (tmp_path / "README.md").write_text(
+        "---\\nlanguage:\\n- English\\npipeline_tag: ov-sed\\n---\\n", encoding="utf-8"
+    )
+    validate = mocker.patch("aiaccel.torch.apps.upload_hf.ModelCard.load")
+    validate.return_value.validate.side_effect = ValueError("Invalid metadata")
+    login = mocker.patch("aiaccel.torch.apps.upload_hf.login")
+
+    upload_hf.upload_model(tmp_path, "test/model")
+
+    login.assert_not_called()
+    validate.return_value.validate.assert_called_once_with(repo_type="model")
