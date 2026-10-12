@@ -181,8 +181,8 @@ def select_state_dict_prefixes(state_dict: dict[str, Any]) -> list[str]:
 
 
 def prepare_checkpoint(checkpoint: dict[str, Any]) -> dict[str, Any]:
-    """Optionally keep only state_dict and remove selected key prefixes."""
-    if not ask_confirm("Keep only state_dict?", default=False):
+    """Optionally retain inference metadata and remove selected state_dict prefixes."""
+    if not ask_confirm("Keep only state_dict and Lightning loading metadata?", default=False):
         return checkpoint
 
     if not isinstance(checkpoint.get("state_dict"), dict):
@@ -203,7 +203,18 @@ def prepare_checkpoint(checkpoint: dict[str, Any]) -> dict[str, Any]:
             for key in matches:
                 del state_dict[key]
 
-    return {"state_dict": state_dict}
+    keep_keys = {
+        "state_dict",
+        "pytorch-lightning_version",
+        "hyper_parameters",
+        "hparams_name",
+        "hparams_type",
+    }
+    return {
+        key: state_dict if key == "state_dict" else value
+        for key, value in checkpoint.items()
+        if key in keep_keys
+    }
 
 
 def get_file_manifest(upload_dir: Path) -> dict[str, tuple[int, int]]:
