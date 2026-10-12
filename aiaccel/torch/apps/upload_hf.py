@@ -211,14 +211,14 @@ def select_state_dict_prefixes(state_dict: dict[str, Any]) -> list[str]:
 
 
 def prepare_checkpoint(checkpoint: dict[str, Any]) -> dict[str, Any]:
-    """Optionally retain inference metadata and remove selected state_dict prefixes."""
+    """Trim checkpoint metadata and selected weights in place when requested."""
     if not ask_confirm("Keep only state_dict and Lightning loading metadata?", default=False):
         return checkpoint
 
     if not isinstance(checkpoint.get("state_dict"), dict):
         raise ValueError("Checkpoint has no state_dict mapping.")
 
-    state_dict = checkpoint["state_dict"].copy()
+    state_dict = checkpoint["state_dict"]
     while state_dict:
         selected = select_state_dict_prefixes(state_dict)
         if not selected:
@@ -238,7 +238,10 @@ def prepare_checkpoint(checkpoint: dict[str, Any]) -> dict[str, Any]:
         "hparams_name",
         "hparams_type",
     }
-    return {key: state_dict if key == "state_dict" else value for key, value in checkpoint.items() if key in keep_keys}
+    for key in list(checkpoint):
+        if key not in keep_keys:
+            del checkpoint[key]
+    return checkpoint
 
 
 def get_file_manifest(upload_dir: Path) -> dict[str, tuple[int, int]]:
