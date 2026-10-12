@@ -258,6 +258,11 @@ def test_select_state_dict_prefixes(mocker: MockerFixture) -> None:
 def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> None:
     checkpoint = {
         "epoch": 1,
+        "pytorch-lightning_version": "2.5.0",
+        "hyper_parameters": {"lr": 0.001},
+        "hparams_name": "kwargs",
+        "hparams_type": "dict",
+        "optimizer_states": [{"step": 10}],
         "state_dict": {
             "model.encoder.layer.0": torch.tensor([1.0]),
             "model.encoder.layer.1": torch.tensor([2.0]),
@@ -273,10 +278,30 @@ def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> N
 
     cleaned = upload_hf.prepare_checkpoint(checkpoint)
 
-    assert list(cleaned) == ["state_dict"]
+    assert set(cleaned) == {
+        "state_dict",
+        "pytorch-lightning_version",
+        "hyper_parameters",
+        "hparams_name",
+        "hparams_type",
+    }
+    assert cleaned["pytorch-lightning_version"] == "2.5.0"
+    assert cleaned["hyper_parameters"] == {"lr": 0.001}
+    assert cleaned["hparams_name"] == "kwargs"
+    assert cleaned["hparams_type"] == "dict"
     assert list(cleaned["state_dict"]) == ["model.encoder_extra.weight"]
     assert len(checkpoint["state_dict"]) == 4
     assert select.call_count == 3
+
+
+def test_prepare_checkpoint_omits_missing_optional_metadata(mocker: MockerFixture) -> None:
+    checkpoint = {"epoch": 1, "state_dict": {"weight": torch.tensor([1.0])}}
+    mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", return_value=True)
+    mocker.patch("aiaccel.torch.apps.upload_hf.select_state_dict_prefixes", return_value=[])
+
+    cleaned = upload_hf.prepare_checkpoint(checkpoint)
+
+    assert list(cleaned) == ["state_dict"]
 
 
 def test_prepare_checkpoint_keeps_metadata_by_default(mocker: MockerFixture) -> None:
