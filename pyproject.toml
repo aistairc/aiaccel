@@ -31,7 +31,7 @@ dependencies = [
     "questionary>=2.0",
     "tensorboard",
     "typing_extensions",
-    "simpleeval"
+    "simpleeval",
 ]
 dynamic = ["version"]
 

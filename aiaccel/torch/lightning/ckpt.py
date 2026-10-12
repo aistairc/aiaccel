@@ -64,7 +64,6 @@ def load_checkpoint(
         else:
             model_path = Path(model_path)
 
-    config_path = model_path / config_name
     task_options = {}
     if strict is not None:
         task_options["strict"] = strict
@@ -72,12 +71,14 @@ def load_checkpoint(
         task_options["weights_only"] = weights_only
     if task_options:
         overwrite_config = oc.merge(overwrite_config if overwrite_config is not None else {}, {"task": task_options})
-    config = prepare_config(config_path, overwrite_config=overwrite_config)
+
+    config = prepare_config(model_path / config_name, overwrite_config=overwrite_config)
+    config.task._target_ += ".load_from_checkpoint"
+
     checkpoint_path = get_checkpoint_path(model_path, config.checkpoint_filename)
 
     logger.info(f"Loading model from {checkpoint_path}...")
 
-    config.task._target_ += ".load_from_checkpoint"
     effective_strict = config.task.get("strict")
     if effective_strict is not None:
         logger.warning("Checkpoint loading with strict=%s.", effective_strict)
@@ -85,6 +86,7 @@ def load_checkpoint(
     with warnings.catch_warnings():
         if effective_strict is False:
             warnings.filterwarnings("ignore", message="Found keys that are", category=UserWarning)
+
         model = instantiate(
             config.task,
             checkpoint_path=checkpoint_path,
