@@ -47,7 +47,7 @@ TODO: Specify the model license.
 {% if base_models %}
 Note that this model is built on the following base models and is also subject to their respective license terms:
 
-{% for model in base_models %}
+{% for model in base_models -%}
 - {% if model.url %}[{{ model.name }}]({{ model.url }}){% else %}{{ model.name }}{% endif %} — {{ model.license or "TODO: Specify the base model license." }}
-{% endfor %}
+{% endfor -%}
 {% endif %}
