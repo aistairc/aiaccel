@@ -52,8 +52,11 @@ def test_stage_readme_creates_model_card(mocker: MockerFixture, tmp_path: Path) 
     assert "This model is released under the **mit** license." in content
     assert "[CLAP](https://huggingface.co/example/base-model) — apache-2.0" in content
     assert "[External Encoder](https://github.com/example/encoder) — mit" in content
-    assert "## Citation" in content
+    assert "You can run inference with the following command:" in content
+    assert "```bash" in content
+    assert "If you use this model in your research, please cite the following work:" in content
     assert "```bibtex" in content
+    assert "is also subject to their respective license terms:" in content
     assert "# test-model" in content
     assert "Test model." in content
     assert (upload_dir / "README.md").read_text(encoding="utf-8") == content
