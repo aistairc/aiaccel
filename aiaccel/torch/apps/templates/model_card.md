@@ -8,7 +8,12 @@
 
 ## Usage
 
-TODO: Add usage instructions.
+You can run inference with the following command:
+
+```bash
+# TODO: Replace with the actual inference command.
+python path/to/inference.py --model path/to/model
+```
 
 ## Training
 
@@ -20,7 +25,7 @@ TODO: Describe known limitations.
 
 ## Citation
 
-TODO: Replace this placeholder with the model's BibTeX citation.
+If you use this model in your research, please cite the following work:
 
 ```bibtex
 @misc{TODO,
@@ -40,7 +45,7 @@ TODO: Specify the model license.
 {% endif %}
 
 {% if base_models %}
-This model is based on the following models:
+Note that this model is built on the following base models and is also subject to their respective license terms:
 
 {% for model in base_models %}
 - {% if model.url %}[{{ model.name }}]({{ model.url }}){% else %}{{ model.name }}{% endif %} — {{ model.license or "TODO: Specify the base model license." }}
