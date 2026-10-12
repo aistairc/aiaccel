@@ -265,7 +265,7 @@ def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> N
             "loss.weight": torch.tensor([4.0]),
         }
     )
-    setattr(state_dict, "_metadata", {"": {"version": 1}})
+    state_dict._metadata = {"": {"version": 1}}  # type: ignore[attr-defined]
     checkpoint = {
         "epoch": 1,
         "pytorch-lightning_version": "2.5.0",
@@ -297,7 +297,7 @@ def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> N
     assert cleaned is checkpoint
     assert cleaned["state_dict"] is state_dict
     assert list(state_dict) == ["model.encoder_extra.weight"]
-    assert getattr(state_dict, "_metadata") == {"": {"version": 1}}
+    assert state_dict._metadata == {"": {"version": 1}}
     assert select.call_count == 3
 
 

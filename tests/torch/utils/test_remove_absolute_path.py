@@ -41,11 +41,11 @@ def test_remove_absolute_path() -> None:
 
 def test_remove_absolute_path_preserves_state_dict_metadata() -> None:
     state_dict = OrderedDict([("model.weight", 1), ("absolute", "/tmp/weights")])
-    setattr(state_dict, "_metadata", {"": {"version": 1}})
+    state_dict._metadata = {"": {"version": 1}}  # type: ignore[attr-defined]
     cleaned, removed = remove_absolute_path({"state_dict": state_dict})
 
     cleaned_state_dict = cleaned["state_dict"]
     assert isinstance(cleaned_state_dict, OrderedDict)
     assert list(cleaned_state_dict) == ["model.weight"]
-    assert getattr(cleaned_state_dict, "_metadata") == {"": {"version": 1}}
+    assert cleaned_state_dict._metadata == {"": {"version": 1}}  # type: ignore[attr-defined]
     assert removed == ["state_dict.absolute"]

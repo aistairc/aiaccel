@@ -24,8 +24,10 @@ def _remove_absolute_path(obj: Any, prefix: str, removed: list[str]) -> Any:
                 continue
 
             cleaned_dict[key] = _remove_absolute_path(value, path, removed)
+
         cleaned = type(obj)(cleaned_dict)
-        if isinstance(obj, OrderedDict) and hasattr(obj, "_metadata"):
+
+        if isinstance(obj, OrderedDict) and hasattr(obj, "_metadata"):  # for state_dict
             cleaned._metadata = obj._metadata
 
     elif isinstance(obj, (list, tuple)):
