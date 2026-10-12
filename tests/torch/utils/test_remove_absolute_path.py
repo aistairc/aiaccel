@@ -1,6 +1,8 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
+from collections import OrderedDict
+
 import pytest
 
 from aiaccel.torch.utils.remove_absolute_path import is_absolute_path, remove_absolute_path
@@ -35,3 +37,15 @@ def test_remove_absolute_path() -> None:
         "items": ["keep"],
     }
     assert removed == ["absolute", "nested.data_dir", "items[1]"]
+
+
+def test_remove_absolute_path_preserves_state_dict_metadata() -> None:
+    state_dict = OrderedDict([("model.weight", 1), ("absolute", "/tmp/weights")])
+    setattr(state_dict, "_metadata", {"": {"version": 1}})
+    cleaned, removed = remove_absolute_path({"state_dict": state_dict})
+
+    cleaned_state_dict = cleaned["state_dict"]
+    assert isinstance(cleaned_state_dict, OrderedDict)
+    assert list(cleaned_state_dict) == ["model.weight"]
+    assert getattr(cleaned_state_dict, "_metadata") == {"": {"version": 1}}
+    assert removed == ["state_dict.absolute"]
