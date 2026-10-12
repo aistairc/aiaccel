@@ -256,6 +256,12 @@ def test_select_state_dict_prefixes(mocker: MockerFixture) -> None:
 
 
 def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> None:
+    state_dict = {
+        "model.encoder.layer.0": torch.tensor([1.0]),
+        "model.encoder.layer.1": torch.tensor([2.0]),
+        "model.encoder_extra.weight": torch.tensor([3.0]),
+        "loss.weight": torch.tensor([4.0]),
+    }
     checkpoint = {
         "epoch": 1,
         "pytorch-lightning_version": "2.5.0",
@@ -263,12 +269,7 @@ def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> N
         "hparams_name": "kwargs",
         "hparams_type": "dict",
         "optimizer_states": [{"step": 10}],
-        "state_dict": {
-            "model.encoder.layer.0": torch.tensor([1.0]),
-            "model.encoder.layer.1": torch.tensor([2.0]),
-            "model.encoder_extra.weight": torch.tensor([3.0]),
-            "loss.weight": torch.tensor([4.0]),
-        },
+        "state_dict": state_dict,
     }
     mocker.patch("aiaccel.torch.apps.upload_hf.ask_confirm", side_effect=[True, True, True])
     select = mocker.patch(
@@ -290,7 +291,7 @@ def test_prepare_checkpoint_repeats_prefix_selection(mocker: MockerFixture) -> N
     assert cleaned["hparams_name"] == "kwargs"
     assert cleaned["hparams_type"] == "dict"
     assert list(cleaned["state_dict"]) == ["model.encoder_extra.weight"]
-    assert len(checkpoint["state_dict"]) == 4  # type: ignore[arg-type]
+    assert len(state_dict) == 4
     assert select.call_count == 3
 
 
