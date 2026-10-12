@@ -155,6 +155,7 @@ def test_stage_readme_regenerates_existing_model_readme(mocker: MockerFixture, t
     assert "New description." in content
     assert "TODO: Specify the model license." in content
     assert "license:" not in content
+    assert "base_model:" not in content
     assert (upload_dir / "README.md").read_text(encoding="utf-8") == content
 
 
