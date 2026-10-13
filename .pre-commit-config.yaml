@@ -34,6 +34,7 @@ repos:
         args:
           - --license-filepath=LICENSE_HEADER
           - --detect-license-in-X-top-lines=16
+          - --allow-past-years
         types_or: [python, makefile]
 
   - repo: local
