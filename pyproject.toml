@@ -22,14 +22,16 @@ dependencies = [
     "omegaconf",
     "hydra-core",
     "huggingface-hub",
+    "jinja2",
     "colorama",
     "lightning>=2.2.1",
     "torch>=2.2.0",
     "h5py",
     "rich",
+    "questionary>=2.0",
     "tensorboard",
     "typing_extensions",
-    "simpleeval"
+    "simpleeval",
 ]
 dynamic = ["version"]
 
