@@ -9,9 +9,12 @@ from aiaccel.config.apps import check_git
 from aiaccel.config.git import PackageGitStatus
 
 
-def test_check_git(mocker: MockerFixture) -> None:
+def test_check_git(tmp_path: Path, mocker: MockerFixture) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("foo: 1\n")
+
     mock_args = mocker.Mock()
-    mock_args.config = str(Path(__file__).parent / "test_check_git.yaml")
+    mock_args.config = str(config_path)
 
     mock_argparse = mocker.patch("argparse.ArgumentParser.parse_known_args")
     mock_argparse.return_value = (mock_args, [])
