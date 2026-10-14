@@ -62,7 +62,7 @@ set -eE -o pipefail
 trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
-exec > >(tee -a {log_filename}) 2>&1
+exec > >(tee {log_filename}) 2>&1
 
 {config.script_prologue}
 
