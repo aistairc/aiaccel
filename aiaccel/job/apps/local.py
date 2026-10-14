@@ -54,7 +54,6 @@ done
     else:
         job = f"{job}"
 
-    log_filename = shlex.quote(str(args.log_filename))
     job_script = f"""\
 #! /bin/bash
 
@@ -62,7 +61,6 @@ set -eE -o pipefail
 trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
-exec > >(tee {log_filename}) 2>&1
 
 {config.script_prologue}
 
@@ -76,7 +74,18 @@ exec > >(tee {log_filename}) 2>&1
     with open(job_filename, "w") as f:
         f.write(job_script)
 
-    subprocess.run(["bash", str(job_filename)], check=True)
+    subprocess.run(
+        [
+            "bash",
+            "-o",
+            "pipefail",
+            "-c",
+            'bash "$0" 2>&1 | tee "$1"',
+            str(job_filename),
+            str(args.log_filename),
+        ],
+        check=True,
+    )
 
 
 if __name__ == "__main__":
