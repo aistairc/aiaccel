@@ -48,3 +48,24 @@ def test_config_from_environ(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
 
     with open(tmp_path / "config_path.txt") as f:
         assert Path(f.read().rstrip("\n")) == config_path
+
+
+def test_local_overwrites_existing_log(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    log_path = tmp_path / "test.log"
+    log_path.write_text("previous run\n")
+
+    subprocess.run(cmd + ["cpu", log_path, "--", "echo", "current run"], check=True)
+
+    log_output = log_path.read_text()
+    assert "previous run\n" not in log_output
+    assert "current run\n" in log_output
+
+
+def test_local_fails_when_log_path_is_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    log_path = tmp_path / "test.log"
+    log_path.mkdir()
+
+    with pytest.raises(subprocess.CalledProcessError):
+        subprocess.run(cmd + ["cpu", log_path, "--", "echo", "current run"], check=True)
