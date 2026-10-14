@@ -63,3 +63,17 @@ def test_config_from_environ(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
 
     with open(tmp_path / "config_path.txt") as f:
         assert Path(f.read().rstrip("\n")) == config_path
+
+
+@pytest.mark.parametrize("mode", ["cpu", "gpu"])
+def test_array_log_path_with_spaces(mode: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    log_path = tmp_path / "log dir" / "test log.log"
+
+    subprocess.run(
+        cmd + [mode, "--n_tasks=1", log_path, "--", "echo", "array output"],
+        check=True,
+    )
+
+    task_log_path = log_path.with_suffix(".1.log")
+    assert task_log_path.read_text() == "array output\n"
