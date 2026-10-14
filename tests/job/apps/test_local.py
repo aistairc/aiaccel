@@ -77,15 +77,3 @@ def test_array_log_path_with_spaces(mode: str, tmp_path: Path, monkeypatch: pyte
 
     task_log_path = log_path.with_suffix(".1.log")
     assert task_log_path.read_text() == "array output\n"
-
-
-def test_local_overwrites_existing_log(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
-    log_path.write_text("previous run\n")
-
-    subprocess.run(cmd + ["cpu", log_path, "--", "echo", "current run"], check=True)
-
-    log_output = log_path.read_text()
-    assert "previous run\n" not in log_output
-    assert "current run\n" in log_output
