@@ -105,8 +105,8 @@ class JobApp(ABC):
 
     def prepare_single_job_context(self) -> None:
         """Prepare job context for non-array jobs."""
-        self.job_log_filename = self.args.log_filename.resolve()
-        self.job_status_filename = self.args.log_filename.with_suffix(".out").resolve()
+        self.job_log_filename = shlex.quote(str(self.args.log_filename))
+        self.job_status_filename = self.args.log_filename.with_suffix(".out")
         self.status_filename_list = [self.job_status_filename]
 
     def prepare_cpu_job_context(self) -> None:
@@ -191,7 +191,7 @@ class SchedulerJobApp(JobApp):
         for status_filename in self.status_filename_list:
             status_filename.unlink(missing_ok=True)
 
-        subprocess.run(f"{submit_command} {submit_args} {job_filename}", shell=True, check=True)
+        subprocess.run(f"{submit_command} {submit_args} {shlex.quote(str(job_filename))}", shell=True, check=True)
 
         for status_filename in self.status_filename_list:
             while not status_filename.exists():

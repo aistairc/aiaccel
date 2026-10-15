@@ -3,6 +3,8 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
+import shlex
+
 from aiaccel.job.apps import SchedulerJobApp
 
 
@@ -28,6 +30,7 @@ wait "$!"
 
     def prepare_array_job_context(self) -> None:
         """Prepare Slurm-specific context for array jobs."""
+        log_filename_prefix = shlex.quote(str(self.args.log_filename.with_suffix("")))
         self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$(( SLURM_ARRAY_TASK_ID + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -39,7 +42,7 @@ for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={self.args.n_tasks_per_proc} \\
         {self.job} > \\
-        {self.args.log_filename.with_suffix("")}.${{SLURM_ARRAY_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+        {log_filename_prefix}.${{SLURM_ARRAY_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -48,10 +51,10 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        self.job_log_filename = self.args.log_filename.with_suffix(".%a.log").resolve()
-        self.job_status_filename = self.args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out").resolve()
+        self.job_log_filename = shlex.quote(str(self.args.log_filename.with_suffix(".%a.log")))
+        self.job_status_filename = self.args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out")
         self.status_filename_list = [
-            self.args.log_filename.with_suffix(f".{array_idx + 1}.out").resolve()
+            self.args.log_filename.with_suffix(f".{array_idx + 1}.out")
             for array_idx in range(
                 0,
                 self.args.n_tasks,
@@ -67,8 +70,8 @@ done
 #SBATCH -t {self.args.walltime}
 
 set -eE -o pipefail
-trap 'echo $? > {self.job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {self.job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'echo $? > "{self.job_status_filename}"' ERR EXIT  # at error and exit
+trap 'echo 143 > "{self.job_status_filename}"' TERM  # at termination (by job scheduler)
 
 
 {self.config.script_prologue}

@@ -19,10 +19,6 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.6
         with:
-          manifest-path: pyproject.toml
-          pixi-version: v0.66.0
-          cache: true
-          activate-environment: false
           environments: gh-actions
       - name: Perform ruff
         run: |

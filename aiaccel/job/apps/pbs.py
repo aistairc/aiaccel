@@ -4,6 +4,8 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
+import shlex
+
 from aiaccel.job.apps import SchedulerJobApp
 
 
@@ -15,17 +17,23 @@ class PbsJobApp(SchedulerJobApp):
 
     def build_submit_command(self) -> tuple[str, str]:
         """Build the PBS submission command."""
-        return (
-            self.config.qsub.format(args=self.args),
-            self.config[self.mode].qsub_args.format(args=self.args),
+        job_name = (
+            str(self.config.get("job_name", self.args.log_filename.with_suffix(""))).replace("/", "_").replace(" ", "_")
         )
+        if job_name[:1].isdigit():
+            job_name = f"_{job_name}"
+
+        qsub = self.config.qsub.format(args=self.args, job_name=job_name)
+        qsub_args = self.config[self.mode].qsub_args.format(args=self.args)
+
+        return (qsub, qsub_args)
 
     def prepare_array_job_context(self) -> None:
         """Prepare PBS-specific context for array jobs."""
+        log_filename_prefix = shlex.quote(str(self.args.log_filename.with_suffix("")))
         self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$(( PBS_ARRAY_INDEX + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
-
     if [[ $TASK_INDEX -gt {self.args.n_tasks} ]]; then
         break
     fi
@@ -33,7 +41,7 @@ for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={self.args.n_tasks_per_proc} \\
         {self.job} > \\
-        {self.args.log_filename.with_suffix("")}.${{PBS_ARRAY_INDEX}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+        {log_filename_prefix}.${{PBS_ARRAY_INDEX}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -42,10 +50,10 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        self.job_log_filename = self.args.log_filename.with_suffix(".^array_index^.log").resolve()
-        self.job_status_filename = self.args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out").resolve()
+        self.job_log_filename = shlex.quote(str(self.args.log_filename.with_suffix(".^array_index^.log")))
+        self.job_status_filename = self.args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
         self.status_filename_list = [
-            self.args.log_filename.with_suffix(f".{array_idx + 1}.out").resolve()
+            self.args.log_filename.with_suffix(f".{array_idx + 1}.out")
             for array_idx in range(
                 0,
                 self.args.n_tasks,
@@ -63,8 +71,8 @@ done
 #PBS -o {self.job_log_filename}
 
 set -eE -o pipefail
-trap 'echo $? > {self.job_status_filename}' ERR EXIT  # at error and exit
-trap 'echo 143 > {self.job_status_filename}' TERM  # at termination (by job scheduler)
+trap 'echo $? > "{self.job_status_filename}"' ERR EXIT  # at error and exit
+trap 'echo 143 > "{self.job_status_filename}"' TERM  # at termination (by job scheduler)
 
 if [ -n "$PBS_O_WORKDIR" ] && [ "$PBS_ENVIRONMENT" != "PBS_INTERACTIVE" ]; then
     cd $PBS_O_WORKDIR

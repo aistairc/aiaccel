@@ -1,6 +1,0 @@
-A:
-  - AAA: base
-D:
-  _inherit_: ${E}
-E:
-  EE: ee
