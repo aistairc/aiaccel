@@ -22,14 +22,16 @@ dependencies = [
     "omegaconf",
     "hydra-core",
     "huggingface-hub",
+    "jinja2",
     "colorama",
     "lightning>=2.2.1",
     "torch>=2.2.0",
     "h5py",
     "rich",
+    "questionary>=2.0",
     "tensorboard",
     "typing_extensions",
-    "simpleeval"
+    "simpleeval",
 ]
 dynamic = ["version"]
 
@@ -45,6 +47,7 @@ aiaccel-job = "aiaccel.launcher:main"
 aiaccel-config = "aiaccel.launcher:main"
 aiaccel-torch = "aiaccel.launcher:main"
 aiaccel-hpo = "aiaccel.launcher:main"
+aiaccel-modelbridge = "aiaccel.launcher:main"
 aiaccel-workflow = "aiaccel.launcher:main"
 
 
@@ -84,3 +87,9 @@ section-order = [
 "torch" = ["torch"]
 "torch-third-party" = ["torchaudio", "torchvision", "auraloss", "lightning", "einops.layers"]
 "audio" = ["librosa", "pypesq", "pystoi", "soundfile"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # Optional GPy/paramz emits deprecated assign output warnings; ignore for modelbridge tests.
+    "ignore::DeprecationWarning:paramz.*",
+]
