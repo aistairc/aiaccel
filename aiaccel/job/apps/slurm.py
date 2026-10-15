@@ -30,7 +30,7 @@ wait "$!"
 
     def prepare_array_job_context(self) -> None:
         """Prepare Slurm-specific context for array jobs."""
-        log_filename_prefix = shlex.quote(str(self.args.log_filename.with_suffix("")))
+        log_filename_prefix = shlex.quote(str(self.args.log_filename.with_suffix("").absolute()))
         self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$(( SLURM_ARRAY_TASK_ID + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -51,10 +51,10 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        self.job_log_filename = shlex.quote(str(self.args.log_filename.with_suffix(".%a.log")))
-        self.job_status_filename = self.args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out")
+        self.job_log_filename = shlex.quote(str(self.args.log_filename.with_suffix(".%a.log").absolute()))
+        self.job_status_filename = self.args.log_filename.with_suffix(".${SLURM_ARRAY_TASK_ID}.out").absolute()
         self.status_filename_list = [
-            self.args.log_filename.with_suffix(f".{array_idx + 1}.out")
+            self.args.log_filename.with_suffix(f".{array_idx + 1}.out").absolute()
             for array_idx in range(
                 0,
                 self.args.n_tasks,

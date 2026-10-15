@@ -105,8 +105,8 @@ class JobApp(ABC):
 
     def prepare_single_job_context(self) -> None:
         """Prepare job context for non-array jobs."""
-        self.job_log_filename = shlex.quote(str(self.args.log_filename))
-        self.job_status_filename = self.args.log_filename.with_suffix(".out")
+        self.job_log_filename = shlex.quote(str(self.args.log_filename.absolute()))
+        self.job_status_filename = self.args.log_filename.with_suffix(".out").absolute()
         self.status_filename_list = [self.job_status_filename]
 
     def prepare_cpu_job_context(self) -> None:

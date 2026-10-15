@@ -30,7 +30,7 @@ class PbsJobApp(SchedulerJobApp):
 
     def prepare_array_job_context(self) -> None:
         """Prepare PBS-specific context for array jobs."""
-        log_filename_prefix = shlex.quote(str(self.args.log_filename.with_suffix("")))
+        log_filename_prefix = shlex.quote(str(self.args.log_filename.with_suffix("").absolute()))
         self.job = f"""\
 for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
     TASK_INDEX=$(( PBS_ARRAY_INDEX + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -50,10 +50,10 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        self.job_log_filename = shlex.quote(str(self.args.log_filename.with_suffix(".^array_index^.log")))
-        self.job_status_filename = self.args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out")
+        self.job_log_filename = shlex.quote(str(self.args.log_filename.with_suffix(".^array_index^.log").absolute()))
+        self.job_status_filename = self.args.log_filename.with_suffix(".${PBS_ARRAY_INDEX}.out").absolute()
         self.status_filename_list = [
-            self.args.log_filename.with_suffix(f".{array_idx + 1}.out")
+            self.args.log_filename.with_suffix(f".{array_idx + 1}.out").absolute()
             for array_idx in range(
                 0,
                 self.args.n_tasks,
