@@ -26,6 +26,15 @@ repos:
     hooks:
       - id: yamlfmt
         args: [-formatter, retain_line_breaks=true, eof_newline=true]
+  - repo: local
+    hooks:
+      - id: update-license-header-year
+        name: Update LICENSE_HEADER year
+        entry: python .github/scripts/update_license_header_year.py
+        language: python
+        files: ^LICENSE_HEADER$
+        always_run: true
+        pass_filenames: false
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -35,7 +44,6 @@ repos:
           - --license-filepath=LICENSE_HEADER
           - --detect-license-in-X-top-lines=16
           - --allow-past-years
-          - --use-current-year
         types_or: [python, makefile]
 
   - repo: local
