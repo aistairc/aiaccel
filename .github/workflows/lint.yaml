@@ -35,4 +35,4 @@ jobs:
           pixi run -e gh-actions pre-commit run yamlfmt --all-files
       - name: Check license headers
         run: |
-          pixi run -e gh-actions pre-commit run insert-license --all-files
+          pixi run -e gh-actions pre-commit run insert-license-current-year --all-files
