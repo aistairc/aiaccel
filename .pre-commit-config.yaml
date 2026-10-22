@@ -26,14 +26,14 @@ repos:
     hooks:
       - id: yamlfmt
         args: [-formatter, retain_line_breaks=true, eof_newline=true]
-  - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.5
+  - repo: local
     hooks:
-      - id: insert-license
-        name: "Insert license header"
-        args:
-          - --license-filepath=LICENSE_HEADER
-          - --detect-license-in-X-top-lines=16
+      - id: insert-license-current-year
+        name: Insert license header using current year
+        entry: python .github/scripts/insert_license_current_year.py
+        language: python
+        additional_dependencies:
+          - git+https://github.com/Lucas-C/pre-commit-hooks@v1.5.5
         types_or: [python, makefile]
 
   - repo: local
