@@ -77,8 +77,8 @@ Typical usages:
         oc.save(pathlib2str_config(config), f)
 
     # build study and hparams manager
-    study = instantiate(config.study)
-    params = instantiate(config.params)
+    study = instantiate(config.study, _convert_="object")
+    params = instantiate(config.params, _convert_="object")
 
     # main loop
     futures: dict[Any, tuple[Trial, Path]] = {}
