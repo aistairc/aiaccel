@@ -13,7 +13,7 @@ def main() -> int:
     template = (repo_root / ".license-header.txt").read_text(encoding="utf-8")
 
     if template.count("@YEAR@") != 1:
-        print(f"{template} must contain exactly one @YEAR@")
+        print(f"{repo_root / '.license-header.txt'} must contain exactly one @YEAR@")
         return 1
 
     header = template.replace("@YEAR@", str(date.today().year))
