@@ -160,6 +160,8 @@ def load_config(
     When the user specifies ``_base_``, the specified YAML file is loaded as the base,
     and the original configuration is merged with the base config.
     If the configuration specified in ``_base_`` also contains ``_base_``, the process is handled recursively.
+    If a mapping contains ``_replace_: true``, it replaces the corresponding
+    mapping in the base config instead of being merged with it.
 
     Args:
         config (Path): Path to the configuration
@@ -170,8 +172,17 @@ def load_config(
     Returns:
         merge_user_config (DictConfig): The merged configuration of the base config and the original config
         user_config(DictConfig | ListConfig) : The configuration without ``_base_``
-
     """
+
+    config = _load_config(config_filename, parent_config)
+    config = remove_replace(config)
+    return config
+
+
+def _load_config(
+    config_filename: str | Path,
+    parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
+) -> DictConfig | ListConfig:
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
 
@@ -181,22 +192,59 @@ def load_config(
     if parent_config is None:
         parent_config = {}
 
-    config = oc.merge(oc.load(config_filename), parent_config)
+    config = _merge_config(oc.load(config_filename), oc.create(parent_config))
 
     if isinstance(config, DictConfig) and "_base_" in config:
-        # process _base_
+        # Resolve _base_
         base_paths = config["_base_"]
+
         if not isinstance(base_paths, ListConfig):
             base_paths = [base_paths]
 
         config.pop("_base_")
+
         for base_path in map(Path, base_paths):
             if not base_path.is_absolute():
                 base_path = config_filename.parent / base_path
 
-            config = load_config(base_path, config)
+            config = _load_config(base_path, config)
 
     return config
+
+
+def _merge_config(
+    base: DictConfig | ListConfig,
+    override: DictConfig | ListConfig,
+) -> DictConfig | ListConfig:
+    # Resolve _replace_
+    if isinstance(override, DictConfig) and override.get("_replace_", False):
+        return copy.deepcopy(override)
+
+    if not isinstance(base, DictConfig) or not isinstance(override, DictConfig):
+        return oc.merge(base, override)
+
+    result = copy.deepcopy(base)
+
+    for key in override:
+        if key == "_replace_":
+            continue
+
+        if isinstance(key, (str, int)) and oc.is_interpolation(override, key):
+            result[key] = override._get_node(key)
+            continue
+
+        override_value = override[key]
+
+        if (
+            key in result
+            and isinstance(result[key], (DictConfig, ListConfig))
+            and isinstance(override_value, (DictConfig, ListConfig))
+        ):
+            result[key] = _merge_config(result[key], override_value)
+        else:
+            result[key] = copy.deepcopy(override_value)
+
+    return result
 
 
 def print_config(
@@ -329,5 +377,17 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
         for ii, value in enumerate(config):
             if isinstance(value, Path):
                 config[ii] = str(value)
+
+    return config
+
+
+@apply_recursively
+def remove_replace(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    """Remove ``_replace_`` directives from the configuration."""
+
+    config = copy.deepcopy(config)
+
+    if isinstance(config, DictConfig):
+        config.pop("_replace_", None)
 
     return config
