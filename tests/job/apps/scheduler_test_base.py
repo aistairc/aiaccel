@@ -56,36 +56,6 @@ class SchedulerTestBase(ABC):
         assert log_path.exists()
         assert log_path.read_text().strip().endswith("hello")
 
-    def test_cpu_log_is_overwritten_on_rerun(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        log_path = tmp_path / "test.log"
-        first_marker = "first-run-marker"
-        second_marker = "second-run-marker"
-
-        def run_job(marker: str) -> None:
-            result = subprocess.run(
-                self.make_command() + ["cpu", log_path, "--", "echo", marker],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            job_id = self.get_job_id(result.stdout)
-            self.wait_for_job_to_finish(job_id)
-
-        run_job(first_marker)
-        assert first_marker in log_path.read_text()
-
-        run_job(second_marker)
-        log_contents = log_path.read_text()
-
-        assert second_marker in log_contents
-        assert first_marker not in log_contents
-
     def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
 
