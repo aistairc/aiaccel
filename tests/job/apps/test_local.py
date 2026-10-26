@@ -51,7 +51,7 @@ def test_config_from_environ(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
         assert Path(f.read().rstrip("\n")) == config_path
 
 
-def test_local_existing_log(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_local_log_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     log_path = tmp_path / "test.log"
 
