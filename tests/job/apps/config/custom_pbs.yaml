@@ -3,7 +3,8 @@ _base_: ${resolve_pkg_path:aiaccel.job.apps.config}/pbs.yaml
 
 walltime: "00:10:00"
 
-script_prologue: ""
+script_prologue: |
+  echo ${config_path} | tee config_path.txt
 
 qsub: "qsub -l walltime={args.walltime} -N {job_name}"
 
