@@ -1,2 +1,2 @@
-Copyright (C) @YEAR@ National Institute of Advanced Industrial Science and Technology (AIST)
+Copyright (C) 2026 National Institute of Advanced Industrial Science and Technology (AIST)
 SPDX-License-Identifier: MIT

@@ -1,0 +1,2 @@
+Copyright (C) {{ current_year }} National Institute of Advanced Industrial Science and Technology (AIST)
+SPDX-License-Identifier: MIT
