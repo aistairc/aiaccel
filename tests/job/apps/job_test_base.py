@@ -75,6 +75,8 @@ class JobTestBase:
         assert log_path.exists()
         assert log_path.read_text().strip().endswith("hello")
 
+    # TODO: Add tests for log filenames containing shell metacharacters
+    # and other characters that require escaping.
     def test_cpu_log_filename_with_spaces(
         self,
         tmp_path: Path,
