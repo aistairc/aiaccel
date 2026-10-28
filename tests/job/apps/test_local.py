@@ -32,7 +32,7 @@ class TestLocal(JobTestBase):
             text=True,
         )
 
-        assert result.returncode != 0
+        assert result.returncode == 1
         assert log_path.exists()
         assert "before failure\n" in log_path.read_text()
 
