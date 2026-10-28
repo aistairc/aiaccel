@@ -109,7 +109,7 @@ class TestLocal(JobTestBase):
                 "--n_tasks_per_proc",
                 "1",
                 "--n_procs",
-                "1",
+                "2",
                 log_path,
                 "--",
                 "bash",
@@ -119,6 +119,7 @@ class TestLocal(JobTestBase):
             check=True,
         )
 
-        log_file = tmp_path / "test log.1.log"
-        assert log_file.exists()
-        assert log_file.read_text().strip() == "TASK_INDEX=1"
+        for task_index in [1, 2]:
+            log_file = tmp_path / f"test log.{task_index}.log"
+            assert log_file.exists()
+            assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
