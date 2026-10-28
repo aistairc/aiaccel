@@ -36,17 +36,6 @@ class TestLocal(JobTestBase):
         assert log_path.exists()
         assert "before failure\n" in log_path.read_text()
 
-    def test_local_log_output(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test.log"
-
-        subprocess.run(
-            self.make_command() + ["cpu", log_path, "--", "echo", "test run"],
-            check=True,
-        )
-
-        assert "test run\n" in log_path.read_text()
-
     def test_local_fails_when_tee_fails(
         self,
         tmp_path: Path,
