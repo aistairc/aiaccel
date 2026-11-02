@@ -11,7 +11,7 @@ from multiprocessing import Pool
 from pathlib import Path
 import tempfile
 import time
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 
@@ -421,8 +421,23 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
             "x": (0.0, 10.0),
             "y": (0.0, 10.0),
         }
-        tpe_sampler = optuna.samplers.TPESampler(seed=43)
-        sampler = NelderMeadSampler(search_space=search_space, seed=42, block=False, sub_sampler=tpe_sampler)
+        cwd = Path(__file__).resolve().parent
+        with open(cwd / "mock_ackley_sub_sampler.csv") as f:
+            sub_sampler_params = {int(row["trial"]): row for row in csv.DictReader(f)}
+
+        sub_sampler = Mock(spec=optuna.samplers.BaseSampler)
+
+        def sample_independent(
+            study: optuna.study.Study,
+            trial: optuna.trial.FrozenTrial,
+            param_name: str,
+            param_distribution: optuna.distributions.BaseDistribution,
+        ) -> float:
+            return float(sub_sampler_params[trial.number][param_name])
+
+        sub_sampler.sample_independent.side_effect = sample_independent
+        sampler = NelderMeadSampler(search_space=search_space, seed=42, block=False, sub_sampler=sub_sampler)
+        self.sub_sampler = sub_sampler
 
         self.common_setup(
             search_space=search_space,
@@ -456,6 +471,7 @@ class TestNelderMeadAckleySubSampler(BaseTestNelderMead):
             assert math.isclose(trial.params["x"], float(result["x"]), rel_tol=0.000001)
             assert math.isclose(trial.params["y"], float(result["y"]), rel_tol=0.000001)
             assert math.isclose(trial.values[0], float(result["objective"]), rel_tol=0.000001)
+        assert self.sub_sampler.sample_independent.call_count > 0
 
 
 class TestNelderMeadAckleyInteger(BaseTestNelderMead):
