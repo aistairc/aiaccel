@@ -7,82 +7,119 @@ import subprocess
 
 import pytest
 
-cmd = ["aiaccel-job", "local"]
+from tests.job.apps.job_test_base import JobTestBase
 
 
-@pytest.mark.parametrize(
-    "base_args",
-    [
-        ["cpu"],
-        ["cpu", "--n_tasks=10"],
-        ["gpu"],
-        ["gpu", "--n_tasks=10"],
-    ],
-)
-def test_default(base_args: list[str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
+class TestLocal(JobTestBase):
+    cmd = ["aiaccel-job", "local"]
+    config_test_path = Path(__file__).parent / "config" / "custom_local.yaml"
 
-    subprocess.run(cmd + base_args + [log_path, "--", "sleep", "0"], check=True)
+    def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / "test.log"
 
+        result = subprocess.run(
+            self.make_command()
+            + [
+                "cpu",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                "echo before failure; exit 7",
+            ],
+            capture_output=True,
+            text=True,
+        )
 
-def test_config_from_argparse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
+        assert result.returncode == 1
+        assert log_path.exists()
+        assert "before failure\n" in log_path.read_text()
 
-    config_path = Path(__file__).parent / "config" / "custom_local.yaml"
+    def test_local_fails_when_tee_fails(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
 
-    subprocess.run(cmd + ["--config", config_path, "cpu", log_path, "sleep", "0"], check=True)
+        fake_bin = tmp_path / "bin"
+        fake_bin.mkdir()
+        fake_tee = fake_bin / "tee"
+        # Make tee fail deterministically after consuming the job output.
+        fake_tee.write_text("#!/bin/sh\ncat >/dev/null\nexit 1\n")
+        fake_tee.chmod(0o755)
 
-    with open(tmp_path / "config_path.txt") as f:
-        assert Path(f.read().rstrip("\n")) == Path(config_path)
+        # Keep aiaccel-job and other system commands available.
+        current_path = os.environ.get("PATH", "")
+        monkeypatch.setenv("PATH", f"{fake_bin}{os.pathsep}{current_path}")
 
+        log_path = tmp_path / "test.log"
 
-def test_config_from_environ(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
+        # The job succeeds; only tee should make the invocation fail.
+        with pytest.raises(subprocess.CalledProcessError):
+            subprocess.run(
+                self.make_command() + ["cpu", log_path, "--", "echo", "job succeeded"],
+                check=True,
+            )
 
-    config_path = Path(__file__).parent / "config" / "custom_local.yaml"
-    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
+    def test_cpu_array(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / "test_log.log"
 
-    subprocess.run(cmd + ["cpu", log_path, "--", "sleep", "0"], check=True)
-
-    with open(tmp_path / "config_path.txt") as f:
-        assert Path(f.read().rstrip("\n")) == config_path
-
-
-def test_local_log_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
-
-    subprocess.run(cmd + ["cpu", log_path, "--", "echo", "test run"], check=True)
-
-    log_output = log_path.read_text()
-    assert "test run\n" in log_output
-
-
-def test_local_fails_when_tee_fails(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    fake_tee = fake_bin / "tee"
-    # Make tee fail deterministically after consuming the job output.
-    fake_tee.write_text("#!/bin/sh\ncat >/dev/null\nexit 1\n")
-    fake_tee.chmod(0o755)
-
-    # Keep aiaccel-job and other system commands available.
-    current_path = os.environ.get("PATH", "")
-    monkeypatch.setenv("PATH", f"{fake_bin}{os.pathsep}{current_path}")
-
-    log_path = tmp_path / "test.log"
-
-    # The job succeeds; only tee should make the invocation fail.
-    with pytest.raises(subprocess.CalledProcessError):
         subprocess.run(
-            cmd + ["cpu", log_path, "--", "echo", "job succeeded"],
+            self.make_command()
+            + [
+                "cpu",
+                "--n_tasks",
+                "2",
+                "--n_tasks_per_proc",
+                "1",
+                "--n_procs",
+                "1",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                'echo "TASK_INDEX=$TASK_INDEX"',
+            ],
             check=True,
         )
+
+        # Local runs one process for each process slot; it does not create
+        # one scheduler-style log per task index.
+        log_file = tmp_path / "test_log.1.log"
+        assert log_file.exists()
+        assert log_file.read_text().strip() == "TASK_INDEX=1"
+
+    def test_cpu_array_log_filename_with_spaces(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / "test log.log"
+
+        subprocess.run(
+            self.make_command()
+            + [
+                "cpu",
+                "--n_tasks",
+                "2",
+                "--n_tasks_per_proc",
+                "1",
+                "--n_procs",
+                "2",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                'echo "TASK_INDEX=$TASK_INDEX"',
+            ],
+            check=True,
+        )
+
+        for task_index in [1, 2]:
+            log_file = tmp_path / f"test log.{task_index}.log"
+            assert log_file.exists()
+            assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
