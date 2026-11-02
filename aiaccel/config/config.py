@@ -212,37 +212,91 @@ def _load_config(
     return config
 
 
+def _contains_replace(config: DictConfig | ListConfig) -> bool:
+    if isinstance(config, DictConfig):
+        replace_node = config._get_node("_replace_")
+        if replace_node is not None and not replace_node._is_interpolation() and config.get("_replace_", False):
+            return True
+
+        for key in config:
+            node = config._get_node(key)
+            if (
+                isinstance(node, Node)
+                and not node._is_interpolation()
+                and isinstance(node, (DictConfig, ListConfig))
+                and _contains_replace(node)
+            ):
+                return True
+
+    elif isinstance(config, ListConfig):
+        for index in range(len(config)):
+            node = config._get_node(index)
+            if (
+                isinstance(node, Node)
+                and not node._is_interpolation()
+                and isinstance(node, (DictConfig, ListConfig))
+                and _contains_replace(node)
+            ):
+                return True
+
+    return False
+
+
+def _replace_child(
+    config: DictConfig,
+    key: str | int,
+    value: DictConfig | ListConfig,
+) -> None:
+    if key in config:
+        del config[key]
+
+    config[key] = value
+
+
 def _merge_config(
     base: DictConfig | ListConfig,
     override: DictConfig | ListConfig,
 ) -> DictConfig | ListConfig:
-    # Resolve _replace_
+    if not _contains_replace(override):
+        return oc.merge(base, override)
+
     if isinstance(override, DictConfig) and override.get("_replace_", False):
         return copy.deepcopy(override)
 
     if not isinstance(base, DictConfig) or not isinstance(override, DictConfig):
         return oc.merge(base, override)
 
-    result = copy.deepcopy(base)
+    normal_override = copy.deepcopy(override)
+    replace_keys: list[Any] = []
 
     for key in override:
-        if key == "_replace_":
+        node = override._get_node(key)
+
+        if key == "_replace_" or (isinstance(node, Node) and node._is_interpolation()):
             continue
 
-        if isinstance(key, (str, int)) and oc.is_interpolation(override, key):
-            result[key] = override._get_node(key)
-            continue
+        if isinstance(node, (DictConfig, ListConfig)) and _contains_replace(node):
+            replace_keys.append(key)
+            del normal_override[key]
 
-        override_value = override[key]
+    normal_override.pop("_replace_", None)
+    result = oc.merge(base, normal_override)
+    assert isinstance(result, DictConfig)
 
-        if (
-            key in result
-            and isinstance(result[key], (DictConfig, ListConfig))
-            and isinstance(override_value, (DictConfig, ListConfig))
-        ):
-            result[key] = _merge_config(result[key], override_value)
+    for key in replace_keys:
+        override_node = override._get_node(key)
+        base_node = base._get_node(key) if key in base else None
+
+        if isinstance(override_node, DictConfig):
+            child_base = base_node if isinstance(base_node, (DictConfig, ListConfig)) else oc.create({})
+
+            replacement = _merge_config(child_base, override_node)
+        elif isinstance(override_node, ListConfig):
+            replacement = copy.deepcopy(override_node)
         else:
-            result[key] = copy.deepcopy(override_value)
+            continue
+
+        _replace_child(result, key, replacement)
 
     return result
 
@@ -300,22 +354,17 @@ def apply_recursively(
             config = copy.deepcopy(config)
 
             for key in config:
-                if (
-                    isinstance(node_dict := config._get_node(key), Node)
-                    and not node_dict._is_interpolation()
-                    and isinstance(config[key], DictConfig | ListConfig)
-                ):
-                    config[key] = _inner_fn(config[key])
+                node = config._get_node(key)
+                if isinstance(node, (DictConfig, ListConfig)) and not node._is_interpolation():
+                    config[key] = _inner_fn(node)
+
         elif isinstance(config, ListConfig):
             config = copy.deepcopy(config)
 
-            for ii in range(len(config)):
-                if (
-                    isinstance(node_list := config._get_node(ii), Node)
-                    and not node_list._is_interpolation()
-                    and isinstance(config[ii], DictConfig | ListConfig)
-                ):
-                    config[ii] = _inner_fn(config[ii])
+            for index in range(len(config)):
+                node = config._get_node(index)
+                if isinstance(node, (DictConfig, ListConfig)) and not node._is_interpolation():
+                    config[index] = _inner_fn(node)
 
         return config
 
