@@ -4,14 +4,10 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-import os
-from pathlib import Path
 import re
 import shlex
-import subprocess
-import time
 
-from aiaccel.job.apps import prepare_argument_parser
+from aiaccel.job.apps import SchedulerJobApp
 
 
 def _append_notify_option_if_needed(qsub: str, qsub_args: str) -> str:
@@ -24,29 +20,41 @@ def _append_notify_option_if_needed(qsub: str, qsub_args: str) -> str:
     return f"-notify {qsub_args}" if qsub_args else "-notify"
 
 
-def main() -> None:
-    # Load configuration (from the default YAML string)
-    config, parser, sub_parsers = prepare_argument_parser("sge.yaml")
+class SgeJobApp(SchedulerJobApp):
+    """Job application for submitting scripts to an SGE scheduler."""
 
-    args = parser.parse_args()
-    mode = args.mode + "-array" if getattr(args, "n_tasks", None) is not None else args.mode
+    def __init__(self) -> None:
+        super().__init__("sge.yaml")
 
-    # Prepare the job script and arguments
-    job = config[mode].job.format(command=shlex.join(args.command), args=args)
+    def build_submit_command(self) -> tuple[str, str]:
+        """Build the SGE submission command."""
+        job_name = (
+            str(self.config.get("job_name", self.args.log_filename.with_suffix(""))).replace("/", "_").replace(" ", "_")
+        )
+        if job_name[:1].isdigit():
+            job_name = f"_{job_name}"
 
-    if mode in ["cpu-array", "gpu-array"]:
-        log_filename_prefix = shlex.quote(str(args.log_filename.with_suffix("")))
-        job = f"""\
-for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
-    TASK_INDEX=$(( SGE_TASK_ID + {args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+        qsub = self.config.qsub.format(args=self.args, job_name=job_name)
+        qsub_args = self.config[self.mode].qsub_args.format(args=self.args)
+        qsub_args = _append_notify_option_if_needed(qsub, qsub_args)
 
-    if [[ $TASK_INDEX -gt {args.n_tasks} ]]; then
+        return (qsub, qsub_args)
+
+    def prepare_array_job_context(self) -> None:
+        """Prepare SGE-specific context for array jobs."""
+        log_filename_prefix = shlex.quote(str(self.args.log_filename.with_suffix("").absolute()))
+        self.job = f"""\
+for LOCAL_PROC_INDEX in {{1..{self.args.n_procs}}}; do
+    TASK_INDEX=$(( SGE_TASK_ID + {self.args.n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
+
+    if [[ $TASK_INDEX -gt {self.args.n_tasks} ]]; then
         break
     fi
 
     TASK_INDEX=$TASK_INDEX \\
-    TASK_STEPSIZE={args.n_tasks_per_proc} \\
-        {job} > {log_filename_prefix}.${{SGE_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
+    TASK_STEPSIZE={self.args.n_tasks_per_proc} \\
+        {self.job} > \\
+        {log_filename_prefix}.${{SGE_TASK_ID}}-${{LOCAL_PROC_INDEX}}.log 2>&1 &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -55,66 +63,42 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-        job_log_filename = shlex.quote(str(args.log_filename.with_suffix(".$TASK_ID.log")))
-        job_status_filename: Path = args.log_filename.with_suffix(".${SGE_TASK_ID}.out")
+        self.job_log_filename = shlex.quote(str(self.args.log_filename.with_suffix(".$TASK_ID.log").absolute()))
+        self.job_status_filename = self.args.log_filename.with_suffix(".${SGE_TASK_ID}.out").absolute()
+        self.status_filename_list = [
+            self.args.log_filename.with_suffix(f".{array_idx + 1}.out").absolute()
+            for array_idx in range(
+                0,
+                self.args.n_tasks,
+                self.args.n_tasks_per_proc * self.args.n_procs,
+            )
+        ]
 
-        status_filename_list = []
-        for array_idx in range(0, args.n_tasks, args.n_tasks_per_proc * args.n_procs):
-            status_filename_list.append(args.log_filename.with_suffix(f".{array_idx + 1}.out"))
-    else:
-        job_log_filename = shlex.quote(str(args.log_filename))
-        job_status_filename = args.log_filename.with_suffix(".out")
-
-        status_filename_list = [job_status_filename]
-
-    job_script = f"""\
+    def build_job_script(self) -> str:
+        """Build the SGE job script."""
+        return f"""\
 #! /bin/bash
 
 #$-S /bin/bash
 #$-j y
 #$-cwd
-#$-o {job_log_filename}
+#$-o {self.job_log_filename}
 
 set -eE -o pipefail
-trap 'echo $? > "{job_status_filename}"' ERR EXIT  # at error and exit
-trap 'echo 143 > "{job_status_filename}"' TERM  # at termination (by job scheduler)
-trap 'echo 140 > "{job_status_filename}"' USR2
+trap 'echo $? > "{self.job_status_filename}"' ERR EXIT  # at error and exit
+trap 'echo 143 > "{self.job_status_filename}"' TERM  # at termination (by job scheduler)
+trap 'echo 140 > "{self.job_status_filename}"' USR2
 
-{config.script_prologue}
 
-{job}
+{self.config.script_prologue}
+
+{self.job}
 """
 
-    job_name = str(config.get("job_name", args.log_filename.with_suffix(""))).replace("/", "_").replace(" ", "_")
-    if job_name[:1].isdigit():
-        job_name = f"_{job_name}"
 
-    qsub = config.qsub.format(args=args, job_name=job_name)
-    qsub_args = config[mode].qsub_args.format(args=args)
-    qsub_args = _append_notify_option_if_needed(qsub, qsub_args)
-
-    # Create the job script file, remove old status files, and run the job
-    args.log_filename.parent.mkdir(exist_ok=True, parents=True)
-
-    job_filename: Path = args.log_filename.with_suffix(".sh")
-    with open(job_filename, "w") as f:
-        f.write(job_script)
-
-    for status_filename in status_filename_list:
-        status_filename.unlink(missing_ok=True)
-
-    subprocess.run(f"{qsub} {qsub_args} {shlex.quote(str(job_filename))}", shell=True, check=True)
-
-    for status_filename in status_filename_list:
-        while not status_filename.exists():
-            time.sleep(1.0)
-            if config.get("use_scandir", False):  # Refresh the file system if needed
-                os.scandir(status_filename.parent)
-
-        status = int(status_filename.read_text())
-        if status != 0:
-            raise RuntimeError(f"Job failed with {status} exit code.")
-        status_filename.unlink()
+def main() -> None:
+    """Run the SGE job application entry point."""
+    SgeJobApp().run()
 
 
 if __name__ == "__main__":
