@@ -44,12 +44,12 @@ def main() -> None:
         lt.seed_everything(config.seed + rank, workers=True)
 
     # build trainer
-    trainer: lt.Trainer = instantiate(config.trainer)
+    trainer: lt.Trainer = instantiate(config.trainer, _convert_="object")
 
     # start training
     trainer.fit(
-        model=instantiate(config.task),
-        datamodule=instantiate(config.datamodule),
+        model=instantiate(config.task, _convert_="object"),
+        datamodule=instantiate(config.datamodule, _convert_="object"),
         **config.get("fit_args", {}),
     )
 

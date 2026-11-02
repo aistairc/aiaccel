@@ -91,6 +91,7 @@ def load_checkpoint(
             config.task,
             checkpoint_path=checkpoint_path,
             map_location=device,
+            _convert_="object",
         )
 
     return model, config
