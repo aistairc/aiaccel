@@ -77,3 +77,54 @@ def test_merge_config_replaces_different_types(
     config = _merge_config(base, override)
 
     assert remove_replace(config) == expected
+
+
+@pytest.mark.parametrize(
+    ("base", "override"),
+    [
+        (oc.create({"x": 1}), oc.create({"x": "???"})),
+        (oc.create({"x": "???"}), oc.create({"x": {"a": 1}})),
+        (oc.create({}), oc.create({"x": "???"})),
+        (
+            oc.create({"source": {"a": 1}, "alias": "${source}"}),
+            oc.create({"alias": {"b": 2}}),
+        ),
+    ],
+)
+def test_merge_config_matches_omegaconf_with_special_nodes(
+    base: DictConfig,
+    override: DictConfig,
+) -> None:
+    expected = oc.merge(base, override)
+    actual = _merge_config(base, override)
+
+    assert oc.to_container(actual, resolve=False) == oc.to_container(expected, resolve=False)
+
+
+def test_merge_config_preserves_missing_value_semantics_with_replace() -> None:
+    base = oc.create({"x": 1, "model": {"name": "base", "optimizer": "sgd"}})
+    override = oc.create({"x": "???", "model": {"_replace_": True, "name": "override"}})
+
+    actual = remove_replace(_merge_config(base, override))
+
+    assert actual == {"x": 1, "model": {"name": "override"}}
+
+
+def test_merge_config_preserves_base_interpolation_with_replace() -> None:
+    base = oc.create(
+        {
+            "source": {"a": 1},
+            "alias": "${source}",
+            "model": {"name": "base", "optimizer": "sgd"},
+        }
+    )
+    override = oc.create({"alias": {"b": 2}, "model": {"_replace_": True, "name": "override", "x": "???"}})
+    expected = {
+        "source": {"a": 1},
+        "alias": {"a": 1, "b": 2},
+        "model": {"name": "override", "x": "???"},
+    }
+
+    actual = remove_replace(_merge_config(base, override))
+
+    assert oc.to_container(actual, resolve=False) == expected
