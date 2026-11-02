@@ -244,7 +244,7 @@ def _contains_replace(config: DictConfig | ListConfig) -> bool:
 
 def _replace_child(
     config: DictConfig,
-    key: str | int,
+    key: Any,
     value: DictConfig | ListConfig,
 ) -> None:
     if key in config:
