@@ -164,3 +164,12 @@ def test_merge_config_preserves_interpolated_base_with_nested_replace() -> None:
     actual = remove_replace(_merge_config(base, override))
 
     assert oc.to_container(actual, resolve=False) == expected
+
+
+def test_merge_config_does_not_resolve_replaced_base_interpolation() -> None:
+    base = oc.create({"alias": "${missing}"})
+    override = oc.create({"alias": {"_replace_": True, "value": 1}})
+
+    actual = remove_replace(_merge_config(base, override))
+
+    assert actual == {"alias": {"value": 1}}
