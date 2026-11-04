@@ -242,17 +242,6 @@ def _contains_replace(config: DictConfig | ListConfig) -> bool:
     return False
 
 
-def _replace_child(
-    config: DictConfig,
-    key: Any,
-    value: DictConfig | ListConfig,
-) -> None:
-    if key in config:
-        del config[key]
-
-    config[key] = value
-
-
 def _split_replace_nodes(
     override: DictConfig,
 ) -> tuple[DictConfig, list[Any]]:
@@ -319,7 +308,11 @@ def _merge_config(
         assert isinstance(override_node, (DictConfig, ListConfig))
 
         replacement = _merge_replace_node(base, key, override_node)
-        _replace_child(result, key, replacement)
+
+        if key in result:
+            del result[key]
+
+        result[key] = replacement
 
     return result
 
