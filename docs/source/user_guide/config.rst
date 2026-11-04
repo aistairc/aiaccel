@@ -125,6 +125,10 @@ section from scratch. The directive remains active while recursive and multiple 
 are processed, and is removed from the configuration returned by
 :func:`~aiaccel.config.load_config`.
 
+``_replace_`` should be specified as a YAML boolean. Use ``true`` to replace the
+corresponding mapping and ``false`` to perform the normal merge. Other value types and
+interpolations are not supported, and their behavior is not guaranteed.
+
 Example configuration:
 
 .. code-block:: yaml
