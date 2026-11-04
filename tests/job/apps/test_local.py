@@ -1,6 +1,7 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
+import os
 from pathlib import Path
 import subprocess
 
@@ -77,3 +78,40 @@ def test_array_log_path_with_spaces(mode: str, tmp_path: Path, monkeypatch: pyte
 
     task_log_path = log_path.with_suffix(".1.log")
     assert task_log_path.read_text() == "array output\n"
+
+
+def test_local_log_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    log_path = tmp_path / "test.log"
+
+    subprocess.run(cmd + ["cpu", log_path, "--", "echo", "test run"], check=True)
+
+    log_output = log_path.read_text()
+    assert "test run\n" in log_output
+
+
+def test_local_fails_when_tee_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_tee = fake_bin / "tee"
+    # Make tee fail deterministically after consuming the job output.
+    fake_tee.write_text("#!/bin/sh\ncat >/dev/null\nexit 1\n")
+    fake_tee.chmod(0o755)
+
+    # Keep aiaccel-job and other system commands available.
+    current_path = os.environ.get("PATH", "")
+    monkeypatch.setenv("PATH", f"{fake_bin}{os.pathsep}{current_path}")
+
+    log_path = tmp_path / "test.log"
+
+    # The job succeeds; only tee should make the invocation fail.
+    with pytest.raises(subprocess.CalledProcessError):
+        subprocess.run(
+            cmd + ["cpu", log_path, "--", "echo", "job succeeded"],
+            check=True,
+        )
