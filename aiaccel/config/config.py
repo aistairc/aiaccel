@@ -253,19 +253,9 @@ def _replace_child(
     config[key] = value
 
 
-def _merge_config(
-    base: DictConfig | ListConfig,
-    override: DictConfig | ListConfig,
-) -> DictConfig | ListConfig:
-    if not _contains_replace(override):
-        return oc.merge(base, override)
-
-    if isinstance(override, DictConfig) and override.get("_replace_", False):
-        return copy.deepcopy(override)
-
-    if not isinstance(base, DictConfig) or not isinstance(override, DictConfig):
-        return oc.merge(base, override)
-
+def _split_replace_nodes(
+    override: DictConfig,
+) -> tuple[DictConfig, list[Any]]:
     normal_override = copy.deepcopy(override)
     replace_keys: list[Any] = []
 
@@ -280,22 +270,55 @@ def _merge_config(
             del normal_override[key]
 
     normal_override.pop("_replace_", None)
+    return normal_override, replace_keys
+
+
+def _merge_replace_node(
+    base: DictConfig,
+    key: Any,
+    override_node: DictConfig | ListConfig,
+) -> DictConfig | ListConfig:
+    if isinstance(override_node, ListConfig):
+        return copy.deepcopy(override_node)
+
+    if override_node.get("_replace_", False):
+        return copy.deepcopy(override_node)
+
+    base_node = base._get_node(key) if key in base else None
+
+    if isinstance(base_node, (DictConfig, ListConfig)):
+        child_base = base_node
+    elif isinstance(base_node, Node) and base_node._is_interpolation():
+        resolved_base = base[key]
+        child_base = resolved_base if isinstance(resolved_base, (DictConfig, ListConfig)) else oc.create({})
+    else:
+        child_base = oc.create({})
+
+    return _merge_config(child_base, override_node)
+
+
+def _merge_config(
+    base: DictConfig | ListConfig,
+    override: DictConfig | ListConfig,
+) -> DictConfig | ListConfig:
+    if not _contains_replace(override):
+        return oc.merge(base, override)
+
+    if isinstance(override, DictConfig) and override.get("_replace_", False):
+        return copy.deepcopy(override)
+
+    if not isinstance(base, DictConfig) or not isinstance(override, DictConfig):
+        return oc.merge(base, override)
+
+    normal_override, replace_keys = _split_replace_nodes(override)
     result = oc.merge(base, normal_override)
     assert isinstance(result, DictConfig)
 
     for key in replace_keys:
         override_node = override._get_node(key)
-        base_node = base._get_node(key) if key in base else None
+        assert isinstance(override_node, (DictConfig, ListConfig))
 
-        if isinstance(override_node, DictConfig):
-            child_base = base_node if isinstance(base_node, (DictConfig, ListConfig)) else oc.create({})
-
-            replacement = _merge_config(child_base, override_node)
-        elif isinstance(override_node, ListConfig):
-            replacement = copy.deepcopy(override_node)
-        else:
-            continue
-
+        replacement = _merge_replace_node(base, key, override_node)
         _replace_child(result, key, replacement)
 
     return result
