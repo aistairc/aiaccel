@@ -26,7 +26,11 @@ def test_apply_recursively_visits_nested_containers_and_preserves_interpolations
         }
     )
 
+    original = oc.to_container(config, resolve=False)
+
     result = mark_processed(config)
+
+    assert oc.to_container(config, resolve=False) == original
 
     assert isinstance(result, DictConfig)
     assert result["branch"]["_processed"] is True
