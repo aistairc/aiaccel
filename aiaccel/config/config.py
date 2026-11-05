@@ -246,11 +246,10 @@ def apply_recursively(
 
     @wraps(func)
     def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+        config = copy.deepcopy(config)
         config = func(config)
 
         if isinstance(config, DictConfig):
-            config = copy.deepcopy(config)
-
             for key in config:
                 if (
                     isinstance(node_dict := config._get_node(key), Node)
@@ -259,8 +258,6 @@ def apply_recursively(
                 ):
                     config[key] = _inner_fn(config[key])
         elif isinstance(config, ListConfig):
-            config = copy.deepcopy(config)
-
             for ii in range(len(config)):
                 if (
                     isinstance(node_list := config._get_node(ii), Node)
