@@ -31,7 +31,6 @@ def main() -> None:
 
     if mode in ["cpu-array", "gpu-array"]:
         n_tasks_per_proc = ceil(args.n_tasks / args.n_procs)
-        array_log_filename = shlex.quote(str(args.log_filename.with_suffix("")))
         job = f"""\
 for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
     TASK_INDEX=$(( 1 + {n_tasks_per_proc} * (LOCAL_PROC_INDEX - 1) ))
@@ -42,7 +41,7 @@ for LOCAL_PROC_INDEX in {{1..{args.n_procs}}}; do
 
     TASK_INDEX=$TASK_INDEX \\
     TASK_STEPSIZE={n_tasks_per_proc} \\
-        {job} 2>&1 | tee {array_log_filename}.${{LOCAL_PROC_INDEX}}.log &
+        {job} 2>&1 | tee {args.log_filename.with_suffix("")}.${{LOCAL_PROC_INDEX}}.log &
 
     pids[$LOCAL_PROC_INDEX]=$!
 done
@@ -51,9 +50,6 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-    else:
-        job = f"{job}"
-
     job_script = f"""\
 #! /bin/bash
 
@@ -61,6 +57,7 @@ set -eE -o pipefail
 trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
+
 
 {config.script_prologue}
 

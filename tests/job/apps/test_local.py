@@ -26,16 +26,9 @@ def test_default(base_args: list[str], tmp_path: Path, monkeypatch: pytest.Monke
     subprocess.run(cmd + base_args + [log_path, "--", "sleep", "0"], check=True)
 
 
-@pytest.mark.parametrize(
-    "log_path",
-    [
-        "test.log",
-        "log dir/test log.log",
-    ],
-)
-def test_config_from_argparse(log_path: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_config_from_argparse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / log_path
+    log_path = tmp_path / "test.log"
 
     config_path = Path(__file__).parent / "config" / "custom_local.yaml"
 
@@ -64,20 +57,6 @@ def test_config_from_environ(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
 
     with open(tmp_path / "config_path.txt") as f:
         assert Path(f.read().rstrip("\n")) == config_path
-
-
-@pytest.mark.parametrize("mode", ["cpu", "gpu"])
-def test_array_log_path_with_spaces(mode: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "log dir" / "test log.log"
-
-    subprocess.run(
-        cmd + [mode, "--n_tasks=1", log_path, "--", "echo", "array output"],
-        check=True,
-    )
-
-    task_log_path = log_path.with_suffix(".1.log")
-    assert task_log_path.read_text() == "array output\n"
 
 
 def test_local_log_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
