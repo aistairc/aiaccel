@@ -50,9 +50,6 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-    else:
-        job = f"{job} 2>&1 | tee {args.log_filename}"
-
     job_script = f"""\
 #! /bin/bash
 
@@ -74,7 +71,18 @@ trap 'kill 0' INT
     with open(job_filename, "w") as f:
         f.write(job_script)
 
-    subprocess.run(f"bash {job_filename}", shell=True, check=True)
+    subprocess.run(
+        [
+            "bash",
+            "-o",
+            "pipefail",
+            "-c",
+            'bash "$0" 2>&1 | tee "$1"',
+            str(job_filename),
+            str(args.log_filename),
+        ],
+        check=True,
+    )
 
 
 if __name__ == "__main__":
