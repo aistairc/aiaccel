@@ -1,7 +1,7 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from typing import Any
+from typing import Any, cast
 
 from collections.abc import Callable
 import copy
@@ -246,27 +246,16 @@ def apply_recursively(
 
     @wraps(func)
     def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+        config = copy.deepcopy(config)
         config = func(config)
 
         if isinstance(config, DictConfig):
-            config = copy.deepcopy(config)
-
             for key in config:
-                if (
-                    isinstance(node_dict := config._get_node(key), Node)
-                    and not node_dict._is_interpolation()
-                    and isinstance(config[key], DictConfig | ListConfig)
-                ):
+                if not oc.is_interpolation(config, cast(Any, key)) and isinstance(config[key], DictConfig | ListConfig):
                     config[key] = _inner_fn(config[key])
         elif isinstance(config, ListConfig):
-            config = copy.deepcopy(config)
-
             for ii in range(len(config)):
-                if (
-                    isinstance(node_list := config._get_node(ii), Node)
-                    and not node_list._is_interpolation()
-                    and isinstance(config[ii], DictConfig | ListConfig)
-                ):
+                if not oc.is_interpolation(config, ii) and isinstance(config[ii], DictConfig | ListConfig):
                     config[ii] = _inner_fn(config[ii])
 
         return config
