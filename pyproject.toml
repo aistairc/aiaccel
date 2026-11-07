@@ -35,6 +35,11 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+pq = [
+    "dilithium-py>=1.0.1",
+]
+
 [tool.hatch.version]
 source = "vcs"
 
