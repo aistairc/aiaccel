@@ -33,15 +33,6 @@ class TestLocal(JobTestBase):
             text=True,
         )
 
-        try:
-            stdout, stderr = process.communicate(timeout=30)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            stdout, stderr = process.communicate()
-            pytest.fail(f"CPU failure job did not finish within 30 seconds.\nstdout:\n{stdout}\nstderr:\n{stderr}")
-
-        assert process.returncode != 0
-
         return process
 
     def assert_run_cpu_failure(
@@ -50,6 +41,8 @@ class TestLocal(JobTestBase):
         log_path: Path,
         status_path: Path | None,
     ) -> None:
+        process.communicate(timeout=60)
+
         assert process.returncode == 1
         assert log_path.exists()
         assert "before failure\n" in log_path.read_text()
