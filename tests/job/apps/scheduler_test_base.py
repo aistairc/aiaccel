@@ -102,11 +102,15 @@ class SchedulerTestBase(JobTestBase, ABC):
 
         return process
 
-    def assert_run_cpu_cancel_job(self, process: subprocess.Popen[str], status_path: Path | None) -> None:
+    def assert_run_cpu_cancel_job(
+        self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None
+    ) -> None:
         _, stderr = process.communicate(timeout=30)
 
         assert process.returncode == 1
         assert f"Job failed with {self.cancel_status} exit code." in stderr
+
+        assert log_path.exists()
 
         assert status_path is not None
         assert status_path.exists()
