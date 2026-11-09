@@ -51,11 +51,11 @@ class SchedulerTestBase(JobTestBase, ABC):
         return process
 
     def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None) -> None:
-        _, cpu_failure_stderr = process.communicate(timeout=60)
-
         assert process.stdout is not None
         job_id = self.get_job_id(process.stdout.readline())
         self.wait_for_job_to_finish(job_id)
+
+        _, cpu_failure_stderr = process.communicate(timeout=60)
 
         assert process.returncode == 1
         assert cpu_failure_stderr is not None
