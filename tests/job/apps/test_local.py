@@ -126,33 +126,7 @@ class TestLocal(JobTestBase):
         assert log_file.exists()
         assert log_file.read_text().strip() == "TASK_INDEX=1"
 
-    def test_cpu_array_log_filename_with_spaces(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test log.log"
-
-        subprocess.run(
-            self.make_command()
-            + [
-                "cpu",
-                "--n_tasks",
-                "2",
-                "--n_tasks_per_proc",
-                "1",
-                "--n_procs",
-                "2",
-                log_path,
-                "--",
-                "bash",
-                "-c",
-                'echo "TASK_INDEX=$TASK_INDEX"',
-            ],
-            check=True,
-        )
-
+    def assert_cpu_array_log_filename_with_spaces(self, tmp_path: Path) -> None:
         for task_index in [1, 2]:
             log_file = tmp_path / f"test log.{task_index}.log"
             assert log_file.exists()
