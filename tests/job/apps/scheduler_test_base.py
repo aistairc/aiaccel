@@ -68,27 +68,6 @@ class SchedulerTestBase(JobTestBase, ABC):
         assert status_path.exists()
         assert status_path.read_text().strip() == "7"
 
-    def test_cpu_cancel_job(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        log_path = tmp_path / "test.log"
-        status_path = tmp_path / "test.out"
-        ready_path = tmp_path / "ready"
-
-        process = self.run_cpu_cancel_job(log_path, ready_path)
-
-        _, stderr = process.communicate(timeout=30)
-
-        assert process.returncode == 1
-        assert f"Job failed with {self.cancel_status} exit code." in stderr
-
-        assert status_path.exists()
-        assert status_path.read_text().strip() == str(self.cancel_status)
-
     def run_cpu_cancel_job(self, log_path: Path, ready_path: Path) -> subprocess.Popen[str]:
         process = subprocess.Popen(
             self.make_command()
@@ -122,6 +101,16 @@ class SchedulerTestBase(JobTestBase, ABC):
         self.wait_for_job_to_finish(job_id)
 
         return process
+
+    def assert_run_cpu_cancel_job(self, process: subprocess.Popen[str], status_path: Path | None) -> None:
+        _, stderr = process.communicate(timeout=30)
+
+        assert process.returncode == 1
+        assert f"Job failed with {self.cancel_status} exit code." in stderr
+
+        assert status_path is not None
+        assert status_path.exists()
+        assert status_path.read_text().strip() == str(self.cancel_status)
 
     def test_cpu_array(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)

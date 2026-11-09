@@ -109,3 +109,24 @@ class JobTestBase:
 
     def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None) -> None:
         raise NotImplementedError
+
+    def test_cpu_cancel_job(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        log_path = tmp_path / "test.log"
+        status_path = tmp_path / "test.out"
+        ready_path = tmp_path / "ready"
+
+        process = self.run_cpu_cancel_job(log_path, ready_path)
+
+        self.assert_run_cpu_cancel_job(process, status_path)
+
+    def run_cpu_cancel_job(self, log_path: Path, ready_path: Path) -> subprocess.Popen[str]:
+        raise NotImplementedError
+
+    def assert_run_cpu_cancel_job(self, process: subprocess.Popen[str], status_path: Path | None) -> None:
+        raise NotImplementedError
