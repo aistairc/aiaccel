@@ -35,15 +35,11 @@ class TestLocal(JobTestBase):
 
         return process
 
-    def assert_run_cpu_failure(
-        self,
-        process: subprocess.Popen[str],
-        log_path: Path,
-        status_path: Path | None,
-    ) -> None:
+    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None) -> None:
         process.communicate(timeout=60)
 
         assert process.returncode == 1
+
         assert log_path.exists()
         assert "before failure\n" in log_path.read_text()
 
