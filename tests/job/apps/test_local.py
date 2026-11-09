@@ -32,7 +32,16 @@ class TestLocal(JobTestBase):
             stderr=subprocess.PIPE,
             text=True,
         )
-        assert process.wait(timeout=30) == 1
+
+        try:
+            stdout, stderr = process.communicate(timeout=30)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate()
+            pytest.fail(f"CPU failure job did not finish within 30 seconds.\nstdout:\n{stdout}\nstderr:\n{stderr}")
+
+        assert process.returncode != 0
+
         return process
 
     def assert_run_cpu_failure(
