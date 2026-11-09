@@ -130,3 +130,31 @@ class JobTestBase:
         self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None
     ) -> None:
         raise NotImplementedError
+
+    def test_cpu_array(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / "test_log.log"
+
+        subprocess.run(
+            self.make_command()
+            + [
+                "cpu",
+                "--n_tasks",
+                "2",
+                "--n_tasks_per_proc",
+                "1",
+                "--n_procs",
+                "1",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                'echo "TASK_INDEX=$TASK_INDEX"',
+            ],
+            check=True,
+        )
+
+        self.assert_cpu_array(tmp_path)
+
+    def assert_cpu_array(self, tmp_path: Path) -> None:
+        raise NotImplementedError

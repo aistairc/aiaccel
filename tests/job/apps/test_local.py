@@ -119,29 +119,7 @@ class TestLocal(JobTestBase):
                 check=True,
             )
 
-    def test_cpu_array(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test_log.log"
-
-        subprocess.run(
-            self.make_command()
-            + [
-                "cpu",
-                "--n_tasks",
-                "2",
-                "--n_tasks_per_proc",
-                "1",
-                "--n_procs",
-                "1",
-                log_path,
-                "--",
-                "bash",
-                "-c",
-                'echo "TASK_INDEX=$TASK_INDEX"',
-            ],
-            check=True,
-        )
-
+    def assert_cpu_array(self, tmp_path: Path) -> None:
         # Local runs one process for each process slot; it does not create
         # one scheduler-style log per task index.
         log_file = tmp_path / "test_log.1.log"
