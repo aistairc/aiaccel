@@ -42,7 +42,7 @@ class SchedulerTestBase(JobTestBase, ABC):
 
     def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
         process = subprocess.Popen(
-            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "exit 7"],
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "echo before failure; exit 7"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
