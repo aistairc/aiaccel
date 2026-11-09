@@ -92,3 +92,20 @@ class JobTestBase:
 
         assert log_path.exists()
         assert log_path.read_text().strip().endswith("hello")
+
+    def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path, status_path = self.setup_run_cpu_failure(tmp_path)
+
+        process = self.run_cpu_failure_case(log_path)
+
+        self.assert_run_cpu_failure(process, log_path, status_path)
+
+    def setup_run_cpu_failure(self, tmp_path: Path) -> tuple[Path, Path | None]:
+        raise NotImplementedError
+
+    def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
+        raise NotImplementedError
+
+    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None) -> None:
+        raise NotImplementedError

@@ -35,12 +35,12 @@ class SchedulerTestBase(JobTestBase, ABC):
 
         pytest.fail(f"Job {job_id} did not terminate")
 
-    def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-
+    def setup_run_cpu_failure(self, tmp_path: Path) -> tuple[Path, Path]:
         log_path = tmp_path / "test.log"
         status_path = tmp_path / "test.out"
+        return log_path, status_path
 
+    def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
         process = subprocess.Popen(
             self.make_command() + ["cpu", log_path, "--", "bash", "-c", "exit 7"],
             stdout=subprocess.PIPE,
@@ -49,16 +49,22 @@ class SchedulerTestBase(JobTestBase, ABC):
         )
 
         assert process.stdout is not None
-
         job_id = self.get_job_id(process.stdout.readline())
-
-        _, stderr = process.communicate(timeout=60)
-
-        assert process.returncode == 1
-        assert "Job failed with 7 exit code." in stderr
-
         self.wait_for_job_to_finish(job_id)
 
+        return process
+
+    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None) -> None:
+        _, cpu_failure_stderr = process.communicate(timeout=60)
+
+        assert process.returncode == 1
+        assert cpu_failure_stderr is not None
+        assert "Job failed with 7 exit code." in cpu_failure_stderr
+
+        assert log_path.exists()
+        assert "before failure\n" in log_path.read_text()
+
+        assert status_path is not None
         assert status_path.exists()
         assert status_path.read_text().strip() == "7"
 

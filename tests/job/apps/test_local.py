@@ -14,25 +14,34 @@ class TestLocal(JobTestBase):
     cmd = ["aiaccel-job", "local"]
     config_test_path = Path(__file__).parent / "config" / "custom_local.yaml"
 
-    def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test.log"
+    def setup_run_cpu_failure(self, tmp_path: Path) -> tuple[Path, None]:
+        return tmp_path / "test.log", None
 
-        result = subprocess.run(
+    def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
+        process = subprocess.Popen(
             self.make_command()
             + [
                 "cpu",
-                log_path,
+                str(log_path),
                 "--",
                 "bash",
                 "-c",
                 "echo before failure; exit 7",
             ],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
         )
+        assert process.wait(timeout=30) == 1
+        return process
 
-        assert result.returncode == 1
+    def assert_run_cpu_failure(
+        self,
+        process: subprocess.Popen[str],
+        log_path: Path,
+        status_path: Path | None,
+    ) -> None:
+        assert process.returncode == 1
         assert log_path.exists()
         assert "before failure\n" in log_path.read_text()
 
