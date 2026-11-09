@@ -18,9 +18,6 @@ class TestLocal(JobTestBase):
     config_test_path = Path(__file__).parent / "config" / "custom_local.yaml"
     cancel_status = 143
 
-    def setup_run_cpu_failure(self, tmp_path: Path) -> tuple[Path, None]:
-        return tmp_path / "test.log", None
-
     def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
         process = subprocess.Popen(
             self.make_command()
@@ -39,7 +36,7 @@ class TestLocal(JobTestBase):
 
         return process
 
-    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None) -> None:
+    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path) -> None:
         process.communicate(timeout=60)
 
         assert process.returncode == 1
