@@ -37,14 +37,6 @@ def test_config_from_argparse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     with open(tmp_path / "config_path.txt") as f:
         assert Path(f.read().rstrip("\n")) == Path(config_path)
 
-    hostname = subprocess.check_output(["hostname"], text=True).strip()
-
-    log_output = f"""\
-Hostname: {hostname}
-{config_path}
-"""
-    assert log_path.read_text() == log_output
-
 
 def test_config_from_environ(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
@@ -63,10 +55,18 @@ def test_local_log_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.chdir(tmp_path)
     log_path = tmp_path / "test.log"
 
-    subprocess.run(cmd + ["cpu", log_path, "--", "echo", "test run"], check=True)
+    config_path = Path(__file__).parent / "config" / "custom_local.yaml"
 
-    log_output = log_path.read_text()
-    assert "test run\n" in log_output
+    subprocess.run(cmd + ["--config", config_path, "cpu", log_path, "--", "echo", "test run"], check=True)
+
+    hostname = subprocess.check_output(["hostname"], text=True).strip()
+
+    log_output = f"""\
+Hostname: {hostname}
+{config_path}
+test run
+"""
+    assert log_path.read_text() == log_output
 
 
 def test_local_fails_when_tee_fails(
