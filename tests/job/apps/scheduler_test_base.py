@@ -186,3 +186,20 @@ class SchedulerTestBase(JobTestBase, ABC):
         assert "Job failed with 1 exit code." in exc_info.value.stderr
         assert status_path.exists()
         assert status_path.read_text().strip() == "1"
+
+    def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
+        subprocess.run(
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "printf 'job output\\n'"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+    def assert_cpu_fails_when_log_write_fails(
+        self, exc_info: pytest.ExceptionInfo[subprocess.CalledProcessError], status_path: Path
+    ) -> None:
+        assert exc_info.value.returncode == 1
+        assert "Job failed with 1 exit code." in exc_info.value.stderr
+        assert status_path.exists()
+        assert status_path.read_text().strip() == "1"

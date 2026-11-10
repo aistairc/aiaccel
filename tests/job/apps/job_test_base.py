@@ -162,3 +162,27 @@ class JobTestBase:
 
     def assert_cpu_array_log_filename_with_spaces(self, tmp_path: Path) -> None:
         raise NotImplementedError
+
+    def test_cpu_fails_when_log_write_fails(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        log_path = tmp_path / "test.log"
+        log_path.symlink_to("/dev/full")
+        status_path = tmp_path / "test.out"
+
+        with pytest.raises(subprocess.CalledProcessError) as exc_info:
+            self.run_cpu_fails_when_log_write_fails(log_path)
+
+        self.assert_cpu_fails_when_log_write_fails(exc_info, status_path)
+
+    def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
+        raise NotImplementedError
+
+    def assert_cpu_fails_when_log_write_fails(
+        self, exc_info: pytest.ExceptionInfo[subprocess.CalledProcessError], status_path: Path
+    ) -> None:
+        raise NotImplementedError

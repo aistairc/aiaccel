@@ -92,33 +92,6 @@ class TestLocal(JobTestBase):
 
         assert log_path.exists()
 
-    def test_local_fails_when_tee_fails(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        fake_bin = tmp_path / "bin"
-        fake_bin.mkdir()
-        fake_tee = fake_bin / "tee"
-        # Make tee fail deterministically after consuming the job output.
-        fake_tee.write_text("#!/bin/sh\ncat >/dev/null\nexit 1\n")
-        fake_tee.chmod(0o755)
-
-        # Keep aiaccel-job and other system commands available.
-        current_path = os.environ.get("PATH", "")
-        monkeypatch.setenv("PATH", f"{fake_bin}{os.pathsep}{current_path}")
-
-        log_path = tmp_path / "test.log"
-
-        # The job succeeds; only tee should make the invocation fail.
-        with pytest.raises(subprocess.CalledProcessError):
-            subprocess.run(
-                self.make_command() + ["cpu", log_path, "--", "echo", "job succeeded"],
-                check=True,
-            )
-
     def run_cpu_array(self, log_path: Path) -> None:
         subprocess.run(
             self.make_command()
@@ -171,3 +144,14 @@ class TestLocal(JobTestBase):
             log_file = tmp_path / f"test log.{task_index}.log"
             assert log_file.exists()
             assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
+
+    def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
+        subprocess.run(
+            self.make_command() + ["cpu", log_path, "--", "echo", "job succeeded"],
+            check=True,
+        )
+
+    def assert_cpu_fails_when_log_write_fails(
+        self, exc_info: pytest.ExceptionInfo[subprocess.CalledProcessError], status_path: Path
+    ) -> None:
+        assert exc_info.value.returncode == 1
