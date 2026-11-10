@@ -94,3 +94,18 @@ def test_local_fails_when_tee_fails(
             cmd + ["cpu", log_path, "--", "echo", "job succeeded"],
             check=True,
         )
+
+
+def test_local_fails_when_job_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    log_path = tmp_path / "test.log"
+
+    # The job fails, while tee can still write the output successfully.
+    with pytest.raises(subprocess.CalledProcessError):
+        subprocess.run(
+            cmd + ["cpu", log_path, "--", "false"],
+            check=True,
+        )
