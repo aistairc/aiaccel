@@ -131,36 +131,30 @@ class JobTestBase:
     ) -> None:
         raise NotImplementedError
 
-    def test_cpu_array(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test_log.log"
-
-        self.run_cpu_array(log_path)
-
-        self.assert_cpu_array(tmp_path)
-
-    def run_cpu_array(self, log_path: Path) -> None:
-        raise NotImplementedError
-
-    def assert_cpu_array(self, tmp_path: Path) -> None:
-        raise NotImplementedError
-
-    def test_cpu_array_log_filename_with_spaces(
+    @pytest.mark.parametrize(
+        "log_name",
+        [
+            pytest.param("test_log.log", id="default_filename"),
+            pytest.param("test log.log", id="filename_with_spaces"),
+        ],
+    )
+    def test_cpu_array(
         self,
+        log_name: str,
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test log.log"
+        log_path = tmp_path / log_name
 
-        self.run_cpu_array_log_filename_with_spaces(log_path)
+        self.run_cpu_array(log_path)
 
-        self.assert_cpu_array_log_filename_with_spaces(tmp_path)
+        self.assert_cpu_array(tmp_path, log_path)
 
-    def run_cpu_array_log_filename_with_spaces(self, log_path: Path) -> None:
+    def run_cpu_array(self, log_path: Path) -> None:
         raise NotImplementedError
 
-    def assert_cpu_array_log_filename_with_spaces(self, tmp_path: Path) -> None:
+    def assert_cpu_array(self, tmp_path: Path, log_path: Path) -> None:
         raise NotImplementedError
 
     def test_cpu_fails_when_log_write_fails(
