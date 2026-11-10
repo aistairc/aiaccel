@@ -54,6 +54,22 @@ sudo env \
   /opt/sge/bin/lx-amd64/qconf \
   -as "$(hostname -f)"
 
+SCHED_CONF="$(mktemp)"
+sudo env \
+  SGE_ROOT=/opt/sge \
+  SGE_CELL=default \
+  /opt/sge/bin/lx-amd64/qconf \
+  -ssconf > "${SCHED_CONF}"
+sed -i \
+  -e 's/^schedule_interval[[:space:]].*/schedule_interval 0:0:1/' \
+  "${SCHED_CONF}"
+sudo env \
+  SGE_ROOT=/opt/sge \
+  SGE_CELL=default \
+  /opt/sge/bin/lx-amd64/qconf \
+  -Msconf "${SCHED_CONF}"
+rm "${SCHED_CONF}"
+
 echo "/opt/sge/bin/lx-amd64" >> "$GITHUB_PATH"
 echo "SGE_ROOT=/opt/sge" >> "$GITHUB_ENV"
 echo "SGE_CELL=default" >> "$GITHUB_ENV"

@@ -8,19 +8,11 @@ import time
 
 import pytest
 
+from tests.job.apps.job_test_base import JobTestBase
 
-class SchedulerTestBase(ABC):
-    cmd: list[str]
-    config_path: Path | None = None
+
+class SchedulerTestBase(JobTestBase, ABC):
     cancel_status: int
-
-    def make_command(self) -> list[str | Path]:
-        command: list[str | Path] = list(self.cmd.copy())
-
-        if self.config_path is not None:
-            command += ["--config", self.config_path]
-
-        return command
 
     @abstractmethod
     def get_job_id(self, stdout: str) -> str:
@@ -43,57 +35,35 @@ class SchedulerTestBase(ABC):
 
         pytest.fail(f"Job {job_id} did not terminate")
 
-    def test_cpu(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        log_path = tmp_path / "test.log"
-
-        subprocess.run(
-            self.make_command() + ["cpu", log_path, "--", "echo", "hello"],
-            check=True,
-        )
-
-        assert log_path.exists()
-        assert log_path.read_text().strip().endswith("hello")
-
-    def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        log_path = tmp_path / "test.log"
-        status_path = tmp_path / "test.out"
-
+    def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
         process = subprocess.Popen(
-            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "exit 7"],
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "echo before failure; exit 7"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
         )
 
+        return process
+
+    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path) -> None:
         assert process.stdout is not None
-
         job_id = self.get_job_id(process.stdout.readline())
-
-        _, stderr = process.communicate(timeout=60)
-
-        assert process.returncode == 1
-        assert "Job failed with 7 exit code." in stderr
-
         self.wait_for_job_to_finish(job_id)
 
+        _, cpu_failure_stderr = process.communicate(timeout=60)
+
+        assert process.returncode == 1
+        assert cpu_failure_stderr is not None
+        assert "Job failed with 7 exit code." in cpu_failure_stderr
+
+        assert log_path.exists()
+        assert "before failure\n" in log_path.read_text()
+
+        assert status_path is not None
         assert status_path.exists()
         assert status_path.read_text().strip() == "7"
 
-    def test_cpu_cancel_job(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        log_path = tmp_path / "test.log"
-        status_path = tmp_path / "test.out"
-        ready_path = tmp_path / "ready"
-
+    def run_cpu_cancel_job(self, log_path: Path, ready_path: Path) -> subprocess.Popen[str]:
         process = subprocess.Popen(
             self.make_command()
             + [
@@ -123,41 +93,25 @@ class SchedulerTestBase(ABC):
             pytest.fail(f"Job {job_id} did not start")
 
         self.cancel_job(job_id)
+        self.wait_for_job_to_finish(job_id)
 
+        return process
+
+    def assert_run_cpu_cancel_job(
+        self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None
+    ) -> None:
         _, stderr = process.communicate(timeout=30)
 
         assert process.returncode == 1
         assert f"Job failed with {self.cancel_status} exit code." in stderr
 
-        self.wait_for_job_to_finish(job_id)
+        assert log_path.exists()
 
+        assert status_path is not None
         assert status_path.exists()
         assert status_path.read_text().strip() == str(self.cancel_status)
 
-    # TODO: Add tests for log filenames containing shell metacharacters
-    # and other characters that require escaping.
-    def test_cpu_log_filename_with_spaces(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        log_path = tmp_path / "test log.log"
-
-        subprocess.run(
-            self.make_command() + ["cpu", log_path, "--", "echo", "hello"],
-            check=True,
-        )
-
-        assert log_path.exists()
-        assert log_path.read_text().strip().endswith("hello")
-
-    def test_cpu_array(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        log_path = tmp_path / "test_log.log"
-
+    def run_cpu_array(self, log_path: Path) -> None:
         subprocess.run(
             self.make_command()
             + [
@@ -177,42 +131,26 @@ class SchedulerTestBase(ABC):
             check=True,
         )
 
+    def assert_cpu_array(self, tmp_path: Path, log_path: Path) -> None:
+        log_prefix = log_path.with_suffix("")
         for task_index in [1, 2]:
-            log_file = tmp_path / f"test_log.{task_index}-1.log"
-
+            log_file = tmp_path / f"{log_prefix.name}.{task_index}-1.log"
             assert log_file.exists()
             assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
 
-    def test_cpu_array_log_filename_with_spaces(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        monkeypatch.chdir(tmp_path)
-
-        log_path = tmp_path / "test log.log"
-
+    def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
         subprocess.run(
-            self.make_command()
-            + [
-                "cpu",
-                "--n_tasks",
-                "2",
-                "--n_tasks_per_proc",
-                "1",
-                "--n_procs",
-                "1",
-                log_path,
-                "--",
-                "bash",
-                "-c",
-                'echo "TASK_INDEX=$TASK_INDEX"',
-            ],
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "printf 'job output\\n'"],
             check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
         )
 
-        for task_index in [1, 2]:
-            log_file = tmp_path / f"test log.{task_index}-1.log"
-
-            assert log_file.exists()
-            assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
+    def assert_cpu_fails_when_log_write_fails(
+        self, exc_info: pytest.ExceptionInfo[subprocess.CalledProcessError], status_path: Path
+    ) -> None:
+        assert exc_info.value.returncode == 1
+        assert "Job failed with 1 exit code." in exc_info.value.stderr
+        assert status_path.exists()
+        assert status_path.read_text().strip() == "1"

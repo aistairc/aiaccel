@@ -3,86 +3,129 @@
 
 import os
 from pathlib import Path
+import shlex
+import signal
 import subprocess
+import time
 
 import pytest
 
-cmd = ["aiaccel-job", "local"]
+from tests.job.apps.job_test_base import JobTestBase
 
 
-@pytest.mark.parametrize(
-    "base_args",
-    [
-        ["cpu"],
-        ["cpu", "--n_tasks=10"],
-        ["gpu"],
-        ["gpu", "--n_tasks=10"],
-    ],
-)
-def test_default(base_args: list[str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
+class TestLocal(JobTestBase):
+    cmd = ["aiaccel-job", "local"]
+    config_test_path = Path(__file__).parent / "config" / "custom_local.yaml"
+    cancel_status = 143
 
-    subprocess.run(cmd + base_args + [log_path, "--", "sleep", "0"], check=True)
+    def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
+        process = subprocess.Popen(
+            self.make_command()
+            + [
+                "cpu",
+                str(log_path),
+                "--",
+                "bash",
+                "-c",
+                "echo before failure; exit 7",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
 
+        return process
 
-def test_config_from_argparse(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
+    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path) -> None:
+        process.communicate(timeout=60)
 
-    config_path = Path(__file__).parent / "config" / "custom_local.yaml"
+        assert process.returncode == 1
 
-    subprocess.run(cmd + ["--config", config_path, "cpu", log_path, "sleep", "0"], check=True)
+        assert log_path.exists()
+        assert "before failure\n" in log_path.read_text()
 
-    with open(tmp_path / "config_path.txt") as f:
-        assert Path(f.read().rstrip("\n")) == Path(config_path)
+    def cancel_job(self, job_id: str) -> None:
+        """Terminate the user program running inside the local job."""
+        os.kill(int(job_id), signal.SIGTERM)
 
+    def run_cpu_cancel_job(
+        self,
+        log_path: Path,
+        ready_path: Path,
+    ) -> subprocess.Popen[str]:
+        pid_path = ready_path.with_name(f"{ready_path.name}.pid")
+        command = f"echo $$ > {shlex.quote(str(pid_path))}; touch {shlex.quote(str(ready_path))}; exec sleep 10"
 
-def test_config_from_environ(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
+        process = subprocess.Popen(
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", command],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
 
-    config_path = Path(__file__).parent / "config" / "custom_local.yaml"
-    monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(config_path))
+        for _ in range(60):
+            if ready_path.exists() and pid_path.exists():
+                break
 
-    subprocess.run(cmd + ["cpu", log_path, "--", "sleep", "0"], check=True)
+            if process.poll() is not None:
+                _, stderr = process.communicate()
+                pytest.fail(f"Local job exited before starting: {stderr}")
 
-    with open(tmp_path / "config_path.txt") as f:
-        assert Path(f.read().rstrip("\n")) == config_path
+            time.sleep(1)
+        else:
+            process.terminate()
+            process.communicate(timeout=30)
+            pytest.fail("Local user program did not start")
 
+        job_id = pid_path.read_text().strip()
+        self.cancel_job(job_id)
+        process.communicate(timeout=30)
 
-def test_local_log_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    log_path = tmp_path / "test.log"
+        return process
 
-    subprocess.run(cmd + ["cpu", log_path, "--", "echo", "test run"], check=True)
+    def assert_run_cpu_cancel_job(
+        self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None
+    ) -> None:
+        process.communicate(timeout=30)
 
-    log_output = log_path.read_text()
-    assert "test run\n" in log_output
+        assert process.returncode == 1
 
+        assert log_path.exists()
 
-def test_local_fails_when_tee_fails(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    fake_tee = fake_bin / "tee"
-    # Make tee fail deterministically after consuming the job output.
-    fake_tee.write_text("#!/bin/sh\ncat >/dev/null\nexit 1\n")
-    fake_tee.chmod(0o755)
-
-    # Keep aiaccel-job and other system commands available.
-    current_path = os.environ.get("PATH", "")
-    monkeypatch.setenv("PATH", f"{fake_bin}{os.pathsep}{current_path}")
-
-    log_path = tmp_path / "test.log"
-
-    # The job succeeds; only tee should make the invocation fail.
-    with pytest.raises(subprocess.CalledProcessError):
+    def run_cpu_array(self, log_path: Path) -> None:
         subprocess.run(
-            cmd + ["cpu", log_path, "--", "echo", "job succeeded"],
+            self.make_command()
+            + [
+                "cpu",
+                "--n_tasks",
+                "2",
+                "--n_tasks_per_proc",
+                "1",
+                "--n_procs",
+                "2",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                'echo "TASK_INDEX=$TASK_INDEX"',
+            ],
             check=True,
         )
+
+    def assert_cpu_array(self, tmp_path: Path, log_path: Path) -> None:
+        log_prefix = log_path.with_suffix("")
+        for process_index in [1, 2]:
+            log_file = tmp_path / f"{log_prefix.name}.{process_index}.log"
+            assert log_file.exists()
+            assert log_file.read_text().strip() == f"TASK_INDEX={process_index}"
+
+    def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
+        subprocess.run(
+            self.make_command() + ["cpu", log_path, "--", "echo", "job succeeded"],
+            check=True,
+        )
+
+    def assert_cpu_fails_when_log_write_fails(
+        self, exc_info: pytest.ExceptionInfo[subprocess.CalledProcessError], status_path: Path
+    ) -> None:
+        assert exc_info.value.returncode == 1
