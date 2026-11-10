@@ -102,7 +102,7 @@ class TestLocal(JobTestBase):
                 "--n_tasks_per_proc",
                 "1",
                 "--n_procs",
-                "1",
+                "2",
                 log_path,
                 "--",
                 "bash",
@@ -113,11 +113,10 @@ class TestLocal(JobTestBase):
         )
 
     def assert_cpu_array(self, tmp_path: Path) -> None:
-        # Local runs one process for each process slot; it does not create
-        # one scheduler-style log per task index.
-        log_file = tmp_path / "test_log.1.log"
-        assert log_file.exists()
-        assert log_file.read_text().strip() == "TASK_INDEX=1"
+        for process_index in [1, 2]:
+            log_file = tmp_path / f"test_log.{process_index}.log"
+            assert log_file.exists()
+            assert log_file.read_text().strip() == f"TASK_INDEX={process_index}"
 
     def run_cpu_array_log_filename_with_spaces(self, log_path: Path) -> None:
         subprocess.run(
