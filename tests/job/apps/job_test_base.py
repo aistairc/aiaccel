@@ -135,26 +135,12 @@ class JobTestBase:
         monkeypatch.chdir(tmp_path)
         log_path = tmp_path / "test_log.log"
 
-        subprocess.run(
-            self.make_command()
-            + [
-                "cpu",
-                "--n_tasks",
-                "2",
-                "--n_tasks_per_proc",
-                "1",
-                "--n_procs",
-                "1",
-                log_path,
-                "--",
-                "bash",
-                "-c",
-                'echo "TASK_INDEX=$TASK_INDEX"',
-            ],
-            check=True,
-        )
+        self.run_cpu_array(log_path)
 
         self.assert_cpu_array(tmp_path)
+
+    def run_cpu_array(self, log_path: Path) -> None:
+        raise NotImplementedError
 
     def assert_cpu_array(self, tmp_path: Path) -> None:
         raise NotImplementedError

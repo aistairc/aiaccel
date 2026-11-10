@@ -119,6 +119,26 @@ class TestLocal(JobTestBase):
                 check=True,
             )
 
+    def run_cpu_array(self, log_path: Path) -> None:
+        subprocess.run(
+            self.make_command()
+            + [
+                "cpu",
+                "--n_tasks",
+                "2",
+                "--n_tasks_per_proc",
+                "1",
+                "--n_procs",
+                "1",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                'echo "TASK_INDEX=$TASK_INDEX"',
+            ],
+            check=True,
+        )
+
     def assert_cpu_array(self, tmp_path: Path) -> None:
         # Local runs one process for each process slot; it does not create
         # one scheduler-style log per task index.

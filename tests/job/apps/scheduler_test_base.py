@@ -111,6 +111,26 @@ class SchedulerTestBase(JobTestBase, ABC):
         assert status_path.exists()
         assert status_path.read_text().strip() == str(self.cancel_status)
 
+    def run_cpu_array(self, log_path: Path) -> None:
+        subprocess.run(
+            self.make_command()
+            + [
+                "cpu",
+                "--n_tasks",
+                "2",
+                "--n_tasks_per_proc",
+                "1",
+                "--n_procs",
+                "1",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                'echo "TASK_INDEX=$TASK_INDEX"',
+            ],
+            check=True,
+        )
+
     def assert_cpu_array(self, tmp_path: Path) -> None:
         for task_index in [1, 2]:
             log_file = tmp_path / f"test_log.{task_index}-1.log"
