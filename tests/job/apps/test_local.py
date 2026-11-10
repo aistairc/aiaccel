@@ -106,6 +106,6 @@ def test_local_fails_when_job_fails(
     # The job fails, while tee can still write the output successfully.
     with pytest.raises(subprocess.CalledProcessError):
         subprocess.run(
-            cmd + ["cpu", log_path, "--", "exit 7"],
+            cmd + ["cpu", log_path, "--", "bash", "-c", "exit 7"],
             check=True,
         )
