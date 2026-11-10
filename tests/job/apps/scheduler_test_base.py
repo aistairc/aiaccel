@@ -162,3 +162,27 @@ class SchedulerTestBase(JobTestBase, ABC):
             log_file = tmp_path / f"test log.{task_index}-1.log"
             assert log_file.exists()
             assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
+
+    def test_cpu_fails_when_scheduler_log_write_fails(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        log_path = tmp_path / "test.log"
+        log_path.symlink_to("/dev/full")
+        status_path = tmp_path / "test.out"
+
+        with pytest.raises(subprocess.CalledProcessError) as exc_info:
+            subprocess.run(
+                self.make_command() + ["cpu", log_path, "--", "bash", "-c", "printf 'job output\\n'"],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+
+        assert "Job failed with 1 exit code." in exc_info.value.stderr
+        assert status_path.exists()
+        assert status_path.read_text().strip() == "1"
