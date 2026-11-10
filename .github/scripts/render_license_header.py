@@ -11,7 +11,7 @@ from jinja2 import Environment, StrictUndefined, TemplateError, nodes
 def main() -> int:
     repo_root = Path(__file__).resolve().parents[2]
     template_path = repo_root / "license-header.template.jinja"
-    output_path = repo_root / ".license-header.txt"
+    output_path = repo_root / "license-header.txt"
 
     try:
         template_text = template_path.read_text(encoding="utf-8")
