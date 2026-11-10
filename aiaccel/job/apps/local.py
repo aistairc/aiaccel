@@ -72,15 +72,9 @@ trap 'kill 0' INT
         f.write(job_script)
 
     subprocess.run(
-        [
-            "bash",
-            "-o",
-            "pipefail",
-            "-c",
-            'bash "$0" 2>&1 | tee "$1"',
-            str(job_filename),
-            str(args.log_filename),
-        ],
+        f"set -o pipefail && bash {str(job_filename)} 2>&1 | tee {str(args.log_filename)}",
+        shell=True,
+        executable="/bin/bash",
         check=True,
     )
 
