@@ -147,4 +147,4 @@ examples/hpo/samplers/coco/*/step_csv
 !.pixi/config.toml
 
 # lisence
-licence_herader.txt
+licence-herader.txt
