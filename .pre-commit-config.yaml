@@ -41,7 +41,7 @@ repos:
     hooks:
       - id: insert-license
         args:
-          - --license-filepath=.license-header.txt
+          - --license-filepath=license-header.txt
           - --detect-license-in-X-top-lines=16
           - --allow-past-years
         types_or: [python, makefile]
