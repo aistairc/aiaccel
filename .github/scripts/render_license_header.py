@@ -10,7 +10,7 @@ from jinja2 import Environment, StrictUndefined, TemplateError, nodes
 
 def main() -> int:
     repo_root = Path(__file__).resolve().parents[2]
-    template_path = repo_root / "templete.txt"
+    template_path = repo_root / "license-header.template.jinja"
     output_path = repo_root / ".license-header.txt"
 
     try:
@@ -19,7 +19,7 @@ def main() -> int:
         parsed_template = environment.parse(template_text)
         year_references = sum(node.name == "current_year" for node in parsed_template.find_all(nodes.Name))
         if year_references != 1:
-            raise ValueError("templete.txt must reference {{ current_year }} exactly once")
+            raise ValueError(f"{template_path} must reference {{ current_year }} exactly once")
 
         header = environment.from_string(template_text).render(current_year=date.today().year)
         output_path.write_text(header, encoding="utf-8")
