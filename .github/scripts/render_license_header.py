@@ -1,7 +1,7 @@
 # Copyright (C) 2026 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from datetime import date
+from datetime import datetime, timezone
 from pathlib import Path
 import sys
 
@@ -21,7 +21,8 @@ def main() -> int:
         if year_references != 1:
             raise ValueError(f"{template_path} must reference {{ current_year }} exactly once")
 
-        header = environment.from_string(template_text).render(current_year=date.today().year)
+        current_year = datetime.now(timezone.utc).year
+        header = environment.from_string(template_text).render(current_year=current_year)
         output_path.write_text(header, encoding="utf-8")
     except (OSError, TemplateError, ValueError) as error:
         print(f"Failed to generate {output_path}: {error}", file=sys.stderr)
