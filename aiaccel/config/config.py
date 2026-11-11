@@ -251,11 +251,18 @@ def apply_recursively(
 
         if isinstance(config, DictConfig):
             for key in config:
-                if not oc.is_interpolation(config, cast(Any, key)) and isinstance(config[key], DictConfig | ListConfig):
+                config_key = cast(Any, key)
+                if oc.is_missing(config, config_key) or oc.is_interpolation(config, config_key):
+                    continue
+
+                if isinstance(config[key], DictConfig | ListConfig):
                     config[key] = _inner_fn(config[key])
         elif isinstance(config, ListConfig):
             for ii in range(len(config)):
-                if not oc.is_interpolation(config, ii) and isinstance(config[ii], DictConfig | ListConfig):
+                if oc.is_missing(config, ii) or oc.is_interpolation(config, ii):
+                    continue
+
+                if isinstance(config[ii], DictConfig | ListConfig):
                     config[ii] = _inner_fn(config[ii])
 
         return config
