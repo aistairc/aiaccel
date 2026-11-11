@@ -172,6 +172,13 @@ def load_config(
         user_config(DictConfig | ListConfig) : The configuration without ``_base_``
 
     """
+    return _load_config(config_filename, parent_config)
+
+
+def _load_config(
+    config_filename: str | Path,
+    parent_config: dict[str, Any] | DictConfig | ListConfig | None = None,
+) -> DictConfig | ListConfig:
     if not isinstance(config_filename, Path):
         config_filename = Path(config_filename)
 
@@ -181,7 +188,7 @@ def load_config(
     if parent_config is None:
         parent_config = {}
 
-    config = oc.merge(oc.load(config_filename), parent_config)
+    config = _merge_config(oc.load(config_filename), parent_config)
 
     if isinstance(config, DictConfig) and "_base_" in config:
         # process _base_
@@ -194,9 +201,16 @@ def load_config(
             if not base_path.is_absolute():
                 base_path = config_filename.parent / base_path
 
-            config = load_config(base_path, config)
+            config = _load_config(base_path, config)
 
     return config
+
+
+def _merge_config(
+    base: DictConfig | ListConfig,
+    override: dict[str, Any] | DictConfig | ListConfig,
+) -> DictConfig | ListConfig:
+    return oc.merge(base, override)
 
 
 def print_config(
