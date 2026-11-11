@@ -90,7 +90,9 @@ Using ``_base_`` to inherit files
 =================================
 
 ``_base_`` lets you inherit from one or more YAML files while overriding their values.
-When multiple files are provided, they are merged in the order given.
+When multiple files are provided, they are processed in the order given. Earlier base
+files take precedence over later base files, and the current configuration takes
+precedence over all base files.
 
 .. code-block:: yaml
     :caption: config_base.yaml
