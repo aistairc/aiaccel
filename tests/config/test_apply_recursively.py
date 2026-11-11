@@ -44,3 +44,29 @@ def test_apply_recursively_visits_nested_containers_and_preserves_interpolations
     assert isinstance(raw_result, dict)
     assert raw_result["branch_alias"] == "${branch}"
     assert raw_result["sequence_alias"] == "${sequence}"
+
+
+def test_apply_recursively_preserves_missing_values() -> None:
+    @apply_recursively
+    def identity(
+        config: DictConfig | ListConfig,
+    ) -> DictConfig | ListConfig:
+        return config
+
+    config = oc.create(
+        {
+            "required": "???",
+            "nested": {
+                "required": "???",
+            },
+        }
+    )
+
+    result = identity(config)
+
+    assert oc.to_container(result, resolve=False) == {
+        "required": "???",
+        "nested": {
+            "required": "???",
+        },
+    }
