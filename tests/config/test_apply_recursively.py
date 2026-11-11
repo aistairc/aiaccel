@@ -59,6 +59,12 @@ def test_apply_recursively_preserves_missing_values() -> None:
             "nested": {
                 "required": "???",
             },
+            "sequence": [
+                "???",
+                {
+                    "required": "???",
+                },
+            ],
         }
     )
 
@@ -69,4 +75,10 @@ def test_apply_recursively_preserves_missing_values() -> None:
         "nested": {
             "required": "???",
         },
+        "sequence": [
+            "???",
+            {
+                "required": "???",
+            },
+        ],
     }
