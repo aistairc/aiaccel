@@ -246,9 +246,9 @@ def apply_recursively(
 
     @wraps(func)
     def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
-        return _innner_fn_recursive(copy.deepcopy(config))
+        return _inner_fn_recursive(copy.deepcopy(config))
 
-    def _innner_fn_recursive(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    def _inner_fn_recursive(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
         config = func(config)
 
         if isinstance(config, DictConfig):
