@@ -1,7 +1,7 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from typing import Any, cast
+from typing import Any
 
 from collections.abc import Callable
 import copy
@@ -250,20 +250,13 @@ def apply_recursively(
         config = func(config)
 
         if isinstance(config, DictConfig):
-            for key in config:
-                config_key = cast(Any, key)
-                if oc.is_missing(config, config_key) or oc.is_interpolation(config, config_key):
-                    continue
-
-                if isinstance(config[key], DictConfig | ListConfig):
-                    config[key] = _inner_fn(config[key])
+            for key, value in config.items_ex(resolve=False):
+                if isinstance(value, DictConfig | ListConfig):
+                    config[key] = _inner_fn(value)
         elif isinstance(config, ListConfig):
-            for ii in range(len(config)):
-                if oc.is_missing(config, ii) or oc.is_interpolation(config, ii):
-                    continue
-
-                if isinstance(config[ii], DictConfig | ListConfig):
-                    config[ii] = _inner_fn(config[ii])
+            for ii, value in enumerate(config._iter_ex(resolve=False)):
+                if isinstance(value, DictConfig | ListConfig):
+                    config[ii] = _inner_fn(value)
 
         return config
 
