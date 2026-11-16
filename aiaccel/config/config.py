@@ -308,8 +308,6 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
 
     """
 
-    config = copy.deepcopy(config)
-
     if isinstance(config, DictConfig):
         for k, v in config.items():
             if isinstance(v, Path):
