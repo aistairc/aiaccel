@@ -244,23 +244,23 @@ def apply_recursively(
         DictConfig | ListConfig: The modified configuration with the function applied.
     """
 
-    @wraps(func)
-    def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
-        return _inner_fn_recursive(copy.deepcopy(config))
-
     def _inner_fn_recursive(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
         config = func(config)
 
         if isinstance(config, DictConfig):
             for key, value in config.items_ex(resolve=False):
                 if isinstance(value, DictConfig | ListConfig):
-                    config[key] = _inner_fn(value)
+                    config[key] = _inner_fn_recursive(value)
         elif isinstance(config, ListConfig):
             for ii, value in enumerate(config._iter_ex(resolve=False)):
                 if isinstance(value, DictConfig | ListConfig):
-                    config[ii] = _inner_fn(value)
+                    config[ii] = _inner_fn_recursive(value)
 
         return config
+
+    @wraps(func)
+    def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+        return _inner_fn_recursive(copy.deepcopy(config))
 
     return _inner_fn
 
