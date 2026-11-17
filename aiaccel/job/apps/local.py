@@ -71,12 +71,19 @@ trap 'kill 0' INT
     with open(job_filename, "w") as f:
         f.write(job_script)
 
-    subprocess.run(
-        f"set -o pipefail && bash {str(job_filename)} 2>&1 | tee {str(args.log_filename)}",
-        shell=True,
-        executable="/bin/bash",
-        check=True,
-    )
+    with open(args.log_filename, "w") as log:
+        process = subprocess.Popen(
+            ["bash", str(job_filename)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        if process.stdout is not None:
+            for line in process.stdout:
+                print(line, end="", flush=True)
+                log.write(line)
+            if process.wait() != 0:
+                raise subprocess.CalledProcessError(process.returncode, process.args)
 
 
 if __name__ == "__main__":
