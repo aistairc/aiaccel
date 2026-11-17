@@ -2,7 +2,8 @@ _base_: ${resolve_pkg_path:aiaccel.job.apps.config}/sge.yaml
 
 walltime: "00:10:00"
 
-script_prologue: ""
+script_prologue: |
+  echo ${config_path} | tee config_path.txt
 
 qsub: "qsub -l h_rt={args.walltime} -N {job_name}"
 
@@ -11,6 +12,14 @@ cpu:
   job: "{command}"
 
 cpu-array:
+  qsub_args: "-t 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
+  job: "{command}"
+
+gpu:
+  qsub_args: ""
+  job: "{command}"
+
+gpu-array:
   qsub_args: "-t 1-{args.n_tasks}:$(( {args.n_tasks_per_proc} * {args.n_procs} ))"
   job: "{command}"
 

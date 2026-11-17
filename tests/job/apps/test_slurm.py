@@ -4,12 +4,13 @@
 from pathlib import Path
 import subprocess
 
-from tests.job.apps.scheduler_test_base import SchedulerTestBase
+from tests.job.apps.base_scheduler_tests import BaseSchedulerTests
 
 
-class TestSlurm(SchedulerTestBase):
+class TestSlurm(BaseSchedulerTests):
     cmd = ["aiaccel-job", "slurm"]
     config_path = Path(__file__).parent / "config" / "custom_slurm.yaml"
+    config_test_path = config_path
     cancel_status = 143
 
     def get_job_id(self, stdout: str) -> str:
