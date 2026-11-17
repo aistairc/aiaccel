@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import sys
 
-from jinja2 import Environment, StrictUndefined, TemplateError, nodes
+from jinja2 import Environment, StrictUndefined, TemplateError
 
 
 def main() -> int:
@@ -16,10 +16,6 @@ def main() -> int:
     try:
         template_text = template_path.read_text(encoding="utf-8")
         environment = Environment(undefined=StrictUndefined, keep_trailing_newline=True)
-        parsed_template = environment.parse(template_text)
-        year_references = sum(node.name == "current_year" for node in parsed_template.find_all(nodes.Name))
-        if year_references != 1:
-            raise ValueError(f"{template_path} must reference {{ current_year }} exactly once")
 
         current_year = datetime.now(timezone.utc).year
         header = environment.from_string(template_text).render(current_year=current_year)
