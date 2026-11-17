@@ -244,32 +244,23 @@ def apply_recursively(
         DictConfig | ListConfig: The modified configuration with the function applied.
     """
 
-    @wraps(func)
-    def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+    def _inner_fn_recursive(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
         config = func(config)
 
         if isinstance(config, DictConfig):
-            config = copy.deepcopy(config)
-
-            for key in config:
-                if (
-                    isinstance(node_dict := config._get_node(key), Node)
-                    and not node_dict._is_interpolation()
-                    and isinstance(config[key], DictConfig | ListConfig)
-                ):
-                    config[key] = _inner_fn(config[key])
+            for key, value in config.items_ex(resolve=False):
+                if isinstance(value, DictConfig | ListConfig):
+                    config[key] = _inner_fn_recursive(value)
         elif isinstance(config, ListConfig):
-            config = copy.deepcopy(config)
-
-            for ii in range(len(config)):
-                if (
-                    isinstance(node_list := config._get_node(ii), Node)
-                    and not node_list._is_interpolation()
-                    and isinstance(config[ii], DictConfig | ListConfig)
-                ):
-                    config[ii] = _inner_fn(config[ii])
+            for ii, value in enumerate(config._iter_ex(resolve=False)):
+                if isinstance(value, DictConfig | ListConfig):
+                    config[ii] = _inner_fn_recursive(value)
 
         return config
+
+    @wraps(func)
+    def _inner_fn(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
+        return _inner_fn_recursive(copy.deepcopy(config))
 
     return _inner_fn
 
@@ -295,7 +286,7 @@ def resolve_inherit(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
         config.pop("_inherit_")
 
         for inherit_config in inherit_configs:
-            inherit_config = resolve_inherit(copy.deepcopy(inherit_config))
+            inherit_config = resolve_inherit(inherit_config)
             if isinstance(inherit_config, DictConfig):
                 config = oc.merge(inherit_config, config)
 
@@ -318,8 +309,6 @@ def pathlib2str_config(config: DictConfig | ListConfig) -> DictConfig | ListConf
         ListConfig | DictConfig: The modified configuration with `Path` objects replaced by strings.
 
     """
-
-    config = copy.deepcopy(config)
 
     if isinstance(config, DictConfig):
         for k, v in config.items():
