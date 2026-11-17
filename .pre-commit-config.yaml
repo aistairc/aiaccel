@@ -26,14 +26,24 @@ repos:
     hooks:
       - id: yamlfmt
         args: [-formatter, retain_line_breaks=true, eof_newline=true]
+  - repo: local
+    hooks:
+      - id: render-license-header
+        name: Render license header from Jinja2 template
+        entry: python .github/scripts/render_license_header.py
+        language: python
+        additional_dependencies: [jinja2==3.1.6]
+        pass_filenames: false
+        always_run: true
+
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
       - id: insert-license
-        name: "Insert license header"
         args:
-          - --license-filepath=LICENSE_HEADER
+          - --license-filepath=.license-header.txt
           - --detect-license-in-X-top-lines=16
+          - --allow-past-years
         types_or: [python, makefile]
 
   - repo: local
