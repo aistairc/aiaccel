@@ -1,7 +1,6 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-import os
 from pathlib import Path
 import subprocess
 
@@ -55,34 +54,30 @@ def test_local_log_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.chdir(tmp_path)
     log_path = tmp_path / "test.log"
 
-    subprocess.run(cmd + ["cpu", log_path, "--", "echo", "test run"], check=True)
+    config_path = Path(__file__).parent / "config" / "custom_local.yaml"
 
-    log_output = log_path.read_text()
-    assert "test run\n" in log_output
+    subprocess.run(cmd + ["--config", config_path, "cpu", log_path, "--", "echo", "test run"], check=True)
+
+    hostname = subprocess.check_output(["hostname"], text=True).strip()
+
+    log_output = f"""\
+Hostname: {hostname}
+{config_path}
+test run
+"""
+    assert log_path.read_text() == log_output
 
 
-def test_local_fails_when_tee_fails(
+def test_local_fails_when_job_fails(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.chdir(tmp_path)
-
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    fake_tee = fake_bin / "tee"
-    # Make tee fail deterministically after consuming the job output.
-    fake_tee.write_text("#!/bin/sh\ncat >/dev/null\nexit 1\n")
-    fake_tee.chmod(0o755)
-
-    # Keep aiaccel-job and other system commands available.
-    current_path = os.environ.get("PATH", "")
-    monkeypatch.setenv("PATH", f"{fake_bin}{os.pathsep}{current_path}")
-
     log_path = tmp_path / "test.log"
 
-    # The job succeeds; only tee should make the invocation fail.
+    # The job fails, while tee can still write the output successfully.
     with pytest.raises(subprocess.CalledProcessError):
         subprocess.run(
-            cmd + ["cpu", log_path, "--", "echo", "job succeeded"],
+            cmd + ["cpu", log_path, "--", "bash", "-c", "exit 7"],
             check=True,
         )
