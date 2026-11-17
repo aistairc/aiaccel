@@ -10,10 +10,10 @@ import time
 
 import pytest
 
-from tests.job.apps.job_test_base import JobTestBase
+from tests.job.apps.base_job_tests import BaseJobTests
 
 
-class TestLocal(JobTestBase):
+class TestLocal(BaseJobTests):
     cmd = ["aiaccel-job", "local"]
     config_test_path = Path(__file__).parent / "config" / "custom_local.yaml"
     cancel_status = 143

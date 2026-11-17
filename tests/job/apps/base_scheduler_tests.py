@@ -8,10 +8,10 @@ import time
 
 import pytest
 
-from tests.job.apps.job_test_base import JobTestBase
+from tests.job.apps.base_job_tests import BaseJobTests
 
 
-class SchedulerTestBase(JobTestBase, ABC):
+class BaseSchedulerTests(BaseJobTests, ABC):
     cancel_status: int
 
     @abstractmethod

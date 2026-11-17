@@ -7,7 +7,7 @@ import subprocess
 import pytest
 
 
-class JobTestBase:
+class BaseJobTests:
     cmd: list[str]
     config_path: Path | None = None
     config_test_path: Path

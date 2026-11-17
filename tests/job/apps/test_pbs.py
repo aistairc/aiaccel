@@ -4,10 +4,10 @@
 from pathlib import Path
 import subprocess
 
-from tests.job.apps.scheduler_test_base import SchedulerTestBase
+from tests.job.apps.base_scheduler_tests import BaseSchedulerTests
 
 
-class TestPBS(SchedulerTestBase):
+class TestPBS(BaseSchedulerTests):
     cmd = ["aiaccel-job", "pbs"]
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
     config_test_path = config_path
