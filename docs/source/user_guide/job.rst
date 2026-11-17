@@ -337,38 +337,91 @@ OpenMPI wrappers.
 Writing Custom Backends
 =======================
 
-If none of the bundled backends match your infrastructure, you can build a new backend
-that mirrors ``aiaccel-job local/pbs/sge/slurm``. The helper
-:func:`~aiaccel.job.apps.prepare_argument_parser` wires the shared CLI options and loads
-your YAML template, so your script only needs to render the ``job`` snippet, emit a
-shell script, and hand it off to the scheduler.
+If none of the bundled backends match your infrastructure, implement a backend as a
+subclass of :class:`~aiaccel.job.apps.JobApp`. For a scheduler-backed backend, use
+:class:`~aiaccel.job.apps.SchedulerJobApp`, which provides the common submission and
+status-file polling workflow.
+
+.. note::
+
+    **Breaking API change:** ``prepare_argument_parser()`` was removed when the job
+    applications were converted to classes. Custom backends that imported this function
+    must be migrated to the class API described below.
+
+A minimal scheduler-backed backend can look like this:
 
 .. code-block:: python
     :caption: custom_backend.py
 
-    import shlex
+    from aiaccel.job.apps import SchedulerJobApp
 
-    from aiaccel.job.apps import prepare_argument_parser
+
+    class CustomJobApp(SchedulerJobApp):
+        def __init__(self) -> None:
+            super().__init__("custom.yaml")
+
+        def build_submit_command(self) -> tuple[str, str]:
+            return (
+                self.config.submit_command.format(args=self.args),
+                self.config[self.mode].submit_args.format(args=self.args),
+            )
+
+        def build_job_script(self) -> str:
+            return f"""\\
+    #!/bin/bash
+    set -eE -o pipefail
+    trap 'echo $? > "{self.job_status_filename}"' ERR EXIT
+
+    {self.config.script_prologue}
+
+    {self.job}
+    """
 
 
     def main() -> None:
-        config, parser, sub_parsers = prepare_argument_parser("custom.yaml")
-        args = parser.parse_args()
-
-        mode = args.mode + "-array" if getattr(args, "n_tasks", None) else args.mode
-        job = config[mode].job.format(command=shlex.join(args.command), args=args)
-
-        # TODO: render a shell script and submit it to your scheduler or execute it
-        # locally.
+        CustomJobApp().run()
 
 
     if __name__ == "__main__":
         main()
 
-From there you can extend the skeleton just like the built-in backends: add scheduler
-commands, implement array loops, or poll status files before returning. Because the CLI
-flags and config semantics stay aligned with ``aiaccel-job``, users only need to switch
-the backend name to run the same payload across different environments.
+In this example, ``custom.yaml`` is expected to define ``submit_command`` and a
+``submit_args`` value for each supported mode. Add scheduler-specific directives,
+log-file handling, and signal traps to ``build_job_script()`` as required by your
+cluster. The default array-job context raises ``NotImplementedError``; override
+``prepare_array_job_context()`` to support array jobs. For a non-scheduler backend,
+subclass ``JobApp`` directly and implement ``launch_job(job_script)`` yourself.
+
+Migrating from ``prepare_argument_parser()``
+--------------------------------------------
+
+The old function returned a config, an argument parser, and subparsers. The class
+initializes the shared parser and exposes the resolved values as attributes:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 35 65
+
+    - - Old function-based code
+      - Class-based code
+    - - ``config``
+      - ``self.config``
+    - - ``args``
+      - ``self.args``
+    - - selected ``mode`` (including ``-array`` selection)
+      - ``self.mode``
+    - - format ``config[mode].job`` with the command and arguments
+      - ``self.build_job()`` is called by ``run()``; the rendered command is available
+        as ``self.job``
+    - - render and submit the script from ``main()``
+      - implement ``build_job_script()`` and ``build_submit_command()``, then call
+        ``CustomJobApp().run()``
+
+``SchedulerJobApp`` implements ``launch_job()`` by submitting the generated script and
+waiting for the status files. A backend that does not use this scheduler workflow must
+implement ``launch_job()`` in its ``JobApp`` subclass. The former parser function also
+returned a subparser object; the class API currently provides the shared CLI modes and
+does not expose a public hook for adding custom command-line options.
 
 *****************
  Further reading
