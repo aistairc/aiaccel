@@ -377,3 +377,25 @@ model:
     config = load_config(config_path, parent_config=parent_config)
 
     assert config == {"model": {"name": "custom"}}
+
+
+def test_replace_missing_in_base(tmp_path: Path) -> None:
+    base_path = tmp_path / "base.yaml"
+    base_path.write_text(
+        """
+model: ${missing}
+""".lstrip()
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """
+_base_: base.yaml
+
+model:
+  _replace_: true
+  name: custom
+""".lstrip()
+    )
+
+    assert load_config(config_path) == {"model": {"name": "custom"}}
