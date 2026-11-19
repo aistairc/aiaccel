@@ -212,7 +212,7 @@ def _load_config(
     return config
 
 
-def _remove_replaced(base: DictConfig, override: DictConfig) -> DictConfig:
+def _remove_replaced_node(base: DictConfig, override: DictConfig) -> DictConfig:
     for key, value in override.items_ex(resolve=False):
         if not isinstance(value, DictConfig):
             continue
@@ -221,7 +221,7 @@ def _remove_replaced(base: DictConfig, override: DictConfig) -> DictConfig:
             if key in base:
                 del base[key]  # Not read base[key]
         elif key in base and isinstance(base_node := base._get_node(key), DictConfig):
-            _remove_replaced(base_node, value)
+            _remove_replaced_node(base_node, value)
     return base
 
 
@@ -230,7 +230,7 @@ def _merge_config_with_replace(
 ) -> DictConfig | ListConfig:
     if isinstance(base, DictConfig) and isinstance(override, DictConfig):
         base = copy.deepcopy(base)
-        base = oc.create({}) if override.get("_replace_", False) is True else _remove_replaced(base, override)
+        base = oc.create({}) if override.get("_replace_", False) is True else _remove_replaced_node(base, override)
 
     return oc.merge(base, override)
 
