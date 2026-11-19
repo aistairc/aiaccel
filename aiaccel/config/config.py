@@ -218,7 +218,8 @@ def _remove_replaced(base: DictConfig, override: DictConfig) -> DictConfig:
             continue
 
         if value.get("_replace_", False) is True:
-            base.pop(key, None)
+            if key in base:
+                del base[key]  # Not read base[key]
         elif key in base and isinstance(base_node := base._get_node(key), DictConfig):
             _remove_replaced(base_node, value)
     return base
