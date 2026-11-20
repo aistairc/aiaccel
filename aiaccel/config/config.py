@@ -218,7 +218,7 @@ def _is_replace(config: DictConfig) -> bool:
         key in config
         and not oc.is_missing(config, key)
         and not oc.is_interpolation(config, key)
-        and config[key] is True
+        and config.get("_replace_", False) is True
     )
 
 
