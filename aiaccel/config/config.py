@@ -402,7 +402,7 @@ def remove_replace(config: DictConfig | ListConfig) -> DictConfig | ListConfig:
 
     config = copy.deepcopy(config)
 
-    if isinstance(config, DictConfig):
-        config.pop("_replace_", None)
+    if isinstance(config, DictConfig) and "_replace_" in config:
+        del config["_replace_"]
 
     return config
