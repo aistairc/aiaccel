@@ -1,7 +1,7 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from typing import Any
+from typing import Any, cast
 
 from collections.abc import Callable
 import copy
@@ -212,24 +212,56 @@ def _load_config(
     return config
 
 
+def _is_replace(config: DictConfig) -> bool:
+    key = "_replace_"
+    return (
+        key in config
+        and not oc.is_missing(config, key)
+        and not oc.is_interpolation(config, key)
+        and config[key] is True
+    )
+
+
+def _contains_replace(config: DictConfig | ListConfig) -> bool:
+    if isinstance(config, DictConfig):
+        if _is_replace(config):
+            return True
+
+        for key in config:
+            node = config._get_node(key)
+            if (
+                isinstance(node, Node)
+                and not node._is_interpolation()
+                and isinstance(node, (DictConfig, ListConfig))
+                and _contains_replace(node)
+            ):
+                return True
+
+    return False
+
+
 def _remove_replaced_node(base: DictConfig, override: DictConfig) -> DictConfig:
+    prepared = copy.deepcopy(base)
     for key, value in override.items_ex(resolve=False):
-        if not isinstance(value, DictConfig):
+        if not isinstance(value, DictConfig) or key not in base:
+            continue
+        if oc.is_interpolation(override, cast(Any, key)):
             continue
 
-        if value.get("_replace_", False) is True:
-            if key in base:
-                del base[key]  # Not read base[key]
-        elif key in base and isinstance(base_node := base._get_node(key), DictConfig):
-            _remove_replaced_node(base_node, value)
-    return base
+        if _is_replace(value):
+            del prepared[key]
+        elif _contains_replace(value) and not oc.is_missing(base, key):
+            base_node = base[key]  # Resolve interpolation
+            if isinstance(base_node, DictConfig):
+                prepared[key] = _remove_replaced_node(base_node, value)
+
+    return prepared
 
 
 def _merge_config_with_replace(
     base: DictConfig | ListConfig, override: DictConfig | ListConfig
 ) -> DictConfig | ListConfig:
     if isinstance(base, DictConfig) and isinstance(override, DictConfig):
-        base = copy.deepcopy(base)
         base = oc.create({}) if override.get("_replace_", False) is True else _remove_replaced_node(base, override)
 
     return oc.merge(base, override)
