@@ -212,19 +212,9 @@ def _load_config(
     return config
 
 
-def _is_replace(config: DictConfig) -> bool:
-    key = "_replace_"
-    return (
-        key in config
-        and not oc.is_missing(config, key)
-        and not oc.is_interpolation(config, key)
-        and config.get("_replace_", False) is True
-    )
-
-
 def _contains_replace(config: DictConfig | ListConfig) -> bool:
     if isinstance(config, DictConfig):
-        if _is_replace(config):
+        if config.get("_replace_", False) is True:
             return True
 
         for key in config:
@@ -248,7 +238,7 @@ def _remove_replaced_node(base: DictConfig, override: DictConfig) -> DictConfig:
         if oc.is_interpolation(override, cast(Any, key)):
             continue
 
-        if _is_replace(value):
+        if value.get("_replace_", False) is True:
             del prepared[key]
         elif _contains_replace(value) and not oc.is_missing(base, key):
             base_node = base[key]  # Resolve interpolation
