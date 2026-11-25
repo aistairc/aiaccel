@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: MIT
 
 from pathlib import Path
-import subprocess
 
 import pytest
 
@@ -20,14 +19,3 @@ class TestLocal(BaseJobTests):
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         pass
-
-    def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
-        subprocess.run(
-            self.make_command() + ["cpu", log_path, "--", "echo", "job succeeded"],
-            check=True,
-        )
-
-    def assert_cpu_fails_when_log_write_fails(
-        self, exc_info: pytest.ExceptionInfo[subprocess.CalledProcessError], status_path: Path
-    ) -> None:
-        assert exc_info.value.returncode == 1

@@ -273,9 +273,12 @@ class BaseJobTests:
         self.assert_cpu_fails_when_log_write_fails(exc_info, status_path)
 
     def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
-        raise NotImplementedError
+        subprocess.run(
+            self.make_command() + ["cpu", log_path, "--", "echo", "job succeeded"],
+            check=True,
+        )
 
     def assert_cpu_fails_when_log_write_fails(
         self, exc_info: pytest.ExceptionInfo[subprocess.CalledProcessError], status_path: Path
     ) -> None:
-        raise NotImplementedError
+        assert exc_info.value.returncode == 1
