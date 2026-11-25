@@ -18,32 +18,6 @@ class TestLocal(BaseJobTests):
     config_test_path = Path(__file__).parent / "config" / "custom_local.yaml"
     cancel_status = 143
 
-    def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
-        process = subprocess.Popen(
-            self.make_command()
-            + [
-                "cpu",
-                str(log_path),
-                "--",
-                "bash",
-                "-c",
-                "echo before failure; exit 7",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-
-        return process
-
-    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path) -> None:
-        process.communicate(timeout=60)
-
-        assert process.returncode == 1
-
-        assert log_path.exists()
-        assert "before failure\n" in log_path.read_text()
-
     def cancel_job(self, job_id: str) -> None:
         """Terminate the user program running inside the local job."""
         os.kill(int(job_id), signal.SIGTERM)

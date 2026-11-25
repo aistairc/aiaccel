@@ -98,15 +98,28 @@ class BaseJobTests:
         log_path = tmp_path / "test.log"
         status_path = tmp_path / "test.out"
 
-        process = self.run_cpu_failure_case(log_path)
+        process = subprocess.Popen(
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "echo before failure; exit 7"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
 
-        self.assert_run_cpu_failure(process, log_path, status_path)
+        self.wait_run_cpu_failure(process)
+        _, cpu_failure_stderr = process.communicate(timeout=60)
 
-    def run_cpu_failure_case(self, log_path: Path) -> subprocess.Popen[str]:
-        raise NotImplementedError
+        assert process.returncode == 1
 
-    def assert_run_cpu_failure(self, process: subprocess.Popen[str], log_path: Path, status_path: Path) -> None:
-        raise NotImplementedError
+        assert log_path.exists()
+        assert "before failure\n" in log_path.read_text()
+
+        self.assert_run_cpu_failure(cpu_failure_stderr, status_path)
+
+    def wait_run_cpu_failure(self, process: subprocess.Popen[str]) -> None:
+        pass
+
+    def assert_run_cpu_failure(self, cpu_failure_stderr: str, status_path: Path) -> None:
+        pass
 
     def test_cpu_cancel_job(
         self,
