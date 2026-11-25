@@ -1,12 +1,8 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-import os
 from pathlib import Path
-import shlex
-import signal
 import subprocess
-import time
 
 import pytest
 
@@ -16,55 +12,14 @@ from tests.job.apps.base_job_tests import BaseJobTests
 class TestLocal(BaseJobTests):
     cmd = ["aiaccel-job", "local"]
     config_test_path = Path(__file__).parent / "config" / "custom_local.yaml"
-    cancel_status = 143
 
-    def cancel_job(self, job_id: str) -> None:
-        """Terminate the user program running inside the local job."""
-        os.kill(int(job_id), signal.SIGTERM)
-
-    def run_cpu_cancel_job(
+    # Skip test_cpu_cancel_job in local
+    def test_cpu_cancel_job(
         self,
-        log_path: Path,
-        ready_path: Path,
-    ) -> subprocess.Popen[str]:
-        pid_path = ready_path.with_name(f"{ready_path.name}.pid")
-        command = f"echo $$ > {shlex.quote(str(pid_path))}; touch {shlex.quote(str(ready_path))}; exec sleep 10"
-
-        process = subprocess.Popen(
-            self.make_command() + ["cpu", log_path, "--", "bash", "-c", command],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-
-        for _ in range(60):
-            if ready_path.exists() and pid_path.exists():
-                break
-
-            if process.poll() is not None:
-                _, stderr = process.communicate()
-                pytest.fail(f"Local job exited before starting: {stderr}")
-
-            time.sleep(1)
-        else:
-            process.terminate()
-            process.communicate(timeout=30)
-            pytest.fail("Local user program did not start")
-
-        job_id = pid_path.read_text().strip()
-        self.cancel_job(job_id)
-        process.communicate(timeout=30)
-
-        return process
-
-    def assert_run_cpu_cancel_job(
-        self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        process.communicate(timeout=30)
-
-        assert process.returncode == 1
-
-        assert log_path.exists()
+        pass
 
     def run_cpu_array(self, log_path: Path) -> None:
         subprocess.run(

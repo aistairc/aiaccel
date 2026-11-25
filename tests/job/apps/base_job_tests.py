@@ -1,8 +1,12 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
+import os
 from pathlib import Path
+import shlex
+import signal
 import subprocess
+import time
 
 import pytest
 
@@ -19,6 +23,10 @@ class BaseJobTests:
             command += ["--config", self.config_path]
 
         return command
+
+    def kill_job(self, job_id: str) -> None:
+        """Terminate the user program running inside the local job."""
+        os.kill(int(job_id), signal.SIGTERM)
 
     @pytest.mark.parametrize(
         "base_args",
@@ -120,6 +128,63 @@ class BaseJobTests:
 
     def assert_run_cpu_failure(self, cpu_failure_stderr: str, status_path: Path) -> None:
         pass
+
+    def test_cpu_kill_job(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        log_path = tmp_path / "test.log"
+        status_path = tmp_path / "test.out"
+        ready_path = tmp_path / "ready"
+
+        process = self.run_cpu_kill_job(log_path, ready_path)
+
+        self.assert_run_cpu_kill_job(process, log_path, status_path)
+
+    def run_cpu_kill_job(
+        self,
+        log_path: Path,
+        ready_path: Path,
+    ) -> subprocess.Popen[str]:
+        pid_path = ready_path.with_name(f"{ready_path.name}.pid")
+        command = f"echo $$ > {shlex.quote(str(pid_path))}; touch {shlex.quote(str(ready_path))}; exec sleep 10"
+
+        process = subprocess.Popen(
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", command],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        for _ in range(60):
+            if ready_path.exists() and pid_path.exists():
+                break
+
+            if process.poll() is not None:
+                _, stderr = process.communicate()
+                pytest.fail(f"Local job exited before starting: {stderr}")
+
+            time.sleep(1)
+        else:
+            process.terminate()
+            process.communicate(timeout=30)
+            pytest.fail("Local user program did not start")
+
+        job_id = pid_path.read_text().strip()
+        self.kill_job(job_id)
+        process.communicate(timeout=30)
+
+        return process
+
+    def assert_run_cpu_kill_job(self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None) -> None:
+        process.communicate(timeout=30)
+
+        assert process.returncode == 1
+
+        assert log_path.exists()
 
     def test_cpu_cancel_job(
         self,
