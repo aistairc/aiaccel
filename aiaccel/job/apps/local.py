@@ -58,10 +58,11 @@ trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
 
+(
+    {config.script_prologue}
 
-{config.script_prologue}
-
-{job}
+    {job}
+) 2>&1 | tee {args.log_filename}
 """
 
     # Create the job script file, remove old status files, and run the job
@@ -71,19 +72,7 @@ trap 'kill 0' INT
     with open(job_filename, "w") as f:
         f.write(job_script)
 
-    with open(args.log_filename, "w") as log:
-        process = subprocess.Popen(
-            ["bash", str(job_filename)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-        )
-        if process.stdout is not None:
-            for line in process.stdout:
-                print(line, end="", flush=True)
-                log.write(line)
-            if process.wait() != 0:
-                raise subprocess.CalledProcessError(process.returncode, process.args)
+    subprocess.run(["bash", str(job_filename)], check=True)
 
 
 if __name__ == "__main__":
