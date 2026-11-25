@@ -1,5 +1,11 @@
 _base_: ${resolve_pkg_path:aiaccel.job.apps.config}/local.yaml
 
+cpu:
+  job: |-
+    echo "before command"
+    {command}
+    echo "after command" >&2
+
 script_prologue: |
   echo Hostname: $(hostname)
 

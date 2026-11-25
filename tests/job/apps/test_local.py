@@ -56,14 +56,19 @@ def test_local_log_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
 
     config_path = Path(__file__).parent / "config" / "custom_local.yaml"
 
-    subprocess.run(cmd + ["--config", config_path, "cpu", log_path, "--", "echo", "test run"], check=True)
+    subprocess.run(
+        cmd + ["--config", config_path, "cpu", log_path, "--", "echo", "test run"],
+        check=True,
+    )
 
     hostname = subprocess.check_output(["hostname"], text=True).strip()
 
     log_output = f"""\
 Hostname: {hostname}
 {config_path}
+before command
 test run
+after command
 """
     assert log_path.read_text() == log_output
 
