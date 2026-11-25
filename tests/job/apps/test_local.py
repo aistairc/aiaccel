@@ -18,4 +18,4 @@ class TestLocal(BaseJobTests):
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        pass
+        pytest.skip("Scheduler cancellation is not supported")
