@@ -15,6 +15,7 @@ class BaseJobTests:
     cmd: list[str]
     config_path: Path | None = None
     config_test_path: Path
+    run_cpu_array_nprocs: int = 2
 
     def make_command(self) -> list[str | Path]:
         command: list[str | Path] = list(self.cmd.copy())
@@ -239,7 +240,7 @@ class BaseJobTests:
                 "--n_tasks_per_proc",
                 "1",
                 "--n_procs",
-                "2",
+                str(self.run_cpu_array_nprocs),
                 log_path,
                 "--",
                 "bash",
