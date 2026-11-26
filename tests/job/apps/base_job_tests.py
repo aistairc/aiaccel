@@ -28,7 +28,7 @@ class BaseJobTests:
         return command
 
     def kill_job(self, pid: str) -> None:
-        """Terminate the user program running inside the local job."""
+        """Kill the job's user process by PID."""
         os.kill(int(pid), signal.SIGTERM)
 
     def get_job_id(self, stdout: str) -> str:
