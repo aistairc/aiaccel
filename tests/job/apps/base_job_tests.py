@@ -14,14 +14,15 @@ import pytest
 class BaseJobTests:
     cmd = ["aiaccel-job", "local"]
     config_path = Path(__file__).parent / "config" / "custom_local.yaml"
+    use_config: bool = True
     cancel_status: int = 143
     array_n_procs: int = 2
     array_log_suffix = "{index}.log"
 
-    def make_command(self, use_config: bool = True) -> list[str | Path]:
+    def make_command(self) -> list[str | Path]:
         command: list[str | Path] = list(self.cmd.copy())
 
-        if use_config:
+        if self.use_config:
             command += ["--config", self.config_path]
 
         return command
@@ -62,7 +63,7 @@ class BaseJobTests:
         log_path = tmp_path / "test.log"
 
         subprocess.run(
-            self.make_command(use_config=False) + base_args + [log_path, "--", "sleep", "0"],
+            self.make_command() + base_args + [log_path, "--", "sleep", "0"],
             check=True,
         )
 

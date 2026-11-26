@@ -10,6 +10,7 @@ from tests.job.apps.base_scheduler_tests import BaseSchedulerTests
 class TestPBS(BaseSchedulerTests):
     cmd = ["aiaccel-job", "pbs"]
     config_path = Path(__file__).parent / "config" / "custom_pbs.yaml"
+    use_config = False
 
     def get_job_id(self, stdout: str) -> str:
         # PBS qsub:
