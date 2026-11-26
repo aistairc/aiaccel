@@ -14,7 +14,7 @@ import pytest
 class BaseJobTests:
     cmd = ["aiaccel-job", "local"]
     config_path = Path(__file__).parent / "config" / "custom_local.yaml"
-    cancel_status: int
+    cancel_status: int = 143
     array_n_procs: int = 2
     array_log_suffix = "{index}.log"
 
