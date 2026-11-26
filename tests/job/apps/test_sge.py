@@ -11,7 +11,6 @@ from tests.job.apps.base_scheduler_tests import BaseSchedulerTests
 class TestSGE(BaseSchedulerTests):
     cmd = ["aiaccel-job", "sge"]
     config_path = Path(__file__).parent / "config" / "custom_sge.yaml"
-    config_test_path = config_path
     cancel_status = 140
 
     def get_job_id(self, stdout: str) -> str:

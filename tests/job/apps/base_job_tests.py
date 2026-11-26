@@ -12,17 +12,16 @@ import pytest
 
 
 class BaseJobTests:
-    cmd: list[str]
-    config_path: Path | None = None
-    config_test_path: Path
+    cmd = ["aiaccel-job", "local"]
+    config_path = Path(__file__).parent / "config" / "custom_local.yaml"
     cancel_status: int
     array_n_procs: int = 2
     array_log_suffix = "{index}.log"
 
-    def make_command(self) -> list[str | Path]:
+    def make_command(self, use_config: bool = True) -> list[str | Path]:
         command: list[str | Path] = list(self.cmd.copy())
 
-        if self.config_path is not None:
+        if use_config:
             command += ["--config", self.config_path]
 
         return command
@@ -63,7 +62,7 @@ class BaseJobTests:
         log_path = tmp_path / "test.log"
 
         subprocess.run(
-            self.make_command() + base_args + [log_path, "--", "sleep", "0"],
+            self.make_command(use_config=False) + base_args + [log_path, "--", "sleep", "0"],
             check=True,
         )
 
@@ -72,25 +71,25 @@ class BaseJobTests:
         log_path = tmp_path / "test.log"
 
         subprocess.run(
-            self.cmd + ["--config", self.config_test_path, "cpu", log_path, "sleep", "0"],
+            self.make_command() + ["cpu", log_path, "sleep", "0"],
             check=True,
         )
 
         with open(tmp_path / "config_path.txt") as f:
-            assert Path(f.read().rstrip("\n")) == self.config_test_path
+            assert Path(f.read().rstrip("\n")) == self.config_path
 
     def test_config_from_environ(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
         log_path = tmp_path / "test.log"
-        monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(self.config_test_path))
+        monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(self.config_path))
 
         subprocess.run(
-            self.cmd + ["cpu", log_path, "--", "sleep", "0"],
+            self.make_command() + ["cpu", log_path, "--", "sleep", "0"],
             check=True,
         )
 
         with open(tmp_path / "config_path.txt") as f:
-            assert Path(f.read().rstrip("\n")) == self.config_test_path
+            assert Path(f.read().rstrip("\n")) == self.config_path
 
     # TODO: Add tests for log filenames containing shell metacharacters
     # and other characters that require escaping.
