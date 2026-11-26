@@ -106,7 +106,7 @@ class BaseJobTests:
     )
     def test_cpu(self, tmp_path: Path, log_filename: str, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test.log"
+        log_path = tmp_path / log_filename
 
         subprocess.run(
             self.make_command() + ["cpu", log_path, "--", "echo", "hello"],
