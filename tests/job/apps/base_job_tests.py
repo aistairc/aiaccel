@@ -40,7 +40,9 @@ class BaseJobTests:
     def cancel_job(self, job_id: str) -> None:
         raise NotImplementedError
 
-    def wait_for_job_to_finish(self, job_id: str, timeout: int = 30) -> None:
+    def wait_for_job_to_finish(self, process: subprocess.Popen[str], timeout: int = 30) -> None:
+        assert process.stdout is not None
+        job_id = self.get_job_id(process.stdout.readline())
         for _ in range(timeout):
             if not self.is_job_running(job_id):
                 return
@@ -125,7 +127,7 @@ class BaseJobTests:
             text=True,
         )
 
-        self.wait_run_cpu_failure(process)
+        self.wait_for_job_to_finish(process)
         _, cpu_failure_stderr = process.communicate(timeout=60)
 
         assert process.returncode == 1
@@ -134,9 +136,6 @@ class BaseJobTests:
         assert "before failure\n" in log_path.read_text()
 
         self.assert_run_cpu_failure(cpu_failure_stderr, status_path)
-
-    def wait_run_cpu_failure(self, process: subprocess.Popen[str]) -> None:
-        pass
 
     def assert_run_cpu_failure(self, cpu_failure_stderr: str, status_path: Path) -> None:
         pass
@@ -262,7 +261,7 @@ class BaseJobTests:
             pytest.fail(f"Job {job_id} did not start")
 
         self.cancel_job(job_id)
-        self.wait_for_job_to_finish(job_id)
+        self.wait_for_job_to_finish(process)
 
         _, stderr = process.communicate(timeout=30)
 

@@ -3,7 +3,6 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-import subprocess
 
 from tests.job.apps.base_job_tests import BaseJobTests
 
@@ -23,11 +22,6 @@ class BaseSchedulerTests(BaseJobTests, ABC):
     @abstractmethod
     def cancel_job(self, job_id: str) -> None:
         """Cancel a scheduler job."""
-
-    def wait_run_cpu_failure(self, process: subprocess.Popen[str]) -> None:
-        assert process.stdout is not None
-        job_id = self.get_job_id(process.stdout.readline())
-        self.wait_for_job_to_finish(job_id)
 
     def assert_cpu_failure(self, cpu_failure_stderr: str, status_path: Path, exit_code: int) -> None:
         assert cpu_failure_stderr is not None
