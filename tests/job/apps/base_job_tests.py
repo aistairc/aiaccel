@@ -255,7 +255,7 @@ class BaseJobTests:
             pytest.fail(f"Job {job_id} did not start")
 
         self.cancel_job(job_id)
-        self.wait_for_job_to_finish(process)
+        self.wait_for_job_to_finish(process, job_id=job_id)
 
         _, stderr = process.communicate(timeout=30)
 
