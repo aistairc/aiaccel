@@ -111,7 +111,7 @@ class BaseJobTests:
         )
 
         assert log_path.exists()
-        assert log_path.read_text().strip().endswith("hello")
+        assert "hello\n" in log_path.read_text()
 
     def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
