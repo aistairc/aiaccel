@@ -9,7 +9,7 @@ from tests.job.apps.base_job_tests import BaseJobTests
 
 
 class BaseSchedulerTests(BaseJobTests, ABC):
-    run_cpu_array_nprocs: int = 1
+    array_n_procs: int = 1
     array_log_suffix = "{index}-1.log"
 
     @abstractmethod
