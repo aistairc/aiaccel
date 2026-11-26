@@ -17,6 +17,7 @@ class BaseJobTests:
     config_test_path: Path
     cancel_status: int
     run_cpu_array_nprocs: int = 2
+    array_log_suffix = "{index}.log"
 
     def make_command(self) -> list[str | Path]:
         command: list[str | Path] = list(self.cmd.copy())
@@ -289,11 +290,6 @@ class BaseJobTests:
         monkeypatch.chdir(tmp_path)
         log_path = tmp_path / log_name
 
-        self.run_cpu_array(log_path)
-
-        self.assert_cpu_array(tmp_path, log_path)
-
-    def run_cpu_array(self, log_path: Path) -> None:
         subprocess.run(
             self.make_command()
             + [
@@ -313,10 +309,10 @@ class BaseJobTests:
             check=True,
         )
 
-    def assert_cpu_array(self, tmp_path: Path, log_path: Path) -> None:
         log_prefix = log_path.with_suffix("")
         for process_index in [1, 2]:
-            log_file = tmp_path / f"{log_prefix.name}.{process_index}.log"
+            suffix = self.array_log_suffix.format(index=process_index)
+            log_file = log_prefix.parent / f"{log_prefix.name}.{suffix}"
             assert log_file.exists()
             assert log_file.read_text().strip() == f"TASK_INDEX={process_index}"
 
