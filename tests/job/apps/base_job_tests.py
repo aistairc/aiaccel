@@ -1,6 +1,7 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
+from abc import abstractmethod
 import os
 from pathlib import Path
 import shlex
@@ -15,6 +16,7 @@ class BaseJobTests:
     cmd: list[str]
     config_path: Path | None = None
     config_test_path: Path
+    cancel_status: int
     run_cpu_array_nprocs: int = 2
 
     def make_command(self) -> list[str | Path]:
@@ -28,6 +30,27 @@ class BaseJobTests:
     def kill_job(self, job_id: str) -> None:
         """Terminate the user program running inside the local job."""
         os.kill(int(job_id), signal.SIGTERM)
+
+    @abstractmethod
+    def get_job_id(self, stdout: str) -> str:
+        """Return the scheduler job ID from submit command output."""
+
+    @abstractmethod
+    def is_job_running(self, job_id: str) -> bool:
+        """Return whether the scheduler job still exists."""
+
+    @abstractmethod
+    def cancel_job(self, job_id: str) -> None:
+        """Cancel a scheduler job."""
+
+    def wait_for_job_to_finish(self, job_id: str, timeout: int = 30) -> None:
+        for _ in range(timeout):
+            if not self.is_job_running(job_id):
+                return
+
+            time.sleep(1)
+
+        pytest.fail(f"Job {job_id} did not terminate")
 
     @pytest.mark.parametrize(
         "base_args",
@@ -176,7 +199,6 @@ class BaseJobTests:
 
         job_id = pid_path.read_text().strip()
         self.kill_job(job_id)
-        process.communicate(timeout=30)
 
         return process
 
@@ -198,17 +220,47 @@ class BaseJobTests:
         status_path = tmp_path / "test.out"
         ready_path = tmp_path / "ready"
 
-        process = self.run_cpu_cancel_job(log_path, ready_path)
+        process = subprocess.Popen(
+            self.make_command()
+            + [
+                "cpu",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                f"touch {ready_path}; sleep 10; exit 0",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
 
-        self.assert_run_cpu_cancel_job(process, log_path, status_path)
+        assert process.stdout is not None
 
-    def run_cpu_cancel_job(self, log_path: Path, ready_path: Path) -> subprocess.Popen[str]:
-        raise NotImplementedError
+        job_id = self.get_job_id(process.stdout.readline())
 
-    def assert_run_cpu_cancel_job(
-        self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None
-    ) -> None:
-        raise NotImplementedError
+        for _ in range(60):
+            if ready_path.exists():
+                break
+
+            time.sleep(1)
+        else:
+            self.cancel_job(job_id)
+            pytest.fail(f"Job {job_id} did not start")
+
+        self.cancel_job(job_id)
+        self.wait_for_job_to_finish(job_id)
+
+        _, stderr = process.communicate(timeout=30)
+
+        assert process.returncode == 1
+        assert f"Job failed with {self.cancel_status} exit code." in stderr
+
+        assert log_path.exists()
+
+        assert status_path is not None
+        assert status_path.exists()
+        assert status_path.read_text().strip() == str(self.cancel_status)
 
     @pytest.mark.parametrize(
         "log_name",
@@ -272,7 +324,7 @@ class BaseJobTests:
             self.run_cpu_fails_when_log_write_fails(log_path)
 
         assert exc_info.value.returncode == 1
-        self.assert_cpu_fails_when_log_write_fails(exc_info, status_path)
+        self.assert_cpu_fails_when_log_write_fails(exc_info.value.stderr, status_path)
 
     def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
         subprocess.run(
@@ -283,7 +335,5 @@ class BaseJobTests:
             timeout=60,
         )
 
-    def assert_cpu_fails_when_log_write_fails(
-        self, exc_info: pytest.ExceptionInfo[subprocess.CalledProcessError], status_path: Path
-    ) -> None:
+    def assert_cpu_fails_when_log_write_fails(self, cpu_failure_stderr: str, status_path: Path) -> None:
         pass
