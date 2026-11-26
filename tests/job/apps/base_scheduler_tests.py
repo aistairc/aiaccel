@@ -42,7 +42,8 @@ class BaseSchedulerTests(BaseJobTests, ABC):
         self.assert_cpu_failure_stderr(cpu_failure_stderr, 7)
         self.assert_status_path(status_path, 7)
 
-    def assert_cpu_kill_job(self, status_path: Path) -> None:
+    def assert_cpu_kill_job(self, cpu_failure_stderr: str, status_path: Path) -> None:
+        self.assert_cpu_failure_stderr(cpu_failure_stderr, 143)
         self.assert_status_path(status_path, 143)
 
     def assert_cpu_fails_when_log_write_fails(self, cpu_failure_stderr: str, status_path: Path) -> None:

@@ -210,15 +210,15 @@ class BaseJobTests:
         pid = pid_path.read_text().strip()
         self.kill_job(pid)
 
-        process.communicate(timeout=30)
+        _, cpu_failure_stderr = process.communicate(timeout=30)
 
         assert process.returncode == 1
 
         assert log_path.exists()
 
-        self.assert_cpu_kill_job(status_path)
+        self.assert_cpu_kill_job(cpu_failure_stderr, status_path)
 
-    def assert_cpu_kill_job(self, status_path: Path) -> None:
+    def assert_cpu_kill_job(self, cpu_failure_stderr: str, status_path: Path) -> None:
         pass
 
     def test_cpu_cancel_job(
