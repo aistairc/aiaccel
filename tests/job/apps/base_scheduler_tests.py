@@ -3,6 +3,10 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
+import subprocess
+import time
+
+import pytest
 
 from tests.job.apps.base_job_tests import BaseJobTests
 
@@ -22,6 +26,17 @@ class BaseSchedulerTests(BaseJobTests, ABC):
     @abstractmethod
     def cancel_job(self, job_id: str) -> None:
         """Cancel a scheduler job."""
+
+    def wait_for_job_to_finish(self, process: subprocess.Popen[str], timeout: int = 30) -> None:
+        assert process.stdout is not None
+        job_id = self.get_job_id(process.stdout.readline())
+        for _ in range(timeout):
+            if not self.is_job_running(job_id):
+                return
+
+            time.sleep(1)
+
+        pytest.fail(f"Job {job_id} did not terminate")
 
     def assert_cpu_failure(self, cpu_failure_stderr: str, status_path: Path, exit_code: int) -> None:
         assert cpu_failure_stderr is not None
