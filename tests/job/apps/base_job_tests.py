@@ -40,7 +40,9 @@ class BaseJobTests:
     def cancel_job(self, job_id: str) -> None:
         raise NotImplementedError
 
-    def wait_for_job_to_finish(self, process: subprocess.Popen[str], timeout: int = 30) -> None:
+    def wait_for_job_to_finish(
+        self, process: subprocess.Popen[str], job_id: str | None = None, timeout: int = 30
+    ) -> None:
         pass
 
     @pytest.mark.parametrize(

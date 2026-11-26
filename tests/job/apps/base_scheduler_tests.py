@@ -27,9 +27,12 @@ class BaseSchedulerTests(BaseJobTests, ABC):
     def cancel_job(self, job_id: str) -> None:
         """Cancel a scheduler job."""
 
-    def wait_for_job_to_finish(self, process: subprocess.Popen[str], timeout: int = 30) -> None:
+    def wait_for_job_to_finish(
+        self, process: subprocess.Popen[str], job_id: str | None = None, timeout: int = 30
+    ) -> None:
         assert process.stdout is not None
-        job_id = self.get_job_id(process.stdout.readline())
+        if job_id is None:
+            job_id = self.get_job_id(process.stdout.readline())
         for _ in range(timeout):
             if not self.is_job_running(job_id):
                 return
