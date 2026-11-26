@@ -16,7 +16,7 @@ class BaseJobTests:
     config_path: Path | None = None
     config_test_path: Path
     cancel_status: int
-    run_cpu_array_nprocs: int = 2
+    array_n_procs: int = 2
     array_log_suffix = "{index}.log"
 
     def make_command(self) -> list[str | Path]:
@@ -299,7 +299,7 @@ class BaseJobTests:
                 "--n_tasks_per_proc",
                 "1",
                 "--n_procs",
-                str(self.run_cpu_array_nprocs),
+                f"{self.array_n_procs}",
                 log_path,
                 "--",
                 "bash",
