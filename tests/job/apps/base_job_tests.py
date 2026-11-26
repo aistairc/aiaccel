@@ -1,7 +1,6 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from abc import abstractmethod
 import os
 from pathlib import Path
 import shlex
@@ -31,17 +30,14 @@ class BaseJobTests:
         """Terminate the user program running inside the local job."""
         os.kill(int(pid), signal.SIGTERM)
 
-    @abstractmethod
     def get_job_id(self, stdout: str) -> str:
-        """Return the scheduler job ID from submit command output."""
+        raise NotImplementedError
 
-    @abstractmethod
     def is_job_running(self, job_id: str) -> bool:
-        """Return whether the scheduler job still exists."""
+        raise NotImplementedError
 
-    @abstractmethod
     def cancel_job(self, job_id: str) -> None:
-        """Cancel a scheduler job."""
+        raise NotImplementedError
 
     def wait_for_job_to_finish(self, job_id: str, timeout: int = 30) -> None:
         for _ in range(timeout):

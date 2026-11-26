@@ -1,7 +1,7 @@
 # Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
 # SPDX-License-Identifier: MIT
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
 import subprocess
 
@@ -10,6 +10,18 @@ from tests.job.apps.base_job_tests import BaseJobTests
 
 class BaseSchedulerTests(BaseJobTests, ABC):
     run_cpu_array_nprocs: int = 1
+
+    @abstractmethod
+    def get_job_id(self, stdout: str) -> str:
+        """Return the scheduler job ID from submit command output."""
+
+    @abstractmethod
+    def is_job_running(self, job_id: str) -> bool:
+        """Return whether the scheduler job still exists."""
+
+    @abstractmethod
+    def cancel_job(self, job_id: str) -> None:
+        """Cancel a scheduler job."""
 
     def wait_run_cpu_failure(self, process: subprocess.Popen[str]) -> None:
         assert process.stdout is not None
