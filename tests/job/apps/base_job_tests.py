@@ -14,7 +14,7 @@ import pytest
 class BaseJobTests:
     cmd = ["aiaccel-job", "local"]
     config_path = Path(__file__).parent / "config" / "custom_local.yaml"
-    use_config: bool = True
+    use_config_default: bool = True
     cancel_status: int = 143
     array_n_procs: int = 2
     array_log_suffix = "{index}.log"
@@ -63,7 +63,7 @@ class BaseJobTests:
         log_path = tmp_path / "test.log"
 
         subprocess.run(
-            self.make_command(use_config=self.use_config) + base_args + [log_path, "--", "sleep", "0"],
+            self.make_command(use_config=self.use_config_default) + base_args + [log_path, "--", "sleep", "0"],
             check=True,
         )
 
