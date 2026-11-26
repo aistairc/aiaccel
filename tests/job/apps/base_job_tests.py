@@ -27,9 +27,9 @@ class BaseJobTests:
 
         return command
 
-    def kill_job(self, job_id: str) -> None:
+    def kill_job(self, pid: str) -> None:
         """Terminate the user program running inside the local job."""
-        os.kill(int(job_id), signal.SIGTERM)
+        os.kill(int(pid), signal.SIGTERM)
 
     @abstractmethod
     def get_job_id(self, stdout: str) -> str:
@@ -165,7 +165,18 @@ class BaseJobTests:
         ready_path: Path,
     ) -> subprocess.Popen[str]:
         pid_path = ready_path.with_name(f"{ready_path.name}.pid")
-        command = f"echo $$ > {shlex.quote(str(pid_path))}; touch {shlex.quote(str(ready_path))}; exec sleep 10"
+        boot_id_path = ready_path.with_name(f"{ready_path.name}.boot_id")
+        pid_namespace_path = ready_path.with_name(f"{ready_path.name}.pid_namespace")
+
+        command = (
+            f"echo $$ > {shlex.quote(str(pid_path))}"
+            f" && cat /proc/sys/kernel/random/boot_id"
+            f" > {shlex.quote(str(boot_id_path))}"
+            f" && readlink /proc/$$/ns/pid"
+            f" > {shlex.quote(str(pid_namespace_path))}"
+            f" && touch {shlex.quote(str(ready_path))}"
+            " && exec sleep 10"
+        )
 
         process = subprocess.Popen(
             self.make_command() + ["cpu", log_path, "--", "bash", "-c", command],
@@ -175,21 +186,39 @@ class BaseJobTests:
         )
 
         for _ in range(60):
-            if ready_path.exists() and pid_path.exists():
+            if ready_path.exists():
                 break
 
             if process.poll() is not None:
                 _, stderr = process.communicate()
-                pytest.fail(f"Local job exited before starting: {stderr}")
+                pytest.fail(f"Job exited before starting: {stderr}")
 
             time.sleep(1)
         else:
             process.terminate()
             process.communicate(timeout=30)
-            pytest.fail("Local user program did not start")
+            pytest.fail("User program did not start")
 
-        job_id = pid_path.read_text().strip()
-        self.kill_job(job_id)
+        try:
+            job_boot_id = boot_id_path.read_text().strip()
+            runner_boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+            assert job_boot_id == runner_boot_id, (
+                f"Job runs on a different kernel: job={job_boot_id}, pytest={runner_boot_id}"
+            )
+
+            job_pid_namespace = pid_namespace_path.read_text().strip()
+            runner_pid_namespace = os.readlink("/proc/self/ns/pid")
+            assert job_pid_namespace == runner_pid_namespace, (
+                f"Job runs in a different PID namespace: job={job_pid_namespace}, pytest={runner_pid_namespace}"
+            )
+        except Exception:
+            # Do not send a signal using an unverified PID.
+            # The user program exits naturally after sleep 10.
+            process.communicate(timeout=30)
+            raise
+
+        pid = pid_path.read_text().strip()
+        self.kill_job(pid)
 
         return process
 
