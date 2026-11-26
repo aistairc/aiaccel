@@ -19,10 +19,10 @@ class BaseJobTests:
     array_n_procs: int = 2
     array_log_suffix = "{index}.log"
 
-    def make_command(self) -> list[str | Path]:
+    def make_command(self, use_config: bool = True) -> list[str | Path]:
         command: list[str | Path] = list(self.cmd.copy())
 
-        if self.use_config:
+        if use_config:
             command += ["--config", self.config_path]
 
         return command
@@ -63,7 +63,7 @@ class BaseJobTests:
         log_path = tmp_path / "test.log"
 
         subprocess.run(
-            self.make_command() + base_args + [log_path, "--", "sleep", "0"],
+            self.make_command(use_config=self.use_config) + base_args + [log_path, "--", "sleep", "0"],
             check=True,
         )
 
@@ -85,7 +85,7 @@ class BaseJobTests:
         monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(self.config_path))
 
         subprocess.run(
-            self.make_command() + ["cpu", log_path, "--", "sleep", "0"],
+            self.make_command(use_config=False) + ["cpu", log_path, "--", "sleep", "0"],
             check=True,
         )
 
