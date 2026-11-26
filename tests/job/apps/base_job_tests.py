@@ -95,27 +95,18 @@ class BaseJobTests:
         with open(tmp_path / "config_path.txt") as f:
             assert Path(f.read().rstrip("\n")) == self.config_test_path
 
-    def test_cpu(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test.log"
-
-        subprocess.run(
-            self.make_command() + ["cpu", log_path, "--", "echo", "hello"],
-            check=True,
-        )
-
-        assert log_path.exists()
-        assert log_path.read_text().strip().endswith("hello")
-
     # TODO: Add tests for log filenames containing shell metacharacters
     # and other characters that require escaping.
-    def test_cpu_log_filename_with_spaces(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
+    @pytest.mark.parametrize(
+        "log_filename",
+        [
+            "test.log",
+            "test log.log",
+        ],
+    )
+    def test_cpu(self, tmp_path: Path, log_filename: str, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)
-        log_path = tmp_path / "test log.log"
+        log_path = tmp_path / "test.log"
 
         subprocess.run(
             self.make_command() + ["cpu", log_path, "--", "echo", "hello"],
