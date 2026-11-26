@@ -24,6 +24,11 @@ class BaseSchedulerTests(BaseJobTests, ABC):
         assert status_path.exists()
         assert status_path.read_text().strip() == "7"
 
+    def assert_cpu_kill_job(self, status_path: Path) -> None:
+        assert status_path is not None
+        assert status_path.exists()
+        assert status_path.read_text().strip() == "1"
+
     def assert_cpu_array(self, tmp_path: Path, log_path: Path) -> None:
         log_prefix = log_path.with_suffix("")
         for task_index in [1, 2]:

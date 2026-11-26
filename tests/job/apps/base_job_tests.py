@@ -155,15 +155,7 @@ class BaseJobTests:
         status_path = tmp_path / "test.out"
         ready_path = tmp_path / "ready"
 
-        process = self.run_cpu_kill_job(log_path, ready_path)
-
-        self.assert_run_cpu_kill_job(process, log_path, status_path)
-
-    def run_cpu_kill_job(
-        self,
-        log_path: Path,
-        ready_path: Path,
-    ) -> subprocess.Popen[str]:
+        # Run job
         pid_path = ready_path.with_name(f"{ready_path.name}.pid")
         boot_id_path = ready_path.with_name(f"{ready_path.name}.boot_id")
         pid_namespace_path = ready_path.with_name(f"{ready_path.name}.pid_namespace")
@@ -200,6 +192,7 @@ class BaseJobTests:
             pytest.fail("User program did not start")
 
         try:
+            # Check boot_id and PID
             job_boot_id = boot_id_path.read_text().strip()
             runner_boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
             assert job_boot_id == runner_boot_id, (
@@ -220,14 +213,16 @@ class BaseJobTests:
         pid = pid_path.read_text().strip()
         self.kill_job(pid)
 
-        return process
-
-    def assert_run_cpu_kill_job(self, process: subprocess.Popen[str], log_path: Path, status_path: Path | None) -> None:
         process.communicate(timeout=30)
 
         assert process.returncode == 1
 
         assert log_path.exists()
+
+        self.assert_cpu_kill_job(status_path)
+
+    def assert_cpu_kill_job(self, status_path: Path) -> None:
+        pass
 
     def test_cpu_cancel_job(
         self,
