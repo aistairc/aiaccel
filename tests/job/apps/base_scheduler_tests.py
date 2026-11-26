@@ -10,6 +10,7 @@ from tests.job.apps.base_job_tests import BaseJobTests
 
 class BaseSchedulerTests(BaseJobTests, ABC):
     run_cpu_array_nprocs: int = 1
+    array_log_suffix = "{index}-1.log"
 
     @abstractmethod
     def get_job_id(self, stdout: str) -> str:
@@ -28,30 +29,22 @@ class BaseSchedulerTests(BaseJobTests, ABC):
         job_id = self.get_job_id(process.stdout.readline())
         self.wait_for_job_to_finish(job_id)
 
-    def assert_run_cpu_failure(self, cpu_failure_stderr: str, status_path: Path) -> None:
+    def assert_cpu_failure_stderr(self, cpu_failure_stderr: str, exit_code: int) -> None:
         assert cpu_failure_stderr is not None
-        assert "Job failed with 7 exit code." in cpu_failure_stderr
+        assert f"Job failed with {exit_code} exit code." in cpu_failure_stderr
 
+    def assert_status_path(self, status_path: Path, exit_code: int) -> None:
         assert status_path is not None
         assert status_path.exists()
-        assert status_path.read_text().strip() == "7"
+        assert status_path.read_text().strip() == f"{exit_code}"
+
+    def assert_run_cpu_failure(self, cpu_failure_stderr: str, status_path: Path) -> None:
+        self.assert_cpu_failure_stderr(cpu_failure_stderr, 7)
+        self.assert_status_path(status_path, 7)
 
     def assert_cpu_kill_job(self, status_path: Path) -> None:
-        assert status_path is not None
-        assert status_path.exists()
-        assert status_path.read_text().strip() == "143"
-
-    def assert_cpu_array(self, tmp_path: Path, log_path: Path) -> None:
-        log_prefix = log_path.with_suffix("")
-        for task_index in [1, 2]:
-            log_file = tmp_path / f"{log_prefix.name}.{task_index}-1.log"
-            assert log_file.exists()
-            assert log_file.read_text().strip() == f"TASK_INDEX={task_index}"
+        self.assert_status_path(status_path, 143)
 
     def assert_cpu_fails_when_log_write_fails(self, cpu_failure_stderr: str, status_path: Path) -> None:
-        assert cpu_failure_stderr is not None
-        assert "Job failed with 1 exit code." in cpu_failure_stderr
-
-        assert status_path is not None
-        assert status_path.exists()
-        assert status_path.read_text().strip() == "1"
+        self.assert_cpu_failure_stderr(cpu_failure_stderr, 1)
+        self.assert_status_path(status_path, 1)
