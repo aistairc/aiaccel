@@ -13,9 +13,5 @@ class TestLocal(BaseJobTests):
     config_test_path = Path(__file__).parent / "config" / "custom_local.yaml"
 
     # Skip test_cpu_cancel_job in local
-    def test_cpu_cancel_job(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
+    def skip_cpu_cancel_job(self) -> None:
         pytest.skip("Scheduler cancellation is not supported")

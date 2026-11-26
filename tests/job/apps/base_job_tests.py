@@ -226,6 +226,7 @@ class BaseJobTests:
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        self.skip_cpu_cancel_job()
         monkeypatch.chdir(tmp_path)
 
         log_path = tmp_path / "test.log"
@@ -273,6 +274,9 @@ class BaseJobTests:
         assert status_path is not None
         assert status_path.exists()
         assert status_path.read_text().strip() == str(self.cancel_status)
+
+    def skip_cpu_cancel_job(self) -> None:
+        pass
 
     @pytest.mark.parametrize(
         "log_name",
