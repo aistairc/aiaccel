@@ -222,7 +222,7 @@ def merge_config_with_replace(
             if not isinstance(value, DictConfig):
                 continue
 
-            if value.get("_replace_", False) is True:
+            if value.get("_replace_", False) is True and key in dst:
                 del dst[key]
             elif key in dst and isinstance(base_node := dst._get_node(key), DictConfig):
                 remove_replaced(base_node, value)
