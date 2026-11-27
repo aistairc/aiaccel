@@ -166,18 +166,15 @@ class BaseJobTests:
             text=True,
         )
 
+        assert process.stdout is not None
+
         for _ in range(60):
             if ready_path.exists():
                 break
 
-            if process.poll() is not None:
-                _, stderr = process.communicate()
-                pytest.fail(f"Job exited before starting: {stderr}")
-
             time.sleep(1)
         else:
-            process.terminate()
-            process.communicate(timeout=30)
+            self.wait_for_job_to_finish(process)
             pytest.fail("User program did not start")
 
         try:
@@ -196,13 +193,13 @@ class BaseJobTests:
         except Exception:
             # Do not send a signal using an unverified PID.
             # The user program exits naturally after sleep 10.
-            process.communicate(timeout=30)
+            self.wait_for_job_to_finish(process)
             raise
 
         pid = pid_path.read_text().strip()
         self.kill_job(pid)
 
-        _, cpu_failure_stderr = process.communicate(timeout=30)
+        _, cpu_failure_stderr = self.wait_for_job_to_finish(process)
 
         assert process.returncode == 1
 
