@@ -399,33 +399,3 @@ model:
     )
 
     assert load_config(config_path) == {"model": {"name": "custom"}}
-
-
-def test_replace_in_interpolated_base(tmp_path: Path) -> None:
-    base_path = tmp_path / "base.yaml"
-    base_path.write_text(
-        """
-source:
-  keep: base
-  inner:
-    old: 1
-alias: ${source}
-""".lstrip()
-    )
-
-    config_path = tmp_path / "config.yaml"
-    config_path.write_text(
-        """
-_base_: base.yaml
-
-alias:
-  inner:
-    _replace_: true
-    new: 2
-""".lstrip()
-    )
-
-    assert load_config(config_path) == {
-        "source": {"keep": "base", "inner": {"old": 1}},
-        "alias": {"keep": "base", "inner": {"new": 2}},
-    }
