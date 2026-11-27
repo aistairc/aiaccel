@@ -75,5 +75,9 @@ if [ "${ready}" != true ]; then
   exit 1
 fi
 
+# Shorten the scheduler's fallback interval for CI.
+sudo /opt/pbs/bin/qmgr -c 'set server scheduler_iteration = 1'
+sudo /opt/pbs/bin/qmgr -c 'list server scheduler_iteration'
+
 echo "/opt/pbs/bin" >> "$GITHUB_PATH"
 echo "/opt/pbs/sbin" >> "$GITHUB_PATH"

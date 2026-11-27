@@ -5,10 +5,10 @@ from pathlib import Path
 import re
 import subprocess
 
-from tests.job.apps.scheduler_test_base import SchedulerTestBase
+from tests.job.apps.base_scheduler_tests import BaseSchedulerTests
 
 
-class TestSGE(SchedulerTestBase):
+class TestSGE(BaseSchedulerTests):
     cmd = ["aiaccel-job", "sge"]
     config_path = Path(__file__).parent / "config" / "custom_sge.yaml"
     cancel_status = 140

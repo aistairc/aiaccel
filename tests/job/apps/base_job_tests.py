@@ -1,0 +1,337 @@
+# Copyright (C) 2025 National Institute of Advanced Industrial Science and Technology (AIST)
+# SPDX-License-Identifier: MIT
+
+import os
+from pathlib import Path
+import shlex
+import signal
+import subprocess
+import time
+
+import pytest
+
+
+class BaseJobTests:
+    cmd = ["aiaccel-job", "local"]
+    config_path = Path(__file__).parent / "config" / "custom_local.yaml"
+    use_config_default: bool = True
+    cancel_status: int = 143
+    array_n_procs: int = 2
+    array_log_suffix = "{index}.log"
+
+    def make_command(self, use_config: bool = True) -> list[str | Path]:
+        command: list[str | Path] = list(self.cmd.copy())
+
+        if use_config:
+            command += ["--config", self.config_path]
+
+        return command
+
+    def kill_job(self, pid: str) -> None:
+        """Kill the job's user process by PID."""
+        os.kill(int(pid), signal.SIGTERM)
+
+    def get_job_id(self, stdout: str) -> str:
+        raise NotImplementedError
+
+    def is_job_running(self, job_id: str) -> bool:
+        raise NotImplementedError
+
+    def cancel_job(self, job_id: str) -> None:
+        raise NotImplementedError
+
+    def wait_for_job_to_finish(
+        self, process: subprocess.Popen[str], job_id: str | None = None, timeout: int = 30
+    ) -> tuple[str, str]:
+        return process.communicate(timeout=timeout)
+
+    @pytest.mark.parametrize(
+        "base_args",
+        [
+            ["cpu"],
+            ["cpu", "--n_tasks=10"],
+            ["gpu"],
+            ["gpu", "--n_tasks=10"],
+        ],
+    )
+    def test_default(self, base_args: list[str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / "test.log"
+
+        subprocess.run(
+            self.make_command(use_config=self.use_config_default) + base_args + [log_path, "--", "sleep", "0"],
+            check=True,
+        )
+
+    def test_config_from_argparse(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / "test.log"
+
+        subprocess.run(
+            self.make_command() + ["cpu", log_path, "sleep", "0"],
+            check=True,
+        )
+
+        with open(tmp_path / "config_path.txt") as f:
+            assert Path(f.read().rstrip("\n")) == self.config_path
+
+    def test_config_from_environ(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / "test.log"
+        monkeypatch.setenv("AIACCEL_JOB_CONFIG", str(self.config_path))
+
+        subprocess.run(
+            self.make_command(use_config=False) + ["cpu", log_path, "--", "sleep", "0"],
+            check=True,
+        )
+
+        with open(tmp_path / "config_path.txt") as f:
+            assert Path(f.read().rstrip("\n")) == self.config_path
+
+    # TODO: Add tests for log filenames containing shell metacharacters
+    # and other characters that require escaping.
+    @pytest.mark.parametrize(
+        "log_filename",
+        [
+            "test.log",
+            "test log.log",
+        ],
+    )
+    def test_cpu(self, tmp_path: Path, log_filename: str, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / log_filename
+
+        subprocess.run(
+            self.make_command() + ["cpu", log_path, "--", "echo", "hello"],
+            check=True,
+        )
+
+        assert log_path.exists()
+        assert "hello\n" in log_path.read_text()
+
+    def test_cpu_failure(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / "test.log"
+        status_path = tmp_path / "test.out"
+
+        process = subprocess.Popen(
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "echo before failure; exit 7"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        _, cpu_failure_stderr = self.wait_for_job_to_finish(process)
+
+        assert process.returncode == 1
+
+        assert log_path.exists()
+        assert "before failure\n" in log_path.read_text()
+
+        self.assert_run_cpu_failure(cpu_failure_stderr, status_path)
+
+    def assert_run_cpu_failure(self, cpu_failure_stderr: str, status_path: Path) -> None:
+        pass
+
+    def test_cpu_kill_job(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        log_path = tmp_path / "test.log"
+        status_path = tmp_path / "test.out"
+        ready_path = tmp_path / "ready"
+
+        # Run job
+        pid_path = ready_path.with_name(f"{ready_path.name}.pid")
+        boot_id_path = ready_path.with_name(f"{ready_path.name}.boot_id")
+        pid_namespace_path = ready_path.with_name(f"{ready_path.name}.pid_namespace")
+
+        command = (
+            f"echo $$ > {shlex.quote(str(pid_path))}"  # Get PID
+            f" && cat /proc/sys/kernel/random/boot_id"  # Get boot_id
+            f" > {shlex.quote(str(boot_id_path))}"
+            f" && readlink /proc/$$/ns/pid"  # Get PID namespace
+            f" > {shlex.quote(str(pid_namespace_path))}"
+            f" && touch {shlex.quote(str(ready_path))}"  # Ready file
+            " && exec sleep 10"
+        )
+
+        process = subprocess.Popen(
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", command],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        assert process.stdout is not None
+
+        for _ in range(60):
+            if ready_path.exists():
+                break
+
+            time.sleep(1)
+        else:
+            self.wait_for_job_to_finish(process)
+            pytest.fail("User program did not start")
+
+        try:
+            # Check boot_id and PID
+            job_boot_id = boot_id_path.read_text().strip()
+            runner_boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+            assert job_boot_id == runner_boot_id, (
+                f"Job runs on a different kernel: job={job_boot_id}, pytest={runner_boot_id}"
+            )
+
+            job_pid_namespace = pid_namespace_path.read_text().strip()
+            runner_pid_namespace = os.readlink("/proc/self/ns/pid")
+            assert job_pid_namespace == runner_pid_namespace, (
+                f"Job runs in a different PID namespace: job={job_pid_namespace}, pytest={runner_pid_namespace}"
+            )
+        except Exception:
+            # Do not send a signal using an unverified PID.
+            # The user program exits naturally after sleep 10.
+            self.wait_for_job_to_finish(process)
+            raise
+
+        pid = pid_path.read_text().strip()
+        self.kill_job(pid)
+
+        _, cpu_failure_stderr = self.wait_for_job_to_finish(process)
+
+        assert process.returncode == 1
+
+        assert log_path.exists()
+
+        self.assert_cpu_kill_job(cpu_failure_stderr, status_path)
+
+    def assert_cpu_kill_job(self, cpu_failure_stderr: str, status_path: Path) -> None:
+        pass
+
+    def test_cpu_cancel_job(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        self.skip_cpu_cancel_job()
+        monkeypatch.chdir(tmp_path)
+
+        log_path = tmp_path / "test.log"
+        status_path = tmp_path / "test.out"
+        ready_path = tmp_path / "ready"
+
+        process = subprocess.Popen(
+            self.make_command()
+            + [
+                "cpu",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                f"touch {ready_path}; sleep 10; exit 0",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        assert process.stdout is not None
+        job_id = self.get_job_id(process.stdout.readline())
+
+        for _ in range(60):
+            if ready_path.exists():
+                break
+
+            time.sleep(1)
+        else:
+            self.cancel_job(job_id)
+            pytest.fail(f"Job {job_id} did not start")
+
+        self.cancel_job(job_id)
+
+        _, stderr = self.wait_for_job_to_finish(process, job_id=job_id)
+
+        assert process.returncode == 1
+        assert f"Job failed with {self.cancel_status} exit code." in stderr
+
+        assert log_path.exists()
+
+        assert status_path is not None
+        assert status_path.exists()
+        assert status_path.read_text().strip() == str(self.cancel_status)
+
+    def skip_cpu_cancel_job(self) -> None:
+        pass
+
+    @pytest.mark.parametrize(
+        "log_name",
+        [
+            pytest.param("test_log.log", id="default_filename"),
+            pytest.param("test log.log", id="filename_with_spaces"),
+        ],
+    )
+    def test_cpu_array(
+        self,
+        log_name: str,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        log_path = tmp_path / log_name
+
+        subprocess.run(
+            self.make_command()
+            + [
+                "cpu",
+                "--n_tasks",
+                "2",
+                "--n_tasks_per_proc",
+                "1",
+                "--n_procs",
+                f"{self.array_n_procs}",
+                log_path,
+                "--",
+                "bash",
+                "-c",
+                'echo "TASK_INDEX=$TASK_INDEX"',
+            ],
+            check=True,
+        )
+
+        log_prefix = log_path.with_suffix("")
+        for process_index in [1, 2]:
+            suffix = self.array_log_suffix.format(index=process_index)
+            log_file = log_prefix.parent / f"{log_prefix.name}.{suffix}"
+            assert log_file.exists()
+            assert log_file.read_text().strip() == f"TASK_INDEX={process_index}"
+
+    def test_cpu_fails_when_log_write_fails(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        log_path = tmp_path / "test.log"
+        log_path.symlink_to("/dev/full")
+        status_path = tmp_path / "test.out"
+
+        with pytest.raises(subprocess.CalledProcessError) as exc_info:
+            self.run_cpu_fails_when_log_write_fails(log_path)
+
+        assert exc_info.value.returncode == 1
+        self.assert_cpu_fails_when_log_write_fails(exc_info.value.stderr, status_path)
+
+    def run_cpu_fails_when_log_write_fails(self, log_path: Path) -> None:
+        subprocess.run(
+            self.make_command() + ["cpu", log_path, "--", "bash", "-c", "printf 'job output\\n'"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+    def assert_cpu_fails_when_log_write_fails(self, cpu_failure_stderr: str, status_path: Path) -> None:
+        pass
