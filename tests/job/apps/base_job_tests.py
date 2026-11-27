@@ -121,8 +121,8 @@ class BaseJobTests:
             text=True,
         )
 
-        self.wait_for_job_to_finish(process)
         _, cpu_failure_stderr = process.communicate(timeout=60)
+        self.wait_for_job_to_finish(process)
 
         assert process.returncode == 1
 
@@ -255,9 +255,9 @@ class BaseJobTests:
             pytest.fail(f"Job {job_id} did not start")
 
         self.cancel_job(job_id)
-        self.wait_for_job_to_finish(process, job_id=job_id)
 
         _, stderr = process.communicate(timeout=30)
+        self.wait_for_job_to_finish(process, job_id=job_id)
 
         assert process.returncode == 1
         assert f"Job failed with {self.cancel_status} exit code." in stderr
