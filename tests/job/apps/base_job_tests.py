@@ -43,7 +43,7 @@ class BaseJobTests:
     def wait_for_job_to_finish(
         self, process: subprocess.Popen[str], job_id: str | None = None, timeout: int = 30
     ) -> tuple[str, str]:
-        return process.communicate(timeout=60)
+        return process.communicate(timeout=timeout)
 
     @pytest.mark.parametrize(
         "base_args",
