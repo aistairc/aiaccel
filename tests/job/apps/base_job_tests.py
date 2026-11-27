@@ -42,8 +42,8 @@ class BaseJobTests:
 
     def wait_for_job_to_finish(
         self, process: subprocess.Popen[str], job_id: str | None = None, timeout: int = 30
-    ) -> None:
-        pass
+    ) -> tuple[str, str]:
+        return process.communicate(timeout=60)
 
     @pytest.mark.parametrize(
         "base_args",
@@ -121,11 +121,7 @@ class BaseJobTests:
             text=True,
         )
 
-        assert process.stdout is not None
-        job_id = self.get_job_id(process.stdout.readline())
-
-        _, cpu_failure_stderr = process.communicate(timeout=60)
-        self.wait_for_job_to_finish(process, job_id=job_id)
+        _, cpu_failure_stderr = self.wait_for_job_to_finish(process)
 
         assert process.returncode == 1
 
@@ -258,8 +254,7 @@ class BaseJobTests:
 
         self.cancel_job(job_id)
 
-        _, stderr = process.communicate(timeout=30)
-        self.wait_for_job_to_finish(process, job_id=job_id)
+        _, stderr = self.wait_for_job_to_finish(process, job_id=job_id)
 
         assert process.returncode == 1
         assert f"Job failed with {self.cancel_status} exit code." in stderr

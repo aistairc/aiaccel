@@ -29,13 +29,16 @@ class BaseSchedulerTests(BaseJobTests, ABC):
 
     def wait_for_job_to_finish(
         self, process: subprocess.Popen[str], job_id: str | None = None, timeout: int = 30
-    ) -> None:
+    ) -> tuple[str, str]:
         assert process.stdout is not None
         if job_id is None:
             job_id = self.get_job_id(process.stdout.readline())
+
+        output = super().wait_for_job_to_finish(process)
+
         for _ in range(timeout):
             if not self.is_job_running(job_id):
-                return
+                return output
 
             time.sleep(1)
 
