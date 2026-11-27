@@ -50,9 +50,6 @@ for i in "${{!pids[@]}}"; do
     wait ${{pids[$i]}}
 done
 """
-    else:
-        job = f"{job} 2>&1 | tee {args.log_filename}"
-
     job_script = f"""\
 #! /bin/bash
 
@@ -61,10 +58,11 @@ trap 'exit $?' ERR EXIT  # at error and exit
 trap 'echo 143' TERM  # at termination (by job scheduler)
 trap 'kill 0' INT
 
+(
+    {config.script_prologue}
 
-{config.script_prologue}
-
-{job}
+    {job}
+) 2>&1 | tee {args.log_filename}
 """
 
     # Create the job script file, remove old status files, and run the job
@@ -74,7 +72,7 @@ trap 'kill 0' INT
     with open(job_filename, "w") as f:
         f.write(job_script)
 
-    subprocess.run(f"bash {job_filename}", shell=True, check=True)
+    subprocess.run(["bash", str(job_filename)], check=True)
 
 
 if __name__ == "__main__":
