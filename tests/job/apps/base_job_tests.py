@@ -121,8 +121,11 @@ class BaseJobTests:
             text=True,
         )
 
+        assert process.stdout is not None
+        job_id = self.get_job_id(process.stdout.readline())
+
         _, cpu_failure_stderr = process.communicate(timeout=60)
-        self.wait_for_job_to_finish(process)
+        self.wait_for_job_to_finish(process, job_id=job_id)
 
         assert process.returncode == 1
 
@@ -242,7 +245,6 @@ class BaseJobTests:
         )
 
         assert process.stdout is not None
-
         job_id = self.get_job_id(process.stdout.readline())
 
         for _ in range(60):
