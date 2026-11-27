@@ -150,12 +150,12 @@ class BaseJobTests:
         pid_namespace_path = ready_path.with_name(f"{ready_path.name}.pid_namespace")
 
         command = (
-            f"echo $$ > {shlex.quote(str(pid_path))}"
-            f" && cat /proc/sys/kernel/random/boot_id"
+            f"echo $$ > {shlex.quote(str(pid_path))}"  # Get PID
+            f" && cat /proc/sys/kernel/random/boot_id"  # Get boot_id
             f" > {shlex.quote(str(boot_id_path))}"
-            f" && readlink /proc/$$/ns/pid"
+            f" && readlink /proc/$$/ns/pid"  # Get PID namespace
             f" > {shlex.quote(str(pid_namespace_path))}"
-            f" && touch {shlex.quote(str(ready_path))}"
+            f" && touch {shlex.quote(str(ready_path))}"  # Ready file
             " && exec sleep 10"
         )
 
